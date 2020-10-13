@@ -1,0 +1,240 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet author="jenik (generated)" id="1585252533730-1">
+        <createTable tableName="api_key">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="api_keyPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key" type="VARCHAR(255)"/>
+            <column name="scopes" type="VARCHAR(255)"/>
+            <column name="repository_id" type="BIGINT"/>
+            <column name="user_account_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-2">
+        <createTable tableName="invitation">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="invitationPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-3">
+        <createTable tableName="language">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="languagePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="abbreviation" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="repository_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-4">
+        <createTable tableName="permission">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="permissionPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="invitation_id" type="BIGINT"/>
+            <column name="repository_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-5">
+        <createTable tableName="repository">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="repositoryPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="created_by_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-6">
+        <createTable tableName="source">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="sourcePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="repository_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-7">
+        <createTable tableName="translation">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="translationPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text" type="TEXT"/>
+            <column name="language_id" type="BIGINT"/>
+            <column name="source_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-8">
+        <createTable tableName="user_account">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="user_accountPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="reset_password_code" type="VARCHAR(255)"/>
+            <column name="role" type="VARCHAR(255)"/>
+            <column name="third_party_auth_id" type="VARCHAR(255)"/>
+            <column name="third_party_auth_type" type="VARCHAR(255)"/>
+            <column name="username" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-9">
+        <addUniqueConstraint columnNames="key" constraintName="api_key_unique" tableName="api_key"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-10">
+        <addUniqueConstraint columnNames="code" constraintName="invitation_code_unique" tableName="invitation"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-11">
+        <addUniqueConstraint columnNames="repository_id, abbreviation" constraintName="language_abbreviation_name"
+                             tableName="language"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-12">
+        <addUniqueConstraint columnNames="repository_id, name" constraintName="language_repository_name"
+                             tableName="language"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-13">
+        <addUniqueConstraint columnNames="name, created_by_id" constraintName="repository_name_created_by_id"
+                             tableName="repository"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-14">
+        <addUniqueConstraint columnNames="repository_id, name" constraintName="source_repository_id_name"
+                             tableName="source"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-15">
+        <addUniqueConstraint columnNames="source_id, language_id" constraintName="translation_source_language"
+                             tableName="translation"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-16">
+        <addUniqueConstraint columnNames="third_party_auth_type, third_party_auth_id"
+                             constraintName="useraccount_authtype_auth_id" tableName="user_account"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-17">
+        <addUniqueConstraint columnNames="username" constraintName="useraccount_username" tableName="user_account"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-18">
+        <createIndex indexName="index_abbreviation" tableName="language">
+            <column name="abbreviation"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-19">
+        <createIndex indexName="index_abbreviation_source" tableName="language">
+            <column name="abbreviation"/>
+            <column name="repository_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-20">
+        <addForeignKeyConstraint baseColumnNames="invitation_id" baseTableName="permission"
+                                 constraintName="FK1yntjh7ggi4te3ovft3q98vjh" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="invitation"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-21">
+        <addForeignKeyConstraint baseColumnNames="repository_id" baseTableName="permission"
+                                 constraintName="FK4eao8empmjkh4djn65mgpo0xy" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="repository"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-22">
+        <addForeignKeyConstraint baseColumnNames="repository_id" baseTableName="source"
+                                 constraintName="FK4w7p5ffylu2s25r0fvcg7m16m" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="repository"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-23">
+        <addForeignKeyConstraint baseColumnNames="source_id" baseTableName="translation"
+                                 constraintName="FKan8l57bdrd3yfsra16gy812nh" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="source"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-24">
+        <addForeignKeyConstraint baseColumnNames="language_id" baseTableName="translation"
+                                 constraintName="FKc2d46w0v0yhqdf6nyel7g0b3u" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-25">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="permission"
+                                 constraintName="FKd4loxn3vchrap5ulsueynd7m2" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-26">
+        <addForeignKeyConstraint baseColumnNames="repository_id" baseTableName="language"
+                                 constraintName="FKk3nnt1okbdkvp7igkexvbyxnf" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="repository"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-27">
+        <addForeignKeyConstraint baseColumnNames="repository_id" baseTableName="api_key"
+                                 constraintName="FKl6qxgkp6jih1aup8laua5ime9" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="repository"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-28">
+        <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="repository"
+                                 constraintName="FKoiov5289pveggjm2sthuhw4qm" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1585252533730-29">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="api_key"
+                                 constraintName="FKsryptvc972nlvw7we7fkr06mg" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
+    </changeSet>
+</databaseChangeLog>

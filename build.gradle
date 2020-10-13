@@ -1,0 +1,197 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.6.RELEASE")
+        classpath "com.github.paralleltasks:parallel-tasks-gradle-plugin:1.0.1"
+    }
+}
+
+plugins {
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'org.springframework.boot' version '2.2.0.RELEASE'
+    id 'java'
+    id 'org.liquibase.gradle' version '2.0.1'
+}
+
+
+group = 'com.polygloat'
+
+if (project.hasProperty('projVersion')) {
+    project.version = project.projVersion
+} else {
+    project.version = 'local'
+}
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.github.paralleltasks'
+
+repositories {
+    mavenCentral()
+}
+
+def liveDb = [
+        url         : 'jdbc:postgresql://localhost:5432/postgres',
+        referenceUrl: 'hibernate:spring:com.polygloat' +
+                '?dialect=org.hibernate.dialect.PostgreSQL95Dialect' +
+                '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
+                '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
+        username    : 'postgres',
+        password    : 'postgres',
+]
+
+liquibase {
+    activities {
+        main {
+            changeLogFile 'src/main/resources/db/changelog/schema.xml'
+            url liveDb.url
+            referenceUrl liveDb.referenceUrl
+            username liveDb.username
+            password liveDb.password
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    compile("org.springframework.boot:spring-boot-starter-security")
+    compile 'io.sentry:sentry-spring:1.7.27'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'com.h2database:h2'
+    testCompile('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testCompile("org.assertj:assertj-core:3.11.1")
+    testCompile("org.springframework.security:spring-security-test")
+    compile("org.springframework.ldap:spring-ldap-core")
+    compile("org.springframework.security:spring-security-ldap")
+    compile("org.springframework:spring-tx")
+    compile("com.unboundid:unboundid-ldapsdk")
+    compile 'io.jsonwebtoken:jjwt-api:0.10.7'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.10.7',
+            'io.jsonwebtoken:jjwt-jackson:0.10.7'
+    implementation('org.liquibase:liquibase-core:3.6.2')
+    liquibaseRuntime 'org.postgresql:postgresql'
+    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:2.0.1')
+    liquibaseRuntime('org.liquibase.ext:liquibase-hibernate5:3.6')
+    liquibaseRuntime('org.springframework.boot:spring-boot-starter-data-jpa')
+    liquibaseRuntime sourceSets.main.output
+    implementation 'com.github.javafaker:javafaker:1.0.1'
+    compile 'org.projectlombok:lombok:1.18.10'
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.6"
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
+    compileOnly 'org.hibernate:hibernate-jpamodelgen'
+    annotationProcessor('org.hibernate:hibernate-jpamodelgen')
+    testCompile group: 'org.testng', name: 'testng', version: '6.14.3'
+    compile 'org.springdoc:springdoc-openapi-webmvc-core:1.3.4'
+    compile group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.3.4'
+}
+
+dockerCompose {
+    template 'docker-compose.template.yml'
+    dockerComposeFile 'docker-compose.yml'
+}
+
+test {
+    useTestNG()
+}
+
+springBoot {
+    buildInfo {
+        properties {
+            version = project.version
+        }
+    }
+}
+
+bootJar {
+    manifest {
+        attributes('Implementation-Version': project.version)
+    }
+}
+
+def clientAppBuildDir = "${project.buildDir}/clientapp"
+
+//task appNpmInstall(type: NpmTask) {
+//    description = "Installs all dependencies from package.json"
+//    workingDir = file(clientAppBuildDir)
+//    args = ["install"]
+//    inputs.files("${clientAppBuildDir}/package.json", "${clientAppBuildDir}/package-lock.json")
+//    outputs.dir("${clientAppBuildDir}/node_modules")
+//}
+//
+//task appNpmBuild(type: NpmTask) {
+//    description = "Builds production version of the webapp"
+//    workingDir = file(clientAppBuildDir)
+//    args = ["run", "build"]
+//    environment = [
+//            'target': 'appbundle'
+//    ]
+//}
+//
+//task appNpmRun(type: NpmTask) {
+//    description = "Runs the polygloat frontend app"
+//    workingDir = file("$project.projectDir/clientapp")
+//    args = ["run", "start"]
+//    environment = [
+//            'target': 'appbundle'
+//    ]
+//}
+//
+//
+//task copyToBuild(type: Copy) {
+//    from "${project.projectDir}/clientapp"
+//    into clientAppBuildDir
+//    inputs.dir("${project.projectDir}/clientapp")
+//    outputs.dir(clientAppBuildDir)
+//    exclude "node_modules", "lib", "dist"
+//}
+//
+//task copyDist(type: Copy) {
+//    from "${clientAppBuildDir}/dist"
+//    into 'build/resources/main/static/.'
+//    inputs.dir("${clientAppBuildDir}/dist")
+//    outputs.dir('build/resources/main/static')
+//}
+//appNpmInstall.dependsOn copyToBuild
+//appNpmBuild.dependsOn appNpmInstall
+//copyDist.dependsOn appNpmBuild
+//
+//bootJar.mustRunAfter(copyDist)
+//
+//task buildProd(dependsOn: ['copyDist', 'bootJar'])
+//
+//task buildProdDocker(dependsOn: ['buildProd', 'docker'])
+
+//task cypress(type: NpmTask) {
+//    description = "Runs cypress tests"
+//    workingDir = file(clientAppBuildDir)
+//    args = ["run", "cypress", "--", "--env", "host=http://localhost:8082", "--spec", "cypress/integration/login.spec.js"]
+//    dependsOn("appNpmInstall")
+//}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java', 'build/generated/sources/annotationProcessor/java/main']
+        }
+    }
+}
+
+//apply from: "${project.projectDir}/gradle/development.gradle"
