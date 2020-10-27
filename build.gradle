@@ -30,7 +30,6 @@ configurations {
     runtimeClasspath {
         extendsFrom developmentOnly
     }
-    liquibaseRuntime.exclude group: "org.codehaus.groovy"
 }
 
 apply plugin: 'java'
@@ -88,8 +87,7 @@ dependencies {
     compile 'io.jsonwebtoken:jjwt-api:0.10.7'
     runtime 'io.jsonwebtoken:jjwt-impl:0.10.7',
             'io.jsonwebtoken:jjwt-jackson:0.10.7'
-    liquibaseRuntime('org.liquibase:liquibase-core:3.6.2')
-    liquibaseRuntime('org.codehaus.groovy:groovy-all:3.0.3')
+    implementation('org.liquibase:liquibase-core:3.6.2')
     liquibaseRuntime 'org.postgresql:postgresql'
     liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:2.0.1')
     liquibaseRuntime('org.liquibase.ext:liquibase-hibernate5:3.6')
