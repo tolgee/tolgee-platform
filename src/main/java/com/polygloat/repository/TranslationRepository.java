@@ -15,23 +15,23 @@ import java.util.Set;
 @Repository
 public interface TranslationRepository extends JpaRepository<Translation, Long> {
 
-    @Query("from Translation t join fetch t.source where t.source.repository.id = :repositoryId and t.language.abbreviation in :languages")
+    @Query("from Translation t join fetch t.key where t.key.repository.id = :repositoryId and t.language.abbreviation in :languages")
     Set<Translation> getTranslations(Set<String> languages, Long repositoryId);
 
-    @Query("from Translation t join fetch Source s on t.source = s where s = :source and s.repository = :repository and t.language in :languages")
+    @Query("from Translation t join fetch Source s on t.key = s where s = :source and s.repository = :repository and t.language in :languages")
     Set<Translation> getTranslations(Source source, com.polygloat.model.Repository repository, Collection<Language> languages);
 
-    Optional<Translation> findOneBySourceAndLanguage(Source source, Language language);
+    Optional<Translation> findOneByKeyAndLanguage(Source source, Language language);
 
     @Modifying
-    @Query("delete from Translation t where t.source.id in (select s.id from Source s where s.repository.id = :repositoryId)")
+    @Query("delete from Translation t where t.key.id in (select s.id from Source s where s.repository.id = :repositoryId)")
     void deleteAllByRepositoryId(Long repositoryId);
 
     void deleteAllByLanguageId(Long languageId);
 
     @Modifying
-    @Query("delete from Translation t where t.source.id in :ids")
+    @Query("delete from Translation t where t.key.id in :ids")
     void deleteAllBySourceIds(Collection<Long> ids);
 
-    void deleteAllBySourceId(Long id);
+    void deleteAllByKeyId(Long id);
 }

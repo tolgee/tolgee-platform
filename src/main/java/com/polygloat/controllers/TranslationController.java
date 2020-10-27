@@ -34,9 +34,9 @@ public class TranslationController implements IController {
 
     @GetMapping(value = "/{languages}")
     public Map<String, Object> getTranslations(@PathVariable("repositoryId") Long repositoryId,
-                                               @PathVariable("languages") String languages) {
+                                               @PathVariable("languages") Set<String> languages) {
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.VIEW);
-        return translationService.getTranslations(parseLanguages(languages).orElse(null), repositoryId);
+        return translationService.getTranslations(languages, repositoryId);
     }
 
     @PostMapping("/set")
@@ -48,25 +48,12 @@ public class TranslationController implements IController {
 
     @GetMapping(value = "/view")
     public ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> getViewData(@PathVariable("repositoryId") Long repositoryId,
-                                                                                          @RequestParam(name = "languages", required = false) String languages,
+                                                                                          @RequestParam(name = "languages", required = false) Set<String> languages,
                                                                                           @RequestParam(name = "limit", defaultValue = "10") int limit,
                                                                                           @RequestParam(name = "offset", defaultValue = "0") int offset,
                                                                                           @RequestParam(name = "search", required = false) String search
     ) {
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.VIEW);
-        return translationService.getViewData(parseLanguages(languages).orElse(null), repositoryId, limit, offset, search);
-    }
-
-    private Optional<Set<String>> parseLanguages(String languages) {
-        if (languages == null) {
-            return Optional.empty();
-        }
-        return Optional.of(new HashSet<>(Arrays.stream(
-                languages.split(","))
-                //filter out empty strings
-                .filter(i ->
-                        !i.isEmpty()
-                )
-                .collect(Collectors.toList())));
+        return translationService.getViewData(languages, repositoryId, limit, offset, search);
     }
 }

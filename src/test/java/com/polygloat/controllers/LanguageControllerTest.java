@@ -71,6 +71,18 @@ public class LanguageControllerTest extends SignedInControllerTest implements IT
         repositoryService.deleteRepository(test.getId());
     }
 
+    @Test
+    void createLanguageTestValidationComa() throws Exception {
+        Repository test = dbPopulator.createBase(generateUniqueString());
+
+        MvcResult mvcResult = performCreate(test.getId(), LanguageDTO.builder().abbreviation("aa,aa").name("Name").build())
+                .andExpect(status().isBadRequest()).andReturn();
+
+        assertThat(mvcResult.getResponse().getContentAsString())
+                .isEqualTo("{\"STANDARD_VALIDATION\":" +
+                        "{\"abbreviation\":\"can not contain coma\"}}");
+    }
+
     private void createLanguageCorrectRequest(Long repoId) throws Exception {
         MvcResult mvcResult = performCreate(repoId, languageDTOCorrect).andExpect(status().isOk()).andReturn();
         LanguageDTO languageDTO = decodeJson(mvcResult.getResponse().getContentAsString(), LanguageDTO.class);

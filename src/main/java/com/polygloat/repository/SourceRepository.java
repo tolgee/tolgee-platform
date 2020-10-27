@@ -14,7 +14,7 @@ import java.util.Set;
 @Repository
 public interface SourceRepository extends JpaRepository<Source, Long> {
     @Query("from Source s " +
-            "join fetch Translation t on t.source = s and t.language.abbreviation in :languages " +
+            "join fetch Translation t on t.key = s and t.language.abbreviation in :languages " +
             "where s.repository.id = :repositoryId")
     Set<Source> getSourcesWithTranslations(List<String> languages, Long repositoryId);
 

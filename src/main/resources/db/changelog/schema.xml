@@ -237,4 +237,12 @@
                                  initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
                                  validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1603761990411-3">
+        <renameColumn
+                tableName="translation"
+                columnDataType="int8"
+                oldColumnName="source_id"
+                newColumnName="key_id"
+        />
+    </changeSet>
 </databaseChangeLog>

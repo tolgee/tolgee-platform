@@ -1,10 +1,12 @@
 package com.polygloat.dtos.request;
 
+import com.polygloat.constants.Message;
 import com.polygloat.model.Language;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 @Builder
 @AllArgsConstructor
@@ -23,6 +25,7 @@ public class LanguageDTO {
     @Setter
     @NotBlank
     @Length(max = 20)
+    @Pattern(regexp = "^[^,]*$", message = "can not contain coma")
     private String abbreviation;
 
     public LanguageDTO(@NotBlank String name, @NotBlank String abbreviation) {

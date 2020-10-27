@@ -1,17 +1,18 @@
 package com.polygloat.dtos;
 
 import com.polygloat.exceptions.InvalidPathException;
+import com.polygloat.helpers.TextHelper;
 import lombok.Data;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class PathDTO {
-    public static final String DELIMITER = ".";
-    public static final String DELIMITER_REGEX = String.format("\\%s", DELIMITER);
+    public static final char DELIMITER = '.';
 
     private LinkedList<String> fullPath = new LinkedList<>();
 
@@ -20,7 +21,7 @@ public class PathDTO {
 
     public static PathDTO fromFullPath(String fullPath) {
         PathDTO pathDTO = new PathDTO();
-        pathDTO.add(Arrays.asList(fullPath.split(DELIMITER_REGEX, 0)));
+        pathDTO.add(TextHelper.splitOnNonEscapedDelimiter(fullPath, DELIMITER));
         return pathDTO;
     }
 
@@ -32,11 +33,11 @@ public class PathDTO {
 
     public static PathDTO fromPathAndName(String path, String name) {
         PathDTO pathDTO = new PathDTO();
-        List<String> items = Arrays.asList(path.split(DELIMITER_REGEX, 0));
+        List<String> items = TextHelper.splitOnNonEscapedDelimiter(path, DELIMITER);
         if (path.isEmpty()) {
             items = Collections.emptyList();
         }
-        pathDTO.add(validate(items));
+        pathDTO.add(items);
         pathDTO.add(name);
         return pathDTO;
     }
@@ -52,27 +53,8 @@ public class PathDTO {
         return fullPath.getLast();
     }
 
-    private static String validate(String item) {
-        if (item.contains(".")) {
-            throw new InvalidPathException();
-        }
-        if (item.isEmpty()) {
-            throw new InvalidPathException();
-        }
-        return item;
-    }
-
-    private static List<String> validate(List<String> list) {
-        list.forEach(PathDTO::validate);
-        return list;
-    }
-
     public String getFullPathString() {
-        return String.join(DELIMITER, getFullPath());
-    }
-
-    public String getPathString() {
-        return String.join(DELIMITER, getPath());
+        return getFullPath().stream().map(i -> i.replaceAll("\\" + DELIMITER, "\\\\" + DELIMITER)).collect(Collectors.joining("."));
     }
 
     public List<String> getPath() {
@@ -81,20 +63,16 @@ public class PathDTO {
         return path;
     }
 
-    public PathDTO getParent() {
-        return PathDTO.fromFullPath(this.getPath());
-    }
-
     public List<String> getFullPath() {
         return new LinkedList<>(this.fullPath);
     }
 
     private void add(String item) {
-        this.fullPath.add(validate(item));
+        this.fullPath.add(item);
     }
 
     private void add(List<String> list) {
-        this.fullPath.addAll(validate(list));
+        this.fullPath.addAll(list);
     }
 
     @Override

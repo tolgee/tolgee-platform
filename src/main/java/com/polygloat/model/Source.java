@@ -29,7 +29,7 @@ public class Source extends AuditModel {
     private Repository repository;
 
     @Builder.Default
-    @OneToMany(mappedBy = "source")
+    @OneToMany(mappedBy = "key")
     private Set<Translation> translations = new HashSet<>();
 
     public Optional<Translation> getTranslation(String abbr) {

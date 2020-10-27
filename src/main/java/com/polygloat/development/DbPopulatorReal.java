@@ -23,7 +23,6 @@ public class DbPopulatorReal {
     private final UserAccountRepository userAccountRepository;
     private final PermissionService permissionService;
     private final UserAccountService userAccountService;
-    private final SecurityService securityService;
     public static final String DEFAULT_USERNAME = "ben";
     private final LanguageService languageService;
     private final RepositoryRepository repositoryRepository;
@@ -129,7 +128,7 @@ public class DbPopulatorReal {
 
         Translation translation = new Translation();
         translation.setLanguage(en);
-        translation.setSource(source);
+        translation.setKey(source);
         translation.setText(english);
 
         source.getTranslations().add(translation);
@@ -139,7 +138,7 @@ public class DbPopulatorReal {
 
         Translation translationDe = new Translation();
         translationDe.setLanguage(de);
-        translationDe.setSource(source);
+        translationDe.setKey(source);
         translationDe.setText(deutsch);
 
         source.getTranslations().add(translationDe);

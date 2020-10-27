@@ -52,15 +52,9 @@ public class TranslationControllerTest extends SignedInControllerTest {
         }
 
         performGetDataForView(repository.getId(), "?languages=langNotExists").andExpect(status().isNotFound());
-        
-        //with starting emtpy string
-        ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> response2 = performValidViewRequest(repository, "?languages=,en,de");
-
-        //with trailing empty string
-        ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> response3 = performValidViewRequest(repository, "?languages=,en,de,");
 
         //with same language multiple times
-        ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> response4 = performValidViewRequest(repository, "?languages=,en,en,,");
+        ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> response4 = performValidViewRequest(repository, "?languages=en,en");
     }
 
     private ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> performValidViewRequest(Repository repository, String queryString) throws Exception {
@@ -125,27 +119,11 @@ public class TranslationControllerTest extends SignedInControllerTest {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        Map<String, Object> result = mapper.readValue(mvcResult.getResponse().getContentAsString(), Map.class);
+        Map<String, Object> result = mapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<>() {
+        });
+
         assertThat(result).containsKeys("en", "de");
     }
-
-   /* @Test
-    @Rollback
-    void getSourceTranslations() throws Exception {
-        dbPopulator.populate("app4");
-
-        Repository repository = repositoryService.findByName("app4", userAccount).orElseThrow(NotFoundException::new);
-
-        MvcResult mvcResult = mvc.perform(
-                loggedGet("/api/repository/" + repository.getId().toString() +
-                        "/translations/source/sampleApp.this_is_standard_text_somewhere_in_dom")
-                        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andReturn();
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        Map<String, Object> result = mapper.readValue(mvcResult.getResponse().getContentAsString(), Map.class);
-        assertThat(result).containsKeys("en", "de");
-    }*/
 
     private ResultActions performGetDataForView(Long repositoryId, String queryString) throws Exception {
         return mvc.perform(

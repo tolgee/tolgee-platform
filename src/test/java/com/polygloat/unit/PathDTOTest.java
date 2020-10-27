@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -49,6 +50,13 @@ public class PathDTOTest {
         assertThat(pathDTO.getFullPath()).isEqualTo(getTestList());
     }
 
+    @Test
+    void escaping() {
+        String fullPath = "aaa.aaa\\.aaaa.a";
+        var testList = PathDTO.fromFullPath(fullPath).getFullPath();
+        assertThat(testList).isEqualTo(List.of("aaa","aaa.aaaa", "a"));
+        assertThat(PathDTO.fromFullPath(testList).getFullPathString()).isEqualTo(fullPath);
+    }
 
     void assertBasicPath(PathDTO pathDTO) {
         assertThat(pathDTO.getFullPath()).isEqualTo(testList);
@@ -56,24 +64,6 @@ public class PathDTOTest {
         String last = testList.removeLast();
         assertThat(pathDTO.getPath()).isEqualTo(testList);
         assertThat(pathDTO.getName()).isEqualTo(last);
-    }
-
-    @Test
-    void testValidation() {
-        LinkedList<String> testList = getTestList();
-
-        assertThatThrownBy(() -> {
-            testList.addFirst("dfkjhdf.adfdf");
-            PathDTO.fromFullPath(testList);
-        }).isInstanceOf(InvalidPathException.class);
-
-        testList.removeFirst();
-
-        assertThatThrownBy(() -> {
-            testList.add("");
-            PathDTO.fromFullPath(testList);
-        }).isInstanceOf(InvalidPathException.class);
-
     }
 
 }

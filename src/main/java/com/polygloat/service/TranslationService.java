@@ -89,11 +89,11 @@ public class TranslationService {
     }
 
     public Translation getOrCreate(Source source, Language language) {
-        return get(source, language).orElseGet(() -> Translation.builder().language(language).source(source).build());
+        return get(source, language).orElseGet(() -> Translation.builder().language(language).key(source).build());
     }
 
     public Optional<Translation> get(Source source, Language language) {
-        return translationRepository.findOneBySourceAndLanguage(source, language);
+        return translationRepository.findOneByKeyAndLanguage(source, language);
     }
 
     public ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> getViewData(
@@ -131,17 +131,17 @@ public class TranslationService {
     public void deleteIfExists(Source source, String languageAbbreviation) {
         Language language = languageService.findByAbbreviation(languageAbbreviation, source.getRepository())
                 .orElseThrow(() -> new NotFoundException(Message.LANGUAGE_NOT_FOUND));
-        translationRepository.findOneBySourceAndLanguage(source, language).ifPresent(translationRepository::delete);
+        translationRepository.findOneByKeyAndLanguage(source, language).ifPresent(translationRepository::delete);
     }
 
 
     public void deleteIfExists(Source source, Language language) {
-        translationRepository.findOneBySourceAndLanguage(source, language).ifPresent(translationRepository::delete);
+        translationRepository.findOneByKeyAndLanguage(source, language).ifPresent(translationRepository::delete);
     }
 
     @SuppressWarnings("unchecked")
     private void addToMap(Translation translation, Map<String, Object> map) {
-        for (String folderName : translation.getSource().getPath().getPath()) {
+        for (String folderName : translation.getKey().getPath().getPath()) {
             Object childMap = map.computeIfAbsent(folderName, k -> new LinkedHashMap<>());
             if (childMap instanceof Map) {
                 map = (Map<String, Object>) childMap;
@@ -149,7 +149,7 @@ public class TranslationService {
             }
             throw new InternalException(Message.DATA_CORRUPTED);
         }
-        map.put(translation.getSource().getPath().getName(), translation.getText());
+        map.put(translation.getKey().getPath().getName(), translation.getText());
     }
 
     public void deleteAllByRepository(Long repositoryId) {
@@ -165,7 +165,7 @@ public class TranslationService {
     }
 
     public void deleteAllBySource(Long id) {
-        translationRepository.deleteAllBySourceId(id);
+        translationRepository.deleteAllByKeyId(id);
 
     }
 }

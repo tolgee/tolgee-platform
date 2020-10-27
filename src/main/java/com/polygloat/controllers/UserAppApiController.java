@@ -33,23 +33,23 @@ public class UserAppApiController implements IController {
     private final LanguageService languageService;
 
     @GetMapping(value = "/{languages}")
-    public Map<String, Object> getTranslations(@PathVariable("languages") String languages) {
+    public Map<String, Object> getTranslations(@PathVariable("languages") Set<String> languages) {
         ApiKey apiKey = authenticationFacade.getApiKey();
         securityService.checkApiKeyScopes(Set.of(ApiScope.TRANSLATIONS_VIEW), apiKey);
-        return translationService.getTranslations(parseLanguages(languages).orElse(null), apiKey.getRepository().getId());
+        return translationService.getTranslations(languages, apiKey.getRepository().getId());
     }
 
-    @GetMapping(value = "/source/{sourceFullPath}/{languages}")
-    public Map<String, String> getSourceTranslations(@PathVariable("sourceFullPath") String fullPath,
-                                                     @PathVariable("languages") String langs) {
+    @GetMapping(value = "/source/{key}/{languages}")
+    public Map<String, String> getSourceTranslations(@PathVariable("key") String fullPath,
+                                                     @PathVariable("languages") Set<String> langs) {
         PathDTO pathDTO = PathDTO.fromFullPath(fullPath);
         ApiKey apiKey = authenticationFacade.getApiKey();
         securityService.checkApiKeyScopes(Set.of(ApiScope.TRANSLATIONS_VIEW), apiKey);
-        return translationService.getSourceTranslationsResult(apiKey.getRepository().getId(), pathDTO, parseLanguages(langs).orElse(null));
+        return translationService.getSourceTranslationsResult(apiKey.getRepository().getId(), pathDTO, langs);
     }
 
-    @GetMapping(value = "/source/{sourceFullPath}")
-    public Map<String, String> getSourceTranslations(@PathVariable("sourceFullPath") String fullPath) {
+    @GetMapping(value = "/source/{key}")
+    public Map<String, String> getSourceTranslations(@PathVariable("key") String fullPath) {
         PathDTO pathDTO = PathDTO.fromFullPath(fullPath);
         ApiKey apiKey = authenticationFacade.getApiKey();
         return translationService.getSourceTranslationsResult(apiKey.getRepository().getId(), pathDTO, null);
@@ -77,16 +77,4 @@ public class UserAppApiController implements IController {
         return apiKey.getScopes().stream().map(ApiScope::getValue).collect(Collectors.toSet());
     }
 
-    private Optional<Set<String>> parseLanguages(String languages) {
-        if (languages == null) {
-            return Optional.empty();
-        }
-        return Optional.of(new HashSet<>(Arrays.stream(
-                languages.split(","))
-                //filter out empty strings
-                .filter(i ->
-                        !i.isEmpty()
-                )
-                .collect(Collectors.toList())));
-    }
 }
