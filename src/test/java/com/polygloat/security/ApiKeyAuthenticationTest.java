@@ -65,7 +65,7 @@ public class ApiKeyAuthenticationTest extends AbstractUserAppApiTest {
         ApiKeyDTO apiKey = createBaseWithApiKey(ApiScope.SOURCES_EDIT);
 
         SetTranslationsDTO translations = SetTranslationsDTO.builder()
-                .sourceFullPath("aaaa")
+                .key("aaaa")
                 .translations(Map.of("aaa", "aaa")).build();//just a fake to pass validation
 
         performAction(buildAction().method(HttpMethod.POST).body(translations).apiKey(apiKey.getKey()).url("/uaa").expectedStatus(HttpStatus.FORBIDDEN));

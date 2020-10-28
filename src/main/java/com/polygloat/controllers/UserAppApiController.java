@@ -60,7 +60,7 @@ public class UserAppApiController implements IController {
         ApiKey apiKey = authenticationFacade.getApiKey();
         securityService.checkApiKeyScopes(Set.of(ApiScope.TRANSLATIONS_EDIT), apiKey);
         Repository repository = repositoryService.findById(apiKey.getRepository().getId()).orElseThrow(() -> new NotFoundException(Message.REPOSITORY_NOT_FOUND));
-        Source source = sourceService.getOrCreateSource(repository, PathDTO.fromFullPath(dto.getSourceFullPath()));
+        Source source = sourceService.getOrCreateSource(repository, PathDTO.fromFullPath(dto.getKey()));
         translationService.setForSource(source, dto.getTranslations());
     }
 

@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -42,7 +41,7 @@ public class TranslationController implements IController {
     @PostMapping("/set")
     public void setTranslations(@PathVariable("repositoryId") Long repositoryId, @RequestBody @Valid SetTranslationsDTO dto) {
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.TRANSLATE);
-        Source source = sourceService.getSource(repositoryId, PathDTO.fromFullPath(dto.getSourceFullPath())).orElseThrow(NotFoundException::new);
+        Source source = sourceService.getSource(repositoryId, PathDTO.fromFullPath(dto.getKey())).orElseThrow(NotFoundException::new);
         translationService.setForSource(source, dto.getTranslations());
     }
 

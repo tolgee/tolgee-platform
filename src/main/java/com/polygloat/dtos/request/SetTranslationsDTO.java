@@ -19,7 +19,7 @@ public class SetTranslationsDTO {
      */
     @NotNull
     @NotBlank
-    private String sourceFullPath;
+    private String key;
 
     /**
      * Map of language abbreviation -> text

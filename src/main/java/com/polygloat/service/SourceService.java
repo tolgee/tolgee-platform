@@ -106,11 +106,11 @@ public class SourceService {
 
     @Transactional
     public void createSource(Repository repository, SetTranslationsDTO dto) {
-        if (this.getSource(repository, PathDTO.fromFullPath(dto.getSourceFullPath())).isPresent()) {
+        if (this.getSource(repository, PathDTO.fromFullPath(dto.getKey())).isPresent()) {
             throw new ValidationException(Message.SOURCE_EXISTS);
         }
 
-        Source source = Source.builder().name(dto.getSourceFullPath()).repository(repository).build();
+        Source source = Source.builder().name(dto.getKey()).repository(repository).build();
 
         sourceRepository.save(source);
         translationService.setForSource(source, dto.getTranslations());
