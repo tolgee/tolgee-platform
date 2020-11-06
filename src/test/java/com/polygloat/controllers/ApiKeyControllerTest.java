@@ -9,6 +9,7 @@ import com.polygloat.dtos.response.ApiKeyDTO.ApiKeyDTO;
 import com.polygloat.model.ApiKey;
 import com.polygloat.model.Repository;
 import com.polygloat.model.UserAccount;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MvcResult;
@@ -25,6 +26,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ApiKeyControllerTest extends SignedInControllerTest implements ITest {
+
+    @Value("${app.initialUsername:admin}")
+    String initialUsername;
+    @Value("${app.initialPassword:admin}")
+    String initialPassword;
 
     @Test()
     void create_success() throws Exception {
@@ -85,7 +91,7 @@ public class ApiKeyControllerTest extends SignedInControllerTest implements ITes
     void getAllByUser() throws Exception {
         Repository repository = dbPopulator.createBase(generateUniqueString());
         ApiKeyDTO apiKey1 = apiKeyService.createApiKey(repository.getCreatedBy(), Set.of(ApiScope.SOURCES_EDIT), repository);
-        Repository repository2 = dbPopulator.createBase(generateUniqueString(), DbPopulatorReal.DEFAULT_USERNAME);
+        Repository repository2 = dbPopulator.createBase(generateUniqueString(), initialUsername);
         ApiKeyDTO apiKey2 = apiKeyService.createApiKey(repository2.getCreatedBy(), Set.of(ApiScope.SOURCES_EDIT, ApiScope.TRANSLATIONS_VIEW), repository);
         UserAccount testUser = dbPopulator.createUser("testUser");
         ApiKeyDTO user2Key = apiKeyService.createApiKey(testUser, Set.of(ApiScope.SOURCES_EDIT, ApiScope.TRANSLATIONS_VIEW), repository);
@@ -96,7 +102,7 @@ public class ApiKeyControllerTest extends SignedInControllerTest implements ITes
         Set<ApiKeyDTO> set = mapResponse(mvcResult, TypeFactory.defaultInstance().constructCollectionType(Set.class, ApiKeyDTO.class));
         assertThat(set).extracting("key").containsExactlyInAnyOrder(apiKeyDTO.getKey(), apiKey1.getKey(), apiKey2.getKey());
 
-        logAsUser("testUser", "testUser");
+        logAsUser("testUser", initialPassword);
         mvcResult = performGet("/api/apiKeys").andExpect(status().isOk()).andReturn();
         set = mapResponse(mvcResult, TypeFactory.defaultInstance().constructCollectionType(Set.class, ApiKeyDTO.class));
         assertThat(set).extracting("key").containsExactlyInAnyOrder(user2Key.getKey());
@@ -107,7 +113,7 @@ public class ApiKeyControllerTest extends SignedInControllerTest implements ITes
         Repository repository = dbPopulator.createBase(generateUniqueString());
         ApiKeyDTO apiKeyDTO = doCreate(repository);
         ApiKeyDTO apiKey1 = apiKeyService.createApiKey(repository.getCreatedBy(), Set.of(ApiScope.SOURCES_EDIT), repository);
-        Repository repository2 = dbPopulator.createBase(generateUniqueString(), DbPopulatorReal.DEFAULT_USERNAME);
+        Repository repository2 = dbPopulator.createBase(generateUniqueString(), initialUsername);
         ApiKeyDTO apiKey2 = apiKeyService.createApiKey(repository2.getCreatedBy(), Set.of(ApiScope.SOURCES_EDIT, ApiScope.TRANSLATIONS_VIEW), repository);
         UserAccount testUser = dbPopulator.createUser("testUser");
         ApiKeyDTO user2Key = apiKeyService.createApiKey(testUser, Set.of(ApiScope.SOURCES_EDIT, ApiScope.TRANSLATIONS_VIEW), repository2);
@@ -117,7 +123,7 @@ public class ApiKeyControllerTest extends SignedInControllerTest implements ITes
         @SuppressWarnings("unchecked") Set<ApiKeyDTO> set = mapResponse(mvcResult, Set.class, ApiKeyDTO.class);
         assertThat(set).extracting("key").containsExactlyInAnyOrder(apiKeyDTO.getKey(), apiKey1.getKey(), apiKey2.getKey());
 
-        logAsUser("testUser", "testUser");
+        logAsUser("testUser", initialPassword);
         performGet("/api/apiKeys/repository/" + repository2.getId()).andExpect(status().isForbidden()).andReturn();
 
         permissionService.grantFullAccessToRepo(testUser, repository2);

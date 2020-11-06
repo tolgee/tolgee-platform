@@ -1,31 +1,40 @@
 package com.polygloat.development;
 
+import com.polygloat.constants.ApiScope;
 import com.polygloat.dtos.request.LanguageDTO;
 import com.polygloat.dtos.request.SignUpDto;
+import com.polygloat.exceptions.NotFoundException;
 import com.polygloat.model.*;
+import com.polygloat.repository.ApiKeyRepository;
 import com.polygloat.repository.RepositoryRepository;
 import com.polygloat.repository.UserAccountRepository;
-import com.polygloat.service.LanguageService;
-import com.polygloat.service.PermissionService;
-import com.polygloat.service.SecurityService;
-import com.polygloat.service.UserAccountService;
+import com.polygloat.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DbPopulatorReal {
+    public static final String API_KEY = "this_is_dummy_api_key";
+
     private final EntityManager entityManager;
     private final UserAccountRepository userAccountRepository;
     private final PermissionService permissionService;
     private final UserAccountService userAccountService;
-    public static final String DEFAULT_USERNAME = "ben";
+    @Value("${app.initialUsername:admin}")
+    String initialUsername;
+    @Value("${app.initialPassword:admin}")
+    String initialPassword;
     private final LanguageService languageService;
     private final RepositoryRepository repositoryRepository;
+    private final ApiKeyRepository apiKeyRepository;
 
     private Language de;
     private Language en;
@@ -43,7 +52,7 @@ public class DbPopulatorReal {
             SignUpDto signUpDto = new SignUpDto();
             signUpDto.setEmail(username);
             signUpDto.setName(username);
-            signUpDto.setPassword(username);
+            signUpDto.setPassword(initialPassword);
             return userAccountService.createUser(signUpDto);
         });
     }
@@ -72,18 +81,20 @@ public class DbPopulatorReal {
 
     @Transactional
     public Repository createBase(String repositoryName) {
-        return createBase(repositoryName, DEFAULT_USERNAME);
+        return createBase(repositoryName, initialUsername);
     }
 
 
     @Transactional
     public Repository populate(String repositoryName) {
-        return populate(repositoryName, DEFAULT_USERNAME);
+        return populate(repositoryName, initialUsername);
     }
 
     @Transactional
     public Repository populate(String repositoryName, String userName) {
         Repository repository = createBase(repositoryName, userName);
+
+        this.createApiKey(repository);
 
         createTranslation(repository, "Hello world!", "Hallo Welt!", en, de);
         createTranslation(repository, "English text one.", "Deutsch text einz.", en, de);
@@ -114,6 +125,18 @@ public class DbPopulatorReal {
         return repository;
     }
 
+
+    private void createApiKey(Repository repository) {
+
+        Permission permission = repository.getPermissions().stream().findAny().orElseThrow(NotFoundException::new);
+
+        ApiKey apiKey = ApiKey.builder()
+                .repository(repository).key(API_KEY)
+                .userAccount(permission.getUser())
+                .scopes(Set.of(ApiScope.values()))
+                .build();
+        apiKeyRepository.save(apiKey);
+    }
 
     private Language createLanguage(String name, Repository repository) {
         return languageService.createLanguage(LanguageDTO.builder().name(name).abbreviation(name).build(), repository);
