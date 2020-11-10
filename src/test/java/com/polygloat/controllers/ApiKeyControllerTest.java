@@ -44,8 +44,15 @@ public class ApiKeyControllerTest extends SignedInControllerTest implements ITes
         return doCreate(dbPopulator.createBase(generateUniqueString()));
     }
 
+    private ApiKeyDTO doCreate(String username) throws Exception {
+        return doCreate(dbPopulator.createBase(generateUniqueString(), username));
+    }
+
     private ApiKeyDTO doCreate(Repository repository) throws Exception {
-        CreateApiKeyDTO requestDto = CreateApiKeyDTO.builder().repositoryId(repository.getId()).scopes(Set.of(ApiScope.TRANSLATIONS_VIEW, ApiScope.SOURCES_EDIT)).build();
+        CreateApiKeyDTO requestDto = CreateApiKeyDTO.builder()
+                .repositoryId(repository.getId())
+                .scopes(Set.of(ApiScope.TRANSLATIONS_VIEW, ApiScope.SOURCES_EDIT))
+                .build();
         MvcResult mvcResult = performPost("/api/apiKeys", requestDto).andExpect(status().isOk()).andReturn();
         return mapResponse(mvcResult, ApiKeyDTO.class);
     }
@@ -89,14 +96,18 @@ public class ApiKeyControllerTest extends SignedInControllerTest implements ITes
 
     @Test()
     void getAllByUser() throws Exception {
-        Repository repository = dbPopulator.createBase(generateUniqueString());
+        Repository repository = dbPopulator.createBase(generateUniqueString(), "ben");
+
+        logAsUser("ben", initialPassword);
+
         ApiKeyDTO apiKey1 = apiKeyService.createApiKey(repository.getCreatedBy(), Set.of(ApiScope.SOURCES_EDIT), repository);
-        Repository repository2 = dbPopulator.createBase(generateUniqueString(), initialUsername);
+        Repository repository2 = dbPopulator.createBase(generateUniqueString(), "ben");
         ApiKeyDTO apiKey2 = apiKeyService.createApiKey(repository2.getCreatedBy(), Set.of(ApiScope.SOURCES_EDIT, ApiScope.TRANSLATIONS_VIEW), repository);
+
         UserAccount testUser = dbPopulator.createUser("testUser");
         ApiKeyDTO user2Key = apiKeyService.createApiKey(testUser, Set.of(ApiScope.SOURCES_EDIT, ApiScope.TRANSLATIONS_VIEW), repository);
 
-        ApiKeyDTO apiKeyDTO = doCreate();
+        ApiKeyDTO apiKeyDTO = doCreate("ben");
 
         MvcResult mvcResult = performGet("/api/apiKeys").andExpect(status().isOk()).andReturn();
         Set<ApiKeyDTO> set = mapResponse(mvcResult, TypeFactory.defaultInstance().constructCollectionType(Set.class, ApiKeyDTO.class));

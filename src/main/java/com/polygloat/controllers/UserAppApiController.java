@@ -4,6 +4,7 @@ import com.polygloat.constants.ApiScope;
 import com.polygloat.constants.Message;
 import com.polygloat.dtos.PathDTO;
 import com.polygloat.dtos.request.SetTranslationsDTO;
+import com.polygloat.dtos.request.UaaGetKeyTranslations;
 import com.polygloat.exceptions.NotFoundException;
 import com.polygloat.model.ApiKey;
 import com.polygloat.model.Language;
@@ -39,7 +40,11 @@ public class UserAppApiController implements IController {
         return translationService.getTranslations(languages, apiKey.getRepository().getId());
     }
 
-    @GetMapping(value = "/source/{key}/{languages}")
+    /**
+     * @deprecated can not pass . as parameter of text, for longer texts it would be much better to use POST
+     */
+    @Deprecated(forRemoval = true, since = "1.0.0")
+    @GetMapping(value = "/source/{key:.+}/{languages}")
     public Map<String, String> getSourceTranslations(@PathVariable("key") String fullPath,
                                                      @PathVariable("languages") Set<String> langs) {
         PathDTO pathDTO = PathDTO.fromFullPath(fullPath);
@@ -48,9 +53,28 @@ public class UserAppApiController implements IController {
         return translationService.getSourceTranslationsResult(apiKey.getRepository().getId(), pathDTO, langs);
     }
 
-    @GetMapping(value = "/source/{key}")
+    @PostMapping(value = "/keyTranslations/{languages}")
+    public Map<String, String> getKeyTranslationsPost(@RequestBody UaaGetKeyTranslations body, @PathVariable("languages") Set<String> langs) {
+        PathDTO pathDTO = PathDTO.fromFullPath(body.getKey());
+        ApiKey apiKey = authenticationFacade.getApiKey();
+        securityService.checkApiKeyScopes(Set.of(ApiScope.TRANSLATIONS_VIEW), apiKey);
+        return translationService.getSourceTranslationsResult(apiKey.getRepository().getId(), pathDTO, langs);
+    }
+
+    /**
+     * @deprecated can not pass . as parameter of text, for longer texts it would be much better to use POST
+     */
+    @Deprecated(forRemoval = true, since = "1.0.0")
+    @GetMapping(value = "/source/{key:.+}")
     public Map<String, String> getSourceTranslations(@PathVariable("key") String fullPath) {
         PathDTO pathDTO = PathDTO.fromFullPath(fullPath);
+        ApiKey apiKey = authenticationFacade.getApiKey();
+        return translationService.getSourceTranslationsResult(apiKey.getRepository().getId(), pathDTO, null);
+    }
+
+    @PostMapping(value = "/sourceTranslations")
+    public Map<String, String> getKeyTranslationsPost(@RequestBody UaaGetKeyTranslations body) {
+        PathDTO pathDTO = PathDTO.fromFullPath(body.getKey());
         ApiKey apiKey = authenticationFacade.getApiKey();
         return translationService.getSourceTranslationsResult(apiKey.getRepository().getId(), pathDTO, null);
     }

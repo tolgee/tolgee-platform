@@ -127,15 +127,17 @@ public class DbPopulatorReal {
 
 
     private void createApiKey(Repository repository) {
-
         Permission permission = repository.getPermissions().stream().findAny().orElseThrow(NotFoundException::new);
 
-        ApiKey apiKey = ApiKey.builder()
-                .repository(repository).key(API_KEY)
-                .userAccount(permission.getUser())
-                .scopes(Set.of(ApiScope.values()))
-                .build();
-        apiKeyRepository.save(apiKey);
+        if (apiKeyRepository.findByKey(API_KEY).isEmpty()) {
+            ApiKey apiKey = ApiKey.builder()
+                    .repository(repository)
+                    .key(API_KEY)
+                    .userAccount(permission.getUser())
+                    .scopes(Set.of(ApiScope.values()))
+                    .build();
+            apiKeyRepository.save(apiKey);
+        }
     }
 
     private Language createLanguage(String name, Repository repository) {
