@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:11
+    volumes:
+      - ../build/db-data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=postgres
+  app:
+    image: polygloat/polygloat
+    ports:
+      - ${exposePort}:8080
+    env_file:
+      - .env
+    depends_on:
+      - "db"
+  smtp:
+    image: namshi/smtp
