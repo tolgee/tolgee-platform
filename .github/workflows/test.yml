@@ -16,7 +16,7 @@ jobs:
           java-version: 14
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: WEBAPP_PATH=./webapp ./gradlew build
 
       - name: Clone webapp
         run: |
