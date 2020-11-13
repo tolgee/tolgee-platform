@@ -21,7 +21,7 @@ jobs:
       - name: Clone webapp
         run: |
           source .buildversions
-          git clone --depth 1 --branch ${WEBAPP_VERSION} git@github.com:polygloat/webapp.git
+          git clone --depth 1 --branch ${WEBAPP_VERSION} https://github.com/polygloat/webapp.git
 
       - name: Setup node
         uses: actions/setup-node@v1
