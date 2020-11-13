@@ -31,6 +31,9 @@ task copyDist(type: Copy) {
     mustRunAfter project.tasks.findByName("dockerPrepare")
 }
 
-task wrapper(type: Wrapper) {}
+if (tasks.findByName("wrapper") == null) {
+    task wrapper(type: Wrapper) {
+    }
+}
 
 project.tasks.findByName("docker").dependsOn(unpack, copyDist)
