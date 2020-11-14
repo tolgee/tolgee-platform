@@ -28,19 +28,13 @@ jobs:
         with:
           node-version: '12.x'
 
-      - name: CD webapp
-        run: cd webapp
-
       - name: Npm install
         run: npm install
-
-      - name: Unit test
-        run: npm run test
+        working-directory: ./webapp
 
       - name: Build webapp
         run: npm run build
-
-      - run: cd ../
+        working-directory: ./webapp
 
       - run: WEBAPP_PATH=./webapp ./gradlew docker
 
@@ -50,16 +44,16 @@ jobs:
       - name: Wait for running container
         run: 'until docker logs --since 5m polygloat | grep -m 1 "started on port(s): 8080"; do : ;done'
 
-
       - name: Run cypress tests
-        run: |
-          cd webapp
-          CYPRESS_host=localhost:8080 npm run cy:run
+        run: npm run cy:run
+        working-directory: ./webapp
+        env:
+          CYPRESS_host: http://localhost:8080
 
       - uses: actions/upload-artifact@v2
         if: always()
         with:
           name: cypress
           path: |
-            webapp/cypress/videos/**/*
-            webappcypress/screenshots/**/*
+            ./webapp/cypress/videos/**/*
+            ./webappcypress/screenshots/**/*
