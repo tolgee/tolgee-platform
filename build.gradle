@@ -134,6 +134,12 @@ sourceSets {
 def customWebApp = System.getenv().containsKey("WEBAPP_PATH");
 def webappPath = customWebApp ? System.getenv().get("WEBAPP_PATH") : rootProject.project("webapp").projectDir
 
+task unpack(type: Copy) {
+    from(zipTree(project.tasks.findByName("bootJar").outputs.files.singleFile))
+    into("build/dependency")
+    dependsOn "bootJar"
+}
+
 task copyDist(type: Copy) {
     if (!customWebApp) {
         evaluationDependsOn rootProject.project("webapp").getPath()
@@ -149,6 +155,7 @@ task copyDist(type: Copy) {
     mustRunAfter project.tasks.findByName("dockerPrepare")
 }
 
+apply from: "./docker.gradle"
+
 task buildProd(dependsOn: ['copyDist', 'bootJar'])
 
-apply from: "./docker.gradle"

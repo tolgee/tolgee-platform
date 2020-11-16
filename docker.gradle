@@ -1,9 +1,3 @@
-task unpack(type: Copy) {
-    from(zipTree(project.tasks.findByName("bootJar").outputs.files.singleFile))
-    into("build/dependency")
-    dependsOn "bootJar"
-}
-
 docker {
     dockerfile file('docker/app/Dockerfile')
     name "polygloat/polygloat"
