@@ -122,6 +122,7 @@ springBoot {
 }
 
 bootJar {
+    archiveFileName = "polygloat-$project.version.jar"
     manifest {
         attributes('Implementation-Version': project.version)
     }
