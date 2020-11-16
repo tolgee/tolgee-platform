@@ -63,7 +63,7 @@ jobs:
           CYPRESS_host: http://localhost:8080
 
       - name: Git push
-         run: git push --tags
+        run: git push --tags
 
       - name: Create Release
         id: create_release
