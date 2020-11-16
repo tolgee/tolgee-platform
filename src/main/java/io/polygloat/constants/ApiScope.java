@@ -23,4 +23,8 @@ public enum ApiScope {
         }
         throw new NotFoundException(Message.SCOPE_NOT_FOUND);
     }
+
+    public String getValue() {
+        return value;
+    }
 }

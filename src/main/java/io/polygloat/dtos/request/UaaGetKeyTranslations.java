@@ -9,4 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UaaGetKeyTranslations {
     private String key;
+
+    public String getKey() {
+        return key;
+    }
 }

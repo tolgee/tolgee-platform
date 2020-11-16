@@ -60,6 +60,10 @@ public class ApiKey extends AuditModel {
         }
     }
 
+    public Repository getRepository() {
+        return repository;
+    }
+
     private static String stringifyScopes(Set<ApiScope> scopes) {
         return scopes.stream().map(ApiScope::getValue).collect(Collectors.joining(";"));
     }
