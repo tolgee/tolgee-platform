@@ -62,6 +62,9 @@ jobs:
         env:
           CYPRESS_host: http://localhost:8080
 
+      - name: Git push
+         run: git push --tags
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
