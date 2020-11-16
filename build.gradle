@@ -22,7 +22,7 @@ plugins {
 group = 'io.polygloat'
 
 if (System.getenv().containsKey("VERSION")) {
-    project.version = System.getenv().containsKey("VERSION")
+    project.version = System.getenv().get("VERSION")
 } else {
     project.version = 'local'
 }
