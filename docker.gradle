@@ -1,8 +1,3 @@
-def customWebApp = System.getenv().containsKey("WEBAPP_PATH");
-def webappPath = customWebApp ? System.getenv().get("WEBAPP_PATH") : rootProject.project("webapp").projectDir
-
-println webappPath;
-
 task unpack(type: Copy) {
     from(zipTree(project.tasks.findByName("bootJar").outputs.files.singleFile))
     into("build/dependency")
@@ -14,21 +9,6 @@ docker {
     name "polygloat/polygloat"
     copySpec.from(tasks.unpack.outputs, 'docker/app').into("dependency")
     buildArgs(['DEPENDENCY': "dependency"])
-}
-
-task copyDist(type: Copy) {
-    if (!customWebApp) {
-        evaluationDependsOn rootProject.project("webapp").getPath()
-        dependsOn rootProject.project("webapp").getTasks().findByName("build")
-    }
-    def fromDir = "${webappPath}/dist"
-    def toDir = "${project.projectDir}/build/docker/dependency/BOOT-INF/classes/static/."
-    from fromDir
-    into toDir
-    inputs.dir(fromDir)
-    outputs.dir(toDir)
-    mustRunAfter unpack
-    mustRunAfter project.tasks.findByName("dockerPrepare")
 }
 
 if (tasks.findByName("wrapper") == null) {

@@ -1,0 +1,100 @@
+name: Prerelease
+
+on:
+  push:
+    branches:
+      - 'prerelease-*'
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 14
+
+      - name: Build with Gradle
+        run: WEBAPP_PATH=./webapp ./gradlew build
+
+      - name: Clone webapp
+        run: |
+          source .buildversions
+          git clone --depth 1 --branch ${WEBAPP_VERSION} https://github.com/polygloat/webapp.git
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Set git globals
+        run: |
+          git config --local user.email "machine@polygloat.io"
+          git config --local user.name "Polygloat Machine"
+
+      - name: Increase npm version
+        id: version
+        run: echo ::set-output name=VERSION::$(npm version prerelease)
+
+      - name: Npm install
+        run: npm install
+        working-directory: ./webapp
+
+      - name: Build webapp
+        run: npm run build
+        working-directory: ./webapp
+
+      - run: ./gradlew docker
+        env:
+          - WEBAPP_PATH: ./webapp
+          - VERSION: ${{ steps.version.outputs.VERSION }}
+
+      - name: Start docker stack
+        run: docker run -d --name app -e app.populate=true -p8080:8080 polygloat/polygloat
+
+      - name: Wait for running container
+        run: 'until docker logs --since 5m app | grep -m 1 "started on port(s): 8080"; do : ;done'
+
+      - name: Run cypress tests
+        run: npm run cy:run
+        working-directory: ./webapp
+        env:
+          CYPRESS_host: http://localhost:8080
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          release_name: Release ${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: true
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./build/libs/polygloat-${{ steps.version.outputs.VERSION }}.jar
+          asset_name: polygloat-${{ steps.version.outputs.VERSION }}.jar
+          asset_content_type: application/java-archive
+
+      - name: Login to docker
+        run: docker login -u ${{ secrets.dockerhubusername }} -p "${{ secrets.dockerhubpassword }}"
+      - name: Tag the image
+        run: docker tag polygloat/polygloat polygloat/polygloat:${{ steps.version.outputs.VERSION }}
+      - name: Publish docker image
+        run: docker push polygloat/polygloat:${{ steps.version.outputs.VERSION }}
+
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: cypress
+          path: |
+            ./webapp/cypress/videos/**/*
+            ./webappcypress/screenshots/**/*

@@ -4,7 +4,6 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.6.RELEASE")
-        classpath "com.github.paralleltasks:parallel-tasks-gradle-plugin:1.0.1"
     }
 }
 
@@ -20,11 +19,10 @@ plugins {
     //id "org.jetbrains.kotlin.kapt" version "1.4.10"
 }
 
-
 group = 'io.polygloat'
 
-if (project.hasProperty('projVersion')) {
-    project.version = project.projVersion
+if (System.getenv().containsKey("VERSION")) {
+    project.version = System.getenv().containsKey("VERSION")
 } else {
     project.version = 'local'
 }
@@ -41,7 +39,6 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-apply plugin: 'com.github.paralleltasks'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 
 repositories {
@@ -130,20 +127,28 @@ bootJar {
     }
 }
 
-/*task cypress(type: NpmTask) {
-    description = "Runs cypress tests"
-    workingDir = file(clientAppBuildDir)
-    args = ["run", "cypress", "--", "--env", "host=http://localhost:8082", "--spec", "cypress/integration/login.spec.js"]
-    dependsOn("appNpmInstall")
-}*/
-
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
-  //  main.java.srcDirs = ['src/main/java']
 }
 
-kotlin {
+def customWebApp = System.getenv().containsKey("WEBAPP_PATH");
+def webappPath = customWebApp ? System.getenv().get("WEBAPP_PATH") : rootProject.project("webapp").projectDir
 
+task copyDist(type: Copy) {
+    if (!customWebApp) {
+        evaluationDependsOn rootProject.project("webapp").getPath()
+        dependsOn rootProject.project("webapp").getTasks().findByName("build")
+    }
+    def fromDir = "${webappPath}/dist"
+    def toDir = "${project.projectDir}/build/docker/dependency/BOOT-INF/classes/static/."
+    from fromDir
+    into toDir
+    inputs.dir(fromDir)
+    outputs.dir(toDir)
+    mustRunAfter unpack
+    mustRunAfter project.tasks.findByName("dockerPrepare")
 }
+
+task buildProd(dependsOn: ['copyDist', 'bootJar'])
 
 apply from: "./docker.gradle"
