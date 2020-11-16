@@ -47,8 +47,8 @@ jobs:
 
       - run: ./gradlew docker
         env:
-          - WEBAPP_PATH: ./webapp
-          - VERSION: ${{ steps.version.outputs.VERSION }}
+          WEBAPP_PATH: ./webapp
+          VERSION: ${{ steps.version.outputs.VERSION }}
 
       - name: Start docker stack
         run: docker run -d --name app -e app.populate=true -p8080:8080 polygloat/polygloat
