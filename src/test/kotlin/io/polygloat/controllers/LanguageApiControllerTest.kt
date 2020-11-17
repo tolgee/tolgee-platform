@@ -2,6 +2,7 @@ package io.polygloat.controllers
 
 import io.polygloat.Assertions.Assertions.assertThat
 import io.polygloat.Assertions.UserApiAppAction
+import io.polygloat.constants.ApiScope
 import io.polygloat.dtos.request.LanguageDTO
 import io.polygloat.exceptions.NotFoundException
 import io.polygloat.helpers.JsonHelper
@@ -21,10 +22,11 @@ class LanguageApiControllerTest : AbstractUserAppApiTest(), ITest {
 
     @Test
     fun findAllLanguages() {
-        val repository = dbPopulator.populate(generateUniqueString(), "ben")
+        val repository = dbPopulator.createBase(generateUniqueString(), "ben")
+        val apiKey = apiKeyService.createApiKey(repository.createdBy, setOf(*ApiScope.values()), repository)
         val contentAsString = performAction(UserApiAppAction(
                 method = HttpMethod.GET,
-                apiKey = repository.apiKeys.stream().findFirst().orElseGet(null).key,
+                apiKey = apiKey.key,
                 expectedStatus = HttpStatus.OK,
                 url = "/api/languages"
         )).response.contentAsString
