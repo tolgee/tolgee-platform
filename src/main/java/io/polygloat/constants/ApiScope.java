@@ -11,7 +11,6 @@ public enum ApiScope {
     TRANSLATIONS_EDIT("translations.edit"),
     SOURCES_EDIT("sources.edit");
 
-    @Getter
     @Setter
     private String value;
 

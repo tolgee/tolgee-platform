@@ -1,87 +1,100 @@
-package io.polygloat.security;
+package io.polygloat.security
 
-
-import io.polygloat.constants.ApiScope;
-import io.polygloat.controllers.AbstractUserAppApiTest;
-import io.polygloat.dtos.request.SetTranslationsDTO;
-import io.polygloat.dtos.response.ApiKeyDTO.ApiKeyDTO;
-import io.polygloat.model.Repository;
-import io.polygloat.Assertions.Assertions;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MvcResult;
-import org.testng.annotations.Test;
-
-import java.util.Map;
-import java.util.Set;
-
-import static io.polygloat.Assertions.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import io.polygloat.Assertions.Assertions
+import io.polygloat.Assertions.UserApiAppAction
+import io.polygloat.constants.ApiScope
+import io.polygloat.controllers.AbstractUserAppApiTest
+import io.polygloat.dtos.request.SetTranslationsDTO
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.testng.annotations.Test
 
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class ApiKeyAuthenticationTest extends AbstractUserAppApiTest {
-
+class ApiKeyAuthenticationTest : AbstractUserAppApiTest() {
     @Test
-    public void accessWithApiKey_failure() throws Exception {
-        MvcResult mvcResult = mvc.perform(get("/uaa/en")).andExpect(status().isForbidden()).andReturn();
-        Assertions.assertThat(mvcResult).error();
+    fun accessWithApiKey_failure() {
+        val mvcResult = mvc.perform(MockMvcRequestBuilders.get("/uaa/en"))
+                .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
+        Assertions.assertThat(mvcResult).error()
     }
 
     @Test
-    public void accessWithApiKey_success() throws Exception {
-        Repository base = this.dbPopulator.createBase(generateUniqueString());
-        ApiKeyDTO apiKey = this.apiKeyService.createApiKey(base.getCreatedBy(), Set.of(ApiScope.values()), base);
-        mvc.perform(get("/uaa/en?ak=" + apiKey.getKey())).andExpect(status().isOk()).andReturn();
+    fun accessWithApiKey_success() {
+        val base = dbPopulator.createBase(generateUniqueString())
+        val apiKey = apiKeyService.createApiKey(base.createdBy, setOf(*ApiScope.values()), base)
+        mvc.perform(MockMvcRequestBuilders.get("/uaa/en?ak=" + apiKey.key))
+                .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
     }
 
     @Test
-    public void accessWithApiKey_failure_wrong_key() throws Exception {
-        mvc.perform(get("/uaa/en?ak=wrong_api_key")).andExpect(status().isForbidden()).andReturn();
+    fun accessWithApiKey_failure_wrong_key() {
+        mvc.perform(MockMvcRequestBuilders.get("/uaa/en?ak=wrong_api_key"))
+                .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
     }
 
     @Test
-    public void accessWithApiKey_failure_api_path() throws Exception {
-        Repository base = this.dbPopulator.createBase(generateUniqueString());
-        ApiKeyDTO apiKey = this.apiKeyService.createApiKey(base.getCreatedBy(), Set.of(ApiScope.values()), base);
-        performAction(buildAction().apiKey(apiKey.getKey()).url("/api/repositories").expectedStatus(HttpStatus.FORBIDDEN));
-
-        mvc.perform(get("/api/repositories")).andExpect(status().isForbidden()).andReturn();
+    fun accessWithApiKey_failure_api_path() {
+        val base = dbPopulator.createBase(generateUniqueString())
+        val apiKey = apiKeyService.createApiKey(base.createdBy, setOf(*ApiScope.values()), base)
+        performAction(UserApiAppAction(
+                apiKey = apiKey.key,
+                url = "/api/repositories",
+                expectedStatus = HttpStatus.FORBIDDEN
+        ))
+        mvc.perform(MockMvcRequestBuilders.get("/api/repositories"))
+                .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
     }
 
     @Test
-    public void accessWithApiKey_listPermissions() {
-        ApiKeyDTO apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_VIEW);
-        performAction(buildAction().apiKey(apiKey.getKey()).url("/uaa/en").expectedStatus(HttpStatus.OK));
-
-        apiKey = createBaseWithApiKey(ApiScope.SOURCES_EDIT);
-        performAction(buildAction().apiKey(apiKey.getKey()).url("/uaa/en").expectedStatus(HttpStatus.FORBIDDEN));
+    fun accessWithApiKey_listPermissions() {
+        var apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_VIEW)
+        performAction(UserApiAppAction(apiKey = apiKey.key, url = "/uaa/en", expectedStatus = HttpStatus.OK))
+        apiKey = createBaseWithApiKey(ApiScope.SOURCES_EDIT)
+        performAction(UserApiAppAction(apiKey = apiKey.key, url = "/uaa/en", expectedStatus = HttpStatus.FORBIDDEN))
     }
 
     @Test
-    public void accessWithApiKey_editPermissions() {
-        ApiKeyDTO apiKey = createBaseWithApiKey(ApiScope.SOURCES_EDIT);
-
-        SetTranslationsDTO translations = SetTranslationsDTO.builder()
+    fun accessWithApiKey_editPermissions() {
+        var apiKey = createBaseWithApiKey(ApiScope.SOURCES_EDIT)
+        val translations = SetTranslationsDTO.builder()
                 .key("aaaa")
-                .translations(Map.of("aaa", "aaa")).build();//just a fake to pass validation
-
-        performAction(buildAction().method(HttpMethod.POST).body(translations).apiKey(apiKey.getKey()).url("/uaa").expectedStatus(HttpStatus.FORBIDDEN));
-
-        apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_EDIT);
-        performAction(buildAction().method(HttpMethod.POST).body(translations).apiKey(apiKey.getKey()).url("/uaa").expectedStatus(HttpStatus.NOT_FOUND));
+                .translations(mapOf<String, String>(Pair("aaa", "aaa"))).build() //just a fake to pass validation
+        performAction(UserApiAppAction(
+                method = HttpMethod.POST,
+                body = translations,
+                apiKey = apiKey.key,
+                url = "/uaa",
+                expectedStatus = HttpStatus.FORBIDDEN
+        ))
+        apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_EDIT)
+        performAction(UserApiAppAction(
+                method = HttpMethod.POST,
+                body = translations,
+                apiKey = apiKey.key,
+                url = "/uaa",
+                expectedStatus = HttpStatus.NOT_FOUND))
     }
 
-
     @Test
-    public void accessWithApiKey_getLanguages() {
-        ApiKeyDTO apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_VIEW);
-        performAction(buildAction().method(HttpMethod.GET).apiKey(apiKey.getKey()).url("/uaa/languages").expectedStatus(HttpStatus.FORBIDDEN));
+    fun accessWithApiKey_getLanguages() {
+        var apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_VIEW)
+        performAction(UserApiAppAction(
+                method = HttpMethod.GET,
+                apiKey = apiKey.key,
+                url = "/uaa/languages",
+                expectedStatus = HttpStatus.FORBIDDEN))
 
-        apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_EDIT);
-        performAction(buildAction().method(HttpMethod.GET).apiKey(apiKey.getKey()).url("/uaa/languages").expectedStatus(HttpStatus.OK));
+        apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_EDIT)
+
+        performAction(UserApiAppAction(
+                method = HttpMethod.GET,
+                apiKey = apiKey.key,
+                url = "/uaa/languages",
+                expectedStatus = HttpStatus.OK))
     }
 }

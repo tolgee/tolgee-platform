@@ -1,50 +1,37 @@
-package io.polygloat.Assertions;
+package io.polygloat.Assertions
 
+import io.polygloat.helpers.JsonHelper
+import lombok.Builder
+import lombok.Data
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.RequestBuilder
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
-import io.polygloat.helpers.JsonHelper;
-import lombok.Builder;
-import lombok.Data;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-@Builder
-@Data
-public class UserApiAppAction {
-    HttpMethod method;
-
-    Object body;
-
-    String apiKey;
-
-    String url;
-
-    HttpStatus expectedStatus;
-
-    public RequestBuilder getRequestBuilder() {
-        String url = this.getUrl() + "?ak=" + apiKey;
-
-        if (this.getMethod() == null) {
-            method = HttpMethod.GET;
+class UserApiAppAction(
+        var method: HttpMethod? = null,
+        var body: Any? = null,
+        var apiKey: String? = null,
+        var url: String? = null,
+        var expectedStatus: HttpStatus? = null,
+) {
+    val requestBuilder: RequestBuilder
+        get() {
+            val url: String = this.url + "?ak=" + apiKey
+            if (this.method == null) {
+                method = HttpMethod.GET
+            }
+            return when (this.method) {
+                HttpMethod.PUT -> withContent(MockMvcRequestBuilders.put(url))
+                HttpMethod.POST -> withContent(MockMvcRequestBuilders.post(url))
+                HttpMethod.DELETE -> withContent(MockMvcRequestBuilders.delete(url))
+                else -> withContent(MockMvcRequestBuilders.get(url))
+            }
         }
 
-        switch (this.getMethod()) {
-            case PUT:
-                return withContent(MockMvcRequestBuilders.put(url));
-            case POST:
-                return withContent(MockMvcRequestBuilders.post(url));
-            case DELETE:
-                return withContent(MockMvcRequestBuilders.delete(url));
-            default:
-                return withContent(MockMvcRequestBuilders.get(url));
-        }
+    private fun withContent(builder: MockHttpServletRequestBuilder): RequestBuilder {
+        return builder.contentType(MediaType.APPLICATION_JSON).content(JsonHelper.asJsonString(body))
     }
-
-    private RequestBuilder withContent(MockHttpServletRequestBuilder builder) {
-        return builder.contentType(MediaType.APPLICATION_JSON).content(JsonHelper.asJsonString(this.body));
-    }
-
 }

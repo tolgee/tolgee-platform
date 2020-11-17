@@ -137,12 +137,13 @@ public class DbPopulatorReal {
                     .userAccount(permission.getUser())
                     .scopes(Set.of(ApiScope.values()))
                     .build();
+            repository.getApiKeys().add(apiKey);
             apiKeyRepository.save(apiKey);
         }
     }
 
     private Language createLanguage(String name, Repository repository) {
-        return languageService.createLanguage(LanguageDTO.builder().name(name).abbreviation(name).build(), repository);
+        return languageService.createLanguage(new LanguageDTO(null, name, name), repository);
     }
 
     private void createTranslation(Repository repository, String english,

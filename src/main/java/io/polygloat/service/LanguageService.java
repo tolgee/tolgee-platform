@@ -84,13 +84,7 @@ public class LanguageService {
     @Transactional
     public Language getOrCreate(Repository repository, String languageAbbreviation) {
         return this.findByAbbreviation(languageAbbreviation, repository)
-                .orElseGet(
-                        () -> this.createLanguage(
-                                LanguageDTO.builder()
-                                        .abbreviation(languageAbbreviation)
-                                        .name(languageAbbreviation).build(),
-                                repository)
-                );
+                .orElseGet(() -> this.createLanguage(new LanguageDTO(null, languageAbbreviation, languageAbbreviation), repository));
     }
 
     public LanguageSet getLanguagesForTranslationsView(Set<String> languages, Repository repository) {

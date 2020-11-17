@@ -1,48 +1,30 @@
-package io.polygloat.controllers;
+package io.polygloat.controllers
 
-import io.polygloat.Assertions.UserApiAppAction;
-import io.polygloat.constants.ApiScope;
-import io.polygloat.dtos.response.ApiKeyDTO.ApiKeyDTO;
-import io.polygloat.model.Repository;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
+import io.polygloat.Assertions.UserApiAppAction
+import io.polygloat.constants.ApiScope
+import io.polygloat.dtos.response.ApiKeyDTO.ApiKeyDTO
+import org.springframework.test.web.servlet.MvcResult
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
-import java.util.Set;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-
-public class AbstractUserAppApiTest extends AbstractControllerTest {
-
-    protected MvcResult performAction(UserApiAppAction action) {
-        try {
-            ResultActions resultActions = mvc.perform(action.getRequestBuilder());
-            if (action.getExpectedStatus() != null) {
-                resultActions = resultActions.andExpect(status().is(action.getExpectedStatus().value()));
+abstract class AbstractUserAppApiTest : AbstractControllerTest() {
+    fun performAction(action: UserApiAppAction): MvcResult {
+        return try {
+            var resultActions = mvc.perform(action.requestBuilder)
+            if (action.expectedStatus != null) {
+                resultActions = resultActions.andExpect(MockMvcResultMatchers.status().`is`(action.expectedStatus!!.value()))
             }
-            return resultActions.andReturn();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            resultActions.andReturn()
+        } catch (e: Exception) {
+            throw RuntimeException(e)
         }
     }
 
-    protected MvcResult performAction(UserApiAppAction.UserApiAppActionBuilder builder) {
-        return performAction(builder.build());
-    }
-
-    protected UserApiAppAction.UserApiAppActionBuilder buildAction() {
-        return UserApiAppAction.builder();
-    }
-
-    protected ApiKeyDTO createBaseWithApiKey(ApiScope... scopes) {
-        Set<ApiScope> scopesSet = Set.of(scopes);
-
+    protected fun createBaseWithApiKey(vararg scopes: ApiScope?): ApiKeyDTO {
+        var scopesSet = setOf(*scopes)
         if (scopesSet.isEmpty()) {
-            scopesSet = Set.of(ApiScope.values());
+            scopesSet = setOf(*ApiScope.values())
         }
-
-        Repository base = this.dbPopulator.createBase(generateUniqueString());
-        return this.apiKeyService.createApiKey(base.getCreatedBy(), scopesSet, base);
+        val base = dbPopulator.createBase(generateUniqueString())
+        return apiKeyService.createApiKey(base.createdBy, scopesSet, base)
     }
-
 }

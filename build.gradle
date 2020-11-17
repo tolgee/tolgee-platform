@@ -130,6 +130,7 @@ bootJar {
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
+    test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
 def customWebApp = System.getenv().containsKey("WEBAPP_PATH");
