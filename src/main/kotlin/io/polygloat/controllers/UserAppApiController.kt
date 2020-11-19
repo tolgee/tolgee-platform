@@ -19,7 +19,7 @@ import javax.validation.Valid
 @RequestMapping("/uaa")
 class UserAppApiController(
         private val translationService: TranslationService,
-        private val sourceService: SourceService,
+        private val keyService: KeyService,
         private val repositoryService: RepositoryService,
         private val securityService: SecurityService,
         private val authenticationFacade: AuthenticationFacade,
@@ -74,7 +74,7 @@ class UserAppApiController(
     fun setTranslations(@RequestBody dto: @Valid SetTranslationsDTO) {
         val apiKey = authenticationFacade.apiKey
         val repository = repositoryService.findById(apiKey.repository.id).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
-        val source = sourceService.getOrCreateSource(repository, PathDTO.fromFullPath(dto.key))
+        val source = keyService.getOrCreateSource(repository, PathDTO.fromFullPath(dto.key))
         translationService.setForSource(source, dto.translations)
     }
 

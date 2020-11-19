@@ -150,8 +150,9 @@ public class DbPopulatorReal {
                                    String deutsch, Language en, Language de) {
 
 
-        Source source = Source.builder().name("sampleApp." + english.replace(" ", "_").toLowerCase().replaceAll("\\.+$", ""))
-                .repository(repository).build();
+        Source source = new Source();
+        source.setName("sampleApp." + english.replace(" ", "_").toLowerCase().replaceAll("\\.+$", ""));
+        source.setRepository(repository);
 
         Translation translation = new Translation();
         translation.setLanguage(en);

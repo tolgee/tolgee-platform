@@ -32,7 +32,6 @@ public enum Message {
     VALIDATION_ERROR,
     LANGUAGE_CAN_NOT_CONTAIN_COMMA;
 
-    @Getter
     String code;
 
     Message(String code) {
@@ -41,5 +40,9 @@ public enum Message {
 
     Message() {
         this.code = this.name().toLowerCase();
+    }
+
+    public String getCode() {
+        return code;
     }
 }

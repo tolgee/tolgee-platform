@@ -23,6 +23,8 @@ public interface TranslationRepository extends JpaRepository<Translation, Long> 
 
     Optional<Translation> findOneByKeyAndLanguage(Source source, Language language);
 
+    Set<Translation> getAllByLanguageId(Long languageId);
+
     @Modifying
     @Query("delete from Translation t where t.key.id in (select s.id from Source s where s.repository.id = :repositoryId)")
     void deleteAllByRepositoryId(Long repositoryId);

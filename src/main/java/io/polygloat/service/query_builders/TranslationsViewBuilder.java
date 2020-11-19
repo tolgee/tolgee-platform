@@ -31,27 +31,27 @@ public class TranslationsViewBuilder {
     public <T> CriteriaQuery<T> getBaseQuery(CriteriaQuery<T> query1) {
         Root<Source> source = query1.from(Source.class);
 
-        Expression<String> fullPath = source.get(Source_.name);
+        Expression<String> fullPath = source.get("name");
 
-        selection.add(source.get(Source_.id));
+        selection.add(source.get("id"));
 
         selection.add(fullPath);
 
-        Join<Source, Repository> repository = source.join(Source_.repository);
+        Join<Source, Repository> repositoryJoin = source.join("repository");
 
         for (Language language : languages) {
-            Join<Repository, Language> languages = repository.join("languages");
-            languages.on(cb.equal(languages.get(Language_.abbreviation), language.getAbbreviation()));
+            Join<Repository, Language> languagesJoin = repositoryJoin.join("languages");
+            languagesJoin.on(cb.equal(languagesJoin.get(Language_.abbreviation), language.getAbbreviation()));
 
-            SetJoin<Source, Translation> translations = source.join(Source_.translations, JoinType.LEFT);
-            translations.on(cb.equal(translations.get(Translation_.language), languages));
+            Join<Source, Translation> translations = source.join("translations", JoinType.LEFT);
+            translations.on(cb.equal(translations.get(Translation_.language), languagesJoin));
 
-            selection.add(languages.get(Language_.abbreviation));
+            selection.add(languagesJoin.get(Language_.abbreviation));
             selection.add(translations.get(Translation_.text));
             fullTextFields.add(translations.get(Translation_.text));
         }
 
-        restrictions.add(cb.equal(source.get(Source_.repository), this.repository));
+        restrictions.add(cb.equal(source.get("repository"), this.repository));
 
         Set<Predicate> fullTextRestrictions = new HashSet<>();
 
@@ -75,7 +75,7 @@ public class TranslationsViewBuilder {
 
         Root<Source> source = (Root<Source>) query1.getRoots().iterator().next();
 
-        Selection<String> fullPath = source.get(Source_.name);
+        Selection<String> fullPath = source.get("name");
 
         Selection<?>[] paths = selection.toArray(new Selection<?>[0]);
 

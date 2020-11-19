@@ -10,7 +10,7 @@ import io.polygloat.model.Permission;
 import io.polygloat.model.Source;
 import io.polygloat.service.RepositoryService;
 import io.polygloat.service.SecurityService;
-import io.polygloat.service.SourceService;
+import io.polygloat.service.KeyService;
 import io.polygloat.service.TranslationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import java.util.*;
 public class TranslationController implements IController {
 
     private final TranslationService translationService;
-    private final SourceService sourceService;
+    private final KeyService keyService;
     private final RepositoryService repositoryService;
     private final SecurityService securityService;
 
@@ -41,7 +41,7 @@ public class TranslationController implements IController {
     @PostMapping("/set")
     public void setTranslations(@PathVariable("repositoryId") Long repositoryId, @RequestBody @Valid SetTranslationsDTO dto) {
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.TRANSLATE);
-        Source source = sourceService.getSource(repositoryId, PathDTO.fromFullPath(dto.getKey())).orElseThrow(NotFoundException::new);
+        Source source = keyService.getSource(repositoryId, PathDTO.fromFullPath(dto.getKey())).orElseThrow(NotFoundException::new);
         translationService.setForSource(source, dto.getTranslations());
     }
 

@@ -35,7 +35,7 @@ public class TranslationService {
     private LanguageService languageService;
 
     @Setter(onMethod = @__({@Autowired}))
-    private SourceService sourceService;
+    private KeyService keyService;
 
     @Setter(onMethod = @__({@Autowired}))
     private RepositoryService repositoryService;
@@ -56,9 +56,13 @@ public class TranslationService {
         return langTranslations;
     }
 
+    public Set<Translation> getAllByLanguageId(Long languageId){
+        return translationRepository.getAllByLanguageId(languageId);
+    }
+
     public Map<String, String> getSourceTranslationsResult(Long repositoryId, PathDTO path, Set<String> languageAbbreviations) {
         Repository repository = repositoryService.findById(repositoryId).orElseThrow(NotFoundException::new);
-        Source source = sourceService.getSource(repository, path).orElse(null);
+        Source source = keyService.getSource(repository, path).orElse(null);
 
 
         Set<Language> languages;

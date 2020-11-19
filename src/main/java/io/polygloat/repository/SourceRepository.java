@@ -22,6 +22,8 @@ public interface SourceRepository extends JpaRepository<Source, Long> {
 
     Optional<Source> getByNameAndRepositoryId(Object fullPathString, Long repositoryId);
 
+    Set<Source> getAllByRepositoryId(long repositoryId);
+
     @Modifying
     @Query("delete from Source s where s.repository.id = :repositoryId")
     void deleteAllByRepositoryId(Long repositoryId);

@@ -1,4 +1,4 @@
-package io.polygloat.controllers.language
+package io.polygloat.controllers
 
 import io.polygloat.constants.Message
 import io.polygloat.controllers.IController

@@ -29,4 +29,27 @@ public class Translation extends AuditModel {
     @ManyToOne
     private Language language;
 
+    public Language getLanguage() {
+        return language;
+    }
+
+    public Source getKey() {
+        return key;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setKey(Source key) {
+        this.key = key;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
 }
