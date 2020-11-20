@@ -1,10 +1,10 @@
 package io.polygloat.service
 
-import io.polygloat.controllers.ImportDto
+import io.polygloat.dtos.ImportDto
 import io.polygloat.model.Repository
-import io.polygloat.model.Source
+import io.polygloat.model.Key
 import io.polygloat.model.Translation
-import io.polygloat.repository.SourceRepository
+import io.polygloat.repository.KeyRepository
 import io.polygloat.repository.TranslationRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -17,7 +17,7 @@ import kotlin.collections.ArrayList
 open class ImportService(
         private val languageService: LanguageService,
         private val keyService: KeyService,
-        private val sourceRepository: SourceRepository,
+        private val keyRepository: KeyRepository,
         private val translationRepository: TranslationRepository
 ) {
 
@@ -27,17 +27,17 @@ open class ImportService(
     @Transactional
     open fun import(repository: Repository, dto: ImportDto, emitter: OutputStream) {
         val language = languageService.getOrCreate(repository, dto.languageAbbreviation)
-        val allKeys = keyService.getAllKeys(repository.id).stream().collect(Collectors.toMap({ it.name }, { it }))
+        val allKeys = keyService.getAll(repository.id).stream().collect(Collectors.toMap({ it.name }, { it }))
         val allTranslations = translationService.getAllByLanguageId(language.id)
                 .stream()
                 .collect(Collectors.toMap({ it.key.id }, { it }))
 
-        val keysToSave = ArrayList<Source>();
+        val keysToSave = ArrayList<Key>();
         val translationsToSave = ArrayList<Translation>()
 
         for ((index, entry) in dto.data!!.entries.withIndex()) {
             val key = allKeys[entry.key] ?: {
-                val keyToSave = Source(name = entry.key, repository = repository)
+                val keyToSave = Key(name = entry.key, repository = repository)
                 keysToSave.add(keyToSave)
                 keyToSave
 
@@ -51,7 +51,7 @@ open class ImportService(
             emitter.write(index);
         }
 
-        sourceRepository.saveAll(keysToSave)
+        keyRepository.saveAll(keysToSave)
         translationRepository.saveAll(translationsToSave)
     }
 }

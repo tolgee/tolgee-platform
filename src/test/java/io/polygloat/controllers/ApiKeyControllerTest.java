@@ -50,7 +50,7 @@ public class ApiKeyControllerTest extends SignedInControllerTest implements ITes
     private ApiKeyDTO doCreate(Repository repository) throws Exception {
         CreateApiKeyDTO requestDto = CreateApiKeyDTO.builder()
                 .repositoryId(repository.getId())
-                .scopes(Set.of(ApiScope.TRANSLATIONS_VIEW, ApiScope.SOURCES_EDIT))
+                .scopes(Set.of(ApiScope.TRANSLATIONS_VIEW, ApiScope.KEYS_EDIT))
                 .build();
         MvcResult mvcResult = performPost("/api/apiKeys", requestDto).andExpect(status().isOk()).andReturn();
         return mapResponse(mvcResult, ApiKeyDTO.class);
@@ -99,12 +99,12 @@ public class ApiKeyControllerTest extends SignedInControllerTest implements ITes
 
         logAsUser("ben", initialPassword);
 
-        ApiKeyDTO apiKey1 = apiKeyService.createApiKey(repository.getCreatedBy(), Set.of(ApiScope.SOURCES_EDIT), repository);
+        ApiKeyDTO apiKey1 = apiKeyService.createApiKey(repository.getCreatedBy(), Set.of(ApiScope.KEYS_EDIT), repository);
         Repository repository2 = dbPopulator.createBase(generateUniqueString(), "ben");
-        ApiKeyDTO apiKey2 = apiKeyService.createApiKey(repository2.getCreatedBy(), Set.of(ApiScope.SOURCES_EDIT, ApiScope.TRANSLATIONS_VIEW), repository);
+        ApiKeyDTO apiKey2 = apiKeyService.createApiKey(repository2.getCreatedBy(), Set.of(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), repository);
 
         UserAccount testUser = dbPopulator.createUser("testUser");
-        ApiKeyDTO user2Key = apiKeyService.createApiKey(testUser, Set.of(ApiScope.SOURCES_EDIT, ApiScope.TRANSLATIONS_VIEW), repository);
+        ApiKeyDTO user2Key = apiKeyService.createApiKey(testUser, Set.of(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), repository);
 
         ApiKeyDTO apiKeyDTO = doCreate("ben");
 
@@ -122,11 +122,11 @@ public class ApiKeyControllerTest extends SignedInControllerTest implements ITes
     void getAllByRepository() throws Exception {
         Repository repository = dbPopulator.createBase(generateUniqueString());
         ApiKeyDTO apiKeyDTO = doCreate(repository);
-        ApiKeyDTO apiKey1 = apiKeyService.createApiKey(repository.getCreatedBy(), Set.of(ApiScope.SOURCES_EDIT), repository);
+        ApiKeyDTO apiKey1 = apiKeyService.createApiKey(repository.getCreatedBy(), Set.of(ApiScope.KEYS_EDIT), repository);
         Repository repository2 = dbPopulator.createBase(generateUniqueString(), initialUsername);
-        ApiKeyDTO apiKey2 = apiKeyService.createApiKey(repository2.getCreatedBy(), Set.of(ApiScope.SOURCES_EDIT, ApiScope.TRANSLATIONS_VIEW), repository);
+        ApiKeyDTO apiKey2 = apiKeyService.createApiKey(repository2.getCreatedBy(), Set.of(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), repository);
         UserAccount testUser = dbPopulator.createUser("testUser");
-        ApiKeyDTO user2Key = apiKeyService.createApiKey(testUser, Set.of(ApiScope.SOURCES_EDIT, ApiScope.TRANSLATIONS_VIEW), repository2);
+        ApiKeyDTO user2Key = apiKeyService.createApiKey(testUser, Set.of(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), repository2);
 
         MvcResult mvcResult = performGet("/api/apiKeys/repository/" + repository.getId()).andExpect(status().isOk()).andReturn();
 

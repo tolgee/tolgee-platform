@@ -1,13 +1,13 @@
 package io.polygloat.controllers
 
 import io.polygloat.constants.Message
+import io.polygloat.dtos.ImportDto
 import io.polygloat.exceptions.NotFoundException
 import io.polygloat.model.Permission
 import io.polygloat.service.*
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.OutputStream
 import java.util.concurrent.ExecutorService
@@ -19,11 +19,8 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/api/repository/{repositoryId}/import")
 class ImportController(
-        private val translationService: TranslationService,
-        private val keyService: KeyService,
         private val repositoryService: RepositoryService,
         private val securityService: SecurityService,
-        private val languageService: LanguageService,
         private val importService: ImportService
 ) : IController {
 

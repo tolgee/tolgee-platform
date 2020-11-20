@@ -245,4 +245,23 @@
                 newColumnName="key_id"
         />
     </changeSet>
+    <changeSet author="jenik (generated)" id="1605910149113-21">
+        <renameTable oldTableName="source" newTableName="key"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1605910784255-14">
+        <dropUniqueConstraint constraintName="translation_source_language" tableName="translation"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1605910784255-15">
+        <addUniqueConstraint columnNames="key_id, language_id" constraintName="translation_key_language"
+                             tableName="translation"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1605910784255-22">
+        <dropIndex indexName="index_abbreviation_source" tableName="language"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1605910784255-23">
+        <createIndex indexName="index_abbreviation_repository" tableName="language">
+            <column name="abbreviation"/>
+            <column name="repository_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

@@ -1,9 +1,9 @@
 package io.polygloat.controllers
 
 import io.polygloat.constants.Message
-import io.polygloat.dtos.request.EditSourceDTO
+import io.polygloat.dtos.request.EditKeyDTO
 import io.polygloat.dtos.request.SetTranslationsDTO
-import io.polygloat.dtos.response.SourceDTO
+import io.polygloat.dtos.response.KeyDTO
 import io.polygloat.exceptions.NotFoundException
 import io.polygloat.model.Permission
 import io.polygloat.service.KeyService
@@ -15,47 +15,47 @@ import javax.validation.ValidationException
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping("/api/repository/{repositoryId}/sources")
-open class SourceController(
+@RequestMapping(value = ["/api/repository/{repositoryId}/sources", "/api/repository/{repositoryId}/keys"])
+open class KeyController(
         private val keyService: KeyService,
         private val securityService: SecurityService
 ) : IController {
 
-    @PostMapping("/create")
-    fun create(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody dto: @Valid SetTranslationsDTO?) {
+    @PostMapping(value = ["/create", ""])
+    open fun create(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody @Valid dto: SetTranslationsDTO?) {
         val permission = securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.TRANSLATE)
-        keyService.createSource(permission.repository!!, dto!!)
+        keyService.create(permission.repository!!, dto!!)
     }
 
     @PostMapping(value = ["/edit"])
-    fun edit(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody dto: @Valid EditSourceDTO?) {
+    open fun edit(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody @Valid dto: EditKeyDTO?) {
         val permission = securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.EDIT)
-        keyService.editSource(permission.repository!!, dto!!)
+        keyService.edit(permission.repository!!, dto!!)
     }
 
     @GetMapping(value = ["{id}"])
-    operator fun get(@PathVariable("id") id: Long?): SourceDTO {
-        val key = keyService.getSource(id!!).orElseThrow { NotFoundException() }
+    open fun get(@PathVariable("id") id: Long?): KeyDTO {
+        val key = keyService.get(id!!).orElseThrow { NotFoundException() }
         securityService.getAnyRepositoryPermission(key.repository!!.id)
-        return SourceDTO(key.name)
+        return KeyDTO(key.name)
     }
 
     @DeleteMapping(value = ["/{id}"])
-    fun delete(@PathVariable id: Long?) {
-        val key = keyService.getSource(id!!).orElseThrow { NotFoundException() }
+    open fun delete(@PathVariable id: Long?) {
+        val key = keyService.get(id!!).orElseThrow { NotFoundException() }
         securityService.checkRepositoryPermission(key.repository!!.id, Permission.RepositoryPermissionType.EDIT)
-        keyService.deleteSource(id)
+        keyService.delete(id)
     }
 
     @DeleteMapping(value = [""])
     @Transactional
     open fun delete(@PathVariable("repositoryId") repositoryId: Long, @RequestBody ids: Set<Long>?) {
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.EDIT)
-        for (key in keyService.getSources(ids!!)) {
+        for (key in keyService.get(ids!!)) {
             if (repositoryId != key.repository!!.id) {
-                throw ValidationException(Message.SOURCE_NOT_FROM_REPOSITORY.code)
+                throw ValidationException(Message.KEY_NOT_FROM_REPOSITORY.code)
             }
-            keyService.deleteSources(ids)
+            keyService.deleteMultiple(ids)
         }
     }
 }

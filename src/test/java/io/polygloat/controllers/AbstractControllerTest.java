@@ -8,7 +8,7 @@ import io.polygloat.AbstractTransactionalTest;
 import io.polygloat.development.DbPopulatorReal;
 import io.polygloat.exceptions.NotFoundException;
 import io.polygloat.model.UserAccount;
-import io.polygloat.repository.SourceRepository;
+import io.polygloat.repository.KeyRepository;
 import io.polygloat.security.payload.LoginRequest;
 import io.polygloat.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +39,13 @@ public abstract class AbstractControllerTest extends AbstractTransactionalTest i
     protected TranslationService translationService;
 
     @Autowired
+    protected KeyService keyService;
+
+    @Autowired
     protected LanguageService languageService;
 
     @Autowired
-    protected SourceRepository sourceRepository;
+    protected KeyRepository keyRepository;
 
     @Autowired
     protected UserAccountService userAccountService;

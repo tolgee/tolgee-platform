@@ -1,4 +1,4 @@
-package io.polygloat.security;
+package io.polygloat.controllers;
 
 import com.fasterxml.jackson.databind.node.TextNode;
 import io.polygloat.configuration.AppConfiguration;
@@ -11,6 +11,7 @@ import io.polygloat.exceptions.BadRequestException;
 import io.polygloat.exceptions.NotFoundException;
 import io.polygloat.model.Invitation;
 import io.polygloat.model.UserAccount;
+import io.polygloat.security.JwtTokenProvider;
 import io.polygloat.security.payload.ApiResponse;
 import io.polygloat.security.payload.JwtAuthenticationResponse;
 import io.polygloat.security.payload.LoginRequest;

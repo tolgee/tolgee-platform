@@ -2,12 +2,12 @@ package io.polygloat.controllers;
 
 import io.polygloat.dtos.PathDTO;
 import io.polygloat.dtos.request.SetTranslationsDTO;
-import io.polygloat.dtos.response.SourceResponseDTO;
+import io.polygloat.dtos.response.KeyResponseDTO;
 import io.polygloat.dtos.response.ViewDataResponse;
 import io.polygloat.dtos.response.translations_view.ResponseParams;
 import io.polygloat.exceptions.NotFoundException;
 import io.polygloat.model.Permission;
-import io.polygloat.model.Source;
+import io.polygloat.model.Key;
 import io.polygloat.service.RepositoryService;
 import io.polygloat.service.SecurityService;
 import io.polygloat.service.KeyService;
@@ -41,16 +41,16 @@ public class TranslationController implements IController {
     @PostMapping("/set")
     public void setTranslations(@PathVariable("repositoryId") Long repositoryId, @RequestBody @Valid SetTranslationsDTO dto) {
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.TRANSLATE);
-        Source source = keyService.getSource(repositoryId, PathDTO.fromFullPath(dto.getKey())).orElseThrow(NotFoundException::new);
-        translationService.setForSource(source, dto.getTranslations());
+        Key key = keyService.get(repositoryId, PathDTO.fromFullPath(dto.getKey())).orElseThrow(NotFoundException::new);
+        translationService.setForKey(key, dto.getTranslations());
     }
 
     @GetMapping(value = "/view")
-    public ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> getViewData(@PathVariable("repositoryId") Long repositoryId,
-                                                                                          @RequestParam(name = "languages", required = false) Set<String> languages,
-                                                                                          @RequestParam(name = "limit", defaultValue = "10") int limit,
-                                                                                          @RequestParam(name = "offset", defaultValue = "0") int offset,
-                                                                                          @RequestParam(name = "search", required = false) String search
+    public ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> getViewData(@PathVariable("repositoryId") Long repositoryId,
+                                                                                       @RequestParam(name = "languages", required = false) Set<String> languages,
+                                                                                       @RequestParam(name = "limit", defaultValue = "10") int limit,
+                                                                                       @RequestParam(name = "offset", defaultValue = "0") int offset,
+                                                                                       @RequestParam(name = "search", required = false) String search
     ) {
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.VIEW);
         return translationService.getViewData(languages, repositoryId, limit, offset, search);

@@ -25,7 +25,7 @@ data class Repository(
     var permissions: MutableSet<Permission> = LinkedHashSet()
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "repository")
-    var sources: MutableSet<Source> = LinkedHashSet()
+    var keys: MutableSet<Key> = LinkedHashSet()
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "repository")
     var apiKeys: MutableSet<ApiKey> = LinkedHashSet()

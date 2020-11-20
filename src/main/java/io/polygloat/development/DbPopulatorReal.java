@@ -150,31 +150,31 @@ public class DbPopulatorReal {
                                    String deutsch, Language en, Language de) {
 
 
-        Source source = new Source();
-        source.setName("sampleApp." + english.replace(" ", "_").toLowerCase().replaceAll("\\.+$", ""));
-        source.setRepository(repository);
+        Key key = new Key();
+        key.setName("sampleApp." + english.replace(" ", "_").toLowerCase().replaceAll("\\.+$", ""));
+        key.setRepository(repository);
 
         Translation translation = new Translation();
         translation.setLanguage(en);
-        translation.setKey(source);
+        translation.setKey(key);
         translation.setText(english);
 
-        source.getTranslations().add(translation);
-        source.getTranslations().add(translation);
+        key.getTranslations().add(translation);
+        key.getTranslations().add(translation);
 
         entityManager.persist(translation);
 
         Translation translationDe = new Translation();
         translationDe.setLanguage(de);
-        translationDe.setKey(source);
+        translationDe.setKey(key);
         translationDe.setText(deutsch);
 
-        source.getTranslations().add(translationDe);
+        key.getTranslations().add(translationDe);
 
 
         entityManager.persist(translationDe);
 
-        entityManager.persist(source);
+        entityManager.persist(key);
         entityManager.flush();
     }
 

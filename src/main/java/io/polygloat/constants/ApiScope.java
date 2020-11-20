@@ -9,7 +9,7 @@ import lombok.Setter;
 public enum ApiScope {
     TRANSLATIONS_VIEW("translations.view"),
     TRANSLATIONS_EDIT("translations.edit"),
-    SOURCES_EDIT("sources.edit");
+    KEYS_EDIT("keys.edit");
 
     @Setter
     private String value;

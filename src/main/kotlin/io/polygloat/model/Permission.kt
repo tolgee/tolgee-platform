@@ -27,8 +27,8 @@ data class Permission(
     enum class RepositoryPermissionType(val power: Int, val availableScopes: Array<ApiScope>) {
         VIEW(1, arrayOf<ApiScope>(ApiScope.TRANSLATIONS_VIEW)),
         TRANSLATE(2, arrayOf<ApiScope>(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT)),
-        EDIT(3, arrayOf<ApiScope>(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.SOURCES_EDIT)),
-        MANAGE(4, arrayOf<ApiScope>(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.SOURCES_EDIT));
+        EDIT(3, arrayOf<ApiScope>(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT)),
+        MANAGE(4, arrayOf<ApiScope>(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT));
     }
 
     @ManyToOne

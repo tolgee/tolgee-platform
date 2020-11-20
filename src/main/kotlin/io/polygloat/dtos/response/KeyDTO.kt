@@ -4,7 +4,7 @@ import io.polygloat.dtos.PathDTO
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Size
 
-data class SourceDTO(
+data class KeyDTO(
         @field:NotBlank
         @field:Size(min = 1, max = 300)
         var fullPathString: String? = null

@@ -15,7 +15,7 @@ import java.util.Set;
 },
         indexes = {
                 @Index(columnList = "abbreviation", name = "index_abbreviation"),
-                @Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_source")
+                @Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_repository")
         }
 )
 @ToString(of = {"id", "abbreviation", "name"})

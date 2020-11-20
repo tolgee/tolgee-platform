@@ -15,7 +15,7 @@ import java.util.Map;
 @Builder
 public class SetTranslationsDTO {
     /**
-     * Source full path is stored as name in entity
+     * Key full path is stored as name in entity
      */
     @NotNull
     @NotBlank

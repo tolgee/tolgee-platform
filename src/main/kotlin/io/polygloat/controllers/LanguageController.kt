@@ -47,8 +47,9 @@ open class LanguageController(
     @AllowAccessWithApiKey
     fun getAll(@PathVariable("repositoryId") pathRepositoryId: Long?): Set<LanguageDTO> {
         val repositoryId = if(pathRepositoryId === null) authenticationFacade.apiKey.repository.id else pathRepositoryId
+        securityService.getAnyRepositoryPermission(repositoryId)
         return languageService.findAll(repositoryId).stream().map { LanguageDTO.fromEntity(it) }
-                .collect(Collectors.toCollection { LinkedHashSet<LanguageDTO>() })
+                .collect(Collectors.toCollection { LinkedHashSet() })
     }
 
     @GetMapping(value = ["{id}"])

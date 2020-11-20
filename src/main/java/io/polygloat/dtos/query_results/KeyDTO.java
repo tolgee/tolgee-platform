@@ -1,24 +1,20 @@
 package io.polygloat.dtos.query_results;
 
 import io.polygloat.dtos.PathDTO;
-import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class SourceDTO {
-    @Getter
+public class KeyDTO {
     private PathDTO path;
 
-    @Getter
     private Long id;
 
-    @Getter
     private Map<String, String> translations = new LinkedHashMap<>();
 
-    public SourceDTO(Object[] queryResult) {
+    public KeyDTO(Object[] queryResult) {
         LinkedList<Object> data = new LinkedList<>(Arrays.asList(queryResult));
         this.id = (Long) data.removeFirst();
         this.path = PathDTO.fromFullPath((String) data.removeFirst());
@@ -34,5 +30,17 @@ public class SourceDTO {
 
             this.translations.put(key, value);
         }
+    }
+
+    public PathDTO getPath() {
+        return this.path;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public Map<String, String> getTranslations() {
+        return this.translations;
     }
 }

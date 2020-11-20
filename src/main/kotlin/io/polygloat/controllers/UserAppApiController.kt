@@ -33,15 +33,15 @@ class UserAppApiController(
         return translationService.getTranslations(languages, apiKey.repository.id)
     }
 
-    @GetMapping(value = ["/source/{key:.+}/{languages}"])
+    @GetMapping(value = ["/source/{key:.+}/{languages}", "/key/{key:.+}/{languages}"])
     @AllowAccessWithApiKey
     @Deprecated("can not pass . as parameter of text, for longer texts it would be much better to use POST")
-    fun getSourceTranslations(@PathVariable("key") fullPath: String?,
-                              @PathVariable("languages") langs: Set<String?>?): Map<String, String> {
+    fun getKeyTranslations(@PathVariable("key") fullPath: String?,
+                           @PathVariable("languages") langs: Set<String?>?): Map<String, String> {
         val pathDTO = PathDTO.fromFullPath(fullPath)
         val apiKey = authenticationFacade.apiKey
         securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_VIEW), apiKey)
-        return translationService.getSourceTranslationsResult(apiKey.repository.id, pathDTO, langs)
+        return translationService.getKeyTranslationsResult(apiKey.repository.id, pathDTO, langs)
     }
 
     @PostMapping(value = ["/keyTranslations/{languages}"])
@@ -49,16 +49,16 @@ class UserAppApiController(
     fun getKeyTranslationsPost(@RequestBody body: UaaGetKeyTranslations, @PathVariable("languages") langs: Set<String?>?): Map<String, String> {
         val pathDTO = PathDTO.fromFullPath(body.key)
         val apiKey = authenticationFacade.apiKey
-        return translationService.getSourceTranslationsResult(apiKey.repository.id, pathDTO, langs)
+        return translationService.getKeyTranslationsResult(apiKey.repository.id, pathDTO, langs)
     }
 
     @GetMapping(value = ["/source/{key:.+}"])
     @AllowAccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
     @Deprecated("can not pass . as parameter of text, for longer texts it would be much better to use POST")
-    fun getSourceTranslations(@PathVariable("key") fullPath: String?): Map<String, String> {
+    fun getKeyTranslations(@PathVariable("key") fullPath: String?): Map<String, String> {
         val pathDTO = PathDTO.fromFullPath(fullPath)
         val apiKey = authenticationFacade.apiKey
-        return translationService.getSourceTranslationsResult(apiKey.repository.id, pathDTO, null)
+        return translationService.getKeyTranslationsResult(apiKey.repository.id, pathDTO, null)
     }
 
     @PostMapping(value = ["/keyTranslations"])
@@ -66,7 +66,7 @@ class UserAppApiController(
     fun getKeyTranslationsPost(@RequestBody body: UaaGetKeyTranslations): Map<String, String> {
         val pathDTO = PathDTO.fromFullPath(body.key)
         val apiKey = authenticationFacade.apiKey
-        return translationService.getSourceTranslationsResult(apiKey.repository.id, pathDTO, null)
+        return translationService.getKeyTranslationsResult(apiKey.repository.id, pathDTO, null)
     }
 
     @PostMapping("")
@@ -74,8 +74,8 @@ class UserAppApiController(
     fun setTranslations(@RequestBody dto: @Valid SetTranslationsDTO) {
         val apiKey = authenticationFacade.apiKey
         val repository = repositoryService.findById(apiKey.repository.id).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
-        val source = keyService.getOrCreateSource(repository, PathDTO.fromFullPath(dto.key))
-        translationService.setForSource(source, dto.translations)
+        val key = keyService.getOrCreateKey(repository, PathDTO.fromFullPath(dto.key))
+        translationService.setForKey(key, dto.translations)
     }
 
 

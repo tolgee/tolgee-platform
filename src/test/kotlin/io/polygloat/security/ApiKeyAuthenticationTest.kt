@@ -54,13 +54,13 @@ class ApiKeyAuthenticationTest : AbstractUserAppApiTest() {
     fun accessWithApiKey_listPermissions() {
         var apiKey = createBaseWithApiKey(ApiScope.TRANSLATIONS_VIEW)
         performAction(UserApiAppAction(apiKey = apiKey.key, url = "/uaa/en", expectedStatus = HttpStatus.OK))
-        apiKey = createBaseWithApiKey(ApiScope.SOURCES_EDIT)
+        apiKey = createBaseWithApiKey(ApiScope.KEYS_EDIT)
         performAction(UserApiAppAction(apiKey = apiKey.key, url = "/uaa/en", expectedStatus = HttpStatus.FORBIDDEN))
     }
 
     @Test
     fun accessWithApiKey_editPermissions() {
-        var apiKey = createBaseWithApiKey(ApiScope.SOURCES_EDIT)
+        var apiKey = createBaseWithApiKey(ApiScope.KEYS_EDIT)
         val translations = SetTranslationsDTO.builder()
                 .key("aaaa")
                 .translations(mapOf<String, String>(Pair("aaa", "aaa"))).build() //just a fake to pass validation

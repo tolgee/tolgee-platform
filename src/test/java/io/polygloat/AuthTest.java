@@ -3,10 +3,8 @@ package io.polygloat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.polygloat.constants.Message;
 import io.polygloat.controllers.AbstractControllerTest;
-import io.polygloat.security.AuthController;
+import io.polygloat.controllers.AuthController;
 import io.polygloat.security.third_party.GithubOAuthDelegate;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +22,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class AuthTest extends AbstractControllerTest {
+public class AuthTest extends AbstractControllerTest {
     @Value("${polygloat.security.github.authorization-link:#{null}}")
     private String githubLink;
 
@@ -44,27 +45,23 @@ class AuthTest extends AbstractControllerTest {
     private String githubUserLink;
 
     @Autowired
-    private ObjectMapper mapper;
-
-    @Autowired
     private AuthController authController;
+
+    @MockBean
+    @Autowired
+    private RestTemplate restTemplate;
 
     private MockMvc authMvc;
 
-    @Autowired
-    private MockMvc mvc;
-
-    @MockBean
-    private RestTemplate restTemplate;
-
-    @BeforeEach
+    @BeforeClass
     public void setup() {
+        dbPopulator.createBase(generateUniqueString());
         authMvc = MockMvcBuilders.standaloneSetup(authController).setControllerAdvice(new ExceptionHandlers()).build();
     }
 
     @Test
     void generatesTokenForValidUser() throws Exception {
-        String response = doAuthentication("ben", "benspassword")
+        String response = doAuthentication("admin", "admin")
                 .getResponse().getContentAsString();
 
         HashMap result = new ObjectMapper().readValue(response, HashMap.class);
@@ -82,7 +79,7 @@ class AuthTest extends AbstractControllerTest {
 
     @Test
     void userWithTokenHasAccess() throws Exception {
-        String response = doAuthentication("ben", "benspassword")
+        String response = doAuthentication("admin", "admin")
                 .getResponse().getContentAsString();
 
         String token = (String) mapper.readValue(response, HashMap.class).get("accessToken");

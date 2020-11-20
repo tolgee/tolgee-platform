@@ -29,21 +29,21 @@ public class TranslationsViewBuilder {
     }
 
     public <T> CriteriaQuery<T> getBaseQuery(CriteriaQuery<T> query1) {
-        Root<Source> source = query1.from(Source.class);
+        Root<Key> key = query1.from(Key.class);
 
-        Expression<String> fullPath = source.get("name");
+        Expression<String> fullPath = key.get("name");
 
-        selection.add(source.get("id"));
+        selection.add(key.get("id"));
 
         selection.add(fullPath);
 
-        Join<Source, Repository> repositoryJoin = source.join("repository");
+        Join<Key, Repository> repositoryJoin = key.join("repository");
 
         for (Language language : languages) {
             Join<Repository, Language> languagesJoin = repositoryJoin.join("languages");
             languagesJoin.on(cb.equal(languagesJoin.get(Language_.abbreviation), language.getAbbreviation()));
 
-            Join<Source, Translation> translations = source.join("translations", JoinType.LEFT);
+            Join<Key, Translation> translations = key.join("translations", JoinType.LEFT);
             translations.on(cb.equal(translations.get(Translation_.language), languagesJoin));
 
             selection.add(languagesJoin.get(Language_.abbreviation));
@@ -51,7 +51,7 @@ public class TranslationsViewBuilder {
             fullTextFields.add(translations.get(Translation_.text));
         }
 
-        restrictions.add(cb.equal(source.get("repository"), this.repository));
+        restrictions.add(cb.equal(key.get("repository"), this.repository));
 
         Set<Predicate> fullTextRestrictions = new HashSet<>();
 
@@ -73,9 +73,9 @@ public class TranslationsViewBuilder {
     public CriteriaQuery<Object> getDataQuery() {
         CriteriaQuery<Object> query1 = getBaseQuery(cb.createQuery());
 
-        Root<Source> source = (Root<Source>) query1.getRoots().iterator().next();
+        Root<Key> key = (Root<Key>) query1.getRoots().iterator().next();
 
-        Selection<String> fullPath = source.get("name");
+        Selection<String> fullPath = key.get("name");
 
         Selection<?>[] paths = selection.toArray(new Selection<?>[0]);
 
@@ -88,7 +88,7 @@ public class TranslationsViewBuilder {
     public CriteriaQuery<Long> getCountQuery() {
         CriteriaQuery<Long> query = getBaseQuery(cb.createQuery(Long.class));
 
-        Root<Source> file = (Root<Source>) query.getRoots().iterator().next();
+        Root<Key> file = (Root<Key>) query.getRoots().iterator().next();
 
         query.select(cb.count(file));
         return query;

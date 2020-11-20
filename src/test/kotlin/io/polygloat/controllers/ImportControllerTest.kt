@@ -2,6 +2,7 @@ package io.polygloat.controllers
 
 import com.github.javafaker.Faker
 import io.polygloat.Assertions.Assertions.assertThat
+import io.polygloat.dtos.ImportDto
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.testng.annotations.Test
@@ -106,10 +107,10 @@ class ImportControllerTest : SignedInControllerTest() {
         val data = HashMap<String, String>()
         for (i in 1..count) {
             val sentence = faker.lorem().sentence()
-            val source = sentence.replace(" ", "_")
+            val key = sentence.replace(" ", "_")
                     .replace("[^A-Za-z0-9]".toRegex(), "")
                     .toLowerCase()
-            data[source + i] = sentence
+            data[key + i] = sentence
         }
 
         return ImportDto("en", data)

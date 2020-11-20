@@ -10,7 +10,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"key_id", "language_id"}, name = "translation_source_language"),
+        @UniqueConstraint(columnNames = {"key_id", "language_id"}, name = "translation_key_language"),
 })
 @Data
 public class Translation extends AuditModel {
@@ -24,7 +24,7 @@ public class Translation extends AuditModel {
     private String text;
 
     @ManyToOne
-    private Source key;
+    private Key key;
 
     @ManyToOne
     private Language language;
@@ -33,7 +33,7 @@ public class Translation extends AuditModel {
         return language;
     }
 
-    public Source getKey() {
+    public Key getKey() {
         return key;
     }
 
@@ -41,7 +41,7 @@ public class Translation extends AuditModel {
         return text;
     }
 
-    public void setKey(Source key) {
+    public void setKey(Key key) {
         this.key = key;
     }
 

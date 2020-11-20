@@ -2,14 +2,14 @@ package io.polygloat.service
 
 import io.polygloat.constants.Message
 import io.polygloat.dtos.PathDTO
-import io.polygloat.dtos.request.EditSourceDTO
+import io.polygloat.dtos.request.EditKeyDTO
 import io.polygloat.dtos.request.SetTranslationsDTO
 import io.polygloat.dtos.request.validators.exceptions.ValidationException
-import io.polygloat.dtos.response.SourceDTO
+import io.polygloat.dtos.response.KeyDTO
 import io.polygloat.exceptions.NotFoundException
 import io.polygloat.model.Repository
-import io.polygloat.model.Source
-import io.polygloat.repository.SourceRepository
+import io.polygloat.model.Key
+import io.polygloat.repository.KeyRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,86 +18,87 @@ import javax.persistence.EntityManager
 
 @Service
 open class KeyService(
-        private val sourceRepository: SourceRepository,
+        private val keyRepository: KeyRepository,
         private val entityManager: EntityManager
 ) {
 
     private var translationService: TranslationService? = null
 
     @Transactional
-    open fun getOrCreateSource(repository: Repository, path: PathDTO): Source {
-        val source = getSource(repository, path)
+    open fun getOrCreateKey(repository: Repository, path: PathDTO): Key {
+        val key = get(repository, path)
                 .orElseGet {
-                    Source(name = path.fullPathString, repository = repository)
+                    Key(name = path.fullPathString, repository = repository)
                 }
-        entityManager.persist(source)
-        return source
+        entityManager.persist(key)
+        return key
     }
 
-    open fun getAllKeys(repositoryId: Long): Set<Source>{
-        return sourceRepository.getAllByRepositoryId(repositoryId);
+    open fun getAll(repositoryId: Long): Set<Key>{
+        return keyRepository.getAllByRepositoryId(repositoryId);
     }
 
-    open fun getSource(repositoryId: Long, pathDTO: PathDTO): Optional<Source> {
-        return sourceRepository.getByNameAndRepositoryId(pathDTO.fullPathString, repositoryId)
+    open fun get(repositoryId: Long, pathDTO: PathDTO): Optional<Key> {
+        return keyRepository.getByNameAndRepositoryId(pathDTO.fullPathString, repositoryId)
     }
 
-    open fun getSource(repository: Repository, pathDTO: PathDTO): Optional<Source> {
-        return sourceRepository.getByNameAndRepository(pathDTO.fullPathString, repository)
+    open fun get(repository: Repository, pathDTO: PathDTO): Optional<Key> {
+        return keyRepository.getByNameAndRepository(pathDTO.fullPathString, repository)
     }
 
-    open fun getSource(id: Long): Optional<Source> {
-        return sourceRepository.findById(id)
+    open fun get(id: Long): Optional<Key> {
+        return keyRepository.findById(id)
     }
 
-    open fun getSources(ids: Set<Long>): List<Source> {
-        return sourceRepository.findAllById(ids)
+    open fun get(ids: Set<Long>): List<Key> {
+        return keyRepository.findAllById(ids)
     }
 
-    open fun createSource(repository: Repository, dto: SourceDTO) {
-        if (this.getSource(repository, dto.pathDto).isPresent) {
-            throw ValidationException(Message.SOURCE_EXISTS)
+    open fun create(repository: Repository, dto: KeyDTO) {
+        if (this.get(repository, dto.pathDto).isPresent) {
+            throw ValidationException(Message.KEY_EXISTS)
         }
-        val source = Source(name = dto.fullPathString, repository = repository)
-        sourceRepository.save(source)
+        val key = Key(name = dto.fullPathString, repository = repository)
+        keyRepository.save(key)
     }
 
-    open fun editSource(repository: Repository, dto: EditSourceDTO) {
+    open fun edit(repository: Repository, dto: EditKeyDTO) {
         //do nothing on no change
         if (dto.newFullPathString == dto.oldFullPathString) {
             return
         }
-        if (getSource(repository, dto.newPathDto).isPresent) {
-            throw ValidationException(Message.SOURCE_EXISTS)
+        if (get(repository, dto.newPathDto).isPresent) {
+            throw ValidationException(Message.KEY_EXISTS)
         }
-        val source = getSource(repository, dto.oldPathDto).orElseThrow { NotFoundException() }
-        source.name = dto.newFullPathString
-        sourceRepository.save(source)
+        val key = get(repository, dto.oldPathDto).orElseThrow { NotFoundException() }
+        key.name = dto.newFullPathString
+        keyRepository.save(key)
     }
 
-    open fun deleteSource(id: Long) {
-        val source = getSource(id).orElseThrow { NotFoundException() }
-        translationService!!.deleteAllBySource(id)
-        sourceRepository.delete(source)
+    open fun delete(id: Long) {
+        val key = get(id).orElseThrow { NotFoundException() }
+        translationService!!.deleteAllByKey(id)
+        keyRepository.delete(key)
     }
 
-    open fun deleteSources(ids: Collection<Long?>?) {
-        translationService!!.deleteAllBySources(ids)
-        sourceRepository.deleteAllByIdIn(ids)
+    open fun deleteMultiple(ids: Collection<Long?>?) {
+        translationService!!.deleteAllByKeys(ids)
+        keyRepository.deleteAllByIdIn(ids)
     }
 
     open fun deleteAllByRepository(repositoryId: Long?) {
-        sourceRepository.deleteAllByRepositoryId(repositoryId)
+        keyRepository.deleteAllByRepositoryId(repositoryId)
     }
 
     @Transactional
-    open fun createSource(repository: Repository, dto: SetTranslationsDTO) {
-        if (this.getSource(repository, PathDTO.fromFullPath(dto.key)).isPresent) {
-            throw ValidationException(Message.SOURCE_EXISTS)
+    open fun create(repository: Repository, dto: SetTranslationsDTO): Key {
+        if (this.get(repository, PathDTO.fromFullPath(dto.key)).isPresent) {
+            throw ValidationException(Message.KEY_EXISTS)
         }
-        val source = Source(name = dto.key, repository = repository)
-        sourceRepository.save(source)
-        translationService!!.setForSource(source, dto.translations)
+        val key = Key(name = dto.key, repository = repository)
+        keyRepository.save(key)
+        translationService!!.setForKey(key, dto.translations)
+        return key;
     }
 
     @Autowired

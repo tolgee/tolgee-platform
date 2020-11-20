@@ -7,9 +7,9 @@ import javax.persistence.*
 import kotlin.collections.HashSet
 
 @Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["repository_id", "name"], name = "source_repository_id_name")])
+@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["repository_id", "name"], name = "key_repository_id_name")])
 //Todo: Rename to Key
-data class Source(
+data class Key(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long? = null,
