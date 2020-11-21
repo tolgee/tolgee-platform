@@ -23,10 +23,6 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     private val keyDto = SetTranslationsDTO("test string", mapOf(Pair("en", "Hello")))
     private val keyDto2 = SetTranslationsDTO("test string 2", mapOf(Pair("en", "Hello 2")))
 
-    fun MvcResult.parseResponseTo(): Any {
-        return jacksonObjectMapper().readValue(this.response.contentAsString)
-    }
-
     private lateinit var repository: Repository;
 
     @BeforeMethod
