@@ -30,7 +30,7 @@ class InternalDenyFilter(
         return request.requestURI.startsWith("/internal") ||
                 (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
                         ?.method?.declaringClass
-                        ?.getAnnotationsByType(InternalController::class.java) != null;
+                        ?.getAnnotation(InternalController::class.java) != null;
     }
 
     private fun isInternalAllowed() = allowInternal == "true"
