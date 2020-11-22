@@ -80,16 +80,16 @@ class UserAppApiController(
 
 
     @Deprecated(message = "Use /api/languages")
+    @get:AllowAccessWithApiKey
     @get:GetMapping("/languages")
     val languages: Set<String>
-        @AllowAccessWithApiKey
         get() {
             val apiKey = authenticationFacade.apiKey
             securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_EDIT), apiKey)
             return languageService.findAll(apiKey.repository.id).stream().map { obj: Language -> obj.abbreviation }.collect(Collectors.toSet())
         }
 
-    @AllowAccessWithApiKey
+    @get:AllowAccessWithApiKey
     @get:GetMapping("/scopes")
     val scopes: Set<String>
         get() {
