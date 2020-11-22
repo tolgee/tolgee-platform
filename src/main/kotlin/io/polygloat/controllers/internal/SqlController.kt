@@ -1,5 +1,6 @@
 package io.polygloat.controllers.internal
 
+import io.polygloat.security.InternalController
 import io.swagger.v3.oas.annotations.Hidden
 import org.hibernate.Session
 import org.springframework.transaction.annotation.Transactional
@@ -11,6 +12,7 @@ import javax.persistence.EntityManager
 @Hidden
 @RequestMapping(value = ["internal/sql"])
 @Transactional
+@InternalController
 open class SqlController(
         val entityManager: EntityManager
 ) {
