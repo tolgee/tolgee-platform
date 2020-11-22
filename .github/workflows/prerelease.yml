@@ -60,7 +60,8 @@ jobs:
         run: npm run cy:run
         working-directory: ./webapp
         env:
-          CYPRESS_host: http://localhost:8080
+          CYPRESS_HOST: http://localhost:8080
+          CYPRESS_API_URL: http://localhost:8080/api/
 
       - name: Push changes
         uses: ad-m/github-push-action@master
