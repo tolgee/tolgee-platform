@@ -6,4 +6,3 @@ ${Ansi.BLUE} / ____/ /_/ / / /_/ / /_/ / / /_/ / /_/ / /__ / / /_/ /            
 ${Ansi.BLUE}/_/    \____/_/\__, /\__, /_/\____/\__,_/\__(_)_/\____/                  / / ``   w w
 ${Ansi.BLUE}              /____//____/                                              w w
 ${Ansi.RED}version: ${application.version}          - The localization framework ${Ansi.DEFAULT}
-

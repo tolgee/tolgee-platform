@@ -1,0 +1,59 @@
+name: Test
+
+on:
+  push:
+    branches-ignore:
+      "prerelease-*"
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 14
+
+      - name: Build with Gradle
+        run: WEBAPP_PATH=./webapp ./gradlew build
+
+      - name: Clone webapp
+        run: |
+          source .buildversions
+          git clone --depth 1 --branch ${WEBAPP_VERSION} https://github.com/polygloat/webapp.git
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Npm install
+        run: npm install
+        working-directory: ./webapp
+
+      - name: Build webapp
+        run: npm run build
+        working-directory: ./webapp
+
+      - run: WEBAPP_PATH=./webapp ./gradlew docker
+
+      - name: Start docker stack
+        run: docker run -d --name app -e app.populate=true -p8080:8080 polygloat/polygloat
+
+      - name: Wait for running container
+        run: 'until docker logs --since 5m app | grep -m 1 "started on port(s): 8080"; do : ;done'
+
+      - name: Run cypress tests
+        run: npm run cy:run
+        working-directory: ./webapp
+        env:
+          CYPRESS_host: http://localhost:8080
+
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: cypress
+          path: |
+            ./webapp/cypress/videos/**/*
+            ./webappcypress/screenshots/**/*

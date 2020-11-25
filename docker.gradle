@@ -1,0 +1,13 @@
+docker {
+    dockerfile file('docker/app/Dockerfile')
+    name "polygloat/polygloat"
+    copySpec.from(tasks.unpack.outputs, 'docker/app').into("dependency")
+    buildArgs(['DEPENDENCY': "dependency"])
+}
+
+if (tasks.findByName("wrapper") == null) {
+    task wrapper(type: Wrapper) {
+    }
+}
+
+project.tasks.findByName("docker").dependsOn(unpack, copyDist)
