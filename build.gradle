@@ -12,7 +12,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'org.springframework.boot' version '2.2.0.RELEASE'
     id 'java'
-    id 'org.liquibase.gradle' version '2.0.1'
+    id 'org.liquibase.gradle' version '2.0.4'
 }
 
 
