@@ -1,27 +1,21 @@
-package io.polygloat.model;
+package io.polygloat.model
 
-import lombok.*;
+import javax.persistence.*
+import javax.validation.constraints.NotBlank
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"code"}, name = "invitation_code_unique"),
-})
-public class Invitation extends AuditModel {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["code"], name = "invitation_code_unique")])
+data class Invitation(
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        var id: Long? = null,
+        var code: @NotBlank String? = null
+) : AuditModel() {
 
-    @NotBlank
-    private String code;
+    @OneToOne(mappedBy = "invitation", cascade = [CascadeType.ALL])
+    var permission: Permission? = null
 
-    @OneToOne(mappedBy = "invitation", cascade = CascadeType.ALL)
-    private Permission permission;
+    constructor(id: Long?, @NotBlank code: String?, permission: Permission?) : this(id = id, code = code) {
+        this.permission = permission
+    }
 }

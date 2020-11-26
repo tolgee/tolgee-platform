@@ -34,8 +34,9 @@ public class InvitationService {
     @Transactional
     public String create(Repository repository, Permission.RepositoryPermissionType type) {
         String code = RandomStringUtils.randomAlphabetic(50);
-        Invitation invitation = Invitation.builder().code(code).build();
+        Invitation invitation = new Invitation(null, code);
         Permission permission = Permission.builder().invitation(invitation).repository(repository).type(type).build();
+        invitation.setPermission(permission);
         permissionRepository.save(permission);
         invitationRepository.save(invitation);
         return code;
