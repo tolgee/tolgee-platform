@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RepositoryControllerTest extends SignedInControllerTest {
-    private final LanguageDTO languageDTO = new LanguageDTO("English", "en");
+    private final LanguageDTO languageDTO = new LanguageDTO(null, "English", "en");
 
     @Test
     void createRepository() throws Exception {

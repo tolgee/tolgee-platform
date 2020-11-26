@@ -9,9 +9,8 @@ import lombok.Setter;
 public enum ApiScope {
     TRANSLATIONS_VIEW("translations.view"),
     TRANSLATIONS_EDIT("translations.edit"),
-    SOURCES_EDIT("sources.edit");
+    KEYS_EDIT("keys.edit");
 
-    @Getter
     @Setter
     private String value;
 
@@ -22,5 +21,9 @@ public enum ApiScope {
             }
         }
         throw new NotFoundException(Message.SCOPE_NOT_FOUND);
+    }
+
+    public String getValue() {
+        return value;
     }
 }

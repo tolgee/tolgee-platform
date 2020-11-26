@@ -46,15 +46,8 @@ public class TranslationServiceTest extends AbstractTransactionalTestNGSpringCon
 
     @Test
     @Transactional
-    void getSourceTranslations() {
+    void getKeyTranslations() {
         Repository app = dbPopulator.populate("App");
-
-     /*   Map<String, String> map = translationService.getSourceTranslations(app.getId(),
-                PathDTO.fromFullPath("home.news.This_is_another_translation_in_news_folder"), parseLanguages(langs).orElse(null));
-        assertThat(map.get("en")).isInstanceOf(String.class);
-        map = translationService.getSourceTranslations(app.getId(),
-                PathDTO.fromFullPath("Hello_world"), parseLanguages(langs).orElse(null));
-        assertThat(map.get("en")).isInstanceOf(String.class);*/
     }
 
 }

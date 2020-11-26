@@ -35,7 +35,7 @@ public class RepositoryService {
     private final TranslationService translationService;
 
     @Setter(onMethod = @__({@Autowired}))
-    private SourceService sourceService;
+    private KeyService keyService;
 
     @Transactional
     public Optional<Repository> findByName(String name, UserAccount userAccount) {
@@ -86,7 +86,7 @@ public class RepositoryService {
         Repository repository = this.findById(id).orElseThrow(NotFoundException::new);
         permissionService.deleteAllByRepository(repository.getId());
         translationService.deleteAllByRepository(repository.getId());
-        sourceService.deleteAllByRepository(repository.getId());
+        keyService.deleteAllByRepository(repository.getId());
         apiKeyService.deleteAllByRepository(repository.getId());
         languageService.deleteAllByRepository(repository.getId());
         repositoryRepository.delete(repository);

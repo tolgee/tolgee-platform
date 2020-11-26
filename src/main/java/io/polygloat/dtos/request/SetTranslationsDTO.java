@@ -15,7 +15,7 @@ import java.util.Map;
 @Builder
 public class SetTranslationsDTO {
     /**
-     * Source full path is stored as name in entity
+     * Key full path is stored as name in entity
      */
     @NotNull
     @NotBlank
@@ -25,4 +25,13 @@ public class SetTranslationsDTO {
      * Map of language abbreviation -> text
      */
     private Map<String, String> translations;
+
+
+    public String getKey() {
+        return key;
+    }
+
+    public Map<String, String> getTranslations() {
+        return translations;
+    }
 }

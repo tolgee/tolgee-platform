@@ -47,11 +47,11 @@ jobs:
 
       - run: ./gradlew docker
         env:
-          - WEBAPP_PATH: ./webapp
-          - VERSION: ${{ steps.version.outputs.VERSION }}
+          WEBAPP_PATH: ./webapp
+          VERSION: ${{ steps.version.outputs.VERSION }}
 
       - name: Start docker stack
-        run: docker run -d --name app -e app.populate=true -p8080:8080 polygloat/polygloat
+        run: docker run -d --name app -e app.populate=true -e app.allowInternal=true -p8080:8080 polygloat/polygloat
 
       - name: Wait for running container
         run: 'until docker logs --since 5m app | grep -m 1 "started on port(s): 8080"; do : ;done'
@@ -60,7 +60,15 @@ jobs:
         run: npm run cy:run
         working-directory: ./webapp
         env:
-          CYPRESS_host: http://localhost:8080
+          CYPRESS_HOST: http://localhost:8080
+          CYPRESS_API_URL: http://localhost:8080/api/
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+          tags: true
 
       - name: Create Release
         id: create_release

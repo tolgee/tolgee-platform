@@ -17,9 +17,9 @@ public enum Message {
     REPOSITORY_NOT_FOUND(),
     RESOURCE_NOT_FOUND(),
     SCOPE_NOT_FOUND(),
-    SOURCE_EXISTS(),
-    SOURCE_NOT_FROM_REPOSITORY(),
-    SOURCE_TEXT_IS_REQUIRED(),
+    KEY_EXISTS(),
+    KEY_NOT_FROM_REPOSITORY(),
+    KEY_TEXT_IS_REQUIRED(),
     THIRD_PARTY_AUTH_ERROR_MESSAGE(),
     THIRD_PARTY_AUTH_NO_EMAIL(),
     THIRD_PARTY_AUTH_UNKNOWN_ERROR(),
@@ -32,7 +32,6 @@ public enum Message {
     VALIDATION_ERROR,
     LANGUAGE_CAN_NOT_CONTAIN_COMMA;
 
-    @Getter
     String code;
 
     Message(String code) {
@@ -41,5 +40,9 @@ public enum Message {
 
     Message() {
         this.code = this.name().toLowerCase();
+    }
+
+    public String getCode() {
+        return code;
     }
 }

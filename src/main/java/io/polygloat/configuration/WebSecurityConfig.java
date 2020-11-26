@@ -1,5 +1,6 @@
 package io.polygloat.configuration;
 
+import io.polygloat.security.InternalDenyFilter;
 import io.polygloat.security.JwtTokenFilter;
 import io.polygloat.security.api_key_auth.ApiAuthFilter;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtTokenFilter jwtTokenFilter;
     private final AppConfiguration configuration;
     private final ApiAuthFilter apiAuthFilter;
+    private final InternalDenyFilter internalDenyFilter;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -28,6 +30,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             http
                     .csrf().disable().cors().and()
                     //if jwt token is provided in header, this filter will manualy authorize user, so the request is not gonna reach the ldap auth
+                    .addFilterBefore(internalDenyFilter, UsernamePasswordAuthenticationFilter.class)
                     .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
                     .addFilterBefore(apiAuthFilter, UsernamePasswordAuthenticationFilter.class)
                     //this is used to authorize user's app calls with genrated api key

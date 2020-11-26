@@ -15,7 +15,7 @@ import java.util.Set;
 },
         indexes = {
                 @Index(columnList = "abbreviation", name = "index_abbreviation"),
-                @Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_source")
+                @Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_repository")
         }
 )
 @ToString(of = {"id", "abbreviation", "name"})
@@ -23,7 +23,6 @@ public class Language extends AuditModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
     @Setter
     private Long id;
 
@@ -33,14 +32,12 @@ public class Language extends AuditModel {
     private Set<Translation> translations;
 
     @ManyToOne
-    @Getter
     @Setter
     private Repository repository;
 
     @Setter
     private String abbreviation;
 
-    @Getter
     @Setter
     private String name;
 
@@ -54,6 +51,18 @@ public class Language extends AuditModel {
     public void updateByDTO(LanguageDTO dto) {
         this.name = dto.getName();
         this.abbreviation = dto.getAbbreviation();
+    }
+
+    public Repository getRepository() {
+        return repository;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getAbbreviation() {

@@ -13,4 +13,7 @@ COPY ${DEPENDENCY}/META-INF /app/META-INF
 COPY ${DEPENDENCY}/BOOT-INF/classes /app
 COPY ${DEPENDENCY}/${PROPERTIES} /app/application.properties
 
+#remove all profile properties
+RUN rm -f /app/application-*.properties
+
 ENTRYPOINT ["java","-cp","app:app/lib/*","io.polygloat.Application"]

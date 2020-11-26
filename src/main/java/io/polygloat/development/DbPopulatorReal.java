@@ -137,42 +137,44 @@ public class DbPopulatorReal {
                     .userAccount(permission.getUser())
                     .scopes(Set.of(ApiScope.values()))
                     .build();
+            repository.getApiKeys().add(apiKey);
             apiKeyRepository.save(apiKey);
         }
     }
 
     private Language createLanguage(String name, Repository repository) {
-        return languageService.createLanguage(LanguageDTO.builder().name(name).abbreviation(name).build(), repository);
+        return languageService.createLanguage(new LanguageDTO(null, name, name), repository);
     }
 
     private void createTranslation(Repository repository, String english,
                                    String deutsch, Language en, Language de) {
 
 
-        Source source = Source.builder().name("sampleApp." + english.replace(" ", "_").toLowerCase().replaceAll("\\.+$", ""))
-                .repository(repository).build();
+        Key key = new Key();
+        key.setName("sampleApp." + english.replace(" ", "_").toLowerCase().replaceAll("\\.+$", ""));
+        key.setRepository(repository);
 
         Translation translation = new Translation();
         translation.setLanguage(en);
-        translation.setKey(source);
+        translation.setKey(key);
         translation.setText(english);
 
-        source.getTranslations().add(translation);
-        source.getTranslations().add(translation);
+        key.getTranslations().add(translation);
+        key.getTranslations().add(translation);
 
         entityManager.persist(translation);
 
         Translation translationDe = new Translation();
         translationDe.setLanguage(de);
-        translationDe.setKey(source);
+        translationDe.setKey(key);
         translationDe.setText(deutsch);
 
-        source.getTranslations().add(translationDe);
+        key.getTranslations().add(translationDe);
 
 
         entityManager.persist(translationDe);
 
-        entityManager.persist(source);
+        entityManager.persist(key);
         entityManager.flush();
     }
 

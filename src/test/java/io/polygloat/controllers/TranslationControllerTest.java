@@ -2,7 +2,7 @@ package io.polygloat.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.polygloat.dtos.response.SourceResponseDTO;
+import io.polygloat.dtos.response.KeyResponseDTO;
 import io.polygloat.dtos.response.ViewDataResponse;
 import io.polygloat.dtos.response.translations_view.ResponseParams;
 import io.polygloat.helpers.JsonHelper;
@@ -33,7 +33,7 @@ public class TranslationControllerTest extends SignedInControllerTest {
 
         String searchString = "This";
 
-        ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> response = performValidViewRequest(app, "?search=" + searchString);
+        ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> response = performValidViewRequest(app, "?search=" + searchString);
         assertThat(response.getData().size()).isGreaterThan(0);
         assertSearch(response, searchString);
     }
@@ -43,21 +43,21 @@ public class TranslationControllerTest extends SignedInControllerTest {
     void getViewDataQueryLanguages() throws Exception {
         Repository repository = dbPopulator.populate(generateUniqueString());
 
-        ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> response = performValidViewRequest(repository, "?languages=en");
+        ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> response = performValidViewRequest(repository, "?languages=en");
 
         assertThat(response.getData().size()).isGreaterThan(8);
 
-        for (SourceResponseDTO item : response.getData()) {
+        for (KeyResponseDTO item : response.getData()) {
             assertThat(item.getTranslations()).doesNotContainKeys("de");
         }
 
         performGetDataForView(repository.getId(), "?languages=langNotExists").andExpect(status().isNotFound());
 
         //with same language multiple times
-        ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> response4 = performValidViewRequest(repository, "?languages=en,en");
+        ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> response4 = performValidViewRequest(repository, "?languages=en,en");
     }
 
-    private ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> performValidViewRequest(Repository repository, String queryString) throws Exception {
+    private ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> performValidViewRequest(Repository repository, String queryString) throws Exception {
         MvcResult mvcResult = performGetDataForView(repository.getId(), queryString).andExpect(status().isOk()).andReturn();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -73,7 +73,7 @@ public class TranslationControllerTest extends SignedInControllerTest {
 
         int limit = 5;
 
-        ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> response = performValidViewRequest(repository, String.format("?limit=%d", limit));
+        ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> response = performValidViewRequest(repository, String.format("?limit=%d", limit));
 
         assertThat(response.getData().size()).isEqualTo(limit);
         assertThat(response.getPaginationMeta().getAllCount()).isEqualTo(12);
@@ -82,7 +82,7 @@ public class TranslationControllerTest extends SignedInControllerTest {
 
         int offset = 3;
 
-        ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> responseOffset = performValidViewRequest(repository, String.format("?limit=%d&offset=%d", limit, offset));
+        ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> responseOffset = performValidViewRequest(repository, String.format("?limit=%d&offset=%d", limit, offset));
 
         assertThat(responseOffset.getData().size()).isEqualTo(limit);
         assertThat(responseOffset.getPaginationMeta().getOffset()).isEqualTo(offset);
@@ -98,13 +98,13 @@ public class TranslationControllerTest extends SignedInControllerTest {
     void getViewDataMetadata() throws Exception {
         Repository repository = dbPopulator.populate(generateUniqueString());
         int limit = 5;
-        ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> response = performValidViewRequest(repository, String.format("?limit=%d", limit));
+        ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> response = performValidViewRequest(repository, String.format("?limit=%d", limit));
 
         assertThat(response.getParams().getLanguages()).contains("en", "de");
     }
 
-    private static void assertSearch(ViewDataResponse<LinkedHashSet<SourceResponseDTO>, ResponseParams> response, String searchString) {
-        for (SourceResponseDTO item : response.getData()) {
+    private static void assertSearch(ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> response, String searchString) {
+        for (KeyResponseDTO item : response.getData()) {
             assertThat(JsonHelper.asJsonString(item)).contains(searchString);
         }
     }
