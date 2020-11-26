@@ -57,6 +57,9 @@ public abstract class AbstractControllerTest extends AbstractTransactionalTest i
     protected PermissionService permissionService;
 
     @Autowired
+    protected InvitationService invitationService;
+
+    @Autowired
     public ObjectMapper mapper;
 
     <T> T decodeJson(String json, Class<T> clazz) {
