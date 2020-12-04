@@ -7,8 +7,6 @@ import io.polygloat.exceptions.NotFoundException;
 import io.polygloat.model.Language;
 import io.polygloat.model.Repository;
 import io.polygloat.repository.LanguageRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,13 +18,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LanguageService {
     private final LanguageRepository languageRepository;
     private final EntityManager entityManager;
 
-    @Setter(onMethod = @__(@Autowired))
     private TranslationService translationService;
+
+    @Autowired
+    public LanguageService(LanguageRepository languageRepository, EntityManager entityManager) {
+        this.languageRepository = languageRepository;
+        this.entityManager = entityManager;
+    }
 
     @Transactional
     public Language createLanguage(LanguageDTO dto, Repository repository) {
@@ -100,5 +102,10 @@ public class LanguageService {
 
     public void deleteAllByRepository(Long repositoryId) {
         languageRepository.deleteAllByRepositoryId(repositoryId);
+    }
+
+    @Autowired
+    public void setTranslationService(TranslationService translationService) {
+        this.translationService = translationService;
     }
 }

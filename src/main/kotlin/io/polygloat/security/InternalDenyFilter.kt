@@ -1,5 +1,6 @@
 package io.polygloat.security
 
+import io.polygloat.configuration.polygloat.InternalProperties
 import io.polygloat.security.api_key_auth.AllowAccessWithApiKey
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -12,8 +13,7 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class InternalDenyFilter(
-        @Value("\${app.allowInternal:false}")
-        val allowInternal: String,
+        private val internalProperties: InternalProperties,
         private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
 ) : OncePerRequestFilter() {
 
@@ -21,7 +21,7 @@ class InternalDenyFilter(
         if (isInternal(request) && !isInternalAllowed()) {
             response.status = 403
             response.outputStream.print("Internal access is not allowed")
-            return;
+            return
         }
         filterChain.doFilter(request, response);
     }
@@ -33,5 +33,5 @@ class InternalDenyFilter(
                         ?.getAnnotation(InternalController::class.java) != null;
     }
 
-    private fun isInternalAllowed() = allowInternal == "true"
+    private fun isInternalAllowed() = internalProperties.controllerEnabled
 }

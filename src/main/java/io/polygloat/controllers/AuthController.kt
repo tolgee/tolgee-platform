@@ -1,208 +1,178 @@
-package io.polygloat.controllers;
+package io.polygloat.controllers
 
-import com.fasterxml.jackson.databind.node.TextNode;
-import io.polygloat.configuration.AppConfiguration;
-import io.polygloat.constants.Message;
-import io.polygloat.dtos.request.ResetPassword;
-import io.polygloat.dtos.request.ResetPasswordRequest;
-import io.polygloat.dtos.request.SignUpDto;
-import io.polygloat.exceptions.AuthenticationException;
-import io.polygloat.exceptions.BadRequestException;
-import io.polygloat.exceptions.NotFoundException;
-import io.polygloat.model.Invitation;
-import io.polygloat.model.UserAccount;
-import io.polygloat.security.JwtTokenProvider;
-import io.polygloat.security.payload.ApiResponse;
-import io.polygloat.security.payload.JwtAuthenticationResponse;
-import io.polygloat.security.payload.LoginRequest;
-import io.polygloat.security.third_party.GithubOAuthDelegate;
-import io.polygloat.service.InvitationService;
-import io.polygloat.service.UserAccountService;
-import com.unboundid.util.Base64;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
+import com.fasterxml.jackson.databind.node.TextNode
+import com.unboundid.util.Base64
+import io.polygloat.configuration.polygloat.PolygloatProperties
+import io.polygloat.constants.Message
+import io.polygloat.dtos.request.ResetPassword
+import io.polygloat.dtos.request.ResetPasswordRequest
+import io.polygloat.dtos.request.SignUpDto
+import io.polygloat.exceptions.AuthenticationException
+import io.polygloat.exceptions.BadRequestException
+import io.polygloat.exceptions.NotFoundException
+import io.polygloat.model.Invitation
+import io.polygloat.model.UserAccount
+import io.polygloat.security.JwtTokenProvider
+import io.polygloat.security.payload.ApiResponse
+import io.polygloat.security.payload.JwtAuthenticationResponse
+import io.polygloat.security.payload.LoginRequest
+import io.polygloat.security.third_party.GithubOAuthDelegate
+import io.polygloat.service.InvitationService
+import io.polygloat.service.UserAccountService
+import org.apache.commons.lang3.RandomStringUtils
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.mail.SimpleMailMessage
+import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.*
+import java.util.function.Supplier
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/api/public")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class AuthController {
-
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider tokenProvider;
-    private final GithubOAuthDelegate githubOAuthDelegate;
-    private final AppConfiguration appConfiguration;
-    private final UserAccountService userAccountService;
-    private final JavaMailSender mailSender;
-    private final InvitationService invitationService;
-
+open class AuthController(private val authenticationManager: AuthenticationManager,
+                          private val tokenProvider: JwtTokenProvider,
+                          private val githubOAuthDelegate: GithubOAuthDelegate,
+                          private val properties: PolygloatProperties,
+                          private val userAccountService: UserAccountService,
+                          private val mailSender: JavaMailSender,
+                          private val invitationService: InvitationService
+) {
     @PostMapping("/generatetoken")
-    public ResponseEntity<JwtAuthenticationResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        if (loginRequest.getUsername().isEmpty() || loginRequest.getPassword().isEmpty()) {
-            return new ResponseEntity(new ApiResponse(false, Message.USERNAME_OR_PASSWORD_INVALID.getCode()),
-                    HttpStatus.BAD_REQUEST);
+    open fun authenticateUser(@RequestBody loginRequest: LoginRequest): ResponseEntity<*> {
+        if (loginRequest.username.isEmpty() || loginRequest.password.isEmpty()) {
+            return ResponseEntity(ApiResponse(false, Message.USERNAME_OR_PASSWORD_INVALID.code),
+                    HttpStatus.BAD_REQUEST)
         }
-
-        if (appConfiguration.isLdapAuthentication() && appConfiguration.isNativeAuth()) {
+        if (properties.authentication.ldap.enabled && properties.authentication.nativeEnabled) {
             //todo: validate properties
-            throw new RuntimeException("Can not use native auth and ldap auth in the same time");
+            throw RuntimeException("Can not use native auth and ldap auth in the same time")
         }
-
-        String jwt = null;
-        if (appConfiguration.isLdapAuthentication()) {
-            jwt = doLdapAuthorization(loginRequest);
+        var jwt: String? = null
+        if (properties.authentication.ldap.enabled) {
+            jwt = doLdapAuthorization(loginRequest)
         }
-
-        if (appConfiguration.isNativeAuth()) {
-            jwt = doNativeAuth(loginRequest);
+        if (properties.authentication.nativeEnabled) {
+            jwt = doNativeAuth(loginRequest)
         }
-
         if (jwt == null) {
             //todo: validate properties
-            throw new RuntimeException("Authentication method not configured");
+            throw RuntimeException("Authentication method not configured")
         }
-
-        return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
-    }
-
-    private String doNativeAuth(LoginRequest loginRequest) {
-        UserAccount userAccount = this.userAccountService.getByUserName(loginRequest.getUsername()).orElseThrow(() -> new AuthenticationException(Message.BAD_CREDENTIALS));
-        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-        boolean matches = bCryptPasswordEncoder.matches(loginRequest.getPassword(), userAccount.getPassword());
-
-        if (!matches) {
-            throw new AuthenticationException(Message.BAD_CREDENTIALS);
-        }
-
-        return tokenProvider.generateToken(userAccount.getId()).toString();
-    }
-
-    private String doLdapAuthorization(LoginRequest loginRequest) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(),
-                            loginRequest.getPassword()
-                    )
-            );
-            LdapUserDetailsImpl userPrincipal = (LdapUserDetailsImpl) authentication.getPrincipal();
-
-            UserAccount userAccountEntity = userAccountService.getByUserName(userPrincipal.getUsername()).orElseGet(() -> {
-                UserAccount userAccount = new UserAccount();
-                userAccount.setUsername(userPrincipal.getUsername());
-                userAccountService.createUser(userAccount);
-                return userAccount;
-            });
-
-            return tokenProvider.generateToken(userAccountEntity.getId()).toString();
-
-        } catch (BadCredentialsException e) {
-            throw new AuthenticationException(Message.BAD_CREDENTIALS);
-        }
+        return ResponseEntity.ok(JwtAuthenticationResponse(jwt))
     }
 
 
     @PostMapping("/reset_password_request")
-    public void resetPasswordRequest(@RequestBody ResetPasswordRequest request) {
-        UserAccount userAccount = userAccountService.getByUserName(request.getEmail()).orElse(null);
+    open fun resetPasswordRequest(@RequestBody request: ResetPasswordRequest) {
+        val userAccount = userAccountService.getByUserName(request.email).orElse(null) ?: return
+        val code = RandomStringUtils.randomAlphabetic(50)
+        userAccountService.setResetPasswordCode(userAccount, code)
+        val message = SimpleMailMessage()
+        message.setTo(request.email!!)
+        message.subject = "Password reset"
+        val url = request.callbackUrl + "/" + Base64.encode(code + "," + request.email)
+        message.text = """Hello!
+ To reset your password click this link: 
+$url
 
-        if (userAccount == null) {
-            return;
-        }
-
-        String code = RandomStringUtils.randomAlphabetic(50);
-        userAccountService.setResetPasswordCode(userAccount, code);
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(request.getEmail());
-        message.setSubject("Password reset");
-
-        String url = request.getCallbackUrl() + "/" + Base64.encode(code + "," + request.getEmail());
-
-        message.setText("Hello!\n To reset your password click this link: \n" + url + "\n" + "\n" +
-                " If you have not requested password reset, please just ignore this e-mail.");
-        message.setFrom(appConfiguration.getMailFrom());
-        mailSender.send(message);
+ If you have not requested password reset, please just ignore this e-mail."""
+        message.from = properties.smtp.from
+        mailSender.send(message)
     }
 
     @GetMapping("/reset_password_validate/{email}/{code}")
-    public void resetPasswordValidate(@PathVariable("code") String code, @PathVariable("email") String email) {
-        this.validateEmailCode(code, email);
+    open fun resetPasswordValidate(@PathVariable("code") code: String, @PathVariable("email") email: String) {
+        validateEmailCode(code, email)
     }
 
     @PostMapping("/reset_password_set")
-    public void resetPasswordSet(@RequestBody ResetPassword request) {
-        UserAccount userAccount = validateEmailCode(request.getCode(), request.getEmail());
-        userAccountService.setUserPassword(userAccount, request.getPassword());
-        userAccountService.removeResetCode(userAccount);
+    open fun resetPasswordSet(@RequestBody request: ResetPassword) {
+        val userAccount = validateEmailCode(request.code!!, request.email!!)
+        userAccountService.setUserPassword(userAccount, request.password)
+        userAccountService.removeResetCode(userAccount)
     }
 
     @PostMapping("/sign_up")
     @Transactional
-    public JwtAuthenticationResponse signUp(@RequestBody @Valid SignUpDto request) {
-        Invitation invitation = null;
-
-        if (request.getInvitationCode() == null || request.getInvitationCode().isEmpty()) {
-            appConfiguration.checkAllowedRegistrations();
+    open fun signUp(@RequestBody @Valid request: SignUpDto?): JwtAuthenticationResponse {
+        var invitation: Invitation? = null
+        if (request!!.invitationCode == null || request.invitationCode.isEmpty()) {
+            properties.authentication.checkAllowedRegistrations()
         } else {
-            invitation = invitationService.getInvitation(request.getInvitationCode());//it throws an exception
+            invitation = invitationService.getInvitation(request.invitationCode) //it throws an exception
         }
-
-        userAccountService.getByUserName(request.getEmail()).ifPresent(u -> {
-            throw new BadRequestException(Message.USERNAME_ALREADY_EXISTS);
-        });
-
-        UserAccount user = userAccountService.createUser(request);
-
+        userAccountService.getByUserName(request.email).ifPresent {
+            throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
+        }
+        val user = userAccountService.createUser(request)
         if (invitation != null) {
-            invitationService.accept(invitation.getCode(), user);
+            invitationService.accept(invitation.code, user)
         }
-
-        return new JwtAuthenticationResponse(this.tokenProvider.generateToken(user.getId()).toString());
+        return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
     }
 
-    @PostMapping(value = "/validate_email", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public boolean validateEmail(@RequestBody TextNode email) {
-        return userAccountService.getByUserName(email.asText()).isEmpty();
-    }
-
-    private UserAccount validateEmailCode(String code, String email) {
-        UserAccount userAccount = userAccountService.getByUserName(email).orElseThrow(NotFoundException::new);
-
-        if (userAccount == null) {
-            throw new BadRequestException(Message.BAD_CREDENTIALS);
-        }
-
-        boolean resetCodeValid = userAccountService.isResetCodeValid(userAccount, code);
-
-        if (!resetCodeValid) {
-            throw new BadRequestException(Message.BAD_CREDENTIALS);
-        }
-
-        return userAccount;
+    @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    open fun validateEmail(@RequestBody email: TextNode): Boolean {
+        return userAccountService.getByUserName(email.asText()).isEmpty
     }
 
 
     @GetMapping("/authorize_oauth/{serviceType}/{code}")
-    public JwtAuthenticationResponse authenticateUser(@PathVariable("serviceType") String serviceType,
-                                                      @PathVariable("code") String code,
-                                                      @RequestParam(value = "invitationCode", required = false) String invitationCode) {
-        return githubOAuthDelegate.getTokenResponse(code, invitationCode);
+    open fun authenticateUser(@PathVariable("serviceType") serviceType: String?,
+                         @PathVariable("code") code: String?,
+                         @RequestParam(value = "invitationCode", required = false) invitationCode: String?): JwtAuthenticationResponse {
+        return githubOAuthDelegate.getTokenResponse(code, invitationCode)
     }
-}
 
+    private fun doNativeAuth(loginRequest: LoginRequest): String {
+        val userAccount = userAccountService.getByUserName(loginRequest.username).orElseThrow {
+            AuthenticationException(Message.BAD_CREDENTIALS)
+        }
+        val bCryptPasswordEncoder = BCryptPasswordEncoder()
+        val matches = bCryptPasswordEncoder.matches(loginRequest.password, userAccount.password)
+        if (!matches) {
+            throw AuthenticationException(Message.BAD_CREDENTIALS)
+        }
+        return tokenProvider.generateToken(userAccount.id).toString()
+    }
+
+    private fun doLdapAuthorization(loginRequest: LoginRequest): String {
+        return try {
+            val authentication = authenticationManager.authenticate(
+                    UsernamePasswordAuthenticationToken(
+                            loginRequest.username,
+                            loginRequest.password
+                    )
+            )
+            val userPrincipal = authentication.principal as LdapUserDetailsImpl
+            val userAccountEntity = userAccountService.getByUserName(userPrincipal.username).orElseGet {
+                val userAccount = UserAccount()
+                userAccount.username = userPrincipal.username
+                userAccountService.createUser(userAccount)
+                userAccount
+            }
+            tokenProvider.generateToken(userAccountEntity.id).toString()
+        } catch (e: BadCredentialsException) {
+            throw AuthenticationException(Message.BAD_CREDENTIALS)
+        }
+    }
+
+    private fun validateEmailCode(code: String, email: String): UserAccount {
+        val userAccount = userAccountService.getByUserName(email).orElseThrow(Supplier<NotFoundException> { NotFoundException() })
+                ?: throw BadRequestException(Message.BAD_CREDENTIALS)
+        val resetCodeValid = userAccountService.isResetCodeValid(userAccount, code)
+        if (!resetCodeValid) {
+            throw BadRequestException(Message.BAD_CREDENTIALS)
+        }
+        return userAccount
+    }
+
+}

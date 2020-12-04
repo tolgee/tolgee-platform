@@ -1,40 +1,31 @@
-package io.polygloat.configuration;
+package io.polygloat.configuration
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-
-import java.util.Properties;
+import io.polygloat.configuration.polygloat.PolygloatProperties
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mail.javamail.JavaMailSenderImpl
 
 @Configuration
-public class EmailConfiguration {
+open class EmailConfiguration(properties: PolygloatProperties) {
 
-    private AppConfiguration appConfiguration;
+    private val mailConfiguration = properties.smtp;
 
-    @Autowired
-    public EmailConfiguration(AppConfiguration appConfiguration) {
-        this.appConfiguration = appConfiguration;
-    }
-
-    @Bean
-    public JavaMailSender getMailSender() {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(appConfiguration.getMailHost());
-        mailSender.setPort(appConfiguration.getMailSmtpPort());
-
-        mailSender.setUsername(appConfiguration.getMailUsername());
-        mailSender.setPassword(appConfiguration.getMailPassword());
-
-        Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", appConfiguration.getMailSmtpAuth().toString());
-        props.put("mail.smtp.ssl.enable", appConfiguration.getMailSSlEnabled().toString());
-        props.put("mail.smtp.starttls.enable", appConfiguration.getMailTtlsEnabled().toString());
-        props.put("mail.smtp.starttls.required", appConfiguration.getMailTtlsRequired().toString());
-        props.put("mail.debug", "true");
-
-        return mailSender;
-    }
+    @Suppress("unused")
+    @get:Bean
+    open val mailSender: JavaMailSender
+        get() {
+            val mailSender = JavaMailSenderImpl()
+            mailSender.host = mailConfiguration.host
+            mailSender.port = mailConfiguration.port
+            mailSender.username = mailConfiguration.username
+            mailSender.password = mailConfiguration.password
+            val props = mailSender.javaMailProperties
+            props["mail.transport.protocol"] = "smtp"
+            props["mail.smtp.auth"] = mailConfiguration.auth.toString()
+            props["mail.smtp.ssl.enable"] = mailConfiguration.sslEnabled.toString()
+            props["mail.smtp.starttls.enable"] = mailConfiguration.tlsEnabled.toString()
+            props["mail.smtp.starttls.required"] = mailConfiguration.tlsRequired.toString()
+            return mailSender
+        }
 }

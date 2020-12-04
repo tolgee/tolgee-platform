@@ -6,29 +6,37 @@ import io.polygloat.dtos.response.KeyResponseDTO;
 import io.polygloat.dtos.response.ViewDataResponse;
 import io.polygloat.dtos.response.translations_view.ResponseParams;
 import io.polygloat.exceptions.NotFoundException;
-import io.polygloat.model.Permission;
 import io.polygloat.model.Key;
+import io.polygloat.model.Permission;
+import io.polygloat.service.KeyService;
 import io.polygloat.service.RepositoryService;
 import io.polygloat.service.SecurityService;
-import io.polygloat.service.KeyService;
 import io.polygloat.service.TranslationService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/api/repository/{repositoryId}/translations")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TranslationController implements IController {
 
     private final TranslationService translationService;
     private final KeyService keyService;
     private final RepositoryService repositoryService;
     private final SecurityService securityService;
+
+    @Autowired
+    public TranslationController(TranslationService translationService, KeyService keyService, RepositoryService repositoryService, SecurityService securityService) {
+        this.translationService = translationService;
+        this.keyService = keyService;
+        this.repositoryService = repositoryService;
+        this.securityService = securityService;
+    }
 
 
     @GetMapping(value = "/{languages}")

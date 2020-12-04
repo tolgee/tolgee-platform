@@ -1,9 +1,6 @@
 package io.polygloat.model;
 
 import io.polygloat.dtos.request.LanguageDTO;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -18,27 +15,20 @@ import java.util.Set;
                 @Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_repository")
         }
 )
-@ToString(of = {"id", "abbreviation", "name"})
 public class Language extends AuditModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter
     private Long id;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
-    @Getter
-    @Setter
     private Set<Translation> translations;
 
     @ManyToOne
-    @Setter
     private Repository repository;
 
-    @Setter
     private String abbreviation;
 
-    @Setter
     private String name;
 
     public static Language fromRequestDTO(LanguageDTO dto) {
@@ -67,5 +57,33 @@ public class Language extends AuditModel {
 
     public String getAbbreviation() {
         return abbreviation;
+    }
+
+    public String toString() {
+        return "Language(id=" + this.getId() + ", abbreviation=" + this.getAbbreviation() + ", name=" + this.getName() + ")";
+    }
+
+    public Set<Translation> getTranslations() {
+        return this.translations;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setTranslations(Set<Translation> translations) {
+        this.translations = translations;
+    }
+
+    public void setRepository(Repository repository) {
+        this.repository = repository;
+    }
+
+    public void setAbbreviation(String abbreviation) {
+        this.abbreviation = abbreviation;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

@@ -1,7 +1,5 @@
 package io.polygloat.constants;
 
-import lombok.Getter;
-
 public enum Message {
     API_KEY_NOT_FOUND(),
     BAD_CREDENTIALS(),

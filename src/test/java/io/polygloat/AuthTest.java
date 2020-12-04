@@ -8,7 +8,6 @@ import io.polygloat.security.third_party.GithubOAuthDelegate;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,7 +22,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -38,12 +36,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class AuthTest extends AbstractControllerTest {
-    @Value("${polygloat.security.github.authorization-link:#{null}}")
-    private String githubLink;
-
-    @Value("${polygloat.security.github.user-link:#{null}}")
-    private String githubUserLink;
-
     @Autowired
     private AuthController authController;
 
@@ -61,7 +53,7 @@ public class AuthTest extends AbstractControllerTest {
 
     @Test
     void generatesTokenForValidUser() throws Exception {
-        String response = doAuthentication("admin", "admin")
+        String response = doAuthentication(initialUsername, initialPassword)
                 .getResponse().getContentAsString();
 
         HashMap result = new ObjectMapper().readValue(response, HashMap.class);
@@ -79,7 +71,7 @@ public class AuthTest extends AbstractControllerTest {
 
     @Test
     void userWithTokenHasAccess() throws Exception {
-        String response = doAuthentication("admin", "admin")
+        String response = doAuthentication(initialUsername, initialPassword)
                 .getResponse().getContentAsString();
 
         String token = (String) mapper.readValue(response, HashMap.class).get("accessToken");
@@ -94,11 +86,8 @@ public class AuthTest extends AbstractControllerTest {
     }
 
     @Test
-    void DoeaNotAuthorizeGithubUserWhenNoEmail() throws Exception {
+    void doesNotAuthorizeGithubUserWhenNoEmail() throws Exception {
         GithubOAuthDelegate.GithubUserResponse fakeGithubUser = getGithubUserResponse();
-
-        String accessToken = "fake_access_token";
-        GithubOAuthDelegate.GithubEmailResponse githubEmailResponse = getGithubEmailResponse();
 
         GithubOAuthDelegate.GithubEmailResponse[] emailResponse = {};
 
@@ -112,7 +101,7 @@ public class AuthTest extends AbstractControllerTest {
     }
 
     @Test
-    void DoeaNotAuthorizeGithubUserWhenNoReceivedToken() throws Exception {
+    void doesNotAuthorizeGithubUserWhenNoReceivedToken() throws Exception {
         GithubOAuthDelegate.GithubUserResponse fakeGithubUser = getGithubUserResponse();
 
         String accessToken = "fake_access_token";
@@ -185,11 +174,13 @@ public class AuthTest extends AbstractControllerTest {
                                   ResponseEntity<GithubOAuthDelegate.GithubEmailResponse[]> emailResponse) throws Exception {
         String receivedCode = "ThiS_Is_Fake_valid_COde";
 
-        Mockito.when(restTemplate.postForObject(eq(githubLink), anyMap(), eq(Map.class))).thenReturn(tokenResponse);
+        var githubConf = polygloatProperties.getAuthentication().getGithub();
 
-        Mockito.when(restTemplate.exchange(eq(githubUserLink), eq(HttpMethod.GET), ArgumentMatchers.any(), eq(GithubOAuthDelegate.GithubUserResponse.class))).thenReturn(userResponse);
+        Mockito.when(restTemplate.postForObject(eq(githubConf.getAuthorizationUrl()), anyMap(), eq(Map.class))).thenReturn(tokenResponse);
 
-        Mockito.when(restTemplate.exchange(eq(githubUserLink + "/emails"), eq(HttpMethod.GET), ArgumentMatchers.any(), eq(GithubOAuthDelegate.GithubEmailResponse[].class)))
+        Mockito.when(restTemplate.exchange(eq(githubConf.getUserUrl()), eq(HttpMethod.GET), ArgumentMatchers.any(), eq(GithubOAuthDelegate.GithubUserResponse.class))).thenReturn(userResponse);
+
+        Mockito.when(restTemplate.exchange(eq(githubConf.getUserUrl() + "/emails"), eq(HttpMethod.GET), ArgumentMatchers.any(), eq(GithubOAuthDelegate.GithubEmailResponse[].class)))
                 .thenReturn(emailResponse);
 
         return authMvc.perform(get("/api/public/authorize_oauth/github/" + receivedCode)

@@ -1,148 +1,109 @@
-package io.polygloat.security.third_party;
+package io.polygloat.security.third_party
 
-import io.polygloat.configuration.AppConfiguration;
-import io.polygloat.constants.Message;
-import io.polygloat.exceptions.AuthenticationException;
-import io.polygloat.model.Invitation;
-import io.polygloat.model.UserAccount;
-import io.polygloat.security.JwtTokenProvider;
-import io.polygloat.security.payload.JwtAuthenticationResponse;
-import io.polygloat.service.InvitationService;
-import io.polygloat.service.UserAccountService;
-import com.sun.istack.Nullable;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import com.sun.istack.Nullable
+import io.polygloat.configuration.polygloat.GithubAuthenticationProperties
+import io.polygloat.configuration.polygloat.PolygloatProperties
+import io.polygloat.constants.Message
+import io.polygloat.exceptions.AuthenticationException
+import io.polygloat.model.Invitation
+import io.polygloat.model.UserAccount
+import io.polygloat.security.JwtTokenProvider
+import io.polygloat.security.payload.JwtAuthenticationResponse
+import io.polygloat.service.InvitationService
+import io.polygloat.service.UserAccountService
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Component
+import org.springframework.web.client.RestTemplate
+import java.util.*
 
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class GithubOAuthDelegate {
-    private final JwtTokenProvider tokenProvider;
-    private final UserAccountService userAccountService;
-    private final RestTemplate restTemplate;
-    private final AppConfiguration appConfiguration;
-    private final InvitationService invitationService;
+class GithubOAuthDelegate(private val tokenProvider: JwtTokenProvider,
+                          private val userAccountService: UserAccountService,
+                          private val restTemplate: RestTemplate,
+                          private val properties: PolygloatProperties,
+                          private val invitationService: InvitationService) {
+    private val githubConfigurationProperties: GithubAuthenticationProperties = properties.authentication.github
 
-    @Value("${polygloat.security.github.client-secret:#{null}}")
-    private String githubClientSecret;
-
-    @Value("${polygloat.security.github.client-id:#{null}}")
-    private String githubClientId;
-
-    @Value("${polygloat.security.github.authorization-link:#{null}}")
-    private String githubLink;
-
-    @Value("${polygloat.security.github.user-link:#{null}}")
-    private String githubUserLink;
-
-    public JwtAuthenticationResponse getTokenResponse(String receivedCode, @Nullable String invitationCode) {
-        HashMap<String, String> body = new HashMap<>();
-        body.put("client_id", githubClientId);
-        body.put("client_secret", githubClientSecret);
-        body.put("code", receivedCode);
+    fun getTokenResponse(receivedCode: String?, @Nullable invitationCode: String?): JwtAuthenticationResponse {
+        val body = HashMap<String, String?>()
+        body["client_id"] = githubConfigurationProperties.clientId
+        body["client_secret"] = githubConfigurationProperties.clientSecret
+        body["code"] = receivedCode
 
         //get token to authorize to github api
-        @SuppressWarnings("unchecked") Map<String, String> response = restTemplate.postForObject(githubLink, body, Map.class);
-
+        val response: MutableMap<*, *>? = restTemplate.postForObject(githubConfigurationProperties.authorizationUrl, body, MutableMap::class.java)
         if (response != null && response.containsKey("access_token")) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "token " + response.get("access_token"));
-            HttpEntity<String> entity = new HttpEntity<>(null, headers);
+            val headers = HttpHeaders()
+            headers["Authorization"] = "token " + response["access_token"]
+            val entity = HttpEntity<String?>(null, headers)
 
 
             //get github user data
-            ResponseEntity<GithubUserResponse> exchange = restTemplate.exchange(githubUserLink, HttpMethod.GET, entity, GithubUserResponse.class);
-
-            if (exchange.getStatusCode() != HttpStatus.OK || exchange.getBody() == null) {
-                throw new AuthenticationException(Message.THIRD_PARTY_UNAUTHORIZED);
+            val exchange = restTemplate.exchange(githubConfigurationProperties.userUrl, HttpMethod.GET, entity, GithubUserResponse::class.java)
+            if (exchange.statusCode != HttpStatus.OK || exchange.body == null) {
+                throw AuthenticationException(Message.THIRD_PARTY_UNAUTHORIZED)
             }
-
-            GithubUserResponse userResponse = exchange.getBody();
+            val userResponse = exchange.body
 
             //get github user emails
-            GithubEmailResponse[] emails = restTemplate.exchange(githubUserLink + "/emails", HttpMethod.GET, entity, GithubEmailResponse[].class).getBody();
+            val emails = restTemplate.exchange(
+                    githubConfigurationProperties.userUrl + "/emails", HttpMethod.GET, entity,
+                    Array<GithubEmailResponse>::class.java).body
+                    ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-            if (emails == null) {
-                throw new AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL);
-            }
+            val githubEmail = Arrays.stream(emails).filter { obj: GithubEmailResponse -> obj.isPrimary }
+                    .findFirst().orElse(null)
+                    ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-            GithubEmailResponse githubEmail = Arrays.stream(emails).filter(GithubEmailResponse::isPrimary).findFirst().orElse(null);
+            val userAccountOptional = userAccountService.findByThirdParty("github", userResponse!!.id)
+            val user = userAccountOptional.orElseGet {
+                userAccountService.getByUserName(githubEmail.email).ifPresent {
+                    throw AuthenticationException(Message.USERNAME_ALREADY_EXISTS)
+                }
 
-            if (githubEmail == null) {
-                throw new AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL);
-            }
-
-            Optional<UserAccount> userAccountOptional = userAccountService.findByThirdParty("github", userResponse.getId());
-
-            UserAccount user = userAccountOptional.orElseGet(() -> {
-                userAccountService.getByUserName(githubEmail.getEmail()).ifPresent(u -> {
-                    throw new AuthenticationException(Message.USERNAME_ALREADY_EXISTS);
-                });
-
-                Invitation invitation = null;
-
+                var invitation: Invitation? = null
                 if (invitationCode == null) {
-                    appConfiguration.checkAllowedRegistrations();
+                    properties.authentication.enabled
                 } else {
-                    invitation = invitationService.getInvitation(invitationCode);
+                    invitation = invitationService.getInvitation(invitationCode)
                 }
 
-                UserAccount newUserAccount = new UserAccount();
-                newUserAccount.setUsername(githubEmail.getEmail());
-                newUserAccount.setName(userResponse.getName());
-                newUserAccount.setThirdPartyAuthId(userResponse.getId());
-                newUserAccount.setThirdPartyAuthType("github");
-                userAccountService.createUser(newUserAccount);
-
+                val newUserAccount = UserAccount()
+                newUserAccount.username = githubEmail.email
+                newUserAccount.name = userResponse.name
+                newUserAccount.thirdPartyAuthId = userResponse.id
+                newUserAccount.thirdPartyAuthType = "github"
+                userAccountService.createUser(newUserAccount)
                 if (invitation != null) {
-                    invitationService.accept(invitation.getCode(), newUserAccount);
+                    invitationService.accept(invitation.code, newUserAccount)
                 }
-
-                return newUserAccount;
-            });
-
-            String jwt = tokenProvider.generateToken(user.getId()).toString();
-            return new JwtAuthenticationResponse(jwt);
+                newUserAccount
+            }
+            val jwt = tokenProvider.generateToken(user.id).toString()
+            return JwtAuthenticationResponse(jwt)
         }
-
         if (response == null) {
-            throw new AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR);
+            throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
         }
 
         if (response.containsKey("error")) {
-            throw new AuthenticationException(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE);
+            throw AuthenticationException(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE)
         }
 
-        throw new AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR);
+        throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
     }
 
-    public static class GithubEmailResponse {
-        @Getter
-        @Setter
-        private String email;
-
-        @Getter
-        @Setter
-        private boolean primary;
+    class GithubEmailResponse {
+        var email: String? = null
+        var isPrimary = false
     }
 
-    public static class GithubUserResponse {
-        @Getter
-        @Setter
-        private String name;
-
-        @Getter
-        @Setter
-        private String id;
+    class GithubUserResponse {
+        var name: String? = null
+        var id: String? = null
     }
+
 }

@@ -26,11 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class ApiKeyControllerTest extends SignedInControllerTest implements ITest {
 
-    @Value("${app.initialUsername:admin}")
-    String initialUsername;
-    @Value("${app.initialPassword:admin}")
-    String initialPassword;
-
     @Test()
     void create_success() throws Exception {
         ApiKeyDTO apiKeyDTO = doCreate();

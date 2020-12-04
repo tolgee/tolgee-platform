@@ -2,6 +2,7 @@ docker {
     dockerfile file('docker/app/Dockerfile')
     name "polygloat/polygloat"
     copySpec.from(tasks.unpack.outputs, 'docker/app').into("dependency")
+    //copySpec.from('docker/app/.dockerignore').into(".")
     buildArgs(['DEPENDENCY': "dependency"])
 }
 
@@ -10,4 +11,9 @@ if (tasks.findByName("wrapper") == null) {
     }
 }
 
-project.tasks.findByName("docker").dependsOn(unpack, copyDist)
+task copyDockerIgnore(type: Copy) {
+    from "docker/app/.dockerignore"
+    into "build/docker"
+}
+
+project.tasks.findByName("docker").dependsOn(unpack, copyDist, copyDockerIgnore)

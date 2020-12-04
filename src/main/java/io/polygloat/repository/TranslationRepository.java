@@ -1,7 +1,7 @@
 package io.polygloat.repository;
 
-import io.polygloat.model.Language;
 import io.polygloat.model.Key;
+import io.polygloat.model.Language;
 import io.polygloat.model.Translation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

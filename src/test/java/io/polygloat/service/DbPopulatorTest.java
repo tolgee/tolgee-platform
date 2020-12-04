@@ -1,5 +1,6 @@
 package io.polygloat.service;
 
+import io.polygloat.configuration.polygloat.PolygloatProperties;
 import io.polygloat.development.DbPopulatorReal;
 import io.polygloat.exceptions.NotFoundException;
 import io.polygloat.model.ApiKey;
@@ -7,7 +8,6 @@ import io.polygloat.model.UserAccount;
 import io.polygloat.repository.RepositoryRepository;
 import io.polygloat.repository.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
@@ -40,24 +40,25 @@ public class DbPopulatorTest extends AbstractTransactionalTestNGSpringContextTes
     @Autowired
     ApiKeyService apiKeyService;
 
-    @Value("${app.initialUsername:admin}")
-    String initialUsername;
-
     @Autowired
     EntityManager entityManager;
+
+    @Autowired
+    PolygloatProperties polygloatProperties;
+
 
     private UserAccount userAccount;
 
     @BeforeMethod
     public void setup() {
         populator.autoPopulate();
-        userAccount = userAccountRepository.findByUsername(initialUsername).orElseThrow(NotFoundException::new);
+        userAccount = userAccountRepository.findByUsername(polygloatProperties.getAuthentication().getInitialUsername()).orElseThrow(NotFoundException::new);
     }
 
     @Test
     @Transactional
     void createsUser() {
-        assertThat(userAccount.getName()).isEqualTo(initialUsername);
+        assertThat(userAccount.getName()).isEqualTo(polygloatProperties.getAuthentication().getInitialUsername());
     }
 
     @Test

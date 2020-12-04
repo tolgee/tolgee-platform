@@ -9,8 +9,6 @@ import io.polygloat.model.Repository;
 import io.polygloat.model.UserAccount;
 import io.polygloat.repository.PermissionRepository;
 import io.polygloat.repository.RepositoryRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +20,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RepositoryService {
 
     private final RepositoryRepository repositoryRepository;
@@ -34,8 +31,19 @@ public class RepositoryService {
     private final ApiKeyService apiKeyService;
     private final TranslationService translationService;
 
-    @Setter(onMethod = @__({@Autowired}))
     private KeyService keyService;
+
+    @Autowired
+    public RepositoryService(RepositoryRepository repositoryRepository, EntityManager entityManager, LanguageService languageService, SecurityService securityService, PermissionRepository permissionRepository, PermissionService permissionService, ApiKeyService apiKeyService, TranslationService translationService) {
+        this.repositoryRepository = repositoryRepository;
+        this.entityManager = entityManager;
+        this.languageService = languageService;
+        this.securityService = securityService;
+        this.permissionRepository = permissionRepository;
+        this.permissionService = permissionService;
+        this.apiKeyService = apiKeyService;
+        this.translationService = translationService;
+    }
 
     @Transactional
     public Optional<Repository> findByName(String name, UserAccount userAccount) {
@@ -90,5 +98,10 @@ public class RepositoryService {
         apiKeyService.deleteAllByRepository(repository.getId());
         languageService.deleteAllByRepository(repository.getId());
         repositoryRepository.delete(repository);
+    }
+
+    @Autowired
+    public void setKeyService(KeyService keyService) {
+        this.keyService = keyService;
     }
 }

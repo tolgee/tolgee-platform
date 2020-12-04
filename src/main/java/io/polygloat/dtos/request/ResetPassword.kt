@@ -1,20 +1,16 @@
-package io.polygloat.dtos.request;
+package io.polygloat.dtos.request
 
-import lombok.Data;
+import javax.validation.constraints.Max
+import javax.validation.constraints.Min
+import javax.validation.constraints.NotBlank
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
+data class ResetPassword(
+        @NotBlank
+        var email: String? = null,
 
-@Data
-public class ResetPassword {
-    @NotBlank
-    String email;
+        @NotBlank
+        var code: String? = null,
 
-    @NotBlank
-    String code;
-
-    @Min(8)
-    @Max(100)
-    String password;
-}
+        @Min(8) @Max(100)
+        var password: String? = null,
+)

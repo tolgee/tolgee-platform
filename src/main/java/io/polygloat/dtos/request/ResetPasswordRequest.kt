@@ -1,17 +1,14 @@
-package io.polygloat.dtos.request;
+package io.polygloat.dtos.request
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.springframework.validation.annotation.Validated
+import javax.validation.constraints.Email
+import javax.validation.constraints.NotBlank
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
+@Validated
+data class ResetPasswordRequest(
+        @NotBlank
+        var callbackUrl: String? = null,
 
-@Data
-@NoArgsConstructor
-public class ResetPasswordRequest {
-    @NotBlank
-    String callbackUrl;
-
-    @Email
-    String email;
-}
+        @Email
+        var email: String? = null
+)

@@ -1,41 +1,50 @@
-package io.polygloat;
+package io.polygloat
 
-import io.polygloat.development.DbPopulatorReal;
-import io.polygloat.dtos.request.SignUpDto;
-import io.polygloat.service.UserAccountService;
-import io.sentry.Sentry;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import io.polygloat.configuration.polygloat.PolygloatProperties
+import io.polygloat.development.DbPopulatorReal
+import io.polygloat.dtos.request.SignUpDto
+import io.polygloat.security.InitialPasswordManager
+import io.polygloat.service.UserAccountService
+import io.sentry.Sentry
+import org.springframework.boot.SpringApplication
+import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 
 @SpringBootApplication
 @EnableJpaAuditing
-public class Application {
-    @Autowired
-    public Application(DbPopulatorReal populator,
-                       UserAccountService userAccountService,
-                       @Value("${app.populate:false}") boolean populate,
-                       @Value("${app.initialUsername:#{null}}") String initialUsername,
-                       @Value("${app.initialPassword:#{null}}") String initialPassword,
-                       @Value("${sentry.enabled:false}") boolean sentry,
-                       @Value("${sentry.dsn:null}") String sentryDSN) {
-        if (populate) {
-            populator.autoPopulate();
-        }
-
-        if (sentry) {
-            Sentry.init(sentryDSN);
-        }
-
-        if (initialUsername != null && initialPassword != null && !userAccountService.isAnyUserAccount() &&
-                userAccountService.getByUserName(initialUsername).isEmpty()) {
-            userAccountService.createUser(SignUpDto.builder().email(initialUsername).password(initialPassword).name(initialUsername).build());
+open class Application(
+        populator: DbPopulatorReal,
+        userAccountService: UserAccountService,
+        val properties: PolygloatProperties,
+        val initialPasswordManager: InitialPasswordManager
+) {
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            SpringApplication.run(Application::class.java, *args)
         }
     }
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+    init {
+        if (properties.internal.populate) {
+            populator.autoPopulate()
+        }
+
+        if (properties.sentry.enabled) {
+            Sentry.init(properties.sentry.dsn)
+        }
+
+        val initialUsername = properties.authentication.initialUsername
+        if (properties.authentication.createInitialUser && !userAccountService.isAnyUserAccount &&
+                userAccountService.getByUserName(initialUsername).isEmpty) {
+            val initialPassword = initialPasswordManager.initialPassword
+
+            userAccountService.createUser(
+                    SignUpDto.builder()
+                            .email(initialUsername)
+                            .password(initialPassword)
+                            .name(initialUsername)
+                            .build())
+        }
     }
 }

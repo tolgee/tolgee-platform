@@ -1,17 +1,11 @@
 package io.polygloat.dtos.request;
 
 import io.polygloat.dtos.request.validators.annotations.RepositoryRequest;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 
 @RepositoryRequest
-@NoArgsConstructor
 public class EditRepositoryDTO extends AbstractRepositoryDTO {
-    @Getter
-    @Setter
     @NotNull
     Long repositoryId;
 
@@ -19,5 +13,16 @@ public class EditRepositoryDTO extends AbstractRepositoryDTO {
     public EditRepositoryDTO(Long repositoryId, String name) {
         this.repositoryId = repositoryId;
         this.name = name;
+    }
+
+    public EditRepositoryDTO() {
+    }
+
+    public @NotNull Long getRepositoryId() {
+        return this.repositoryId;
+    }
+
+    public void setRepositoryId(@NotNull Long repositoryId) {
+        this.repositoryId = repositoryId;
     }
 }

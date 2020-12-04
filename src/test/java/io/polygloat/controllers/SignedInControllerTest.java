@@ -2,7 +2,6 @@ package io.polygloat.controllers;
 
 import io.polygloat.helpers.JsonHelper;
 import io.polygloat.model.UserAccount;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -17,17 +16,12 @@ import static io.polygloat.controllers.LoggedRequestFactory.loggedPost;
 public abstract class SignedInControllerTest extends AbstractControllerTest {
     UserAccount userAccount;
 
-    @Value("${app.initialUsername:admin}")
-    String initialUsername;
-    @Value("${app.initialPassword:admin}")
-    String initialPassword;
-
     @BeforeMethod
     public void beforeEach() throws Exception {
         //populate to create the user if not created
         dbPopulator.autoPopulate();
         if (userAccount == null) {
-            logAsUser(initialUsername, initialPassword);
+            logAsUser(polygloatProperties.getAuthentication().getInitialUsername(), initialPassword);
         }
         commitTransaction();
     }

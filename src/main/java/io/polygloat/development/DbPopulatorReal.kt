@@ -1,182 +1,161 @@
-package io.polygloat.development;
+package io.polygloat.development
 
-import io.polygloat.constants.ApiScope;
-import io.polygloat.dtos.request.LanguageDTO;
-import io.polygloat.dtos.request.SignUpDto;
-import io.polygloat.exceptions.NotFoundException;
-import io.polygloat.model.*;
-import io.polygloat.repository.ApiKeyRepository;
-import io.polygloat.repository.RepositoryRepository;
-import io.polygloat.repository.UserAccountRepository;
-import io.polygloat.service.LanguageService;
-import io.polygloat.service.PermissionService;
-import io.polygloat.service.UserAccountService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.Set;
+import io.polygloat.configuration.polygloat.PolygloatProperties
+import io.polygloat.constants.ApiScope
+import io.polygloat.dtos.request.LanguageDTO
+import io.polygloat.dtos.request.SignUpDto
+import io.polygloat.exceptions.NotFoundException
+import io.polygloat.model.*
+import io.polygloat.repository.ApiKeyRepository
+import io.polygloat.repository.RepositoryRepository
+import io.polygloat.repository.UserAccountRepository
+import io.polygloat.security.InitialPasswordManager
+import io.polygloat.service.LanguageService
+import io.polygloat.service.PermissionService
+import io.polygloat.service.UserAccountService
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.Set
+import java.util.function.Supplier
+import javax.persistence.EntityManager
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class DbPopulatorReal {
-    public static final String API_KEY = "this_is_dummy_api_key";
-
-    private final EntityManager entityManager;
-    private final UserAccountRepository userAccountRepository;
-    private final PermissionService permissionService;
-    private final UserAccountService userAccountService;
-    @Value("${app.initialUsername:admin}")
-    String initialUsername;
-    @Value("${app.initialPassword:admin}")
-    String initialPassword;
-    private final LanguageService languageService;
-    private final RepositoryRepository repositoryRepository;
-    private final ApiKeyRepository apiKeyRepository;
-
-    private Language de;
-    private Language en;
+open class DbPopulatorReal(private val entityManager: EntityManager,
+                           private val userAccountRepository: UserAccountRepository,
+                           private val permissionService: PermissionService,
+                           private val userAccountService: UserAccountService,
+                           private val languageService: LanguageService,
+                           private val repositoryRepository: RepositoryRepository,
+                           private val apiKeyRepository: ApiKeyRepository,
+                           private val polygloatProperties: PolygloatProperties,
+                           private val initialPasswordManager: InitialPasswordManager
+) {
+    private var de: Language? = null
+    private var en: Language? = null
 
     @Transactional
-    public void autoPopulate() {
+    open fun autoPopulate() {
         //do not populate if db is not empty
-        if (userAccountRepository.count() == 0) {
-            this.populate("Application");
+        if (userAccountRepository.count() == 0L) {
+            this.populate("Application")
         }
     }
 
-    public UserAccount createUser(String username) {
-        return userAccountService.getByUserName(username).orElseGet(() -> {
-            SignUpDto signUpDto = new SignUpDto();
-            signUpDto.setEmail(username);
-            signUpDto.setName(username);
-            signUpDto.setPassword(initialPassword);
-            return userAccountService.createUser(signUpDto);
-        });
+    open fun createUser(username: String?, password: String? = null): UserAccount {
+        return userAccountService.getByUserName(username).orElseGet {
+            val signUpDto = SignUpDto()
+            signUpDto.email = username
+            signUpDto.name = username
+            signUpDto.password = password ?: initialPasswordManager.initialPassword
+            userAccountService.createUser(signUpDto)
+        }
+    }
+
+    open fun createUser(username: String?): UserAccount {
+        return createUser(username, null)
     }
 
     @Transactional
-    public Repository createBase(String repositoryName, String username) {
-
-        UserAccount userAccount = createUser(username);
-
-        Repository repository = new Repository();
-        repository.setName(repositoryName);
-        repository.setCreatedBy(userAccount);
-
-        en = createLanguage("en", repository);
-        de = createLanguage("de", repository);
-
-        permissionService.grantFullAccessToRepo(userAccount, repository);
-
-        repositoryRepository.saveAndFlush(repository);
-        entityManager.flush();
-        entityManager.clear();
-
-        return repository;
-    }
-
-
-    @Transactional
-    public Repository createBase(String repositoryName) {
-        return createBase(repositoryName, initialUsername);
-    }
-
-
-    @Transactional
-    public Repository populate(String repositoryName) {
-        return populate(repositoryName, initialUsername);
+    open fun createBase(repositoryName: String?, username: String?, password: String? = null): Repository {
+        val userAccount = createUser(username, password)
+        val repository = Repository()
+        repository.name = repositoryName
+        repository.createdBy = userAccount
+        en = createLanguage("en", repository)
+        de = createLanguage("de", repository)
+        permissionService.grantFullAccessToRepo(userAccount, repository)
+        repositoryRepository.saveAndFlush(repository)
+        entityManager.flush()
+        entityManager.clear()
+        return repository
     }
 
     @Transactional
-    public Repository populate(String repositoryName, String userName) {
-        Repository repository = createBase(repositoryName, userName);
+    open fun createBase(repositoryName: String?, username: String?): Repository {
+        return createBase(repositoryName, username, null);
+    }
 
-        this.createApiKey(repository);
+    @Transactional
+    open fun createBase(repositoryName: String?): Repository {
+        return createBase(repositoryName, polygloatProperties.authentication.initialUsername)
+    }
 
-        createTranslation(repository, "Hello world!", "Hallo Welt!", en, de);
-        createTranslation(repository, "English text one.", "Deutsch text einz.", en, de);
+    @Transactional
+    open fun populate(repositoryName: String?): Repository {
+        return populate(repositoryName, polygloatProperties.authentication.initialUsername)
+    }
 
+    @Transactional
+    open fun populate(repositoryName: String?, userName: String?): Repository {
+        val repository = createBase(repositoryName, userName)
+        createApiKey(repository)
+        createTranslation(repository, "Hello world!", "Hallo Welt!", en, de)
+        createTranslation(repository, "English text one.", "Deutsch text einz.", en, de)
         createTranslation(repository, "This is translation in home folder",
-                "Das ist die Übersetzung im Home-Ordner", en, de);
-
+                "Das ist die Übersetzung im Home-Ordner", en, de)
         createTranslation(repository, "This is translation in news folder",
-                "Das ist die Übersetzung im News-Ordner", en, de);
+                "Das ist die Übersetzung im News-Ordner", en, de)
         createTranslation(repository, "This is another translation in news folder",
-                "Das ist eine weitere Übersetzung im Nachrichtenordner", en, de);
-
+                "Das ist eine weitere Übersetzung im Nachrichtenordner", en, de)
         createTranslation(repository, "This is standard text somewhere in DOM.",
-                "Das ist Standardtext irgendwo im DOM.", en, de);
+                "Das ist Standardtext irgendwo im DOM.", en, de)
         createTranslation(repository, "This is another standard text somewhere in DOM.",
-                "Das ist ein weiterer Standardtext irgendwo in DOM.", en, de);
+                "Das ist ein weiterer Standardtext irgendwo in DOM.", en, de)
         createTranslation(repository, "This is translation retrieved by service.",
-                "Dase Übersetzung wird vom Service abgerufen.", en, de);
+                "Dase Übersetzung wird vom Service abgerufen.", en, de)
         createTranslation(repository, "This is textarea with placeholder and value.",
-                "Das ist ein Textarea mit Placeholder und Value.", en, de);
+                "Das ist ein Textarea mit Placeholder und Value.", en, de)
         createTranslation(repository, "This is textarea with placeholder.",
-                "Das ist ein Textarea mit Placeholder.", en, de);
+                "Das ist ein Textarea mit Placeholder.", en, de)
         createTranslation(repository, "This is input with value.",
-                "Das ist ein Input mit value.", en, de);
+                "Das ist ein Input mit value.", en, de)
         createTranslation(repository, "This is input with placeholder.",
-                "Das ist ein Input mit Placeholder.", en, de);
-
-        return repository;
+                "Das ist ein Input mit Placeholder.", en, de)
+        return repository
     }
 
-
-    private void createApiKey(Repository repository) {
-        Permission permission = repository.getPermissions().stream().findAny().orElseThrow(NotFoundException::new);
-
-        if (apiKeyRepository.findByKey(API_KEY).isEmpty()) {
-            ApiKey apiKey = ApiKey.builder()
+    private fun createApiKey(repository: Repository) {
+        val (_, user) = repository.permissions.stream().findAny().orElseThrow(Supplier<NotFoundException> { NotFoundException() })
+        if (apiKeyRepository.findByKey(API_KEY).isEmpty) {
+            val apiKey = ApiKey.builder()
                     .repository(repository)
                     .key(API_KEY)
-                    .userAccount(permission.getUser())
-                    .scopes(Set.of(ApiScope.values()))
-                    .build();
-            repository.getApiKeys().add(apiKey);
-            apiKeyRepository.save(apiKey);
+                    .userAccount(user)
+                    .scopes(setOf(*ApiScope.values()))
+                    .build()
+            repository.apiKeys.add(apiKey)
+            apiKeyRepository.save(apiKey)
         }
     }
 
-    private Language createLanguage(String name, Repository repository) {
-        return languageService.createLanguage(new LanguageDTO(null, name, name), repository);
+    private fun createLanguage(name: String, repository: Repository): Language {
+        return languageService.createLanguage(LanguageDTO(null, name, name), repository)
     }
 
-    private void createTranslation(Repository repository, String english,
-                                   String deutsch, Language en, Language de) {
-
-
-        Key key = new Key();
-        key.setName("sampleApp." + english.replace(" ", "_").toLowerCase().replaceAll("\\.+$", ""));
-        key.setRepository(repository);
-
-        Translation translation = new Translation();
-        translation.setLanguage(en);
-        translation.setKey(key);
-        translation.setText(english);
-
-        key.getTranslations().add(translation);
-        key.getTranslations().add(translation);
-
-        entityManager.persist(translation);
-
-        Translation translationDe = new Translation();
-        translationDe.setLanguage(de);
-        translationDe.setKey(key);
-        translationDe.setText(deutsch);
-
-        key.getTranslations().add(translationDe);
-
-
-        entityManager.persist(translationDe);
-
-        entityManager.persist(key);
-        entityManager.flush();
+    private fun createTranslation(repository: Repository, english: String,
+                                  deutsch: String, en: Language?, de: Language?) {
+        val key = Key()
+        key.name = "sampleApp." + english.replace(" ", "_").toLowerCase().replace("\\.+$".toRegex(), "")
+        key.repository = repository
+        val translation = Translation()
+        translation.language = en
+        translation.key = key
+        translation.text = english
+        key.translations.add(translation)
+        key.translations.add(translation)
+        entityManager.persist(translation)
+        val translationDe = Translation()
+        translationDe.language = de
+        translationDe.key = key
+        translationDe.text = deutsch
+        key.translations.add(translationDe)
+        entityManager.persist(translationDe)
+        entityManager.persist(key)
+        entityManager.flush()
     }
 
-
+    companion object {
+        const val API_KEY = "this_is_dummy_api_key"
+    }
 }

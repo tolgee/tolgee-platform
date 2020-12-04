@@ -51,13 +51,15 @@ jobs:
           VERSION: ${{ steps.version.outputs.VERSION }}
 
       - name: Start docker stack
-        run: docker run -d --name app -e app.populate=true -e app.allowInternal=true -p8080:8080 polygloat/polygloat
+        run: docker run -d --name polygloat -e polygloat.internal.populate=true -e polygloat.internal.controller-enabled=true -p8080:8080 polygloat/polygloat
 
       - name: Wait for running container
         run: 'until docker logs --since 5m app | grep -m 1 "started on port(s): 8080"; do : ;done'
 
       - name: Run cypress tests
-        run: npm run cy:run
+        run: |
+          export CYPRESS_DEFAULT_PASSWORD=$(docker exec polygloat cat /data/initial.pwd)
+          npm run cy:run
         working-directory: ./webapp
         env:
           CYPRESS_HOST: http://localhost:8080
@@ -87,7 +89,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/libs/polygloat-${{ steps.version.outputs.VERSION }}.jar
           asset_name: polygloat-${{ steps.version.outputs.VERSION }}.jar
           asset_content_type: application/java-archive

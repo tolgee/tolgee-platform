@@ -1,14 +1,16 @@
 package io.polygloat.security;
 
-import io.polygloat.constants.Message;
-import io.polygloat.exceptions.AuthenticationException;
-import io.polygloat.model.UserAccount;
-import io.polygloat.service.UserAccountService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import io.polygloat.configuration.polygloat.PolygloatProperties;
+import io.polygloat.constants.Message;
+import io.polygloat.exceptions.AuthenticationException;
+import io.polygloat.model.UserAccount;
+import io.polygloat.service.UserAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.LinkedList;
@@ -25,15 +28,21 @@ import java.util.List;
 @Component
 public class JwtTokenProvider {
 
-    private JwtProperties properties;
+    private PolygloatProperties configuration;
     private UserAccountService userAccountService;
+    private JwtSecretProvider jwtSecretProvider;
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     @Autowired
-    public JwtTokenProvider(JwtProperties properties, UserAccountService userAccountService) {
-        this.properties = properties;
+    public JwtTokenProvider(PolygloatProperties configuration, UserAccountService userAccountService, JwtSecretProvider jwtSecretProvider) {
+        this.configuration = configuration;
         this.userAccountService = userAccountService;
+        this.jwtSecretProvider = jwtSecretProvider;
+    }
+
+    private SecretKey getKey() {
+        return Keys.hmacShaKeyFor(jwtSecretProvider.getJwtSecret());
     }
 
     public JwtToken generateToken(Long userId) {
@@ -42,14 +51,14 @@ public class JwtTokenProvider {
         return new JwtToken(Jwts.builder()
                 .setSubject(userId.toString())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(now.getTime() + properties.getJwtExpirationInMs()))
-                .signWith(properties.getKey())
-                .compact(), properties.getKey());
+                .setExpiration(new Date(now.getTime() + configuration.getAuthentication().getJwtExpiration()))
+                .signWith(getKey())
+                .compact(), getKey());
     }
 
     public boolean validateToken(JwtToken authToken) {
         try {
-            Jwts.parser().setSigningKey(properties.getKey()).parseClaimsJws(authToken.toString());
+            Jwts.parser().setSigningKey(getKey()).parseClaimsJws(authToken.toString());
             return true;
         } catch (SignatureException ex) {
             logger.error("Invalid JWT signature");
@@ -80,7 +89,7 @@ public class JwtTokenProvider {
     public JwtToken resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return new JwtToken(bearerToken.substring(7), properties.getKey());
+            return new JwtToken(bearerToken.substring(7), getKey());
         }
         return null;
     }

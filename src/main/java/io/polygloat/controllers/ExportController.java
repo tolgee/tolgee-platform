@@ -7,7 +7,6 @@ import io.polygloat.model.Repository;
 import io.polygloat.service.LanguageService;
 import io.polygloat.service.SecurityService;
 import io.polygloat.service.TranslationService;
-import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +22,6 @@ import java.util.zip.ZipOutputStream;
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/api/repository/{repositoryId}/export")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ExportController implements IController {
 
     private final TranslationService translationService;
@@ -31,6 +29,15 @@ public class ExportController implements IController {
     private final LanguageService languageService;
     private final SmartValidator validator;
     private final ObjectMapper objectMapper;
+
+    @Autowired
+    public ExportController(TranslationService translationService, SecurityService securityService, LanguageService languageService, SmartValidator validator, ObjectMapper objectMapper) {
+        this.translationService = translationService;
+        this.securityService = securityService;
+        this.languageService = languageService;
+        this.validator = validator;
+        this.objectMapper = objectMapper;
+    }
 
 
     @GetMapping(value = "/jsonZip", produces = "application/zip")

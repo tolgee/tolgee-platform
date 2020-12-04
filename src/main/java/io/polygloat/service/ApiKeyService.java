@@ -7,22 +7,29 @@ import io.polygloat.model.ApiKey;
 import io.polygloat.model.Repository;
 import io.polygloat.model.UserAccount;
 import io.polygloat.repository.ApiKeyRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApiKeyService {
 
     private final ApiKeyRepository apiKeyRepository;
     private final PermissionService permissionService;
     private final SecureRandom random;
+
+    @Autowired
+    public ApiKeyService(ApiKeyRepository apiKeyRepository, PermissionService permissionService, SecureRandom random) {
+        this.apiKeyRepository = apiKeyRepository;
+        this.permissionService = permissionService;
+        this.random = random;
+    }
 
     public ApiKeyDTO createApiKey(UserAccount userAccount, Set<ApiScope> scopes, Repository repository) {
         ApiKey apiKey = ApiKey.builder()
