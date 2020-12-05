@@ -122,7 +122,7 @@ dependencies {
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
     implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.1'
     kapt "org.hibernate:hibernate-jpamodelgen"
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.10'
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.20'
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.10'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3'
 }
