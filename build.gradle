@@ -117,7 +117,7 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok:1.18.6"
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
     implementation 'org.hibernate:hibernate-jpamodelgen'
-    testCompile group: 'org.testng', name: 'testng', version: '6.14.3'
+    testCompile group: 'org.testng', name: 'testng', version: '7.3.0'
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
     implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.1'
