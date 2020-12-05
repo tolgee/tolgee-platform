@@ -124,7 +124,7 @@ dependencies {
     kapt "org.hibernate:hibernate-jpamodelgen"
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.10'
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.10'
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0'
 }
 
 test {
