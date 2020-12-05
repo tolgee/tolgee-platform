@@ -120,7 +120,7 @@ dependencies {
     testCompile group: 'org.testng', name: 'testng', version: '6.14.3'
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
-    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.1'
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.2-native-mt'
     kapt "org.hibernate:hibernate-jpamodelgen"
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.10'
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.10'
