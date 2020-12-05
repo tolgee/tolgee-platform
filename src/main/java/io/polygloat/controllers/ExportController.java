@@ -27,15 +27,13 @@ public class ExportController implements IController {
     private final TranslationService translationService;
     private final SecurityService securityService;
     private final LanguageService languageService;
-    private final SmartValidator validator;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public ExportController(TranslationService translationService, SecurityService securityService, LanguageService languageService, SmartValidator validator, ObjectMapper objectMapper) {
+    public ExportController(TranslationService translationService, SecurityService securityService, LanguageService languageService, ObjectMapper objectMapper) {
         this.translationService = translationService;
         this.securityService = securityService;
         this.languageService = languageService;
-        this.validator = validator;
         this.objectMapper = objectMapper;
     }
 

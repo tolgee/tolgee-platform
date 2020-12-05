@@ -8,10 +8,12 @@ import io.polygloat.service.UserAccountService
 import io.sentry.Sentry
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 
 @SpringBootApplication
 @EnableJpaAuditing
+@ConfigurationPropertiesScan
 open class Application(
         populator: DbPopulatorReal,
         userAccountService: UserAccountService,

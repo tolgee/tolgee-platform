@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:./build/test_data/testdb.h2db;AUTO_SERVER=TRUE;MVCC=true;
+    url: jdbc:h2:./build/test_data/testdb.h2db;AUTO_SERVER=TRUE;
     driver-class-name: org.h2.Driver
     username: sa
     password: password
