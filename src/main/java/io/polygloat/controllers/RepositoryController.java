@@ -13,7 +13,6 @@ import io.polygloat.security.AuthenticationFacade;
 import io.polygloat.service.InvitationService;
 import io.polygloat.service.RepositoryService;
 import io.polygloat.service.SecurityService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,13 +22,20 @@ import java.util.Set;
 @RestController("_repositoryController")
 @CrossOrigin(origins = "*")
 @RequestMapping("/api/repositories")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RepositoryController implements IController {
 
     private final RepositoryService repositoryService;
     private final AuthenticationFacade authenticationFacade;
     private final SecurityService securityService;
     private final InvitationService invitationService;
+
+    @Autowired
+    public RepositoryController(RepositoryService repositoryService, AuthenticationFacade authenticationFacade, SecurityService securityService, InvitationService invitationService) {
+        this.repositoryService = repositoryService;
+        this.authenticationFacade = authenticationFacade;
+        this.securityService = securityService;
+        this.invitationService = invitationService;
+    }
 
     @PostMapping(value = "")
     public RepositoryDTO createRepository(@RequestBody @Valid CreateRepositoryDTO dto) {

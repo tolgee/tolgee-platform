@@ -1,8 +1,6 @@
 package io.polygloat.service.query_builders;
 
 import io.polygloat.model.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -103,10 +101,61 @@ public class TranslationsViewBuilder {
         return new Result(count, resultList);
     }
 
-    @Data
-    @AllArgsConstructor
     public static class Result {
         private Long count;
         private List<Object> data;
+
+        public Result(Long count, List<Object> data) {
+            this.count = count;
+            this.data = data;
+        }
+
+        public Long getCount() {
+            return this.count;
+        }
+
+        public List<Object> getData() {
+            return this.data;
+        }
+
+        public void setCount(Long count) {
+            this.count = count;
+        }
+
+        public void setData(List<Object> data) {
+            this.data = data;
+        }
+
+        public boolean equals(final Object o) {
+            if (o == this) return true;
+            if (!(o instanceof Result)) return false;
+            final Result other = (Result) o;
+            if (!other.canEqual((Object) this)) return false;
+            final Object this$count = this.getCount();
+            final Object other$count = other.getCount();
+            if (this$count == null ? other$count != null : !this$count.equals(other$count)) return false;
+            final Object this$data = this.getData();
+            final Object other$data = other.getData();
+            if (this$data == null ? other$data != null : !this$data.equals(other$data)) return false;
+            return true;
+        }
+
+        protected boolean canEqual(final Object other) {
+            return other instanceof Result;
+        }
+
+        public int hashCode() {
+            final int PRIME = 59;
+            int result = 1;
+            final Object $count = this.getCount();
+            result = result * PRIME + ($count == null ? 43 : $count.hashCode());
+            final Object $data = this.getData();
+            result = result * PRIME + ($data == null ? 43 : $data.hashCode());
+            return result;
+        }
+
+        public String toString() {
+            return "TranslationsViewBuilder.Result(count=" + this.getCount() + ", data=" + this.getData() + ")";
+        }
     }
 }

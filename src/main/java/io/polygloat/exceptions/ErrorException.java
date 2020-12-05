@@ -1,17 +1,14 @@
 package io.polygloat.exceptions;
 
 import io.polygloat.constants.Message;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
 import java.util.List;
 
 public abstract class ErrorException extends RuntimeException {
-    @Getter
     private final List<Serializable> params;
 
-    @Getter
     private final String code;
 
     public ErrorException(Message message, List<Serializable> params) {
@@ -30,4 +27,11 @@ public abstract class ErrorException extends RuntimeException {
 
     public abstract HttpStatus getHttpStatus();
 
+    public List<Serializable> getParams() {
+        return this.params;
+    }
+
+    public String getCode() {
+        return this.code;
+    }
 }

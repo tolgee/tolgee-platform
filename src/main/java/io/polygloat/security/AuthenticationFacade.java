@@ -1,6 +1,6 @@
 package io.polygloat.security;
 
-import io.polygloat.configuration.AppConfiguration;
+import io.polygloat.configuration.polygloat.PolygloatProperties;
 import io.polygloat.model.ApiKey;
 import io.polygloat.model.UserAccount;
 import io.polygloat.security.api_key_auth.ApiKeyAuthenticationToken;
@@ -11,11 +11,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AuthenticationFacade {
-    private AppConfiguration configuration;
+    private PolygloatProperties configuration;
     private UserAccountService userAccountService;
 
-    AuthenticationFacade(AppConfiguration configuration, UserAccountService userAccountService) {
-
+    AuthenticationFacade(PolygloatProperties configuration, UserAccountService userAccountService) {
         this.configuration = configuration;
         this.userAccountService = userAccountService;
     }
@@ -25,7 +24,7 @@ public class AuthenticationFacade {
     }
 
     public UserAccount getUserAccount() {
-        if (!configuration.isAuthentication()) {
+        if (!configuration.getAuthentication().getEnabled()) {
             return userAccountService.getImplicitUser();
         }
 

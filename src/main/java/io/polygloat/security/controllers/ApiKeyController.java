@@ -13,7 +13,6 @@ import io.polygloat.model.Repository;
 import io.polygloat.service.ApiKeyService;
 import io.polygloat.service.RepositoryService;
 import io.swagger.v3.oas.annotations.Operation;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,12 +25,17 @@ import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RequestMapping("/api/apiKeys")
 public class ApiKeyController extends PrivateController {
 
     private final ApiKeyService apiKeyService;
     private final RepositoryService repositoryService;
+
+    @Autowired
+    public ApiKeyController(ApiKeyService apiKeyService, RepositoryService repositoryService) {
+        this.apiKeyService = apiKeyService;
+        this.repositoryService = repositoryService;
+    }
 
     @Operation(summary = "Get all user's api keys")
     @GetMapping(path = "")

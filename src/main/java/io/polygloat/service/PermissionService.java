@@ -5,7 +5,6 @@ import io.polygloat.model.Repository;
 import io.polygloat.model.UserAccount;
 import io.polygloat.repository.PermissionRepository;
 import io.polygloat.security.AuthenticationFacade;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,11 +14,17 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PermissionService {
     private final PermissionRepository permissionRepository;
     private final EntityManager entityManager;
     private final AuthenticationFacade authenticationFacade;
+
+    @Autowired
+    public PermissionService(PermissionRepository permissionRepository, EntityManager entityManager, AuthenticationFacade authenticationFacade) {
+        this.permissionRepository = permissionRepository;
+        this.entityManager = entityManager;
+        this.authenticationFacade = authenticationFacade;
+    }
 
     public Set<Permission> getAllOfRepository(Repository repository) {
         return this.permissionRepository.getAllByRepositoryAndUserNotNull(repository);

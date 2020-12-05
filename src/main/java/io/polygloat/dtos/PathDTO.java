@@ -1,14 +1,12 @@
 package io.polygloat.dtos;
 
 import io.polygloat.helpers.TextHelper;
-import lombok.Data;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
 public class PathDTO {
     public static final char DELIMITER = '.';
 
@@ -86,5 +84,13 @@ public class PathDTO {
     @Override
     public int hashCode() {
         return getFullPath().hashCode();
+    }
+
+    public void setFullPath(LinkedList<String> fullPath) {
+        this.fullPath = fullPath;
+    }
+
+    public String toString() {
+        return "PathDTO(fullPath=" + this.getFullPath() + ")";
     }
 }

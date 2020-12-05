@@ -1,49 +1,69 @@
 package io.polygloat.dtos;
 
-import io.polygloat.configuration.AppConfiguration;
-import lombok.Getter;
+import io.polygloat.configuration.polygloat.PolygloatProperties;
 
 public class PublicConfigurationDTO {
-    @Getter
     private boolean authentication;
 
-    @Getter
     private AuthMethodsDTO authMethods;
 
-    @Getter
     private boolean passwordResettable;
 
-    @Getter
     private boolean allowRegistrations;
 
-    public PublicConfigurationDTO(AppConfiguration configuration) {
-        this.authentication = configuration.isAuthentication();
+    public PublicConfigurationDTO(PolygloatProperties configuration) {
+        this.authentication = configuration.getAuthentication().getEnabled();
         if (authentication) {
-            authMethods = new AuthMethodsDTO(new GithubPublicConfigDTO(configuration.getGithubClientId()));
+            authMethods = new AuthMethodsDTO(new GithubPublicConfigDTO(configuration.getAuthentication().getGithub().getClientId()));
         }
-        passwordResettable = configuration.isNativeAuth();
-        allowRegistrations = configuration.isAllowRegistrations();
+        passwordResettable = configuration.getAuthentication().getNativeEnabled();
+        allowRegistrations = configuration.getAuthentication().getRegistrationsAllowed();
+    }
+
+    public boolean isAuthentication() {
+        return this.authentication;
+    }
+
+    public AuthMethodsDTO getAuthMethods() {
+        return this.authMethods;
+    }
+
+    public boolean isPasswordResettable() {
+        return this.passwordResettable;
+    }
+
+    public boolean isAllowRegistrations() {
+        return this.allowRegistrations;
     }
 
     public static class AuthMethodsDTO {
-        @Getter
         private GithubPublicConfigDTO github;
 
         public AuthMethodsDTO(GithubPublicConfigDTO github) {
             this.github = github;
         }
+
+        public GithubPublicConfigDTO getGithub() {
+            return this.github;
+        }
     }
 
     public static class GithubPublicConfigDTO {
-        @Getter
         private boolean enabled;
 
-        @Getter
         private String clientId;
 
         public GithubPublicConfigDTO(String clientId) {
             this.clientId = clientId;
             this.enabled = clientId != null && !clientId.isEmpty();
+        }
+
+        public boolean isEnabled() {
+            return this.enabled;
+        }
+
+        public String getClientId() {
+            return this.clientId;
         }
     }
 }

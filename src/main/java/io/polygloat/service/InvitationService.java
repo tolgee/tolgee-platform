@@ -9,7 +9,6 @@ import io.polygloat.model.UserAccount;
 import io.polygloat.repository.InvitationRepository;
 import io.polygloat.repository.PermissionRepository;
 import io.polygloat.security.AuthenticationFacade;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,12 +23,19 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class InvitationService {
     private final InvitationRepository invitationRepository;
     private final PermissionRepository permissionRepository;
     private final EntityManager entityManager;
     private final AuthenticationFacade authenticationFacade;
+
+    @Autowired
+    public InvitationService(InvitationRepository invitationRepository, PermissionRepository permissionRepository, EntityManager entityManager, AuthenticationFacade authenticationFacade) {
+        this.invitationRepository = invitationRepository;
+        this.permissionRepository = permissionRepository;
+        this.entityManager = entityManager;
+        this.authenticationFacade = authenticationFacade;
+    }
 
     @Transactional
     public String create(Repository repository, Permission.RepositoryPermissionType type) {

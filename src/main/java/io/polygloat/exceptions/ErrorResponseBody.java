@@ -1,22 +1,31 @@
 package io.polygloat.exceptions;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class ErrorResponseBody {
-    @Getter
-    @Setter
     private String code;
 
-    @Getter
-    @Setter
     private List<Serializable> params;
 
     public ErrorResponseBody(String code, List<Serializable> params) {
         this.code = code;
+        this.params = params;
+    }
+
+    public String getCode() {
+        return this.code;
+    }
+
+    public List<Serializable> getParams() {
+        return this.params;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public void setParams(List<Serializable> params) {
         this.params = params;
     }
 }

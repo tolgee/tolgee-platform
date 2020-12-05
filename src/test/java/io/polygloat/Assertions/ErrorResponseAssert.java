@@ -43,14 +43,17 @@ public class ErrorResponseAssert extends AbstractAssert<ErrorResponseAssert, Mvc
         }
     }
 
-    @SneakyThrows
     private Map<String, Map<String, List<Object>>> getCustomMap() {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             return objectMapper.readValue(actual.getResponse().getContentAsString(), new TypeReference<>() {
             });
         } catch (JsonProcessingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Can not parse error response:\n" + actual.getResponse().getContentAsString());
+            try {
+                throw new RuntimeException("Can not parse error response:\n" + actual.getResponse().getContentAsString());
+            } catch (UnsupportedEncodingException unsupportedEncodingException) {
+                throw new RuntimeException(unsupportedEncodingException);
+            }
         }
     }
 }

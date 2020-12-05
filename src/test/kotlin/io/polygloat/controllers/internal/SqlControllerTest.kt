@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testng.annotations.Test
 
 @AutoConfigureMockMvc
-@SpringBootTest(properties = ["app.allowInternal=true"])
+@SpringBootTest(properties = ["polygloat.internal.controllerEnabled=true"])
 class SqlControllerTest : AbstractControllerTest() {
 
     inline fun <reified T> MvcResult.parseResponseTo(): T {

@@ -1,0 +1,16 @@
+polygloat:
+  data-path: /data
+
+spring:
+  datasource:
+    url: jdbc:h2:${polygloat.data-path}/db.h2
+    username: sa
+    password: password
+  liquibase:
+    change-log: classpath:db/changelog/schema.xml
+
+server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024

@@ -45,8 +45,8 @@ class LanguageControllerTest : SignedInControllerTest(), ITest {
 
     @Test
     fun findAllLanguages() {
-        val repository = dbPopulator.createBase(generateUniqueString(), "ben")
-        logAsUser("ben", "admin")
+        val repository = dbPopulator.createBase(generateUniqueString(), "ben", "pwd")
+        logAsUser("ben", "pwd")
         val mvcResult = performFindAll(repository.id).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
         assertThat(decodeJson(mvcResult.response.contentAsString, Set::class.java)).hasSize(2)
     }

@@ -7,7 +7,6 @@ import io.polygloat.model.Permission;
 import io.polygloat.model.Repository;
 import io.polygloat.model.UserAccount;
 import io.polygloat.security.AuthenticationFacade;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +15,17 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SecurityService {
     private final AuthenticationFacade authenticationFacade;
     private final PermissionService permissionService;
     private final ApiKeyService apiKeyService;
+
+    @Autowired
+    public SecurityService(AuthenticationFacade authenticationFacade, PermissionService permissionService, ApiKeyService apiKeyService) {
+        this.authenticationFacade = authenticationFacade;
+        this.permissionService = permissionService;
+        this.apiKeyService = apiKeyService;
+    }
 
     @Transactional
     public void grantFullAccessToRepo(Repository repository) {

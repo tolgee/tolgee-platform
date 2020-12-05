@@ -1,7 +1,6 @@
 package io.polygloat.security;
 
-import io.polygloat.configuration.AppConfiguration;
-import lombok.RequiredArgsConstructor;
+import io.polygloat.configuration.polygloat.PolygloatProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,10 +14,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class JwtTokenFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
-    private final AppConfiguration configuration;
+    private final PolygloatProperties configuration;
+
+    @Autowired
+    public JwtTokenFilter(JwtTokenProvider jwtTokenProvider, PolygloatProperties configuration) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.configuration = configuration;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
@@ -37,6 +41,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !configuration.isAuthentication();
+        return !configuration.getAuthentication().getEnabled();
     }
 }

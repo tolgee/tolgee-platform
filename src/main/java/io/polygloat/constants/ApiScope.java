@@ -1,18 +1,17 @@
 package io.polygloat.constants;
 
 import io.polygloat.exceptions.NotFoundException;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 
-@AllArgsConstructor
 public enum ApiScope {
     TRANSLATIONS_VIEW("translations.view"),
     TRANSLATIONS_EDIT("translations.edit"),
     KEYS_EDIT("keys.edit");
 
-    @Setter
     private String value;
+
+    private ApiScope(String value) {
+        this.value = value;
+    }
 
     public static ApiScope fromValue(String value) {
         for (ApiScope scope : ApiScope.values()) {
@@ -25,5 +24,9 @@ public enum ApiScope {
 
     public String getValue() {
         return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }

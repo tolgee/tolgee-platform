@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import io.polygloat.AbstractTransactionalTest;
+import io.polygloat.configuration.polygloat.AuthenticationProperties;
+import io.polygloat.configuration.polygloat.PolygloatProperties;
 import io.polygloat.development.DbPopulatorReal;
 import io.polygloat.exceptions.NotFoundException;
 import io.polygloat.model.UserAccount;
 import io.polygloat.repository.KeyRepository;
+import io.polygloat.security.InitialPasswordManager;
 import io.polygloat.security.payload.LoginRequest;
 import io.polygloat.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +63,23 @@ public abstract class AbstractControllerTest extends AbstractTransactionalTest i
     protected InvitationService invitationService;
 
     @Autowired
+    protected PolygloatProperties polygloatProperties;
+
+    @Autowired
     public ObjectMapper mapper;
+
+    @Autowired
+    protected InitialPasswordManager initialPasswordManager;
+
+    protected String initialUsername;
+
+    protected String initialPassword;
+
+    @Autowired
+    private void initInitialUser(AuthenticationProperties authenticationProperties) {
+        initialUsername = authenticationProperties.getInitialUsername();
+        initialPassword = initialPasswordManager.getInitialPassword();
+    }
 
     <T> T decodeJson(String json, Class<T> clazz) {
         ObjectMapper mapper = new ObjectMapper();

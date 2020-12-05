@@ -11,7 +11,6 @@ import io.polygloat.security.AuthenticationFacade;
 import io.polygloat.service.PermissionService;
 import io.polygloat.service.RepositoryService;
 import io.polygloat.service.SecurityService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,13 +21,20 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/permission")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PermissionController {
 
     private final SecurityService securityService;
     private final RepositoryService repositoryService;
     private final PermissionService permissionService;
     private final AuthenticationFacade authenticationFacade;
+
+    @Autowired
+    public PermissionController(SecurityService securityService, RepositoryService repositoryService, PermissionService permissionService, AuthenticationFacade authenticationFacade) {
+        this.securityService = securityService;
+        this.repositoryService = repositoryService;
+        this.permissionService = permissionService;
+        this.authenticationFacade = authenticationFacade;
+    }
 
     @GetMapping("/list/{repositoryId}")
     public Set<PermissionDTO> getRepositoryPermissions(@PathVariable("repositoryId") Long id) {

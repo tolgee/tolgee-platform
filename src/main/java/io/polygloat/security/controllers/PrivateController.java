@@ -2,13 +2,14 @@ package io.polygloat.security.controllers;
 
 import io.polygloat.security.AuthenticationFacade;
 import io.polygloat.service.SecurityService;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@NoArgsConstructor
 public abstract class PrivateController {
     protected AuthenticationFacade authenticationFacade;
     protected SecurityService securityService;
+
+    public PrivateController() {
+    }
 
 
     @Autowired

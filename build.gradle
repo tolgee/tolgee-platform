@@ -3,21 +3,21 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.6.RELEASE")
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.10"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.0")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.20"
     }
 }
 
 plugins {
-    id "com.palantir.docker" version "0.22.1"
+    id "com.palantir.docker" version "0.25.0"
     id 'com.palantir.docker-compose' version "0.22.1"
-    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
-    id 'org.springframework.boot' version '2.2.0.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'org.springframework.boot' version '2.4.0'
     id 'java'
     id 'org.liquibase.gradle' version '2.0.4'
     id 'org.jetbrains.kotlin.jvm' version '1.4.10'
     id "org.jetbrains.kotlin.plugin.jpa" version "1.4.20-RC"
-    //id "org.jetbrains.kotlin.kapt" version "1.4.10"
+    id "org.jetbrains.kotlin.kapt" version "1.4.20"
 }
 
 group = 'io.polygloat'
@@ -64,13 +64,18 @@ liquibase {
             referenceUrl liveDb.referenceUrl
             username liveDb.username
             password liveDb.password
+            driver "org.postgresql.Driver"
         }
     }
 }
 
-def LIQUIBASE_VERSION = "3.6.3"
-def LIQUIBASE_HIBERNATE_VERSION = "3.6"
+diff.dependsOn compileKotlin
+diffChangeLog.dependsOn compileKotlin
 
+def LIQUIBASE_VERSION = "4.2.1"
+def LIQUIBASE_HIBERNATE_VERSION = "4.1.1"
+def JJWT_VERSION = "0.11.2"
+def SPRING_DOC_VERSION = "1.5.0"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -78,43 +83,48 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation 'io.sentry:sentry-spring:1.7.27'
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    kapt "org.springframework.boot:spring-boot-configuration-processor"
+    compile "org.springframework.boot:spring-boot-configuration-processor"
+    testCompile "org.springframework.boot:spring-boot-configuration-processor"
+    implementation 'io.sentry:sentry-spring-boot-starter:3.2.0'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
-    testCompile("org.assertj:assertj-core:3.11.1")
+    testCompile("org.assertj:assertj-core:3.18.1")
     testCompile("org.springframework.security:spring-security-test")
     implementation("org.springframework.ldap:spring-ldap-core")
     implementation("org.springframework.security:spring-security-ldap")
     implementation("org.springframework:spring-tx")
     implementation("com.unboundid:unboundid-ldapsdk")
-    implementation 'io.jsonwebtoken:jjwt-api:0.10.7'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.10.7',
-            'io.jsonwebtoken:jjwt-jackson:0.10.7'
+    implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
+    runtime "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
+            "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
     implementation("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     runtime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
+    compile("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
+    liquibaseRuntime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime 'org.postgresql:postgresql'
-    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:2.0.1')
+    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.0')
     liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:$LIQUIBASE_HIBERNATE_VERSION")
     liquibaseRuntime('org.springframework.boot:spring-boot-starter-data-jpa')
     liquibaseRuntime sourceSets.main.output
     implementation 'com.github.javafaker:javafaker:1.0.1'
-    implementation 'org.projectlombok:lombok:1.18.10'
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.6"
+    implementation 'org.projectlombok:lombok:1.18.16'
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
     implementation 'org.hibernate:hibernate-jpamodelgen'
-    annotationProcessor('org.hibernate:hibernate-jpamodelgen')
-    testCompile group: 'org.testng', name: 'testng', version: '6.14.3'
-    implementation 'org.springdoc:springdoc-openapi-webmvc-core:1.3.4'
-    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.3.4'
-    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.1'
-    //kapt "org.hibernate:hibernate-jpamodelgen"
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.10'
+    testCompile group: 'org.testng', name: 'testng', version: '7.3.0'
+    implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.2-native-mt'
+    kapt "org.hibernate:hibernate-jpamodelgen"
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.20'
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.10'
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0'
 }
 
 test {
@@ -141,7 +151,7 @@ sourceSets {
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-def customWebApp = System.getenv().containsKey("WEBAPP_PATH");
+def customWebApp = System.getenv().containsKey("WEBAPP_PATH")
 def webappPath = customWebApp ? System.getenv().get("WEBAPP_PATH") : rootProject.project("webapp").projectDir
 
 task unpack(type: Copy) {

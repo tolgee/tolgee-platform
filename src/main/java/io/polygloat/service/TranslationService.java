@@ -8,14 +8,12 @@ import io.polygloat.dtos.response.ViewDataResponse;
 import io.polygloat.dtos.response.translations_view.ResponseParams;
 import io.polygloat.exceptions.InternalException;
 import io.polygloat.exceptions.NotFoundException;
+import io.polygloat.model.Key;
 import io.polygloat.model.Language;
 import io.polygloat.model.Repository;
-import io.polygloat.model.Key;
 import io.polygloat.model.Translation;
 import io.polygloat.repository.TranslationRepository;
 import io.polygloat.service.query_builders.TranslationsViewBuilder;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,20 +23,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TranslationService {
 
     private final TranslationRepository translationRepository;
     private final EntityManager entityManager;
 
-    @Setter(onMethod = @__({@Autowired}))
     private LanguageService languageService;
 
-    @Setter(onMethod = @__({@Autowired}))
     private KeyService keyService;
 
-    @Setter(onMethod = @__({@Autowired}))
     private RepositoryService repositoryService;
+
+    @Autowired
+    public TranslationService(TranslationRepository translationRepository, EntityManager entityManager) {
+        this.translationRepository = translationRepository;
+        this.entityManager = entityManager;
+    }
 
     @SuppressWarnings("unchecked")
     @Transactional
@@ -170,5 +170,20 @@ public class TranslationService {
 
     public void deleteAllByKey(Long id) {
         translationRepository.deleteAllByKeyId(id);
+    }
+
+    @Autowired
+    public void setLanguageService(LanguageService languageService) {
+        this.languageService = languageService;
+    }
+
+    @Autowired
+    public void setKeyService(KeyService keyService) {
+        this.keyService = keyService;
+    }
+
+    @Autowired
+    public void setRepositoryService(RepositoryService repositoryService) {
+        this.repositoryService = repositoryService;
     }
 }
