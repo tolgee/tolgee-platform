@@ -113,8 +113,8 @@ dependencies {
     liquibaseRuntime('org.springframework.boot:spring-boot-starter-data-jpa')
     liquibaseRuntime sourceSets.main.output
     implementation 'com.github.javafaker:javafaker:1.0.1'
-    implementation 'org.projectlombok:lombok:1.18.10'
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.6"
+    implementation 'org.projectlombok:lombok:1.18.16'
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
     implementation 'org.hibernate:hibernate-jpamodelgen'
     testCompile group: 'org.testng', name: 'testng', version: '7.3.0'
