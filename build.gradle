@@ -68,7 +68,7 @@ liquibase {
     }
 }
 
-def LIQUIBASE_VERSION = "3.6.3"
+def LIQUIBASE_VERSION = "4.2.0"
 def LIQUIBASE_HIBERNATE_VERSION = "3.6"
 
 
