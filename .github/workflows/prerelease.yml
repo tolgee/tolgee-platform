@@ -54,7 +54,7 @@ jobs:
         run: docker run -d --name polygloat -e polygloat.internal.populate=true -e polygloat.internal.controller-enabled=true -p8080:8080 polygloat/polygloat
 
       - name: Wait for running container
-        run: 'until docker logs --since 5m app | grep -m 1 "started on port(s): 8080"; do : ;done'
+        run: 'until docker logs --since 5m polygloat | grep -m 1 "started on port(s): 8080"; do : ;done'
 
       - name: Run cypress tests
         run: |
