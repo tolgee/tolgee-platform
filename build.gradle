@@ -74,6 +74,7 @@ diffChangeLog.dependsOn compileKotlin
 
 def LIQUIBASE_VERSION = "4.2.0"
 def LIQUIBASE_HIBERNATE_VERSION = "4.1.1"
+def JJWT_VERSION = "0.11.2"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -98,9 +99,9 @@ dependencies {
     implementation("org.springframework.security:spring-security-ldap")
     implementation("org.springframework:spring-tx")
     implementation("com.unboundid:unboundid-ldapsdk")
-    implementation 'io.jsonwebtoken:jjwt-api:0.10.7'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.10.7',
-            'io.jsonwebtoken:jjwt-jackson:0.10.7'
+    implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
+    runtime "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
+            "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
     implementation("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     runtime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     compile("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
