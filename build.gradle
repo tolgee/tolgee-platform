@@ -100,7 +100,7 @@ dependencies {
     implementation("com.unboundid:unboundid-ldapsdk")
     implementation 'io.jsonwebtoken:jjwt-api:0.10.7'
     runtime 'io.jsonwebtoken:jjwt-impl:0.10.7',
-            'io.jsonwebtoken:jjwt-jackson:0.10.7'
+            'io.jsonwebtoken:jjwt-jackson:0.11.2'
     implementation("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     runtime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     compile("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
