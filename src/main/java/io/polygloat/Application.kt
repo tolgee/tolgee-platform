@@ -33,7 +33,9 @@ open class Application(
         }
 
         if (properties.sentry.enabled) {
-            Sentry.init(properties.sentry.dsn)
+            Sentry.init {
+                it.dsn = properties.sentry.dsn
+            }
         }
 
         val initialUsername = properties.authentication.initialUsername
