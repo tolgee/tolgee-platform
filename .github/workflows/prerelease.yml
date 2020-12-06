@@ -97,7 +97,10 @@ jobs:
       - name: Login to docker
         run: docker login -u ${{ secrets.dockerhubusername }} -p "${{ secrets.dockerhubpassword }}"
       - name: Tag the image
-        run: docker tag polygloat/polygloat polygloat/polygloat:${{ steps.version.outputs.VERSION }}
+        run: |
+          docker tag polygloat/polygloat polygloat/polygloat:${{ steps.version.outputs.VERSION }}
+          docker tag polygloat/polygloat polygloat/polygloat:latest
+          
       - name: Publish docker image
         run: docker push polygloat/polygloat:${{ steps.version.outputs.VERSION }}
 
