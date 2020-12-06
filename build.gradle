@@ -153,10 +153,11 @@ sourceSets {
 
 def customWebApp = System.getenv().containsKey("WEBAPP_PATH")
 def webappPath = customWebApp ? System.getenv().get("WEBAPP_PATH") : rootProject.project("webapp").projectDir
+def unpackTarget = "build/dependency"
 
 task unpack(type: Copy) {
     from(zipTree(project.tasks.findByName("bootJar").outputs.files.singleFile))
-    into("build/dependency")
+    into(unpackTarget)
     dependsOn "bootJar"
 }
 
@@ -166,16 +167,25 @@ task copyDist(type: Copy) {
         dependsOn rootProject.project("webapp").getTasks().findByName("build")
     }
     def fromDir = "${webappPath}/dist"
-    def toDir = "${project.projectDir}/build/docker/dependency/BOOT-INF/classes/static/."
+    def toDir = "${project.projectDir}/build/dependency/BOOT-INF/classes/static/."
     from fromDir
     into toDir
     inputs.dir(fromDir)
     outputs.dir(toDir)
     mustRunAfter unpack
-    mustRunAfter project.tasks.findByName("dockerPrepare")
 }
+
+project.tasks.findByName("dockerPrepare").mustRunAfter(copyDist)
 
 apply from: "./docker.gradle"
 
-task buildProd(dependsOn: ['copyDist', 'bootJar'])
+task buildProd(dependsOn: ['bootJar'])
 
+task packWebapp(type: Zip) {
+    dependsOn "unpack"
+    dependsOn "copyDist"
+    from "${project.projectDir}/build/dependency"
+    archiveFileName = "polygloat-${project.version}-test.jar"
+    destinationDirectory = file("$buildDir/libs")
+    entryCompression ZipEntryCompression.STORED
+}

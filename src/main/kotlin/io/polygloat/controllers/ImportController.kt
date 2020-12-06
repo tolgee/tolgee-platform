@@ -24,8 +24,6 @@ class ImportController(
         private val importService: ImportService
 ) : IController {
 
-    private val nonBlockingService: ExecutorService = Executors.newCachedThreadPool()
-
     @PostMapping(value = [""])
     fun doImport(@PathVariable("repositoryId")
                  repositoryId: Long,

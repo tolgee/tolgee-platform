@@ -13,7 +13,7 @@ jobs:
 
       - uses: actions/setup-java@v1
         with:
-          java-version: 14
+          java-version: 11
 
       - name: Build with Gradle
         run: WEBAPP_PATH=./webapp ./gradlew build
@@ -100,7 +100,7 @@ jobs:
         run: |
           docker tag polygloat/polygloat polygloat/polygloat:${{ steps.version.outputs.VERSION }}
           docker tag polygloat/polygloat polygloat/polygloat:latest
-          
+
       - name: Publish docker image
         run: docker push polygloat/polygloat:${{ steps.version.outputs.VERSION }}
 
