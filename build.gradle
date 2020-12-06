@@ -4,20 +4,20 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.0")
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.10"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.20"
     }
 }
 
 plugins {
     id "com.palantir.docker" version "0.25.0"
     id 'com.palantir.docker-compose' version "0.22.1"
-    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
     id 'org.springframework.boot' version '2.4.0'
     id 'java'
     id 'org.liquibase.gradle' version '2.0.4'
     id 'org.jetbrains.kotlin.jvm' version '1.4.10'
     id "org.jetbrains.kotlin.plugin.jpa" version "1.4.20-RC"
-    id "org.jetbrains.kotlin.kapt" version "1.4.10"
+    id "org.jetbrains.kotlin.kapt" version "1.4.20"
 }
 
 group = 'io.polygloat'
@@ -72,7 +72,7 @@ liquibase {
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
-def LIQUIBASE_VERSION = "4.2.0"
+def LIQUIBASE_VERSION = "4.2.1"
 def LIQUIBASE_HIBERNATE_VERSION = "4.1.1"
 def JJWT_VERSION = "0.11.2"
 def SPRING_DOC_VERSION = "1.5.0"
@@ -94,7 +94,7 @@ dependencies {
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
-    testCompile("org.assertj:assertj-core:3.11.1")
+    testCompile("org.assertj:assertj-core:3.18.1")
     testCompile("org.springframework.security:spring-security-test")
     implementation("org.springframework.ldap:spring-ldap-core")
     implementation("org.springframework.security:spring-security-ldap")
@@ -113,18 +113,18 @@ dependencies {
     liquibaseRuntime('org.springframework.boot:spring-boot-starter-data-jpa')
     liquibaseRuntime sourceSets.main.output
     implementation 'com.github.javafaker:javafaker:1.0.1'
-    implementation 'org.projectlombok:lombok:1.18.10'
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.6"
+    implementation 'org.projectlombok:lombok:1.18.16'
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
     implementation 'org.hibernate:hibernate-jpamodelgen'
-    testCompile group: 'org.testng', name: 'testng', version: '6.14.3'
+    testCompile group: 'org.testng', name: 'testng', version: '7.3.0'
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
-    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.1'
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.2-native-mt'
     kapt "org.hibernate:hibernate-jpamodelgen"
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.10'
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.20'
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.10'
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0'
 }
 
 test {
