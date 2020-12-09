@@ -23,7 +23,7 @@ public class LoggedRequestFactory {
         return addToken(MockMvcRequestBuilders.delete(url));
     }
 
-    private static MockHttpServletRequestBuilder addToken(MockHttpServletRequestBuilder builder) {
+    public static MockHttpServletRequestBuilder addToken(MockHttpServletRequestBuilder builder) {
         return builder.header("Authorization", String.format("Bearer %s", token));
     }
 }

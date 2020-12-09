@@ -58,6 +58,7 @@ def liveDb = [
 
 liquibase {
     activities {
+        //noinspection GroovyAssignabilityCheck
         main {
             changeLogFile 'src/main/resources/db/changelog/schema.xml'
             url liveDb.url
@@ -72,8 +73,8 @@ liquibase {
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
-def LIQUIBASE_VERSION = "4.2.1"
-def LIQUIBASE_HIBERNATE_VERSION = "4.1.1"
+def LIQUIBASE_VERSION = "3.10.3"
+def LIQUIBASE_HIBERNATE_VERSION = "3.10.2"
 def JJWT_VERSION = "0.11.2"
 def SPRING_DOC_VERSION = "1.5.0"
 
@@ -125,6 +126,7 @@ dependencies {
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.20'
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.10'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0'
+    implementation 'commons-codec:commons-codec:1.15'
 }
 
 test {

@@ -8,8 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.testng.annotations.BeforeMethod;
 
-import static io.polygloat.controllers.LoggedRequestFactory.loggedGet;
-import static io.polygloat.controllers.LoggedRequestFactory.loggedPost;
+import static io.polygloat.controllers.LoggedRequestFactory.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -51,4 +50,13 @@ public abstract class SignedInControllerTest extends AbstractControllerTest {
             throw new RuntimeException(e);
         }
     }
+
+    public ResultActions performDelete(String url, Object content) {
+        try {
+            return mvc.perform(loggedDelete(url).contentType(MediaType.APPLICATION_JSON).content(JsonHelper.asJsonString(content)));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

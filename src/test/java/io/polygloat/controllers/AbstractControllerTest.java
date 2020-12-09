@@ -71,6 +71,9 @@ public abstract class AbstractControllerTest extends AbstractTransactionalTest i
     @Autowired
     protected InitialPasswordManager initialPasswordManager;
 
+    @Autowired
+    protected ScreenshotService screenshotService;
+
     protected String initialUsername;
 
     protected String initialPassword;
@@ -132,10 +135,9 @@ public abstract class AbstractControllerTest extends AbstractTransactionalTest i
     }
 
 
-    @SuppressWarnings("unchecked")
     protected <C extends Collection<E>, E> C mapResponse(MvcResult result, Class<C> collectionType, Class<E> elementType) {
         try {
-            return (C) mapper.readValue(
+            return mapper.readValue(
                     result.getResponse().getContentAsString(),
                     TypeFactory.defaultInstance().constructCollectionType(collectionType, elementType)
             );

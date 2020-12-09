@@ -10,7 +10,6 @@ import io.polygloat.model.Repository;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.testng.annotations.Test;
@@ -27,19 +26,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TranslationControllerTest extends SignedInControllerTest {
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     void getViewDataSearch() throws Exception {
         Repository app = dbPopulator.populate(generateUniqueString());
 
         String searchString = "This";
 
         ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> response = performValidViewRequest(app, "?search=" + searchString);
-        assertThat(response.getData().size()).isGreaterThan(0);
+        assertThat(response.getData().size()).isPositive();
         assertSearch(response, searchString);
     }
 
     @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     void getViewDataQueryLanguages() throws Exception {
         Repository repository = dbPopulator.populate(generateUniqueString());
 
@@ -53,8 +50,7 @@ public class TranslationControllerTest extends SignedInControllerTest {
 
         performGetDataForView(repository.getId(), "?languages=langNotExists").andExpect(status().isNotFound());
 
-        //with same language multiple times
-        ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> response4 = performValidViewRequest(repository, "?languages=en,en");
+        performValidViewRequest(repository, "?languages=en,en");
     }
 
     private ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> performValidViewRequest(Repository repository, String queryString) throws Exception {
@@ -77,7 +73,7 @@ public class TranslationControllerTest extends SignedInControllerTest {
 
         assertThat(response.getData().size()).isEqualTo(limit);
         assertThat(response.getPaginationMeta().getAllCount()).isEqualTo(12);
-        assertThat(response.getPaginationMeta().getOffset()).isEqualTo(0);
+        assertThat(response.getPaginationMeta().getOffset()).isZero();
 
 
         int offset = 3;
@@ -89,9 +85,7 @@ public class TranslationControllerTest extends SignedInControllerTest {
 
         response.getData().stream().limit(offset).forEach(i -> assertThat(responseOffset.getData()).doesNotContain(i));
 
-        response.getData().stream().skip(offset).forEach(i -> {
-            assertThat(responseOffset.getData()).contains(i);
-        });
+        response.getData().stream().skip(offset).forEach(i -> assertThat(responseOffset.getData()).contains(i));
     }
 
     @Test
