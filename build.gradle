@@ -74,7 +74,7 @@ diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
 def LIQUIBASE_VERSION = "3.10.3"
-def LIQUIBASE_HIBERNATE_VERSION = "3.10.2"
+def LIQUIBASE_HIBERNATE_VERSION = "4.1.1"
 def JJWT_VERSION = "0.11.2"
 def SPRING_DOC_VERSION = "1.5.0"
 
