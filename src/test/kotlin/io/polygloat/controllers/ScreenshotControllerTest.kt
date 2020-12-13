@@ -5,15 +5,12 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.polygloat.Assertions.Assertions.assertThat
 import io.polygloat.controllers.LoggedRequestFactory.addToken
 import io.polygloat.dtos.request.GetScreenshotsByKeyDTO
-import io.polygloat.dtos.request.UploadScreenshotDTO
 import io.polygloat.dtos.response.KeyDTO
 import io.polygloat.dtos.response.ScreenshotDTO
-import io.polygloat.helpers.JsonHelper
 import io.polygloat.model.Key
 import io.polygloat.model.Repository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
-import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
@@ -38,13 +35,14 @@ class ScreenshotControllerTest : SignedInControllerTest() {
 
         val key = keyService.create(repository, KeyDTO("test"))
 
-        performStoreScreenshot(repository, key)
+        val responseBody: ScreenshotDTO = performStoreScreenshot(repository, key)
 
         val screenshots = screenshotService.findAll(key = key)
         assertThat(screenshots).hasSize(1)
         val file = File(polygloatProperties.dataPath + "/screenshots/" + screenshots[0].filename)
         assertThat(file).exists()
         assertThat(file.readBytes().size).isLessThan(1024 * 100)
+        assertThat(responseBody.filename).isEqualTo(screenshots[0].filename)
     }
 
     @Test
@@ -121,8 +119,7 @@ class ScreenshotControllerTest : SignedInControllerTest() {
         val response = mvc.perform(addToken(multipart("/api/repository/${repository.id}/screenshots")
                 .file(MockMultipartFile("screenshot", "originalShot.png", "not_valid",
                         "test".toByteArray()))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(JsonHelper.asJsonString(UploadScreenshotDTO(key.name)))))
+                .param("key", key.name)))
                 .andExpect(status().isBadRequest).andReturn()
 
         assertThat(response).error().isCustomValidation.hasMessage("file_not_image")
@@ -133,9 +130,7 @@ class ScreenshotControllerTest : SignedInControllerTest() {
         val repository = dbPopulator.createBase(generateUniqueString())
         val response = mvc.perform(addToken(multipart("/api/repository/${repository.id}/screenshots")
                 .file(MockMultipartFile("screenshot", "originalShot.png", "image/png",
-                        screenshotFile.file.readBytes()))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(JsonHelper.asJsonString(UploadScreenshotDTO(null)))))
+                        screenshotFile.file.readBytes()))))
                 .andExpect(status().isBadRequest).andReturn()
 
         assertThat(response).error().isStandardValidation.onField("key")
@@ -146,12 +141,11 @@ class ScreenshotControllerTest : SignedInControllerTest() {
     }
 
 
-    private fun performStoreScreenshot(repository: Repository, key: Key) {
-        mvc.perform(addToken(multipart("/api/repository/${repository.id}/screenshots")
+    private fun performStoreScreenshot(repository: Repository, key: Key): ScreenshotDTO {
+        return mvc.perform(addToken(multipart("/api/repository/${repository.id}/screenshots")
                 .file(MockMultipartFile("screenshot", "originalShot.png", "image/png",
                         screenshotFile.file.readBytes()))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(JsonHelper.asJsonString(UploadScreenshotDTO(key.name)))))
-                .andExpect(status().isOk)
+                .param("key", key.name)))
+                .andExpect(status().isOk).andReturn().parseResponseTo()
     }
 }

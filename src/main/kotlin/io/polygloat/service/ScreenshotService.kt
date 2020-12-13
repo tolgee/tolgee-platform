@@ -19,6 +19,7 @@ import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
 import javax.imageio.ImageWriter
 import kotlin.math.floor
+import kotlin.math.sqrt
 
 
 @Service
@@ -57,9 +58,9 @@ open class ScreenshotService(
 
     private fun prepareImage(screenshotStream: InputStream): ByteArrayOutputStream {
         val image = ImageIO.read(screenshotStream)
-        val writer = ImageIO.getImageWritersByFormatName("png").next() as ImageWriter
+        val writer = ImageIO.getImageWritersByFormatName("jpg").next() as ImageWriter
         val targetDimension = getTargetDimension(image)
-        val resizedImage = BufferedImage(targetDimension.width, targetDimension.height, BufferedImage.TYPE_INT_ARGB)
+        val resizedImage = BufferedImage(targetDimension.width, targetDimension.height, BufferedImage.TYPE_INT_RGB)
         val graphics2D: Graphics2D = resizedImage.createGraphics()
         graphics2D.drawImage(image, 0, 0, targetDimension.width, targetDimension.height, null)
         graphics2D.dispose()
@@ -69,7 +70,7 @@ open class ScreenshotService(
 
         val param = writer.defaultWriteParam
         param.compressionMode = ImageWriteParam.MODE_EXPLICIT
-        param.compressionQuality = 0.002f
+        param.compressionQuality = 0.5f
 
         writer.output = imageOutputStream
         writer.write(null, IIOImage(resizedImage, null, null), param)
@@ -82,10 +83,12 @@ open class ScreenshotService(
 
     private fun getTargetDimension(image: BufferedImage): Dimension {
         val imagePxs = image.height * image.width
-        val maxPxs = 1000000
-        val ratio = maxPxs.toDouble() / imagePxs
+        val maxPxs = 3000000
+        val newHeight = floor(sqrt(maxPxs.toDouble()*image.height/image.width)).toInt()
+        val newWidth = floor(sqrt(maxPxs.toDouble()*image.width/image.height)).toInt()
+
         if (imagePxs > maxPxs) {
-            return Dimension(floor(image.width * ratio).toInt(), floor(image.height * ratio).toInt())
+            return Dimension(newWidth, newHeight)
         }
         return Dimension(image.width, image.height)
     }

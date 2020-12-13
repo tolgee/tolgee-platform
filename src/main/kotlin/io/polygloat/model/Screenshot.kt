@@ -19,6 +19,6 @@ data class Screenshot(
     val filename: String
         get() {
             val nameToHash = "${this.id}_${this.createdAt.toInstant().toEpochMilli()}"
-            return "${DigestUtils.sha256Hex(nameToHash.toByteArray())}.png"
+            return "${DigestUtils.sha256Hex(nameToHash.toByteArray())}.jpg"
         }
 }

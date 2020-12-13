@@ -29,7 +29,8 @@ public enum Message {
     USER_NOT_FOUND(),
     VALIDATION_ERROR,
     LANGUAGE_CAN_NOT_CONTAIN_COMMA,
-    FILE_NOT_IMAGE;
+    FILE_NOT_IMAGE,
+    FILE_TOO_BIG;
 
     String code;
 

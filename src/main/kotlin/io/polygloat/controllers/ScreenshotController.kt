@@ -3,7 +3,6 @@ package io.polygloat.controllers
 import io.polygloat.constants.Message
 import io.polygloat.dtos.PathDTO
 import io.polygloat.dtos.request.GetScreenshotsByKeyDTO
-import io.polygloat.dtos.request.UploadScreenshotDTO
 import io.polygloat.dtos.request.validators.exceptions.ValidationException
 import io.polygloat.dtos.response.ScreenshotDTO
 import io.polygloat.exceptions.NotFoundException
@@ -15,6 +14,7 @@ import io.polygloat.service.SecurityService
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import javax.validation.Valid
+import javax.validation.constraints.NotBlank
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -28,7 +28,7 @@ class ScreenshotController(
     @PostMapping("")
     fun uploadScreenshot(@PathVariable("repositoryId") repositoryId: Long,
                          @RequestParam("screenshot") screenshot: MultipartFile,
-                         @Valid @RequestBody dto: UploadScreenshotDTO) {
+                         @NotBlank @RequestParam key: String): ScreenshotDTO {
 
         val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
 
@@ -38,8 +38,8 @@ class ScreenshotController(
 
         repositoryService.findById(repositoryId).orElseThrow { NotFoundException() }
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.TRANSLATE)
-        val key = keyService.get(repositoryId, PathDTO.fromFullPath(dto.key)).orElseThrow { NotFoundException() }
-        screenshotService.store(screenshot, key)
+        val keyEntity = keyService.get(repositoryId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
+        return ScreenshotDTO.fromEntity(screenshotService.store(screenshot, keyEntity))
     }
 
     @PostMapping("/get")

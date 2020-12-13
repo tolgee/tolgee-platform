@@ -127,8 +127,8 @@ $url
 
     @GetMapping("/authorize_oauth/{serviceType}/{code}")
     open fun authenticateUser(@PathVariable("serviceType") serviceType: String?,
-                         @PathVariable("code") code: String?,
-                         @RequestParam(value = "invitationCode", required = false) invitationCode: String?): JwtAuthenticationResponse {
+                              @PathVariable("code") code: String?,
+                              @RequestParam(value = "invitationCode", required = false) invitationCode: String?): JwtAuthenticationResponse {
         return githubOAuthDelegate.getTokenResponse(code, invitationCode)
     }
 
@@ -166,7 +166,7 @@ $url
     }
 
     private fun validateEmailCode(code: String, email: String): UserAccount {
-        val userAccount = userAccountService.getByUserName(email).orElseThrow(Supplier<NotFoundException> { NotFoundException() })
+        val userAccount = userAccountService.getByUserName(email).orElseThrow({ NotFoundException() })
                 ?: throw BadRequestException(Message.BAD_CREDENTIALS)
         val resetCodeValid = userAccountService.isResetCodeValid(userAccount, code)
         if (!resetCodeValid) {

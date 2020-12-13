@@ -1,69 +1,26 @@
-package io.polygloat.dtos;
+package io.polygloat.dtos
 
-import io.polygloat.configuration.polygloat.PolygloatProperties;
+import io.polygloat.configuration.polygloat.PolygloatProperties
 
-public class PublicConfigurationDTO {
-    private boolean authentication;
+@Suppress("MemberVisibilityCanBePrivate", "unused")
+class PublicConfigurationDTO(configuration: PolygloatProperties) {
+    val isAuthentication: Boolean = configuration.authentication.enabled
+    var authMethods: AuthMethodsDTO? = null
+    val isPasswordResettable: Boolean
+    val isAllowRegistrations: Boolean
+    val screenshotsUrl = configuration.screenshotsUrl
+    val maxUploadFileSize = configuration.maxUploadFileSize
 
-    private AuthMethodsDTO authMethods;
-
-    private boolean passwordResettable;
-
-    private boolean allowRegistrations;
-
-    public PublicConfigurationDTO(PolygloatProperties configuration) {
-        this.authentication = configuration.getAuthentication().getEnabled();
-        if (authentication) {
-            authMethods = new AuthMethodsDTO(new GithubPublicConfigDTO(configuration.getAuthentication().getGithub().getClientId()));
-        }
-        passwordResettable = configuration.getAuthentication().getNativeEnabled();
-        allowRegistrations = configuration.getAuthentication().getRegistrationsAllowed();
+    class AuthMethodsDTO(val github: GithubPublicConfigDTO)
+    class GithubPublicConfigDTO(val clientId: String?) {
+        val isEnabled: Boolean = clientId != null && clientId.isNotEmpty()
     }
 
-    public boolean isAuthentication() {
-        return this.authentication;
-    }
-
-    public AuthMethodsDTO getAuthMethods() {
-        return this.authMethods;
-    }
-
-    public boolean isPasswordResettable() {
-        return this.passwordResettable;
-    }
-
-    public boolean isAllowRegistrations() {
-        return this.allowRegistrations;
-    }
-
-    public static class AuthMethodsDTO {
-        private GithubPublicConfigDTO github;
-
-        public AuthMethodsDTO(GithubPublicConfigDTO github) {
-            this.github = github;
+    init {
+        if (isAuthentication) {
+            authMethods = AuthMethodsDTO(GithubPublicConfigDTO(configuration.authentication.github.clientId))
         }
-
-        public GithubPublicConfigDTO getGithub() {
-            return this.github;
-        }
-    }
-
-    public static class GithubPublicConfigDTO {
-        private boolean enabled;
-
-        private String clientId;
-
-        public GithubPublicConfigDTO(String clientId) {
-            this.clientId = clientId;
-            this.enabled = clientId != null && !clientId.isEmpty();
-        }
-
-        public boolean isEnabled() {
-            return this.enabled;
-        }
-
-        public String getClientId() {
-            return this.clientId;
-        }
+        isPasswordResettable = configuration.authentication.nativeEnabled
+        isAllowRegistrations = configuration.authentication.registrationsAllowed
     }
 }
