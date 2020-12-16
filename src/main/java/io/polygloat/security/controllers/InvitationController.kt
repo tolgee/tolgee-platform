@@ -26,7 +26,7 @@ class InvitationController @Autowired constructor(
     }
 
     @GetMapping("/list/{repositoryId}")
-    fun getRepositoryInvitations(@PathVariable("repositoryId") id: Long?): Set<InvitationDTO> {
+    fun getRepositoryInvitations(@PathVariable("repositoryId") id: Long): Set<InvitationDTO> {
         val repository = repositoryService.findById(id).orElseThrow { NotFoundException() }
         securityService.checkRepositoryPermission(id, Permission.RepositoryPermissionType.MANAGE)
         return invitationService.getForRepository(repository).stream().map { invitation: Invitation? ->

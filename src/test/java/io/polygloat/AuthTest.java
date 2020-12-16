@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -34,7 +33,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class AuthTest extends AbstractControllerTest {
     @Autowired
     private AuthController authController;
@@ -56,7 +54,7 @@ public class AuthTest extends AbstractControllerTest {
         String response = doAuthentication(initialUsername, initialPassword)
                 .getResponse().getContentAsString();
 
-        HashMap result = new ObjectMapper().readValue(response, HashMap.class);
+        @SuppressWarnings("unchecked") HashMap<String, Object> result = new ObjectMapper().readValue(response, HashMap.class);
 
         assertThat(result.get("accessToken")).isNotNull();
         assertThat(result.get("tokenType")).isEqualTo("Bearer");
@@ -155,7 +153,7 @@ public class AuthTest extends AbstractControllerTest {
                 .getResponse().getContentAsString();
 
 
-        HashMap result = new ObjectMapper().readValue(response, HashMap.class);
+        @SuppressWarnings("rawtypes") HashMap result = new ObjectMapper().readValue(response, HashMap.class);
 
         assertThat(result.get("accessToken")).isNotNull();
         assertThat(result.get("tokenType")).isEqualTo("Bearer");

@@ -10,5 +10,7 @@ open class PolygloatProperties(
         var smtp: SmtpProperties = SmtpProperties(),
         var sentry: SentryProperties = SentryProperties(),
         var internal: InternalProperties = InternalProperties(),
-        var dataPath: String = """${System.getProperty("user.home")}/.polygloat"""
+        var dataPath: String = """${System.getProperty("user.home")}/.polygloat""",
+        var screenshotsUrl: String = "/screenshots",
+        var maxUploadFileSize: Int = 2048
 )

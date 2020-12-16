@@ -10,12 +10,12 @@ import java.io.File
 class JwtSecretProvider(
         private val polygloatProperties: PolygloatProperties,
 ) {
-    private lateinit var cachedSecret: ByteArray;
+    private lateinit var cachedSecret: ByteArray
 
     val jwtSecret: ByteArray
         get() {
             if (this::cachedSecret.isInitialized) {
-                return cachedSecret;
+                return cachedSecret
             }
 
             if (polygloatProperties.authentication.jwtSecret != null) {
@@ -27,8 +27,9 @@ class JwtSecretProvider(
             val file = File(secretFilePath)
             if (!file.exists()) {
                 val generated = Keys.secretKeyFor(SignatureAlgorithm.HS512).encoded
+                file.parentFile.mkdirs()
                 file.writeBytes(generated)
-                cachedSecret = generated;
+                cachedSecret = generated
                 return generated
             }
             cachedSecret = file.readBytes()

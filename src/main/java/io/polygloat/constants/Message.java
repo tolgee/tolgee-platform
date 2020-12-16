@@ -28,13 +28,11 @@ public enum Message {
     USER_ALREADY_HAS_PERMISSIONS(),
     USER_NOT_FOUND(),
     VALIDATION_ERROR,
-    LANGUAGE_CAN_NOT_CONTAIN_COMMA;
+    LANGUAGE_CAN_NOT_CONTAIN_COMMA,
+    FILE_NOT_IMAGE,
+    FILE_TOO_BIG;
 
     String code;
-
-    Message(String code) {
-        this.code = code;
-    }
 
     Message() {
         this.code = this.name().toLowerCase();

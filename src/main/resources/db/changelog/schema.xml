@@ -264,4 +264,21 @@
             <column name="repository_id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1607517248611-1">
+        <createTable tableName="screenshot">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="screenshotPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1607517248611-7">
+        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="screenshot" constraintName="FKojcltkbo4pxlf41nwlxwkgtjy" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

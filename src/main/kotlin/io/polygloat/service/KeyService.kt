@@ -19,7 +19,8 @@ import javax.persistence.EntityManager
 @Service
 open class KeyService(
         private val keyRepository: KeyRepository,
-        private val entityManager: EntityManager
+        private val entityManager: EntityManager,
+        private val screenshotService: ScreenshotService
 ) {
 
     private var translationService: TranslationService? = null
@@ -34,8 +35,8 @@ open class KeyService(
         return key
     }
 
-    open fun getAll(repositoryId: Long): Set<Key>{
-        return keyRepository.getAllByRepositoryId(repositoryId);
+    open fun getAll(repositoryId: Long): Set<Key> {
+        return keyRepository.getAllByRepositoryId(repositoryId)
     }
 
     open fun get(repositoryId: Long, pathDTO: PathDTO): Optional<Key> {
@@ -54,12 +55,12 @@ open class KeyService(
         return keyRepository.findAllById(ids)
     }
 
-    open fun create(repository: Repository, dto: KeyDTO) {
+    open fun create(repository: Repository, dto: KeyDTO): Key {
         if (this.get(repository, dto.pathDto).isPresent) {
             throw ValidationException(Message.KEY_EXISTS)
         }
         val key = Key(name = dto.fullPathString, repository = repository)
-        keyRepository.save(key)
+        return keyRepository.save(key)
     }
 
     open fun edit(repository: Repository, dto: EditKeyDTO) {
@@ -78,11 +79,13 @@ open class KeyService(
     open fun delete(id: Long) {
         val key = get(id).orElseThrow { NotFoundException() }
         translationService!!.deleteAllByKey(id)
+        screenshotService.deleteAllByKeyId(id)
         keyRepository.delete(key)
     }
 
-    open fun deleteMultiple(ids: Collection<Long?>?) {
+    open fun deleteMultiple(ids: Collection<Long>) {
         translationService!!.deleteAllByKeys(ids)
+        screenshotService.deleteAllByKeyId(ids)
         keyRepository.deleteAllByIdIn(ids)
     }
 
@@ -98,7 +101,7 @@ open class KeyService(
         val key = Key(name = dto.key, repository = repository)
         keyRepository.save(key)
         translationService!!.setForKey(key, dto.translations)
-        return key;
+        return key
     }
 
     @Autowired
