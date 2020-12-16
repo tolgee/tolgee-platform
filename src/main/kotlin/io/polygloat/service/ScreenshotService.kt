@@ -48,7 +48,7 @@ open class ScreenshotService(
     open fun delete(screenshots: Collection<Screenshot>) {
         screenshots.forEach {
             screenshotRepository.deleteById(it.id!!)
-            File("${polygloatProperties.dataPath}/screenshots/${it.filename}").delete()
+            deleteFile(it)
         }
     }
 
@@ -81,11 +81,33 @@ open class ScreenshotService(
         return outputStream
     }
 
+    open fun deleteAllByRepository(repositoryId: Long) {
+        val all = screenshotRepository.getAllByKeyRepositoryId(repositoryId)
+        all.forEach { this.deleteFile(it) }
+        screenshotRepository.deleteInBatch(all)
+    }
+
+    open fun deleteAllByKeyId(keyId: Long) {
+        val all = screenshotRepository.getAllByKeyId(keyId)
+        all.forEach { this.deleteFile(it) }
+        screenshotRepository.deleteInBatch(all)
+    }
+
+    open fun deleteAllByKeyId(keyIds: Collection<Long>) {
+        val all = screenshotRepository.getAllByKeyIdIn(keyIds)
+        all.forEach { this.deleteFile(it) }
+        screenshotRepository.deleteInBatch(all)
+    }
+
+    private fun deleteFile(screenshot: Screenshot) {
+        File("${polygloatProperties.dataPath}/screenshots/${screenshot.filename}").delete()
+    }
+
     private fun getTargetDimension(image: BufferedImage): Dimension {
         val imagePxs = image.height * image.width
         val maxPxs = 3000000
-        val newHeight = floor(sqrt(maxPxs.toDouble()*image.height/image.width)).toInt()
-        val newWidth = floor(sqrt(maxPxs.toDouble()*image.width/image.height)).toInt()
+        val newHeight = floor(sqrt(maxPxs.toDouble() * image.height / image.width)).toInt()
+        val newWidth = floor(sqrt(maxPxs.toDouble() * image.width / image.height)).toInt()
 
         if (imagePxs > maxPxs) {
             return Dimension(newWidth, newHeight)

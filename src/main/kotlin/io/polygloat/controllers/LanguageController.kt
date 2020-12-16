@@ -26,7 +26,7 @@ open class LanguageController(
         private val authenticationFacade: AuthenticationFacade
 ) : IController {
     @PostMapping(value = [""])
-    fun createLanguage(@PathVariable("repositoryId") repositoryId: Long?,
+    fun createLanguage(@PathVariable("repositoryId") repositoryId: Long,
                        @RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
         val repository = repositoryService.findById(repositoryId).orElseThrow { NotFoundException() }
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.MANAGE)

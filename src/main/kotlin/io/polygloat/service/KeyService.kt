@@ -19,7 +19,8 @@ import javax.persistence.EntityManager
 @Service
 open class KeyService(
         private val keyRepository: KeyRepository,
-        private val entityManager: EntityManager
+        private val entityManager: EntityManager,
+        private val screenshotService: ScreenshotService
 ) {
 
     private var translationService: TranslationService? = null
@@ -78,11 +79,13 @@ open class KeyService(
     open fun delete(id: Long) {
         val key = get(id).orElseThrow { NotFoundException() }
         translationService!!.deleteAllByKey(id)
+        screenshotService.deleteAllByKeyId(id)
         keyRepository.delete(key)
     }
 
-    open fun deleteMultiple(ids: Collection<Long?>?) {
+    open fun deleteMultiple(ids: Collection<Long>) {
         translationService!!.deleteAllByKeys(ids)
+        screenshotService.deleteAllByKeyId(ids)
         keyRepository.deleteAllByIdIn(ids)
     }
 
