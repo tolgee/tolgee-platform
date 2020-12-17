@@ -15,9 +15,11 @@ class AuthenticationProperties(
         var registrationsAllowed: Boolean = false,
         var createInitialUser: Boolean = true,
         var initialUsername: String = "admin",
+        var initialPassword: String? = null,
         var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
-        var ldap: LdapAuthenticationProperties = LdapAuthenticationProperties()
+        var ldap: LdapAuthenticationProperties = LdapAuthenticationProperties(),
 ) {
+
     fun checkAllowedRegistrations() {
         if (!this.registrationsAllowed) {
             throw BadRequestException(Message.REGISTRATIONS_NOT_ALLOWED)
