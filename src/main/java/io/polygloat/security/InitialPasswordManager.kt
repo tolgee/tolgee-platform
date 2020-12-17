@@ -17,6 +17,11 @@ class InitialPasswordManager(
                 return cachedInitialPassword
             }
 
+            if(polygloatProperties.authentication.initialPassword != null){
+                cachedInitialPassword = polygloatProperties.authentication.initialPassword!!
+                return cachedInitialPassword
+            }
+
             val file = File(pwdFile)
             if (file.exists()) {
                 cachedInitialPassword = file.readText();

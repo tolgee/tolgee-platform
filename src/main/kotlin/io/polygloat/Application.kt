@@ -18,7 +18,7 @@ open class Application(
         populator: DbPopulatorReal,
         userAccountService: UserAccountService,
         val properties: PolygloatProperties,
-        val initialPasswordManager: InitialPasswordManager
+        private val initialPasswordManager: InitialPasswordManager
 ) {
     companion object {
         @JvmStatic
@@ -34,7 +34,7 @@ open class Application(
 
         if (properties.sentry.enabled) {
             Sentry.init {
-                it.dsn = properties.sentry.dsn
+                it.dsn = properties.sentry.serverDsn
             }
         }
 
