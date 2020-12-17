@@ -34,7 +34,7 @@ open class Application(
 
         if (properties.sentry.enabled) {
             Sentry.init {
-                it.dsn = properties.sentry.dsn
+                it.dsn = properties.sentry.serverDsn
             }
         }
 

@@ -5,5 +5,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 @ConfigurationProperties(prefix = "polygloat.sentry")
 class SentryProperties {
     var enabled = false
-    var dsn: String? = null
+    var serverDsn: String? = null
+    var clientDsn: String? = null
 }
