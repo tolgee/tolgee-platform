@@ -1,9 +1,10 @@
 polygloat:
-  data-path: /data
+  file-storage:
+    fs-data-path: /data
 
 spring:
   datasource:
-    url: jdbc:h2:${polygloat.data-path}/db.h2
+    url: jdbc:h2:${polygloat.file-storage.fs-data-path}/db.h2
     username: sa
     password: password
   liquibase:
