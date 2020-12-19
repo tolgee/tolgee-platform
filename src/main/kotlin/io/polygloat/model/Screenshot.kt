@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020. Polygloat
+ */
+
 package io.polygloat.model
 
 import org.apache.commons.codec.digest.DigestUtils
@@ -13,12 +17,15 @@ data class Screenshot(
         this.key = key
     }
 
-    @ManyToOne
-    var key: Key? = null
+    @ManyToOne(optional = false)
+    lateinit var key: Key
 
     val filename: String
         get() {
             val nameToHash = "${this.id}_${this.createdAt.toInstant().toEpochMilli()}"
-            return "${DigestUtils.sha256Hex(nameToHash.toByteArray())}.jpg"
+            val fileName = DigestUtils.sha256Hex(nameToHash.toByteArray())
+            val keyFolder = DigestUtils.sha256Hex(key.id.toString())
+            val repositoryFolder = DigestUtils.sha256Hex(key.repository!!.id.toString())
+            return "${repositoryFolder}/${keyFolder}/${fileName}.jpg"
         }
 }

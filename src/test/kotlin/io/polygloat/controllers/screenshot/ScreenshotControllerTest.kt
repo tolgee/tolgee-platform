@@ -1,33 +1,23 @@
-package io.polygloat.controllers
+/*
+ * Copyright (c) 2020. Polygloat
+ */
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+package io.polygloat.controllers.screenshot
+
 import io.polygloat.Assertions.Assertions.assertThat
 import io.polygloat.controllers.LoggedRequestFactory.addToken
 import io.polygloat.dtos.request.GetScreenshotsByKeyDTO
 import io.polygloat.dtos.response.KeyDTO
 import io.polygloat.dtos.response.ScreenshotDTO
-import io.polygloat.model.Key
-import io.polygloat.model.Repository
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.io.Resource
 import org.springframework.mock.web.MockMultipartFile
-import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testng.annotations.AfterClass
 import org.testng.annotations.Test
 import java.io.File
 import java.util.stream.Collectors
 
-class ScreenshotControllerTest : SignedInControllerTest() {
-    @Value("classpath:screenshot.png")
-    lateinit var screenshotFile: Resource
-
-    @AfterClass
-    fun cleanUp() {
-        File("${polygloatProperties.dataPath}/screenshots").deleteRecursively()
-    }
+class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
     @Test
     fun uploadScreenshot() {
@@ -39,7 +29,7 @@ class ScreenshotControllerTest : SignedInControllerTest() {
 
         val screenshots = screenshotService.findAll(key = key)
         assertThat(screenshots).hasSize(1)
-        val file = File(polygloatProperties.dataPath + "/screenshots/" + screenshots[0].filename)
+        val file = File(polygloatProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
         assertThat(file).exists()
         assertThat(file.readBytes().size).isLessThan(1024 * 100)
         assertThat(responseBody.filename).isEqualTo(screenshots[0].filename)
@@ -71,7 +61,7 @@ class ScreenshotControllerTest : SignedInControllerTest() {
 
         assertThat(result).hasSize(2)
 
-        val file = File(polygloatProperties.dataPath + "/screenshots/" + result[0].filename)
+        val file = File(polygloatProperties.fileStorage.fsDataPath + "/screenshots/" + result[0].filename)
         assertThat(file).exists()
 
         result = performPost("/api/repository/${repository.id}/screenshots/get",
@@ -87,8 +77,12 @@ class ScreenshotControllerTest : SignedInControllerTest() {
         val key = keyService.create(repository, KeyDTO("test"))
         val screenshot = screenshotService.store(screenshotFile, key)
 
-        val file = File(polygloatProperties.dataPath + "/screenshots/" + screenshot.filename)
-        val result = performGet("/screenshots/${screenshot.filename}").andExpect(status().isOk).andReturn()
+        val file = File(polygloatProperties.fileStorage.fsDataPath + "/screenshots/" + screenshot.filename)
+        val result = performGet("/screenshots/${screenshot.filename}")
+                .andExpect(status().isOk)
+                .andExpect(
+                        header().string("Cache-Control", "max-age=365, must-revalidate, no-transform"))
+                .andReturn()
 
         assertThat(result.response.contentAsByteArray).isEqualTo(file.readBytes())
     }
@@ -134,18 +128,5 @@ class ScreenshotControllerTest : SignedInControllerTest() {
                 .andExpect(status().isBadRequest).andReturn()
 
         assertThat(response).error().isStandardValidation.onField("key")
-    }
-
-    private inline fun <reified T> MvcResult.parseResponseTo(): T {
-        return jacksonObjectMapper().readValue(this.response.contentAsString)
-    }
-
-
-    private fun performStoreScreenshot(repository: Repository, key: Key): ScreenshotDTO {
-        return mvc.perform(addToken(multipart("/api/repository/${repository.id}/screenshots")
-                .file(MockMultipartFile("screenshot", "originalShot.png", "image/png",
-                        screenshotFile.file.readBytes()))
-                .param("key", key.name)))
-                .andExpect(status().isOk).andReturn().parseResponseTo()
     }
 }
