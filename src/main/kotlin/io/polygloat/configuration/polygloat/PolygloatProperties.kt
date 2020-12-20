@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020. Polygloat
+ */
+
 package io.polygloat.configuration.polygloat
 
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -10,7 +14,7 @@ open class PolygloatProperties(
         var smtp: SmtpProperties = SmtpProperties(),
         var sentry: SentryProperties = SentryProperties(),
         var internal: InternalProperties = InternalProperties(),
-        var dataPath: String = """${System.getProperty("user.home")}/.polygloat""",
         var screenshotsUrl: String = "/screenshots",
-        var maxUploadFileSize: Int = 2048
+        var maxUploadFileSize: Int = 2048,
+        var fileStorage: FileStorageProperties = FileStorageProperties()
 )

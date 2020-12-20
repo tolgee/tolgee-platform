@@ -3,7 +3,6 @@ package io.polygloat.Assertions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import org.assertj.core.api.AbstractAssert;
 import org.springframework.test.web.servlet.MvcResult;
 

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020. Polygloat
+ */
+
 package io.polygloat.constants;
 
 public enum Message {
@@ -30,7 +34,8 @@ public enum Message {
     VALIDATION_ERROR,
     LANGUAGE_CAN_NOT_CONTAIN_COMMA,
     FILE_NOT_IMAGE,
-    FILE_TOO_BIG;
+    FILE_TOO_BIG,
+    INVALID_TIMESTAMP;
 
     String code;
 

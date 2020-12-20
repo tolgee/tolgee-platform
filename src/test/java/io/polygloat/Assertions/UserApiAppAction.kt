@@ -1,8 +1,6 @@
 package io.polygloat.Assertions
 
 import io.polygloat.helpers.JsonHelper
-import lombok.Builder
-import lombok.Data
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType

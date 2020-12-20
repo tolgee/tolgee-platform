@@ -1,5 +1,10 @@
+/*
+ * Copyright (c) 2020. Polygloat
+ */
+
 package io.polygloat.service
 
+import com.amazonaws.services.s3.AmazonS3
 import io.polygloat.configuration.polygloat.PolygloatProperties
 import io.polygloat.model.Key
 import io.polygloat.model.Screenshot
@@ -12,7 +17,6 @@ import java.awt.Dimension
 import java.awt.Graphics2D
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.io.InputStream
 import javax.imageio.IIOImage
 import javax.imageio.ImageIO
@@ -25,18 +29,18 @@ import kotlin.math.sqrt
 @Service
 open class ScreenshotService(
         private val screenshotRepository: ScreenshotRepository,
-        private val polygloatProperties: PolygloatProperties
+        private val polygloatProperties: PolygloatProperties,
+        private val s3: AmazonS3?,
+        private val fileStorageService: FileStorageService
 ) {
+    private val screenshotFolderName = "screenshots"
+
     @Transactional
-    open fun store(screenshot: InputStreamSource, key: Key): Screenshot {
+    open fun store(screenshotImage: InputStreamSource, key: Key): Screenshot {
         val screenshotEntity = Screenshot(key = key)
         screenshotRepository.save(screenshotEntity)
-        val image = prepareImage(screenshot.inputStream)
-
-        val file = File("${polygloatProperties.dataPath}/screenshots/${screenshotEntity.filename}")
-
-        file.parentFile.mkdirs()
-        file.writeBytes(image.toByteArray())
+        val image = prepareImage(screenshotImage.inputStream)
+        fileStorageService.storeFile(screenshotEntity.getFilePath(), image.toByteArray())
         return screenshotEntity
     }
 
@@ -54,6 +58,24 @@ open class ScreenshotService(
 
     open fun findByIdIn(ids: Collection<Long>): MutableList<Screenshot> {
         return screenshotRepository.findAllById(ids)
+    }
+
+    open fun deleteAllByRepository(repositoryId: Long) {
+        val all = screenshotRepository.getAllByKeyRepositoryId(repositoryId)
+        all.forEach { this.deleteFile(it) }
+        screenshotRepository.deleteInBatch(all)
+    }
+
+    open fun deleteAllByKeyId(keyId: Long) {
+        val all = screenshotRepository.getAllByKeyId(keyId)
+        all.forEach { this.deleteFile(it) }
+        screenshotRepository.deleteInBatch(all)
+    }
+
+    open fun deleteAllByKeyId(keyIds: Collection<Long>) {
+        val all = screenshotRepository.getAllByKeyIdIn(keyIds)
+        all.forEach { this.deleteFile(it) }
+        screenshotRepository.deleteInBatch(all)
     }
 
     private fun prepareImage(screenshotStream: InputStream): ByteArrayOutputStream {
@@ -81,26 +103,12 @@ open class ScreenshotService(
         return outputStream
     }
 
-    open fun deleteAllByRepository(repositoryId: Long) {
-        val all = screenshotRepository.getAllByKeyRepositoryId(repositoryId)
-        all.forEach { this.deleteFile(it) }
-        screenshotRepository.deleteInBatch(all)
-    }
-
-    open fun deleteAllByKeyId(keyId: Long) {
-        val all = screenshotRepository.getAllByKeyId(keyId)
-        all.forEach { this.deleteFile(it) }
-        screenshotRepository.deleteInBatch(all)
-    }
-
-    open fun deleteAllByKeyId(keyIds: Collection<Long>) {
-        val all = screenshotRepository.getAllByKeyIdIn(keyIds)
-        all.forEach { this.deleteFile(it) }
-        screenshotRepository.deleteInBatch(all)
-    }
-
     private fun deleteFile(screenshot: Screenshot) {
-        File("${polygloatProperties.dataPath}/screenshots/${screenshot.filename}").delete()
+        fileStorageService.deleteFile(screenshot.getFilePath())
+    }
+
+    private fun Screenshot.getFilePath(): String {
+        return "${this@ScreenshotService.screenshotFolderName}/${this.filename}"
     }
 
     private fun getTargetDimension(image: BufferedImage): Dimension {

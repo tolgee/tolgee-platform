@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020. Polygloat
+ */
+
 package io.polygloat.initial_user_creation
 
 import io.polygloat.Assertions.Assertions.assertThat
@@ -14,7 +18,7 @@ import java.io.File
 
 @AutoConfigureMockMvc
 @SpringBootTest(properties = [
-    "polygloat.data-path=./build/create-enabled-test-data/",
+    "polygloat.file-storage.fs-data-path=./build/create-enabled-test-data/",
     "polygloat.authentication.create-initial-user=true",
     "polygloat.authentication.initialUsername=johny"
 ])
@@ -35,13 +39,13 @@ class CreateEnabledTest : AbstractTestNGSpringContextTests() {
 
     @Test
     fun passwordStoredInDb() {
-        val johny = userAccountService.getByUserName("johny").orElseGet(null);
+        val johny = userAccountService.getByUserName("johny").orElseGet(null)
         val bCryptPasswordEncoder = BCryptPasswordEncoder()
         assertThat(bCryptPasswordEncoder.matches(passwordFile.readText(), johny.password)).isTrue
     }
 
     @AfterClass
     fun cleanUp() {
-        passwordFile.delete();
+        passwordFile.delete()
     }
 }

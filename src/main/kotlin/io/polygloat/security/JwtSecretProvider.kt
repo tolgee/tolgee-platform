@@ -1,14 +1,19 @@
+/*
+ * Copyright (c) 2020. Polygloat
+ */
+
 package io.polygloat.security
 
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import io.polygloat.configuration.polygloat.PolygloatProperties
+import io.polygloat.service.FileStorageService
 import org.springframework.stereotype.Component
-import java.io.File
 
 @Component
 class JwtSecretProvider(
         private val polygloatProperties: PolygloatProperties,
+        private val fileStorageService: FileStorageService
 ) {
     private lateinit var cachedSecret: ByteArray
 
@@ -23,16 +28,17 @@ class JwtSecretProvider(
             }
 
 
-            val secretFilePath = polygloatProperties.dataPath + "/jwt.secret"
-            val file = File(secretFilePath)
-            if (!file.exists()) {
+            val fileName = "jwt.secret"
+
+
+            if (!fileStorageService.fileExists(fileName)) {
                 val generated = Keys.secretKeyFor(SignatureAlgorithm.HS512).encoded
-                file.parentFile.mkdirs()
-                file.writeBytes(generated)
+                fileStorageService.storeFile(fileName, generated)
                 cachedSecret = generated
                 return generated
             }
-            cachedSecret = file.readBytes()
+
+            cachedSecret = fileStorageService.readFile(fileName)
             return cachedSecret
         }
 }

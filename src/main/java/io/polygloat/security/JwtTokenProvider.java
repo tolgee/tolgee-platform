@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020. Polygloat
+ */
+
 package io.polygloat.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -28,9 +32,9 @@ import java.util.List;
 @Component
 public class JwtTokenProvider {
 
-    private PolygloatProperties configuration;
-    private UserAccountService userAccountService;
-    private JwtSecretProvider jwtSecretProvider;
+    private final PolygloatProperties configuration;
+    private final UserAccountService userAccountService;
+    private final JwtSecretProvider jwtSecretProvider;
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
@@ -58,7 +62,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(JwtToken authToken) {
         try {
-            Jwts.parser().setSigningKey(getKey()).parseClaimsJws(authToken.toString());
+            Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(authToken.toString());
             return true;
         } catch (SignatureException ex) {
             logger.error("Invalid JWT signature");
