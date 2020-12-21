@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import java.util.*
+import java.util.stream.Collectors
 
 @Component
 class GithubOAuthDelegate(private val tokenProvider: JwtTokenProvider,
@@ -54,11 +55,11 @@ class GithubOAuthDelegate(private val tokenProvider: JwtTokenProvider,
                     Array<GithubEmailResponse>::class.java).body
                     ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-            val verifiedEmails = Arrays.stream(emails).filter { it.verified }
+            val verifiedEmails = Arrays.stream(emails).filter { it.verified }.collect(Collectors.toList())
 
-            val githubEmail = verifiedEmails.filter { it.primary }
+            val githubEmail = verifiedEmails.stream().filter { it.primary }
                     .findFirst().orElse(null)
-                    ?: verifiedEmails.findFirst().orElse(null)
+                    ?: verifiedEmails.stream().findFirst().orElse(null)
                     ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
             val userAccountOptional = userAccountService.findByThirdParty("github", userResponse!!.id)

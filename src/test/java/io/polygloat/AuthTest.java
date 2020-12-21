@@ -129,6 +129,7 @@ public class AuthTest extends AbstractControllerTest {
         GithubOAuthDelegate.GithubEmailResponse githubEmailResponse = new GithubOAuthDelegate.GithubEmailResponse();
         githubEmailResponse.setEmail("fake_email@email.com");
         githubEmailResponse.setPrimary(true);
+        githubEmailResponse.setVerified(true);
         return githubEmailResponse;
     }
 
