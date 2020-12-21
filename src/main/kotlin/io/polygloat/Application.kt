@@ -18,7 +18,7 @@ open class Application(
         populator: DbPopulatorReal,
         userAccountService: UserAccountService,
         val properties: PolygloatProperties,
-        private val initialPasswordManager: InitialPasswordManager
+        initialPasswordManager: InitialPasswordManager
 ) {
     companion object {
         @JvmStatic
