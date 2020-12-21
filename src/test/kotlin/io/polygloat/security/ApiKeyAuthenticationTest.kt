@@ -1,7 +1,7 @@
 package io.polygloat.security
 
-import io.polygloat.Assertions.Assertions
-import io.polygloat.Assertions.UserApiAppAction
+import io.polygloat.assertions.Assertions
+import io.polygloat.assertions.UserApiAppAction
 import io.polygloat.constants.ApiScope
 import io.polygloat.controllers.AbstractUserAppApiTest
 import io.polygloat.dtos.request.SetTranslationsDTO

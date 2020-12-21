@@ -4,7 +4,7 @@
 
 package io.polygloat.service
 
-import io.polygloat.Assertions.Assertions.assertThat
+import io.polygloat.assertions.Assertions.assertThat
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test

@@ -1,6 +1,6 @@
 package io.polygloat.configuration.polygloat
 
-import io.polygloat.Assertions.Assertions.assertThat
+import io.polygloat.assertions.Assertions.assertThat
 import io.polygloat.service.UserAccountService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc

@@ -13,11 +13,8 @@ import io.polygloat.security.InitialPasswordManager
 import io.polygloat.service.LanguageService
 import io.polygloat.service.PermissionService
 import io.polygloat.service.UserAccountService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.Set
-import java.util.function.Supplier
 import javax.persistence.EntityManager
 
 @Service
@@ -42,22 +39,20 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
         }
     }
 
-    open fun createUser(username: String?, password: String? = null): UserAccount {
+    open fun createUser(username: String, password: String? = null): UserAccount {
         return userAccountService.getByUserName(username).orElseGet {
-            val signUpDto = SignUpDto()
-            signUpDto.email = username
-            signUpDto.name = username
-            signUpDto.password = password ?: initialPasswordManager.initialPassword
+            val signUpDto = SignUpDto(name = username, email = username, password = password
+                    ?: initialPasswordManager.initialPassword)
             userAccountService.createUser(signUpDto)
         }
     }
 
-    open fun createUser(username: String?): UserAccount {
+    open fun createUser(username: String): UserAccount {
         return createUser(username, null)
     }
 
     @Transactional
-    open fun createBase(repositoryName: String?, username: String?, password: String? = null): Repository {
+    open fun createBase(repositoryName: String?, username: String, password: String? = null): Repository {
         val userAccount = createUser(username, password)
         val repository = Repository()
         repository.name = repositoryName
@@ -72,8 +67,8 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     @Transactional
-    open fun createBase(repositoryName: String?, username: String?): Repository {
-        return createBase(repositoryName, username, null);
+    open fun createBase(repositoryName: String?, username: String): Repository {
+        return createBase(repositoryName, username, null)
     }
 
     @Transactional
@@ -87,7 +82,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     @Transactional
-    open fun populate(repositoryName: String?, userName: String?): Repository {
+    open fun populate(repositoryName: String?, userName: String): Repository {
         val repository = createBase(repositoryName, userName)
         createApiKey(repository)
         createTranslation(repository, "Hello world!", "Hallo Welt!", en, de)
@@ -116,7 +111,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     private fun createApiKey(repository: Repository) {
-        val (_, user) = repository.permissions.stream().findAny().orElseThrow(Supplier<NotFoundException> { NotFoundException() })
+        val (_, user) = repository.permissions.stream().findAny().orElseThrow { NotFoundException() }
         if (apiKeyRepository.findByKey(API_KEY).isEmpty) {
             val apiKey = ApiKey.builder()
                     .repository(repository)

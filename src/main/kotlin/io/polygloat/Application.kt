@@ -44,11 +44,8 @@ open class Application(
             val initialPassword = initialPasswordManager.initialPassword
 
             userAccountService.createUser(
-                    SignUpDto.builder()
-                            .email(initialUsername)
-                            .password(initialPassword)
-                            .name(initialUsername)
-                            .build())
+                    SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername)
+            )
         }
     }
 }

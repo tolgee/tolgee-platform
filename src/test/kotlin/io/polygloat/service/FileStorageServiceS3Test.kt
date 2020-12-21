@@ -10,7 +10,7 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import io.polygloat.Assertions.Assertions.assertThat
+import io.polygloat.assertions.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Bean

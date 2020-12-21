@@ -1,6 +1,6 @@
 package io.polygloat.controllers
 
-import io.polygloat.Assertions.Assertions.assertThat
+import io.polygloat.assertions.Assertions.assertThat
 import io.polygloat.dtos.request.LanguageDTO
 import io.polygloat.exceptions.NotFoundException
 import io.polygloat.helpers.JsonHelper

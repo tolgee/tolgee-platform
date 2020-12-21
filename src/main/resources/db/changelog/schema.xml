@@ -281,4 +281,27 @@
     <changeSet author="jenik (generated)" id="1607517248611-7">
         <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="screenshot" constraintName="FKojcltkbo4pxlf41nwlxwkgtjy" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1608575242334-1">
+        <createTable tableName="email_verification">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="email_verificationPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="code" type="VARCHAR(255)"/>
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1608575242334-2">
+        <addUniqueConstraint columnNames="user_account_id" constraintName="UK_cd9fw5vcfl5dll439ewlw42hd" tableName="email_verification"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1608575242334-3">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="email_verification" constraintName="FKi6un5jx0t91rgwm8ah2bevcbj" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

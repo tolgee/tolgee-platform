@@ -1,6 +1,7 @@
 package io.polygloat.controllers
 
 import com.fasterxml.jackson.databind.node.TextNode
+import com.sun.istack.NotNull
 import com.unboundid.util.Base64
 import io.polygloat.configuration.polygloat.PolygloatProperties
 import io.polygloat.constants.Message
@@ -17,6 +18,7 @@ import io.polygloat.security.payload.ApiResponse
 import io.polygloat.security.payload.JwtAuthenticationResponse
 import io.polygloat.security.payload.LoginRequest
 import io.polygloat.security.third_party.GithubOAuthDelegate
+import io.polygloat.service.EmailVerificationService
 import io.polygloat.service.InvitationService
 import io.polygloat.service.UserAccountService
 import org.apache.commons.lang3.RandomStringUtils
@@ -32,8 +34,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
-import java.util.function.Supplier
 import javax.validation.Valid
+import javax.validation.constraints.NotBlank
 
 @RestController
 @RequestMapping("/api/public")
@@ -43,7 +45,8 @@ open class AuthController(private val authenticationManager: AuthenticationManag
                           private val properties: PolygloatProperties,
                           private val userAccountService: UserAccountService,
                           private val mailSender: JavaMailSender,
-                          private val invitationService: InvitationService
+                          private val invitationService: InvitationService,
+                          private val emailVerificationService: EmailVerificationService
 ) {
     @PostMapping("/generatetoken")
     open fun authenticateUser(@RequestBody loginRequest: LoginRequest): ResponseEntity<*> {
@@ -104,7 +107,7 @@ $url
     @Transactional
     open fun signUp(@RequestBody @Valid request: SignUpDto?): JwtAuthenticationResponse {
         var invitation: Invitation? = null
-        if (request!!.invitationCode == null || request.invitationCode.isEmpty()) {
+        if (request!!.invitationCode == null || request.invitationCode == null) {
             properties.authentication.checkAllowedRegistrations()
         } else {
             invitation = invitationService.getInvitation(request.invitationCode) //it throws an exception
@@ -116,7 +119,16 @@ $url
         if (invitation != null) {
             invitationService.accept(invitation.code, user)
         }
+
+        emailVerificationService.createForUser(user, request.callbackUrl)
+
         return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
+    }
+
+    @GetMapping("/verify_email/{userId}/{code}")
+    open fun verifyEmail(@PathVariable("userId") @NotNull userId: Long,
+                         @PathVariable("code") @NotBlank code: String) {
+        emailVerificationService.verify(userId, code)
     }
 
     @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -141,6 +153,7 @@ $url
         if (!matches) {
             throw AuthenticationException(Message.BAD_CREDENTIALS)
         }
+        emailVerificationService.check(userAccount)
         return tokenProvider.generateToken(userAccount.id).toString()
     }
 

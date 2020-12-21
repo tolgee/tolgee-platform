@@ -4,7 +4,7 @@
 
 package io.polygloat.controllers.screenshot
 
-import io.polygloat.Assertions.Assertions.assertThat
+import io.polygloat.assertions.Assertions.assertThat
 import io.polygloat.component.TimestampValidation
 import io.polygloat.configuration.polygloat.PolygloatProperties
 import io.polygloat.dtos.request.GetScreenshotsByKeyDTO
