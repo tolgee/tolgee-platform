@@ -54,8 +54,11 @@ class GithubOAuthDelegate(private val tokenProvider: JwtTokenProvider,
                     Array<GithubEmailResponse>::class.java).body
                     ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
-            val githubEmail = Arrays.stream(emails).filter { obj: GithubEmailResponse -> obj.isPrimary }
+            val verifiedEmails = Arrays.stream(emails).filter { it.verified }
+
+            val githubEmail = verifiedEmails.filter { it.primary }
                     .findFirst().orElse(null)
+                    ?: verifiedEmails.findFirst().orElse(null)
                     ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
 
             val userAccountOptional = userAccountService.findByThirdParty("github", userResponse!!.id)
@@ -98,7 +101,8 @@ class GithubOAuthDelegate(private val tokenProvider: JwtTokenProvider,
 
     class GithubEmailResponse {
         var email: String? = null
-        var isPrimary = false
+        var primary = false
+        var verified = false
     }
 
     class GithubUserResponse {
