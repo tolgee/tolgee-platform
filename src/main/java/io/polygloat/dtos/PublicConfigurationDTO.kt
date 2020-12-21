@@ -10,7 +10,7 @@ class PublicConfigurationDTO(configuration: PolygloatProperties) {
     val isAllowRegistrations: Boolean
     val screenshotsUrl = configuration.screenshotsUrl
     val maxUploadFileSize = configuration.maxUploadFileSize
-    val clientSentryDsn = configuration.sentry.clientDsn
+    val clientSentryDsn = if (configuration.sentry.enabled) configuration.sentry.clientDsn else null
 
     class AuthMethodsDTO(val github: GithubPublicConfigDTO)
     class GithubPublicConfigDTO(val clientId: String?) {
