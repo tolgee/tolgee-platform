@@ -31,7 +31,7 @@ data class UserAccount(
     @OneToMany(mappedBy = "user")
     var permissions: Set<Permission>? = null
 
-    @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY, optional = true)
     var emailVerification: EmailVerification? = null
 
     @Column(name = "third_party_auth_type")

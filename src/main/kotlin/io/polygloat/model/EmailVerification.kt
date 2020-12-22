@@ -13,7 +13,7 @@ data class EmailVerification(
         var code: String? = null,
 ) : AuditModel() {
     @Suppress("JoinDeclarationAndAssignment")
-    @OneToOne(cascade = [CascadeType.ALL], optional = false)
+    @OneToOne(optional = false)
     lateinit var userAccount: UserAccount
 
     constructor(id: Long? = null, @NotBlank code: String, userAccount: UserAccount) : this(id = id, code = code) {

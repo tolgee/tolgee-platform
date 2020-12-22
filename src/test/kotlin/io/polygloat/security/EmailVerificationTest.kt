@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.http.MediaType
 import org.springframework.mail.MailSender
 import org.springframework.mail.SimpleMailMessage
+import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -30,7 +31,7 @@ import org.testng.annotations.Test
     "polygloat.front-end-url=dummy_frontend_url"
 ])
 @AutoConfigureMockMvc
-class EmailVerificationTest : AbstractControllerTest() {
+open class EmailVerificationTest : AbstractControllerTest() {
 
     @set:Autowired
     lateinit var mailSender: MailSender
@@ -44,6 +45,11 @@ class EmailVerificationTest : AbstractControllerTest() {
     @BeforeMethod
     fun setup() {
         every { mailSender.send(any()) } returns Unit
+    }
+
+    @BeforeMethod
+    fun setupConstructor() {
+        mockkConstructor(SimpleMailMessage::class)
     }
 
     @Test
@@ -73,16 +79,39 @@ class EmailVerificationTest : AbstractControllerTest() {
     }
 
     @Test
-    fun signUpSavesVerification() {
-        val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", "testtest", null)
+    fun doesNotVerifyWithWrongCode() {
+        val createUser = dbPopulator.createUser(initialUsername)
+        val emailVerification = emailVerificationService.createForUser(createUser)
+        mvc.perform(get("/api/public/verify_email/${createUser.id}/wrong_code"))
+                .andExpect(status().isNotFound).andReturn()
 
-        mockkConstructor(SimpleMailMessage::class)
+        assertThat(emailVerificationRepository.findById(emailVerification!!.id!!)).isPresent
+    }
 
-        mvc.perform(post("/api/public/sign_up")
+    @Test
+    fun doesNotVerifyWithWrongUser() {
+        val createUser = dbPopulator.createUser(initialUsername)
+        val emailVerification = emailVerificationService.createForUser(createUser)
+        mvc.perform(get("/api/public/verify_email/${createUser.id!! + 1L}/${emailVerification!!.code}"))
+                .andExpect(status().isNotFound).andReturn()
+
+        assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isPresent
+    }
+
+
+    val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", "testtest", null)
+
+    protected fun perform(): MvcResult {
+        return mvc.perform(post("/api/public/sign_up")
                 .content(mapper.writeValueAsString(signUpDto))
                 .accept(MediaType.ALL)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andReturn()
+    }
+
+    @Test
+    fun signUpSavesVerification() {
+        perform()
 
         val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
 
@@ -96,7 +125,68 @@ class EmailVerificationTest : AbstractControllerTest() {
             }
         }
 
-        assertThat(userAccountService.get(user.id!!)).isNotNull
+        assertThat(userAccountService[user.id!!]).isNotNull
+    }
+
+    @Test
+    fun signUpFrontendUrlIsPrimary() {
+        signUpDto.callbackUrl = "dummyCallbackUrl"
+
+        perform()
+
+        val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
+
+        verify {
+            anyConstructed<SimpleMailMessage>().text = match {
+                it.contains("dummy_frontend_url/login/verify_email/${user.id}/")
+            }
+        }
+
+        assertThat(userAccountService[user.id!!]).isNotNull
+    }
+
+    @Test
+    fun signUpDoesNotReturnToken() {
+        assertThat(perform().response.contentAsString).isEqualTo("{}")
+    }
+
+    @SpringBootTest(properties = [
+        "polygloat.authentication.needs-email-verification=true",
+    ])
+    @AutoConfigureMockMvc
+    class EmailVerificationNoFrontendUrlTest : AbstractControllerTest() {
+
+        val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", "testtest", null)
+
+        @set:Autowired
+        lateinit var mailSender: MailSender
+
+        @Test
+        fun usesCallbackUrlIs() {
+            mockkConstructor(SimpleMailMessage::class)
+
+            every { mailSender.send(any()) } returns Unit
+
+            signUpDto.callbackUrl = "dummyCallbackUrl"
+
+
+            mvc.perform(post("/api/public/sign_up")
+                    .content(mapper.writeValueAsString(signUpDto))
+                    .accept(MediaType.ALL)
+                    .contentType(MediaType.APPLICATION_JSON))
+                    .andReturn()
+
+
+            val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
+
+            verify {
+                anyConstructed<SimpleMailMessage>().text = match {
+                    it.contains("dummyCallbackUrl/login/verify_email/${user.id}/")
+                }
+            }
+
+            assertThat(userAccountService[user.id!!]).isNotNull
+        }
     }
 }
 

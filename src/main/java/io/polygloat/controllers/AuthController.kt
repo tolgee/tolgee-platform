@@ -105,7 +105,7 @@ $url
 
     @PostMapping("/sign_up")
     @Transactional
-    open fun signUp(@RequestBody @Valid request: SignUpDto?): JwtAuthenticationResponse {
+    open fun signUp(@RequestBody @Valid request: SignUpDto?): Any {
         var invitation: Invitation? = null
         if (request!!.invitationCode == null || request.invitationCode == null) {
             properties.authentication.checkAllowedRegistrations()
@@ -121,14 +121,17 @@ $url
         }
 
         emailVerificationService.createForUser(user, request.callbackUrl)
-
-        return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
+        if (!properties.authentication.needsEmailVerification) {
+            return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
+        }
+        return Unit
     }
 
     @GetMapping("/verify_email/{userId}/{code}")
     open fun verifyEmail(@PathVariable("userId") @NotNull userId: Long,
-                         @PathVariable("code") @NotBlank code: String) {
+                         @PathVariable("code") @NotBlank code: String): JwtAuthenticationResponse {
         emailVerificationService.verify(userId, code)
+        return JwtAuthenticationResponse(tokenProvider.generateToken(userId).toString())
     }
 
     @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])

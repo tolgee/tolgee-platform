@@ -3,14 +3,15 @@ package io.polygloat.dtos
 import io.polygloat.configuration.polygloat.PolygloatProperties
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class PublicConfigurationDTO(configuration: PolygloatProperties) {
-    val isAuthentication: Boolean = configuration.authentication.enabled
+class PublicConfigurationDTO(properties: PolygloatProperties) {
+    val isAuthentication: Boolean = properties.authentication.enabled
     var authMethods: AuthMethodsDTO? = null
     val isPasswordResettable: Boolean
     val isAllowRegistrations: Boolean
-    val screenshotsUrl = configuration.screenshotsUrl
-    val maxUploadFileSize = configuration.maxUploadFileSize
-    val clientSentryDsn = if (configuration.sentry.enabled) configuration.sentry.clientDsn else null
+    val screenshotsUrl = properties.screenshotsUrl
+    val maxUploadFileSize = properties.maxUploadFileSize
+    val clientSentryDsn = if (properties.sentry.enabled) properties.sentry.clientDsn else null
+    val needsEmailVerification = properties.authentication.needsEmailVerification
 
     class AuthMethodsDTO(val github: GithubPublicConfigDTO)
     class GithubPublicConfigDTO(val clientId: String?) {
@@ -19,9 +20,9 @@ class PublicConfigurationDTO(configuration: PolygloatProperties) {
 
     init {
         if (isAuthentication) {
-            authMethods = AuthMethodsDTO(GithubPublicConfigDTO(configuration.authentication.github.clientId))
+            authMethods = AuthMethodsDTO(GithubPublicConfigDTO(properties.authentication.github.clientId))
         }
-        isPasswordResettable = configuration.authentication.nativeEnabled
-        isAllowRegistrations = configuration.authentication.registrationsAllowed
+        isPasswordResettable = properties.authentication.nativeEnabled
+        isAllowRegistrations = properties.authentication.registrationsAllowed
     }
 }
