@@ -1,6 +1,6 @@
 package io.polygloat.controllers
 
-import io.polygloat.Assertions.UserApiAppAction
+import io.polygloat.assertions.UserApiAppAction
 import io.polygloat.constants.ApiScope
 import io.polygloat.dtos.response.ApiKeyDTO.ApiKeyDTO
 import org.springframework.test.web.servlet.MvcResult

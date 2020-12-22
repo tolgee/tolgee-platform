@@ -129,6 +129,7 @@ public class AuthTest extends AbstractControllerTest {
         GithubOAuthDelegate.GithubEmailResponse githubEmailResponse = new GithubOAuthDelegate.GithubEmailResponse();
         githubEmailResponse.setEmail("fake_email@email.com");
         githubEmailResponse.setPrimary(true);
+        githubEmailResponse.setVerified(true);
         return githubEmailResponse;
     }
 
@@ -176,7 +177,8 @@ public class AuthTest extends AbstractControllerTest {
 
         Mockito.when(restTemplate.postForObject(eq(githubConf.getAuthorizationUrl()), anyMap(), eq(Map.class))).thenReturn(tokenResponse);
 
-        Mockito.when(restTemplate.exchange(eq(githubConf.getUserUrl()), eq(HttpMethod.GET), ArgumentMatchers.any(), eq(GithubOAuthDelegate.GithubUserResponse.class))).thenReturn(userResponse);
+        Mockito.when(restTemplate.exchange(eq(githubConf.getUserUrl()), eq(HttpMethod.GET), ArgumentMatchers.any(), eq(GithubOAuthDelegate.GithubUserResponse.class)))
+                .thenReturn(userResponse);
 
         Mockito.when(restTemplate.exchange(eq(githubConf.getUserUrl() + "/emails"), eq(HttpMethod.GET), ArgumentMatchers.any(), eq(GithubOAuthDelegate.GithubEmailResponse[].class)))
                 .thenReturn(emailResponse);
@@ -186,6 +188,4 @@ public class AuthTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
     }
-
-
 }

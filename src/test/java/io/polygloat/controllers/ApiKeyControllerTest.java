@@ -8,7 +8,6 @@ import io.polygloat.dtos.response.ApiKeyDTO.ApiKeyDTO;
 import io.polygloat.model.ApiKey;
 import io.polygloat.model.Repository;
 import io.polygloat.model.UserAccount;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MvcResult;
@@ -19,7 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.polygloat.Assertions.Assertions.assertThat;
+import static io.polygloat.assertions.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest

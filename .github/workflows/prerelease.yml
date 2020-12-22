@@ -102,7 +102,9 @@ jobs:
           docker tag polygloat/polygloat polygloat/polygloat:latest
 
       - name: Publish docker image
-        run: docker push polygloat/polygloat:${{ steps.version.outputs.VERSION }}
+        run: |
+          docker push polygloat/polygloat:${{ steps.version.outputs.VERSION }}
+          docker push polygloat/polygloat:latest
 
       - uses: actions/upload-artifact@v2
         if: always()

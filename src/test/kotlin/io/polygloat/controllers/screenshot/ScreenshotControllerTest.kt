@@ -4,7 +4,7 @@
 
 package io.polygloat.controllers.screenshot
 
-import io.polygloat.Assertions.Assertions.assertThat
+import io.polygloat.assertions.Assertions.assertThat
 import io.polygloat.controllers.LoggedRequestFactory.addToken
 import io.polygloat.dtos.request.GetScreenshotsByKeyDTO
 import io.polygloat.dtos.response.KeyDTO

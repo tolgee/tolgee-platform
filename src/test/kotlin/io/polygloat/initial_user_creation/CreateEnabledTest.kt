@@ -4,7 +4,7 @@
 
 package io.polygloat.initial_user_creation
 
-import io.polygloat.Assertions.Assertions.assertThat
+import io.polygloat.assertions.Assertions.assertThat
 import io.polygloat.configuration.polygloat.PolygloatProperties
 import io.polygloat.service.UserAccountService
 import org.springframework.beans.factory.annotation.Autowired

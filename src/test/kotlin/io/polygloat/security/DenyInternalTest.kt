@@ -1,6 +1,6 @@
 package io.polygloat.security
 
-import io.polygloat.Assertions.Assertions
+import io.polygloat.assertions.Assertions
 import io.polygloat.controllers.AbstractUserAppApiTest
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
