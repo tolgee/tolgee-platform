@@ -51,7 +51,13 @@ jobs:
           VERSION: ${{ steps.version.outputs.VERSION }}
 
       - name: Start docker stack
-        run: docker run -d --name polygloat -e polygloat.internal.populate=true -e polygloat.internal.controller-enabled=true -p8080:8080 polygloat/polygloat
+        run: "docker run -d --name polygloat \
+        -e polygloat.internal.populate=true \
+        -e polygloat.internal.controller-enabled=true \
+        -e polygloat.internal.fake-emails-sent=true \
+        -e polygloat.authentication.needs-email-verification=true \
+        -e polygloat.authentication.registrations-allowed=true
+          -p8080:8080 polygloat/polygloat"
 
       - name: Wait for running container
         run: 'until docker logs --since 5m polygloat | grep -m 1 "started on port(s): 8080"; do : ;done'
