@@ -7,12 +7,12 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import static io.polygloat.Assertions.Assertions.assertThat;
+import static io.polygloat.assertions.Assertions.assertThat;
 
 public class TextHelperTest {
 
     private static final String testFullPath = "item1.item2.item1.item1.last";
-    private LinkedList<String> testList = new LinkedList<>(Arrays.asList(testFullPath.split("\\.", 0)));
+    private final LinkedList<String> testList = new LinkedList<>(Arrays.asList(testFullPath.split("\\.", 0)));
 
     @Test
     void splitOnNonEscapedDelimiter() {

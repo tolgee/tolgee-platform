@@ -1,4 +1,4 @@
-package io.polygloat.Assertions
+package io.polygloat.assertions
 
 import io.polygloat.helpers.JsonHelper
 import org.springframework.http.HttpMethod

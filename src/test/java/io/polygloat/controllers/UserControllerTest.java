@@ -1,6 +1,6 @@
 package io.polygloat.controllers;
 
-import io.polygloat.Assertions.StandardValidationMessageAssert;
+import io.polygloat.assertions.StandardValidationMessageAssert;
 import io.polygloat.dtos.request.UserUpdateRequestDTO;
 import io.polygloat.model.UserAccount;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 import java.util.Optional;
 
-import static io.polygloat.Assertions.Assertions.assertThat;
+import static io.polygloat.assertions.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserControllerTest extends SignedInControllerTest implements ITest {

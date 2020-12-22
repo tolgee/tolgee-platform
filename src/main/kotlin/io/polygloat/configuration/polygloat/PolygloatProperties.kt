@@ -16,5 +16,6 @@ open class PolygloatProperties(
         var internal: InternalProperties = InternalProperties(),
         var screenshotsUrl: String = "/screenshots",
         var maxUploadFileSize: Int = 2048,
-        var fileStorage: FileStorageProperties = FileStorageProperties()
+        var fileStorage: FileStorageProperties = FileStorageProperties(),
+        var frontEndUrl: String? = null
 )

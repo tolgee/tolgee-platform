@@ -35,7 +35,10 @@ public enum Message {
     LANGUAGE_CAN_NOT_CONTAIN_COMMA,
     FILE_NOT_IMAGE,
     FILE_TOO_BIG,
-    INVALID_TIMESTAMP;
+    INVALID_TIMESTAMP,
+    EMAIL_NOT_VERIFIED,
+    MISSING_CALLBACK_URL
+    ;
 
     String code;
 

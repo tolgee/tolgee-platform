@@ -2,7 +2,7 @@ package io.polygloat.controllers.internal
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.polygloat.Assertions.Assertions.assertThat
+import io.polygloat.assertions.Assertions.assertThat
 import io.polygloat.controllers.AbstractControllerTest
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -21,20 +21,20 @@ class SqlControllerTest : AbstractControllerTest() {
 
     @Test
     fun getList() {
-        dbPopulator.createBase("Test");
+        dbPopulator.createBase("Test")
         val parseResponseTo: List<Any> = mvc.perform(post("/internal/sql/list")
                 .content("select * from user_account"))
-                .andExpect(status().isOk).andReturn().parseResponseTo();
+                .andExpect(status().isOk).andReturn().parseResponseTo()
 
         assertThat(parseResponseTo).isNotEmpty
     }
 
     @Test
     fun delete() {
-        val repo = dbPopulator.createBase("Test");
+        val repo = dbPopulator.createBase("Test")
         mvc.perform(post("/internal/sql/execute")
                 .content("delete from permission"))
-                .andExpect(status().isOk).andReturn();
+                .andExpect(status().isOk).andReturn()
 
         assertThat(permissionService.getAllOfRepository(repo)).isEmpty()
     }

@@ -8,7 +8,7 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.ObjectMetadata
 import com.amazonaws.services.s3.model.PutObjectRequest
 import io.polygloat.configuration.polygloat.PolygloatProperties
-import io.polygloat.exceptions.FileDeleteException
+import io.polygloat.exceptions.FileStoreException
 import org.springframework.stereotype.Service
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -24,10 +24,14 @@ open class FileStorageService(
     private val localDataPath = polygloatProperties.fileStorage.fsDataPath
 
     fun readFile(storageFilePath: String): ByteArray {
-        if (isS3) {
-            return s3!!.getObject(bucketName, storageFilePath).objectContent.readAllBytes()
+        try {
+            if (isS3) {
+                return s3!!.getObject(bucketName, storageFilePath).objectContent.readAllBytes()
+            }
+            return getLocalFile(storageFilePath).readBytes()
+        } catch (e: Exception) {
+            throw FileStoreException("Can not obtain file", storageFilePath, e)
         }
-        return getLocalFile(storageFilePath).readBytes()
     }
 
     fun deleteFile(storageFilePath: String) {
@@ -36,13 +40,13 @@ open class FileStorageService(
                 s3!!.deleteObject(bucketName, storageFilePath)
                 return
             } catch (e: Exception) {
-                throw FileDeleteException("Can not delete file using s3 bucket!", storageFilePath, e)
+                throw FileStoreException("Can not delete file using s3 bucket!", storageFilePath, e)
             }
         }
         try {
             getLocalFile(storageFilePath).delete()
         } catch (e: Exception) {
-            throw FileDeleteException("Can not delete file from local filesystem!", storageFilePath, e)
+            throw FileStoreException("Can not delete file from local filesystem!", storageFilePath, e)
         }
     }
 
@@ -58,7 +62,7 @@ open class FileStorageService(
             try {
                 s3!!.putObject(putObjectRequest)
             } catch (e: Exception) {
-                throw FileDeleteException("Can not store file using s3 bucket!", storageFilePath, e)
+                throw FileStoreException("Can not store file using s3 bucket!", storageFilePath, e)
             }
             return
         }
@@ -67,7 +71,7 @@ open class FileStorageService(
             file.parentFile.mkdirs()
             file.writeBytes(bytes)
         } catch (e: Exception) {
-            throw FileDeleteException("Can not store file to local filesystem!", storageFilePath, e)
+            throw FileStoreException("Can not store file to local filesystem!", storageFilePath, e)
         }
     }
 

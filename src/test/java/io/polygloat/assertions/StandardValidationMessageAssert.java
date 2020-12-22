@@ -1,4 +1,4 @@
-package io.polygloat.Assertions;
+package io.polygloat.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.IntegerAssert;

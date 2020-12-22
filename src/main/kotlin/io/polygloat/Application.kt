@@ -18,7 +18,7 @@ open class Application(
         populator: DbPopulatorReal,
         userAccountService: UserAccountService,
         val properties: PolygloatProperties,
-        private val initialPasswordManager: InitialPasswordManager
+        initialPasswordManager: InitialPasswordManager
 ) {
     companion object {
         @JvmStatic
@@ -44,11 +44,8 @@ open class Application(
             val initialPassword = initialPasswordManager.initialPassword
 
             userAccountService.createUser(
-                    SignUpDto.builder()
-                            .email(initialUsername)
-                            .password(initialPassword)
-                            .name(initialUsername)
-                            .build())
+                    SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername)
+            )
         }
     }
 }

@@ -1,21 +1,18 @@
 package io.polygloat.controllers
 
+import io.polygloat.assertions.Assertions.assertThat
+import io.polygloat.dtos.PathDTO
 import io.polygloat.dtos.request.EditKeyDTO
 import io.polygloat.dtos.request.SetTranslationsDTO
 import io.polygloat.helpers.JsonHelper
+import io.polygloat.model.Repository
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testng.annotations.Test
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.polygloat.Assertions.Assertions.assertThat
-import io.polygloat.dtos.PathDTO
-import io.polygloat.model.Repository
 import org.testng.annotations.BeforeMethod
+import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -23,19 +20,19 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     private val keyDto = SetTranslationsDTO("test string", mapOf(Pair("en", "Hello")))
     private val keyDto2 = SetTranslationsDTO("test string 2", mapOf(Pair("en", "Hello 2")))
 
-    private lateinit var repository: Repository;
+    private lateinit var repository: Repository
 
     @BeforeMethod
     fun setup() {
-        this.repository = dbPopulator.createBase(generateUniqueString());
+        this.repository = dbPopulator.createBase(generateUniqueString())
     }
 
     @Test
     fun create() {
         performCreate(repositoryId = repository.id, content = keyDto).andExpect(status().`is`(200))
-                .andReturn();
+                .andReturn()
 
-        assertThat(keyService.get(repository, PathDTO.fromFullPath("test string"))).isNotEmpty;
+        assertThat(keyService.get(repository, PathDTO.fromFullPath("test string"))).isNotEmpty
     }
 
     @Test
@@ -44,13 +41,13 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
                 repositoryId = repository.id,
                 content = SetTranslationsDTO("", mapOf(Pair("en", "aaa"))))
                 .andExpect(status().`is`(400))
-                .andReturn();
-        assertThat(result).error().isStandardValidation;
+                .andReturn()
+        assertThat(result).error().isStandardValidation
     }
 
     @Test
     fun edit() {
-        keyService.create(repository, keyDto);
+        keyService.create(repository, keyDto)
 
         performEdit(
                 repositoryId = repository.id,
@@ -59,10 +56,10 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
                         newFullPathString = "hello"
                 ))
                 .andExpect(status().`is`(200))
-                .andReturn();
+                .andReturn()
 
-        assertThat(keyService.get(repository, PathDTO.fromFullPath("test string"))).isEmpty;
-        assertThat(keyService.get(repository, PathDTO.fromFullPath("hello"))).isNotEmpty;
+        assertThat(keyService.get(repository, PathDTO.fromFullPath("test string"))).isEmpty
+        assertThat(keyService.get(repository, PathDTO.fromFullPath("hello"))).isNotEmpty
     }
 
     @Test
@@ -70,12 +67,12 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
         keyService.create(repository, keyDto)
         keyService.create(repository, keyDto2)
 
-        val keyInstance = keyService.get(repository, PathDTO.fromFullPath(keyDto.key)).orElseGet(null);
+        val keyInstance = keyService.get(repository, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
 
         performDelete(repositoryId = repository.id, keyInstance.id!!)
 
-        assertThat(keyService.get(repository, PathDTO.fromFullPath(keyDto.key))).isEmpty;
-        assertThat(keyService.get(repository, PathDTO.fromFullPath(keyDto2.key))).isNotEmpty;
+        assertThat(keyService.get(repository, PathDTO.fromFullPath(keyDto.key))).isEmpty
+        assertThat(keyService.get(repository, PathDTO.fromFullPath(keyDto2.key))).isNotEmpty
     }
 
     private fun performCreate(repositoryId: Long, content: SetTranslationsDTO): ResultActions {

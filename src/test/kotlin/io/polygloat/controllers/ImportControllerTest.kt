@@ -1,7 +1,7 @@
 package io.polygloat.controllers
 
 import com.github.javafaker.Faker
-import io.polygloat.Assertions.Assertions.assertThat
+import io.polygloat.assertions.Assertions.assertThat
 import io.polygloat.dtos.ImportDto
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -15,7 +15,7 @@ class ImportControllerTest : SignedInControllerTest() {
     private val faker = Faker()
 
     companion object {
-        const val IMPORT_SINGLE_TIME_LIMIT_MS: Double = 2.5;
+        const val IMPORT_SINGLE_TIME_LIMIT_MS: Double = 2.5
         fun getMaxTimeInMs(count: Int): Long = ceil(count.toDouble() * IMPORT_SINGLE_TIME_LIMIT_MS).toLong()
     }
 
@@ -25,7 +25,7 @@ class ImportControllerTest : SignedInControllerTest() {
 
         commitTransaction()
 
-        val dto = generateData(5000);
+        val dto = generateData(5000)
 
         performPost("/api/repository/${repository.id}/import", dto)
                 .andExpect(MockMvcResultMatchers.status().isOk)
@@ -42,7 +42,7 @@ class ImportControllerTest : SignedInControllerTest() {
 
         commitTransaction()
 
-        val dto = generateData(50);
+        val dto = generateData(50)
 
         val asyncResult = performPost("/api/repository/${repository.id}/import", dto)
                 .andExpect(MockMvcResultMatchers.status().isOk)
@@ -58,7 +58,7 @@ class ImportControllerTest : SignedInControllerTest() {
 
         commitTransaction()
 
-        val dto1 = generateData(10000);
+        val dto1 = generateData(10000)
 
         val timeOnEmpty = measureTimeMillis {
             performPost("/api/repository/${repository.id}/import", dto1)
@@ -68,11 +68,11 @@ class ImportControllerTest : SignedInControllerTest() {
 
         assertThat(timeOnEmpty).isLessThan(getMaxTimeInMs(dto1.data!!.size))
 
-        val dto2 = generateData(5000);
+        val dto2 = generateData(5000)
         val timeOnFull = measureTimeMillis {
             performPost("/api/repository/${repository.id}/import", dto2)
                     .andExpect(MockMvcResultMatchers.status().isOk)
-                    .andReturn().asyncResult;
+                    .andReturn().asyncResult
         }
 
         //if it does not import in 5 seconds, you are doing something terribly wrong!
@@ -85,7 +85,7 @@ class ImportControllerTest : SignedInControllerTest() {
 
         commitTransaction()
 
-        val dto = generateData(100);
+        val dto = generateData(100)
 
         performPost("/api/repository/${repository.id}/import", dto)
                 .andExpect(MockMvcResultMatchers.status().isOk)
@@ -97,7 +97,7 @@ class ImportControllerTest : SignedInControllerTest() {
 
         performPost("/api/repository/${repository.id}/import", dto)
                 .andExpect(MockMvcResultMatchers.status().isOk)
-                .andReturn().asyncResult;
+                .andReturn().asyncResult
 
         translations = translationService.getAllByLanguageId(language.id)
         assertThat(translations.stream().map { it.text }.collect(Collectors.toList())).containsAll(dto.data!!.values)
