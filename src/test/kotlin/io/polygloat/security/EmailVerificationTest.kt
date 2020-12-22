@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Primary
 import org.springframework.http.MediaType
 import org.springframework.mail.MailSender
 import org.springframework.mail.SimpleMailMessage
+import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -194,7 +195,7 @@ open class EmailVerificationTest : AbstractControllerTest() {
 open class MockBeanMailSender {
     @Bean
     @Primary
-    open fun mailSender(): MailSender {
+    open fun mailSender(): JavaMailSender {
         return mockk()
     }
 }
