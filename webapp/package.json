@@ -56,7 +56,7 @@
     "@sentry/types": "^5.24.2",
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
-    "@types/jest": "^26.0.16",
+    "@types/jest": "^26.0.20",
     "@types/react": "16.9.17",
     "@types/react-dom": "16.9.0",
     "@types/react-redux": "^7.1.9",
