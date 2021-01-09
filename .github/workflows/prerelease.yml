@@ -23,9 +23,6 @@ jobs:
         with:
           node-version: '12.x'
 
-      - name: Create docker image
-        run: ./gradlew docker
-
       - name: Run E2E test
         run: ./gradlew runE2e
 
@@ -37,6 +34,11 @@ jobs:
       - name: Increase npm version
         id: version
         run: echo ::set-output name=VERSION::$(npm version prerelease)
+
+      - name: Create docker image
+        run: ./gradlew docker
+        env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
 
       - name: Push changes
         uses: ad-m/github-push-action@master
