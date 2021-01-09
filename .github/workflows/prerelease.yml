@@ -3,7 +3,7 @@ name: Prerelease
 on:
   push:
     branches:
-      - 'prerelease-*'
+      - 'main'
 
 jobs:
   main:
