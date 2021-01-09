@@ -1,0 +1,11 @@
+{
+  "button_add_aria_label" : "Ajouter",
+  "abbreviation" : "Abréviation",
+  "Api key list label - Api Key" : "Clé API",
+  "Api key list label - Repository" : "Dépôt ",
+  "Api keys title" : "Mes clés API",
+  "translations_language_select_label" : "Langues",
+  "translation_add" : "Ajouter",
+  "global_delete_confirmation" : "",
+  "add_translation_dialog_title" : ""
+}

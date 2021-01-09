@@ -156,8 +156,6 @@ sourceSets {
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
 }
 
-def customWebApp = System.getenv().containsKey("WEBAPP_PATH")
-def webappPath = customWebApp ? System.getenv().get("WEBAPP_PATH") : rootProject.project("webapp").projectDir
 def unpackTarget = "build/dependency"
 
 task unpack(type: Copy) {
@@ -166,24 +164,11 @@ task unpack(type: Copy) {
     dependsOn "bootJar"
 }
 
-task copyDist(type: Copy) {
-    if (!customWebApp) {
-        evaluationDependsOn rootProject.project("webapp").getPath()
-        dependsOn rootProject.project("webapp").getTasks().findByName("build")
-    }
-    def fromDir = "${webappPath}/dist"
-    def toDir = "${project.projectDir}/build/dependency/BOOT-INF/classes/static/."
-    from fromDir
-    into toDir
-    inputs.dir(fromDir)
-    outputs.dir(toDir)
-    mustRunAfter unpack
-}
+apply from: "./gradle/webapp.gradle"
+apply from: "./gradle/docker.gradle"
+apply from: "./gradle/e2e.gradle"
 
 project.tasks.findByName("dockerPrepare").mustRunAfter(copyDist)
-
-apply from: "./docker.gradle"
-
 task buildProd(dependsOn: ['bootJar'])
 
 task packWebapp(type: Zip) {
@@ -194,3 +179,4 @@ task packWebapp(type: Zip) {
     destinationDirectory = file("$buildDir/libs")
     entryCompression ZipEntryCompression.STORED
 }
+

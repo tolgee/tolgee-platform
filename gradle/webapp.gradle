@@ -1,0 +1,29 @@
+def webappPath = "${project.projectDir}/webapp"
+
+task copyDist(type: Copy) {
+    def fromDir = "${webappPath}/dist"
+    def toDir = "${project.projectDir}/build/dependency/BOOT-INF/classes/static/."
+    from fromDir
+    into toDir
+    inputs.dir(fromDir)
+    outputs.dir(toDir)
+    mustRunAfter unpack
+    dependsOn "buildWebapp"
+}
+
+task installWebappDeps(type: Exec){
+    commandLine "npm", "install"
+    workingDir = webappPath
+    inputs.file("${project.projectDir}/webapp/package.json")
+    inputs.file("${project.projectDir}/webapp/package-lock.json")
+    outputs.dir("${project.projectDir}/webapp/node_modules")
+}
+
+task buildWebapp(type: Exec){
+    commandLine "npm", "run", "build"
+    workingDir = webappPath
+    inputs.dir("${project.projectDir}/webapp/")
+    outputs.dir("${project.projectDir}/webapp/dist/")
+    outputs.dir("${project.projectDir}/webapp/lib/")
+    dependsOn installWebappDeps
+}

@@ -1,0 +1,16 @@
+import io.polygloat.node.PolygloatNodePlugin
+
+idea {
+    module {
+        excludeDirs += file('node_modules')
+        excludeDirs += file('dist')
+        excludeDirs += file('lib')
+    }
+}
+
+apply plugin: PolygloatNodePlugin
+
+polygloatNpm {
+    linkablePackages = ["polygloat-react"]
+    createReactApp = false
+}

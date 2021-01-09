@@ -1,0 +1,65 @@
+def E2E_DIR = "${project.projectDir}/e2e"
+
+task waitForRunningContainer(type: Task) {
+    doLast {
+        while (true) {
+            def pb = new ProcessBuilder("docker-compose", "logs")
+            pb.directory(new File(E2E_DIR))
+            def proc = pb.start()
+
+            BufferedReader stdInput = new BufferedReader(new
+                    InputStreamReader(proc.getInputStream()))
+            String s = null
+            proc.waitFor()
+            while ((s = stdInput.readLine()) != null) {
+                if (s.contains("Tomcat started on port(s): 8080 (http) with context path")) {
+                    return
+                }
+            }
+            if (proc.exitValue() != 0) {
+                throw new RuntimeException("Docker-compose logs retuned non zero exit code")
+            }
+        }
+    }
+}
+
+task installE2eDeps(type: Exec, group: "e2e") {
+    inputs.file("$E2E_DIR/package.json")
+    inputs.file("$E2E_DIR/package-lock.json")
+    outputs.dir("$E2E_DIR/node_modules")
+
+    commandLine "npm", "install"
+    workingDir E2E_DIR
+}
+
+task runE2e(type: Exec, group: "e2e") {
+    dependsOn "runDockerE2e", "installE2eDeps"
+
+    commandLine "npm", "run", "cy:run"
+
+    workingDir E2E_DIR
+
+    finalizedBy "stopDockerE2e", "cleanupDockerE2e"
+}
+
+task runDockerE2e(type: Exec, group: "e2e") {
+    dependsOn "tagDockerLocal"
+    commandLine "docker-compose", "up", "-d"
+    workingDir E2E_DIR
+    finalizedBy "waitForRunningContainer"
+}
+
+task stopDockerE2e(type: Exec, group: "e2e") {
+    commandLine "docker-compose", "stop"
+    workingDir E2E_DIR
+}
+
+task cleanupDockerE2e(type: Exec, group: "e2e") {
+    commandLine "docker-compose", "rm", "-f"
+    workingDir E2E_DIR
+}
+
+task tagDockerLocal(type: Exec) {
+    dependsOn "docker"
+    commandLine "docker", "tag", "polygloat/polygloat", "polygloat/polygloat:local"
+}
