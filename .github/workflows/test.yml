@@ -16,53 +16,21 @@ jobs:
           java-version: 11
 
       - name: Build with Gradle
-        run: WEBAPP_PATH=./webapp ./gradlew build
-
-      - name: Clone webapp
-        run: |
-          source .buildversions
-          git clone --depth 1 --branch ${WEBAPP_VERSION} https://github.com/polygloat/webapp.git
+        run: ./gradlew build
 
       - name: Setup node
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
 
-      - name: Npm install
-        run: npm install
-        working-directory: ./webapp
-
-      - name: Build webapp
-        run: npm run build
-        working-directory: ./webapp
-
-      - run: WEBAPP_PATH=./webapp ./gradlew docker
-
-      - name: Start docker stack
-        run: "docker run -d --name polygloat \
-        -e polygloat.internal.populate=true \
-        -e polygloat.internal.controller-enabled=true \
-        -e polygloat.internal.fake-emails-sent=true \
-        -e polygloat.authentication.needs-email-verification=true \
-        -e polygloat.authentication.registrations-allowed=true
-          -p8080:8080 polygloat/polygloat"
-
-      - name: Wait for running container
-        run: 'until docker logs --since 5m polygloat | grep -m 1 "started on port(s): 8080"; do : ;done'
-
-      - name: Run cypress tests
-        run: |
-          export CYPRESS_DEFAULT_PASSWORD=$(docker exec polygloat cat /data/initial.pwd)
-          npm run cy:run
-        working-directory: ./webapp
-        env:
-          CYPRESS_HOST: http://localhost:8080
-          CYPRESS_API_URL: http://localhost:8080/api/
+      - name: Run E2E test
+        run: ./gradlew runE2e
 
       - uses: actions/upload-artifact@v2
         if: always()
         with:
-          name: cypress
+          name: test
           path: |
-            ./webapp/cypress/videos/**/*
-            ./webappcypress/screenshots/**/*
+            ./e2e/cypress/videos/**/*
+            ./e2e/screenshots/**/*
+            ./build/reports/**/*
