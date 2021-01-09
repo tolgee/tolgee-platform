@@ -18,7 +18,7 @@
   "dependencies": {
     "@polygloat/react": "^1.0.0-alpha.3",
     "@polygloat/ui": "^1.0.0-alpha.2",
-    "@sentry/browser": "^5.27.6",
+    "@sentry/browser": "^5.29.2",
     "@types/yup": "^0.29.10",
     "clsx": "^1.1.1",
     "formik": "^2.1.6",
