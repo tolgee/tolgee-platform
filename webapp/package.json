@@ -21,7 +21,7 @@
     "@sentry/browser": "^5.29.2",
     "@types/yup": "^0.29.10",
     "clsx": "^1.1.1",
-    "formik": "^2.1.6",
+    "formik": "^2.2.6",
     "formik-material-ui": "^3.0.1",
     "namor": "^2.0.2",
     "notistack": "^1.0.3",
