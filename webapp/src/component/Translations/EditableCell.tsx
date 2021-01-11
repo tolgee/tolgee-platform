@@ -21,6 +21,7 @@ export interface EditableCellProps {
     isEditing: boolean;
     onCancel?: (value: string) => void
     onEditClick: () => void
+    lang?: string
 }
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
@@ -113,7 +114,7 @@ export const EditableCell: FunctionComponent<EditableCellProps> = (props) => {
         <Box flexGrow={1}>
             <MicroForm onSubmit={(v: { value: any }) => props.onSubmit(v.value)} initialValues={{value: props.initialValue || ""}}
                        validationSchema={Yup.object().shape({value: props.validationSchema})}>
-                <EasyInput onChange={onInputChange} multiline name="value" fullWidth endAdornment={
+                <EasyInput lang={props.lang} onChange={onInputChange} multiline name="value" fullWidth endAdornment={
                     <InputAdornment position="end">
                         <IconButton
                             edge="end"
