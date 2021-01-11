@@ -16,7 +16,7 @@
   "author": "Jan Cizmar",
   "license": "BSD",
   "dependencies": {
-    "@polygloat/react": "^1.0.0-alpha.3",
+    "@polygloat/react": "^1.0.0-alpha.5",
     "@polygloat/ui": "^1.0.0-alpha.2",
     "@sentry/browser": "^5.29.2",
     "@types/yup": "^0.29.11",
