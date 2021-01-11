@@ -86,6 +86,6 @@
     "webpack": "^4.45.0",
     "webpack-bundle-analyzer": "^4.2.0",
     "webpack-conditional-loader": "^1.0.12",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.1"
   }
 }
