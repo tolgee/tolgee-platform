@@ -61,7 +61,7 @@
     "@types/react-dom": "17.0.0",
     "@types/react-redux": "^7.1.9",
     "@types/react-router-dom": "^5.1.7",
-    "babel-loader": "^8.1.0",
+    "babel-loader": "^8.2.2",
     "babel-plugin-import": "^1.13.3",
     "babel-plugin-transform-imports": "^2.0.0",
     "babel-plugin-transform-typescript-metadata": "^0.3.1",
