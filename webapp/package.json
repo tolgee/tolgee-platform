@@ -54,7 +54,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
     "@sentry/types": "^5.29.2",
-    "@testing-library/jest-dom": "^5.11.6",
+    "@testing-library/jest-dom": "^5.11.8",
     "@testing-library/react": "^11.2.2",
     "@types/jest": "^26.0.20",
     "@types/react": "16.9.17",
