@@ -35,7 +35,7 @@
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.7",
     "tsyringe": "^4.4.0",
-    "webpack-cli": "^3.3.12",
+    "webpack-cli": "^4.4.0",
     "yup": "^0.28.5"
   },
   "devDependencies": {
