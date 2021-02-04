@@ -95,7 +95,7 @@ jobs:
           asset_content_type: application/java-archive
 
       - name: Login to docker
-        run: docker login -u ${{ secrets.dockerhubusername }} -p "${{ secrets.dockerhubpassword }}"
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
       - name: Tag the image
         run: |
           docker tag polygloat/polygloat polygloat/polygloat:${{ steps.version.outputs.VERSION }}
