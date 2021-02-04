@@ -2,7 +2,7 @@ import {singleton} from 'tsyringe';
 import {ApiHttpService} from './apiHttpService';
 import {UserDTO, UserUpdateDTO} from './response.types';
 import {messageService} from './messageService';
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 import React from "react";
 
 

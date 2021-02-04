@@ -2,7 +2,7 @@ import {container, singleton} from 'tsyringe';
 import {ApiHttpService} from './apiHttpService';
 import {messageService} from './messageService';
 import {ImportDto} from "./request.types";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 import React from "react";
 
 const http = container.resolve(ApiHttpService);

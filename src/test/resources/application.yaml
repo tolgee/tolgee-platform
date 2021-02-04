@@ -11,7 +11,7 @@ spring:
   liquibase:
     drop-first: true
     change-log: classpath:db/changelog/schema.xml
-polygloat:
+tolgee:
   data-path: ./build/test_data
   authentication:
     native-enabled: true

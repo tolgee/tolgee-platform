@@ -1,7 +1,7 @@
 {
-  "name": "@polygloat/webapp",
+  "name": "@tolgee/webapp",
   "version": "1.0.0-alpha.8",
-  "description": "e2e tests for polygloat server & webapp",
+  "description": "e2e tests for tolgee server & webapp",
   "scripts": {
     "cy:run": "cypress run",
     "cy:open": "cypress open"

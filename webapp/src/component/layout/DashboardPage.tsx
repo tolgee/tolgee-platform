@@ -8,14 +8,14 @@ import Grid from '@material-ui/core/Grid';
 import Container from '@material-ui/core/Container';
 import {Link} from "react-router-dom";
 import {LINKS} from "../../constants/links";
-import {PolygloatLogo} from "../common/icons/PolygloatLogo";
+import {TolgeeLogo} from "../common/icons/TolgeeLogo";
 
 function Copyright() {
     return (
         <>
             <Box display="flex" p={2} alignItems="center" justifyContent="center" fontWeight="500">
                 <Link to={LINKS.ROOT.build()} style={{color: "inherit"}}>
-                    <PolygloatLogo opacity={0.2} style={{width: 40, height: 40, filter: "drop-shadow(0px 1px 1px rgba(0, 0, 0, 1))"}}/>
+                    <TolgeeLogo opacity={0.2} style={{width: 40, height: 40, filter: "drop-shadow(0px 1px 1px rgba(0, 0, 0, 1))"}}/>
                 </Link>
             </Box>
         </>

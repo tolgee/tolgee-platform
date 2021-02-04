@@ -93,9 +93,9 @@ module.exports = env => {
                     mode: env.mode,
                     sentryDsn: env.sentryDsn,
                     apiUrl: env.apiUrl,
-                    polygloatApiKey: env.polygloatApiKey,
-                    polygloatApiUrl: env.polygloatApiUrl,
-                    polygloatWithUI: env.polygloatWithUI
+                    tolgeeApiKey: env.tolgeeApiKey,
+                    tolgeeApiUrl: env.tolgeeApiUrl,
+                    tolgeeWithUI: env.tolgeeWithUI
                 })
             })
         ],

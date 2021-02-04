@@ -9,9 +9,9 @@ declare module '*.woff2' {
 }
 
 declare const environment: {
-    polygloatApiKey: string;
-    polygloatApiUrl: string;
-    polygloatWithUI: string;
+    tolgeeApiKey: string;
+    tolgeeApiUrl: string;
+    tolgeeWithUI: string;
     sentryDsn: string,
     mode: "production" | "development",
     apiUrl: string,

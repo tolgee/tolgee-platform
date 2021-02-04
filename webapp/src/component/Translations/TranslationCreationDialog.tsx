@@ -15,7 +15,7 @@ import {ResourceErrorComponent} from "../common/form/ResourceErrorComponent";
 import {messageService} from "../../service/messageService";
 import {Validation} from "../../constants/GlobalValidationSchema";
 import {TranslationListContext} from "./TtranslationsGridContextProvider";
-import {useTranslate} from "@polygloat/react";
+import {useTranslate} from "@tolgee/react";
 
 export type TranslationCreationValue = {
     key: string;
@@ -77,7 +77,7 @@ export function TranslationCreationDialog() {
                     <TextField multiline name="key" label={t("translation_grid_key_text")} fullWidth/>
 
                     {selectedLanguages.map(s => (
-                        <TextField multiline key={s} name={"translations." + s} label={s}/>
+                        <TextField multiline lang={s} key={s} name={"translations." + s} label={s}/>
                     ))}
 
                 </StandardForm>

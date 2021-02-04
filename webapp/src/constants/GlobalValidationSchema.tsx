@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import {container} from "tsyringe";
 import {signUpService} from "../service/signUpService";
 import React from "react";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 Yup.setLocale({
     // use constant translation keys for messages without values

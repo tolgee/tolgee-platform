@@ -5,7 +5,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import {Link} from "react-router-dom";
-import {PolygloatLogo} from "../common/icons/PolygloatLogo";
+import {TolgeeLogo} from "../common/icons/TolgeeLogo";
 import {Box} from "@material-ui/core";
 import {UserMenu} from "../security/UserMenu";
 import {LocaleMenu} from "../LocaleMenu";
@@ -37,7 +37,7 @@ const useStyles = makeStyles(theme => ({
     menuButtonHidden: {
         display: 'none',
     },
-    polygloatLink: {
+    tolgeeLink: {
         color: "inherit",
         textDecoration: "inherit"
     }
@@ -54,13 +54,13 @@ export function TopBar(props: TopBarProps) {
             <Toolbar className={classes.toolbar}>
                 <Box flexGrow={1} display="flex">
                     <Box>
-                        <Link className={classes.polygloatLink} to={"/"}>
+                        <Link className={classes.tolgeeLink} to={"/"}>
                             <Box display="flex" alignItems="center">
                                 <Box pr={1} display="flex" justifyItems="center">
-                                    <PolygloatLogo fontSize="large"/>
+                                    <TolgeeLogo fontSize="large"/>
                                 </Box>
                                 <Typography variant="h6" color="inherit">
-                                    Polygloat
+                                    Tolgee
                                 </Typography>
                             </Box>
                         </Link>

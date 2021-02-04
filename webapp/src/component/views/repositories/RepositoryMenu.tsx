@@ -15,7 +15,7 @@ import ImportExportIcon from '@material-ui/icons/ImportExport';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import {useConfig} from "../../../hooks/useConfig";
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import {useTranslate} from "@polygloat/react";
+import {useTranslate} from "@tolgee/react";
 
 export const RepositoryMenu = ({id}) => {
 

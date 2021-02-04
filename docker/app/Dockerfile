@@ -13,4 +13,4 @@ COPY ${DEPENDENCY}/META-INF /app/META-INF
 COPY ${DEPENDENCY}/BOOT-INF/classes /app
 COPY ${DEPENDENCY}/${PROPERTIES} /app/application.yaml
 
-ENTRYPOINT ["java","-cp","app:app/lib/*","io.polygloat.Application"]
+ENTRYPOINT ["java","-cp","app:app/lib/*","io.tolgee.Application"]

@@ -8,7 +8,7 @@ import ClearIcon from '@material-ui/icons/Clear';
 import {ScreenshotActions} from "../../../store/repository/ScreenshotActions";
 import {container} from 'tsyringe';
 import {confirmation} from "../../../hooks/confirmation";
-import {T} from '@polygloat/react';
+import {T} from '@tolgee/react';
 import {useRepositoryPermissions} from "../../../hooks/useRepositoryPermissions";
 
 export interface ScreenshotThumbnailProps {

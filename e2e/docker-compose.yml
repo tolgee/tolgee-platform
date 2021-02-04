@@ -1,17 +1,17 @@
 version: '3'
 services:
   app:
-    container_name: polygloat_e2e
-    image: polygloat/polygloat:local
+    container_name: tolgee_e2e
+    image: tolgee/tolgee:local
     ports:
       - 8201:8080
       - 8091:8091
     environment:
-      - polygloat.internal.populate=true
-      - polygloat.internal.controllerEnabled=true
-      - "polygloat.screenshots-url=http://localhost:8201/screenshots"
-      - polygloat.authentication.needs-email-verification=true
-      - polygloat.authentication.registrations-allowed=true
-      - polygloat.internal.fake-emails-sent=true
-      - polygloat.authentication.initialPassword=admin
+      - tolgee.internal.populate=true
+      - tolgee.internal.controllerEnabled=true
+      - "tolgee.screenshots-url=http://localhost:8201/screenshots"
+      - tolgee.authentication.needs-email-verification=true
+      - tolgee.authentication.registrations-allowed=true
+      - tolgee.internal.fake-emails-sent=true
+      - tolgee.authentication.initialPassword=admin
       - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=*:8091,server=y,suspend=n

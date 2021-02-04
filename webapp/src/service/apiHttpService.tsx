@@ -7,7 +7,7 @@ import {GlobalError} from "../error/GlobalError";
 import {messageService} from "./messageService";
 import * as Sentry from '@sentry/browser';
 import React from "react";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);

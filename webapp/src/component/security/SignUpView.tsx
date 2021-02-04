@@ -14,7 +14,7 @@ import {useConfig} from "../../hooks/useConfig";
 import {Validation} from "../../constants/GlobalValidationSchema";
 import {BaseFormView} from "../layout/BaseFormView";
 import {Alert} from "../common/Alert";
-import {T} from '@polygloat/react';
+import {T} from '@tolgee/react';
 import {BaseView} from "../layout/BaseView";
 
 const actions = container.resolve(SignUpActions);

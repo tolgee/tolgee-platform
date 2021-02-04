@@ -9,7 +9,7 @@ import {ScreenshotActions} from "../../../store/repository/ScreenshotActions";
 import {container} from 'tsyringe';
 import AddIcon from '@material-ui/icons/Add';
 import {Message} from "../../../store/global/types";
-import {T} from '@polygloat/react';
+import {T} from '@tolgee/react';
 import {MessageActions} from "../../../store/global/messageActions";
 import {useConfig} from "../../../hooks/useConfig";
 import {useRepository} from "../../../hooks/useRepository";

@@ -11,7 +11,7 @@ import {TextField} from "../../../common/form/fields/TextField";
 import {object, string} from "yup";
 import {ImportExportActions} from "../../../../store/repository/ImportExportActions";
 import {container} from "tsyringe";
-import {T} from '@polygloat/react';
+import {T} from '@tolgee/react';
 
 type SubtreeType = { [key: string]: string | object };
 const actions = container.resolve(ImportExportActions);

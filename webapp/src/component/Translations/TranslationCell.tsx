@@ -46,6 +46,7 @@ export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (p
                       }}
                       isEditing={isEditing}
                       onCancel={() => actions.setTranslationEditing.dispatch(null)}
+                      lang={props.abbreviation}
         />
     )
 };

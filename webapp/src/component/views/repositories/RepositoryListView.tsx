@@ -17,7 +17,7 @@ import {Link} from 'react-router-dom';
 import {BaseView} from '../../layout/BaseView';
 import {EmptyListMessage} from "../../common/EmptyListMessage";
 import {PossibleRepositoryPage} from "../PossibleRepositoryPage";
-import {useTranslate} from "@polygloat/react";
+import {useTranslate} from "@tolgee/react";
 
 const actions = container.resolve(RepositoryActions);
 

@@ -10,7 +10,7 @@ import {useSelector} from "react-redux";
 import {AppState} from "../../store";
 import {useHistory} from 'react-router-dom';
 import {PossibleRepositoryPage} from "./PossibleRepositoryPage";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 const actions = container.resolve(UserActions);
 const userActions = container.resolve(UserActions);

@@ -19,7 +19,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import {confirmation} from '../../../../hooks/confirmation';
 import {useUser} from "../../../../hooks/useUser";
 import {PermissionEditDTO} from "../../../../service/response.types";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 import {PermissionSelect} from "../../../security/PermissionSelect";
 import {ConfirmationDialogProps} from "../../../common/ConfirmationDialog";
 
