@@ -1,0 +1,9 @@
+node_modules/
+lib
+dist
+/cypress/integration/examples/
+tolgeeRestructure.webapp.iml
+.env.dev
+e2e/cypress/videos
+e2e/cypress/screenshots
+e2e/node_modules

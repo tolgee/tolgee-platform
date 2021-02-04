@@ -1,10 +1,19 @@
 build
-polygloatRestructure.server.iml
-polygloatRestructure.server.main.iml
-polygloatRestructure.server.test.iml
+*.iml
 src/main/resources/application-dev.properties
 src/main/resources/application-dev.yaml
 
 bin
 server.iml
 trace.db
+
+webapp/node_modules/
+webapp/lib
+webapp/dist
+webapp/tolgeeRestructure.webapp.iml
+webapp/.env.dev
+e2e/cypress/videos
+e2e/cypress/screenshots
+e2e/node_modules
+e2e/cypress/integration/examples/
+.gradle

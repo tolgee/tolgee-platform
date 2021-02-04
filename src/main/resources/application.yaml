@@ -1,14 +1,14 @@
 spring:
   datasource:
-    url: jdbc:h2:${user.home}/.polygloat/db.h2
+    url: jdbc:h2:${user.home}/.tolgee/db.h2
 #    username: sa
 #    password: sa
   liquibase:
     change-log: classpath:db/changelog/schema.xml
-polygloat:
+tolgee:
   authentication:
     enabled: false
-#    jwt-secret-file: /<user home>/.polygloat/jwt.secret
+#    jwt-secret-file: /<user home>/.tolgee/jwt.secret
 #    jwt-secret: some long string
 #    jwt-expiration: 604800000
 #    native-enabled: true

@@ -1,0 +1,16 @@
+version: '3'
+services:
+  app:
+    container_name: ${TEST_TOLGEE_CONTAINER_NAME}
+    image: tolgee/tolgee:${TEST_TOLGEE_SERVER_VERSION}
+    ports:
+      - "${TEST_TOLGEE_API_PORT}:8080"
+      - 8091:8091
+    environment:
+      - tolgee.internal.populate=true
+      - tolgee.internal.controllerEnabled=true
+      - "tolgee.screenshots-url=http://localhost:8201/screenshots"
+      - tolgee.authentication.needs-email-verification=true
+      - tolgee.authentication.registrations-allowed=true
+      - tolgee.internal.fake-emails-sent=true
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=*:8091,server=y,suspend=n
