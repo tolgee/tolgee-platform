@@ -92,7 +92,7 @@ dependencies {
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     compile "org.springframework.boot:spring-boot-configuration-processor"
     testCompile "org.springframework.boot:spring-boot-configuration-processor"
-    implementation 'io.sentry:sentry-spring-boot-starter:3.2.0'
+    implementation 'io.sentry:sentry-spring-boot-starter:4.1.0'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'
