@@ -1,6 +1,6 @@
 {
-  "name": "@polygloat/webapp",
-  "description": "Single page web application for Polygloat localization framework",
+  "name": "@tolgee/webapp",
+  "description": "Single page web application for Tolgee localization framework",
   "main": "dist/index.js",
   "sideEffects": false,
   "scripts": {
@@ -16,8 +16,8 @@
   "author": "Jan Cizmar",
   "license": "BSD",
   "dependencies": {
-    "@polygloat/react": "^1.0.0-alpha.5",
-    "@polygloat/ui": "^1.0.0-alpha.2",
+    "@tolgee/react": "^1.0.0-alpha.23",
+    "@tolgee/ui": "^1.0.0-alpha.23",
     "@sentry/browser": "^5.29.2",
     "@types/yup": "^0.29.11",
     "clsx": "^1.1.1",

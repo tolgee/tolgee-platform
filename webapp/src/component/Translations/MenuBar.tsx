@@ -11,7 +11,7 @@ import {TranslationListContext} from "./TtranslationsGridContextProvider";
 import {useRepository} from "../../hooks/useRepository";
 import {container} from "tsyringe";
 import {TranslationActions} from "../../store/repository/TranslationActions";
-import {T, useTranslate} from "@polygloat/react";
+import {T, useTranslate} from "@tolgee/react";
 import {useRepositoryPermissions} from "../../hooks/useRepositoryPermissions";
 import {RepositoryPermissionType} from "../../service/response.types";
 

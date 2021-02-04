@@ -12,7 +12,7 @@ import {SettingsIconButton} from '../../../common/buttons/SettingsIconButton';
 import {Link, useRouteMatch} from 'react-router-dom';
 import {LanguageActions} from '../../../../store/languages/LanguageActions';
 import {BaseView} from '../../../layout/BaseView';
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 const actions = container.resolve(LanguageActions);
 

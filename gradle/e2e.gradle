@@ -61,5 +61,5 @@ task cleanupDockerE2e(type: Exec, group: "e2e") {
 
 task tagDockerLocal(type: Exec) {
     dependsOn "docker"
-    commandLine "docker", "tag", "polygloat/polygloat", "polygloat/polygloat:local"
+    commandLine "docker", "tag", "tolgee/tolgee", "tolgee/tolgee:local"
 }

@@ -10,7 +10,7 @@ services:
   #    ports:
   #      - "5432:5432"
   app:
-    image: polygloat/polygloat
+    image: tolgee/tolgee
     ports:
       - "8090:8080"
       - "8091:8091"

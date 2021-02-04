@@ -5,7 +5,7 @@ import {KeyTranslationsDTO} from "../../../service/response.types";
 import {ScreenshotActions} from "../../../store/repository/ScreenshotActions";
 import {container} from 'tsyringe';
 import {useRepository} from "../../../hooks/useRepository";
-import {T} from '@polygloat/react';
+import {T} from '@tolgee/react';
 import {Alert} from "../../common/Alert";
 import {ScreenshotGallery} from "./ScreenshotGallery";
 

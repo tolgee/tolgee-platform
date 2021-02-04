@@ -9,7 +9,7 @@ import {RedirectionActions} from '../store/global/redirectionActions';
 import {invitationCodeService} from "./invitationCodeService";
 import {invitationService} from "./invitationService";
 import React from "react";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 const API_URL = environment.apiUrl;
 

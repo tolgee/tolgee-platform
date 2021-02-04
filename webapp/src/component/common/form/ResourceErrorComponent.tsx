@@ -1,7 +1,7 @@
 import {default as React, FunctionComponent} from "react";
 import {Alert} from "../Alert";
 import {ErrorResponseDTO} from "../../../service/response.types";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 import {Box} from "@material-ui/core";
 
 const standardValidationProp = "STANDARD_VALIDATION";

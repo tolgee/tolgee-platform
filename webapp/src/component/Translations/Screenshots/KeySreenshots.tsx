@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {FunctionComponent} from 'react';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
-import {T} from '@polygloat/react';
+import {T} from '@tolgee/react';
 import {Box, createStyles, IconButton, makeStyles, Theme, Tooltip} from '@material-ui/core';
 import {KeyTranslationsDTO} from "../../../service/response.types";
 import {ScreenshotsPopover} from "./ScreenshotsPopover";

@@ -1,5 +1,5 @@
 {
-  "name": "@polygloat/server",
+  "name": "@tolgee/server",
   "version": "1.0.0-alpha.20",
-  "description": "Dummy package.json to achieve same versioning as polygloat js libraries"
+  "description": "Dummy package.json to achieve same versioning as tolgee js libraries"
 }

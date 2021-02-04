@@ -5,7 +5,7 @@ import {RepositoryDTO} from '../../service/response.types';
 import {LINKS} from "../../constants/links";
 import {AbstractLoadableActions, createLoadable, Loadable, StateWithLoadables} from "../AbstractLoadableActions";
 import React from "react";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 export class RepositoriesState extends StateWithLoadables<RepositoryActions> {
     repositoriesLoading: boolean = true;

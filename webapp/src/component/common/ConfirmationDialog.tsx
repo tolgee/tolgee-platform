@@ -8,7 +8,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import {PropTypes, TextField} from "@material-ui/core";
 import Box from "@material-ui/core/Box";
-import {T} from '@polygloat/react';
+import {T} from '@tolgee/react';
 
 export class ConfirmationDialogProps {
     open?: boolean = true;

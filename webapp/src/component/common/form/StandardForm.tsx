@@ -4,7 +4,7 @@ import {Box, Button} from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import {ObjectSchema} from 'yup';
 import {useHistory} from 'react-router-dom';
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 interface FormProps<T = { [key: string]: any }> {
     initialValues: T;

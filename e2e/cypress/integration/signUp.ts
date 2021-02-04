@@ -3,7 +3,7 @@ import {getInput} from "../fixtures/xPath";
 import {deleteUserWithInvitationCode, getUser} from "../fixtures/apiCalls";
 
 
-const TEST_USERNAME = "test@polygloat.io";
+const TEST_USERNAME = "test@tolgee.io";
 context('Login', () => {
     beforeEach(() => {
         cy.visit(HOST + "/sign_up");

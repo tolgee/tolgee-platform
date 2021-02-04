@@ -25,11 +25,11 @@ jobs:
       - name: Start docker stack
         run: |
           docker-compose --env-file .test.docker.env -f test-docker-compose.yml up -d
-          until docker logs --since 5m polygloat_webapp_test | grep -m 1 "started on port(s): 8080"; do : ;done
+          until docker logs --since 5m tolgee_webapp_test | grep -m 1 "started on port(s): 8080"; do : ;done
 
       - name: Run the tests
         run: |
-          export CYPRESS_DEFAULT_PASSWORD=$(docker exec polygloat_webapp_test cat /data/initial.pwd)
+          export CYPRESS_DEFAULT_PASSWORD=$(docker exec tolgee_webapp_test cat /data/initial.pwd)
           npm run serve & npm run cy:run
 
       - uses: actions/upload-artifact@v2

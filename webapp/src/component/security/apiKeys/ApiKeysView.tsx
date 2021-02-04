@@ -9,7 +9,7 @@ import {FormDialog} from "./FormDialog";
 import {ApiKeysList} from "./ApiKeysList";
 import {EmptyListMessage} from "../../common/EmptyListMessage";
 import {PossibleRepositoryPage} from "../../views/PossibleRepositoryPage";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 export const ApiKeysView: FunctionComponent = () => {
 
