@@ -10,7 +10,7 @@ trace.db
 webapp/node_modules/
 webapp/lib
 webapp/dist
-webapp/tolgeeRestructure.webapp.iml
+**/*.iml
 webapp/.env.dev
 e2e/cypress/videos
 e2e/cypress/screenshots
