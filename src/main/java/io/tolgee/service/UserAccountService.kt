@@ -33,7 +33,7 @@ open class UserAccountService(private val userAccountRepository: UserAccountRepo
         return account
     }
 
-    val implicitUser: UserAccount
+    open val implicitUser: UserAccount
         get() {
             val username = "___implicit_user"
             return userAccountRepository.findByUsername(username).orElseGet {

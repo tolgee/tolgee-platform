@@ -35,7 +35,7 @@ public class TranslationsViewBuilder {
 
         selection.add(fullPath);
 
-        Join<Key, Repository> repositoryJoin = key.join("repository");
+        Join<Key, Repository> repositoryJoin = key.join(Key_.repository);
 
         for (Language language : languages) {
             Join<Repository, Language> languagesJoin = repositoryJoin.join("languages");

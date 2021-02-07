@@ -13,7 +13,7 @@ export class remoteConfigService {
         try {
             return await (await this.http.fetch(`public/configuration`)).json();
         } catch (e) {
-            this.errorActions.globalError.dispatch(new GlobalError('Server responded with error status. Check your internet connection.'));
+            this.errorActions.globalError.dispatch(new GlobalError('Error loading configuration.'));
         }
     }
 }
