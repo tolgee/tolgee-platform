@@ -30,6 +30,12 @@ module.exports = env => {
         module: {
             rules: [
                 {
+                    test: /\.m?js/,
+                    resolve: {
+                        fullySpecified: false
+                    }
+                },
+                {
                     test: /\.jsx?$/,
                     enforce: 'pre',
                     use: ['source-map-loader']
