@@ -14,7 +14,7 @@ import {createStyles, makeStyles} from "@material-ui/core/styles";
 
 export interface EditableCellProps {
     initialValue: any,
-    validationSchema: Yup.Schema<any>,
+    validationSchema: Yup.AnySchema,
     onSubmit: (value: string) => void;
     onChange?: (value: string) => void;
     editEnabled: boolean;

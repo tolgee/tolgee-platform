@@ -81,7 +81,8 @@ ReactDOM.render(
         >
             <ThemeProvider theme={theme}>
                 <Provider store={store}>
-                    {/*@ts-ignore --  Type '{ children: Element; }' has no properties ... */}
+                    {/*
+                    // @ts-ignore --  Type '{ children: Element; }' has no properties ... */}
                     <ErrorBoundary>
                         <SnackbarProvider>
                             <App/>

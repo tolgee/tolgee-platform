@@ -30,6 +30,12 @@ module.exports = env => {
         module: {
             rules: [
                 {
+                    test: /\.m?js/,
+                    resolve: {
+                        fullySpecified: false
+                    }
+                },
+                {
                     test: /\.jsx?$/,
                     enforce: 'pre',
                     use: ['source-map-loader']
@@ -40,10 +46,7 @@ module.exports = env => {
                     exclude: [/node_modules/, /lib/],
                 }, {
                     test: /\.svg$/,
-                    use: [
-                        {
-                            loader: "babel-loader"
-                        },
+                    use: ["babel-loader",
                         {
                             loader: "react-svg-loader",
                             options: {
@@ -66,7 +69,7 @@ module.exports = env => {
                 },
                 {
                     test: /favicon\.svg/,
-                    loader: 'file-loader?name=[name].[ext]'  // <-- retain original file name
+                    use: ['file-loader?name=[name].[ext]']
                 },
             ]
         },
@@ -75,7 +78,6 @@ module.exports = env => {
             splitChunks: {
                 chunks: 'all'
             },
-            namedModules: true
         },
         mode,
         plugins: [
