@@ -11,7 +11,7 @@ interface FormProps<T = { [key: string]: any }> {
     onSubmit: (values: T, formikBag: FormikBag<any, any>) => void | Promise<any>;
     onCancel?: () => void;
     loading?: boolean;
-    validationSchema?: ObjectSchema;
+    validationSchema?: ObjectSchema<any>;
     submitButtons?: ReactNode
     customActions?: ReactNode
     submitButtonInner?: ReactNode

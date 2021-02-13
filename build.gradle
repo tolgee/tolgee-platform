@@ -7,21 +7,21 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.0")
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.21"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.2")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.30"
     }
 }
 
 plugins {
-    id "com.palantir.docker" version "0.25.0"
-    id 'com.palantir.docker-compose' version "0.25.0"
-    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
-    id 'org.springframework.boot' version '2.4.0'
+    id "com.palantir.docker" version "0.26.0"
+    id 'com.palantir.docker-compose' version "0.26.0"
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot' version '2.4.2'
     id 'java'
     id 'org.liquibase.gradle' version '2.0.4'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.21'
-    id "org.jetbrains.kotlin.plugin.jpa" version "1.4.21"
-    id "org.jetbrains.kotlin.kapt" version "1.4.21"
+    id 'org.jetbrains.kotlin.jvm' version '1.4.30'
+    id "org.jetbrains.kotlin.plugin.jpa" version "1.4.30"
+    id "org.jetbrains.kotlin.kapt" version "1.4.30"
 }
 
 group = 'io.tolgee'
@@ -77,10 +77,10 @@ liquibase {
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
-def LIQUIBASE_VERSION = "4.2.2"
-def LIQUIBASE_HIBERNATE_VERSION = "4.2.2"
+def LIQUIBASE_VERSION = "4.3.1"
+def LIQUIBASE_HIBERNATE_VERSION = "4.3.0.1"
 def JJWT_VERSION = "0.11.2"
-def SPRING_DOC_VERSION = "1.5.2"
+def SPRING_DOC_VERSION = "1.5.4"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -92,14 +92,14 @@ dependencies {
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     compile "org.springframework.boot:spring-boot-configuration-processor"
     testCompile "org.springframework.boot:spring-boot-configuration-processor"
-    implementation 'io.sentry:sentry-spring-boot-starter:3.2.0'
+    implementation 'io.sentry:sentry-spring-boot-starter:4.1.0'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
-    testCompile("org.assertj:assertj-core:3.18.1")
+    testCompile("org.assertj:assertj-core:3.19.0")
     testCompile("org.springframework.security:spring-security-test")
     implementation("org.springframework.ldap:spring-ldap-core")
     implementation("org.springframework.security:spring-security-ldap")
@@ -124,12 +124,12 @@ dependencies {
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
     implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.2-native-mt'
     kapt "org.hibernate:hibernate-jpamodelgen"
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.21'
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.30'
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.21'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1'
     implementation 'commons-codec:commons-codec:1.15'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.921'
-    compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.0'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.953'
+    compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
 }
 
 test {
