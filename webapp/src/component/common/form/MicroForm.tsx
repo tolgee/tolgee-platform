@@ -5,7 +5,7 @@ import {ObjectSchema} from 'yup';
 interface MicroFormProps<T = { [key: string]: any }> {
     initialValues: T;
     onSubmit: (values: T, formikBag: FormikBag<any, any>) => void | Promise<any>;
-    validationSchema?: ObjectSchema;
+    validationSchema?: ObjectSchema<any>;
     onChange?: (value: any) => any
 }
 

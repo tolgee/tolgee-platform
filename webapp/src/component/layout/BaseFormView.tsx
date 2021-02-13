@@ -12,9 +12,9 @@ interface BaseFormViewProps {
     initialValues: object;
     onSubmit: (v: object) => void,
     onCancel?: () => void,
-    validationSchema: ObjectSchema,
-    resourceLoadable?: Loadable<any>,
-    saveActionLoadable?: Loadable<any>,
+    validationSchema: ObjectSchema<any>,
+    resourceLoadable?: Loadable,
+    saveActionLoadable?: Loadable,
     redirectAfter?: Link;
     customActions?: ReactNode;
     submitButtons?: ReactNode;
