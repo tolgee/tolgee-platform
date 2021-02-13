@@ -99,7 +99,7 @@ dependencies {
     testCompile('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
-    testCompile("org.assertj:assertj-core:3.18.1")
+    testCompile("org.assertj:assertj-core:3.19.0")
     testCompile("org.springframework.security:spring-security-test")
     implementation("org.springframework.ldap:spring-ldap-core")
     implementation("org.springframework.security:spring-security-ldap")
