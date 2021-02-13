@@ -1,6 +1,6 @@
 import {confirmation} from "../../hooks/confirmation";
 import React from "react";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 import {TranslationActions} from "../../store/repository/TranslationActions";
 import {container} from "tsyringe";
 

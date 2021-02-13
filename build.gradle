@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. Polygloat
+ * Copyright (c) 2020. Tolgee
  */
 
 buildscript {
@@ -24,7 +24,7 @@ plugins {
     id "org.jetbrains.kotlin.kapt" version "1.4.30"
 }
 
-group = 'io.polygloat'
+group = 'io.tolgee'
 
 if (System.getenv().containsKey("VERSION")) {
     project.version = System.getenv().get("VERSION")
@@ -52,7 +52,7 @@ repositories {
 
 def liveDb = [
         url         : 'jdbc:postgresql://localhost:5432/postgres',
-        referenceUrl: 'hibernate:spring:io.polygloat' +
+        referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.PostgreSQL95Dialect' +
                 '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
                 '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
@@ -145,7 +145,7 @@ springBoot {
 }
 
 bootJar {
-    archiveFileName = "polygloat-${project.version}.jar"
+    archiveFileName = "tolgee-${project.version}.jar"
     manifest {
         attributes('Implementation-Version': project.version)
     }
@@ -175,7 +175,7 @@ task packWebapp(type: Zip) {
     dependsOn "unpack"
     dependsOn "copyDist"
     from "${project.projectDir}/build/dependency"
-    archiveFileName = "polygloat-${project.version}-test.jar"
+    archiveFileName = "tolgee-${project.version}-test.jar"
     destinationDirectory = file("$buildDir/libs")
     entryCompression ZipEntryCompression.STORED
 }

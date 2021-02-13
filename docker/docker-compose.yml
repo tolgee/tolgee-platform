@@ -8,7 +8,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=postgres
   app:
-    image: polygloat/polygloat
+    image: tolgee/tolgee
     ports:
       - ${exposePort}:8080
     env_file:

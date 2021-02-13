@@ -17,7 +17,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import {BoxLoading} from '../../../common/BoxLoading';
 import {EmptyListMessage} from "../../../common/EmptyListMessage";
-import {T} from '@polygloat/react';
+import {T} from '@tolgee/react';
 import {PermissionSelect} from "../../../security/PermissionSelect";
 
 const actions = container.resolve(RepositoryInvitationActions);

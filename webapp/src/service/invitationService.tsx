@@ -8,7 +8,7 @@ import {tokenService} from "./tokenService";
 import {invitationCodeService} from "./invitationCodeService";
 import {GlobalActions} from "../store/global/globalActions";
 import React from "react";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 
 const http = container.resolve(ApiHttpService);

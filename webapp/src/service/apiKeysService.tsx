@@ -3,7 +3,7 @@ import {ApiHttpService} from './apiHttpService';
 import {ApiKeyDTO} from "./response.types";
 import {messageService} from "./messageService";
 import {EditApiKeyDTO} from "./request.types";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 import React from "react";
 
 const BASE = "apiKeys";

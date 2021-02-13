@@ -2,7 +2,7 @@ import * as React from 'react';
 import {FunctionComponent, useContext, useState} from 'react';
 import {Box, TablePagination} from "@material-ui/core";
 import {TranslationListContext} from "./TtranslationsGridContextProvider";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 import {useLeaveEditConfirmationPagination} from "./useLeaveEditConfirmation";
 
 export const Pagination: FunctionComponent = (props) => {

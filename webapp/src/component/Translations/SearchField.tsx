@@ -2,7 +2,7 @@ import * as React from 'react';
 import {FunctionComponent, useContext, useEffect, useState} from 'react';
 import {TextField} from "@material-ui/core";
 import {TranslationListContext} from "./TtranslationsGridContextProvider";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 export const SearchField: FunctionComponent = (props) => {
     const listContext = useContext(TranslationListContext);

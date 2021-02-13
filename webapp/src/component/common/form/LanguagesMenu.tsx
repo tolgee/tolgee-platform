@@ -9,7 +9,7 @@ import {TranslationActions} from "../../../store/repository/TranslationActions";
 import Input from "@material-ui/core/Input";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import {messageService} from "../../../service/messageService";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 export interface LanguagesMenuProps {
     context: string

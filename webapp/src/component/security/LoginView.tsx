@@ -15,7 +15,7 @@ import {GlobalActions} from '../../store/global/globalActions';
 import {Alert} from '../common/Alert';
 import {securityService} from '../../service/securityService';
 import {useConfig} from "../../hooks/useConfig";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 interface LoginProps {
 

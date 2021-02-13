@@ -6,7 +6,7 @@ import {TranslationActions} from "../../store/repository/TranslationActions";
 import {useRepository} from "../../hooks/useRepository";
 import {Loadable} from "../../store/AbstractLoadableActions";
 import {RepositoryPermissionType, TranslationsDataResponse} from "../../service/response.types";
-import {T, useTranslate} from "@polygloat/react";
+import {T, useTranslate} from "@tolgee/react";
 import {FullPageLoading} from "../common/FullPageLoading";
 import {useRepositoryLanguages} from "../../hooks/useRepositoryLanguages";
 import {useLeaveEditConfirmationOtherEdit} from "./useLeaveEditConfirmation";

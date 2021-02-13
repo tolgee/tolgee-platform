@@ -7,7 +7,7 @@ import {SignUpType} from '../component/security/SignUpView';
 import {RedirectionActions} from '../store/global/redirectionActions';
 import {GlobalActions} from '../store/global/globalActions';
 import {invitationCodeService} from "./invitationCodeService";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 import React from "react";
 
 @singleton()

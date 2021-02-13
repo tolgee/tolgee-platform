@@ -8,7 +8,7 @@ import {ImportExportActions} from "../../../../store/repository/ImportExportActi
 import {useSelector} from "react-redux";
 import {AppState} from "../../../../store";
 import {useRepository} from "../../../../hooks/useRepository";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 
 const actions = container.resolve(ImportExportActions);
 

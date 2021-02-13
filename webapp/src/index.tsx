@@ -15,8 +15,8 @@ import ErrorBoundary from "./component/ErrorBoundary";
 import RubikTTf from './fonts/Rubik/Rubik-Regular.woff2';
 import {blue, red} from "@material-ui/core/colors";
 import {createMuiTheme, ThemeProvider} from '@material-ui/core/styles';
-import {PolygloatProvider} from "@polygloat/react";
-import {UI} from "@polygloat/ui";
+import {TolgeeProvider} from "@tolgee/react";
+import {UI} from "@tolgee/ui";
 import {App} from "./component/App";
 import {FullPageLoading} from "./component/common/FullPageLoading";
 import './yupLocalization';
@@ -72,10 +72,10 @@ const theme = createMuiTheme({
 
 ReactDOM.render(
     <React.Suspense fallback={<FullPageLoading/>}>
-        <PolygloatProvider
-            apiUrl={environment.polygloatApiUrl}
-            apiKey={environment.polygloatApiKey}
-            ui={environment.polygloatWithUI === "true" ? UI : undefined}
+        <TolgeeProvider
+            apiUrl={environment.tolgeeApiUrl}
+            apiKey={environment.tolgeeApiKey}
+            ui={environment.tolgeeWithUI === "true" ? UI : undefined}
             filesUrlPrefix="/i18n/"
             loadingFallback={<FullPageLoading/>}
         >
@@ -89,7 +89,7 @@ ReactDOM.render(
                     </ErrorBoundary>
                 </Provider>
             </ThemeProvider>
-        </PolygloatProvider>
+        </TolgeeProvider>
     </React.Suspense>,
     document.getElementById('root')
 );

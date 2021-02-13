@@ -28,8 +28,8 @@ jobs:
 
       - name: Set git globals
         run: |
-          git config --local user.email "machine@polygloat.io"
-          git config --local user.name "Polygloat Machine"
+          git config --local user.email "machine@tolgee.io"
+          git config --local user.name "Tolgee Machine"
 
       - name: Increase npm version
         id: version
@@ -65,21 +65,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/libs/polygloat-${{ steps.version.outputs.VERSION }}.jar
-          asset_name: polygloat-${{ steps.version.outputs.VERSION }}.jar
+          asset_path: ./build/libs/tolgee-${{ steps.version.outputs.VERSION }}.jar
+          asset_name: tolgee-${{ steps.version.outputs.VERSION }}.jar
           asset_content_type: application/java-archive
 
       - name: Login to docker
-        run: docker login -u ${{ secrets.dockerhubusername }} -p "${{ secrets.dockerhubpassword }}"
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
       - name: Tag the image
         run: |
-          docker tag polygloat/polygloat polygloat/polygloat:${{ steps.version.outputs.VERSION }}
-          docker tag polygloat/polygloat polygloat/polygloat:latest
+          docker tag tolgee/tolgee tolgee/tolgee:${{ steps.version.outputs.VERSION }}
+          docker tag tolgee/tolgee tolgee/tolgee:latest
 
       - name: Publish docker image
         run: |
-          docker push polygloat/polygloat:${{ steps.version.outputs.VERSION }}
-          docker push polygloat/polygloat:latest
+          docker push tolgee/tolgee:${{ steps.version.outputs.VERSION }}
+          docker push tolgee/tolgee:latest
 
       - uses: actions/upload-artifact@v2
         if: always()

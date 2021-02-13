@@ -5,7 +5,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import withStyles from "@material-ui/core/styles/withStyles";
 import LanguageIcon from '@material-ui/icons/Language';
-import {useCurrentLanguage, useSetLanguage} from "@polygloat/react";
+import {useCurrentLanguage, useSetLanguage} from "@tolgee/react";
 
 export const LocaleMenu: FunctionComponent<{ className?: string }> = (props) => {
     const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {

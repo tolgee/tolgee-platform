@@ -11,7 +11,7 @@ import {confirmation} from "../../../../hooks/confirmation";
 import {LanguageDTO} from "../../../../service/response.types";
 import {Validation} from "../../../../constants/GlobalValidationSchema";
 import {useRedirect} from "../../../../hooks/useRedirect";
-import {T} from "@polygloat/react";
+import {T} from "@tolgee/react";
 import {ConfirmationDialogProps} from "../../../common/ConfirmationDialog";
 
 const actions = container.resolve(LanguageActions);
