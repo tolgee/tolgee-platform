@@ -1,89 +1,47 @@
-package io.tolgee.model;
+package io.tolgee.model
 
-import io.tolgee.dtos.request.LanguageDTO;
-
-import javax.persistence.*;
-import java.util.Set;
+import io.tolgee.dtos.request.LanguageDTO
+import javax.persistence.*
 
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"repository_id", "name"}, name = "language_repository_name"),
-        @UniqueConstraint(columnNames = {"repository_id", "abbreviation"}, name = "language_abbreviation_name")
-},
-        indexes = {
-                @Index(columnList = "abbreviation", name = "index_abbreviation"),
-                @Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_repository")
-        }
+@Table(
+    uniqueConstraints = [UniqueConstraint(
+        columnNames = ["repository_id", "name"],
+        name = "language_repository_name"
+    ), UniqueConstraint(columnNames = ["repository_id", "abbreviation"], name = "language_abbreviation_name")],
+    indexes = [Index(
+        columnList = "abbreviation",
+        name = "index_abbreviation"
+    ), Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_repository")]
 )
-public class Language extends AuditModel {
-
+class Language : AuditModel() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    var id: Long? = null
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
-    private Set<Translation> translations;
+    var translations: MutableSet<Translation>? = null
 
     @ManyToOne
-    private Repository repository;
-
-    private String abbreviation;
-
-    private String name;
-
-    public static Language fromRequestDTO(LanguageDTO dto) {
-        Language language = new Language();
-        language.setName(dto.getName());
-        language.setAbbreviation(dto.getAbbreviation());
-        return language;
+    var repository: Repository? = null
+    var abbreviation: String? = null
+    var name: String? = null
+    fun updateByDTO(dto: LanguageDTO) {
+        name = dto.name
+        abbreviation = dto.abbreviation
     }
 
-    public void updateByDTO(LanguageDTO dto) {
-        this.name = dto.getName();
-        this.abbreviation = dto.getAbbreviation();
+    override fun toString(): String {
+        return "Language(id=" + id + ", abbreviation=" + abbreviation + ", name=" + name + ")"
     }
 
-    public Repository getRepository() {
-        return repository;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getAbbreviation() {
-        return abbreviation;
-    }
-
-    public String toString() {
-        return "Language(id=" + this.getId() + ", abbreviation=" + this.getAbbreviation() + ", name=" + this.getName() + ")";
-    }
-
-    public Set<Translation> getTranslations() {
-        return this.translations;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setTranslations(Set<Translation> translations) {
-        this.translations = translations;
-    }
-
-    public void setRepository(Repository repository) {
-        this.repository = repository;
-    }
-
-    public void setAbbreviation(String abbreviation) {
-        this.abbreviation = abbreviation;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    companion object {
+        @JvmStatic
+        fun fromRequestDTO(dto: LanguageDTO): Language {
+            val language = Language()
+            language.name = dto.name
+            language.abbreviation = dto.abbreviation
+            return language
+        }
     }
 }

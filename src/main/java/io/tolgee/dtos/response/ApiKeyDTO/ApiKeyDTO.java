@@ -1,8 +1,8 @@
 package io.tolgee.dtos.response.ApiKeyDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.tolgee.constants.ApiScope;
 import io.tolgee.model.ApiKey;
-import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,7 +41,7 @@ public class ApiKeyDTO {
                 .userName(apiKey.getUserAccount().getName())
                 .repositoryId(apiKey.getRepository().getId())
                 .repositoryName(apiKey.getRepository().getName())
-                .scopes(apiKey.getScopes().stream().map(ApiScope::getValue).collect(Collectors.toSet()))
+                .scopes(apiKey.getScopesSet().stream().map(ApiScope::getValue).collect(Collectors.toSet()))
                 .build();
     }
 

@@ -1,37 +1,24 @@
-package io.tolgee.model;
+package io.tolgee.model
 
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.io.Serializable
+import java.util.*
+import javax.persistence.*
 
 @MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(
-        value = {"createdAt", "updatedAt"},
-        allowGetters = true
-)
-public abstract class AuditModel implements Serializable {
+@EntityListeners(AuditingEntityListener::class)
+@JsonIgnoreProperties(value = ["createdAt", "updatedAt"], allowGetters = true)
+abstract class AuditModel : Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
-    private Date createdAt;
+    open var createdAt: Date? = null
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at", nullable = false)
     @LastModifiedDate
-    private Date updatedAt;
-
-    public Date getCreatedAt() {
-        return this.createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return this.updatedAt;
-    }
+    var updatedAt: Date? = null
 }

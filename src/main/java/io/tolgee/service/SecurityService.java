@@ -63,7 +63,7 @@ public class SecurityService {
 
     public void checkApiKeyScopes(Set<ApiScope> scopes, ApiKey apiKey) {
         checkApiKeyScopes(scopes, apiKey.getRepository()); // checks if user's has permissions to use api key with api key's permissions
-        if (!apiKey.getScopes().containsAll(scopes)) {
+        if (!apiKey.getScopesSet().containsAll(scopes)) {
             throw new PermissionException();
         }
     }

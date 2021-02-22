@@ -1,7 +1,6 @@
 package io.tolgee.controllers
 
 import io.tolgee.constants.Message
-import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.dtos.request.validators.LanguageValidator
 import io.tolgee.exceptions.NotFoundException
@@ -39,14 +38,14 @@ open class LanguageController(
     fun editLanguage(@RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
         languageValidator.validateEdit(dto)
         val language = languageService.findById(dto!!.id).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-        securityService.checkRepositoryPermission(language.repository.id, Permission.RepositoryPermissionType.MANAGE)
+        securityService.checkRepositoryPermission(language.repository!!.id, Permission.RepositoryPermissionType.MANAGE)
         return LanguageDTO.fromEntity(languageService.editLanguage(dto))
     }
 
     @GetMapping(value = [""])
     @AllowAccessWithApiKey
     fun getAll(@PathVariable("repositoryId") pathRepositoryId: Long?): Set<LanguageDTO> {
-        val repositoryId = if(pathRepositoryId === null) authenticationFacade.apiKey.repository.id else pathRepositoryId
+        val repositoryId = if(pathRepositoryId === null) authenticationFacade.apiKey.repository!!.id else pathRepositoryId
         securityService.getAnyRepositoryPermission(repositoryId)
         return languageService.findAll(repositoryId).stream().map { LanguageDTO.fromEntity(it) }
                 .collect(Collectors.toCollection { LinkedHashSet() })
@@ -55,14 +54,14 @@ open class LanguageController(
     @GetMapping(value = ["{id}"])
     operator fun get(@PathVariable("id") id: Long?): LanguageDTO {
         val language = languageService.findById(id).orElseThrow { NotFoundException() }
-        securityService.getAnyRepositoryPermission(language.repository.id)
+        securityService.getAnyRepositoryPermission(language.repository!!.id)
         return LanguageDTO.fromEntity(language)
     }
 
     @DeleteMapping(value = ["/{id}"])
     fun deleteLanguage(@PathVariable id: Long?) {
         val language = languageService.findById(id).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-        securityService.checkRepositoryPermission(language.repository.id, Permission.RepositoryPermissionType.MANAGE)
+        securityService.checkRepositoryPermission(language.repository!!.id, Permission.RepositoryPermissionType.MANAGE)
         languageService.deleteLanguage(id)
     }
 }

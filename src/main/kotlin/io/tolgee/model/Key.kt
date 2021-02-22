@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import com.unboundid.util.Mutable
 import io.tolgee.dtos.PathDTO
 import java.util.*
 import javax.persistence.*
@@ -31,7 +30,7 @@ data class Key(
     }
 
     fun getTranslation(abbr: String): Optional<Translation> {
-        return translations.stream().filter { t: Translation -> t.language.abbreviation == abbr }.findFirst()
+        return translations.stream().filter { t: Translation -> t.language!!.abbreviation == abbr }.findFirst()
     }
 
     val path: PathDTO
