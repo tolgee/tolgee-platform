@@ -17,7 +17,7 @@
   "license": "BSD",
   "dependencies": {
     "@tolgee/react": "^1.0.0-alpha.23",
-    "@tolgee/ui": "^1.0.0-alpha.23",
+    "@tolgee/ui": "^1.0.0-alpha.31",
     "@sentry/browser": "^6.1.0",
     "@types/yup": "^0.29.11",
     "clsx": "^1.1.1",
