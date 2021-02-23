@@ -17,12 +17,13 @@ data class Screenshot(
         this.key = key
     }
 
+    @Suppress("JoinDeclarationAndAssignment")
     @ManyToOne(optional = false)
     lateinit var key: Key
 
     val filename: String
         get() {
-            val nameToHash = "${this.id}_${this.createdAt.toInstant().toEpochMilli()}"
+            val nameToHash = "${this.id}_${this.createdAt!!.toInstant().toEpochMilli()}"
             val fileName = DigestUtils.sha256Hex(nameToHash.toByteArray())
             return "${key.repository!!.id}/${key.id}/${fileName}.jpg"
         }

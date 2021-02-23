@@ -1,5 +1,6 @@
 package io.tolgee.security.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.tolgee.constants.ApiScope;
 import io.tolgee.constants.Message;
 import io.tolgee.dtos.request.CreateApiKeyDTO;
@@ -12,7 +13,6 @@ import io.tolgee.model.Permission;
 import io.tolgee.model.Repository;
 import io.tolgee.service.ApiKeyService;
 import io.tolgee.service.RepositoryService;
-import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,7 +64,7 @@ public class ApiKeyController extends PrivateController {
     public void edit(@RequestBody() @Valid EditApiKeyDTO dto) {
         ApiKey apiKey = apiKeyService.getApiKey(dto.getId()).orElseThrow(() -> new NotFoundException(Message.API_KEY_NOT_FOUND));
         securityService.checkApiKeyScopes(dto.getScopes(), apiKey.getRepository());
-        apiKey.setScopes(dto.getScopes());
+        apiKey.setScopesSet(dto.getScopes());
         apiKeyService.editApiKey(apiKey);
     }
 

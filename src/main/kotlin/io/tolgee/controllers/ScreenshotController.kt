@@ -79,6 +79,6 @@ class ScreenshotController(
         if (tolgeeProperties.authentication.securedScreenshotRetrieval) {
             filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
         }
-        return ScreenshotDTO(id = entity.id!!, filename = filename, createdAt = entity.createdAt)
+        return ScreenshotDTO(id = entity.id!!, filename = filename, createdAt = entity.createdAt!!)
     }
 }

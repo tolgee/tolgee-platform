@@ -30,7 +30,7 @@ class UserAppApiController(
     fun getTranslations(@PathVariable("languages") languages: Set<String?>?): Map<String, Any> {
         val apiKey = authenticationFacade.apiKey
         securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_VIEW), apiKey)
-        return translationService.getTranslations(languages, apiKey.repository.id)
+        return translationService.getTranslations(languages, apiKey.repository!!.id)
     }
 
     @GetMapping(value = ["/source/{key:.+}/{languages}", "/key/{key:.+}/{languages}"])
@@ -41,7 +41,7 @@ class UserAppApiController(
         val pathDTO = PathDTO.fromFullPath(fullPath)
         val apiKey = authenticationFacade.apiKey
         securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_VIEW), apiKey)
-        return translationService.getKeyTranslationsResult(apiKey.repository.id, pathDTO, langs)
+        return translationService.getKeyTranslationsResult(apiKey.repository!!.id, pathDTO, langs)
     }
 
     @PostMapping(value = ["/keyTranslations/{languages}"])
@@ -49,7 +49,7 @@ class UserAppApiController(
     fun getKeyTranslationsPost(@RequestBody body: UaaGetKeyTranslations, @PathVariable("languages") langs: Set<String?>?): Map<String, String> {
         val pathDTO = PathDTO.fromFullPath(body.key)
         val apiKey = authenticationFacade.apiKey
-        return translationService.getKeyTranslationsResult(apiKey.repository.id, pathDTO, langs)
+        return translationService.getKeyTranslationsResult(apiKey.repository!!.id, pathDTO, langs)
     }
 
     @GetMapping(value = ["/source/{key:.+}"])
@@ -58,7 +58,7 @@ class UserAppApiController(
     fun getKeyTranslations(@PathVariable("key") fullPath: String?): Map<String, String> {
         val pathDTO = PathDTO.fromFullPath(fullPath)
         val apiKey = authenticationFacade.apiKey
-        return translationService.getKeyTranslationsResult(apiKey.repository.id, pathDTO, null)
+        return translationService.getKeyTranslationsResult(apiKey.repository!!.id, pathDTO, null)
     }
 
     @PostMapping(value = ["/keyTranslations"])
@@ -66,14 +66,14 @@ class UserAppApiController(
     fun getKeyTranslationsPost(@RequestBody body: UaaGetKeyTranslations): Map<String, String> {
         val pathDTO = PathDTO.fromFullPath(body.key)
         val apiKey = authenticationFacade.apiKey
-        return translationService.getKeyTranslationsResult(apiKey.repository.id, pathDTO, null)
+        return translationService.getKeyTranslationsResult(apiKey.repository!!.id, pathDTO, null)
     }
 
     @PostMapping("")
     @AllowAccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
     fun setTranslations(@RequestBody dto: @Valid SetTranslationsDTO) {
         val apiKey = authenticationFacade.apiKey
-        val repository = repositoryService.findById(apiKey.repository.id).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
+        val repository = repositoryService.findById(apiKey.repository!!.id).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
         val key = keyService.getOrCreateKey(repository, PathDTO.fromFullPath(dto.key))
         translationService.setForKey(key, dto.translations)
     }
@@ -86,7 +86,7 @@ class UserAppApiController(
         get() {
             val apiKey = authenticationFacade.apiKey
             securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_EDIT), apiKey)
-            return languageService.findAll(apiKey.repository.id).stream().map { obj: Language -> obj.abbreviation }.collect(Collectors.toSet())
+            return languageService.findAll(apiKey.repository!!.id).stream().map { obj: Language -> obj.abbreviation!! }.collect(Collectors.toSet())
         }
 
     @get:AllowAccessWithApiKey
@@ -94,6 +94,6 @@ class UserAppApiController(
     val scopes: Set<String>
         get() {
             val apiKey = authenticationFacade.apiKey
-            return apiKey.scopes.stream().map { obj: ApiScope -> obj.value }.collect(Collectors.toSet())
+            return apiKey.getScopesSet().stream().map { obj: ApiScope -> obj.value }.collect(Collectors.toSet())
         }
 }

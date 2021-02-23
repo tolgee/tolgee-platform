@@ -1,8 +1,8 @@
 
-${Ansi.BLUE}    ____        __            __            __    _                     _))
-${Ansi.BLUE}   / __ \____  / /_  ______ _/ /___  ____ _/ /_  (_)___                > *\     _~
-${Ansi.BLUE}  / /_/ / __ \/ / / / / __ `/ / __ \/ __ `/ __/ / / __ \               `;'\\__-' \_
-${Ansi.BLUE} / ____/ /_/ / / /_/ / /_/ / / /_/ / /_/ / /__ / / /_/ /                  | )  _ \ \
-${Ansi.BLUE}/_/    \____/_/\__, /\__, /_/\____/\__,_/\__(_)_/\____/                  / / ``   w w
-${Ansi.BLUE}              /____//____/                                              w w
+${Ansi.BLUE}
+${Ansi.BLUE} ______     __               _
+${Ansi.BLUE}/_  __/__  / /__ ____ ___   (_)__
+${Ansi.BLUE} / / / _ \/ / _ `/ -_) -_) / / _ \
+${Ansi.BLUE}/_/  \___/_/\_, /\__/\__(_)_/\___/
+${Ansi.BLUE}           /___/
 ${Ansi.RED}version: ${application.version}          - The localization framework ${Ansi.DEFAULT}

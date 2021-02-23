@@ -55,7 +55,7 @@ class LanguageControllerTest : SignedInControllerTest(), ITest {
     fun deleteLanguage() {
         val test = dbPopulator.createBase(generateUniqueString())
         val en = test.getLanguage("en").orElseThrow { NotFoundException() }
-        performDelete(test.id, en.id).andExpect(MockMvcResultMatchers.status().isOk)
+        performDelete(test.id, en.id!!).andExpect(MockMvcResultMatchers.status().isOk)
         Assertions.assertThat(languageService.findById(en.id)).isEmpty
         repositoryService.deleteRepository(test.id)
     }
