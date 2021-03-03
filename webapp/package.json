@@ -82,7 +82,7 @@
     "ts-loader": "^8.0.17",
     "tslint": "~6.1.3",
     "typeface-roboto": "1.1.13",
-    "typescript": "^4.1.5",
+    "typescript": "^4.2.2",
     "webpack": "^5.24.2",
     "webpack-bundle-analyzer": "^4.4.0",
     "webpack-conditional-loader": "^1.0.12",
