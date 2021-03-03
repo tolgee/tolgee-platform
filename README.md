@@ -1,5 +1,4 @@
-![Logo](./webapp/src/favicon.svg =100x)
-
+<img src="./webapp/src/favicon.svg" alt="Tolgee Logo" width="100"/>
 
 # Tolgee Toolkit Server & Web Application
 
