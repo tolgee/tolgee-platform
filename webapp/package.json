@@ -65,7 +65,7 @@
     "babel-plugin-import": "^1.13.3",
     "babel-plugin-transform-imports": "^2.0.0",
     "babel-plugin-transform-typescript-metadata": "^0.3.1",
-    "bcrypt": "^5.0.0",
+    "bcrypt": "^5.0.1",
     "bcryptjs": "^2.4.3",
     "copy-webpack-plugin": "^7.0.0",
     "dotenv": "^8.2.0",
