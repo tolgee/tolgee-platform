@@ -16,11 +16,7 @@ public class JwtToken {
     }
 
     public String getContent() {
-        Claims claims = Jwts.parser()
-                .setSigningKey(key)
-                .parseClaimsJws(this.value)
-                .getBody();
-
+        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(this.value).getBody();
         return claims.getSubject();
     }
 
