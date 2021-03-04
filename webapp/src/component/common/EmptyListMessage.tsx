@@ -1,9 +1,9 @@
 import {default as React, FunctionComponent} from 'react';
 
-import {SadGoatMessage} from "./SadGoatMessage";
+import {SadEmotionMessage} from "./SadEmotionMessage";
 import {Box} from "@material-ui/core";
 import {T} from '@tolgee/react';
 
 export const EmptyListMessage: FunctionComponent = (props) => {
-    return <Box p={8}><SadGoatMessage>{props.children || <T>global_empty_list_message</T>}</SadGoatMessage></Box>
+    return <Box p={8}><SadEmotionMessage>{props.children || <T>global_empty_list_message</T>}</SadEmotionMessage></Box>
 };
