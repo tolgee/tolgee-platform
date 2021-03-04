@@ -4,7 +4,7 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import {GlobalError as GlobalErrorError} from "../../error/GlobalError";
-import {SadGoatMessage} from "./SadGoatMessage";
+import {SadEmotionMessage} from "./SadEmotionMessage";
 import {GlobalActions} from "../../store/global/globalActions";
 import {container} from "tsyringe";
 
@@ -23,7 +23,7 @@ export default function GlobalError(props: { error: GlobalErrorError }) {
 
                             {!dev &&
                             <Box>
-                                <SadGoatMessage>{null}</SadGoatMessage>
+                                <SadEmotionMessage>{null}</SadEmotionMessage>
                             </Box>}
 
                             {props.error.publicInfo &&
