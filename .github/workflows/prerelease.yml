@@ -33,7 +33,7 @@ jobs:
 
       - name: Increase npm version
         id: version
-        run: echo ::set-output name=VERSION::$(npm version prerelease)
+        run: echo ::set-output name=VERSION::$(npm version prerelease -f)
 
       - name: Create docker image
         run: ./gradlew docker
