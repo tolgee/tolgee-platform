@@ -18,7 +18,7 @@
   "dependencies": {
     "@sentry/browser": "^6.2.1",
     "@tolgee/react": "^1.0.0-alpha.31",
-    "@tolgee/ui": "^1.0.0-alpha.31",
+    "@tolgee/ui": "^1.0.0-alpha.33",
     "@types/yup": "^0.29.11",
     "clsx": "^1.1.1",
     "formik": "^2.2.6",
