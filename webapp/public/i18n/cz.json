@@ -122,5 +122,6 @@
   "third_party_auth_error_message" : "Problém s přihlášení pomocí služeb třetích stran",
   "delete_language_confirmation" : "Skutečně odstranit jazyk a všechny překlady do něj?",
   "hard_mode_confirmation_rewrite_text" : "Přepište text: {{text}}",
-  "sign_up_success_needs_verification_message" : "Registrace proběhla úspěšně. Před prvním přihlášením prosím ověřte svůj e-mail kliknutím na odkaz, který byl odeslán na Vám byl odeslán."
+  "sign_up_success_needs_verification_message" : "Registrace proběhla úspěšně. Před prvním přihlášením prosím ověřte svůj e-mail kliknutím na odkaz, který byl odeslán na Vám byl odeslán.",
+  "email_not_verified" : "Váš e-mail nebyl ověřen. Zkontrolujte přijatou poštu a pokračujte podle instrukcí."
 }

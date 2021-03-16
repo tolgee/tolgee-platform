@@ -100,12 +100,14 @@ const theme = createMuiTheme({
     },
 });
 
+console.log(environment);
+
 ReactDOM.render(
     <React.Suspense fallback={<FullPageLoading/>}>
         <TolgeeProvider
             apiUrl={environment.tolgeeApiUrl}
             apiKey={environment.tolgeeApiKey}
-            ui={environment.tolgeeWithUI === "true" ? UI : undefined}
+            ui={environment.tolgeeApiKey ? UI : undefined}
             filesUrlPrefix="/i18n/"
             loadingFallback={<FullPageLoading/>}
         >
