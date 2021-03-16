@@ -67,6 +67,12 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
     };
 
     useEffect(() => {
+        return () => {
+            actions.loadableReset.translations.dispatch();
+        }
+    }, []);
+
+    useEffect(() => {
         if (!listLoadable.data || (selectedLanguages !== listLoadable.data.params.languages && selectedLanguages.length)) {
             loadData();
         }
