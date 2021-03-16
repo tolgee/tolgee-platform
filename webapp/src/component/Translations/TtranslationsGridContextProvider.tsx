@@ -33,6 +33,7 @@ export type TranslationListContextType = {
     showCheckBoxes: boolean
     showKeys: boolean,
     setShowKeys: (showKeys: boolean) => void
+    offset: number;
 }
 
 const messaging = container.resolve(messageService);
@@ -52,12 +53,14 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
 
     const t = useTranslate();
     const [perPage, setPerPage] = useState(20);
+    const [offset, setOffset] = useState(0);
     const [showKeys, setShowKeys] = useState(true);
     const [checkedKeys, setCheckedKeys] = useState(new Set<number>());
     const [_resetEdit, setResetEdit] = useState(() => () => {
     });
 
     const loadData = (search?: string, limit?: number, offset?: number) => {
+        setOffset(0);
         setPerPage(limit || perPage);
         const lastLoadOffset = listLoadable?.dispatchParams?.[4];
         offset = offset !== undefined ? offset : lastLoadOffset
@@ -173,6 +176,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
         loadData,
         listLoadable,
         perPage: perPage,
+        offset: 0,
         isKeyChecked: isKeyChecked,
         toggleKeyChecked: (id) => {
             let copy = new Set<number>(checkedKeys);
