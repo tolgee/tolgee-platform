@@ -13,7 +13,7 @@ export const SearchField: FunctionComponent = (props) => {
     useEffect(() => {
         const handler = setTimeout(() => {
             if (oldSearch !== search) {
-                listContext.loadData(search);
+                listContext.loadData(search, listContext.perPage, 0);
                 setOldSearch(search);
             }
         }, 500);
