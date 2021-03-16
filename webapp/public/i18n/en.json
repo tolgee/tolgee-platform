@@ -122,5 +122,6 @@
   "third_party_auth_error_message" : "Third party authentication error",
   "delete_language_confirmation" : "Do you really want to delete this language and all translations?",
   "hard_mode_confirmation_rewrite_text" : "Rewrite text: {{text}}",
-  "sign_up_success_needs_verification_message" : "Thank you for signing up. To verify your e-mail please follow instructions sent to provided e-mail address."
+  "sign_up_success_needs_verification_message" : "Thank you for signing up. To verify your e-mail please follow instructions sent to provided e-mail address.",
+  "email_not_verified" : "Your e-mail is not verified. Check your incoming messages and follow the instructions."
 }
