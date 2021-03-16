@@ -9,24 +9,22 @@ export const Pagination: FunctionComponent = (props) => {
     const listContext = useContext(TranslationListContext);
 
     const [perPage, setPerPage] = useState(listContext.perPage);
-    const [page, setPage] = useState(Math.ceil(listContext.listLoadable.data.paginationMeta.offset / listContext.perPage));
-
     const confirmation = useLeaveEditConfirmationPagination();
 
-    const onPerPageChange = (pp) => {
+    const onPerPageChange = (perPage) => {
         confirmation(() => {
-            setPerPage(pp);
-            setPage(0);
-            listContext.loadData(listContext.listLoadable.data.params.search, pp, 0);
+            setPerPage(perPage);
+            listContext.loadData(listContext.listLoadable.data.params.search, perPage, 0);
         })
     };
 
     const onPageChange = (p) => {
         confirmation(() => {
-            setPage(p);
             listContext.loadData(listContext.listLoadable.data.params.search, perPage, p * perPage);
         })
     };
+
+    const page = Math.ceil(listContext.listLoadable.data.paginationMeta.offset / listContext.perPage)
 
     return (
         <Box mt={3}>
