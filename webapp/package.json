@@ -16,7 +16,7 @@
   "author": "Jan Cizmar",
   "license": "BSD",
   "dependencies": {
-    "@sentry/browser": "^6.2.1",
+    "@sentry/browser": "^6.2.2",
     "@tolgee/react": "^1.0.0-alpha.35",
     "@tolgee/ui": "^1.0.0-alpha.35",
     "@types/yup": "^0.29.11",
