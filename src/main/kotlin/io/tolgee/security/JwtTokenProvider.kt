@@ -1,100 +1,77 @@
 /*
  * Copyright (c) 2020. Tolgee
  */
+package io.tolgee.security
 
-package io.tolgee.security;
-
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
-import io.tolgee.configuration.tolgee.TolgeeProperties;
-import io.tolgee.constants.Message;
-import io.tolgee.exceptions.AuthenticationException;
-import io.tolgee.model.UserAccount;
-import io.tolgee.service.UserAccountService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.MalformedJwtException
+import io.jsonwebtoken.UnsupportedJwtException
+import io.jsonwebtoken.security.Keys
+import io.jsonwebtoken.security.SignatureException
+import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.service.UserAccountService
+import org.slf4j.LoggerFactory
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.stereotype.Component
+import java.util.*
+import javax.crypto.SecretKey
+import javax.servlet.http.HttpServletRequest
 
 @Component
-public class JwtTokenProvider {
+class JwtTokenProvider(private val configuration: TolgeeProperties,
+                       private val userAccountService: UserAccountService,
+                       private val jwtSecretProvider: JwtSecretProvider) {
 
-    private final TolgeeProperties configuration;
-    private final UserAccountService userAccountService;
-    private final JwtSecretProvider jwtSecretProvider;
+    private val logger = LoggerFactory.getLogger(JwtTokenProvider::class.java)
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
+    private val key: SecretKey
+        get() = Keys.hmacShaKeyFor(jwtSecretProvider.jwtSecret)
 
-    @Autowired
-    public JwtTokenProvider(TolgeeProperties configuration, UserAccountService userAccountService, JwtSecretProvider jwtSecretProvider) {
-        this.configuration = configuration;
-        this.userAccountService = userAccountService;
-        this.jwtSecretProvider = jwtSecretProvider;
-    }
-
-    private SecretKey getKey() {
-        return Keys.hmacShaKeyFor(jwtSecretProvider.getJwtSecret());
-    }
-
-    public JwtToken generateToken(Long userId) {
-        Date now = new Date();
-
-        return new JwtToken(Jwts.builder()
+    fun generateToken(userId: Long): JwtToken {
+        val now = Date()
+        return JwtToken(Jwts.builder()
                 .setSubject(userId.toString())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(now.getTime() + configuration.getAuthentication().getJwtExpiration()))
-                .signWith(getKey())
-                .compact(), getKey());
+                .setIssuedAt(Date())
+                .setExpiration(Date(now.time + configuration.authentication.jwtExpiration))
+                .signWith(key)
+                .compact(), key)
     }
 
-    public boolean validateToken(JwtToken authToken) {
+    fun validateToken(authToken: JwtToken): Boolean {
         try {
-            Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(authToken.toString());
-            return true;
-        } catch (SignatureException ex) {
-            logger.error("Invalid JWT signature");
-        } catch (MalformedJwtException ex) {
-            logger.error("Invalid JWT token");
-        } catch (ExpiredJwtException ex) {
-            logger.error("Expired JWT token");
-        } catch (UnsupportedJwtException ex) {
-            logger.error("Unsupported JWT token");
-        } catch (IllegalArgumentException ex) {
-            logger.error("JWT claims string is empty.");
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken.toString())
+            return true
+        } catch (ex: SignatureException) {
+            logger.error("Invalid JWT signature")
+        } catch (ex: MalformedJwtException) {
+            throw AuthenticationException(Message.INVALID_JWT_TOKEN)
+        } catch (ex: ExpiredJwtException) {
+            throw AuthenticationException(Message.EXPIRED_JWT_TOKEN)
+        } catch (ex: UnsupportedJwtException) {
+            logger.error("Unsupported JWT token")
+        } catch (ex: IllegalArgumentException) {
+            logger.error("JWT claims string is empty.")
         }
-        return false;
+        throw AuthenticationException(Message.GENERAL_JWT_ERROR)
     }
 
-    public Authentication getAuthentication(JwtToken token) {
-        UserAccount userDetails = userAccountService.get(token.getId()).orElseThrow(() -> new AuthenticationException(Message.USER_NOT_FOUND));
-
-        List<GrantedAuthority> authorities = new LinkedList<>();
-
-        GrantedAuthority grantedAuthority = () -> "user";
-
-        authorities.add(grantedAuthority);
-
-        return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+    fun getAuthentication(token: JwtToken): Authentication {
+        val userDetails = userAccountService[token.id].orElseThrow { AuthenticationException(Message.USER_NOT_FOUND) }
+        val authorities: MutableList<GrantedAuthority> = LinkedList()
+        val grantedAuthority = GrantedAuthority { "user" }
+        authorities.add(grantedAuthority)
+        return UsernamePasswordAuthenticationToken(userDetails, null, authorities)
     }
 
-    public JwtToken resolveToken(HttpServletRequest req) {
-        String bearerToken = req.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return new JwtToken(bearerToken.substring(7), getKey());
-        }
-        return null;
+    fun resolveToken(req: HttpServletRequest): JwtToken? {
+        val bearerToken = req.getHeader("Authorization")
+        return if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            JwtToken(bearerToken.substring(7), key)
+        } else null
     }
 }

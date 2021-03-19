@@ -56,7 +56,13 @@ export class ApiHttpService {
             fetch(API_URL + input, init).then((r) => {
                 if (r.status == 401) {
                     console.warn('Redirecting to login - unauthorized user');
-                    redirectionActions.redirect.dispatch(LINKS.LOGIN.build());
+                    ApiHttpService.getResObject(r).then(() => {
+                        this.messageService.error(<T>expired_jwt_token</T>);
+                        redirectionActions.redirect.dispatch(LINKS.LOGIN.build());
+                        this.tokenService.disposeToken();
+                        location.reload();
+                    });
+                    return;
                 }
                 if (r.status >= 500) {
                     errorActions.globalError.dispatch(new GlobalError('Server responded with error status.'));
@@ -71,7 +77,7 @@ export class ApiHttpService {
                 }
                 if (r.status == 404) {
                     redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
-                    this.messageService.error("Resource not found");
+                    this.messageService.error(<T>resource_not_found_message</T>);
                 }
                 if (r.status >= 400 && r.status <= 500) {
                     ApiHttpService.getResObject(r).then(b => {
@@ -92,8 +98,7 @@ export class ApiHttpService {
     }
 
     async getFile(url, queryObject?: { [key: string]: any }): Promise<Blob> {
-        const blob = await (await this.fetch(url + (!queryObject ? "" : "?" + this.buildQuery(queryObject)))).blob();
-        return blob;
+        return await (await this.fetch(url + (!queryObject ? "" : "?" + this.buildQuery(queryObject)))).blob();
     }
 
     async post<T>(url, body): Promise<T> {

@@ -1,46 +1,42 @@
-package io.tolgee.security;
+package io.tolgee.security
 
-import io.tolgee.configuration.tolgee.TolgeeProperties;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.exceptions.AuthenticationException
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.stereotype.Component
+import org.springframework.web.filter.OncePerRequestFilter
+import org.springframework.web.servlet.HandlerExceptionResolver
+import java.io.IOException
+import javax.servlet.FilterChain
+import javax.servlet.ServletException
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @Component
-public class JwtTokenFilter extends OncePerRequestFilter {
-    private final JwtTokenProvider jwtTokenProvider;
-    private final TolgeeProperties configuration;
+class JwtTokenFilter @Autowired constructor(
+        private val jwtTokenProvider: JwtTokenProvider,
+        private val configuration: TolgeeProperties,
+        @param:Qualifier("handlerExceptionResolver")
+        private val resolver: HandlerExceptionResolver
 
-    @Autowired
-    public JwtTokenFilter(JwtTokenProvider jwtTokenProvider, TolgeeProperties configuration) {
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.configuration = configuration;
-    }
-
-    @Override
-    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
-        JwtToken token = jwtTokenProvider.resolveToken(req);
-
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            try {
-                Authentication auth = jwtTokenProvider.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            } catch (Exception e) {
-                logger.error(e);
+) : OncePerRequestFilter() {
+    @Throws(ServletException::class, IOException::class)
+    override fun doFilterInternal(req: HttpServletRequest, res: HttpServletResponse, filterChain: FilterChain) {
+        val token = jwtTokenProvider.resolveToken(req)
+        try {
+            if (token != null && jwtTokenProvider.validateToken(token)) {
+                val auth = jwtTokenProvider.getAuthentication(token)
+                SecurityContextHolder.getContext().authentication = auth
             }
+            filterChain.doFilter(req, res)
+        } catch (e: AuthenticationException) {
+            resolver.resolveException(req, res, null, e)
         }
-        filterChain.doFilter(req, res);
     }
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !configuration.getAuthentication().getEnabled();
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+        return !configuration.authentication.enabled
     }
 }
