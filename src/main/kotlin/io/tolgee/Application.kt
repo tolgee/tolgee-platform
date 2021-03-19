@@ -5,7 +5,6 @@ import io.tolgee.development.DbPopulatorReal
 import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.UserAccountService
-import io.sentry.Sentry
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
@@ -30,12 +29,6 @@ open class Application(
     init {
         if (properties.internal.populate) {
             populator.autoPopulate()
-        }
-
-        if (properties.sentry.enabled) {
-            Sentry.init {
-                it.dsn = properties.sentry.serverDsn
-            }
         }
 
         val initialUsername = properties.authentication.initialUsername
