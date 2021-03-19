@@ -122,7 +122,7 @@ $url
 
         emailVerificationService.createForUser(user, request.callbackUrl)
         if (!properties.authentication.needsEmailVerification) {
-            return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
+            return JwtAuthenticationResponse(tokenProvider.generateToken(user.id!!).toString())
         }
         return Unit
     }
@@ -157,7 +157,7 @@ $url
             throw AuthenticationException(Message.BAD_CREDENTIALS)
         }
         emailVerificationService.check(userAccount)
-        return tokenProvider.generateToken(userAccount.id).toString()
+        return tokenProvider.generateToken(userAccount.id!!).toString()
     }
 
     private fun doLdapAuthorization(loginRequest: LoginRequest): String {
@@ -175,7 +175,7 @@ $url
                 userAccountService.createUser(userAccount)
                 userAccount
             }
-            tokenProvider.generateToken(userAccountEntity.id).toString()
+            tokenProvider.generateToken(userAccountEntity.id!!).toString()
         } catch (e: BadCredentialsException) {
             throw AuthenticationException(Message.BAD_CREDENTIALS)
         }

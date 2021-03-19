@@ -100,8 +100,6 @@ const theme = createMuiTheme({
     },
 });
 
-console.log(environment);
-
 ReactDOM.render(
     <React.Suspense fallback={<FullPageLoading/>}>
         <TolgeeProvider

@@ -20,10 +20,11 @@ import {T} from "@tolgee/react";
 interface LoginProps {
 
 }
-
+const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const globalActions = container.resolve(GlobalActions);
 const securityServiceIns = container.resolve(securityService);
 
+// noinspection JSUnusedLocalSymbols
 export const LoginView: FunctionComponent<LoginProps> = (props) => {
 
     const security = useSelector((state: AppState) => state.global.security);
@@ -33,10 +34,9 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
         return (<Redirect to={LINKS.AFTER_LOGIN.build()}/>);
     }
 
-    const githubBase = 'https://github.com/login/oauth/authorize';
     const githubRedirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({[PARAMS.SERVICE_TYPE]: 'github'});
     const clientId = remoteConfig.authMethods.github.clientId;
-    const gitHubUrl = githubBase + `?client_id=${clientId}&redirect_uri=${githubRedirectUri}&scope=user%3Aemail`;
+    const gitHubUrl = GITHUB_BASE + `?client_id=${clientId}&redirect_uri=${githubRedirectUri}&scope=user%3Aemail`;
 
     const history = useHistory();
     if (history.location.state && (history.location.state as any).from) {

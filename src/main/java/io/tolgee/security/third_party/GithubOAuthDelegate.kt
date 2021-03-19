@@ -86,7 +86,7 @@ class GithubOAuthDelegate(private val tokenProvider: JwtTokenProvider,
                 }
                 newUserAccount
             }
-            val jwt = tokenProvider.generateToken(user.id).toString()
+            val jwt = tokenProvider.generateToken(user.id!!).toString()
             return JwtAuthenticationResponse(jwt)
         }
         if (response == null) {

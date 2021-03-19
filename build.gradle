@@ -50,6 +50,12 @@ repositories {
     mavenCentral()
 }
 
+idea {
+    module {
+        generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
+    }
+}
+
 def liveDb = [
         url         : 'jdbc:postgresql://localhost:5432/postgres',
         referenceUrl: 'hibernate:spring:io.tolgee' +
@@ -151,11 +157,6 @@ bootJar {
     }
 }
 
-sourceSets {
-    main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
-    test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
-}
-
 def unpackTarget = "build/dependency"
 
 task unpack(type: Copy) {
@@ -180,3 +181,7 @@ task packWebapp(type: Zip) {
     entryCompression ZipEntryCompression.STORED
 }
 
+sourceSets {
+    main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
+    test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+}

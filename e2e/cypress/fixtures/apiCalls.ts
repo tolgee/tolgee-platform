@@ -23,7 +23,6 @@ const internalFetch = (input: string, init?: ArgumentTypes<typeof cy.request>[0]
         url: API_URL.replace("/api/", "/internal/") + input,
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': "Bearer " + token
         },
         ...init
     })
