@@ -1,6 +1,6 @@
 import {API_URL, PASSWORD, USERNAME} from "./constants";
-import {LanguageDTO} from "../../src/service/response.types";
 import {ArgumentTypes, Scope} from "./types";
+import {LanguageDTO} from "../../../webapp/src/service/response.types";
 
 const bcrypt = require('bcryptjs');
 

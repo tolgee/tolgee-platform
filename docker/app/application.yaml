@@ -1,7 +1,8 @@
 tolgee:
   file-storage:
     fs-data-path: /data
-
+  authentication:
+    enabled: false
 spring:
   datasource:
     url: jdbc:h2:${tolgee.file-storage.fs-data-path}/db.h2
@@ -9,7 +10,6 @@ spring:
     password: password
   liquibase:
     change-log: classpath:db/changelog/schema.xml
-
 server:
   compression:
     enabled: true
