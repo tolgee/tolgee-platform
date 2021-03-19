@@ -43,7 +43,7 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (props) => 
 
     const languages = {
         en: "English",
-        cz: "Česky"
+        cs: "Česky"
     }
 
     return (

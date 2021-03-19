@@ -108,6 +108,7 @@ ReactDOM.render(
             ui={environment.tolgeeApiKey ? UI : undefined}
             filesUrlPrefix="/i18n/"
             loadingFallback={<FullPageLoading/>}
+            availableLanguages={["en", "cs"]}
         >
             <ThemeProvider theme={theme}>
                 <Provider store={store}>
