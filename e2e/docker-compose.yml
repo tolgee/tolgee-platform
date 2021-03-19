@@ -14,4 +14,5 @@ services:
       - tolgee.authentication.registrations-allowed=true
       - tolgee.internal.fake-emails-sent=true
       - tolgee.authentication.initialPassword=admin
+      - tolgee.authentication.enabled=true
       - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=*:8091,server=y,suspend=n

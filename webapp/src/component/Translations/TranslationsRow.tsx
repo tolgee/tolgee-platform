@@ -49,7 +49,7 @@ export const TranslationsRow: FunctionComponent<TranslationProps> = (props) => {
         <Box display="flex" className={classes.lineBox}>
             <RowContext.Provider value={contextValue}>
                 {listContext.showCheckBoxes &&
-                <Box display="flex" alignItems="center" justifyContent="start" style={{width: 40}}>
+                <Box display="flex" alignItems="center" justifyContent="start" style={{width: 40, flexShrink: 0}}>
                     <Checkbox onChange={() => listContext.toggleKeyChecked(contextValue.data.id)}
                               checked={listContext.isKeyChecked(contextValue.data.id)} size="small" style={{padding: 0}}/>
                 </Box>}

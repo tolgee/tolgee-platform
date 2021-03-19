@@ -11,7 +11,6 @@
   "translation_add" : "Přidat",
   "pagination_displayed_rows" : "{{from}}-{{to}} z {{count}}",
   "translation_grid_source_text" : "Zdrojový text",
-  "login_title" : "Přihlášení",
   "login_username_label" : "Uživatelské jméno",
   "login_password_label" : "Heslo",
   "login_sign_up" : "Vytvořit účet",
@@ -23,7 +22,6 @@
   "delete_repository_button" : "Smazat repozitář",
   "delete_repository_confirmation_message" : "Skutečně chcete smazat repozitář {{name}}?",
   "global_form_save" : "Uložit",
-  "global_form_cancel" : "Zavřít",
   "repository_settings_name_label" : "Název",
   "repository_deleted_message" : "Repozitář byl odstraněn!",
   "repository_successfully_edited_message" : "Nastavení repozitáře bylo uloženo.",
@@ -45,6 +43,7 @@
   "global_cancel_button" : "Zrušit",
   "invite_user_invitation_cancel_button" : "Zrušit",
   "global_empty_list_message" : "Zde nic není. Pro pokračování něco přidejte.",
+  "global_form_cancel" : "Zrušit",
   "repository_permission_label" : "oprávnění:",
   "import_translations_title" : "Importovat překlady",
   "import_translations_loaded_message" : "Načteno {{length}} položek. Pro dokončení klikněte na \"IMPORTOVAT\".",
@@ -123,5 +122,7 @@
   "delete_language_confirmation" : "Skutečně odstranit jazyk a všechny překlady do něj?",
   "hard_mode_confirmation_rewrite_text" : "Přepište text: {{text}}",
   "sign_up_success_needs_verification_message" : "Registrace proběhla úspěšně. Před prvním přihlášením prosím ověřte svůj e-mail kliknutím na odkaz, který byl odeslán na Vám byl odeslán.",
-  "email_not_verified" : "Váš e-mail nebyl ověřen. Zkontrolujte přijatou poštu a pokračujte podle instrukcí."
+  "email_not_verified" : "Váš e-mail nebyl ověřen. Zkontrolujte přijatou poštu a pokračujte podle instrukcí.",
+  "login_title" : "Přihlášení",
+  "resource_not_found_message" : "Nenalezeno"
 }
