@@ -94,6 +94,6 @@ class UserAppApiController(
     val scopes: Set<String>
         get() {
             val apiKey = authenticationFacade.apiKey
-            return apiKey.getScopesSet().stream().map { obj: ApiScope -> obj.value }.collect(Collectors.toSet())
+            return apiKey.scopesEnum.asSequence().map { it.value }.toSet()
         }
 }

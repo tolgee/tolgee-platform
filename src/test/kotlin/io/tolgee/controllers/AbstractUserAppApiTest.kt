@@ -19,10 +19,10 @@ abstract class AbstractUserAppApiTest : AbstractControllerTest() {
         }
     }
 
-    protected fun createBaseWithApiKey(vararg scopes: ApiScope?): ApiKeyDTO {
-        var scopesSet = setOf(*scopes)
+    protected fun createBaseWithApiKey(vararg scopes: ApiScope): ApiKeyDTO {
+        var scopesSet = scopes.toSet()
         if (scopesSet.isEmpty()) {
-            scopesSet = setOf(*ApiScope.values())
+            scopesSet = ApiScope.values().toSet()
         }
         val base = dbPopulator.createBase(generateUniqueString())
         return apiKeyService.createApiKey(base.createdBy, scopesSet, base)
