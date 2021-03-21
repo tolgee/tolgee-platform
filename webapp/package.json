@@ -30,7 +30,7 @@
     "react-redux": "^7.2.2",
     "react-router-dom": "^5.2.0",
     "redux": "^4.0.5",
-    "redux-devtools-extension": "^2.13.8",
+    "redux-devtools-extension": "^2.13.9",
     "redux-promise-middleware": "^6.1.2",
     "redux-thunk": "^2.3.0",
     "regenerator-runtime": "^0.13.7",
