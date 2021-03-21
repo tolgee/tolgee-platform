@@ -75,7 +75,7 @@ public class ApiKeyControllerTest extends SignedInControllerTest implements ITes
         performPost("/api/apiKeys/edit", editDto).andExpect(status().isOk()).andReturn();
         Optional<ApiKey> apiKey = apiKeyService.getApiKey(apiKeyDTO.getId());
         assertThat(apiKey).isPresent();
-        assertThat(apiKey.get().getScopesSet()).isEqualTo(newScopes);
+        assertThat(apiKey.get().getScopesEnum()).isEqualTo(newScopes);
     }
 
     @Test()

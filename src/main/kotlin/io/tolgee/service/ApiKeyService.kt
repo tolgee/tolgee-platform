@@ -1,77 +1,64 @@
-package io.tolgee.service;
+package io.tolgee.service
 
-import io.tolgee.constants.ApiScope;
-import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO;
-import io.tolgee.exceptions.NotFoundException;
-import io.tolgee.model.ApiKey;
-import io.tolgee.model.Repository;
-import io.tolgee.model.UserAccount;
-import io.tolgee.repository.ApiKeyRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.math.BigInteger;
-import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import io.tolgee.constants.ApiScope
+import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.ApiKey
+import io.tolgee.model.Repository
+import io.tolgee.model.UserAccount
+import io.tolgee.repository.ApiKeyRepository
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import java.math.BigInteger
+import java.security.SecureRandom
+import java.util.*
+import java.util.stream.Collectors
 
 @Service
-public class ApiKeyService {
-
-    private final ApiKeyRepository apiKeyRepository;
-    private final PermissionService permissionService;
-    private final SecureRandom random;
-
-    @Autowired
-    public ApiKeyService(ApiKeyRepository apiKeyRepository, PermissionService permissionService, SecureRandom random) {
-        this.apiKeyRepository = apiKeyRepository;
-        this.permissionService = permissionService;
-        this.random = random;
+open class ApiKeyService @Autowired constructor(private val apiKeyRepository: ApiKeyRepository, private val permissionService: PermissionService, private val random: SecureRandom) {
+    open fun createApiKey(userAccount: UserAccount?, scopes: Set<ApiScope>, repository: Repository?): ApiKeyDTO {
+        val apiKey: ApiKey = ApiKey(
+                key = BigInteger(130, random).toString(32),
+                repository = repository,
+                userAccount = userAccount,
+                scopesEnum = scopes
+        )
+        apiKeyRepository.save(apiKey)
+        return ApiKeyDTO.fromEntity(apiKey)
     }
 
-    public ApiKeyDTO createApiKey(UserAccount userAccount, Set<ApiScope> scopes, Repository repository) {
-        ApiKey apiKey = ApiKey.builder()
-                .key(new BigInteger(130, random).toString(32))
-                .scopes(scopes)
-                .repository(repository)
-                .userAccount(userAccount).build();
-        apiKeyRepository.save(apiKey);
-        return ApiKeyDTO.fromEntity(apiKey);
+    open fun getAllByUser(userAccount: UserAccount?): Set<ApiKey> {
+        return apiKeyRepository.getAllByUserAccountOrderById(userAccount)
     }
 
-    public Set<ApiKey> getAllByUser(UserAccount userAccount) {
-        return apiKeyRepository.getAllByUserAccountOrderById(userAccount);
+    open fun getAllByRepository(repositoryId: Long?): Set<ApiKey> {
+        return apiKeyRepository.getAllByRepositoryId(repositoryId)
     }
 
-    public Set<ApiKey> getAllByRepository(Long repositoryId) {
-        return apiKeyRepository.getAllByRepositoryId(repositoryId);
+    open fun getApiKey(apiKey: String?): Optional<ApiKey> {
+        return apiKeyRepository.findByKey(apiKey)
     }
 
-    public Optional<ApiKey> getApiKey(String apiKey) {
-        return apiKeyRepository.findByKey(apiKey);
+    open fun getApiKey(id: Long): Optional<ApiKey> {
+        return apiKeyRepository.findById(id)
     }
 
-    public Optional<ApiKey> getApiKey(Long id) {
-        return apiKeyRepository.findById(id);
+    open fun deleteApiKey(apiKey: ApiKey) {
+        apiKeyRepository.delete(apiKey)
     }
 
-    public void deleteApiKey(ApiKey apiKey) {
-        apiKeyRepository.delete(apiKey);
-    }
-
-    public Set<ApiScope> getAvailableScopes(UserAccount userAccount, Repository repository) {
+    open fun getAvailableScopes(userAccount: UserAccount?, repository: Repository): Set<ApiScope> {
         return Arrays.stream(
-                permissionService.getRepositoryPermission(repository.getId(), userAccount).orElseThrow(NotFoundException::new).getType().getAvailableScopes()
-        ).collect(Collectors.toSet());
+                permissionService.getRepositoryPermission(repository.id, userAccount)
+                        .orElseThrow { NotFoundException() }.type!!.availableScopes
+        ).collect(Collectors.toSet())
     }
 
-    public void editApiKey(ApiKey apiKey) {
-        apiKeyRepository.save(apiKey);
+    open fun editApiKey(apiKey: ApiKey) {
+        apiKeyRepository.save(apiKey)
     }
 
-    public void deleteAllByRepository(Long repositoryId) {
-        apiKeyRepository.deleteAllByRepositoryId(repositoryId);
+    open fun deleteAllByRepository(repositoryId: Long?) {
+        apiKeyRepository.deleteAllByRepositoryId(repositoryId)
     }
 }

@@ -64,7 +64,7 @@ public class ApiKeyController extends PrivateController {
     public void edit(@RequestBody() @Valid EditApiKeyDTO dto) {
         ApiKey apiKey = apiKeyService.getApiKey(dto.getId()).orElseThrow(() -> new NotFoundException(Message.API_KEY_NOT_FOUND));
         securityService.checkApiKeyScopes(dto.getScopes(), apiKey.getRepository());
-        apiKey.setScopesSet(dto.getScopes());
+        apiKey.setScopesEnum(dto.getScopes());
         apiKeyService.editApiKey(apiKey);
     }
 
