@@ -19,7 +19,7 @@ data class ApiKey(
         @NotNull
         @NotEmpty
         @Enumerated(EnumType.ORDINAL)
-        @field:ElementCollection(targetClass = ApiScope::class)
+        @field:ElementCollection(targetClass = ApiScope::class, fetch = FetchType.EAGER)
         var scopesEnum: Set<ApiScope>
 ) : AuditModel() {
 
