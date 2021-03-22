@@ -39,7 +39,7 @@ open class LanguageController(
         languageValidator.validateEdit(dto)
         val language = languageService.findById(dto!!.id).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         securityService.checkRepositoryPermission(language.repository!!.id, Permission.RepositoryPermissionType.MANAGE)
-        return LanguageDTO.fromEntity(LanguageService.editLanguage(dto))
+        return LanguageDTO.fromEntity(languageService.editLanguage(dto))
     }
 
     @GetMapping(value = [""])
