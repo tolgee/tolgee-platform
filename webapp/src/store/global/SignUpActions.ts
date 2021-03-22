@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {SignUpService} from '../../service/signUpService';
+import {SignUpService} from '../../service/SignUpService';
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
 
 export class SignUpState extends StateWithLoadables<SignUpActions> {

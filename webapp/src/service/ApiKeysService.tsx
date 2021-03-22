@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
+import {ApiHttpService} from './ApiHttpService';
 import {ApiKeyDTO} from "./response.types";
 import {MessageService} from "./MessageService";
 import {EditApiKeyDTO} from "./request.types";

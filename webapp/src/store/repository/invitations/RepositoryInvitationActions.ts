@@ -1,6 +1,6 @@
 import {singleton} from 'tsyringe';
 import {AbstractLoadableActions, StateWithLoadables} from "../../AbstractLoadableActions";
-import {InvitationService} from "../../../service/invitationService";
+import {InvitationService} from "../../../service/InvitationService";
 
 export class RepositoryInvitationState extends StateWithLoadables<RepositoryInvitationActions> {
     invitationLoading: boolean = false;

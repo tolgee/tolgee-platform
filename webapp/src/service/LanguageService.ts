@@ -1,5 +1,5 @@
 import {container, singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
+import {ApiHttpService} from './ApiHttpService';
 import {LanguageDTO} from './response.types';
 
 const http = container.resolve(ApiHttpService);

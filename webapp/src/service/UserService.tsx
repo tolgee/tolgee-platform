@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
+import {ApiHttpService} from './ApiHttpService';
 import {UserDTO, UserUpdateDTO} from './response.types';
 import {MessageService} from './MessageService';
 import {T} from "@tolgee/react";

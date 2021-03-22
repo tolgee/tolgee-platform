@@ -1,12 +1,12 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
+import {ApiHttpService} from './ApiHttpService';
 import {TokenDTO} from './response.types';
-import {TokenService} from './tokenService';
+import {TokenService} from './TokenService';
 import {MessageService} from './MessageService';
 import {SignUpType} from '../component/security/SignUpView';
 import {RedirectionActions} from '../store/global/RedirectionActions';
 import {GlobalActions} from '../store/global/GlobalActions';
-import {InvitationCodeService} from "./invitationCodeService";
+import {InvitationCodeService} from "./InvitationCodeService";
 import {T} from "@tolgee/react";
 import React from "react";
 

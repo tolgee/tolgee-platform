@@ -1,6 +1,6 @@
 import {container, singleton} from 'tsyringe';
 
-import {LanguageService} from '../../service/languageService';
+import {LanguageService} from '../../service/LanguageService';
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
 import {useSelector} from "react-redux";
 import {AppState} from "../index";

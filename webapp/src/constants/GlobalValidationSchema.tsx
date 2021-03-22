@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 import {container} from "tsyringe";
-import {SignUpService} from "../service/signUpService";
+import {SignUpService} from "../service/SignUpService";
 import React from "react";
 import {T} from "@tolgee/react";
 

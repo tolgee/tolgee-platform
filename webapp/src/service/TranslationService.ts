@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
+import {ApiHttpService} from './ApiHttpService';
 import {MessageService} from './MessageService';
 import {TranslationsDataResponse, TranslationsObject} from './response.types';
 import {TranslationCreationValue} from "../component/Translations/TranslationCreationDialog";

@@ -1,5 +1,5 @@
 import {container, singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
+import {ApiHttpService} from './ApiHttpService';
 import {PermissionDTO, PermissionEditDTO, RepositoryDTO} from './response.types';
 import {useRedirect} from "../hooks/useRedirect";
 import {LINKS} from "../constants/links";

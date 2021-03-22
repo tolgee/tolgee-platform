@@ -1,12 +1,12 @@
 import {SecurityDTO} from './types';
 import {singleton} from 'tsyringe';
-import {RemoteConfigService} from '../../service/remoteConfigService';
+import {RemoteConfigService} from '../../service/RemoteConfigService';
 import {SecurityService} from '../../service/SecurityService';
 import {ErrorResponseDTO, TokenDTO} from '../../service/response.types';
-import {UserService} from "../../service/userService";
+import {UserService} from "../../service/UserService";
 import {ConfirmationDialogProps} from "../../component/common/ConfirmationDialog";
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
-import {InvitationCodeService} from "../../service/invitationCodeService";
+import {InvitationCodeService} from "../../service/InvitationCodeService";
 
 export class GlobalState extends StateWithLoadables<GlobalActions> {
     authLoading: boolean = false;

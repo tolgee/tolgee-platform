@@ -1,6 +1,6 @@
 import {container, singleton} from 'tsyringe';
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
-import {ImportExportService} from "../../service/importExportService";
+import {ImportExportService} from "../../service/ImportExportService";
 
 export class ImportExportState extends StateWithLoadables<ImportExportActions> {
 

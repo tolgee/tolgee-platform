@@ -1,7 +1,7 @@
 import {singleton} from 'tsyringe';
-import {RemoteConfigService} from '../../service/remoteConfigService';
+import {RemoteConfigService} from '../../service/RemoteConfigService';
 import {SecurityService} from '../../service/SecurityService';
-import {UserService} from "../../service/userService";
+import {UserService} from "../../service/UserService";
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
 
 export class UserState extends StateWithLoadables<UserActions> {

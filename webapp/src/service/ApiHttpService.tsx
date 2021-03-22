@@ -2,7 +2,7 @@ import {container, singleton} from 'tsyringe';
 import {ErrorActions} from '../store/global/ErrorActions';
 import {RedirectionActions} from '../store/global/RedirectionActions';
 import {LINKS} from '../constants/links';
-import {TokenService} from './tokenService';
+import {TokenService} from './TokenService';
 import {GlobalError} from "../error/GlobalError";
 import {MessageService} from "./MessageService";
 import * as Sentry from '@sentry/browser';
