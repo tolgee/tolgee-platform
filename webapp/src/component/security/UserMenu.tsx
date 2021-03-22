@@ -27,6 +27,7 @@ export const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
     const authentication = useConfig().authentication;
 
     const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+        //@ts-ignore
         setAnchorEl(event.currentTarget);
     };
 

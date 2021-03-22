@@ -9,7 +9,7 @@ import {T} from "@tolgee/react";
 
 export class RepositoriesState extends StateWithLoadables<RepositoryActions> {
     repositoriesLoading: boolean = true;
-    repositories: RepositoryDTO[];
+    repositories: RepositoryDTO[] | undefined = undefined;
 }
 
 @singleton()
@@ -29,14 +29,14 @@ export class RepositoryActions extends AbstractLoadableActions<RepositoriesState
 
 
     loadableDefinitions = {
-        editRepository: this.createLoadableDefinition((id, values) => this.service.editRepository(id, values), null,
+        editRepository: this.createLoadableDefinition((id, values) => this.service.editRepository(id, values), undefined,
             <T>repository_successfully_edited_message</T>, LINKS.REPOSITORIES),
         createRepository: this.createLoadableDefinition((values) => this.service.createRepository(values),
-            null, <T>repository_created_message</T>, LINKS.REPOSITORIES),
+            undefined, <T>repository_created_message</T>, LINKS.REPOSITORIES),
         repository: this.createLoadableDefinition(this.service.loadRepository),
         deleteRepository: this.createLoadableDefinition(this.service.deleteRepository, (state): RepositoriesState =>
             (
-                {...state, loadables: {...state.loadables, repository: {...createLoadable()} as Loadable<RepositoryDTO>}}
+                {...state, loadables: {...state.loadables!, repository: {...createLoadable()} as Loadable<RepositoryDTO>}}
             ), <T>repository_deleted_message</T>)
     };
 

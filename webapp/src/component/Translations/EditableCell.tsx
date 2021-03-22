@@ -16,7 +16,7 @@ export interface EditableCellProps {
     initialValue: any,
     validationSchema: Yup.AnySchema,
     onSubmit: (value: string) => void;
-    onChange?: (value: string) => void;
+    onChange: (value: string) => void;
     editEnabled: boolean;
     isEditing: boolean;
     onCancel?: (value: string) => void
@@ -112,6 +112,8 @@ export const EditableCell: FunctionComponent<EditableCellProps> = (props) => {
 
     return (
         <Box flexGrow={1}>
+            {/*
+            @ts-ignore*/}
             <MicroForm onSubmit={(v: { value: any }) => props.onSubmit(v.value)} initialValues={{value: props.initialValue || ""}}
                        validationSchema={Yup.object().shape({value: props.validationSchema})}>
                 <EasyInput lang={props.lang} onChange={onInputChange} multiline name="value" fullWidth endAdornment={
@@ -124,7 +126,7 @@ export const EditableCell: FunctionComponent<EditableCellProps> = (props) => {
                             <CheckIcon/>
                         </IconButton>
                         <IconButton
-                            onClick={() => props.onCancel(value)}
+                            onClick={() => props.onCancel && props.onCancel(value)}
                             edge="end"
                             color="secondary"
                         >

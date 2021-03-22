@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {FunctionComponent} from 'react';
-import Logo from '../../../svgs/tolgeeLogo.svg'
+import {ReactComponent as Logo} from '../../../svgs/tolgeeLogo.svg'
 import {SvgIcon, SvgIconProps} from "@material-ui/core";
 
 export const TolgeeLogo: FunctionComponent<SvgIconProps> = (props) =>

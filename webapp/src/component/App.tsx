@@ -46,7 +46,7 @@ const Redirection = () => {
     return null;
 };
 
-const MandatoryDataProvider = (props) => {
+const MandatoryDataProvider = (props: any) => {
     let config = useConfig();
     let userData = useUser();
 
@@ -75,12 +75,12 @@ const GlobalConfirmation = () => {
     let actions = container.resolve(GlobalActions);
 
     const onCancel = () => {
-        state.onCancel?.();
+        state?.onCancel?.();
         actions.closeConfirmation.dispatch();
     };
 
     const onConfirm = () => {
-        state.onConfirm?.();
+        state?.onConfirm?.();
         actions.closeConfirmation.dispatch();
     };
 

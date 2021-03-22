@@ -42,7 +42,7 @@ export const RepositoryPermissionsView: FunctionComponent = () => {
 
     const userData = useUser();
 
-    const [editingId, setEditingId] = useState(null);
+    const [editingId, setEditingId] = useState(null as number | null);
 
     return (
         <BaseView title={<T>edit_repository_permissions_title</T>} xs={12} md={10} lg={8}
@@ -58,7 +58,7 @@ export const RepositoryPermissionsView: FunctionComponent = () => {
                                 <ListItemText>
                                     {p.userFullName} | {p.username}
                                     &nbsp;[ <i><T>repository_permission_label</T> {p.id === editingId &&
-                                <PermissionSelect name="type" className={null}/> || <T>{`permission_type_${repositoryPermissionTypes[p.type]}`}</T>}</i> ]
+                                <PermissionSelect name="type" className=""/> || <T>{`permission_type_${repositoryPermissionTypes[p.type]}`}</T>}</i> ]
                                 </ListItemText>
                                 {userData && userData.id !== p.userId &&
                                 <ListItemSecondaryAction>

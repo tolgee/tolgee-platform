@@ -22,9 +22,9 @@ export class LanguageActions extends AbstractLoadableActions<LanguagesState> {
         return {
             list: this.createLoadableDefinition(this.service.getLanguages),
             language: this.createLoadableDefinition(this.service.get),
-            create: this.createLoadableDefinition(this.service.create, null, "Language created"),
-            edit: this.createLoadableDefinition(this.service.editLanguage, null, "Language saved"),
-            delete: this.createLoadableDefinition(this.service.delete, null, "Language deleted"),
+            create: this.createLoadableDefinition(this.service.create, undefined, "Language created"),
+            edit: this.createLoadableDefinition(this.service.editLanguage, undefined, "Language saved"),
+            delete: this.createLoadableDefinition(this.service.delete, undefined, "Language deleted"),
         };
     }
 

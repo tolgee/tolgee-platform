@@ -18,3 +18,27 @@ e2e/cypress/screenshots
 e2e/node_modules
 e2e/cypress/integration/examples/
 .gradle
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/webapp/node_modules
+/webapp/.pnp
+/webapp/.pnp.js
+
+# testing
+/webapp/coverage
+
+# production
+/webapp/build
+
+# misc
+/webapp/.DS_Store
+/webapp/.env.local
+/webapp/.env.development.local
+/webapp/.env.test.local
+/webapp/.env.production.local
+
+/webapp/npm-debug.log*
+/webapp/yarn-debug.log*
+/webapp/yarn-error.log*

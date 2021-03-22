@@ -38,7 +38,7 @@ export const Select: FunctionComponent<Props> = (props) => {
                 labelId={'select_' + field.name + '_label'}
                 value={field.value}
                 onChange={e => helpers.setValue(e.target.value)}
-                renderValue={typeof renderValue === 'function' ? renderValue : value => value}
+                renderValue={typeof renderValue === 'function' ? renderValue : value => value as ReactNode}
             >
                 {props.children}
             </MUISelect>

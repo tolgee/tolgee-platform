@@ -12,6 +12,7 @@ interface MicroFormProps<T = { [key: string]: any }> {
 export const MicroForm: FunctionComponent<MicroFormProps> = ({initialValues, validationSchema, ...props}) => {
 
     return (
+        // @ts-ignore
         <Formik initialValues={initialValues} onSubmit={props.onSubmit} validationSchema={validationSchema}>
             {(formikProps: FormikProps<any>) => (
                 <Form>

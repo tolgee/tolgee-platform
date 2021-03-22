@@ -12,7 +12,7 @@ import {T} from "@tolgee/react";
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
 
-const API_URL = environment.apiUrl;
+const API_URL = process.env.REACT_APP_API_URL;
 
 let timer;
 let requests: { [address: string]: number } = {};
@@ -53,6 +53,11 @@ export class ApiHttpService {
                 init.headers = init.headers || {};
                 init.headers = {...init.headers, 'Authorization': 'Bearer ' + this.tokenService.getToken()};
             }
+
+            if(!API_URL){
+                throw Error("API URL not specified.")
+            }
+
             fetch(API_URL + input, init).then((r) => {
                 if (r.status == 401) {
                     console.warn('Redirecting to login - unauthorized user');

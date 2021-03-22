@@ -26,7 +26,7 @@ export class Link {
      * @param link
      * @param itemTemplate
      */
-    static ofParent(link: Link, itemTemplate: string): Link {
+    static ofParent(link: Link | null, itemTemplate: string): Link {
         return new Link(`${link ? link.template : ''}/${itemTemplate}`);
     }
 

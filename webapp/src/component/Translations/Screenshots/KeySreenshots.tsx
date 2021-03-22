@@ -57,8 +57,10 @@ export const KeyScreenshots: FunctionComponent<ScreenshotsProps> = (props) => {
                 </IconButton>
             </Box>
             {!!anchorEl &&
+            //@ts-ignore
             <ScreenshotsPopover data={props.data} anchorEl={anchorEl} onClose={handleClose}/>
             }
         </>
     )
-};
+}
+;

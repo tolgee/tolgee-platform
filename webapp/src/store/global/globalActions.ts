@@ -2,7 +2,7 @@ import {SecurityDTO} from './types';
 import {singleton} from 'tsyringe';
 import {remoteConfigService} from '../../service/remoteConfigService';
 import {securityService} from '../../service/securityService';
-import {ErrorResponseDTO, RemoteConfigurationDTO, TokenDTO} from '../../service/response.types';
+import {ErrorResponseDTO, TokenDTO} from '../../service/response.types';
 import {userService} from "../../service/userService";
 import {ConfirmationDialogProps} from "../../component/common/ConfirmationDialog";
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
@@ -20,7 +20,7 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
     passwordResetSetValidated = false;
     passwordResetSetError = null;
     passwordResetSetSucceed = false;
-    confirmationDialog: ConfirmationDialogProps = null;
+    confirmationDialog: ConfirmationDialogProps | null = null;
     sideMenuOpen: boolean = true;
 }
 
@@ -40,7 +40,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
 
     logout = this.createAction('LOGOUT', () => this.securityService.logout()).build.on(
         (state) => (
-            {...state, security: <SecurityDTO>{...state.security, jwtToken: null, allowPrivate: false}}
+            {...state, security: <SecurityDTO>{...state.security, jwtToken: undefined, allowPrivate: false}}
         ));
     login = this.buildLoginAction('LOGIN', v => this.securityService.login(v));
 
@@ -51,12 +51,12 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
         }).build.onFullFilled((state) => {
             return {...state, passwordResetSetLoading: false, passwordResetSetValidated: true};
         }).build.onRejected((state, action) => {
-            return <GlobalState>{
+            return {
                 ...state,
                 passwordResetSetValidated: false,
                 passwordResetSetError: action.payload.code,
                 passwordResetSetLoading: false
-            };
+            } as unknown as GlobalState;
         });
     resetPasswordSet = this.createPromiseAction<void, ErrorResponseDTO, Parameters<securityService['resetPasswordSet']>>('RESET_PASSWORD_SET',
         this.securityService.resetPasswordSet)
@@ -65,11 +65,11 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
         }).build.onFullFilled((state) => {
             return <GlobalState>{...state, passwordResetSetSucceed: true};
         }).build.onRejected((state, action) => {
-            return <GlobalState>{
+            return {
                 ...state, passwordResetSetError: action.payload.code,
                 passwordResetSetSucceed: false,
                 passwordResetSetLoading: false
-            };
+            } as unknown as GlobalState;
         });
 
     setJWTToken = this.createAction('SET_JWT', (token: string) => token).build.on(
@@ -92,7 +92,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
                 confirmationDialog: action.payload
             }));
 
-    closeConfirmation = this.createAction('CLOSE_CONFIRMATION', null)
+    closeConfirmation = this.createAction('CLOSE_CONFIRMATION', undefined)
         .build.on((state) =>
             (<GlobalState>{
                 ...state,
@@ -103,15 +103,15 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
             }));
 
     readonly loadableDefinitions = {
-        remoteConfig: this.createLoadableDefinition<RemoteConfigurationDTO>(() => this.configService.getConfiguration(),
+        remoteConfig: this.createLoadableDefinition(() => this.configService.getConfiguration(),
             (state, action) => {
                 let invitationCode = this.invitationCodeService.getCode();
                 return {
                     ...state,
                     security: {
                         ...state.security,
-                        allowPrivate: !action.payload.authentication || state.security.allowPrivate,
-                        allowRegistration: action.payload.allowRegistrations || !!invitationCode //if user has invitation code, registration is allowed
+                        allowPrivate: !action.payload?.authentication || state.security.allowPrivate,
+                        allowRegistration: action.payload?.allowRegistrations || !!invitationCode //if user has invitation code, registration is allowed
                     }
                 };
             }),

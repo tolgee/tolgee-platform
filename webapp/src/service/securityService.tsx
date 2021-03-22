@@ -11,7 +11,7 @@ import {invitationService} from "./invitationService";
 import React from "react";
 import {T} from "@tolgee/react";
 
-const API_URL = environment.apiUrl;
+const API_URL = process.env.REACT_APP_API_URL;
 
 interface ResetPasswordPostRequest {
     email: string,
@@ -90,7 +90,7 @@ export class securityService {
         this.disposeLogoutMark();
     };
 
-    public getAfterLoginLink = (): object => {
+    public getAfterLoginLink = (): object | null => {
         let link = localStorage.getItem('afterLoginLink');
         if (link) {
             return JSON.parse(link);
@@ -111,8 +111,9 @@ export class securityService {
 
         this.tokenService.setToken(tokenDTO.accessToken);
 
-        if (this.invitationCodeService.getCode()) {
-            await this.invitationService.acceptInvitation(this.invitationCodeService.getCode());
+        const code = this.invitationCodeService.getCode();
+        if (code) {
+            await this.invitationService.acceptInvitation(code);
             this.invitationCodeService.disposeCode();
         }
         return tokenDTO;

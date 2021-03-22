@@ -3,7 +3,7 @@ import {singleton} from 'tsyringe';
 import {GlobalError} from "../../error/GlobalError";
 
 export class ErrorState {
-    error: GlobalError = null;
+    error: GlobalError | null = null;
 }
 
 @singleton()

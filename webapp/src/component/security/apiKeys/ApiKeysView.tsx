@@ -27,7 +27,7 @@ export const ApiKeysView: FunctionComponent = () => {
         <>
             {list.loaded && (
                 <FormDialog
-                    editKey={list.data.find((key) => key.id === parseInt(useRouteMatch().params[PARAMS.API_KEY_ID]))}
+                    editKey={list.data!.find((key) => key.id === parseInt(useRouteMatch().params[PARAMS.API_KEY_ID]))}
                 />
             )}
         </>
@@ -49,9 +49,9 @@ export const ApiKeysView: FunctionComponent = () => {
                 {() => (
                     <>
                         {
-                            list.loaded && (!list.data.length ?
+                            list.loaded && (!list.data!.length ?
                                 <EmptyListMessage><T>No api keys yet!</T></EmptyListMessage> :
-                                <ApiKeysList data={list.data}/>)
+                                <ApiKeysList data={list.data!}/>)
                         }
                         <FabAddButtonLink to={LINKS.USER_API_KEYS_GENERATE.build()}/>
                     </>

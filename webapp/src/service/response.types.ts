@@ -85,7 +85,7 @@ export interface UserDTO {
 export interface UserUpdateDTO {
     email: string,
     name: string,
-    password: string
+    password?: string
 }
 
 export interface ApiKeyDTO {

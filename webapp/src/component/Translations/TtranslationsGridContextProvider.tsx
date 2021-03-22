@@ -11,6 +11,7 @@ import {FullPageLoading} from "../common/FullPageLoading";
 import {useRepositoryLanguages} from "../../hooks/useRepositoryLanguages";
 import {useLeaveEditConfirmationOtherEdit} from "./useLeaveEditConfirmation";
 
+//@ts-ignore
 export const TranslationListContext = React.createContext<TranslationListContextType>(null);
 
 const actions = container.resolve(TranslationActions);
