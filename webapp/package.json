@@ -38,7 +38,7 @@
     "file-loader": "^6.2.0",
     "formik": "^2.2.6",
     "formik-material-ui": "^3.0.1",
-    "html-webpack-plugin": "^5.2.0",
+    "html-webpack-plugin": "^5.3.1",
     "jest": "^26.6.3",
     "namor": "^2.0.2",
     "notistack": "^1.0.5",
