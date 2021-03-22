@@ -3,7 +3,7 @@ import {singleton} from 'tsyringe';
 const LOCAL_STORAGE_KEY = 'jwtToken';
 
 @singleton()
-export class tokenService {
+export class TokenService {
     getToken() {
         return localStorage.getItem(LOCAL_STORAGE_KEY);
     }

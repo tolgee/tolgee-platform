@@ -2,9 +2,9 @@ import {container, singleton} from 'tsyringe';
 import {ErrorActions} from '../store/global/errorActions';
 import {RedirectionActions} from '../store/global/redirectionActions';
 import {LINKS} from '../constants/links';
-import {tokenService} from './tokenService';
+import {TokenService} from './tokenService';
 import {GlobalError} from "../error/GlobalError";
-import {messageService} from "./messageService";
+import {MessageService} from "./messageService";
 import * as Sentry from '@sentry/browser';
 import React from "react";
 import {T} from "@tolgee/react";
@@ -29,7 +29,7 @@ const detectLoop = (url) => {
 
 @singleton()
 export class ApiHttpService {
-    constructor(private tokenService: tokenService, private messageService: messageService) {
+    constructor(private tokenService: TokenService, private messageService: MessageService) {
     }
 
     private static async getResObject(r: Response) {

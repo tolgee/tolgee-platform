@@ -1,6 +1,6 @@
 import {container, singleton} from 'tsyringe';
 
-import {languageService} from '../../service/languageService';
+import {LanguageService} from '../../service/languageService';
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
 import {useSelector} from "react-redux";
 import {AppState} from "../index";
@@ -12,7 +12,7 @@ export class LanguagesState extends StateWithLoadables<LanguageActions> {
 
 @singleton()
 export class LanguageActions extends AbstractLoadableActions<LanguagesState> {
-    private service = container.resolve(languageService);
+    private service = container.resolve(LanguageService);
 
     constructor() {
         super(new LanguagesState());

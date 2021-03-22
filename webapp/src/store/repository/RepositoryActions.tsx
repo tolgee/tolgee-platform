@@ -1,6 +1,6 @@
 import {container, singleton} from 'tsyringe';
 
-import {repositoryService} from '../../service/repositoryService';
+import {RepositoryService} from '../../service/repositoryService';
 import {RepositoryDTO} from '../../service/response.types';
 import {LINKS} from "../../constants/links";
 import {AbstractLoadableActions, createLoadable, Loadable, StateWithLoadables} from "../AbstractLoadableActions";
@@ -18,7 +18,7 @@ export class RepositoryActions extends AbstractLoadableActions<RepositoriesState
         super(new RepositoriesState());
     }
 
-    private service = container.resolve(repositoryService);
+    private service = container.resolve(RepositoryService);
 
     public loadRepositories = this.createPromiseAction<RepositoryDTO[], any>('LOAD_ALL', this.service.getRepositories)
         .build.onFullFilled((state, action) => {

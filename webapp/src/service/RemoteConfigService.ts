@@ -5,7 +5,7 @@ import {GlobalError} from "../error/GlobalError";
 import {ErrorActions} from "../store/global/errorActions";
 
 @singleton()
-export class remoteConfigService {
+export class RemoteConfigService {
     constructor(private http: ApiHttpService, private errorActions: ErrorActions) {
     }
 

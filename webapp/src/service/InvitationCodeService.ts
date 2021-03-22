@@ -3,7 +3,7 @@ import {singleton} from 'tsyringe';
 const LOCAL_STORAGE_KEY = 'invitationCode';
 
 @singleton()
-export class invitationCodeService {
+export class InvitationCodeService {
     getCode() {
         return localStorage.getItem(LOCAL_STORAGE_KEY);
     }

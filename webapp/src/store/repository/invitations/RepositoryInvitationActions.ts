@@ -1,6 +1,6 @@
 import {singleton} from 'tsyringe';
 import {AbstractLoadableActions, StateWithLoadables} from "../../AbstractLoadableActions";
-import {invitationService} from "../../../service/invitationService";
+import {InvitationService} from "../../../service/invitationService";
 
 export class RepositoryInvitationState extends StateWithLoadables<RepositoryInvitationActions> {
     invitationLoading: boolean = false;
@@ -32,7 +32,7 @@ export class RepositoryInvitationActions extends AbstractLoadableActions<Reposit
         }, (state) => ({...state, invitationCode: ""}))
     };
 
-    constructor(private invitationService: invitationService) {
+    constructor(private invitationService: InvitationService) {
         super(new RepositoryInvitationState());
     }
 

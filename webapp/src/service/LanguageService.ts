@@ -5,7 +5,7 @@ import {LanguageDTO} from './response.types';
 const http = container.resolve(ApiHttpService);
 
 @singleton()
-export class languageService {
+export class LanguageService {
     public getLanguages = async (repositoryId: number): Promise<LanguageDTO[]> =>
         (await http.fetch(`repository/${repositoryId}/languages`)).json();
 

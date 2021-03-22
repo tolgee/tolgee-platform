@@ -5,7 +5,7 @@ const LOCAL_STORAGE_KEY = 'selectedLanguages';
 type AllType = { [repositoryId: number]: string[] };
 
 @singleton()
-export class repositoryPreferencesService {
+export class RepositoryPreferencesService {
     getAll(): AllType {
         return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
     }

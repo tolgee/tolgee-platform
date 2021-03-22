@@ -13,7 +13,7 @@ import Box from '@material-ui/core/Box';
 import {container} from 'tsyringe';
 import {GlobalActions} from '../../store/global/globalActions';
 import {Alert} from '../common/Alert';
-import {securityService} from '../../service/securityService';
+import {SecurityService} from '../../service/securityService';
 import {useConfig} from "../../hooks/useConfig";
 import {T} from "@tolgee/react";
 
@@ -22,7 +22,7 @@ interface LoginProps {
 }
 const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const globalActions = container.resolve(GlobalActions);
-const securityServiceIns = container.resolve(securityService);
+const securityServiceIns = container.resolve(SecurityService);
 
 // noinspection JSUnusedLocalSymbols
 export const LoginView: FunctionComponent<LoginProps> = (props) => {

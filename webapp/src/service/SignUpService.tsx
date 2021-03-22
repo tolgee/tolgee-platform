@@ -1,22 +1,22 @@
 import {singleton} from 'tsyringe';
 import {ApiHttpService} from './apiHttpService';
 import {TokenDTO} from './response.types';
-import {tokenService} from './tokenService';
-import {messageService} from './messageService';
+import {TokenService} from './tokenService';
+import {MessageService} from './messageService';
 import {SignUpType} from '../component/security/SignUpView';
 import {RedirectionActions} from '../store/global/redirectionActions';
 import {GlobalActions} from '../store/global/globalActions';
-import {invitationCodeService} from "./invitationCodeService";
+import {InvitationCodeService} from "./invitationCodeService";
 import {T} from "@tolgee/react";
 import React from "react";
 
 @singleton()
-export class signUpService {
-    constructor(private http: ApiHttpService, private tokenService: tokenService,
-                private messageService: messageService,
+export class SignUpService {
+    constructor(private http: ApiHttpService, private tokenService: TokenService,
+                private messageService: MessageService,
                 private redirectionActions: RedirectionActions,
                 private globalActions: GlobalActions,
-                private invitationCodeService: invitationCodeService) {
+                private invitationCodeService: InvitationCodeService) {
     }
 
     validateEmail = async (email: string): Promise<boolean> => {

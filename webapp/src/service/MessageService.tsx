@@ -5,7 +5,7 @@ import {MessageActions} from '../store/global/messageActions';
 import {VariantType} from "notistack";
 
 @singleton()
-export class messageService {
+export class MessageService {
     constructor(private actions: MessageActions) {
     }
 

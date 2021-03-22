@@ -7,7 +7,7 @@ import {LINKS} from "../constants/links";
 const http = container.resolve(ApiHttpService);
 
 @singleton()
-export class repositoryService {
+export class RepositoryService {
     constructor() {
     }
 

@@ -9,7 +9,7 @@ import configureStore from './store';
 
 import {container} from 'tsyringe';
 
-import {dispatchService} from './service/dispatchService';
+import {DispatchService} from './service/dispatchService';
 
 import ErrorBoundary from "./component/ErrorBoundary";
 import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
@@ -28,7 +28,7 @@ const store = configureStore();
 const SnackbarProvider = React.lazy(() => import(/* webpackChunkName: "notistack" */ 'notistack')
     .then(module => ({"default": module.SnackbarProvider})));
 
-container.resolve(dispatchService).store = store;
+container.resolve(DispatchService).store = store;
 
 const rubik = {
     fontFamily: 'Rubik',
