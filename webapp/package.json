@@ -43,7 +43,7 @@
     "namor": "^2.0.2",
     "notistack": "^1.0.5",
     "query-string": "^7.0.0",
-    "react": "^16.14.0",
+    "react": "^17.0.1",
     "react-column-resizer": "^1.1.9",
     "react-dom": "^16.14.0",
     "react-redux": "^7.2.2",
