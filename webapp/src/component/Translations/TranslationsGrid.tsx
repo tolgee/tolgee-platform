@@ -14,6 +14,7 @@ import {MenuBar} from "./MenuBar";
 import {BaseView} from "../layout/BaseView";
 import {useRepositoryPermissions} from "../../hooks/useRepositoryPermissions";
 import {RepositoryPermissionType} from "../../service/response.types";
+import {T} from "@tolgee/react";
 
 export const TranslationsGrid: FunctionComponent = (props) => {
     let repositoryDTO = useRepository();
@@ -51,7 +52,7 @@ export const TranslationsGrid: FunctionComponent = (props) => {
     );
 
     return (
-        <BaseView title="Translations"
+        <BaseView title={<T>translations_view_title</T>}
                   headerChildren={isSearch || !isEmpty ? <MenuBar/> : null}
                   loading={listContext.listLoadable.loading}
                   hideChildrenOnLoading={false}>

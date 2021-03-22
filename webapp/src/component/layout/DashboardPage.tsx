@@ -10,12 +10,15 @@ import {Link} from "react-router-dom";
 import {LINKS} from "../../constants/links";
 import {TolgeeLogo} from "../common/icons/TolgeeLogo";
 
+const FOOTER_IMAGE_HEIGHT = 30;
+const FOOTER_PADDING = 1;
+
 function Copyright() {
     return (
         <>
-            <Box display="flex" p={2} alignItems="center" justifyContent="center" fontWeight="500">
-                <Link to={LINKS.ROOT.build()} style={{color: "inherit"}}>
-                    <TolgeeLogo opacity={0.2} style={{width: 40, height: 40, filter: "drop-shadow(0px 1px 1px rgba(0, 0, 0, 1))"}}/>
+            <Box display="flex" p={1} alignItems="center" justifyContent="center" fontWeight="500">
+                <Link to={LINKS.ROOT.build()} style={{color: "inherit", height: 30}}>
+                    <TolgeeLogo opacity={0.2} style={{width: 30, height: 30, filter: "drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.2))"}}/>
                 </Link>
             </Box>
         </>
@@ -29,10 +32,12 @@ const useStyles = makeStyles(theme => ({
     appBarSpacer: theme.mixins.toolbar,
     content: {
         flexGrow: 1,
-        height: '100vh',
+        height: `100vh`,
         overflow: 'auto',
     },
     container: {
+        flexGrow: 1,
+        display: "flex"
     },
 }));
 
@@ -52,7 +57,7 @@ export const DashboardPage: FunctionComponent<DashboardPageProps> = ({children, 
             <main className={classes.content}>
                 <Box display="flex" flexDirection="column" flexGrow={1} minHeight="100%">
                     {!props.repositoryName && <div className={classes.appBarSpacer}/>}
-                    <Box flexGrow={1}>
+                    <Box flexGrow={1} display={"flex"} flexDirection="column">
                         <Container maxWidth={false} className={classes.container}>
                             <Grid container spacing={3}>
                                 {children}
