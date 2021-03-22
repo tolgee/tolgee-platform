@@ -15,7 +15,7 @@ export function SideMenuItem({linkTo, icon, text, selected}: SideMenuItemProps) 
     let match = useRouteMatch();
 
     return (
-        <ListItemLink selected={selected ? true : match.url === linkTo} to={linkTo}>
+        <ListItemLink selected={selected ? true : match.url === linkTo} to={linkTo || ""}>
             <ListItemIcon>
                 {icon}
             </ListItemIcon>

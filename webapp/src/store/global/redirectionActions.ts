@@ -2,7 +2,7 @@ import {AbstractActions} from '../AbstractActions';
 import {singleton} from 'tsyringe';
 
 export class RedirectionState {
-    to: string = null;
+    to: string | null = null;
     redirecting: boolean = false;
 }
 

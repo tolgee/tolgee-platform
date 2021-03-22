@@ -63,6 +63,7 @@ const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
                                           </Box>
                                       </Box>
                                   </>}
+                              // @ts-ignore
                               onSubmit={(v: ValueType) => {
                                   globalActions.loadableActions.resetPasswordRequest.dispatch(v.email);
                               }}>

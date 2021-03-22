@@ -31,7 +31,7 @@ export const LanguageListView = () => {
             {() => (
                 <Box ml={-2}>
                     <List>
-                        {loadable.data.map(l => (
+                        {loadable.data!.map(l => (
                             <ListItem key={l.id}>
                                 <ListItemText>
                                     {l.name} [{l.abbreviation}]

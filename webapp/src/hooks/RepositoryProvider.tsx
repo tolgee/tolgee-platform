@@ -38,6 +38,6 @@ export const RepositoryProvider: FunctionComponent<{ id: number }> = (props) => 
         );
     }
 
-    throw new GlobalError("Unexpected error occurred", repositoryDTOLoadable.error.code || "Loadable error");
+    throw new GlobalError("Unexpected error occurred", repositoryDTOLoadable.error?.code || "Loadable error");
 
 };

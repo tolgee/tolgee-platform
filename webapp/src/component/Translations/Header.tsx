@@ -11,6 +11,8 @@ export const Header: FunctionComponent = () => {
 
     return (
         <Box display="flex" height={40}>
+            {/*
+            @ts-ignore*/}
             <RowContext.Provider value={{data: null, lastRendered: 0}}>
                 {listContext.showCheckBoxes &&
                 <Box width={40} display="flex" alignItems="center">

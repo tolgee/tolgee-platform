@@ -35,10 +35,10 @@ export class Validation {
     });
 
     private static readonly createEmailValidation = (): (v) => Promise<boolean> => {
-        let timer = null;
+        let timer: any = undefined;
         const signUpServiceImpl = container.resolve(signUpService);
-        let lastValue = undefined;
-        let lastResult = undefined;
+        let lastValue = undefined as any;
+        let lastResult = undefined as any;
         return (v) => {
             clearTimeout(timer);
             return new Promise((resolve) => {

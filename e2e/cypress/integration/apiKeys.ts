@@ -71,7 +71,7 @@ const del = (key) => {
         .last()
         .xpath("(./ancestor::*//*[@aria-label='delete'])[1]")
         .scrollIntoView({offset: {top: -500, left: 0}}).click();
-    cy.xpath(getAnyContainingText("confirm")).click();
+    cy.xpath(getAnyContainingText("confirm", "span")).click();
 };
 
 const edit = (key, scopes: Scope[]) => {

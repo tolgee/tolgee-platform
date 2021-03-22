@@ -20,8 +20,8 @@ export const TranslationsGrid: FunctionComponent = (props) => {
     let repositoryDTO = useRepository();
 
     const listContext = useContext(TranslationListContext);
-    const isEmpty = listContext.listLoadable.data.paginationMeta.allCount === 0;
-    const isSearch = listContext.listLoadable.data.params.search;
+    const isEmpty = listContext.listLoadable.data!.paginationMeta.allCount === 0;
+    const isSearch = listContext.listLoadable.data!.params.search;
     const repositoryPermissions = useRepositoryPermissions();
 
     const onEmptyInner = (

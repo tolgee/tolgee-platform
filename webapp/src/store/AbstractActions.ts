@@ -6,7 +6,7 @@ import {ReactNode} from "react";
 export abstract class AbstractActions<StateType> {
     private actions = new Map<string, AbstractAction>();
 
-    protected readonly _initialState: StateType = null;
+    protected readonly _initialState: StateType;
 
     public get initialState(): StateType {
         return {...this._initialState};
@@ -19,7 +19,7 @@ export abstract class AbstractActions<StateType> {
         this._initialState = initialState;
     }
 
-    createAction<PayloadType, DispatchParams extends any[]>(type: string, payloadProvider?: (...params: DispatchParams) => PayloadType):
+    createAction<PayloadType, DispatchParams extends any[]>(type: string, payloadProvider?: ((...params: DispatchParams) => PayloadType)):
         Action<PayloadType, StateType, DispatchParams> {
         let action = new Action<PayloadType, StateType, DispatchParams>(`${this.prefix}_${type}`, payloadProvider);
         this.register(action);
@@ -42,7 +42,7 @@ export abstract class AbstractActions<StateType> {
     }
 
     public getAction(type: string): AbstractAction {
-        return this.actions.get(type);
+        return this.actions.get(type)!;
     }
 
     protected register(action: AbstractAction) {
