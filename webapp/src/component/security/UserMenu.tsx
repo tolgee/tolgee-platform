@@ -1,7 +1,7 @@
 import {default as React, FunctionComponent, useState} from 'react';
 import {Button, MenuProps} from '@material-ui/core';
 import {container} from 'tsyringe';
-import {GlobalActions} from '../../store/global/globalActions';
+import {GlobalActions} from '../../store/global/GlobalActions';
 import {useSelector} from 'react-redux';
 import {AppState} from '../../store';
 import {useConfig} from "../../hooks/useConfig";

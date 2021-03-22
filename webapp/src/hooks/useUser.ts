@@ -3,7 +3,7 @@ import {useSelector} from "react-redux";
 import {AppState} from "../store";
 import {useEffect} from "react";
 import {UserDTO} from "../service/response.types";
-import {UserActions} from "../store/global/userActions";
+import {UserActions} from "../store/global/UserActions";
 
 const userActions = container.resolve(UserActions);
 

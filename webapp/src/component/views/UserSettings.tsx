@@ -4,7 +4,7 @@ import {TextField} from '../common/form/fields/TextField';
 import {Validation} from "../../constants/GlobalValidationSchema";
 import {BaseFormView} from "../layout/BaseFormView";
 import {SetPasswordFields} from "../security/SetPasswordFields";
-import {UserActions} from "../../store/global/userActions";
+import {UserActions} from "../../store/global/UserActions";
 import {UserUpdateDTO} from "../../service/response.types";
 import {useSelector} from "react-redux";
 import {AppState} from "../../store";

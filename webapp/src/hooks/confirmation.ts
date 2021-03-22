@@ -1,5 +1,5 @@
 import {container} from 'tsyringe';
-import {GlobalActions} from '../store/global/globalActions';
+import {GlobalActions} from '../store/global/GlobalActions';
 import {ConfirmationDialogProps} from "../component/common/ConfirmationDialog";
 
 export const confirmation = (options: ConfirmationDialogProps = {}) => {

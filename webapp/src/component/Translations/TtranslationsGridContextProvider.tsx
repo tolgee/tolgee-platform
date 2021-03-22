@@ -1,7 +1,7 @@
 import {default as React, FunctionComponent, ReactNode, useEffect, useState} from "react";
 import {parseError} from "../common/form/ResourceErrorComponent";
 import {container} from "tsyringe";
-import {MessageService} from "../../service/messageService";
+import {MessageService} from "../../service/MessageService";
 import {TranslationActions} from "../../store/repository/TranslationActions";
 import {useRepository} from "../../hooks/useRepository";
 import {Loadable} from "../../store/AbstractLoadableActions";

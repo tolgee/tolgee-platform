@@ -1,13 +1,13 @@
 import {default as React, FunctionComponent, useEffect} from 'react';
 import {useRouteMatch} from 'react-router-dom';
-import {GlobalState} from '../../store/global/globalActions';
+import {GlobalState} from '../../store/global/GlobalActions';
 import {LINKS, PARAMS} from '../../constants/links';
 import {useSelector} from 'react-redux';
 import {AppState} from '../../store';
 import {FullPageLoading} from "../common/FullPageLoading";
 import {container} from 'tsyringe';
-import {SignUpActions} from "../../store/global/signUpActions";
-import {RedirectionActions} from "../../store/global/redirectionActions";
+import {SignUpActions} from "../../store/global/SignUpActions";
+import {RedirectionActions} from "../../store/global/RedirectionActions";
 
 interface OAuthRedirectionHandlerProps {
 }

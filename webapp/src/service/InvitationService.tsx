@@ -1,12 +1,12 @@
 import {container, singleton} from 'tsyringe';
 import {ApiHttpService} from './apiHttpService';
 import {ErrorResponseDTO, InvitationDTO} from './response.types';
-import {RedirectionActions} from '../store/global/redirectionActions';
+import {RedirectionActions} from '../store/global/RedirectionActions';
 import {LINKS} from '../constants/links';
-import {MessageService} from './messageService';
+import {MessageService} from './MessageService';
 import {TokenService} from "./tokenService";
 import {InvitationCodeService} from "./invitationCodeService";
-import {GlobalActions} from "../store/global/globalActions";
+import {GlobalActions} from "../store/global/GlobalActions";
 import React from "react";
 import {T} from "@tolgee/react";
 

@@ -1,10 +1,10 @@
 import {container, singleton} from 'tsyringe';
-import {ErrorActions} from '../store/global/errorActions';
-import {RedirectionActions} from '../store/global/redirectionActions';
+import {ErrorActions} from '../store/global/ErrorActions';
+import {RedirectionActions} from '../store/global/RedirectionActions';
 import {LINKS} from '../constants/links';
 import {TokenService} from './tokenService';
 import {GlobalError} from "../error/GlobalError";
-import {MessageService} from "./messageService";
+import {MessageService} from "./MessageService";
 import * as Sentry from '@sentry/browser';
 import React from "react";
 import {T} from "@tolgee/react";

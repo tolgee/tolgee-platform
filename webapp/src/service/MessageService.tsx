@@ -1,7 +1,7 @@
 import {singleton} from 'tsyringe';
 import {Message} from '../store/global/types';
 import {default as React, ReactNode} from 'react';
-import {MessageActions} from '../store/global/messageActions';
+import {MessageActions} from '../store/global/MessageActions';
 import {VariantType} from "notistack";
 
 @singleton()

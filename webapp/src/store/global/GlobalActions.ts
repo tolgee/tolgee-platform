@@ -1,7 +1,7 @@
 import {SecurityDTO} from './types';
 import {singleton} from 'tsyringe';
 import {RemoteConfigService} from '../../service/remoteConfigService';
-import {SecurityService} from '../../service/securityService';
+import {SecurityService} from '../../service/SecurityService';
 import {ErrorResponseDTO, RemoteConfigurationDTO, TokenDTO} from '../../service/response.types';
 import {UserService} from "../../service/userService";
 import {ConfirmationDialogProps} from "../../component/common/ConfirmationDialog";

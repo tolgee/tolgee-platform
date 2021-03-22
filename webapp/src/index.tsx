@@ -9,7 +9,7 @@ import configureStore from './store';
 
 import {container} from 'tsyringe';
 
-import {DispatchService} from './service/dispatchService';
+import {DispatchService} from './service/DispatchService';
 
 import ErrorBoundary from "./component/ErrorBoundary";
 import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';

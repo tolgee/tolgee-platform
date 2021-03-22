@@ -1,6 +1,6 @@
 import {container, singleton} from 'tsyringe';
 import {ApiHttpService} from './apiHttpService';
-import {MessageService} from './messageService';
+import {MessageService} from './MessageService';
 import {ImportDto} from "./request.types";
 import {T} from "@tolgee/react";
 import React from "react";

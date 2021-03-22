@@ -1,5 +1,5 @@
 import {container} from 'tsyringe';
-import {DispatchService} from '../service/dispatchService';
+import {DispatchService} from '../service/DispatchService';
 
 export type ActionType<PayloadType> = { type: string, payload: PayloadType, meta?: any, params?: any[] };
 export type StateModifier<StateType, PayloadType> = (state: StateType, action: ActionType<PayloadType>) => StateType;

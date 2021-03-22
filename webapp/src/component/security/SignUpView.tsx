@@ -8,7 +8,7 @@ import {Redirect} from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import {container} from 'tsyringe';
 import {SetPasswordFields} from './SetPasswordFields';
-import {SignUpActions} from '../../store/global/signUpActions';
+import {SignUpActions} from '../../store/global/SignUpActions';
 import {TextField} from '../common/form/fields/TextField';
 import {useConfig} from "../../hooks/useConfig";
 import {Validation} from "../../constants/GlobalValidationSchema";

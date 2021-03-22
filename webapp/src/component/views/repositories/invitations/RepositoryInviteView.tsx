@@ -6,7 +6,7 @@ import {BaseView} from '../../../layout/BaseView';
 import {useSelector} from 'react-redux';
 import {AppState} from '../../../../store';
 import {container} from 'tsyringe';
-import {RepositoryInvitationActions} from '../../../../store/repository/invitations/repositoryInvitationActions';
+import {RepositoryInvitationActions} from '../../../../store/repository/invitations/RepositoryInvitationActions';
 import {repositoryPermissionTypes} from '../../../../constants/repositoryPermissionTypes';
 import {StandardForm} from '../../../common/form/StandardForm';
 import Box from '@material-ui/core/Box';

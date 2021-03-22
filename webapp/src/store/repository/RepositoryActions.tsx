@@ -1,6 +1,6 @@
 import {container, singleton} from 'tsyringe';
 
-import {RepositoryService} from '../../service/repositoryService';
+import {RepositoryService} from '../../service/RepositoryService';
 import {RepositoryDTO} from '../../service/response.types';
 import {LINKS} from "../../constants/links";
 import {AbstractLoadableActions, createLoadable, Loadable, StateWithLoadables} from "../AbstractLoadableActions";

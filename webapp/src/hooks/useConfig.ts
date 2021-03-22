@@ -1,5 +1,5 @@
 import {container} from 'tsyringe';
-import {GlobalActions} from '../store/global/globalActions';
+import {GlobalActions} from '../store/global/GlobalActions';
 import {useSelector} from "react-redux";
 import {AppState} from "../store";
 import {RemoteConfigurationDTO} from "../service/response.types";

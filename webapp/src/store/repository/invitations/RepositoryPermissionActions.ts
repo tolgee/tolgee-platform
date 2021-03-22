@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {RepositoryService} from '../../../service/repositoryService';
+import {RepositoryService} from '../../../service/RepositoryService';
 import {AbstractLoadableActions, StateWithLoadables} from "../../AbstractLoadableActions";
 
 export class RepositoryPermissionState extends StateWithLoadables<RepositoryPermissionActions> {

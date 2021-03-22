@@ -11,7 +11,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import {RepositoryPermissionActions} from '../../../../store/repository/invitations/repositoryPermissionActions';
+import {RepositoryPermissionActions} from '../../../../store/repository/invitations/RepositoryPermissionActions';
 import EditIcon from '@material-ui/icons/Edit';
 import {MicroForm} from '../../../common/form/MicroForm';
 import CloseIcon from '@material-ui/icons/Close';

@@ -1,6 +1,6 @@
 import {singleton} from 'tsyringe';
 import {RemoteConfigService} from '../../service/remoteConfigService';
-import {SecurityService} from '../../service/securityService';
+import {SecurityService} from '../../service/SecurityService';
 import {UserService} from "../../service/userService";
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
 

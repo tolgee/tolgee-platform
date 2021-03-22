@@ -8,7 +8,7 @@ import {container} from "tsyringe";
 import {TranslationActions} from "../../../store/repository/TranslationActions";
 import Input from "@material-ui/core/Input";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import {MessageService} from "../../../service/messageService";
+import {MessageService} from "../../../service/MessageService";
 import {T} from "@tolgee/react";
 
 export interface LanguagesMenuProps {
