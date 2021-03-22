@@ -4,7 +4,7 @@ import {InvitationService} from "../../../service/invitationService";
 
 export class RepositoryInvitationState extends StateWithLoadables<RepositoryInvitationActions> {
     invitationLoading: boolean = false;
-    invitationCode: string = null;
+    invitationCode: string | null = null;
 }
 
 @singleton()

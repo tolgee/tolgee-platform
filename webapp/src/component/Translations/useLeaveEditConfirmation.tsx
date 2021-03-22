@@ -9,7 +9,7 @@ const actions = container.resolve(TranslationActions);
 export const useLeaveEditConfirmationPagination = () => {
     const confirmationData = actions.useSelector(s => {
         if (s.editing?.data?.initialValue !== s.editing?.data?.newValue) {
-            return s.editing.data;
+            return s.editing!.data;
         }
         return null;
     });
@@ -30,7 +30,7 @@ export const useLeaveEditConfirmationPagination = () => {
 export const useLeaveEditConfirmationOtherEdit = () => {
     const confirmationData = actions.useSelector(s => {
         if (s.editingAfterConfirmation) {
-            return s.editing.data;
+            return s.editing!.data;
         }
         return null;
     });

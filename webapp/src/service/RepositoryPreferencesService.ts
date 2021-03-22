@@ -7,7 +7,7 @@ type AllType = { [repositoryId: number]: string[] };
 @singleton()
 export class RepositoryPreferencesService {
     getAll(): AllType {
-        return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+        return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) as string);
     }
 
     getForRepository(repositoryId: number): Set<string> {

@@ -5,16 +5,18 @@ import {AbstractActions} from "./AbstractActions";
 import {ReactNode} from "react";
 
 export class LoadableDefinition<StateType extends StateWithLoadables<any>, PayloadType, DispatchParams extends any[]> {
-    constructor(public payloadProvider: (...params: DispatchParams) => Promise<any>, public then?: StateModifier<StateType, PayloadType>,
+    constructor(public payloadProvider: (...params: DispatchParams) => Promise<any>, public then: StateModifier<StateType, PayloadType>,
                 public successMessage?: ReactNode, public redirectAfter?: Link) {
     }
 }
+
+type ThenType<ActionsType extends AbstractLoadableActions<any>, K extends string> = ActionsType['loadableDefinitions'][K]['then'] extends Function ? ActionsType['loadableDefinitions'][K]['then'] : () => void;
 
 export abstract class StateWithLoadables<ActionsType extends AbstractLoadableActions<any>> {
     loadables: {
         [K in keyof ActionsType['loadableDefinitions']]: Loadable<Parameters<ActionsType['loadableDefinitions'][K]['then']>[1]['payload'],
             Parameters<ActionsType['loadableDefinitions'][K]['payloadProvider']>>
-    };
+    } = {} as any;
 }
 
 export abstract class AbstractLoadableActions<StateType extends StateWithLoadables<any>> extends AbstractActions<StateType> {
@@ -33,10 +35,11 @@ export abstract class AbstractLoadableActions<StateType extends StateWithLoadabl
         super(initialState);
     }
 
-    createLoadableDefinition<PayloadType, DispatchParams extends any[] = []>(payloadProvider: (...params: DispatchParams) => Promise<PayloadType>,
-                                                                             then?: StateModifier<StateType, PayloadType>,
-                                                                             successMessage?: ReactNode,
-                                                                             redirectAfter?: Link) {
+    createLoadableDefinition<PayloadType, DispatchParams extends any[]>(payloadProvider: (...params: DispatchParams) => Promise<PayloadType>,
+                                                                        then?: StateModifier<StateType, PayloadType>,
+                                                                        successMessage?: ReactNode,
+                                                                        redirectAfter?: Link) {
+        then = then || ((state, action) => state);
         return new LoadableDefinition<StateType, PayloadType, DispatchParams>(payloadProvider, then, successMessage, redirectAfter);
     }
 
@@ -52,7 +55,7 @@ export abstract class AbstractLoadableActions<StateType extends StateWithLoadabl
                     loadables: {
                         ...state.loadables,
                         [loadableName]: <Loadable<PayloadType, DispatchParams>>{
-                            ...state.loadables[loadableName],
+                            ...state.loadables![loadableName],
                             loading: true,
                             errorParams: null,
                             dispatchParams: action.meta.params,
@@ -66,10 +69,10 @@ export abstract class AbstractLoadableActions<StateType extends StateWithLoadabl
                     loadables: {
                         ...state.loadables,
                         [loadableName]: <Loadable<PayloadType, DispatchParams>>{
-                            ...state.loadables[loadableName],
+                            ...state.loadables![loadableName],
                             loading: false,
                             data: action.payload,
-                            error: null,
+                            error: undefined,
                             dispatchParams: action.meta.params,
                             loaded: true
                         }
@@ -84,7 +87,7 @@ export abstract class AbstractLoadableActions<StateType extends StateWithLoadabl
                     loadables: {
                         ...state.loadables,
                         [loadableName]: <Loadable<PayloadType, DispatchParams>>{
-                            ...state.loadables[loadableName],
+                            ...state.loadables![loadableName],
                             loading: false,
                             data: null,
                             error: action.payload.__handled ? null : action.payload,
@@ -134,21 +137,21 @@ export abstract class AbstractLoadableActions<StateType extends StateWithLoadabl
     protected createDeleteDefinition = (listLoadableName: string, payloadProvider: (id: number) => Promise<number>,
                                         then?: (state: StateType, action: ActionType<number>) => StateType) =>
         this.createLoadableDefinition(payloadProvider, (state, action) => {
-            const data = [...(state.loadables[listLoadableName].data as { id: number }[])];
+            const data = [...(state.loadables![listLoadableName].data as { id: number }[])];
             let index = data.findIndex(i => i.id === action.payload);
             if (index > -1) {
                 data.splice(index, 1);
             }
             //set new data to list loadable
-            state = {...state, loadables: {...state.loadables, [listLoadableName]: {...state.loadables[listLoadableName], data}}};
+            state = {...state, loadables: {...state.loadables, [listLoadableName]: {...state.loadables![listLoadableName], data}}};
             return typeof then === "function" ? then(state, action) : state;
         });
 }
 
 export interface Loadable<DataType = any, DispatchParams = any> {
     __discriminator: 'loadable',
-    data: DataType,
-    dispatchParams: DispatchParams
+    data: DataType | null,
+    dispatchParams: DispatchParams | null
     loading: boolean,
     error?: ErrorResponseDTO,
     loaded: boolean,

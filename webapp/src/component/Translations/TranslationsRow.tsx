@@ -20,6 +20,7 @@ export type RowContextType = {
     lastRendered: number,
 }
 
+//@ts-ignore
 export const RowContext = React.createContext<RowContextType>({data: null, lastRendered: 0});
 
 const useStyles = makeStyles(() => createStyles({

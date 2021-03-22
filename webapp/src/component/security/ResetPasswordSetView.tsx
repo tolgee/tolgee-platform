@@ -65,6 +65,7 @@ const PasswordResetSetView: FunctionComponent = () => {
                                               </Box>
                                           </Box>
                                       </>}
+                                  //@ts-ignore
                                   onSubmit={(v: ValueType) => {
                                       globalActions.resetPasswordSet.dispatch(email, code, v.password);
                                   }}>

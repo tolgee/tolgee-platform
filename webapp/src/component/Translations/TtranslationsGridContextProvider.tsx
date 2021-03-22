@@ -11,6 +11,7 @@ import {FullPageLoading} from "../common/FullPageLoading";
 import {useRepositoryLanguages} from "../../hooks/useRepositoryLanguages";
 import {useLeaveEditConfirmationOtherEdit} from "./useLeaveEditConfirmation";
 
+//@ts-ignore
 export const TranslationListContext = React.createContext<TranslationListContextType>(null);
 
 const actions = container.resolve(TranslationActions);
@@ -68,6 +69,12 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
             repositoryDTO.id, selectedLanguages.length ? selectedLanguages : null, search, limit || perPage, offset
         );
     };
+
+    useEffect(() => {
+        return () => {
+            actions.loadableReset.translations.dispatch();
+        }
+    }, []);
 
     useEffect(() => {
         if (!listLoadable.data || (selectedLanguages !== listLoadable.data.params.languages && selectedLanguages.length)) {

@@ -8,13 +8,13 @@ import {ActionType} from "../Action";
 import {LanguageActions} from "../languages/LanguageActions";
 import {RepositoryPreferencesService} from "../../service/RepositoryPreferencesService";
 
-export type TranslationEditingType = { key: string, languageAbbreviation: string, initialValue: string, newValue: string };
+export type TranslationEditingType = { key: string, languageAbbreviation: string, initialValue: string, newValue: string } | null;
 export type SourceEditingType = { initialValue: string, newValue: string };
 
 export class TranslationsState extends StateWithLoadables<TranslationActions> {
     selectedLanguages: string[] = [];
-    editing: { type: "key" | "translation", data: TranslationEditingType | SourceEditingType } = null;
-    editingAfterConfirmation: { type: "key" | "translation", data: TranslationEditingType | SourceEditingType } = null;
+    editing: { type: "key" | "translation", data: TranslationEditingType | SourceEditingType | null } | null = null;
+    editingAfterConfirmation: { type: "key" | "translation", data: TranslationEditingType | SourceEditingType | null } | null = null;
 }
 
 
@@ -33,6 +33,7 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
 
     otherEditionConfirm = this.createAction("OTHER_EDITION_CONFIRM", () => {
     }).build.on((state, action) => ({
+        //@ts-ignore
         ...state, editing: {...state.editingAfterConfirmation}, editingAfterConfirmation: null
     }))
 
@@ -41,12 +42,13 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
         ...state, editingAfterConfirmation: null
     }))
 
+    //@ts-ignore
     setEditingValue = this.createAction("SET_EDITING_VALUE", (val: string) => val).build.on((state, action) => {
         return {
             ...state,
             editing: {
                 ...state.editing,
-                data: {...state.editing.data, newValue: action.payload}
+                data: {...state.editing?.data, newValue: action.payload}
             }
         }
     })

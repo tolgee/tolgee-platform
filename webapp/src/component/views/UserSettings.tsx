@@ -31,7 +31,7 @@ export const UserSettings: FunctionComponent = () => {
     return (
         <PossibleRepositoryPage>
             <BaseFormView title={<T>User settings title</T>} lg={6} md={8} xs={12} saveActionLoadable={saveLoadable} resourceLoadable={resourceLoadable}
-                          initialValues={{password: '', passwordRepeat: '', name: resourceLoadable.data.name, email: resourceLoadable.data.username}}
+                          initialValues={{password: '', passwordRepeat: '', name: resourceLoadable.data!.name, email: resourceLoadable.data!.username}}
                           validationSchema={Validation.USER_SETTINGS}
                           submitButtonInner={"Save"}
                           onCancel={() => history.goBack()}

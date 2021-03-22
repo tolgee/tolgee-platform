@@ -16,7 +16,7 @@ export class ConfirmationDialogProps {
     confirmButtonText?: ReactNode = <T>Confirm</T>;
     cancelButtonText?: ReactNode = <T>Cancel</T>;
     title?: ReactNode = <T>Confirmation</T>;
-    hardModeText?: string = null;
+    hardModeText?: string | null = null;
     confirmButtonColor?: PropTypes.Color = "primary";
     cancelButtonColor?: PropTypes.Color = "default";
 
@@ -38,17 +38,16 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
 
     const disabled = props.hardModeText && props.hardModeText !== input;
 
-    return open ? (
-
+    return (
         <Dialog
-            open={props.open}
+            open={!!props.open}
             onClose={props.onCancel}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
         >
             <DialogTitle id="alert-dialog-title">{props.title}</DialogTitle>
             <form onSubmit={(e) => {
-                if (!disabled) {
+                if (!disabled && props.onConfirm) {
                     props.onConfirm();
                 }
                 e.preventDefault();
@@ -72,12 +71,12 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
                     <Button
                         color={props.confirmButtonColor}
                         autoFocus
-                        disabled={disabled}
+                        disabled={!!disabled}
                         type="submit">
                         {props.confirmButtonText}
                     </Button>
                 </DialogActions>
             </form>
         </Dialog>
-    ) : null;
+    );
 }

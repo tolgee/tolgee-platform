@@ -23,7 +23,7 @@ export type SignUpType = {
     name: string,
     email: string,
     password: string;
-    passwordRepeat: string;
+    passwordRepeat?: string;
     invitationCode?: string;
 }
 
@@ -52,6 +52,7 @@ const SignUpView: FunctionComponent = () => {
                                       <Button color="primary" type="submit"><T>sign_up_submit_button</T></Button>
                                   </Box>
                               }
+                              //@ts-ignore
                               onSubmit={(v: SignUpType) => {
                                   actions.loadableActions.signUp.dispatch(v);
                               }}>

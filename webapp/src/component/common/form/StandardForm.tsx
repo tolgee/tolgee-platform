@@ -24,6 +24,7 @@ export const StandardForm: FunctionComponent<FormProps> = ({initialValues, valid
     const onCancel = () => typeof props.onCancel === "function" ? props.onCancel() : history.goBack();
 
     return (
+        // @ts-ignore
         <Formik initialValues={initialValues} onSubmit={props.onSubmit} validationSchema={validationSchema} enableReinitialize>
             {(formikProps: FormikProps<any>) => (
                 <Form>

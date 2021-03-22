@@ -9,7 +9,7 @@ export class RemoteConfigService {
     constructor(private http: ApiHttpService, private errorActions: ErrorActions) {
     }
 
-    public async getConfiguration(): Promise<RemoteConfigurationDTO> {
+    public async getConfiguration(): Promise<RemoteConfigurationDTO | undefined> {
         try {
             return await (await this.http.fetch(`public/configuration`)).json();
         } catch (e) {

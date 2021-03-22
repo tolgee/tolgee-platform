@@ -38,6 +38,6 @@ export const RepositoryLanguageProvider: FunctionComponent = (props) => {
         );
     }
 
-    throw new GlobalError("Unexpected error occurred", languagesLoadable.error.code || "Loadable error");
+    throw new GlobalError("Unexpected error occurred", languagesLoadable.error?.code || "Loadable error");
 
 };

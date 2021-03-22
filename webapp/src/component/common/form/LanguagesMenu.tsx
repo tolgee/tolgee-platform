@@ -71,6 +71,7 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
                     onChange={e => langsChange(e)}
                     input={<Input className={classes.input}/>}
                     renderValue={selected => (selected as string[])
+                        // @ts-ignore
                         .map(val => languageDTOS.find(languageDTO => languageDTO.abbreviation === val).name)
                         .join(', ')}
                     MenuProps={menuProps}

@@ -7,10 +7,10 @@ import {UserActions} from "../store/global/UserActions";
 
 const userActions = container.resolve(UserActions);
 
-export const useUser = (): UserDTO => {
-    let userDTO = useSelector((state: AppState) => state.user.loadables.userData.data);
-    let loadError = useSelector((state: AppState) => state.user.loadables.userData.error);
-    let loading = useSelector((state: AppState) => state.user.loadables.userData.loading);
+export const useUser = (): UserDTO | null => {
+    let userDTO = useSelector((state: AppState) => state.user.loadables!.userData.data);
+    let loadError = useSelector((state: AppState) => state.user.loadables!.userData.error);
+    let loading = useSelector((state: AppState) => state.user.loadables!.userData.loading);
     let jwt = useSelector((state: AppState) => state.global.security.jwtToken);
 
     let allowPrivate = useSelector((state: AppState) => state.global.security.allowPrivate);
