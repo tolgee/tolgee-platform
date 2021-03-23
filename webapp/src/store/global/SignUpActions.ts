@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {signUpService} from '../../service/signUpService';
+import {SignUpService} from '../../service/SignUpService';
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
 
 export class SignUpState extends StateWithLoadables<SignUpActions> {
@@ -15,7 +15,7 @@ export class SignUpActions extends AbstractLoadableActions<SignUpState> {
         verifyEmail: this.createLoadableDefinition((userId, code) => this.service.verifyEmail(userId, code))
     };
 
-    constructor(private service: signUpService) {
+    constructor(private service: SignUpService) {
         super(new SignUpState());
     }
 

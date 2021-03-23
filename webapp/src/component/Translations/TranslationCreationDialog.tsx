@@ -6,13 +6,13 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import {useRepository} from "../../hooks/useRepository";
 import {LINKS, PARAMS} from '../../constants/links';
 import {container} from "tsyringe";
-import {RedirectionActions} from "../../store/global/redirectionActions";
+import {RedirectionActions} from "../../store/global/RedirectionActions";
 import {StandardForm} from "../common/form/StandardForm";
 import {LanguagesMenu} from "../common/form/LanguagesMenu";
 import {TranslationActions} from "../../store/repository/TranslationActions";
 import {TextField} from "../common/form/fields/TextField";
 import {ResourceErrorComponent} from "../common/form/ResourceErrorComponent";
-import {messageService} from "../../service/messageService";
+import {MessageService} from "../../service/MessageService";
 import {Validation} from "../../constants/GlobalValidationSchema";
 import {TranslationListContext} from "./TtranslationsGridContextProvider";
 import {useTranslate} from "@tolgee/react";
@@ -24,7 +24,7 @@ export type TranslationCreationValue = {
 
 const redirectionActions = container.resolve(RedirectionActions);
 const translationActions = container.resolve(TranslationActions);
-const messaging = container.resolve(messageService);
+const messaging = container.resolve(MessageService);
 
 export function TranslationCreationDialog() {
 

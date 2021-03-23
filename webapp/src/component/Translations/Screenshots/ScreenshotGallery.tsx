@@ -10,7 +10,7 @@ import {container} from 'tsyringe';
 import AddIcon from '@material-ui/icons/Add';
 import {Message} from "../../../store/global/types";
 import {T} from '@tolgee/react';
-import {MessageActions} from "../../../store/global/messageActions";
+import {MessageActions} from "../../../store/global/MessageActions";
 import {useConfig} from "../../../hooks/useConfig";
 import {useRepository} from "../../../hooks/useRepository";
 import {createStyles, makeStyles, Theme} from '@material-ui/core';

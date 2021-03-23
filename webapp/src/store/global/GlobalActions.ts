@@ -1,12 +1,12 @@
 import {SecurityDTO} from './types';
 import {singleton} from 'tsyringe';
-import {remoteConfigService} from '../../service/remoteConfigService';
-import {securityService} from '../../service/securityService';
+import {RemoteConfigService} from '../../service/RemoteConfigService';
+import {SecurityService} from '../../service/SecurityService';
 import {ErrorResponseDTO, TokenDTO} from '../../service/response.types';
-import {userService} from "../../service/userService";
+import {UserService} from "../../service/UserService";
 import {ConfirmationDialogProps} from "../../component/common/ConfirmationDialog";
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
-import {invitationCodeService} from "../../service/invitationCodeService";
+import {InvitationCodeService} from "../../service/InvitationCodeService";
 
 export class GlobalState extends StateWithLoadables<GlobalActions> {
     authLoading: boolean = false;
@@ -27,10 +27,10 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
 
 @singleton()
 export class GlobalActions extends AbstractLoadableActions<GlobalState> {
-    constructor(private configService: remoteConfigService,
-                private securityService: securityService,
-                private userService: userService,
-                private invitationCodeService: invitationCodeService) {
+    constructor(private configService: RemoteConfigService,
+                private securityService: SecurityService,
+                private userService: UserService,
+                private invitationCodeService: InvitationCodeService) {
         super(new GlobalState());
     }
 
@@ -44,7 +44,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
         ));
     login = this.buildLoginAction('LOGIN', v => this.securityService.login(v));
 
-    resetPasswordValidate = this.createPromiseAction<never, ErrorResponseDTO, Parameters<securityService['resetPasswordValidate']>>('RESET_PASSWORD_VALIDATE',
+    resetPasswordValidate = this.createPromiseAction<never, ErrorResponseDTO, Parameters<SecurityService['resetPasswordValidate']>>('RESET_PASSWORD_VALIDATE',
         this.securityService.resetPasswordValidate)
         .build.onPending((state) => {
             return {...state, passwordResetSetLoading: true};
@@ -58,7 +58,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
                 passwordResetSetLoading: false
             } as unknown as GlobalState;
         });
-    resetPasswordSet = this.createPromiseAction<void, ErrorResponseDTO, Parameters<securityService['resetPasswordSet']>>('RESET_PASSWORD_SET',
+    resetPasswordSet = this.createPromiseAction<void, ErrorResponseDTO, Parameters<SecurityService['resetPasswordSet']>>('RESET_PASSWORD_SET',
         this.securityService.resetPasswordSet)
         .build.onPending((state) => {
             return <GlobalState>{...state, passwordResetSetLoading: true, passwordResetSetSucceed: false};

@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
-import {MessageActions} from '../../store/global/messageActions';
+import {MessageActions} from '../../store/global/MessageActions';
 import {Message} from '../../store/global/types';
 import {connect} from 'react-redux';
 import {AppState} from '../../store';

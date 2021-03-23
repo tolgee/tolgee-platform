@@ -3,22 +3,22 @@ import thunkMiddleware from 'redux-thunk';
 import {composeWithDevTools} from 'redux-devtools-extension';
 import promise from 'redux-promise-middleware';
 import {container} from 'tsyringe';
-import {implicitReducer as ir} from './implicitReducer';
+import {ImplicitReducer as ir} from './ImplicitReducer';
 import {RepositoryActions} from './repository/RepositoryActions';
 import {LanguageActions} from './languages/LanguageActions';
-import {GlobalActions} from './global/globalActions';
-import {ErrorActions} from './global/errorActions';
-import {RedirectionActions} from './global/redirectionActions';
-import {MessageActions} from './global/messageActions';
-import {SignUpActions} from './global/signUpActions';
-import {RepositoryInvitationActions} from './repository/invitations/repositoryInvitationActions';
-import {RepositoryPermissionActions} from './repository/invitations/repositoryPermissionActions';
-import {securityService} from "../service/securityService";
-import {messageService} from "../service/messageService";
+import {GlobalActions} from './global/GlobalActions';
+import {ErrorActions} from './global/ErrorActions';
+import {RedirectionActions} from './global/RedirectionActions';
+import {MessageActions} from './global/MessageActions';
+import {SignUpActions} from './global/SignUpActions';
+import {RepositoryInvitationActions} from './repository/invitations/RepositoryInvitationActions';
+import {RepositoryPermissionActions} from './repository/invitations/RepositoryPermissionActions';
+import {SecurityService} from "../service/SecurityService";
+import {MessageService} from "../service/MessageService";
 import {TranslationActions} from "./repository/TranslationActions";
 import {UserApiKeysActions} from "./api_keys/UserApiKeysActions";
 import {ImportExportActions} from "./repository/ImportExportActions";
-import {UserActions} from "./global/userActions";
+import {UserActions} from "./global/UserActions";
 import {ScreenshotActions} from "./repository/ScreenshotActions";
 
 const implicitReducer = container.resolve(ir);
@@ -52,7 +52,7 @@ const rootReducer = (state, action): ReturnType<typeof appReducer> => {
     if (action.type === globalActionsIns.logout.type) {
         state = undefined;
         //remove after login link to avoid buggy behaviour
-        container.resolve(securityService).setLogoutMark();
+        container.resolve(SecurityService).setLogoutMark();
     }
 
     return appReducer(state, action);
@@ -60,7 +60,7 @@ const rootReducer = (state, action): ReturnType<typeof appReducer> => {
 
 const successMessageMiddleware = store => next => action => {
     if (action.meta && action.meta.successMessage && action.type.indexOf("_PENDING") <= -1 && action.type.indexOf("_REJECTED") <= -1) {
-        container.resolve(messageService).success(action.meta.successMessage);
+        container.resolve(MessageService).success(action.meta.successMessage);
     }
 
     next(action);

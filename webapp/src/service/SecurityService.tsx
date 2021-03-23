@@ -1,13 +1,13 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
+import {ApiHttpService} from './ApiHttpService';
 import {ErrorResponseDTO, TokenDTO} from './response.types';
-import {tokenService} from './tokenService';
+import {TokenService} from './TokenService';
 import {API_LINKS} from '../constants/apiLinks';
 import {LINKS} from '../constants/links';
-import {messageService} from './messageService';
-import {RedirectionActions} from '../store/global/redirectionActions';
-import {invitationCodeService} from "./invitationCodeService";
-import {invitationService} from "./invitationService";
+import {MessageService} from './MessageService';
+import {RedirectionActions} from '../store/global/RedirectionActions';
+import {InvitationCodeService} from "./InvitationCodeService";
+import {InvitationService} from "./InvitationService";
 import React from "react";
 import {T} from "@tolgee/react";
 
@@ -20,11 +20,11 @@ interface ResetPasswordPostRequest {
 }
 
 @singleton()
-export class securityService {
-    constructor(private http: ApiHttpService, private tokenService: tokenService, private messageService: messageService,
+export class SecurityService {
+    constructor(private http: ApiHttpService, private tokenService: TokenService, private messageService: MessageService,
                 private redirectionActions: RedirectionActions,
-                private invitationCodeService: invitationCodeService,
-                private invitationService: invitationService) {
+                private invitationCodeService: InvitationCodeService,
+                private invitationService: InvitationService) {
     }
 
     public authorizeOAuthLogin = async (type: string, code: string): Promise<TokenDTO> => {

@@ -11,9 +11,9 @@ import {StandardForm} from '../common/form/StandardForm';
 import {TextField} from '../common/form/fields/TextField';
 import Box from '@material-ui/core/Box';
 import {container} from 'tsyringe';
-import {GlobalActions} from '../../store/global/globalActions';
+import {GlobalActions} from '../../store/global/GlobalActions';
 import {Alert} from '../common/Alert';
-import {securityService} from '../../service/securityService';
+import {SecurityService} from '../../service/SecurityService';
 import {useConfig} from "../../hooks/useConfig";
 import {T} from "@tolgee/react";
 
@@ -22,7 +22,7 @@ interface LoginProps {
 }
 const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const globalActions = container.resolve(GlobalActions);
-const securityServiceIns = container.resolve(securityService);
+const securityServiceIns = container.resolve(SecurityService);
 
 // noinspection JSUnusedLocalSymbols
 export const LoginView: FunctionComponent<LoginProps> = (props) => {

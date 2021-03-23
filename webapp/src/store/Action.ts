@@ -1,5 +1,5 @@
 import {container} from 'tsyringe';
-import {dispatchService} from '../service/dispatchService';
+import {DispatchService} from '../service/DispatchService';
 
 export type ActionType<PayloadType> = { type: string, payload: PayloadType, meta?: any, params?: any[] };
 export type StateModifier<StateType, PayloadType> = (state: StateType, action: ActionType<PayloadType>) => StateType;
@@ -10,7 +10,7 @@ export abstract class AbstractAction<PayloadType = any, StateType = any, Dispatc
     }
 
     dispatch(...params: DispatchParams) {
-        container.resolve(dispatchService).dispatch({
+        container.resolve(DispatchService).dispatch({
             type: this.type,
             meta: {...this.meta, params: params},
             payload: this.payloadProvider && this.payloadProvider(...params),

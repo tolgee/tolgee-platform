@@ -1,6 +1,6 @@
 import {container, singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
-import {messageService} from './messageService';
+import {ApiHttpService} from './ApiHttpService';
+import {MessageService} from './MessageService';
 import {ImportDto} from "./request.types";
 import {T} from "@tolgee/react";
 import React from "react";
@@ -8,8 +8,8 @@ import React from "react";
 const http = container.resolve(ApiHttpService);
 
 @singleton()
-export class importExportService {
-    constructor(private messaging: messageService) {
+export class ImportExportService {
+    constructor(private messaging: MessageService) {
     }
 
     readonly doImport = async (repositoryId: number, dto: ImportDto) => {

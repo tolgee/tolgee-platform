@@ -1,6 +1,6 @@
 import * as Yup from 'yup';
 import {container} from "tsyringe";
-import {signUpService} from "../service/signUpService";
+import {SignUpService} from "../service/SignUpService";
 import React from "react";
 import {T} from "@tolgee/react";
 
@@ -36,7 +36,7 @@ export class Validation {
 
     private static readonly createEmailValidation = (): (v) => Promise<boolean> => {
         let timer: any = undefined;
-        const signUpServiceImpl = container.resolve(signUpService);
+        const signUpServiceImpl = container.resolve(SignUpService);
         let lastValue = undefined as any;
         let lastResult = undefined as any;
         return (v) => {

@@ -1,7 +1,7 @@
 import {singleton} from 'tsyringe';
 
 @singleton()
-export class dispatchService {
+export class DispatchService {
     private _store;
 
     public set store(store) {

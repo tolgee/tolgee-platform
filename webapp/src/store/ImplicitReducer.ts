@@ -3,7 +3,7 @@ import {Action, ActionType, PromiseAction} from './Action';
 import {AbstractActions} from './AbstractActions';
 
 @singleton()
-export class implicitReducer {
+export class ImplicitReducer {
     create = <StateType>(actions: AbstractActions<StateType>, appState?) =>
         (state = actions.initialState, action: ActionType<any>): StateType => {
             let abstractActionDef = actions.getAction(action.type);

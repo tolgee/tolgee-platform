@@ -9,7 +9,7 @@ import {Redirect, useRouteMatch} from 'react-router-dom';
 import {StandardForm} from '../common/form/StandardForm';
 import Box from '@material-ui/core/Box';
 import {container} from 'tsyringe';
-import {GlobalActions} from '../../store/global/globalActions';
+import {GlobalActions} from '../../store/global/GlobalActions';
 import {Alert} from '../common/Alert';
 import {SetPasswordFields} from './SetPasswordFields';
 import {useConfig} from "../../hooks/useConfig";

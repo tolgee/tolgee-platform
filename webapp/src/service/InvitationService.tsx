@@ -1,12 +1,12 @@
 import {container, singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
+import {ApiHttpService} from './ApiHttpService';
 import {ErrorResponseDTO, InvitationDTO} from './response.types';
-import {RedirectionActions} from '../store/global/redirectionActions';
+import {RedirectionActions} from '../store/global/RedirectionActions';
 import {LINKS} from '../constants/links';
-import {messageService} from './messageService';
-import {tokenService} from "./tokenService";
-import {invitationCodeService} from "./invitationCodeService";
-import {GlobalActions} from "../store/global/globalActions";
+import {MessageService} from './MessageService';
+import {TokenService} from "./TokenService";
+import {InvitationCodeService} from "./InvitationCodeService";
+import {GlobalActions} from "../store/global/GlobalActions";
 import React from "react";
 import {T} from "@tolgee/react";
 
@@ -15,9 +15,9 @@ const http = container.resolve(ApiHttpService);
 
 
 @singleton()
-export class invitationService {
-    constructor(private redirectActions: RedirectionActions, private messaging: messageService, private tokenService: tokenService,
-                private invitationCodeService: invitationCodeService) {
+export class InvitationService {
+    constructor(private redirectActions: RedirectionActions, private messaging: MessageService, private tokenService: TokenService,
+                private invitationCodeService: InvitationCodeService) {
     }
 
     public generateInvitationCode = async (repositoryId: number, type: string): Promise<string> => await http.post('repositories/invite', {

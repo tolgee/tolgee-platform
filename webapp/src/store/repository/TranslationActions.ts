@@ -1,12 +1,12 @@
 import {container, singleton} from 'tsyringe';
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
-import {translationService} from "../../service/translationService";
+import {TranslationService} from "../../service/TranslationService";
 import {AppState} from "../index";
 import {useSelector} from "react-redux";
 import {LanguageDTO} from "../../service/response.types";
 import {ActionType} from "../Action";
 import {LanguageActions} from "../languages/LanguageActions";
-import {repositoryPreferencesService} from "../../service/repositoryPreferencesService";
+import {RepositoryPreferencesService} from "../../service/RepositoryPreferencesService";
 
 export type TranslationEditingType = { key: string, languageAbbreviation: string, initialValue: string, newValue: string } | null;
 export type SourceEditingType = { initialValue: string, newValue: string };
@@ -18,12 +18,12 @@ export class TranslationsState extends StateWithLoadables<TranslationActions> {
 }
 
 
-const service = container.resolve(translationService);
+const service = container.resolve(TranslationService);
 const languageActions = container.resolve(LanguageActions);
 
 @singleton()
 export class TranslationActions extends AbstractLoadableActions<TranslationsState> {
-    constructor(private selectedLanguagesService: repositoryPreferencesService) {
+    constructor(private selectedLanguagesService: RepositoryPreferencesService) {
         super(new TranslationsState());
     }
 

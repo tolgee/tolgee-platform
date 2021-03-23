@@ -1,14 +1,14 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
-import {messageService} from './messageService';
+import {ApiHttpService} from './ApiHttpService';
+import {MessageService} from './MessageService';
 import {TranslationsDataResponse, TranslationsObject} from './response.types';
 import {TranslationCreationValue} from "../component/Translations/TranslationCreationDialog";
-import {repositoryPreferencesService} from "./repositoryPreferencesService";
+import {RepositoryPreferencesService} from "./RepositoryPreferencesService";
 
 
 @singleton()
-export class translationService {
-    constructor(private http: ApiHttpService, private messaging: messageService, private selectedLanguagesService: repositoryPreferencesService) {
+export class TranslationService {
+    constructor(private http: ApiHttpService, private messaging: MessageService, private selectedLanguagesService: RepositoryPreferencesService) {
     }
 
     public getTranslations = async (repositoryId: number, langs?: string[], search?: string, limit?: number, offset?: number): Promise<TranslationsDataResponse> => {

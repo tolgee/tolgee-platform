@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {repositoryService} from '../../../service/repositoryService';
+import {RepositoryService} from '../../../service/RepositoryService';
 import {AbstractLoadableActions, StateWithLoadables} from "../../AbstractLoadableActions";
 
 export class RepositoryPermissionState extends StateWithLoadables<RepositoryPermissionActions> {
@@ -19,7 +19,7 @@ export class RepositoryPermissionActions extends AbstractLoadableActions<Reposit
         }, "Permission successfully edited!")
     };
 
-    constructor(private repositoryService: repositoryService) {
+    constructor(private repositoryService: RepositoryService) {
         super(new RepositoryPermissionState());
     }
 

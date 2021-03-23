@@ -1,9 +1,9 @@
 import {singleton} from 'tsyringe';
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
-import {apiKeysService} from "../../service/apiKeysService";
+import {ApiKeysService} from "../../service/ApiKeysService";
 import {AppState} from "../index";
 import {useSelector} from "react-redux";
-import {repositoryService} from "../../service/repositoryService";
+import {RepositoryService} from "../../service/RepositoryService";
 
 export class UserApiKeysState extends StateWithLoadables<UserApiKeysActions> {
 }
@@ -20,7 +20,7 @@ export class UserApiKeysActions extends AbstractLoadableActions<UserApiKeysState
         delete: this.createLoadableDefinition(this.apiKeysService.delete)
     };
 
-    constructor(private apiKeysService: apiKeysService, private repositoryService: repositoryService) {
+    constructor(private apiKeysService: ApiKeysService, private repositoryService: RepositoryService) {
         super(new UserApiKeysState());
     }
 

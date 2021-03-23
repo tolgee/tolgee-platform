@@ -1,7 +1,7 @@
 import {singleton} from 'tsyringe';
-import {remoteConfigService} from '../../service/remoteConfigService';
-import {securityService} from '../../service/securityService';
-import {userService} from "../../service/userService";
+import {RemoteConfigService} from '../../service/RemoteConfigService';
+import {SecurityService} from '../../service/SecurityService';
+import {UserService} from "../../service/UserService";
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
 
 export class UserState extends StateWithLoadables<UserActions> {
@@ -10,9 +10,9 @@ export class UserState extends StateWithLoadables<UserActions> {
 
 @singleton()
 export class UserActions extends AbstractLoadableActions<UserState> {
-    constructor(private configService: remoteConfigService,
-                private securityService: securityService,
-                private userService: userService) {
+    constructor(private configService: RemoteConfigService,
+                private securityService: SecurityService,
+                private userService: UserService) {
         super(new UserState());
     }
 

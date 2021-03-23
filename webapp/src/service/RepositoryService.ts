@@ -1,5 +1,5 @@
 import {container, singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
+import {ApiHttpService} from './ApiHttpService';
 import {PermissionDTO, PermissionEditDTO, RepositoryDTO} from './response.types';
 import {useRedirect} from "../hooks/useRedirect";
 import {LINKS} from "../constants/links";
@@ -7,7 +7,7 @@ import {LINKS} from "../constants/links";
 const http = container.resolve(ApiHttpService);
 
 @singleton()
-export class repositoryService {
+export class RepositoryService {
     constructor() {
     }
 
