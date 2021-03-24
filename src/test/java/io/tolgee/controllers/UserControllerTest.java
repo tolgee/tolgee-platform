@@ -18,7 +18,7 @@ public class UserControllerTest extends SignedInControllerTest implements ITest 
     void updateUser() throws Exception {
         UserUpdateRequestDTO requestDTO = UserUpdateRequestDTO.builder().email("ben@ben.aa").password("super new password").name("Ben's new name").build();
 
-        MvcResult mvcResult = performPost("/api/user", requestDTO).andExpect(status().isOk()).andReturn();
+        MvcResult mvcResult = performAuthPost("/api/user", requestDTO).andExpect(status().isOk()).andReturn();
 
         Optional<UserAccount> fromDb = userAccountService.getByUserName(requestDTO.getEmail());
         assertThat(fromDb).isNotEmpty();
@@ -33,7 +33,7 @@ public class UserControllerTest extends SignedInControllerTest implements ITest 
     void updateUserValidation() throws Exception {
         UserUpdateRequestDTO requestDTO = UserUpdateRequestDTO.builder().email("ben@ben.aa").password("").name("").build();
 
-        MvcResult mvcResult = performPost("/api/user", requestDTO).andExpect(status().isBadRequest()).andReturn();
+        MvcResult mvcResult = performAuthPost("/api/user", requestDTO).andExpect(status().isBadRequest()).andReturn();
 
         StandardValidationMessageAssert standardValidation = assertThat(mvcResult).error().isStandardValidation();
         standardValidation.onField("password");
@@ -41,7 +41,7 @@ public class UserControllerTest extends SignedInControllerTest implements ITest 
 
         requestDTO = UserUpdateRequestDTO.builder().email("ben@ben.aa").password("aksjhd  dasdsa").name("a").build();
         dbPopulator.createUser(requestDTO.getEmail());
-        mvcResult = performPost("/api/user", requestDTO).andExpect(status().isBadRequest()).andReturn();
+        mvcResult = performAuthPost("/api/user", requestDTO).andExpect(status().isBadRequest()).andReturn();
         assertThat(mvcResult).error().isCustomValidation().hasMessage("username_already_exists");
     }
 

@@ -1,7 +1,8 @@
 package io.tolgee.controllers
 
 import io.tolgee.constants.ApiScope
-import io.tolgee.fixtures.parseResponseTo
+import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.mapResponseTo
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -22,6 +23,6 @@ class UserAppApiControllerTest : AbstractUserAppApiTest() {
         val base = dbPopulator.createBase(generateUniqueString())
         val apiKey = apiKeyService.createApiKey(base.createdBy, setOf(*ApiScope.values()), base)
         val languages = mvc.perform(MockMvcRequestBuilders.get("/uaa/languages?ak=" + apiKey.key))
-                .andExpect(MockMvcResultMatchers.status().isOk).andReturn().parseResponseTo<Set<String>>()
+                .andExpect(MockMvcResultMatchers.status().isOk).andReturn().mapResponseTo<Set<String>>()
     }
 }

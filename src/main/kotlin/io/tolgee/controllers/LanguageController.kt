@@ -6,7 +6,7 @@ import io.tolgee.dtos.request.validators.LanguageValidator
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.api_key_auth.AllowAccessWithApiKey
+import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.service.LanguageService
 import io.tolgee.service.RepositoryService
 import io.tolgee.service.SecurityService
@@ -16,7 +16,11 @@ import javax.validation.Valid
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/api/repository/{repositoryId:[0-9]+}/languages", "/api/languages"])
+@RequestMapping(value = [
+    "/api/repository/{repositoryId:[0-9]+}/languages",
+    "/api/languages",
+    "/api/repository/languages"
+])
 open class LanguageController(
         private val languageService: LanguageService,
         private val repositoryService: RepositoryService,
@@ -27,7 +31,7 @@ open class LanguageController(
     @PostMapping(value = [""])
     fun createLanguage(@PathVariable("repositoryId") repositoryId: Long,
                        @RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
-        val repository = repositoryService.findById(repositoryId).orElseThrow { NotFoundException() }
+        val repository = repositoryService.getById(repositoryId).orElseThrow { NotFoundException() }
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.MANAGE)
         languageValidator.validateCreate(dto, repository)
         val language = languageService.createLanguage(dto, repository)
@@ -43,9 +47,9 @@ open class LanguageController(
     }
 
     @GetMapping(value = [""])
-    @AllowAccessWithApiKey
+    @AccessWithApiKey
     fun getAll(@PathVariable("repositoryId") pathRepositoryId: Long?): Set<LanguageDTO> {
-        val repositoryId = if(pathRepositoryId === null) authenticationFacade.apiKey.repository!!.id else pathRepositoryId
+        val repositoryId = if (pathRepositoryId === null) authenticationFacade.apiKey.repository!!.id else pathRepositoryId
         securityService.getAnyRepositoryPermission(repositoryId)
         return languageService.findAll(repositoryId).stream().map { LanguageDTO.fromEntity(it) }
                 .collect(Collectors.toCollection { LinkedHashSet() })

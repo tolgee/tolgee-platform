@@ -5,10 +5,11 @@
 package io.tolgee.controllers.screenshot
 
 import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.controllers.LoggedRequestFactory.addToken
 import io.tolgee.dtos.request.GetScreenshotsByKeyDTO
 import io.tolgee.dtos.response.KeyDTO
 import io.tolgee.dtos.response.ScreenshotDTO
+import io.tolgee.fixtures.LoggedRequestFactory.addToken
+import io.tolgee.fixtures.generateUniqueString
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
@@ -55,7 +56,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
         screenshotService.store(screenshotFile, key)
         screenshotService.store(screenshotFile, key2)
 
-        var result: List<ScreenshotDTO> = performPost("/api/repository/${repository.id}/screenshots/get",
+        var result: List<ScreenshotDTO> = performAuthPost("/api/repository/${repository.id}/screenshots/get",
                 GetScreenshotsByKeyDTO(key.name!!)).andExpect(status().isOk)
                 .andReturn().parseResponseTo()
 
@@ -64,7 +65,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + result[0].filename)
         assertThat(file).exists()
 
-        result = performPost("/api/repository/${repository.id}/screenshots/get",
+        result = performAuthPost("/api/repository/${repository.id}/screenshots/get",
                 GetScreenshotsByKeyDTO(key2.name!!)).andExpect(status().isOk)
                 .andReturn().parseResponseTo()
 
@@ -78,7 +79,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
         val screenshot = screenshotService.store(screenshotFile, key)
 
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshot.filename)
-        val result = performGet("/screenshots/${screenshot.filename}")
+        val result = performAuthGet("/screenshots/${screenshot.filename}")
                 .andExpect(status().isOk)
                 .andExpect(
                         header().string("Cache-Control", "max-age=365, must-revalidate, no-transform"))
@@ -99,7 +100,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
         val idsToDelete = list.stream().limit(10).map { it.id.toString() }.collect(Collectors.joining(","))
 
-        performDelete("/api/repository/screenshots/$idsToDelete", null).andExpect(status().isOk)
+        performAuthDelete("/api/repository/screenshots/$idsToDelete", null).andExpect(status().isOk)
 
         val rest = screenshotService.findAll(key)
         assertThat(rest).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))

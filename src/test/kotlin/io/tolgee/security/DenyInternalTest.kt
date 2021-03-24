@@ -1,7 +1,7 @@
 package io.tolgee.security
 
 import io.tolgee.assertions.Assertions
-import io.tolgee.controllers.AbstractUserAppApiTest
+import io.tolgee.controllers.AbstractControllerTest
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -13,7 +13,7 @@ import org.testng.annotations.Test
 
 @AutoConfigureMockMvc
 @SpringBootTest(properties = ["app.allowInternal=false"])
-class DenyInternalTest : AbstractUserAppApiTest() {
+class DenyInternalTest : AbstractControllerTest() {
     @Test
     fun getListFail() {
         dbPopulator.createBase("Test")

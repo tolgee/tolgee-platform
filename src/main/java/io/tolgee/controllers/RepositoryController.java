@@ -47,7 +47,7 @@ public class RepositoryController implements IController {
     @GetMapping(value = "/{id}")
     public RepositoryDTO getRepository(@PathVariable("id") Long id) {
         Permission permission = securityService.getAnyRepositoryPermission(id);
-        return RepositoryDTO.fromEntityAndPermission(repositoryService.findById(id).orElseThrow(null), permission);
+        return RepositoryDTO.fromEntityAndPermission(repositoryService.getById(id).orElseThrow(null), permission);
     }
 
 
@@ -72,7 +72,7 @@ public class RepositoryController implements IController {
     @PostMapping("/invite")
     public String inviteUser(@RequestBody InviteUser invitation) {
         securityService.checkRepositoryPermission(invitation.getRepositoryId(), Permission.RepositoryPermissionType.MANAGE);
-        Repository repository = repositoryService.findById(invitation.getRepositoryId()).orElseThrow(NotFoundException::new);
+        Repository repository = repositoryService.getById(invitation.getRepositoryId()).orElseThrow(NotFoundException::new);
         return invitationService.create(repository, invitation.getType());
     }
 }

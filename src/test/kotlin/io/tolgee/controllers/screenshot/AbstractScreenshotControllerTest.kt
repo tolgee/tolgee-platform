@@ -6,9 +6,9 @@ package io.tolgee.controllers.screenshot
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.controllers.LoggedRequestFactory.addToken
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.dtos.response.ScreenshotDTO
+import io.tolgee.fixtures.LoggedRequestFactory.addToken
 import io.tolgee.model.Key
 import io.tolgee.model.Repository
 import org.springframework.beans.factory.annotation.Value
@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testng.annotations.AfterClass
 import java.io.File
 
-abstract class AbstractScreenshotControllerTest : SignedInControllerTest() {
+abstract class AbstractScreenshotControllerTest  : SignedInControllerTest() {
     @Value("classpath:screenshot.png")
     lateinit var screenshotFile: Resource
 

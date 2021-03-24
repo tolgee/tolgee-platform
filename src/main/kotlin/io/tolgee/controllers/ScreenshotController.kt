@@ -46,7 +46,7 @@ class ScreenshotController(
             throw ValidationException(Message.FILE_NOT_IMAGE)
         }
 
-        repositoryService.findById(repositoryId).orElseThrow { NotFoundException() }
+        repositoryService.getById(repositoryId).orElseThrow { NotFoundException() }
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.TRANSLATE)
         val keyEntity = keyService.get(repositoryId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
         val screenShotEntity = screenshotService.store(screenshot, keyEntity)

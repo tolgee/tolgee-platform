@@ -6,10 +6,10 @@ package io.tolgee.controllers.screenshot
 
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.component.TimestampValidation
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.GetScreenshotsByKeyDTO
 import io.tolgee.dtos.response.KeyDTO
 import io.tolgee.dtos.response.ScreenshotDTO
+import io.tolgee.fixtures.generateUniqueString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -25,16 +25,13 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
     @set:Autowired
     lateinit var timestampValidation: TimestampValidation
 
-    @set:Autowired
-    lateinit var tolgeeProperties: TolgeeProperties
-
     @Test
     fun getScreenshotFileNoTimestamp() {
         val repository = dbPopulator.createBase(generateUniqueString())
         val key = keyService.create(repository, KeyDTO("test"))
         val screenshot = screenshotService.store(screenshotFile, key)
 
-        val result = performGet("/screenshots/${screenshot.filename}")
+        val result = performAuthGet("/screenshots/${screenshot.filename}")
                 .andExpect(status().isBadRequest)
                 .andReturn()
 
@@ -50,7 +47,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
         val rawTimestamp = Date().time - tolgeeProperties.authentication.timestampMaxAge - 500
         val timestamp = timestampValidation.encryptTimeStamp(rawTimestamp)
 
-        val result = performGet("/screenshots/${screenshot.filename}?timestamp=${timestamp}")
+        val result = performAuthGet("/screenshots/${screenshot.filename}?timestamp=${timestamp}")
                 .andExpect(status().isBadRequest)
                 .andReturn()
 
@@ -66,7 +63,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
         val rawTimestamp = Date().time - tolgeeProperties.authentication.timestampMaxAge + 500
         val timestamp = timestampValidation.encryptTimeStamp(rawTimestamp)
 
-        performGet("/screenshots/${screenshot.filename}?timestamp=${timestamp}")
+        performAuthGet("/screenshots/${screenshot.filename}?timestamp=${timestamp}")
                 .andExpect(status().isOk)
                 .andReturn()
     }
@@ -93,7 +90,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
         val repository = dbPopulator.createBase(generateUniqueString())
         val key = keyService.create(repository, KeyDTO("test"))
         screenshotService.store(screenshotFile, key)
-        val result: List<ScreenshotDTO> = performPost("/api/repository/${repository.id}/screenshots/get",
+        val result: List<ScreenshotDTO> = performAuthPost("/api/repository/${repository.id}/screenshots/get",
                 GetScreenshotsByKeyDTO(key.name!!)).andExpect(status().isOk)
                 .andReturn().parseResponseTo()
         timestampValidation.checkTimeStamp(result[0].filename.split("timestamp=")[1])

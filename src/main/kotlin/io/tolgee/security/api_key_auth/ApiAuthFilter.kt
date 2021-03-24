@@ -1,13 +1,17 @@
 package io.tolgee.security.api_key_auth
 
 import io.tolgee.ExceptionHandlers
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.security.repository_auth.RepositoryHolder
 import io.tolgee.service.ApiKeyService
 import io.tolgee.service.SecurityService
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod
+import org.springframework.web.servlet.HandlerExceptionResolver
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
@@ -18,7 +22,10 @@ class ApiAuthFilter(
         private val apiKeyService: ApiKeyService,
         private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
         private val securityService: SecurityService,
-        private val exceptionHandlers: ExceptionHandlers
+        private val exceptionHandlers: ExceptionHandlers,
+        private val repositoryHolder: RepositoryHolder,
+        @param:Qualifier("handlerExceptionResolver")
+        private val resolver: HandlerExceptionResolver,
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
@@ -32,12 +39,12 @@ class ApiAuthFilter(
 
                     val apiScopes = this.getAccessAllowedAnnotation(request)!!.scopes
                     try {
-                        securityService.checkApiKeyScopes(setOf(*apiScopes), ak.get())
+                        val key = ak.get()
+                        securityService.checkApiKeyScopes(setOf(*apiScopes), key)
+                        repositoryHolder.repository = key.repository ?: throw NotFoundException()
                     } catch (e: PermissionException) {
-                        val errorResponseEntity = exceptionHandlers.handleServerError(e);
-                        response.status = errorResponseEntity.statusCodeValue;
-                        response.outputStream.print(errorResponseEntity?.body?.toString());
-                        return;
+                        resolver.resolveException(request, response, null, e)
+                        return
                     }
                 }
             }
@@ -49,8 +56,8 @@ class ApiAuthFilter(
         return this.getAccessAllowedAnnotation(request) != null
     }
 
-    private fun getAccessAllowedAnnotation(request: HttpServletRequest): AllowAccessWithApiKey? {
+    private fun getAccessAllowedAnnotation(request: HttpServletRequest): AccessWithApiKey? {
         return (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
-                ?.getMethodAnnotation(AllowAccessWithApiKey::class.java) ?: return null
+                ?.getMethodAnnotation(AccessWithApiKey::class.java) ?: return null
     }
 }

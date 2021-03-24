@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.testng.annotations.Test;
 
 import static io.tolgee.assertions.Assertions.assertThat;
+import static io.tolgee.fixtures.UniqueStringGenerationKt.generateUniqueString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -25,7 +26,7 @@ public class PermissionControllerTest extends SignedInControllerTest implements 
         entityManager.refresh(user);
         Permission permission = user.getPermissions().stream().findFirst().orElseThrow(NotFoundException::new);
         PermissionEditDto dto = PermissionEditDto.builder().permissionId(permission.getId()).type(Permission.RepositoryPermissionType.EDIT).build();
-        performPost("/api/permission/edit", dto).andExpect(status().isOk()).andReturn();
+        performAuthPost("/api/permission/edit", dto).andExpect(status().isOk()).andReturn();
         assertThat(permissionService.findById(permission.getId()).get().getType()).isEqualTo(Permission.RepositoryPermissionType.EDIT);
     }
 
