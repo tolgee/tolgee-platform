@@ -1,8 +1,6 @@
 package io.tolgee.security
 
 import io.tolgee.configuration.tolgee.InternalProperties
-import io.tolgee.security.api_key_auth.AllowAccessWithApiKey
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod

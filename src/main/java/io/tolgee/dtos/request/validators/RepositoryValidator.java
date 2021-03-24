@@ -29,7 +29,7 @@ public class RepositoryValidator implements ConstraintValidator<RepositoryReques
     public boolean isValid(Object object, ConstraintValidatorContext context) {
         if (object instanceof EditRepositoryDTO) {
             EditRepositoryDTO edit = (EditRepositoryDTO) object;
-            Repository repository = repositoryService.findById(edit.getRepositoryId()).orElse(null);
+            Repository repository = repositoryService.getById(edit.getRepositoryId()).orElse(null);
 
             if (repository == null) {
                 context.disableDefaultConstraintViolation();

@@ -6,7 +6,7 @@ import io.tolgee.dtos.request.validators.LanguageValidator
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.api_key_auth.AllowAccessWithApiKey
+import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.service.LanguageService
 import io.tolgee.service.RepositoryService
 import io.tolgee.service.SecurityService
@@ -27,7 +27,7 @@ open class LanguageController(
     @PostMapping(value = [""])
     fun createLanguage(@PathVariable("repositoryId") repositoryId: Long,
                        @RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
-        val repository = repositoryService.findById(repositoryId).orElseThrow { NotFoundException() }
+        val repository = repositoryService.getById(repositoryId).orElseThrow { NotFoundException() }
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.MANAGE)
         languageValidator.validateCreate(dto, repository)
         val language = languageService.createLanguage(dto, repository)
@@ -43,7 +43,7 @@ open class LanguageController(
     }
 
     @GetMapping(value = [""])
-    @AllowAccessWithApiKey
+    @AccessWithApiKey
     fun getAll(@PathVariable("repositoryId") pathRepositoryId: Long?): Set<LanguageDTO> {
         val repositoryId = if(pathRepositoryId === null) authenticationFacade.apiKey.repository!!.id else pathRepositoryId
         securityService.getAnyRepositoryPermission(repositoryId)

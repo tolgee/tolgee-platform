@@ -74,7 +74,7 @@ open class AuthController(private val authenticationManager: AuthenticationManag
 
 
     @PostMapping("/reset_password_request")
-    open fun resetPasswordRequest(@RequestBody request: ResetPasswordRequest) {
+    open fun resetPasswordRequest(@RequestBody @Valid request: ResetPasswordRequest) {
         val userAccount = userAccountService.getByUserName(request.email).orElse(null) ?: return
         val code = RandomStringUtils.randomAlphabetic(50)
         userAccountService.setResetPasswordCode(userAccount, code)
@@ -97,7 +97,7 @@ $url
     }
 
     @PostMapping("/reset_password_set")
-    open fun resetPasswordSet(@RequestBody request: ResetPassword) {
+    open fun resetPasswordSet(@RequestBody @Valid request: ResetPassword) {
         val userAccount = validateEmailCode(request.code!!, request.email!!)
         userAccountService.setUserPassword(userAccount, request.password)
         userAccountService.removeResetCode(userAccount)
@@ -112,18 +112,21 @@ $url
         } else {
             invitation = invitationService.getInvitation(request.invitationCode) //it throws an exception
         }
+
         userAccountService.getByUserName(request.email).ifPresent {
             throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
         }
+
         val user = userAccountService.createUser(request)
         if (invitation != null) {
             invitationService.accept(invitation.code, user)
         }
 
-        emailVerificationService.createForUser(user, request.callbackUrl)
         if (!properties.authentication.needsEmailVerification) {
             return JwtAuthenticationResponse(tokenProvider.generateToken(user.id!!).toString())
         }
+
+        emailVerificationService.createForUser(user, request.callbackUrl)
         return Unit
     }
 

@@ -17,7 +17,7 @@ import java.util.stream.Collectors
 @Service
 open class ApiKeyService @Autowired constructor(private val apiKeyRepository: ApiKeyRepository, private val permissionService: PermissionService, private val random: SecureRandom) {
     open fun createApiKey(userAccount: UserAccount?, scopes: Set<ApiScope>, repository: Repository?): ApiKeyDTO {
-        val apiKey: ApiKey = ApiKey(
+        val apiKey = ApiKey(
                 key = BigInteger(130, random).toString(32),
                 repository = repository,
                 userAccount = userAccount,

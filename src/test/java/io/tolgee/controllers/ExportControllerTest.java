@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static io.tolgee.fixtures.UniqueStringGenerationKt.generateUniqueString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -20,7 +21,7 @@ public class ExportControllerTest extends SignedInControllerTest {
     public void exportZipJson() throws Exception {
         Repository repository = dbPopulator.populate(generateUniqueString());
         commitTransaction();
-        MvcResult mvcResult = performGet("/api/repository/" + repository.getId() + "/export/jsonZip")
+        MvcResult mvcResult = performAuthGet("/api/repository/" + repository.getId() + "/export/jsonZip")
                 .andExpect(status().isOk()).andDo(MvcResult::getAsyncResult).andReturn();
         mvcResult.getResponse();
         Map<String, Long> fileSizes = parseZip(mvcResult.getResponse().getContentAsByteArray());

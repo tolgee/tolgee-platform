@@ -37,7 +37,7 @@ open class RepositoryService constructor(
     }
 
     @Transactional
-    open fun findById(id: Long): Optional<Repository> {
+    open fun getById(id: Long): Optional<Repository> {
         return repositoryRepository.findById(id)
     }
 
@@ -72,7 +72,7 @@ open class RepositoryService constructor(
 
     @Transactional
     open fun deleteRepository(id: Long) {
-        val repository = findById(id).orElseThrow { NotFoundException() }
+        val repository = getById(id).orElseThrow { NotFoundException() }
         permissionService.deleteAllByRepository(repository.id)
         translationService.deleteAllByRepository(repository.id)
         screenshotService.deleteAllByRepository(repository.id)

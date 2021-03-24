@@ -3,6 +3,7 @@ package io.tolgee.controllers
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.assertions.UserApiAppAction
 import io.tolgee.constants.ApiScope
+import io.tolgee.fixtures.generateUniqueString
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpMethod

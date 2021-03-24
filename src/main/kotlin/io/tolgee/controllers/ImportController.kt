@@ -4,14 +4,14 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.ImportDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
-import io.tolgee.service.*
+import io.tolgee.service.ImportService
+import io.tolgee.service.RepositoryService
+import io.tolgee.service.SecurityService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import java.io.OutputStream
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import javax.validation.Valid
 
 
@@ -31,7 +31,7 @@ class ImportController(
                  dto: ImportDto
     ): ResponseEntity<StreamingResponseBody> {
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.MANAGE)
-        val repository = repositoryService.findById(repositoryId).orElseThrow {
+        val repository = repositoryService.getById(repositoryId).orElseThrow {
             NotFoundException(Message.REPOSITORY_NOT_FOUND)
         }
 
