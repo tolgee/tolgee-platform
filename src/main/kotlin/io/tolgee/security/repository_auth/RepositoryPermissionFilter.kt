@@ -27,7 +27,7 @@ class RepositoryPermissionFilter(
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val matchRegex = "/api/repository/([0-9]+)/.*".toRegex()
-        if (request.pathInfo.matches(matchRegex)) {
+        if (request.requestURI.matches(matchRegex)) {
             val specificPermissionAnnotation = getSpecificPermissionAnnotation(request)
             val anyPermissionAnnotation = getAnyPermissionAnnotation(request)
 
@@ -56,7 +56,7 @@ class RepositoryPermissionFilter(
     }
 
     private val HttpServletRequest.repositoryId
-        get() = this.pathInfo
+        get() = this.requestURI
                 .replace("/api/repository/([0-9]+)/.*".toRegex(), "$1").toLong()
 
     private fun getSpecificPermissionAnnotation(request: HttpServletRequest): AccessWithRepositoryPermission? {

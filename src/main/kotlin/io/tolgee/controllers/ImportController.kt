@@ -40,6 +40,5 @@ class ImportController(
         }
 
         return ResponseEntity(stream, HttpStatus.OK)
-
     }
 }

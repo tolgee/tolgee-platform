@@ -194,6 +194,8 @@ task packWebapp(type: Zip) {
     entryCompression ZipEntryCompression.STORED
 }
 
+tasks.findByName("build").dependsOn("runE2e")
+
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']

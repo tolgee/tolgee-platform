@@ -21,15 +21,21 @@ import javax.persistence.EntityManager
 open class RepositoryService constructor(
         private val repositoryRepository: RepositoryRepository,
         private val entityManager: EntityManager,
-        private val languageService: LanguageService,
         private val securityService: SecurityService,
         private val permissionRepository: PermissionRepository,
         private val permissionService: PermissionService,
         private val apiKeyService: ApiKeyService,
-        private val translationService: TranslationService,
         private val screenshotService: ScreenshotService
 ) {
     private var keyService: KeyService? = null
+
+
+    @set:Autowired
+    lateinit var languageService: LanguageService
+
+    @set:Autowired
+    lateinit var translationService: TranslationService
+
 
     @Transactional
     open fun findByName(name: String?, userAccount: UserAccount?): Optional<Repository> {
