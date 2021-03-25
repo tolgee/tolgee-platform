@@ -1,10 +1,22 @@
+@file:Suppress("MVCPathVariableInspection")
+
 package io.tolgee.controllers
 
+import io.swagger.v3.oas.annotations.Hidden
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.enums.Explode
+import io.swagger.v3.oas.annotations.enums.ParameterIn
+import io.swagger.v3.oas.annotations.enums.ParameterStyle
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.tags.Tag
+import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.dtos.request.validators.LanguageValidator
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
+import io.tolgee.openapi_fixtures.OpenApiApiKeyPaths
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.service.LanguageService
@@ -18,9 +30,12 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = [
     "/api/repository/{repositoryId:[0-9]+}/languages",
-    "/api/languages",
     "/api/repository/languages"
 ])
+@Tags(value = [
+    Tag(name = "Languages", description = "Languages"),
+])
+@OpenApiApiKeyPaths(["/api/repository/languages/**"])
 open class LanguageController(
         private val languageService: LanguageService,
         private val repositoryService: RepositoryService,
@@ -48,6 +63,7 @@ open class LanguageController(
 
     @GetMapping(value = [""])
     @AccessWithApiKey
+    @Operation(summary = "Returns all repository languages", tags = ["API KEY", "Languages"])
     fun getAll(@PathVariable("repositoryId") pathRepositoryId: Long?): Set<LanguageDTO> {
         val repositoryId = if (pathRepositoryId === null) authenticationFacade.apiKey.repository!!.id else pathRepositoryId
         securityService.getAnyRepositoryPermission(repositoryId)
