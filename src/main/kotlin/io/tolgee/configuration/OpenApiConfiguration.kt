@@ -22,7 +22,7 @@ open class OpenApiConfiguration() {
                         .version("v1.0")
                 )
                 .externalDocs(ExternalDocumentation()
-                        .description("Toolgee")
+                        .description("Tolgee documentation")
                         .url("https://toolkit.tolgee.io"))
     }
 
