@@ -36,7 +36,7 @@ public class SecurityService {
         return permissionService.getRepositoryPermission(repositoryId, getActiveUser());
     }
 
-    public Permission getAnyRepositoryPermission(Long repositoryId) {
+    public Permission getAnyRepositoryPermissionOrThrow(Long repositoryId) {
         Optional<Permission> repositoryPermission = getRepositoryPermission(repositoryId);
         if (repositoryPermission.isEmpty()) {
             throw new PermissionException();
@@ -47,7 +47,7 @@ public class SecurityService {
 
 
     public Permission checkRepositoryPermission(Long repositoryId, Permission.RepositoryPermissionType requiredPermission) {
-        Permission usersPermission = getAnyRepositoryPermission(repositoryId);
+        Permission usersPermission = getAnyRepositoryPermissionOrThrow(repositoryId);
         if (requiredPermission.getPower() > usersPermission.getType().getPower()) {
             throw new PermissionException();
         }

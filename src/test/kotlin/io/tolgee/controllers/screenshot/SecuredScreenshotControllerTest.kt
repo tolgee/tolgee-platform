@@ -7,7 +7,7 @@ package io.tolgee.controllers.screenshot
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.component.TimestampValidation
 import io.tolgee.dtos.request.GetScreenshotsByKeyDTO
-import io.tolgee.dtos.response.KeyDTO
+import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.fixtures.generateUniqueString
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,7 +28,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
     @Test
     fun getScreenshotFileNoTimestamp() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        val key = keyService.create(repository, KeyDTO("test"))
+        val key = keyService.create(repository, DeprecatedKeyDto("test"))
         val screenshot = screenshotService.store(screenshotFile, key)
 
         val result = performAuthGet("/screenshots/${screenshot.filename}")
@@ -41,7 +41,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
     @Test
     fun getScreenshotFileInvalidTimestamp() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        val key = keyService.create(repository, KeyDTO("test"))
+        val key = keyService.create(repository, DeprecatedKeyDto("test"))
         val screenshot = screenshotService.store(screenshotFile, key)
 
         val rawTimestamp = Date().time - tolgeeProperties.authentication.timestampMaxAge - 500
@@ -57,7 +57,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
     @Test
     fun getScreenshotFile() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        val key = keyService.create(repository, KeyDTO("test"))
+        val key = keyService.create(repository, DeprecatedKeyDto("test"))
         val screenshot = screenshotService.store(screenshotFile, key)
 
         val rawTimestamp = Date().time - tolgeeProperties.authentication.timestampMaxAge + 500
@@ -72,7 +72,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
     fun uploadScreenshot() {
         val repository = dbPopulator.createBase(generateUniqueString())
 
-        val key = keyService.create(repository, KeyDTO("test"))
+        val key = keyService.create(repository, DeprecatedKeyDto("test"))
 
         val responseBody: ScreenshotDTO = performStoreScreenshot(repository, key)
 
@@ -88,7 +88,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
     @Test
     fun findAll() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        val key = keyService.create(repository, KeyDTO("test"))
+        val key = keyService.create(repository, DeprecatedKeyDto("test"))
         screenshotService.store(screenshotFile, key)
         val result: List<ScreenshotDTO> = performAuthPost("/api/repository/${repository.id}/screenshots/get",
                 GetScreenshotsByKeyDTO(key.name!!)).andExpect(status().isOk)

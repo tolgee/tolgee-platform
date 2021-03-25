@@ -3,7 +3,7 @@ package io.tolgee;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.tolgee.constants.Message;
 import io.tolgee.controllers.AbstractControllerTest;
-import io.tolgee.controllers.AuthController;
+import io.tolgee.controllers.PublicController;
 import io.tolgee.security.third_party.GithubOAuthDelegate;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 public class AuthTest extends AbstractControllerTest {
     @Autowired
-    private AuthController authController;
+    private PublicController publicController;
 
     @MockBean
     @Autowired
@@ -47,7 +47,7 @@ public class AuthTest extends AbstractControllerTest {
     @BeforeClass
     public void setup() {
         dbPopulator.createBase(generateUniqueString());
-        authMvc = MockMvcBuilders.standaloneSetup(authController).setControllerAdvice(new ExceptionHandlers()).build();
+        authMvc = MockMvcBuilders.standaloneSetup(publicController).setControllerAdvice(new ExceptionHandlers()).build();
     }
 
     @Test
@@ -62,7 +62,7 @@ public class AuthTest extends AbstractControllerTest {
     }
 
     @Test
-    void DoesNotGenerateTokenForInValidUser() throws Exception {
+    void DoesNotGenerateTokenForInValidUser(){
         MvcResult mvcResult = doAuthentication("bena", "benaspassword");
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(401);
     }

@@ -2,13 +2,7 @@
 
 package io.tolgee.controllers
 
-import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
-import io.swagger.v3.oas.annotations.enums.Explode
-import io.swagger.v3.oas.annotations.enums.ParameterIn
-import io.swagger.v3.oas.annotations.enums.ParameterStyle
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.constants.Message
@@ -16,7 +10,6 @@ import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.dtos.request.validators.LanguageValidator
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
-import io.tolgee.openapi_fixtures.OpenApiApiKeyPaths
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.service.LanguageService
@@ -35,7 +28,6 @@ import javax.validation.Valid
 @Tags(value = [
     Tag(name = "Languages", description = "Languages"),
 ])
-@OpenApiApiKeyPaths(["/api/repository/languages/**"])
 open class LanguageController(
         private val languageService: LanguageService,
         private val repositoryService: RepositoryService,
@@ -43,7 +35,9 @@ open class LanguageController(
         private val securityService: SecurityService,
         private val authenticationFacade: AuthenticationFacade
 ) : IController {
+
     @PostMapping(value = [""])
+    @Operation(summary = "Creates language")
     fun createLanguage(@PathVariable("repositoryId") repositoryId: Long,
                        @RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
         val repository = repositoryService.getById(repositoryId).orElseThrow { NotFoundException() }
@@ -53,6 +47,7 @@ open class LanguageController(
         return LanguageDTO.fromEntity(language)
     }
 
+    @Operation(summary = "Edits language")
     @PostMapping(value = ["/edit"])
     fun editLanguage(@RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
         languageValidator.validateEdit(dto)
@@ -66,18 +61,20 @@ open class LanguageController(
     @Operation(summary = "Returns all repository languages", tags = ["API KEY", "Languages"])
     fun getAll(@PathVariable("repositoryId") pathRepositoryId: Long?): Set<LanguageDTO> {
         val repositoryId = if (pathRepositoryId === null) authenticationFacade.apiKey.repository!!.id else pathRepositoryId
-        securityService.getAnyRepositoryPermission(repositoryId)
+        securityService.getAnyRepositoryPermissionOrThrow(repositoryId)
         return languageService.findAll(repositoryId).stream().map { LanguageDTO.fromEntity(it) }
                 .collect(Collectors.toCollection { LinkedHashSet() })
     }
 
     @GetMapping(value = ["{id}"])
+    @Operation(summary = "Returns specific language")
     operator fun get(@PathVariable("id") id: Long?): LanguageDTO {
         val language = languageService.findById(id).orElseThrow { NotFoundException() }
-        securityService.getAnyRepositoryPermission(language.repository!!.id)
+        securityService.getAnyRepositoryPermissionOrThrow(language.repository!!.id)
         return LanguageDTO.fromEntity(language)
     }
 
+    @Operation(summary = "Deletes specific language")
     @DeleteMapping(value = ["/{id}"])
     fun deleteLanguage(@PathVariable id: Long?) {
         val language = languageService.findById(id).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }

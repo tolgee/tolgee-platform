@@ -4,6 +4,8 @@
 
 package io.tolgee.controllers
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.TimestampValidation
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -14,6 +16,7 @@ import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
+import io.tolgee.security.repository_auth.AccessWithAnyRepositoryPermission
 import io.tolgee.service.KeyService
 import io.tolgee.service.RepositoryService
 import io.tolgee.service.ScreenshotService
@@ -24,9 +27,11 @@ import java.util.*
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 
+@Suppress("MVCPathVariableInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/api/repository/screenshots", "/api/repository/{repositoryId:[0-9]+}/screenshots"])
+@Tag(name = "Screenshots")
 class ScreenshotController(
         private val screenshotService: ScreenshotService,
         private val keyService: KeyService,
@@ -36,6 +41,7 @@ class ScreenshotController(
         private val timestampValidation: TimestampValidation
 ) {
     @PostMapping("")
+    @Operation(summary = "Upload screenshot for specific key")
     fun uploadScreenshot(@PathVariable("repositoryId") repositoryId: Long,
                          @RequestParam("screenshot") screenshot: MultipartFile,
                          @NotBlank @RequestParam key: String): ScreenshotDTO {
@@ -54,14 +60,16 @@ class ScreenshotController(
     }
 
     @PostMapping("/get")
+    @Operation(summary = "Returns all screenshots for specific key")
+    @AccessWithAnyRepositoryPermission
     fun getKeyScreenshots(@PathVariable("repositoryId") repositoryId: Long,
                           @RequestBody @Valid dto: GetScreenshotsByKeyDTO): List<ScreenshotDTO> {
-        securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.VIEW)
         val keyEntity = keyService.get(repositoryId, PathDTO.fromFullPath(dto.key)).orElseThrow { NotFoundException() }
         return screenshotService.findAll(keyEntity).map { it.toDTO() }
     }
 
     @DeleteMapping("/{ids}")
+    @Operation(summary = "Deletes multiple screenshots by id")
     fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
         val screenshots = screenshotService.findByIdIn(ids)
         screenshots.forEach {

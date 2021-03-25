@@ -9,7 +9,7 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class AuthControllerTest
+class PublicControllerTest
     : AbstractControllerTest() {
     @Test
     fun testSignUpValidationBlankEmail() {

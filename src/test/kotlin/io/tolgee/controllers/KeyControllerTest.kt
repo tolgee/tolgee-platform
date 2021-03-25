@@ -2,10 +2,11 @@ package io.tolgee.controllers
 
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.PathDTO
+import io.tolgee.dtos.request.DeprecatedEditKeyDTO
 import io.tolgee.dtos.request.EditKeyDTO
 import io.tolgee.dtos.request.GetKeyTranslationsReqDto
 import io.tolgee.dtos.request.SetTranslationsDTO
-import io.tolgee.dtos.response.KeyDTO
+import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Repository
@@ -48,14 +49,28 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     }
 
     @Test
+    fun editDeprecated() {
+        keyService.create(repository, keyDto)
+
+        performAuthPost("/api/repository/${repository.id}/keys/edit", DeprecatedEditKeyDTO(
+                oldFullPathString = "test string",
+                newFullPathString = "hello"
+        )).andExpect(status().`is`(200))
+        .andReturn()
+
+        assertThat(keyService.get(repository, PathDTO.fromFullPath("test string"))).isEmpty
+        assertThat(keyService.get(repository, PathDTO.fromFullPath("hello"))).isNotEmpty
+    }
+
+    @Test
     fun edit() {
         keyService.create(repository, keyDto)
 
         performEdit(
                 repositoryId = repository.id,
                 content = EditKeyDTO(
-                        oldFullPathString = "test string",
-                        newFullPathString = "hello"
+                        currentName = "test string",
+                        newName = "hello"
                 ))
                 .andExpect(status().`is`(200))
                 .andReturn()
@@ -97,7 +112,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
         val got = performGet(key.repository!!.id, key.id!!)
                 .andExpect(status().isOk)
                 .andReturn()
-                .mapResponseTo<KeyDTO>()
+                .mapResponseTo<DeprecatedKeyDto>()
         assertThat(got.fullPathString).isEqualTo(key.path.fullPathString)
     }
 
