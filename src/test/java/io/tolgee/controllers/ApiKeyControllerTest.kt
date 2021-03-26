@@ -1,7 +1,7 @@
 package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.type.TypeFactory
-import io.tolgee.annotations.ApiKeyAccessTestMethod
+import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.request.CreateApiKeyDTO
@@ -122,7 +122,7 @@ class ApiKeyControllerTest : RepositoryAuthControllerTest(), ITest {
     }
 
     @Test
-    @ApiKeyAccessTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT])
+    @RepositoryApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT])
     fun getApiKeyScopes() {
         val scopes = performGet("/api/apiKeys/scopes?ak=" + apiKey.key).andIsOk.andReturn().mapResponseTo<Set<String>>()
         assertThat(scopes).containsAll(setOf(ApiScope.TRANSLATIONS_EDIT.value, ApiScope.KEYS_EDIT.value))

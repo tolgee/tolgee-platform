@@ -131,7 +131,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     }
 
     private fun performEdit(repositoryId: Long, content: EditKeyDTO): ResultActions {
-        return performAuthPost("/api/repository/$repositoryId/keys/edit", content)
+        return performAuthPut("/api/repository/$repositoryId/keys", content)
     }
 
     private fun performDelete(repositoryId: Long, ids: Set<Long>): ResultActions {

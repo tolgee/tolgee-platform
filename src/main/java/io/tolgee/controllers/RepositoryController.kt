@@ -26,7 +26,7 @@ class RepositoryController @Autowired constructor(private val repositoryService:
 
     @PostMapping(value = [""])
     @Operation(summary = "Creates repository with specified languages")
-    fun createRepository(@RequestBody dto: @Valid CreateRepositoryDTO?): RepositoryDTO {
+    fun createRepository(@RequestBody @Valid dto: CreateRepositoryDTO?): RepositoryDTO {
         val userAccount = authenticationFacade.userAccount
         val repository = repositoryService.createRepository(dto!!, userAccount)
         return fromEntityAndPermission(repository, repository.permissions.stream().findAny().orElseThrow { InvalidStateException() })
@@ -41,7 +41,7 @@ class RepositoryController @Autowired constructor(private val repositoryService:
 
     @Operation(summary = "Modifies repository")
     @PostMapping(value = ["/edit"])
-    fun editRepository(@RequestBody dto: @Valid EditRepositoryDTO?): RepositoryDTO {
+    fun editRepository(@RequestBody @Valid dto: EditRepositoryDTO?): RepositoryDTO {
         val permission = securityService.checkRepositoryPermission(dto!!.repositoryId, Permission.RepositoryPermissionType.MANAGE)
         val repository = repositoryService.editRepository(dto)
         return fromEntityAndPermission(repository, permission)
