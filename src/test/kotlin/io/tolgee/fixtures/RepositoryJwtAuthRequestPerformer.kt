@@ -14,11 +14,7 @@ class RepositoryJwtAuthRequestPerformer(
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val userAccount: UserAccount,
         dbPopulator: DbPopulatorReal,
-) : SignedInRequestPerformer(), RepositoryAuthRequestPerformer {
-
-    override val repository: Repository by lazy {
-        dbPopulator.createBase(generateUniqueString(), username = userAccount.username!!)
-    }
+) : RepositoryAuthRequestPerformer(userAccount) {
 
     override fun performRepositoryAuthPut(url: String, content: Any?): ResultActions {
         return super.performAuthPut(API_REPOSITORY_URL_PREFIX + repository.id + "/" + url, content)

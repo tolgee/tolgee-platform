@@ -3,7 +3,7 @@ package io.tolgee.configuration
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.InternalDenyFilter
 import io.tolgee.security.JwtTokenFilter
-import io.tolgee.security.api_key_auth.ApiAuthFilter
+import io.tolgee.security.api_key_auth.ApiKeyAuthFilter
 import io.tolgee.security.repository_auth.RepositoryPermissionFilter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 open class WebSecurityConfig @Autowired constructor(private val jwtTokenFilter: JwtTokenFilter,
                                                     private val configuration: TolgeeProperties,
-                                                    private val apiAuthFilter: ApiAuthFilter,
+                                                    private val apiKeyAuthFilter: ApiKeyAuthFilter,
                                                     private val internalDenyFilter: InternalDenyFilter,
                                                     private val repositoryPermissionFilter: RepositoryPermissionFilter
 ) : WebSecurityConfigurerAdapter() {
@@ -31,7 +31,7 @@ open class WebSecurityConfig @Autowired constructor(private val jwtTokenFilter: 
                     //if jwt token is provided in header, this filter will authorize user, so the request is not gonna reach the ldap auth
                     .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter::class.java)
                     //this is used to authorize user's app calls with generated api key
-                    .addFilterBefore(apiAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
+                    .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
                     .addFilterAfter(repositoryPermissionFilter, JwtTokenFilter::class.java)
                     .authorizeRequests()
                     .antMatchers("/api/public/**", "/webjars/**", "/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs").permitAll()

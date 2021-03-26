@@ -28,6 +28,12 @@ abstract class RepositoryAuthControllerTest : SignedInControllerTest(), AuthRequ
     val repository: Repository
         get() = this.repositoryAuthRequestPerformer.repository
 
+    var repositorySupplier: (() -> Repository)?
+        get() = this.repositoryAuthRequestPerformer.repositorySupplier
+        set(value) {
+            this.repositoryAuthRequestPerformer.repositorySupplier = value
+        }
+
     private var _repositoryAuthRequestPerformer: RepositoryAuthRequestPerformer? = null;
 
     private var repositoryAuthRequestPerformer: RepositoryAuthRequestPerformer

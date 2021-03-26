@@ -1,53 +1,69 @@
-package io.tolgee.controllers;
+package io.tolgee.controllers
 
-import io.tolgee.model.Repository;
-import org.springframework.test.web.servlet.MvcResult;
-import org.testng.annotations.Test;
+import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
+import io.tolgee.constants.ApiScope
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.model.Language
+import org.assertj.core.api.Assertions
+import org.springframework.test.web.servlet.MvcResult
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.testng.annotations.Test
+import java.io.ByteArrayInputStream
+import java.util.*
+import java.util.function.Consumer
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import static io.tolgee.fixtures.UniqueStringGenerationKt.generateUniqueString;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-public class ExportControllerTest extends SignedInControllerTest {
-
+class ExportControllerTest : RepositoryAuthControllerTest() {
     @Test
-    public void exportZipJson() throws Exception {
-        Repository repository = dbPopulator.populate(generateUniqueString());
-        commitTransaction();
-        MvcResult mvcResult = performAuthGet("/api/repository/" + repository.getId() + "/export/jsonZip")
-                .andExpect(status().isOk()).andDo(MvcResult::getAsyncResult).andReturn();
-        mvcResult.getResponse();
-        Map<String, Long> fileSizes = parseZip(mvcResult.getResponse().getContentAsByteArray());
-
-
-        repository.getLanguages().forEach(l -> {
-            String name = l.getAbbreviation() + ".json";
-            assertThat(fileSizes).containsKey(name);
-            //assertThat(fileSizes.get(name)).isGreaterThan(0);
-        });
+    fun exportZipJson() {
+        val repository = dbPopulator.populate(generateUniqueString())
+        commitTransaction()
+        val mvcResult = performAuthGet("/api/repository/" + repository.id + "/export/jsonZip")
+                .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
+        mvcResult.response
+        val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
+        repository.languages.forEach(Consumer { l: Language ->
+            val name = l.abbreviation + ".json"
+            Assertions.assertThat(fileSizes).containsKey(name)
+        })
         //cleanup
-        repositoryService.deleteRepository(repository.getId());
+        repositoryService.deleteRepository(repository.id)
     }
 
+    @Test
+    @RepositoryApiKeyAuthTestMethod
+    fun exportZipJsonWithApiKey() {
+        repositorySupplier = { dbPopulator.populate(generateUniqueString()).also { commitTransaction() } }
+        val mvcResult = performRepositoryAuthGet("export/jsonZip")
+                .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
+        mvcResult.response
+        val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
+        repository.languages.forEach(Consumer { l: Language ->
+            val name = l.abbreviation + ".json"
+            Assertions.assertThat(fileSizes).containsKey(name)
+        })
+        //cleanup
+        repositoryService.deleteRepository(repository.id)
+    }
 
-    private Map<String, Long> parseZip(byte[] responseContent) throws IOException {
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(responseContent);
-        ZipInputStream zipInputStream = new ZipInputStream(byteArrayInputStream);
+    @Test
+    @RepositoryApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT])
+    fun exportZipJsonApiKeyPermissionFail() {
+        performRepositoryAuthGet("export/jsonZip").andIsForbidden
+    }
 
-        HashMap<String, Long> result = new HashMap<>();
-
-        ZipEntry nextEntry;
-        while ((nextEntry = zipInputStream.getNextEntry()) != null) {
-            result.put(nextEntry.getName(), nextEntry.getSize());
+    private fun parseZip(responseContent: ByteArray): Map<String, Long> {
+        val byteArrayInputStream = ByteArrayInputStream(responseContent)
+        val zipInputStream = ZipInputStream(byteArrayInputStream)
+        val result = HashMap<String, Long>()
+        var nextEntry: ZipEntry?
+        while (zipInputStream.nextEntry.also {
+                    nextEntry = it
+                } != null) {
+            result[nextEntry!!.name] = nextEntry!!.size
         }
-
-        return result;
+        return result
     }
 }
