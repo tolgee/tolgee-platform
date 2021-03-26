@@ -11,7 +11,7 @@ task copyDist(type: Copy) {
     dependsOn "buildWebapp"
 }
 
-task installWebappDeps(type: Exec){
+task installWebappDeps(type: Exec) {
     commandLine "npm", "install"
     workingDir = webappPath
     inputs.file("${project.projectDir}/webapp/package.json")
@@ -19,10 +19,33 @@ task installWebappDeps(type: Exec){
     outputs.dir("${project.projectDir}/webapp/node_modules")
 }
 
-task buildWebapp(type: Exec){
+task buildWebapp(type: Exec) {
     commandLine "npm", "run", "build"
     workingDir = webappPath
     inputs.dir("${project.projectDir}/webapp/")
     outputs.dir("${project.projectDir}/webapp/build/")
-    dependsOn installWebappDeps
+    dependsOn "installWebappDeps", "updateStaticTranslations"
+}
+
+task updateStaticTranslations() {
+    def tolgeeApiKey = System.env.TOLGEE_API_KEY
+    def tolgeeApiUrl = System.env.TOLGEE_API_URL
+    onlyIf { tolgeeApiUrl != null }
+    doFirst {
+        def command = "curl $tolgeeApiUrl/api/repository/export/jsonZip?ak=$tolgeeApiKey --output $buildDir/translations.zip"
+        ProcessBuilder builder = new ProcessBuilder(command.split(' '))
+        Process process = builder.start()
+        process.waitFor()
+        println process.err.text
+        println process.text
+    }
+    doLast {
+        copy {
+            def zipFile = file("$buildDir/translations.zip")
+            def outputDir = file("$webappPath/public/i18n")
+
+            from zipTree(zipFile)
+            into outputDir
+        }
+    }
 }
