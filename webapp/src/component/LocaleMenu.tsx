@@ -9,6 +9,7 @@ import {useCurrentLanguage, useSetLanguage} from "@tolgee/react";
 
 export const LocaleMenu: FunctionComponent<{ className?: string }> = (props) => {
     const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+        // @ts-ignore
         setAnchorEl(event.currentTarget);
     };
 

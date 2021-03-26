@@ -1,5 +1,5 @@
 import * as React from "react";
-import {FunctionComponent} from "react";
+import {FunctionComponent, useEffect} from "react";
 import {container} from "tsyringe";
 import {useSelector} from "react-redux";
 import {AppState} from "../store";
@@ -21,12 +21,13 @@ export const RepositoryLanguageProvider: FunctionComponent = (props) => {
     const idChanged = languagesLoadable.dispatchParams && languagesLoadable.dispatchParams[0] !== repositoryDTO.id;
 
 
-    if (init || idChanged) {
-        languageActions.loadableActions.list.dispatch(repositoryDTO.id);
-        return <FullPageLoading/>
-    }
+    useEffect(() => {
+        if (init || idChanged) {
+            languageActions.loadableActions.list.dispatch(repositoryDTO.id);
+        }
+    }, []);
 
-    if (languagesLoadable.loading) {
+    if (init || idChanged || languagesLoadable.loading) {
         return <FullPageLoading/>
     }
 
@@ -38,6 +39,5 @@ export const RepositoryLanguageProvider: FunctionComponent = (props) => {
         );
     }
 
-    throw new GlobalError("Unexpected error occurred", languagesLoadable.error.code || "Loadable error");
-
+    throw new GlobalError("Unexpected error occurred", languagesLoadable.error?.code || "Loadable error");
 };

@@ -41,6 +41,7 @@ export const FormDialog: FunctionComponent<Props> = (props) => {
     }, []);
 
     const getAvailableScopes = (repositoryId: number): Set<string> => {
+        // @ts-ignore
         return new Set(scopes.data[repositories.data.find(r => r.id === repositoryId).permissionType]);
     };
 
@@ -78,9 +79,9 @@ export const FormDialog: FunctionComponent<Props> = (props) => {
         }
 
         return {
-            repositoryId: repositories.data[0].id,
+            repositoryId: repositories.data![0].id,
             //check all scopes checked by default
-            scopes: getAvailableScopes(repositories.data[0].id)
+            scopes: getAvailableScopes(repositories.data![0].id)
         }
     };
 
@@ -92,7 +93,7 @@ export const FormDialog: FunctionComponent<Props> = (props) => {
         <Dialog open={true} onClose={onDialogClose} fullWidth maxWidth={"xs"}>
             <DialogTitle>Generate api key</DialogTitle>
             <DialogContent>
-                {(repositories.loaded && repositories.data.length === 0)
+                {(repositories.loaded && repositories.data!.length === 0)
                 && "Can not add api key without repository. Add repository first :("
                 ||
                 <>
@@ -107,8 +108,9 @@ export const FormDialog: FunctionComponent<Props> = (props) => {
                         {(formikProps: FormikProps<Value>) => <>
                             {!props.editKey && <Select fullWidth name="repositoryId"
                                                        label="Repository"
+                                                       // @ts-ignore
                                                        renderValue={v => repositories.data.find(r => r.id === v).name}>
-                                {repositories.data.map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
+                                {repositories.data!.map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
                             </Select>}
                             <Box mt={2}>
                                 <CheckBoxGroupMultiSelect label="Scopes" name="scopes" options={getAvailableScopes(formikProps.values.repositoryId)}/>

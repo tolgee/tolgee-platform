@@ -14,10 +14,7 @@ import {ExportView} from "./imprt_export/ExportView";
 import {RepositoryPage} from "./RepositoryPage";
 import {Box} from "@material-ui/core";
 import {BoxLoading} from "../../common/BoxLoading";
-
-const TranslationsView = React.lazy(() => import(/*
-    webpackChunkName: "translationsView"
-    */ './translations/TranslationView'));
+import {TranslationView} from "./translations/TranslationView";
 
 export const RepositoryRouter = () => {
     let match = useRouteMatch();
@@ -28,7 +25,7 @@ export const RepositoryRouter = () => {
                 <RepositoryPage fullWidth={true}>
                     <Route path={LINKS.REPOSITORY_TRANSLATIONS.template}>
                         <React.Suspense fallback={<Box><BoxLoading/></Box>}>
-                            <TranslationsView/>
+                            <TranslationView/>
                         </React.Suspense>
                     </Route>
                     <Route exact path={LINKS.REPOSITORY_EDIT.template}>

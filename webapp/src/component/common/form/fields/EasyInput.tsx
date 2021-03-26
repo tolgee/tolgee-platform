@@ -15,7 +15,9 @@ export const EasyInput: FunctionComponent<Props> = (props) => {
 
     const onChange = (e) => {
         field.onChange(e);
-        props.onChange(e);
+        if (props.onChange) {
+            props.onChange(e);
+        }
     }
 
     return (

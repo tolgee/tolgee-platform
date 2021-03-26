@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './apiHttpService';
+import {ApiHttpService} from './ApiHttpService';
 import {ErrorResponseDTO, ScreenshotDTO} from './response.types';
 
 type UploadResult = { stored: ScreenshotDTO[], errors: ErrorResponseDTO[] };

@@ -59,7 +59,7 @@ export const LanguageEditView = () => {
         <BaseFormView
             lg={6} md={8} xs={10}
             title={<T>language_settings_title</T>}
-            initialValues={languageLoadable.data}
+            initialValues={languageLoadable.data!}
             onSubmit={onSubmit}
             saveActionLoadable={editLoadable}
             resourceLoadable={languageLoadable}
@@ -67,8 +67,8 @@ export const LanguageEditView = () => {
             customActions={
                 <Button variant="outlined" color="secondary"
                         onClick={() => confirmationMessage({
-                            message: <T parameters={{name: languageLoadable.data.name}}>delete_language_confirmation</T>,
-                            hardModeText: languageLoadable.data.name.toUpperCase(),
+                            message: <T parameters={{name: languageLoadable.data!.name}}>delete_language_confirmation</T>,
+                            hardModeText: languageLoadable.data!.name.toUpperCase(),
                             confirmButtonText: <T>global_delete_button</T>,
                             confirmButtonColor: "secondary",
                             onConfirm: () => {

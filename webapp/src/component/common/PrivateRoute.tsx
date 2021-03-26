@@ -3,7 +3,7 @@ import {Redirect, Route} from 'react-router-dom';
 import {useSelector} from 'react-redux';
 import {AppState} from '../../store';
 import {LINKS} from '../../constants/links';
-import {securityService} from '../../service/securityService';
+import {SecurityService} from '../../service/SecurityService';
 import {container} from 'tsyringe';
 
 interface PrivateRouteProps {
@@ -14,7 +14,7 @@ export const PrivateRoute: FunctionComponent<PrivateRouteProps & React.Component
     (props) => {
 
         const allowPrivate = useSelector((state: AppState) => state.global.security.allowPrivate);
-        const ss = container.resolve(securityService);
+        const ss = container.resolve(SecurityService);
         const afterLoginLink = ss.getAfterLoginLink();
 
         if (allowPrivate && afterLoginLink) {

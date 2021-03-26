@@ -6,7 +6,7 @@ import {LINKS} from "../../../../constants/links";
 import {TranslationCreationDialog} from "../../../Translations/TranslationCreationDialog";
 import {Route} from 'react-router-dom';
 
-export default function TranslationView() {
+export const TranslationView = () => {
     return (
         <RepositoryLanguageProvider>
             <TranslationGridContextProvider>

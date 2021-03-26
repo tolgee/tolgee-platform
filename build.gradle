@@ -7,8 +7,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.3")
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.31"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.4")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.32"
     }
 }
 
@@ -16,12 +16,12 @@ plugins {
     id "com.palantir.docker" version "0.26.0"
     id 'com.palantir.docker-compose' version "0.26.0"
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.springframework.boot' version '2.4.3'
+    id 'org.springframework.boot' version '2.4.4'
     id 'java'
     id 'org.liquibase.gradle' version '2.0.4'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.31'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.32'
     id "org.jetbrains.kotlin.plugin.jpa" version "1.4.31"
-    id "org.jetbrains.kotlin.kapt" version "1.4.31"
+    id "org.jetbrains.kotlin.kapt" version "1.4.32"
 }
 
 group = 'io.tolgee'
@@ -56,7 +56,8 @@ idea {
     }
 }
 
-def liveDb = [
+
+def liveDbH2 = [
         url         : 'jdbc:postgresql://localhost:5432/postgres',
         referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.PostgreSQL95Dialect' +
@@ -64,7 +65,18 @@ def liveDb = [
                 '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
         username    : 'postgres',
         password    : 'postgres',
+        driver      : "org.postgresql.Driver"
 ]
+
+def liveDbPostgres = [
+        url         : 'jdbc:h2:~/.tolgee/db.h2;AUTO_SERVER=TRUE',
+        referenceUrl: 'hibernate:spring:io.tolgee' +
+                '?dialect=org.hibernate.dialect.H2Dialect' +
+                '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
+                '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
+]
+
+def liveDb = liveDbPostgres
 
 liquibase {
     activities {
@@ -83,10 +95,10 @@ liquibase {
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
-def LIQUIBASE_VERSION = "4.3.1"
+def LIQUIBASE_VERSION = "4.3.2"
 def LIQUIBASE_HIBERNATE_VERSION = "4.3.1"
 def JJWT_VERSION = "0.11.2"
-def SPRING_DOC_VERSION = "1.5.5"
+def SPRING_DOC_VERSION = "1.5.6"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -128,14 +140,16 @@ dependencies {
     testCompile group: 'org.testng', name: 'testng', version: '7.4.0'
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
-    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.2-native-mt'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.3-native-mt'
     kapt "org.hibernate:hibernate-jpamodelgen"
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.31'
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.32'
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.31'
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2'
     implementation 'commons-codec:commons-codec:1.15'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.953'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.982'
     compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
+    implementation('org.reflections:reflections:0.9.12')
 }
 
 test {
@@ -180,6 +194,8 @@ task packWebapp(type: Zip) {
     destinationDirectory = file("$buildDir/libs")
     entryCompression ZipEntryCompression.STORED
 }
+
+tasks.findByName("build").dependsOn("runE2e")
 
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']

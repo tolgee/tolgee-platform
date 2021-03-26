@@ -113,12 +113,12 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     private fun createApiKey(repository: Repository) {
         val (_, user) = repository.permissions.stream().findAny().orElseThrow { NotFoundException() }
         if (apiKeyRepository.findByKey(API_KEY).isEmpty) {
-            val apiKey = ApiKey.builder()
-                    .repository(repository)
-                    .key(API_KEY)
-                    .userAccount(user)
-                    .scopes(setOf(*ApiScope.values()))
-                    .build()
+            val apiKey = ApiKey(
+                    repository = repository,
+                    key = API_KEY,
+                    userAccount = user,
+                    scopesEnum = ApiScope.values().toSet()
+            )
             repository.apiKeys.add(apiKey)
             apiKeyRepository.save(apiKey)
         }

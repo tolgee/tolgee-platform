@@ -22,7 +22,7 @@ import {useTranslate} from "@tolgee/react";
 const actions = container.resolve(RepositoryActions);
 
 interface Props {
-    repositories: RepositoryDTO[];
+    repositories: RepositoryDTO[] | undefined;
     loading: boolean;
 }
 
@@ -41,8 +41,8 @@ export const RepositoryListView = connect((state: AppState) =>
                 <BaseView title={t("repositories_title")} lg={5} md={7} loading={loading}>
                     {() => (
                         <Box ml={-2}>
-                            {repositories.length && <List>
-                                {repositories.map(r =>
+                            {repositories!.length && <List>
+                                {repositories!.map(r =>
                                     <ListItemLink
                                         key={r.id}
                                         to={LINKS.REPOSITORY_TRANSLATIONS.build({[PARAMS.REPOSITORY_ID]: r.id})}>

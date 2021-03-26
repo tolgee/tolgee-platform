@@ -5,10 +5,11 @@
 package io.tolgee.controllers.screenshot
 
 import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.controllers.LoggedRequestFactory.addToken
 import io.tolgee.dtos.request.GetScreenshotsByKeyDTO
-import io.tolgee.dtos.response.KeyDTO
+import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.dtos.response.ScreenshotDTO
+import io.tolgee.fixtures.LoggedRequestFactory.addToken
+import io.tolgee.fixtures.generateUniqueString
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
@@ -23,7 +24,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
     fun uploadScreenshot() {
         val repository = dbPopulator.createBase(generateUniqueString())
 
-        val key = keyService.create(repository, KeyDTO("test"))
+        val key = keyService.create(repository, DeprecatedKeyDto("test"))
 
         val responseBody: ScreenshotDTO = performStoreScreenshot(repository, key)
 
@@ -38,7 +39,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
     @Test
     fun uploadMultipleScreenshots() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        val key = keyService.create(repository, KeyDTO("test"))
+        val key = keyService.create(repository, DeprecatedKeyDto("test"))
         repeat((1..5).count()) {
             performStoreScreenshot(repository, key)
         }
@@ -48,14 +49,14 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
     @Test
     fun findAll() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        val key = keyService.create(repository, KeyDTO("test"))
-        val key2 = keyService.create(repository, KeyDTO("test_2"))
+        val key = keyService.create(repository, DeprecatedKeyDto("test"))
+        val key2 = keyService.create(repository, DeprecatedKeyDto("test_2"))
 
         screenshotService.store(screenshotFile, key)
         screenshotService.store(screenshotFile, key)
         screenshotService.store(screenshotFile, key2)
 
-        var result: List<ScreenshotDTO> = performPost("/api/repository/${repository.id}/screenshots/get",
+        var result: List<ScreenshotDTO> = performAuthPost("/api/repository/${repository.id}/screenshots/get",
                 GetScreenshotsByKeyDTO(key.name!!)).andExpect(status().isOk)
                 .andReturn().parseResponseTo()
 
@@ -64,7 +65,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + result[0].filename)
         assertThat(file).exists()
 
-        result = performPost("/api/repository/${repository.id}/screenshots/get",
+        result = performAuthPost("/api/repository/${repository.id}/screenshots/get",
                 GetScreenshotsByKeyDTO(key2.name!!)).andExpect(status().isOk)
                 .andReturn().parseResponseTo()
 
@@ -74,11 +75,11 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
     @Test
     fun getScreenshotFile() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        val key = keyService.create(repository, KeyDTO("test"))
+        val key = keyService.create(repository, DeprecatedKeyDto("test"))
         val screenshot = screenshotService.store(screenshotFile, key)
 
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshot.filename)
-        val result = performGet("/screenshots/${screenshot.filename}")
+        val result = performAuthGet("/screenshots/${screenshot.filename}")
                 .andExpect(status().isOk)
                 .andExpect(
                         header().string("Cache-Control", "max-age=365, must-revalidate, no-transform"))
@@ -90,7 +91,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
     @Test
     fun delete() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        val key = keyService.create(repository, KeyDTO("test"))
+        val key = keyService.create(repository, DeprecatedKeyDto("test"))
 
 
         val list = (1..20).map {
@@ -99,7 +100,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
         val idsToDelete = list.stream().limit(10).map { it.id.toString() }.collect(Collectors.joining(","))
 
-        performDelete("/api/repository/screenshots/$idsToDelete", null).andExpect(status().isOk)
+        performAuthDelete("/api/repository/screenshots/$idsToDelete", null).andExpect(status().isOk)
 
         val rest = screenshotService.findAll(key)
         assertThat(rest).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))
@@ -109,7 +110,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
     @Test
     fun uploadValidationNoImage() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        val key = keyService.create(repository, KeyDTO("test"))
+        val key = keyService.create(repository, DeprecatedKeyDto("test"))
         val response = mvc.perform(addToken(multipart("/api/repository/${repository.id}/screenshots")
                 .file(MockMultipartFile("screenshot", "originalShot.png", "not_valid",
                         "test".toByteArray()))

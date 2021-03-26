@@ -5,14 +5,14 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Size
 
 data class SignUpDto(
-        @NotBlank
+        @field:NotBlank
         var name: String? = null,
 
-        @Email @NotBlank
+        @field:Email @field:NotBlank
         var email: String? = null,
 
-        @Size(min = 8, max = 100)
-        @NotBlank
+        @field:Size(min = 8, max = 100)
+        @field:NotBlank
         var password: String? = null,
 
         var invitationCode: String? = null,

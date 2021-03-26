@@ -29,7 +29,7 @@ export const BaseView = (props: BaseViewProps) => {
                        margin: "0 -12px 0 -12px",
                        width: "calc(100% + 24px)"
                    }}>
-            <Box minHeight="calc(100vh - 76px)">
+            <Box minHeight="100%">
                 <Box style={{backgroundColor: grey[50], borderBottom: `1px solid ${grey[200]}`}} p={4} pb={2}>
                     <Grid container justify="center" alignItems="center">
                         <Grid item xs={props.xs || 12} md={props.md || 12} lg={props.lg || 12} sm={props.sm || 12}>

@@ -15,16 +15,13 @@ jobs:
         with:
           java-version: 11
 
-      - name: Build with Gradle
-        run: ./gradlew build
-
       - name: Setup node
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
 
-      - name: Run E2E test
-        run: ./gradlew runE2e
+      - name: Build with Gradle
+        run: ./gradlew build
 
       - name: Set git globals
         run: |

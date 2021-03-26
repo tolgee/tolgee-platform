@@ -6,7 +6,7 @@ import {Box} from "@material-ui/core";
 import {useSelector} from "react-redux";
 import {AppState} from "../../store";
 import {container} from "tsyringe";
-import {GlobalActions} from "../../store/global/globalActions";
+import {GlobalActions} from "../../store/global/GlobalActions";
 import {UserMenu} from "../security/UserMenu";
 
 interface MainMenuProps {

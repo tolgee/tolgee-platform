@@ -3,8 +3,8 @@ import {VariantType} from "notistack";
 
 export type SecurityDTO = {
     allowPrivate: boolean;
-    jwtToken: string;
-    loginErrorCode: string;
+    jwtToken: string | undefined | null;
+    loginErrorCode: string | null;
     allowRegistration: boolean;
 }
 

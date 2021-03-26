@@ -7,17 +7,17 @@ import javax.validation.constraints.NotBlank
 
 data class EditKeyDTO(
         @field:NotBlank
-        var oldFullPathString: String? = null,
+        var currentName: String? = null,
         @field:NotBlank
-        var newFullPathString: String? = null
+        var newName: String? = null
 ) {
     @get:Hidden
     @get:JsonIgnore
     val oldPathDto: PathDTO
-        get() = PathDTO.fromFullPath(oldFullPathString)
+        get() = PathDTO.fromFullPath(currentName)
 
     @get:Hidden
     @get:JsonIgnore
     val newPathDto: PathDTO
-        get() = PathDTO.fromFullPath(newFullPathString)
+        get() = PathDTO.fromFullPath(newName)
 }

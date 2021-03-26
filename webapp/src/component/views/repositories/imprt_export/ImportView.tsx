@@ -24,11 +24,14 @@ export const ImportView: FunctionComponent = () => {
     let state = useSelector((state: AppState) => state.importExport.loadables.import);
 
 
-    const [data, setData] = useState(null);
+    const [data, setData] = useState(null as any);
     const [suggestedName, setSuggestedName] = useState("");
 
     const fileSelected = (event: ChangeEvent) => {
         let target = event.target as HTMLInputElement;
+        if(!target.files){
+            return;
+        }
         if (target.files.length > 0) {
             const file = target.files[0];
             let fileReader = new FileReader();

@@ -2,8 +2,8 @@ package io.tolgee.service;
 
 import io.tolgee.constants.Message;
 import io.tolgee.dtos.PathDTO;
-import io.tolgee.dtos.query_results.KeyDTO;
-import io.tolgee.dtos.response.KeyResponseDTO;
+import io.tolgee.dtos.query_results.KeyWithTranslationsDto;
+import io.tolgee.dtos.response.KeyWithTranslationsResponseDto;
 import io.tolgee.dtos.response.ViewDataResponse;
 import io.tolgee.dtos.response.translations_view.ResponseParams;
 import io.tolgee.exceptions.InternalException;
@@ -61,9 +61,8 @@ public class TranslationService {
     }
 
     public Map<String, String> getKeyTranslationsResult(Long repositoryId, PathDTO path, Set<String> languageAbbreviations) {
-        Repository repository = repositoryService.findById(repositoryId).orElseThrow(NotFoundException::new);
+        Repository repository = repositoryService.getById(repositoryId).orElseThrow(NotFoundException::new);
         Key key = keyService.get(repository, path).orElse(null);
-
 
         Set<Language> languages;
         if (languageAbbreviations == null) {
@@ -100,17 +99,17 @@ public class TranslationService {
         return translationRepository.findOneByKeyAndLanguage(key, language);
     }
 
-    public ViewDataResponse<LinkedHashSet<KeyResponseDTO>, ResponseParams> getViewData(
+    public ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> getViewData(
             Set<String> languageAbbreviations, Long repositoryId, int limit, int offset, String search
     ) {
-        Repository repository = repositoryService.findById(repositoryId).orElseThrow(NotFoundException::new);
+        Repository repository = repositoryService.getById(repositoryId).orElseThrow(NotFoundException::new);
 
         Set<Language> languages = languageService.getLanguagesForTranslationsView(languageAbbreviations, repository);
 
         TranslationsViewBuilder.Result data = TranslationsViewBuilder.getData(entityManager, repository, languages, search, limit, offset);
         return new ViewDataResponse<>(data.getData()
                 .stream()
-                .map(queryResult -> KeyResponseDTO.fromQueryResult(new KeyDTO((Object[]) queryResult)))
+                .map(queryResult -> KeyWithTranslationsResponseDto.fromQueryResult(new KeyWithTranslationsDto((Object[]) queryResult)))
                 .collect(Collectors.toCollection(LinkedHashSet::new)), offset, data.getCount(),
                 new ResponseParams(search, languages.stream().map(Language::getAbbreviation).collect(Collectors.toSet())));
     }

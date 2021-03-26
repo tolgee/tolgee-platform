@@ -10,7 +10,7 @@ import {StandardForm} from '../common/form/StandardForm';
 import {TextField} from '../common/form/fields/TextField';
 import Box from '@material-ui/core/Box';
 import {container} from 'tsyringe';
-import {GlobalActions} from '../../store/global/globalActions';
+import {GlobalActions} from '../../store/global/GlobalActions';
 import {Alert} from '../common/Alert';
 import {useConfig} from "../../hooks/useConfig";
 import {Validation} from "../../constants/GlobalValidationSchema";
@@ -63,6 +63,7 @@ const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
                                           </Box>
                                       </Box>
                                   </>}
+                              // @ts-ignore
                               onSubmit={(v: ValueType) => {
                                   globalActions.loadableActions.resetPasswordRequest.dispatch(v.email);
                               }}>

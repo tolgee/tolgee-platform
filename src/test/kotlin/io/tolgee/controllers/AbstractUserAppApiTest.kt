@@ -3,9 +3,11 @@ package io.tolgee.controllers
 import io.tolgee.assertions.UserApiAppAction
 import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
+import io.tolgee.fixtures.generateUniqueString
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
+@Deprecated("This is too complicated")
 abstract class AbstractUserAppApiTest : AbstractControllerTest() {
     fun performAction(action: UserApiAppAction): MvcResult {
         return try {
@@ -19,10 +21,10 @@ abstract class AbstractUserAppApiTest : AbstractControllerTest() {
         }
     }
 
-    protected fun createBaseWithApiKey(vararg scopes: ApiScope?): ApiKeyDTO {
-        var scopesSet = setOf(*scopes)
+    protected fun createBaseWithApiKey(vararg scopes: ApiScope): ApiKeyDTO {
+        var scopesSet = scopes.toSet()
         if (scopesSet.isEmpty()) {
-            scopesSet = setOf(*ApiScope.values())
+            scopesSet = ApiScope.values().toSet()
         }
         val base = dbPopulator.createBase(generateUniqueString())
         return apiKeyService.createApiKey(base.createdBy, scopesSet, base)

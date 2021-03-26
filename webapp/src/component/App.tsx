@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {useEffect, useState} from 'react';
-import {GlobalActions} from '../store/global/globalActions';
+import {GlobalActions} from '../store/global/GlobalActions';
 import SnackBar from './common/SnackBar';
 import {BrowserRouter, Redirect, Route, Switch} from 'react-router-dom';
 import {container} from 'tsyringe';
@@ -8,8 +8,8 @@ import {useSelector} from 'react-redux';
 import {AppState} from '../store';
 import {LINKS} from '../constants/links';
 import {PrivateRoute} from './common/PrivateRoute';
-import {ErrorActions} from '../store/global/errorActions';
-import {RedirectionActions} from '../store/global/redirectionActions';
+import {ErrorActions} from '../store/global/ErrorActions';
+import {RedirectionActions} from '../store/global/RedirectionActions';
 import {useConfig} from "../hooks/useConfig";
 import {useUser} from "../hooks/useUser";
 import {ApiKeysView} from "./security/apiKeys/ApiKeysView";
@@ -46,7 +46,7 @@ const Redirection = () => {
     return null;
 };
 
-const MandatoryDataProvider = (props) => {
+const MandatoryDataProvider = (props: any) => {
     let config = useConfig();
     let userData = useUser();
 
@@ -75,12 +75,12 @@ const GlobalConfirmation = () => {
     let actions = container.resolve(GlobalActions);
 
     const onCancel = () => {
-        state.onCancel?.();
+        state?.onCancel?.();
         actions.closeConfirmation.dispatch();
     };
 
     const onConfirm = () => {
-        state.onConfirm?.();
+        state?.onConfirm?.();
         actions.closeConfirmation.dispatch();
     };
 

@@ -1,6 +1,6 @@
 import {Link, PARAMS} from "../constants/links";
 import {container} from "tsyringe";
-import {RedirectionActions} from "../store/global/redirectionActions";
+import {RedirectionActions} from "../store/global/RedirectionActions";
 
 
 export function useRedirect(to: Link, params?: Partial<{ [K in PARAMS]: any }>) {

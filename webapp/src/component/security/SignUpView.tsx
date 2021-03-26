@@ -8,7 +8,7 @@ import {Redirect} from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import {container} from 'tsyringe';
 import {SetPasswordFields} from './SetPasswordFields';
-import {SignUpActions} from '../../store/global/signUpActions';
+import {SignUpActions} from '../../store/global/SignUpActions';
 import {TextField} from '../common/form/fields/TextField';
 import {useConfig} from "../../hooks/useConfig";
 import {Validation} from "../../constants/GlobalValidationSchema";
@@ -23,7 +23,7 @@ export type SignUpType = {
     name: string,
     email: string,
     password: string;
-    passwordRepeat: string;
+    passwordRepeat?: string;
     invitationCode?: string;
 }
 
@@ -52,6 +52,7 @@ const SignUpView: FunctionComponent = () => {
                                       <Button color="primary" type="submit"><T>sign_up_submit_button</T></Button>
                                   </Box>
                               }
+                              //@ts-ignore
                               onSubmit={(v: SignUpType) => {
                                   actions.loadableActions.signUp.dispatch(v);
                               }}>

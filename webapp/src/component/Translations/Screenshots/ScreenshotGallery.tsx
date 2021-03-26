@@ -10,7 +10,7 @@ import {container} from 'tsyringe';
 import AddIcon from '@material-ui/icons/Add';
 import {Message} from "../../../store/global/types";
 import {T} from '@tolgee/react';
-import {MessageActions} from "../../../store/global/messageActions";
+import {MessageActions} from "../../../store/global/MessageActions";
 import {useConfig} from "../../../hooks/useConfig";
 import {useRepository} from "../../../hooks/useRepository";
 import {createStyles, makeStyles, Theme} from '@material-ui/core';
@@ -57,13 +57,14 @@ export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (pro
         const screenshots = screenshotsLoadable.data as ScreenshotDTO[]
         const repositoryPermissions = useRepositoryPermissions();
 
-        const [detailFileName, setDetailFileName] = React.useState(null);
+        const [detailFileName, setDetailFileName] = React.useState(null as string | null);
         const classes = useStyles({});
         const config = useConfig();
         const repository = useRepository();
 
         const addBox = repositoryPermissions.satisfiesPermission(RepositoryPermissionType.TRANSLATE) && (
             <Box key="add" className={`${classes.addBox}`} data-cy="add-box"
+                //@ts-ignore
                  onClick={() => fileRef.current.dispatchEvent(new MouseEvent("click"))}>
                 <AddIcon className={classes.addIcon}/>
             </Box>
@@ -110,8 +111,14 @@ export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (pro
 
             const pasteListener = (e: ClipboardEvent) => {
                 const files: File[] = [];
+                if (e.clipboardData == null) {
+                    return;
+                }
                 for (let i = 0; i < e.clipboardData.files.length; i++) {
-                    files.push(e.clipboardData.files.item(i));
+                    const item = e.clipboardData.files.item(i);
+                    if (item) {
+                        files.push(item);
+                    }
                 }
                 validateAndUpload(files);
             }
@@ -129,9 +136,15 @@ export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (pro
 
         function onFileSelected(e: React.SyntheticEvent) {
             const files = (e.target as HTMLInputElement).files
+            if (!files) {
+                return
+            }
             const toUpload: File[] = []
             for (let i = 0; i < files.length; i++) {
-                toUpload.push(files.item(i))
+                const item = files.item(i);
+                if (item) {
+                    toUpload.push(item)
+                }
             }
             validateAndUpload(toUpload);
         }
@@ -157,7 +170,7 @@ export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (pro
                                 {addBox}
                             </>}
                 </ScreenshotDropzone>
-                <ScreenshotDetail fileName={detailFileName} onClose={() => setDetailFileName(null)}/>
+                <ScreenshotDetail fileName={detailFileName as string} onClose={() => setDetailFileName(null)}/>
             </>
         )
     }

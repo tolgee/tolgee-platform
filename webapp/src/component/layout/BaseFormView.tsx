@@ -10,7 +10,7 @@ interface BaseFormViewProps {
     onInit?: () => {};
     saving?: boolean;
     initialValues: object;
-    onSubmit: (v: object) => void,
+    onSubmit: (v: any) => void,
     onCancel?: () => void,
     validationSchema: ObjectSchema<any>,
     resourceLoadable?: Loadable,

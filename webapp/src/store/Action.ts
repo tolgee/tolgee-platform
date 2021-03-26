@@ -1,16 +1,16 @@
 import {container} from 'tsyringe';
-import {dispatchService} from '../service/dispatchService';
+import {DispatchService} from '../service/DispatchService';
 
 export type ActionType<PayloadType> = { type: string, payload: PayloadType, meta?: any, params?: any[] };
 export type StateModifier<StateType, PayloadType> = (state: StateType, action: ActionType<PayloadType>) => StateType;
 
 export abstract class AbstractAction<PayloadType = any, StateType = any, DispatchParams extends any[] = any[]> {
     protected constructor(public type: string,
-                          public payloadProvider?: (...params: any[]) => PayloadType, public meta?: object) {
+                          public payloadProvider?: (...params: DispatchParams) => PayloadType, public meta?: object) {
     }
 
     dispatch(...params: DispatchParams) {
-        container.resolve(dispatchService).dispatch({
+        container.resolve(DispatchService).dispatch({
             type: this.type,
             meta: {...this.meta, params: params},
             payload: this.payloadProvider && this.payloadProvider(...params),
@@ -35,14 +35,16 @@ export class Action<PayloadType, StateType, DispatchParams extends any[]> extend
     }
 
     public reduce(state: StateType, action: ActionType<PayloadType>): void {
-        this.stateModifier(state, action);
+        if (this.stateModifier) {
+            this.stateModifier(state, action);
+        }
     }
 }
 
 export class PromiseAction<PayloadType, ErrorType, StateType, DispatchParams extends any[]>
     extends AbstractAction<Promise<PayloadType>, StateType, DispatchParams> {
 
-    public reducePending: StateModifier<StateType, any>;
+    public reducePending?: StateModifier<StateType, any>;
 
     get fulfilledType() {
         return this.type + '_FULFILLED';
@@ -56,8 +58,8 @@ export class PromiseAction<PayloadType, ErrorType, StateType, DispatchParams ext
         return this.type + '_REJECTED';
     }
 
-    public reduceRejected: StateModifier<StateType, any>;
-    public reduceFulfilled: StateModifier<StateType, PayloadType>;
+    public reduceRejected?: StateModifier<StateType, any>;
+    public reduceFulfilled?: StateModifier<StateType, PayloadType>;
     build = {
         onPending: (callback: StateModifier<StateType, any>): PromiseAction<PayloadType, ErrorType, StateType, DispatchParams> => {
             this.reducePending = callback;
@@ -75,7 +77,7 @@ export class PromiseAction<PayloadType, ErrorType, StateType, DispatchParams ext
         }
     };
 
-    constructor(type: string, payloadProvider: (...params: any[]) => Promise<PayloadType>, meta?: object) {
+    constructor(type: string, payloadProvider: (...params: DispatchParams) => Promise<PayloadType>, meta?: object) {
         super(type, payloadProvider, meta);
     }
 }

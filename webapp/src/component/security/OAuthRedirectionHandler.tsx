@@ -1,7 +1,7 @@
 import {default as React, FunctionComponent, useEffect} from 'react';
 import {Redirect, useRouteMatch} from 'react-router-dom';
 import {container} from 'tsyringe';
-import {GlobalActions, GlobalState} from '../../store/global/globalActions';
+import {GlobalActions, GlobalState} from '../../store/global/GlobalActions';
 import {LINKS, PARAMS} from '../../constants/links';
 import {useSelector} from 'react-redux';
 import {AppState} from '../../store';

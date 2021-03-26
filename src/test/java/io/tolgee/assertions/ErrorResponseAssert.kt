@@ -2,7 +2,7 @@ package io.tolgee.assertions
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.fixtures.parseResponseTo
+import io.tolgee.fixtures.mapResponseTo
 import org.assertj.core.api.AbstractAssert
 import org.springframework.test.web.servlet.MvcResult
 import java.io.UnsupportedEncodingException
@@ -26,14 +26,14 @@ class ErrorResponseAssert(mvcResult: MvcResult?) : AbstractAssert<ErrorResponseA
         }
 
     fun hasCode(code: String) {
-        val content: Map<String, Any> = actual!!.parseResponseTo()
+        val content: Map<String, Any> = actual!!.mapResponseTo()
         assertThat(content["code"]).isEqualTo(code)
     }
 
     private val standardMap: Map<String, Map<String, String>>
         get() {
             return try {
-                actual!!.parseResponseTo()
+                actual!!.mapResponseTo()
             } catch (e: JsonProcessingException) {
                 throw RuntimeException("Can not parse error response.")
             } catch (e: UnsupportedEncodingException) {
@@ -43,7 +43,7 @@ class ErrorResponseAssert(mvcResult: MvcResult?) : AbstractAssert<ErrorResponseA
     private val customMap: Map<String, Map<String, List<Any>>>
         get() {
             return try {
-                actual!!.parseResponseTo()
+                actual!!.mapResponseTo()
             } catch (e: JsonProcessingException) {
                 try {
                     throw RuntimeException("""

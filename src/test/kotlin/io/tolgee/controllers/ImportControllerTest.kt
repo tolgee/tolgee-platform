@@ -3,6 +3,7 @@ package io.tolgee.controllers
 import com.github.javafaker.Faker
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.ImportDto
+import io.tolgee.fixtures.generateUniqueString
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.testng.annotations.Test
@@ -27,7 +28,7 @@ class ImportControllerTest : SignedInControllerTest() {
 
         val dto = generateData(5000)
 
-        performPost("/api/repository/${repository.id}/import", dto)
+        performAuthPost("/api/repository/${repository.id}/import", dto)
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn().asyncResult
 
@@ -44,7 +45,7 @@ class ImportControllerTest : SignedInControllerTest() {
 
         val dto = generateData(50)
 
-        val asyncResult = performPost("/api/repository/${repository.id}/import", dto)
+        val asyncResult = performAuthPost("/api/repository/${repository.id}/import", dto)
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn()
 
@@ -61,7 +62,7 @@ class ImportControllerTest : SignedInControllerTest() {
         val dto1 = generateData(10000)
 
         val timeOnEmpty = measureTimeMillis {
-            performPost("/api/repository/${repository.id}/import", dto1)
+            performAuthPost("/api/repository/${repository.id}/import", dto1)
                     .andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn().asyncResult
         }
@@ -70,7 +71,7 @@ class ImportControllerTest : SignedInControllerTest() {
 
         val dto2 = generateData(5000)
         val timeOnFull = measureTimeMillis {
-            performPost("/api/repository/${repository.id}/import", dto2)
+            performAuthPost("/api/repository/${repository.id}/import", dto2)
                     .andExpect(MockMvcResultMatchers.status().isOk)
                     .andReturn().asyncResult
         }
@@ -87,7 +88,7 @@ class ImportControllerTest : SignedInControllerTest() {
 
         val dto = generateData(100)
 
-        performPost("/api/repository/${repository.id}/import", dto)
+        performAuthPost("/api/repository/${repository.id}/import", dto)
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn().asyncResult
 
@@ -95,7 +96,7 @@ class ImportControllerTest : SignedInControllerTest() {
         var translations = translationService.getAllByLanguageId(language.id)
         assertThat(translations.stream().map { it.text }.collect(Collectors.toList())).containsAll(dto.data!!.values)
 
-        performPost("/api/repository/${repository.id}/import", dto)
+        performAuthPost("/api/repository/${repository.id}/import", dto)
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn().asyncResult
 

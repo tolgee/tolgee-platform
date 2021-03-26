@@ -21,7 +21,7 @@ export const ScreenshotsPopover: FunctionComponent<ScreenshotsPopoverProps> = (p
     const uploadLoadable = actions.useSelector(s => s.loadables.uploadScreenshot)
 
     const repository = useRepository();
-    const id = open ? `screenshot-popover-${props.data.id}` : undefined;
+    const id = `screenshot-popover-${props.data.id}`;
 
     useEffect(() => {
         actions.loadableActions.getForKey.dispatch(repository.id, props.data.name)

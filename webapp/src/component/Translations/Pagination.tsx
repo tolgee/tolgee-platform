@@ -14,23 +14,23 @@ export const Pagination: FunctionComponent = (props) => {
     const onPerPageChange = (perPage) => {
         confirmation(() => {
             setPerPage(perPage);
-            listContext.loadData(listContext.listLoadable.data.params.search, perPage, 0);
+            listContext.loadData(listContext.listLoadable.data!.params.search, perPage, 0);
         })
     };
 
     const onPageChange = (p) => {
         confirmation(() => {
-            listContext.loadData(listContext.listLoadable.data.params.search, perPage, p * perPage);
+            listContext.loadData(listContext.listLoadable.data!.params.search, perPage, p * perPage);
         })
     };
 
-    const page = Math.ceil(listContext.listLoadable.data.paginationMeta.offset / listContext.perPage)
+    const page = Math.ceil(listContext.listLoadable.data!.paginationMeta.offset / listContext.perPage)
 
     return (
         <Box mt={3}>
             <Box display="flex" justifyContent="flex-end">
                 <TablePagination component={Box} rowsPerPageOptions={[10, 20, 30, 40, 50]}
-                                 count={listContext.listLoadable.data.paginationMeta.allCount}
+                                 count={listContext.listLoadable.data!.paginationMeta.allCount}
                                  onChangePage={(_, p) => onPageChange(p)}
                                  page={page}
                                  onChangeRowsPerPage={(e) => onPerPageChange(e.target.value)}

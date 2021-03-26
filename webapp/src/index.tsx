@@ -9,7 +9,7 @@ import configureStore from './store';
 
 import {container} from 'tsyringe';
 
-import {dispatchService} from './service/dispatchService';
+import {DispatchService} from './service/DispatchService';
 
 import ErrorBoundary from "./component/ErrorBoundary";
 import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
@@ -21,14 +21,14 @@ import {TolgeeProvider} from "@tolgee/react";
 import {UI} from "@tolgee/ui";
 import {App} from "./component/App";
 import {FullPageLoading} from "./component/common/FullPageLoading";
-import './yupLocalization';
+import reportWebVitals from "./reportWebVitals";
 
 const store = configureStore();
 
 const SnackbarProvider = React.lazy(() => import(/* webpackChunkName: "notistack" */ 'notistack')
     .then(module => ({"default": module.SnackbarProvider})));
 
-container.resolve(dispatchService).store = store;
+container.resolve(DispatchService).store = store;
 
 const rubik = {
     fontFamily: 'Rubik',
@@ -103,9 +103,9 @@ const theme = createMuiTheme({
 ReactDOM.render(
     <React.Suspense fallback={<FullPageLoading/>}>
         <TolgeeProvider
-            apiUrl={environment.tolgeeApiUrl}
-            apiKey={environment.tolgeeApiKey}
-            ui={environment.tolgeeApiKey ? UI : undefined}
+            apiUrl={process.env.REACT_APP_TOLGEE_API_URL}
+            apiKey={process.env.REACT_APP_TOLGEE_API_KEY}
+            ui={process.env.REACT_APP_TOLGEE_API_KEY ? UI : undefined}
             filesUrlPrefix="/i18n/"
             loadingFallback={<FullPageLoading/>}
             availableLanguages={["en", "cs"]}
@@ -125,3 +125,9 @@ ReactDOM.render(
     </React.Suspense>,
     document.getElementById('root')
 );
+
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();

@@ -42,6 +42,17 @@ task runE2e(type: Exec, group: "e2e") {
     finalizedBy "stopDockerE2e", "cleanupDockerE2e"
 }
 
+task openE2e(type: Exec, group: "e2e") {
+    dependsOn "runDockerE2e", "installE2eDeps"
+
+    commandLine "npm", "run", "cy:open"
+
+    workingDir E2E_DIR
+
+    finalizedBy "stopDockerE2e", "cleanupDockerE2e"
+}
+
+
 task runDockerE2e(type: Exec, group: "e2e") {
     dependsOn "tagDockerLocal"
     commandLine "docker-compose", "up", "-d"

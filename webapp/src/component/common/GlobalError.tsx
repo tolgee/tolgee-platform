@@ -5,11 +5,11 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import {GlobalError as GlobalErrorError} from "../../error/GlobalError";
 import {SadEmotionMessage} from "./SadEmotionMessage";
-import {GlobalActions} from "../../store/global/globalActions";
+import {GlobalActions} from "../../store/global/GlobalActions";
 import {container} from "tsyringe";
 
 export default function GlobalError(props: { error: GlobalErrorError }) {
-    let dev = environment.mode === "development";
+    let dev = process.env.NODE_ENV === "development";
 
     return (
         <Container maxWidth={dev ? 'lg' : 'sm'}>

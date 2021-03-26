@@ -36,7 +36,7 @@ public class SecurityService {
         return permissionService.getRepositoryPermission(repositoryId, getActiveUser());
     }
 
-    public Permission getAnyRepositoryPermission(Long repositoryId) {
+    public Permission getAnyRepositoryPermissionOrThrow(Long repositoryId) {
         Optional<Permission> repositoryPermission = getRepositoryPermission(repositoryId);
         if (repositoryPermission.isEmpty()) {
             throw new PermissionException();
@@ -47,7 +47,7 @@ public class SecurityService {
 
 
     public Permission checkRepositoryPermission(Long repositoryId, Permission.RepositoryPermissionType requiredPermission) {
-        Permission usersPermission = getAnyRepositoryPermission(repositoryId);
+        Permission usersPermission = getAnyRepositoryPermissionOrThrow(repositoryId);
         if (requiredPermission.getPower() > usersPermission.getType().getPower()) {
             throw new PermissionException();
         }
@@ -62,8 +62,8 @@ public class SecurityService {
     }
 
     public void checkApiKeyScopes(Set<ApiScope> scopes, ApiKey apiKey) {
-        checkApiKeyScopes(scopes, apiKey.getRepository()); // checks if user's has permissions to use api key with api key's permissions
-        if (!apiKey.getScopesSet().containsAll(scopes)) {
+        checkApiKeyScopes(scopes, apiKey.getRepository()); // checks if user's has permissions to use api key its permissions
+        if (!apiKey.getScopesEnum().containsAll(scopes)) {
             throw new PermissionException();
         }
     }

@@ -4,6 +4,9 @@ import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
 
 data class ImportDto(
-        val languageAbbreviation: @NotEmpty String? = null,
-        var data: @NotNull Map<String, String>? = null
+        @field:NotEmpty
+        val languageAbbreviation: String? = null,
+
+        @field:NotNull
+        var data: Map<String, String>? = null
 )

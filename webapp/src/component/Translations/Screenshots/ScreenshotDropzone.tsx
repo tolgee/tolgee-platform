@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({validateAndUpload, ...props}) => {
     const [dragOver, setDragOver] = useState(null as null | "valid" | "invalid");
-    const [dragEnterTarget, setDragEnterTarget] = useState(null)
+    const [dragEnterTarget, setDragEnterTarget] = useState(null as EventTarget | null)
     const classes = useStyles({});
     const repositoryPermissions = useRepositoryPermissions();
 
