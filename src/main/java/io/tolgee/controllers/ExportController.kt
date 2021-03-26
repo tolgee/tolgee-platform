@@ -2,6 +2,8 @@ package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.ApiScope
 import io.tolgee.model.Permission
 import io.tolgee.security.api_key_auth.AccessWithApiKey
@@ -23,6 +25,7 @@ import java.util.zip.ZipOutputStream
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/api/repository/{repositoryId}/export", "/api/repository/export")
+@Tag(name = "Export")
 class ExportController @Autowired constructor(private val translationService: TranslationService,
                                               private val securityService: SecurityService,
                                               private val languageService: LanguageService,
@@ -31,6 +34,7 @@ class ExportController @Autowired constructor(private val translationService: Tr
     @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.VIEW)
+    @Operation(summary = "Exports data as ZIP of jsons")
     fun doExportJsonZip(@PathVariable("repositoryId") repositoryId: Long?): ResponseEntity<StreamingResponseBody> {
         securityService.checkRepositoryPermission(repositoryHolder.repository.id, Permission.RepositoryPermissionType.VIEW)
         val languages = languageService.findAll(repositoryHolder.repository.id)
