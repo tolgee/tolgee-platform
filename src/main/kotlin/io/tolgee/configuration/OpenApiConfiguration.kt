@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.HandlerMethod
 import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.media.ArraySchema
+import io.swagger.v3.oas.models.media.Content
+import io.swagger.v3.oas.models.media.Schema
 
 
 @Configuration
@@ -104,26 +107,7 @@ open class OpenApiConfiguration() {
                     val usedTags = newPaths.flatMap { it.value.readOperations() }.flatMap { it.tags }
                     openApi.tags.removeIf { !usedTags.contains(it.name) }
 
-
-                    val usedSchemas = mutableListOf<String>()
-                    newPaths.forEach {
-                        it.value.readOperations().forEach {
-                            it.requestBody?.content?.values?.forEach {
-                                it?.schema?.`$ref`?.let {
-                                    usedSchemas.add(it.replace("#/components/schemas/", ""))
-                                }
-                            }
-                            it.responses?.values?.forEach {
-                                it.content?.values?.forEach {
-                                    it.schema?.`$ref`?.let {
-                                        usedSchemas.add(it.replace("#/components/schemas/", ""))
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    openApi.components.schemas.entries.removeIf { !usedSchemas.contains(it.key) }
+                    openApi.components.schemas.entries.removeIf { !newPaths.usedSchemas.contains(it.key) }
 
                 }
                 .addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
@@ -131,6 +115,34 @@ open class OpenApiConfiguration() {
                     operation
                 }.build()
     }
+
+    private val Paths.usedSchemas: List<String>
+        get() {
+            val result = mutableListOf<String>()
+            this.forEach { path ->
+                path.value.readOperations().forEach { method ->
+                    method.requestBody?.content?.forEachSchemaName { result.add(it) }
+                    method.responses?.values?.forEach {
+                        it.content?.forEachSchemaName { result.add(it) }
+                    }
+                }
+            }
+            return result
+        }
+
+    private fun Content?.forEachSchemaName(callback: (name: String) -> Unit) {
+
+        this?.values?.forEach {
+            val refReplacePath = "#/components/schemas/"
+            it.schema?.`$ref`?.let { schemaRef ->
+                callback(schemaRef.replace(refReplacePath, ""))
+            }
+            (it.schema as? ArraySchema)?.items?.`$ref`?.let { schemaRef ->
+                callback(schemaRef.replace(refReplacePath, ""))
+            }
+        }
+    }
+
 
     private fun PathItem.getHttpMethod(operation: Operation): PathItem.HttpMethod? {
         return when (operation) {
