@@ -6,8 +6,8 @@ import java.util.*
 class KeyWithTranslationsDto(queryResult: Array<Any?>) {
     val path: PathDTO
     val id: Long
-    private val translations: MutableMap<String, String> = LinkedHashMap()
-    fun getTranslations(): Map<String, String> {
+    private val translations: MutableMap<String, String?> = LinkedHashMap()
+    fun getTranslations(): Map<String, String?> {
         return translations
     }
 
@@ -18,7 +18,7 @@ class KeyWithTranslationsDto(queryResult: Array<Any?>) {
         var i = 0
         while (i < data.size) {
             val key = data[i] as String?
-            val value = data[i + 1] as String
+            val value = data[i + 1] as String?
 
             //remove not existing languages or folders
             if (key == null) {

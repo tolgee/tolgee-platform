@@ -19,13 +19,6 @@ const path = require("path");
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-    on('before:browser:launch', (browser, launchOptions) => {
-        if (browser.family === 'chromium' && browser.name !== 'electron') {
-            launchOptions.preferences.default.intl = {accept_languages: "en"}
-            return launchOptions
-        }
-    })
-
     return dotenvPlugin(config, {path: path.resolve(__dirname, '../../.test.docker.env')})
 }
 
