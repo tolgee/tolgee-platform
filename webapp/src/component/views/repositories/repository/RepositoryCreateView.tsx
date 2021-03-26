@@ -12,6 +12,7 @@ import {BaseFormView} from '../../../layout/BaseFormView';
 import {FieldArray} from "../../../common/form/fields/FieldArray";
 import {Validation} from "../../../../constants/GlobalValidationSchema";
 import {PossibleRepositoryPage} from "../../PossibleRepositoryPage";
+import {T} from "@tolgee/react";
 
 const actions = container.resolve(RepositoryActions);
 
@@ -39,19 +40,19 @@ export const RepositoryCreateView: FunctionComponent = () => {
 
     return (
         <PossibleRepositoryPage>
-            <BaseFormView lg={6} md={8} title={"Create repository"} initialValues={initialValues} onSubmit={onSubmit}
+            <BaseFormView lg={6} md={8} title={<T>create_repository_view</T>} initialValues={initialValues} onSubmit={onSubmit}
                           onCancel={() => setCancelled(true)}
                           saveActionLoadable={loadable}
                           validationSchema={Validation.REPOSITORY_CREATION}
             >
                 <>
-                    <TextField label="Name" name="name" required={true}/>
+                    <TextField label={<T>create_repository_name_label</T>} name="name" required={true}/>
 
                     <FieldArray name="languages">
                         {(n) => (
                             <>
-                                <TextField fullWidth={false} label="Language name" name={n('name')} required={true}/>
-                                <TextField fullWidth={false} label='Abbreviation' name={n('abbreviation')} required={true}/>
+                                <TextField fullWidth={false} label={<T>create_repository_language_name_label</T>} name={n('name')} required={true}/>
+                                <TextField fullWidth={false} label={<T>create_repository_language_abbreviation_label</T>} name={n('abbreviation')} required={true}/>
                             </>
                         )}
                     </FieldArray>
