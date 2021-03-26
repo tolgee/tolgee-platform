@@ -6,7 +6,7 @@ import java.util.*
 data class KeyWithTranslationsResponseDto(
         var id: Long? = null,
         var name: String? = null,
-        var translations: Map<String, String> = LinkedHashMap()
+        var translations: Map<String, String?> = LinkedHashMap()
 ) {
     companion object {
         @JvmStatic
