@@ -75,7 +75,7 @@ class UserAppApiController(
     @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
     fun setTranslations(@RequestBody @Valid dto: SetTranslationsDTO) {
         val apiKey = authenticationFacade.apiKey
-        val repository = repositoryService.getById(apiKey.repository!!.id).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
+        val repository = repositoryService.get(apiKey.repository!!.id).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
         val key = keyService.getOrCreateKey(repository, PathDTO.fromFullPath(dto.key))
         translationService.setForKey(key, dto.translations)
     }

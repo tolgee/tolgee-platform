@@ -31,7 +31,7 @@ open class LanguageController(
     @PostMapping(value = [""])
     fun createLanguage(@PathVariable("repositoryId") repositoryId: Long,
                        @RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
-        val repository = repositoryService.getById(repositoryId).orElseThrow { NotFoundException() }
+        val repository = repositoryService.get(repositoryId).orElseThrow { NotFoundException() }
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.MANAGE)
         languageValidator.validateCreate(dto, repository)
         val language = languageService.createLanguage(dto, repository)

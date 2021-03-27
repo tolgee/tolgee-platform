@@ -1,5 +1,6 @@
 package io.tolgee.controllers
 
+import io.tolgee.ITest
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.exceptions.NotFoundException

@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -25,8 +24,6 @@ data class UserAccount(
         @Enumerated(EnumType.STRING)
         var role: Role? = Role.USER
 ) : AuditModel() {
-    @OneToMany(mappedBy = "createdBy")
-    var createdRepositories: Set<Repository>? = HashSet()
 
     @OneToMany(mappedBy = "user")
     var permissions: Set<Permission>? = null
@@ -47,14 +44,12 @@ data class UserAccount(
                 username: String?,
                 password: String?,
                 name: String?,
-                createdRepositories: Set<Repository>?,
                 permissions: Set<Permission>?,
                 role: Role?,
                 thirdPartyAuthType: String?,
                 thirdPartyAuthId: String?,
                 resetPasswordCode: String?
     ) : this(id, username, password, name) {
-        this.createdRepositories = createdRepositories
         this.permissions = permissions
         this.role = role
         this.thirdPartyAuthType = thirdPartyAuthType

@@ -1,77 +1,71 @@
-package io.tolgee.service;
+package io.tolgee.service
 
-import io.tolgee.configuration.tolgee.TolgeeProperties;
-import io.tolgee.development.DbPopulatorReal;
-import io.tolgee.exceptions.NotFoundException;
-import io.tolgee.model.ApiKey;
-import io.tolgee.model.UserAccount;
-import io.tolgee.repository.RepositoryRepository;
-import io.tolgee.repository.UserAccountRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.development.DbPopulatorReal
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.UserAccount
+import io.tolgee.repository.RepositoryRepository
+import io.tolgee.repository.UserAccountRepository
+import org.assertj.core.api.Assertions
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
+import org.springframework.transaction.annotation.Transactional
+import org.testng.annotations.BeforeMethod
+import org.testng.annotations.Test
+import javax.persistence.EntityManager
 
 @SpringBootTest
-public class DbPopulatorTest extends AbstractTransactionalTestNGSpringContextTests {
+open class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
+    @Autowired
+    lateinit var populator: DbPopulatorReal
 
     @Autowired
-    DbPopulatorReal populator;
+    lateinit var userAccountRepository: UserAccountRepository
 
     @Autowired
-    UserAccountRepository userAccountRepository;
+    lateinit var repositoryRepository: RepositoryRepository
 
     @Autowired
-    RepositoryRepository repositoryRepository;
+    lateinit var apiKeyService: ApiKeyService
 
     @Autowired
-    PlatformTransactionManager transactionManager;
+    lateinit var entityManager: EntityManager
 
     @Autowired
-    ApiKeyService apiKeyService;
+    lateinit var tolgeeProperties: TolgeeProperties
 
-    @Autowired
-    EntityManager entityManager;
-
-    @Autowired
-    TolgeeProperties tolgeeProperties;
-
-
-    private UserAccount userAccount;
+    lateinit var userAccount: UserAccount
 
     @BeforeMethod
-    public void setup() {
-        populator.autoPopulate();
-        userAccount = userAccountRepository.findByUsername(tolgeeProperties.getAuthentication().getInitialUsername()).orElseThrow(NotFoundException::new);
+    open fun setup() {
+        populator.autoPopulate()
+        userAccount = userAccountRepository.findByUsername(tolgeeProperties.authentication.initialUsername).orElseThrow({ NotFoundException() })
     }
 
     @Test
     @Transactional
-    void createsUser() {
-        assertThat(userAccount.getName()).isEqualTo(tolgeeProperties.getAuthentication().getInitialUsername());
+    open fun createsUser() {
+        Assertions.assertThat(userAccount.name).isEqualTo(tolgeeProperties.authentication.initialUsername)
     }
 
     @Test
     @Transactional
-    void createsRepository() {
-        entityManager.refresh(userAccount);
-        assertThat(userAccount.getCreatedRepositories().size()).isPositive();
+    open fun createsRepository() {
+        entityManager.refresh(userAccount)
+        val found = repositoryRepository.findAll().asSequence()
+                .flatMap { it.permissions.map { it.user } }
+                .find { it == userAccount }
+        assertThat(found).isNotNull
     }
 
     @Test
     @Transactional
-    void createsApiKey() {
-        Optional<ApiKey> key = apiKeyService.getAllByUser(userAccount).stream().findFirst();
-        assertThat(key).isPresent();
-        ApiKey apiKey = key.get();
-        assertThat(apiKey.getKey()).isEqualTo("this_is_dummy_api_key");
+    open fun createsApiKey() {
+        val key = apiKeyService.getAllByUser(userAccount).stream().findFirst()
+        Assertions.assertThat(key).isPresent
+        val (_, key1) = key.get()
+        Assertions.assertThat(key1).isEqualTo("this_is_dummy_api_key")
     }
 }

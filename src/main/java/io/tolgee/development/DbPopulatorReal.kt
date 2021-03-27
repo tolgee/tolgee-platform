@@ -56,7 +56,6 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
         val userAccount = createUser(username, password)
         val repository = Repository()
         repository.name = repositoryName
-        repository.createdBy = userAccount
         en = createLanguage("en", repository)
         de = createLanguage("de", repository)
         permissionService.grantFullAccessToRepo(userAccount, repository)

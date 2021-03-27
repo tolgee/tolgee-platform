@@ -31,7 +31,7 @@ class ImportController(
                  dto: ImportDto
     ): ResponseEntity<StreamingResponseBody> {
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.MANAGE)
-        val repository = repositoryService.getById(repositoryId).orElseThrow {
+        val repository = repositoryService.get(repositoryId).orElseThrow {
             NotFoundException(Message.REPOSITORY_NOT_FOUND)
         }
 

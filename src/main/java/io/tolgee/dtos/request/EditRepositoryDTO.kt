@@ -1,28 +1,17 @@
-package io.tolgee.dtos.request;
+package io.tolgee.dtos.request
 
-import io.tolgee.dtos.request.validators.annotations.RepositoryRequest;
+import javax.validation.constraints.NotNull
+import javax.validation.constraints.Pattern
+import javax.validation.constraints.Size
 
-import javax.validation.constraints.NotNull;
+data class EditRepositoryDTO(
+        @field:NotNull
+        var repositoryId: Long? = null,
 
-@RepositoryRequest
-public class EditRepositoryDTO extends AbstractRepositoryDTO {
-    @NotNull
-    Long repositoryId;
+        @field:NotNull @field:Size(min = 3, max = 500)
+        var name: String? = null,
 
-
-    public EditRepositoryDTO(Long repositoryId, String name) {
-        this.repositoryId = repositoryId;
-        this.name = name;
-    }
-
-    public EditRepositoryDTO() {
-    }
-
-    public @NotNull Long getRepositoryId() {
-        return this.repositoryId;
-    }
-
-    public void setRepositoryId(@NotNull Long repositoryId) {
-        this.repositoryId = repositoryId;
-    }
-}
+        @field:Size(min = 3, max = 60)
+        @field:Pattern(regexp = "^[a-z0-9]*[a-z]+[a-z0-9]*$", message = "invalid_pattern")
+        var addressPart: String? = null
+)

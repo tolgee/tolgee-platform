@@ -65,7 +65,7 @@ class TranslationController @Autowired constructor(
     @AccessWithApiKey([ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
     @AccessWithRepositoryPermission(permission = Permission.RepositoryPermissionType.EDIT)
     fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsDTO) {
-        val repository = repositoryService.getById(repositoryHolder.repository.id).get()
+        val repository = repositoryService.get(repositoryHolder.repository.id).get()
         val key = keyService.getOrCreateKey(repository, PathDTO.fromFullPath(dto.key))
         translationService.setForKey(key, dto.translations)
     }

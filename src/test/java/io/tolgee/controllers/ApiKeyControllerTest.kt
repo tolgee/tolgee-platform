@@ -1,6 +1,7 @@
 package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.type.TypeFactory
+import io.tolgee.ITest
 import io.tolgee.annotations.ApiKeyAccessTestMethod
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.constants.ApiScope
@@ -85,9 +86,9 @@ class ApiKeyControllerTest : RepositoryAuthControllerTest(), ITest {
     fun getAllByUser() {
         val repository = dbPopulator.createBase(generateUniqueString(), "ben")
         logAsUser("ben", initialPassword)
-        val apiKey1 = apiKeyService.createApiKey(repository.createdBy, setOf(ApiScope.KEYS_EDIT), repository)
+        val apiKey1 = apiKeyService.createApiKey(repository.permissions.first().user, setOf(ApiScope.KEYS_EDIT), repository)
         val repository2 = dbPopulator.createBase(generateUniqueString(), "ben")
-        val apiKey2 = apiKeyService.createApiKey(repository2.createdBy, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), repository)
+        val apiKey2 = apiKeyService.createApiKey(repository2.permissions.first().user, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), repository)
         val testUser = dbPopulator.createUser("testUser")
         val user2Key = apiKeyService.createApiKey(testUser, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), repository)
         val apiKeyDTO = doCreate("ben")
@@ -104,9 +105,9 @@ class ApiKeyControllerTest : RepositoryAuthControllerTest(), ITest {
     fun allByRepository() {
         val repository = dbPopulator.createBase(generateUniqueString())
         val apiKeyDTO = doCreate(repository)
-        val apiKey1 = apiKeyService.createApiKey(repository.createdBy, setOf(ApiScope.KEYS_EDIT), repository)
+        val apiKey1 = apiKeyService.createApiKey(repository.permissions.first().user, setOf(ApiScope.KEYS_EDIT), repository)
         val repository2 = dbPopulator.createBase(generateUniqueString(), initialUsername)
-        val apiKey2 = apiKeyService.createApiKey(repository2.createdBy, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), repository)
+        val apiKey2 = apiKeyService.createApiKey(repository2.permissions.first().user, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), repository)
         val testUser = dbPopulator.createUser("testUser")
         val user2Key = apiKeyService.createApiKey(testUser, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), repository2)
         var mvcResult = performAuthGet("/api/apiKeys/repository/" + repository.id).andExpect(MockMvcResultMatchers.status().isOk).andReturn()

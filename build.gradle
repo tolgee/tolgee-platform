@@ -57,7 +57,7 @@ idea {
 }
 
 
-def liveDbH2 = [
+def liveDbPostgres = [
         url         : 'jdbc:postgresql://localhost:5432/postgres',
         referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.PostgreSQL95Dialect' +
@@ -68,15 +68,16 @@ def liveDbH2 = [
         driver      : "org.postgresql.Driver"
 ]
 
-def liveDbPostgres = [
+def liveDbH2 = [
         url         : 'jdbc:h2:~/.tolgee/db.h2;AUTO_SERVER=TRUE',
         referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.H2Dialect' +
                 '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
                 '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
+        driver      : 'org.h2.Driver'
 ]
 
-def liveDb = liveDbPostgres
+def liveDb = liveDbH2
 
 liquibase {
     activities {
@@ -85,9 +86,14 @@ liquibase {
             changeLogFile 'src/main/resources/db/changelog/schema.xml'
             url liveDb.url
             referenceUrl liveDb.referenceUrl
-            username liveDb.username
-            password liveDb.password
-            driver "org.postgresql.Driver"
+            if (liveDb.username) {
+                username liveDb.username
+            }
+            if (liveDb.password) {
+                password liveDb.password
+            }
+
+            driver liveDb.driver
         }
     }
 }

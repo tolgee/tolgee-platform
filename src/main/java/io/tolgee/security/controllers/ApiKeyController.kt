@@ -40,7 +40,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService, private val rep
 
     @PostMapping(path = [""])
     fun create(@RequestBody @Valid createApiKeyDTO:  CreateApiKeyDTO?): ApiKeyDTO {
-        val repository = repositoryService.getById(createApiKeyDTO!!.repositoryId).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
+        val repository = repositoryService.get(createApiKeyDTO!!.repositoryId).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
         securityService.checkApiKeyScopes(createApiKeyDTO.scopes, repository)
         return apiKeyService.createApiKey(authenticationFacade.userAccount, createApiKeyDTO.scopes, repository)
     }

@@ -36,24 +36,17 @@ open class RepositoryService constructor(
     @set:Autowired
     lateinit var translationService: TranslationService
 
-
     @Transactional
-    open fun findByName(name: String?, userAccount: UserAccount?): Optional<Repository> {
-        return repositoryRepository.findByNameAndCreatedBy(name, userAccount)
-    }
-
-    @Transactional
-    open fun getById(id: Long): Optional<Repository> {
+    open fun get(id: Long): Optional<Repository> {
         return repositoryRepository.findById(id)
     }
 
     @Transactional
-    open fun createRepository(dto: CreateRepositoryDTO, createdBy: UserAccount?): Repository {
+    open fun createRepository(dto: CreateRepositoryDTO): Repository {
         val repository = Repository()
         repository.name = dto.name
-        repository.createdBy = createdBy
         securityService.grantFullAccessToRepo(repository)
-        for (language in dto.languages) {
+        for (language in dto.languages!!) {
             languageService.createLanguage(language, repository)
         }
         entityManager.persist(repository)
@@ -62,7 +55,7 @@ open class RepositoryService constructor(
 
     @Transactional
     open fun editRepository(dto: EditRepositoryDTO): Repository {
-        val repository = repositoryRepository.findById(dto.repositoryId)
+        val repository = repositoryRepository.findById(dto.repositoryId!!)
                 .orElseThrow { NotFoundException() }
         repository.name = dto.name
         entityManager.persist(repository)
@@ -78,7 +71,7 @@ open class RepositoryService constructor(
 
     @Transactional
     open fun deleteRepository(id: Long) {
-        val repository = getById(id).orElseThrow { NotFoundException() }
+        val repository = get(id).orElseThrow { NotFoundException() }
         permissionService.deleteAllByRepository(repository.id)
         translationService.deleteAllByRepository(repository.id)
         screenshotService.deleteAllByRepository(repository.id)

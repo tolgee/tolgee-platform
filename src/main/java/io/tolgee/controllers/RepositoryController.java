@@ -8,7 +8,6 @@ import io.tolgee.exceptions.InvalidStateException;
 import io.tolgee.exceptions.NotFoundException;
 import io.tolgee.model.Permission;
 import io.tolgee.model.Repository;
-import io.tolgee.model.UserAccount;
 import io.tolgee.security.AuthenticationFacade;
 import io.tolgee.service.InvitationService;
 import io.tolgee.service.RepositoryService;
@@ -39,15 +38,14 @@ public class RepositoryController implements IController {
 
     @PostMapping(value = "")
     public RepositoryDTO createRepository(@RequestBody @Valid CreateRepositoryDTO dto) {
-        UserAccount userAccount = authenticationFacade.getUserAccount();
-        Repository repository = repositoryService.createRepository(dto, userAccount);
+        Repository repository = repositoryService.createRepository(dto);
         return RepositoryDTO.fromEntityAndPermission(repository, repository.getPermissions().stream().findAny().orElseThrow(InvalidStateException::new));
     }
 
     @GetMapping(value = "/{id}")
     public RepositoryDTO getRepository(@PathVariable("id") Long id) {
         Permission permission = securityService.getAnyRepositoryPermission(id);
-        return RepositoryDTO.fromEntityAndPermission(repositoryService.getById(id).orElseThrow(null), permission);
+        return RepositoryDTO.fromEntityAndPermission(repositoryService.get(id).orElseThrow(null), permission);
     }
 
 
@@ -72,7 +70,7 @@ public class RepositoryController implements IController {
     @PostMapping("/invite")
     public String inviteUser(@RequestBody InviteUser invitation) {
         securityService.checkRepositoryPermission(invitation.getRepositoryId(), Permission.RepositoryPermissionType.MANAGE);
-        Repository repository = repositoryService.getById(invitation.getRepositoryId()).orElseThrow(NotFoundException::new);
+        Repository repository = repositoryService.get(invitation.getRepositoryId()).orElseThrow(NotFoundException::new);
         return invitationService.create(repository, invitation.getType());
     }
 }

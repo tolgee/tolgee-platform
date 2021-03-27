@@ -338,4 +338,73 @@
             delete from API_KEY_SCOPES_ENUM where 1 = 1
         </rollback>
     </changeSet>
+    <changeSet author="jenik" id="1616848963360-1">
+        <tagDatabase tag="version_1.0.0-alpha.36" />
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616848963361-1">
+        <createSequence incrementBy="1" sequenceName="hibernate_sequence" startValue="1"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616848963361-2">
+        <createTable tableName="organization">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="organizationPK"/>
+            </column>
+            <column name="address_part" type="VARCHAR(255)"/>
+            <column name="base_permissions" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616848963361-3">
+        <createTable tableName="organization_member_role">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="organization_member_rolePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="INTEGER"/>
+            <column name="invitation_id" type="BIGINT"/>
+            <column name="organization_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616848963361-4">
+        <addColumn tableName="repository">
+            <column name="address_part" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616848963361-5">
+        <addForeignKeyConstraint baseColumnNames="invitation_id" baseTableName="organization_member_role" constraintName="FK581ryvy4rn9ey7rx3lestkuix" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="invitation" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616848963361-6">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="organization_member_role" constraintName="FK6p6nbxihffjckr4tayum4x67v" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616848963361-7">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="organization_member_role" constraintName="FKqj2a0uojwh4p5rc9vfsu92fdk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616848963361-8">
+        <dropForeignKeyConstraint baseTableName="repository" constraintName="FKoiov5289pveggjm2sthuhw4qm"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616848963361-9">
+        <dropUniqueConstraint constraintName="repository_name_created_by_id" tableName="repository"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616848963361-10">
+        <dropColumn columnName="created_by_id" tableName="repository"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616859362518-1">
+        <alterSequence incrementBy="1" sequenceName="hibernate_sequence"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616859844733-2">
+        <addUniqueConstraint columnNames="address_part" constraintName="organization_address_part_unique" tableName="organization"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616859844733-3">
+        <addUniqueConstraint columnNames="address_part" constraintName="repository_address_part_unique" tableName="repository"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1616859844733-1">
+        <alterSequence incrementBy="1" sequenceName="hibernate_sequence"/>
+    </changeSet>
 </databaseChangeLog>

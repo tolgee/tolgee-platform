@@ -1,5 +1,6 @@
 package io.tolgee.controllers;
 
+import io.tolgee.ITest;
 import io.tolgee.assertions.StandardValidationMessageAssert;
 import io.tolgee.dtos.request.UserUpdateRequestDTO;
 import io.tolgee.model.UserAccount;

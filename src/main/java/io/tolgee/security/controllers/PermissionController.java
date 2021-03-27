@@ -38,7 +38,7 @@ public class PermissionController {
 
     @GetMapping("/list/{repositoryId}")
     public Set<PermissionDTO> getRepositoryPermissions(@PathVariable("repositoryId") Long id) {
-        Repository repository = repositoryService.getById(id).orElseThrow(NotFoundException::new);
+        Repository repository = repositoryService.get(id).orElseThrow(NotFoundException::new);
         securityService.checkRepositoryPermission(id, Permission.RepositoryPermissionType.MANAGE);
         return permissionService.getAllOfRepository(repository).stream().map(PermissionDTO::fromEntity).collect(Collectors.toCollection(LinkedHashSet::new));
     }

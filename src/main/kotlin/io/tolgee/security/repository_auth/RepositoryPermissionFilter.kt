@@ -38,7 +38,7 @@ class RepositoryPermissionFilter(
 
             try {
                 val repositoryId = request.repositoryId
-                repositoryHolder.repository = repositoryService.getById(repositoryId).orElseThrow { NotFoundException() }
+                repositoryHolder.repository = repositoryService.get(repositoryId).orElseThrow { NotFoundException() }
 
                 if (specificPermissionAnnotation != null) {
                     securityService.checkRepositoryPermission(repositoryId, specificPermissionAnnotation.permission)

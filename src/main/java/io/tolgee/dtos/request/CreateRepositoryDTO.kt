@@ -1,29 +1,18 @@
-package io.tolgee.dtos.request;
+package io.tolgee.dtos.request
 
-import io.tolgee.dtos.request.validators.annotations.RepositoryRequest;
+import javax.validation.constraints.NotEmpty
+import javax.validation.constraints.NotNull
+import javax.validation.constraints.Pattern
+import javax.validation.constraints.Size
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.Set;
+data class CreateRepositoryDTO(
+        @field:NotNull @field:Size(min = 3, max = 500)
+        var name: String? = null,
 
-@RepositoryRequest
-public class CreateRepositoryDTO extends AbstractRepositoryDTO {
-    @NotEmpty
-    Set<LanguageDTO> languages;
+        @field:NotEmpty
+        var languages: Set<LanguageDTO>? = null,
 
-    public CreateRepositoryDTO(@NotNull String name, @NotEmpty Set<LanguageDTO> languages) {
-        this.name = name;
-        this.languages = languages;
-    }
-
-    public CreateRepositoryDTO() {
-    }
-
-    public @NotEmpty Set<LanguageDTO> getLanguages() {
-        return this.languages;
-    }
-
-    public void setLanguages(@NotEmpty Set<LanguageDTO> languages) {
-        this.languages = languages;
-    }
-}
+        @field:Size(min = 3, max = 60)
+        @field:Pattern(regexp = "^[a-z0-9]*[a-z]+[a-z0-9]*$", message = "invalid_pattern")
+        var addressPart: String? = null
+)

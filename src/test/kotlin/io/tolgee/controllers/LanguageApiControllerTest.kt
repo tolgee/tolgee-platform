@@ -1,5 +1,6 @@
 package io.tolgee.controllers
 
+import io.tolgee.ITest
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.assertions.UserApiAppAction
 import io.tolgee.constants.ApiScope
@@ -17,7 +18,7 @@ class LanguageApiControllerTest : AbstractUserAppApiTest(), ITest {
     @Test
     fun findAllLanguages() {
         val repository = dbPopulator.createBase(generateUniqueString(), "ben")
-        val apiKey = apiKeyService.createApiKey(repository.createdBy, setOf(*ApiScope.values()), repository)
+        val apiKey = apiKeyService.createApiKey(repository.permissions.first().user, setOf(*ApiScope.values()), repository)
         val contentAsString = performAction(UserApiAppAction(
                 method = HttpMethod.GET,
                 apiKey = apiKey.key,
