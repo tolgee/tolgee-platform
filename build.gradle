@@ -101,6 +101,15 @@ liquibase {
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
+compileKotlin {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
 def LIQUIBASE_VERSION = "4.3.2"
 def LIQUIBASE_HIBERNATE_VERSION = "4.3.1"
 def JJWT_VERSION = "0.11.2"
@@ -113,6 +122,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-starter-hateoas"
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     compile "org.springframework.boot:spring-boot-configuration-processor"
     testCompile "org.springframework.boot:spring-boot-configuration-processor"

@@ -7,7 +7,7 @@ import javax.validation.constraints.Size
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "organization_address_part_unique")])
-data class Organization(
+open class Organization(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long? = null,
 

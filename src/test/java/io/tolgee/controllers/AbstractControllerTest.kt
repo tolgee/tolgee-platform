@@ -12,6 +12,7 @@ import io.tolgee.development.DbPopulatorReal
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.RequestPerformer
 import io.tolgee.repository.KeyRepository
+import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.security.payload.LoginRequest
 import io.tolgee.service.*
@@ -84,6 +85,12 @@ abstract class AbstractControllerTest :
     @Qualifier("baseRequestPerformer")
     @Autowired
     protected lateinit var requestPerformer: RequestPerformer
+
+    @Autowired
+    protected lateinit var organizationRepository: OrganizationRepository
+
+    @Autowired
+    protected lateinit var organizationService: OrganizationService
 
     @Autowired
     private fun initInitialUser(authenticationProperties: AuthenticationProperties) {
