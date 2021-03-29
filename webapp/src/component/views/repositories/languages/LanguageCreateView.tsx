@@ -9,6 +9,7 @@ import {LanguageActions} from '../../../../store/languages/LanguageActions';
 import {LanguageDTO} from "../../../../service/response.types";
 import {useRedirect} from "../../../../hooks/useRedirect";
 import {Validation} from "../../../../constants/GlobalValidationSchema";
+import {T} from "@tolgee/react";
 
 const actions = container.resolve(LanguageActions);
 
@@ -38,7 +39,7 @@ export const LanguageCreateView = () => {
         <>
             <BaseFormView
                 lg={6} md={8} xs={12}
-                title={'Add language'}
+                title={<T>create_language_title</T>}
                 initialValues={{name: "", abbreviation: ""}}
                 onSubmit={onSubmit}
                 onCancel={() => setCancelled(true)}
@@ -46,8 +47,8 @@ export const LanguageCreateView = () => {
                 validationSchema={Validation.LANGUAGE}
             >
                 <>
-                    <TextField label="Name" name="name" required={true}/>
-                    <TextField label="Abbreviation" name="abbreviation" required={true}/>
+                    <TextField label={<T>language_create_edit_language_name_label</T>} name="name" required={true}/>
+                    <TextField label={<T>language_create_edit_abbreviation</T>} name="abbreviation" required={true}/>
                 </>
             </BaseFormView>
             <Switch>

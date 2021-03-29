@@ -1,5 +1,6 @@
 package io.tolgee.controllers
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
 import io.tolgee.dtos.ImportDto
 import io.tolgee.exceptions.NotFoundException
@@ -18,6 +19,7 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/api/repository/{repositoryId}/import")
+@Tag(name = "Import")
 class ImportController(
         private val repositoryService: RepositoryService,
         private val securityService: SecurityService,

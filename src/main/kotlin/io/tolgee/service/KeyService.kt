@@ -2,10 +2,11 @@ package io.tolgee.service
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
+import io.tolgee.dtos.request.DeprecatedEditKeyDTO
 import io.tolgee.dtos.request.EditKeyDTO
 import io.tolgee.dtos.request.SetTranslationsDTO
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
-import io.tolgee.dtos.response.KeyDTO
+import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Repository
 import io.tolgee.model.Key
@@ -55,7 +56,7 @@ open class KeyService(
         return keyRepository.findAllById(ids)
     }
 
-    open fun create(repository: Repository, dto: KeyDTO): Key {
+    open fun create(repository: Repository, dto: DeprecatedKeyDto): Key {
         if (this.get(repository, dto.pathDto).isPresent) {
             throw ValidationException(Message.KEY_EXISTS)
         }
@@ -63,7 +64,8 @@ open class KeyService(
         return keyRepository.save(key)
     }
 
-    open fun edit(repository: Repository, dto: EditKeyDTO) {
+    @Deprecated("Ugly naming")
+    open fun edit(repository: Repository, dto: DeprecatedEditKeyDTO) {
         //do nothing on no change
         if (dto.newFullPathString == dto.oldFullPathString) {
             return
@@ -73,6 +75,19 @@ open class KeyService(
         }
         val key = get(repository, dto.oldPathDto).orElseThrow { NotFoundException() }
         key.name = dto.newFullPathString
+        keyRepository.save(key)
+    }
+
+    open fun edit(repository: Repository, dto: EditKeyDTO) {
+        //do nothing on no change
+        if (dto.newName == dto.currentName) {
+            return
+        }
+        if (get(repository, dto.newPathDto).isPresent) {
+            throw ValidationException(Message.KEY_EXISTS)
+        }
+        val key = get(repository, dto.oldPathDto).orElseThrow { NotFoundException() }
+        key.name = dto.newName
         keyRepository.save(key)
     }
 

@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.annotations.ApiKeyAccessTestMethod
+import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.PathDTO
@@ -113,7 +113,7 @@ class TranslationControllerTest()
     }
 
     @Test
-    @ApiKeyAccessTestMethod
+    @RepositoryApiKeyAuthTestMethod
     fun setTranslationsWithApiKey() {
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 
@@ -131,7 +131,7 @@ class TranslationControllerTest()
     }
 
     @Test
-    @ApiKeyAccessTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT])
+    @RepositoryApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT])
     fun setTranslationsWithApiKeyForbidden() {
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 

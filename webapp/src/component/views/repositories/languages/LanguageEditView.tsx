@@ -80,8 +80,8 @@ export const LanguageEditView = () => {
                 </Button>}
         >
             {() => <>
-                <TextField label={<T>edit_language_languge_name_label</T>} name="name" required={true}/>
-                <TextField label={<T>abbreviation</T>} name="abbreviation" required={true}/>
+                <TextField label={<T>language_create_edit_language_name_label</T>} name="name" required={true}/>
+                <TextField label={<T>language_create_edit_abbreviation</T>} name="abbreviation" required={true}/>
             </>}
         </BaseFormView>
     );

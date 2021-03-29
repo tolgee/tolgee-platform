@@ -1,6 +1,7 @@
 package io.tolgee.security.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.ApiScope
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.CreateApiKeyDTO
@@ -21,8 +22,9 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/api/apiKeys")
+@Tag(name = "API keys")
 class ApiKeyController(private val apiKeyService: ApiKeyService, private val repositoryService: RepositoryService) : PrivateController() {
-    @Operation(summary = "Get all user's api keys")
+    @Operation(summary = "Returns all user's api keys")
     @GetMapping(path = [""])
     fun allByUser(): Set<ApiKeyDTO> {
         return apiKeyService.getAllByUser(authenticationFacade.userAccount).stream()
@@ -31,6 +33,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService, private val rep
     }
 
     @GetMapping(path = ["/repository/{repositoryId}"])
+    @Operation(summary = "Returns all API keys for repository")
     fun allByRepository(@PathVariable("repositoryId") repositoryId: Long?): Set<ApiKeyDTO> {
         securityService.checkRepositoryPermission(repositoryId!!, RepositoryPermissionType.MANAGE)
         return apiKeyService.getAllByRepository(repositoryId).stream()
@@ -39,13 +42,15 @@ class ApiKeyController(private val apiKeyService: ApiKeyService, private val rep
     }
 
     @PostMapping(path = [""])
-    fun create(@RequestBody @Valid createApiKeyDTO:  CreateApiKeyDTO?): ApiKeyDTO {
+    @Operation(summary = "Creates new API key with provided scopes")
+    fun create(@RequestBody @Valid createApiKeyDTO: CreateApiKeyDTO?): ApiKeyDTO {
         val repository = repositoryService.get(createApiKeyDTO!!.repositoryId).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
         securityService.checkApiKeyScopes(createApiKeyDTO.scopes, repository)
         return apiKeyService.createApiKey(authenticationFacade.userAccount, createApiKeyDTO.scopes, repository)
     }
 
     @PostMapping(path = ["/edit"])
+    @Operation(summary = "Edits existing API key")
     fun edit(@RequestBody @Valid dto: EditApiKeyDTO?) {
         val apiKey = apiKeyService.getApiKey(dto!!.id).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
         securityService.checkApiKeyScopes(dto.scopes, apiKey.repository)
@@ -54,6 +59,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService, private val rep
     }
 
     @DeleteMapping(path = ["/{key}"])
+    @Operation(summary = "Deletes API key")
     fun delete(@PathVariable("key") key: String?) {
         val apiKey = apiKeyService.getApiKey(key).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
         try {
@@ -68,6 +74,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService, private val rep
     }
 
     @GetMapping(path = ["/availableScopes"])
+    @Operation(summary = "Returns API key scopes for every permission type")
     fun getScopes(): Map<String, Set<String>> = Arrays.stream(RepositoryPermissionType.values())
             .collect(Collectors.toMap({ obj: RepositoryPermissionType -> obj.name },
                     { type: RepositoryPermissionType ->
@@ -78,6 +85,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService, private val rep
             ))
 
     @GetMapping(path = ["/scopes"])
+    @Operation(summary = "Returns API key scopes")
     @AccessWithApiKey
     fun getApiKeyScopes(): Set<String> {
         val apiKey = authenticationFacade.apiKey

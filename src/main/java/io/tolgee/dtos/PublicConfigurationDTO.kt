@@ -1,9 +1,12 @@
 package io.tolgee.dtos
 
+import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.configuration.tolgee.TolgeeProperties
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
-class PublicConfigurationDTO(properties: TolgeeProperties) {
+class PublicConfigurationDTO(
+        @Schema(hidden = true)
+        properties: TolgeeProperties) {
     val isAuthentication: Boolean = properties.authentication.enabled
     var authMethods: AuthMethodsDTO? = null
     val isPasswordResettable: Boolean
@@ -14,7 +17,7 @@ class PublicConfigurationDTO(properties: TolgeeProperties) {
     val needsEmailVerification = properties.authentication.needsEmailVerification
 
     class AuthMethodsDTO(val github: GithubPublicConfigDTO)
-    class GithubPublicConfigDTO(val clientId: String?) {
+    data class GithubPublicConfigDTO(val clientId: String?) {
         val isEnabled: Boolean = clientId != null && clientId.isNotEmpty()
     }
 

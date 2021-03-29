@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
-class ApiAuthFilter(
+class ApiKeyAuthFilter(
         private val apiKeyService: ApiKeyService,
         private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
         private val securityService: SecurityService,

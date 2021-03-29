@@ -19,17 +19,10 @@ class RepositoryApiKeyAuthRequestPerformer(
         @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val userAccount: UserAccount,
         //bean is created manually
         @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val scopes: Array<ApiScope>,
-) : SignedInRequestPerformer(), RepositoryAuthRequestPerformer {
-
-    @field:Autowired
-    lateinit var dbPopulator: DbPopulatorReal
+) : RepositoryAuthRequestPerformer(userAccount) {
 
     @field:Autowired
     lateinit var apiKeyService: ApiKeyService
-
-    override val repository: Repository by lazy {
-        dbPopulator.createBase(generateUniqueString(), username = userAccount.username!!)
-    }
 
     val apiKey: ApiKeyDTO by lazy {
         apiKeyService.createApiKey(userAccount, scopes = this.scopes.toSet(), repository)

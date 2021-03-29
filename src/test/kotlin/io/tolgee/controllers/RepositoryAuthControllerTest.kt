@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.annotations.ApiKeyAccessTestMethod
+import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
 import io.tolgee.annotations.RepositoryJWTAuthTestMethod
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.fixtures.*
@@ -28,6 +28,12 @@ abstract class RepositoryAuthControllerTest : SignedInControllerTest(), AuthRequ
     val repository: Repository
         get() = this.repositoryAuthRequestPerformer.repository
 
+    var repositorySupplier: (() -> Repository)?
+        get() = this.repositoryAuthRequestPerformer.repositorySupplier
+        set(value) {
+            this.repositoryAuthRequestPerformer.repositorySupplier = value
+        }
+
     private var _repositoryAuthRequestPerformer: RepositoryAuthRequestPerformer? = null;
 
     private var repositoryAuthRequestPerformer: RepositoryAuthRequestPerformer
@@ -41,7 +47,7 @@ abstract class RepositoryAuthControllerTest : SignedInControllerTest(), AuthRequ
 
     @BeforeMethod
     fun beforeEach(method: Method) {
-        with(method.getAnnotation(ApiKeyAccessTestMethod::class.java)) {
+        with(method.getAnnotation(RepositoryApiKeyAuthTestMethod::class.java)) {
             if (this != null) {
                 this@RepositoryAuthControllerTest.repositoryAuthRequestPerformer =
                         applicationContext!!.getBean(RepositoryApiKeyAuthRequestPerformer::class.java, userAccount, this.scopes)

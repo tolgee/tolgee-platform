@@ -3,6 +3,8 @@ package io.tolgee.controllers
 import com.fasterxml.jackson.databind.node.TextNode
 import com.sun.istack.NotNull
 import com.unboundid.util.Base64
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.ResetPassword
@@ -39,15 +41,17 @@ import javax.validation.constraints.NotBlank
 
 @RestController
 @RequestMapping("/api/public")
-open class AuthController(private val authenticationManager: AuthenticationManager,
-                          private val tokenProvider: JwtTokenProvider,
-                          private val githubOAuthDelegate: GithubOAuthDelegate,
-                          private val properties: TolgeeProperties,
-                          private val userAccountService: UserAccountService,
-                          private val mailSender: JavaMailSender,
-                          private val invitationService: InvitationService,
-                          private val emailVerificationService: EmailVerificationService
+@Tag(name = "Public controller for authentication")
+open class PublicController(private val authenticationManager: AuthenticationManager,
+                            private val tokenProvider: JwtTokenProvider,
+                            private val githubOAuthDelegate: GithubOAuthDelegate,
+                            private val properties: TolgeeProperties,
+                            private val userAccountService: UserAccountService,
+                            private val mailSender: JavaMailSender,
+                            private val invitationService: InvitationService,
+                            private val emailVerificationService: EmailVerificationService
 ) {
+    @Operation(summary = "Generates JWT token")
     @PostMapping("/generatetoken")
     open fun authenticateUser(@RequestBody loginRequest: LoginRequest): ResponseEntity<*> {
         if (loginRequest.username.isEmpty() || loginRequest.password.isEmpty()) {
@@ -73,6 +77,7 @@ open class AuthController(private val authenticationManager: AuthenticationManag
     }
 
 
+    @Operation(summary = "Reset password request")
     @PostMapping("/reset_password_request")
     open fun resetPasswordRequest(@RequestBody @Valid request: ResetPasswordRequest) {
         val userAccount = userAccountService.getByUserName(request.email).orElse(null) ?: return
@@ -92,11 +97,13 @@ $url
     }
 
     @GetMapping("/reset_password_validate/{email}/{code}")
+    @Operation(summary = "Validates key sent by email")
     open fun resetPasswordValidate(@PathVariable("code") code: String, @PathVariable("email") email: String) {
         validateEmailCode(code, email)
     }
 
     @PostMapping("/reset_password_set")
+    @Operation(summary = "Sets new password with password reset code from e-mail")
     open fun resetPasswordSet(@RequestBody @Valid request: ResetPassword) {
         val userAccount = validateEmailCode(request.code!!, request.email!!)
         userAccountService.setUserPassword(userAccount, request.password)
@@ -105,6 +112,7 @@ $url
 
     @PostMapping("/sign_up")
     @Transactional
+    @Operation(summary = "Creates new user account")
     open fun signUp(@RequestBody @Valid request: SignUpDto?): Any {
         var invitation: Invitation? = null
         if (request!!.invitationCode == null || request.invitationCode == null) {
@@ -131,6 +139,7 @@ $url
     }
 
     @GetMapping("/verify_email/{userId}/{code}")
+    @Operation(summary = "Sets user account as verified, when code from email is OK")
     open fun verifyEmail(@PathVariable("userId") @NotNull userId: Long,
                          @PathVariable("code") @NotBlank code: String): JwtAuthenticationResponse {
         emailVerificationService.verify(userId, code)
@@ -138,12 +147,14 @@ $url
     }
 
     @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(summary = "Validates if email is not in use")
     open fun validateEmail(@RequestBody email: TextNode): Boolean {
         return userAccountService.getByUserName(email.asText()).isEmpty
     }
 
 
     @GetMapping("/authorize_oauth/{serviceType}/{code}")
+    @Operation(summary = "Authenticates user using third party oAuth service")
     open fun authenticateUser(@PathVariable("serviceType") serviceType: String?,
                               @PathVariable("code") code: String?,
                               @RequestParam(value = "invitationCode", required = false) invitationCode: String?): JwtAuthenticationResponse {

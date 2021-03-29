@@ -1,5 +1,6 @@
 package io.tolgee.controllers
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.constants.ApiScope
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
@@ -18,6 +19,7 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/uaa")
 @Deprecated(message = "This endpoint is deprecated. Integration libraries should use standard endpoints for each resource.")
+@Hidden
 class UserAppApiController(
         private val translationService: TranslationService,
         private val keyService: KeyService,
@@ -80,7 +82,7 @@ class UserAppApiController(
         translationService.setForKey(key, dto.translations)
     }
 
-    @Deprecated(message = "Use /api/languages")
+    @Deprecated(message = "Use /api/repository/languages")
     @AccessWithApiKey
     @GetMapping("/languages")
     fun getLanguages(): Set<String> {

@@ -1,15 +1,22 @@
 package io.tolgee.controllers
 
 import io.tolgee.ITest
+import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.assertions.UserApiAppAction
+import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.LoggedRequestFactory
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.helpers.JsonHelper
 import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -17,7 +24,7 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class LanguageControllerTest : SignedInControllerTest(), ITest {
+class LanguageControllerTest : RepositoryAuthControllerTest(), ITest {
     private val languageDTO = LanguageDTO(null, "en", "en")
     private val languageDTOBlank = LanguageDTO(null, "")
     private val languageDTOCorrect = LanguageDTO(null, "Espanol", "es")
@@ -94,6 +101,13 @@ class LanguageControllerTest : SignedInControllerTest(), ITest {
                 .isEqualTo("{\"STANDARD_VALIDATION\":" +
                         "{\"name\":\"must not be blank\"," +
                         "\"abbreviation\":\"must not be blank\"}}")
+    }
+
+    @Test
+    @RepositoryApiKeyAuthTestMethod
+    fun findAllLanguagesApiKey() {
+        val contentAsString = performRepositoryAuthGet("languages").andIsOk.andReturn().mapResponseTo<Set<Any>>()
+        assertThat(contentAsString).hasSize(2)
     }
 
     private fun performCreate(repositoryId: Long, content: LanguageDTO): ResultActions {
