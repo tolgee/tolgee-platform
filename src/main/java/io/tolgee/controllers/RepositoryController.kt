@@ -1,76 +1,67 @@
-package io.tolgee.controllers;
+package io.tolgee.controllers
 
-import io.tolgee.dtos.request.CreateRepositoryDTO;
-import io.tolgee.dtos.request.EditRepositoryDTO;
-import io.tolgee.dtos.request.InviteUser;
-import io.tolgee.dtos.response.RepositoryDTO;
-import io.tolgee.exceptions.InvalidStateException;
-import io.tolgee.exceptions.NotFoundException;
-import io.tolgee.model.Permission;
-import io.tolgee.model.Repository;
-import io.tolgee.security.AuthenticationFacade;
-import io.tolgee.service.InvitationService;
-import io.tolgee.service.RepositoryService;
-import io.tolgee.service.SecurityService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.Set;
+import io.tolgee.dtos.request.CreateRepositoryDTO
+import io.tolgee.dtos.request.EditRepositoryDTO
+import io.tolgee.dtos.request.InviteUser
+import io.tolgee.dtos.response.RepositoryDTO
+import io.tolgee.dtos.response.RepositoryDTO.Companion.fromEntityAndPermission
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Permission
+import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.InvitationService
+import io.tolgee.service.PermissionService
+import io.tolgee.service.RepositoryService
+import io.tolgee.service.SecurityService
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController("_repositoryController")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = ["*"])
 @RequestMapping("/api/repositories")
-public class RepositoryController implements IController {
-
-    private final RepositoryService repositoryService;
-    private final AuthenticationFacade authenticationFacade;
-    private final SecurityService securityService;
-    private final InvitationService invitationService;
-
-    @Autowired
-    public RepositoryController(RepositoryService repositoryService, AuthenticationFacade authenticationFacade, SecurityService securityService, InvitationService invitationService) {
-        this.repositoryService = repositoryService;
-        this.authenticationFacade = authenticationFacade;
-        this.securityService = securityService;
-        this.invitationService = invitationService;
+class RepositoryController @Autowired constructor(private val repositoryService: RepositoryService,
+                                                  private val authenticationFacade: AuthenticationFacade,
+                                                  private val securityService: SecurityService,
+                                                  private val invitationService: InvitationService,
+                                                  private val permissionService: PermissionService
+) : IController {
+    @PostMapping(value = [""])
+    fun createRepository(@RequestBody @Valid dto: CreateRepositoryDTO?): RepositoryDTO {
+        val repository = repositoryService.createRepository(dto!!)
+        val permission = permissionService.getRepositoryPermissionType(repository.id, authenticationFacade.userAccount)
+                ?: throw IllegalStateException()
+        return fromEntityAndPermission(repository, permission)
     }
 
-    @PostMapping(value = "")
-    public RepositoryDTO createRepository(@RequestBody @Valid CreateRepositoryDTO dto) {
-        Repository repository = repositoryService.createRepository(dto);
-        return RepositoryDTO.fromEntityAndPermission(repository, repository.getPermissions().stream().findAny().orElseThrow(InvalidStateException::new));
+    @GetMapping(value = ["/{id}"])
+    fun getRepository(@PathVariable("id") id: Long?): RepositoryDTO {
+        val permission = securityService.checkAnyRepositoryPermission(id!!)
+        return fromEntityAndPermission(repositoryService.get(id)
+                .orElseThrow<RuntimeException>(null), permission)
     }
 
-    @GetMapping(value = "/{id}")
-    public RepositoryDTO getRepository(@PathVariable("id") Long id) {
-        Permission permission = securityService.getAnyRepositoryPermission(id);
-        return RepositoryDTO.fromEntityAndPermission(repositoryService.get(id).orElseThrow(null), permission);
+    @PostMapping(value = ["/edit"])
+    fun editRepository(@RequestBody @Valid dto: EditRepositoryDTO?): RepositoryDTO {
+        val permission = securityService.checkRepositoryPermission(dto!!.repositoryId!!, Permission.RepositoryPermissionType.MANAGE)
+        val repository = repositoryService.editRepository(dto)
+        return fromEntityAndPermission(repository, permission)
     }
 
-
-    @PostMapping(value = "/edit")
-    public RepositoryDTO editRepository(@RequestBody @Valid EditRepositoryDTO dto) {
-        Permission permission = securityService.checkRepositoryPermission(dto.getRepositoryId(), Permission.RepositoryPermissionType.MANAGE);
-        Repository repository = repositoryService.editRepository(dto);
-        return RepositoryDTO.fromEntityAndPermission(repository, permission);
+    @GetMapping(value = [""])
+    fun getAll(): Set<RepositoryDTO> {
+        return repositoryService.findAllPermitted(authenticationFacade.userAccount)
     }
 
-    @GetMapping(value = "")
-    public Set<RepositoryDTO> getAll() {
-        return repositoryService.findAllPermitted(authenticationFacade.getUserAccount());
-    }
-
-    @DeleteMapping(value = "/{id}")
-    public void deleteRepository(@PathVariable Long id) {
-        securityService.checkRepositoryPermission(id, Permission.RepositoryPermissionType.MANAGE);
-        repositoryService.deleteRepository(id);
+    @DeleteMapping(value = ["/{id}"])
+    fun deleteRepository(@PathVariable id: Long?) {
+        securityService.checkRepositoryPermission(id!!, Permission.RepositoryPermissionType.MANAGE)
+        repositoryService.deleteRepository(id)
     }
 
     @PostMapping("/invite")
-    public String inviteUser(@RequestBody InviteUser invitation) {
-        securityService.checkRepositoryPermission(invitation.getRepositoryId(), Permission.RepositoryPermissionType.MANAGE);
-        Repository repository = repositoryService.get(invitation.getRepositoryId()).orElseThrow(NotFoundException::new);
-        return invitationService.create(repository, invitation.getType());
+    fun inviteUser(@RequestBody invitation: InviteUser): String {
+        securityService.checkRepositoryPermission(invitation.repositoryId, Permission.RepositoryPermissionType.MANAGE)
+        val repository = repositoryService.get(invitation.repositoryId).orElseThrow { NotFoundException() }
+        return invitationService.create(repository, invitation.type)
     }
 }

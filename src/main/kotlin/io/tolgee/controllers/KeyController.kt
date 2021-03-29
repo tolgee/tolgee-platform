@@ -11,6 +11,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.repository_auth.AccessWithAnyRepositoryPermission
+import io.tolgee.security.repository_auth.AccessWithRepositoryPermission
 import io.tolgee.security.repository_auth.RepositoryHolder
 import io.tolgee.service.KeyService
 import io.tolgee.service.SecurityService
@@ -36,21 +37,21 @@ open class KeyController(
 ) : IController {
 
     @PostMapping(value = ["/create", ""])
+    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.TRANSLATE)
     open fun create(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody @Valid dto: SetTranslationsDTO?) {
-        val permission = securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.TRANSLATE)
-        keyService.create(permission.repository!!, dto!!)
+        keyService.create(repositoryHolder.repository, dto!!)
     }
 
     @PostMapping(value = ["/edit"])
+    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
     open fun edit(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody @Valid dto: EditKeyDTO?) {
-        val permission = securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.EDIT)
-        keyService.edit(permission.repository!!, dto!!)
+        keyService.edit(repositoryHolder.repository, dto!!)
     }
 
     @GetMapping(value = ["{id}"])
     open fun get(@PathVariable("id") id: Long?): KeyDTO {
         val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-        securityService.getAnyRepositoryPermission(key.repository!!.id)
+        securityService.checkAnyRepositoryPermission(key.repository!!.id)
         return KeyDTO(key.name)
     }
 

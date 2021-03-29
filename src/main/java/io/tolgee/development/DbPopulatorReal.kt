@@ -7,12 +7,12 @@ import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.*
 import io.tolgee.repository.ApiKeyRepository
+import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.RepositoryRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
-import io.tolgee.service.LanguageService
-import io.tolgee.service.PermissionService
-import io.tolgee.service.UserAccountService
+import io.tolgee.service.*
+import io.tolgee.util.AddressPartGenerator
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
@@ -26,7 +26,11 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
                            private val repositoryRepository: RepositoryRepository,
                            private val apiKeyRepository: ApiKeyRepository,
                            private val tolgeeProperties: TolgeeProperties,
-                           private val initialPasswordManager: InitialPasswordManager
+                           private val initialPasswordManager: InitialPasswordManager,
+                           private val organizationService: OrganizationService,
+                           private val organizationRepository: OrganizationRepository,
+                           private val addressPartGenerator: AddressPartGenerator,
+                           private val organizationMemberRoleService: OrganizationMemberRoleService
 ) {
     private var de: Language? = null
     private var en: Language? = null
@@ -47,6 +51,13 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
         }
     }
 
+    open fun createOrganization(name: String, userAccount: UserAccount): Organization {
+        val addressPart = addressPartGenerator.generate(name, 20, 100) { true }
+        val organization = Organization(name = name, addressPart = addressPart, basePermissions = Permission.RepositoryPermissionType.VIEW)
+        organizationMemberRoleService.grantOwnerRoleToUser(userAccount, organization)
+        return organizationRepository.save(organization)
+    }
+
     open fun createUser(username: String): UserAccount {
         return createUser(username, null)
     }
@@ -56,6 +67,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
         val userAccount = createUser(username, password)
         val repository = Repository()
         repository.name = repositoryName
+        repository.userOwner = userAccount
         en = createLanguage("en", repository)
         de = createLanguage("de", repository)
         permissionService.grantFullAccessToRepo(userAccount, repository)

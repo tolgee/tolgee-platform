@@ -372,19 +372,30 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-4">
-        <addUniqueConstraint columnNames="address_part" constraintName="organization_address_part_unique" tableName="organization"/>
+        <addUniqueConstraint columnNames="address_part" constraintName="organization_address_part_unique"
+                             tableName="organization"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-5">
-        <addUniqueConstraint columnNames="address_part" constraintName="repository_address_part_unique" tableName="repository"/>
+        <addUniqueConstraint columnNames="address_part" constraintName="repository_address_part_unique"
+                             tableName="repository"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-6">
-        <addForeignKeyConstraint baseColumnNames="invitation_id" baseTableName="organization_member_role" constraintName="FK581ryvy4rn9ey7rx3lestkuix" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="invitation" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="invitation_id" baseTableName="organization_member_role"
+                                 constraintName="FK581ryvy4rn9ey7rx3lestkuix" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="invitation"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-7">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="organization_member_role" constraintName="FK6p6nbxihffjckr4tayum4x67v" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="organization_member_role"
+                                 constraintName="FK6p6nbxihffjckr4tayum4x67v" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-8">
-        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="organization_member_role" constraintName="FKqj2a0uojwh4p5rc9vfsu92fdk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="organization_member_role"
+                                 constraintName="FKqj2a0uojwh4p5rc9vfsu92fdk" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-9">
         <dropForeignKeyConstraint baseTableName="REPOSITORY" constraintName="FKOIOV5289PVEGGJM2STHUHW4QM"/>
@@ -393,6 +404,17 @@
         <dropUniqueConstraint constraintName="REPOSITORY_NAME_CREATED_BY_ID" tableName="REPOSITORY"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-11">
-        <dropColumn columnName="CREATED_BY_ID" tableName="REPOSITORY"/>
+        <renameColumn oldColumnName="CREATED_BY_ID" newColumnName="USER_OWNER_ID" tableName="REPOSITORY"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1617016717129-1">
+        <addColumn tableName="repository">
+            <column name="organization_owner_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1617016717129-2">
+        <addForeignKeyConstraint baseColumnNames="user_owner_id" baseTableName="repository" constraintName="FKe8q5ar4olfji1mw1p0163ctyk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1617016717129-3">
+        <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="repository" constraintName="FKp2q5w860n1uai6oyel74udi83" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
     </changeSet>
 </databaseChangeLog>

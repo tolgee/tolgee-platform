@@ -77,7 +77,7 @@ class TranslationController @Autowired constructor(
                     @RequestParam(name = "offset", defaultValue = "0") offset: Int,
                     @RequestParam(name = "search", required = false) search: String?
     ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-        securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.VIEW)
+        securityService.checkRepositoryPermission(repositoryId!!, Permission.RepositoryPermissionType.VIEW)
         return translationService.getViewData(languages, repositoryId, limit, offset, search)
     }
 }

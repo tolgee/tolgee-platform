@@ -1,65 +1,72 @@
-package io.tolgee.service;
+package io.tolgee.service
 
-import io.tolgee.model.Permission;
-import io.tolgee.model.Repository;
-import io.tolgee.model.UserAccount;
-import io.tolgee.repository.PermissionRepository;
-import io.tolgee.security.AuthenticationFacade;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.Optional;
-import java.util.Set;
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Permission
+import io.tolgee.model.Permission.Companion.builder
+import io.tolgee.model.Permission.RepositoryPermissionType
+import io.tolgee.model.Repository
+import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.repository.PermissionRepository
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
-public class PermissionService {
-    private final PermissionRepository permissionRepository;
-    private final EntityManager entityManager;
-    private final AuthenticationFacade authenticationFacade;
-
-    @Autowired
-    public PermissionService(PermissionRepository permissionRepository, EntityManager entityManager, AuthenticationFacade authenticationFacade) {
-        this.permissionRepository = permissionRepository;
-        this.entityManager = entityManager;
-        this.authenticationFacade = authenticationFacade;
+open class PermissionService @Autowired constructor(private val permissionRepository: PermissionRepository,
+                                                    private val repositoryService: RepositoryService,
+                                                    private val organizationMemberRoleService: OrganizationMemberRoleService
+) {
+    open fun getAllOfRepository(repository: Repository?): Set<Permission> {
+        return permissionRepository.getAllByRepositoryAndUserNotNull(repository)
     }
 
-    public Set<Permission> getAllOfRepository(Repository repository) {
-        return this.permissionRepository.getAllByRepositoryAndUserNotNull(repository);
+    open fun findById(id: Long): Permission? {
+        return permissionRepository.findById(id).orElse(null)
     }
 
-    public Optional<Permission> findById(Long id) {
-        return permissionRepository.findById(id);
+    open fun getRepositoryPermissionType(repositoryId: Long, userAccount: UserAccount): RepositoryPermissionType? {
+        val repository = repositoryService.get(repositoryId).orElseThrow { NotFoundException() }
+        val repositoryPermission = permissionRepository.findOneByRepositoryIdAndUserId(repositoryId, userAccount.id)
+        repository.organizationOwner?.let { organization ->
+            val type = organizationMemberRoleService.getType(userAccount.id!!, organization.id!!)
+            if (type == OrganizationRoleType.OWNER) {
+                return RepositoryPermissionType.MANAGE
+            }
+
+            if (type == OrganizationRoleType.MEMBER) {
+                if (repositoryPermission == null ||
+                        organization.basePermissions.power > repositoryPermission.type!!.power) {
+                    return organization.basePermissions
+                }
+                return repositoryPermission.type!!
+            }
+        }
+        return null
     }
 
-    public Optional<Permission> getRepositoryPermission(Long repositoryId, UserAccount userAccount) {
-        return this.permissionRepository.findOneByRepositoryIdAndUserId(repositoryId, userAccount.getId());
+    open fun create(permission: Permission) {
+        permission.repository!!.permissions.add(permission)
+        permissionRepository.save(permission)
     }
 
-    public void create(Permission permission) {
-        permission.getRepository().getPermissions().add(permission);
-        permissionRepository.save(permission);
+    open fun delete(permission: Permission) {
+        permissionRepository.delete(permission)
     }
 
-    public void delete(Permission permission) {
-        permissionRepository.delete(permission);
-    }
-
-    public void deleteAllByRepository(Long repositoryId) {
-        permissionRepository.deleteAllByRepositoryId(repositoryId);
+    open fun deleteAllByRepository(repositoryId: Long?) {
+        permissionRepository.deleteAllByRepositoryId(repositoryId)
     }
 
     @Transactional
-    public void grantFullAccessToRepo(UserAccount userAccount, Repository repository) {
-        Permission permission = Permission.builder().type(Permission.RepositoryPermissionType.MANAGE).repository(repository).user(userAccount).build();
-        create(permission);
+    open fun grantFullAccessToRepo(userAccount: UserAccount?, repository: Repository?) {
+        val permission = builder().type(RepositoryPermissionType.MANAGE).repository(repository).user(userAccount).build()
+        create(permission)
     }
 
     @Transactional
-    public void editPermission(Permission permission, Permission.RepositoryPermissionType type) {
-        permission.setType(type);
-        permissionRepository.save(permission);
+    open fun editPermission(permission: Permission, type: RepositoryPermissionType?) {
+        permission.type = type
+        permissionRepository.save(permission)
     }
 }

@@ -1,6 +1,7 @@
 package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.CreateRepositoryDTO
 import io.tolgee.dtos.request.EditRepositoryDTO
 import io.tolgee.dtos.request.LanguageDTO
@@ -8,6 +9,7 @@ import io.tolgee.dtos.response.RepositoryDTO
 import io.tolgee.fixtures.LoggedRequestFactory.loggedDelete
 import io.tolgee.fixtures.LoggedRequestFactory.loggedGet
 import io.tolgee.fixtures.LoggedRequestFactory.loggedPost
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.helpers.JsonHelper
@@ -32,6 +34,19 @@ class RepositoryControllerTest : SignedInControllerTest() {
         testCreateValidationSize()
         testCreateCorrectRequest()
     }
+
+    @Test
+    fun createRepositoryOrganization() {
+        val userAccount = dbPopulator.createUser("testuser")
+        val organization = dbPopulator.createOrganization("Test Organization", userAccount)
+        logAsUser("testuser", initialPasswordManager.initialPassword)
+        val request = CreateRepositoryDTO("aaa", setOf(languageDTO), organizationId = organization.id)
+        val result = performAuthPost("/api/repositories", request).andIsOk.andReturn().mapResponseTo<RepositoryDTO>()
+        repositoryService.get(result.id!!).get().let {
+            assertThat(it.organizationOwner?.id).isEqualTo(organization.id)
+        }
+    }
+
 
     private fun testCreateCorrectRequest() {
         val request = CreateRepositoryDTO("aaa", setOf(languageDTO))

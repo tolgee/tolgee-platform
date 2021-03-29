@@ -64,7 +64,7 @@ public class InvitationService {
 
         Permission permission = invitation.getPermission();
 
-        if (this.permissionRepository.findOneByRepositoryIdAndUserId(permission.getRepository().getId(), userAccount.getId()).isPresent()) {
+        if (this.permissionRepository.findOneByRepositoryIdAndUserId(permission.getRepository().getId(), userAccount.getId()) != null) {
             throw new BadRequestException(Message.USER_ALREADY_HAS_PERMISSIONS);
         }
 

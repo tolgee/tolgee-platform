@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service
 import java.math.BigInteger
 import java.security.SecureRandom
 import java.util.*
-import java.util.stream.Collectors
 
 @Service
 open class ApiKeyService @Autowired constructor(private val apiKeyRepository: ApiKeyRepository, private val permissionService: PermissionService, private val random: SecureRandom) {
@@ -47,11 +46,9 @@ open class ApiKeyService @Autowired constructor(private val apiKeyRepository: Ap
         apiKeyRepository.delete(apiKey)
     }
 
-    open fun getAvailableScopes(userAccount: UserAccount?, repository: Repository): Set<ApiScope> {
-        return Arrays.stream(
-                permissionService.getRepositoryPermission(repository.id, userAccount)
-                        .orElseThrow { NotFoundException() }.type!!.availableScopes
-        ).collect(Collectors.toSet())
+    open fun getAvailableScopes(userAccount: UserAccount, repository: Repository): Set<ApiScope> {
+        return permissionService.getRepositoryPermissionType(repository.id, userAccount)?.availableScopes?.toSet()
+                ?: throw NotFoundException()
     }
 
     open fun editApiKey(apiKey: ApiKey) {

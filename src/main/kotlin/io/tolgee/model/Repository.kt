@@ -10,6 +10,10 @@ import javax.validation.constraints.Size
 @EntityListeners(Repository.Companion.RepositoryListener::class)
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "repository_address_part_unique")])
 data class Repository(
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        var id: Long = 0L,
+
         @field:NotBlank
         @field:Size(min = 3, max = 500)
         var name: String? = null,
@@ -20,15 +24,10 @@ data class Repository(
         @field:Size(min = 3, max = 500)
         @field:Pattern(regexp = "^[a-z0-9]*[a-z]+[a-z0-9]*$", message = "invalid_pattern")
         var addressPart: String? = null,
-
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        var id: Long = 0L,
 ) : AuditModel() {
     @OrderBy("abbreviation")
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "repository")
     var languages: MutableSet<Language> = LinkedHashSet()
-
 
     @OneToMany(mappedBy = "repository")
     var permissions: MutableSet<Permission> = LinkedHashSet()
@@ -43,7 +42,17 @@ data class Repository(
     var userOwner: UserAccount? = null
 
     @ManyToOne(optional = true)
-    var organizationOwner: UserAccount? = null
+    var organizationOwner: Organization? = null
+
+    constructor(name: String?, description: String? = null, addressPart: String?, userOwner: UserAccount?)
+            : this(id = 0L, name, description, addressPart) {
+        this.userOwner = userOwner
+    }
+
+    constructor(name: String?, description: String? = null, addressPart: String?, organizationOwner: Organization?)
+            : this(id = 0L, name, description, addressPart) {
+        this.organizationOwner = organizationOwner
+    }
 
     fun getLanguage(abbreviation: String): Optional<Language> {
         return languages.stream().filter { l: Language -> (l.abbreviation == abbreviation) }.findFirst()
@@ -52,19 +61,11 @@ data class Repository(
     companion object {
         class RepositoryListener {
             @PrePersist
-            fun prePersist(repository: Repository) {
-                if (repository.organizationOwner == null && repository.userOwner == null) {
-                    throw Exception("User owner or organization owner must be set")
-                }
-
-                if (repository.organizationOwner != null && repository.userOwner != null) {
-                    throw Exception("Cannot set both organization owner and user owner")
-                }
-            }
-
             @PreUpdate
-            fun preUpdate(repository: Repository) {
-
+            fun preSave(repository: Repository) {
+                if (!(repository.organizationOwner == null).xor(repository.userOwner == null)) {
+                    throw Exception("Exactly one of organizationOwner or userOwner must be set!")
+                }
             }
         }
     }

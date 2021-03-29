@@ -10,6 +10,7 @@ import io.tolgee.model.Repository
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.RepositoryRepository
+import io.tolgee.security.AuthenticationFacade
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,7 +26,11 @@ open class RepositoryService constructor(
         private val permissionRepository: PermissionRepository,
         private val permissionService: PermissionService,
         private val apiKeyService: ApiKeyService,
-        private val screenshotService: ScreenshotService
+        private val screenshotService: ScreenshotService,
+        private val organizationService: OrganizationService,
+        private val organizationMemberRoleService: OrganizationMemberRoleService,
+        private val authenticationFacade: AuthenticationFacade
+
 ) {
     private var keyService: KeyService? = null
 
@@ -45,7 +50,13 @@ open class RepositoryService constructor(
     open fun createRepository(dto: CreateRepositoryDTO): Repository {
         val repository = Repository()
         repository.name = dto.name
-        securityService.grantFullAccessToRepo(repository)
+        dto.organizationId?.also {
+            organizationMemberRoleService.checkUserIsOwner(it)
+            repository.organizationOwner = organizationService.get(it) ?: throw NotFoundException()
+        } ?: let {
+            repository.userOwner = authenticationFacade.userAccount
+            securityService.grantFullAccessToRepo(repository)
+        }
         for (language in dto.languages!!) {
             languageService.createLanguage(language, repository)
         }
@@ -65,7 +76,7 @@ open class RepositoryService constructor(
     @Transactional
     open fun findAllPermitted(userAccount: UserAccount?): Set<RepositoryDTO> {
         return permissionRepository.findAllByUser(userAccount).stream()
-                .map { permission: Permission -> fromEntityAndPermission(permission.repository!!, permission) }
+                .map { permission: Permission -> fromEntityAndPermission(permission.repository!!, permission.type!!) }
                 .collect(Collectors.toCollection { LinkedHashSet() })
     }
 

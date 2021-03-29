@@ -1,4 +1,4 @@
-package io.tolgee.model
+package io.tolgee.model.enums
 
 enum class OrganizationRoleType {
     MEMBER,

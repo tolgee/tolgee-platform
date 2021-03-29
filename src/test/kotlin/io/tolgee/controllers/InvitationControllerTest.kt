@@ -36,8 +36,8 @@ class InvitationControllerTest : SignedInControllerTest() {
         performAuthGet("/api/invitation/accept/${invitation}").andExpect(status().isOk).andReturn()
 
         assertThat(invitationService.getForRepository(repository)).hasSize(0)
-        assertThat(permissionService.getRepositoryPermission(repository.id, newUser)).isNotEmpty
-        val type = permissionService.getRepositoryPermission(repository.id, newUser).get().type
+        assertThat(permissionService.getRepositoryPermissionType(repository.id, newUser)).isNotNull
+        val type = permissionService.getRepositoryPermissionType(repository.id, newUser)!!
         assertThat(type).isEqualTo(Permission.RepositoryPermissionType.EDIT)
     }
 }

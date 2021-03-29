@@ -32,7 +32,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService, private val rep
 
     @GetMapping(path = ["/repository/{repositoryId}"])
     fun allByRepository(@PathVariable("repositoryId") repositoryId: Long?): Set<ApiKeyDTO> {
-        securityService.checkRepositoryPermission(repositoryId, RepositoryPermissionType.MANAGE)
+        securityService.checkRepositoryPermission(repositoryId!!, RepositoryPermissionType.MANAGE)
         return apiKeyService.getAllByRepository(repositoryId).stream()
                 .map { apiKey: ApiKey? -> ApiKeyDTO.fromEntity(apiKey) }
                 .collect(Collectors.toCollection { LinkedHashSet() })

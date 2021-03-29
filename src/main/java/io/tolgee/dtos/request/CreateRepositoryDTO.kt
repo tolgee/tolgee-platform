@@ -1,5 +1,6 @@
 package io.tolgee.dtos.request
 
+import io.swagger.v3.oas.annotations.media.Schema
 import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
@@ -14,5 +15,8 @@ data class CreateRepositoryDTO(
 
         @field:Size(min = 3, max = 60)
         @field:Pattern(regexp = "^[a-z0-9]*[a-z]+[a-z0-9]*$", message = "invalid_pattern")
-        var addressPart: String? = null
+        var addressPart: String? = null,
+
+        @Schema(description = "If not provided, repository will be created as users")
+        var organizationId: Long? = null
 )
