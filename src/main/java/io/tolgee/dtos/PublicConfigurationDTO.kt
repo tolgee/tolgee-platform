@@ -17,7 +17,7 @@ class PublicConfigurationDTO(
     val needsEmailVerification = properties.authentication.needsEmailVerification
 
     class AuthMethodsDTO(val github: GithubPublicConfigDTO)
-    class GithubPublicConfigDTO(clientId: String?) {
+    data class GithubPublicConfigDTO(val clientId: String?) {
         val isEnabled: Boolean = clientId != null && clientId.isNotEmpty()
     }
 
