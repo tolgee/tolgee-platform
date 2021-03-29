@@ -28,7 +28,7 @@ public class PermissionControllerTest extends SignedInControllerTest implements 
         Permission permission = user.getPermissions().stream().findFirst().orElseThrow(NotFoundException::new);
         PermissionEditDto dto = PermissionEditDto.builder().permissionId(permission.getId()).type(Permission.RepositoryPermissionType.EDIT).build();
         performAuthPost("/api/permission/edit", dto).andExpect(status().isOk()).andReturn();
-        assertThat(permissionService.findById(permission.getId()).get().getType()).isEqualTo(Permission.RepositoryPermissionType.EDIT);
+        assertThat(permissionService.findById(permission.getId()).getType()).isEqualTo(Permission.RepositoryPermissionType.EDIT);
     }
 
 

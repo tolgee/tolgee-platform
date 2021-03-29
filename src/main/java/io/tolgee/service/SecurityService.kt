@@ -13,8 +13,11 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 open class SecurityService @Autowired constructor(private val authenticationFacade: AuthenticationFacade,
-                                                  private val permissionService: PermissionService,
                                                   private val apiKeyService: ApiKeyService) {
+
+    @set:Autowired
+    lateinit var permissionService: PermissionService
+
     @Transactional
     open fun grantFullAccessToRepo(repository: Repository?) {
         permissionService.grantFullAccessToRepo(activeUser, repository)

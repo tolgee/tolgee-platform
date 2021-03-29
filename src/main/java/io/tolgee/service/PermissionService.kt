@@ -14,9 +14,12 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 open class PermissionService @Autowired constructor(private val permissionRepository: PermissionRepository,
-                                                    private val repositoryService: RepositoryService,
                                                     private val organizationMemberRoleService: OrganizationMemberRoleService
 ) {
+
+    @set:Autowired
+    lateinit var repositoryService: RepositoryService
+
     open fun getAllOfRepository(repository: Repository?): Set<Permission> {
         return permissionRepository.getAllByRepositoryAndUserNotNull(repository)
     }
@@ -34,15 +37,12 @@ open class PermissionService @Autowired constructor(private val permissionReposi
                 return RepositoryPermissionType.MANAGE
             }
 
-            if (type == OrganizationRoleType.MEMBER) {
-                if (repositoryPermission == null ||
-                        organization.basePermissions.power > repositoryPermission.type!!.power) {
-                    return organization.basePermissions
-                }
-                return repositoryPermission.type!!
+            if (type == OrganizationRoleType.MEMBER && (repositoryPermission == null ||
+                            organization.basePermissions.power > repositoryPermission.type!!.power)) {
+                return organization.basePermissions
             }
         }
-        return null
+        return repositoryPermission?.type
     }
 
     open fun create(permission: Permission) {
