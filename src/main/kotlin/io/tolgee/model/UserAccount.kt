@@ -40,6 +40,9 @@ data class UserAccount(
     @Column(name = "reset_password_code")
     var resetPasswordCode: String? = null
 
+    @OneToMany(mappedBy = "user")
+    var organizationMemberRoles: MutableList<OrganizationMemberRole> = mutableListOf()
+
     constructor(id: Long?,
                 username: String?,
                 password: String?,

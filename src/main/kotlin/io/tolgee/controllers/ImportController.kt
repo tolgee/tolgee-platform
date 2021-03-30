@@ -35,7 +35,7 @@ class ImportController(
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.MANAGE)
         val repository = repositoryService.get(repositoryId).orElseThrow {
             NotFoundException(Message.REPOSITORY_NOT_FOUND)
-        }
+        }!!
 
         val stream = StreamingResponseBody { out: OutputStream ->
             importService.import(repository, dto, out)

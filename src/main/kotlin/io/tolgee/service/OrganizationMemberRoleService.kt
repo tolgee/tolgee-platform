@@ -64,6 +64,7 @@ open class OrganizationMemberRoleService(
                 .let {
                     organizationMemberRoleRepository.save(it)
                     organization.memberRoles.add(it)
+                    user.organizationMemberRoles.add(it)
                 }
     }
 

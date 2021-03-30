@@ -2,6 +2,7 @@ package io.tolgee.model
 
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
 
@@ -18,6 +19,7 @@ open class Organization(
 
         @Column(name = "address_part")
         @field:NotBlank @field:Size(min = 3, max = 60)
+        @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
         open var addressPart: String? = null,
 
         @Enumerated(EnumType.STRING)
@@ -32,4 +34,7 @@ open class Organization(
 
     @OneToMany(mappedBy = "organization")
     open var memberRoles: MutableList<OrganizationMemberRole> = mutableListOf()
+
+    @OneToMany(mappedBy = "organizationOwner")
+    open var repositories: MutableList<Repository> = mutableListOf()
 }

@@ -56,7 +56,7 @@ class RepositoryControllerTest : SignedInControllerTest() {
                                 JsonHelper.asJsonString(request)))
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn()
-        val repositoryDto = repositoryService.findAllPermitted(userAccount).find { it.name == "aaa" }
+        val repositoryDto = repositoryService.findAllPermitted(userAccount!!).find { it.name == "aaa" }
         Assertions.assertThat(repositoryDto).isNotNull
         val repository = repositoryService.get(repositoryDto!!.id!!).get()
         Assertions.assertThat(repository.languages).isNotEmpty
@@ -97,7 +97,7 @@ class RepositoryControllerTest : SignedInControllerTest() {
         val response = mapper.readValue(mvcResult.response.contentAsString, RepositoryDTO::class.java)
         Assertions.assertThat(response.name).isEqualTo("new test")
         Assertions.assertThat(response.id).isEqualTo(test.id)
-        val found = repositoryService.findAllPermitted(userAccount).find { it.name == "new test" }
+        val found = repositoryService.findAllPermitted(userAccount!!).find { it.name == "new test" }
         Assertions.assertThat(found).isNotNull
     }
 

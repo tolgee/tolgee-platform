@@ -19,7 +19,7 @@ data class Permission(
         var type: RepositoryPermissionType? = null
 ) : AuditModel() {
 
-    constructor(id: Long?, user: UserAccount?, invitation: Invitation?, repository: Repository?,
+    constructor(id: Long? = null, user: UserAccount?, invitation: Invitation? = null, repository: Repository?,
                 type: RepositoryPermissionType?) : this(id, user, invitation, type) {
         this.repository = repository;
     }

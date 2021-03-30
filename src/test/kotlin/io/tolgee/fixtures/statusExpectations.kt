@@ -2,6 +2,7 @@ package io.tolgee.fixtures
 
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.assertions.MvcResultAssert
+import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -18,3 +19,6 @@ val ResultActions.andIsForbidden: ResultActions
 
 val ResultActions.andAssertResponse: MvcResultAssert
     get() = assertThat(this.andReturn())
+
+val ResultActions.andAssertThatJson
+    get() = assertThatJson(this.andReturn().response.contentAsString)

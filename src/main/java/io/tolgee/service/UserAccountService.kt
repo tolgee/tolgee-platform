@@ -6,6 +6,8 @@ import io.tolgee.dtos.request.UserUpdateRequestDTO
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.UserAccountRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,7 +19,7 @@ open class UserAccountService(private val userAccountRepository: UserAccountRepo
         return userAccountRepository.findByUsername(username)
     }
 
-    open operator fun get(id: Long): Optional<UserAccount> {
+    open operator fun get(id: Long): Optional<UserAccount?> {
         return userAccountRepository.findById(id)
     }
 
@@ -44,7 +46,7 @@ open class UserAccountService(private val userAccountRepository: UserAccountRepo
         }
 
     open fun findByThirdParty(type: String?, id: String?): Optional<UserAccount> {
-        return userAccountRepository.findByThirdPartyAuthTypeAndThirdPartyAuthId(type, id)
+        return userAccountRepository.findByThirdPartyAuthTypeAndThirdPartyAuthId(type!!, id!!)
     }
 
     @Transactional
@@ -70,6 +72,10 @@ open class UserAccountService(private val userAccountRepository: UserAccountRepo
     @Transactional
     open fun removeResetCode(userAccount: UserAccount) {
         userAccount.resetPasswordCode = null
+    }
+
+    open fun getAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<Array<Any>> {
+        return userAccountRepository.getAllInOrganization(organizationId, pageable, search = search ?: "")
     }
 
     private fun encodePassword(rawPassword: String): String {

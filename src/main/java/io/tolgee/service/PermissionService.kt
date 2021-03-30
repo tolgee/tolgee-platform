@@ -29,20 +29,13 @@ open class PermissionService @Autowired constructor(private val permissionReposi
     }
 
     open fun getRepositoryPermissionType(repositoryId: Long, userAccount: UserAccount): RepositoryPermissionType? {
-        val repository = repositoryService.get(repositoryId).orElseThrow { NotFoundException() }
+        val repository = repositoryService.get(repositoryId).orElseThrow { NotFoundException() }!!
         val repositoryPermission = permissionRepository.findOneByRepositoryIdAndUserId(repositoryId, userAccount.id)
-        repository.organizationOwner?.let { organization ->
-            val type = organizationMemberRoleService.getType(userAccount.id!!, organization.id!!)
-            if (type == OrganizationRoleType.OWNER) {
-                return RepositoryPermissionType.MANAGE
-            }
 
-            if (type == OrganizationRoleType.MEMBER && (repositoryPermission == null ||
-                            organization.basePermissions.power > repositoryPermission.type!!.power)) {
-                return organization.basePermissions
-            }
-        }
-        return repositoryPermission?.type
+        val organization = repository.organizationOwner
+        val organizationRole = organization?.let { organizationMemberRoleService.getType(userAccount.id!!, organization.id!!) }
+        val organizationBasePermissionType = organization?.basePermissions
+        return computeRepositoryPermissionType(organizationRole, organizationBasePermissionType, repositoryPermission?.type)
     }
 
     open fun create(permission: Permission) {
@@ -68,5 +61,33 @@ open class PermissionService @Autowired constructor(private val permissionReposi
     open fun editPermission(permission: Permission, type: RepositoryPermissionType?) {
         permission.type = type
         permissionRepository.save(permission)
+    }
+
+    open fun computeRepositoryPermissionType(
+            organizationRole: OrganizationRoleType?,
+            organizationBasePermissionType: RepositoryPermissionType?,
+            repositoryPermissionType: RepositoryPermissionType?
+    ): RepositoryPermissionType? {
+        if (organizationRole == null) {
+            return repositoryPermissionType
+        }
+
+        if (organizationRole == OrganizationRoleType.OWNER) {
+            return RepositoryPermissionType.MANAGE
+        }
+
+        if (organizationRole == OrganizationRoleType.MEMBER) {
+            if (repositoryPermissionType == null) {
+                return organizationBasePermissionType
+            }
+            if (organizationBasePermissionType == null) {
+                return repositoryPermissionType
+            }
+
+            if (repositoryPermissionType.power > organizationBasePermissionType.power) {
+                return repositoryPermissionType
+            }
+        }
+        return organizationBasePermissionType
     }
 }

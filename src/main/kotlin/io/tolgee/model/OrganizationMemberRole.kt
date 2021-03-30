@@ -4,6 +4,11 @@ import io.tolgee.model.enums.OrganizationRoleType
 import javax.persistence.*
 
 @Entity
+@Table(uniqueConstraints = [
+    UniqueConstraint(
+            columnNames = ["user_id", "organization_id"],
+            name = "organization_member_role_user_organization_unique")
+])
 data class OrganizationMemberRole(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +27,7 @@ data class OrganizationMemberRole(
         this.user = user
     }
 
-    @ManyToOne
+    @ManyToOne()
     var user: UserAccount? = null
 
     @ManyToOne

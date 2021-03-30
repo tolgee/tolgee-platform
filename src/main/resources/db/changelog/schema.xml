@@ -417,4 +417,7 @@
     <changeSet author="jenik (generated)" id="1617016717129-3">
         <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="repository" constraintName="FKp2q5w860n1uai6oyel74udi83" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1617093013144-2">
+        <addUniqueConstraint columnNames="user_id, organization_id" constraintName="organization_member_role_user_organization_unique" tableName="organization_member_role"/>
+    </changeSet>
 </databaseChangeLog>

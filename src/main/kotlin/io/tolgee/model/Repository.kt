@@ -22,7 +22,7 @@ data class Repository(
 
         @Column(name = "address_part")
         @field:Size(min = 3, max = 500)
-        @field:Pattern(regexp = "^[a-z0-9]*[a-z]+[a-z0-9]*$", message = "invalid_pattern")
+        @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
         var addressPart: String? = null,
 ) : AuditModel() {
     @OrderBy("abbreviation")

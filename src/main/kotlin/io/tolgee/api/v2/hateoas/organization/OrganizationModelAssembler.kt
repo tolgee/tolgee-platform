@@ -10,7 +10,13 @@ import org.springframework.stereotype.Component
 class OrganizationModelAssembler : RepresentationModelAssemblerSupport<Organization, OrganizationModel>(
         OrganizationController::class.java, OrganizationModel::class.java) {
     override fun toModel(entity: Organization): OrganizationModel {
-        val link = linkTo<OrganizationController> { get(entity.id!!) }.withSelfRel()
-        return OrganizationModel(entity.name!!).add(link)
+        val link = linkTo<OrganizationController> { get(entity.addressPart!!) }.withSelfRel()
+        return OrganizationModel(
+                entity.id!!,
+                entity.name!!,
+                entity.addressPart!!,
+                entity.description!!,
+                entity.basePermissions
+        ).add(link)
     }
 }

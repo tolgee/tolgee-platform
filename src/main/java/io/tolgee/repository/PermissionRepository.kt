@@ -11,6 +11,7 @@ import java.util.*
 @Repository
 interface PermissionRepository : JpaRepository<Permission?, Long?> {
     fun findOneByRepositoryIdAndUserId(repositoryId: Long?, userId: Long?): Permission?
+
     fun getAllByRepositoryAndUserNotNull(repository: io.tolgee.model.Repository?): Set<Permission>
 
     @Query("from Permission p join Repository r on r = p.repository where p.user = ?1 order by r.name")

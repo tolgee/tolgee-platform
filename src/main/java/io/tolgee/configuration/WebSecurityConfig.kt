@@ -35,7 +35,7 @@ open class WebSecurityConfig @Autowired constructor(private val jwtTokenFilter: 
                     .addFilterAfter(repositoryPermissionFilter, JwtTokenFilter::class.java)
                     .authorizeRequests()
                     .antMatchers("/api/public/**", "/webjars/**", "/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs").permitAll()
-                    .antMatchers("/api/**", "/uaa", "/uaa/**").authenticated()
+                    .antMatchers("/api/**", "/uaa", "/uaa/**", "/v2/**").authenticated()
                     .and().sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             return

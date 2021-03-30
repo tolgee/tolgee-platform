@@ -2,13 +2,16 @@ package io.tolgee.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.CreateRepositoryDTO
 import io.tolgee.dtos.request.EditRepositoryDTO
 import io.tolgee.dtos.request.InviteUserDto
 import io.tolgee.dtos.response.RepositoryDTO
 import io.tolgee.dtos.response.RepositoryDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Permission
+import io.tolgee.model.UserAccount
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.InvitationService
 import io.tolgee.service.PermissionService
@@ -26,13 +29,18 @@ class RepositoryController @Autowired constructor(private val repositoryService:
                                                   private val authenticationFacade: AuthenticationFacade,
                                                   private val securityService: SecurityService,
                                                   private val invitationService: InvitationService,
-                                                  private val permissionService: PermissionService
+                                                  private val permissionService: PermissionService,
+                                                  private val tolgeeProperties: TolgeeProperties
 ) : IController {
 
     @PostMapping(value = [""])
     @Operation(summary = "Creates repository with specified languages")
     fun createRepository(@RequestBody @Valid dto: CreateRepositoryDTO?): RepositoryDTO {
         val userAccount = authenticationFacade.userAccount
+        if (!this.tolgeeProperties.authentication.userCanCreateRepositories
+                && userAccount.role != UserAccount.Role.ADMIN) {
+            throw PermissionException()
+        }
         val repository = repositoryService.createRepository(dto!!)
         val type = permissionService.getRepositoryPermissionType(repository.id, userAccount)
                 ?: throw IllegalStateException()
@@ -43,7 +51,8 @@ class RepositoryController @Autowired constructor(private val repositoryService:
     @Operation(summary = "Returns repository by id")
     fun getRepository(@PathVariable("id") id: Long?): RepositoryDTO {
         val permission = securityService.checkAnyRepositoryPermission(id!!)
-        return fromEntityAndPermission(repositoryService.get(id).orElseThrow<RuntimeException>(null), permission)
+        val repository = repositoryService.get(id).orElseThrow { NotFoundException() }!!
+        return fromEntityAndPermission(repository, permission)
     }
 
     @Operation(summary = "Modifies repository")
@@ -56,7 +65,7 @@ class RepositoryController @Autowired constructor(private val repositoryService:
 
     @GetMapping(value = [""])
     @Operation(summary = "Return all repositories, where use has any access")
-    fun getAll(): Set<RepositoryDTO> = repositoryService.findAllPermitted(authenticationFacade.userAccount)
+    fun getAll(): List<RepositoryDTO> = repositoryService.findAllPermitted(authenticationFacade.userAccount)
 
     @DeleteMapping(value = ["/{id}"])
     @Operation(summary = "Deletes repository by id")

@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.*
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.ApiKeyRepository
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.RepositoryRepository
@@ -58,8 +59,46 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
         return organizationRepository.save(organization)
     }
 
+
+    open fun createUsersAndOrganizations(): List<UserAccount> {
+        val users = (1..4).map {
+            createUser("user $it")
+        }
+
+        users.mapIndexed { listUserIdx, user ->
+            (1..listUserIdx).forEach { organzizationNum ->
+                val org = createOrganization("User $listUserIdx's organization $organzizationNum", user)
+                (0 until listUserIdx).forEach { userIdx ->
+                    organizationMemberRoleService.grantRoleToUser(users[userIdx], org, OrganizationRoleType.MEMBER)
+
+                }
+                (1..3).forEach { repositoryNum ->
+                    val name = "User $listUserIdx's organization $organzizationNum repository $repositoryNum";
+                    createRepositoryWithOrganization(name, org);
+                }
+            }
+        }
+
+        return users
+    }
+
     open fun createUser(username: String): UserAccount {
         return createUser(username, null)
+    }
+
+    @Transactional
+    open fun createRepositoryWithOrganization(repositoryName: String, organization: Organization): Repository {
+        val repository = Repository()
+        repository.name = repositoryName
+        repository.organizationOwner = organization
+        repository.addressPart = addressPartGenerator.generate(repositoryName, 3, 60) { true }
+        en = createLanguage("en", repository)
+        de = createLanguage("de", repository)
+        repositoryRepository.saveAndFlush(repository)
+        organization.repositories.add(repository)
+        entityManager.flush()
+        entityManager.clear()
+        return repository
     }
 
     @Transactional

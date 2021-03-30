@@ -54,7 +54,7 @@ open class EmailVerificationService(private val tolgeeProperties: TolgeeProperti
 
     open fun verify(userId: Long, code: String) {
         val user = userAccountRepository.findById(userId).orElseThrow { NotFoundException() }
-        if (user.emailVerification == null || user.emailVerification?.code != code) {
+        if (user!!.emailVerification == null || user.emailVerification?.code != code) {
             throw NotFoundException()
         }
         emailVerificationRepository.delete(user.emailVerification!!)

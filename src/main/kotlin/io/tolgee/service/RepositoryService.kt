@@ -5,9 +5,7 @@ import io.tolgee.dtos.request.EditRepositoryDTO
 import io.tolgee.dtos.response.RepositoryDTO
 import io.tolgee.dtos.response.RepositoryDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Permission
-import io.tolgee.model.Repository
-import io.tolgee.model.UserAccount
+import io.tolgee.model.*
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.RepositoryRepository
 import io.tolgee.security.AuthenticationFacade
@@ -15,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import java.util.stream.Collectors
 import javax.persistence.EntityManager
 
 @Service
@@ -42,7 +39,7 @@ open class RepositoryService constructor(
     lateinit var translationService: TranslationService
 
     @Transactional
-    open fun get(id: Long): Optional<Repository> {
+    open fun get(id: Long): Optional<Repository?> {
         return repositoryRepository.findById(id)
     }
 
@@ -67,22 +64,34 @@ open class RepositoryService constructor(
     @Transactional
     open fun editRepository(dto: EditRepositoryDTO): Repository {
         val repository = repositoryRepository.findById(dto.repositoryId!!)
-                .orElseThrow { NotFoundException() }
+                .orElseThrow { NotFoundException() }!!
         repository.name = dto.name
         entityManager.persist(repository)
         return repository
     }
 
     @Transactional
-    open fun findAllPermitted(userAccount: UserAccount?): Set<RepositoryDTO> {
-        return permissionRepository.findAllByUser(userAccount).stream()
-                .map { permission: Permission -> fromEntityAndPermission(permission.repository!!, permission.type!!) }
-                .collect(Collectors.toCollection { LinkedHashSet() })
+    open fun findAllPermitted(userAccount: UserAccount): List<RepositoryDTO> {
+        return repositoryRepository.findAllPermitted(userAccount.id!!).asSequence()
+                .map { result ->
+                    val repository = result[0] as Repository
+                    val permission = result[1] as Permission?
+                    val organization = result[2] as Organization?
+                    val organizationMemberRole = result[3] as OrganizationMemberRole?
+                    val permissionType = permissionService.computeRepositoryPermissionType(
+                            organizationMemberRole?.type,
+                            organization?.basePermissions,
+                            permission?.type
+                    )
+                            ?: throw IllegalStateException("Repository repository should not return repository with no permission for provided user")
+
+                    fromEntityAndPermission(repository, permissionType)
+                }.toList()
     }
 
     @Transactional
     open fun deleteRepository(id: Long) {
-        val repository = get(id).orElseThrow { NotFoundException() }
+        val repository = get(id).orElseThrow { NotFoundException() }!!
         permissionService.deleteAllByRepository(repository.id)
         translationService.deleteAllByRepository(repository.id)
         screenshotService.deleteAllByRepository(repository.id)
