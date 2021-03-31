@@ -7,7 +7,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
     "@sentry/browser": "^6.2.1",
-    "@sentry/types": "^6.2.3",
+    "@sentry/types": "^6.2.4",
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^13.0.16",
