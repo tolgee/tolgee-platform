@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface OrganizationMemberRoleRepository : JpaRepository<OrganizationMemberRole, Long> {
-    fun findAllByUserIdAndOrganizationId(userId: Long, organizationId: Long): OrganizationMemberRole?
+    fun findOneByUserIdAndOrganizationId(userId: Long, organizationId: Long): OrganizationMemberRole?
 }

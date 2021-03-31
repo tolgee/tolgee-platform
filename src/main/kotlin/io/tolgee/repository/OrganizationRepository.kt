@@ -9,10 +9,10 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface OrganizationRepository : JpaRepository<Organization, Long> {
-    fun findByNameContainingIgnoreCase(name: String, pageable: Pageable): Page<Organization>
-
     fun getOneByAddressPart(addressPart: String): Organization?
 
-    @Query("from Organization o join fetch OrganizationMemberRole r on r.user.id = :userId")
+    @Query("select o from Organization o join OrganizationMemberRole r on r.user.id = :userId and r.organization = o")
     fun findAllPermitted(userId: Long?, pageable: Pageable): Page<Organization>
+
+    fun countAllByAddressPart(addressPart: String): Long
 }

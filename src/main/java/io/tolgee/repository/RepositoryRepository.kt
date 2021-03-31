@@ -1,5 +1,7 @@
 package io.tolgee.repository
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -13,4 +15,8 @@ interface RepositoryRepository : JpaRepository<io.tolgee.model.Repository, Long>
         where p is not null or (role is not null)
         """)
     fun findAllPermitted(userAccountId: Long): List<Array<Any>>
+
+    fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<io.tolgee.model.Repository>
+
+    fun findAllByOrganizationOwnerId(organizationOwnerId: Long, pageable: Pageable): Page<io.tolgee.model.Repository>
 }

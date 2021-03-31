@@ -27,7 +27,7 @@ data class OrganizationMemberRole(
         this.user = user
     }
 
-    @ManyToOne()
+    @ManyToOne
     var user: UserAccount? = null
 
     @ManyToOne

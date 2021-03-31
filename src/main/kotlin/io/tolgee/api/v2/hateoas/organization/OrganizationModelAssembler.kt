@@ -15,7 +15,7 @@ class OrganizationModelAssembler : RepresentationModelAssemblerSupport<Organizat
                 entity.id!!,
                 entity.name!!,
                 entity.addressPart!!,
-                entity.description!!,
+                entity.description,
                 entity.basePermissions
         ).add(link)
     }

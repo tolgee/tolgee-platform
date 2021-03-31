@@ -5,6 +5,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.repository.KeyRepository
+import io.tolgee.repository.OrganizationMemberRoleRepository
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.*
@@ -65,6 +66,8 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
     @Autowired
     protected lateinit var organizationMemberRoleService: OrganizationMemberRoleService
+
+    @Autowired lateinit var organizationMemberRoleRepository: OrganizationMemberRoleRepository
 
     @Autowired
     private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

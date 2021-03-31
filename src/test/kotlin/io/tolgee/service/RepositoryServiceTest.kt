@@ -47,6 +47,7 @@ open class RepositoryServiceTest : AbstractSpringTest() {
     open fun testFindMultiple() {
         val usersWithOrganizations = dbPopulator.createUsersAndOrganizations() //create some data
         val repo = dbPopulator.createBase("Hello world")
+        repo.userOwner = userAccountService.get(repo.userOwner!!.id!!).get()
         val organization = usersWithOrganizations[0].organizationMemberRoles[0].organization
         organizationMemberRoleService.grantRoleToUser(repo.userOwner!!, organization!!, OrganizationRoleType.MEMBER)
         val organization2 = usersWithOrganizations[3].organizationMemberRoles[0].organization
@@ -62,6 +63,7 @@ open class RepositoryServiceTest : AbstractSpringTest() {
     open fun testFindMultiplePermissions() {
         val usersWithOrganizations = dbPopulator.createUsersAndOrganizations() //create some data
         val repo = dbPopulator.createBase("Hello world")
+        repo.userOwner = userAccountService.get(repo.userOwner!!.id!!).get()
         val organization = usersWithOrganizations[0].organizationMemberRoles[0].organization
         organizationMemberRoleService.grantRoleToUser(repo.userOwner!!, organization!!, OrganizationRoleType.MEMBER)
         val organization2 = usersWithOrganizations[3].organizationMemberRoles[0].organization

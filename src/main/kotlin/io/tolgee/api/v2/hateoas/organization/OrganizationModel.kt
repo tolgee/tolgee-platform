@@ -9,6 +9,6 @@ open class OrganizationModel(
         val id: Long,
         val name: String,
         val addressPart: String,
-        val description: String,
+        val description: String?,
         val basePermission: Permission.RepositoryPermissionType
 ) : RepresentationModel<OrganizationModel>()

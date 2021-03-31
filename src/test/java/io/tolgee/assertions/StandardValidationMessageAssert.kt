@@ -1,26 +1,27 @@
-package io.tolgee.assertions;
+package io.tolgee.assertions
 
-import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.IntegerAssert;
-import org.assertj.core.api.StringAssert;
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.assertj.core.api.AbstractAssert
+import org.assertj.core.api.IntegerAssert
+import org.assertj.core.api.StringAssert
 
-import java.util.Map;
-
-public class StandardValidationMessageAssert extends AbstractAssert<StandardValidationMessageAssert, Map<String, String>> {
-
-    public StandardValidationMessageAssert(Map<String, String> data) {
-        super(data, StandardValidationMessageAssert.class);
-    }
-
-    public StringAssert onField(String field) {
-        if (!actual.containsKey(field)) {
-            failWithMessage("Error is not on field %s.", field);
+class StandardValidationMessageAssert(val data: Map<String, String>) :
+        AbstractAssert<StandardValidationMessageAssert?, Map<String, String>>(data, StandardValidationMessageAssert::class.java) {
+    fun onField(field: String?): StringAssert {
+        if (!actual!!.containsKey(field)) {
+            jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(data).let {
+                failWithMessage("""
+                    |Data:
+                    |
+                    |$it
+                    |
+                    |Error is not on field %s.""".trimMargin(), field)
+            }
         }
-        return new StringAssert(actual.get(field)).describedAs("Message assertion on field %s", field);
-    }
-    public IntegerAssert errorCount() {
-        return new IntegerAssert(actual.size());
+        return StringAssert(actual[field]).describedAs("Message assertion on field %s", field)
     }
 
-
+    fun errorCount(): IntegerAssert {
+        return IntegerAssert(actual!!.size)
+    }
 }

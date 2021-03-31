@@ -2,6 +2,7 @@ package io.tolgee.repository
 
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.development.DbPopulatorReal
+import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationMemberRole
 import io.tolgee.model.Permission
@@ -58,7 +59,7 @@ class RepositoryRepositoryTest : AbstractTransactionalTestNGSpringContextTests()
 
     @Test
     fun testPermittedRepositoriesJustNoOrg() {
-        val base = dbPopulatorReal.createBase("No org repo")
+        val base = dbPopulatorReal.createBase("No org repo", generateUniqueString())
         val result = repositoryRepository.findAllPermitted(base.userOwner!!.id!!)
         assertThat(result).hasSize(1)
     }

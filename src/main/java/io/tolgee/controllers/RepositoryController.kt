@@ -25,7 +25,7 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/api/repositories")
 @Tag(name = "Repository")
-class RepositoryController @Autowired constructor(private val repositoryService: RepositoryService,
+open class RepositoryController @Autowired constructor(private val repositoryService: RepositoryService,
                                                   private val authenticationFacade: AuthenticationFacade,
                                                   private val securityService: SecurityService,
                                                   private val invitationService: InvitationService,
@@ -35,7 +35,7 @@ class RepositoryController @Autowired constructor(private val repositoryService:
 
     @PostMapping(value = [""])
     @Operation(summary = "Creates repository with specified languages")
-    fun createRepository(@RequestBody @Valid dto: CreateRepositoryDTO?): RepositoryDTO {
+    open fun createRepository(@RequestBody @Valid dto: CreateRepositoryDTO?): RepositoryDTO {
         val userAccount = authenticationFacade.userAccount
         if (!this.tolgeeProperties.authentication.userCanCreateRepositories
                 && userAccount.role != UserAccount.Role.ADMIN) {
@@ -49,7 +49,7 @@ class RepositoryController @Autowired constructor(private val repositoryService:
 
     @GetMapping(value = ["/{id}"])
     @Operation(summary = "Returns repository by id")
-    fun getRepository(@PathVariable("id") id: Long?): RepositoryDTO {
+    open fun getRepository(@PathVariable("id") id: Long?): RepositoryDTO {
         val permission = securityService.checkAnyRepositoryPermission(id!!)
         val repository = repositoryService.get(id).orElseThrow { NotFoundException() }!!
         return fromEntityAndPermission(repository, permission)
@@ -57,7 +57,7 @@ class RepositoryController @Autowired constructor(private val repositoryService:
 
     @Operation(summary = "Modifies repository")
     @PostMapping(value = ["/edit"])
-    fun editRepository(@RequestBody @Valid dto: EditRepositoryDTO?): RepositoryDTO {
+    open fun editRepository(@RequestBody @Valid dto: EditRepositoryDTO?): RepositoryDTO {
         val permission = securityService.checkRepositoryPermission(dto!!.repositoryId!!, Permission.RepositoryPermissionType.MANAGE)
         val repository = repositoryService.editRepository(dto)
         return fromEntityAndPermission(repository, permission)
@@ -65,18 +65,18 @@ class RepositoryController @Autowired constructor(private val repositoryService:
 
     @GetMapping(value = [""])
     @Operation(summary = "Return all repositories, where use has any access")
-    fun getAll(): List<RepositoryDTO> = repositoryService.findAllPermitted(authenticationFacade.userAccount)
+    open fun getAll(): List<RepositoryDTO> = repositoryService.findAllPermitted(authenticationFacade.userAccount)
 
     @DeleteMapping(value = ["/{id}"])
     @Operation(summary = "Deletes repository by id")
-    fun deleteRepository(@PathVariable id: Long?) {
+    open fun deleteRepository(@PathVariable id: Long?) {
         securityService.checkRepositoryPermission(id!!, Permission.RepositoryPermissionType.MANAGE)
         repositoryService.deleteRepository(id)
     }
 
     @PostMapping("/invite")
     @Operation(summary = "Generates user invitation link for repository")
-    fun inviteUser(@RequestBody invitation: InviteUserDto): String {
+    open fun inviteUser(@RequestBody invitation: InviteUserDto): String {
         securityService.checkRepositoryPermission(invitation.repositoryId!!, Permission.RepositoryPermissionType.MANAGE)
         val repository = repositoryService.get(invitation.repositoryId!!).orElseThrow { NotFoundException() }
         return invitationService.create(repository, invitation.type)

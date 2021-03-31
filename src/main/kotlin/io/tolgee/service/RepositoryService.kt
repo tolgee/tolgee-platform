@@ -10,6 +10,8 @@ import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.RepositoryRepository
 import io.tolgee.security.AuthenticationFacade
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -24,13 +26,15 @@ open class RepositoryService constructor(
         private val permissionService: PermissionService,
         private val apiKeyService: ApiKeyService,
         private val screenshotService: ScreenshotService,
-        private val organizationService: OrganizationService,
         private val organizationMemberRoleService: OrganizationMemberRoleService,
         private val authenticationFacade: AuthenticationFacade
 
 ) {
     private var keyService: KeyService? = null
 
+
+    @set:Autowired
+    lateinit var organizationService: OrganizationService
 
     @set:Autowired
     lateinit var languageService: LanguageService
@@ -70,7 +74,6 @@ open class RepositoryService constructor(
         return repository
     }
 
-    @Transactional
     open fun findAllPermitted(userAccount: UserAccount): List<RepositoryDTO> {
         return repositoryRepository.findAllPermitted(userAccount.id!!).asSequence()
                 .map { result ->
@@ -87,6 +90,14 @@ open class RepositoryService constructor(
 
                     fromEntityAndPermission(repository, permissionType)
                 }.toList()
+    }
+
+    open fun findAllInOrganization(organizationId: Long): List<Repository> {
+        return this.repositoryRepository.findAllByOrganizationOwnerId(organizationId)
+    }
+
+    open fun findAllInOrganization(organizationId: Long, pageable: Pageable): Page<Repository> {
+        return this.repositoryRepository.findAllByOrganizationOwnerId(organizationId, pageable)
     }
 
     @Transactional
