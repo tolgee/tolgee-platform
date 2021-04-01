@@ -2,7 +2,7 @@ import {clickAdd, getPopover} from "../fixtures/shared";
 import {getAnyContainingAriaLabelAttribute, getAnyContainingText, getClosestContainingText} from "../fixtures/xPath";
 import {createRepository, deleteRepository, login, setTranslations} from "../fixtures/apiCalls";
 import {HOST} from "../fixtures/constants";
-import {RepositoryDTO} from "../../src/service/response.types"
+import { RepositoryDTO } from "../../../webapp/src/service/response.types";
 
 describe('Translations', () => {
     let repository: RepositoryDTO = null
