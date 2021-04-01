@@ -1,3 +1,5 @@
+import java.time.Duration
+
 def E2E_DIR = "${project.projectDir}/e2e"
 
 task waitForRunningContainer(type: Task) {
@@ -21,6 +23,7 @@ task waitForRunningContainer(type: Task) {
             }
         }
     }
+    timeout = Duration.ofSeconds(120)
 }
 
 task installE2eDeps(type: Exec, group: "e2e") {

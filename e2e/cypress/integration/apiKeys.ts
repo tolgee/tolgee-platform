@@ -37,7 +37,7 @@ describe('Api keys', () => {
             cy.reload()
             cy.contains("API key:").should("be.visible")
             del(key.key);
-            cy.contains("Api key successfully deleted!").should("be.visible")
+            cy.contains("API key successfully deleted!").should("be.visible")
         });
     });
 
@@ -49,7 +49,7 @@ describe('Api keys', () => {
             cy.reload()
             cy.contains("API key:").should("be.visible")
             del(key.key);
-            cy.contains("Api key successfully deleted!").should("be.visible")
+            cy.contains("API key successfully deleted!").should("be.visible")
         });
     });
 });
