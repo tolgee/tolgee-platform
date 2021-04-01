@@ -1,11 +1,14 @@
 package io.tolgee.controllers
 
 import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.assertions.Assertions.assertThatThrownBy
 import io.tolgee.dtos.request.OrganizationDto
+import io.tolgee.dtos.request.OrganizationInviteUserDto
 import io.tolgee.dtos.request.SetOrganizationRoleDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.fixtures.*
 import io.tolgee.model.Organization
-import io.tolgee.model.OrganizationMemberRole
+import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -62,7 +65,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     open fun testGetAllUsers() {
         val users = dbPopulator.createUsersAndOrganizations()
         logAsUser(users[0].username!!, initialPassword)
-        val organizationId = users[1].organizationMemberRoles[0].organization!!.id
+        val organizationId = users[1].organizationRoles[0].organization!!.id
         performAuthGet("/v2/organizations/$organizationId/users").andIsOk
                 .also { println(it.andReturn().response.contentAsString) }
                 .andAssertThatJson.node("_embedded.usersInOrganization").also {
@@ -109,7 +112,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     @Test
     open fun testGetAllUsersNotPermitted() {
         val users = dbPopulator.createUsersAndOrganizations()
-        val organizationId = users[1].organizationMemberRoles[1].organization!!.id
+        val organizationId = users[1].organizationRoles[1].organization!!.id
         performAuthGet("/v2/organizations/$organizationId/users").andIsForbidden
     }
 
@@ -119,16 +122,14 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                 "/v2/organizations",
                 dummyDto
         ).andIsCreated.andPrettyPrint.andAssertThatJson.let {
-            it.node("name").isEqualTo("Test org");
-            it.node("addressPart").isEqualTo("test-org");
+            it.node("name").isEqualTo("Test org")
+            it.node("addressPart").isEqualTo("test-org")
             it.node("_links.self.href").isEqualTo("http://localhost/api/organizations/test-org")
             it.node("id").isNumber.satisfies {
                 organizationService.get(it.toLong()) is Organization
             }
         }
-
     }
-
 
     @Test
     open fun testCreateAddressPartValidation() {
@@ -178,10 +179,8 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     @Test
     open fun testCreateGeneratesAddressPart() {
         performAuthPost("/v2/organizations",
-                dummyDto.also { it.addressPart = null }
-        ).andIsCreated.let {
-            it.andAssertThatJson.node("addressPart").isEqualTo("test-org")
-        }
+            dummyDto.also { it.addressPart = null }
+    ).andIsCreated.andAssertThatJson.node("addressPart").isEqualTo("test-org")
     }
 
     @Test
@@ -248,11 +247,11 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     open fun testSetUserRole() {
         this.organizationService.create(dummyDto, userAccount!!).let { organization ->
             dbPopulator.createUser("superuser").let { createdUser ->
-                OrganizationMemberRole(
+                OrganizationRole(
                         user = createdUser,
                         organization = organization,
                         type = OrganizationRoleType.OWNER).let { createdMemberRole ->
-                    organizationMemberRoleRepository.save(createdMemberRole)
+                    organizationRoleRepository.save(createdMemberRole)
                     performAuthPut(
                             "/v2/organizations/${organization.id!!}/users/${createdUser.id}/set-role",
                             SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
@@ -267,16 +266,16 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     open fun testRemoveUser() {
         this.organizationService.create(dummyDto, userAccount!!).let { organization ->
             dbPopulator.createUser("superuser").let { createdUser ->
-                OrganizationMemberRole(
+                OrganizationRole(
                         user = createdUser,
                         organization = organization,
                         type = OrganizationRoleType.OWNER).let { createdMemberRole ->
-                    organizationMemberRoleRepository.save(createdMemberRole)
+                    organizationRoleRepository.save(createdMemberRole)
                     performAuthDelete(
                             "/v2/organizations/${organization.id!!}/users/${createdUser.id}",
                             SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
                     ).andIsOk
-                    organizationMemberRoleRepository.findByIdOrNull(createdMemberRole.id!!).let {
+                    organizationRoleRepository.findByIdOrNull(createdMemberRole.id!!).let {
                         assertThat(it).isNull()
                     }
                 }
@@ -288,16 +287,62 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     @Test
     open fun testGetAllRepositories() {
         val users = dbPopulator.createUsersAndOrganizations()
-        logAsUser(users[1].username!!, initialPassword);
-        users[1].organizationMemberRoles[0].organization.let { organization ->
+        logAsUser(users[1].username!!, initialPassword)
+        users[1].organizationRoles[0].organization.let { organization ->
             performAuthGet("/v2/organizations/${organization!!.addressPart}/repositories")
                     .andIsOk.andAssertThatJson.let {
-                        it.node("_embedded.repositories").let {
-                            it.isArray.hasSize(3)
-                            it.node("[1].name").isEqualTo("User 1's organization 1 repository 2")
-                            it.node("[1].organizationOwner.addressPart").isEqualTo("user-1-s-organization-1")
+                        it.node("_embedded.repositories").let { repositoriesNode ->
+                            repositoriesNode.isArray.hasSize(3)
+                            repositoriesNode.node("[1].name").isEqualTo("User 1's organization 1 repository 2")
+                            repositoriesNode.node("[1].organizationOwner.addressPart").isEqualTo("user-1-s-organization-1")
                         }
                     }
+        }
+    }
+
+    @Test
+    open fun testInviteUser() {
+        val helloUser = dbPopulator.createUser("hellouser")
+        logAsUser(helloUser.username!!, initialPassword)
+
+        this.organizationService.create(dummyDto, helloUser).let { organization ->
+            val body = OrganizationInviteUserDto(type = OrganizationRoleType.MEMBER)
+            performAuthPut("/v2/organizations/${organization.id}/invite", body).andPrettyPrint.andAssertThatJson.let {
+                it.node("code").isString.hasSize(50).satisfies {
+                    invitationService.getInvitation(it) //it throws on not found
+                }
+                it.node("type").isEqualTo("MEMBER")
+            }
+        }
+    }
+
+    @Test
+    open fun testAcceptInvitation() {
+        val helloUser = dbPopulator.createUser("hellouser")
+
+        this.organizationService.create(dummyDto, helloUser).let { organization ->
+            val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
+            val invitedUser = dbPopulator.createUser("invitedUser")
+            logAsUser(invitedUser.username!!, initialPassword)
+            performAuthGet("/api/invitation/accept/${invitation.code}").andIsOk
+            assertThatThrownBy { invitationService.getInvitation(invitation.code) }
+                    .isInstanceOf(BadRequestException::class.java)
+            organizationRoleService.isUserMemberOrOwner(invitedUser.id!!, organization.id!!).let {
+                assertThat(it).isTrue
+            }
+        }
+    }
+
+    @Test
+    open fun testDeleteInvitation() {
+        val helloUser = dbPopulator.createUser("hellouser")
+
+        this.organizationService.create(dummyDto, helloUser).let { organization ->
+            val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
+            logAsUser(helloUser.username!!, initialPassword)
+            performAuthDelete("/api/invitation/${invitation.id!!}", null).andIsOk
+            assertThatThrownBy { invitationService.getInvitation(invitation.code) }
+                    .isInstanceOf(BadRequestException::class.java)
         }
     }
 }

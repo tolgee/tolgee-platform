@@ -5,17 +5,18 @@ import io.tolgee.dtos.request.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.Invitation
 import io.tolgee.model.Organization
-import io.tolgee.model.OrganizationMemberRole
+import io.tolgee.model.OrganizationRole
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
-import io.tolgee.repository.OrganizationMemberRoleRepository
+import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.AuthenticationFacade
 import org.springframework.stereotype.Service
 
 @Service
-open class OrganizationMemberRoleService(
-        private val organizationMemberRoleRepository: OrganizationMemberRoleRepository,
+open class OrganizationRoleService(
+        private val organizationRoleRepository: OrganizationRoleRepository,
         private val authenticationFacade: AuthenticationFacade,
         private val userAccountService: UserAccountService
 ) {
@@ -25,10 +26,7 @@ open class OrganizationMemberRoleService(
     }
 
     open fun checkUserIsOwner(organizationId: Long) {
-        if (this.isUserOwner(authenticationFacade.userAccount.id!!, organizationId)) {
-            return
-        }
-        throw PermissionException()
+        this.checkUserIsOwner(authenticationFacade.userAccount.id!!, organizationId)
     }
 
     open fun checkUserIsMemberOrOwner(userId: Long, organizationId: Long) {
@@ -43,7 +41,7 @@ open class OrganizationMemberRoleService(
     }
 
     open fun isUserMemberOrOwner(userId: Long, organizationId: Long): Boolean {
-        val role = organizationMemberRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
+        val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
         if (role != null) {
             return true
         }
@@ -51,7 +49,7 @@ open class OrganizationMemberRoleService(
     }
 
     open fun isUserOwner(userId: Long, organizationId: Long): Boolean {
-        val role = organizationMemberRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
+        val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
         if (role?.type == OrganizationRoleType.OWNER) {
             return true
         }
@@ -59,17 +57,17 @@ open class OrganizationMemberRoleService(
     }
 
     open fun getType(userId: Long, organizationId: Long): OrganizationRoleType? {
-        organizationMemberRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
+        organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
                 ?.let { return it.type }
         return null
     }
 
     open fun grantRoleToUser(user: UserAccount, organization: Organization, organizationRoleType: OrganizationRoleType) {
-        OrganizationMemberRole(user = user, organization = organization, type = organizationRoleType)
+        OrganizationRole(user = user, organization = organization, type = organizationRoleType)
                 .let {
-                    organizationMemberRoleRepository.save(it)
+                    organizationRoleRepository.save(it)
                     organization.memberRoles.add(it)
-                    user.organizationMemberRoles.add(it)
+                    user.organizationRoles.add(it)
                 }
     }
 
@@ -78,13 +76,13 @@ open class OrganizationMemberRoleService(
     }
 
     open fun removeUser(organizationId: Long, userId: Long) {
-        organizationMemberRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
-            organizationMemberRoleRepository.delete(it)
+        organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
+            organizationRoleRepository.delete(it)
         }
     }
 
     open fun delete(id: Long) {
-        organizationMemberRoleRepository.deleteById(id)
+        organizationRoleRepository.deleteById(id)
     }
 
     open fun grantMemberRoleToUser(user: UserAccount, organization: Organization) {
@@ -97,9 +95,21 @@ open class OrganizationMemberRoleService(
 
     fun setMemberRole(organizationId: Long, userId: Long, dto: SetOrganizationRoleDto) {
         val user = userAccountService.get(userId).orElseThrow { NotFoundException() }!!
-        organizationMemberRoleRepository.findOneByUserIdAndOrganizationId(user.id!!, organizationId)?.let {
+        organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id!!, organizationId)?.let {
             it.type = dto.roleType
-            organizationMemberRoleRepository.save(it)
+            organizationRoleRepository.save(it)
         } ?: throw ValidationException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
+    }
+
+    fun createForInvitation(invitation: Invitation, type: OrganizationRoleType, organization: Organization): OrganizationRole {
+        return OrganizationRole(invitation = invitation, type = type, organization = organization).let {
+            organizationRoleRepository.save(it)
+        }
+    }
+
+    fun acceptInvitation(organizationRole: OrganizationRole, userAccount: UserAccount) {
+        organizationRole.invitation = null
+        organizationRole.user = userAccount
+        organizationRoleRepository.save(organizationRole)
     }
 }

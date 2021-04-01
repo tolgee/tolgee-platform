@@ -14,7 +14,7 @@ interface UserAccountRepository : JpaRepository<UserAccount?, Long?> {
     fun findByThirdPartyAuthTypeAndThirdPartyAuthId(thirdPartyAuthId: String, thirdPartyAuthType: String): Optional<UserAccount>
 
     @Query("""from UserAccount userAccount 
-        join fetch OrganizationMemberRole memberRole on memberRole.user = userAccount and memberRole.organization.id = :organizationId
+        join fetch OrganizationRole memberRole on memberRole.user = userAccount and memberRole.organization.id = :organizationId
         where (lower(userAccount.name)
         like lower(concat('%', :search,'%')) 
         or lower(userAccount.username) like lower(concat('%', :search,'%')))

@@ -31,7 +31,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
                            private val organizationService: OrganizationService,
                            private val organizationRepository: OrganizationRepository,
                            private val addressPartGenerator: AddressPartGenerator,
-                           private val organizationMemberRoleService: OrganizationMemberRoleService
+                           private val organizationRoleService: OrganizationRoleService
 ) {
     private var de: Language? = null
     private var en: Language? = null
@@ -55,8 +55,9 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     open fun createOrganization(name: String, userAccount: UserAccount): Organization {
         val addressPart = addressPartGenerator.generate(name, 20, 100) { true }
         val organization = Organization(name = name, addressPart = addressPart, basePermissions = Permission.RepositoryPermissionType.VIEW)
-        organizationMemberRoleService.grantOwnerRoleToUser(userAccount, organization)
-        return organizationRepository.save(organization)
+        return organizationRepository.save(organization).also {
+            organizationRoleService.grantOwnerRoleToUser(userAccount, organization)
+        }
     }
 
 
@@ -69,12 +70,12 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
             (1..listUserIdx).forEach { organzizationNum ->
                 val org = createOrganization("User $listUserIdx's organization $organzizationNum", user)
                 (0 until listUserIdx).forEach { userIdx ->
-                    organizationMemberRoleService.grantRoleToUser(users[userIdx], org, OrganizationRoleType.MEMBER)
+                    organizationRoleService.grantRoleToUser(users[userIdx], org, OrganizationRoleType.MEMBER)
 
                 }
                 (1..3).forEach { repositoryNum ->
-                    val name = "User $listUserIdx's organization $organzizationNum repository $repositoryNum";
-                    createRepositoryWithOrganization(name, org);
+                    val name = "User $listUserIdx's organization $organzizationNum repository $repositoryNum"
+                    createRepositoryWithOrganization(name, org)
                 }
             }
         }

@@ -4,7 +4,7 @@ import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Organization
-import io.tolgee.model.OrganizationMemberRole
+import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
 import io.tolgee.model.Repository
 import org.assertj.core.api.Assertions
@@ -20,7 +20,7 @@ class RepositoryRepositoryTest : AbstractTransactionalTestNGSpringContextTests()
     lateinit var repositoryRepository: RepositoryRepository
 
     @Autowired
-    lateinit var dbPopulatorReal: DbPopulatorReal;
+    lateinit var dbPopulatorReal: DbPopulatorReal
 
     @Test
     fun testRepositoryPreSaveHookBothSet() {
@@ -54,7 +54,7 @@ class RepositoryRepositoryTest : AbstractTransactionalTestNGSpringContextTests()
         assertThat(result[9][1]).isInstanceOf(Permission::class.java)
         assertThat(result[8][1]).isNull()
         assertThat(result[8][0]).isInstanceOf(Repository::class.java)
-        assertThat(result[8][3]).isInstanceOf(OrganizationMemberRole::class.java)
+        assertThat(result[8][3]).isInstanceOf(OrganizationRole::class.java)
     }
 
     @Test

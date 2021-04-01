@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.CreateRepositoryDTO
 import io.tolgee.dtos.request.EditRepositoryDTO
-import io.tolgee.dtos.request.InviteUserDto
+import io.tolgee.dtos.request.RepositoryInviteUserDto
 import io.tolgee.dtos.response.RepositoryDTO
 import io.tolgee.dtos.response.RepositoryDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.NotFoundException
@@ -76,9 +76,9 @@ open class RepositoryController @Autowired constructor(private val repositorySer
 
     @PostMapping("/invite")
     @Operation(summary = "Generates user invitation link for repository")
-    open fun inviteUser(@RequestBody invitation: InviteUserDto): String {
+    open fun inviteUser(@RequestBody @Valid invitation: RepositoryInviteUserDto): String {
         securityService.checkRepositoryPermission(invitation.repositoryId!!, Permission.RepositoryPermissionType.MANAGE)
-        val repository = repositoryService.get(invitation.repositoryId!!).orElseThrow { NotFoundException() }
-        return invitationService.create(repository, invitation.type)
+        val repository = repositoryService.get(invitation.repositoryId!!).orElseThrow { NotFoundException() }!!
+        return invitationService.create(repository, invitation.type!!)
     }
 }

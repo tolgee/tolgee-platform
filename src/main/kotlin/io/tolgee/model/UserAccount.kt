@@ -41,7 +41,7 @@ data class UserAccount(
     var resetPasswordCode: String? = null
 
     @OneToMany(mappedBy = "user")
-    var organizationMemberRoles: MutableList<OrganizationMemberRole> = mutableListOf()
+    var organizationRoles: MutableList<OrganizationRole> = mutableListOf()
 
     constructor(id: Long?,
                 username: String?,

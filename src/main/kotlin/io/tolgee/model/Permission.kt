@@ -19,16 +19,16 @@ data class Permission(
         var type: RepositoryPermissionType? = null
 ) : AuditModel() {
 
-    constructor(id: Long? = null, user: UserAccount?, invitation: Invitation? = null, repository: Repository?,
+    constructor(id: Long? = null, user: UserAccount? = null, invitation: Invitation? = null, repository: Repository?,
                 type: RepositoryPermissionType?) : this(id, user, invitation, type) {
-        this.repository = repository;
+        this.repository = repository
     }
 
     enum class RepositoryPermissionType(val power: Int, val availableScopes: Array<ApiScope>) {
-        VIEW(1, arrayOf<ApiScope>(ApiScope.TRANSLATIONS_VIEW)),
-        TRANSLATE(2, arrayOf<ApiScope>(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT)),
-        EDIT(3, arrayOf<ApiScope>(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT)),
-        MANAGE(4, arrayOf<ApiScope>(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT));
+        VIEW(1, arrayOf(ApiScope.TRANSLATIONS_VIEW)),
+        TRANSLATE(2, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT)),
+        EDIT(3, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT)),
+        MANAGE(4, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT));
     }
 
     @ManyToOne

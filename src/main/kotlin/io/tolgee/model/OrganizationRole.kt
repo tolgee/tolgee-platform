@@ -2,6 +2,7 @@ package io.tolgee.model
 
 import io.tolgee.model.enums.OrganizationRoleType
 import javax.persistence.*
+import javax.validation.constraints.NotNull
 
 @Entity
 @Table(uniqueConstraints = [
@@ -9,7 +10,7 @@ import javax.persistence.*
             columnNames = ["user_id", "organization_id"],
             name = "organization_member_role_user_organization_unique")
 ])
-data class OrganizationMemberRole(
+data class OrganizationRole(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long? = null,
@@ -21,7 +22,7 @@ data class OrganizationMemberRole(
         var type: OrganizationRoleType? = null
 ) : AuditModel() {
 
-    constructor(id: Long? = null, user: UserAccount?, invitation: Invitation? = null, organization: Organization?,
+    constructor(id: Long? = null, user: UserAccount? = null, invitation: Invitation? = null, organization: Organization?,
                 type: OrganizationRoleType?) : this(id, invitation, type) {
         this.organization = organization
         this.user = user
@@ -31,5 +32,6 @@ data class OrganizationMemberRole(
     var user: UserAccount? = null
 
     @ManyToOne
+    @NotNull
     var organization: Organization? = null
 }

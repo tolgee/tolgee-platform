@@ -33,7 +33,7 @@ open class Organization(
     ) : this(null, name, description, addressPart, basePermissions)
 
     @OneToMany(mappedBy = "organization")
-    open var memberRoles: MutableList<OrganizationMemberRole> = mutableListOf()
+    open var memberRoles: MutableList<OrganizationRole> = mutableListOf()
 
     @OneToMany(mappedBy = "organizationOwner")
     open var repositories: MutableList<Repository> = mutableListOf()

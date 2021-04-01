@@ -16,7 +16,7 @@ data class Invitation(
     var permission: Permission? = null
 
     @OneToOne(mappedBy = "invitation", cascade = [CascadeType.ALL])
-    var memberRole: OrganizationMemberRole? = null
+    var organizationRole: OrganizationRole? = null
 
     constructor(id: Long?, @NotBlank code: String?, permission: Permission?) : this(id = id, code = code) {
         this.permission = permission

@@ -22,7 +22,7 @@ open class OrganizationService(
         private val authenticationFacade: AuthenticationFacade,
         private val addressPartGenerator: AddressPartGenerator,
         private val repositoryService: RepositoryService,
-        private val organizationMemberRoleService: OrganizationMemberRoleService
+        private val organizationRoleService: OrganizationRoleService
 ) {
 
     @Transactional
@@ -48,7 +48,7 @@ open class OrganizationService(
                 basePermissions = createDto.basePermissions
         ).let {
             organizationRepository.save(it)
-            organizationMemberRoleService.grantOwnerRoleToUser(userAccount, it)
+            organizationRoleService.grantOwnerRoleToUser(userAccount, it)
             return it
         }
     }
@@ -93,7 +93,7 @@ open class OrganizationService(
         }
 
         organization.memberRoles.forEach {
-            organizationMemberRoleService.delete(it.id!!)
+            organizationRoleService.delete(it.id!!)
         }
 
         this.organizationRepository.delete(organization)

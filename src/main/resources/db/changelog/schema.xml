@@ -350,9 +350,9 @@
         </createTable>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-2">
-        <createTable tableName="organization_member_role">
+        <createTable tableName="organization_role">
             <column autoIncrement="true" name="id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="organization_member_rolePK"/>
+                <constraints nullable="false" primaryKey="true" primaryKeyName="organization_rolePK"/>
             </column>
             <column name="created_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
@@ -380,19 +380,19 @@
                              tableName="repository"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-6">
-        <addForeignKeyConstraint baseColumnNames="invitation_id" baseTableName="organization_member_role"
+        <addForeignKeyConstraint baseColumnNames="invitation_id" baseTableName="organization_role"
                                  constraintName="FK581ryvy4rn9ey7rx3lestkuix" deferrable="false"
                                  initiallyDeferred="false" referencedColumnNames="id" referencedTableName="invitation"
                                  validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-7">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="organization_member_role"
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="organization_role"
                                  constraintName="FK6p6nbxihffjckr4tayum4x67v" deferrable="false"
                                  initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
                                  validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-8">
-        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="organization_member_role"
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="organization_role"
                                  constraintName="FKqj2a0uojwh4p5rc9vfsu92fdk" deferrable="false"
                                  initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization"
                                  validate="true"/>
@@ -418,6 +418,6 @@
         <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="repository" constraintName="FKp2q5w860n1uai6oyel74udi83" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1617093013144-2">
-        <addUniqueConstraint columnNames="user_id, organization_id" constraintName="organization_member_role_user_organization_unique" tableName="organization_member_role"/>
+        <addUniqueConstraint columnNames="user_id, organization_id" constraintName="organization_role_user_organization_unique" tableName="organization_role"/>
     </changeSet>
 </databaseChangeLog>

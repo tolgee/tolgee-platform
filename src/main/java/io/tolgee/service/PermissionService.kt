@@ -1,6 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.Permission.Companion.builder
 import io.tolgee.model.Permission.RepositoryPermissionType
@@ -14,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 open class PermissionService @Autowired constructor(private val permissionRepository: PermissionRepository,
-                                                    private val organizationMemberRoleService: OrganizationMemberRoleService
+                                                    private val organizationRoleService: OrganizationRoleService
 ) {
 
     @set:Autowired
@@ -33,7 +34,7 @@ open class PermissionService @Autowired constructor(private val permissionReposi
         val repositoryPermission = permissionRepository.findOneByRepositoryIdAndUserId(repositoryId, userAccount.id)
 
         val organization = repository.organizationOwner
-        val organizationRole = organization?.let { organizationMemberRoleService.getType(userAccount.id!!, organization.id!!) }
+        val organizationRole = organization?.let { organizationRoleService.getType(userAccount.id!!, organization.id!!) }
         val organizationBasePermissionType = organization?.basePermissions
         return computeRepositoryPermissionType(organizationRole, organizationBasePermissionType, repositoryPermission?.type)
     }
@@ -89,5 +90,21 @@ open class PermissionService @Autowired constructor(private val permissionReposi
             }
         }
         return organizationBasePermissionType
+    }
+
+    open fun createForInvitation(invitation: Invitation, repository: Repository, type: RepositoryPermissionType): Permission {
+        return Permission(invitation = invitation, repository = repository, type = type).let {
+            permissionRepository.save(it)
+        }
+    }
+
+    open fun findOneByRepositoryIdAndUserId(repositoryId: Long, userId: Long): Permission? {
+        return permissionRepository.findOneByRepositoryIdAndUserId(repositoryId, userId)
+    }
+
+    open fun acceptInvitation(permission: Permission, userAccount: UserAccount) {
+        permission.invitation = null
+        permission.user = userAccount
+        permissionRepository.save(permission)
     }
 }

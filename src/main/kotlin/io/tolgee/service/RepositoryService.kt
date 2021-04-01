@@ -26,7 +26,7 @@ open class RepositoryService constructor(
         private val permissionService: PermissionService,
         private val apiKeyService: ApiKeyService,
         private val screenshotService: ScreenshotService,
-        private val organizationMemberRoleService: OrganizationMemberRoleService,
+        private val organizationRoleService: OrganizationRoleService,
         private val authenticationFacade: AuthenticationFacade
 
 ) {
@@ -52,7 +52,7 @@ open class RepositoryService constructor(
         val repository = Repository()
         repository.name = dto.name
         dto.organizationId?.also {
-            organizationMemberRoleService.checkUserIsOwner(it)
+            organizationRoleService.checkUserIsOwner(it)
             repository.organizationOwner = organizationService.get(it) ?: throw NotFoundException()
         } ?: let {
             repository.userOwner = authenticationFacade.userAccount
@@ -80,9 +80,9 @@ open class RepositoryService constructor(
                     val repository = result[0] as Repository
                     val permission = result[1] as Permission?
                     val organization = result[2] as Organization?
-                    val organizationMemberRole = result[3] as OrganizationMemberRole?
+                    val organizationRole = result[3] as OrganizationRole?
                     val permissionType = permissionService.computeRepositoryPermissionType(
-                            organizationMemberRole?.type,
+                            organizationRole?.type,
                             organization?.basePermissions,
                             permission?.type
                     )
