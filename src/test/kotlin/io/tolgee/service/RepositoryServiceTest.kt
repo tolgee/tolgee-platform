@@ -10,10 +10,12 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.transaction.annotation.Transactional
 import org.testng.annotations.Test
 
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 open class RepositoryServiceTest : AbstractSpringTest() {
 
     @Test
@@ -45,7 +47,7 @@ open class RepositoryServiceTest : AbstractSpringTest() {
     @Test
     @Transactional
     open fun testFindMultiple() {
-        val usersWithOrganizations = dbPopulator.createUsersAndOrganizations() //create some data
+        val usersWithOrganizations = dbPopulator.createUsersAndOrganizations(generateUniqueString()) //create some data
         val repo = dbPopulator.createBase("Hello world")
         repo.userOwner = userAccountService.get(repo.userOwner!!.id!!).get()
         val organization = usersWithOrganizations[0].organizationMemberRoles[0].organization
@@ -61,7 +63,7 @@ open class RepositoryServiceTest : AbstractSpringTest() {
 
     @Test
     open fun testFindMultiplePermissions() {
-        val usersWithOrganizations = dbPopulator.createUsersAndOrganizations() //create some data
+        val usersWithOrganizations = dbPopulator.createUsersAndOrganizations(generateUniqueString()) //create some data
         val repo = dbPopulator.createBase("Hello world")
         repo.userOwner = userAccountService.get(repo.userOwner!!.id!!).get()
         val organization = usersWithOrganizations[0].organizationMemberRoles[0].organization

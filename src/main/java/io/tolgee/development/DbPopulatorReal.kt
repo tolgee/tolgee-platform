@@ -60,9 +60,9 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
 
-    open fun createUsersAndOrganizations(): List<UserAccount> {
+    open fun createUsersAndOrganizations(username: String = "user"): List<UserAccount> {
         val users = (1..4).map {
-            createUser("user $it")
+            createUser("$username $it")
         }
 
         users.mapIndexed { listUserIdx, user ->
