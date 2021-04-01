@@ -11,9 +11,11 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Permission.RepositoryPermissionType
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.service.ApiKeyService
 import io.tolgee.service.RepositoryService
+import io.tolgee.service.SecurityService
 import org.springframework.web.bind.annotation.*
 import java.util.*
 import java.util.stream.Collectors
@@ -23,7 +25,11 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/api/apiKeys")
 @Tag(name = "API keys")
-class ApiKeyController(private val apiKeyService: ApiKeyService, private val repositoryService: RepositoryService) : PrivateController() {
+class ApiKeyController(private val apiKeyService: ApiKeyService,
+                       private val repositoryService: RepositoryService,
+                       private val authenticationFacade: AuthenticationFacade,
+                       private val securityService: SecurityService
+) {
     @Operation(summary = "Returns all user's api keys")
     @GetMapping(path = [""])
     fun allByUser(): Set<ApiKeyDTO> {

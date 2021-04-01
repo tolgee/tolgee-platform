@@ -15,8 +15,11 @@ import java.util.*
 
 @Service
 open class ApiKeyService @Autowired constructor(private val apiKeyRepository: ApiKeyRepository,
-                                                private val permissionService: PermissionService,
                                                 private val random: SecureRandom) {
+
+    @set:Autowired
+    lateinit var permissionService: PermissionService
+
     open fun createApiKey(userAccount: UserAccount?, scopes: Set<ApiScope>, repository: Repository?): ApiKeyDTO {
         val apiKey = ApiKey(
                 key = BigInteger(130, random).toString(32),

@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-open class SecurityService @Autowired constructor(private val authenticationFacade: AuthenticationFacade,
-                                                  private val apiKeyService: ApiKeyService) {
+open class SecurityService @Autowired constructor(private val authenticationFacade: AuthenticationFacade) {
+
+    @set:Autowired
+    lateinit var apiKeyService: ApiKeyService
 
     @set:Autowired
     lateinit var permissionService: PermissionService
