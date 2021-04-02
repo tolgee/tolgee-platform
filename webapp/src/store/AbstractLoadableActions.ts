@@ -13,6 +13,7 @@ export class LoadableDefinition<StateType extends StateWithLoadables<any>, Paylo
 type ThenType<ActionsType extends AbstractLoadableActions<any>, K extends string> = ActionsType['loadableDefinitions'][K]['then'] extends Function ? ActionsType['loadableDefinitions'][K]['then'] : () => void;
 
 export abstract class StateWithLoadables<ActionsType extends AbstractLoadableActions<any>> {
+    // @ts-ignore
     loadables: {
         [K in keyof ActionsType['loadableDefinitions']]: Loadable<Parameters<ActionsType['loadableDefinitions'][K]['then']>[1]['payload'],
             Parameters<ActionsType['loadableDefinitions'][K]['payloadProvider']>>

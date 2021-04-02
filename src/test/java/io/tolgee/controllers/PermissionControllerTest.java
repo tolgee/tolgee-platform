@@ -21,7 +21,7 @@ public class PermissionControllerTest extends SignedInControllerTest implements 
     @Test()
     void editPermissionTest() throws Exception {
         Repository base = dbPopulator.createBase(generateUniqueString());
-        UserAccount user = dbPopulator.createUser(generateUniqueString());
+        UserAccount user = dbPopulator.createUserIfNotExists(generateUniqueString());
         permissionService.grantFullAccessToRepo(user, base);
 
         entityManager.refresh(user);

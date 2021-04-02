@@ -24,7 +24,7 @@ class RepositoryRepositoryTest : AbstractTransactionalTestNGSpringContextTests()
 
     @Test
     fun testRepositoryPreSaveHookBothSet() {
-        val user = dbPopulatorReal.createUser("hello")
+        val user = dbPopulatorReal.createUserIfNotExists("hello")
         val repo = Repository(name = "Test", addressPart = "hello", userOwner = user)
         val organization = Organization(
                 name = "Test org",

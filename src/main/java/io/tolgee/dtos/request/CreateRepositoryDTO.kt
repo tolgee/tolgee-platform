@@ -14,7 +14,7 @@ data class CreateRepositoryDTO(
         var languages: Set<LanguageDTO>? = null,
 
         @field:Size(min = 3, max = 60)
-        @field:Pattern(regexp = "^[a-z0-9]*[a-z]+[a-z0-9]*$", message = "invalid_pattern")
+        @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
         var addressPart: String? = null,
 
         @Schema(description = "If not provided, repository will be created as users")

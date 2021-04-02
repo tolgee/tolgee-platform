@@ -41,10 +41,11 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
         //do not populate if db is not empty
         if (userAccountRepository.findByUsername(this.tolgeeProperties.authentication.initialUsername).isEmpty) {
             this.populate("Application")
+            this.createUsersAndOrganizations()
         }
     }
 
-    open fun createUser(username: String, password: String? = null): UserAccount {
+    open fun createUserIfNotExists(username: String, password: String? = null): UserAccount {
         return userAccountService.getByUserName(username).orElseGet {
             val signUpDto = SignUpDto(name = username, email = username, password = password
                     ?: initialPasswordManager.initialPassword)
@@ -63,7 +64,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
 
     open fun createUsersAndOrganizations(username: String = "user"): List<UserAccount> {
         val users = (1..4).map {
-            createUser("$username $it")
+            createUserIfNotExists("$username $it")
         }
 
         users.mapIndexed { listUserIdx, user ->
@@ -83,8 +84,8 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
         return users
     }
 
-    open fun createUser(username: String): UserAccount {
-        return createUser(username, null)
+    open fun createUserIfNotExists(username: String): UserAccount {
+        return createUserIfNotExists(username, null)
     }
 
     @Transactional
@@ -104,7 +105,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
 
     @Transactional
     open fun createBase(repositoryName: String?, username: String, password: String? = null): Repository {
-        val userAccount = createUser(username, password)
+        val userAccount = createUserIfNotExists(username, password)
         val repository = Repository()
         repository.name = repositoryName
         repository.userOwner = userAccount

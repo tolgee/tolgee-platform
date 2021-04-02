@@ -31,7 +31,7 @@ class InvitationControllerTest : SignedInControllerTest() {
         val repository = dbPopulator.createBase(generateUniqueString())
         val invitation = invitationService.create(repository, Permission.RepositoryPermissionType.EDIT)
 
-        val newUser = dbPopulator.createUser(generateUniqueString(), "pwd")
+        val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
         logAsUser(newUser.username!!, "pwd")
         performAuthGet("/api/invitation/accept/${invitation}").andExpect(status().isOk).andReturn()
 

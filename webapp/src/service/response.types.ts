@@ -1,3 +1,5 @@
+import {components} from "./apiSchema";
+
 export type TranslationsObject = { [abbreviation: string]: string };
 
 export type KeyTranslationsDTO = {
@@ -43,6 +45,8 @@ export interface RemoteConfigurationDTO {
     screenshotsUrl: string
     maxUploadFileSize: number
     needsEmailVerification: boolean
+    userCanCreateOrganizations: boolean
+    userCanCreateRepositories: boolean
 }
 
 export interface TokenDTO {
@@ -60,6 +64,11 @@ export enum RepositoryPermissionType {
     EDIT = 'EDIT',
     TRANSLATE = 'TRANSLATE',
     VIEW = 'VIEW'
+}
+
+export enum OrganizationRoleType {
+    MEMBER = 'MEMBER',
+    OWNER = 'OWNER',
 }
 
 export interface InvitationDTO {
@@ -106,4 +115,10 @@ export interface ScreenshotDTO {
     "id": 0,
     "filename": string,
     "createdAt": string
+}
+
+export interface HateoasPaginatedData<ItemDataType> {
+    page?: components["schemas"]["PageMetadata"],
+    _embedded?: { [key: string]: ItemDataType[] },
+    _links?: components["schemas"]["Links"]
 }

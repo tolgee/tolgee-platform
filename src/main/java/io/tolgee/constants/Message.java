@@ -4,6 +4,8 @@
 
 package io.tolgee.constants;
 
+import org.jetbrains.annotations.Nullable;
+
 public enum Message {
     API_KEY_NOT_FOUND(),
     BAD_CREDENTIALS(),
@@ -44,8 +46,8 @@ public enum Message {
     GENERAL_JWT_ERROR,
     CANNOT_FIND_SUITABLE_ADDRESS_PART,
     ADDRESS_PART_NOT_UNIQUE,
-    USER_IS_NOT_MEMBER_OF_ORGANIZATION
-    ;
+    USER_IS_NOT_MEMBER_OF_ORGANIZATION,
+    ORGANIZATION_HAS_NO_OTHER_OWNER;
 
     String code;
 

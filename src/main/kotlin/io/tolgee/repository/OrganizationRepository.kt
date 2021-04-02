@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository
 interface OrganizationRepository : JpaRepository<Organization, Long> {
     fun getOneByAddressPart(addressPart: String): Organization?
 
-    @Query("select o from Organization o join OrganizationRole r on r.user.id = :userId and r.organization = o")
-    fun findAllPermitted(userId: Long?, pageable: Pageable): Page<Organization>
+    @Query("from Organization o join fetch OrganizationRole r on r.user.id = :userId and r.organization = o")
+    fun findAllPermitted(userId: Long?, pageable: Pageable): Page<Array<Any>>
 
     fun countAllByAddressPart(addressPart: String): Long
 }

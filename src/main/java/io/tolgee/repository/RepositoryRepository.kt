@@ -19,4 +19,6 @@ interface RepositoryRepository : JpaRepository<io.tolgee.model.Repository, Long>
     fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<io.tolgee.model.Repository>
 
     fun findAllByOrganizationOwnerId(organizationOwnerId: Long, pageable: Pageable): Page<io.tolgee.model.Repository>
+
+    fun countAllByAddressPart(addressPart: String): Long
 }

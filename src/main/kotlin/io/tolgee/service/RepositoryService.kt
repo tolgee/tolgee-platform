@@ -9,6 +9,7 @@ import io.tolgee.model.*
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.RepositoryRepository
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.util.AddressPartGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -27,7 +28,8 @@ open class RepositoryService constructor(
         private val apiKeyService: ApiKeyService,
         private val screenshotService: ScreenshotService,
         private val organizationRoleService: OrganizationRoleService,
-        private val authenticationFacade: AuthenticationFacade
+        private val authenticationFacade: AuthenticationFacade,
+        private val addressPartGenerator: AddressPartGenerator
 
 ) {
     private var keyService: KeyService? = null
@@ -61,6 +63,11 @@ open class RepositoryService constructor(
         for (language in dto.languages!!) {
             languageService.createLanguage(language, repository)
         }
+
+        if (dto.addressPart == null) {
+            dto.addressPart = generateAddressPart(dto.name!!)
+        }
+
         entityManager.persist(repository)
         return repository
     }
@@ -115,5 +122,15 @@ open class RepositoryService constructor(
     @Autowired
     open fun setKeyService(keyService: KeyService?) {
         this.keyService = keyService
+    }
+
+    open fun validateAddressPartUniqueness(addressPart: String): Boolean {
+        return repositoryRepository.countAllByAddressPart(addressPart) < 1
+    }
+
+    open fun generateAddressPart(name: String): String {
+        return addressPartGenerator.generate(name, 3, 60) {
+            this.validateAddressPartUniqueness(it)
+        }
     }
 }

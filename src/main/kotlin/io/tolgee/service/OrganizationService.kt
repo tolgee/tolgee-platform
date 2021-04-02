@@ -6,6 +6,7 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.util.AddressPartGenerator
@@ -32,13 +33,13 @@ open class OrganizationService(
 
     @Transactional
     open fun create(createDto: OrganizationDto, userAccount: UserAccount): Organization {
-        if (createDto.addressPart != null && !validateUniqueAddressPart(createDto.addressPart!!)) {
+        if (createDto.addressPart != null && !validateAddressPartUniqueness(createDto.addressPart!!)) {
             throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
         }
 
         val addressPart = createDto.addressPart
                 ?: addressPartGenerator.generate(createDto.name!!, 3, 60) {
-                    this.validateUniqueAddressPart(it)
+                    this.validateAddressPartUniqueness(it)
                 }
 
         Organization(
@@ -53,7 +54,7 @@ open class OrganizationService(
         }
     }
 
-    open fun findPermittedPaged(pageable: Pageable): Page<Organization> {
+    open fun findPermittedPaged(pageable: Pageable): Page<Array<Any>> {
         return organizationRepository.findAllPermitted(authenticationFacade.userAccount.id, pageable)
     }
 
@@ -72,7 +73,7 @@ open class OrganizationService(
             editDto.addressPart = organization.addressPart
         }
 
-        if (editDto.addressPart != organization.addressPart && !validateUniqueAddressPart(editDto.addressPart!!)) {
+        if (editDto.addressPart != organization.addressPart && !validateAddressPartUniqueness(editDto.addressPart!!)) {
             throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
         }
 
@@ -103,7 +104,17 @@ open class OrganizationService(
      * Checks address part uniqueness
      * @return Returns true if valid
      */
-    open fun validateUniqueAddressPart(addressPart: String): Boolean {
+    open fun validateAddressPartUniqueness(addressPart: String): Boolean {
         return organizationRepository.countAllByAddressPart(addressPart) < 1
+    }
+
+    open fun isThereAnotherOwner(id: Long): Boolean {
+        return organizationRoleService.isAnotherOwnerInOrganization(id)
+    }
+
+    open fun generateAddressPart(name: String): String {
+        return addressPartGenerator.generate(name, 3, 60) {
+            this.validateAddressPartUniqueness(it)
+        }
     }
 }

@@ -23,7 +23,7 @@ abstract class SignedInControllerTest : AbstractControllerTest(), AuthRequestPer
     @BeforeMethod
     fun beforeEach() {
         //populate to create the user if not created
-        dbPopulator.autoPopulate()
+        dbPopulator.createUserIfNotExists(tolgeeProperties.authentication.initialUsername)
         if (userAccount == null) {
             logAsUser(tolgeeProperties.authentication.initialUsername, initialPassword)
         }

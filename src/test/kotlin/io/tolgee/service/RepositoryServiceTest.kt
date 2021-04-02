@@ -30,7 +30,7 @@ open class RepositoryServiceTest : AbstractSpringTest() {
     @Test
     open fun testFindAllEmpty() {
         dbPopulator.createUsersAndOrganizations() //create some data
-        val user = dbPopulator.createUser("user")
+        val user = dbPopulator.createUserIfNotExists("user")
         val repositories = repositoryService.findAllPermitted(user)
         assertThat(repositories).hasSize(0)
     }

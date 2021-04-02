@@ -11,7 +11,7 @@ import {InvitationService} from "./InvitationService";
 import React from "react";
 import {T} from "@tolgee/react";
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL + "/api/"
 
 interface ResetPasswordPostRequest {
     email: string,

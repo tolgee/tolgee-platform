@@ -18,6 +18,7 @@ import {RepositoriesRouter} from "./views/repositories/RepositoriesRouter";
 import {FullPageLoading} from "./common/FullPageLoading";
 import * as Sentry from '@sentry/browser';
 import {GlobalError} from "../error/GlobalError";
+import {OrganizationsRouter} from "./views/organizations/OrganizationsRouter";
 
 const LoginRouter = React.lazy(() => import(/* webpackChunkName: "login" */'./security/LoginRouter'));
 const SignUpView = React.lazy(() => import(/* webpackChunkName: "sign-up-view" */'./security/SignUpView'));
@@ -133,6 +134,9 @@ export class App extends React.Component {
                         </PrivateRoute>
                         <PrivateRoute path={`${LINKS.USER_API_KEYS.template}`}>
                             <ApiKeysView/>
+                        </PrivateRoute>
+                        <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
+                            <OrganizationsRouter/>
                         </PrivateRoute>
                     </Switch>
                     <SnackBar/>

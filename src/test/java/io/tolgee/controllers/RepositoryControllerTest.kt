@@ -37,7 +37,7 @@ class RepositoryControllerTest : SignedInControllerTest() {
 
     @Test
     fun createRepositoryOrganization() {
-        val userAccount = dbPopulator.createUser("testuser")
+        val userAccount = dbPopulator.createUserIfNotExists("testuser")
         val organization = dbPopulator.createOrganization("Test Organization", userAccount)
         logAsUser("testuser", initialPasswordManager.initialPassword)
         val request = CreateRepositoryDTO("aaa", setOf(languageDTO), organizationId = organization.id)

@@ -157,6 +157,8 @@ dependencies {
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-data-rest', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-hateoas', version: "${SPRING_DOC_VERSION}"
     implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.3-native-mt'
     kapt "org.hibernate:hibernate-jpamodelgen"
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.32'

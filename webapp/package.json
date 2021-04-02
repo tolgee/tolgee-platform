@@ -11,8 +11,8 @@
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^13.0.16",
-    "@tolgee/react": "^1.0.0-alpha.40",
-    "@tolgee/ui": "^1.0.0-alpha.40",
+    "@tolgee/react": "file:../../clients/js/packages/react",
+    "@tolgee/ui": "^1.0.0-alpha.42",
     "@types/jest": "^26.0.21",
     "@types/node": "^14.14.36",
     "@types/react": "^17.0.3",
@@ -39,6 +39,7 @@
     "tsyringe": "^4.5.0",
     "typeface-roboto": "1.1.13",
     "typescript": "^4.2.3",
+    "use-debounce": "^6.0.0",
     "web-vitals": "^1.1.1",
     "yup": "^0.32.9"
   },
@@ -66,6 +67,7 @@
     ]
   },
   "devDependencies": {
-    "craco": "^0.0.3"
+    "craco": "^0.0.3",
+    "webpack": "4.44.2"
   }
 }

@@ -40,7 +40,7 @@ class RepositoryPermissionFilterTest : SignedInControllerTest() {
 
     @Test
     fun returnsNotFoundWhenRepositoryNotExist() {
-        val user = dbPopulator.createUser("newUser")
+        val user = dbPopulator.createUserIfNotExists("newUser")
         performAuthGet("/api/repository/${user.id}/translations/en")
                 .andExpect(MockMvcResultMatchers.status().isNotFound).andReturn()
     }

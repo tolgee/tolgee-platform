@@ -13,12 +13,14 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.AuthenticationFacade
 import org.springframework.stereotype.Service
+import javax.persistence.EntityManager
 
 @Service
 open class OrganizationRoleService(
         private val organizationRoleRepository: OrganizationRoleRepository,
         private val authenticationFacade: AuthenticationFacade,
-        private val userAccountService: UserAccountService
+        private val userAccountService: UserAccountService,
+        private val entityManager: EntityManager
 ) {
 
     open fun checkUserIsOwner(userId: Long, organizationId: Long) {
@@ -67,7 +69,7 @@ open class OrganizationRoleService(
                 .let {
                     organizationRoleRepository.save(it)
                     organization.memberRoles.add(it)
-                    user.organizationRoles.add(it)
+                    entityManager.merge(user).organizationRoles.add(it)
                 }
     }
 
@@ -101,7 +103,8 @@ open class OrganizationRoleService(
         } ?: throw ValidationException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
     }
 
-    fun createForInvitation(invitation: Invitation, type: OrganizationRoleType, organization: Organization): OrganizationRole {
+    fun createForInvitation(invitation: Invitation, type: OrganizationRoleType, organization: Organization)
+            : OrganizationRole {
         return OrganizationRole(invitation = invitation, type = type, organization = organization).let {
             organizationRoleRepository.save(it)
         }
@@ -111,5 +114,14 @@ open class OrganizationRoleService(
         organizationRole.invitation = null
         organizationRole.user = userAccount
         organizationRoleRepository.save(organizationRole)
+    }
+
+    fun isAnotherOwnerInOrganization(id: Long): Boolean {
+        return this.organizationRoleRepository
+                .countAllByOrganizationIdAndTypeAndUserIdNot(
+                        id,
+                        OrganizationRoleType.OWNER,
+                        authenticationFacade.userAccount.id!!
+                ) > 0
     }
 }

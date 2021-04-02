@@ -13,6 +13,7 @@ import {LINKS} from "../../constants/links";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import PersonIcon from '@material-ui/icons/Person';
 import withStyles from "@material-ui/core/styles/withStyles";
+import {T} from "@tolgee/react";
 
 interface UserMenuProps {
     variant: "small" | "expanded"
@@ -75,9 +76,10 @@ export const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
                             anchorEl={anchorEl}
                             onClose={handleClose}
                 >
-                    <MenuItem onClick={() => globalActions.logout.dispatch()}>Logout</MenuItem>
-                    <MenuItem component={Link} to={LINKS.USER_SETTINGS.build()}>Settings</MenuItem>
-                    <MenuItem component={Link} to={LINKS.USER_API_KEYS.build()}>Api keys</MenuItem>
+                    <MenuItem onClick={() => globalActions.logout.dispatch()}><T noWrap>user_menu_logout</T></MenuItem>
+                    <MenuItem component={Link} to={LINKS.USER_SETTINGS.build()}><T noWrap>user_menu_user_settings</T></MenuItem>
+                    <MenuItem component={Link} to={LINKS.USER_API_KEYS.build()}><T noWrap>user_menu_api_keys</T></MenuItem>
+                    <MenuItem component={Link} to={LINKS.ORGANIZATIONS.build()}><T noWrap>user_menu_organizations</T></MenuItem>
                 </StyledMenu>
             </div>
             }

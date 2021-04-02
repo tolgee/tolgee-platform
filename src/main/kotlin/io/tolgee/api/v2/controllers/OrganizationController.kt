@@ -7,16 +7,16 @@ package io.tolgee.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModel
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModelAssembler
-import io.tolgee.api.v2.hateoas.organization.OrganizationModel
-import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
-import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModel
-import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
+import io.tolgee.api.v2.hateoas.organization.*
 import io.tolgee.api.v2.hateoas.repository.RepositoryModel
 import io.tolgee.api.v2.hateoas.repository.RepositoryModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.OrganizationDto
 import io.tolgee.dtos.request.OrganizationInviteUserDto
 import io.tolgee.dtos.request.SetOrganizationRoleDto
+import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.*
@@ -25,16 +25,19 @@ import io.tolgee.service.*
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.CollectionModel
+import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/api/organizations", "/v2/organizations"])
+@RequestMapping(value = ["/v2/organizations", "/api/organizations"])
 open class OrganizationController(
         private val organizationService: OrganizationService,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -42,8 +45,9 @@ open class OrganizationController(
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val pagedRepositoryResourcesAssembler: PagedResourcesAssembler<Repository>,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        private val userPagedResourcesAssembler: PagedResourcesAssembler<Array<Any>>,
+        private val arrayResourcesAssembler: PagedResourcesAssembler<Array<Any>>,
         private val organizationModelAssembler: OrganizationModelAssembler,
+        private val organizationWithCurrentUserRoleModelAssembler: OrganizationWithCurrentUserRoleModelAssembler,
         private val userAccountWithOrganizationRoleModelAssembler: UserAccountWithOrganizationRoleModelAssembler,
         private val tolgeeProperties: TolgeeProperties,
         private val authenticationFacade: AuthenticationFacade,
@@ -56,6 +60,7 @@ open class OrganizationController(
 ) {
 
     @PostMapping
+    @Transactional
     open fun create(@RequestBody @Valid dto: OrganizationDto): ResponseEntity<OrganizationModel> {
         if (!this.tolgeeProperties.authentication.userCanCreateOrganizations
                 && authenticationFacade.userAccount.role != UserAccount.Role.ADMIN) {
@@ -84,10 +89,10 @@ open class OrganizationController(
                 ?: throw NotFoundException()
     }
 
-    @GetMapping("")
-    open fun getAll(pageable: Pageable): PagedModel<OrganizationModel> {
+    @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
+    open fun getAll(pageable: Pageable): PagedModel<OrganizationWithCurrentUserRoleModel>? {
         val organizations = organizationService.findPermittedPaged(pageable)
-        return pagedResourcesAssembler.toModel(organizations, organizationModelAssembler)
+        return arrayResourcesAssembler.toModel(organizations, organizationWithCurrentUserRoleModelAssembler)
     }
 
     @PutMapping("/{id:[0-9]+}")
@@ -109,13 +114,19 @@ open class OrganizationController(
             @RequestParam("search") search: String?): PagedModel<UserAccountWithOrganizationRoleModel> {
         organizationRoleService.checkUserIsMemberOrOwner(id)
         val allInOrganization = userAccountService.getAllInOrganization(id, pageable, search)
-        return userPagedResourcesAssembler.toModel(allInOrganization, userAccountWithOrganizationRoleModelAssembler)
+        return arrayResourcesAssembler.toModel(allInOrganization, userAccountWithOrganizationRoleModelAssembler)
     }
 
     @PutMapping("/{id:[0-9]+}/leave")
     open fun leaveOrganization(@PathVariable("id") id: Long) {
-        organizationRoleService.checkUserIsMemberOrOwner(id)
-        organizationRoleService.leave(id)
+        organizationService.get(id)?.let {
+            if (!organizationService.isThereAnotherOwner(id)) {
+                throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
+            }
+            organizationRoleService.checkUserIsMemberOrOwner(id)
+            organizationRoleService.leave(id)
+
+        } ?: throw NotFoundException()
     }
 
     @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/set-role")

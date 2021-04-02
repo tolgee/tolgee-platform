@@ -20,7 +20,6 @@ Yup.setLocale({
 });
 
 export class Validation {
-
     static readonly USER_PASSWORD = Yup.string().min(8).max(100).required();
 
     static readonly USER_PASSWORD_WITH_REPEAT_NAKED = {
@@ -122,5 +121,12 @@ export class Validation {
             }))
         });
 
-
+    static readonly ORGANIZATION_CREATION = Yup.object().shape(
+        {
+            name: Yup.string().required().min(3).max(50),
+            addressPart: Yup.string().required().min(3).max(60).matches(/^[a-z0-9-]*[a-z]+[a-z0-9-]*$/, {
+                message: <T>address_part_validation_can_contain_just_lowercase_numbers_hyphens</T>
+            }),
+            description: Yup.string()
+        });
 }

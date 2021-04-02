@@ -41,7 +41,7 @@ public class UserControllerTest extends SignedInControllerTest implements ITest 
         standardValidation.onField("name");
 
         requestDTO = UserUpdateRequestDTO.builder().email("ben@ben.aa").password("aksjhd  dasdsa").name("a").build();
-        dbPopulator.createUser(requestDTO.getEmail());
+        dbPopulator.createUserIfNotExists(requestDTO.getEmail());
         mvcResult = performAuthPost("/api/user", requestDTO).andExpect(status().isBadRequest()).andReturn();
         assertThat(mvcResult).error().isCustomValidation().hasMessage("username_already_exists");
     }

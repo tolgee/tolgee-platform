@@ -57,6 +57,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                         it.isArray.hasSize(6)
                         it.node("[0].name").isEqualTo("User 1's organization 1")
                         it.node("[0].basePermission").isEqualTo("VIEW")
+                        it.node("[0].currentUserRole").isEqualTo("OWNER")
                     }
                 }
     }
@@ -179,8 +180,8 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     @Test
     open fun testCreateGeneratesAddressPart() {
         performAuthPost("/v2/organizations",
-            dummyDto.also { it.addressPart = null }
-    ).andIsCreated.andAssertThatJson.node("addressPart").isEqualTo("test-org")
+                dummyDto.also { it.addressPart = null }
+        ).andIsCreated.andAssertThatJson.node("addressPart").isEqualTo("test-org")
     }
 
     @Test
@@ -235,6 +236,8 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                 assertThat(it).isNotEmpty
             }
 
+            organizationRoleService.grantOwnerRoleToUser(dbPopulator.createUserIfNotExists("secondOwner"), it)
+
             performAuthPut("/v2/organizations/${it.id}/leave", null)
 
             organizationRepository.findAllPermitted(userAccount!!.id!!, PageRequest.of(0, 20)).content.let {
@@ -244,9 +247,23 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
+    open fun testLeaveOrganizationNoOtherOwner() {
+        this.organizationService.create(dummyDto, userAccount!!).let {
+            organizationRepository.findAllPermitted(userAccount!!.id!!, PageRequest.of(0, 20)).content.let {
+                assertThat(it).isNotEmpty
+            }
+
+            performAuthPut("/v2/organizations/${it.id}/leave", null)
+                    .andIsBadRequest
+                    .andAssertError
+                    .isCustomValidation.hasMessage("organization_has_no_other_owner")
+        }
+    }
+
+    @Test
     open fun testSetUserRole() {
         this.organizationService.create(dummyDto, userAccount!!).let { organization ->
-            dbPopulator.createUser("superuser").let { createdUser ->
+            dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
                 OrganizationRole(
                         user = createdUser,
                         organization = organization,
@@ -265,7 +282,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     @Test
     open fun testRemoveUser() {
         this.organizationService.create(dummyDto, userAccount!!).let { organization ->
-            dbPopulator.createUser("superuser").let { createdUser ->
+            dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
                 OrganizationRole(
                         user = createdUser,
                         organization = organization,
@@ -302,7 +319,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
 
     @Test
     open fun testInviteUser() {
-        val helloUser = dbPopulator.createUser("hellouser")
+        val helloUser = dbPopulator.createUserIfNotExists("hellouser")
         logAsUser(helloUser.username!!, initialPassword)
 
         this.organizationService.create(dummyDto, helloUser).let { organization ->
@@ -318,11 +335,11 @@ open class OrganizationControllerTest : SignedInControllerTest() {
 
     @Test
     open fun testAcceptInvitation() {
-        val helloUser = dbPopulator.createUser("hellouser")
+        val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
         this.organizationService.create(dummyDto, helloUser).let { organization ->
             val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
-            val invitedUser = dbPopulator.createUser("invitedUser")
+            val invitedUser = dbPopulator.createUserIfNotExists("invitedUser")
             logAsUser(invitedUser.username!!, initialPassword)
             performAuthGet("/api/invitation/accept/${invitation.code}").andIsOk
             assertThatThrownBy { invitationService.getInvitation(invitation.code) }
@@ -335,7 +352,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
 
     @Test
     open fun testDeleteInvitation() {
-        val helloUser = dbPopulator.createUser("hellouser")
+        val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
         this.organizationService.create(dummyDto, helloUser).let { organization ->
             val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)

@@ -96,6 +96,13 @@ export class LINKS {
     static USER_SETTINGS = Link.ofRoot('user');
 
     /**
+     * Organizations
+     */
+    static ORGANIZATIONS = Link.ofRoot('organizations');
+
+    static ORGANIZATIONS_ADD = Link.ofParent(LINKS.ORGANIZATIONS, 'add');
+
+    /**
      * Repository stuff
      */
 

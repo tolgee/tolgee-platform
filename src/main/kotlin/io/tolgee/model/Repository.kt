@@ -26,6 +26,7 @@ data class Repository(
         @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
         var addressPart: String? = null,
 ) : AuditModel() {
+
     @OrderBy("abbreviation")
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "repository")
     var languages: MutableSet<Language> = LinkedHashSet()
