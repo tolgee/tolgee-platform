@@ -17,5 +17,5 @@ open class OrganizationModel(
 
         @Schema(example = "This is a beautiful organization full of beautiful and clever people")
         val description: String?,
-        val basePermission: Permission.RepositoryPermissionType
+        val basePermissions: Permission.RepositoryPermissionType
 ) : RepresentationModel<OrganizationModel>()

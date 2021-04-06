@@ -38,9 +38,9 @@ export const parseError = (errorData): string[] => {
 };
 
 export const ResourceErrorComponent: FunctionComponent<{ error: ErrorResponseDTO | any }> = (props) => {
-    return <>{parseError(props.error).map(e => (
-        <Box ml={-2} mr={-2}>
-            <Alert key={new Date().toDateString()} severity="error">
+    return <>{props.error && parseError(props.error).map(e => (
+        <Box ml={-2} mr={-2} key={new Date().toDateString()}>
+            <Alert severity="error">
                 <T>{e}</T>
             </Alert>
         </Box>))}</>;

@@ -3,6 +3,7 @@ import {ErrorResponseDTO} from "../service/response.types";
 import {Link} from "../constants/links";
 import {AbstractActions} from "./AbstractActions";
 import {ReactNode} from "react";
+import {LanguagesState} from "./languages/LanguageActions";
 
 export class LoadableDefinition<StateType extends StateWithLoadables<any>, PayloadType, DispatchParams extends any[]> {
     constructor(public payloadProvider: (...params: DispatchParams) => Promise<any>, public then: StateModifier<StateType, PayloadType>,
@@ -147,6 +148,10 @@ export abstract class AbstractLoadableActions<StateType extends StateWithLoadabl
             state = {...state, loadables: {...state.loadables, [listLoadableName]: {...state.loadables![listLoadableName], data}}};
             return typeof then === "function" ? then(state, action) : state;
         });
+
+    useSelector<T>(selector: (state: StateType) => T): T {
+        throw new Error("useSelector not implemented. Implement it in you Actions class.")
+    }
 }
 
 export interface Loadable<DataType = any, DispatchParams = any> {

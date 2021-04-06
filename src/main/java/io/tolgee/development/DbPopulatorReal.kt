@@ -39,7 +39,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     @Transactional
     open fun autoPopulate() {
         //do not populate if db is not empty
-        if (userAccountRepository.findByUsername(this.tolgeeProperties.authentication.initialUsername).isEmpty) {
+        if (userAccountRepository.count() == 0L) {
             this.populate("Application")
             this.createUsersAndOrganizations()
         }

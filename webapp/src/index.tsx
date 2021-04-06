@@ -97,6 +97,12 @@ const theme = createMuiTheme({
                 borderRadius: 3,
             },
         },
+        MuiList: {
+            padding: {
+                paddingTop: 0,
+                paddingBottom: 0
+            }
+        }
     },
 });
 

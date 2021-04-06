@@ -14,7 +14,7 @@ import {useConfig} from "../../hooks/useConfig";
 import {Validation} from "../../constants/GlobalValidationSchema";
 import {BaseFormView} from "../layout/BaseFormView";
 import {Alert} from "../common/Alert";
-import {T} from '@tolgee/react';
+import {T, useTranslate} from '@tolgee/react';
 import {BaseView} from "../layout/BaseView";
 
 const actions = container.resolve(SignUpActions);
@@ -32,6 +32,7 @@ const SignUpView: FunctionComponent = () => {
     const state = useSelector((state: AppState) => state.signUp.loadables.signUp);
     const config = useConfig();
     const remoteConfig = useConfig();
+    const t = useTranslate()
 
     if (!remoteConfig.authentication || security.allowPrivate || !security.allowRegistration) {
         return (<Redirect to={LINKS.AFTER_LOGIN.build()}/>);
@@ -46,13 +47,12 @@ const SignUpView: FunctionComponent = () => {
                 :
                 <BaseFormView loading={state.loading} title={<T>sign_up_title</T>} lg={4} md={6} xs={12} saveActionLoadable={state}
                               initialValues={{password: '', passwordRepeat: '', name: '', email: ''} as SignUpType}
-                              validationSchema={Validation.SIGN_UP}
+                              validationSchema={Validation.SIGN_UP(t)}
                               submitButtons={
                                   <Box display="flex" justifyContent="flex-end">
                                       <Button color="primary" type="submit"><T>sign_up_submit_button</T></Button>
                                   </Box>
                               }
-                              //@ts-ignore
                               onSubmit={(v: SignUpType) => {
                                   actions.loadableActions.signUp.dispatch(v);
                               }}>

@@ -54,6 +54,8 @@ export interface TokenDTO {
 }
 
 export type ErrorResponseDTO = {
+    CUSTOM_VALIDATION?: { [key: string]: any[] };
+    STANDARD_VALIDATION?: { [key: string]: any[] };
     code: string;
     params: [];
     __handled: boolean;

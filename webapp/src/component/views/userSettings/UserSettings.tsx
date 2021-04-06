@@ -1,16 +1,19 @@
 import {default as React, FunctionComponent, useEffect} from 'react';
 import {container} from 'tsyringe';
-import {TextField} from '../common/form/fields/TextField';
-import {Validation} from "../../constants/GlobalValidationSchema";
-import {BaseFormView} from "../layout/BaseFormView";
-import {SetPasswordFields} from "../security/SetPasswordFields";
-import {UserActions} from "../../store/global/UserActions";
-import {UserUpdateDTO} from "../../service/response.types";
+
 import {useSelector} from "react-redux";
-import {AppState} from "../../store";
 import {useHistory} from 'react-router-dom';
-import {PossibleRepositoryPage} from "./PossibleRepositoryPage";
+
 import {T} from "@tolgee/react";
+import {AppState} from "../../../store";
+import {BaseFormView} from "../../layout/BaseFormView";
+import {Validation} from "../../../constants/GlobalValidationSchema";
+import {SetPasswordFields} from "../../security/SetPasswordFields";
+import {UserActions} from "../../../store/global/UserActions";
+import {UserUpdateDTO} from "../../../service/request.types";
+import {TextField} from "../../common/form/fields/TextField";
+import {BaseUserSettingsView} from "./BaseUserSettingsView";
+import {StandardForm} from "../../common/form/StandardForm";
 
 const actions = container.resolve(UserActions);
 const userActions = container.resolve(UserActions);
@@ -29,11 +32,15 @@ export const UserSettings: FunctionComponent = () => {
     const history = useHistory();
 
     return (
-        <PossibleRepositoryPage>
-            <BaseFormView title={<T>User settings title</T>} lg={6} md={8} xs={12} saveActionLoadable={saveLoadable} resourceLoadable={resourceLoadable}
-                          initialValues={{password: '', passwordRepeat: '', name: resourceLoadable.data!.name, email: resourceLoadable.data!.username}}
+        <BaseUserSettingsView title={<T>User settings title</T>} loading={resourceLoadable.loading}>
+            <StandardForm saveActionLoadable={saveLoadable}
+                          initialValues={{
+                              password: '',
+                              passwordRepeat: '',
+                              name: resourceLoadable.data!.name,
+                              email: resourceLoadable.data!.username
+                          } as UserUpdateDTO}
                           validationSchema={Validation.USER_SETTINGS}
-                          submitButtonInner={"Save"}
                           onCancel={() => history.goBack()}
                           onSubmit={(v: UserUpdateDTO) => {
                               if (!v.password) {
@@ -41,10 +48,11 @@ export const UserSettings: FunctionComponent = () => {
                               }
                               actions.loadableActions.updateUser.dispatch(v);
                           }}>
+
                 <TextField name="name" label={<T>User settings - Full name</T>}/>
                 <TextField name="email" label={<T>User settings - E-mail</T>}/>
                 <SetPasswordFields/>
-            </BaseFormView>
-        </PossibleRepositoryPage>
+            </StandardForm>
+        </BaseUserSettingsView>
     );
 };

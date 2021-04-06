@@ -12,10 +12,10 @@ import {T} from '@tolgee/react';
 
 export class ConfirmationDialogProps {
     open?: boolean = true;
-    message?: ReactNode = <T>Are you sure?</T>;
-    confirmButtonText?: ReactNode = <T>Confirm</T>;
-    cancelButtonText?: ReactNode = <T>Cancel</T>;
-    title?: ReactNode = <T>Confirmation</T>;
+    message?: ReactNode = <T>confirmation_dialog_message</T>;
+    confirmButtonText?: ReactNode = <T>confirmation_dialog_confirm</T>;
+    cancelButtonText?: ReactNode = <T>confirmation_dialog_cancel</T>;
+    title?: ReactNode = <T>confirmation_dialog_title</T>;
     hardModeText?: string | null = null;
     confirmButtonColor?: PropTypes.Color = "primary";
     cancelButtonColor?: PropTypes.Color = "default";

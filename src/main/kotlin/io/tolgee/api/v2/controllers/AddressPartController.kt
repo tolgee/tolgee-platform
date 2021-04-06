@@ -42,7 +42,7 @@ open class AddressPartController(
     open fun generateOrganizationAddressPart(
             @RequestBody @Valid dto: GenerateAddressPathDto
     ): String {
-        return """"${organizationService.generateAddressPart(dto.name!!)}""""
+        return """"${organizationService.generateAddressPart(dto.name!!, dto.oldAddressPart)}""""
     }
 
 
@@ -51,6 +51,6 @@ open class AddressPartController(
     open fun generateRepositoryAddressPart(
             @RequestBody @Valid dto: GenerateAddressPathDto
     ): String {
-        return """"${repositoryService.generateAddressPart(dto.name!!)}""""
+        return """"${repositoryService.generateAddressPart(dto.name!!, dto.oldAddressPart)}""""
     }
 }

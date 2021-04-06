@@ -63,6 +63,18 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
+    open fun testGetAllSort() {
+        val users = dbPopulator.createUsersAndOrganizations()
+
+        logAsUser(users[1].name!!, initialPassword)
+
+        performAuthGet("/api/organizations?size=100&sort=basePermissions,desc&sort=name,desc")
+                .andPrettyPrint
+                .andAssertThatJson
+                .node("_embedded.organizations").node("[0].name").isEqualTo("User 3's organization 3")
+    }
+
+    @Test
     open fun testGetAllUsers() {
         val users = dbPopulator.createUsersAndOrganizations()
         logAsUser(users[0].username!!, initialPassword)

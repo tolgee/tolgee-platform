@@ -3,6 +3,7 @@ import {container} from "tsyringe";
 import {SignUpService} from "../service/SignUpService";
 import React from "react";
 import {T} from "@tolgee/react";
+import {OrganizationService} from "../service/OrganizationService";
 
 Yup.setLocale({
     // use constant translation keys for messages without values
@@ -13,7 +14,7 @@ Yup.setLocale({
         },
     },
     string: {
-        email: () => <T>Validation - email is not valid</T>,
+        email: () => <T>validation_email_is_not_valid</T>,
         min: ({min}) => <T parameters={{min: min.toString()}}>Field should have at least n chars</T>,
         max: ({max}) => <T parameters={{max: max.toString()}}>Field should have maximum of n chars</T>,
     },
@@ -33,35 +34,23 @@ export class Validation {
         email: Yup.string().email().required()
     });
 
-    private static readonly createEmailValidation = (): (v) => Promise<boolean> => {
-        let timer: any = undefined;
-        const signUpServiceImpl = container.resolve(SignUpService);
-        let lastValue = undefined as any;
-        let lastResult = undefined as any;
-        return (v) => {
-            clearTimeout(timer);
-            return new Promise((resolve) => {
-                timer = setTimeout(
-                    () => {
-                        if (lastValue == v) {
-                            resolve(lastResult);
-                            return;
-                        }
-                        lastResult = v && Yup.string().email().validateSync(v) && signUpServiceImpl.validateEmail(v);
-                        resolve(lastResult);
-                        lastValue = v;
-                    },
-                    500,
-                );
-            });
-        }
-    };
+    private static readonly createEmailValidation = (): (v) => Promise<boolean> =>
+        debouncedValidation((v) => {
+                try {
+                    Yup.string().required().email().validateSync(v)
+                    return true
+                } catch (e) {
+                    return false
+                }
+            },
+            container.resolve(SignUpService).validateEmail)
 
-    static readonly SIGN_UP = Yup.object().shape({
+
+    static readonly SIGN_UP = (t: (key: string) => string) => Yup.object().shape({
         ...Validation.USER_PASSWORD_WITH_REPEAT_NAKED,
         name: Yup.string().required(),
         email: Yup.string().email().required()
-            .test('checkEmailUnique', 'User with this e-mail already exists.', Validation.createEmailValidation())
+            .test('checkEmailUnique', t('validation_email_not_unique'), Validation.createEmailValidation())
     });
 
     static readonly USER_SETTINGS = Yup.object().shape({
@@ -121,12 +110,65 @@ export class Validation {
             }))
         });
 
-    static readonly ORGANIZATION_CREATION = Yup.object().shape(
-        {
-            name: Yup.string().required().min(3).max(50),
-            addressPart: Yup.string().required().min(3).max(60).matches(/^[a-z0-9-]*[a-z]+[a-z0-9-]*$/, {
-                message: <T>address_part_validation_can_contain_just_lowercase_numbers_hyphens</T>
-            }),
-            description: Yup.string()
+    static readonly ORGANIZATION_CREATE_OR_EDIT = (t: (key: string) => string, addressPartInitialValue?: string) => {
+
+        const addressPartSyncValidation = Yup.string().required().min(3).max(60).matches(/^[a-z0-9-]*[a-z]+[a-z0-9-]*$/, {
+            message: <T>address_part_validation_can_contain_just_lowercase_numbers_hyphens</T>
         });
+
+        const addressPartUniqueDebouncedAsyncValidation = (v) => {
+
+            if (addressPartInitialValue === v) {
+                return true
+            }
+
+            return debouncedValidation(
+                (v) => {
+                    try {
+                        addressPartSyncValidation.validateSync(v)
+                        return true
+                    } catch (e) {
+                        return false
+                    }
+                },
+                (v) => container.resolve(OrganizationService).validateAddressPart(v)
+            )(v)
+        }
+
+        return Yup.object().shape(
+            {
+                name: Yup.string().required().min(3).max(50),
+                addressPart: addressPartSyncValidation.test("addressPartUnique", t('validation_address_part_not_unique'), addressPartUniqueDebouncedAsyncValidation),
+                description: Yup.string().nullable()
+            });
+    }
+}
+
+let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;
+
+/**
+ * @param syncValidationCallback sync validation callback - must return true to async validation be called
+ * @param asyncValidationCallback the async validation
+ * @return Promise<true> if valid
+ */
+const debouncedValidation = (syncValidationCallback: (v) => boolean, asyncValidationCallback: (v) => Promise<boolean>): (v) => Promise<boolean> => {
+    let lastValue = undefined as any;
+    let lastResult = undefined as any;
+    return (v) => {
+        clearTimeout(GLOBAL_VALIDATION_DEBOUNCE_TIMER);
+        return new Promise((resolve) => {
+            GLOBAL_VALIDATION_DEBOUNCE_TIMER = setTimeout(
+                () => {
+                    if (lastValue == v) {
+                        resolve(lastResult);
+                        return;
+                    }
+                    lastResult = syncValidationCallback(v) && asyncValidationCallback(v)
+                    resolve(lastResult);
+                    lastValue = v;
+                },
+                500,
+            );
+        });
+    }
 }

@@ -11,6 +11,6 @@ open class OrganizationWithCurrentUserRoleModel(
         val name: String,
         val addressPart: String,
         val description: String?,
-        val basePermission: Permission.RepositoryPermissionType,
+        val basePermissions: Permission.RepositoryPermissionType,
         val currentUserRole: OrganizationRoleType?
 ) : RepresentationModel<OrganizationWithCurrentUserRoleModel>()

@@ -60,6 +60,19 @@ class AddressPartControllerTest : SignedInControllerTest() {
     }
 
     @Test
+    fun testGenerateOrganizationAddressPartSameOld() {
+        organizationRepository.save(
+                Organization(
+                        name = "aaa",
+                        addressPart = "hello-world"
+                )
+        )
+
+        performAuthPost("/v2/address-part/generate-organization", GenerateAddressPathDto("Hello world", "hello-world"))
+                .andIsOk.andAssertThatJson.isEqualTo("hello-world")
+    }
+
+    @Test
     fun testGenerateRepositoryAddressPart() {
         repositoryRepository.save(
                 Repository(

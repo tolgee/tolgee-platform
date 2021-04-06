@@ -207,7 +207,7 @@ export interface components {
       name: string;
       addressPart: string;
       description?: string;
-      basePermission: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       _links?: components["schemas"]["Links"];
     };
     OrganizationDto: {

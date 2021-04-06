@@ -112,8 +112,11 @@ open class OrganizationService(
         return organizationRoleService.isAnotherOwnerInOrganization(id)
     }
 
-    open fun generateAddressPart(name: String): String {
+    open fun generateAddressPart(name: String, oldAddressPart: String?): String {
         return addressPartGenerator.generate(name, 3, 60) {
+            if (it == oldAddressPart) {
+                return@generate true
+            }
             this.validateAddressPartUniqueness(it)
         }
     }

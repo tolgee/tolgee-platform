@@ -5,8 +5,12 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import {ObjectSchema} from 'yup';
 import {useHistory} from 'react-router-dom';
 import {T} from "@tolgee/react";
+import {ResourceErrorComponent} from "./ResourceErrorComponent";
+import {BaseView} from "../../layout/BaseView";
+import {Loadable} from "../../../store/AbstractLoadableActions";
+import LoadingButton from "./LoadingButton";
 
-interface FormProps<T = { [key: string]: any }> {
+interface FormProps<T> {
     initialValues: T;
     onSubmit: (values: T, formikBag: FormikBag<any, any>) => void | Promise<any>;
     onCancel?: () => void;
@@ -15,38 +19,49 @@ interface FormProps<T = { [key: string]: any }> {
     submitButtons?: ReactNode
     customActions?: ReactNode
     submitButtonInner?: ReactNode
+    saveActionLoadable?: Loadable,
 }
 
-export const StandardForm: FunctionComponent<FormProps> = ({initialValues, validationSchema, ...props}) => {
+export const StandardForm: FunctionComponent<FormProps<any>> = ({initialValues, validationSchema, ...props}) => {
 
-    let history = useHistory();
+        let history = useHistory();
 
-    const onCancel = () => typeof props.onCancel === "function" ? props.onCancel() : history.goBack();
+        const onCancel = () => typeof props.onCancel === "function" ? props.onCancel() : history.goBack();
 
-    return (
-        // @ts-ignore
-        <Formik initialValues={initialValues} onSubmit={props.onSubmit} validationSchema={validationSchema} enableReinitialize>
-            {(formikProps: FormikProps<any>) => (
-                <Form>
-                    {typeof props.children === "function" && (!props.loading && props.children(formikProps)) || props.children}
-                    {props.loading && <CircularProgress size="small"/>}
-                    {(props.submitButtons || (
-                        <Box mt={2} display="flex" justifyContent="flex-end">
-                            <React.Fragment>
-                                {props.customActions && <Box flexGrow={1}>{props.customActions}</Box>}
-                                <Box display="flex" alignItems="flex-end" mb={2}>
-                                    <Button disabled={props.loading}
-                                            onClick={onCancel}><T>global_form_cancel</T></Button>
-                                    <Box ml={1}>
-                                        <Button color="primary" variant="contained" disabled={props.loading || !formikProps.isValid} type="submit">
-                                            {props.submitButtonInner || <T>global_form_save</T>}
-                                        </Button>
-                                    </Box>
-                                </Box>
-                            </React.Fragment>
-                        </Box>))}
-                </Form>
-            )}
-        </Formik>
-    );
-};
+        return (
+            <>
+                {props.saveActionLoadable && props.saveActionLoadable.error && <ResourceErrorComponent error={props.saveActionLoadable.error}/>}
+                {/*
+            @ts-ignore*/}
+                <Formik initialValues={initialValues} onSubmit={props.onSubmit} validationSchema={validationSchema} enableReinitialize>
+                    {(formikProps: FormikProps<any>) => {
+                        return (
+                            <Form>
+                                {typeof props.children === "function" && (!props.loading && props.children(formikProps)) || props.children}
+                                {props.loading && <CircularProgress size="small"/>}
+                                {(props.submitButtons || (
+                                    <Box display="flex" justifyContent="flex-end">
+                                        <React.Fragment>
+                                            {props.customActions && <Box flexGrow={1}>{props.customActions}</Box>}
+                                            <Box display="flex" alignItems="flex-end" mb={2}>
+                                                <Button disabled={props.loading}
+                                                        onClick={onCancel}><T>global_form_cancel</T></Button>
+                                                <Box ml={1}>
+                                                    <LoadingButton loading={props.saveActionLoadable?.loading}
+                                                                   color="primary"
+                                                                   variant="contained"
+                                                                   disabled={props.loading} type="submit">
+                                                        {props.submitButtonInner || <T>global_form_save</T>}
+                                                    </LoadingButton>
+                                                </Box>
+                                            </Box>
+                                        </React.Fragment>
+                                    </Box>))}
+                            </Form>
+                        )
+                    }}
+                </Formik>
+            </>
+        );
+    }
+;

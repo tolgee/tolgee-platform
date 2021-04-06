@@ -65,7 +65,7 @@ open class RepositoryService constructor(
         }
 
         if (dto.addressPart == null) {
-            dto.addressPart = generateAddressPart(dto.name!!)
+            dto.addressPart = generateAddressPart(dto.name!!, null)
         }
 
         entityManager.persist(repository)
@@ -128,8 +128,11 @@ open class RepositoryService constructor(
         return repositoryRepository.countAllByAddressPart(addressPart) < 1
     }
 
-    open fun generateAddressPart(name: String): String {
+    open fun generateAddressPart(name: String, oldAddressPart: String?): String {
         return addressPartGenerator.generate(name, 3, 60) {
+            if (oldAddressPart == it) {
+                return@generate true
+            }
             this.validateAddressPartUniqueness(it)
         }
     }

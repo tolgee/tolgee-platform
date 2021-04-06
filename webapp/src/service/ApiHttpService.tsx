@@ -30,7 +30,7 @@ export class ApiHttpService {
     constructor(private tokenService: TokenService, private messageService: MessageService) {
     }
 
-    apiUrl = process.env.REACT_APP_API_URL+"/api/"
+    apiUrl = process.env.REACT_APP_API_URL + "/api/"
 
     private static async getResObject(r: Response) {
         const textBody = await r.text();
@@ -54,7 +54,7 @@ export class ApiHttpService {
                 init.headers = {...init.headers, 'Authorization': 'Bearer ' + this.tokenService.getToken()};
             }
 
-            if(!this.apiUrl){
+            if (!this.apiUrl) {
                 throw Error("API URL not specified.")
             }
 
@@ -110,6 +110,10 @@ export class ApiHttpService {
         return ApiHttpService.getResObject(await (this.postNoJson(url, body)));
     }
 
+    async put<T>(url, body): Promise<T> {
+        return ApiHttpService.getResObject(await (this.putNoJson(url, body)));
+    }
+
     async delete<T>(url, body?: object): Promise<T> {
         return ApiHttpService.getResObject(await this.fetch(url, {
             method: 'DELETE',
@@ -131,6 +135,16 @@ export class ApiHttpService {
         return this.fetch(input, {
             body: JSON.stringify(body),
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+    }
+
+    putNoJson(input: RequestInfo, body: {}): Promise<Response> {
+        return this.fetch(input, {
+            body: JSON.stringify(body),
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },

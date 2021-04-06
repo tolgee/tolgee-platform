@@ -18,8 +18,12 @@ export class OrganizationActions extends AbstractLoadableActions<OrganizationSta
     }
 
     loadableDefinitions = {
-        listPermitted: this.createLoadableDefinition(() => this.organizationService.getPermitted()),
-        create: this.createLoadableDefinition(data => this.organizationService.createOrganization(data))
+        listPermitted: this.createLoadableDefinition(this.organizationService.getPermitted),
+        create: this.createLoadableDefinition(data => this.organizationService.createOrganization(data)),
+        get: this.createLoadableDefinition(this.organizationService.getOrganization),
+        edit: this.createLoadableDefinition(this.organizationService.editOrganization),
+        listAllUsers: this.createLoadableDefinition(this.organizationService.listAllUsers),
+        leave: this.createLoadableDefinition(this.organizationService.leave)
     };
 
     get prefix(): string {
