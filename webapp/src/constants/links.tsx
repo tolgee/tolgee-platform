@@ -111,7 +111,9 @@ export class LINKS {
 
     static ORGANIZATION_MEMBER_PRIVILEGES = Link.ofParent(LINKS.ORGANIZATION, 'member-privileges');
 
-    static ORGANIZATION_REPOSITORIES = Link.ofParent(LINKS.ORGANIZATION, 'members');
+    static ORGANIZATION_INVITATIONS = Link.ofParent(LINKS.ORGANIZATION, 'invitations');
+
+    static ORGANIZATION_REPOSITORIES = Link.ofParent(LINKS.ORGANIZATION, 'repositories');
 
     /**
      * Repository stuff

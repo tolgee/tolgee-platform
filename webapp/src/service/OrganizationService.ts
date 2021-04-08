@@ -12,7 +12,7 @@ export class OrganizationService {
     constructor(private v2http: ApiV2HttpService) {
     }
 
-    public getPermitted = async (query?: components["schemas"]["Pageable"]):
+    public listPermitted = async (query?: components["schemas"]["Pageable"] & components["schemas"]["OrganizationRequestParamsDto"]):
         Promise<components["schemas"]["PagedModelOrganizationWithCurrentUserRoleModel"]> => this.v2http.get(`organizations`, query);
 
     public createOrganization = (data: components["schemas"]["OrganizationDto"]) =>
@@ -28,9 +28,26 @@ export class OrganizationService {
     public editOrganization = (id, data: components["schemas"]["OrganizationDto"]) =>
         this.v2http.put(`organizations/${id}`, data) as Promise<components["schemas"]["OrganizationModel"]>
 
-    public listAllUsers = async (id: number, query?: components["schemas"]["Pageable"]):
+    public listUsers = async (id: number, query?: components["schemas"]["Pageable"]):
         Promise<components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"]> => this.v2http.get(`organizations/${id}/users`, query);
 
     public leave = async (id: number) => this.v2http.put(`organizations/${id}/leave`, {});
 
+    public setRole = async (organizationId: number, userId: number, roleType: string) =>
+        this.v2http.put(`organizations/${organizationId}/users/${userId}/set-role`, {roleType});
+
+    public invite = async (organizationId: number, roleType: string): Promise<components["schemas"]["OrganizationInvitationModel"]> =>
+        this.v2http.put(`organizations/${organizationId}/invite`, {roleType});
+
+    public listInvitations = async (organizationId: number):
+        Promise<components["schemas"]["CollectionModelOrganizationInvitationModel"]> => this.v2http.get(`organizations/${organizationId}/invitations`);
+
+    public listRepositories = async (organizationId: number, query?: components["schemas"]["Pageable"]):
+        Promise<components["schemas"]["CollectionModelOrganizationInvitationModel"]> => this.v2http.get(`organizations/${organizationId}/repositories`, query);
+
+    public removeUser = async (organizationId: number, userId: number) =>
+        this.v2http.delete(`organizations/${organizationId}/users/${userId}`, {});
+
+    public deleteOrganization = async (organizationId: number) =>
+        this.v2http.delete(`organizations/${organizationId}`, {});
 }

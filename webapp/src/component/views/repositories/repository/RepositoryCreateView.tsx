@@ -13,6 +13,10 @@ import {FieldArray} from "../../../common/form/fields/FieldArray";
 import {Validation} from "../../../../constants/GlobalValidationSchema";
 import {PossibleRepositoryPage} from "../../PossibleRepositoryPage";
 import {T} from "@tolgee/react";
+import {Box, FormControl, Grid, InputLabel, MenuItem, Select} from "@material-ui/core";
+import OwnerSelect from "./components/OwnerSelect";
+import {useConfig} from "../../../../hooks/useConfig";
+import {components} from "../../../../service/apiSchema";
 
 const actions = container.resolve(RepositoryActions);
 
@@ -20,17 +24,24 @@ const actions = container.resolve(RepositoryActions);
 type ValueType = {
     name: string,
     languages: Partial<LanguageDTO>[];
+    owner: number
 }
 
 export const RepositoryCreateView: FunctionComponent = () => {
-
     const loadable = useSelector((state: AppState) => state.repositories.loadables.createRepository);
 
-    const onSubmit = (values) => {
-        actions.loadableActions.createRepository.dispatch(values);
+    const config = useConfig()
+
+    const onSubmit = (values: ValueType) => {
+        const data = {...values} as components["schemas"]["CreateRepositoryDTO"] | any;
+        if(values.owner !== 0){
+            data.organizationId = values.owner
+        }
+        delete data.owner
+        actions.loadableActions.createRepository.dispatch(data);
     };
 
-    const initialValues: ValueType = {name: '', languages: [{abbreviation: "", name: ""}]};
+    const initialValues: ValueType = {name: '', languages: [{abbreviation: "", name: ""}], owner: 0};
 
     const [cancelled, setCancelled] = useState(false);
 
@@ -46,13 +57,22 @@ export const RepositoryCreateView: FunctionComponent = () => {
                           validationSchema={Validation.REPOSITORY_CREATION}
             >
                 <>
-                    <TextField label={<T>create_repository_name_label</T>} name="name" required={true}/>
+                    <Grid container spacing={2}>
+                        {config.authentication &&
+                        <Grid item lg={3} md={4} sm={12} xs={12}>
+                            <OwnerSelect/>
+                        </Grid>}
 
+                        <Grid item lg md sm xs>
+                            <TextField label={<T>create_repository_name_label</T>} name="name" required={true}/>
+                        </Grid>
+                    </Grid>
                     <FieldArray name="languages">
                         {(n) => (
                             <>
                                 <TextField fullWidth={false} label={<T>create_repository_language_name_label</T>} name={n('name')} required={true}/>
-                                <TextField fullWidth={false} label={<T>create_repository_language_abbreviation_label</T>} name={n('abbreviation')} required={true}/>
+                                <TextField fullWidth={false} label={<T>create_repository_language_abbreviation_label</T>} name={n('abbreviation')}
+                                           required={true}/>
                             </>
                         )}
                     </FieldArray>

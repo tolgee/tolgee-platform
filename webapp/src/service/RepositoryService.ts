@@ -3,6 +3,7 @@ import {ApiHttpService} from './ApiHttpService';
 import {PermissionDTO, PermissionEditDTO, RepositoryDTO} from './response.types';
 import {useRedirect} from "../hooks/useRedirect";
 import {LINKS} from "../constants/links";
+import {components} from "./apiSchema";
 
 const http = container.resolve(ApiHttpService);
 
@@ -16,7 +17,7 @@ export class RepositoryService {
     public editRepository = async (id: number, values: {}) => (await http.postNoJson(`repositories/edit`,
         {...values, repositoryId: id})).json();
 
-    public createRepository = async (values: Partial<RepositoryDTO>) => (await http.postNoJson(`repositories`, values)).json();
+    public createRepository = async (values: components["schemas"]["CreateRepositoryDTO"]) => (await http.postNoJson(`repositories`, values)).json();
 
     public deleteRepository = async (id) => {
         await http.delete('repositories/' + id);

@@ -3,13 +3,13 @@ import {ReactNode, useEffect} from "react";
 import {EmptyListMessage} from "../EmptyListMessage";
 import {SimplePaperList} from "./SimplePaperList";
 import {AbstractLoadableActions, StateWithLoadables} from "../../../store/AbstractLoadableActions";
-import {HateoasPaginatedData} from "../../../service/response.types";
+import {HateoasListData} from "../../../service/response.types";
 import {BoxLoading} from "../BoxLoading";
 
 type EmbeddedDataItem<ResourceActionsStateType extends StateWithLoadables<any>, LoadableName extends keyof ResourceActionsStateType["loadables"]> =
-    NonNullable<ResourceActionsStateType["loadables"][LoadableName]["data"]> extends HateoasPaginatedData<infer ItemDataType> ? ItemDataType : never
+    NonNullable<ResourceActionsStateType["loadables"][LoadableName]["data"]> extends HateoasListData<infer ItemDataType> ? ItemDataType : never
 
-export interface SimplePaginatedHateoasListProps<ItemDataType, ActionsType extends AbstractLoadableActions<ResourceActionsStateType>, ResourceActionsStateType extends StateWithLoadables<any>,
+export interface SimpleHateoasListProps<ItemDataType, ActionsType extends AbstractLoadableActions<ResourceActionsStateType>, ResourceActionsStateType extends StateWithLoadables<any>,
     LoadableName extends keyof ActionsType["loadableActions"]> {
     renderItem: (itemData: EmbeddedDataItem<ResourceActionsStateType, LoadableName>) => ReactNode
     actions: AbstractLoadableActions<ResourceActionsStateType>
@@ -18,28 +18,17 @@ export interface SimplePaginatedHateoasListProps<ItemDataType, ActionsType exten
     pageSize?: number
 }
 
-export function SimplePaginatedHateoasList<ItemDataType,
+export function SimpleHateoasList<ItemDataType,
     ActionsType extends AbstractLoadableActions<ResourceActionsStateType>,
     ResourceActionsStateType extends StateWithLoadables<any>,
     LoadableName extends keyof ActionsType["loadableActions"]>
-(props: SimplePaginatedHateoasListProps<ItemDataType, ActionsType, ResourceActionsStateType, LoadableName>) {
+(props: SimpleHateoasListProps<ItemDataType, ActionsType, ResourceActionsStateType, LoadableName>) {
     const loadable = props.actions.useSelector((state) => state.loadables[props.loadableName])
-
-    const loadPage = (page) => {
-        const dispatchParams = props.dispatchParams ? [...props.dispatchParams] : [];
-
-        const params = [...dispatchParams, {
-            page: page - 1,
-            size: props.pageSize || 100,
-            sort: ["name"]
-        }]
-
-        return (props.actions.loadableActions as any)[props.loadableName].dispatch(...params)
-    }
 
     useEffect(() => {
         if(!loadable.touched){
-            loadPage(1)
+            const dispatchParams = props.dispatchParams ? [...props.dispatchParams] : [];
+            return (props.actions.loadableActions as any)[props.loadableName].dispatch(dispatchParams)
         }
     }, [loadable.touched])
 
@@ -48,10 +37,6 @@ export function SimplePaginatedHateoasList<ItemDataType,
             (props.actions.loadableReset as any)[props.loadableName].dispatch()
         }
     }, [])
-
-    const onPageChange = (page) => {
-        loadPage(page)
-    }
 
     const data = loadable.data as any
     const embedded = data?._embedded;
@@ -70,15 +55,8 @@ export function SimplePaginatedHateoasList<ItemDataType,
 
     const key = Object.keys(embedded)[0];
 
-    const pageCount = Math.ceil(data.page?.totalElements!! / data.page?.size!!);
-
     return (
         <SimplePaperList
-            pagination={{
-                page: data.page?.number!! + 1,
-                onPageChange,
-                pageCount
-            }}
             data={embedded[key]}
             renderItem={props.renderItem}
         />

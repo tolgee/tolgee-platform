@@ -6,6 +6,8 @@ import {useSelector} from "react-redux";
 import {AppState} from "../index";
 import {ActionType} from "../Action";
 import {RepositoryActions} from "../repository/RepositoryActions";
+import React from 'react';
+import { T } from '@tolgee/react';
 
 export class LanguagesState extends StateWithLoadables<LanguageActions> {
 }
@@ -22,9 +24,9 @@ export class LanguageActions extends AbstractLoadableActions<LanguagesState> {
         return {
             list: this.createLoadableDefinition(this.service.getLanguages),
             language: this.createLoadableDefinition(this.service.get),
-            create: this.createLoadableDefinition(this.service.create, undefined, "Language created"),
-            edit: this.createLoadableDefinition(this.service.editLanguage, undefined, "Language saved"),
-            delete: this.createLoadableDefinition(this.service.delete, undefined, "Language deleted"),
+            create: this.createLoadableDefinition(this.service.create, undefined, <T>language_created_message</T>),
+            edit: this.createLoadableDefinition(this.service.editLanguage, undefined, <T>language_edited_message</T>),
+            delete: this.createLoadableDefinition(this.service.delete, undefined, <T>language_deleted_message</T>),
         };
     }
 

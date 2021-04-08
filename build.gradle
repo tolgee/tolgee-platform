@@ -48,6 +48,7 @@ apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 idea {
@@ -169,6 +170,7 @@ dependencies {
     compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
     implementation('org.reflections:reflections:0.9.12')
     implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.25.0'
+    compile("au.com.console:kotlin-jpa-specification-dsl:2.0.0")
 }
 
 test {

@@ -31,5 +31,9 @@ export const useOrganizationMenuItems = (): OrganizationMenuItem[] => {
             link: LINKS.ORGANIZATION_MEMBER_PRIVILEGES.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: organization.addressPart}),
             nameTranslationKey: "organization_menu_member_privileges"
         },
+        {
+            link: LINKS.ORGANIZATION_INVITATIONS.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: organization.addressPart}),
+            nameTranslationKey: "organization_menu_invitations"
+        },
     ].map(i => new OrganizationMenuItem(i.link, i.nameTranslationKey, match.url === i.link))
 }

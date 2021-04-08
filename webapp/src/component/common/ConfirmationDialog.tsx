@@ -48,6 +48,7 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
             <DialogTitle id="alert-dialog-title">{props.title}</DialogTitle>
             <form onSubmit={(e) => {
                 if (!disabled && props.onConfirm) {
+                    setInput("");
                     props.onConfirm();
                 }
                 e.preventDefault();
@@ -65,7 +66,10 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={props.onCancel} type="button" color={props.cancelButtonColor}>
+                    <Button onClick={() => {
+                        setInput("")
+                        props.onCancel && props.onCancel();
+                    }} type="button" color={props.cancelButtonColor}>
                         {props.cancelButtonText}
                     </Button>
                     <Button

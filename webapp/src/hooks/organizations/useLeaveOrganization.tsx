@@ -1,30 +1,21 @@
-import { T } from "@tolgee/react";
-import React, {useEffect} from "react";
+import {T} from "@tolgee/react";
+import React, {ReactNode} from "react";
 import {container} from "tsyringe";
 import {OrganizationActions} from "../../store/organization/OrganizationActions";
-import {useSuccessMessage} from "../useSuccessMessage";
 import {confirmation} from "../confirmation";
+import {ResourceErrorComponent} from "../../component/common/form/ResourceErrorComponent";
+import {Box} from "@material-ui/core";
 
 const actions = container.resolve(OrganizationActions);
 
 export const useLeaveOrganization = () => {
     const leaveLoadable = actions.useSelector(state => state.loadables.leave)
 
-    const successMessage = useSuccessMessage()
-
-    useEffect(() => {
-        if (leaveLoadable.loaded) {
-            actions.loadableReset.leave.dispatch()
-            actions.loadableReset.listPermitted.dispatch()
-            successMessage(<T>organization_left_message</T>)
-        }
-    }, [leaveLoadable.loaded])
-
-    return [leaveLoadable, (id) => {
+    return [(id) => {
         confirmation({
             message: <T>really_leave_organization_confirmation_message</T>,
             onConfirm: () => actions.loadableActions.leave.dispatch(id)
         })
 
-    }] as [typeof leaveLoadable, (id: number) => void]
+    }, <Box ml={2} mr={2}><ResourceErrorComponent error={leaveLoadable.error}/></Box>] as [(id: number) => void, ReactNode]
 }

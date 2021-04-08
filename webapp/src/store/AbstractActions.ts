@@ -29,7 +29,7 @@ export abstract class AbstractActions<StateType> {
     createPromiseAction<PayloadType, ErrorType = ErrorResponseDTO, DispatchParams extends any[] = []>(type: string,
                                                                    payloadProvider: (...params: DispatchParams) => Promise<PayloadType>,
                                                                    successMessage?: ReactNode,
-                                                                   redirectAfter?: Link):
+                                                                   redirectAfter?: string):
         PromiseAction<PayloadType, ErrorType, StateType, DispatchParams> {
         let promiseAction = new PromiseAction<PayloadType, ErrorType, StateType, DispatchParams>(`${this.prefix}_${type}`,
             payloadProvider,

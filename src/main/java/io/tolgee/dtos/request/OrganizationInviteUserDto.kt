@@ -5,5 +5,5 @@ import javax.validation.constraints.NotNull
 
 data class OrganizationInviteUserDto(
         @field:NotNull
-        var type: OrganizationRoleType = OrganizationRoleType.MEMBER
+        var roleType: OrganizationRoleType = OrganizationRoleType.MEMBER
 )

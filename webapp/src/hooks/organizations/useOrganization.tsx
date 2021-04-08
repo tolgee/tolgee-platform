@@ -13,11 +13,10 @@ export const useOrganization = () => {
     const resourceLoadable = actions.useSelector(state => state.loadables.get);
 
     useEffect(() => {
-        if (!resourceLoadable.loaded && !resourceLoadable.loading) {
+        if (!resourceLoadable.loading && resourceLoadable.data?.addressPart !== organizationAddressPart) {
             actions.loadableActions.get.dispatch(organizationAddressPart);
         }
-    }, [resourceLoadable.loaded])
-
+    }, [organizationAddressPart, resourceLoadable.loading])
 
     return resourceLoadable.data as NonNullable<typeof resourceLoadable.data>
 }

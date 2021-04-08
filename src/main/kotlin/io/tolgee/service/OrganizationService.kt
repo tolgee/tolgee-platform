@@ -2,6 +2,7 @@ package io.tolgee.service
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.OrganizationDto
+import io.tolgee.dtos.request.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
@@ -54,9 +55,13 @@ open class OrganizationService(
         }
     }
 
-    open fun findPermittedPaged(pageable: Pageable): Page<Array<Any>> {
+    open fun findPermittedPaged(pageable: Pageable, requestParamsDto: OrganizationRequestParamsDto): Page<Array<Any>> {
+        if (requestParamsDto.filterCurrentUserOwner) {
+            return organizationRepository.findAllPermittedUserRoleType(authenticationFacade.userAccount.id, pageable, OrganizationRoleType.OWNER)
+        }
         return organizationRepository.findAllPermitted(authenticationFacade.userAccount.id, pageable)
     }
+
 
     open fun get(id: Long): Organization? {
         return organizationRepository.findByIdOrNull(id)

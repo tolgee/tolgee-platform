@@ -109,7 +109,7 @@ open class InvitationService @Autowired constructor(
         invitationRepository.delete(invitation)
     }
 
-    fun getForOrganization(organization: Organization): List<Invitation> {
+    open fun getForOrganization(organization: Organization): List<Invitation> {
         return invitationRepository.getAllByOrganizationRoleOrganizationOrderByCreatedAt(organization)
     }
 }

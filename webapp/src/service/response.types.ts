@@ -1,4 +1,5 @@
 import {components} from "./apiSchema";
+import {SimpleHateoasList} from "../component/common/list/SimpleHateoasList";
 
 export type TranslationsObject = { [abbreviation: string]: string };
 
@@ -119,8 +120,11 @@ export interface ScreenshotDTO {
     "createdAt": string
 }
 
-export interface HateoasPaginatedData<ItemDataType> {
+export type HateoasPaginatedData<ItemDataType> = {
     page?: components["schemas"]["PageMetadata"],
+} & HateoasListData<ItemDataType>
+
+export type HateoasListData<ItemDataType> = {
     _embedded?: { [key: string]: ItemDataType[] },
     _links?: components["schemas"]["Links"]
 }

@@ -14,7 +14,7 @@ export class RepositoryPermissionActions extends AbstractLoadableActions<Reposit
             await this.repositoryService.deletePermission(id);
             return id;
         }),
-        edit: this.createLoadableDefinition((this.repositoryService.editPermission), (state) => {
+        edit: this.createLoadableDefinition((this.repositoryService.editPermission), (state): RepositoryPermissionState => {
             return this.resetLoadable(state, "list");
         }, "Permission successfully edited!")
     };

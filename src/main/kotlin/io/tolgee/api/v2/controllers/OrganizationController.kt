@@ -14,9 +14,9 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.OrganizationDto
 import io.tolgee.dtos.request.OrganizationInviteUserDto
+import io.tolgee.dtos.request.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.*
@@ -28,7 +28,6 @@ import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
@@ -90,8 +89,8 @@ open class OrganizationController(
     }
 
     @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
-    open fun getAll(pageable: Pageable): PagedModel<OrganizationWithCurrentUserRoleModel>? {
-        val organizations = organizationService.findPermittedPaged(pageable)
+    open fun getAll(pageable: Pageable, params: OrganizationRequestParamsDto): PagedModel<OrganizationWithCurrentUserRoleModel>? {
+        val organizations = organizationService.findPermittedPaged(pageable, params)
         return arrayResourcesAssembler.toModel(organizations, organizationWithCurrentUserRoleModelAssembler)
     }
 
@@ -182,23 +181,24 @@ open class OrganizationController(
         organizationRoleService.checkUserIsOwner(id)
 
         return organizationService.get(id)?.let { organization ->
-            invitationService.create(organization, invitation.type).let {
+            invitationService.create(organization, invitation.roleType).let {
                 organizationInvitationModelAssembler.toModel(it)
             }
         } ?: throw NotFoundException()
     }
 
-    private fun Organization.toModel(): OrganizationModel {
-        return this@OrganizationController.organizationModelAssembler.toModel(this)
-    }
-
     @GetMapping("/{organizationId}/invitations")
-    @Operation(summary = "Prints all invitations to organization")
-    fun getInvitations(@PathVariable("organizationId") id: Long): CollectionModel<OrganizationInvitationModel> {
+    @Operation(summary = "Returns all invitations to organization")
+    open fun getInvitations(@PathVariable("organizationId") id: Long):
+            CollectionModel<OrganizationInvitationModel> {
         val organization = organizationService.get(id) ?: throw NotFoundException()
         organizationRoleService.checkUserIsOwner(id)
         return invitationService.getForOrganization(organization).let {
             organizationInvitationModelAssembler.toCollectionModel(it)
         }
+    }
+
+    private fun Organization.toModel(): OrganizationModel {
+        return this@OrganizationController.organizationModelAssembler.toModel(this)
     }
 }

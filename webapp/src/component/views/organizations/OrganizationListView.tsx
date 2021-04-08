@@ -13,7 +13,6 @@ import Box from "@material-ui/core/Box";
 import {BaseUserSettingsView} from "../userSettings/BaseUserSettingsView";
 import {SimpleListItem} from "../../common/list/SimpleListItem";
 import {Button} from "@material-ui/core";
-import {ResourceErrorComponent} from "../../common/form/ResourceErrorComponent";
 import {useLeaveOrganization} from "../../../hooks/organizations/useLeaveOrganization";
 
 const actions = container.resolve(OrganizationActions);
@@ -22,11 +21,11 @@ export const OrganizationsListView = () => {
 
     const t = useTranslate();
 
-    const [leaveLoadable, leaveOrganization] = useLeaveOrganization()
+    const [leaveOrganization, leaveOrganizationError] = useLeaveOrganization()
 
     return (
         <BaseUserSettingsView title={t("organizations_title")} containerMaxWidth="lg">
-            <ResourceErrorComponent error={leaveLoadable.error}/>
+            {leaveOrganizationError}
             <SimplePaginatedHateoasList
                 actions={actions}
                 loadableName={"listPermitted"}

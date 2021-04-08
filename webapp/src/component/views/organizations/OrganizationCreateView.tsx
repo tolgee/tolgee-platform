@@ -12,7 +12,7 @@ import {components} from "../../../service/apiSchema";
 import {RepositoryPermissionType} from "../../../service/response.types";
 import {BaseFormView} from "../../layout/BaseFormView";
 import {Validation} from "../../../constants/GlobalValidationSchema";
-import {OrganizationFields} from "./OrganizationFields";
+import {OrganizationFields} from "./components/OrganizationFields";
 
 const actions = container.resolve(OrganizationActions);
 

@@ -56,7 +56,24 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                     it.node("_embedded.organizations").let {
                         it.isArray.hasSize(6)
                         it.node("[0].name").isEqualTo("User 1's organization 1")
-                        it.node("[0].basePermission").isEqualTo("VIEW")
+                        it.node("[0].basePermissions").isEqualTo("VIEW")
+                        it.node("[0].currentUserRole").isEqualTo("OWNER")
+                    }
+                }
+    }
+
+    @Test
+    open fun testGetAllFilterOwned() {
+        val users = dbPopulator.createUsersAndOrganizations()
+
+        logAsUser(users[1].name!!, initialPassword)
+
+        performAuthGet("/api/organizations?size=100&filterCurrentUserOwner=true")
+                .andPrettyPrint.andAssertThatJson.let {
+                    it.node("_embedded.organizations").let {
+                        it.isArray.hasSize(1)
+                        it.node("[0].name").isEqualTo("User 1's organization 1")
+                        it.node("[0].basePermissions").isEqualTo("VIEW")
                         it.node("[0].currentUserRole").isEqualTo("OWNER")
                     }
                 }
@@ -330,12 +347,30 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
+    open fun testGetAllInvitations() {
+        val helloUser = dbPopulator.createUserIfNotExists("hellouser")
+
+        this.organizationService.create(dummyDto, helloUser).let { organization ->
+            val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
+            logAsUser("hellouser", initialPassword)
+            performAuthGet("/v2/organizations/${organization.id}/invitations")
+                    .andIsOk.andAssertThatJson.let {
+                        it.node("_embedded.organizationInvitations").let { repositoriesNode ->
+                            repositoriesNode.isArray.hasSize(1)
+                            repositoriesNode.node("[0].id").isEqualTo(invitation.id)
+                        }
+                    }
+        }
+    }
+
+
+    @Test
     open fun testInviteUser() {
         val helloUser = dbPopulator.createUserIfNotExists("hellouser")
         logAsUser(helloUser.username!!, initialPassword)
 
         this.organizationService.create(dummyDto, helloUser).let { organization ->
-            val body = OrganizationInviteUserDto(type = OrganizationRoleType.MEMBER)
+            val body = OrganizationInviteUserDto(roleType = OrganizationRoleType.MEMBER)
             performAuthPut("/v2/organizations/${organization.id}/invite", body).andPrettyPrint.andAssertThatJson.let {
                 it.node("code").isString.hasSize(50).satisfies {
                     invitationService.getInvitation(it) //it throws on not found

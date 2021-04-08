@@ -3,7 +3,7 @@ import thunkMiddleware from 'redux-thunk';
 import {composeWithDevTools} from 'redux-devtools-extension';
 import promise from 'redux-promise-middleware';
 import {container} from 'tsyringe';
-import {ImplicitReducer as ir} from './ImplicitReducer';
+import {ImplicitReducer} from './ImplicitReducer';
 import {RepositoryActions} from './repository/RepositoryActions';
 import {LanguageActions} from './languages/LanguageActions';
 import {GlobalActions} from './global/GlobalActions';
@@ -22,20 +22,20 @@ import {UserActions} from "./global/UserActions";
 import {ScreenshotActions} from "./repository/ScreenshotActions";
 import {OrganizationActions} from "./organization/OrganizationActions";
 
-const implicitReducer = container.resolve(ir);
-const repositoryActionsIns = container.resolve(RepositoryActions);
-const languageActionsIns = container.resolve(LanguageActions);
-const globalActionsIns = container.resolve(GlobalActions);
-const errorActionsIns = container.resolve(ErrorActions);
-const redirectionActionsIns = container.resolve(RedirectionActions);
+const implicitReducer = container.resolve(ImplicitReducer);
+const repositoryActions = container.resolve(RepositoryActions);
+const languageActions = container.resolve(LanguageActions);
+const globalActions = container.resolve(GlobalActions);
+const errorActions = container.resolve(ErrorActions);
+const redirectionActions = container.resolve(RedirectionActions);
 
 const appReducer = (appState, action) => combineReducers({
     translations: implicitReducer.create(container.resolve(TranslationActions), appState),
-    global: implicitReducer.create(globalActionsIns),
-    repositories: implicitReducer.create(repositoryActionsIns),
-    languages: implicitReducer.create(languageActionsIns),
-    error: implicitReducer.create(errorActionsIns),
-    redirection: implicitReducer.create(redirectionActionsIns),
+    global: implicitReducer.create(globalActions),
+    repositories: implicitReducer.create(repositoryActions),
+    languages: implicitReducer.create(languageActions),
+    error: implicitReducer.create(errorActions),
+    redirection: implicitReducer.create(redirectionActions),
     message: implicitReducer.create(container.resolve(MessageActions)),
     signUp: implicitReducer.create(container.resolve(SignUpActions)),
     repositoryInvitation: implicitReducer.create(container.resolve(RepositoryInvitationActions)),
@@ -51,7 +51,7 @@ const rootReducer = (state, action): ReturnType<typeof appReducer> => {
     /**
      * reset state on logout
      */
-    if (action.type === globalActionsIns.logout.type) {
+    if (action.type === globalActions.logout.type) {
         state = undefined;
         //remove after login link to avoid buggy behaviour
         container.resolve(SecurityService).setLogoutMark();
@@ -70,7 +70,7 @@ const successMessageMiddleware = store => next => action => {
 
 const redirectAfterMiddleware = store => next => action => {
     if (action.meta && action.meta.redirectAfter && action.type.indexOf("_PENDING") <= -1 && action.type.indexOf("_REJECTED") <= -1) {
-        redirectionActionsIns.redirect.dispatch(action.meta.redirectAfter);
+        redirectionActions.redirect.dispatch(action.meta.redirectAfter);
     }
 
     next(action);

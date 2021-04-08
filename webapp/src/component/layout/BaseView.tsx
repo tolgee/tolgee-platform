@@ -7,13 +7,13 @@ import grey from '@material-ui/core/colors/grey';
 
 export interface BaseViewProps {
     loading?: boolean;
-    title: ReactNode;
+    title?: ReactNode;
     children: (() => ReactNode) | ReactNode;
     xs?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
     sm?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
     md?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
     lg?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12,
-    headerChildren?: ReactNode;
+    customHeader?: ReactNode;
     hideChildrenOnLoading?: boolean;
     containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
 }
@@ -33,8 +33,7 @@ export const BaseView = (props: BaseViewProps) => {
                     <Container maxWidth={props.containerMaxWidth || false}>
                         <Grid container justify="center" alignItems="center">
                             <Grid item xs={props.xs || 12} md={props.md || 12} lg={props.lg || 12} sm={props.sm || 12}>
-                                <Typography variant="h5">{props.title}</Typography>
-                                {props.headerChildren && <Box mt={3}>{props.headerChildren}</Box>}
+                                {props.customHeader || <Typography variant="h5">{props.title}</Typography>}
                             </Grid>
                         </Grid>
                     </Container>
@@ -53,7 +52,7 @@ export const BaseView = (props: BaseViewProps) => {
                                         {typeof props.children === 'function' ? props.children() : props.children}
                                     </Box>
                                     :
-                                    <BoxLoading/>
+                                    <></>
                                 }
                             </Grid>
                         </Grid>

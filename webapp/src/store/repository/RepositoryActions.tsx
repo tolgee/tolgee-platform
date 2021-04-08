@@ -30,9 +30,9 @@ export class RepositoryActions extends AbstractLoadableActions<RepositoriesState
 
     loadableDefinitions = {
         editRepository: this.createLoadableDefinition((id, values) => this.service.editRepository(id, values), undefined,
-            <T>repository_successfully_edited_message</T>, LINKS.REPOSITORIES),
-        createRepository: this.createLoadableDefinition((values) => this.service.createRepository(values),
-            undefined, <T>repository_created_message</T>, LINKS.REPOSITORIES),
+            <T>repository_successfully_edited_message</T>, LINKS.REPOSITORIES.build()),
+        createRepository: this.createLoadableDefinition(this.service.createRepository,
+            undefined, <T>repository_created_message</T>, LINKS.REPOSITORIES.build()),
         repository: this.createLoadableDefinition(this.service.loadRepository),
         deleteRepository: this.createLoadableDefinition(this.service.deleteRepository, (state): RepositoriesState =>
             (

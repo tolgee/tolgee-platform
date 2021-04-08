@@ -5,7 +5,7 @@ import {FunctionComponent, PropsWithChildren} from "react";
 import {Box, Grid, Typography} from "@material-ui/core";
 import {useUser} from "../../../hooks/useUser";
 import {UserSettingsMenu} from "./UserSettingsMenu";
-
+import UserOrganizationSettingsSubtitleLink from "../organizations/components/UserOrganizationSettingsSubtitleLink";
 
 export const BaseUserSettingsView: FunctionComponent<BaseViewProps> = ({children, title, ...otherProps}: PropsWithChildren<BaseViewProps>) => {
 
@@ -13,7 +13,14 @@ export const BaseUserSettingsView: FunctionComponent<BaseViewProps> = ({children
 
     return (
         <DashboardPage>
-            <BaseView {...otherProps} title={user?.name} containerMaxWidth="md">
+            <BaseView {...otherProps} containerMaxWidth="md"
+                      customHeader={
+                          <>
+                              <Typography variant="h5">{user?.name}</Typography>
+                              <UserOrganizationSettingsSubtitleLink isUser={true}/>
+                          </>
+                      }
+            >
                 <Grid container>
                     <Grid item lg={3} md={4}>
                         <Box mr={4} mb={4}>

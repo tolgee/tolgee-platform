@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import javax.persistence.EntityManager
 
+@Transactional
 @Service
 open class RepositoryService constructor(
         private val repositoryRepository: RepositoryRepository,
@@ -56,16 +57,17 @@ open class RepositoryService constructor(
         dto.organizationId?.also {
             organizationRoleService.checkUserIsOwner(it)
             repository.organizationOwner = organizationService.get(it) ?: throw NotFoundException()
+
+            if (dto.addressPart == null) {
+                repository.addressPart = generateAddressPart(dto.name!!, null)
+            }
+
         } ?: let {
             repository.userOwner = authenticationFacade.userAccount
             securityService.grantFullAccessToRepo(repository)
         }
         for (language in dto.languages!!) {
             languageService.createLanguage(language, repository)
-        }
-
-        if (dto.addressPart == null) {
-            dto.addressPart = generateAddressPart(dto.name!!, null)
         }
 
         entityManager.persist(repository)
