@@ -1,22 +1,24 @@
 package io.tolgee.api.v2.hateoas.organization
 
-import io.tolgee.controllers.OrganizationController
+import io.tolgee.api.v2.controllers.OrganizationController
 import io.tolgee.model.Organization
+import io.tolgee.model.views.OrganizationView
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.stereotype.Component
 
 @Component
-class OrganizationModelAssembler : RepresentationModelAssemblerSupport<Organization, OrganizationModel>(
+class OrganizationModelAssembler : RepresentationModelAssemblerSupport<OrganizationView, OrganizationModel>(
         OrganizationController::class.java, OrganizationModel::class.java) {
-    override fun toModel(entity: Organization): OrganizationModel {
-        val link = linkTo<OrganizationController> { get(entity.addressPart!!) }.withSelfRel()
+    override fun toModel(view: OrganizationView): OrganizationModel {
+        val link = linkTo<OrganizationController> { get(view.addressPart) }.withSelfRel()
         return OrganizationModel(
-                entity.id!!,
-                entity.name!!,
-                entity.addressPart!!,
-                entity.description,
-                entity.basePermissions
+                view.id,
+                view.name,
+                view.addressPart,
+                view.description,
+                view.basePermissions,
+                view.currentUserRole
         ).add(link)
     }
 }

@@ -41,7 +41,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
         //do not populate if db is not empty
         if (userAccountRepository.count() == 0L) {
             this.populate("Application")
-            this.createUsersAndOrganizations()
+            this.createUsersAndOrganizations("User", 50)
         }
     }
 
@@ -54,7 +54,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     open fun createOrganization(name: String, userAccount: UserAccount): Organization {
-        val addressPart = addressPartGenerator.generate(name, 20, 100) { true }
+        val addressPart = addressPartGenerator.generate(name, 3, 100) { true }
         val organization = Organization(name = name, addressPart = addressPart, basePermissions = Permission.RepositoryPermissionType.VIEW)
         return organizationRepository.save(organization).also {
             organizationRoleService.grantOwnerRoleToUser(userAccount, organization)
@@ -62,20 +62,20 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
 
-    open fun createUsersAndOrganizations(username: String = "user"): List<UserAccount> {
-        val users = (1..4).map {
+    open fun createUsersAndOrganizations(username: String = "user", userCount: Int = 4): List<UserAccount> {
+        val users = (1..userCount).map {
             createUserIfNotExists("$username $it")
         }
 
         users.mapIndexed { listUserIdx, user ->
-            (1..listUserIdx).forEach { organzizationNum ->
-                val org = createOrganization("User $listUserIdx's organization $organzizationNum", user)
+            (1..listUserIdx).forEach { organizationNum ->
+                val org = createOrganization("${user.name}'s organization $organizationNum", user)
                 (0 until listUserIdx).forEach { userIdx ->
                     organizationRoleService.grantRoleToUser(users[userIdx], org, OrganizationRoleType.MEMBER)
 
                 }
                 (1..3).forEach { repositoryNum ->
-                    val name = "User $listUserIdx's organization $organzizationNum repository $repositoryNum"
+                    val name = "${user.name}'s organization $organizationNum repository $repositoryNum"
                     createRepositoryWithOrganization(name, org)
                 }
             }

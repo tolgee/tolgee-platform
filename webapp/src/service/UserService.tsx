@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './ApiHttpService';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
 import {UserDTO, UserUpdateDTO} from './response.types';
 import {MessageService} from './MessageService';
 import {T} from "@tolgee/react";
@@ -8,7 +8,7 @@ import React from "react";
 
 @singleton()
 export class UserService {
-    constructor(private http: ApiHttpService, private messagesService: MessageService) {
+    constructor(private http: ApiV1HttpService, private messagesService: MessageService) {
     }
 
     public getUserData = (): Promise<UserDTO> => this.http.get("user");

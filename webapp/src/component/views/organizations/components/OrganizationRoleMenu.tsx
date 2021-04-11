@@ -42,7 +42,7 @@ export const OrganizationRoleMenu: FunctionComponent<{ user: components["schemas
         <>
             <Button disabled={currentUser?.id == props.user.id} variant="outlined" size="small" aria-controls="simple-menu" aria-haspopup="true"
                     onClick={handleClick}>
-                <T>{`organization_role_type_${props.user.organizationRoleType}`}</T> <ArrowDropDown fontSize="small"/>
+                <T>{`organization_role_type_${props.user.organizationRole}`}</T> <ArrowDropDown fontSize="small"/>
             </Button>
             <Menu
                 elevation={1}
@@ -65,7 +65,7 @@ export const OrganizationRoleMenu: FunctionComponent<{ user: components["schemas
                     <MenuItem
                         key={k}
                         onClick={() => handleSet(k)}
-                        selected={k === props.user.organizationRoleType}
+                        selected={k === props.user.organizationRole}
                     >
                         <T>{`organization_role_type_${k}`}</T>
                     </MenuItem>)}

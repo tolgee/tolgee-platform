@@ -24,10 +24,10 @@ interface Props {
     loading?: boolean
 }
 
+const actions = container.resolve(UserApiKeysActions);
+
 export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
     const onDialogClose = () => useRedirect(LINKS.USER_API_KEYS);
-
-    const actions = container.resolve(UserApiKeysActions);
 
     let repositories = actions.useSelector(s => s.loadables.repositories);
     let scopes = actions.useSelector(s => s.loadables.scopes);

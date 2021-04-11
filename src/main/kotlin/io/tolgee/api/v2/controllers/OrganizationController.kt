@@ -2,7 +2,7 @@
  * Copyright (c) 2020. Tolgee
  */
 
-package io.tolgee.controllers
+package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModel
@@ -20,6 +20,10 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.*
+import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.views.OrganizationView
+import io.tolgee.model.views.RepositoryView
+import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.*
 import org.springframework.data.domain.Pageable
@@ -42,11 +46,12 @@ open class OrganizationController(
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val pagedResourcesAssembler: PagedResourcesAssembler<Organization>,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        private val pagedRepositoryResourcesAssembler: PagedResourcesAssembler<Repository>,
+        private val pagedRepositoryResourcesAssembler: PagedResourcesAssembler<RepositoryView>,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        private val arrayResourcesAssembler: PagedResourcesAssembler<Array<Any>>,
+        private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
+        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+        private val arrayUserResourcesAssembler: PagedResourcesAssembler<UserAccountWithOrganizationRoleView>,
         private val organizationModelAssembler: OrganizationModelAssembler,
-        private val organizationWithCurrentUserRoleModelAssembler: OrganizationWithCurrentUserRoleModelAssembler,
         private val userAccountWithOrganizationRoleModelAssembler: UserAccountWithOrganizationRoleModelAssembler,
         private val tolgeeProperties: TolgeeProperties,
         private val authenticationFacade: AuthenticationFacade,
@@ -66,15 +71,15 @@ open class OrganizationController(
             throw PermissionException()
         }
         this.organizationService.create(dto).let {
-            return ResponseEntity(organizationModelAssembler.toModel(it), HttpStatus.CREATED)
+            return ResponseEntity(organizationModelAssembler.toModel(OrganizationView.of(it, OrganizationRoleType.OWNER)), HttpStatus.CREATED)
         }
     }
 
     @GetMapping("/{id:[0-9]+}")
     open fun get(@PathVariable("id") id: Long): OrganizationModel? {
         organizationService.get(id)?.let {
-            organizationRoleService.checkUserIsMemberOrOwner(id)
-            return it.toModel()
+            val roleType = organizationRoleService.getTypeOrThrow(id)
+            return OrganizationView.of(it, roleType).toModel()
         }
                 ?: throw NotFoundException()
     }
@@ -82,16 +87,16 @@ open class OrganizationController(
     @GetMapping("/{addressPart:.*[a-z].*}")
     open fun get(@PathVariable("addressPart") addressPart: String): OrganizationModel {
         organizationService.get(addressPart)?.let {
-            organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
-            return it.toModel()
+            val roleType = organizationRoleService.getTypeOrThrow(it.id!!)
+            return OrganizationView.of(it, roleType).toModel()
         }
                 ?: throw NotFoundException()
     }
 
     @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
-    open fun getAll(pageable: Pageable, params: OrganizationRequestParamsDto): PagedModel<OrganizationWithCurrentUserRoleModel>? {
+    open fun getAll(pageable: Pageable, params: OrganizationRequestParamsDto): PagedModel<OrganizationModel>? {
         val organizations = organizationService.findPermittedPaged(pageable, params)
-        return arrayResourcesAssembler.toModel(organizations, organizationWithCurrentUserRoleModelAssembler)
+        return arrayResourcesAssembler.toModel(organizations, organizationModelAssembler)
     }
 
     @PutMapping("/{id:[0-9]+}")
@@ -113,7 +118,7 @@ open class OrganizationController(
             @RequestParam("search") search: String?): PagedModel<UserAccountWithOrganizationRoleModel> {
         organizationRoleService.checkUserIsMemberOrOwner(id)
         val allInOrganization = userAccountService.getAllInOrganization(id, pageable, search)
-        return arrayResourcesAssembler.toModel(allInOrganization, userAccountWithOrganizationRoleModelAssembler)
+        return arrayUserResourcesAssembler.toModel(allInOrganization, userAccountWithOrganizationRoleModelAssembler)
     }
 
     @PutMapping("/{id:[0-9]+}/leave")
@@ -198,7 +203,7 @@ open class OrganizationController(
         }
     }
 
-    private fun Organization.toModel(): OrganizationModel {
+    private fun OrganizationView.toModel(): OrganizationModel {
         return this@OrganizationController.organizationModelAssembler.toModel(this)
     }
 }

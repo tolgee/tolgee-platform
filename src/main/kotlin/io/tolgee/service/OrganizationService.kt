@@ -8,6 +8,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.views.OrganizationView
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.util.AddressPartGenerator
@@ -55,11 +56,11 @@ open class OrganizationService(
         }
     }
 
-    open fun findPermittedPaged(pageable: Pageable, requestParamsDto: OrganizationRequestParamsDto): Page<Array<Any>> {
+    open fun findPermittedPaged(pageable: Pageable, requestParamsDto: OrganizationRequestParamsDto): Page<OrganizationView> {
         if (requestParamsDto.filterCurrentUserOwner) {
-            return organizationRepository.findAllPermittedUserRoleType(authenticationFacade.userAccount.id, pageable, OrganizationRoleType.OWNER)
+            return organizationRepository.findAllPermitted(authenticationFacade.userAccount.id, pageable, OrganizationRoleType.OWNER)
         }
-        return organizationRepository.findAllPermitted(authenticationFacade.userAccount.id, pageable)
+        return organizationRepository.findAllPermitted(authenticationFacade.userAccount.id, pageable, null)
     }
 
 
@@ -71,7 +72,7 @@ open class OrganizationService(
         return organizationRepository.getOneByAddressPart(addressPart)
     }
 
-    open fun edit(id: Long, editDto: OrganizationDto): Organization {
+    open fun edit(id: Long, editDto: OrganizationDto): OrganizationView {
         val organization = this.get(id) ?: throw NotFoundException()
 
         if (editDto.addressPart == null) {
@@ -87,7 +88,7 @@ open class OrganizationService(
         organization.addressPart = editDto.addressPart
         organization.basePermissions = editDto.basePermissions
         organizationRepository.save(organization)
-        return organization
+        return OrganizationView.of(organization, OrganizationRoleType.OWNER)
     }
 
     @Transactional

@@ -7,6 +7,7 @@ import {useOrganization} from "../../../hooks/organizations/useOrganization";
 import UserOrganizationSettingsSubtitleLink from "./components/UserOrganizationSettingsSubtitleLink";
 import {container} from "tsyringe";
 import {OrganizationActions} from "../../../store/organization/OrganizationActions";
+import SearchField from "../../common/form/fields/SearchField";
 
 const actions = container.resolve(OrganizationActions);
 
@@ -34,12 +35,10 @@ export const BaseOrganizationSettingsView: FunctionComponent<BaseViewProps> = ({
                     </Box>
                 </Grid>
                 <Grid item lg={9} md={8} sm={12} xs={12}>
-                    <Box>
-                        <Box mb={2}>
-                            <Typography variant="h6">{title}</Typography>
-                        </Box>
-                        {children}
-                    </Box>
+                    {title && <Box mb={2}>
+                        <Box><Typography variant="h6">{title}</Typography></Box>
+                    </Box>}
+                    {children}
                 </Grid>
             </Grid>
         </BaseView>

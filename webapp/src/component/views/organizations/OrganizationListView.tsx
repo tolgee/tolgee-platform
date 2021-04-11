@@ -35,7 +35,7 @@ export const OrganizationsListView = () => {
                         //@ts-ignore
                         component={Link}
                         key={item.id}
-                        to={LINKS.REPOSITORY_TRANSLATIONS.build({[PARAMS.REPOSITORY_ID]: item.id})}
+                        to={LINKS.ORGANIZATION_REPOSITORIES.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: item.addressPart})}
                     >
                         <ListItemText>
                             {item.name}

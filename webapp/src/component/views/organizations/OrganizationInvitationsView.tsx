@@ -1,29 +1,20 @@
 import * as React from 'react';
-import {FunctionComponent, useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
+import {FunctionComponent} from 'react';
 import {container} from 'tsyringe';
-import {T, useTranslate} from "@tolgee/react";
+import {T} from "@tolgee/react";
 import {OrganizationActions} from "../../../store/organization/OrganizationActions";
-import {AppState} from "../../../store";
 import {LINKS, PARAMS} from "../../../constants/links";
-import {Redirect} from "react-router-dom";
-import {components} from "../../../service/apiSchema";
-import {Validation} from "../../../constants/GlobalValidationSchema";
-import {OrganizationFields} from "./components/OrganizationFields";
 import {MessageService} from "../../../service/MessageService";
 import {StandardForm} from "../../common/form/StandardForm";
 import {BaseOrganizationSettingsView} from "./BaseOrganizationSettingsView";
 import {useOrganization} from "../../../hooks/organizations/useOrganization";
 import {Button, ListItemText, TextField, Typography} from "@material-ui/core";
-import {PermissionSelect} from "../../security/PermissionSelect";
 import Box from "@material-ui/core/Box";
 import {OrganizationRoleSelect} from "./components/OrganizationRoleSelect";
 import {OrganizationRoleType} from "../../../service/response.types";
 import {SimpleHateoasList} from "../../common/list/SimpleHateoasList";
 import {SimpleListItem} from "../../common/list/SimpleListItem";
-import {repositoryPermissionTypes} from "../../../constants/repositoryPermissionTypes";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import ListItem from "@material-ui/core/ListItem";
 
 const actions = container.resolve(OrganizationActions);
 const messageService = container.resolve(MessageService)

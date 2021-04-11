@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './ApiHttpService';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
 import {ErrorResponseDTO, TokenDTO} from './response.types';
 import {TokenService} from './TokenService';
 import {API_LINKS} from '../constants/apiLinks';
@@ -21,7 +21,7 @@ interface ResetPasswordPostRequest {
 
 @singleton()
 export class SecurityService {
-    constructor(private http: ApiHttpService, private tokenService: TokenService, private messageService: MessageService,
+    constructor(private http: ApiV1HttpService, private tokenService: TokenService, private messageService: MessageService,
                 private redirectionActions: RedirectionActions,
                 private invitationCodeService: InvitationCodeService,
                 private invitationService: InvitationService) {

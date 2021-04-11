@@ -14,6 +14,8 @@ import {MessageService} from "../../../service/MessageService";
 import {StandardForm} from "../../common/form/StandardForm";
 import {BaseOrganizationSettingsView} from "./BaseOrganizationSettingsView";
 import {useOrganization} from "../../../hooks/organizations/useOrganization";
+import {Button} from "@material-ui/core";
+import {confirmation} from "../../../hooks/confirmation";
 
 const actions = container.resolve(OrganizationActions);
 const messageService = container.resolve(MessageService)
@@ -47,6 +49,14 @@ export const OrganizationProfileView: FunctionComponent = () => {
         }
     }, [saveLoadable.loaded])
 
+    const handleDelete = () => {
+        confirmation({
+            hardModeText: organization.name.toUpperCase(),
+            message: <T>delete_organization_confirmation_message</T>,
+            onConfirm: () => actions.loadableActions.deleteOrganization.dispatch(organization.id)
+        })
+    }
+
     if (cancelled) {
         return <Redirect to={LINKS.ORGANIZATIONS.build()}/>
     }
@@ -62,6 +72,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
                           onCancel={() => setCancelled(true)}
                           saveActionLoadable={saveLoadable}
                           validationSchema={Validation.ORGANIZATION_CREATE_OR_EDIT(t, initialValues?.addressPart)}
+                          customActions={<Button color="secondary" variant="outlined" onClick={handleDelete}><T>organization_delete_button</T></Button>}
             >
                 <>
                     <OrganizationFields/>

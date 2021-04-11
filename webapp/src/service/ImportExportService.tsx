@@ -1,11 +1,11 @@
 import {container, singleton} from 'tsyringe';
-import {ApiHttpService} from './ApiHttpService';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
 import {MessageService} from './MessageService';
 import {ImportDto} from "./request.types";
 import {T} from "@tolgee/react";
 import React from "react";
 
-const http = container.resolve(ApiHttpService);
+const http = container.resolve(ApiV1HttpService);
 
 @singleton()
 export class ImportExportService {

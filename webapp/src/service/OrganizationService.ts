@@ -1,9 +1,9 @@
 import {container, singleton} from 'tsyringe';
-import {ApiHttpService} from './ApiHttpService';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
 import {PermissionDTO, PermissionEditDTO, RepositoryDTO} from './response.types';
 import {useRedirect} from "../hooks/useRedirect";
 import {LINKS} from "../constants/links";
-import {ApiV2HttpService} from "./ApiV2HttpService";
+import {ApiV2HttpService} from "./http/ApiV2HttpService";
 import {components} from "./apiSchema";
 
 @singleton()
@@ -13,7 +13,7 @@ export class OrganizationService {
     }
 
     public listPermitted = async (query?: components["schemas"]["Pageable"] & components["schemas"]["OrganizationRequestParamsDto"]):
-        Promise<components["schemas"]["PagedModelOrganizationWithCurrentUserRoleModel"]> => this.v2http.get(`organizations`, query);
+        Promise<components["schemas"]["PagedModelOrganizationModel"]> => this.v2http.get(`organizations`, query);
 
     public createOrganization = (data: components["schemas"]["OrganizationDto"]) =>
         this.v2http.post(`organizations`, data) as Promise<components["schemas"]["OrganizationModel"]>
@@ -43,7 +43,7 @@ export class OrganizationService {
         Promise<components["schemas"]["CollectionModelOrganizationInvitationModel"]> => this.v2http.get(`organizations/${organizationId}/invitations`);
 
     public listRepositories = async (organizationId: number, query?: components["schemas"]["Pageable"]):
-        Promise<components["schemas"]["CollectionModelOrganizationInvitationModel"]> => this.v2http.get(`organizations/${organizationId}/repositories`, query);
+        Promise<components["schemas"]["PagedModelRepositoryModel"]> => this.v2http.get(`organizations/${organizationId}/repositories`, query);
 
     public removeUser = async (organizationId: number, userId: number) =>
         this.v2http.delete(`organizations/${organizationId}/users/${userId}`, {});

@@ -33,8 +33,8 @@ export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (p
         <EditableCell initialValue={context.data.translations[props.abbreviation]}
                       validationSchema={Validation.TRANSLATION_TRANSLATION}
                       onSubmit={handleSubmit}
-                      editEnabled={repositoryDTO.permissionType === RepositoryPermissionType.MANAGE
-                      || repositoryDTO.permissionType === RepositoryPermissionType.EDIT || repositoryDTO.permissionType === RepositoryPermissionType.TRANSLATE}
+                      editEnabled={repositoryDTO.computedPermissions === RepositoryPermissionType.MANAGE
+                      || repositoryDTO.computedPermissions === RepositoryPermissionType.EDIT || repositoryDTO.computedPermissions === RepositoryPermissionType.TRANSLATE}
                       onChange={(value) => actions.setEditingValue.dispatch(value)}
                       onEditClick={() => {
                           actions.setTranslationEditing.dispatch({

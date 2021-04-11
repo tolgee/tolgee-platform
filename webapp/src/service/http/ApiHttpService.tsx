@@ -1,13 +1,15 @@
 import {container, singleton} from 'tsyringe';
-import {ErrorActions} from '../store/global/ErrorActions';
-import {RedirectionActions} from '../store/global/RedirectionActions';
-import {LINKS} from '../constants/links';
-import {TokenService} from './TokenService';
-import {GlobalError} from "../error/GlobalError";
-import {MessageService} from "./MessageService";
+import {ErrorActions} from '../../store/global/ErrorActions';
+import {RedirectionActions} from '../../store/global/RedirectionActions';
+import {LINKS} from '../../constants/links';
+import {TokenService} from '../TokenService';
+import {GlobalError} from "../../error/GlobalError";
+import {MessageService} from "../MessageService";
 import * as Sentry from '@sentry/browser';
 import React from "react";
 import {T} from "@tolgee/react";
+import {SecurityService} from "../SecurityService";
+import {components, paths} from "../apiSchema";
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -27,24 +29,16 @@ const detectLoop = (url) => {
 
 @singleton()
 export class ApiHttpService {
-    constructor(private tokenService: TokenService, private messageService: MessageService) {
+    constructor(private tokenService: TokenService, private messageService: MessageService, private redirectionActions: RedirectionActions) {
     }
 
     apiUrl = process.env.REACT_APP_API_URL + "/api/"
-
-    private static async getResObject(r: Response) {
-        const textBody = await r.text();
-        try {
-            return JSON.parse(textBody);
-        } catch (e) {
-            return textBody;
-        }
-    }
 
     fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
         if (detectLoop(input)) {
             //if we get into loop, maybe something went wrong in login requests etc, rather start over
             this.tokenService.disposeToken();
+            this.redirectionActions.redirect.dispatch(LINKS.REPOSITORIES.build())
             location.reload();
         }
         return new Promise((resolve, reject) => {
@@ -151,10 +145,21 @@ export class ApiHttpService {
         });
     }
 
+
+
+
     buildQuery(object: { [key: string]: any }): string {
         return Object.keys(object).filter(k => !!object[k])
             .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(object[k]))
             .join('&');
     }
 
+    static async getResObject(r: Response) {
+        const textBody = await r.text();
+        try {
+            return JSON.parse(textBody);
+        } catch (e) {
+            return textBody;
+        }
+    }
 }

@@ -13,9 +13,11 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.AuthenticationFacade
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
 
 @Service
+@Transactional
 open class OrganizationRoleService(
         private val organizationRoleRepository: OrganizationRoleRepository,
         private val authenticationFacade: AuthenticationFacade,
@@ -58,6 +60,16 @@ open class OrganizationRoleService(
         return false
     }
 
+    open fun getTypeOrThrow(userId: Long, organizationId: Long): OrganizationRoleType {
+        organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
+                ?.let { return it.type!! }
+        throw PermissionException()
+    }
+
+    open fun getTypeOrThrow(organizationId: Long): OrganizationRoleType {
+        return getTypeOrThrow(authenticationFacade.userAccount.id!!, organizationId)
+    }
+
     open fun getType(userId: Long, organizationId: Long): OrganizationRoleType? {
         organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
                 ?.let { return it.type }
@@ -95,7 +107,7 @@ open class OrganizationRoleService(
         this.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.OWNER)
     }
 
-    fun setMemberRole(organizationId: Long, userId: Long, dto: SetOrganizationRoleDto) {
+    open fun setMemberRole(organizationId: Long, userId: Long, dto: SetOrganizationRoleDto) {
         val user = userAccountService.get(userId).orElseThrow { NotFoundException() }!!
         organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id!!, organizationId)?.let {
             it.type = dto.roleType
@@ -103,20 +115,20 @@ open class OrganizationRoleService(
         } ?: throw ValidationException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
     }
 
-    fun createForInvitation(invitation: Invitation, type: OrganizationRoleType, organization: Organization)
+    open fun createForInvitation(invitation: Invitation, type: OrganizationRoleType, organization: Organization)
             : OrganizationRole {
         return OrganizationRole(invitation = invitation, type = type, organization = organization).let {
             organizationRoleRepository.save(it)
         }
     }
 
-    fun acceptInvitation(organizationRole: OrganizationRole, userAccount: UserAccount) {
+    open fun acceptInvitation(organizationRole: OrganizationRole, userAccount: UserAccount) {
         organizationRole.invitation = null
         organizationRole.user = userAccount
         organizationRoleRepository.save(organizationRole)
     }
 
-    fun isAnotherOwnerInOrganization(id: Long): Boolean {
+    open fun isAnotherOwnerInOrganization(id: Long): Boolean {
         return this.organizationRoleRepository
                 .countAllByOrganizationIdAndTypeAndUserIdNot(
                         id,

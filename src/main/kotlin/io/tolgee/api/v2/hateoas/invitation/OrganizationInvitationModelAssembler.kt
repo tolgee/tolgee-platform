@@ -17,7 +17,6 @@ class OrganizationInvitationModelAssembler(
                 entity.id!!,
                 entity.code!!,
                 entity.organizationRole!!.type!!,
-                organizationModelAssembler.toModel(entity.organizationRole!!.organization!!),
                 entity.createdAt!!
         )
                 .add(linkTo<InvitationController> { acceptInvitation(entity.code) }.withRel("accept"))

@@ -11,27 +11,33 @@ import {StateModifier} from "../Action";
 import {T} from '@tolgee/react';
 import {LINKS} from "../../constants/links";
 import {InvitationService} from "../../service/InvitationService";
+import {ApiSchemaHttpService} from "../../service/http/ApiSchemaHttpService";
 
 export class OrganizationState extends StateWithLoadables<OrganizationActions> {
 }
 
 @singleton()
 export class OrganizationActions extends AbstractLoadableActions<OrganizationState> {
-    constructor(private organizationService: OrganizationService, private invitationService: InvitationService) {
+    constructor(private organizationService: OrganizationService,
+                private invitationService: InvitationService,
+                private apiSchemaHttpService: ApiSchemaHttpService) {
         super(new OrganizationState());
     }
 
     loadableDefinitions = {
         listPermitted: this.createLoadableDefinition(this.organizationService.listPermitted),
         listPermittedForMenu: this.createLoadableDefinition(() => this.organizationService.listPermitted({filterCurrentUserOwner: true, size: 100})),
-        listPermittedForRepositoryOwnerSelect: this.createLoadableDefinition(() => this.organizationService.listPermitted({filterCurrentUserOwner: true, size: 100})),
+        listPermittedForRepositoryOwnerSelect: this.createLoadableDefinition(() => this.organizationService.listPermitted({
+            filterCurrentUserOwner: true,
+            size: 100
+        })),
         create: this.createLoadableDefinition(data => this.organizationService.createOrganization(data)),
         get: this.createLoadableDefinition(this.organizationService.getOrganization),
         edit: this.createLoadableDefinition(this.organizationService.editOrganization, (state): OrganizationState => {
             state = this.resetLoadable(state, "edit")
             return this.resetLoadable(state, "get")
         }, <T>organization_updated_message</T>),
-        listUsers: this.createLoadableDefinition(this.organizationService.listUsers),
+        listUsers: this.createLoadableDefinition(this.apiSchemaHttpService.schemaRequest("/v2/organizations/{id}/users", "get")),
         leave: this.createLoadableDefinition(this.organizationService.leave, (state): OrganizationState => {
             state = this.resetLoadable(state, "leave")
             state = this.resetLoadable(state, "listUsers")
@@ -50,7 +56,11 @@ export class OrganizationActions extends AbstractLoadableActions<OrganizationSta
         }, <T>organization_user_deleted</T>),
         deleteInvitation: this.createLoadableDefinition(this.invitationService.deleteInvitation, (state: OrganizationState): OrganizationState => {
             return this.resetLoadable(state, "listInvitations")
-        })
+        }),
+        deleteOrganization: this.createLoadableDefinition(this.organizationService.deleteOrganization, (state: OrganizationState): OrganizationState => {
+            state = this.resetLoadable(state, "listPermitted")
+            return this.resetLoadable(state, "get")
+        }, <T>organization_deleted_message</T>, LINKS.ORGANIZATIONS.build())
     };
 
     get prefix(): string {

@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './ApiHttpService';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
 import {TokenDTO} from './response.types';
 import {TokenService} from './TokenService';
 import {MessageService} from './MessageService';
@@ -12,7 +12,7 @@ import React from "react";
 
 @singleton()
 export class SignUpService {
-    constructor(private http: ApiHttpService, private tokenService: TokenService,
+    constructor(private http: ApiV1HttpService, private tokenService: TokenService,
                 private messageService: MessageService,
                 private redirectionActions: RedirectionActions,
                 private globalActions: GlobalActions,

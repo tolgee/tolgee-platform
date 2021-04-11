@@ -6,6 +6,7 @@ import io.tolgee.dtos.response.RepositoryDTO
 import io.tolgee.dtos.response.RepositoryDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.*
+import io.tolgee.model.views.RepositoryView
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.RepositoryRepository
 import io.tolgee.security.AuthenticationFacade
@@ -48,6 +49,11 @@ open class RepositoryService constructor(
     @Transactional
     open fun get(id: Long): Optional<Repository?> {
         return repositoryRepository.findById(id)
+    }
+
+    @Transactional
+    open fun getView(id: Long): RepositoryView? {
+        return repositoryRepository.findViewById(authenticationFacade.userAccount.id!!, id)
     }
 
     @Transactional
@@ -105,8 +111,8 @@ open class RepositoryService constructor(
         return this.repositoryRepository.findAllByOrganizationOwnerId(organizationId)
     }
 
-    open fun findAllInOrganization(organizationId: Long, pageable: Pageable): Page<Repository> {
-        return this.repositoryRepository.findAllByOrganizationOwnerId(organizationId, pageable)
+    open fun findAllInOrganization(organizationId: Long, pageable: Pageable): Page<RepositoryView> {
+        return this.repositoryRepository.findAllPermittedInOrganization(authenticationFacade.userAccount.id!!, organizationId, pageable)
     }
 
     @Transactional
@@ -137,5 +143,9 @@ open class RepositoryService constructor(
             }
             this.validateAddressPartUniqueness(it)
         }
+    }
+
+    open fun findPermittedPaged(pageable: Pageable): Page<RepositoryView> {
+        return repositoryRepository.findAllPermitted(authenticationFacade.userAccount.id!!, pageable)
     }
 }

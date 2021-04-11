@@ -11,12 +11,12 @@ import {Validation} from "../../constants/GlobalValidationSchema";
 let actions = container.resolve(TranslationActions);
 
 export const KeyCell: FunctionComponent = (props) => {
-    let repositoryDTO = useRepository();
+    let repository = useRepository();
 
     let context = useContext(RowContext);
 
     const handleSubmit = (v) => {
-        actions.loadableActions.editKey.dispatch(repositoryDTO.id, {oldFullPathString: context.data.name, newFullPathString: v});
+        actions.loadableActions.editKey.dispatch(repository.id, {oldFullPathString: context.data.name, newFullPathString: v});
     };
 
     const isEditing = actions.useSelector(s => s.editing?.type === "key" && s.editing?.data?.initialValue === context.data.name)
@@ -25,8 +25,8 @@ export const KeyCell: FunctionComponent = (props) => {
         <EditableCell initialValue={context.data.name}
                       validationSchema={Validation.TRANSLATION_KEY}
                       onSubmit={handleSubmit}
-                      editEnabled={repositoryDTO.permissionType === RepositoryPermissionType.MANAGE
-                      || repositoryDTO.permissionType === RepositoryPermissionType.EDIT}
+                      editEnabled={repository.computedPermissions === RepositoryPermissionType.MANAGE
+                      || repository.computedPermissions === RepositoryPermissionType.EDIT}
                       onChange={(value) => actions.setEditingValue.dispatch(value)}
                       onEditClick={() => {
                           actions.setKeyEditing.dispatch({

@@ -100,8 +100,8 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                 .also { println(it.andReturn().response.contentAsString) }
                 .andAssertThatJson.node("_embedded.usersInOrganization").also {
                     it.isArray.hasSize(2)
-                    it.node("[0].organizationRoleType").isEqualTo("OWNER")
-                    it.node("[1].organizationRoleType").isEqualTo("MEMBER")
+                    it.node("[0].organizationRole").isEqualTo("OWNER")
+                    it.node("[1].organizationRole").isEqualTo("MEMBER")
                 }
     }
 
@@ -123,7 +123,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                 it.node("name").isEqualTo(dummyDto.name)
                 it.node("id").isEqualTo(organization.id)
                 it.node("description").isEqualTo(dummyDto.description)
-                it.node("basePermission").isEqualTo(dummyDto.basePermissions.name)
+                it.node("basePermissions").isEqualTo(dummyDto.basePermissions.name)
                 it.node("addressPart").isEqualTo(dummyDto.addressPart)
             }
         }
@@ -142,7 +142,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     @Test
     open fun testGetAllUsersNotPermitted() {
         val users = dbPopulator.createUsersAndOrganizations()
-        val organizationId = users[1].organizationRoles[1].organization!!.id
+        val organizationId = users[1].organizationRoles[0].organization!!.id
         performAuthGet("/v2/organizations/$organizationId/users").andIsForbidden
     }
 
@@ -154,7 +154,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
         ).andIsCreated.andPrettyPrint.andAssertThatJson.let {
             it.node("name").isEqualTo("Test org")
             it.node("addressPart").isEqualTo("test-org")
-            it.node("_links.self.href").isEqualTo("http://localhost/api/organizations/test-org")
+            it.node("_links.self.href").isEqualTo("http://localhost/v2/organizations/test-org")
             it.node("id").isNumber.satisfies {
                 organizationService.get(it.toLong()) is Organization
             }
@@ -227,8 +227,8 @@ open class OrganizationControllerTest : SignedInControllerTest() {
             ).andIsOk.andPrettyPrint.andAssertThatJson.let {
                 it.node("name").isEqualTo("Hello")
                 it.node("addressPart").isEqualTo("hello-1")
-                it.node("_links.self.href").isEqualTo("http://localhost/api/organizations/hello-1")
-                it.node("basePermission").isEqualTo("TRANSLATE")
+                it.node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
+                it.node("basePermissions").isEqualTo("TRANSLATE")
                 it.node("description").isEqualTo("This is changed description")
             }
         }
@@ -340,7 +340,8 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                         it.node("_embedded.repositories").let { repositoriesNode ->
                             repositoriesNode.isArray.hasSize(3)
                             repositoriesNode.node("[1].name").isEqualTo("User 1's organization 1 repository 2")
-                            repositoriesNode.node("[1].organizationOwner.addressPart").isEqualTo("user-1-s-organization-1")
+                            repositoriesNode.node("[1].organizationOwnerAddressPart").isEqualTo("user-1-s-organization-1")
+                            repositoriesNode.node("[1].organizationOwnerName").isEqualTo("User 1's organization 1")
                         }
                     }
         }

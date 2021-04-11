@@ -191,7 +191,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
         isAllChecked,
         isSomeChecked,
         checkedKeys: checkedKeys,
-        showCheckBoxes: repositoryDTO.permissionType === RepositoryPermissionType.MANAGE,
+        showCheckBoxes: repositoryDTO.computedPermissions === RepositoryPermissionType.MANAGE,
         showKeys,
         setShowKeys,
     };

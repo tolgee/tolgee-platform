@@ -12,7 +12,6 @@ import {RedirectionActions} from './global/RedirectionActions';
 import {MessageActions} from './global/MessageActions';
 import {SignUpActions} from './global/SignUpActions';
 import {RepositoryInvitationActions} from './repository/invitations/RepositoryInvitationActions';
-import {RepositoryPermissionActions} from './repository/invitations/RepositoryPermissionActions';
 import {SecurityService} from "../service/SecurityService";
 import {MessageService} from "../service/MessageService";
 import {TranslationActions} from "./repository/TranslationActions";
@@ -39,7 +38,6 @@ const appReducer = (appState, action) => combineReducers({
     message: implicitReducer.create(container.resolve(MessageActions)),
     signUp: implicitReducer.create(container.resolve(SignUpActions)),
     repositoryInvitation: implicitReducer.create(container.resolve(RepositoryInvitationActions)),
-    repositoryPermission: implicitReducer.create(container.resolve(RepositoryPermissionActions)),
     importExport: implicitReducer.create(container.resolve(ImportExportActions)),
     userApiKey: implicitReducer.create(container.resolve(UserApiKeysActions)),
     user: implicitReducer.create(container.resolve(UserActions)),

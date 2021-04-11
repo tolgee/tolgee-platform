@@ -22,6 +22,7 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
     passwordResetSetSucceed = false;
     confirmationDialog: ConfirmationDialogProps | null = null;
     sideMenuOpen: boolean = true;
+    loading: boolean = false
 }
 
 
@@ -123,6 +124,15 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
         sideMenuOpen: !state.sideMenuOpen
     } as GlobalState));
 
+    readonly startLoading = this.createAction('START_LOADING').build.on((state: GlobalState) => ({
+        ...state,
+        loading: true
+    }))
+
+    readonly stopLoading = this.createAction('STOP_LOADING').build.on((state: GlobalState) => ({
+        ...state,
+        loading: false
+    }))
 
     get prefix(): string {
         return 'GLOBAL';

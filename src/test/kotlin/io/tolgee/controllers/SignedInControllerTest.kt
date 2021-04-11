@@ -35,7 +35,7 @@ abstract class SignedInControllerTest : AbstractControllerTest(), AuthRequestPer
         logout()
     }
 
-    fun logAsUser(userName: String, password: String) {
+    fun logAsUser(userName: String, password: String = initialPassword) {
         val defaultAuthenticationResult = login(userName, password)
         init(defaultAuthenticationResult.token)
         userAccount = defaultAuthenticationResult.entity

@@ -25,6 +25,7 @@
     "formik": "^2.2.6",
     "formik-material-ui": "^3.0.1",
     "notistack": "^1.0.5",
+    "openapi-typescript": "^3.2.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.3",
@@ -46,7 +47,8 @@
   "scripts": {
     "start": "craco start",
     "build": "craco build",
-    "test": "craco test"
+    "test": "craco test",
+    "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.ts"
   },
   "eslintConfig": {
     "extends": [

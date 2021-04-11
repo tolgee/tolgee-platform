@@ -13,6 +13,7 @@ import {OrganizationMemberPrivilegesView} from "./OrganizationMemberPrivilegesVi
 import {OrganizationInvitationsView} from "./OrganizationInvitationsView";
 import {container} from "tsyringe";
 import {OrganizationActions} from "../../../store/organization/OrganizationActions";
+import {OrganizationsRepositoryListView} from "./OrganizationRepositoryListView";
 
 
 const SpecificOrganizationRouter = () => {
@@ -34,6 +35,9 @@ const SpecificOrganizationRouter = () => {
                     </PrivateRoute>
                     <PrivateRoute exact path={LINKS.ORGANIZATION_INVITATIONS.template}>
                         <OrganizationInvitationsView/>
+                    </PrivateRoute>
+                    <PrivateRoute exact path={LINKS.ORGANIZATION_REPOSITORIES.template}>
+                        <OrganizationsRepositoryListView/>
                     </PrivateRoute>
                 </>
                 :

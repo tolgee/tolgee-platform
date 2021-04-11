@@ -4,40 +4,70 @@
  */
 
 export interface paths {
-  "/api/organizations/{organizationId}/users/{userId}/set-role": {
+  "/v2/repositories/{repositoryId}/users/{userId}/set-permissions/{permissionType}": {
+    put: operations["setUsersPermissions"];
+  };
+  "/v2/repositories/{repositoryId}/users/{userId}/revoke-access": {
+    put: operations["revokePermission"];
+  };
+  "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole"];
   };
-  "/api/organizations/{id}/leave": {
+  "/api/organizations/{organizationId}/users/{userId}/set-role": {
+    put: operations["setUserRole_1"];
+  };
+  "/v2/organizations/{id}/leave": {
     put: operations["leaveOrganization"];
   };
-  "/api/organizations/{id}/invite": {
+  "/api/organizations/{id}/leave": {
+    put: operations["leaveOrganization_1"];
+  };
+  "/v2/organizations/{id}/invite": {
     put: operations["inviteUser"];
   };
-  "/api/organizations/{id}": {
-    get: operations["get"];
+  "/api/organizations/{id}/invite": {
+    put: operations["inviteUser_1"];
+  };
+  "/v2/organizations/{id}": {
+    get: operations["get_1"];
     put: operations["update"];
     delete: operations["delete"];
   };
+  "/api/organizations/{id}": {
+    get: operations["get_2"];
+    put: operations["update_1"];
+    delete: operations["delete_1"];
+  };
   "/api/repository/{repositoryId}/keys": {
     put: operations["edit"];
-    post: operations["create_2"];
+    post: operations["create_3"];
   };
   "/api/repository/keys": {
-    delete: operations["delete_4"];
+    delete: operations["delete_5"];
   };
   "/api/repository/translations": {
     put: operations["setTranslations_1"];
     post: operations["createOrUpdateTranslations_1"];
   };
-  "/api/organizations": {
-    get: operations["getAll"];
+  "/v2/organizations": {
+    get: operations["getAll_1"];
     post: operations["create"];
   };
-  "/api/address-part/generate-repository": {
+  "/api/organizations": {
+    get: operations["getAll_2"];
+    post: operations["create_1"];
+  };
+  "/v2/address-part/generate-repository": {
     post: operations["generateRepositoryAddressPart"];
   };
-  "/api/address-part/generate-organization": {
+  "/api/address-part/generate-repository": {
+    post: operations["generateRepositoryAddressPart_1"];
+  };
+  "/v2/address-part/generate-organization": {
     post: operations["generateOrganizationAddressPart"];
+  };
+  "/api/address-part/generate-organization": {
+    post: operations["generateOrganizationAddressPart_1"];
   };
   "/api/user": {
     get: operations["getInfo"];
@@ -47,7 +77,7 @@ export interface paths {
     post: operations["editDeprecated"];
   };
   "/api/repository/{repositoryId}/keys/create": {
-    post: operations["create_1"];
+    post: operations["create_2"];
   };
   "/api/repository/{repositoryId}/import": {
     post: operations["doImport"];
@@ -56,7 +86,7 @@ export interface paths {
     post: operations["editLanguage_1"];
   };
   "/api/repository/{repositoryId}/languages": {
-    get: operations["getAll_1"];
+    get: operations["getAll_3"];
     post: operations["createLanguage"];
   };
   "/api/repository/{repositoryId}/screenshots/get": {
@@ -66,11 +96,11 @@ export interface paths {
     post: operations["uploadScreenshot_1"];
   };
   "/api/repositories": {
-    get: operations["getAll_3"];
+    get: operations["getAll_5"];
     post: operations["createRepository"];
   };
   "/api/repositories/invite": {
-    post: operations["inviteUser_1"];
+    post: operations["inviteUser_2"];
   };
   "/api/repositories/edit": {
     post: operations["editRepository"];
@@ -90,40 +120,67 @@ export interface paths {
   "/api/public/generatetoken": {
     post: operations["authenticateUser"];
   };
-  "/api/permission/edit": {
-    post: operations["editPermission"];
-  };
   "/api/apiKeys": {
     get: operations["allByUser"];
-    post: operations["create_5"];
+    post: operations["create_6"];
   };
   "/api/apiKeys/edit": {
     post: operations["edit_2"];
   };
-  "/api/organizations/{organizationId}/invitations": {
-    get: operations["getInvitations"];
+  "/v2/repositories": {
+    get: operations["getAll"];
   };
-  "/api/organizations/{id}/users": {
+  "/v2/repositories/{repositoryId}": {
+    get: operations["get"];
+  };
+  "/v2/repositories/{repositoryId}/users": {
     get: operations["getAllUsers"];
   };
-  "/api/organizations/{id}/repositories": {
+  "/v2/organizations/{organizationId}/invitations": {
+    get: operations["getInvitations"];
+  };
+  "/api/organizations/{organizationId}/invitations": {
+    get: operations["getInvitations_1"];
+  };
+  "/v2/organizations/{id}/users": {
+    get: operations["getAllUsers_1"];
+  };
+  "/api/organizations/{id}/users": {
+    get: operations["getAllUsers_2"];
+  };
+  "/v2/organizations/{id}/repositories": {
     get: operations["getAllRepositories"];
   };
-  "/api/organizations/{addressPart}/repositories": {
+  "/api/organizations/{id}/repositories": {
     get: operations["getAllRepositories_1"];
   };
-  "/api/organizations/{addressPart}": {
-    get: operations["get_1"];
+  "/v2/organizations/{addressPart}/repositories": {
+    get: operations["getAllRepositories_2"];
   };
-  "/api/address-part/validate-repository/{addressPart}": {
+  "/api/organizations/{addressPart}/repositories": {
+    get: operations["getAllRepositories_3"];
+  };
+  "/v2/organizations/{addressPart}": {
+    get: operations["get_3"];
+  };
+  "/api/organizations/{addressPart}": {
+    get: operations["get_4"];
+  };
+  "/v2/address-part/validate-repository/{addressPart}": {
     get: operations["validateRepositoryAddressPart"];
   };
-  "/api/address-part/validate-organization/{addressPart}": {
+  "/api/address-part/validate-repository/{addressPart}": {
+    get: operations["validateRepositoryAddressPart_1"];
+  };
+  "/v2/address-part/validate-organization/{addressPart}": {
     get: operations["validateOrganizationAddressPart"];
+  };
+  "/api/address-part/validate-organization/{addressPart}": {
+    get: operations["validateOrganizationAddressPart_1"];
   };
   "/api/repository/keys/{id}": {
     get: operations["getDeprecated_1"];
-    delete: operations["delete_2"];
+    delete: operations["delete_3"];
   };
   "/api/repository/{repositoryId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
@@ -135,7 +192,7 @@ export interface paths {
     get: operations["getViewData"];
   };
   "/api/repository/languages/{id}": {
-    get: operations["get_3"];
+    get: operations["get_6"];
     delete: operations["deleteLanguage_1"];
   };
   "/api/repositories/{id}": {
@@ -154,9 +211,6 @@ export interface paths {
   "/api/public/authorize_oauth/{serviceType}/{code}": {
     get: operations["authenticateUser_1"];
   };
-  "/api/permission/list/{repositoryId}": {
-    get: operations["getRepositoryPermissions"];
-  };
   "/api/invitation/list/{repositoryId}": {
     get: operations["getRepositoryInvitations"];
   };
@@ -172,20 +226,20 @@ export interface paths {
   "/api/apiKeys/availableScopes": {
     get: operations["getScopes"];
   };
-  "/api/organizations/{organizationId}/users/{userId}": {
+  "/v2/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser"];
+  };
+  "/api/organizations/{organizationId}/users/{userId}": {
+    delete: operations["removeUser_1"];
   };
   "/api/repository/screenshots/{ids}": {
     delete: operations["deleteScreenshots"];
-  };
-  "/api/permission/{permissionId}": {
-    delete: operations["deletePermission"];
   };
   "/api/invitation/{invitationId}": {
     delete: operations["deleteInvitation"];
   };
   "/api/apiKeys/{key}": {
-    delete: operations["delete_5"];
+    delete: operations["delete_6"];
   };
 }
 
@@ -202,16 +256,7 @@ export interface components {
       id: number;
       code: string;
       type: "MEMBER" | "OWNER";
-      organization: components["schemas"]["OrganizationModel"];
       createdAt: string;
-      _links?: components["schemas"]["Links"];
-    };
-    OrganizationModel: {
-      id: number;
-      name: string;
-      addressPart: string;
-      description?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       _links?: components["schemas"]["Links"];
     };
     OrganizationDto: {
@@ -219,6 +264,15 @@ export interface components {
       description?: string;
       addressPart?: string;
       basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+    };
+    OrganizationModel: {
+      id: number;
+      name: string;
+      addressPart: string;
+      description?: string;
+      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      currentUserRole: "MEMBER" | "OWNER";
+      _links?: components["schemas"]["Links"];
     };
     EditKeyDTO: {
       currentName: string;
@@ -301,10 +355,6 @@ export interface components {
       username?: string;
       password?: string;
     };
-    PermissionEditDto: {
-      permissionId?: number;
-      type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-    };
     CreateApiKeyDTO: {
       repositoryId: number;
       scopes?: string[];
@@ -321,12 +371,6 @@ export interface components {
       id: number;
       scopes: string[];
     };
-    CollectionModelOrganizationInvitationModel: {
-      _embedded?: {
-        organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
-      };
-      _links?: components["schemas"]["Links"];
-    };
     Pageable: {
       page?: number;
       size?: number;
@@ -337,20 +381,6 @@ export interface components {
       totalElements?: number;
       totalPages?: number;
       number?: number;
-    };
-    PagedModelUserAccountWithOrganizationRoleModel: {
-      _embedded?: {
-        usersInOrganization?: components["schemas"]["UserAccountWithOrganizationRoleModel"][];
-      };
-      _links?: components["schemas"]["Links"];
-      page?: components["schemas"]["PageMetadata"];
-    };
-    UserAccountWithOrganizationRoleModel: {
-      id: number;
-      name: string;
-      username: string;
-      organizationRoleType: "MEMBER" | "OWNER";
-      _links?: components["schemas"]["Links"];
     };
     PagedModelRepositoryModel: {
       _embedded?: {
@@ -363,9 +393,20 @@ export interface components {
       id: number;
       name: string;
       description?: string;
-      addressPart: string;
+      addressPart?: string;
       userOwner?: components["schemas"]["UserAccountModel"];
-      organizationOwner?: components["schemas"]["OrganizationModel"];
+      organizationOwnerName?: string;
+      organizationOwnerAddressPart?: string;
+      organizationOwnerBasePermissions?:
+        | "VIEW"
+        | "TRANSLATE"
+        | "EDIT"
+        | "MANAGE";
+      organizationRole?: "MEMBER" | "OWNER";
+      /** Current user's direct permission */
+      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      /** Actual current user's permissions on this repository. You can not sort data by this column! */
+      computedPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       _links?: components["schemas"]["Links"];
     };
     UserAccountModel: {
@@ -374,21 +415,50 @@ export interface components {
       name: string;
       _links?: components["schemas"]["Links"];
     };
+    PagedModelUserAccountInRepositoryModel: {
+      _embedded?: {
+        users?: components["schemas"]["UserAccountInRepositoryModel"][];
+      };
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
+    };
+    UserAccountInRepositoryModel: {
+      id: number;
+      username: string;
+      name: string;
+      organizationRole?: "MEMBER" | "OWNER";
+      organizationBasePermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      /** Actual user's permissions on selected repository. You can not sort data by this column! */
+      computedPermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      _links?: components["schemas"]["Links"];
+    };
+    CollectionModelOrganizationInvitationModel: {
+      _embedded?: {
+        organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
+      };
+      _links?: components["schemas"]["Links"];
+    };
+    PagedModelUserAccountWithOrganizationRoleModel: {
+      _embedded?: {
+        usersInOrganization?: components["schemas"]["UserAccountWithOrganizationRoleModel"][];
+      };
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
+    };
+    UserAccountWithOrganizationRoleModel: {
+      id: number;
+      name: string;
+      username: string;
+      organizationRole: "MEMBER" | "OWNER";
+      _links?: components["schemas"]["Links"];
+    };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
     };
-    OrganizationWithCurrentUserRoleModel: {
-      id: number;
-      name: string;
-      addressPart: string;
-      description?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      currentUserRole?: "MEMBER" | "OWNER";
-      _links?: components["schemas"]["Links"];
-    };
-    PagedModelOrganizationWithCurrentUserRoleModel: {
+    PagedModelOrganizationModel: {
       _embedded?: {
-        organizations?: components["schemas"]["OrganizationWithCurrentUserRoleModel"][];
+        organizations?: components["schemas"]["OrganizationModel"][];
       };
       _links?: components["schemas"]["Links"];
       page?: components["schemas"]["PageMetadata"];
@@ -443,13 +513,6 @@ export interface components {
       userCanCreateRepositories: boolean;
       userCanCreateOrganizations: boolean;
     };
-    PermissionDTO: {
-      id?: number;
-      type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      username?: string;
-      userId?: number;
-      userFullName?: string;
-    };
     InvitationDTO: {
       id?: number;
       code?: string;
@@ -469,6 +532,31 @@ export interface components {
 }
 
 export interface operations {
+  setUsersPermissions: {
+    parameters: {
+      path: {
+        repositoryId: number;
+        userId: number;
+        permissionType: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  revokePermission: {
+    parameters: {
+      path: {
+        repositoryId: number;
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
   setUserRole: {
     parameters: {
       path: {
@@ -486,7 +574,35 @@ export interface operations {
       };
     };
   };
+  setUserRole_1: {
+    parameters: {
+      path: {
+        organizationId: number;
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetOrganizationRoleDto"];
+      };
+    };
+  };
   leaveOrganization: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  leaveOrganization_1: {
     parameters: {
       path: {
         id: number;
@@ -517,7 +633,27 @@ export interface operations {
       };
     };
   };
-  get: {
+  inviteUser_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationInvitationModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationInviteUserDto"];
+      };
+    };
+  };
+  get_1: {
     parameters: {
       path: {
         id: number;
@@ -563,6 +699,52 @@ export interface operations {
       200: unknown;
     };
   };
+  get_2: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+    };
+  };
+  update_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationDto"];
+      };
+    };
+  };
+  delete_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
   edit: {
     parameters: {
       path: {
@@ -579,7 +761,7 @@ export interface operations {
       };
     };
   };
-  create_2: {
+  create_3: {
     parameters: {
       path: {
         repositoryId: number;
@@ -595,7 +777,7 @@ export interface operations {
       };
     };
   };
-  delete_4: {
+  delete_5: {
     responses: {
       /** OK */
       200: unknown;
@@ -630,7 +812,7 @@ export interface operations {
       };
     };
   };
-  getAll: {
+  getAll_1: {
     parameters: {
       query: {
         pageable: components["schemas"]["Pageable"];
@@ -641,12 +823,43 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelOrganizationWithCurrentUserRoleModel"];
+          "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
         };
       };
     };
   };
   create: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationDto"];
+      };
+    };
+  };
+  getAll_2: {
+    parameters: {
+      query: {
+        pageable: components["schemas"]["Pageable"];
+        params: components["schemas"]["OrganizationRequestParamsDto"];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
+        };
+      };
+    };
+  };
+  create_1: {
     responses: {
       /** OK */
       200: {
@@ -676,7 +889,37 @@ export interface operations {
       };
     };
   };
+  generateRepositoryAddressPart_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateAddressPathDto"];
+      };
+    };
+  };
   generateOrganizationAddressPart: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateAddressPathDto"];
+      };
+    };
+  };
+  generateOrganizationAddressPart_1: {
     responses: {
       /** OK */
       200: {
@@ -728,7 +971,7 @@ export interface operations {
       };
     };
   };
-  create_1: {
+  create_2: {
     parameters: {
       path: {
         repositoryId: number;
@@ -779,7 +1022,7 @@ export interface operations {
       };
     };
   };
-  getAll_1: {
+  getAll_3: {
     parameters: {
       path: {
         repositoryId: number;
@@ -859,7 +1102,7 @@ export interface operations {
       };
     };
   };
-  getAll_3: {
+  getAll_5: {
     responses: {
       /** OK */
       200: {
@@ -884,7 +1127,7 @@ export interface operations {
       };
     };
   };
-  inviteUser_1: {
+  inviteUser_2: {
     responses: {
       /** OK */
       200: {
@@ -981,17 +1224,6 @@ export interface operations {
       };
     };
   };
-  editPermission: {
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PermissionEditDto"];
-      };
-    };
-  };
   allByUser: {
     responses: {
       /** OK */
@@ -1002,7 +1234,7 @@ export interface operations {
       };
     };
   };
-  create_5: {
+  create_6: {
     responses: {
       /** OK */
       200: {
@@ -1028,6 +1260,55 @@ export interface operations {
       };
     };
   };
+  getAll: {
+    parameters: {
+      query: {
+        pageable: components["schemas"]["Pageable"];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelRepositoryModel"];
+        };
+      };
+    };
+  };
+  get: {
+    parameters: {
+      path: {
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["RepositoryModel"];
+        };
+      };
+    };
+  };
+  getAllUsers: {
+    parameters: {
+      path: {
+        repositoryId: number;
+      };
+      query: {
+        pageable: components["schemas"]["Pageable"];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelUserAccountInRepositoryModel"];
+        };
+      };
+    };
+  };
   getInvitations: {
     parameters: {
       path: {
@@ -1043,7 +1324,41 @@ export interface operations {
       };
     };
   };
-  getAllUsers: {
+  getInvitations_1: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
+        };
+      };
+    };
+  };
+  getAllUsers_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+      query: {
+        pageable: components["schemas"]["Pageable"];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+        };
+      };
+    };
+  };
+  getAllUsers_2: {
     parameters: {
       path: {
         id: number;
@@ -1083,6 +1398,24 @@ export interface operations {
   getAllRepositories_1: {
     parameters: {
       path: {
+        id: number;
+      };
+      query: {
+        pageable: components["schemas"]["Pageable"];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelRepositoryModel"];
+        };
+      };
+    };
+  };
+  getAllRepositories_2: {
+    parameters: {
+      path: {
         addressPart: string;
       };
       query: {
@@ -1098,7 +1431,40 @@ export interface operations {
       };
     };
   };
-  get_1: {
+  getAllRepositories_3: {
+    parameters: {
+      path: {
+        addressPart: string;
+      };
+      query: {
+        pageable: components["schemas"]["Pageable"];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelRepositoryModel"];
+        };
+      };
+    };
+  };
+  get_3: {
+    parameters: {
+      path: {
+        addressPart: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+    };
+  };
+  get_4: {
     parameters: {
       path: {
         addressPart: string;
@@ -1128,7 +1494,37 @@ export interface operations {
       };
     };
   };
+  validateRepositoryAddressPart_1: {
+    parameters: {
+      path: {
+        addressPart: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": boolean;
+        };
+      };
+    };
+  };
   validateOrganizationAddressPart: {
+    parameters: {
+      path: {
+        addressPart: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": boolean;
+        };
+      };
+    };
+  };
+  validateOrganizationAddressPart_1: {
     parameters: {
       path: {
         addressPart: string;
@@ -1158,7 +1554,7 @@ export interface operations {
       };
     };
   };
-  delete_2: {
+  delete_3: {
     parameters: {
       path: {
         id: number;
@@ -1220,7 +1616,7 @@ export interface operations {
       };
     };
   };
-  get_3: {
+  get_6: {
     parameters: {
       path: {
         id: number;
@@ -1329,21 +1725,6 @@ export interface operations {
       };
     };
   };
-  getRepositoryPermissions: {
-    parameters: {
-      path: {
-        repositoryId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["PermissionDTO"][];
-        };
-      };
-    };
-  };
   getRepositoryInvitations: {
     parameters: {
       path: {
@@ -1418,10 +1799,11 @@ export interface operations {
       200: unknown;
     };
   };
-  deleteScreenshots: {
+  removeUser_1: {
     parameters: {
       path: {
-        ids: number[];
+        organizationId: number;
+        userId: number;
       };
     };
     responses: {
@@ -1429,10 +1811,10 @@ export interface operations {
       200: unknown;
     };
   };
-  deletePermission: {
+  deleteScreenshots: {
     parameters: {
       path: {
-        permissionId: number;
+        ids: number[];
       };
     };
     responses: {
@@ -1451,7 +1833,7 @@ export interface operations {
       200: unknown;
     };
   };
-  delete_5: {
+  delete_6: {
     parameters: {
       path: {
         key: string;

@@ -1,9 +1,10 @@
-import {default as React, ReactNode} from 'react';
+import {default as React, ReactNode, useEffect} from 'react';
 import Grid from '@material-ui/core/Grid';
 import {Box, Container, LinearProgress} from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import {BoxLoading} from '../common/BoxLoading';
 import grey from '@material-ui/core/colors/grey';
+import {useLoading} from "../../hooks/loading";
 
 export interface BaseViewProps {
     loading?: boolean;
@@ -20,6 +21,8 @@ export interface BaseViewProps {
 
 export const BaseView = (props: BaseViewProps) => {
     const hideChildrenOnLoading = props.hideChildrenOnLoading === undefined || props.hideChildrenOnLoading
+
+    const globalLoading = useLoading()
 
     return (
         <Container maxWidth={false}
@@ -40,7 +43,7 @@ export const BaseView = (props: BaseViewProps) => {
                 </Box>
                 <Box position="relative" overflow="visible">
                     <Box position="absolute" width="100%">
-                        {props.loading && <LinearProgress/>}
+                        {(globalLoading || props.loading) && <LinearProgress style={{height: "2px"}}/>}
                     </Box>
                 </Box>
                 <Box p={4} pt={2} pb={2}>

@@ -10,6 +10,7 @@ import io.tolgee.model.Repository
 import org.assertj.core.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.domain.PageRequest
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
 import org.testng.annotations.Test
 
@@ -42,7 +43,6 @@ class RepositoryRepositoryTest : AbstractTransactionalTestNGSpringContextTests()
                 .withMessage("java.lang.Exception: Exactly one of organizationOwner or userOwner must be set!")
     }
 
-
     @Test
     fun testPermittedRepositories() {
         val users = dbPopulatorReal.createUsersAndOrganizations()
@@ -71,5 +71,17 @@ class RepositoryRepositoryTest : AbstractTransactionalTestNGSpringContextTests()
         dbPopulatorReal.createBase("No org repo", users[1].username!!)
         val result = repositoryRepository.findAllPermitted(users[3].id!!)
         assertThat(result).hasSize(9)
+    }
+
+    @Test
+    fun findAllPermittedPaged(){
+        val users = dbPopulatorReal.createUsersAndOrganizations()
+        dbPopulatorReal.createBase("No org repo", users[3].username!!)
+        val result = repositoryRepository.findAllPermitted(users[3].id!!, PageRequest.of(0, 20))
+        assertThat(result).hasSize(10)
+        assertThat(result.content[0].organizationOwnerName).isNotNull
+        assertThat(result.content[8].organizationOwnerAddressPart).isNotNull
+        assertThat(result.content[9].userOwner).isNotNull
+        assertThat(result.content[9].directPermissions).isNotNull
     }
 }

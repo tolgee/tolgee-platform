@@ -38,9 +38,12 @@ export const OrganizationMembersView: FunctionComponent = () => {
     const [leaveOrganization, leaveOrganizationError] = useLeaveOrganization()
 
     return (
-        <BaseOrganizationSettingsView title={<T>organization_members_view_title</T>}>
+        <BaseOrganizationSettingsView>
             {leaveOrganizationError}
             <SimplePaginatedHateoasList
+                search
+                title={<T>organization_members_view_title</T>}
+                pageSize={10}
                 renderItem={(i) =>
                     <Box p={1} pl={2} className={classes.container} key={i.id}>
                         <Grid container justify="space-between" alignItems="center">

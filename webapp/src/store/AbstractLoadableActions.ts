@@ -43,7 +43,6 @@ export abstract class AbstractLoadableActions<StateType extends StateWithLoadabl
         return new LoadableDefinition<StateType, PayloadType, DispatchParams>(payloadProvider, then, successMessage, redirectAfter);
     }
 
-
     private createLoadableAction<PayloadType, DispatchParams extends any[]>(loadableName,
                                                                             payloadProvider: (...params: DispatchParams) => Promise<any>,
                                                                             then?: StateModifier<StateType, PayloadType>, successMessage?: ReactNode, redirectAfter?: string):

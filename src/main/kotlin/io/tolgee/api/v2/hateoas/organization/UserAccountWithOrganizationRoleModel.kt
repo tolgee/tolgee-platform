@@ -9,5 +9,5 @@ data class UserAccountWithOrganizationRoleModel(
         val id: Long,
         val name: String,
         var username: String,
-        var organizationRoleType: OrganizationRoleType
+        var organizationRole: OrganizationRoleType
 ) : RepresentationModel<UserAccountWithOrganizationRoleModel>()

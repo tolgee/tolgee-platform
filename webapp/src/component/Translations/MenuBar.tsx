@@ -3,7 +3,7 @@ import {Box, Button, FormControlLabel, FormGroup, IconButton, Slide, Switch, Too
 import {confirmation} from "../../hooks/confirmation";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {LanguagesMenu} from "../common/form/LanguagesMenu";
-import {SearchField} from "./SearchField";
+import {TranslationsSearchField} from "./TranslationsSearchField";
 import {Link} from "react-router-dom";
 import {LINKS, PARAMS} from "../../constants/links";
 import AddIcon from "@material-ui/icons/Add";
@@ -53,7 +53,7 @@ export const MenuBar: FunctionComponent = () => {
                             <LanguagesMenu context="translations"/>
                         </Box>
                         <Box pr={2}>
-                            <SearchField/>
+                            <TranslationsSearchField/>
                         </Box>
                         <FormGroup>
                             <FormControlLabel labelPlacement="start"
