@@ -24,7 +24,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
 
         performAuthGet("/v2/repositories").andPrettyPrint.andAssertThatJson.node("_embedded.repositories").let {
             it.isArray.hasSize(3)
-            it.node("[0].userOwner.name").isEqualTo("admin")
+            it.node("[0].userOwner.name").isEqualTo("kim")
             it.node("[0].directPermissions").isEqualTo("MANAGE")
             it.node("[2].userOwner").isEqualTo("null")
             it.node("[2].organizationOwnerName").isEqualTo("cool")
