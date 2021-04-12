@@ -13,8 +13,11 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
 
     @Test
     fun getAll() {
-        dbPopulator.createBase("one")
-        dbPopulator.createBase("two")
+        dbPopulator.createBase("one", "kim")
+        dbPopulator.createBase("two", "kim")
+
+        logAsUser("kim")
+
         dbPopulator.createOrganization("cool", userAccount!!).let { org ->
             dbPopulator.createRepositoryWithOrganization("org repo", org)
         }

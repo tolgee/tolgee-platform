@@ -47,12 +47,16 @@ open class RepositoryServiceTest : AbstractSpringTest() {
     @Test
     @Transactional
     open fun testFindMultiple() {
-        val usersWithOrganizations = dbPopulator.createUsersAndOrganizations(generateUniqueString()) //create some data
+        val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("helga") //create some data
         val repo = dbPopulator.createBase("Hello world")
         repo.userOwner = userAccountService.get(repo.userOwner!!.id!!).get()
         val organization = usersWithOrganizations[0].organizationRoles[0].organization
         organizationRoleService.grantRoleToUser(repo.userOwner!!, organization!!, OrganizationRoleType.MEMBER)
-        val organization2 = usersWithOrganizations[3].organizationRoles[0].organization
+
+        val user3 = entityManager.merge(usersWithOrganizations[3])
+        entityManager.refresh(user3)
+
+        val organization2 = user3.organizationRoles[0].organization
         organizationRoleService.grantRoleToUser(repo.userOwner!!, organization2!!, OrganizationRoleType.OWNER)
         val repositories = repositoryService.findAllPermitted(repo.userOwner!!)
         assertThat(repositories).hasSize(7)
@@ -63,16 +67,20 @@ open class RepositoryServiceTest : AbstractSpringTest() {
 
     @Test
     open fun testFindMultiplePermissions() {
-        val usersWithOrganizations = dbPopulator.createUsersAndOrganizations(generateUniqueString()) //create some data
+        val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("agnes") //create some data
         val repo = dbPopulator.createBase("Hello world")
         repo.userOwner = userAccountService.get(repo.userOwner!!.id!!).get()
         val organization = usersWithOrganizations[0].organizationRoles[0].organization
         organizationRoleService.grantRoleToUser(repo.userOwner!!, organization!!, OrganizationRoleType.MEMBER)
-        val organization2 = usersWithOrganizations[3].organizationRoles[0].organization
+
+        val user3 = entityManager.merge(usersWithOrganizations[3])
+        entityManager.refresh(user3)
+
+        val organization2 = user3.organizationRoles[0].organization
         organizationRoleService.grantRoleToUser(repo.userOwner!!, organization2!!, OrganizationRoleType.OWNER)
 
         val customPermissionRepo = usersWithOrganizations[0].organizationRoles[0].organization!!.repositories[2]
-        val customPermissionRepo2 = usersWithOrganizations[3].organizationRoles[0].organization!!.repositories[2]
+        val customPermissionRepo2 = user3.organizationRoles[0].organization!!.repositories[2]
         permissionService.create(
                 Permission(
                         user = repo.userOwner,

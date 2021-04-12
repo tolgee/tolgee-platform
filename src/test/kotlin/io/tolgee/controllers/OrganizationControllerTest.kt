@@ -55,7 +55,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                 .andPrettyPrint.andAssertThatJson.let {
                     it.node("_embedded.organizations").let {
                         it.isArray.hasSize(6)
-                        it.node("[0].name").isEqualTo("User 1's organization 1")
+                        it.node("[0].name").isEqualTo("user 2's organization 1")
                         it.node("[0].basePermissions").isEqualTo("VIEW")
                         it.node("[0].currentUserRole").isEqualTo("OWNER")
                     }
@@ -72,7 +72,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                 .andPrettyPrint.andAssertThatJson.let {
                     it.node("_embedded.organizations").let {
                         it.isArray.hasSize(1)
-                        it.node("[0].name").isEqualTo("User 1's organization 1")
+                        it.node("[0].name").isEqualTo("user 2's organization 1")
                         it.node("[0].basePermissions").isEqualTo("VIEW")
                         it.node("[0].currentUserRole").isEqualTo("OWNER")
                     }
@@ -88,7 +88,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
         performAuthGet("/api/organizations?size=100&sort=basePermissions,desc&sort=name,desc")
                 .andPrettyPrint
                 .andAssertThatJson
-                .node("_embedded.organizations").node("[0].name").isEqualTo("User 3's organization 3")
+                .node("_embedded.organizations").node("[0].name").isEqualTo("user 4's organization 3")
     }
 
     @Test
@@ -339,9 +339,9 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                     .andIsOk.andAssertThatJson.let {
                         it.node("_embedded.repositories").let { repositoriesNode ->
                             repositoriesNode.isArray.hasSize(3)
-                            repositoriesNode.node("[1].name").isEqualTo("User 1's organization 1 repository 2")
-                            repositoriesNode.node("[1].organizationOwnerAddressPart").isEqualTo("user-1-s-organization-1")
-                            repositoriesNode.node("[1].organizationOwnerName").isEqualTo("User 1's organization 1")
+                            repositoriesNode.node("[1].name").isEqualTo("user 2's organization 1 repository 2")
+                            repositoriesNode.node("[1].organizationOwnerAddressPart").isEqualTo("user-2-s-organization-1")
+                            repositoriesNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
                         }
                     }
         }

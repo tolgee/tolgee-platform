@@ -72,7 +72,6 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
                 val org = createOrganization("${user.name}'s organization $organizationNum", user)
                 (0 until listUserIdx).forEach { userIdx ->
                     organizationRoleService.grantRoleToUser(users[userIdx], org, OrganizationRoleType.MEMBER)
-
                 }
                 (1..3).forEach { repositoryNum ->
                     val name = "${user.name}'s organization $organizationNum repository $repositoryNum"

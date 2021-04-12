@@ -10,6 +10,7 @@ import io.tolgee.repository.UserAccountRepository
 import org.assertj.core.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
 import org.springframework.transaction.annotation.Transactional
 import org.testng.annotations.BeforeMethod
@@ -17,6 +18,7 @@ import org.testng.annotations.Test
 import javax.persistence.EntityManager
 
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 open class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
     @Autowired
     lateinit var populator: DbPopulatorReal

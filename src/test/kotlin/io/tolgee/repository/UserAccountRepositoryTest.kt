@@ -35,9 +35,12 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
     @Test
     fun getAllInOrganizationCorrectAccounts() {
         val usersAndOrganizations = dbPopulatorReal.createUsersAndOrganizations()
-        val org = usersAndOrganizations[0].organizationRoles[0].organization
+        val user = entityManager.merge(usersAndOrganizations[2])
+        entityManager.refresh(user)
+
+        val org = user.organizationRoles[0].organization
         val returned = userAccountRepository.getAllInOrganization(org!!.id!!, PageRequest.of(0, 20), "")
-        assertThat(returned.content).hasSize(4)
+        assertThat(returned.content).hasSize(3)
     }
 
 
