@@ -34,7 +34,7 @@ export class ApiSchemaHttpService extends ApiHttpService {
                 const params = Object.entries(queryParams).reduce((acc, [key, value]) =>
                         typeof value === "object" ? {...acc, ...value} : {...acc, [key]: value},
                     {})
-                queryString = this.buildQuery(params)
+                queryString = "?" + this.buildQuery(params)
             }
 
             const response = await ApiHttpService.getResObject(await this.fetch(urlResult + queryString, {method: method as string}))
@@ -43,20 +43,35 @@ export class ApiSchemaHttpService extends ApiHttpService {
     }
 }
 
-
 type ResponseContent<Url extends keyof paths, Method extends keyof paths[Url]> =
-    OperationSchema<Url, Method>["responses"][200] extends NotNullContent ? OperationSchema<Url, Method>["responses"][200]["content"]["*/*"] : void;
+    OperationSchema<Url, Method>["responses"][200] extends NotNullAnyContent ? OperationSchema<Url, Method>["responses"][200]["content"]["*/*"] :
+    OperationSchema<Url, Method>["responses"][200] extends NotNullJsonHalContent ? OperationSchema<Url, Method>["responses"][200]["content"]["application/hal+json"] :
+    OperationSchema<Url, Method>["responses"][200] extends NotNullJsonContent ? OperationSchema<Url, Method>["responses"][200]["content"]["application/json"] : void;
 
-type NotNullContent = {
+type NotNullAnyContent = {
     content: {
         "*/*": any
+    }
+}
+
+type NotNullJsonHalContent = {
+    content: {
+        "application/hal+json": any
+    }
+}
+
+type NotNullJsonContent = {
+    content: {
+        "application/json": any
     }
 }
 
 type ResponseType = {
     200: {
         content?: {
-            "*/*": any
+            "*/*"?: any,
+            "application/json"?: any,
+            "application/hal+json"?: any
         }
     } | unknown
 }

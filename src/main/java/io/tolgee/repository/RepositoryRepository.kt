@@ -31,14 +31,21 @@ interface RepositoryRepository : JpaRepository<io.tolgee.model.Repository, Long>
         """)
     fun findAllPermitted(userAccountId: Long): List<Array<Any>>
 
-    @Query(BASE_ALL_PERMITTED_QUERY)
-    fun findAllPermitted(userAccountId: Long, pageable: Pageable): Page<RepositoryView>
+    @Query("""$BASE_ALL_PERMITTED_QUERY 
+                and ((lower(r.name) like lower(concat('%', :search,'%'))
+                or lower(o.name) like lower(concat('%', :search,'%')))
+                or lower(ua.name) like lower(concat('%', :search,'%')) or :search is null)
+    """)
+    fun findAllPermitted(userAccountId: Long, pageable: Pageable, search: String? = null): Page<RepositoryView>
 
     fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<io.tolgee.model.Repository>
 
     @Query("""$BASE_ALL_PERMITTED_QUERY and o.id = :organizationOwnerId and o is not null
+         and ((lower(r.name) like lower(concat('%', :search,'%'))
+                or lower(o.name) like lower(concat('%', :search,'%')))
+                or lower(ua.name) like lower(concat('%', :search,'%')) or :search is null)
         """)
-    fun findAllPermittedInOrganization(userAccountId: Long, organizationOwnerId: Long, pageable: Pageable): Page<RepositoryView>
+    fun findAllPermittedInOrganization(userAccountId: Long, organizationOwnerId: Long, pageable: Pageable, search: String?): Page<RepositoryView>
 
     fun countAllByAddressPart(addressPart: String): Long
 

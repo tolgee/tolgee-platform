@@ -154,11 +154,12 @@ open class OrganizationController(
     @GetMapping("/{id:[0-9]+]}/repositories")
     open fun getAllRepositories(
             @PathVariable("id") id: Long,
-            pageable: Pageable
+            pageable: Pageable,
+            @RequestParam("search") search: String?
     ): PagedModel<RepositoryModel> {
         return organizationService.get(id)?.let {
             organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
-            repositoryService.findAllInOrganization(it.id!!, pageable).let { repositories ->
+            repositoryService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
                 pagedRepositoryResourcesAssembler.toModel(repositories, repositoryModelAssembler)
             }
         } ?: throw NotFoundException()
@@ -167,11 +168,12 @@ open class OrganizationController(
     @GetMapping("/{addressPart:.*[a-z].*}/repositories")
     open fun getAllRepositories(
             @PathVariable("addressPart") addressPart: String,
-            pageable: Pageable
+            pageable: Pageable,
+            @RequestParam("search") search: String?
     ): PagedModel<RepositoryModel> {
         return organizationService.get(addressPart)?.let {
             organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
-            repositoryService.findAllInOrganization(it.id!!, pageable).let { repositories ->
+            repositoryService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
                 pagedRepositoryResourcesAssembler.toModel(repositories, repositoryModelAssembler)
             }
         } ?: throw NotFoundException()

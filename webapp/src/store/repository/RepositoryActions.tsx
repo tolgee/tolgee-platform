@@ -27,8 +27,8 @@ export class RepositoryActions extends AbstractLoadableActions<RepositoriesState
 
 
     loadableDefinitions = {
-        listPermitted: this.createLoadableDefinition(this.service.getV2Repositories),
-        listUsersForPermissions: this.createLoadableDefinition(this.service.getV2Users),
+        listPermitted: this.createLoadableDefinition(this.apiSchemaHttpService.schemaRequest("/v2/repositories", "get")),
+        listUsersForPermissions: this.createLoadableDefinition(this.apiSchemaHttpService.schemaRequest("/v2/repositories/{repositoryId}/users", "get")),
         editRepository: this.createLoadableDefinition((id, values) => this.service.editRepository(id, values), undefined,
             <T>repository_successfully_edited_message</T>, LINKS.REPOSITORIES.build()),
         createRepository: this.createLoadableDefinition(this.service.createRepository,

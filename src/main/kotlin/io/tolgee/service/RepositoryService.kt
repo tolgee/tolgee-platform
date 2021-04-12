@@ -111,8 +111,8 @@ open class RepositoryService constructor(
         return this.repositoryRepository.findAllByOrganizationOwnerId(organizationId)
     }
 
-    open fun findAllInOrganization(organizationId: Long, pageable: Pageable): Page<RepositoryView> {
-        return this.repositoryRepository.findAllPermittedInOrganization(authenticationFacade.userAccount.id!!, organizationId, pageable)
+    open fun findAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<RepositoryView> {
+        return this.repositoryRepository.findAllPermittedInOrganization(authenticationFacade.userAccount.id!!, organizationId, pageable, search)
     }
 
     @Transactional
@@ -145,7 +145,7 @@ open class RepositoryService constructor(
         }
     }
 
-    open fun findPermittedPaged(pageable: Pageable): Page<RepositoryView> {
-        return repositoryRepository.findAllPermitted(authenticationFacade.userAccount.id!!, pageable)
+    open fun findPermittedPaged(pageable: Pageable, search: String?): Page<RepositoryView> {
+        return repositoryRepository.findAllPermitted(authenticationFacade.userAccount.id!!, pageable, search)
     }
 }

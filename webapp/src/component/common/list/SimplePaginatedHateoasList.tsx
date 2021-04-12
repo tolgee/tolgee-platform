@@ -17,7 +17,7 @@ export interface SimplePaginatedHateoasListProps<ItemDataType, ActionsType exten
     renderItem: (itemData: EmbeddedDataItem<ActionsType, ResourceActionsStateType, LoadableName>) => ReactNode
     actions: ActionsType
     loadableName: LoadableName
-    dispatchParams?: any[]
+    dispatchParams?: [Omit<Parameters<ActionsType["loadableDefinitions"][LoadableName]["payloadProvider"]>[0], "query">, ...any[]]
     pageSize?: number,
     title?: ReactNode
     search?: boolean
@@ -30,18 +30,30 @@ export function SimplePaginatedHateoasList<ItemDataType,
 (props: SimplePaginatedHateoasListProps<ItemDataType, ActionsType, ResourceActionsStateType, LoadableName>) {
     const loadable = props.actions.useSelector((state) => state.loadables[props.loadableName])
     const [currentPage, setCurrentPage] = useState(1)
+    const [search, setSearch] = useState(undefined as string | undefined);
 
-    const loadPage = (page) => {
-        const dispatchParams = props.dispatchParams ? [...props.dispatchParams] : [];
+    const loadPage = (page: number) => {
+        const [requestParam, ...otherParams] = props.dispatchParams ? [...props.dispatchParams] : [];
 
-        const params = [...dispatchParams, {
-            page: page - 1,
-            size: props.pageSize || 100,
-            sort: ["name"]
-        }] as Parameters<(typeof props.actions.loadableActions[LoadableName])["dispatch"]>
+        const params = [{
+            ...requestParam, query: {
+                ...requestParam, pageable: {
+                    page: page - 1,
+                    size: props.pageSize || 20,
+                    sort: ["name"]
+                },
+                search: search || undefined
+            }
+        }, ...otherParams] as Parameters<(typeof props.actions.loadableActions[LoadableName])["dispatch"]>
 
         return props.actions.loadableActions[props.loadableName].dispatch(...params)
     }
+
+    useEffect(() => {
+        if (search != undefined) {
+            loadPage(1)
+        }
+    }, [search])
 
     useEffect(() => {
         if (!loadable.touched) {
@@ -90,29 +102,23 @@ export function SimplePaginatedHateoasList<ItemDataType,
         return <BoxLoading/>
     }
 
-    if (!embedded) {
-        return (
-            <>
-                <EmptyListMessage/>
-            </>
-        )
-    }
-
     return (
-        <> {props.title && props.search &&
+        <> {(props.title || props.search) &&
         <Box mb={1}>
             <Grid container alignItems="center">
                 <Grid item lg md sm xs>
-                    <Box><Typography variant="h6">{props.title}</Typography></Box>
+                    {props.title &&
+                    <Box><Typography variant="h6">{props.title}</Typography></Box>}
                 </Grid>
                 {props.search &&
                 <Grid item lg={4} md={5} sm={12} xs={12}>
-                    <SearchField fullWidth onSearch={() => {
+                    <SearchField fullWidth initial={search || ""} onSearch={val => {
+                        setSearch(val)
                     }} variant={"outlined"} size="small"/>
                 </Grid>}
             </Grid>
         </Box>}
-            <SimplePaperList
+            {!embedded ? <EmptyListMessage/> : <SimplePaperList
                 pagination={{
                     page: data.page?.number!! + 1,
                     onPageChange,
@@ -120,7 +126,7 @@ export function SimplePaginatedHateoasList<ItemDataType,
                 }}
                 data={items}
                 renderItem={props.renderItem}
-            />
+            />}
         </>
     )
 }

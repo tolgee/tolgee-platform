@@ -25,7 +25,7 @@ export class OrganizationActions extends AbstractLoadableActions<OrganizationSta
     }
 
     loadableDefinitions = {
-        listPermitted: this.createLoadableDefinition(this.organizationService.listPermitted),
+        listPermitted: this.createLoadableDefinition(this.apiSchemaHttpService.schemaRequest("/v2/organizations", "get")),
         listPermittedForMenu: this.createLoadableDefinition(() => this.organizationService.listPermitted({filterCurrentUserOwner: true, size: 100})),
         listPermittedForRepositoryOwnerSelect: this.createLoadableDefinition(() => this.organizationService.listPermitted({
             filterCurrentUserOwner: true,
@@ -50,7 +50,9 @@ export class OrganizationActions extends AbstractLoadableActions<OrganizationSta
             return this.resetLoadable(state, "listInvitations")
         }),
         listInvitations: this.createLoadableDefinition(this.organizationService.listInvitations),
-        listRepositories: this.createLoadableDefinition(this.organizationService.listRepositories),
+        listRepositories: this.createLoadableDefinition(
+            this.apiSchemaHttpService.schemaRequest("/api/organizations/{addressPart}/repositories", "get")
+        ),
         removeUser: this.createLoadableDefinition(this.organizationService.removeUser, (state: OrganizationState): OrganizationState => {
             return this.resetLoadable(state, "listUsers")
         }, <T>organization_user_deleted</T>),

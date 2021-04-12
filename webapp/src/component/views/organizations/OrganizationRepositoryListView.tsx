@@ -21,8 +21,9 @@ export const OrganizationsRepositoryListView = () => {
     const loadable = actions.useSelector(state => state.loadables.listRepositories)
 
     return (
-        <BaseView title={t("organization_repositories_title")} containerMaxWidth="md" hideChildrenOnLoading={false} loading={loadable.loading}>
-            <SimplePaginatedHateoasList pageSize={20} dispatchParams={[organization.addressPart]} actions={actions} loadableName="listRepositories" renderItem={r =>
+        <BaseView title={t("organization_repositories_title", {name: organization.name})} containerMaxWidth="md" hideChildrenOnLoading={false} loading={loadable.loading}>
+            <SimplePaginatedHateoasList pageSize={20} dispatchParams={[{path: {addressPart: organization.addressPart}}]} actions={actions} search
+                                        loadableName="listRepositories" renderItem={r =>
                 <RepositoryListItem {...r} />
             }/>
             <Box display="flex" flexDirection="column" alignItems="flex-end" mt={2} pr={2}>

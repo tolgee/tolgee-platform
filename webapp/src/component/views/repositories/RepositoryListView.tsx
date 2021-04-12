@@ -21,7 +21,7 @@ export const RepositoryListView = () => {
     return (
         <PossibleRepositoryPage>
             <BaseView title={t("repositories_title")} containerMaxWidth="md" hideChildrenOnLoading={false} loading={listPermitted.loading}>
-                <SimplePaginatedHateoasList pageSize={20} actions={actions} loadableName="listPermitted" renderItem={r =>
+                <SimplePaginatedHateoasList search pageSize={20} actions={actions} loadableName="listPermitted" renderItem={r =>
                     <RepositoryListItem {...r} />
                 }/>
                 <Box display="flex" flexDirection="column" alignItems="flex-end" mt={2} pr={2}>

@@ -78,7 +78,9 @@ export const OrganizationMembersView: FunctionComponent = () => {
                 }
                 actions={actions}
                 loadableName="listUsers"
-                dispatchParams={[organization.id]}
+                dispatchParams={[{
+                    path: {id: organization.id}
+                }]}
             />
 
 

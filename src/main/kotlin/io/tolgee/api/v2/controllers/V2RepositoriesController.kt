@@ -45,8 +45,8 @@ open class V2RepositoriesController(
         val authenticationFacade: AuthenticationFacade
 ) {
     @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
-    open fun getAll(pageable: Pageable): PagedModel<RepositoryModel>? {
-        val repositories = repositoryService.findPermittedPaged(pageable)
+    open fun getAll(pageable: Pageable, @RequestParam("search") search: String?): PagedModel<RepositoryModel>? {
+        val repositories = repositoryService.findPermittedPaged(pageable, search)
         return arrayResourcesAssembler.toModel(repositories, repositoryModelAssembler)
     }
 
