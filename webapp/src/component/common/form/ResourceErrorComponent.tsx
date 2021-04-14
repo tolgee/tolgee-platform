@@ -3,42 +3,10 @@ import {Alert} from "../Alert";
 import {ErrorResponseDTO} from "../../../service/response.types";
 import {T} from "@tolgee/react";
 import {Box} from "@material-ui/core";
-
-const standardValidationProp = "STANDARD_VALIDATION";
-const customValidationProp = "CUSTOM_VALIDATION";
-
-const isStandardValidationError = (error) => {
-    return error.hasOwnProperty(standardValidationProp);
-};
-
-const isCustomValidationError = (error) => {
-    return error.hasOwnProperty(customValidationProp);
-};
-
-
-const isErrorResponseDTO = (error) => {
-    return error.hasOwnProperty("code");
-};
-
-export const parseError = (errorData): string[] => {
-    if (isStandardValidationError(errorData)) {
-        return Object.keys(errorData[standardValidationProp]).map(k => k + "->" + errorData[standardValidationProp][k]);
-    }
-
-    if (isCustomValidationError(errorData)) {
-        //todo pretty print message with params
-        return Object.keys(errorData[customValidationProp]);
-    }
-
-    if (isErrorResponseDTO(errorData)) {
-        return [errorData.code];
-    }
-
-    return errorData && ["Unexpected error"];
-};
+import { parseErrorResponse } from "../../../fixtures/errorFIxtures";
 
 export const ResourceErrorComponent: FunctionComponent<{ error: ErrorResponseDTO | any }> = (props) => {
-    return <>{props.error && parseError(props.error).map(e => (
+    return <>{props.error && parseErrorResponse(props.error).map(e => (
         <Box ml={-2} mr={-2} key={new Date().toDateString()}>
             <Alert severity="error">
                 <T>{e}</T>

@@ -59,20 +59,24 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
                     </DialogContentText>
                     {props.hardModeText &&
                     <Box>
-                        <TextField fullWidth={true} label={<T parameters={{text: props.hardModeText}}>hard_mode_confirmation_rewrite_text</T>}
+                        <TextField data-cy={"global-confirmation-hard-mode-text-field"}
+                                   fullWidth={true} label={<T parameters={{text: props.hardModeText}}>hard_mode_confirmation_rewrite_text</T>}
                                    value={input}
                                    onChange={(e) => setInput(e.target.value)}/>
                     </Box>
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => {
+                    <Button
+                        data-cy="global-confirmation-cancel"
+                        onClick={() => {
                         setInput("")
                         props.onCancel && props.onCancel();
                     }} type="button" color={props.cancelButtonColor}>
                         {props.cancelButtonText}
                     </Button>
                     <Button
+                        data-cy="global-confirmation-confirm"
                         color={props.confirmButtonColor}
                         autoFocus
                         disabled={!!disabled}

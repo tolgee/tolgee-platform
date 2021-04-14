@@ -12,17 +12,20 @@ type SimplePaperListProps<T> = {
     renderItem: (item: T) => ReactNode
 }
 
-export function SimplePaperList<T>(props: SimplePaperListProps<T>) {
+export function SimplePaperList<T>(props: SimplePaperListProps<T> & React.ComponentProps<typeof Paper>) {
+    const {data, pagination, renderItem, ...paperProps} = props
+
     return (
         <>
-            <Paper variant="outlined">
+            <Paper variant="outlined" {...paperProps}>
                 <List>
-                    {props.data.map((i) => props.renderItem(i))}
+                    {data.map((i) => props.renderItem(i))}
                 </List>
-                {props.pagination && props.pagination.pageCount > 1 &&
+                {pagination && pagination.pageCount > 1 &&
                 <Box display="flex" justifyContent="flex-end" mt={1} mb={1}>
-                    <Pagination page={props.pagination.page}
-                                count={props.pagination.pageCount}
+                    <Pagination data-cy="global-list-pagination"
+                                page={pagination.page}
+                                count={pagination.pageCount}
                                 onChange={(_, value) => props.pagination?.onPageChange(value)}
                     />
                 </Box>}

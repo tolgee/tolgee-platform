@@ -68,9 +68,9 @@ const successMessageMiddleware = store => next => action => {
 
 const redirectAfterMiddleware = store => next => action => {
     if (action.meta && action.meta.redirectAfter && action.type.indexOf("_PENDING") <= -1 && action.type.indexOf("_REJECTED") <= -1) {
-        redirectionActions.redirect.dispatch(action.meta.redirectAfter);
+        const path = typeof action.meta.redirectAfter === "function" ? action.meta.redirectAfter(action) : action.meta.redirectAfter;
+        redirectionActions.redirect.dispatch(path);
     }
-
     next(action);
 };
 

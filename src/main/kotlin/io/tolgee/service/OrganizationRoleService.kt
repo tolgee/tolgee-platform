@@ -95,6 +95,10 @@ open class OrganizationRoleService(
         }
     }
 
+    open fun deleteAllInOrganization(organization: Organization) {
+        organizationRoleRepository.deleteByOrganization(organization)
+    }
+
     open fun delete(id: Long) {
         organizationRoleRepository.deleteById(id)
     }

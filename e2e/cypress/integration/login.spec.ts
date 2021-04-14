@@ -15,7 +15,7 @@ context('Login', () => {
         cy.xpath('//input[@name="password"]')
             .type(PASSWORD).should('have.value', PASSWORD);
         cy.xpath("//button//*[text() = 'Login']").click();
-        cy.xpath(getAnyContainingText("Login")).should("not.be.visible");
+        cy.xpath(getAnyContainingText("Login")).should("not.exist");
         cy.xpath("//*[@aria-controls='user-menu']").should("be.visible");
     });
 
@@ -24,7 +24,7 @@ context('Login', () => {
             .type("aaaa").should('have.value', "aaaa");
         cy.xpath('//input[@name="password"]')
             .type(PASSWORD).should('have.value', PASSWORD);
-        cy.xpath("//button//*[text() = 'Login']").click();
+        cy.xpath("//button//*[text() = 'Login']").should("be.visible").click();
         cy.xpath(getAnyContainingText("Login")).should("be.visible");
         cy.contains("Invalid credentials").should("be.visible");
     });

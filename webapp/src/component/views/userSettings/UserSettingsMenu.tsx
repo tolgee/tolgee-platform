@@ -10,7 +10,7 @@ export const UserSettingsMenu = () => {
     const menuItems = useUserMenuItems()
 
     return (
-        <Paper elevation={0} variant="outlined">
+        <Paper elevation={0} variant="outlined" data-cy="user-account-side-menu">
             <MenuList>
                 {menuItems.map((mi, idx) =>
                     <MenuItem

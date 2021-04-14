@@ -44,13 +44,15 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({initialValues, 
                                         <React.Fragment>
                                             {props.customActions && <Box flexGrow={1}>{props.customActions}</Box>}
                                             <Box display="flex" alignItems="flex-end" mb={2}>
-                                                <Button disabled={props.loading}
+                                                <Button data-cy="global-form-cancel-button" disabled={props.loading}
                                                         onClick={onCancel}><T>global_form_cancel</T></Button>
                                                 <Box ml={1}>
-                                                    <LoadingButton loading={props.saveActionLoadable?.loading}
-                                                                   color="primary"
-                                                                   variant="contained"
-                                                                   disabled={props.loading} type="submit">
+                                                    <LoadingButton
+                                                        data-cy="global-form-save-button"
+                                                        loading={props.saveActionLoadable?.loading}
+                                                        color="primary"
+                                                        variant="contained"
+                                                        disabled={props.loading} type="submit">
                                                         {props.submitButtonInner || <T>global_form_save</T>}
                                                     </LoadingButton>
                                                 </Box>

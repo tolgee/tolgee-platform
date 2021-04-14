@@ -61,10 +61,6 @@ export const OrganizationProfileView: FunctionComponent = () => {
         return <Redirect to={LINKS.ORGANIZATIONS.build()}/>
     }
 
-    if (saveLoadable.loaded) {
-        return <Redirect to={LINKS.ORGANIZATION_PROFILE.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: saveLoadable.data?.addressPart!!})}/>
-    }
-
     return (
         <BaseOrganizationSettingsView title={<T>edit_organization_title</T>}>
             <StandardForm initialValues={initialValues!}
@@ -72,7 +68,10 @@ export const OrganizationProfileView: FunctionComponent = () => {
                           onCancel={() => setCancelled(true)}
                           saveActionLoadable={saveLoadable}
                           validationSchema={Validation.ORGANIZATION_CREATE_OR_EDIT(t, initialValues?.addressPart)}
-                          customActions={<Button color="secondary" variant="outlined" onClick={handleDelete}><T>organization_delete_button</T></Button>}
+                          customActions={<Button data-cy="organization-delete-button"
+                                                 color="secondary"
+                                                 variant="outlined"
+                                                 onClick={handleDelete}><T>organization_delete_button</T></Button>}
             >
                 <>
                     <OrganizationFields/>

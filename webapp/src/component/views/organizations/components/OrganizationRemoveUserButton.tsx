@@ -20,7 +20,8 @@ const OrganizationRemoveUserButton = (props: { userId: number, userName: string 
     }
 
     return (
-        <Button onClick={removeUser} variant="outlined" size="small" aria-controls="simple-menu" aria-haspopup="true">
+        <Button data-cy="organization-members-remove-user-button"
+                onClick={removeUser} variant="outlined" size="small" aria-controls="simple-menu" aria-haspopup="true">
             <T>organization_users_remove_user</T>
         </Button>
     );

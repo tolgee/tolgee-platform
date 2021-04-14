@@ -57,6 +57,7 @@ export function SimpleHateoasList<ItemDataType,
 
     return (
         <SimplePaperList
+            data-cy="simple-hateoas-list"
             data={embedded[key]}
             renderItem={props.renderItem}
         />

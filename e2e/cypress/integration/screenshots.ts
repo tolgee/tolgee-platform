@@ -1,41 +1,37 @@
 import {addScreenshot, createRepository, deleteRepository, login, setTranslations} from "../fixtures/apiCalls";
 import {HOST} from "../fixtures/constants";
-import {RepositoryDTO} from "../../src/service/response.types"
 import 'cypress-file-upload';
 import {getPopover} from "../fixtures/shared";
+import {RepositoryDTO} from "../../../webapp/src/service/response.types";
 
 describe('Key screenshots', () => {
     let repository: RepositoryDTO = null
 
-    beforeEach(() => {
-        cy.wrap(null).then(() => login().then(() => {
-            cy.wrap(null).then(() => createRepository({
-                    name: "Test",
-                    languages: [
-                        {
-                            abbreviation: "en",
-                            name: "English"
-                        },
-                        {
-                            abbreviation: "cs",
-                            name: "Česky"
-                        }
-                    ]
-                }
-            ).then(r => {
-                repository = r.body as RepositoryDTO;
-                window.localStorage.setItem('selectedLanguages', `{"${repository.id}":["en"]}`);
-                const promises = []
-                for (let i = 1; i < 5; i++) {
-                    promises.push(setTranslations(repository.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}))
-                }
-                Cypress.Promise.all(promises).then(() => {
-                    visit();
-                })
-            }))
-        }));
-    });
+    beforeEach(async () => {
+        await login().promisify()
+        const r = await createRepository({
+                name: "Test",
+                languages: [
+                    {
+                        abbreviation: "en",
+                        name: "English"
+                    },
+                    {
+                        abbreviation: "cs",
+                        name: "Česky"
+                    }
+                ]
+            }
+        ).promisify()
 
+        repository = r.body as RepositoryDTO;
+        window.localStorage.setItem('selectedLanguages', `{"${repository.id}":["en"]}`);
+        for (let i = 1; i < 5; i++) {
+            await setTranslations(repository.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}).promisify()
+        }
+
+        await visit();
+    })
 
     it("opens popup", () => {
         getCameraButton(1).click()
@@ -137,12 +133,12 @@ describe('Key screenshots', () => {
         );
     });
 
-    afterEach(() => {
-        cy.wrap(null).then(() => deleteRepository(repository.id));
+    afterEach (() => {
+        deleteRepository(repository.id)
     })
 
-    const visit = () => {
-        cy.visit(`${HOST}/repositories/${repository.id}/translations`)
+    const visit = async () => {
+        await cy.visit(`${HOST}/repositories/${repository.id}/translations`).promisify()
     }
 })
 

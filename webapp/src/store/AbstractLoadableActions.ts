@@ -5,7 +5,7 @@ import {ReactNode} from "react";
 
 export class LoadableDefinition<StateType extends StateWithLoadables<any>, PayloadType, DispatchParams extends any[]> {
     constructor(public payloadProvider: (...params: DispatchParams) => Promise<any>, public then: StateModifier<StateType, PayloadType>,
-                public successMessage?: ReactNode, public redirectAfter?: string) {
+                public successMessage?: ReactNode, public redirectAfter?: string | ((action: ActionType<PayloadType>) => string)) {
     }
 }
 
@@ -36,14 +36,16 @@ export abstract class AbstractLoadableActions<StateType extends StateWithLoadabl
     createLoadableDefinition<PayloadType, DispatchParams extends any[]>(payloadProvider: (...params: DispatchParams) => Promise<PayloadType>,
                                                                         then?: StateModifier<StateType, PayloadType>,
                                                                         successMessage?: ReactNode,
-                                                                        redirectAfter?: string) {
+                                                                        redirectAfter?: string | ((action: ActionType<PayloadType>) => string)) {
         then = then as StateModifier<StateType, PayloadType> || ((state, action) => state) as StateModifier<StateType, PayloadType>;
         return new LoadableDefinition<StateType, PayloadType, DispatchParams>(payloadProvider, then, successMessage, redirectAfter);
     }
 
     private createLoadableAction<PayloadType, DispatchParams extends any[]>(loadableName,
                                                                             payloadProvider: (...params: DispatchParams) => Promise<any>,
-                                                                            then?: StateModifier<StateType, PayloadType>, successMessage?: ReactNode, redirectAfter?: string):
+                                                                            then?: StateModifier<StateType, PayloadType>,
+                                                                            successMessage?: ReactNode,
+                                                                            redirectAfter?: string | ((action: ActionType<PayloadType>) => string)):
         PromiseAction<PayloadType, ErrorResponseDTO, StateType, DispatchParams> {
         return this.createPromiseAction(loadableName.toUpperCase(), payloadProvider, successMessage, redirectAfter)
             .build.onPending((state, action) => {

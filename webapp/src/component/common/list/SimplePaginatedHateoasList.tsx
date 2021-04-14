@@ -103,7 +103,7 @@ export function SimplePaginatedHateoasList<ItemDataType,
     }
 
     return (
-        <> {(props.title || props.search) &&
+        <Box data-cy="global-paginated-list"> {(props.title || props.search) &&
         <Box mb={1}>
             <Grid container alignItems="center">
                 <Grid item lg md sm xs>
@@ -112,7 +112,7 @@ export function SimplePaginatedHateoasList<ItemDataType,
                 </Grid>
                 {props.search &&
                 <Grid item lg={4} md={5} sm={12} xs={12}>
-                    <SearchField fullWidth initial={search || ""} onSearch={val => {
+                    <SearchField data-cy="global-list-search" fullWidth initial={search || ""} onSearch={val => {
                         setSearch(val)
                     }} variant={"outlined"} size="small"/>
                 </Grid>}
@@ -127,6 +127,6 @@ export function SimplePaginatedHateoasList<ItemDataType,
                 data={items}
                 renderItem={props.renderItem}
             />}
-        </>
+        </Box>
     )
 }

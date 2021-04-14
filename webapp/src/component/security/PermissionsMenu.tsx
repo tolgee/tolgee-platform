@@ -32,11 +32,12 @@ export const PermissionsMenu: FunctionComponent<{
 
     return (
         <>
-            <Button {...props.buttonProps} variant="outlined" aria-controls="simple-menu" aria-haspopup="true"
+            <Button data-cy="permissions-menu-button" {...props.buttonProps} variant="outlined" aria-controls="simple-menu" aria-haspopup="true"
                     onClick={handleClick}>
                 <T>{`permission_type_${props.selected.toLowerCase()}`}</T> <ArrowDropDown fontSize="small"/>
             </Button>
             <Menu
+                data-cy="permissions-menu"
                 elevation={1}
                 id="simple-menu"
                 anchorEl={anchorEl}

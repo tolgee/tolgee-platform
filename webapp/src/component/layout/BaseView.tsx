@@ -1,8 +1,7 @@
-import {default as React, ReactNode, useEffect} from 'react';
+import {default as React, ReactNode} from 'react';
 import Grid from '@material-ui/core/Grid';
 import {Box, Container, LinearProgress} from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
-import {BoxLoading} from '../common/BoxLoading';
 import grey from '@material-ui/core/colors/grey';
 import {useLoading} from "../../hooks/loading";
 
@@ -35,7 +34,7 @@ export const BaseView = (props: BaseViewProps) => {
                 <Box style={{backgroundColor: grey[50], borderBottom: `1px solid ${grey[200]}`}} p={4} pb={2} pt={2}>
                     <Container maxWidth={props.containerMaxWidth || false}>
                         <Grid container justify="center" alignItems="center">
-                            <Grid item xs={props.xs || 12} md={props.md || 12} lg={props.lg || 12} sm={props.sm || 12}>
+                            <Grid data-cy="global-base-view-title" item xs={props.xs || 12} md={props.md || 12} lg={props.lg || 12} sm={props.sm || 12}>
                                 {props.customHeader || <Typography variant="h5">{props.title}</Typography>}
                             </Grid>
                         </Grid>

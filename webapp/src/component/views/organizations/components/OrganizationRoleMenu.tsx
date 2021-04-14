@@ -40,11 +40,13 @@ export const OrganizationRoleMenu: FunctionComponent<{ user: components["schemas
 
     return (
         <>
-            <Button disabled={currentUser?.id == props.user.id} variant="outlined" size="small" aria-controls="simple-menu" aria-haspopup="true"
+            <Button data-cy="organization-role-menu-button"
+                    disabled={currentUser?.id == props.user.id} variant="outlined" size="small" aria-controls="simple-menu" aria-haspopup="true"
                     onClick={handleClick}>
                 <T>{`organization_role_type_${props.user.organizationRole}`}</T> <ArrowDropDown fontSize="small"/>
             </Button>
             <Menu
+                data-cy="organization-role-menu"
                 elevation={1}
                 id="simple-menu"
                 anchorEl={anchorEl}

@@ -8,6 +8,6 @@ export const PermissionSelect: FunctionComponent<ComponentProps<typeof Select>> 
     return <Select {...props}
                    renderValue={v => translatedPermissionType(v)}>
         {Object.keys(repositoryPermissionTypes).map(k =>
-            <MenuItem key={k} value={k}>{translatedPermissionType(k)}</MenuItem>)}
+            <MenuItem data-cy="permission-select-item" key={k} value={k}>{translatedPermissionType(k)}</MenuItem>)}
     </Select>
 }

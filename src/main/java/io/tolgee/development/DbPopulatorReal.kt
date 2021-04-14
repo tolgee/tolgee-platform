@@ -41,13 +41,12 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
         //do not populate if db is not empty
         if (userAccountRepository.count() == 0L) {
             this.populate("Application")
-            this.createUsersAndOrganizations("User", 50)
         }
     }
 
-    open fun createUserIfNotExists(username: String, password: String? = null): UserAccount {
+    open fun createUserIfNotExists(username: String, password: String? = null, name: String? = null): UserAccount {
         return userAccountService.getByUserName(username).orElseGet {
-            val signUpDto = SignUpDto(name = username, email = username, password = password
+            val signUpDto = SignUpDto(name = name ?: username, email = username, password = password
                     ?: initialPasswordManager.initialPassword)
             userAccountService.createUser(signUpDto)
         }
@@ -81,10 +80,6 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
         }
 
         return users
-    }
-
-    open fun createUserIfNotExists(username: String): UserAccount {
-        return createUserIfNotExists(username, null)
     }
 
     @Transactional

@@ -23,7 +23,7 @@ describe('Api keys', () => {
 
     it('Will add an api key', () => {
         create("Test", ["translations.view", "translations.edit"]);
-        cy.contains("key.edit").should("not.be.visible");
+        cy.contains("keys.edit").should("not.exist");
         cy.contains("translations.view").should("be.visible");
         cy.contains("translations.edit").should("be.visible");
     });

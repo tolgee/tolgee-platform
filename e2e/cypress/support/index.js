@@ -17,6 +17,16 @@
 import './commands'
 
 require('cypress-xpath')
+import 'cypress-promise/register'
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
+
+Cypress.on('uncaught:exception', (err, runnable) => {
+    if (err.hasOwnProperty("CUSTOM_VALIDATION") || err.hasOwnProperty("STANDARD_VALIDATION")) {
+        return false
+    }
+    if (err.hasOwnProperty("code") && typeof err.code == "string") {
+        return false
+    }
+})

@@ -97,7 +97,7 @@ describe('Translations', () => {
             cy.contains("Cool key 01").xpath("./parent::div/button[@aria-label='edit']").click()
             cy.contains("Cool key 01").type("{backspace}{backspace}edited");
             cy.contains("Cool key edited").xpath("./parent::*//button[@type='submit']").click()
-            cy.xpath(`${getAnyContainingText("Cool key edited")}/parent::*//button[@type='submit']`).should("not.be.visible");
+            cy.xpath(`${getAnyContainingText("Cool key edited")}/parent::*//button[@type='submit']`).should("not.exist");
             cy.contains("Cool key edited").should("be.visible");
             cy.contains("Cool key 02").should("be.visible");
             cy.contains("Cool key 04").should("be.visible");
@@ -107,7 +107,7 @@ describe('Translations', () => {
             cy.contains("Cool translated text 1").last().xpath("./parent::div/button[@aria-label='edit']").click()
             cy.contains("Cool translated text 1").clear().type("Super cool changed text...");
             cy.contains("Super cool changed text...").xpath("./parent::*//button[@type='submit']").click()
-            cy.xpath(`${getAnyContainingText("Super cool changed text...")}/parent::*//button[@type='submit']`).should("not.be.visible");
+            cy.xpath(`${getAnyContainingText("Super cool changed text...")}/parent::*//button[@type='submit']`).should("not.exist");
             cy.contains("Super cool changed text...").should("be.visible");
             cy.contains("Cool translated text 2").should("be.visible");
         })
@@ -118,7 +118,7 @@ describe('Translations', () => {
             cy.contains("Cool key edited").xpath("./parent::*//button[@type='button']").click();
             cy.contains("Do you want to discard your change from").should("be.visible");
             clickDiscardChanges()
-            cy.contains("Cool key edited").should("not.be.visible");
+            cy.contains("Cool key edited").should("not.exist");
             cy.contains("Cool key 01").should("be.visible");
         })
 
@@ -148,21 +148,21 @@ describe('Translations', () => {
                 toggleLang("Česky");
                 cy.contains("Studený přeložený text 1").should("be.visible");
                 toggleLang("Česky")
-                cy.contains("Studený přeložený text 1").should("not.be.visible");
+                cy.contains("Studený přeložený text 1").should("not.exist");
                 toggleLang("English")
                 cy.contains("Select at least one language").should("be.visible");
             })
 
             it("will search", () => {
                 cy.get("#standard-search").type("Cool key 04")
-                cy.contains("Cool key 01").should("not.be.visible")
+                cy.contains("Cool key 01").should("not.exist")
                 cy.contains("Cool key 04").should("be.visible")
             })
 
             it("will toggle key", () => {
                 cy.contains("Cool key 01").should("be.visible")
                 cy.contains("Show keys").click();
-                cy.contains("Cool key 01").should("not.be.visible")
+                cy.contains("Cool key 01").should("not.exist")
                 cy.contains("Show keys").click();
                 cy.contains("Cool key 01").should("be.visible")
             })

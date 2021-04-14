@@ -23,3 +23,15 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+
+Cypress.Commands.add("closestDataCy", {prevSubject: true}, (subject, dataCy) => {
+    return subject.closest('[data-cy="' + dataCy + '"]')
+})
+
+Cypress.Commands.add("gcy", (dataCy) => {
+   return cy.get('[data-cy="' + dataCy + '"]')
+})
+
+
+

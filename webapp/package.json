@@ -46,6 +46,7 @@
   },
   "scripts": {
     "start": "craco start",
+    "startConcurrently": "concurrently \"craco start\"",
     "build": "craco build",
     "test": "craco test",
     "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.ts"
@@ -69,6 +70,7 @@
     ]
   },
   "devDependencies": {
+    "concurrently": "^6.0.2",
     "craco": "^0.0.3",
     "webpack": "4.44.2"
   }

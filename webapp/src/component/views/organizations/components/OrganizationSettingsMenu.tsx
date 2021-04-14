@@ -8,7 +8,7 @@ export const OrganizationSettingsMenu = () => {
     const menuItems = useOrganizationMenuItems()
 
     return (
-        <Paper elevation={0} variant="outlined">
+        <Paper elevation={0} variant="outlined" data-cy="organization-side-menu">
             <MenuList>
                 {menuItems.map((mi, idx) =>
                     <MenuItem

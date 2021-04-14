@@ -121,7 +121,7 @@ ReactDOM.render(
                     {/*
                     // @ts-ignore --  Type '{ children: Element; }' has no properties ... */}
                     <ErrorBoundary>
-                        <SnackbarProvider>
+                        <SnackbarProvider data-cy="global-snackbars">
                             <App/>
                         </SnackbarProvider>
                     </ErrorBoundary>

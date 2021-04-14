@@ -1,10 +1,10 @@
 import {useFormikContext} from "formik";
 import {useDebounce} from "use-debounce";
+import * as React from "react";
 import {useEffect, useState} from "react";
 import {TextField} from "../../../common/form/fields/TextField";
 import {Box, FormHelperText} from "@material-ui/core";
 import {LINKS, PARAMS} from "../../../../constants/links";
-import * as React from "react";
 import {container} from "tsyringe";
 import {OrganizationService} from "../../../../service/OrganizationService";
 import {T} from "@tolgee/react";
@@ -14,7 +14,6 @@ const organizationService = container.resolve(OrganizationService);
 
 export const OrganizationFields = () => {
     const [addressPartDisabled, setAddressPartDisabled] = useState(true);
-
 
     let formik = useFormikContext();
     const [value] = useDebounce(formik.getFieldProps("name").value, 500);
@@ -40,11 +39,11 @@ export const OrganizationFields = () => {
     }, [value])
 
     return <>
-        <TextField fullWidth label={<T>create_organization_name_label</T>} name="name" required={true}/>
+        <TextField data-cy={"organization-name-field"} fullWidth label={<T>create_organization_name_label</T>} name="name" required={true}/>
         <Box onClick={() => setAddressPartDisabled(false)}
              style={{cursor: addressPartDisabled ? "pointer" : "initial"}}
         >
-            <TextField disabled={addressPartDisabled}
+            <TextField data-cy={"organization-address-part-field"} disabled={addressPartDisabled}
                        fullWidth
                        label={<T>create_organization_addressPart_label</T>} name="addressPart" required={true}/>
             <FormHelperText><T parameters={{
@@ -53,6 +52,6 @@ export const OrganizationFields = () => {
             }>organization_your_address_to_access_organization</T></FormHelperText>
         </Box>
 
-        <TextField fullWidth label={<T>create_organization_description_label</T>} name="description"/>
+        <TextField data-cy={"organization-description-field"} fullWidth label={<T>create_organization_description_label</T>} name="description"/>
     </>
 }

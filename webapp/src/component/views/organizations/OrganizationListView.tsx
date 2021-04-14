@@ -21,13 +21,13 @@ export const OrganizationsListView = () => {
 
     const t = useTranslate();
 
-    const [leaveOrganization, leaveOrganizationError] = useLeaveOrganization()
+    const leaveOrganization = useLeaveOrganization()
 
     return (
         <BaseUserSettingsView title={t("organizations_title")} containerMaxWidth="lg">
-            {leaveOrganizationError}
             <SimplePaginatedHateoasList
                 actions={actions}
+                pageSize={10}
                 loadableName={"listPermitted"}
                 renderItem={(item) =>
                     <SimpleListItem
@@ -37,7 +37,7 @@ export const OrganizationsListView = () => {
                         key={item.id}
                         to={LINKS.ORGANIZATION_REPOSITORIES.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: item.addressPart})}
                     >
-                        <ListItemText>
+                        <ListItemText data-cy="global-list-item-text">
                             {item.name}
                         </ListItemText>
                         <ListItemSecondaryAction>
@@ -45,12 +45,15 @@ export const OrganizationsListView = () => {
                                 <Button variant="outlined"
                                         size="small"
                                         onClick={() => leaveOrganization(item.id!!)}
+                                        data-cy={"leave-organization-button"}
                                 >
                                     <T>organization_users_leave</T>
                                 </Button>
                             </Box>
                             {item.currentUserRole == OrganizationRoleType.OWNER &&
-                            <Button variant="outlined"
+                            <Button
+                                    data-cy={"organization-settings-button"}
+                                    variant="outlined"
                                     component={Link}
                                     size="small"
                                     to={LINKS.ORGANIZATION_PROFILE.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: item.addressPart})}>

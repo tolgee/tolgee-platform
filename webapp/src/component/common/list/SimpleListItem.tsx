@@ -21,7 +21,7 @@ export const SimpleListItem: FunctionComponent<PropTypes> = (props) => {
     const classes = useStyles();
 
     return (
-            <ListItem {...props} button={props.button as any} classes={{container: classes.container}}>
+            <ListItem data-cy="global-list-item" {...props} button={props.button as any} classes={{container: classes.container}}>
                 {props.children}
             </ListItem>
     );

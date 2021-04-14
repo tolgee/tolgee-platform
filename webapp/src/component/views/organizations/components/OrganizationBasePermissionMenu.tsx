@@ -20,7 +20,7 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{ organization: c
     const handleSet = (type: components["schemas"]["OrganizationDto"]["basePermissions"]) => {
         confirmation({
             message: <T>really_want_to_change_base_permission_confirmation</T>,
-            hardModeText: organization.name,
+            hardModeText: organization.name.toUpperCase(),
             onConfirm: () => {
                 const dto: components["schemas"]["OrganizationDto"] = {
                     name: organization.name,
@@ -28,7 +28,7 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{ organization: c
                     basePermissions: type,
                     description: organization.description
                 }
-                actions.loadableActions.edit.dispatch(organization.id, dto)
+                actions.loadableActions.setMemberPrivileges.dispatch(organization.id, dto)
             }
         })
     };

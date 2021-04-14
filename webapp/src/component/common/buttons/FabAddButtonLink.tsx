@@ -11,7 +11,7 @@ export function FabAddButtonLink(props: { to: string }) {
 
     return (
         <Box mt={2}>
-            <Fab color="primary" aria-label={t("button_add_aria_label", undefined, true)} component={Link} {...props}>
+            <Fab color="primary" data-cy="global-plus-button" aria-label={t("button_add_aria_label", undefined, true)} component={Link} {...props}>
                 <AddIcon/>
             </Fab>
         </Box>

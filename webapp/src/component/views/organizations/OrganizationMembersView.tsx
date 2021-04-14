@@ -13,6 +13,7 @@ import {useOrganization} from "../../../hooks/organizations/useOrganization";
 import {useLeaveOrganization} from "../../../hooks/organizations/useLeaveOrganization";
 import {OrganizationRoleMenu} from "./components/OrganizationRoleMenu";
 import OrganizationRemoveUserButton from "./components/OrganizationRemoveUserButton";
+import {SimpleListItem} from "../../common/list/SimpleListItem";
 
 const actions = container.resolve(OrganizationActions);
 
@@ -35,17 +36,16 @@ export const OrganizationMembersView: FunctionComponent = () => {
 
     const currentUser = useUser();
 
-    const [leaveOrganization, leaveOrganizationError] = useLeaveOrganization()
+    const leaveOrganization = useLeaveOrganization();
 
     return (
         <BaseOrganizationSettingsView>
-            {leaveOrganizationError}
             <SimplePaginatedHateoasList
                 search
                 title={<T>organization_members_view_title</T>}
                 pageSize={10}
                 renderItem={(i) =>
-                    <Box p={1} pl={2} className={classes.container} key={i.id}>
+                    <SimpleListItem className={classes.container} key={i.id}>
                         <Grid container justify="space-between" alignItems="center">
                             <Grid item data-cy={"organizations-user-name"} lg={3} md={3} sm={6}>
                                 <Box mr={1}>
@@ -60,6 +60,7 @@ export const OrganizationMembersView: FunctionComponent = () => {
                                 <Box display={"inline"} ml={1}>
                                     {currentUser?.id == i.id ?
                                         <Button
+                                            data-cy="organization-members-leave-button"
                                             variant="outlined"
                                             size="small"
                                             aria-controls="simple-menu"
@@ -74,7 +75,7 @@ export const OrganizationMembersView: FunctionComponent = () => {
                                 </Box>
                             </Grid>
                         </Grid>
-                    </Box>
+                    </SimpleListItem>
                 }
                 actions={actions}
                 loadableName="listUsers"

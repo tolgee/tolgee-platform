@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import javax.persistence.EntityManager
 
 @Service
 @Transactional
@@ -25,7 +26,9 @@ open class OrganizationService(
         private val authenticationFacade: AuthenticationFacade,
         private val addressPartGenerator: AddressPartGenerator,
         private val repositoryService: RepositoryService,
-        private val organizationRoleService: OrganizationRoleService
+        private val organizationRoleService: OrganizationRoleService,
+        private val invitationService: InvitationService,
+        private val entityManager: EntityManager
 ) {
 
     @Transactional
@@ -99,9 +102,12 @@ open class OrganizationService(
             repositoryService.deleteRepository(it.id)
         }
 
-        organization.memberRoles.forEach {
-            organizationRoleService.delete(it.id!!)
+        invitationService.getForOrganization(organization).forEach { invitation ->
+            invitationService.delete(invitation)
         }
+
+        organizationRoleService.deleteAllInOrganization(organization)
+
 
         this.organizationRepository.delete(organization)
     }

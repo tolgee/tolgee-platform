@@ -9,9 +9,10 @@ import {useSelector} from 'react-redux';
 import {components} from "../../service/apiSchema";
 import {StateModifier} from "../Action";
 import {T} from '@tolgee/react';
-import {LINKS} from "../../constants/links";
+import {LINKS, PARAMS} from "../../constants/links";
 import {InvitationService} from "../../service/InvitationService";
 import {ApiSchemaHttpService} from "../../service/http/ApiSchemaHttpService";
+import {Redirect} from "react-router-dom";
 
 export class OrganizationState extends StateWithLoadables<OrganizationActions> {
 }
@@ -31,12 +32,25 @@ export class OrganizationActions extends AbstractLoadableActions<OrganizationSta
             filterCurrentUserOwner: true,
             size: 100
         })),
-        create: this.createLoadableDefinition(data => this.organizationService.createOrganization(data)),
+        create: this.createLoadableDefinition(data => this.organizationService.createOrganization(data), undefined,
+            <T>organization_created_message</T>),
         get: this.createLoadableDefinition(this.organizationService.getOrganization),
         edit: this.createLoadableDefinition(this.organizationService.editOrganization, (state): OrganizationState => {
-            state = this.resetLoadable(state, "edit")
-            return this.resetLoadable(state, "get")
-        }, <T>organization_updated_message</T>),
+                state = this.resetLoadable(state, "edit")
+                state = this.resetLoadable(state, "setMemberPrivileges")
+                return this.resetLoadable(state, "get")
+            }, <T>organization_updated_message</T>,
+            (action) => {
+                return LINKS.ORGANIZATION_PROFILE.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: action.payload.addressPart})
+            }),
+        setMemberPrivileges: this.createLoadableDefinition(this.organizationService.editOrganization, (state): OrganizationState => {
+                state = this.resetLoadable(state, "edit")
+                state = this.resetLoadable(state, "setMemberPrivileges")
+                return this.resetLoadable(state, "get")
+            }, <T>organization_member_privileges_set</T>,
+            (action) => {
+                return LINKS.ORGANIZATION_MEMBER_PRIVILEGES.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: action.payload.addressPart})
+            }),
         listUsers: this.createLoadableDefinition(this.apiSchemaHttpService.schemaRequest("/v2/organizations/{id}/users", "get")),
         leave: this.createLoadableDefinition(this.organizationService.leave, (state): OrganizationState => {
             state = this.resetLoadable(state, "leave")

@@ -22,7 +22,7 @@ export const RepositoryListView = () => {
         <PossibleRepositoryPage>
             <BaseView title={t("repositories_title")} containerMaxWidth="md" hideChildrenOnLoading={false} loading={listPermitted.loading}>
                 <SimplePaginatedHateoasList search pageSize={20} actions={actions} loadableName="listPermitted" renderItem={r =>
-                    <RepositoryListItem {...r} />
+                    <RepositoryListItem key={r.id} {...r} />
                 }/>
                 <Box display="flex" flexDirection="column" alignItems="flex-end" mt={2} pr={2}>
                     <FabAddButtonLink to={LINKS.REPOSITORY_ADD.build()}/>

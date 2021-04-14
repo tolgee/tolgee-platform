@@ -17,7 +17,6 @@ import {SimpleListItem} from "../../common/list/SimpleListItem";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 
 const actions = container.resolve(OrganizationActions);
-const messageService = container.resolve(MessageService)
 
 export const OrganizationInvitationsView: FunctionComponent = () => {
 
@@ -33,18 +32,24 @@ export const OrganizationInvitationsView: FunctionComponent = () => {
         <BaseOrganizationSettingsView title={<T>organization_invitations_title</T>}>
             <StandardForm saveActionLoadable={inviteLoadable}
                           submitButtons={
-                              <Button variant="contained" color="primary" type="submit" size="large">
+                              <Button
+                                  data-cy="organization-invitation-generate-button"
+                                  variant="contained" color="primary" type="submit" size="large">
                                   <T>invite_user_generate_invitation_link</T>
                               </Button>}
 
                           onSubmit={v => actions.loadableActions.invite.dispatch(organization.id, v.type)} initialValues={{type: OrganizationRoleType.MEMBER}}>
 
-                <OrganizationRoleSelect label={<T>invite_user_organization_role_label</T>} name="type" fullWidth/>
+                <OrganizationRoleSelect
+                    data-cy="organization-invitation-role-select"
+                    label={<T>invite_user_organization_role_label</T>} name="type" fullWidth/>
             </StandardForm>
 
             {inviteLoadable.data &&
             <Box mt={2}>
-                <TextField fullWidth multiline InputProps={{
+                <TextField
+                    data-cy="organization-invitations-generated-field"
+                    fullWidth multiline InputProps={{
                     readOnly: true,
                 }} value={LINKS.ACCEPT_INVITATION.buildWithOrigin({[PARAMS.INVITATION_CODE]: inviteLoadable.data.code})}
                            label={<T>invite_user_invitation_code</T>}/>
@@ -64,7 +69,12 @@ export const OrganizationInvitationsView: FunctionComponent = () => {
                                                    <T>{`organization_role_type_${OrganizationRoleType[i.type]}`}</T></i>]
                                                </ListItemText>
                                                <ListItemSecondaryAction>
-                                                   <Button color="secondary" onClick={() => onCancel(i.id)}><T>invite_user_invitation_cancel_button</T></Button>
+                                                   <Button
+                                                       data-cy="organization-invitation-cancel-button"
+                                                       color="secondary" onClick={() => onCancel(i.id)}
+                                                   >
+                                                       <T>invite_user_invitation_cancel_button</T>
+                                                   </Button>
                                                </ListItemSecondaryAction>
                                            </SimpleListItem>
                                        )}/>
