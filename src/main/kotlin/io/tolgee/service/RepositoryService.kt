@@ -132,11 +132,17 @@ open class RepositoryService constructor(
         this.keyService = keyService
     }
 
+    open fun deleteAllByName(name: String) {
+        repositoryRepository.findAllByName(name).forEach {
+            this.deleteRepository(it.id)
+        }
+    }
+
     open fun validateAddressPartUniqueness(addressPart: String): Boolean {
         return repositoryRepository.countAllByAddressPart(addressPart) < 1
     }
 
-    open fun generateAddressPart(name: String, oldAddressPart: String?): String {
+    open fun generateAddressPart(name: String, oldAddressPart: String? = null): String {
         return addressPartGenerator.generate(name, 3, 60) {
             if (oldAddressPart == it) {
                 return@generate true

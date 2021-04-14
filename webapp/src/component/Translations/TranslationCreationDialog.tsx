@@ -59,6 +59,7 @@ export function TranslationCreationDialog() {
 
     return (
         <Dialog
+            data-cy="translations-add-key-dialog"
             open
             onClose={() => onClose()}
             aria-labelledby="alert-dialog-title"
@@ -74,7 +75,7 @@ export function TranslationCreationDialog() {
                               initialValues={{key: "", translations: initialTranslations}}
                               validationSchema={Validation.KEY_TRANSLATION_CREATION(selectedLanguages)}
                               onCancel={() => onClose()}>
-                    <TextField multiline name="key" label={t("translation_grid_key_text")} fullWidth/>
+                    <TextField data-cy="translations-add-key-field" multiline name="key" label={t("translation_grid_key_text")} fullWidth/>
 
                     {selectedLanguages.map(s => (
                         <TextField multiline lang={s} key={s} name={"translations." + s} label={s}/>

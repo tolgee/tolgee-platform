@@ -25,7 +25,7 @@ export const RepositoryMenu = ({id}) => {
     const t = useTranslate();
 
     return (
-        <div>
+        <div data-cy="repository-menu-items">
             <List>
                 <SideMenuItem linkTo={LINKS.REPOSITORIES.build({[PARAMS.REPOSITORY_ID]: id})}
                               icon={<DynamicFeedIcon/>} text={t("repository_menu_repositories")}/>

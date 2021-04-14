@@ -23,7 +23,7 @@ export const RepositoryPermissionsView: FunctionComponent = () => {
     const basePermissionText = translatedPermissionType(repository.organizationOwnerBasePermissions!, true);
 
     return (
-        <BaseView title={<T>edit_repository_permissions_title</T>} xs={12} md={10} lg={8}
+        <BaseView title={<T>edit_repository_permissions_title</T>} containerMaxWidth="lg"
                   loading={listLoadable.loading} hideChildrenOnLoading={false}>
 
             {repository.organizationOwnerAddressPart &&

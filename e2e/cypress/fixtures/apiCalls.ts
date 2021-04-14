@@ -130,3 +130,6 @@ export const addScreenshot = (repositoryId: number, key: string, path: string) =
 export const cleanOrganizationData = () => internalFetch("e2e-data/organizations/clean")
 export const createOrganizationData = () => internalFetch("e2e-data/organizations/create")
 
+export const cleanRepositoriesData = () => internalFetch("e2e-data/repositories/clean")
+export const createRepositoriesData = () => internalFetch("e2e-data/repositories/create")
+

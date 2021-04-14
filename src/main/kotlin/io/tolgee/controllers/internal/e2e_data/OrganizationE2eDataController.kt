@@ -1,4 +1,4 @@
-package io.tolgee.controllers.internal
+package io.tolgee.controllers.internal.e2e_data
 
 import io.tolgee.security.InternalController
 import io.swagger.v3.oas.annotations.Hidden
@@ -32,8 +32,8 @@ open class OrganizationE2eDataController(
                     it.dto,
                     this.dbPopulatorReal.createUserIfNotExists(it.owner.email, null, it.owner.name)
             )
-
         }
+
         data.forEach {
             val organization = organizationService.get(it.dto.addressPart!!)
             it.members.forEach { memberUserName ->
@@ -154,7 +154,7 @@ open class OrganizationE2eDataController(
                         otherOwners = mutableListOf("admin"),
                         owner = UserData(email),
                 ))
-                data.find{item -> item.dto.addressPart == "facebook"}!!.otherOwners.add(email)
+                data.find{ item -> item.dto.addressPart == "facebook"}!!.otherOwners.add(email)
             }
         }
     }

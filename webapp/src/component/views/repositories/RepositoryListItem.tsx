@@ -20,10 +20,12 @@ const RepositoryListItem = (r: components["schemas"]["RepositoryModel"]) => {
             </ListItemText>
             {(r.computedPermissions === RepositoryPermissionType.MANAGE) &&
             <ListItemSecondaryAction>
-                <Button component={Link}
-                        size="small"
-                        variant="outlined"
-                        to={LINKS.REPOSITORY_EDIT.build({[PARAMS.REPOSITORY_ID]: r.id})}>
+                <Button
+                    data-cy="repository-settings-button"
+                    component={Link}
+                    size="small"
+                    variant="outlined"
+                    to={LINKS.REPOSITORY_EDIT.build({[PARAMS.REPOSITORY_ID]: r.id})}>
                     <T>repository_settings_button</T>
                 </Button>
             </ListItemSecondaryAction>}

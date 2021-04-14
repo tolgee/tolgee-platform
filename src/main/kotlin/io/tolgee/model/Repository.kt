@@ -51,9 +51,14 @@ data class Repository(
         this.userOwner = userOwner
     }
 
-    constructor(name: String?, description: String? = null, addressPart: String?, organizationOwner: Organization?)
+    constructor(name: String?,
+                description: String? = null,
+                addressPart: String?,
+                organizationOwner: Organization?,
+                userOwner: UserAccount? = null)
             : this(id = 0L, name, description, addressPart) {
         this.organizationOwner = organizationOwner
+        this.userOwner = userOwner
     }
 
     fun getLanguage(abbreviation: String): Optional<Language> {

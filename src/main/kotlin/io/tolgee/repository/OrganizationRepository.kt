@@ -20,4 +20,5 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     fun findAllPermitted(userId: Long?, pageable: Pageable, roleType: OrganizationRoleType? = null): Page<OrganizationView>
 
     fun countAllByAddressPart(addressPart: String): Long
+    fun findAllByName(name: String): List<Organization>
 }

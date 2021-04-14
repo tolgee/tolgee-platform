@@ -45,5 +45,10 @@ declare namespace DataCy {
         "global-form-select" |
         "simple-hateoas-list" |
         "permission-select-item" |
-        "organization-role-select-item"
+        "organization-role-select-item" |
+        "repository-settings-button" |
+        "repository-menu-items" |
+        "translations-add-key-dialog" |
+        "translations-add-key-dialog" |
+        "translations-add-key-field"
 }

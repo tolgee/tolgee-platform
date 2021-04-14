@@ -73,3 +73,7 @@ export const assertMessage = (message: string) => {
         cy.contains(message)
     })
 }
+
+export const selectInRepositoryMenu = (itemName: string) => {
+    gcy("repository-menu-items").contains(itemName).click()
+}

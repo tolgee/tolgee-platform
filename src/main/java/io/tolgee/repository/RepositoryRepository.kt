@@ -51,4 +51,6 @@ interface RepositoryRepository : JpaRepository<io.tolgee.model.Repository, Long>
 
     @Query("""$BASE_ALL_PERMITTED_QUERY and r.id = :repositoryId""")
     fun findViewById(userAccountId: Long, repositoryId: Long): RepositoryView?
+
+    fun findAllByName(name: String): List<io.tolgee.model.Repository>
 }
