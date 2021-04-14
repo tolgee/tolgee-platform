@@ -48,10 +48,6 @@ export class ApiHttpService {
                 init.headers = {...init.headers, 'Authorization': 'Bearer ' + this.tokenService.getToken()};
             }
 
-            if (!this.apiUrl) {
-                throw Error("API URL not specified.")
-            }
-
             fetch(this.apiUrl + input, init).then((r) => {
                 if (r.status == 401) {
                     console.warn('Redirecting to login - unauthorized user');
