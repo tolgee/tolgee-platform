@@ -11,7 +11,7 @@ import org.springframework.hateoas.server.core.Relation
 data class UserAccountInRepositoryModel(
         override val id: Long,
         override val username: String,
-        override var name: String,
+        override var name: String?,
         override val organizationRole: OrganizationRoleType?,
         override val organizationBasePermissions: Permission.RepositoryPermissionType?,
         override val directPermissions: Permission.RepositoryPermissionType?,

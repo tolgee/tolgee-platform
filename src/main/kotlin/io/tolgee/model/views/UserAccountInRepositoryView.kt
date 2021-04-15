@@ -5,7 +5,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 
 interface UserAccountInRepositoryView {
     val id: Long
-    val name: String
+    val name: String?
     val username: String
     val organizationRole: OrganizationRoleType?
     val organizationBasePermissions: Permission.RepositoryPermissionType?
