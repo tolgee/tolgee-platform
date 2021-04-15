@@ -13,7 +13,7 @@ describe('Organization Members', () => {
 
     it("contains organization users", () => {
         gcy("global-paginated-list").within(() => {
-            cy.contains("Cukrberg").closestDataCy("global-list-item").contains("cukrberg@facebook.com").should("be.visible")
+            cy.contains("Cukrberg").closestDcy("global-list-item").contains("cukrberg@facebook.com").should("be.visible")
             cy.contains("admin")
             cy.contains("Goldberg")
             cy.contains("Bill Gates")
@@ -26,14 +26,14 @@ describe('Organization Members', () => {
 
     it("Can remove other users", () => {
         gcy("global-paginated-list").within(() => {
-            cy.contains("Goldberg").closestDataCy("global-list-item").within(() => {
+            cy.contains("Goldberg").closestDcy("global-list-item").within(() => {
                 cy.gcy("organization-members-remove-user-button").click()
             })
         })
         confirmStandard()
         assertMessage("User removed from organization")
         gcy("global-paginated-list").within(() => {
-            cy.contains("Cukrberg").closestDataCy("global-list-item").within(() => {
+            cy.contains("Cukrberg").closestDcy("global-list-item").within(() => {
                 cy.gcy("organization-members-remove-user-button").click()
             })
         })
@@ -69,12 +69,12 @@ describe('Organization Members', () => {
         })
     })
 
-    it.only("Paginates", () => {
+    it("Paginates", () => {
         cy.visit(`${HOST}/organizations/facebook/members`)
         gcy("global-paginated-list").contains("Cukrberg").should("be.visible")
         gcy("global-paginated-list").contains("owner@zzzcool16.com").should("be.visible")
         goToPage(2)
-        gcy("global-paginated-list").contains("owner@zzzcool17.com").should("be.visible")
+        gcy("global-paginated-list").contains("owner@zzzcool2.com").should("be.visible")
     })
 
 
@@ -88,7 +88,7 @@ describe('Organization Members', () => {
 
     const setGoldbergMember = () => {
         gcy("global-paginated-list").within(() => {
-            cy.contains("Goldberg").closestDataCy("global-list-item").within(() => {
+            cy.contains("Goldberg").closestDcy("global-list-item").within(() => {
                 cy.gcy("organization-role-menu-button").click()
             })
         })
@@ -101,7 +101,7 @@ describe('Organization Members', () => {
 
     function leaveOrganization() {
         gcy("global-paginated-list").within(() => {
-            cy.contains("admin").closestDataCy("global-list-item").within(() => {
+            cy.contains("admin").closestDcy("global-list-item").within(() => {
                 cy.gcy("organization-members-leave-button").click()
             })
         })

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:${user.home}/.tolgee/db-e2e.h2
+    url: jdbc:h2:${user.home}/.tolgee/db-e2e.h2;AUTO_SERVER=TRUE
   liquibase:
     change-log: classpath:db/changelog/schema.xml
     drop-first: true

@@ -8,3 +8,17 @@ services:
       - 8091:8091
     environment:
       - spring.profiles.active=e2e
+      - spring.datasource.url=jdbc:postgresql://postgres:5432/postgres
+      - spring.datasource.username=postgres
+      - spring.datasource.password=postgres
+  postgres:
+    image: postgres:13
+    volumes:
+      - e2e-db-data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "25432:25432"
+    command: postgres -c 'max_connections=10000'
+volumes:
+  e2e-db-data:

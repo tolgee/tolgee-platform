@@ -22,8 +22,7 @@ describe('Organization Invitations', () => {
         generateInvitation("OWNER")
         generateInvitation("OWNER")
         generateInvitation("MEMBER")
-
-        gcy("simple-hateoas-list").should("be.visible").find("li").should("be.visible").should("have.length", 4)
+        cy.xpath("//*[@data-cy='simple-hateoas-list']//li").should("have.length", 4)
         gcy("simple-hateoas-list").xpath("." + getAnyContainingText("MEMBER")).should("have.length", 2)
         gcy("simple-hateoas-list").xpath("." + getAnyContainingText("OWNER")).should("have.length", 2)
     })
