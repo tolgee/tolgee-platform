@@ -12,7 +12,7 @@ class UserAccountModelAssembler : RepresentationModelAssemblerSupport<UserAccoun
         return UserAccountModel(
                 entity.id!!,
                 entity.username!!,
-                entity.name!!
+                entity.name
         )
     }
 }
