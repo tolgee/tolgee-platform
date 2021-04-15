@@ -25,7 +25,7 @@ export const RepositoryMenu = ({id}) => {
     const t = useTranslate();
 
     return (
-        <div>
+        <div data-cy="repository-menu-items">
             <List>
                 <SideMenuItem linkTo={LINKS.REPOSITORIES.build({[PARAMS.REPOSITORY_ID]: id})}
                               icon={<DynamicFeedIcon/>} text={t("repository_menu_repositories")}/>
@@ -37,7 +37,7 @@ export const RepositoryMenu = ({id}) => {
             </List>
             <Divider/>
             <List>
-                {repositoryDTO.permissionType === RepositoryPermissionType.MANAGE && (
+                {repositoryDTO.computedPermissions === RepositoryPermissionType.MANAGE && (
                     <>
                         <SideMenuItem linkTo={LINKS.REPOSITORY_EDIT.build({[PARAMS.REPOSITORY_ID]: id})}
                                       icon={<SettingsIcon/>} text={t("repository_menu_repository_settings")}/>

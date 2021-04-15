@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:h2:${user.home}/.tolgee/db.h2
-#    username: sa
-#    password: sa
+  #    username: sa
+  #    password: sa
   liquibase:
     change-log: classpath:db/changelog/schema.xml
 tolgee:
@@ -46,5 +46,8 @@ server:
     enabled: true
     mime-types: "text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json"
     min-response-size: 1024
+  error:
+    include-exception: true
+    include-stacktrace: never
 sentry:
   dsn: ${tolgee.sentry.server-dsn:}

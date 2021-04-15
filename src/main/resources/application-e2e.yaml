@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:${user.home}/.tolgee/db-e2e.h2;AUTO_SERVER=TRUE
+  liquibase:
+    change-log: classpath:db/changelog/schema.xml
+    drop-first: true
+  jpa:
+    show-sql: true
+tolgee:
+  authentication:
+    enabled: true
+    needs-email-verification: true
+    registrations-allowed: true
+    initial-password: "admin"
+  screenshots-url: http://localhost:8201/screenshots
+  internal:
+    populate: true
+    controller-enabled: true
+    fake-emails-sent: true
+server:
+  port: 8201
+  error:
+    include-exception: true
+    include-stacktrace: always

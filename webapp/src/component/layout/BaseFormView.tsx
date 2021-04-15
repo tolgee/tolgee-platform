@@ -25,7 +25,6 @@ export const BaseFormView: FunctionComponent<BaseFormViewProps & BaseViewProps> 
 
     return (
         <BaseView loading={props.resourceLoadable && !props.resourceLoadable.data || (props.resourceLoadable && !props.resourceLoadable.touched)} {...props}>
-            {props.saveActionLoadable && props.saveActionLoadable.error && <ResourceErrorComponent error={props.saveActionLoadable.error}/>}
 
             <StandardForm initialValues={props.initialValues} onSubmit={props.onSubmit}
                           onCancel={props.onCancel}
@@ -33,6 +32,7 @@ export const BaseFormView: FunctionComponent<BaseFormViewProps & BaseViewProps> 
                           customActions={props.customActions}
                           submitButtons={props.submitButtons}
                           submitButtonInner={props.submitButtonInner}
+                          saveActionLoadable={props.saveActionLoadable}
             >
                 {props.children}
             </StandardForm>

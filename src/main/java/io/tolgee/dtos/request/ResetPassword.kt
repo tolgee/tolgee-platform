@@ -1,8 +1,7 @@
 package io.tolgee.dtos.request
 
-import javax.validation.constraints.Max
-import javax.validation.constraints.Min
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.Size
 
 data class ResetPassword(
         @field:NotBlank
@@ -11,6 +10,6 @@ data class ResetPassword(
         @field:NotBlank
         var code: String? = null,
 
-        @field:Min(8) @Max(100)
+        @field:Size(min = 8, max = 100)
         var password: String? = null,
 )

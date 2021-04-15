@@ -1,0 +1,39 @@
+import {LINKS, PARAMS} from "../../constants/links";
+import {default as React} from "react";
+import {useRouteMatch} from "react-router-dom";
+import {useOrganization} from "./useOrganization";
+
+export class OrganizationMenuItem {
+    constructor(
+        public link: string,
+        public nameTranslationKey: string,
+        public isSelected: boolean
+    ) {
+    }
+}
+
+
+export const useOrganizationMenuItems = (): OrganizationMenuItem[] => {
+
+    let match = useRouteMatch();
+    const organization = useOrganization();
+
+    return [
+        {
+            link: LINKS.ORGANIZATION_PROFILE.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: organization.addressPart}),
+            nameTranslationKey: "organization_menu_profile",
+        },
+        {
+            link: LINKS.ORGANIZATION_MEMBERS.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: organization.addressPart}),
+            nameTranslationKey: "organization_menu_members"
+        },
+        {
+            link: LINKS.ORGANIZATION_MEMBER_PRIVILEGES.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: organization.addressPart}),
+            nameTranslationKey: "organization_menu_member_privileges"
+        },
+        {
+            link: LINKS.ORGANIZATION_INVITATIONS.build({[PARAMS.ORGANIZATION_ADDRESS_PART]: organization.addressPart}),
+            nameTranslationKey: "organization_menu_invitations"
+        },
+    ].map(i => new OrganizationMenuItem(i.link, i.nameTranslationKey, match.url === i.link))
+}

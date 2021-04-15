@@ -23,7 +23,7 @@ describe('Api keys', () => {
 
     it('Will add an api key', () => {
         create("Test", ["translations.view", "translations.edit"]);
-        cy.contains("key.edit").should("not.be.visible");
+        cy.contains("keys.edit").should("not.exist");
         cy.contains("translations.view").should("be.visible");
         cy.contains("translations.edit").should("be.visible");
     });
@@ -37,7 +37,7 @@ describe('Api keys', () => {
             cy.reload()
             cy.contains("API key:").should("be.visible")
             del(key.key);
-            cy.contains("Api key successfully deleted!").should("be.visible")
+            cy.contains("API key successfully deleted!").should("be.visible")
         });
     });
 
@@ -49,7 +49,7 @@ describe('Api keys', () => {
             cy.reload()
             cy.contains("API key:").should("be.visible")
             del(key.key);
-            cy.contains("Api key successfully deleted!").should("be.visible")
+            cy.contains("API key successfully deleted!").should("be.visible")
         });
     });
 });

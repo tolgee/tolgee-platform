@@ -1,5 +1,5 @@
 import {container, singleton} from 'tsyringe';
-import {ApiHttpService} from './ApiHttpService';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
 import {ErrorResponseDTO, InvitationDTO} from './response.types';
 import {RedirectionActions} from '../store/global/RedirectionActions';
 import {LINKS} from '../constants/links';
@@ -11,7 +11,7 @@ import React from "react";
 import {T} from "@tolgee/react";
 
 
-const http = container.resolve(ApiHttpService);
+const http = container.resolve(ApiV1HttpService);
 
 
 @singleton()
@@ -39,7 +39,7 @@ export class InvitationService {
 
         } catch (e) {
             if ((e as ErrorResponseDTO).code) {
-                this.messaging.error(<T>e.code</T>);
+                this.messaging.error(<T>{e.code}</T>);
             }
         }
         this.redirectActions.redirect.dispatch(LINKS.REPOSITORIES.build());

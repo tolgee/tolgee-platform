@@ -30,7 +30,7 @@ task buildWebapp(type: Exec) {
 task updateStaticTranslations() {
     def tolgeeApiKey = System.env.TOLGEE_API_KEY
     def tolgeeApiUrl = System.env.TOLGEE_API_URL
-    onlyIf { tolgeeApiUrl != null }
+    onlyIf { tolgeeApiUrl != null && tolgeeApiUrl != "" }
     doFirst {
         def command = "curl $tolgeeApiUrl/api/repository/export/jsonZip?ak=$tolgeeApiKey --output $buildDir/translations.zip"
         ProcessBuilder builder = new ProcessBuilder(command.split(' '))

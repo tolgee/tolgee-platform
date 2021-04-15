@@ -48,6 +48,7 @@ apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 idea {
@@ -57,7 +58,7 @@ idea {
 }
 
 
-def liveDbH2 = [
+def liveDbPostgres = [
         url         : 'jdbc:postgresql://localhost:5432/postgres',
         referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.PostgreSQL95Dialect' +
@@ -68,15 +69,16 @@ def liveDbH2 = [
         driver      : "org.postgresql.Driver"
 ]
 
-def liveDbPostgres = [
+def liveDbH2 = [
         url         : 'jdbc:h2:~/.tolgee/db.h2;AUTO_SERVER=TRUE',
         referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.H2Dialect' +
                 '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
                 '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
+        driver      : 'org.h2.Driver'
 ]
 
-def liveDb = liveDbPostgres
+def liveDb = liveDbH2
 
 liquibase {
     activities {
@@ -85,9 +87,14 @@ liquibase {
             changeLogFile 'src/main/resources/db/changelog/schema.xml'
             url liveDb.url
             referenceUrl liveDb.referenceUrl
-            username liveDb.username
-            password liveDb.password
-            driver "org.postgresql.Driver"
+            if (liveDb.username) {
+                username liveDb.username
+            }
+            if (liveDb.password) {
+                password liveDb.password
+            }
+
+            driver liveDb.driver
         }
     }
 }
@@ -95,10 +102,19 @@ liquibase {
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
+compileKotlin {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
 def LIQUIBASE_VERSION = "4.3.2"
 def LIQUIBASE_HIBERNATE_VERSION = "4.3.1"
 def JJWT_VERSION = "0.11.2"
-def SPRING_DOC_VERSION = "1.5.6"
+def SPRING_DOC_VERSION = "1.5.7"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -107,6 +123,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-starter-hateoas"
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     compile "org.springframework.boot:spring-boot-configuration-processor"
     testCompile "org.springframework.boot:spring-boot-configuration-processor"
@@ -141,6 +158,8 @@ dependencies {
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-data-rest', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-hateoas', version: "${SPRING_DOC_VERSION}"
     implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.3-native-mt'
     kapt "org.hibernate:hibernate-jpamodelgen"
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.32'
@@ -150,6 +169,8 @@ dependencies {
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.982'
     compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
     implementation('org.reflections:reflections:0.9.12')
+    implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.25.0'
+    compile("au.com.console:kotlin-jpa-specification-dsl:2.0.0")
 }
 
 test {
@@ -190,7 +211,7 @@ task packWebapp(type: Zip) {
     dependsOn "unpack"
     dependsOn "copyDist"
     from "${project.projectDir}/build/dependency"
-    archiveFileName = "tolgee-${project.version}-test.jar"
+    archiveFileName = "tolgee-${project.version}.jar"
     destinationDirectory = file("$buildDir/libs")
     entryCompression ZipEntryCompression.STORED
 }

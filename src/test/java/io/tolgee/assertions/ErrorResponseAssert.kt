@@ -14,7 +14,7 @@ class ErrorResponseAssert(mvcResult: MvcResult?) : AbstractAssert<ErrorResponseA
             if (standardValidation == null) {
                 failWithMessage("Error response is not standard validation type.")
             }
-            return StandardValidationMessageAssert(standardValidation)
+            return standardValidation?.let { StandardValidationMessageAssert(it) }!!
         }
     val isCustomValidation: CustomValidationMessageAssert
         get() {

@@ -1,8 +1,8 @@
 import {container, singleton} from 'tsyringe';
-import {ApiHttpService} from './ApiHttpService';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
 import {LanguageDTO} from './response.types';
 
-const http = container.resolve(ApiHttpService);
+const http = container.resolve(ApiV1HttpService);
 
 @singleton()
 export class LanguageService {

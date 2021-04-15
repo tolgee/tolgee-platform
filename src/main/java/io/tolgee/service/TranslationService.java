@@ -61,7 +61,7 @@ public class TranslationService {
     }
 
     public Map<String, String> getKeyTranslationsResult(Long repositoryId, PathDTO path, Set<String> languageAbbreviations) {
-        Repository repository = repositoryService.getById(repositoryId).orElseThrow(NotFoundException::new);
+        Repository repository = repositoryService.get(repositoryId).orElseThrow(NotFoundException::new);
         Key key = keyService.get(repository, path).orElse(null);
 
         Set<Language> languages;
@@ -102,7 +102,7 @@ public class TranslationService {
     public ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> getViewData(
             Set<String> languageAbbreviations, Long repositoryId, int limit, int offset, String search
     ) {
-        Repository repository = repositoryService.getById(repositoryId).orElseThrow(NotFoundException::new);
+        Repository repository = repositoryService.get(repositoryId).orElseThrow(NotFoundException::new);
 
         Set<Language> languages = languageService.getLanguagesForTranslationsView(languageAbbreviations, repository);
 

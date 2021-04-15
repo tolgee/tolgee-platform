@@ -10,16 +10,17 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
+import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingServletRequestParameterException
-import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.multipart.MaxUploadSizeExceededException
 import java.util.*
 import java.util.function.Consumer
 import javax.persistence.EntityNotFoundException
 
-@ControllerAdvice
+@RestControllerAdvice
 class ExceptionHandlers {
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidationExceptions(ex: MethodArgumentNotValidException): ResponseEntity<Map<String, Map<String, String>>> {
@@ -67,4 +68,10 @@ class ExceptionHandlers {
         return ResponseEntity(ErrorResponseBody(Message.FILE_TOO_BIG.code, listOf()),
                 HttpStatus.BAD_REQUEST)
     }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
+    fun handleFileSizeLimitExceeded(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> {
+        return ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED)
+    }
+
 }

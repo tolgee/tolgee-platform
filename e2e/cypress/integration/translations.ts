@@ -2,7 +2,7 @@ import {clickAdd, getPopover} from "../fixtures/shared";
 import {getAnyContainingAriaLabelAttribute, getAnyContainingText, getClosestContainingText} from "../fixtures/xPath";
 import {createRepository, deleteRepository, login, setTranslations} from "../fixtures/apiCalls";
 import {HOST} from "../fixtures/constants";
-import {RepositoryDTO} from "../../src/service/response.types"
+import { RepositoryDTO } from "../../../webapp/src/service/response.types";
 
 describe('Translations', () => {
     let repository: RepositoryDTO = null
@@ -57,11 +57,12 @@ describe('Translations', () => {
             promises.push(setTranslations(repository.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}))
         }
         Cypress.Promise.all(promises).then(() => {
+            visit();
             setPerPage(20, 10)
             editKey("Cool key 01", "Cool key edited", false);
             goToNextPage();
             cy.contains(`Do you want to discard your change from "Cool key 01" to "Cool key edited"?`).should("be.visible");
-            cy.contains("Discard changes").click();
+            clickDiscardChanges()
             cy.contains("Cool key 14").xpath("./parent::*//button[@type='button']").should("be.visible");
         })
     })
@@ -96,7 +97,7 @@ describe('Translations', () => {
             cy.contains("Cool key 01").xpath("./parent::div/button[@aria-label='edit']").click()
             cy.contains("Cool key 01").type("{backspace}{backspace}edited");
             cy.contains("Cool key edited").xpath("./parent::*//button[@type='submit']").click()
-            cy.xpath(`${getAnyContainingText("Cool key edited")}/parent::*//button[@type='submit']`).should("not.be.visible");
+            cy.xpath(`${getAnyContainingText("Cool key edited")}/parent::*//button[@type='submit']`).should("not.exist");
             cy.contains("Cool key edited").should("be.visible");
             cy.contains("Cool key 02").should("be.visible");
             cy.contains("Cool key 04").should("be.visible");
@@ -106,7 +107,7 @@ describe('Translations', () => {
             cy.contains("Cool translated text 1").last().xpath("./parent::div/button[@aria-label='edit']").click()
             cy.contains("Cool translated text 1").clear().type("Super cool changed text...");
             cy.contains("Super cool changed text...").xpath("./parent::*//button[@type='submit']").click()
-            cy.xpath(`${getAnyContainingText("Super cool changed text...")}/parent::*//button[@type='submit']`).should("not.be.visible");
+            cy.xpath(`${getAnyContainingText("Super cool changed text...")}/parent::*//button[@type='submit']`).should("not.exist");
             cy.contains("Super cool changed text...").should("be.visible");
             cy.contains("Cool translated text 2").should("be.visible");
         })
@@ -116,8 +117,8 @@ describe('Translations', () => {
             cy.contains("Cool key 01").type("{backspace}{backspace}edited");
             cy.contains("Cool key edited").xpath("./parent::*//button[@type='button']").click();
             cy.contains("Do you want to discard your change from").should("be.visible");
-            cy.contains("Discard changes").click();
-            cy.contains("Cool key edited").should("not.be.visible");
+            clickDiscardChanges()
+            cy.contains("Cool key edited").should("not.exist");
             cy.contains("Cool key 01").should("be.visible");
         })
 
@@ -125,7 +126,7 @@ describe('Translations', () => {
             editKey("Cool key 01", "Cool key edited", false);
             cy.contains("Cool key 04").xpath("./parent::div/button[@aria-label='edit']").click();
             cy.contains(`Do you want to discard your change from "Cool key 01" to "Cool key edited"?`).should("be.visible");
-            cy.contains("Discard changes").click();
+            clickDiscardChanges()
             cy.contains("Cool key 04").xpath("./parent::*//button[@type='button']").should("be.visible");
         })
 
@@ -133,7 +134,7 @@ describe('Translations', () => {
             editKey("Cool key 01", "Cool key edited", false);
             setPerPage(20, 10);
             cy.contains(`Do you want to discard your change from "Cool key 01" to "Cool key edited"?`).should("be.visible");
-            cy.contains("Discard changes").click();
+            clickDiscardChanges()
             cy.contains("Cool key 04").xpath("./parent::*//button[@type='button']").should("be.visible");
         })
 
@@ -147,21 +148,21 @@ describe('Translations', () => {
                 toggleLang("Česky");
                 cy.contains("Studený přeložený text 1").should("be.visible");
                 toggleLang("Česky")
-                cy.contains("Studený přeložený text 1").should("not.be.visible");
+                cy.contains("Studený přeložený text 1").should("not.exist");
                 toggleLang("English")
                 cy.contains("Select at least one language").should("be.visible");
             })
 
             it("will search", () => {
                 cy.get("#standard-search").type("Cool key 04")
-                cy.contains("Cool key 01").should("not.be.visible")
+                cy.contains("Cool key 01").should("not.exist")
                 cy.contains("Cool key 04").should("be.visible")
             })
 
             it("will toggle key", () => {
                 cy.contains("Cool key 01").should("be.visible")
                 cy.contains("Show keys").click();
-                cy.contains("Cool key 01").should("not.be.visible")
+                cy.contains("Cool key 01").should("not.exist")
                 cy.contains("Show keys").click();
                 cy.contains("Cool key 01").should("be.visible")
             })
@@ -203,5 +204,9 @@ function goToNextPage() {
 
 function goToPreviousPage() {
     cy.xpath(getAnyContainingAriaLabelAttribute("Previous page")).click()
+}
+
+function clickDiscardChanges(){
+    cy.xpath(getAnyContainingText("Discard changes", "button")).click();
 }
 

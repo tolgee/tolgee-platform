@@ -5,7 +5,11 @@ import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.dtos.request.UserUpdateRequestDTO
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.model.UserAccount
+import io.tolgee.model.views.UserAccountInRepositoryView
+import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,7 +21,7 @@ open class UserAccountService(private val userAccountRepository: UserAccountRepo
         return userAccountRepository.findByUsername(username)
     }
 
-    open operator fun get(id: Long): Optional<UserAccount> {
+    open operator fun get(id: Long): Optional<UserAccount?> {
         return userAccountRepository.findById(id)
     }
 
@@ -27,10 +31,15 @@ open class UserAccountService(private val userAccountRepository: UserAccountRepo
     }
 
     open fun createUser(request: SignUpDto): UserAccount {
+        dtoToEntity(request).let {
+            this.createUser(it)
+            return it
+        }
+    }
+
+    open fun dtoToEntity(request: SignUpDto): UserAccount {
         val encodedPassword = encodePassword(request.password!!)
-        val account = UserAccount(name = request.name, username = request.email, password = encodedPassword)
-        this.createUser(account)
-        return account
+        return UserAccount(name = request.name, username = request.email, password = encodedPassword)
     }
 
     open val implicitUser: UserAccount
@@ -44,7 +53,7 @@ open class UserAccountService(private val userAccountRepository: UserAccountRepo
         }
 
     open fun findByThirdParty(type: String?, id: String?): Optional<UserAccount> {
-        return userAccountRepository.findByThirdPartyAuthTypeAndThirdPartyAuthId(type, id)
+        return userAccountRepository.findByThirdPartyAuthTypeAndThirdPartyAuthId(type!!, id!!)
     }
 
     @Transactional
@@ -70,6 +79,14 @@ open class UserAccountService(private val userAccountRepository: UserAccountRepo
     @Transactional
     open fun removeResetCode(userAccount: UserAccount) {
         userAccount.resetPasswordCode = null
+    }
+
+    open fun getAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<UserAccountWithOrganizationRoleView> {
+        return userAccountRepository.getAllInOrganization(organizationId, pageable, search = search ?: "")
+    }
+
+    open fun getAllInRepository(repositoryId: Long, pageable: Pageable, search: String?): Page<UserAccountInRepositoryView> {
+        return userAccountRepository.getAllInRepository(repositoryId, pageable, search = search)
     }
 
     private fun encodePassword(rawPassword: String): String {

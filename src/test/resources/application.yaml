@@ -3,11 +3,6 @@ spring:
     allow-bean-definition-overriding: true
   datasource:
     url: jdbc:h2:./build/test_data/testdb.h2db;AUTO_SERVER=TRUE;
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: password
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
   liquibase:
     drop-first: true
     change-log: classpath:db/changelog/schema.xml

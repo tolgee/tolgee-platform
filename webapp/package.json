@@ -7,12 +7,12 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
     "@sentry/browser": "^6.2.1",
-    "@sentry/types": "^6.2.3",
+    "@sentry/types": "^6.2.5",
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.5",
-    "@testing-library/user-event": "^13.0.16",
-    "@tolgee/react": "^1.0.0-alpha.40",
-    "@tolgee/ui": "^1.0.0-alpha.40",
+    "@testing-library/user-event": "^13.1.2",
+    "@tolgee/react": "^1.0.0-alpha.42",
+    "@tolgee/ui": "^1.0.0-alpha.42",
     "@types/jest": "^26.0.21",
     "@types/node": "^14.14.36",
     "@types/react": "^17.0.3",
@@ -25,6 +25,7 @@
     "formik": "^2.2.6",
     "formik-material-ui": "^3.0.1",
     "notistack": "^1.0.5",
+    "openapi-typescript": "^3.2.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.3",
@@ -38,14 +39,17 @@
     "regenerator-runtime": "^0.13.7",
     "tsyringe": "^4.5.0",
     "typeface-roboto": "1.1.13",
-    "typescript": "^4.2.3",
+    "typescript": "^4.2.4",
+    "use-debounce": "^6.0.0",
     "web-vitals": "^1.1.1",
     "yup": "^0.32.9"
   },
   "scripts": {
     "start": "craco start",
+    "startConcurrently": "concurrently \"craco start\"",
     "build": "craco build",
-    "test": "craco test"
+    "test": "craco test",
+    "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.ts"
   },
   "eslintConfig": {
     "extends": [
@@ -66,6 +70,8 @@
     ]
   },
   "devDependencies": {
-    "craco": "^0.0.3"
+    "concurrently": "^6.0.2",
+    "craco": "^0.0.3",
+    "webpack": "4.44.2"
   }
 }

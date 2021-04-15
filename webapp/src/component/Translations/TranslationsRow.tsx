@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {FunctionComponent, useContext} from 'react';
-import {KeyTranslationsDTO} from "../../service/response.types";
+import {KeyTranslationsDTO, RepositoryPermissionType} from "../../service/response.types";
 import {Box, Checkbox} from "@material-ui/core";
 import {TableCell} from "./TableCell";
 import {KeyCell} from "./KeyCell";
@@ -9,6 +9,7 @@ import {grey} from "@material-ui/core/colors";
 import {TranslationListContext} from "./TtranslationsGridContextProvider";
 import {createStyles, makeStyles} from "@material-ui/core/styles";
 import {KeyScreenshots} from "./Screenshots/KeySreenshots";
+import {useRepositoryPermissions} from "../../hooks/useRepositoryPermissions";
 
 
 export interface TranslationProps {
@@ -40,6 +41,7 @@ export const TranslationsRow: FunctionComponent<TranslationProps> = (props) => {
     const classes = useStyles({});
 
     const listContext = useContext(TranslationListContext);
+    const permissions = useRepositoryPermissions()
 
     const contextValue: RowContextType = {
         lastRendered: 0,
@@ -49,10 +51,12 @@ export const TranslationsRow: FunctionComponent<TranslationProps> = (props) => {
     return (
         <Box display="flex" className={classes.lineBox}>
             <RowContext.Provider value={contextValue}>
-                {listContext.showCheckBoxes &&
+                {permissions.satisfiesPermission(RepositoryPermissionType.EDIT) &&
                 <Box display="flex" alignItems="center" justifyContent="start" style={{width: 40, flexShrink: 0}}>
-                    <Checkbox onChange={() => listContext.toggleKeyChecked(contextValue.data.id)}
-                              checked={listContext.isKeyChecked(contextValue.data.id)} size="small" style={{padding: 0}}/>
+                    <Checkbox
+                        data-cy="translations-row-checkbox"
+                        onChange={() => listContext.toggleKeyChecked(contextValue.data.id)}
+                        checked={listContext.isKeyChecked(contextValue.data.id)} size="small" style={{padding: 0}}/>
                 </Box>}
                 <Box display="flex" flexGrow={1} minWidth={0}>
                     {listContext.showKeys &&
