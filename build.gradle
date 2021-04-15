@@ -114,7 +114,7 @@ compileKotlin {
 def LIQUIBASE_VERSION = "4.3.2"
 def LIQUIBASE_HIBERNATE_VERSION = "4.3.1"
 def JJWT_VERSION = "0.11.2"
-def SPRING_DOC_VERSION = "1.5.6"
+def SPRING_DOC_VERSION = "1.5.7"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
