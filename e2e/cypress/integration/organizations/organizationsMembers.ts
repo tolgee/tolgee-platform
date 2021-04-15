@@ -5,10 +5,10 @@ import {assertMessage, confirmStandard, gcy, goToPage} from "../../fixtures/shar
 
 describe('Organization Members', () => {
     beforeEach(async () => {
-        await login().promisify()
-        await cleanOrganizationData().promisify()
-        await createOrganizationData().promisify()
-        await visit();
+        login()
+        cleanOrganizationData()
+        createOrganizationData()
+        visit();
     })
 
     it("contains organization users", () => {
@@ -83,7 +83,7 @@ describe('Organization Members', () => {
     })
 
     const visit = async () => {
-        await cy.visit(`${HOST}/organizations/tolgee/members`).promisify()
+        cy.visit(`${HOST}/organizations/tolgee/members`)
     }
 
     const setGoldbergMember = () => {

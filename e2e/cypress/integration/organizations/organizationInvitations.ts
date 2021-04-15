@@ -5,11 +5,11 @@ import {assertMessage, confirmStandard, gcy} from "../../fixtures/shared";
 import {getAnyContainingText} from "../../fixtures/xPath";
 
 describe('Organization Invitations', () => {
-    beforeEach(async () => {
-        await login().promisify()
-        await cleanOrganizationData().promisify()
-        await createOrganizationData().promisify()
-        await visit();
+    beforeEach(() => {
+        login()
+        cleanOrganizationData()
+        createOrganizationData()
+        visit();
     })
 
     it("generates invitations", () => {
@@ -61,8 +61,8 @@ describe('Organization Invitations', () => {
         cleanOrganizationData()
     })
 
-    const visit = async () => {
-        await cy.visit(`${HOST}/organizations/tolgee/invitations`).promisify()
+    const visit = () => {
+        cy.visit(`${HOST}/organizations/tolgee/invitations`)
     }
 
     const generateInvitation = (roleType: "MEMBER" | "OWNER") => {

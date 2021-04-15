@@ -109,8 +109,8 @@ describe('Organization List', () => {
         cleanOrganizationData()
     })
 
-    const visit = async () => {
-        await cy.visit(`${HOST}/organizations`).promisify()
+    const visit = () => {
+        cy.visit(`${HOST}/organizations`)
     }
 })
 
