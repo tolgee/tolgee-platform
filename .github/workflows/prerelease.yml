@@ -43,11 +43,11 @@ jobs:
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
       - name: Pack with webapp
-          run: ./gradlew packWebapp
-          env:
-            VERSION: ${{ steps.version.outputs.VERSION }}
-            TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-            TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+        run: ./gradlew packWebapp
+        env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
       - name: Push changes
         uses: ad-m/github-push-action@master
@@ -89,6 +89,13 @@ jobs:
         run: |
           docker push tolgee/tolgee:${{ steps.version.outputs.VERSION }}
           docker push tolgee/tolgee:latest
+
+      - name: Merge to develop
+          uses: devmasx/merge-branch@v1.3.1
+          with:
+            type: now
+            target_branch: develop
+            github_token: ${{ github.token }}
 
       - uses: actions/upload-artifact@v2
         if: always()
