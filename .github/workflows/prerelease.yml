@@ -42,6 +42,13 @@ jobs:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
+      - name: Pack with webapp
+          run: ./gradlew packWebapp
+          env:
+            VERSION: ${{ steps.version.outputs.VERSION }}
+            TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+            TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
