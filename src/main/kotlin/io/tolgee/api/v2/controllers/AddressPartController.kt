@@ -5,6 +5,7 @@
 package io.tolgee.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.GenerateAddressPathDto
 import io.tolgee.service.*
 import org.springframework.http.MediaType
@@ -15,6 +16,7 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/address-part", "/api/address-part"])
+@Tag(name = "Address Part generation")
 open class AddressPartController(
         private val organizationService: OrganizationService,
         private val repositoryService: RepositoryService,

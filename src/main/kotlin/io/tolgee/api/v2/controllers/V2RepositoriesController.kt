@@ -4,6 +4,8 @@
 
 package io.tolgee.api.v2.controllers
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.repository.RepositoryModel
 import io.tolgee.api.v2.hateoas.repository.RepositoryModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInRepositoryModel
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/repositories"])
+@Tag(name = "Repositories")
 open class V2RepositoriesController(
         val repositoryService: RepositoryService,
         val repositoryHolder: RepositoryHolder,
@@ -44,6 +47,7 @@ open class V2RepositoriesController(
         val permissionService: PermissionService,
         val authenticationFacade: AuthenticationFacade
 ) {
+    @Operation(summary = "Returns all repositories, which are current user permitted to view")
     @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
     open fun getAll(pageable: Pageable, @RequestParam("search") search: String?): PagedModel<RepositoryModel>? {
         val repositories = repositoryService.findPermittedPaged(pageable, search)
@@ -53,6 +57,7 @@ open class V2RepositoriesController(
     @GetMapping("/{repositoryId}")
     @AccessWithAnyRepositoryPermission
     @AccessWithApiKey
+    @Operation(summary = "Returns repository by id")
     open fun get(@PathVariable("repositoryId") repositoryId: Long): RepositoryModel {
         return repositoryService.getView(repositoryId)?.let {
             repositoryModelAssembler.toModel(it)
@@ -60,6 +65,7 @@ open class V2RepositoriesController(
     }
 
     @GetMapping("/{repositoryId}/users")
+    @Operation(summary = "Returns repository all users, who have permission to access repository")
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.MANAGE)
     open fun getAllUsers(@PathVariable("repositoryId") repositoryId: Long,
                          pageable: Pageable,
@@ -72,6 +78,7 @@ open class V2RepositoriesController(
 
     @PutMapping("/{repositoryId}/users/{userId}/set-permissions/{permissionType}")
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.MANAGE)
+    @Operation(summary = "Sets user's direct permission")
     open fun setUsersPermissions(
             @PathVariable("repositoryId") repositoryId: Long,
             @PathVariable("userId") userId: Long,
@@ -85,6 +92,7 @@ open class V2RepositoriesController(
 
     @PutMapping("/{repositoryId}/users/{userId}/revoke-access")
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.MANAGE)
+    @Operation(summary = "Revokes user's access")
     fun revokePermission(
             @PathVariable("repositoryId") repositoryId: Long,
             @PathVariable("userId") userId: Long

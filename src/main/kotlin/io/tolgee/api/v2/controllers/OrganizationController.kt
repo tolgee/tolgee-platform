@@ -5,6 +5,8 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModel
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModelAssembler
 import io.tolgee.api.v2.hateoas.organization.*
@@ -41,6 +43,7 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/organizations", "/api/organizations"])
+@Tag(name = "Organizations")
 open class OrganizationController(
         private val organizationService: OrganizationService,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -65,6 +68,7 @@ open class OrganizationController(
 
     @PostMapping
     @Transactional
+    @Operation(summary = "Creates organization")
     open fun create(@RequestBody @Valid dto: OrganizationDto): ResponseEntity<OrganizationModel> {
         if (!this.tolgeeProperties.authentication.userCanCreateOrganizations
                 && authenticationFacade.userAccount.role != UserAccount.Role.ADMIN) {
@@ -76,6 +80,7 @@ open class OrganizationController(
     }
 
     @GetMapping("/{id:[0-9]+}")
+    @Operation(summary = "Returns organization by ID")
     open fun get(@PathVariable("id") id: Long): OrganizationModel? {
         organizationService.get(id)?.let {
             val roleType = organizationRoleService.getTypeOrThrow(id)
@@ -85,6 +90,7 @@ open class OrganizationController(
     }
 
     @GetMapping("/{addressPart:.*[a-z].*}")
+    @Operation(summary = "Returns organization by address part")
     open fun get(@PathVariable("addressPart") addressPart: String): OrganizationModel {
         organizationService.get(addressPart)?.let {
             val roleType = organizationRoleService.getTypeOrThrow(it.id!!)
@@ -94,24 +100,28 @@ open class OrganizationController(
     }
 
     @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
+    @Operation(summary = "Returns all organizations, which is current user allowed to view")
     open fun getAll(pageable: Pageable, params: OrganizationRequestParamsDto): PagedModel<OrganizationModel>? {
         val organizations = organizationService.findPermittedPaged(pageable, params)
         return arrayResourcesAssembler.toModel(organizations, organizationModelAssembler)
     }
 
     @PutMapping("/{id:[0-9]+}")
+    @Operation(summary = "Updates organization data")
     open fun update(@PathVariable("id") id: Long, @RequestBody @Valid dto: OrganizationDto): OrganizationModel {
         organizationRoleService.checkUserIsOwner(id)
         return this.organizationService.edit(id, editDto = dto).toModel()
     }
 
     @DeleteMapping("/{id:[0-9]+}")
+    @Operation(summary = "Deletes organization and all its repositories")
     open fun delete(@PathVariable("id") id: Long) {
         organizationRoleService.checkUserIsOwner(id)
         organizationService.delete(id)
     }
 
     @GetMapping("/{id:[0-9]+}/users")
+    @Operation(summary = "Returns all users in organization")
     open fun getAllUsers(
             @PathVariable("id") id: Long,
             pageable: Pageable,
@@ -122,6 +132,7 @@ open class OrganizationController(
     }
 
     @PutMapping("/{id:[0-9]+}/leave")
+    @Operation(summary = "Removes current user from organization")
     open fun leaveOrganization(@PathVariable("id") id: Long) {
         organizationService.get(id)?.let {
             if (!organizationService.isThereAnotherOwner(id)) {
@@ -134,6 +145,7 @@ open class OrganizationController(
     }
 
     @PutMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}/set-role")
+    @Operation(summary = "Sets user role (Owner or Member)")
     open fun setUserRole(@PathVariable("organizationId") organizationId: Long,
                          @PathVariable("userId") userId: Long,
                          @RequestBody dto: SetOrganizationRoleDto
@@ -143,6 +155,7 @@ open class OrganizationController(
     }
 
     @DeleteMapping("/{organizationId:[0-9]+}/users/{userId:[0-9]+}")
+    @Operation(summary = "Removes user from organization")
     open fun removeUser(
             @PathVariable("organizationId") organizationId: Long,
             @PathVariable("userId") userId: Long
@@ -152,6 +165,7 @@ open class OrganizationController(
     }
 
     @GetMapping("/{id:[0-9]+]}/repositories")
+    @Operation(summary = "Returns all organization repositories")
     open fun getAllRepositories(
             @PathVariable("id") id: Long,
             pageable: Pageable,
@@ -166,6 +180,7 @@ open class OrganizationController(
     }
 
     @GetMapping("/{addressPart:.*[a-z].*}/repositories")
+    @Operation(summary = "Returns all organization repositories")
     open fun getAllRepositories(
             @PathVariable("addressPart") addressPart: String,
             pageable: Pageable,
