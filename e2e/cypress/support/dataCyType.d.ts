@@ -1,18 +1,26 @@
 declare namespace DataCy {
     export type Value = 
+        "translations-editable-cell" |
+        "translations-editable-cell-editing" |
+        "translations-delete-button" |
         "camera-button" |
         "dropzone" |
         "add-box" |
         "screenshot-box" |
         "translations-add-key-dialog" |
         "translations-add-key-field" |
+        "translations-row-checkbox" |
         "global-confirmation-hard-mode-text-field" |
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |
         "global-plus-button" |
         "global-form-cancel-button" |
         "global-form-save-button" |
+        "global-field-array-minus-button" |
+        "global-field-array-plus-button" |
+        "global-field-array-add-button" |
         "global-form-select" |
+        "global-list-item" |
         "simple-hateoas-list" |
         "global-list-item" |
         "global-paginated-list" |
@@ -41,28 +49,15 @@ declare namespace DataCy {
         "organization-role-menu" |
         "organization-role-select-item" |
         "organization-side-menu" |
-        "repository-settings-button" |
         "repository-list-owner" |
         "repository-settings-button" |
         "repository-menu-items" |
-        "user-account-side-menu" |
-        "global-snackbars" |
-        "translations-row-checkbox" |
-        "translations-delete-button" |
-        "translations-editable-cell" |
-        "translations-editable-cell" |
-        "translations-editable-cell-editing" |
         "permissions-revoke-button" |
-        "global-list-item" |
-        "repository-owner-select" |
-        "repository-owner-select-item" |
-        "repository-owner-select" |
-        "repository-create-label-name" |
-        "repository-create-label-name" |
         "repository-name-field" |
         "repository-language-name-field" |
         "repository-language-abbreviation-field" |
-        "global-field-array-minus-button" |
-        "global-field-array-plus-button" |
-        "global-field-array-add-button"
+        "repository-owner-select-item" |
+        "repository-owner-select" |
+        "user-account-side-menu" |
+        "global-snackbars"
 }

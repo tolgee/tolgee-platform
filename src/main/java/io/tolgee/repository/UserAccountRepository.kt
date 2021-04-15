@@ -18,8 +18,8 @@ interface UserAccountRepository : JpaRepository<UserAccount?, Long?> {
     @Query("""select userAccount.id as id, userAccount.name as name, userAccount.username as username, memberRole.type as organizationRole from UserAccount userAccount 
         join OrganizationRole memberRole on memberRole.user = userAccount and memberRole.organization.id = :organizationId
         where ((lower(userAccount.name)
-        like lower(concat('%', :search,'%')) 
-        or lower(userAccount.username) like lower(concat('%', :search,'%'))) or :search is null)
+        like lower(concat('%', cast(:search as text),'%')) 
+        or lower(userAccount.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
         """)
     fun getAllInOrganization(organizationId: Long, pageable: Pageable, search: String): Page<UserAccountWithOrganizationRoleView>
 
@@ -31,8 +31,8 @@ interface UserAccountRepository : JpaRepository<UserAccount?, Long?> {
         left join Organization  o on orl.organization = o
         where r.id = :repositoryId and (p is not null or orl is not null)
         and ((lower(ua.name)
-        like lower(concat('%', :search,'%'))
-        or lower(ua.username) like lower(concat('%', :search,'%'))) or :search is null)
+        like lower(concat('%', cast(:search as text),'%'))
+        or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
     """)
     fun getAllInRepository(repositoryId: Long, pageable: Pageable, search: String? = ""): Page<UserAccountInRepositoryView>
 }

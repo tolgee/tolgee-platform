@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -32,18 +33,18 @@ interface RepositoryRepository : JpaRepository<io.tolgee.model.Repository, Long>
     fun findAllPermitted(userAccountId: Long): List<Array<Any>>
 
     @Query("""$BASE_ALL_PERMITTED_QUERY 
-                and ((lower(r.name) like lower(concat('%', :search,'%'))
-                or lower(o.name) like lower(concat('%', :search,'%')))
-                or lower(ua.name) like lower(concat('%', :search,'%')) or :search is null)
+                and (:search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
+                or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
+                or lower(ua.name) like lower(concat('%', cast(:search as text),'%')))
     """)
-    fun findAllPermitted(userAccountId: Long, pageable: Pageable, search: String? = null): Page<RepositoryView>
+    fun findAllPermitted(userAccountId: Long, pageable: Pageable, @Param("search") search: String? = null): Page<RepositoryView>
 
     fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<io.tolgee.model.Repository>
 
     @Query("""$BASE_ALL_PERMITTED_QUERY and o.id = :organizationOwnerId and o is not null
-         and ((lower(r.name) like lower(concat('%', :search,'%'))
-                or lower(o.name) like lower(concat('%', :search,'%')))
-                or lower(ua.name) like lower(concat('%', :search,'%')) or :search is null)
+         and ((lower(r.name) like lower(concat('%', cast(:search as text),'%'))
+                or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
+                or lower(ua.name) like lower(concat('%', cast(:search as text),'%')) or cast(:search as text) is null)
         """)
     fun findAllPermittedInOrganization(userAccountId: Long, organizationOwnerId: Long, pageable: Pageable, search: String?): Page<RepositoryView>
 

@@ -398,7 +398,7 @@
                                  validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-9">
-        <dropForeignKeyConstraint baseTableName="REPOSITORY" constraintName="FKOIOV5289PVEGGJM2STHUHW4QM"/>
+        <dropForeignKeyConstraint baseTableName="REPOSITORY" constraintName="FKoiov5289pveggjm2sthuhw4qm"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1616861797397-10">
         <dropUniqueConstraint constraintName="REPOSITORY_NAME_CREATED_BY_ID" tableName="REPOSITORY"/>
