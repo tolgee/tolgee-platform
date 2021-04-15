@@ -71,7 +71,10 @@ describe('Organization Settings', () => {
                 enterRepositorySettings("Facebook itself")
                 selectInRepositoryMenu("Permissions")
                 gcy("global-list-search").find("input").type("Doe")
-                gcy("global-list-item").should("have.length", 1).should("contain", "John Doe")
+                gcy("global-paginated-list").within(() => {
+                    gcy("global-list-item").should("have.length", 1).should("contain", "John Doe")
+                })
+
             })
 
             it("Can paginate", () => {
@@ -87,13 +90,15 @@ describe('Organization Settings', () => {
                 visitList()
                 enterRepositorySettings("Facebook itself")
                 selectInRepositoryMenu("Permissions")
-                gcy("global-list-item").contains("John Doe").closest("li").within(() => {
-                    gcy("permissions-revoke-button").should("be.disabled")
-                    gcy("permissions-menu-button").should("be.enabled")
-                })
-                gcy("global-list-item").contains("Cukrberg").closest("li").within(() => {
-                    gcy("permissions-revoke-button").should("be.disabled")
-                    gcy("permissions-menu-button").should("be.disabled")
+                gcy("global-paginated-list").within(() => {
+                    gcy("global-list-item").contains("John Doe").closest("li").within(() => {
+                        gcy("permissions-revoke-button").should("be.disabled")
+                        gcy("permissions-menu-button").should("be.enabled")
+                    })
+                    gcy("global-list-item").contains("Cukrberg").closest("li").within(() => {
+                        gcy("permissions-revoke-button").should("be.disabled")
+                        gcy("permissions-menu-button").should("be.disabled")
+                    })
                 })
             })
         })
@@ -109,8 +114,10 @@ describe('Organization Settings', () => {
                 visitList()
                 enterRepositorySettings("Facebook itself")
                 selectInRepositoryMenu("Permissions")
-                gcy("global-list-item").contains("Vaclav Novak").closest("li").within(() => {
-                    gcy("permissions-menu-button").click()
+                gcy("global-paginated-list").within(() => {
+                    gcy("global-list-item").contains("Vaclav Novak").closest("li").within(() => {
+                        gcy("permissions-menu-button").click()
+                    })
                 })
                 gcy("permissions-menu").filter(":visible").contains("Manage").click()
                 confirmStandard()
@@ -124,8 +131,10 @@ describe('Organization Settings', () => {
                 visitList()
                 enterRepositorySettings("Facebook itself")
                 selectInRepositoryMenu("Permissions")
-                gcy("global-list-item").contains("Vaclav Novak").closest("li").within(() => {
-                    gcy("permissions-revoke-button").click()
+                gcy("global-paginated-list").within(() => {
+                    gcy("global-list-item").contains("Vaclav Novak").closest("li").within(() => {
+                        gcy("permissions-revoke-button").click()
+                    })
                 })
                 confirmStandard()
                 login("vaclav.novak@fake.com", "admin")
