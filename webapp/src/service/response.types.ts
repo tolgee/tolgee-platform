@@ -1,3 +1,6 @@
+import {components} from "./apiSchema";
+import {SimpleHateoasList} from "../component/common/list/SimpleHateoasList";
+
 export type TranslationsObject = { [abbreviation: string]: string };
 
 export type KeyTranslationsDTO = {
@@ -43,6 +46,8 @@ export interface RemoteConfigurationDTO {
     screenshotsUrl: string
     maxUploadFileSize: number
     needsEmailVerification: boolean
+    userCanCreateOrganizations: boolean
+    userCanCreateRepositories: boolean
 }
 
 export interface TokenDTO {
@@ -50,6 +55,8 @@ export interface TokenDTO {
 }
 
 export type ErrorResponseDTO = {
+    CUSTOM_VALIDATION?: { [key: string]: any[] };
+    STANDARD_VALIDATION?: { [key: string]: any[] };
     code: string;
     params: [];
     __handled: boolean;
@@ -60,6 +67,11 @@ export enum RepositoryPermissionType {
     EDIT = 'EDIT',
     TRANSLATE = 'TRANSLATE',
     VIEW = 'VIEW'
+}
+
+export enum OrganizationRoleType {
+    MEMBER = 'MEMBER',
+    OWNER = 'OWNER',
 }
 
 export interface InvitationDTO {
@@ -106,4 +118,13 @@ export interface ScreenshotDTO {
     "id": 0,
     "filename": string,
     "createdAt": string
+}
+
+export type HateoasPaginatedData<ItemDataType> = {
+    page?: components["schemas"]["PageMetadata"],
+} & HateoasListData<ItemDataType>
+
+export type HateoasListData<ItemDataType> = {
+    _embedded?: { [key: string]: ItemDataType[] },
+    _links?: components["schemas"]["Links"]
 }

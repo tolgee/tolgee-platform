@@ -1,9 +1,9 @@
 import {useSelector} from "react-redux";
 import {AppState} from "../store";
-import {RepositoryDTO} from "../service/response.types";
 import {GlobalError} from "../error/GlobalError";
+import {components} from "../service/apiSchema";
 
-export const useRepository = (): RepositoryDTO => {
+export const useRepository = (): components["schemas"]["RepositoryModel"] => {
     let repositoryDTOLoadable = useSelector((state: AppState) => state.repositories.loadables.repository);
 
     if (!repositoryDTOLoadable.data) {

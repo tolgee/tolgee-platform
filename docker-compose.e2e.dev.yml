@@ -1,0 +1,22 @@
+version: '3'
+services:
+  bootJar:
+    container_name: tolgee_e2e_dev_bootRun
+    image: openjdk:14-jdk-alpine
+    ports:
+      - 8201:8080
+      - 8091:8091
+    volumes:
+      - ".:/data"
+    working_dir: "/data"
+    entrypoint: ["./gradlew", "bootRun"]
+    environment:
+    - tolgee.internal.populate=true
+    - tolgee.internal.controllerEnabled=true
+    - "tolgee.screenshots-url=http://localhost:8201/screenshots"
+    - tolgee.authentication.needs-email-verification=true
+    - tolgee.authentication.registrations-allowed=true
+    - tolgee.internal.fake-emails-sent=true
+    - tolgee.authentication.initialPassword=admin
+    - tolgee.authentication.enabled=true
+    - agentlib:jdwp=transport=dt_socket,address=*:8091,server=y,suspend=n

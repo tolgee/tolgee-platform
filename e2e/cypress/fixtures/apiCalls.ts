@@ -1,6 +1,6 @@
 import {API_URL, PASSWORD, USERNAME} from "./constants";
 import {ArgumentTypes, Scope} from "./types";
-import {LanguageDTO} from "../../../webapp/src/service/response.types";
+import {ApiKeyDTO, LanguageDTO} from "../../../webapp/src/service/response.types";
 
 const bcrypt = require('bcryptjs');
 
@@ -102,7 +102,8 @@ export const getUser = (username: string) => {
     })
 }
 
-export const createApiKey = (body: { repositoryId: number, scopes: Scope[] }) => apiFetch(`apiKeys`, {method: "POST", body}).then(r => r.body)
+export const createApiKey = (body: { repositoryId: number, scopes: Scope[] }) =>
+    apiFetch(`apiKeys`, {method: "POST", body}).then(r => r.body) as any as Promise<ApiKeyDTO>
 
 export const addScreenshot = (repositoryId: number, key: string, path: string) => {
     return cy.fixture(path).then(f => {
@@ -125,3 +126,10 @@ export const addScreenshot = (repositoryId: number, key: string, path: string) =
         });
     })
 }
+
+export const cleanOrganizationData = () => internalFetch("e2e-data/organizations/clean")
+export const createOrganizationData = () => internalFetch("e2e-data/organizations/create")
+
+export const cleanRepositoriesData = () => internalFetch("e2e-data/repositories/clean")
+export const createRepositoriesData = () => internalFetch("e2e-data/repositories/create")
+

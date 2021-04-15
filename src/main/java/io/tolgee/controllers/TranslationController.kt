@@ -73,7 +73,7 @@ class TranslationController @Autowired constructor(
     @AccessWithRepositoryPermission(permission = Permission.RepositoryPermissionType.EDIT)
     @Operation(summary = "Sets translations for existing or not existing key")
     fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsDTO) {
-        val repository = repositoryService.getById(repositoryHolder.repository.id).get()
+        val repository = repositoryService.get(repositoryHolder.repository.id).get()
         val key = keyService.getOrCreateKey(repository, PathDTO.fromFullPath(dto.key))
         translationService.setForKey(key, dto.translations)
     }
@@ -86,7 +86,7 @@ class TranslationController @Autowired constructor(
                     @RequestParam(name = "offset", defaultValue = "0") offset: Int,
                     @RequestParam(name = "search", required = false) search: String?
     ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-        securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.VIEW)
+        securityService.checkRepositoryPermission(repositoryId!!, Permission.RepositoryPermissionType.VIEW)
         return translationService.getViewData(languages, repositoryId, limit, offset, search)
     }
 }

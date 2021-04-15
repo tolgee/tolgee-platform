@@ -21,6 +21,6 @@ export class RepositoryPermissions {
 
 export const useRepositoryPermissions = (): RepositoryPermissions => {
     const repository = useRepository();
-
-    return new RepositoryPermissions(repository.permissionType)
+    const type = RepositoryPermissionType[repository.computedPermissions as NonNullable<typeof repository.computedPermissions>];
+    return new RepositoryPermissions(type)
 };

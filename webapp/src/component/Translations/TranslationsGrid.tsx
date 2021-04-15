@@ -15,6 +15,7 @@ import {BaseView} from "../layout/BaseView";
 import {useRepositoryPermissions} from "../../hooks/useRepositoryPermissions";
 import {RepositoryPermissionType} from "../../service/response.types";
 import {T} from "@tolgee/react";
+import Typography from "@material-ui/core/Typography";
 
 export const TranslationsGrid: FunctionComponent = (props) => {
     let repositoryDTO = useRepository();
@@ -51,11 +52,12 @@ export const TranslationsGrid: FunctionComponent = (props) => {
         </>
     );
 
+    const title = <Typography variant="h5"><T>translations_view_title</T></Typography>
+
     return (
-        <BaseView title={<T>translations_view_title</T>}
-                  headerChildren={isSearch || !isEmpty ? <MenuBar/> : null}
+        <BaseView customHeader={isSearch || !isEmpty ? <>{title}<Box mt={2}><MenuBar/></Box></> : title}
                   loading={listContext.listLoadable.loading}
-                  hideChildrenOnLoading={false}>
+        >
             {isEmpty ? onEmptyInner : onNotEmptyInner}
         </BaseView>
     )

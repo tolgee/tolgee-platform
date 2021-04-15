@@ -21,4 +21,3 @@ const path = require("path");
 module.exports = (on, config) => {
     return dotenvPlugin(config, {path: path.resolve(__dirname, '../../.test.docker.env')})
 }
-

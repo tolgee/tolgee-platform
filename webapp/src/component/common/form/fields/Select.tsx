@@ -34,6 +34,7 @@ export const Select: FunctionComponent<Props> = (props) => {
         <FormControl className={classes.select} error={!!meta.error} {...formControlProps} >
             {props.label && <InputLabel id={'select_' + field.name + '_label'}>{props.label}</InputLabel>}
             <MUISelect
+                data-cy="global-form-select"
                 name={field.name}
                 labelId={'select_' + field.name + '_label'}
                 value={field.value}

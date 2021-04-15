@@ -1,15 +1,15 @@
 import {addScreenshot, createRepository, deleteRepository, login, setTranslations} from "../fixtures/apiCalls";
 import {HOST} from "../fixtures/constants";
-import {RepositoryDTO} from "../../src/service/response.types"
 import 'cypress-file-upload';
 import {getPopover} from "../fixtures/shared";
+import {RepositoryDTO} from "../../../webapp/src/service/response.types";
 
 describe('Key screenshots', () => {
     let repository: RepositoryDTO = null
 
     beforeEach(() => {
-        cy.wrap(null).then(() => login().then(() => {
-            cy.wrap(null).then(() => createRepository({
+        login().then(() => {
+            createRepository({
                     name: "Test",
                     languages: [
                         {
@@ -29,13 +29,13 @@ describe('Key screenshots', () => {
                 for (let i = 1; i < 5; i++) {
                     promises.push(setTranslations(repository.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}))
                 }
-                Cypress.Promise.all(promises).then(() => {
-                    visit();
+                return Cypress.Promise.all(promises).then(() => {
+                    visit(repository.id)
                 })
-            }))
-        }));
-    });
+            })
+        })
 
+    })
 
     it("opens popup", () => {
         getCameraButton(1).click()
@@ -138,11 +138,13 @@ describe('Key screenshots', () => {
     });
 
     afterEach(() => {
-        cy.wrap(null).then(() => deleteRepository(repository.id));
+        if (repository) {
+            deleteRepository(repository.id)
+        }
     })
 
-    const visit = () => {
-        cy.visit(`${HOST}/repositories/${repository.id}/translations`)
+    const visit = (repositoryId) => {
+        cy.visit(`${HOST}/repositories/${repositoryId}/translations`)
     }
 })
 

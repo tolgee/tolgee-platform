@@ -1,12 +1,12 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './ApiHttpService';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
 import {ErrorResponseDTO, ScreenshotDTO} from './response.types';
 
 type UploadResult = { stored: ScreenshotDTO[], errors: ErrorResponseDTO[] };
 
 @singleton()
 export class ScreenshotService {
-    constructor(private http: ApiHttpService) {
+    constructor(private http: ApiV1HttpService) {
     }
 
     async getForKey(repositoryId, key: string): Promise<ScreenshotDTO[]> {

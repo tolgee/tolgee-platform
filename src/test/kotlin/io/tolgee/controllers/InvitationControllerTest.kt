@@ -31,13 +31,13 @@ class InvitationControllerTest : SignedInControllerTest() {
         val repository = dbPopulator.createBase(generateUniqueString())
         val invitation = invitationService.create(repository, Permission.RepositoryPermissionType.EDIT)
 
-        val newUser = dbPopulator.createUser(generateUniqueString(), "pwd")
+        val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
         logAsUser(newUser.username!!, "pwd")
         performAuthGet("/api/invitation/accept/${invitation}").andExpect(status().isOk).andReturn()
 
         assertThat(invitationService.getForRepository(repository)).hasSize(0)
-        assertThat(permissionService.getRepositoryPermission(repository.id, newUser)).isNotEmpty
-        val type = permissionService.getRepositoryPermission(repository.id, newUser).get().type
+        assertThat(permissionService.getRepositoryPermissionType(repository.id, newUser)).isNotNull
+        val type = permissionService.getRepositoryPermissionType(repository.id, newUser)!!
         assertThat(type).isEqualTo(Permission.RepositoryPermissionType.EDIT)
     }
 }

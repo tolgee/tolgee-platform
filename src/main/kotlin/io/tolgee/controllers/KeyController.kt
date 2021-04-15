@@ -67,7 +67,7 @@ open class KeyController(
     @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
     open fun getDeprecated(@PathVariable("id") id: Long?): DeprecatedKeyDto {
         val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-        securityService.getAnyRepositoryPermissionOrThrow(key.repository!!.id)
+        securityService.checkAnyRepositoryPermission(key.repository!!.id)
         return DeprecatedKeyDto(key.name)
     }
 

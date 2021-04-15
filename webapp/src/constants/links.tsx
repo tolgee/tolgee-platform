@@ -57,6 +57,7 @@ export enum PARAMS {
     API_KEY_ID = 'languageId',
     USER_ID = 'userID',
     VERIFICATION_CODE = 'verificationCode',
+    ORGANIZATION_ADDRESS_PART = 'addressPart',
 }
 
 export class LINKS {
@@ -94,6 +95,25 @@ export class LINKS {
     static USER_API_KEYS_EDIT = Link.ofParent(LINKS.USER_API_KEYS, 'edit/' + p(PARAMS.API_KEY_ID));
 
     static USER_SETTINGS = Link.ofRoot('user');
+
+    /**
+     * Organizations
+     */
+    static ORGANIZATIONS = Link.ofRoot('organizations');
+
+    static ORGANIZATIONS_ADD = Link.ofParent(LINKS.ORGANIZATIONS, 'add');
+
+    static ORGANIZATION = Link.ofParent(LINKS.ORGANIZATIONS, p(PARAMS.ORGANIZATION_ADDRESS_PART));
+
+    static ORGANIZATION_PROFILE = Link.ofParent(LINKS.ORGANIZATION, 'profile');
+
+    static ORGANIZATION_MEMBERS = Link.ofParent(LINKS.ORGANIZATION, 'members');
+
+    static ORGANIZATION_MEMBER_PRIVILEGES = Link.ofParent(LINKS.ORGANIZATION, 'member-privileges');
+
+    static ORGANIZATION_INVITATIONS = Link.ofParent(LINKS.ORGANIZATION, 'invitations');
+
+    static ORGANIZATION_REPOSITORIES = Link.ofParent(LINKS.ORGANIZATION, 'repositories');
 
     /**
      * Repository stuff
