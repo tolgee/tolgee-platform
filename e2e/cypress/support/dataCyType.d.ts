@@ -4,21 +4,28 @@ declare namespace DataCy {
         "dropzone" |
         "add-box" |
         "screenshot-box" |
+        "translations-add-key-dialog" |
+        "translations-add-key-field" |
         "global-confirmation-hard-mode-text-field" |
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |
         "global-plus-button" |
         "global-form-cancel-button" |
         "global-form-save-button" |
+        "global-form-select" |
+        "simple-hateoas-list" |
         "global-list-item" |
         "global-paginated-list" |
         "global-list-search" |
         "global-list-pagination" |
-        "global-list-pagination" |
-        "global-list-pagination" |
         "global-base-view-title" |
+        "permission-select-item" |
         "permissions-menu-button" |
         "permissions-menu" |
+        "organization-invitation-generate-button" |
+        "organization-invitation-role-select" |
+        "organization-invitations-generated-field" |
+        "organization-invitation-cancel-button" |
         "global-list-item-text" |
         "leave-organization-button" |
         "organization-settings-button" |
@@ -32,23 +39,10 @@ declare namespace DataCy {
         "organization-members-remove-user-button" |
         "organization-role-menu-button" |
         "organization-role-menu" |
-        "organization-side-menu" |
-        "user-account-side-menu" |
-        "global-snackbars" |
-        "organization-invitation-generate-button" |
-        "organization-invitation-role-select" |
-        "organization-invitation-cancel-button" |
-        "organization-invitation-generate-button" |
-        "organization-invitation-role-select" |
-        "organization-invitations-generated-field" |
-        "organization-invitation-cancel-button" |
-        "global-form-select" |
-        "simple-hateoas-list" |
-        "permission-select-item" |
         "organization-role-select-item" |
+        "organization-side-menu" |
         "repository-settings-button" |
         "repository-menu-items" |
-        "translations-add-key-dialog" |
-        "translations-add-key-dialog" |
-        "translations-add-key-field"
+        "user-account-side-menu" |
+        "global-snackbars"
 }

@@ -14,8 +14,7 @@ context('Login', () => {
             .type(USERNAME).should('have.value', USERNAME);
         cy.xpath('//input[@name="password"]')
             .type(PASSWORD).should('have.value', PASSWORD);
-        cy.xpath("//button//*[text() = 'Login']").click();
-        cy.xpath(getAnyContainingText("Login")).should("not.exist");
+        cy.xpath("//button//*[text() = 'Login']").click().should("not.exist");
         cy.xpath("//*[@aria-controls='user-menu']").should("be.visible");
     });
 

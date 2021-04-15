@@ -123,7 +123,6 @@
   "Validation - required field" : "Ce champ doit être rempli",
   "Validation - required field - abbreviation" : "Abréviation doit  être remplie",
   "Validation - required field - name" : "Nom doit  être rempli",
-  "Validation - email is not valid" : "Le format de l'e-mail n'est pas valide",
   "sign_up_success_title" : "Succès !",
   "sign_up_success_needs_verification_message" : "Merci de vous être inscrit. Vous allez recevoir un e-mail de confirmation. Suivez les instructions contenues dans cet e-mail. ",
   "Translation grid - Successfully deleted!" : "Traductions supprimés !",
@@ -132,5 +131,6 @@
   "User data - Successfully updated!" : "Paramètres du compte utilisateur actualisés",
   "translations_leave_save_confirmation" : "Annuler les changements ?",
   "translations_key_delete_confirmation_text" : "Etes-vous sûr de vouloir supprimer {count} clés et ses traductions ? ",
-  "translations_leave_save_confirmation_message" : "Voulez-vous annuler le changement de \"{initialValue}\" à \"{newValue}\"?"
+  "translations_leave_save_confirmation_message" : "Voulez-vous annuler le changement de \"{initialValue}\" à \"{newValue}\"?",
+  "validation_email_is_not_valid" : "Le format de l'e-mail n'est pas valide"
 }

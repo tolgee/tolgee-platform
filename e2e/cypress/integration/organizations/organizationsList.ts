@@ -5,11 +5,11 @@ import {clickGlobalSave, gcy, goToPage} from "../../fixtures/shared";
 import {RepositoryDTO} from "../../../../webapp/src/service/response.types";
 
 describe('Organization List', () => {
-    beforeEach(async () => {
-        await login().promisify()
-        await cleanOrganizationData().promisify()
-        await createOrganizationData().promisify()
-        await visit();
+    beforeEach(() => {
+        login()
+        cleanOrganizationData()
+        createOrganizationData()
+        visit();
     })
 
     it("creates organization", () => {
