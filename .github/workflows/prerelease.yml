@@ -91,11 +91,11 @@ jobs:
           docker push tolgee/tolgee:latest
 
       - name: Merge to develop
-          uses: devmasx/merge-branch@v1.3.1
-          with:
-            type: now
-            target_branch: develop
-            github_token: ${{ github.token }}
+        uses: devmasx/merge-branch@v1.3.1
+        with:
+          type: now
+          target_branch: develop
+          github_token: ${{ github.token }}
 
       - uses: actions/upload-artifact@v2
         if: always()
