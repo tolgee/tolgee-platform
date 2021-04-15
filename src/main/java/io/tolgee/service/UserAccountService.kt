@@ -31,10 +31,15 @@ open class UserAccountService(private val userAccountRepository: UserAccountRepo
     }
 
     open fun createUser(request: SignUpDto): UserAccount {
+        dtoToEntity(request).let {
+            this.createUser(it)
+            return it
+        }
+    }
+
+    open fun dtoToEntity(request: SignUpDto): UserAccount {
         val encodedPassword = encodePassword(request.password!!)
-        val account = UserAccount(name = request.name, username = request.email, password = encodedPassword)
-        this.createUser(account)
-        return account
+        return UserAccount(name = request.name, username = request.email, password = encodedPassword)
     }
 
     open val implicitUser: UserAccount

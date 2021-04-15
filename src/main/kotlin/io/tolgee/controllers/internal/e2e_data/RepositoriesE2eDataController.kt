@@ -2,9 +2,13 @@ package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.DbPopulatorReal
+import io.tolgee.dtos.request.LanguageDTO
+import io.tolgee.dtos.request.SetTranslationsDTO
+import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Repository
+import io.tolgee.model.UserAccount
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.RepositoryRepository
@@ -33,14 +37,24 @@ open class RepositoriesE2eDataController(
         private val repositoryRepository: RepositoryRepository,
         private val permissionService: PermissionService,
         private val userAccountRepository: UserAccountRepository,
-        private val permissionRepository: PermissionRepository
+        private val permissionRepository: PermissionRepository,
+        private val keyService: KeyService,
+        private val languageService: LanguageService,
 ) {
     @GetMapping(value = ["/create"])
     @Transactional
     open fun createRepositories() {
+        val createdUsers = mutableMapOf<String, UserAccount>()
+
         users.forEach {
-            dbPopulatorReal.createUserIfNotExists(username = it.email, name = it.name)
+            createdUsers[it.email] = userAccountService.dtoToEntity(
+                    SignUpDto(
+                            name = it.name, email = it.email, password = "admin")
+            )
         }
+
+        userAccountRepository.saveAll(createdUsers.values)
+
 
         organizations.forEach {
             val organization = organizationRepository.save(Organization(
@@ -50,13 +64,13 @@ open class RepositoriesE2eDataController(
             ))
 
             it.owners.forEach {
-                userAccountService.getByUserName(it).get().let { user ->
+                createdUsers[it]!!.let { user ->
                     organizationRoleService.grantOwnerRoleToUser(user, organization)
                 }
             }
 
             it.members.forEach {
-                userAccountService.getByUserName(it).get().let { user ->
+                createdUsers[it]!!.let { user ->
                     organizationRoleService.grantMemberRoleToUser(user, organization)
                 }
             }
@@ -65,7 +79,7 @@ open class RepositoriesE2eDataController(
         repositories.forEach { repositoryData ->
 
             val userOwner = if (repositoryData.userOwner != null)
-                userAccountService.getByUserName(repositoryData.userOwner).get() else null
+                createdUsers[repositoryData.userOwner]!! else null
 
             val organizationOwner = if (repositoryData.organizationOwner != null)
                 organizationService.get(repositoryData.organizationOwner) else null
@@ -78,9 +92,22 @@ open class RepositoriesE2eDataController(
                     organizationOwner = organizationOwner
             ))
 
+
             repositoryData.permittedUsers.forEach {
-                val user = userAccountService.getByUserName(it.userName).get()
+                val user = createdUsers[it.userName]!!
                 permissionRepository.save(Permission(repository = repository, user = user, type = it.permission))
+            }
+
+            val createdLanguages = mutableListOf<String>()
+
+            repositoryData.keyData.forEach {
+                it.value.keys.forEach {
+                    if (!createdLanguages.contains(it)) {
+                        languageService.createLanguage(LanguageDTO(name = it, abbreviation = it), repository)
+                        createdLanguages.add(it)
+                    }
+                }
+                keyService.create(repository, SetTranslationsDTO(it.key, it.value))
             }
         }
     }
@@ -126,6 +153,7 @@ open class RepositoriesE2eDataController(
                 val organizationOwner: String? = null,
                 val userOwner: String? = null,
                 val permittedUsers: MutableList<PermittedUserData> = mutableListOf(),
+                val keyData: Map<String, Map<String, String>> = mutableMapOf()
         )
 
         val users = mutableListOf(
@@ -190,7 +218,8 @@ open class RepositoriesE2eDataController(
                                         "vaclav.novak@fake.com",
                                         Permission.RepositoryPermissionType.TRANSLATE
                                 )
-                        )
+                        ),
+                        keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
                 ),
                 RepositoryDataItem(
                         name = "Microsoft Frontpage",
@@ -228,6 +257,9 @@ open class RepositoriesE2eDataController(
             (1..20).forEach { number ->
                 val email = "owner@zzzcool${number}.com";
                 users.add(UserData(email))
+                repositories.find { item -> item.name == "Microsoft Word" }!!.permittedUsers.add(
+                        PermittedUserData(email, Permission.RepositoryPermissionType.EDIT)
+                )
             }
         }
     }

@@ -85,6 +85,7 @@ export const EditableCell: FunctionComponent<EditableCellProps> = (props) => {
 
     if (!props.isEditing) {
         return <Box
+            data-cy="translations-editable-cell"
             onClick={
                 () => {
                     props.editEnabled && props.onEditClick()
@@ -111,7 +112,7 @@ export const EditableCell: FunctionComponent<EditableCellProps> = (props) => {
     }
 
     return (
-        <Box flexGrow={1}>
+        <Box flexGrow={1} data-cy="translations-editable-cell-editing">
             {/*
             @ts-ignore*/}
             <MicroForm onSubmit={(v: { value: any }) => props.onSubmit(v.value)} initialValues={{value: props.initialValue || ""}}

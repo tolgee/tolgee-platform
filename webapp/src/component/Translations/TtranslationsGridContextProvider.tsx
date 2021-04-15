@@ -31,7 +31,6 @@ export type TranslationListContextType = {
     isAllChecked: () => boolean,
     isSomeChecked: () => boolean
     checkedKeys: Set<number>
-    showCheckBoxes: boolean
     showKeys: boolean,
     setShowKeys: (showKeys: boolean) => void
     offset: number;
@@ -191,7 +190,6 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
         isAllChecked,
         isSomeChecked,
         checkedKeys: checkedKeys,
-        showCheckBoxes: repositoryDTO.computedPermissions === RepositoryPermissionType.MANAGE,
         showKeys,
         setShowKeys,
     };

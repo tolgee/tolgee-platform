@@ -4,7 +4,7 @@ import 'cypress-file-upload';
 import {assertMessage, clickGlobalSave, confirmHardMode, gcy} from "../../fixtures/shared";
 
 describe('Organization Settings', () => {
-    beforeEach(async () => {
+    beforeEach( () => {
         login()
         cleanOrganizationData()
         createOrganizationData()
@@ -69,7 +69,7 @@ describe('Organization Settings', () => {
         cy.visit(`${HOST}/organizations/tolgee/profile`)
     }
 
-    const visitMemberPrivileges = async () => {
+    const visitMemberPrivileges = () => {
         cy.visit(`${HOST}/organizations/tolgee/member-privileges`)
     }
 

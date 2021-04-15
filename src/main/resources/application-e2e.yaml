@@ -4,6 +4,8 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/schema.xml
     drop-first: true
+  jpa:
+    show-sql: true
 tolgee:
   authentication:
     enabled: true

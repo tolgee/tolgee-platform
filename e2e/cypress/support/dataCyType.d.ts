@@ -44,5 +44,11 @@ declare namespace DataCy {
         "repository-settings-button" |
         "repository-menu-items" |
         "user-account-side-menu" |
-        "global-snackbars"
+        "global-snackbars" |
+        "translations-row-checkbox" |
+        "translations-delete-button" |
+        "translations-editable-cell" |
+        "translations-editable-cell" |
+        "translations-editable-cell-editing" |
+        "permissions-revoke-button"
 }

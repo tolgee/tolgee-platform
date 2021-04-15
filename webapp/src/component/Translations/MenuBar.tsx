@@ -31,6 +31,7 @@ export const MenuBar: FunctionComponent = () => {
                         <Box pr={2} ml={-2}>
                             <Tooltip title={<T>translations_delete_selected</T>}>
                                 <IconButton color="secondary"
+                                            data-cy="translations-delete-button"
                                             onClick={() =>
                                                 confirmation({
                                                     onConfirm: () => actions.loadableActions.delete

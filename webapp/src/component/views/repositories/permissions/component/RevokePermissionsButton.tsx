@@ -31,7 +31,9 @@ const RevokePermissionsButton = (props: { user: components["schemas"]["UserAccou
 
     return (
         <Wrapper>
-            <Button disabled={isDisabled} size="small" variant="outlined" onClick={
+            <Button
+                data-cy="permissions-revoke-button"
+                disabled={isDisabled} size="small" variant="outlined" onClick={
                 () => confirmation({
                     title: <T>revoke_access_confirmation_title</T>,
                     message: <T parameters={{userName: props.user.name}}>repository_permissions_revoke_user_access_message</T>,
