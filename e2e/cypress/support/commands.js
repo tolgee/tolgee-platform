@@ -25,12 +25,16 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 
-Cypress.Commands.add("closestDataCy", {prevSubject: true}, (subject, dataCy) => {
+Cypress.Commands.add("closestDcy", {prevSubject: true}, (subject, dataCy) => {
     return subject.closest('[data-cy="' + dataCy + '"]')
 })
 
 Cypress.Commands.add("gcy", (dataCy) => {
    return cy.get('[data-cy="' + dataCy + '"]')
+})
+
+Cypress.Commands.add("findDcy", {prevSubject: true},(subject, dataCy) => {
+    return subject.find('[data-cy="' + dataCy + '"]')
 })
 
 

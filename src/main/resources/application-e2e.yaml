@@ -19,3 +19,6 @@ tolgee:
     fake-emails-sent: true
 server:
   port: 8201
+  error:
+    include-exception: true
+    include-stacktrace: always

@@ -7,30 +7,34 @@ import {RepositoryDTO} from "../../../webapp/src/service/response.types";
 describe('Key screenshots', () => {
     let repository: RepositoryDTO = null
 
-    beforeEach(async () => {
-        await login().promisify()
-        const r = await createRepository({
-                name: "Test",
-                languages: [
-                    {
-                        abbreviation: "en",
-                        name: "English"
-                    },
-                    {
-                        abbreviation: "cs",
-                        name: "Česky"
-                    }
-                ]
-            }
-        ).promisify()
+    beforeEach(() => {
+        login().then(() => {
+            createRepository({
+                    name: "Test",
+                    languages: [
+                        {
+                            abbreviation: "en",
+                            name: "English"
+                        },
+                        {
+                            abbreviation: "cs",
+                            name: "Česky"
+                        }
+                    ]
+                }
+            ).then(r => {
+                repository = r.body as RepositoryDTO;
+                window.localStorage.setItem('selectedLanguages', `{"${repository.id}":["en"]}`);
+                const promises = []
+                for (let i = 1; i < 5; i++) {
+                    promises.push(setTranslations(repository.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}))
+                }
+                return Cypress.Promise.all(promises).then(() => {
+                    visit(repository.id)
+                })
+            })
+        })
 
-        repository = r.body as RepositoryDTO;
-        window.localStorage.setItem('selectedLanguages', `{"${repository.id}":["en"]}`);
-        for (let i = 1; i < 5; i++) {
-            await setTranslations(repository.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}).promisify()
-        }
-
-        await visit();
     })
 
     it("opens popup", () => {
@@ -133,12 +137,14 @@ describe('Key screenshots', () => {
         );
     });
 
-    afterEach (() => {
-        deleteRepository(repository.id)
+    afterEach(() => {
+        if (repository) {
+            deleteRepository(repository.id)
+        }
     })
 
-    const visit = async () => {
-        await cy.visit(`${HOST}/repositories/${repository.id}/translations`).promisify()
+    const visit = (repositoryId) => {
+        cy.visit(`${HOST}/repositories/${repositoryId}/translations`)
     }
 })
 

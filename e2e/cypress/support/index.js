@@ -30,3 +30,7 @@ Cypress.on('uncaught:exception', (err, runnable) => {
         return false
     }
 })
+
+Cypress.on('window:before:load', (win) => {
+    win.localStorage.setItem("__tolgee_currentLanguage", "en")
+})

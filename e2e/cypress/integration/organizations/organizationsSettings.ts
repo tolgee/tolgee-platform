@@ -62,7 +62,7 @@ describe('Organization Settings', () => {
 
 
     after(() => {
-        cleanOrganizationData()
+       cleanOrganizationData()
     })
 
     const visitProfile = () => {

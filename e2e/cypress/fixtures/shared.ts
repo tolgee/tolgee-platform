@@ -69,9 +69,7 @@ export const confirmStandard = () => {
 }
 
 export const assertMessage = (message: string) => {
-    gcy("global-snackbars").should("be.visible").within(() => {
-        cy.contains(message).should("be.visible")
-    })
+    gcy("global-snackbars").contains(message).should("be.visible")
 }
 
 export const selectInRepositoryMenu = (itemName: string) => {

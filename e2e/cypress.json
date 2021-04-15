@@ -1,3 +1,4 @@
 {
-  "scrollBehavior": "center"
+  "scrollBehavior": "center",
+  "video": false
 }

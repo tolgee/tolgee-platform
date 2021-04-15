@@ -211,7 +211,7 @@ task packWebapp(type: Zip) {
     dependsOn "unpack"
     dependsOn "copyDist"
     from "${project.projectDir}/build/dependency"
-    archiveFileName = "tolgee-${project.version}-test.jar"
+    archiveFileName = "tolgee-${project.version}.jar"
     destinationDirectory = file("$buildDir/libs")
     entryCompression ZipEntryCompression.STORED
 }

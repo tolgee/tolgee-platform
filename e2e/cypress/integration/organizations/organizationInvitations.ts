@@ -1,7 +1,7 @@
 import {cleanOrganizationData, createOrganizationData, login} from "../../fixtures/apiCalls";
 import {HOST} from "../../fixtures/constants";
 import 'cypress-file-upload';
-import {assertMessage, confirmStandard, gcy} from "../../fixtures/shared";
+import {assertMessage, gcy} from "../../fixtures/shared";
 import {getAnyContainingText} from "../../fixtures/xPath";
 
 describe('Organization Invitations', () => {
@@ -12,7 +12,7 @@ describe('Organization Invitations', () => {
         visit();
     })
 
-    it("generates invitations", () => {
+    it.only("generates invitations", () => {
         generateInvitation("MEMBER")
 
         gcy("organization-invitations-generated-field").within(() => {
@@ -23,9 +23,7 @@ describe('Organization Invitations', () => {
         generateInvitation("OWNER")
         generateInvitation("MEMBER")
 
-        gcy("simple-hateoas-list").within(() => {
-            cy.get("li").should("have.length", 4)
-        })
+        gcy("simple-hateoas-list").should("be.visible").find("li").should("be.visible").should("have.length", 4)
         gcy("simple-hateoas-list").xpath("." + getAnyContainingText("MEMBER")).should("have.length", 2)
         gcy("simple-hateoas-list").xpath("." + getAnyContainingText("OWNER")).should("have.length", 2)
     })
@@ -34,7 +32,7 @@ describe('Organization Invitations', () => {
         generateInvitation("MEMBER")
         generateInvitation("OWNER")
 
-        gcy("simple-hateoas-list").xpath("." + getAnyContainingText("MEMBER")).closest("li").within(() => {
+        gcy("simple-hateoas-list").find("li").eq(0).within(() => {
             gcy("organization-invitation-cancel-button").click()
         })
 
@@ -42,7 +40,7 @@ describe('Organization Invitations', () => {
             cy.get("li").should("have.length", 1)
         })
 
-        gcy("simple-hateoas-list").xpath("." + getAnyContainingText("OWNER")).closest("li").within(() => {
+        gcy("simple-hateoas-list").find("li").eq(0).within(() => {
             gcy("organization-invitation-cancel-button").click()
         })
 
