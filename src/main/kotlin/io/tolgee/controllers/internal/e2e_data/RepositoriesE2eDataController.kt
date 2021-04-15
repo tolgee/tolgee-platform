@@ -115,6 +115,8 @@ open class RepositoriesE2eDataController(
     @GetMapping(value = ["/clean"])
     @Transactional
     open fun cleanupRepositories() {
+        repositoryService.deleteAllByName("I am a great repository")
+
         repositories.forEach {
             repositoryService.deleteAllByName(it.name)
         }

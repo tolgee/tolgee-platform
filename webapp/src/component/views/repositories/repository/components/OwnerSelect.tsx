@@ -20,15 +20,16 @@ const OwnerSelect = () => {
 
     const data = [{value: 0, render: user?.name, key: 0}]
     organizationsLoadable.data?._embedded?.organizations?.forEach(i => data.push({value: i.id, key: i.id, render: i.name}))
-    const items = data.map(item => <MenuItem key={item.key} value={item.value}>{item.render}</MenuItem>)
+    const items = data.map(item => <MenuItem data-cy="repository-owner-select-item" key={item.key} value={item.value}>{item.render}</MenuItem>)
     const [fieldProps, fieldMeta, fieldHelpers] = useField("owner")
 
     return (
         <Box mt={2}>
             <FormControl fullWidth={true}>
-                <InputLabel id="demo-simple-select-label"><T>create_repository_owner_label</T></InputLabel>
+                <InputLabel id="repository-owner-select"><T>create_repository_owner_label</T></InputLabel>
                 <Select
-                    labelId="demo-simple-select-label"
+                    data-cy="repository-owner-select"
+                    labelId="repository-owner-select"
                     id="demo-simple-select"
                     name="owner"
                     value={fieldProps.value}

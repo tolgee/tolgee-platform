@@ -64,14 +64,23 @@ export const RepositoryCreateView: FunctionComponent = () => {
                         </Grid>}
 
                         <Grid item lg md sm xs>
-                            <TextField label={<T>create_repository_name_label</T>} name="name" required={true}/>
+                            <TextField
+                                data-cy="repository-name-field"
+                                label={<T>create_repository_name_label</T>}
+                                name="name"
+                                required={true}
+                            />
                         </Grid>
                     </Grid>
                     <FieldArray name="languages">
                         {(n) => (
                             <>
-                                <TextField fullWidth={false} label={<T>create_repository_language_name_label</T>} name={n('name')} required={true}/>
-                                <TextField fullWidth={false} label={<T>create_repository_language_abbreviation_label</T>} name={n('abbreviation')}
+                                <TextField
+                                    data-cy="repository-language-name-field"
+                                    fullWidth={false} label={<T>create_repository_language_name_label</T>} name={n('name')} required={true}/>
+                                <TextField
+                                    data-cy="repository-language-abbreviation-field"
+                                    fullWidth={false} label={<T>create_repository_language_abbreviation_label</T>} name={n('abbreviation')}
                                            required={true}/>
                             </>
                         )}

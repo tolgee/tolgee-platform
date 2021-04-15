@@ -42,6 +42,8 @@ declare namespace DataCy {
         "organization-role-select-item" |
         "organization-side-menu" |
         "repository-settings-button" |
+        "repository-list-owner" |
+        "repository-settings-button" |
         "repository-menu-items" |
         "user-account-side-menu" |
         "global-snackbars" |
@@ -50,5 +52,17 @@ declare namespace DataCy {
         "translations-editable-cell" |
         "translations-editable-cell" |
         "translations-editable-cell-editing" |
-        "permissions-revoke-button"
+        "permissions-revoke-button" |
+        "global-list-item" |
+        "repository-owner-select" |
+        "repository-owner-select-item" |
+        "repository-owner-select" |
+        "repository-create-label-name" |
+        "repository-create-label-name" |
+        "repository-name-field" |
+        "repository-language-name-field" |
+        "repository-language-abbreviation-field" |
+        "global-field-array-minus-button" |
+        "global-field-array-plus-button" |
+        "global-field-array-add-button"
 }

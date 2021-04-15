@@ -16,7 +16,7 @@ const RepositoryListItem = (r: components["schemas"]["RepositoryModel"]) => {
             to={LINKS.REPOSITORY_TRANSLATIONS.build({[PARAMS.REPOSITORY_ID]: r.id})}
         >
             <ListItemText>
-                {r.name} <Chip size="small" label={r.organizationOwnerName || r.userOwner?.name}/>
+                {r.name} <Chip data-cy="repository-list-owner" size="small" label={r.organizationOwnerName || r.userOwner?.name}/>
             </ListItemText>
             {(r.computedPermissions === RepositoryPermissionType.MANAGE) &&
             <ListItemSecondaryAction>

@@ -26,7 +26,6 @@ open class OrganizationE2eDataController(
     @GetMapping(value = ["/create"])
     @Transactional
     open fun createOrganizations() {
-
         data.forEach {
             val organization = organizationService.create(
                     it.dto,
