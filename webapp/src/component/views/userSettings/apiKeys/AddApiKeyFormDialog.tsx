@@ -13,6 +13,7 @@ import {ApiKeyDTO} from "../../../../service/response.types";
 import {EditApiKeyDTO} from "../../../../service/request.types";
 import {Validation} from "../../../../constants/GlobalValidationSchema";
 import {FullPageLoading} from "../../../common/FullPageLoading";
+import { T } from "@tolgee/react";
 
 interface Value {
     scopes: string[],
@@ -90,11 +91,11 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <Dialog open={true} onClose={onDialogClose} fullWidth maxWidth={"xs"}>
-            <DialogTitle>Generate api key</DialogTitle>
+        <Dialog open={true} onClose={onDialogClose} fullWidth maxWidth={"xs"} data-cy="api-keys-create-edit-dialog">
+            <DialogTitle>{props.editKey ? <T>edit_api_key_title</T> :<T>generate_api_key_title</T>}</DialogTitle>
             <DialogContent>
                 {(repositories.loaded && repositories.data!.length === 0)
-                && "Can not add api key without repository. Add repository first :("
+                && <T>cannot_add_api_key_without_repository_message</T>
                 ||
                 <>
                     {(repositories.loading || scopes.loading || props.loading) && <BoxLoading/>}
@@ -103,19 +104,28 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
                                   onCancel={() => onDialogClose()}
                                   initialValues={getInitialValues()}
                                   validationSchema={props.editKey && props.editKey.repositoryId ? Validation.EDIT_API_KEY : Validation.CREATE_API_KEY}
-                                  submitButtonInner={props.editKey ? "Save" : "Generate"}
                     >
-                        {(formikProps: FormikProps<Value>) => <>
-                            {!props.editKey && <Select fullWidth name="repositoryId"
-                                                       label="Repository"
-                                                       // @ts-ignore
-                                                       renderValue={v => repositories.data.find(r => r.id === v).name}>
-                                {repositories.data!.map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
-                            </Select>}
-                            <Box mt={2}>
-                                <CheckBoxGroupMultiSelect label="Scopes" name="scopes" options={getAvailableScopes(formikProps.values.repositoryId)}/>
-                            </Box>
-                        </>}
+                        {(formikProps: FormikProps<Value>) => {
+
+                            useEffect(() => {
+                                formikProps.setFieldValue("scopes", getAvailableScopes(formikProps.values.repositoryId))
+                            }, [formikProps.values.repositoryId])
+
+                            return (
+                                <>
+                                    {!props.editKey && <Select fullWidth name="repositoryId"
+                                                               label="Repository"
+                                        // @ts-ignore
+                                                               renderValue={v => repositories.data.find(r => r.id === v).name}>
+                                        {repositories.data!.map(r => <MenuItem data-cy="api-keys-repository-select-item" key={r.id}
+                                                                               value={r.id}>{r.name}</MenuItem>)}
+                                    </Select>}
+                                    <Box mt={2}>
+                                        <CheckBoxGroupMultiSelect label="Scopes" name="scopes" options={getAvailableScopes(formikProps.values.repositoryId)}/>
+                                    </Box>
+                                </>
+                            )
+                        }}
                     </StandardForm>
                     }
                 </>
