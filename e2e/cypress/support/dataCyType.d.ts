@@ -1,87 +1,62 @@
 declare namespace DataCy {
     export type Value = 
-        "translations-editable-cell" |
-        "translations-editable-cell-editing" |
-        "translations-editable-cell" |
-        "translations-editable-cell-editing" |
-        "translations-delete-button" |
-        "translations-delete-button" |
+        "add-box" |
         "camera-button" |
         "dropzone" |
-        "add-box" |
-        "screenshot-box" |
-        "translations-add-key-dialog" |
-        "translations-add-key-field" |
-        "translations-add-key-dialog" |
-        "translations-add-key-field" |
-        "translations-row-checkbox" |
-        "translations-row-checkbox" |
-        "global-confirmation-hard-mode-text-field" |
+        "global-base-view-title" |
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |
         "global-confirmation-hard-mode-text-field" |
-        "global-confirmation-cancel" |
-        "global-confirmation-confirm" |
-        "global-plus-button" |
-        "global-plus-button" |
-        "global-form-cancel-button" |
-        "global-form-save-button" |
-        "global-form-cancel-button" |
-        "global-form-save-button" |
-        "global-field-array-minus-button" |
-        "global-field-array-plus-button" |
         "global-field-array-add-button" |
         "global-field-array-minus-button" |
         "global-field-array-plus-button" |
-        "global-field-array-add-button" |
+        "global-form-cancel-button" |
+        "global-form-save-button" |
         "global-form-select" |
-        "global-form-select" |
         "global-list-item" |
-        "global-list-item" |
-        "simple-hateoas-list" |
-        "global-list-item" |
-        "global-paginated-list" |
-        "global-list-search" |
+        "global-list-item-text" |
         "global-list-pagination" |
-        "global-base-view-title" |
-        "global-base-view-title" |
-        "permission-select-item" |
-        "permission-select-item" |
-        "permissions-menu-button" |
-        "permissions-menu" |
+        "global-list-search" |
+        "global-paginated-list" |
+        "global-plus-button" |
+        "global-snackbars" |
+        "leave-organization-button" |
+        "organization-address-part-field" |
+        "organization-delete-button" |
+        "organization-description-field" |
+        "organization-invitation-cancel-button" |
         "organization-invitation-generate-button" |
         "organization-invitation-role-select" |
         "organization-invitations-generated-field" |
-        "organization-invitation-cancel-button" |
-        "global-list-item-text" |
-        "leave-organization-button" |
-        "organization-settings-button" |
-        "organizations-user-name" |
-        "organizations-user-email" |
         "organization-members-leave-button" |
-        "organization-delete-button" |
-        "organization-name-field" |
-        "organization-address-part-field" |
-        "organization-description-field" |
         "organization-members-remove-user-button" |
-        "organization-role-menu-button" |
+        "organization-name-field" |
         "organization-role-menu" |
+        "organization-role-menu-button" |
         "organization-role-select-item" |
+        "organization-settings-button" |
         "organization-side-menu" |
-        "repository-list-owner" |
-        "repository-settings-button" |
-        "repository-menu-items" |
-        "repository-menu-items" |
+        "organizations-user-email" |
+        "organizations-user-name" |
+        "permission-select-item" |
+        "permissions-menu" |
+        "permissions-menu-button" |
         "permissions-revoke-button" |
-        "repository-name-field" |
-        "repository-language-name-field" |
         "repository-language-abbreviation-field" |
-        "repository-name-field" |
         "repository-language-name-field" |
-        "repository-language-abbreviation-field" |
-        "repository-owner-select-item" |
+        "repository-list-owner" |
+        "repository-menu-items" |
+        "repository-name-field" |
         "repository-owner-select" |
-        "user-account-side-menu" |
-        "global-snackbars" |
-        "global-snackbars"
+        "repository-owner-select-item" |
+        "repository-settings-button" |
+        "screenshot-box" |
+        "simple-hateoas-list" |
+        "translations-add-key-dialog" |
+        "translations-add-key-field" |
+        "translations-delete-button" |
+        "translations-editable-cell" |
+        "translations-editable-cell-editing" |
+        "translations-row-checkbox" |
+        "user-account-side-menu"
 }
