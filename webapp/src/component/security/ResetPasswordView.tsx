@@ -14,6 +14,7 @@ import {GlobalActions} from '../../store/global/GlobalActions';
 import {Alert} from '../common/Alert';
 import {useConfig} from "../../hooks/useConfig";
 import {Validation} from "../../constants/GlobalValidationSchema";
+import { T } from '@tolgee/react';
 
 
 interface LoginProps {
@@ -41,10 +42,10 @@ const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
 
     return (
         <DashboardPage>
-            <BaseView title="Reset password" lg={6} md={8} xs={12} loading={loadable.loading}>
+            <BaseView title={<T>reset_password_title</T>} lg={6} md={8} xs={12} loading={loadable.loading}>
                 {loadable.error || loadable.loaded &&
                 <Box mt={1}>
-                    {loadable.loaded && <Alert severity="success">Request successfully sent! Check your mail box.</Alert>
+                    {loadable.loaded && <Alert severity="success"><T>reset_password_success_message</T></Alert>
                     ||
                     loadable.error &&
                     <Alert severity="error">{loadable.error}</Alert>}
@@ -59,7 +60,7 @@ const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
                                           <Box flexGrow={1}>
                                           </Box>
                                           <Box display="flex" flexGrow={0}>
-                                              <Button color="primary" type="submit">Send request</Button>
+                                              <Button color="primary" type="submit"><T>reset_password_send_request_button</T></Button>
                                           </Box>
                                       </Box>
                                   </>}
@@ -67,7 +68,7 @@ const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
                               onSubmit={(v: ValueType) => {
                                   globalActions.loadableActions.resetPasswordRequest.dispatch(v.email);
                               }}>
-                    <TextField name="email" label="E-mail"/>
+                    <TextField name="email" label={<T>reset_password_email_field</T>}/>
                 </StandardForm>}
             </BaseView>
         </DashboardPage>
