@@ -420,4 +420,9 @@
     <changeSet author="jenik (generated)" id="1617093013144-2">
         <addUniqueConstraint columnNames="user_id, organization_id" constraintName="organization_role_user_organization_unique" tableName="organization_role"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1618582318718-1">
+        <addColumn tableName="email_verification">
+            <column name="new_email" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

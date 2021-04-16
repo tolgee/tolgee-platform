@@ -37,7 +37,7 @@ export class SignUpService {
 
     async verifyEmail(userId: string, code: string) {
         let response = await this.http.get(`public/verify_email/${userId}/${code}`) as TokenDTO;
-        this.messageService.success(<T>Thanks for your sign up!</T>);
+        this.messageService.success(<T>email_verified_message</T>);
         this.invitationCodeService.disposeCode();
         if (response.accessToken) {
             this.tokenService.setToken(response.accessToken);

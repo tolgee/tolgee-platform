@@ -10,8 +10,12 @@ import org.testng.annotations.Test
 class UserControllerTest : SignedInControllerTest(), ITest {
     @Test
     fun updateUser() {
-        val requestDTO = UserUpdateRequestDTO.builder().email("ben@ben.aa").password("super new password").name("Ben's new name").build()
-        val mvcResult = performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+        val requestDTO = UserUpdateRequestDTO(
+                email = "ben@ben.aa",
+                password = "super new password",
+                name = "Ben's new name"
+        )
+        performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
         val fromDb = userAccountService.getByUserName(requestDTO.email)
         Assertions.assertThat(fromDb).isNotEmpty
         val bCryptPasswordEncoder = BCryptPasswordEncoder()
@@ -21,13 +25,22 @@ class UserControllerTest : SignedInControllerTest(), ITest {
 
     @Test
     fun updateUserValidation() {
-        var requestDTO = UserUpdateRequestDTO.builder().email("ben@ben.aa").password("").name("").build()
+        var requestDTO = UserUpdateRequestDTO(
+                email = "ben@ben.aa",
+                password = "",
+                name = ""
+        )
         var mvcResult = performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
         val standardValidation = io.tolgee.assertions.Assertions.assertThat(mvcResult).error().isStandardValidation
         standardValidation.onField("password")
         standardValidation.onField("name")
-        requestDTO = UserUpdateRequestDTO.builder().email("ben@ben.aa").password("aksjhd  dasdsa").name("a").build()
-        dbPopulator.createUserIfNotExists(requestDTO.email)
+
+        requestDTO = UserUpdateRequestDTO(
+                email = "ben@ben.aa",
+                password = "aksjhd  dasdsa",
+                name = "a"
+        )
+        dbPopulator.createUserIfNotExists(requestDTO.email!!)
         mvcResult = performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
         io.tolgee.assertions.Assertions.assertThat(mvcResult).error().isCustomValidation.hasMessage("username_already_exists")
     }
