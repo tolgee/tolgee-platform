@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.4")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.5")
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.32"
     }
 }
@@ -16,7 +16,7 @@ plugins {
     id "com.palantir.docker" version "0.26.0"
     id 'com.palantir.docker-compose' version "0.26.0"
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.springframework.boot' version '2.4.4'
+    id 'org.springframework.boot' version '2.4.5'
     id 'java'
     id 'org.liquibase.gradle' version '2.0.4'
     id 'org.jetbrains.kotlin.jvm' version '1.4.32'
@@ -111,8 +111,8 @@ compileKotlin {
     }
 }
 
-def LIQUIBASE_VERSION = "4.3.2"
-def LIQUIBASE_HIBERNATE_VERSION = "4.3.1"
+def LIQUIBASE_VERSION = "4.3.3"
+def LIQUIBASE_HIBERNATE_VERSION = "4.3.3"
 def JJWT_VERSION = "0.11.2"
 def SPRING_DOC_VERSION = "1.5.7"
 
@@ -164,9 +164,9 @@ dependencies {
     kapt "org.hibernate:hibernate-jpamodelgen"
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.32'
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.31'
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3'
     implementation 'commons-codec:commons-codec:1.15'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.982'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.1000'
     compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
     implementation('org.reflections:reflections:0.9.12')
     implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.25.0'
