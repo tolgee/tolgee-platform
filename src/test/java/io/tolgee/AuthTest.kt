@@ -1,192 +1,185 @@
-package io.tolgee;
+package io.tolgee
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.tolgee.constants.Message;
-import io.tolgee.controllers.AbstractControllerTest;
-import io.tolgee.controllers.PublicController;
-import io.tolgee.security.third_party.GithubOAuthDelegate;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.client.RestTemplate;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static io.tolgee.assertions.Assertions.assertThat;
-import static io.tolgee.fixtures.UniqueStringGenerationKt.generateUniqueString;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.constants.Message
+import io.tolgee.controllers.AbstractControllerTest
+import io.tolgee.controllers.PublicController
+import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.mapResponseTo
+import io.tolgee.security.third_party.GithubOAuthDelegate.GithubEmailResponse
+import io.tolgee.security.third_party.GithubOAuthDelegate.GithubUserResponse
+import org.assertj.core.api.Assertions
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.MvcResult
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.web.client.RestTemplate
+import org.testng.annotations.BeforeClass
+import org.testng.annotations.Test
+import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class AuthTest extends AbstractControllerTest {
+class AuthTest : AbstractControllerTest() {
     @Autowired
-    private PublicController publicController;
+    private val publicController: PublicController? = null
 
     @MockBean
     @Autowired
-    private RestTemplate restTemplate;
-
-    private MockMvc authMvc;
+    private val restTemplate: RestTemplate? = null
+    private var authMvc: MockMvc? = null
 
     @BeforeClass
-    public void setup() {
-        dbPopulator.createBase(generateUniqueString());
-        authMvc = MockMvcBuilders.standaloneSetup(publicController).setControllerAdvice(new ExceptionHandlers()).build();
+    fun setup() {
+        dbPopulator.createBase(generateUniqueString())
+        authMvc = MockMvcBuilders.standaloneSetup(publicController).setControllerAdvice(ExceptionHandlers()).build()
     }
 
     @Test
-    void generatesTokenForValidUser() throws Exception {
-        String response = doAuthentication(initialUsername, initialPassword)
-                .getResponse().getContentAsString();
-
-        @SuppressWarnings("unchecked") HashMap<String, Object> result = new ObjectMapper().readValue(response, HashMap.class);
-
-        assertThat(result.get("accessToken")).isNotNull();
-        assertThat(result.get("tokenType")).isEqualTo("Bearer");
+    @Throws(Exception::class)
+    fun generatesTokenForValidUser() {
+        val response = doAuthentication(initialUsername, initialPassword)
+        val result: HashMap<String, Any> = response.mapResponseTo()
+        Assertions.assertThat(result["accessToken"]).isNotNull
+        Assertions.assertThat(result["tokenType"]).isEqualTo("Bearer")
     }
 
     @Test
-    void DoesNotGenerateTokenForInValidUser(){
-        MvcResult mvcResult = doAuthentication("bena", "benaspassword");
-        assertThat(mvcResult.getResponse().getStatus()).isEqualTo(401);
+    fun DoesNotGenerateTokenForInValidUser() {
+        val mvcResult = doAuthentication("bena", "benaspassword")
+        Assertions.assertThat(mvcResult.response.status).isEqualTo(401)
     }
 
-
     @Test
-    void userWithTokenHasAccess() throws Exception {
-        String response = doAuthentication(initialUsername, initialPassword)
-                .getResponse().getContentAsString();
-
-        String token = (String) mapper.readValue(response, HashMap.class).get("accessToken");
-
-        MvcResult mvcResult = mvc.perform(get("/api/repositories")
+    @Throws(Exception::class)
+    fun userWithTokenHasAccess() {
+        val response = doAuthentication(initialUsername, initialPassword)
+                .response.contentAsString
+        val token = mapper.readValue(response, HashMap::class.java)["accessToken"] as String?
+        val mvcResult = mvc.perform(MockMvcRequestBuilders.get("/api/repositories")
                 .accept(MediaType.ALL)
                 .header("Authorization", String.format("Bearer %s", token))
                 .contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
-
-        assertThat(mvcResult.getResponse().getStatus()).isEqualTo(200);
+                .andReturn()
+        Assertions.assertThat(mvcResult.response.status).isEqualTo(200)
     }
 
     @Test
-    void doesNotAuthorizeGithubUserWhenNoEmail() throws Exception {
-        GithubOAuthDelegate.GithubUserResponse fakeGithubUser = getGithubUserResponse();
-
-        GithubOAuthDelegate.GithubEmailResponse[] emailResponse = {};
-
-        Map<String, String> tokenResponse = getTokenResponse();
-
-        MvcResult mvcResult = authorizeGithubUser(tokenResponse, new ResponseEntity<>(fakeGithubUser, HttpStatus.OK), new ResponseEntity<>(emailResponse, HttpStatus.OK));
-        MockHttpServletResponse response = mvcResult.getResponse();
-        assertThat(response.getStatus()).isEqualTo(401);
-
-        assertThat(response.getContentAsString()).contains(Message.THIRD_PARTY_AUTH_NO_EMAIL.getCode());
+    @Throws(Exception::class)
+    fun doesNotAuthorizeGithubUserWhenNoEmail() {
+        val fakeGithubUser = githubUserResponse
+        val emailResponse = arrayOf<GithubEmailResponse>()
+        val tokenResponse = tokenResponse
+        val mvcResult = authorizeGithubUser(tokenResponse, ResponseEntity(fakeGithubUser, HttpStatus.OK), ResponseEntity(emailResponse, HttpStatus.OK))
+        val response = mvcResult.response
+        Assertions.assertThat(response.status).isEqualTo(401)
+        Assertions.assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_NO_EMAIL.code)
     }
 
     @Test
-    void doesNotAuthorizeGithubUserWhenNoReceivedToken() throws Exception {
-        GithubOAuthDelegate.GithubUserResponse fakeGithubUser = getGithubUserResponse();
-
-        String accessToken = "fake_access_token";
-        GithubOAuthDelegate.GithubEmailResponse githubEmailResponse = getGithubEmailResponse();
-
-        GithubOAuthDelegate.GithubEmailResponse[] emailResponse = {githubEmailResponse};
-
-        Map<String, String> tokenResponse = null;
+    @Throws(Exception::class)
+    fun doesNotAuthorizeGithubUserWhenNoReceivedToken() {
+        val fakeGithubUser = githubUserResponse
+        val accessToken = "fake_access_token"
+        val githubEmailResponse = githubEmailResponse
+        val emailResponse = arrayOf(githubEmailResponse)
+        var tokenResponse: MutableMap<String, String?>? = null
         //tokenResponse.put("access_token", accessToken);
-
-        MvcResult mvcResult = authorizeGithubUser(tokenResponse, new ResponseEntity<>(fakeGithubUser, HttpStatus.OK), new ResponseEntity<>(emailResponse, HttpStatus.OK));
-        MockHttpServletResponse response = mvcResult.getResponse();
-        assertThat(response.getStatus()).isEqualTo(401);
-
-        assertThat(response.getContentAsString()).contains(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR.getCode());
-
-        tokenResponse = new HashMap<>();
-        tokenResponse.put("error", null);
-        mvcResult = authorizeGithubUser(tokenResponse, new ResponseEntity<>(fakeGithubUser, HttpStatus.OK), new ResponseEntity<>(emailResponse, HttpStatus.OK));
-        response = mvcResult.getResponse();
-        assertThat(response.getStatus()).isEqualTo(401);
-
-        assertThat(response.getContentAsString()).contains(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE.getCode());
-    }
-
-    private GithubOAuthDelegate.GithubEmailResponse getGithubEmailResponse() {
-        GithubOAuthDelegate.GithubEmailResponse githubEmailResponse = new GithubOAuthDelegate.GithubEmailResponse();
-        githubEmailResponse.setEmail("fake_email@email.com");
-        githubEmailResponse.setPrimary(true);
-        githubEmailResponse.setVerified(true);
-        return githubEmailResponse;
-    }
-
-    private GithubOAuthDelegate.GithubUserResponse getGithubUserResponse() {
-        GithubOAuthDelegate.GithubUserResponse fakeGithubUser = new GithubOAuthDelegate.GithubUserResponse();
-        fakeGithubUser.setId("fakeId");
-        fakeGithubUser.setName("fakeName");
-        return fakeGithubUser;
+        var mvcResult = authorizeGithubUser(tokenResponse, ResponseEntity(fakeGithubUser, HttpStatus.OK), ResponseEntity(emailResponse, HttpStatus.OK))
+        var response = mvcResult.response
+        Assertions.assertThat(response.status).isEqualTo(401)
+        Assertions.assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR.code)
+        tokenResponse = HashMap()
+        tokenResponse["error"] = null
+        mvcResult = authorizeGithubUser(tokenResponse, ResponseEntity(fakeGithubUser, HttpStatus.OK), ResponseEntity(emailResponse, HttpStatus.OK))
+        response = mvcResult.response
+        Assertions.assertThat(response.status).isEqualTo(401)
+        Assertions.assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE.code)
     }
 
     @Test
-    void authorizesGithubUser() throws Exception {
-        GithubOAuthDelegate.GithubUserResponse fakeGithubUser = getGithubUserResponse();
-
-        GithubOAuthDelegate.GithubEmailResponse githubEmailResponse = getGithubEmailResponse();
-
-        GithubOAuthDelegate.GithubEmailResponse[] emailResponse = {githubEmailResponse};
-
-        Map<String, String> tokenResponse = getTokenResponse();
-
-        String response = authorizeGithubUser(tokenResponse, new ResponseEntity<>(fakeGithubUser, HttpStatus.OK), new ResponseEntity<>(emailResponse, HttpStatus.OK))
-                .getResponse().getContentAsString();
-
-
-        @SuppressWarnings("rawtypes") HashMap result = new ObjectMapper().readValue(response, HashMap.class);
-
-        assertThat(result.get("accessToken")).isNotNull();
-        assertThat(result.get("tokenType")).isEqualTo("Bearer");
+    fun doesNotAuthorizeWhenRegistrationsNotAllowed() {
+        val oldRegistrationsAllowed = tolgeeProperties.authentication.registrationsAllowed
+        tolgeeProperties.authentication.registrationsAllowed = false
+        val fakeGithubUser = githubUserResponse
+        val githubEmailResponse = githubEmailResponse
+        val emailResponse = arrayOf(githubEmailResponse)
+        val tokenResponse = tokenResponse
+        val response = authorizeGithubUser(tokenResponse, ResponseEntity(fakeGithubUser, HttpStatus.OK), ResponseEntity(emailResponse, HttpStatus.OK))
+        val result = response.mapResponseTo<Map<String, String>>()
+        assertThat(result["code"]).isEqualTo("registrations_not_allowed")
+        tolgeeProperties.authentication.registrationsAllowed = oldRegistrationsAllowed
     }
 
-    private Map<String, String> getTokenResponse() {
-        String accessToken = "fake_access_token";
-        Map<String, String> tokenResponse = new HashMap<>();
-        tokenResponse.put("access_token", accessToken);
-        return tokenResponse;
+    private val githubEmailResponse: GithubEmailResponse
+        private get() {
+            val githubEmailResponse = GithubEmailResponse()
+            githubEmailResponse.email = "fake_email@email.com"
+            githubEmailResponse.primary = true
+            githubEmailResponse.verified = true
+            return githubEmailResponse
+        }
+    private val githubUserResponse: GithubUserResponse
+        private get() {
+            val fakeGithubUser = GithubUserResponse()
+            fakeGithubUser.id = "fakeId"
+            fakeGithubUser.name = "fakeName"
+            return fakeGithubUser
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun authorizesGithubUser() {
+        val fakeGithubUser = githubUserResponse
+        val githubEmailResponse = githubEmailResponse
+        val emailResponse = arrayOf(githubEmailResponse)
+        val tokenResponse = tokenResponse
+        val response = authorizeGithubUser(tokenResponse, ResponseEntity(fakeGithubUser, HttpStatus.OK), ResponseEntity(emailResponse, HttpStatus.OK))
+                .response.contentAsString
+        val result = ObjectMapper().readValue(response, HashMap::class.java)
+        Assertions.assertThat(result["accessToken"]).isNotNull
+        Assertions.assertThat(result["tokenType"]).isEqualTo("Bearer")
     }
 
+    private val tokenResponse: Map<String, String?>
+        private get() {
+            val accessToken = "fake_access_token"
+            val tokenResponse: MutableMap<String, String?> = HashMap()
+            tokenResponse["access_token"] = accessToken
+            return tokenResponse
+        }
 
-    MvcResult authorizeGithubUser(Map<String, String> tokenResponse,
-                                  ResponseEntity<GithubOAuthDelegate.GithubUserResponse> userResponse,
-                                  ResponseEntity<GithubOAuthDelegate.GithubEmailResponse[]> emailResponse) throws Exception {
-        String receivedCode = "ThiS_Is_Fake_valid_COde";
+    @Throws(Exception::class)
+    fun authorizeGithubUser(tokenResponse: Map<String, String?>?,
+                            userResponse: ResponseEntity<GithubUserResponse>,
+                            emailResponse: ResponseEntity<Array<GithubEmailResponse>>): MvcResult {
+        val receivedCode = "ThiS_Is_Fake_valid_COde"
+        val githubConf = tolgeeProperties.authentication.github
 
-        var githubConf = tolgeeProperties.getAuthentication().getGithub();
+        whenever(restTemplate!!.postForObject<Map<*, *>>(eq(githubConf.authorizationUrl), any(), any()))
+                .thenReturn(tokenResponse)
 
-        Mockito.when(restTemplate.postForObject(eq(githubConf.getAuthorizationUrl()), anyMap(), eq(Map.class))).thenReturn(tokenResponse);
+        whenever(restTemplate.exchange(eq(githubConf.userUrl), eq(HttpMethod.GET), any(), eq(GithubUserResponse::class.java)))
+                .thenReturn(userResponse)
 
-        Mockito.when(restTemplate.exchange(eq(githubConf.getUserUrl()), eq(HttpMethod.GET), ArgumentMatchers.any(), eq(GithubOAuthDelegate.GithubUserResponse.class)))
-                .thenReturn(userResponse);
+        whenever(restTemplate.exchange(eq(githubConf.userUrl + "/emails"), eq(HttpMethod.GET), any(), eq(Array<GithubEmailResponse>::class.java)))
+                .thenReturn(emailResponse)
 
-        Mockito.when(restTemplate.exchange(eq(githubConf.getUserUrl() + "/emails"), eq(HttpMethod.GET), ArgumentMatchers.any(), eq(GithubOAuthDelegate.GithubEmailResponse[].class)))
-                .thenReturn(emailResponse);
-
-        return authMvc.perform(get("/api/public/authorize_oauth/github/" + receivedCode)
+        return authMvc!!.perform(MockMvcRequestBuilders.get("/api/public/authorize_oauth/github/$receivedCode")
                 .accept(MediaType.ALL)
                 .contentType(MediaType.APPLICATION_JSON))
-                .andReturn();
+                .andReturn()
     }
 }

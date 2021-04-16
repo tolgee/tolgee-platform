@@ -2,9 +2,6 @@ declare namespace DataCy {
     export type Value = 
         "translations-editable-cell" |
         "translations-editable-cell-editing" |
-        "translations-editable-cell" |
-        "translations-editable-cell-editing" |
-        "translations-delete-button" |
         "translations-delete-button" |
         "camera-button" |
         "dropzone" |
@@ -12,31 +9,17 @@ declare namespace DataCy {
         "screenshot-box" |
         "translations-add-key-dialog" |
         "translations-add-key-field" |
-        "translations-add-key-dialog" |
-        "translations-add-key-field" |
-        "translations-row-checkbox" |
         "translations-row-checkbox" |
         "global-confirmation-hard-mode-text-field" |
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |
-        "global-confirmation-hard-mode-text-field" |
-        "global-confirmation-cancel" |
-        "global-confirmation-confirm" |
         "global-plus-button" |
-        "global-plus-button" |
-        "global-form-cancel-button" |
-        "global-form-save-button" |
         "global-form-cancel-button" |
         "global-form-save-button" |
         "global-field-array-minus-button" |
         "global-field-array-plus-button" |
         "global-field-array-add-button" |
-        "global-field-array-minus-button" |
-        "global-field-array-plus-button" |
-        "global-field-array-add-button" |
         "global-form-select" |
-        "global-form-select" |
-        "global-list-item" |
         "global-list-item" |
         "simple-hateoas-list" |
         "global-list-item" |
@@ -44,8 +27,6 @@ declare namespace DataCy {
         "global-list-search" |
         "global-list-pagination" |
         "global-base-view-title" |
-        "global-base-view-title" |
-        "permission-select-item" |
         "permission-select-item" |
         "permissions-menu-button" |
         "permissions-menu" |
@@ -71,17 +52,12 @@ declare namespace DataCy {
         "repository-list-owner" |
         "repository-settings-button" |
         "repository-menu-items" |
-        "repository-menu-items" |
         "permissions-revoke-button" |
-        "repository-name-field" |
-        "repository-language-name-field" |
-        "repository-language-abbreviation-field" |
         "repository-name-field" |
         "repository-language-name-field" |
         "repository-language-abbreviation-field" |
         "repository-owner-select-item" |
         "repository-owner-select" |
         "user-account-side-menu" |
-        "global-snackbars" |
         "global-snackbars"
 }
