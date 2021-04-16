@@ -13,7 +13,6 @@ class DataCyPlugin {
         const srcPath = path.resolve("./src");
         // Specify the event hook to attach to
         compiler.hooks.afterPlugins.tap("DataCyPlugin", async () => {
-            console.log("Generating Data Cy type...")
             const files = await this.getFiles(srcPath)
             await this.generate(files);
         })
@@ -21,7 +20,6 @@ class DataCyPlugin {
         compiler.hooks.watchRun.tapPromise('DataCyPluginWatch', async (comp) => {
             const changedTimes = comp.watchFileSystem.watcher.mtimes;
             const changedFiles = Object.keys(changedTimes)
-            console.log("watch")
             if (changedFiles.length) {
                 await this.generate(changedFiles)
             }
@@ -33,17 +31,19 @@ class DataCyPlugin {
             if (/.*\.tsx$/.test(file)) {
                 const content = (await readFile(file)).toString()
                 const matches = content.matchAll(/data-cy={?["'`]([A-Za-z0-9-_\s]+)["'`]?}?/g)
+                this.fileItems[file] = []
                 for (let match of matches) {
-                    this.fileItems[file] = this.fileItems[file] ? [...this.fileItems[file], match[1]] : [match[1]]
+                    this.fileItems[file] = [...this.fileItems[file], match[1]]
                 }
             }
         }
 
         const items = Object.values(this.fileItems).reduce((acc, curr) => [...acc, ...curr], [])
+        const itemsSet = new Set(items)
+        const sortedItems = [...itemsSet].sort()
         let fileContent = "declare namespace DataCy {\n"
-        fileContent += "    export type Value = \n        " + items.map(i => `"${i}"`).join(" |\n        ") + "\n}";
+        fileContent += "    export type Value = \n        " + sortedItems.map(i => `"${i}"`).join(" |\n        ") + "\n}";
         await writeFile(path.resolve(`../e2e/cypress/support/dataCyType.d.ts`), fileContent)
-        console.log("Data Cy type generated")
     }
 
     async getFiles(dir) {
