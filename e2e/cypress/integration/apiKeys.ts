@@ -50,7 +50,7 @@ describe('Api keys', () => {
             }).then((key: ApiKeyDTO) => {
                 cy.reload()
                 cy.contains("API key:").should("be.visible")
-                cy.gcy("api-keys-edit-button").click()
+                cy.gcy("api-keys-edit-button").eq(1).click()
                 cy.gcy("api-keys-create-edit-dialog").contains("translations.edit").click()
                 cy.gcy("api-keys-create-edit-dialog").contains("keys.edit").click()
                 cy.gcy("global-form-save-button").click()
