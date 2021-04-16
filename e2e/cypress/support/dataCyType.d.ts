@@ -1,6 +1,9 @@
 declare namespace DataCy {
     export type Value = 
         "add-box" |
+        "api-keys-create-edit-dialog" |
+        "api-keys-edit-button" |
+        "api-keys-repository-select-item" |
         "camera-button" |
         "dropzone" |
         "global-base-view-title" |

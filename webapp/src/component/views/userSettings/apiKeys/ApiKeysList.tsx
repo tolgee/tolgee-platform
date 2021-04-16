@@ -54,7 +54,7 @@ const Item: FunctionComponent<{ keyDTO: ApiKeyDTO }> = (props) => {
                     <T>Api key list label - Scopes</T>&nbsp;{props.keyDTO.scopes.join(", ")}
                 </Grid>
                 <Grid item>
-                    <EditIconButton component={Link} to={LINKS.USER_API_KEYS_EDIT.build({[PARAMS.API_KEY_ID]: props.keyDTO.id})} size="small"/>
+                    <EditIconButton data-cy="api-keys-edit-button" component={Link} to={LINKS.USER_API_KEYS_EDIT.build({[PARAMS.API_KEY_ID]: props.keyDTO.id})} size="small"/>
                     <DeleteIconButton onClick={() => onDelete(props.keyDTO)} size="small"/>
                 </Grid>
             </Grid>

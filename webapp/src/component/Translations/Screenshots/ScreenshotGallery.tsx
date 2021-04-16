@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {FunctionComponent, ReactNode} from 'react';
+import {FunctionComponent, ReactNode, useEffect} from 'react';
 import {BoxLoading} from "../../common/BoxLoading";
 import {ScreenshotThumbnail} from "./ScreenshotThumbnail";
 import Box from '@material-ui/core/Box';
@@ -17,6 +17,8 @@ import {createStyles, makeStyles, Theme} from '@material-ui/core';
 import {ScreenshotDetail} from "./ScreenshotDetail";
 import {ScreenshotDropzone} from "./ScreenshotDropzone";
 import {useRepositoryPermissions} from "../../../hooks/useRepositoryPermissions";
+import {Skeleton} from "@material-ui/lab";
+import {startLoading, stopLoading, useLoading} from "../../../hooks/loading";
 
 export interface ScreenshotGalleryProps {
     data: KeyTranslationsDTO,
@@ -56,6 +58,7 @@ export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (pro
         const screenshotsLoadable = actions.useSelector(s => s.loadables.getForKey)
         const screenshots = screenshotsLoadable.data as ScreenshotDTO[]
         const repositoryPermissions = useRepositoryPermissions();
+        const uploadLoadable = actions.useSelector(s => s.loadables.uploadScreenshot)
 
         const [detailFileName, setDetailFileName] = React.useState(null as string | null);
         const classes = useStyles({});
@@ -149,17 +152,28 @@ export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (pro
             validateAndUpload(toUpload);
         }
 
+        useEffect(() => {
+            if (uploadLoadable.loading) {
+                startLoading()
+            } else {
+                stopLoading()
+            }
+        }, [uploadLoadable.loading])
+
+        const loadingSkeleton = uploadLoadable.loading ? <Skeleton variant="rect" width={100} height={100}/> : null
+
         return (
             <>
                 <input type="file" style={{display: "none"}} ref={fileRef} onChange={e => onFileSelected(e)} multiple accept={ALLOWED_UPLOAD_TYPES.join(",")}/>
                 <ScreenshotDropzone validateAndUpload={validateAndUpload}>
                     {screenshotsLoadable.loading || !screenshotsLoadable.touched ? <BoxLoading/>
                         :
-                        screenshots.length > 0 ?
+                        screenshots.length > 0 || uploadLoadable.loading ?
                             <Box display="flex" flexWrap="wrap" overflow="visible"> {
                                 screenshots.map(s =>
                                     <ScreenshotThumbnail key={s.id} onClick={() => setDetailFileName(s.filename)} screenshotData={s}/>
                                 )}
+                                {loadingSkeleton}
                                 {addBox}
                             </Box>
                             :
