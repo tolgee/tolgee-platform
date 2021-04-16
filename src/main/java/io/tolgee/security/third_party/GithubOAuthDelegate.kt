@@ -70,14 +70,16 @@ class GithubOAuthDelegate(private val tokenProvider: JwtTokenProvider,
 
                 var invitation: Invitation? = null
                 if (invitationCode == null) {
-                    properties.authentication.enabled
+                    if (!properties.authentication.registrationsAllowed) {
+                        throw AuthenticationException(Message.REGISTRATIONS_NOT_ALLOWED)
+                    }
                 } else {
                     invitation = invitationService.getInvitation(invitationCode)
                 }
 
                 val newUserAccount = UserAccount()
                 newUserAccount.username = githubEmail.email
-                newUserAccount.name = userResponse.name
+                newUserAccount.name = userResponse.name ?: userResponse.login
                 newUserAccount.thirdPartyAuthId = userResponse.id
                 newUserAccount.thirdPartyAuthType = "github"
                 userAccountService.createUser(newUserAccount)
@@ -109,6 +111,7 @@ class GithubOAuthDelegate(private val tokenProvider: JwtTokenProvider,
     class GithubUserResponse {
         var name: String? = null
         var id: String? = null
+        val login: String? = null
     }
 
 }

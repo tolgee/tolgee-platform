@@ -171,6 +171,7 @@ dependencies {
     implementation('org.reflections:reflections:0.9.12')
     implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.25.0'
     compile("au.com.console:kotlin-jpa-specification-dsl:2.0.0")
+    implementation('org.mockito.kotlin:mockito-kotlin:3.1.0')
 }
 
 test {
