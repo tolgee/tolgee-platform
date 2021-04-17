@@ -14,6 +14,8 @@ describe('Test no authentication mode', () => {
 
     it("Has API keys item in repository menu", () => {
         disableAuthentication()
+        createTestRepository()
+        cy.reload()
         gcy("repository-settings-button").click()
         gcy("repository-menu-items").should("contain", "API keys")
     })
