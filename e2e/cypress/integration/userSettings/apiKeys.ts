@@ -1,9 +1,9 @@
-import {allScopes, assertMessage, clickAdd, getPopover} from "../fixtures/shared";
-import {getAnyContainingText, getClosestContainingText} from "../fixtures/xPath";
-import {HOST} from "../fixtures/constants";
-import {cleanRepositoriesData, createApiKey, createRepositoriesData, createRepository, deleteRepository, login} from "../fixtures/apiCalls";
-import {Scope} from "../fixtures/types";
-import {ApiKeyDTO} from "../../../webapp/src/service/response.types";
+import {allScopes, assertMessage, clickAdd, getPopover} from "../../fixtures/shared";
+import {getAnyContainingText, getClosestContainingText} from "../../fixtures/xPath";
+import {HOST} from "../../fixtures/constants";
+import {cleanRepositoriesData, createApiKey, createRepositoriesData, createRepository, deleteRepository, login} from "../../fixtures/apiCalls";
+import {Scope} from "../../fixtures/types";
+import {ApiKeyDTO} from "../../../../webapp/src/service/response.types";
 
 describe('Api keys', () => {
     let repository;
@@ -11,11 +11,10 @@ describe('Api keys', () => {
 
     describe("As admin", () => {
         beforeEach(() => {
-            cy.wrap(null).then(() => login().then(() => {
-                createRepository({
-                    name: "Test", languages: [{abbreviation: "en", name: "English"}]
-                }).then(r => repository = r.body);
-            }));
+            login()
+            createRepository({
+                name: "Test", languages: [{abbreviation: "en", name: "English"}]
+            }).then(r => repository = r.body);
             cy.visit(HOST + '/apiKeys');
         });
 
@@ -30,7 +29,6 @@ describe('Api keys', () => {
             cy.contains("translations.edit").should("be.visible");
         });
 
-
         it('Will delete an api key', () => {
             createApiKey({
                 repositoryId: repository.id,
@@ -43,14 +41,14 @@ describe('Api keys', () => {
             });
         });
 
-        it.only('Will edit an api key', () => {
+        it('Will edit an api key', () => {
             createApiKey({
                 repositoryId: repository.id,
                 scopes: ["keys.edit", "keys.edit", "translations.view"]
             }).then((key: ApiKeyDTO) => {
                 cy.reload()
                 cy.contains("API key:").should("be.visible")
-                cy.gcy("api-keys-edit-button").eq(1).click()
+                cy.gcy("api-keys-edit-button").eq(0).click()
                 cy.gcy("api-keys-create-edit-dialog").contains("translations.edit").click()
                 cy.gcy("api-keys-create-edit-dialog").contains("keys.edit").click()
                 cy.gcy("global-form-save-button").click()
@@ -70,7 +68,8 @@ describe('Api keys', () => {
         cy.gcy("global-form-save-button").click()
         assertMessage("API key successfully created")
     })
-});
+})
+;
 
 const visit = () => {
     cy.visit(HOST + '/apiKeys');
@@ -78,12 +77,12 @@ const visit = () => {
 
 const create = (repository: string, scopes: Scope[]) => {
     clickAdd();
-    cy.contains("Generate api key").xpath(getClosestContainingText("Application")).click();
+    cy.gcy("global-form-select").click()
     getPopover().contains(repository).click();
     const toRemove = new Set(allScopes);
     scopes.forEach(s => toRemove.delete(s));
-    toRemove.forEach(s => cy.contains("Generate api key").xpath(getClosestContainingText(s)).click())
-    cy.xpath(getAnyContainingText("generate", "button")).click();
+    toRemove.forEach(s => cy.contains("Generate API key").xpath(getClosestContainingText(s)).click())
+    cy.xpath(getAnyContainingText("Save", "button")).click();
 };
 
 const del = (key) => {

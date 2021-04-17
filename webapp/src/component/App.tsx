@@ -17,9 +17,9 @@ import {FullPageLoading} from "./common/FullPageLoading";
 import * as Sentry from '@sentry/browser';
 import {GlobalError} from "../error/GlobalError";
 import {OrganizationsRouter} from "./views/organizations/OrganizationsRouter";
-import {UserSettings} from "./views/userSettings/UserSettings";
 import {ApiKeysView} from "./views/userSettings/apiKeys/ApiKeysView";
 import ConfirmationDialog from "./common/ConfirmationDialog";
+import { UserProfileView } from './views/userSettings/UserProfileView';
 
 const LoginRouter = React.lazy(() => import(/* webpackChunkName: "login" */'./security/LoginRouter'));
 const SignUpView = React.lazy(() => import(/* webpackChunkName: "sign-up-view" */'./security/SignUpView'));
@@ -127,7 +127,7 @@ export class App extends React.Component {
                             <Redirect to={LINKS.REPOSITORIES.template}/>
                         </PrivateRoute>
                         <PrivateRoute exact path={LINKS.USER_SETTINGS.template}>
-                            <UserSettings/>
+                            <UserProfileView/>
                         </PrivateRoute>
                         <PrivateRoute path={LINKS.REPOSITORIES.template}>
                             <RepositoriesRouter/>

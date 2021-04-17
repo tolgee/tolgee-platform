@@ -1,6 +1,8 @@
 spring:
   datasource:
-    url: jdbc:h2:${user.home}/.tolgee/db-e2e.h2;AUTO_SERVER=TRUE
+    url: jdbc:postgresql://localhost:25432/postgres
+    username: postgres
+    password: postgres
   liquibase:
     change-log: classpath:db/changelog/schema.xml
     drop-first: true
@@ -14,7 +16,14 @@ tolgee:
   internal:
     populate: true
     controller-enabled: true
-    fake-emails-sent: true
+  smtp:
+    host: localhost
+    port: 21025
+    ssl-enabled: false
+    auth: false
+    tls-enabled: false
+    tls-required: false
+    from: Tolgee <no-reply@tolgee.io>
 server:
   port: 8201
   error:

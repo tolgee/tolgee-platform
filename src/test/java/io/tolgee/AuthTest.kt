@@ -1,6 +1,7 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.ninjasquad.springmockk.MockkBean
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.constants.Message
 import io.tolgee.controllers.AbstractControllerTest
@@ -21,6 +22,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -48,7 +50,6 @@ class AuthTest : AbstractControllerTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun generatesTokenForValidUser() {
         val response = doAuthentication(initialUsername, initialPassword)
         val result: HashMap<String, Any> = response.mapResponseTo()
@@ -57,13 +58,12 @@ class AuthTest : AbstractControllerTest() {
     }
 
     @Test
-    fun DoesNotGenerateTokenForInValidUser() {
+    fun doesNotGenerateTokenForInvalidUser() {
         val mvcResult = doAuthentication("bena", "benaspassword")
         Assertions.assertThat(mvcResult.response.status).isEqualTo(401)
     }
 
     @Test
-    @Throws(Exception::class)
     fun userWithTokenHasAccess() {
         val response = doAuthentication(initialUsername, initialPassword)
                 .response.contentAsString
@@ -77,7 +77,6 @@ class AuthTest : AbstractControllerTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun doesNotAuthorizeGithubUserWhenNoEmail() {
         val fakeGithubUser = githubUserResponse
         val emailResponse = arrayOf<GithubEmailResponse>()
@@ -89,7 +88,6 @@ class AuthTest : AbstractControllerTest() {
     }
 
     @Test
-    @Throws(Exception::class)
     fun doesNotAuthorizeGithubUserWhenNoReceivedToken() {
         val fakeGithubUser = githubUserResponse
         val accessToken = "fake_access_token"
@@ -140,7 +138,6 @@ class AuthTest : AbstractControllerTest() {
         }
 
     @Test
-    @Throws(Exception::class)
     fun authorizesGithubUser() {
         val fakeGithubUser = githubUserResponse
         val githubEmailResponse = githubEmailResponse
@@ -161,7 +158,6 @@ class AuthTest : AbstractControllerTest() {
             return tokenResponse
         }
 
-    @Throws(Exception::class)
     fun authorizeGithubUser(tokenResponse: Map<String, String?>?,
                             userResponse: ResponseEntity<GithubUserResponse>,
                             emailResponse: ResponseEntity<Array<GithubEmailResponse>>): MvcResult {

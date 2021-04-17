@@ -92,6 +92,7 @@ export interface UserDTO {
     id: number,
     username: string,
     name: string,
+    emailAwaitingVerification?: string
 }
 
 export interface UserUpdateDTO {
