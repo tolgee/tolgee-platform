@@ -50,8 +50,9 @@ describe('User profile', () => {
         })
     })
 
-    it("works without verification enabled", () => {
+    it("works without email verification enabled", () => {
         disableEmailVerification()
+        cy.reload()
         cy.get("form").findInputByName("email").clear().type(NEW_EMAIL)
         cy.contains(EMAIL_VERIFICATION_TEXT).should("not.exist")
         cy.gcy("global-form-save-button").click()
