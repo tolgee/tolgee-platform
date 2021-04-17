@@ -103,12 +103,17 @@ export class Validation {
 
     static readonly REPOSITORY_CREATION = Yup.object().shape(
         {
-            name: Yup.string().required().min(3).max(500),
+            name: Yup.string().required().min(3).max(50),
             languages: Yup.array().required().of(Yup.object().shape({
                 name: Validation.LANGUAGE_NAME.label("name").required(),
                 abbreviation: Validation.LANGUAGE_ABBREVIATION.label("name").required()
             }))
         });
+
+    static readonly REPOSITORY_SETTINGS = Yup.object().shape(
+        {
+            name: Yup.string().required().min(3).max(100)
+        })
 
     static readonly ORGANIZATION_CREATE_OR_EDIT = (t: (key: string) => string, addressPartInitialValue?: string) => {
 

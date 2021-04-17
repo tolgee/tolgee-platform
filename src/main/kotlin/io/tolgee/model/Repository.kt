@@ -15,14 +15,14 @@ data class Repository(
         var id: Long = 0L,
 
         @field:NotBlank
-        @field:Size(min = 3, max = 500)
+        @field:Size(min = 3, max = 50)
         var name: String? = null,
 
         @field:Size(min = 3, max = 2000)
         var description: String? = null,
 
         @Column(name = "address_part")
-        @field:Size(min = 3, max = 50)
+        @field:Size(min = 3, max = 60)
         @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
         var addressPart: String? = null,
 ) : AuditModel() {

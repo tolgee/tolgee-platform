@@ -1,8 +1,9 @@
 /// <reference types="cypress" />
 import {getAnyContainingText} from "../../common/xPath";
 import {HOST} from "../../common/constants";
-import {createTestRepository, createUser, deleteUser, login} from "../../common/apiCalls";
+import {createTestRepository, login} from "../../common/apiCalls";
 import {getPopover} from "../../common/shared";
+
 
 describe('User settings', () => {
     beforeEach(() => {

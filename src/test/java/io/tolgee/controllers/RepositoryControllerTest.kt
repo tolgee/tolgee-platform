@@ -9,6 +9,7 @@ import io.tolgee.dtos.response.RepositoryDTO
 import io.tolgee.fixtures.LoggedRequestFactory.loggedDelete
 import io.tolgee.fixtures.LoggedRequestFactory.loggedGet
 import io.tolgee.fixtures.LoggedRequestFactory.loggedPost
+import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
@@ -31,7 +32,8 @@ class RepositoryControllerTest : SignedInControllerTest() {
     @Test
     fun createRepository() {
         dbPopulator.createBase("test")
-        testCreateValidationSize()
+        testCreateValidationSizeShort()
+        testCreateValidationSizeLong()
         testCreateCorrectRequest()
     }
 
@@ -46,7 +48,6 @@ class RepositoryControllerTest : SignedInControllerTest() {
             assertThat(it.organizationOwner?.id).isEqualTo(organization.id)
         }
     }
-
 
     private fun testCreateCorrectRequest() {
         val request = CreateRepositoryDTO("aaa", setOf(languageDTO))
@@ -66,18 +67,19 @@ class RepositoryControllerTest : SignedInControllerTest() {
         Assertions.assertThat(language.name).isEqualTo("English")
     }
 
-    private fun testCreateValidationSize() {
+    private fun testCreateValidationSizeShort() {
         val request = CreateRepositoryDTO("aa", setOf(languageDTO))
+        val mvcResult = performAuthPost("/api/repositories", request).andIsBadRequest.andReturn()
+        assertThat(mvcResult).error().isStandardValidation
+    }
 
-        //test validation
-        val mvcResult = mvc.perform(
-                loggedPost("/api/repositories")
-                        .contentType(MediaType.APPLICATION_JSON).content(
-                                JsonHelper.asJsonString(request)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest)
-                .andReturn()
-        Assertions.assertThat(mvcResult.response.contentAsString).contains("name")
-        Assertions.assertThat(mvcResult.response.contentAsString).contains("STANDARD_VALIDATION")
+    private fun testCreateValidationSizeLong() {
+        val request = CreateRepositoryDTO(
+                "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+                setOf(languageDTO)
+        )
+        val mvcResult = performAuthPost("/api/repositories", request).andIsBadRequest.andReturn()
+        assertThat(mvcResult).error().isStandardValidation
     }
 
     @Test
