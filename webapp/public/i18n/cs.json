@@ -195,8 +195,21 @@
   "permissions_set_message" : "Oprávnění nastavena",
   "change_permissions_confirmation" : "Skutečně změnit oprávnění?",
   "standard_search_label" : "Hledat",
+  "cannot_add_api_key_without_repository_message" : "Nelze přidat api klíč bez repozitáře :(",
+  "edit_api_key_title" : "Upravit API klíč",
   "organization_repositories_title" : "{name} - Repozitáře",
   "repository_permission_information_text_base_permission_before" : "Tento repozitář je vlastněn organizací, která má základní oprávnění nastaveno na:",
   "organization_created_message" : "Organizace vytvořena",
-  "organization_member_privileges_set" : "Oprávnění nastavena"
+  "organization_member_privileges_set" : "Oprávnění nastavena",
+  "registrations_not_allowed" : "Registrace nejsou povoleny",
+  "reset_password_title" : "Resetovat heslo",
+  "reset_password_send_request_button" : "Odeslat",
+  "reset_password_email_field" : "E-mail",
+  "reset_password_success_message" : "Požadavek odeslán. Pokud jste se s tímto e-mailem registrovali, přijde vám e-mail s odkazem pro obnovení hesla. Zkontrolujte svoji e-mailovou schránku.",
+  "your_email_was_changed_verification_message" : "Pokud změníte svůj e-mail. Změna se projeví až po ověření nového e-mailu.",
+  "missing_callback_url" : "Chybí nastavení callback URL adresy.",
+  "user_profile_title" : "Profil uživatele",
+  "email_waiting_for_verification" : "E-mail čekající na ověření: {email}",
+  "email_verified_message" : "E-mail ověřen.",
+  "generate_api_key_title" : "Generovat API klíč"
 }
