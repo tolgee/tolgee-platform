@@ -28,6 +28,17 @@ context('Login', () => {
         cy.contains("Invalid credentials").should("be.visible");
     });
 
+    it.only('Will login with github',() => {
+        cy.intercept("https://github.com/login/oauth/**", {
+            statusCode: 200,
+            body: "Fake GitHub"
+        })
+        cy.contains("Github login").click()
+        cy.contains("Fake GitHub").should("be.visible")
+        cy.visit(HOST+"/login/auth_callback/github?scope=user%3Aemail&code=this_is_dummy_code")
+        cy.contains("Repositories").should("be.visible")
+    });
+
     it('Will logout', () => {
         login().then(() => {
             cy.reload();
