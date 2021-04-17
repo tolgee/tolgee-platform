@@ -283,13 +283,15 @@ export interface components {
       translations?: { [key: string]: string };
     };
     GenerateAddressPathDto: {
-      oldAddressPart?: string;
       name: string;
+      oldAddressPart?: string;
     };
     UserUpdateRequestDTO: {
       name: string;
       email: string;
       password?: string;
+      /** Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
+      callbackUrl?: string;
     };
     DeprecatedEditKeyDTO: {
       oldFullPathString: string;
@@ -412,7 +414,7 @@ export interface components {
     UserAccountModel: {
       id: number;
       username: string;
-      name: string;
+      name?: string;
       _links?: components["schemas"]["Links"];
     };
     PagedModelUserAccountInRepositoryModel: {
@@ -425,7 +427,7 @@ export interface components {
     UserAccountInRepositoryModel: {
       id: number;
       username: string;
-      name: string;
+      name?: string;
       organizationRole?: "MEMBER" | "OWNER";
       organizationBasePermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
@@ -467,6 +469,7 @@ export interface components {
       id?: number;
       name?: string;
       username?: string;
+      emailAwaitingVerification?: string;
     };
     DeprecatedKeyDto: {
       /** This means name of key. Will be renamed in v2 */
@@ -1264,6 +1267,7 @@ export interface operations {
     parameters: {
       query: {
         pageable: components["schemas"]["Pageable"];
+        search?: string;
       };
     };
     responses: {
@@ -1384,6 +1388,7 @@ export interface operations {
       };
       query: {
         pageable: components["schemas"]["Pageable"];
+        search?: string;
       };
     };
     responses: {
@@ -1402,6 +1407,7 @@ export interface operations {
       };
       query: {
         pageable: components["schemas"]["Pageable"];
+        search?: string;
       };
     };
     responses: {
@@ -1420,6 +1426,7 @@ export interface operations {
       };
       query: {
         pageable: components["schemas"]["Pageable"];
+        search?: string;
       };
     };
     responses: {
@@ -1438,6 +1445,7 @@ export interface operations {
       };
       query: {
         pageable: components["schemas"]["Pageable"];
+        search?: string;
       };
     };
     responses: {

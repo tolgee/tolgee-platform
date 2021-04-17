@@ -18,12 +18,12 @@ let timer;
 let requests: { [address: string]: number } = {};
 const detectLoop = (url) => {
     requests[url] = 1 + (requests[url] || 0);
-    if (requests[url] > 20) {
+    if (requests[url] > 30) {
         return true;
     }
     timer = setTimeout(() => {
         requests = {};
-    }, 2000)
+    }, 20000)
 };
 
 

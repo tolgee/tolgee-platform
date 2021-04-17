@@ -79,6 +79,11 @@ task runDockerE2e(type: Exec, group: "e2e") {
     finalizedBy "waitForRunningContainer"
 }
 
+task runDockerE2eDev(type: Exec, group: "e2e") {
+    commandLine "docker-compose", "up", "-d", "postgres", "fakesmtp"
+    workingDir E2E_DIR
+}
+
 task stopDockerE2e(type: Exec, group: "e2e") {
     commandLine "docker-compose", "stop"
     workingDir E2E_DIR

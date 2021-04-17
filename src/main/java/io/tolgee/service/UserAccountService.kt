@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.dtos.request.UserUpdateRequestDTO
@@ -16,7 +17,11 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
-open class UserAccountService(private val userAccountRepository: UserAccountRepository) {
+open class UserAccountService(
+        private val userAccountRepository: UserAccountRepository,
+        private val tolgeeProperties: TolgeeProperties,
+        private val emailVerificationService: EmailVerificationService
+) {
     open fun getByUserName(username: String?): Optional<UserAccount> {
         return userAccountRepository.findByUsername(username)
     }
@@ -98,11 +103,19 @@ open class UserAccountService(private val userAccountRepository: UserAccountRepo
     open fun update(userAccount: UserAccount, dto: UserUpdateRequestDTO) {
         if (userAccount.username != dto.email) {
             getByUserName(dto.email).ifPresent { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
-            userAccount.username = dto.email
+            if (tolgeeProperties.authentication.needsEmailVerification) {
+                emailVerificationService.createForUser(userAccount, dto.callbackUrl, dto.email)
+            } else {
+                userAccount.username = dto.email
+            }
         }
-        if (dto.password != null && !dto.password.isEmpty()) {
-            userAccount.password = encodePassword(dto.password)
+
+        dto.password?.let {
+            if (!it.isEmpty()) {
+                userAccount.password = encodePassword(it)
+            }
         }
+
         userAccount.name = dto.name
         userAccountRepository.save(userAccount)
     }
