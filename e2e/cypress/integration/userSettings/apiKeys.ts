@@ -77,7 +77,7 @@ const visit = () => {
 
 const create = (repository: string, scopes: Scope[]) => {
     clickAdd();
-    cy.gcy("global-form-select").contains("Test").click()
+    cy.gcy("global-form-select").click()
     getPopover().contains(repository).click();
     const toRemove = new Set(allScopes);
     scopes.forEach(s => toRemove.delete(s));
