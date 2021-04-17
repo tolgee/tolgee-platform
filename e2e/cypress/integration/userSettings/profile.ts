@@ -1,6 +1,6 @@
 import {
     createUser,
-    deleteAllEmails,
+    deleteAllEmails, deleteUser,
     deleteUserWithEmailVerification,
     disableEmailVerification,
     enableEmailVerification,
@@ -8,10 +8,11 @@ import {
     login
 } from "../../fixtures/apiCalls";
 import {HOST} from "../../fixtures/constants";
-import {assertMessage} from "../../fixtures/shared";
+import {assertMessage, gcy} from "../../fixtures/shared";
+import {getAnyContainingText} from "../../fixtures/xPath";
 
 describe('User profile', () => {
-    const INITIAL_USERNAME = "honza@honza.com"
+    const INITIAL_EMAIL = "honza@honza.com"
     const INITIAL_PASSWORD = "honza"
     const EMAIL_VERIFICATION_TEXT = "When you change your email, new e-mail will be set after its verification";
 
@@ -20,12 +21,13 @@ describe('User profile', () => {
     }
 
     let NEW_EMAIL = "pavel@honza.com";
+
     beforeEach(() => {
         enableEmailVerification()
-        deleteUserWithEmailVerification(INITIAL_USERNAME)
+        deleteUserWithEmailVerification(INITIAL_EMAIL)
         deleteUserWithEmailVerification(NEW_EMAIL)
-        createUser(INITIAL_USERNAME, INITIAL_PASSWORD)
-        login(INITIAL_USERNAME, INITIAL_PASSWORD)
+        createUser(INITIAL_EMAIL, INITIAL_PASSWORD)
+        login(INITIAL_EMAIL, INITIAL_PASSWORD)
         deleteAllEmails()
         visit();
     })
@@ -48,11 +50,36 @@ describe('User profile', () => {
         })
     })
 
-    it.only("works without verification enabled", () => {
+    it("works without verification enabled", () => {
         disableEmailVerification()
         cy.get("form").findInputByName("email").clear().type(NEW_EMAIL)
         cy.contains(EMAIL_VERIFICATION_TEXT).should("not.exist")
         cy.gcy("global-form-save-button").click()
         cy.get("form").findInputByName("email").should("have.value", NEW_EMAIL)
     })
-});
+
+    it("will change user settings", () => {
+        cy.visit(`${HOST}/user`);
+        cy.contains("User profile").should("be.visible");
+        cy.xpath("//*[@name='name']").clear().type("New name")
+        cy.xpath("//*[@name='email']").clear().type("honza@honza.com");
+        cy.contains("Save").click();
+        cy.contains("User data updated").should("be.visible")
+        cy.reload();
+        cy.contains("New name").should("be.visible");
+        cy.xpath("//*[@name='email']").should("have.value", "honza@honza.com");
+        gcy("global-base-view-title").should("contain", "New name")
+    })
+
+    it("will fail when user exists", () => {
+        createUser(NEW_EMAIL)
+        cy.visit(`${HOST}/user`);
+        cy.contains("User profile").should("be.visible");
+        cy.xpath("//*[@name='name']").clear().type("New name")
+        cy.xpath("//*[@name='email']").clear().type(NEW_EMAIL);
+        cy.contains("Save").click();
+        cy.contains("User name already exists.").should("be.visible");
+        cy.reload();
+        cy.xpath("//*[@name='email']").should("have.value", INITIAL_EMAIL);
+    })
+})
