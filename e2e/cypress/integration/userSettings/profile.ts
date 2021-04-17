@@ -6,9 +6,9 @@ import {
     enableEmailVerification,
     getParsedEmailVerification,
     login
-} from "../../fixtures/apiCalls";
-import {HOST} from "../../fixtures/constants";
-import {assertMessage, gcy} from "../../fixtures/shared";
+} from "../../common/apiCalls";
+import {HOST} from "../../common/constants";
+import {assertMessage, gcy} from "../../common/shared";
 
 describe('User profile', () => {
     const INITIAL_EMAIL = "honza@honza.com"

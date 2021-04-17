@@ -32,6 +32,16 @@ class DenyInternalTest : AbstractControllerTest() {
 
         Assertions.assertThat(response).isEqualTo("Internal access is not allowed")
     }
+
+    @Test
+    fun setPropertyFail() {
+        dbPopulator.createBase("Test")
+        val response = mvc.perform(MockMvcRequestBuilders.post("/internal/properties")
+                .content("select * from user_account"))
+                .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn().response.contentAsString
+
+        Assertions.assertThat(response).isEqualTo("Internal access is not allowed")
+    }
 }
 
 @RestController

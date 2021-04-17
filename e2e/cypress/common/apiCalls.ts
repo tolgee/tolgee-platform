@@ -162,3 +162,6 @@ export const setProperty = (name: string, value: any) => internalFetch("properti
 
 export const enableEmailVerification = () => setProperty("authentication.needsEmailVerification", true)
 export const disableEmailVerification = () => setProperty("authentication.needsEmailVerification", false)
+
+export const enableAuthentication = () => setProperty("authentication.enabled", true)
+export const disableAuthentication = () => setProperty("authentication.enabled", false)

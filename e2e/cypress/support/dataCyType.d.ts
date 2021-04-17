@@ -23,6 +23,7 @@ declare namespace DataCy {
         "global-paginated-list" |
         "global-plus-button" |
         "global-snackbars" |
+        "global-user-menu-button" |
         "leave-organization-button" |
         "organization-address-part-field" |
         "organization-delete-button" |
@@ -61,5 +62,6 @@ declare namespace DataCy {
         "translations-editable-cell" |
         "translations-editable-cell-editing" |
         "translations-row-checkbox" |
-        "user-account-side-menu"
+        "user-account-side-menu" |
+        "user-organizations-settings-subtitle-link"
 }
