@@ -30,7 +30,7 @@ class UserController(
 
     @PostMapping("")
     @Operation(summary = "Updates current user's data")
-    fun updateUser(@RequestBody dto: @Valid UserUpdateRequestDTO?) {
+    fun updateUser(@RequestBody @Valid dto: UserUpdateRequestDTO?) {
         userAccountService.update(authenticationFacade.userAccount, dto!!)
     }
 }

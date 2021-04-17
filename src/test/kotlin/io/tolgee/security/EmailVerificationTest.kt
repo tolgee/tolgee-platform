@@ -80,6 +80,16 @@ open class EmailVerificationTest : AbstractControllerTest() {
     }
 
     @Test
+    fun verifiesNewEmail() {
+        val createUser = dbPopulator.createUserIfNotExists(initialUsername)
+        val emailVerification = emailVerificationService.createForUser(createUser, newEmail = "this.is@new.email")
+        mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
+                .andExpect(status().isOk).andReturn()
+        assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
+        assertThat(userAccountService.getByUserName(createUser.username).get().username).isEqualTo("this.is@new.email")
+    }
+
+    @Test
     fun doesNotVerifyWithWrongCode() {
         val createUser = dbPopulator.createUserIfNotExists(initialUsername)
         val emailVerification = emailVerificationService.createForUser(createUser)
