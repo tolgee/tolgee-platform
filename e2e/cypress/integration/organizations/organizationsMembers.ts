@@ -1,7 +1,7 @@
-import {cleanOrganizationData, createOrganizationData, login} from "../../fixtures/apiCalls";
-import {HOST} from "../../fixtures/constants";
+import {cleanOrganizationData, createOrganizationData, login} from "../../common/apiCalls";
+import {HOST} from "../../common/constants";
 import 'cypress-file-upload';
-import {assertMessage, confirmStandard, gcy, goToPage} from "../../fixtures/shared";
+import {assertMessage, confirmStandard, gcy, goToPage} from "../../common/shared";
 
 describe('Organization Members', () => {
     beforeEach(() => {

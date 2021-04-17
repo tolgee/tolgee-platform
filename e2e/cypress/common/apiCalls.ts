@@ -128,11 +128,21 @@ export const addScreenshot = (repositoryId: number, key: string, path: string) =
     })
 }
 
-export const getAllEmails = () => cy.request("http://localhost:21080/api/emails").then(r => r.body)
-export const deleteAllEmails = () => cy.request({url: "http://localhost:21080/api/emails", method: "DELETE"})
 export const getParsedEmailVerification = () => getAllEmails().then(r => {
     return {
         verifyEmailLink: r[0].text.replace(/.*(http:\/\/[\w:\/]*).*/gs, "$1"),
+        fromAddress: r[0].from.value[0].address,
+        toAddress: r[0].to.value[0].address,
+        text: r[0].text
+    }
+})
+
+export const getAllEmails = () => cy.request("http://localhost:21080/api/emails").then(r => r.body)
+export const deleteAllEmails = () => cy.request({url: "http://localhost:21080/api/emails", method: "DELETE"})
+
+export const getParsedResetPasswordEmail = () => getAllEmails().then(r => {
+    return {
+        resetLink: r[0].text.replace(/.*(http:\/\/[\w:\/=]*).*/gs, "$1"),
         fromAddress: r[0].from.value[0].address,
         toAddress: r[0].to.value[0].address,
         text: r[0].text
@@ -145,11 +155,13 @@ export const createOrganizationData = () => internalFetch("e2e-data/organization
 export const cleanRepositoriesData = () => internalFetch("e2e-data/repositories/clean")
 export const createRepositoriesData = () => internalFetch("e2e-data/repositories/create")
 
+export const enableEmailVerification = () => setProperty("authentication.needsEmailVerification", true)
+export const disableEmailVerification = () => setProperty("authentication.needsEmailVerification", false)
+
+export const enableAuthentication = () => setProperty("authentication.enabled", true)
+export const disableAuthentication = () => setProperty("authentication.enabled", false)
 export const setProperty = (name: string, value: any) => internalFetch("properties/set", {
     method: "PUT", body: {
         name, value
     }
 })
-
-export const enableEmailVerification = () => setProperty("authentication.needsEmailVerification", true)
-export const disableEmailVerification = () => setProperty("authentication.needsEmailVerification", false)

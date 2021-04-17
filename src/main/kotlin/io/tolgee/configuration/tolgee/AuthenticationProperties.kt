@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 @ConfigurationProperties(prefix = "tolgee.authentication")
 class AuthenticationProperties(
+        @E2eRuntimeMutable
         var enabled: Boolean = true,
         var jwtSecret: String? = null,
         var jwtExpiration: Int = 604800000,

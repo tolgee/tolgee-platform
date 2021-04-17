@@ -71,7 +71,7 @@ export const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
             <>
                 {userLogged &&
                 <div>
-                    <Button style={{padding: 0}} endIcon={<KeyboardArrowDownIcon/>} color="inherit" aria-controls="user-menu" aria-haspopup="true"
+                    <Button style={{padding: 0}} endIcon={<KeyboardArrowDownIcon/>} color="inherit" data-cy="global-user-menu-button" aria-controls="user-menu" aria-haspopup="true"
                             onClick={handleOpen}>{props.variant == "expanded" ? user.name : <PersonIcon/>}</Button>
                     <StyledMenu id="user-menu" keepMounted
                                 open={!!anchorEl}

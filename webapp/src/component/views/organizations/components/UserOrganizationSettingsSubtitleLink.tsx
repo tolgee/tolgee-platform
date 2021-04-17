@@ -68,7 +68,7 @@ const UserOrganizationSettingsSubtitleLink = (props: UserOrganizationSettingsSub
 
     return (
         <>
-            <Box display="flex">
+            <Box display="flex" data-cy="user-organizations-settings-subtitle-link">
                 <Link style={{
                     cursor: "pointer",
                     display: 'flex',

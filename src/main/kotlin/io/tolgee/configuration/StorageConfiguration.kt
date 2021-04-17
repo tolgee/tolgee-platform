@@ -31,6 +31,7 @@ open class StorageConfiguration(properties: TolgeeProperties) {
 
             return AmazonS3ClientBuilder.standard().withCredentials(AWSStaticCredentialsProvider(credentials))
                     .withEndpointConfiguration(endpointConfig)
+                    .enablePathStyleAccess()
                     .build()
         }
         return null

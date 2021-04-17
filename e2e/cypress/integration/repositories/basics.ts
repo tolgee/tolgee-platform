@@ -1,8 +1,7 @@
-import {cleanOrganizationData, cleanRepositoriesData, createOrganizationData, createRepositoriesData, login} from "../../fixtures/apiCalls";
-import {HOST} from "../../fixtures/constants";
+import {cleanRepositoriesData, createRepositoriesData, login} from "../../common/apiCalls";
+import {HOST} from "../../common/constants";
 import 'cypress-file-upload';
-import {assertMessage, clickGlobalSave, confirmHardMode, confirmStandard, gcy, goToPage, selectInRepositoryMenu} from "../../fixtures/shared";
-import {RepositoryDTO} from "../../../../webapp/src/service/response.types";
+import {assertMessage, gcy} from "../../common/shared";
 
 describe('Repositories Basics', () => {
     beforeEach(() => {

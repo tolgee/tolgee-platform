@@ -28,9 +28,9 @@ open class WebConfiguration(
     override fun addViewControllers(registry: ViewControllerRegistry) {
         registry.run {
             val forwardTo = "forward:/"
-            addViewController("/{spring:[\\w-_]+}")
+            addViewController("/{spring:[\\w-_=]+}")
                     .setViewName(forwardTo)
-            addViewController("/**/{spring:[\\w-_]+}")
+            addViewController("/**/{spring:[\\w-_=]+}")
                     .setViewName(forwardTo)
             addViewController("/{spring:\\w+}/**{spring:?!(\\.js|\\.css||\\.woff2)$}")
                     .setViewName(forwardTo)

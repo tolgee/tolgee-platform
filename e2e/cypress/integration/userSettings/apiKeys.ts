@@ -1,8 +1,8 @@
-import {allScopes, assertMessage, clickAdd, getPopover} from "../../fixtures/shared";
-import {getAnyContainingText, getClosestContainingText} from "../../fixtures/xPath";
-import {HOST} from "../../fixtures/constants";
-import {cleanRepositoriesData, createApiKey, createRepositoriesData, createRepository, deleteRepository, login} from "../../fixtures/apiCalls";
-import {Scope} from "../../fixtures/types";
+import {allScopes, assertMessage, clickAdd, getPopover} from "../../common/shared";
+import {getAnyContainingText, getClosestContainingText} from "../../common/xPath";
+import {HOST} from "../../common/constants";
+import {cleanRepositoriesData, createApiKey, createRepositoriesData, createRepository, deleteRepository, login} from "../../common/apiCalls";
+import {Scope} from "../../common/types";
 import {ApiKeyDTO} from "../../../../webapp/src/service/response.types";
 
 describe('Api keys', () => {

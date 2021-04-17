@@ -13,13 +13,11 @@ import javax.crypto.spec.SecretKeySpec
 
 
 @Component
-class Aes(jwtSecretProvider: JwtSecretProvider) {
-    private var secretKey: SecretKeySpec? = null
-
-    init {
+open class Aes(jwtSecretProvider: JwtSecretProvider) {
+    private val secretKey: SecretKeySpec? by lazy {
         val sha = MessageDigest.getInstance("SHA-1")
         val key = Arrays.copyOf(sha.digest(jwtSecretProvider.jwtSecret), 16)
-        secretKey = SecretKeySpec(key, "AES")
+        SecretKeySpec(key, "AES")
     }
 
     fun encrypt(toEncrypt: ByteArray): ByteArray? {
