@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.development.DbPopulatorReal
 import io.tolgee.dtos.request.ResetPassword
 import io.tolgee.dtos.request.ResetPasswordRequest
 import io.tolgee.dtos.request.SignUpDto
@@ -49,7 +50,8 @@ open class PublicController(private val authenticationManager: AuthenticationMan
                             private val userAccountService: UserAccountService,
                             private val mailSender: JavaMailSender,
                             private val invitationService: InvitationService,
-                            private val emailVerificationService: EmailVerificationService
+                            private val emailVerificationService: EmailVerificationService,
+                            private val dbPopulatorReal: DbPopulatorReal
 ) {
     @Operation(summary = "Generates JWT token")
     @PostMapping("/generatetoken")
@@ -157,7 +159,12 @@ $url
     @Operation(summary = "Authenticates user using third party oAuth service")
     open fun authenticateUser(@PathVariable("serviceType") serviceType: String?,
                               @PathVariable("code") code: String?,
-                              @RequestParam(value = "invitationCode", required = false) invitationCode: String?): JwtAuthenticationResponse {
+                              @RequestParam(value = "invitationCode", required = false) invitationCode: String?)
+            : JwtAuthenticationResponse {
+        if (properties.internal.fakeGithubLogin && code == "this_is_dummy_code") {
+            val user = dbPopulatorReal.createUserIfNotExists("johndoe@doe.com")
+            return JwtAuthenticationResponse(tokenProvider.generateToken(user.id!!).toString())
+        }
         return githubOAuthDelegate.getTokenResponse(code, invitationCode)
     }
 

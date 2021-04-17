@@ -1,8 +1,8 @@
-import {cleanOrganizationData, createOrganizationData, login} from "../../fixtures/apiCalls";
-import {HOST} from "../../fixtures/constants";
+import {cleanOrganizationData, createOrganizationData, login} from "../../common/apiCalls";
+import {HOST} from "../../common/constants";
 import 'cypress-file-upload';
-import {assertMessage, gcy} from "../../fixtures/shared";
-import {getAnyContainingText} from "../../fixtures/xPath";
+import {assertMessage, gcy} from "../../common/shared";
+import {getAnyContainingText} from "../../common/xPath";
 
 describe('Organization Invitations', () => {
     beforeEach(() => {

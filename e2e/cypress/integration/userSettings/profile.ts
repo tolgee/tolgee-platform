@@ -6,9 +6,9 @@ import {
     enableEmailVerification,
     getParsedEmailVerification,
     login
-} from "../../fixtures/apiCalls";
-import {HOST} from "../../fixtures/constants";
-import {assertMessage, gcy} from "../../fixtures/shared";
+} from "../../common/apiCalls";
+import {HOST} from "../../common/constants";
+import {assertMessage, gcy} from "../../common/shared";
 
 describe('User profile', () => {
     const INITIAL_EMAIL = "honza@honza.com"
@@ -81,5 +81,17 @@ describe('User profile', () => {
         cy.contains("User name already exists.").should("be.visible");
         cy.reload();
         cy.xpath("//*[@name='email']").should("have.value", INITIAL_EMAIL);
+    })
+
+    it.only("changes password", () => {
+        cy.visit(`${HOST}/user`);
+        let superNewPassword = "super_new_password";
+        cy.xpath("//*[@name='password']").clear().type(superNewPassword)
+        cy.xpath("//*[@name='passwordRepeat']").clear().type(superNewPassword)
+        cy.contains("Save").click();
+        assertMessage("updated")
+        login(INITIAL_EMAIL, superNewPassword)
+        cy.reload()
+        cy.contains("User profile")
     })
 })

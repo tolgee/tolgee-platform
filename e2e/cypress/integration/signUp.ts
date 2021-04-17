@@ -1,5 +1,5 @@
-import {HOST} from "../fixtures/constants";
-import {getInput} from "../fixtures/xPath";
+import {HOST} from "../common/constants";
+import {getInput} from "../common/xPath";
 import {
     deleteAllEmails,
     deleteUserWithEmailVerification,
@@ -7,8 +7,8 @@ import {
     enableEmailVerification,
     getParsedEmailVerification,
     getUser
-} from "../fixtures/apiCalls";
-import {assertMessage} from "../fixtures/shared";
+} from "../common/apiCalls";
+import {assertMessage} from "../common/shared";
 
 
 const TEST_USERNAME = "test@tolgee.io";

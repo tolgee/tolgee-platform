@@ -41,7 +41,7 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
 
     const githubRedirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({[PARAMS.SERVICE_TYPE]: 'github'});
     const clientId = remoteConfig.authMethods.github.clientId;
-    const gitHubUrl = GITHUB_BASE + `?client_id=${clientId}&redirect_uri=${githubRedirectUri}&scope=user%3Aemail`;
+    const gitHubUrl = GITHUB_BASE + `?client_id=${clientId}&redirect_uri=${githubRedirectUri}?scope=user%3Aemail`;
 
     const history = useHistory();
     if (history.location.state && (history.location.state as any).from) {

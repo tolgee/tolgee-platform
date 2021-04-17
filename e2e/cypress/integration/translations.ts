@@ -1,7 +1,7 @@
-import {clickAdd, getPopover} from "../fixtures/shared";
-import {getAnyContainingAriaLabelAttribute, getAnyContainingText, getClosestContainingText} from "../fixtures/xPath";
-import {createRepository, deleteRepository, login, setTranslations} from "../fixtures/apiCalls";
-import {HOST} from "../fixtures/constants";
+import {clickAdd, getPopover} from "../common/shared";
+import {getAnyContainingAriaLabelAttribute, getAnyContainingText, getClosestContainingText} from "../common/xPath";
+import {createRepository, deleteRepository, login, setTranslations} from "../common/apiCalls";
+import {HOST} from "../common/constants";
 import { RepositoryDTO } from "../../../webapp/src/service/response.types";
 
 describe('Translations', () => {
