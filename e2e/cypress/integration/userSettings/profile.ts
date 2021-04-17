@@ -9,7 +9,6 @@ import {
 } from "../../fixtures/apiCalls";
 import {HOST} from "../../fixtures/constants";
 import {assertMessage, gcy} from "../../fixtures/shared";
-import {getAnyContainingText} from "../../fixtures/xPath";
 
 describe('User profile', () => {
     const INITIAL_EMAIL = "honza@honza.com"
