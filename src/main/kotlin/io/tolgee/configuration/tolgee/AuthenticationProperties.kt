@@ -17,6 +17,7 @@ class AuthenticationProperties(
         var jwtExpiration: Int = 604800000,
         var nativeEnabled: Boolean = true,
         var registrationsAllowed: Boolean = false,
+        @E2eRuntimeMutable
         var needsEmailVerification: Boolean = false,
         var createInitialUser: Boolean = true,
         var initialUsername: String = "admin",

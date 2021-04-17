@@ -15,6 +15,7 @@ import {BaseUserSettingsView} from "./BaseUserSettingsView";
 import {StandardForm} from "../../common/form/StandardForm";
 import {useFormikContext} from "formik";
 import {Box, Typography} from "@material-ui/core";
+import {useConfig} from "../../../hooks/useConfig";
 
 const actions = container.resolve(UserActions);
 const userActions = container.resolve(UserActions);
@@ -31,6 +32,7 @@ export const UserProfileView: FunctionComponent = () => {
     }, [saveLoadable.loading]);
 
     const history = useHistory();
+    const config = useConfig()
 
     const Fields = () => {
         const formik = useFormikContext()
@@ -47,7 +49,7 @@ export const UserProfileView: FunctionComponent = () => {
                         parameters={{email: resourceLoadable.data.emailAwaitingVerification!}}>email_waiting_for_verification</T></Typography>
                 </Box>}
 
-                {emailChanged &&
+                {emailChanged && config.needsEmailVerification &&
                 <Typography variant="body1"><T>your_email_was_changed_verification_message</T></Typography>
                 }
                 <SetPasswordFields/>

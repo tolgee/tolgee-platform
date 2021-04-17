@@ -27,7 +27,9 @@ export const EmailVerificationHandler: FunctionComponent<OAuthRedirectionHandler
     const verifyEmailLoadable = useSelector<AppState, Loadable>((state) => state.signUp.loadables.verifyEmail);
 
     useEffect(() => {
-        actions.loadableActions.verifyEmail.dispatch(match.params[PARAMS.USER_ID], match.params[PARAMS.VERIFICATION_CODE]);
+        if (!verifyEmailLoadable.touched) {
+            actions.loadableActions.verifyEmail.dispatch(match.params[PARAMS.USER_ID], match.params[PARAMS.VERIFICATION_CODE]);
+        }
     }, []);
 
     useEffect(() => {

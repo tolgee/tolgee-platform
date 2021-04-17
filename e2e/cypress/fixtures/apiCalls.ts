@@ -1,6 +1,7 @@
 import {API_URL, PASSWORD, USERNAME} from "./constants";
 import {ArgumentTypes, Scope} from "./types";
 import {ApiKeyDTO, LanguageDTO} from "../../../webapp/src/service/response.types";
+import {assertMessage} from "./shared";
 
 const bcrypt = require('bcryptjs');
 
@@ -84,7 +85,7 @@ export const deleteUser = (username: string) => {
     return internalFetch(`sql/execute`, {method: "POST", body: deleteUserSql})
 }
 
-export const deleteUserWithInvitationCode = (username: string) => {
+export const deleteUserWithEmailVerification = (username: string) => {
     const sql = `
         delete from email_verification where user_account_id in (select id from user_account where username='${username}');
         delete from user_account where username='${username}';
@@ -127,9 +128,28 @@ export const addScreenshot = (repositoryId: number, key: string, path: string) =
     })
 }
 
+export const getAllEmails = () => cy.request("http://localhost:21080/api/emails").then(r => r.body)
+export const deleteAllEmails = () => cy.request({url: "http://localhost:21080/api/emails", method: "DELETE"})
+export const getParsedEmailVerification = () => getAllEmails().then(r => {
+    return {
+        verifyEmailLink: r[0].text.replace(/.*(http:\/\/[\w:\/]*).*/gs, "$1"),
+        fromAddress: r[0].from.value[0].address,
+        toAddress: r[0].to.value[0].address,
+        text: r[0].text
+    }
+})
+
 export const cleanOrganizationData = () => internalFetch("e2e-data/organizations/clean")
 export const createOrganizationData = () => internalFetch("e2e-data/organizations/create")
 
 export const cleanRepositoriesData = () => internalFetch("e2e-data/repositories/clean")
 export const createRepositoriesData = () => internalFetch("e2e-data/repositories/create")
 
+export const setProperty = (name: string, value: any) => internalFetch("properties/set", {
+    method: "PUT", body: {
+        name, value
+    }
+})
+
+export const enableEmailVerification = () => setProperty("authentication.needsEmailVerification", true)
+export const disableEmailVerification = () => setProperty("authentication.needsEmailVerification", false)
