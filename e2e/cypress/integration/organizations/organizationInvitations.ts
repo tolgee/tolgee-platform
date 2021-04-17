@@ -31,17 +31,11 @@ describe('Organization Invitations', () => {
         generateInvitation("MEMBER")
         generateInvitation("OWNER")
 
-        gcy("simple-hateoas-list").find("li").eq(0).within(() => {
-            gcy("organization-invitation-cancel-button").click()
-        })
+        gcy("organization-invitation-cancel-button").eq(0).click()
 
-        gcy("simple-hateoas-list").within(() => {
-            cy.get("li").should("have.length", 1)
-        })
+        gcy("simple-hateoas-list").find("li").should("have.length", 1)
 
-        gcy("simple-hateoas-list").find("li").eq(0).within(() => {
-            gcy("organization-invitation-cancel-button").click()
-        })
+        gcy("organization-invitation-cancel-button").click()
 
         gcy("simple-hateoas-list").should("not.exist")
     })

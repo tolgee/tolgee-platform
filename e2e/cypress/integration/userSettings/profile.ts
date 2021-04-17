@@ -6,10 +6,9 @@ import {
     enableEmailVerification,
     getParsedEmailVerification,
     login
-} from "../../common/apiCalls";
-import {HOST} from "../../common/constants";
-import {assertMessage, gcy} from "../../common/shared";
-import {getAnyContainingText} from "../../common/xPath";
+} from "../../fixtures/apiCalls";
+import {HOST} from "../../fixtures/constants";
+import {assertMessage, gcy} from "../../fixtures/shared";
 
 describe('User profile', () => {
     const INITIAL_EMAIL = "honza@honza.com"
@@ -50,8 +49,9 @@ describe('User profile', () => {
         })
     })
 
-    it("works without verification enabled", () => {
+    it("works without email verification enabled", () => {
         disableEmailVerification()
+        cy.reload()
         cy.get("form").findInputByName("email").clear().type(NEW_EMAIL)
         cy.contains(EMAIL_VERIFICATION_TEXT).should("not.exist")
         cy.gcy("global-form-save-button").click()
