@@ -1,4 +1,5 @@
 {
   "scrollBehavior": "center",
-  "video": false
+  "video": false,
+  "chromeWebSecurity": false
 }

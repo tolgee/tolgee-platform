@@ -1,7 +1,7 @@
-import {cleanOrganizationData, createOrganizationData, login} from "../../fixtures/apiCalls";
-import {HOST} from "../../fixtures/constants";
+import {cleanOrganizationData, createOrganizationData, login} from "../../common/apiCalls";
+import {HOST} from "../../common/constants";
 import 'cypress-file-upload';
-import {clickGlobalSave, gcy, goToPage} from "../../fixtures/shared";
+import {clickGlobalSave, gcy, goToPage} from "../../common/shared";
 import {RepositoryDTO} from "../../../../webapp/src/service/response.types";
 
 describe('Organization List', () => {

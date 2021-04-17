@@ -1,7 +1,7 @@
-import {addScreenshot, createRepository, deleteRepository, login, setTranslations} from "../fixtures/apiCalls";
-import {HOST} from "../fixtures/constants";
+import {addScreenshot, createRepository, deleteRepository, login, setTranslations} from "../common/apiCalls";
+import {HOST} from "../common/constants";
 import 'cypress-file-upload';
-import {getPopover} from "../fixtures/shared";
+import {getPopover} from "../common/shared";
 import {RepositoryDTO} from "../../../webapp/src/service/response.types";
 
 describe('Key screenshots', () => {
