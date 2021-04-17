@@ -12,7 +12,7 @@ describe('Organization Invitations', () => {
         visit();
     })
 
-    it.only("generates invitations", () => {
+    it("generates invitations", () => {
         generateInvitation("MEMBER")
 
         gcy("organization-invitations-generated-field").within(() => {

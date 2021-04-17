@@ -23,7 +23,7 @@ describe('Organization Settings', () => {
             validateManagePermissions("Facebook")
         })
 
-        it.only("Has edit permissions on microsoft word (organization base)", () => {
+        it("Has edit permissions on microsoft word (organization base)", () => {
             validateEditPermissions("Microsoft Word")
         })
 

@@ -43,7 +43,7 @@ describe('Api keys', () => {
             });
         });
 
-        it.only('Will edit an api key', () => {
+        it('Will edit an api key', () => {
             createApiKey({
                 repositoryId: repository.id,
                 scopes: ["keys.edit", "keys.edit", "translations.view"]
