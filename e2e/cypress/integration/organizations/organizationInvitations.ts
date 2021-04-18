@@ -31,9 +31,9 @@ describe('Organization Invitations', () => {
         generateInvitation("MEMBER")
         generateInvitation("OWNER")
 
-        gcy("organization-invitation-cancel-button").should("have.length", 2)
+        cy.xpath("//*[@data-cy='simple-hateoas-list']//li").should("have.length", 2)
         gcy("organization-invitation-cancel-button").eq(0).click()
-        gcy("simple-hateoas-list").find("li").should("have.length", 1)
+        cy.xpath("//*[@data-cy='simple-hateoas-list']//li").should("have.length", 1)
         gcy("organization-invitation-cancel-button").click()
         gcy("simple-hateoas-list").should("not.exist")
     })
