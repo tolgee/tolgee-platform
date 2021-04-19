@@ -26,7 +26,7 @@ data class UserAccount(
 ) : AuditModel() {
 
     @OneToMany(mappedBy = "user")
-    var permissions: Set<Permission>? = null
+    var permissions: MutableSet<Permission>? = null
 
     @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY, optional = true)
     var emailVerification: EmailVerification? = null
@@ -47,7 +47,7 @@ data class UserAccount(
                 username: String?,
                 password: String?,
                 name: String?,
-                permissions: Set<Permission>?,
+                permissions: MutableSet<Permission>?,
                 role: Role?,
                 thirdPartyAuthType: String?,
                 thirdPartyAuthId: String?,

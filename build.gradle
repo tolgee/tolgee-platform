@@ -6,9 +6,15 @@ buildscript {
     repositories {
         mavenCentral()
     }
+    ext {
+        kotlinVersion = '1.4.32'
+        springBootVersion = '2.4.5'
+    }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.5")
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.32"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
     }
 }
 
@@ -45,11 +51,14 @@ apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
+apply plugin: "kotlin-allopen"
 
 repositories {
     mavenCentral()
     jcenter()
 }
+
+sourceCompatibility = 11
 
 idea {
     module {
@@ -57,6 +66,12 @@ idea {
     }
 }
 
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
+    annotation("org.springframework.stereotype.Service")
+}
 
 def liveDbPostgres = [
         url         : 'jdbc:postgresql://localhost:5432/postgres',
@@ -70,7 +85,7 @@ def liveDbPostgres = [
 ]
 
 def liveDbH2 = [
-        url         : 'jdbc:h2:~/.tolgee/db.h2;AUTO_SERVER=TRUE',
+        url         : 'jdbc:h2:~/.tolgee/db.h2;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE',
         referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.H2Dialect' +
                 '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
@@ -78,7 +93,7 @@ def liveDbH2 = [
         driver      : 'org.h2.Driver'
 ]
 
-def liveDb = liveDbPostgres
+def liveDb = liveDbH2
 
 liquibase {
     activities {

@@ -1,10 +1,11 @@
 package io.tolgee.helpers;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class TextHelper {
-    public static ArrayList<String> splitOnNonEscapedDelimiter(String string, char delimiter) {
+    public static List<String> splitOnNonEscapedDelimiter(String string, char delimiter) {
         ArrayList<String> result = new ArrayList<>();
         StringBuilder actual = new StringBuilder();
 

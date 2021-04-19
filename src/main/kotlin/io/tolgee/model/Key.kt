@@ -3,6 +3,8 @@ package io.tolgee.model
 import io.tolgee.dtos.PathDTO
 import java.util.*
 import javax.persistence.*
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.Size
 import kotlin.collections.HashSet
 
 @Entity
@@ -12,6 +14,9 @@ data class Key(
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long? = null,
 
+        @field:NotBlank
+        @field:Size(max = 2000)
+        @Column(length = 2000)
         var name: String? = null,
 ) : AuditModel() {
     @ManyToOne

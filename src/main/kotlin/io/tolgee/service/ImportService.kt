@@ -4,8 +4,10 @@ import io.tolgee.dtos.ImportDto
 import io.tolgee.model.Key
 import io.tolgee.model.Repository
 import io.tolgee.model.Translation
+import io.tolgee.model.import.Import
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.TranslationRepository
+import io.tolgee.repository.import.ImportRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,7 +19,8 @@ open class ImportService(
         private val languageService: LanguageService,
         private val keyService: KeyService,
         private val keyRepository: KeyRepository,
-        private val translationRepository: TranslationRepository
+        private val translationRepository: TranslationRepository,
+        private val importRepository: ImportRepository
 ) {
 
     @Autowired
@@ -51,5 +54,9 @@ open class ImportService(
 
         keyRepository.saveAll(keysToSave)
         translationRepository.saveAll(translationsToSave)
+    }
+
+    fun save(import: Import): Import {
+        return this.importRepository.save(import)
     }
 }
