@@ -71,6 +71,7 @@ allOpen {
     annotation("javax.persistence.MappedSuperclass")
     annotation("javax.persistence.Embeddable")
     annotation("org.springframework.stereotype.Service")
+    annotation("org.springframework.stereotype.Component")
 }
 
 def liveDbPostgres = [

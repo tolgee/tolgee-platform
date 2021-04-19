@@ -1,6 +1,7 @@
-package io.tolgee.controllers
+package io.tolgee.api.v2.controllers
 
 import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.fixtures.*
 import io.tolgee.model.Permission
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc

@@ -12,9 +12,9 @@ class ImportFileIssue(
         @field:NotNull
         val file: ImportFile,
 
-        @OneToMany(fetch = FetchType.EAGER, mappedBy = "issue")
-        val params: List<ImportFileIssueParam>,
-
         @Enumerated
-        val type: FileIssueType
+        val type: FileIssueType,
+
+        @OneToMany(fetch = FetchType.EAGER, mappedBy = "issue")
+        val params: List<ImportFileIssueParam>? = null,
 ) : StandardAuditModel()
