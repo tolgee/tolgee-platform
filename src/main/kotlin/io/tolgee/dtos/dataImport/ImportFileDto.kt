@@ -1,6 +1,6 @@
 package io.tolgee.dtos.dataImport
 
-import io.tolgee.model.import.ImportArchive
+import io.tolgee.model.dataImport.ImportArchive
 import java.io.InputStream
 
 data class ImportFileDto (

@@ -11,7 +11,7 @@ import io.tolgee.dtos.dataImport.ImportStreamingProgressMessage
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.model.Permission
 import io.tolgee.security.repository_auth.AccessWithRepositoryPermission
-import io.tolgee.service.import.ImportService
+import io.tolgee.service.dataImport.ImportService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

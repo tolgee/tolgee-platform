@@ -7,7 +7,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.service.RepositoryService
 import io.tolgee.service.SecurityService
-import io.tolgee.service.import.ImportService
+import io.tolgee.service.dataImport.ImportService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

@@ -10,7 +10,7 @@ import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.repository.RepositoryRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.*
-import io.tolgee.service.import.ImportService
+import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.annotation.Autowired
 
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
