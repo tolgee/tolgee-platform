@@ -94,7 +94,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
         mvc.perform(LoggedRequestFactory.addToken(
                 builder
         )).andReturn().let {
-            return mvc.perform(asyncDispatch(it, 20000000))
+            return mvc.perform(asyncDispatch(it))
         }
     }
 
