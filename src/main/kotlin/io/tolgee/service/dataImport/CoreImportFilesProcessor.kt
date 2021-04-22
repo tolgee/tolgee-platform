@@ -6,13 +6,13 @@ import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIV
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_FILES_IN_ARCHIVE
 import io.tolgee.exceptions.FileIssueException
 import io.tolgee.model.Language
+import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
-import io.tolgee.model.dataImport.issues.issueTypes.TranslationIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE
-import io.tolgee.model.dataImport.issues.paramTypes.TranslationIssueParamType.KEY_ID
-import io.tolgee.model.dataImport.issues.paramTypes.TranslationIssueParamType.LANGUAGE_ID
+import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.LanguageService
+import io.tolgee.service.TranslationService
 import io.tolgee.service.dataImport.processors.*
 import org.springframework.context.ApplicationContext
 import java.net.FileNameMap
@@ -23,17 +23,22 @@ class CoreImportFilesProcessor(
         val applicationContext: ApplicationContext,
         val import: Import
 ) {
+    private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
+    private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
+    private val translationService: TranslationService by lazy { applicationContext.getBean(TranslationService::class.java) }
+    private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
+
     private val storedKeys by lazy {
         importService.findKeys(import).asSequence().map { it.name to it }.toMap(mutableMapOf())
     }
 
     private val storedLanguages by lazy {
-        importService.findLanguages(import)
+        importService.findLanguages(import).toMutableList()
     }
 
-    val storedTranslations = mutableMapOf<ImportLanguage, MutableMap<ImportKey, MutableList<ImportTranslation>>>()
-    private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
-    private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
+    private val storedTranslations = mutableMapOf<ImportLanguage, MutableMap<ImportKey, MutableList<ImportTranslation>>>()
+
+    private val existingTranslations = mutableMapOf<Long, MutableMap<String, Translation>>()
 
     fun processFiles(files: List<ImportFileDto>?,
                      messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit) {
@@ -50,7 +55,7 @@ class CoreImportFilesProcessor(
             if (isArchive(mimeType)) {
                 messageClient(FOUND_ARCHIVE, null)
                 file.saveArchiveEntity()
-                val processor = getArchiveProcessorByMimeType(mimeType)
+                val processor = processorFactory.getArchiveProcessorByMimeType(mimeType)
                 processor.process(file).apply {
                     messageClient(FOUND_FILES_IN_ARCHIVE, listOf(size))
                     processFiles(this, messageClient)
@@ -60,7 +65,7 @@ class CoreImportFilesProcessor(
 
             val savedFileEntity = file.saveFileEntity()
             val fileProcessorContext = FileProcessorContext(file, savedFileEntity, messageClient)
-            val processor = getProcessorByMimeType(mimeType, fileProcessorContext)
+            val processor = processorFactory.getProcessorByMimeType(mimeType, fileProcessorContext)
             processor.process()
             processor.context.processResult()
         } catch (e: FileIssueException) {
@@ -74,19 +79,6 @@ class CoreImportFilesProcessor(
 
     private fun ImportFileDto.saveArchiveEntity() = importService.saveArchive(ImportArchive(this.name!!, import))
 
-    private fun getArchiveProcessorByMimeType(type: String): ImportArchiveProcessor {
-        return when (type) {
-            "application/zip" -> ZipTypeProcessor()
-            else -> throw FileIssueException(FileIssueType.NO_MATCHING_PROCESSOR)
-        }
-    }
-
-    private fun getProcessorByMimeType(type: String, context: FileProcessorContext): ImportFileProcessor {
-        return when (type) {
-            "application/json" -> JsonFileProcessor(context)
-            else -> throw FileIssueException(FileIssueType.NO_MATCHING_PROCESSOR)
-        }
-    }
 
     private fun isArchive(mimeType: String) = mimeType == "application/zip"
 
@@ -116,6 +108,7 @@ class CoreImportFilesProcessor(
                 languageEntity.existingLanguage = languageEntity.findMatchingExisting()
             }
             importService.saveLanguages(this.languages.values)
+            storedLanguages.addAll(this.languages.values)
         }
     }
 
@@ -187,17 +180,44 @@ class CoreImportFilesProcessor(
                 val existingTranslations = getStoredTranslations(keyEntity, newTranslation.language)
                 if (existingTranslations.size > 1) {
                     existingTranslations.forEach { collidingTranslations ->
-                        collidingTranslations.addIssue(MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE,
+                        fileEntity.addIssue(FileIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE,
                                 mapOf(
-                                        KEY_ID to collidingTranslations.key.id.toString(),
-                                        LANGUAGE_ID to collidingTranslations.language.id.toString()
+                                        FileIssueParamType.KEY_ID to collidingTranslations.key.id.toString(),
+                                        FileIssueParamType.LANGUAGE_ID to collidingTranslations.language.id.toString()
                                 )
                         )
                     }
+                    return
                 }
                 this@CoreImportFilesProcessor.addToStoredTranslations(newTranslation)
             }
         }
+        this@CoreImportFilesProcessor.handleCollisions()
         this@CoreImportFilesProcessor.saveAllStoredTranslations()
     }
+
+    private fun handleCollisions() {
+        populateExistingTranslations()
+        this.storedTranslations.asSequence().flatMap { it.value.values }.flatMap { it }.forEach { storedTranslation ->
+            val existingLanguage = storedTranslation.language.existingLanguage
+            if (existingLanguage != null) {
+                val existingTranslation = existingTranslations[existingLanguage.id]?.let { it[storedTranslation.key.name] }
+                if (existingTranslation != null) {
+                    storedTranslation.collision = existingTranslation
+                }
+            }
+        }
+    }
+
+    private fun populateExistingTranslations() {
+        this.storedLanguages.asSequence().map { it.existingLanguage }.toSet().forEach { language ->
+            if (language != null && existingTranslations[language.id] == null) {
+                existingTranslations[language.id!!] = mutableMapOf<String, Translation>().apply {
+                    this@CoreImportFilesProcessor.translationService.getAllByLanguageId(language.id)
+                            .forEach { translation -> put(translation.key!!.name!!, translation) }
+                }
+            }
+        }
+    }
 }
+

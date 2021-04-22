@@ -50,7 +50,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    fun `it parses zip of jsons and saves data`() {
+    fun `it finds proper `() {
         val repository = dbPopulator.createBase(generateUniqueString())
         commitTransaction()
 

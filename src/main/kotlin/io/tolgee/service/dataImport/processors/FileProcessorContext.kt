@@ -12,7 +12,6 @@ data class FileProcessorContext(
         val fileEntity: ImportFile,
         val messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit,
 ) {
-    var files: MutableList<ImportFileDto>? = null
     var languages: MutableMap<String, ImportLanguage> = mutableMapOf()
     var translations: MutableMap<String, MutableList<ImportTranslation>> = mutableMapOf()
 
@@ -25,7 +24,7 @@ data class FileProcessorContext(
             translations[keyName] = mutableListOf()
         }
 
-        val entity = ImportTranslation(value as? String?, language);
+        val entity = ImportTranslation(value as? String?, language)
 
         translations[keyName]!!.add(entity)
 
