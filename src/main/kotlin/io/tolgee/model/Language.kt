@@ -4,6 +4,7 @@ import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import javax.persistence.*
 
 @Entity
@@ -62,6 +63,7 @@ class Language : AuditModel() {
             }
 
             @PreRemove
+            @Transactional
             fun preRemove(language: Language) {
                 importService.onExistingLanguageRemoved(language)
             }

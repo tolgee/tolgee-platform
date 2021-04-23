@@ -23,5 +23,4 @@ public abstract class AbstractTransactionalTest extends AbstractTransactionalTes
         TestTransaction.start();
         entityManager.clear();
     }
-
 }

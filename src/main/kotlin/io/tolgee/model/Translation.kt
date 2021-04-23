@@ -3,6 +3,7 @@ package io.tolgee.model
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import javax.persistence.*
 
 @Entity
@@ -89,6 +90,7 @@ data class Translation(
             }
 
             @PreRemove
+            @Transactional
             fun preRemove(translation: Translation) {
                 importService.onTranslationCollisionRemoved(translation)
             }

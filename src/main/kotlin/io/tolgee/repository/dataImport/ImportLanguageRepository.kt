@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 
 @Repository
 interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
@@ -13,6 +14,7 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
     fun findAllByImport(importId: Long): List<ImportLanguage>
 
     @Modifying
+    @Transactional
     @Query("update ImportLanguage il set il.existingLanguage = null where il.existingLanguage = :language")
     fun removeExistingLanguageReference(language: Language)
 }

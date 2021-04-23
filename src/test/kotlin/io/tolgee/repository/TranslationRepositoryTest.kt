@@ -8,11 +8,15 @@ import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
+import org.springframework.transaction.annotation.Transactional
 import org.testng.annotations.Test
 import javax.persistence.EntityManager
 
 @SpringBootTest
+@Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class TranslationRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
 
     @Autowired
@@ -28,6 +32,7 @@ class TranslationRepositoryTest : AbstractTransactionalTestNGSpringContextTests(
     lateinit var entityManager: EntityManager
 
     @Test
+    @Transactional
     fun `remove of language removes existing language reference from import language`() {
         var import: Import? = null
         var importLanguage: ImportLanguage? = null
@@ -70,6 +75,7 @@ class TranslationRepositoryTest : AbstractTransactionalTestNGSpringContextTests(
 
         assertThat(importService.findTranslations(import!!, importLanguage!!.id).first().collision).isEqualTo(collision)
         translationRepository.delete(collision!!)
+        entityManager.flush()
         entityManager.clear()
         assertThat(importService.findTranslations(import!!, importLanguage!!.id).first().collision).isEqualTo(null)
     }

@@ -72,6 +72,7 @@ allOpen {
     annotation("javax.persistence.Embeddable")
     annotation("org.springframework.stereotype.Service")
     annotation("org.springframework.stereotype.Component")
+    annotation("org.springframework.transaction.annotation.Transactional")
 }
 
 def liveDbPostgres = [

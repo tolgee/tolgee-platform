@@ -79,7 +79,7 @@ class UserAppApiController(
         val apiKey = authenticationFacade.apiKey
         val repository = repositoryService.get(apiKey.repository!!.id).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }!!
         val key = keyService.getOrCreateKey(repository, PathDTO.fromFullPath(dto.key))
-        translationService.setForKey(key, dto.translations)
+        translationService.setForKey(key, dto.translations!!)
     }
 
     @Deprecated(message = "Use /api/repository/languages")

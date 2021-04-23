@@ -21,3 +21,7 @@ tolgee:
     create-initial-user: false
   internal:
     populate: false
+logging:
+  level:
+    org.springframework.orm.jpa: DEBUG
+    org.springframework.transaction: DEBUG

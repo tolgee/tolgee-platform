@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testng.annotations.AfterClass
 import java.io.File
 
-abstract class AbstractScreenshotControllerTest  : SignedInControllerTest() {
+abstract class AbstractScreenshotControllerTest : SignedInControllerTest() {
     @Value("classpath:screenshot.png")
     lateinit var screenshotFile: Resource
 
@@ -37,7 +37,8 @@ abstract class AbstractScreenshotControllerTest  : SignedInControllerTest() {
                 .andExpect(status().isOk).andReturn().parseResponseTo()
     }
 
-    protected inline fun <reified T> MvcResult.parseResponseTo(): T {
+    @Suppress("RedundantModalityModifier")
+    protected final inline fun <reified T> MvcResult.parseResponseTo(): T {
         return jacksonObjectMapper().readValue(this.response.contentAsString)
     }
 }

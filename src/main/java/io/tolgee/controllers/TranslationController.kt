@@ -50,7 +50,7 @@ class TranslationController @Autowired constructor(
     @AccessWithRepositoryPermission(permission = Permission.RepositoryPermissionType.TRANSLATE)
     @Deprecated(message = "Use put method to /api/repository/{repositoryId}/translations or /api/repository/translations")
     @Hidden
-    fun setTranslationsPost(@RequestBody dto: @Valid SetTranslationsDTO?) {
+    fun setTranslationsPost(@RequestBody @Valid dto: SetTranslationsDTO?) {
         setTranslations(dto)
     }
 
@@ -58,13 +58,13 @@ class TranslationController @Autowired constructor(
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
     @AccessWithRepositoryPermission(permission = Permission.RepositoryPermissionType.TRANSLATE)
     @Operation(summary = "Sets translations for existing key")
-    fun setTranslations(@RequestBody dto: @Valid SetTranslationsDTO?) {
+    fun setTranslations(@RequestBody @Valid dto: SetTranslationsDTO?) {
         val key = keyService.get(
                 repositoryHolder.repository.id,
                 PathDTO.fromFullPath(dto!!.key)
         ).orElseThrow { NotFoundException() }
 
-        translationService.setForKey(key, dto.translations)
+        translationService.setForKey(key, dto.translations!!)
     }
 
     @PostMapping("")
@@ -74,7 +74,7 @@ class TranslationController @Autowired constructor(
     fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsDTO) {
         val repository = repositoryService.get(repositoryHolder.repository.id).get()
         val key = keyService.getOrCreateKey(repository, PathDTO.fromFullPath(dto.key))
-        translationService.setForKey(key, dto.translations)
+        translationService.setForKey(key, dto.translations!!)
     }
 
     @GetMapping(value = ["/view"])

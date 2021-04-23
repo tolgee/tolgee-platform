@@ -26,6 +26,7 @@ import java.io.OutputStream
 import java.util.stream.Collectors
 
 @Service
+@Transactional
 class ImportService(
         private val languageService: LanguageService,
         private val keyService: KeyService,

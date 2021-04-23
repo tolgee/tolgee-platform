@@ -16,5 +16,5 @@ data class SetTranslationsDTO(
          * Map of language abbreviation -> text
          */
         @field:NotNull
-        var translations: Map<String, String?>
+        var translations: Map<String, String?>? = null
 )

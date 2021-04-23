@@ -24,6 +24,7 @@ import java.util.stream.Collectors
 import javax.persistence.EntityManager
 
 @Service
+@Transactional
 class TranslationService(private val translationRepository: TranslationRepository, private val entityManager: EntityManager) {
     private var languageService: LanguageService? = null
     private var keyService: KeyService? = null

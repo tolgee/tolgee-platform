@@ -115,7 +115,7 @@ class KeyService(
         }
         val key = Key(name = dto.key, repository = repository)
         keyRepository.save(key)
-        translationService!!.setForKey(key, dto.translations)
+        translationService!!.setForKey(key, dto.translations!!)
         return key
     }
 
