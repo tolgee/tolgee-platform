@@ -1,18 +1,22 @@
 package io.tolgee.model
 
 import io.tolgee.dtos.request.LanguageDTO
+import io.tolgee.service.dataImport.ImportService
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import javax.persistence.*
 
 @Entity
+@EntityListeners(Language.Companion.LanguageListeners::class)
 @Table(
-    uniqueConstraints = [UniqueConstraint(
-        columnNames = ["repository_id", "name"],
-        name = "language_repository_name"
-    ), UniqueConstraint(columnNames = ["repository_id", "abbreviation"], name = "language_abbreviation_name")],
-    indexes = [Index(
-        columnList = "abbreviation",
-        name = "index_abbreviation"
-    ), Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_repository")]
+        uniqueConstraints = [UniqueConstraint(
+                columnNames = ["repository_id", "name"],
+                name = "language_repository_name"
+        ), UniqueConstraint(columnNames = ["repository_id", "abbreviation"], name = "language_abbreviation_name")],
+        indexes = [Index(
+                columnList = "abbreviation",
+                name = "index_abbreviation"
+        ), Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_repository")]
 )
 class Language : AuditModel() {
     @Id
@@ -43,5 +47,25 @@ class Language : AuditModel() {
             language.abbreviation = dto.abbreviation
             return language
         }
+
+        @Component
+        class LanguageListeners {
+
+            companion object {
+                @JvmStatic
+                private lateinit var importService: ImportService
+            }
+
+            @Autowired
+            fun setImportService(importService: ImportService) {
+                LanguageListeners.importService = importService
+            }
+
+            @PreRemove
+            fun preRemove(language: Language) {
+                importService.onExistingLanguageRemoved(language)
+            }
+        }
+
     }
 }

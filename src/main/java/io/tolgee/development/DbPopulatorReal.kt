@@ -19,32 +19,32 @@ import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
 
 @Service
-open class DbPopulatorReal(private val entityManager: EntityManager,
-                           private val userAccountRepository: UserAccountRepository,
-                           private val permissionService: PermissionService,
-                           private val userAccountService: UserAccountService,
-                           private val languageService: LanguageService,
-                           private val repositoryRepository: RepositoryRepository,
-                           private val apiKeyRepository: ApiKeyRepository,
-                           private val tolgeeProperties: TolgeeProperties,
-                           private val initialPasswordManager: InitialPasswordManager,
-                           private val organizationService: OrganizationService,
-                           private val organizationRepository: OrganizationRepository,
-                           private val addressPartGenerator: AddressPartGenerator,
-                           private val organizationRoleService: OrganizationRoleService
+class DbPopulatorReal(private val entityManager: EntityManager,
+                      private val userAccountRepository: UserAccountRepository,
+                      private val permissionService: PermissionService,
+                      private val userAccountService: UserAccountService,
+                      private val languageService: LanguageService,
+                      private val repositoryRepository: RepositoryRepository,
+                      private val apiKeyRepository: ApiKeyRepository,
+                      private val tolgeeProperties: TolgeeProperties,
+                      private val initialPasswordManager: InitialPasswordManager,
+                      private val organizationService: OrganizationService,
+                      private val organizationRepository: OrganizationRepository,
+                      private val addressPartGenerator: AddressPartGenerator,
+                      private val organizationRoleService: OrganizationRoleService
 ) {
     private var de: Language? = null
     private var en: Language? = null
 
     @Transactional
-    open fun autoPopulate() {
+    fun autoPopulate() {
         //do not populate if db is not empty
         if (userAccountRepository.count() == 0L) {
             this.populate("Application")
         }
     }
 
-    open fun createUserIfNotExists(username: String, password: String? = null, name: String? = null): UserAccount {
+    fun createUserIfNotExists(username: String, password: String? = null, name: String? = null): UserAccount {
         return userAccountService.getByUserName(username).orElseGet {
             val signUpDto = SignUpDto(name = name ?: username, email = username, password = password
                     ?: initialPasswordManager.initialPassword)
@@ -52,7 +52,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
         }
     }
 
-    open fun createOrganization(name: String, userAccount: UserAccount): Organization {
+    fun createOrganization(name: String, userAccount: UserAccount): Organization {
         val addressPart = addressPartGenerator.generate(name, 3, 100) { true }
         val organization = Organization(name = name, addressPart = addressPart, basePermissions = Permission.RepositoryPermissionType.VIEW)
         return organizationRepository.save(organization).also {
@@ -61,7 +61,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
 
-    open fun createUsersAndOrganizations(username: String = "user", userCount: Int = 4): List<UserAccount> {
+    fun createUsersAndOrganizations(username: String = "user", userCount: Int = 4): List<UserAccount> {
         val users = (1..userCount).map {
             createUserIfNotExists("$username $it")
         }
@@ -83,7 +83,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     @Transactional
-    open fun createRepositoryWithOrganization(repositoryName: String, organization: Organization): Repository {
+    fun createRepositoryWithOrganization(repositoryName: String, organization: Organization): Repository {
         val repository = Repository()
         repository.name = repositoryName
         repository.organizationOwner = organization
@@ -98,7 +98,7 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     @Transactional
-    open fun createBase(repositoryName: String?, username: String, password: String? = null): Repository {
+    fun createBase(repositoryName: String?, username: String, password: String? = null): Repository {
         val userAccount = createUserIfNotExists(username, password)
         val repository = Repository()
         repository.name = repositoryName
@@ -113,22 +113,22 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     @Transactional
-    open fun createBase(repositoryName: String?, username: String): Repository {
+    fun createBase(repositoryName: String?, username: String): Repository {
         return createBase(repositoryName, username, null)
     }
 
     @Transactional
-    open fun createBase(repositoryName: String?): Repository {
+    fun createBase(repositoryName: String?): Repository {
         return createBase(repositoryName, tolgeeProperties.authentication.initialUsername)
     }
 
     @Transactional
-    open fun populate(repositoryName: String?): Repository {
+    fun populate(repositoryName: String?): Repository {
         return populate(repositoryName, tolgeeProperties.authentication.initialUsername)
     }
 
     @Transactional
-    open fun populate(repositoryName: String?, userName: String): Repository {
+    fun populate(repositoryName: String?, userName: String): Repository {
         val repository = createBase(repositoryName, userName)
         createApiKey(repository)
         createTranslation(repository, "Hello world!", "Hallo Welt!", en, de)
@@ -177,7 +177,8 @@ open class DbPopulatorReal(private val entityManager: EntityManager,
     private fun createTranslation(repository: Repository, english: String,
                                   deutsch: String, en: Language?, de: Language?) {
         val key = Key()
-        key.name = "sampleApp." + english.replace(" ", "_").toLowerCase().replace("\\.+$".toRegex(), "")
+        key.name = "sampleApp." + english.replace(" ", "_")
+                .toLowerCase().replace("\\.+$".toRegex(), "")
         key.repository = repository
         val translation = Translation()
         translation.language = en

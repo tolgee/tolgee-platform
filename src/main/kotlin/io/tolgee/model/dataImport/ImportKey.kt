@@ -11,7 +11,7 @@ class ImportKey(
         @field:NotBlank
         @field:Size(max = 2000)
         @Column(length = 2000)
-        val name: String,
+        var name: String,
 ) : StandardAuditModel() {
     @ManyToMany(mappedBy = "keys", cascade = [CascadeType.PERSIST])
     @field:NotEmpty

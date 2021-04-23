@@ -201,7 +201,8 @@ class CoreImportFilesProcessor(
         this.storedTranslations.asSequence().flatMap { it.value.values }.flatMap { it }.forEach { storedTranslation ->
             val existingLanguage = storedTranslation.language.existingLanguage
             if (existingLanguage != null) {
-                val existingTranslation = existingTranslations[existingLanguage.id]?.let { it[storedTranslation.key.name] }
+                val existingTranslation = existingTranslations[existingLanguage.id]
+                        ?.let { it[storedTranslation.key.name] }
                 if (existingTranslation != null) {
                     storedTranslation.collision = existingTranslation
                 }

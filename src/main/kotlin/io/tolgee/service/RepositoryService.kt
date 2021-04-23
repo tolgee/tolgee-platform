@@ -21,7 +21,7 @@ import javax.persistence.EntityManager
 
 @Transactional
 @Service
-open class RepositoryService constructor(
+class RepositoryService constructor(
         private val repositoryRepository: RepositoryRepository,
         private val entityManager: EntityManager,
         private val securityService: SecurityService,
@@ -47,17 +47,17 @@ open class RepositoryService constructor(
     lateinit var translationService: TranslationService
 
     @Transactional
-    open fun get(id: Long): Optional<Repository?> {
+    fun get(id: Long): Optional<Repository?> {
         return repositoryRepository.findById(id)
     }
 
     @Transactional
-    open fun getView(id: Long): RepositoryView? {
+    fun getView(id: Long): RepositoryView? {
         return repositoryRepository.findViewById(authenticationFacade.userAccount.id!!, id)
     }
 
     @Transactional
-    open fun createRepository(dto: CreateRepositoryDTO): Repository {
+    fun createRepository(dto: CreateRepositoryDTO): Repository {
         val repository = Repository()
         repository.name = dto.name
         dto.organizationId?.also {
@@ -81,7 +81,7 @@ open class RepositoryService constructor(
     }
 
     @Transactional
-    open fun editRepository(dto: EditRepositoryDTO): Repository {
+    fun editRepository(dto: EditRepositoryDTO): Repository {
         val repository = repositoryRepository.findById(dto.repositoryId!!)
                 .orElseThrow { NotFoundException() }!!
         repository.name = dto.name
@@ -89,7 +89,7 @@ open class RepositoryService constructor(
         return repository
     }
 
-    open fun findAllPermitted(userAccount: UserAccount): List<RepositoryDTO> {
+    fun findAllPermitted(userAccount: UserAccount): List<RepositoryDTO> {
         return repositoryRepository.findAllPermitted(userAccount.id!!).asSequence()
                 .map { result ->
                     val repository = result[0] as Repository
@@ -107,16 +107,16 @@ open class RepositoryService constructor(
                 }.toList()
     }
 
-    open fun findAllInOrganization(organizationId: Long): List<Repository> {
+    fun findAllInOrganization(organizationId: Long): List<Repository> {
         return this.repositoryRepository.findAllByOrganizationOwnerId(organizationId)
     }
 
-    open fun findAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<RepositoryView> {
+    fun findAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<RepositoryView> {
         return this.repositoryRepository.findAllPermittedInOrganization(authenticationFacade.userAccount.id!!, organizationId, pageable, search)
     }
 
     @Transactional
-    open fun deleteRepository(id: Long) {
+    fun deleteRepository(id: Long) {
         val repository = get(id).orElseThrow { NotFoundException() }!!
         permissionService.deleteAllByRepository(repository.id)
         translationService.deleteAllByRepository(repository.id)
@@ -128,21 +128,21 @@ open class RepositoryService constructor(
     }
 
     @Autowired
-    open fun setKeyService(keyService: KeyService?) {
+    fun setKeyService(keyService: KeyService?) {
         this.keyService = keyService
     }
 
-    open fun deleteAllByName(name: String) {
+    fun deleteAllByName(name: String) {
         repositoryRepository.findAllByName(name).forEach {
             this.deleteRepository(it.id)
         }
     }
 
-    open fun validateAddressPartUniqueness(addressPart: String): Boolean {
+    fun validateAddressPartUniqueness(addressPart: String): Boolean {
         return repositoryRepository.countAllByAddressPart(addressPart) < 1
     }
 
-    open fun generateAddressPart(name: String, oldAddressPart: String? = null): String {
+    fun generateAddressPart(name: String, oldAddressPart: String? = null): String {
         return addressPartGenerator.generate(name, 3, 60) {
             if (oldAddressPart == it) {
                 return@generate true
@@ -151,7 +151,10 @@ open class RepositoryService constructor(
         }
     }
 
-    open fun findPermittedPaged(pageable: Pageable, search: String?): Page<RepositoryView> {
+    fun findPermittedPaged(pageable: Pageable, search: String?): Page<RepositoryView> {
         return repositoryRepository.findAllPermitted(authenticationFacade.userAccount.id!!, pageable, search)
     }
+
+    fun saveAll(repositories: Collection<Repository>): MutableList<Repository> =
+            repositoryRepository.saveAll(repositories)
 }

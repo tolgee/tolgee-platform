@@ -1,111 +1,108 @@
-package io.tolgee.service;
+package io.tolgee.service
 
-import io.tolgee.collections.LanguageSet;
-import io.tolgee.constants.Message;
-import io.tolgee.dtos.request.LanguageDTO;
-import io.tolgee.exceptions.NotFoundException;
-import io.tolgee.model.Language;
-import io.tolgee.model.Repository;
-import io.tolgee.repository.LanguageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import io.tolgee.collections.LanguageSet
+import io.tolgee.constants.Message
+import io.tolgee.dtos.request.LanguageDTO
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Language
+import io.tolgee.model.Language.Companion.fromRequestDTO
+import io.tolgee.model.Repository
+import io.tolgee.repository.LanguageRepository
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.*
+import java.util.stream.Collectors
+import javax.persistence.EntityManager
 
 @Service
-public class LanguageService {
-    private final LanguageRepository languageRepository;
-    private final EntityManager entityManager;
+class LanguageService(
+        private val languageRepository: LanguageRepository,
+        private val entityManager: EntityManager,
+) {
+    private var translationService: TranslationService? = null
 
-    private TranslationService translationService;
-
-    @Autowired
-    public LanguageService(LanguageRepository languageRepository, EntityManager entityManager) {
-        this.languageRepository = languageRepository;
-        this.entityManager = entityManager;
+    @Transactional
+    fun createLanguage(dto: LanguageDTO?, repository: Repository): Language {
+        val language = fromRequestDTO(dto!!)
+        language.repository = repository
+        repository.languages.add(language)
+        languageRepository.save(language)
+        return language
     }
 
     @Transactional
-    public Language createLanguage(LanguageDTO dto, Repository repository) {
-        Language language = Language.fromRequestDTO(dto);
-        language.setRepository(repository);
-        repository.getLanguages().add(language);
-        languageRepository.save(language);
-        return language;
+    fun deleteLanguage(id: Long) {
+        val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
+        translationService!!.deleteAllByLanguage(language.id)
+        languageRepository.delete(language)
     }
 
     @Transactional
-    public void deleteLanguage(Long id) {
-        Language language = languageRepository.findById(id).orElseThrow(NotFoundException::new);
-        translationService.deleteAllByLanguage(language.getId());
-        languageRepository.delete(language);
+    fun editLanguage(dto: LanguageDTO): Language {
+        val language = languageRepository.findById(dto.id!!).orElseThrow { NotFoundException() }
+        language.updateByDTO(dto)
+        entityManager.persist(language)
+        return language
+    }
+
+    fun getImplicitLanguages(repository: Repository): LanguageSet {
+        return repository.languages.stream().limit(2).collect(Collectors.toCollection { LanguageSet() })
     }
 
     @Transactional
-    public Language editLanguage(LanguageDTO dto) {
-        Language language = languageRepository.findById(dto.getId()).orElseThrow(NotFoundException::new);
-        language.updateByDTO(dto);
-        entityManager.persist(language);
-        return language;
+    fun findAll(repositoryId: Long?): LanguageSet {
+        return LanguageSet(languageRepository.findAllByRepositoryId(repositoryId))
     }
 
-    public LanguageSet getImplicitLanguages(Repository repository) {
-        return repository.getLanguages().stream().limit(2).collect(Collectors.toCollection(LanguageSet::new));
+    fun findById(id: Long): Optional<Language> {
+        return languageRepository.findById(id)
     }
 
-    @Transactional
-    public LanguageSet findAll(Long repositoryId) {
-        return new LanguageSet(languageRepository.findAllByRepositoryId(repositoryId));
+    fun findByAbbreviation(abbreviation: String, repository: Repository): Optional<Language> {
+        return languageRepository.findByAbbreviationAndRepository(abbreviation, repository)
     }
 
-    public Optional<Language> findById(Long id) {
-        return languageRepository.findById(id);
+    fun findByAbbreviation(abbreviation: String?, repositoryId: Long): Optional<Language> {
+        return languageRepository.findByAbbreviationAndRepositoryId(abbreviation, repositoryId)
     }
 
-    public Optional<Language> findByAbbreviation(String abbreviation, Repository repository) {
-        return languageRepository.findByAbbreviationAndRepository(abbreviation, repository);
-    }
-
-    public Optional<Language> findByAbbreviation(String abbreviation, Long repositoryId) {
-        return languageRepository.findByAbbreviationAndRepositoryId(abbreviation, repositoryId);
-    }
-
-    public LanguageSet findByAbbreviations(Collection<String> abbreviations, Long repositoryId) {
-        Set<Language> langs = languageRepository.findAllByAbbreviationInAndRepositoryId(abbreviations, repositoryId);
-        if (!langs.stream().map(Language::getAbbreviation).collect(Collectors.toSet()).containsAll(abbreviations)) {
-            throw new NotFoundException(Message.LANGUAGE_NOT_FOUND);
+    fun findByAbbreviations(abbreviations: Collection<String>?, repositoryId: Long?): LanguageSet {
+        val langs = languageRepository.findAllByAbbreviationInAndRepositoryId(abbreviations, repositoryId)
+        if (!langs.stream().map(Language::abbreviation).collect(Collectors.toSet()).containsAll(abbreviations!!)) {
+            throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
         }
-        return new LanguageSet(langs);
+        return LanguageSet(langs)
     }
 
     @Transactional
-    public Language getOrCreate(Repository repository, String languageAbbreviation) {
+    fun getOrCreate(repository: Repository, languageAbbreviation: String): Language {
         return this.findByAbbreviation(languageAbbreviation, repository)
-                .orElseGet(() -> this.createLanguage(new LanguageDTO(null, languageAbbreviation, languageAbbreviation), repository));
+                .orElseGet {
+                    createLanguage(LanguageDTO(null, languageAbbreviation, languageAbbreviation), repository)
+                }
     }
 
-    public LanguageSet getLanguagesForTranslationsView(Set<String> languages, Repository repository) {
-        if (languages == null) {
-            return getImplicitLanguages(repository);
-        }
-        return findByAbbreviations(languages, repository.getId());
+    fun getLanguagesForTranslationsView(languages: Set<String>?, repository: Repository): LanguageSet {
+        return if (languages == null) {
+            getImplicitLanguages(repository)
+        } else findByAbbreviations(languages, repository.id)
     }
 
-    public Optional<Language> findByName(String name, Repository repository) {
-        return languageRepository.findByNameAndRepository(name, repository);
+    fun findByName(name: String?, repository: Repository): Optional<Language> {
+        return languageRepository.findByNameAndRepository(name, repository)
     }
 
-    public void deleteAllByRepository(Long repositoryId) {
-        languageRepository.deleteAllByRepositoryId(repositoryId);
+    fun deleteAllByRepository(repositoryId: Long?) {
+        languageRepository.deleteAllByRepositoryId(repositoryId)
     }
 
     @Autowired
-    public void setTranslationService(TranslationService translationService) {
-        this.translationService = translationService;
+    fun setTranslationService(translationService: TranslationService?) {
+        this.translationService = translationService
+    }
+
+    fun saveAll(languages: Iterable<Language>): MutableList<Language>? {
+        return this.languageRepository.saveAll(languages)
     }
 }

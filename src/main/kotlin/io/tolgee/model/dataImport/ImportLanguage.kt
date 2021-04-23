@@ -12,10 +12,10 @@ import javax.validation.constraints.Size
 class ImportLanguage(
         @Size(max = 2000)
         @Column(length = 2000)
-        val name: String,
+        var name: String,
 
         @ManyToOne(optional = false)
-        val file: ImportFile
+        var file: ImportFile
 ) : StandardAuditModel() {
     @OneToMany(mappedBy = "language")
     var translations: MutableList<ImportTranslation> = mutableListOf()

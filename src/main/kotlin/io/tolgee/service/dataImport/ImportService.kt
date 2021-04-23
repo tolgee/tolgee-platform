@@ -4,6 +4,7 @@ import io.tolgee.dtos.ImportDto
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.model.Key
+import io.tolgee.model.Language
 import io.tolgee.model.Repository
 import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.*
@@ -47,7 +48,7 @@ class ImportService(
     @Transactional
     @Deprecated("Use doImport")
     fun import(repository: Repository, dto: ImportDto, emitter: OutputStream) {
-        val language = languageService.getOrCreate(repository, dto.languageAbbreviation)
+        val language = languageService.getOrCreate(repository, dto.languageAbbreviation!!)
         val allKeys = keyService.getAll(repository.id).stream().collect(Collectors.toMap({ it.name }, { it }))
         val allTranslations = translationService.getAllByLanguageId(language.id)
                 .stream()
@@ -115,5 +116,17 @@ class ImportService(
 
     fun saveTranslations(translations: List<ImportTranslation>) {
         this.importTranslationRepository.saveAll(translations)
+    }
+
+    fun onExistingLanguageRemoved(language: Language) {
+        this.importLanguageRepository.removeExistingLanguageReference(language)
+    }
+
+    fun saveAllImports(imports: Iterable<Import>) {
+        this.importRepository.saveAll(imports)
+    }
+
+    fun saveAllFiles(files: Iterable<ImportFile>): MutableList<ImportFile>? {
+        return this.importFileRepository.saveAll(files)
     }
 }
