@@ -8,7 +8,7 @@
     "@material-ui/lab": "^4.0.0-alpha.57",
     "@sentry/browser": "^6.3.0",
     "@sentry/types": "^6.2.5",
-    "@testing-library/jest-dom": "^5.11.10",
+    "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^13.1.5",
     "@tolgee/react": "^1.0.0-alpha.42",
