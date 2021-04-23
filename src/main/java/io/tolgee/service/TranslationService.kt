@@ -1,188 +1,169 @@
-package io.tolgee.service;
+package io.tolgee.service
 
-import io.tolgee.constants.Message;
-import io.tolgee.dtos.PathDTO;
-import io.tolgee.dtos.query_results.KeyWithTranslationsDto;
-import io.tolgee.dtos.response.KeyWithTranslationsResponseDto;
-import io.tolgee.dtos.response.ViewDataResponse;
-import io.tolgee.dtos.response.translations_view.ResponseParams;
-import io.tolgee.exceptions.InternalException;
-import io.tolgee.exceptions.NotFoundException;
-import io.tolgee.model.Key;
-import io.tolgee.model.Language;
-import io.tolgee.model.Repository;
-import io.tolgee.model.Translation;
-import io.tolgee.repository.TranslationRepository;
-import io.tolgee.service.query_builders.TranslationsViewBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
-import java.util.*;
-import java.util.stream.Collectors;
+import io.tolgee.constants.Message
+import io.tolgee.dtos.PathDTO
+import io.tolgee.dtos.query_results.KeyWithTranslationsDto
+import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
+import io.tolgee.dtos.response.KeyWithTranslationsResponseDto.Companion.fromQueryResult
+import io.tolgee.dtos.response.ViewDataResponse
+import io.tolgee.dtos.response.translations_view.ResponseParams
+import io.tolgee.exceptions.InternalException
+import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Key
+import io.tolgee.model.Language
+import io.tolgee.model.Repository
+import io.tolgee.model.Translation
+import io.tolgee.model.Translation.Companion.builder
+import io.tolgee.repository.TranslationRepository
+import io.tolgee.service.query_builders.TranslationsViewBuilder.Companion.getData
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.util.*
+import java.util.stream.Collectors
+import javax.persistence.EntityManager
 
 @Service
-public class TranslationService {
+class TranslationService(private val translationRepository: TranslationRepository, private val entityManager: EntityManager) {
+    private var languageService: LanguageService? = null
+    private var keyService: KeyService? = null
+    private var repositoryService: RepositoryService? = null
 
-    private final TranslationRepository translationRepository;
-    private final EntityManager entityManager;
-
-    private LanguageService languageService;
-
-    private KeyService keyService;
-
-    private RepositoryService repositoryService;
-
-    @Autowired
-    public TranslationService(TranslationRepository translationRepository, EntityManager entityManager) {
-        this.translationRepository = translationRepository;
-        this.entityManager = entityManager;
-    }
-
-    @SuppressWarnings("unchecked")
     @Transactional
-    public Map<String, Object> getTranslations(Set<String> languageAbbreviations, Long repositoryId) {
-        Set<Translation> allByLanguages = translationRepository.getTranslations(languageAbbreviations, repositoryId);
-
-        HashMap<String, Object> langTranslations = new LinkedHashMap<>();
-        for (Translation translation : allByLanguages) {
-            Map<String, Object> map = (Map<String, Object>) langTranslations
-                    .computeIfAbsent(translation.getLanguage().getAbbreviation(),
-                            t -> new LinkedHashMap<>());
-            addToMap(translation, map);
+    @Suppress("UNCHECKED_CAST")
+    fun getTranslations(languageAbbreviations: Set<String?>?, repositoryId: Long?): Map<String, Any> {
+        val allByLanguages = translationRepository.getTranslations(languageAbbreviations, repositoryId)
+        val langTranslations: HashMap<String, Any> = LinkedHashMap()
+        for (translation in allByLanguages) {
+            val map = langTranslations
+                    .computeIfAbsent(translation.language!!.abbreviation!!
+                    ) { LinkedHashMap<String, Any>() } as MutableMap<String, Any?>
+            addToMap(translation, map)
         }
-
-        return langTranslations;
+        return langTranslations
     }
 
-    public Set<Translation> getAllByLanguageId(Long languageId){
-        return translationRepository.getAllByLanguageId(languageId);
+    fun getAllByLanguageId(languageId: Long): Set<Translation> {
+        return translationRepository.getAllByLanguageId(languageId)
     }
 
-    public Map<String, String> getKeyTranslationsResult(Long repositoryId, PathDTO path, Set<String> languageAbbreviations) {
-        Repository repository = repositoryService.get(repositoryId).orElseThrow(NotFoundException::new);
-        Key key = keyService.get(repository, path).orElse(null);
-
-        Set<Language> languages;
-        if (languageAbbreviations == null) {
-            languages = languageService.getImplicitLanguages(repository);
+    fun getKeyTranslationsResult(repositoryId: Long, path: PathDTO?, languageAbbreviations: Set<String>?): Map<String, String?> {
+        val repository = repositoryService!!.get(repositoryId).orElseThrow { NotFoundException() }!!
+        val key = keyService!!.get(repository, path!!).orElse(null)
+        val languages: Set<Language> = if (languageAbbreviations == null) {
+            languageService!!.getImplicitLanguages(repository)
         } else {
-            languages = languageService.findByAbbreviations(languageAbbreviations, repositoryId);
+            languageService!!.findByAbbreviations(languageAbbreviations, repositoryId)
         }
-
-        Set<Translation> translations = getKeyTranslations(languages, repository, key);
-
-        Map<String, String> translationsMap = translations.stream().collect(Collectors.toMap(v -> v.getLanguage().getAbbreviation(), Translation::getText));
-
-        for (Language language : languages) {
-            if (translationsMap.keySet().stream().filter(l -> l.equals(language.getAbbreviation())).findAny().isEmpty()) {
-                translationsMap.put(language.getAbbreviation(), "");
+        val translations = getKeyTranslations(languages, repository, key)
+        val translationsMap = translations.stream()
+                .collect(Collectors.toMap({ v: Translation -> v.language!!.abbreviation!! }, Translation::text))
+        for (language in languages) {
+            if (translationsMap.keys.stream().filter { l: String? -> l == language.abbreviation }.findAny().isEmpty) {
+                translationsMap[language.abbreviation] = ""
             }
         }
-
-        return translationsMap;
+        return translationsMap
     }
 
-    private Set<Translation> getKeyTranslations(Set<Language> languages, Repository repository, Key key) {
-        if (key != null) {
-            return translationRepository.getTranslations(key, repository, languages);
-        }
-        return new LinkedHashSet<>();
+    private fun getKeyTranslations(languages: Set<Language>, repository: Repository, key: Key?): Set<Translation> {
+        return if (key != null) {
+            translationRepository.getTranslations(key, repository, languages)
+        } else LinkedHashSet()
     }
 
-    public Translation getOrCreate(Key key, Language language) {
-        return get(key, language).orElseGet(() -> Translation.builder().language(language).key(key).build());
+    fun getOrCreate(key: Key?, language: Language?): Translation {
+        return get(key, language).orElseGet { builder().language(language).key(key).build() }
     }
 
-    public Optional<Translation> get(Key key, Language language) {
-        return translationRepository.findOneByKeyAndLanguage(key, language);
+    operator fun get(key: Key?, language: Language?): Optional<Translation> {
+        return translationRepository.findOneByKeyAndLanguage(key, language)
     }
 
-    public ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> getViewData(
-            Set<String> languageAbbreviations, Long repositoryId, int limit, int offset, String search
-    ) {
-        Repository repository = repositoryService.get(repositoryId).orElseThrow(NotFoundException::new);
-
-        Set<Language> languages = languageService.getLanguagesForTranslationsView(languageAbbreviations, repository);
-
-        TranslationsViewBuilder.Result data = TranslationsViewBuilder.getData(entityManager, repository, languages, search, limit, offset);
-        return new ViewDataResponse<>(data.getData()
+    @Suppress("UNCHECKED_CAST")
+    fun getViewData(
+            languageAbbreviations: Set<String>?, repositoryId: Long?, limit: Int, offset: Int, search: String?
+    ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
+        val repository = repositoryService!!.get(repositoryId!!).orElseThrow { NotFoundException() }!!
+        val languages: Set<Language> = languageService!!.getLanguagesForTranslationsView(languageAbbreviations, repository)
+        val (count, data1) = getData(entityManager, repository, languages, search, limit, offset)
+        return ViewDataResponse(data1
                 .stream()
-                .map(queryResult -> KeyWithTranslationsResponseDto.fromQueryResult(new KeyWithTranslationsDto((Object[]) queryResult)))
-                .collect(Collectors.toCollection(LinkedHashSet::new)), offset, data.getCount(),
-                new ResponseParams(search, languages.stream().map(Language::getAbbreviation).collect(Collectors.toSet())));
+                .map { queryResult: Any? -> fromQueryResult(KeyWithTranslationsDto((queryResult as Array<Any?>))) }
+                .collect(Collectors.toCollection { LinkedHashSet() }), offset, count,
+                ResponseParams(search, languages.stream().map(Language::abbreviation).collect(Collectors.toSet())))
     }
 
-    public void setTranslation(Key key, String languageAbbreviation, String text) {
-        Language language = languageService.findByAbbreviation(languageAbbreviation, key.getRepository())
-                .orElseThrow(() -> new NotFoundException(Message.LANGUAGE_NOT_FOUND));
-        Translation translation = getOrCreate(key, language);
-        translation.setText(text);
-        translationRepository.save(translation);
+    fun setTranslation(key: Key, languageAbbreviation: String?, text: String?) {
+        val language = languageService!!.findByAbbreviation(languageAbbreviation!!, key.repository!!)
+                .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+        val translation = getOrCreate(key, language)
+        translation.text = text
+        translationRepository.save(translation)
     }
 
-    public void setForKey(Key key, Map<String, String> translations) {
-        for (Map.Entry<String, String> entry : translations.entrySet()) {
-            if (entry.getValue() == null || entry.getValue().isEmpty()) {
-                deleteIfExists(key, entry.getKey());
+    fun setForKey(key: Key, translations: Map<String, String?>) {
+        for ((key1, value) in translations) {
+            if (value == null || value.isEmpty()) {
+                deleteIfExists(key, key1)
             }
-            setTranslation(key, entry.getKey(), entry.getValue());
+            setTranslation(key, key1, value)
         }
     }
 
-    public void deleteIfExists(Key key, String languageAbbreviation) {
-        Language language = languageService.findByAbbreviation(languageAbbreviation, key.getRepository())
-                .orElseThrow(() -> new NotFoundException(Message.LANGUAGE_NOT_FOUND));
-        translationRepository.findOneByKeyAndLanguage(key, language).ifPresent(translationRepository::delete);
+    fun deleteIfExists(key: Key, languageAbbreviation: String?) {
+        val language = languageService!!.findByAbbreviation(languageAbbreviation!!, key.repository!!)
+                .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+        translationRepository.findOneByKeyAndLanguage(key, language)
+                .ifPresent { entity: Translation -> translationRepository.delete(entity) }
     }
 
-
-    public void deleteIfExists(Key key, Language language) {
-        translationRepository.findOneByKeyAndLanguage(key, language).ifPresent(translationRepository::delete);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void addToMap(Translation translation, Map<String, Object> map) {
-        for (String folderName : translation.getKey().getPath().getPath()) {
-            Object childMap = map.computeIfAbsent(folderName, k -> new LinkedHashMap<>());
-            if (childMap instanceof Map) {
-                map = (Map<String, Object>) childMap;
-                continue;
+    @Suppress("UNCHECKED_CAST")
+    private fun addToMap(translation: Translation, map: MutableMap<String, Any?>) {
+        var currentMap = map
+        for (folderName in translation.key!!.path.path) {
+            val childMap = currentMap.computeIfAbsent(folderName) { LinkedHashMap<Any, Any>() }
+            if (childMap is Map<*, *>) {
+                currentMap = childMap as MutableMap<String, Any?>
+                continue
             }
-            throw new InternalException(Message.DATA_CORRUPTED);
+            throw InternalException(Message.DATA_CORRUPTED)
         }
-        map.put(translation.getKey().getPath().getName(), translation.getText());
+        currentMap[translation.key!!.path.name] = translation.text
     }
 
-    public void deleteAllByRepository(Long repositoryId) {
-        translationRepository.deleteAllByRepositoryId(repositoryId);
+    fun deleteAllByRepository(repositoryId: Long?) {
+        translationRepository.deleteAllByRepositoryId(repositoryId)
     }
 
-    public void deleteAllByLanguage(Long languageId) {
-        translationRepository.deleteAllByLanguageId(languageId);
+    fun deleteAllByLanguage(languageId: Long?) {
+        translationRepository.deleteAllByLanguageId(languageId)
     }
 
-    public void deleteAllByKeys(Collection<Long> ids) {
-        translationRepository.deleteAllByKeyIds(ids);
+    fun deleteAllByKeys(ids: Collection<Long?>?) {
+        translationRepository.deleteAllByKeyIds(ids)
     }
 
-    public void deleteAllByKey(Long id) {
-        translationRepository.deleteAllByKeyId(id);
-    }
-
-    @Autowired
-    public void setLanguageService(LanguageService languageService) {
-        this.languageService = languageService;
+    fun deleteAllByKey(id: Long?) {
+        translationRepository.deleteAllByKeyId(id)
     }
 
     @Autowired
-    public void setKeyService(KeyService keyService) {
-        this.keyService = keyService;
+    fun setLanguageService(languageService: LanguageService?) {
+        this.languageService = languageService
     }
 
     @Autowired
-    public void setRepositoryService(RepositoryService repositoryService) {
-        this.repositoryService = repositoryService;
+    fun setKeyService(keyService: KeyService?) {
+        this.keyService = keyService
+    }
+
+    @Autowired
+    fun setRepositoryService(repositoryService: RepositoryService?) {
+        this.repositoryService = repositoryService
+    }
+
+    fun saveAll(entities: Iterable<Translation?>) {
+        translationRepository.saveAll(entities)
     }
 }

@@ -13,7 +13,8 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.LanguageService
 import io.tolgee.service.TranslationService
-import io.tolgee.service.dataImport.processors.*
+import io.tolgee.service.dataImport.processors.FileProcessorContext
+import io.tolgee.service.dataImport.processors.ProcessorFactory
 import org.springframework.context.ApplicationContext
 import java.net.FileNameMap
 import java.net.URLConnection
@@ -214,7 +215,7 @@ class CoreImportFilesProcessor(
         this.storedLanguages.asSequence().map { it.existingLanguage }.toSet().forEach { language ->
             if (language != null && existingTranslations[language.id] == null) {
                 existingTranslations[language.id!!] = mutableMapOf<String, Translation>().apply {
-                    this@CoreImportFilesProcessor.translationService.getAllByLanguageId(language.id)
+                    this@CoreImportFilesProcessor.translationService.getAllByLanguageId(language.id!!)
                             .forEach { translation -> put(translation.key!!.name!!, translation) }
                 }
             }

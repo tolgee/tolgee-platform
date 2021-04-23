@@ -1,16 +1,15 @@
 package io.tolgee.development.testDataBuilder
 
-import io.tolgee.model.Language
-import io.tolgee.model.Organization
-import io.tolgee.model.Repository
-import io.tolgee.model.UserAccount
+import io.tolgee.model.*
 import io.tolgee.model.dataImport.*
+
+typealias FT<T> = T.() -> Unit
 
 class DataBuilders {
     class RepositoryBuilder(userOwner: UserAccount? = null,
                             organizationOwner: Organization? = null,
                             testDataBuilder: TestDataBuilder
-    ) : EntityDataBuilder<Repository> {
+    ) : BaseEntityDataBuilder<Repository>() {
         override var self: Repository = Repository().apply {
             if (userOwner == null && organizationOwner == null) {
                 if (testDataBuilder.data.userAccounts.size > 0) {
@@ -26,28 +25,29 @@ class DataBuilders {
         }
 
         class DATA {
-            val languages = mutableListOf<Language>()
+            val languages = mutableListOf<LanguageBuilder>()
             val imports = mutableListOf<ImportBuilder>()
+            val keys = mutableListOf<KeyBuilder>()
+            val translations = mutableListOf<TranslationBuilder>()
         }
 
         var data = DATA()
 
-        fun addImport(author: UserAccount? = null, ft: ImportBuilder.() -> Unit): ImportBuilder {
-            return ImportBuilder(author, this).apply {
-                this@RepositoryBuilder.data.imports.add(this)
-                ft(this)
-            }
-        }
+        fun addImport(author: UserAccount? = null, ft: FT<ImportBuilder>) =
+                addOperation(data.imports, ImportBuilder(this, author), ft)
 
-        fun addLanguage(ft: Language.() -> Unit): Language {
-            val language = Language()
-            data.languages.add(language)
-            ft(language)
-            return language
-        }
+        fun addLanguage(ft: FT<LanguageBuilder>) =
+                addOperation(data.languages, ft)
+
+        fun addKey(ft: FT<KeyBuilder>) = addOperation(data.keys, ft)
+
+        fun addTranslation(ft: FT<TranslationBuilder>) = addOperation(data.translations, ft)
     }
 
-    class ImportBuilder(author: UserAccount? = null, repositoryBuilder: RepositoryBuilder) : EntityDataBuilder<Import> {
+    class ImportBuilder(
+            repositoryBuilder: RepositoryBuilder,
+            author: UserAccount? = null
+    ) : BaseEntityDataBuilder<Import>() {
         class DATA {
             val importFiles = mutableListOf<ImportFileBuilder>()
         }
@@ -56,47 +56,23 @@ class DataBuilders {
 
         override var self: Import = Import(author ?: repositoryBuilder.self.userOwner!!, repositoryBuilder.self)
 
-        fun addFile(ft: ImportFileBuilder.() -> Unit): ImportFileBuilder {
-            val importFileBuilder = ImportFileBuilder(this)
-            data.importFiles.add(importFileBuilder)
-            ft(importFileBuilder)
-            return importFileBuilder
-        }
-
+        fun addImportFile(ft: FT<ImportFileBuilder>) = addOperation(data.importFiles, ft)
     }
 
-    class ImportFileBuilder(importBuilder: ImportBuilder) : EntityDataBuilder<ImportFile> {
+    class ImportFileBuilder(importBuilder: ImportBuilder) : BaseEntityDataBuilder<ImportFile>() {
         override var self: ImportFile = ImportFile("lang.json", importBuilder.self)
 
         class DATA {
             val importKeys = mutableListOf<ImportKeyBuilder>()
-            val importLanguages = mutableListOf<ImportLanguage>()
-            val importTranslations = mutableListOf<ImportTranslation>()
+            val importLanguages = mutableListOf<ImportLanguageBuilder>()
+            val importTranslations = mutableListOf<ImportTranslationBuilder>()
         }
 
         val data = DATA()
 
-
-        fun addKey(ft: ImportKeyBuilder.() -> Unit): ImportKeyBuilder {
-            val importKeyBuilder = ImportKeyBuilder(this)
-            data.importKeys.add(importKeyBuilder)
-            ft(importKeyBuilder)
-            return importKeyBuilder
-        }
-
-        fun addLanguage(ft: ImportLanguageBuilder.() -> Unit): ImportLanguageBuilder {
-            val importLanguageBuilder = ImportLanguageBuilder(this)
-            data.importLanguages += importLanguageBuilder.self
-            ft(importLanguageBuilder)
-            return importLanguageBuilder
-        }
-
-        fun addTranslation(ft: ImportTranslationBuilder.() -> Unit): ImportTranslationBuilder {
-            val importTranslationBuilder = ImportTranslationBuilder(this)
-            data.importTranslations += importTranslationBuilder.self
-            ft(importTranslationBuilder)
-            return importTranslationBuilder
-        }
+        fun addImportKey(ft: FT<ImportKeyBuilder>) = addOperation(data.importKeys, ft)
+        fun addImportLanguage(ft: FT<ImportLanguageBuilder>) = addOperation(data.importLanguages, ft)
+        fun addImportTranslation(ft: FT<ImportTranslationBuilder>) = addOperation(data.importTranslations, ft)
     }
 
     class ImportKeyBuilder(
@@ -119,7 +95,7 @@ class DataBuilders {
             importFileBuilder: ImportFileBuilder
     ) : EntityDataBuilder<ImportTranslation> {
         override var self: ImportTranslation =
-                ImportTranslation("test translation", importFileBuilder.data.importLanguages[0]).apply {
+                ImportTranslation("test translation", importFileBuilder.data.importLanguages[0].self).apply {
                     key = importFileBuilder.data.importKeys.first().self
                 }
     }
@@ -128,5 +104,23 @@ class DataBuilders {
             testDataBuilder: TestDataBuilder
     ) : EntityDataBuilder<Organization> {
         override var self: Organization = Organization()
+    }
+
+    class KeyBuilder(
+            repositoryBuilder: RepositoryBuilder
+    ) : EntityDataBuilder<Key> {
+        override var self: Key = Key()
+    }
+
+    class LanguageBuilder(
+            repositoryBuilder: RepositoryBuilder
+    ) : EntityDataBuilder<Language> {
+        override var self: Language = Language()
+    }
+
+    class TranslationBuilder(
+            repositoryBuilder: RepositoryBuilder
+    ) : EntityDataBuilder<Translation> {
+        override var self: Translation = Translation()
     }
 }

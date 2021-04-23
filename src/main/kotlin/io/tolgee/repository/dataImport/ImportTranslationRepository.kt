@@ -1,8 +1,10 @@
 package io.tolgee.repository.dataImport
 
+import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportTranslation
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
@@ -15,4 +17,8 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
         join if.import i on i = :import
         """)
     fun findAllByImportAndLanguageId(import: Import, languageId: Long): List<ImportTranslation>
+
+    @Modifying
+    @Query("update ImportTranslation it set it.collision = null where it.collision = :translation")
+    fun removeExistingTranslationCollisionReference(translation: Translation)
 }

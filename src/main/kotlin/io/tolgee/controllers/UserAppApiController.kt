@@ -41,7 +41,7 @@ class UserAppApiController(
     @AccessWithApiKey
     @Deprecated("can not pass . as parameter of text, for longer texts it would be much better to use POST")
     fun getKeyTranslations(@PathVariable("key") fullPath: String?,
-                           @PathVariable("languages") langs: Set<String?>?): Map<String, String> {
+                           @PathVariable("languages") langs: Set<String>?): Map<String, String?> {
         val pathDTO = PathDTO.fromFullPath(fullPath)
         val apiKey = authenticationFacade.apiKey
         securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_VIEW), apiKey)
@@ -50,7 +50,7 @@ class UserAppApiController(
 
     @PostMapping(value = ["/keyTranslations/{languages}"])
     @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-    fun getKeyTranslationsPost(@RequestBody body: GetKeyTranslationsReqDto, @PathVariable("languages") langs: Set<String?>?): Map<String, String> {
+    fun getKeyTranslationsPost(@RequestBody body: GetKeyTranslationsReqDto, @PathVariable("languages") langs: Set<String>?): Map<String, String?> {
         val pathDTO = PathDTO.fromFullPath(body.key)
         val apiKey = authenticationFacade.apiKey
         return translationService.getKeyTranslationsResult(apiKey.repository!!.id, pathDTO, langs)
@@ -59,7 +59,7 @@ class UserAppApiController(
     @GetMapping(value = ["/source/{key:.+}"])
     @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
     @Deprecated("can not pass . as parameter of text, for longer texts it would be much better to use POST")
-    fun getKeyTranslations(@PathVariable("key") fullPath: String?): Map<String, String> {
+    fun getKeyTranslations(@PathVariable("key") fullPath: String?): Map<String, String?> {
         val pathDTO = PathDTO.fromFullPath(fullPath)
         val apiKey = authenticationFacade.apiKey
         return translationService.getKeyTranslationsResult(apiKey.repository!!.id, pathDTO, null)
@@ -67,7 +67,7 @@ class UserAppApiController(
 
     @PostMapping(value = ["/keyTranslations"])
     @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-    fun getKeyTranslationsPost(@RequestBody body: GetKeyTranslationsReqDto): Map<String, String> {
+    fun getKeyTranslationsPost(@RequestBody body: GetKeyTranslationsReqDto): Map<String, String?> {
         val pathDTO = PathDTO.fromFullPath(body.key)
         val apiKey = authenticationFacade.apiKey
         return translationService.getKeyTranslationsResult(apiKey.repository!!.id, pathDTO, null)

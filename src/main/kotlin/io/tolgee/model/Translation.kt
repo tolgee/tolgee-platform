@@ -1,21 +1,25 @@
 package io.tolgee.model
 
+import io.tolgee.service.dataImport.ImportService
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import javax.persistence.*
 
 @Entity
+@EntityListeners(Translation.Companion.TranslationListeners::class)
 @Table(
-    uniqueConstraints = [UniqueConstraint(
-        columnNames = ["key_id", "language_id"],
-        name = "translation_key_language"
-    )]
+        uniqueConstraints = [UniqueConstraint(
+                columnNames = ["key_id", "language_id"],
+                name = "translation_key_language"
+        )]
 )
 data class Translation(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null,
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        var id: Long? = null,
 
-    @Column(columnDefinition = "text")
-    var text: String? = null
+        @Column(columnDefinition = "text")
+        var text: String? = null
 ) : AuditModel() {
 
 
@@ -69,6 +73,25 @@ data class Translation(
         @JvmStatic
         fun builder(): TranslationBuilder {
             return TranslationBuilder()
+        }
+
+        @Component
+        class TranslationListeners {
+
+            companion object {
+                @JvmStatic
+                private lateinit var importService: ImportService
+            }
+
+            @Autowired
+            fun setImportService(importService: ImportService) {
+                TranslationListeners.importService = importService
+            }
+
+            @PreRemove
+            fun preRemove(translation: Translation) {
+                importService.onTranslationCollisionRemoved(translation)
+            }
         }
     }
 }

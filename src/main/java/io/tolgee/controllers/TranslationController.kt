@@ -23,7 +23,6 @@ import io.tolgee.service.SecurityService
 import io.tolgee.service.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import java.util.*
 import javax.validation.Valid
 
 @RestController
@@ -81,7 +80,7 @@ class TranslationController @Autowired constructor(
     @GetMapping(value = ["/view"])
     @Operation(summary = "Returns data for translations view with metadata")
     fun getViewData(@PathVariable("repositoryId") repositoryId: Long?,
-                    @RequestParam(name = "languages", required = false) languages: Set<String?>?,
+                    @RequestParam(name = "languages", required = false) languages: Set<String>?,
                     @RequestParam(name = "limit", defaultValue = "10") limit: Int,
                     @RequestParam(name = "offset", defaultValue = "0") offset: Int,
                     @RequestParam(name = "search", required = false) search: String?

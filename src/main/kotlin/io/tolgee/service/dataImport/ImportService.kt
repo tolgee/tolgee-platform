@@ -50,7 +50,7 @@ class ImportService(
     fun import(repository: Repository, dto: ImportDto, emitter: OutputStream) {
         val language = languageService.getOrCreate(repository, dto.languageAbbreviation!!)
         val allKeys = keyService.getAll(repository.id).stream().collect(Collectors.toMap({ it.name }, { it }))
-        val allTranslations = translationService.getAllByLanguageId(language.id)
+        val allTranslations = translationService.getAllByLanguageId(language.id!!)
                 .stream()
                 .collect(Collectors.toMap({ it.key!!.id }, { it }))
 
@@ -128,5 +128,9 @@ class ImportService(
 
     fun saveAllFiles(files: Iterable<ImportFile>): MutableList<ImportFile>? {
         return this.importFileRepository.saveAll(files)
+    }
+
+    fun onTranslationCollisionRemoved(translation: Translation) {
+        this.importTranslationRepository.removeExistingTranslationCollisionReference(translation)
     }
 }

@@ -7,7 +7,6 @@ import io.tolgee.fixtures.generateUniqueString
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.testng.annotations.Test
-import java.util.*
 import java.util.stream.Collectors
 import kotlin.math.ceil
 import kotlin.system.measureTimeMillis
@@ -33,7 +32,7 @@ class ImportControllerTest : SignedInControllerTest() {
                 .andReturn().asyncResult
 
         val language = languageService.findByAbbreviation("en", repository).orElseGet(null)!!
-        val translations = translationService.getAllByLanguageId(language.id)
+        val translations = translationService.getAllByLanguageId(language.id!!)
         assertThat(translations.stream().map { it.text }.collect(Collectors.toList())).containsAll(dto.data!!.values)
     }
 
@@ -93,14 +92,14 @@ class ImportControllerTest : SignedInControllerTest() {
                 .andReturn().asyncResult
 
         val language = languageService.findByAbbreviation("en", repository).orElseGet(null)!!
-        var translations = translationService.getAllByLanguageId(language.id)
+        var translations = translationService.getAllByLanguageId(language.id!!)
         assertThat(translations.stream().map { it.text }.collect(Collectors.toList())).containsAll(dto.data!!.values)
 
         performAuthPost("/api/repository/${repository.id}/import", dto)
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn().asyncResult
 
-        translations = translationService.getAllByLanguageId(language.id)
+        translations = translationService.getAllByLanguageId(language.id!!)
         assertThat(translations.stream().map { it.text }.collect(Collectors.toList())).containsAll(dto.data!!.values)
     }
 
