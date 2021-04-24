@@ -8,7 +8,6 @@ import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
 import org.springframework.transaction.annotation.Transactional
 import org.testng.annotations.Test
@@ -16,7 +15,6 @@ import javax.persistence.EntityManager
 
 @SpringBootTest
 @Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class TranslationRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
 
     @Autowired

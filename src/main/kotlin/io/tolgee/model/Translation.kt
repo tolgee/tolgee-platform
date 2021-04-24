@@ -1,8 +1,9 @@
 package io.tolgee.model
 
 import io.tolgee.service.dataImport.ImportService
+import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.*
 
@@ -76,23 +77,16 @@ data class Translation(
             return TranslationBuilder()
         }
 
-        @Component
-        class TranslationListeners {
-
-            companion object {
-                @JvmStatic
-                private lateinit var importService: ImportService
-            }
+        @Configurable
+        open class TranslationListeners {
 
             @Autowired
-            fun setImportService(importService: ImportService) {
-                TranslationListeners.importService = importService
-            }
+            open lateinit var provider: ObjectFactory<ImportService>
 
             @PreRemove
             @Transactional
-            fun preRemove(translation: Translation) {
-                importService.onTranslationCollisionRemoved(translation)
+            open fun preRemove(translation: Translation) {
+                provider.`object`.onTranslationCollisionRemoved(translation)
             }
         }
     }

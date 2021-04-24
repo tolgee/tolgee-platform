@@ -13,7 +13,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 @SpringBootApplication
 @EnableJpaAuditing
 @ConfigurationPropertiesScan
-open class Application(
+class Application(
         populator: DbPopulatorReal,
         userAccountService: UserAccountService,
         val properties: TolgeeProperties,

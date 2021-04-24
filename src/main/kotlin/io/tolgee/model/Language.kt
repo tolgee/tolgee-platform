@@ -2,8 +2,9 @@ package io.tolgee.model
 
 import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.service.dataImport.ImportService
+import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
+import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.*
 
@@ -49,23 +50,16 @@ class Language : AuditModel() {
             return language
         }
 
-        @Component
-        class LanguageListeners {
-
-            companion object {
-                @JvmStatic
-                private lateinit var importService: ImportService
-            }
+        @Configurable
+        open class LanguageListeners() {
 
             @Autowired
-            fun setImportService(importService: ImportService) {
-                LanguageListeners.importService = importService
-            }
+            open lateinit var provider: ObjectFactory<ImportService>
 
             @PreRemove
             @Transactional
-            fun preRemove(language: Language) {
-                importService.onExistingLanguageRemoved(language)
+            open fun preRemove(language: Language) {
+                provider.`object`.onExistingLanguageRemoved(language)
             }
         }
 
