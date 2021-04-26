@@ -11,11 +11,10 @@ import javax.persistence.*
 @Entity
 class ImportTranslation(
         @Column(columnDefinition = "text")
-        val text: String?,
+        var text: String?,
 
         @ManyToOne
-        val language: ImportLanguage,
-
+        var language: ImportLanguage,
         ) : StandardAuditModel() {
     @OneToMany(mappedBy = "translation", cascade = [CascadeType.ALL])
     var issues: MutableList<ImportTranslationIssue> = mutableListOf()

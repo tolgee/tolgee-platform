@@ -1,22 +1,32 @@
 package io.tolgee.repository.dataImport
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.development.testDataBuilder.TestDataService
+import io.tolgee.development.testDataBuilder.data.ImportTestData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.domain.PageRequest
 import org.testng.annotations.Test
 
 @SpringBootTest
 class ImportLanguageRepositoryTest : AbstractSpringTest() {
 
     @Autowired
-    lateinit var importRepository: ImportRepository
+    lateinit var importLanguageRepository: ImportLanguageRepository
 
     @Autowired
     lateinit var testDataService: TestDataService
 
     @Test
-    fun `creates, saves and gets Import entity`() {
+    fun `view query returns correct result`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.data)
+        val result = importLanguageRepository.findImportLanguagesView(testData.import.id, PageRequest.of(0, 10))
 
+        assertThat(result).hasSize(3)
+        assertThat(result[0].existingLanguageName).isEqualTo("English")
+        assertThat(result[0].conflictCount).isEqualTo(4)
+        assertThat(result[0].totalCount).isEqualTo(6)
     }
 }

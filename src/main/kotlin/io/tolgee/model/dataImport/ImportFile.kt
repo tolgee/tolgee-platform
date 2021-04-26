@@ -12,7 +12,7 @@ import javax.validation.constraints.Size
 class ImportFile(
         @field:Size(max = 2000)
         @Column(length = 2000)
-        val name: String?,
+        var name: String?,
 
         @ManyToOne(optional = false)
         val import: Import,

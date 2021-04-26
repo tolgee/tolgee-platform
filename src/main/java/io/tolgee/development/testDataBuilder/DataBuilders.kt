@@ -8,7 +8,7 @@ typealias FT<T> = T.() -> Unit
 class DataBuilders {
     class RepositoryBuilder(userOwner: UserAccount? = null,
                             organizationOwner: Organization? = null,
-                            testDataBuilder: TestDataBuilder
+                            val testDataBuilder: TestDataBuilder
     ) : BaseEntityDataBuilder<Repository>() {
         override var self: Repository = Repository().apply {
             if (userOwner == null && organizationOwner == null) {
@@ -45,7 +45,7 @@ class DataBuilders {
     }
 
     class ImportBuilder(
-            repositoryBuilder: RepositoryBuilder,
+            val repositoryBuilder: RepositoryBuilder,
             author: UserAccount? = null
     ) : BaseEntityDataBuilder<Import>() {
         class DATA {
@@ -101,25 +101,25 @@ class DataBuilders {
     }
 
     class OrganizationBuilder(
-            testDataBuilder: TestDataBuilder
+            val testDataBuilder: TestDataBuilder
     ) : EntityDataBuilder<Organization> {
         override var self: Organization = Organization()
     }
 
     class KeyBuilder(
-            repositoryBuilder: RepositoryBuilder
+            val repositoryBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Key> {
         override var self: Key = Key()
     }
 
     class LanguageBuilder(
-            repositoryBuilder: RepositoryBuilder
+            val repositoryBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Language> {
         override var self: Language = Language()
     }
 
     class TranslationBuilder(
-            repositoryBuilder: RepositoryBuilder
+            val repositoryBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Translation> {
         override var self: Translation = Translation()
     }

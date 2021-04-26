@@ -31,7 +31,7 @@ class LanguageRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
     @Transactional
     fun `remove of language removes existing language reference from import language`() {
         val testData = ImportTestData()
-        testDataService.saveTestData(testData.base { })
+        testDataService.saveTestData(testData.data)
 
         var foundImportLanguage = importService.findLanguages(testData.import).first()
         assertThat(foundImportLanguage.existingLanguage).isEqualTo(testData.english)
