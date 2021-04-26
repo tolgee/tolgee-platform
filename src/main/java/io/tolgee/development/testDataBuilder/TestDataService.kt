@@ -37,7 +37,7 @@ class TestDataService(
         importService.saveLanguages(importFileBuilders.flatMap { it.data.importLanguages.map { it.self } })
     }
 
-    fun buildTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
+    fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
         val builder = TestDataBuilder()
         ft(builder)
         saveTestData(builder)

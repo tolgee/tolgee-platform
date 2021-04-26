@@ -2,9 +2,7 @@ package io.tolgee.repository
 
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.development.testDataBuilder.TestDataService
-import io.tolgee.model.Translation
-import io.tolgee.model.dataImport.Import
-import io.tolgee.model.dataImport.ImportLanguage
+import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -32,50 +30,17 @@ class TranslationRepositoryTest : AbstractTransactionalTestNGSpringContextTests(
     @Test
     @Transactional
     fun `remove of language removes existing language reference from import language`() {
-        var import: Import? = null
-        var importLanguage: ImportLanguage? = null
-        var collision: Translation? = null
+        val testData = ImportTestData()
 
-        testDataService.buildTestData {
-            addUserAccount {
-                username = "franta"
-            }
-            addRepository {
-                self { name = "test" }
-                val key = addKey {
-                    self { name = "what a key" }
-                }.self
-                collision = addTranslation {
-                    self {
-                        this.key = key
-                    }
-                }.self
-                import = addImport {
-                    addImportFile {
-                        importLanguage = addImportLanguage {
-                            self.name = "en"
-                        }.self
-                        val addedKey = addImportKey {
-                            self {
-                                name = "cool_key"
-                            }
-                        }
-                        addImportTranslation {
-                            self {
-                                this.key = addedKey.self
-                                this.collision = collision
-                            }
-                        }
-                    }
-                }.self
-            }
-        }
+        testDataService.saveTestData(testData.base { })
 
-        assertThat(importService.findTranslations(import!!, importLanguage!!.id).first().collision).isEqualTo(collision)
-        translationRepository.delete(collision!!)
+        assertThat(importService.findTranslations(testData.import, testData.importEnglish.id).first().collision)
+                .isEqualTo(testData.collision)
+        translationRepository.delete(testData.collision)
         entityManager.flush()
         entityManager.clear()
-        assertThat(importService.findTranslations(import!!, importLanguage!!.id).first().collision).isEqualTo(null)
+        assertThat(importService.findTranslations(testData.import, testData.importEnglish.id).first().collision)
+                .isEqualTo(null)
     }
 }
 

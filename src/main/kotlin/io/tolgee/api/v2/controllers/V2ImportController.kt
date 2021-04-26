@@ -24,14 +24,14 @@ import java.io.OutputStream
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/repositories/{repositoryId}/import"])
 @Tag(name = "Import")
-open class V2ImportController(
+class V2ImportController(
         private val importService: ImportService
 ) {
 
     @PostMapping("")
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
     @Operation(summary = "Prepares provided files to import, streams operation progress")
-    open fun import(
+    fun import(
             @PathVariable("repositoryId") repositoryId: Long,
             @RequestParam("files") files: Array<MultipartFile>,
     ): ResponseEntity<StreamingResponseBody> {
