@@ -22,7 +22,7 @@ class ImportLanguageRepositoryTest : AbstractSpringTest() {
     fun `view query returns correct result`() {
         val testData = ImportTestData()
         testDataService.saveTestData(testData.data)
-        val result = importLanguageRepository.findImportLanguagesView(testData.import.id, PageRequest.of(0, 10))
+        val result = importLanguageRepository.findImportLanguagesView(testData.import.id, PageRequest.of(0, 10)).content
 
         assertThat(result).hasSize(3)
         assertThat(result[0].existingLanguageName).isEqualTo("English")

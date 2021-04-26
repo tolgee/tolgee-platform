@@ -1,5 +1,6 @@
 package io.tolgee.model.dataImport
 
+import com.sun.istack.NotNull
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.issues.ImportTranslationIssue
@@ -15,7 +16,7 @@ class ImportTranslation(
 
         @ManyToOne
         var language: ImportLanguage,
-        ) : StandardAuditModel() {
+) : StandardAuditModel() {
     @OneToMany(mappedBy = "translation", cascade = [CascadeType.ALL])
     var issues: MutableList<ImportTranslationIssue> = mutableListOf()
 
@@ -28,6 +29,7 @@ class ImportTranslation(
     /**
      * Whether this translation will override the collision
      */
+    @field:NotNull
     var override: Boolean = false
 
     fun addIssue(

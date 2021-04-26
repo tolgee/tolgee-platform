@@ -3,6 +3,7 @@ package io.tolgee.repository.dataImport
 import io.tolgee.model.Language
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.views.ImportLanguageView
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -28,5 +29,5 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             from ImportLanguage il join il.file if left join il.existingLanguage el left join il.translations it
             group by il.id
             """)
-    fun findImportLanguagesView(importId: Long, pageable: Pageable): List<ImportLanguageView>
+    fun findImportLanguagesView(importId: Long, pageable: Pageable): Page<ImportLanguageView>
 }

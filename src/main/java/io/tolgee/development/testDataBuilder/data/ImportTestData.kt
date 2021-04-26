@@ -69,24 +69,28 @@ class ImportTestData {
                 self {
                     this.language = english
                     this.key = key
+                    this.text = "What a text"
                 }
             }.self
             addTranslation {
                 self {
                     this.language = english
                     this.key = repositoryBuilder.data.keys[1].self
+                    this.text = "What a text"
                 }
             }.self
             addTranslation {
                 self {
                     this.language = english
                     this.key = repositoryBuilder.data.keys[2].self
+                    this.text = "What a text"
                 }
             }.self
             addTranslation {
                 self {
                     this.language = english
                     this.key = repositoryBuilder.data.keys[3].self
+                    this.text = "What a text"
                 }
             }.self
             importBuilder = addImport {
