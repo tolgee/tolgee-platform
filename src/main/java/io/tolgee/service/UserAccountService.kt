@@ -94,7 +94,7 @@ class UserAccountService(
         return userAccountRepository.getAllInRepository(repositoryId, pageable, search = search)
     }
 
-    private fun encodePassword(rawPassword: String): String {
+    fun encodePassword(rawPassword: String): String {
         val bCryptPasswordEncoder = BCryptPasswordEncoder()
         return bCryptPasswordEncoder.encode(rawPassword)
     }

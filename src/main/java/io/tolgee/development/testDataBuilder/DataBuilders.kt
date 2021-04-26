@@ -13,7 +13,7 @@ class DataBuilders {
         override var self: Repository = Repository().apply {
             if (userOwner == null && organizationOwner == null) {
                 if (testDataBuilder.data.userAccounts.size > 0) {
-                    this.userOwner = testDataBuilder.data.userAccounts.first()
+                    this.userOwner = testDataBuilder.data.userAccounts.first().self
                 } else if (testDataBuilder.data.organizations.size > 0) {
                     this.organizationOwner = testDataBuilder.data.organizations.first().self
                 }
@@ -25,6 +25,7 @@ class DataBuilders {
         }
 
         class DATA {
+            val permissions = mutableListOf<PermissionBuilder>()
             val languages = mutableListOf<LanguageBuilder>()
             val imports = mutableListOf<ImportBuilder>()
             val keys = mutableListOf<KeyBuilder>()
@@ -32,6 +33,8 @@ class DataBuilders {
         }
 
         var data = DATA()
+
+        fun addPermission(ft: FT<PermissionBuilder>) = addOperation(data.permissions, ft)
 
         fun addImport(author: UserAccount? = null, ft: FT<ImportBuilder>) =
                 addOperation(data.imports, ImportBuilder(this, author), ft)
@@ -42,6 +45,7 @@ class DataBuilders {
         fun addKey(ft: FT<KeyBuilder>) = addOperation(data.keys, ft)
 
         fun addTranslation(ft: FT<TranslationBuilder>) = addOperation(data.translations, ft)
+
     }
 
     class ImportBuilder(
@@ -122,5 +126,18 @@ class DataBuilders {
             val repositoryBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Translation> {
         override var self: Translation = Translation()
+    }
+
+    class UserAccountBuilder(
+            val testDataBuilder: TestDataBuilder
+    ) : EntityDataBuilder<UserAccount> {
+        var rawPassword = "admin"
+        override var self: UserAccount = UserAccount()
+    }
+
+    class PermissionBuilder(
+            val repositoryBuilder: RepositoryBuilder
+    ) : EntityDataBuilder<Permission> {
+        override var self: Permission = Permission()
     }
 }

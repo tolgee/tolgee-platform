@@ -2,8 +2,7 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.DataBuilders
 import io.tolgee.development.testDataBuilder.TestDataBuilder
-import io.tolgee.model.Language
-import io.tolgee.model.Translation
+import io.tolgee.model.*
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 
@@ -16,13 +15,23 @@ class ImportTestData {
     lateinit var czech: Language
     lateinit var french: Language
     lateinit var importEnglish: ImportLanguage
+    lateinit var repository: Repository
+    lateinit var userAccount: UserAccount
 
-    val data: TestDataBuilder = TestDataBuilder().apply {
-        addUserAccount {
-            username = "franta"
-        }
-        addRepository {
+    val root: TestDataBuilder = TestDataBuilder().apply {
+        userAccount = addUserAccount {
+            self { username = "franta" }
+        }.self
+        repository = addRepository {
             self { name = "test" }
+            addPermission {
+                self {
+                    repository = this@addRepository.self
+                    user = this@ImportTestData.userAccount
+                    type = Permission.RepositoryPermissionType.MANAGE
+                }
+            }
+
             val key = addKey {
                 self { name = "what a key" }
             }.self
@@ -175,11 +184,11 @@ class ImportTestData {
                 }
             }
             import = importBuilder.self
-        }
+        }.self
     }
 
     operator fun invoke(ft: DataBuilders.ImportBuilder.() -> Unit): TestDataBuilder {
         ft(importBuilder)
-        return data
+        return root
     }
 }

@@ -12,12 +12,17 @@ class TestDataService(
         private val languageService: LanguageService,
         private val importService: ImportService,
         private val keyService: KeyService,
-        private val translationService: TranslationService
+        private val translationService: TranslationService,
+        private val permissionService: PermissionService
 ) {
     @Transactional
     fun saveTestData(builder: TestDataBuilder) {
-        userAccountService.saveAll(builder.data.userAccounts)
+        userAccountService.saveAll(builder.data.userAccounts.map {
+            it.self.password = userAccountService.encodePassword(it.rawPassword)
+            it.self
+        })
         repositoryService.saveAll(builder.data.repositories.map { it.self })
+        permissionService.saveAll(builder.data.repositories.flatMap { it.data.permissions.map { it.self } })
         val languages = builder.data.repositories.flatMap { it.data.languages.map { it.self } }
         languageService.saveAll(languages)
 

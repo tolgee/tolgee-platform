@@ -3,12 +3,12 @@ package io.tolgee.controllers
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessage
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIVE
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_FILES_IN_ARCHIVE
-import io.tolgee.fixtures.LoggedRequestFactory
-import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.fixtures.*
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
@@ -50,7 +50,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    fun `it finds proper `() {
+    fun `it saves proper data`() {
         val repository = dbPopulator.createBase(generateUniqueString())
         commitTransaction()
 
@@ -78,6 +78,88 @@ class V2ImportControllerTest : SignedInControllerTest() {
             }
             assertThat(keys).hasSize(206)
         }
+    }
+
+    @Test
+    fun `it returns correct result data`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+
+        logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
+
+        performAuthGet("/v2/repositories/${testData.repository.id}/import/result")
+                .andPrettyPrint.andAssertThatJson.node("_embedded.languages").let { languages ->
+                    languages.isArray.isNotEmpty
+                    languages.node("[0]").let {
+                        it.node("name").isEqualTo("en")
+                        it.node("existingLanguageName").isEqualTo("English")
+                        it.node("importFileName").isEqualTo("multilang.json")
+                        it.node("totalCount").isEqualTo("6")
+                        it.node("conflictCount").isEqualTo("4")
+                    }
+                }
+    }
+
+    @Test
+    fun `it paginates result`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+
+        logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
+
+        performAuthGet("/v2/repositories/${testData.repository.id}/import/result?page=0&size=2")
+                .andPrettyPrint.andAssertThatJson.node("_embedded.languages").let { languages ->
+                    languages.isArray.isNotEmpty.hasSize(2)
+                }
+    }
+
+    @Test
+    fun `it return correct translation data`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+
+        logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
+
+        performAuthGet("/v2/repositories/${testData.repository.id}" +
+                "/import/result/languages/${testData.importEnglish.id}/translations").andIsOk
+                .andPrettyPrint.andAssertThatJson.node("_embedded.translations").let { translations ->
+                    translations.isArray.isNotEmpty.hasSize(4)
+                    translations.node("[0]").let {
+                        it.node("id").isNotNull
+                        it.node("text").isEqualTo("test translation")
+                        it.node("keyName").isEqualTo("cool_key")
+                        it.node("keyId").isNotNull
+                        it.node("collisionId").isNotNull
+                        it.node("collisionText").isEqualTo("What a text")
+                        it.node("override").isEqualTo(false)
+                    }
+                }
+    }
+
+
+    @Test
+    fun `it pages translation data`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+
+        logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
+
+        performAuthGet("/v2/repositories/${testData.repository.id}" +
+                "/import/result/languages/${testData.importEnglish.id}/translations?size=2").andIsOk
+                .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(2)
+    }
+
+
+    @Test
+    fun `it disables onlyCollision filter translation data`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+
+        logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
+
+        performAuthGet("/v2/repositories/${testData.repository.id}" +
+                "/import/result/languages/${testData.importEnglish.id}/translations?onlyCollisions=false").andIsOk
+                .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(6)
     }
 
     private fun performImport(repositoryId: Long, files: Map<String?, Resource>): ResultActions {

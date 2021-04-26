@@ -2,7 +2,6 @@ package io.tolgee.repository.dataImport
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ImportTestData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -15,13 +14,10 @@ class ImportLanguageRepositoryTest : AbstractSpringTest() {
     @Autowired
     lateinit var importLanguageRepository: ImportLanguageRepository
 
-    @Autowired
-    lateinit var testDataService: TestDataService
-
     @Test
     fun `view query returns correct result`() {
         val testData = ImportTestData()
-        testDataService.saveTestData(testData.data)
+        testDataService.saveTestData(testData.root)
         val result = importLanguageRepository.findImportLanguagesView(testData.import.id, PageRequest.of(0, 10)).content
 
         assertThat(result).hasSize(3)

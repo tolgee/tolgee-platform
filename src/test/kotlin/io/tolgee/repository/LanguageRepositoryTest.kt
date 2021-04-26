@@ -3,6 +3,7 @@ package io.tolgee.repository
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ImportTestData
+import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -19,7 +20,7 @@ class LanguageRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
     lateinit var importService: ImportService
 
     @Autowired
-    lateinit var languageRepository: LanguageRepository
+    lateinit var languageService: LanguageService
 
     @Autowired
     lateinit var testDataService: TestDataService
@@ -31,12 +32,12 @@ class LanguageRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
     @Transactional
     fun `remove of language removes existing language reference from import language`() {
         val testData = ImportTestData()
-        testDataService.saveTestData(testData.data)
+        testDataService.saveTestData(testData.root)
 
         var foundImportLanguage = importService.findLanguages(testData.import).first()
         assertThat(foundImportLanguage.existingLanguage).isEqualTo(testData.english)
-        languageRepository.delete(testData.english)
-        languageRepository.flush()
+        languageService.deleteLanguage(testData.english.id!!)
+        entityManager.flush()
         entityManager.clear()
         foundImportLanguage = importService.findLanguages(testData.import).first()
         assertThat(foundImportLanguage.existingLanguage).isEqualTo(null)

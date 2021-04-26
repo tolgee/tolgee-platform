@@ -3,12 +3,15 @@ package io.tolgee.service.dataImport
 import io.tolgee.dtos.ImportDto
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Key
 import io.tolgee.model.Language
 import io.tolgee.model.Repository
 import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
+import io.tolgee.model.views.ImportLanguageView
+import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.repository.dataImport.*
@@ -20,6 +23,8 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.OutputStream
@@ -133,5 +138,19 @@ class ImportService(
 
     fun onTranslationCollisionRemoved(translation: Translation) {
         this.importTranslationRepository.removeExistingTranslationCollisionReference(translation)
+    }
+
+    fun getResult(repositoryId: Long, userId: Long, pageable: Pageable): Page<ImportLanguageView> {
+        return this.find(repositoryId, userId)?.let {
+            this.importLanguageRepository.findImportLanguagesView(it.id, pageable)
+        } ?: throw NotFoundException()
+    }
+
+    fun findLanguage(languageId: Long): ImportLanguage? {
+        return importLanguageRepository.findById(languageId).orElse(null)
+    }
+
+    fun getTranslations(languageId: Long, pageable: Pageable, onlyCollisions: Boolean): Page<ImportTranslationView> {
+        return importTranslationRepository.findImportTranslationsView(languageId, pageable, onlyCollisions)
     }
 }

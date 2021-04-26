@@ -32,7 +32,7 @@ class TranslationRepositoryTest : AbstractTransactionalTestNGSpringContextTests(
     fun `remove of language removes existing language reference from import language`() {
         val testData = ImportTestData()
 
-        testDataService.saveTestData(testData.data)
+        testDataService.saveTestData(testData.root)
 
         assertThat(importService.findTranslations(testData.import, testData.importEnglish.id).first().collision)
                 .isEqualTo(testData.collision)

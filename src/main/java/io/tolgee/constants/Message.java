@@ -4,8 +4,6 @@
 
 package io.tolgee.constants;
 
-import org.jetbrains.annotations.Nullable;
-
 public enum Message {
     API_KEY_NOT_FOUND(),
     BAD_CREDENTIALS(),
@@ -53,8 +51,8 @@ public enum Message {
     CANNOT_SET_LOWER_THAN_ORGANIZATION_BASE_PERMISSIONS,
     CANNOT_SET_YOUR_OWN_PERMISSIONS,
     USER_IS_ORGANIZATION_MEMBER,
-    PROPERTY_NOT_MUTABLE
-    ;
+    PROPERTY_NOT_MUTABLE,
+    IMPORT_LANGUAGE_NOT_FROM_REPOSITORY;
 
     String code;
 

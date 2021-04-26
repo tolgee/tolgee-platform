@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.DbPopulatorReal
+import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
@@ -74,6 +75,8 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     @Autowired lateinit var repositoryRepository: RepositoryRepository
 
     @Autowired lateinit var importService: ImportService
+
+    @Autowired lateinit var testDataService: TestDataService
 
     @Autowired
     private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

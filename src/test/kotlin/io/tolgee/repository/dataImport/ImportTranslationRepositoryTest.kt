@@ -2,7 +2,6 @@ package io.tolgee.repository.dataImport
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ImportTestData
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -15,13 +14,10 @@ class ImportTranslationRepositoryTest : AbstractSpringTest() {
     @Autowired
     lateinit var importTranslationRepository: ImportTranslationRepository
 
-    @Autowired
-    lateinit var testDataService: TestDataService
-
     @Test
     fun `view returns correct data`() {
         val importTestData = ImportTestData()
-        testDataService.saveTestData(importTestData.data)
+        testDataService.saveTestData(importTestData.root)
 
         val result = importTranslationRepository
                 .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10), false)
@@ -41,7 +37,7 @@ class ImportTranslationRepositoryTest : AbstractSpringTest() {
     @Test
     fun `view filters`() {
         val importTestData = ImportTestData()
-        testDataService.saveTestData(importTestData.data)
+        testDataService.saveTestData(importTestData.root)
 
         val result = importTranslationRepository
                 .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10), true)
