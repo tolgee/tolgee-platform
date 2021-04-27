@@ -22,7 +22,6 @@ import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.testng.annotations.Test
 import javax.servlet.DispatcherType
-import javax.servlet.ServletContext
 
 class V2ImportControllerTest : SignedInControllerTest() {
     @Value("classpath:import/zipOfJsons.zip")
@@ -131,9 +130,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
         performAuthGet("/v2/repositories/${testData.repository.id}/import/result?page=0&size=2")
-                .andPrettyPrint.andAssertThatJson.node("_embedded.languages").let { languages ->
-                    languages.isArray.isNotEmpty.hasSize(2)
-                }
+    .andPrettyPrint.andAssertThatJson.node("_embedded.languages").isArray.isNotEmpty.hasSize(2)
     }
 
     @Test
@@ -226,7 +223,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
             val mapped = jacksonObjectMapper().readValue<ImportStreamingProgressMessage>(it)
             ImportStreamingProgressMessage(type, params) == mapped
         }.let {
-            assertThat(it).describedAs("""Streaming response contains message of type ${type} 
+            assertThat(it).describedAs("""Streaming response contains message of type $type 
                 |with params ${params.toString()}
             """.trimMargin()).isTrue
         }
@@ -252,7 +249,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
 
     private fun asyncDispatch(mvcResult: MvcResult): RequestBuilder {
         mvcResult.getAsyncResult(10000)
-        return RequestBuilder { servletContext: ServletContext? ->
+        return RequestBuilder {
             val request = mvcResult.request
             request.dispatcherType = DispatcherType.ASYNC
             request.isAsyncStarted = false
