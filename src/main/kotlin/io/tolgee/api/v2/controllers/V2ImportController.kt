@@ -4,6 +4,7 @@
 
 package io.tolgee.api.v2.controllers
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -22,9 +23,11 @@ import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.repository_auth.AccessWithRepositoryPermission
 import io.tolgee.service.dataImport.ImportService
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
+import org.springframework.hateoas.mediatype.hal.HalMediaTypeConfiguration
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -47,12 +50,15 @@ class V2ImportController(
 
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val pagedTranslationsResourcesAssembler: PagedResourcesAssembler<ImportTranslationView>,
+
+        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+        private val halMediaTypeConfiguration: HalMediaTypeConfiguration
 ) {
 
-    @PostMapping("")
+    @PostMapping("/with-streaming-response")
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
     @Operation(summary = "Prepares provided files to import, streams operation progress")
-    fun import(
+    fun importStreaming(
             @PathVariable("repositoryId") repositoryId: Long,
             @RequestParam("files") files: Array<MultipartFile>,
     ): ResponseEntity<StreamingResponseBody> {
@@ -63,9 +69,26 @@ class V2ImportController(
             }
             val fileDtos = files.map { ImportFileDto(it.originalFilename, it.inputStream) }
             importService.doImport(files = fileDtos, messageClient)
+            val result = this.getImportResult(repositoryId, PageRequest.of(0, 100))
+            val mapper = jacksonObjectMapper()
+            halMediaTypeConfiguration.configureObjectMapper(mapper)
+            val jsonByteResult = mapper.writeValueAsBytes(result)
+            responseStream.write(jsonByteResult)
         }
 
         return ResponseEntity(stream, HttpStatus.OK)
+    }
+
+    @PostMapping("")
+    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @Operation(summary = "Prepares provided files to import, streams operation progress")
+    fun import(
+            @PathVariable("repositoryId") repositoryId: Long,
+            @RequestParam("files") files: Array<MultipartFile>,
+    ): PagedModel<ImportLanguageModel> {
+        val fileDtos = files.map { ImportFileDto(it.originalFilename, it.inputStream) }
+        importService.doImport(files = fileDtos)
+        return this.getImportResult(repositoryId, PageRequest.of(0, 100))
     }
 
     @GetMapping("/result")

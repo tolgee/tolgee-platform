@@ -84,14 +84,17 @@ class ImportService(
 
     @Transactional
     fun doImport(files: List<ImportFileDto>,
-                 messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit) {
+                 messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null) {
         val import = Import(authenticationFacade.userAccount, repositoryHolder.repository)
+
+        val nonNullMessageClient = messageClient ?: { _, _ -> }
+
         importRepository.save(import)
         val fileProcessor = CoreImportFilesProcessor(
                 applicationContext = applicationContext,
                 import = import
         )
-        fileProcessor.processFiles(files, messageClient)
+        fileProcessor.processFiles(files, nonNullMessageClient)
     }
 
     fun save(import: Import): Import {

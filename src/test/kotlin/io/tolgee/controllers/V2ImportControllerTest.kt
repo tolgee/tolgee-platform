@@ -9,7 +9,10 @@ import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIVE
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_FILES_IN_ARCHIVE
 import io.tolgee.fixtures.*
+import io.tolgee.model.Repository
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
+import net.javacrumbs.jsonunit.assertj.JsonAssert
+import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.mock.web.MockMultipartFile
@@ -33,9 +36,11 @@ class V2ImportControllerTest : SignedInControllerTest() {
         val repository = dbPopulator.createBase(generateUniqueString())
         commitTransaction()
 
-        performImport(repositoryId = repository.id, mapOf(Pair("zipOfUnknown.zip", zipOfUnknown)))
-                .assertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
-                .assertContainsMessage(FOUND_ARCHIVE)
+        performStreamingImport(repositoryId = repository.id, mapOf(Pair("zipOfUnknown.zip", zipOfUnknown)))
+                .andAssertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
+                .andAssertContainsMessage(FOUND_ARCHIVE).andPrettyPrintStreamingResult().andAssertStreamingResultJson {
+                    node("page.totalElements").isEqualTo(0)
+                }
 
         importService.find(repository.id, repository.userOwner?.id!!)!!.let { import ->
             assertThat(import.files.size).isEqualTo(3)
@@ -50,15 +55,33 @@ class V2ImportControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    fun `it saves proper data`() {
+    fun `it saves proper data and returns correct response `() {
         val repository = dbPopulator.createBase(generateUniqueString())
         commitTransaction()
 
         performImport(repositoryId = repository.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
-                .assertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
-                .assertContainsMessage(FOUND_ARCHIVE)
+                .andPrettyPrint.andAssertThatJson {
+                    node("_embedded.languages").isArray.hasSize(3)
+                }
+        validateSavedImportData(repository)
+    }
 
+    @Test
+    fun `it saves proper data and returns correct response (streamed)`() {
+        val repository = dbPopulator.createBase(generateUniqueString())
+        commitTransaction()
+
+        performStreamingImport(repositoryId = repository.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
+                .andAssertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
+                .andAssertContainsMessage(FOUND_ARCHIVE).andPrettyPrintStreamingResult().andAssertStreamingResultJson {
+                    node("_embedded.languages").isArray.hasSize(3)
+                }
+        validateSavedImportData(repository)
+    }
+
+    private fun validateSavedImportData(repository: Repository) {
         importService.find(repository.id, repository.userOwner?.id!!)!!.let { importEntity ->
+            entityManager.refresh(importEntity)
             assertThat(importEntity.files.size).isEqualTo(3)
             assertThat(importEntity.archives.size).isEqualTo(1)
             assertThat(importEntity.archives[0].name).isEqualTo("zipOfJsons.zip")
@@ -162,9 +185,24 @@ class V2ImportControllerTest : SignedInControllerTest() {
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(6)
     }
 
+
     private fun performImport(repositoryId: Long, files: Map<String?, Resource>): ResultActions {
         val builder = MockMvcRequestBuilders
                 .multipart("/v2/repositories/${repositoryId}/import")
+
+        files.forEach {
+            builder.file(MockMultipartFile(
+                    "files", it.key, "application/zip",
+                    it.value.file.readBytes()
+            ))
+        }
+
+        return mvc.perform(LoggedRequestFactory.addToken(builder))
+    }
+
+    private fun performStreamingImport(repositoryId: Long, files: Map<String?, Resource>): ResultActions {
+        val builder = MockMvcRequestBuilders
+                .multipart("/v2/repositories/${repositoryId}/import/with-streaming-response")
 
         files.forEach {
             builder.file(MockMultipartFile(
@@ -180,7 +218,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
         }
     }
 
-    private fun ResultActions.assertContainsMessage(
+    private fun ResultActions.andAssertContainsMessage(
             type: ImportStreamingProgressMessageType,
             params: List<Any?>? = null)
             : ResultActions {
@@ -192,6 +230,23 @@ class V2ImportControllerTest : SignedInControllerTest() {
                 |with params ${params.toString()}
             """.trimMargin()).isTrue
         }
+        return this
+    }
+
+    private fun ResultActions.andAssertStreamingResultJson(jsonAssert: JsonAssert.ConfigurableJsonAssert.() -> Unit)
+            : ResultActions {
+        val rawResult = this.andReturn().response.contentAsString
+                .removeSuffix(";;;").split(";;;").last()
+        jsonAssert(assertThatJson(rawResult))
+        return this
+    }
+
+    private fun ResultActions.andPrettyPrintStreamingResult()
+            : ResultActions {
+        val rawResult = this.andReturn().response.contentAsString
+                .removeSuffix(";;;").split(";;;").last()
+        val parsed = jacksonObjectMapper().readValue<Any>(rawResult)
+        println(jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(parsed))
         return this
     }
 

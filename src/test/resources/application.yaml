@@ -7,7 +7,7 @@ spring:
     drop-first: true
     change-log: classpath:db/changelog/schema.xml
   jpa:
-    show-sql: true
+#    show-sql: true
     properties:
       hibernate:
         jdbc:
@@ -21,8 +21,8 @@ tolgee:
     create-initial-user: false
   internal:
     populate: false
-logging:
-  level:
-    org.springframework.orm.jpa: DEBUG
+#logging:
+#  level:
+#    org.springframework.orm.jpa: DEBUG
 #    org.springframework.transaction: DEBUG
 #    org.hibernate.type: TRACE
