@@ -722,4 +722,7 @@
     <changeSet author="jenik (generated)" id="1619076364983-33">
         <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="import_translation" constraintName="FKrtx4aq0bqg6m83cdbi8vcuyve" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_key" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1619603073836-1">
+        <addUniqueConstraint columnNames="author_id, repository_id" constraintName="UKiiys1nq2g2sdg7alh8oelygkh" tableName="import"/>
+    </changeSet>
 </databaseChangeLog>

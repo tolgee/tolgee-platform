@@ -88,7 +88,7 @@ def liveDbPostgres = [
 ]
 
 def liveDbH2 = [
-        url         : 'jdbc:h2:~/.tolgee/db.h2;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE',
+        url         : 'jdbc:h2:~/.tolgee/db.h2',
         referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.H2Dialect' +
                 '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +

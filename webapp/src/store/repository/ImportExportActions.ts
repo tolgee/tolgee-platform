@@ -1,4 +1,4 @@
-import {container, singleton} from 'tsyringe';
+import {singleton} from 'tsyringe';
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
 import {ImportExportService} from "../../service/ImportExportService";
 
@@ -8,14 +8,11 @@ export class ImportExportState extends StateWithLoadables<ImportExportActions> {
 
 @singleton()
 export class ImportExportActions extends AbstractLoadableActions<ImportExportState> {
-    constructor() {
+    constructor(private service: ImportExportService) {
         super(new ImportExportState());
     }
-
-    private service = container.resolve(ImportExportService);
-
+    
     loadableDefinitions = {
-        import: this.createLoadableDefinition(this.service.doImport),
         export: this.createLoadableDefinition(this.service.exportToJsons)
     };
 

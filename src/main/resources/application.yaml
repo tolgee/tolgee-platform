@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:${user.home}/.tolgee/db.h2;DATABASE_TO_LOWER=TRUE
+    url: jdbc:h2:${user.home}/.tolgee/db.h2
   #    username: sa
   #    password: sa
   liquibase:

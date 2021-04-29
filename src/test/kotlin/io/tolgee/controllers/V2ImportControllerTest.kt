@@ -130,7 +130,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
         performAuthGet("/v2/repositories/${testData.repository.id}/import/result?page=0&size=2")
-    .andPrettyPrint.andAssertThatJson.node("_embedded.languages").isArray.isNotEmpty.hasSize(2)
+                .andPrettyPrint.andAssertThatJson.node("_embedded.languages").isArray.isNotEmpty.hasSize(2)
     }
 
     @Test
@@ -180,6 +180,32 @@ class V2ImportControllerTest : SignedInControllerTest() {
         performAuthGet("/v2/repositories/${testData.repository.id}" +
                 "/import/result/languages/${testData.importEnglish.id}/translations?onlyCollisions=false").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(6)
+    }
+
+
+    @Test
+    fun `it deletes import`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+
+        logAsUser(user.username!!, "admin")
+
+        performAuthDelete("/v2/repositories/${repositoryId}/import", null).andIsOk
+        assertThat(importService.find(repositoryId, user.id!!)).isNull()
+    }
+
+    @Test
+    fun `it deletes import language`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+        logAsUser(user.username!!, "admin")
+        val path = "/v2/repositories/${repositoryId}/import/result/languages/${testData.importEnglish.id}"
+        performAuthDelete(path, null).andIsOk
+        assertThat(importService.findLanguage(testData.importEnglish.id)).isNull()
     }
 
 

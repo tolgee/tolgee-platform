@@ -51,14 +51,14 @@ class Language : AuditModel() {
         }
 
         @Configurable
-        open class LanguageListeners() {
+        class LanguageListeners {
 
             @Autowired
-            open lateinit var provider: ObjectFactory<ImportService>
+            lateinit var provider: ObjectFactory<ImportService>
 
             @PreRemove
             @Transactional
-            open fun preRemove(language: Language) {
+            fun preRemove(language: Language) {
                 provider.`object`.onExistingLanguageRemoved(language)
             }
         }

@@ -25,4 +25,16 @@ class ImportLanguageRepositoryTest : AbstractSpringTest() {
         assertThat(result[0].conflictCount).isEqualTo(4)
         assertThat(result[0].totalCount).isEqualTo(6)
     }
+
+    @Test
+    fun `deletes language`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        entityManager.flush()
+        entityManager.clear()
+        importLanguageRepository.deleteById(testData.importEnglish.id)
+        entityManager.flush()
+        entityManager.clear()
+        assertThat(importLanguageRepository.findById(testData.importEnglish.id)).isEmpty
+    }
 }

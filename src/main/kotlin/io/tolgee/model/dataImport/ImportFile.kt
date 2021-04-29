@@ -20,10 +20,10 @@ class ImportFile(
     @OneToMany(mappedBy = "file", cascade = [CascadeType.ALL])
     var issues: MutableList<ImportFileIssue> = mutableListOf()
 
-    @ManyToMany(cascade = [CascadeType.PERSIST])
+    @ManyToMany(cascade = [CascadeType.ALL])
     var keys: MutableList<ImportKey> = mutableListOf()
 
-    @OneToMany(mappedBy = "file")
+    @OneToMany(mappedBy = "file", cascade = [CascadeType.ALL])
     var languages: MutableList<ImportLanguage> = mutableListOf()
 
     @ManyToOne

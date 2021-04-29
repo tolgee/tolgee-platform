@@ -2,10 +2,7 @@ package io.tolgee.model.dataImport
 
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
+import javax.persistence.*
 import javax.validation.constraints.Size
 
 @Entity
@@ -17,7 +14,7 @@ class ImportLanguage(
         @ManyToOne(optional = false)
         var file: ImportFile
 ) : StandardAuditModel() {
-    @OneToMany(mappedBy = "language")
+    @OneToMany(mappedBy = "language", cascade = [CascadeType.ALL])
     var translations: MutableList<ImportTranslation> = mutableListOf()
 
     @ManyToOne

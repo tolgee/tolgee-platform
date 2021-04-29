@@ -17,7 +17,7 @@ class ImportKey(
     @field:NotEmpty
     var files: MutableList<ImportFile> = mutableListOf()
 
-    @OneToMany(mappedBy = "key")
+    @OneToMany(mappedBy = "key", cascade = [CascadeType.ALL])
     var translations: MutableList<ImportTranslation> = mutableListOf()
 
     override fun equals(other: Any?): Boolean {

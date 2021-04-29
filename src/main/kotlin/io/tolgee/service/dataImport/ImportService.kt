@@ -85,7 +85,8 @@ class ImportService(
     @Transactional
     fun doImport(files: List<ImportFileDto>,
                  messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null) {
-        val import = Import(authenticationFacade.userAccount, repositoryHolder.repository)
+        val import = find(repositoryHolder.repository.id, authenticationFacade.userAccount.id!!)
+                ?: Import(authenticationFacade.userAccount, repositoryHolder.repository)
 
         val nonNullMessageClient = messageClient ?: { _, _ -> }
 
@@ -109,6 +110,9 @@ class ImportService(
 
     fun find(repositoryId: Long, authorId: Long) =
             this.importRepository.findByRepositoryIdAndAuthorId(repositoryId, authorId)
+
+    fun findOrThrow(repositoryId: Long, authorId: Long) =
+            this.find(repositoryId, authorId) ?: throw NotFoundException()
 
     fun saveArchive(importArchive: ImportArchive): ImportArchive = importArchiveRepository.save(importArchive)
 
@@ -155,5 +159,12 @@ class ImportService(
 
     fun getTranslations(languageId: Long, pageable: Pageable, onlyCollisions: Boolean): Page<ImportTranslationView> {
         return importTranslationRepository.findImportTranslationsView(languageId, pageable, onlyCollisions)
+    }
+
+    fun deleteImport(repositoryId: Long, authorId: Long) =
+            this.importRepository.deleteById(findOrThrow(repositoryId, authorId).id)
+
+    fun deleteLanguage(languageId: Long) {
+        this.importLanguageRepository.deleteById(languageId)
     }
 }

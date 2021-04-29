@@ -2,6 +2,7 @@ package io.tolgee.repository.dataImport
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.model.dataImport.Import
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -25,5 +26,17 @@ class ImportRepositoryTest : AbstractSpringTest() {
                 }
             }
         }
+    }
+
+    @Test
+    fun `deletes import`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        entityManager.flush()
+        entityManager.clear()
+        importRepository.deleteById(testData.import.id)
+        importRepository.flush()
+        entityManager.clear()
+        assertThat(importRepository.findById(testData.import.id)).isEmpty
     }
 }

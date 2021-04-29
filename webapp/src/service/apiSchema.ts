@@ -49,6 +49,12 @@ export interface paths {
     put: operations["setTranslations_1"];
     post: operations["createOrUpdateTranslations_1"];
   };
+  "/v2/repositories/{repositoryId}/import": {
+    post: operations["import"];
+  };
+  "/v2/repositories/{repositoryId}/import/with-streaming-response": {
+    post: operations["importStreaming"];
+  };
   "/v2/organizations": {
     get: operations["getAll_1"];
     post: operations["create"];
@@ -135,6 +141,12 @@ export interface paths {
   };
   "/v2/repositories/{repositoryId}/users": {
     get: operations["getAllUsers"];
+  };
+  "/v2/repositories/{repositoryId}/import/result": {
+    get: operations["getImportResult"];
+  };
+  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations": {
+    get: operations["getImportTranslations"];
   };
   "/v2/organizations/{organizationId}/invitations": {
     get: operations["getInvitations"];
@@ -280,8 +292,34 @@ export interface components {
     };
     SetTranslationsDTO: {
       key: string;
-      translations?: { [key: string]: string };
+      translations: { [key: string]: string };
     };
+    ImportLanguageModel: {
+      id: number;
+      name: string;
+      existingLanguageId?: number;
+      existingLanguageAbbreviation?: string;
+      existingLanguageName?: string;
+      importFileName: string;
+      importFileId: number;
+      totalCount: number;
+      conflictCount: number;
+      _links?: components["schemas"]["Links"];
+    };
+    PageMetadata: {
+      size?: number;
+      totalElements?: number;
+      totalPages?: number;
+      number?: number;
+    };
+    PagedModelImportLanguageModel: {
+      _embedded?: {
+        languages?: components["schemas"]["ImportLanguageModel"][];
+      };
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
+    };
+    StreamingResponseBody: { [key: string]: any };
     GenerateAddressPathDto: {
       name: string;
       oldAddressPart?: string;
@@ -301,7 +339,6 @@ export interface components {
       languageAbbreviation: string;
       data: { [key: string]: string };
     };
-    StreamingResponseBody: { [key: string]: any };
     LanguageDTO: {
       id?: number;
       name: string;
@@ -378,12 +415,6 @@ export interface components {
       size?: number;
       sort?: string[];
     };
-    PageMetadata: {
-      size?: number;
-      totalElements?: number;
-      totalPages?: number;
-      number?: number;
-    };
     PagedModelRepositoryModel: {
       _embedded?: {
         repositories?: components["schemas"]["RepositoryModel"][];
@@ -434,6 +465,23 @@ export interface components {
       /** Actual user's permissions on selected repository. You can not sort data by this column! */
       computedPermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       _links?: components["schemas"]["Links"];
+    };
+    ImportTranslationModel: {
+      id: number;
+      text: string;
+      keyName: string;
+      keyId: number;
+      collisionId?: number;
+      collisionText?: string;
+      override: boolean;
+      _links?: components["schemas"]["Links"];
+    };
+    PagedModelImportTranslationModel: {
+      _embedded?: {
+        translations?: components["schemas"]["ImportTranslationModel"][];
+      };
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
     };
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
@@ -812,6 +860,50 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetTranslationsDTO"];
+      };
+    };
+  };
+  import: {
+    parameters: {
+      path: {
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelImportLanguageModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          files: string[];
+        };
+      };
+    };
+  };
+  importStreaming: {
+    parameters: {
+      path: {
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          files: string[];
+        };
       };
     };
   };
@@ -1309,6 +1401,44 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelUserAccountInRepositoryModel"];
+        };
+      };
+    };
+  };
+  getImportResult: {
+    parameters: {
+      path: {
+        repositoryId: number;
+      };
+      query: {
+        pageable: components["schemas"]["Pageable"];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelImportLanguageModel"];
+        };
+      };
+    };
+  };
+  getImportTranslations: {
+    parameters: {
+      path: {
+        repositoryId: number;
+        languageId: number;
+      };
+      query: {
+        onlyCollisions?: boolean;
+        pageable: components["schemas"]["Pageable"];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelImportTranslationModel"];
         };
       };
     };

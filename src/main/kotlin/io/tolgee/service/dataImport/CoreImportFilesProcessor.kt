@@ -2,8 +2,7 @@ package io.tolgee.service.dataImport
 
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIVE
-import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_FILES_IN_ARCHIVE
+import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.*
 import io.tolgee.exceptions.FileIssueException
 import io.tolgee.model.Language
 import io.tolgee.model.Translation
@@ -102,6 +101,7 @@ class CoreImportFilesProcessor(
     private fun FileProcessorContext.processLanguages() {
         this.languages.forEach { entry ->
             val languageEntity = entry.value
+            messageClient(FOUND_LANGUAGE, listOf(languageEntity.name))
             val matchingStoredLanguage = storedLanguages.find {
                 it.name == entry.value.name && it.existingLanguage != null
             }
