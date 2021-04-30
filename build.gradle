@@ -152,7 +152,7 @@ dependencies {
     liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:$LIQUIBASE_HIBERNATE_VERSION")
     liquibaseRuntime('org.springframework.boot:spring-boot-starter-data-jpa')
     liquibaseRuntime sourceSets.main.output
-    implementation 'com.github.javafaker:javafaker:1.0.1'
+    implementation 'com.github.javafaker:javafaker:1.0.2'
     implementation 'org.hibernate:hibernate-jpamodelgen'
     testCompile group: 'org.testng', name: 'testng', version: '7.4.0'
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
