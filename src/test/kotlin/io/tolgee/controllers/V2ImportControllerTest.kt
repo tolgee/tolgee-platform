@@ -10,6 +10,7 @@ import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIV
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_FILES_IN_ARCHIVE
 import io.tolgee.fixtures.*
 import io.tolgee.model.Repository
+import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
@@ -141,7 +142,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
         performAuthGet("/v2/repositories/${testData.repository.id}" +
-                "/import/result/languages/${testData.importEnglish.id}/translations").andIsOk
+                "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=true").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").let { translations ->
                     translations.isArray.isNotEmpty.hasSize(4)
                     translations.node("[0]").let {
@@ -149,8 +150,8 @@ class V2ImportControllerTest : SignedInControllerTest() {
                         it.node("text").isEqualTo("test translation")
                         it.node("keyName").isEqualTo("cool_key")
                         it.node("keyId").isNotNull
-                        it.node("collisionId").isNotNull
-                        it.node("collisionText").isEqualTo("What a text")
+                        it.node("conflictId").isNotNull
+                        it.node("conflictText").isEqualTo("What a text")
                         it.node("override").isEqualTo(false)
                     }
                 }
@@ -171,15 +172,51 @@ class V2ImportControllerTest : SignedInControllerTest() {
 
 
     @Test
-    fun `it disables onlyCollision filter translation data`() {
+    fun `onlyConflict filter on translations works`() {
         val testData = ImportTestData()
         testDataService.saveTestData(testData.root)
 
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
         performAuthGet("/v2/repositories/${testData.repository.id}" +
-                "/import/result/languages/${testData.importEnglish.id}/translations?onlyCollisions=false").andIsOk
+                "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=false").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(6)
+
+
+        performAuthGet("/v2/repositories/${testData.repository.id}" +
+                "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=true").andIsOk
+                .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(4)
+    }
+
+    @Test
+    fun `onlyUnresolved filter on translations works`() {
+        val testData = ImportTestData()
+        var resolved: ImportTranslation? = null
+        var resolvedText = "Hello, I am resolved"
+
+        testData {
+            resolved = data.importFiles[0].addImportTranslation {
+                self {
+                    this.resolved = true
+                    key = data.importFiles[0].data.importKeys[0].self
+                    text = resolvedText
+                    language = testData.importEnglish
+                    conflict = testData.conflict
+                }
+            }.self
+        }
+
+        testDataService.saveTestData(testData.root)
+        logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
+
+        performAuthGet("/v2/repositories/${testData.repository.id}" +
+                "/import/result/languages/${testData.importEnglish.id}/" +
+                "translations?onlyConflicts=true").andIsOk
+                .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(5)
+
+        performAuthGet("/v2/repositories/${testData.repository.id}" +
+                "/import/result/languages/${testData.importEnglish.id}/translations?onlyUnresolved=true").andIsOk
+                .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(4)
     }
 
 
@@ -208,6 +245,64 @@ class V2ImportControllerTest : SignedInControllerTest() {
         assertThat(importService.findLanguage(testData.importEnglish.id)).isNull()
     }
 
+    @Test
+    fun `it resolves import translation conflict (override)`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+        logAsUser(user.username!!, "admin")
+        val path = "/v2/repositories/${repositoryId}/import/result/languages/${testData.importEnglish.id}" +
+                "/translations/${testData.translationWithConflict.id}/resolve/set-override"
+        performAuthPut(path, null).andIsOk
+        val translation = importService.findTranslation(testData.translationWithConflict.id)
+        assertThat(translation?.resolved).isTrue
+        assertThat(translation?.override).isTrue
+    }
+
+
+    @Test
+    fun `it resolves import translation conflict (keep)`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+        logAsUser(user.username!!, "admin")
+        val path = "/v2/repositories/${repositoryId}/import/result/languages/${testData.importEnglish.id}" +
+                "/translations/${testData.translationWithConflict.id}/resolve/set-keep-existing"
+        performAuthPut(path, null).andIsOk
+        val translation = importService.findTranslation(testData.translationWithConflict.id)
+        assertThat(translation?.resolved).isTrue
+        assertThat(translation?.override).isFalse
+    }
+
+    @Test
+    fun `it resolves all language translation conflicts (override)`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+        logAsUser(user.username!!, "admin")
+        val path = "/v2/repositories/${repositoryId}/import/result/languages/${testData.importEnglish.id}/resolve-all/set-override"
+        performAuthPut(path, null).andIsOk
+        val translation = importService.findTranslation(testData.translationWithConflict.id)
+        assertThat(translation?.resolved).isTrue
+        assertThat(translation?.override).isTrue
+    }
+
+    @Test
+    fun `it resolves all language translation conflicts (keep)`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+        logAsUser(user.username!!, "admin")
+        val path = "/v2/repositories/${repositoryId}/import/result/languages/${testData.importEnglish.id}/resolve-all/set-keep-existing"
+        performAuthPut(path, null).andIsOk
+        val translation = importService.findTranslation(testData.translationWithConflict.id)
+        assertThat(translation?.resolved).isTrue
+        assertThat(translation?.override).isFalse
+    }
 
     private fun performImport(repositoryId: Long, files: Map<String?, Resource>): ResultActions {
         val builder = MockMvcRequestBuilders

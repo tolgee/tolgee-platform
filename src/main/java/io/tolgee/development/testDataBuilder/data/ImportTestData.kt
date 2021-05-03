@@ -5,9 +5,10 @@ import io.tolgee.development.testDataBuilder.TestDataBuilder
 import io.tolgee.model.*
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
+import io.tolgee.model.dataImport.ImportTranslation
 
 class ImportTestData {
-    lateinit var collision: Translation
+    lateinit var conflict: Translation
     lateinit var importBuilder: DataBuilders.ImportBuilder
     lateinit var import: Import
     lateinit var english: Language
@@ -15,6 +16,7 @@ class ImportTestData {
     lateinit var czech: Language
     lateinit var french: Language
     lateinit var importEnglish: ImportLanguage
+    lateinit var translationWithConflict: ImportTranslation
     lateinit var repository: Repository
     lateinit var userAccount: UserAccount
 
@@ -74,7 +76,7 @@ class ImportTestData {
                     abbreviation = "fr"
                 }
             }.self
-            collision = addTranslation {
+            conflict = addTranslation {
                 self {
                     this.language = english
                     this.key = key
@@ -141,32 +143,32 @@ class ImportTestData {
                         self { name = "this is another key" }
                     }.self
 
-                    addImportTranslation {
+                    translationWithConflict = addImportTranslation {
                         self {
                             this.language = importEnglish
                             this.key = addedKey.self
-                            this.collision = this@ImportTestData.collision
+                            this.conflict = this@ImportTestData.conflict
                         }
-                    }
+                    }.self
                     addImportTranslation {
                         self {
                             this.language = importEnglish
                             this.key = this@addImport.data.importFiles[0].data.importKeys[1].self
-                            this.collision = repositoryBuilder.data.translations[1].self
+                            this.conflict = repositoryBuilder.data.translations[1].self
                         }
                     }
                     addImportTranslation {
                         self {
                             this.language = importEnglish
                             this.key = this@addImport.data.importFiles[0].data.importKeys[2].self
-                            this.collision = repositoryBuilder.data.translations[2].self
+                            this.conflict = repositoryBuilder.data.translations[2].self
                         }
                     }
                     addImportTranslation {
                         self {
                             this.language = importEnglish
                             this.key = this@addImport.data.importFiles[0].data.importKeys[3].self
-                            this.collision = repositoryBuilder.data.translations[3].self
+                            this.conflict = repositoryBuilder.data.translations[3].self
                         }
                     }
                     addImportTranslation {

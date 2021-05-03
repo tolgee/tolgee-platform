@@ -4,7 +4,7 @@ import {MessageService} from "../MessageService";
 import React from "react";
 import {RedirectionActions} from "../../store/global/RedirectionActions";
 import {paths} from "../apiSchema";
-import {ApiHttpService} from "./ApiHttpService";
+import {ApiHttpService, RequestOptions} from "./ApiHttpService";
 
 @singleton()
 export class ApiSchemaHttpService extends ApiHttpService {
@@ -14,14 +14,14 @@ export class ApiSchemaHttpService extends ApiHttpService {
 
     apiUrl = process.env.REACT_APP_API_URL as string
 
-    schemaRequest<Url extends keyof paths, Method extends keyof paths[Url]>(url: Url, method: Method) {
+    schemaRequest<Url extends keyof paths, Method extends keyof paths[Url]>(url: Url, method: Method, options?: RequestOptions) {
         return async (request: RequestParamsType<Url, Method>) => {
-            const response = await ApiHttpService.getResObject(await this.schemaRequestRaw(url, method)(request))
+            const response = await ApiHttpService.getResObject(await this.schemaRequestRaw(url, method, options)(request))
             return response as Promise<ResponseContent<Url, Method>>
         }
     }
 
-    schemaRequestRaw<Url extends keyof paths, Method extends keyof paths[Url]>(url: Url, method: Method) {
+    schemaRequestRaw<Url extends keyof paths, Method extends keyof paths[Url]>(url: Url, method: Method, options?: RequestOptions) {
         return async (request: RequestParamsType<Url, Method>) => {
             const pathParams = request?.path;
             let urlResult = url as string;
@@ -60,7 +60,7 @@ export class ApiSchemaHttpService extends ApiHttpService {
                 queryString = "?" + this.buildQuery(params)
             }
 
-            return await this.fetch(urlResult + queryString, {method: method as string, body: body})
+            return await this.fetch(urlResult + queryString, {method: method as string, body: body}, options)
         }
     }
 }
@@ -110,7 +110,7 @@ type OperationSchemaType = {
     }
     parameters?: {
         path?: { [key: string]: any },
-        query?: { [key: string]: { [key: string]: any } | string }
+        query?: { [key: string]: { [key: string]: any } | any }
     }
     responses: ResponseType
 }

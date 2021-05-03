@@ -10,7 +10,8 @@ open class ImportTranslationModel(
         override val text: String,
         override val keyName: String,
         override val keyId: Long,
-        override val collisionId: Long?,
-        override val collisionText: String?,
-        override val override: Boolean
+        override val conflictId: Long?,
+        override val conflictText: String?,
+        override val override: Boolean,
+        override val resolved: Boolean
 ) : RepresentationModel<ImportTranslationModel>(), ImportTranslationView

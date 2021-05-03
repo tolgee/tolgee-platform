@@ -24,14 +24,20 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
 
     @Modifying
     @Transactional
-    @Query("update ImportTranslation it set it.collision = null where it.collision = :translation")
-    fun removeExistingTranslationCollisionReference(translation: Translation)
+    @Query("update ImportTranslation it set it.conflict = null where it.conflict = :translation")
+    fun removeExistingTranslationConflictReference(translation: Translation)
 
 
     @Query(""" select it.id as id, it.text as text, ik.name as keyName, ik.id as keyId,
-        itc.id as collisionId, itc.text as collisionText, it.override as override
-        from ImportTranslation it left join it.collision itc join it.key ik
-        where (itc.id is not null or :onlyCollisions = false) and it.language.id = :languageId
+        itc.id as conflictId, itc.text as conflictText, it.override as override, it.resolved as resolved
+        from ImportTranslation it left join it.conflict itc join it.key ik
+        where (itc.id is not null or :onlyConflicts = false)
+        and ((itc.id is not null and it.resolved = false) or :onlyUnresolved = false)
+        and it.language.id = :languageId
     """)
-    fun findImportTranslationsView(languageId: Long, pageable: Pageable, onlyCollisions: Boolean = true): Page<ImportTranslationView>
+    fun findImportTranslationsView(languageId: Long,
+                                   pageable: Pageable,
+                                   onlyConflicts: Boolean = false,
+                                   onlyUnresolved: Boolean = false
+    ): Page<ImportTranslationView>
 }

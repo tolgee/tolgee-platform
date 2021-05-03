@@ -1,18 +1,24 @@
 import {components} from "../../../../../service/apiSchema";
 import React from "react";
-import {Box, Button, Collapse, IconButton, TableCell, TableRow} from "@material-ui/core";
+import {Button, IconButton, TableCell, TableRow} from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
+import {ImportActions} from "../../../../../store/repository/ImportActions";
+import {container} from "tsyringe";
+import {useRepository} from "../../../../../hooks/useRepository";
+import {confirmation} from "../../../../../hooks/confirmation";
 
-export const ImportResultRow = (props: { row: components["schemas"]["ImportLanguageModel"] }) => {
-    const [open, setOpen] = React.useState(false);
+const actions = container.resolve(ImportActions)
+export const ImportResultRow = (props: {
+    row: components["schemas"]["ImportLanguageModel"]
+    onResolveConflicts: (row: components["schemas"]["ImportLanguageModel"]) => void
+}) => {
+    const repository = useRepository()
 
-    const expandAllTranslations = () => {
-
-    }
-
-    const expandConflicts = () => {
-
-    }
+    const deleteLanguage = () => {
+        confirmation({
+            onConfirm: () => actions.loadableActions.deleteLanguage.dispatch({path: {languageId: props.row.id, repositoryId: repository.id}})
+        })
+    };
 
     return (
         <React.Fragment>
@@ -24,24 +30,15 @@ export const ImportResultRow = (props: { row: components["schemas"]["ImportLangu
                     {props.row.importFileName}
                 </TableCell>
                 <TableCell scope="row">
-                    <Button onClick={expandAllTranslations} size="small">{props.row.totalCount}</Button>
+                    <Button size="small">{props.row.totalCount}</Button>
                 </TableCell>
                 <TableCell scope="row">
-                    <Button onClick={expandConflicts} size="small">{props.row.conflictCount}</Button>
+                    <Button onClick={() => props.onResolveConflicts(props.row)} size="small">{props.row.conflictCount}</Button>
                 </TableCell>
                 <TableCell scope="row" align={"right"}>
                     <IconButton size="small" style={{padding: 0}}>
-                        <DeleteIcon/>
+                        <DeleteIcon onClick={deleteLanguage}/>
                     </IconButton>
-                </TableCell>
-            </TableRow>
-            <TableRow>
-                <TableCell style={{paddingBottom: 0, paddingTop: 0}} colSpan={6}>
-                    <Collapse in={open} timeout="auto" unmountOnExit>
-                        <Box margin={1}>
-
-                        </Box>
-                    </Collapse>
                 </TableCell>
             </TableRow>
         </React.Fragment>

@@ -20,7 +20,7 @@ class ImportTranslationRepositoryTest : AbstractSpringTest() {
         testDataService.saveTestData(importTestData.root)
 
         val result = importTranslationRepository
-                .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10), false)
+                .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10))
         assertThat(result.content).hasSize(6)
 
         result.content[0].let {
@@ -28,8 +28,8 @@ class ImportTranslationRepositoryTest : AbstractSpringTest() {
             assertThat(it.keyName).isEqualTo("cool_key")
             assertThat(it.keyId).isNotNull
             assertThat(it.text).isEqualTo("test translation")
-            assertThat(it.collisionText).isEqualTo("What a text")
-            assertThat(it.collisionId).isNotNull
+            assertThat(it.conflictText).isEqualTo("What a text")
+            assertThat(it.conflictId).isNotNull
             assertThat(it.override).isEqualTo(false)
         }
     }

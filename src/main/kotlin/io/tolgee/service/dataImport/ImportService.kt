@@ -143,8 +143,8 @@ class ImportService(
         return this.importFileRepository.saveAll(files)
     }
 
-    fun onTranslationCollisionRemoved(translation: Translation) {
-        this.importTranslationRepository.removeExistingTranslationCollisionReference(translation)
+    fun onTranslationConflictRemoved(translation: Translation) {
+        this.importTranslationRepository.removeExistingTranslationConflictReference(translation)
     }
 
     fun getResult(repositoryId: Long, userId: Long, pageable: Pageable): Page<ImportLanguageView> {
@@ -157,14 +157,36 @@ class ImportService(
         return importLanguageRepository.findById(languageId).orElse(null)
     }
 
-    fun getTranslations(languageId: Long, pageable: Pageable, onlyCollisions: Boolean): Page<ImportTranslationView> {
-        return importTranslationRepository.findImportTranslationsView(languageId, pageable, onlyCollisions)
+    fun getTranslations(languageId: Long, pageable: Pageable, onlyConflicts: Boolean, onlyUnresolved: Boolean):
+            Page<ImportTranslationView> {
+        return importTranslationRepository.findImportTranslationsView(languageId, pageable, onlyConflicts, onlyUnresolved)
     }
 
-    fun deleteImport(repositoryId: Long, authorId: Long) =
-            this.importRepository.deleteById(findOrThrow(repositoryId, authorId).id)
+    fun deleteImport(import: Import) =
+            this.importRepository.delete(import)
 
-    fun deleteLanguage(languageId: Long) {
-        this.importLanguageRepository.deleteById(languageId)
+    fun deleteImport(repositoryId: Long, authorId: Long) =
+            this.deleteImport(findOrThrow(repositoryId, authorId))
+
+    fun deleteLanguage(language: ImportLanguage) {
+        val import = language.file.import
+        this.importLanguageRepository.delete(language)
+        if (this.findLanguages(import = language.file.import).isEmpty()) {
+            deleteImport(import)
+        }
+    }
+
+    fun findTranslation(translationId: Long): ImportTranslation? {
+        return importTranslationRepository.findById(translationId).orElse(null)
+    }
+
+    fun resolveTranslationConflict(translation: ImportTranslation, override: Boolean) {
+        translation.override = override
+        translation.resolved = true
+        importTranslationRepository.save(translation)
+    }
+
+    fun resolveAllOfLanguage(language: ImportLanguage, override: Boolean) {
+        return this.translationRepository.resolveAllOfLanguage(language, override)
     }
 }

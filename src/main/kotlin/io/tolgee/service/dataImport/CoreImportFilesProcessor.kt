@@ -193,11 +193,11 @@ class CoreImportFilesProcessor(
                 this@CoreImportFilesProcessor.addToStoredTranslations(newTranslation)
             }
         }
-        this@CoreImportFilesProcessor.handleCollisions()
+        this@CoreImportFilesProcessor.handleConflicts()
         this@CoreImportFilesProcessor.saveAllStoredTranslations()
     }
 
-    private fun handleCollisions() {
+    private fun handleConflicts() {
         populateExistingTranslations()
         this.storedTranslations.asSequence().flatMap { it.value.values }.flatMap { it }.forEach { storedTranslation ->
             val existingLanguage = storedTranslation.language.existingLanguage
@@ -205,7 +205,7 @@ class CoreImportFilesProcessor(
                 val existingTranslation = existingTranslations[existingLanguage.id]
                         ?.let { it[storedTranslation.key.name] }
                 if (existingTranslation != null) {
-                    storedTranslation.collision = existingTranslation
+                    storedTranslation.conflict = existingTranslation
                 }
             }
         }

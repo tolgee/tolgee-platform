@@ -25,7 +25,7 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             select il.id as id, il.name as name, el.id as existingLanguageId, 
             el.abbreviation as existingLanguageAbbreviation, el.name as existingLanguageName,
             if.name as importFileName, if.id as importFileId,
-            count(it) as totalCount, sum(case when it.collision is null then 0 else 1 end) as conflictCount
+            count(it) as totalCount, sum(case when it.conflict is null then 0 else 1 end) as conflictCount
             from ImportLanguage il join il.file if left join il.existingLanguage el left join il.translations it
             group by il.id
             """)

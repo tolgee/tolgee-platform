@@ -13,7 +13,7 @@ export class ImportExportService {
     constructor(private messaging: MessageService) {
     }
 
-    readonly preImport = async (repositoryId: number, files: File[]) => schemaHttpService
+    readonly addFiles = async (repositoryId: number, files: File[]) => schemaHttpService
         .schemaRequestRaw("/v2/repositories/{repositoryId}/import/with-streaming-response", "post")(
             {
                 path: {
@@ -28,7 +28,9 @@ export class ImportExportService {
         );
 
     readonly loadData = async (repositoryId: number, pageable: components["schemas"]["Pageable"]) => schemaHttpService
-        .schemaRequest("/v2/repositories/{repositoryId}/import/result", "get")(
+        .schemaRequest("/v2/repositories/{repositoryId}/import/result", "get",{
+            disableNotFoundHandling: true
+        })(
             {
                 path: {
                     repositoryId

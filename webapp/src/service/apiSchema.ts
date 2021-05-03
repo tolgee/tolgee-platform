@@ -41,9 +41,14 @@ export interface paths {
   "/api/repository/{repositoryId}/keys": {
     put: operations["edit"];
     post: operations["create_3"];
+    delete: operations["delete_4"];
   };
   "/api/repository/keys": {
     delete: operations["delete_5"];
+  };
+  "/api/repository/{repositoryId}/translations": {
+    put: operations["setTranslations"];
+    post: operations["createOrUpdateTranslations"];
   };
   "/api/repository/translations": {
     put: operations["setTranslations_1"];
@@ -51,6 +56,7 @@ export interface paths {
   };
   "/v2/repositories/{repositoryId}/import": {
     post: operations["import"];
+    delete: operations["cancelImport"];
   };
   "/v2/repositories/{repositoryId}/import/with-streaming-response": {
     post: operations["importStreaming"];
@@ -79,6 +85,10 @@ export interface paths {
     get: operations["getInfo"];
     post: operations["updateUser"];
   };
+  "/api/repository/{repositoryId}/keys/translations/{languages}": {
+    /** Key name must be provided in method body, since it can be long and can contain characters hard to encode */
+    post: operations["getKeyTranslationsPost"];
+  };
   "/api/repository/{repositoryId}/keys/edit": {
     post: operations["editDeprecated"];
   };
@@ -87,6 +97,9 @@ export interface paths {
   };
   "/api/repository/{repositoryId}/import": {
     post: operations["doImport"];
+  };
+  "/api/repository/{repositoryId}/languages/edit": {
+    post: operations["editLanguage"];
   };
   "/api/repository/languages/edit": {
     post: operations["editLanguage_1"];
@@ -190,6 +203,10 @@ export interface paths {
   "/api/address-part/validate-organization/{addressPart}": {
     get: operations["validateOrganizationAddressPart_1"];
   };
+  "/api/repository/{repositoryId}/keys/{id}": {
+    get: operations["getDeprecated"];
+    delete: operations["delete_2"];
+  };
   "/api/repository/keys/{id}": {
     get: operations["getDeprecated_1"];
     delete: operations["delete_3"];
@@ -197,15 +214,22 @@ export interface paths {
   "/api/repository/{repositoryId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
   };
+  "/api/repository/{repositoryId}/translations/{languages}": {
+    get: operations["getTranslations"];
+  };
   "/api/repository/translations/{languages}": {
     get: operations["getTranslations_1"];
   };
   "/api/repository/{repositoryId}/translations/view": {
     get: operations["getViewData"];
   };
+  "/api/repository/{repositoryId}/languages/{id}": {
+    get: operations["get_5"];
+    delete: operations["deleteLanguage_1"];
+  };
   "/api/repository/languages/{id}": {
     get: operations["get_6"];
-    delete: operations["deleteLanguage_1"];
+    delete: operations["deleteLanguage_2"];
   };
   "/api/repositories/{id}": {
     get: operations["getRepository"];
@@ -238,6 +262,9 @@ export interface paths {
   "/api/apiKeys/availableScopes": {
     get: operations["getScopes"];
   };
+  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}": {
+    delete: operations["deleteLanguage"];
+  };
   "/v2/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser"];
   };
@@ -246,6 +273,9 @@ export interface paths {
   };
   "/api/repository/screenshots/{ids}": {
     delete: operations["deleteScreenshots"];
+  };
+  "/api/repository/{repositoryId}/screenshots/{ids}": {
+    delete: operations["deleteScreenshots_1"];
   };
   "/api/invitation/{invitationId}": {
     delete: operations["deleteInvitation"];
@@ -330,6 +360,9 @@ export interface components {
       password?: string;
       /** Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
       callbackUrl?: string;
+    };
+    GetKeyTranslationsReqDto: {
+      key?: string;
     };
     DeprecatedEditKeyDTO: {
       oldFullPathString: string;
@@ -471,9 +504,10 @@ export interface components {
       text: string;
       keyName: string;
       keyId: number;
-      collisionId?: number;
-      collisionText?: string;
+      conflictId?: number;
+      conflictText?: string;
       override: boolean;
+      resolved: boolean;
       _links?: components["schemas"]["Links"];
     };
     PagedModelImportTranslationModel: {
@@ -828,6 +862,22 @@ export interface operations {
       };
     };
   };
+  delete_4: {
+    parameters: {
+      path: {
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
+      };
+    };
+  };
   delete_5: {
     responses: {
       /** OK */
@@ -836,6 +886,38 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": number[];
+      };
+    };
+  };
+  setTranslations: {
+    parameters: {
+      path: {
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTranslationsDTO"];
+      };
+    };
+  };
+  createOrUpdateTranslations: {
+    parameters: {
+      path: {
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTranslationsDTO"];
       };
     };
   };
@@ -883,6 +965,17 @@ export interface operations {
           files: string[];
         };
       };
+    };
+  };
+  cancelImport: {
+    parameters: {
+      path: {
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
     };
   };
   importStreaming: {
@@ -1050,6 +1143,28 @@ export interface operations {
       };
     };
   };
+  /** Key name must be provided in method body, since it can be long and can contain characters hard to encode */
+  getKeyTranslationsPost: {
+    parameters: {
+      path: {
+        languages: string[];
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": { [key: string]: string };
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetKeyTranslationsReqDto"];
+      };
+    };
+  };
   editDeprecated: {
     parameters: {
       path: {
@@ -1099,6 +1214,26 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ImportDto"];
+      };
+    };
+  };
+  editLanguage: {
+    parameters: {
+      path: {
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["LanguageDTO"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LanguageDTO"];
       };
     };
   };
@@ -1430,7 +1565,7 @@ export interface operations {
         languageId: number;
       };
       query: {
-        onlyCollisions?: boolean;
+        onlyConflicts?: boolean;
         pageable: components["schemas"]["Pageable"];
       };
     };
@@ -1677,6 +1812,34 @@ export interface operations {
       };
     };
   };
+  getDeprecated: {
+    parameters: {
+      path: {
+        id: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["DeprecatedKeyDto"];
+        };
+      };
+    };
+  };
+  delete_2: {
+    parameters: {
+      path: {
+        id: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
   getDeprecated_1: {
     parameters: {
       path: {
@@ -1718,6 +1881,22 @@ export interface operations {
       };
     };
   };
+  getTranslations: {
+    parameters: {
+      path: {
+        languages: string[];
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": { [key: string]: { [key: string]: any } };
+        };
+      };
+    };
+  };
   getTranslations_1: {
     parameters: {
       path: {
@@ -1754,6 +1933,34 @@ export interface operations {
       };
     };
   };
+  get_5: {
+    parameters: {
+      path: {
+        id: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["LanguageDTO"];
+        };
+      };
+    };
+  };
+  deleteLanguage_1: {
+    parameters: {
+      path: {
+        id: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
   get_6: {
     parameters: {
       path: {
@@ -1769,7 +1976,7 @@ export interface operations {
       };
     };
   };
-  deleteLanguage_1: {
+  deleteLanguage_2: {
     parameters: {
       path: {
         id: number;
@@ -1925,6 +2132,18 @@ export interface operations {
       };
     };
   };
+  deleteLanguage: {
+    parameters: {
+      path: {
+        languageId: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
   removeUser: {
     parameters: {
       path: {
@@ -1953,6 +2172,18 @@ export interface operations {
     parameters: {
       path: {
         ids: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  deleteScreenshots_1: {
+    parameters: {
+      path: {
+        ids: number[];
+        repositoryId: number;
       };
     };
     responses: {

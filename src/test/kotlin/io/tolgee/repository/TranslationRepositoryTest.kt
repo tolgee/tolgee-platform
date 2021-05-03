@@ -34,12 +34,12 @@ class TranslationRepositoryTest : AbstractTransactionalTestNGSpringContextTests(
 
         testDataService.saveTestData(testData.root)
 
-        assertThat(importService.findTranslations(testData.import, testData.importEnglish.id).first().collision)
-                .isEqualTo(testData.collision)
-        translationRepository.delete(testData.collision)
+        assertThat(importService.findTranslations(testData.import, testData.importEnglish.id).first().conflict)
+                .isEqualTo(testData.conflict)
+        translationRepository.delete(testData.conflict)
         entityManager.flush()
         entityManager.clear()
-        assertThat(importService.findTranslations(testData.import, testData.importEnglish.id).first().collision)
+        assertThat(importService.findTranslations(testData.import, testData.importEnglish.id).first().conflict)
                 .isEqualTo(null)
     }
 }

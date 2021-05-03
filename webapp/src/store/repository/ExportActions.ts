@@ -2,14 +2,14 @@ import {singleton} from 'tsyringe';
 import {AbstractLoadableActions, StateWithLoadables} from "../AbstractLoadableActions";
 import {ImportExportService} from "../../service/ImportExportService";
 
-export class ImportExportState extends StateWithLoadables<ImportExportActions> {
+export class ExportState extends StateWithLoadables<ExportActions> {
 
 }
 
 @singleton()
-export class ImportExportActions extends AbstractLoadableActions<ImportExportState> {
+export class ExportActions extends AbstractLoadableActions<ExportState> {
     constructor(private service: ImportExportService) {
-        super(new ImportExportState());
+        super(new ExportState());
     }
     
     loadableDefinitions = {
@@ -17,7 +17,7 @@ export class ImportExportActions extends AbstractLoadableActions<ImportExportSta
     };
 
     get prefix(): string {
-        return 'IMPORT_EXPORT';
+        return 'EXPORT';
     }
 
 }

@@ -14,9 +14,10 @@ class ImportTranslationModelAssembler() : RepresentationModelAssemblerSupport<Im
                 text = view.text,
                 keyName = view.keyName,
                 keyId = view.keyId,
-                collisionId = view.collisionId,
-                collisionText = view.collisionText,
-                override = view.override
+                conflictId = view.conflictId,
+                conflictText = view.conflictText,
+                override = view.override,
+                resolved = view.resolved
         )
     }
 }

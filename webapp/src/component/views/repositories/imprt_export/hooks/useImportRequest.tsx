@@ -1,18 +1,21 @@
-import {useRepository} from "../../../../hooks/useRepository";
+import {useRepository} from "../../../../../hooks/useRepository";
 import {ReactNode, useEffect, useState} from "react";
-import {components} from "../../../../service/apiSchema";
+import {components} from "../../../../../service/apiSchema";
 import {container} from "tsyringe";
-import {ImportExportService} from "../../../../service/ImportExportService";
+import {ImportExportService} from "../../../../../service/ImportExportService";
 import {T} from "@tolgee/react";
-import {startLoading, stopLoading} from "../../../../hooks/loading";
+import {startLoading, stopLoading} from "../../../../../hooks/loading";
+import {ImportActions} from "../../../../../store/repository/ImportActions";
 
 const service = container.resolve(ImportExportService)
+const actions = container.resolve(ImportActions)
 
 export const useImportRequest = () => {
     const repository = useRepository()
     const [result, setResult] = useState(undefined as components["schemas"]["PagedModelImportLanguageModel"] | undefined)
     const [progressMessage, setProgressMessage] = useState(undefined as ReactNode | undefined)
-
+    const cancelLoadable = actions.useSelector(s => s.loadables.cancelImport)
+    const deleteLanguageLoadable = actions.useSelector(s => s.loadables.deleteLanguage)
 
     const onMessage = (type: string, ...params) => {
         setProgressMessage(<T>{type.toLocaleLowerCase()}</T>)
@@ -48,7 +51,7 @@ export const useImportRequest = () => {
         }
 
         try {
-            const response = await service.preImport(repository.id, files)
+            const response = await service.addFiles(repository.id, files)
             const reader = response.body!.getReader()
             let done = false
             while (!done) {
@@ -62,17 +65,31 @@ export const useImportRequest = () => {
         }
     }
 
-    useEffect(() => {
+    const loadData = () => {
         startLoading()
         service.loadData(repository.id, {page: 0, size: 100}).then(r => {
             setResult(r)
         }).catch(e => {
+            setResult(undefined)
             console.error(e)
         }).finally(() => {
             stopLoading()
-
         })
-    }, [])
+    }
+
+    useEffect(() => {
+        if (deleteLanguageLoadable.loaded || !deleteLanguageLoadable.touched) {
+            startLoading()
+            loadData()
+        }
+    }, [deleteLanguageLoadable.loading])
+
+
+    useEffect(() => {
+        if (cancelLoadable.loaded) {
+            setResult(undefined)
+        }
+    }, [cancelLoadable.touched, cancelLoadable.loading])
 
     return {
         onNewFiles, result, progressMessage

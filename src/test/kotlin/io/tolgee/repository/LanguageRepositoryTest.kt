@@ -35,7 +35,7 @@ class LanguageRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
         testDataService.saveTestData(testData.root)
 
         var foundImportLanguage = importService.findLanguages(testData.import).first()
-        assertThat(foundImportLanguage.existingLanguage).isEqualTo(testData.english)
+        assertThat(foundImportLanguage.existingLanguage!!.id).isEqualTo(testData.english.id)
         languageService.deleteLanguage(testData.english.id!!)
         entityManager.flush()
         entityManager.clear()

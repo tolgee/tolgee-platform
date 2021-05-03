@@ -5,7 +5,8 @@ interface ImportTranslationView {
     val text: String
     val keyName: String
     val keyId: Long
-    val collisionId: Long?
-    val collisionText: String?
+    val conflictId: Long?
+    val conflictText: String?
     val override: Boolean
+    val resolved: Boolean
 }

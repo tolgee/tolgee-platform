@@ -78,15 +78,15 @@ class CoreImportFileProcessorUnitTest {
     }
 
     @Test
-    fun `handles collisions properly`() {
+    fun `handles conflicts properly`() {
         fileProcessorContext.addTranslation("colliding key", "lng", "colliding value")
         fileProcessorContext.addTranslation("not colliding key", "lng", "not colliding value")
 
         whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(setOf(existingTranslation))
         processor.processFiles(listOf(importFileDto), messageClient = mock())
         verify(importServiceMock).saveTranslations(argThat {
-            assertThat(this[0].collision).isEqualTo(existingTranslation)
-            assertThat(this[1].collision).isNull()
+            assertThat(this[0].conflict).isEqualTo(existingTranslation)
+            assertThat(this[1].conflict).isNull()
             true
         })
     }

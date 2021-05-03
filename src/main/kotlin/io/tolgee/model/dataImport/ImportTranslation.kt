@@ -24,13 +24,19 @@ class ImportTranslation(
     lateinit var key: ImportKey
 
     @OneToOne
-    var collision: Translation? = null
+    var conflict: Translation? = null
 
     /**
-     * Whether this translation will override the collision
+     * Whether this translation will override the conflict
      */
     @field:NotNull
     var override: Boolean = false
+
+    /**
+     * Whether uset explicitely resolved this conflict
+     */
+    @field:NotNull
+    var resolved: Boolean = false
 
     fun addIssue(
             type: TranslationIssueType,

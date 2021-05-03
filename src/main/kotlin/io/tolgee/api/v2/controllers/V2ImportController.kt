@@ -18,7 +18,10 @@ import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessage
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
+import io.tolgee.model.dataImport.ImportLanguage
+import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.security.AuthenticationFacade
@@ -116,11 +119,14 @@ class V2ImportController(
             @PathVariable("languageId") languageId: Long,
             @Schema(description = "Whether only translations, which are in conflict " +
                     "with existing translations should be returned")
-            @RequestParam("onlyCollisions", defaultValue = "true") onlyCollisions: Boolean = true,
+            @RequestParam("onlyConflicts", defaultValue = "false") onlyConflicts: Boolean = false,
+            @Schema(description = "Whether only translations with unresolved conflicts" +
+                    "with existing translations should be returned")
+            @RequestParam("onlyUnresolved", defaultValue = "false") onlyUnresolved: Boolean = false,
             pageable: Pageable
     ): PagedModel<ImportTranslationModel> {
-        checkUserOwnsLanguage(languageId)
-        val translations = importService.getTranslations(languageId, pageable, onlyCollisions)
+        checkLanguageInRepository(languageId)
+        val translations = importService.getTranslations(languageId, pageable, onlyConflicts, onlyUnresolved)
         return pagedTranslationsResourcesAssembler.toModel(translations, importTranslationModelAssembler)
     }
 
@@ -133,14 +139,69 @@ class V2ImportController(
     @DeleteMapping("/result/languages/{languageId}")
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
     fun deleteLanguage(@PathVariable("languageId") languageId: Long) {
-        checkUserOwnsLanguage(languageId)
-        this.importService.deleteLanguage(languageId)
+        val language = checkLanguageInRepository(languageId)
+        this.importService.deleteLanguage(language)
     }
 
-    private fun checkUserOwnsLanguage(languageId: Long) {
-        val languageRepositoryId = importService.findLanguage(languageId)?.file?.import?.repository?.id
+    @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-override")
+    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    fun resolveTranslationSetOverride(
+            @PathVariable("languageId") languageId: Long,
+            @PathVariable("translationId") translationId: Long
+    ) {
+        resolveTranslation(languageId, translationId, true)
+    }
+
+    @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing")
+    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    fun resolveTranslationSetKeepExisting(@PathVariable("languageId") languageId: Long,
+                                          @PathVariable("translationId") translationId: Long
+    ) {
+        resolveTranslation(languageId, translationId, false)
+    }
+
+    @PutMapping("/result/languages/{languageId}/resolve-all/set-override")
+    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    fun resolveTranslationSetOverride(
+            @PathVariable("languageId") languageId: Long
+    ) {
+        resolveAllOfLanguage(languageId, true)
+    }
+
+    @PutMapping("/result/languages/{languageId}/resolve-all/set-keep-existing")
+    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    fun resolveTranslationSetKeepExisting(
+            @PathVariable("languageId") languageId: Long,
+    ) {
+        resolveAllOfLanguage(languageId, false)
+    }
+
+    private fun resolveAllOfLanguage(languageId: Long, override: Boolean) {
+        val language = checkLanguageInRepository(languageId)
+        importService.resolveAllOfLanguage(language, override)
+    }
+
+    private fun resolveTranslation(languageId: Long, translationId: Long, override: Boolean) {
+        checkLanguageInRepository(languageId)
+        val translation = checkTranslationOfLanguage(translationId, languageId)
+        return importService.resolveTranslationConflict(translation, override)
+    }
+
+    private fun checkLanguageInRepository(languageId: Long): ImportLanguage {
+        val language = importService.findLanguage(languageId) ?: throw NotFoundException()
+        val languageRepositoryId = language.file.import.repository.id
         if (languageRepositoryId != repositoryHolder.repository.id) {
             throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
         }
+        return language
+    }
+
+    private fun checkTranslationOfLanguage(translationId: Long, languageId: Long): ImportTranslation {
+        val translation = importService.findTranslation(translationId) ?: throw NotFoundException()
+
+        if (translation.language.id != languageId) {
+            throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
+        }
+        return translation
     }
 }

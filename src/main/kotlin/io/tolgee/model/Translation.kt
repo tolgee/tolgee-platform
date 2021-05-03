@@ -86,7 +86,7 @@ data class Translation(
             @PreRemove
             @Transactional
             open fun preRemove(translation: Translation) {
-                provider.`object`.onTranslationCollisionRemoved(translation)
+                provider.`object`.onTranslationConflictRemoved(translation)
             }
         }
     }
