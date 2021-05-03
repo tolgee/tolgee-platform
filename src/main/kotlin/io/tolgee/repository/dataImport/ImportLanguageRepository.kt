@@ -25,8 +25,11 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             select il.id as id, il.name as name, el.id as existingLanguageId, 
             el.abbreviation as existingLanguageAbbreviation, el.name as existingLanguageName,
             if.name as importFileName, if.id as importFileId,
-            count(it) as totalCount, sum(case when it.conflict is null then 0 else 1 end) as conflictCount
+            count(it) as totalCount, 
+            sum(case when it.conflict is null then 0 else 1 end) as conflictCount,
+            sum(case when (it.conflict is null or it.resolved != true) then 0 else 1 end) as resolvedCount
             from ImportLanguage il join il.file if left join il.existingLanguage el left join il.translations it
+            where if.import.id = :importId
             group by il.id
             """)
     fun findImportLanguagesView(importId: Long, pageable: Pageable): Page<ImportLanguageView>

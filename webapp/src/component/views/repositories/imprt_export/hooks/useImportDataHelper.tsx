@@ -10,7 +10,7 @@ import {ImportActions} from "../../../../../store/repository/ImportActions";
 const service = container.resolve(ImportExportService)
 const actions = container.resolve(ImportActions)
 
-export const useImportRequest = () => {
+export const useImportDataHelper = () => {
     const repository = useRepository()
     const [result, setResult] = useState(undefined as components["schemas"]["PagedModelImportLanguageModel"] | undefined)
     const [progressMessage, setProgressMessage] = useState(undefined as ReactNode | undefined)
@@ -92,6 +92,6 @@ export const useImportRequest = () => {
     }, [cancelLoadable.touched, cancelLoadable.loading])
 
     return {
-        onNewFiles, result, progressMessage
+        onNewFiles, result, progressMessage, loadData
     }
 }

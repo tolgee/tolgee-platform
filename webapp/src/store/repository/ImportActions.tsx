@@ -34,6 +34,26 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
                 "/v2/repositories/{repositoryId}/import/result/languages/{languageId}",
                 "delete"
             ), undefined, <T>import_language_deleted</T>
+        ),
+        resolveTranslationConflictOverride: this.createLoadableDefinition(
+            this.schemaService.schemaRequest(
+                "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override",
+                "put"
+            )),
+        resolveTranslationConflictKeep: this.createLoadableDefinition(
+            this.schemaService.schemaRequest(
+                "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing",
+                "put"
+            )),
+        resolveAllOverride: this.createLoadableDefinition(
+            this.schemaService.schemaRequest(
+                "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-override", "put"
+            ), undefined, <T>import_resolve_override_all_success</T>
+        ),
+        resolveAllKeepExisting: this.createLoadableDefinition(
+            this.schemaService.schemaRequest(
+                "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-keep-existing", "put"
+            ), undefined, <T>import_resolve_keep_all_existing_success</T>
         )
     };
 

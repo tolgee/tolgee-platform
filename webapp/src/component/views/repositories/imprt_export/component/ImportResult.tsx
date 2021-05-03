@@ -7,7 +7,9 @@ import {ImportConflictResolutionDialog} from "./ImportConflictResolutionDialog";
 
 type ImportResultProps = {
     result?: components["schemas"]["PagedModelImportLanguageModel"]
+    onLoadData: () => void
 }
+
 
 const useStyles = makeStyles(theme => ({
     table: {
@@ -23,13 +25,18 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
     const rows = props.result?._embedded?.languages
     const [resolveRow, setResolveRow] = useState(undefined as components["schemas"]["ImportLanguageModel"] | undefined)
 
+    const onDialogClose = () => {
+        props.onLoadData()
+        setResolveRow(undefined)
+    }
+
     if (!rows) {
         return <></>
     }
 
     return (
         <>
-            <ImportConflictResolutionDialog row={resolveRow} onClose={() => setResolveRow(undefined)}/>
+            <ImportConflictResolutionDialog row={resolveRow} onClose={onDialogClose}/>
             <Box mt={5}>
                 <TableContainer>
                     <Table className={classes.table}>

@@ -14,5 +14,6 @@ open class ImportLanguageModel(
         override val importFileName: String,
         override val importFileId: Long,
         override val totalCount: Int,
-        override val conflictCount: Int
+        override val conflictCount: Int,
+        override val resolvedCount: Int
 ) : RepresentationModel<ImportLanguageModel>(), ImportLanguageView

@@ -10,6 +10,18 @@ export interface paths {
   "/v2/repositories/{repositoryId}/users/{userId}/revoke-access": {
     put: operations["revokePermission"];
   };
+  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
+    put: operations["resolveTranslationSetOverride"];
+  };
+  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing": {
+    put: operations["resolveTranslationSetKeepExisting"];
+  };
+  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-override": {
+    put: operations["resolveTranslationSetOverride_1"];
+  };
+  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
+    put: operations["resolveTranslationSetKeepExisting_1"];
+  };
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole"];
   };
@@ -334,6 +346,7 @@ export interface components {
       importFileId: number;
       totalCount: number;
       conflictCount: number;
+      resolvedCount: number;
       _links?: components["schemas"]["Links"];
     };
     PageMetadata: {
@@ -635,6 +648,56 @@ export interface operations {
       path: {
         repositoryId: number;
         userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  resolveTranslationSetOverride: {
+    parameters: {
+      path: {
+        languageId: number;
+        translationId: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  resolveTranslationSetKeepExisting: {
+    parameters: {
+      path: {
+        languageId: number;
+        translationId: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  resolveTranslationSetOverride_1: {
+    parameters: {
+      path: {
+        languageId: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  resolveTranslationSetKeepExisting_1: {
+    parameters: {
+      path: {
+        languageId: number;
+        repositoryId: number;
       };
     };
     responses: {
@@ -1566,6 +1629,7 @@ export interface operations {
       };
       query: {
         onlyConflicts?: boolean;
+        onlyUnresolved?: boolean;
         pageable: components["schemas"]["Pageable"];
       };
     };
