@@ -25,7 +25,7 @@ class ImportTranslationRepositoryTest : AbstractSpringTest() {
 
         result.content[0].let {
             assertThat(it.id).isNotNull
-            assertThat(it.keyName).isEqualTo("cool_key")
+            assertThat(it.keyName).isEqualTo("what a key")
             assertThat(it.keyId).isNotNull
             assertThat(it.text).isEqualTo("test translation")
             assertThat(it.conflictText).isEqualTo("What a text")

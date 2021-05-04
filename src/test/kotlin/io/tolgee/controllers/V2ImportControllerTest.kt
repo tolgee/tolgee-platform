@@ -10,7 +10,6 @@ import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIV
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_FILES_IN_ARCHIVE
 import io.tolgee.fixtures.*
 import io.tolgee.model.Repository
-import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
@@ -147,8 +146,8 @@ class V2ImportControllerTest : SignedInControllerTest() {
                     translations.isArray.isNotEmpty.hasSize(4)
                     translations.node("[0]").let {
                         it.node("id").isNotNull
-                        it.node("text").isEqualTo("test translation")
-                        it.node("keyName").isEqualTo("cool_key")
+                        it.node("text").isEqualTo("Overridden")
+                        it.node("keyName").isEqualTo("what a key")
                         it.node("keyId").isNotNull
                         it.node("conflictId").isNotNull
                         it.node("conflictText").isEqualTo("What a text")
@@ -191,11 +190,10 @@ class V2ImportControllerTest : SignedInControllerTest() {
     @Test
     fun `onlyUnresolved filter on translations works`() {
         val testData = ImportTestData()
-        var resolved: ImportTranslation? = null
-        var resolvedText = "Hello, I am resolved"
+        val resolvedText = "Hello, I am resolved"
 
         testData {
-            resolved = data.importFiles[0].addImportTranslation {
+            data.importFiles[0].addImportTranslation {
                 self {
                     this.resolved = true
                     key = data.importFiles[0].data.importKeys[0].self
