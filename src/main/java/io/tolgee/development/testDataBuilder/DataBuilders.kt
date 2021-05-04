@@ -113,7 +113,9 @@ class DataBuilders {
     class KeyBuilder(
             val repositoryBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Key> {
-        override var self: Key = Key()
+        override var self: Key = Key().also {
+            it.repository = repositoryBuilder.self
+        }
     }
 
     class LanguageBuilder(

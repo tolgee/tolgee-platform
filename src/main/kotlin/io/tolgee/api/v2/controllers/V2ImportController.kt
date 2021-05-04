@@ -67,7 +67,7 @@ class V2ImportController(
     @RequestBody
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
     @Operation(summary = "Prepares provided files to import, streams operation progress")
-    fun importStreaming(
+    fun addFilesStreaming(
             @PathVariable("repositoryId") repositoryId: Long,
             @RequestPart("files") files: Array<MultipartFile>,
     ): ResponseEntity<StreamingResponseBody> {
@@ -78,7 +78,7 @@ class V2ImportController(
                 responseStream.flush()
             }
             val fileDtos = files.map { ImportFileDto(it.originalFilename, it.inputStream) }
-            importService.doImport(files = fileDtos, messageClient)
+            importService.addFiles(files = fileDtos, messageClient)
             val result = this.getImportResult(repositoryId, PageRequest.of(0, 100))
             val mapper = jacksonObjectMapper()
             halMediaTypeConfiguration.configureObjectMapper(mapper)
@@ -92,12 +92,12 @@ class V2ImportController(
     @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
     @Operation(summary = "Prepares provided files to import, streams operation progress")
-    fun import(
+    fun addFiles(
             @PathVariable("repositoryId") repositoryId: Long,
             @RequestPart("files") files: Array<MultipartFile>,
     ): PagedModel<ImportLanguageModel> {
         val fileDtos = files.map { ImportFileDto(it.originalFilename, it.inputStream) }
-        importService.doImport(files = fileDtos)
+        importService.addFiles(files = fileDtos)
         return this.getImportResult(repositoryId, PageRequest.of(0, 100))
     }
 

@@ -83,7 +83,7 @@ class ImportService(
     }
 
     @Transactional
-    fun doImport(files: List<ImportFileDto>,
+    fun addFiles(files: List<ImportFileDto>,
                  messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null) {
         val import = find(repositoryHolder.repository.id, authenticationFacade.userAccount.id!!)
                 ?: Import(authenticationFacade.userAccount, repositoryHolder.repository)
@@ -96,6 +96,17 @@ class ImportService(
                 import = import
         )
         fileProcessor.processFiles(files, nonNullMessageClient)
+    }
+
+    @Transactional
+    fun import(repositoryId: Long, authorId: Long) {
+        import(findOrThrow(repositoryId, authorId))
+    }
+
+
+    @Transactional
+    fun import(import: Import) {
+        StoredDataImporter(applicationContext, import).doImport()
     }
 
     fun save(import: Import): Import {

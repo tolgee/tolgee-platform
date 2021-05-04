@@ -4,8 +4,8 @@ import io.tolgee.dtos.PathDTO
 import java.util.*
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
-import kotlin.collections.HashSet
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["repository_id", "name"], name = "key_repository_id_name")])
@@ -19,7 +19,8 @@ data class Key(
         @Column(length = 2000)
         var name: String? = null,
 ) : AuditModel() {
-    @ManyToOne
+    @field:NotNull
+    @ManyToOne(optional = false)
     var repository: Repository? = null
 
     @OneToMany(mappedBy = "key")

@@ -74,11 +74,15 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     fun getOrCreate(key: Key?, language: Language?): Translation {
-        return get(key, language).orElseGet { builder().language(language).key(key).build() }
+        return find(key, language).orElseGet { builder().language(language).key(key).build() }
     }
 
-    operator fun get(key: Key?, language: Language?): Optional<Translation> {
+    fun find(key: Key?, language: Language?): Optional<Translation> {
         return translationRepository.findOneByKeyAndLanguage(key, language)
+    }
+
+    fun find(id: Long): Translation? {
+        return this.translationRepository.findById(id).orElse(null)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -98,6 +102,10 @@ class TranslationService(private val translationRepository: TranslationRepositor
     fun setTranslation(key: Key, languageAbbreviation: String?, text: String?) {
         val language = languageService!!.findByAbbreviation(languageAbbreviation!!, key.repository!!)
                 .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+        setTranslation(key, language, text)
+    }
+
+    fun setTranslation(key: Key, language: Language, text: String?) {
         val translation = getOrCreate(key, language)
         translation.text = text
         translationRepository.save(translation)

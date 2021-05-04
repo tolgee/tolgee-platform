@@ -124,7 +124,7 @@ class ImportTestData {
 
                     val addedKey = addImportKey {
                         self {
-                            name = "cool_key"
+                            name = "what a key"
                         }
                     }
                     addImportKey {
@@ -148,6 +148,7 @@ class ImportTestData {
                             this.language = importEnglish
                             this.key = addedKey.self
                             this.conflict = this@ImportTestData.conflict
+                            this.text = "Overridden"
                         }
                     }.self
                     addImportTranslation {
@@ -155,6 +156,7 @@ class ImportTestData {
                             this.language = importEnglish
                             this.key = this@addImport.data.importFiles[0].data.importKeys[1].self
                             this.conflict = repositoryBuilder.data.translations[1].self
+                            this.text = "Imported text"
                         }
                     }
                     addImportTranslation {
@@ -169,18 +171,19 @@ class ImportTestData {
                             this.language = importEnglish
                             this.key = this@addImport.data.importFiles[0].data.importKeys[3].self
                             this.conflict = repositoryBuilder.data.translations[3].self
+
                         }
                     }
                     addImportTranslation {
                         self {
                             this.language = importEnglish
-                            this.key = this@addImport.data.importFiles[0].data.importKeys[1].self
+                            this.key = this@addImport.data.importFiles[0].data.importKeys[4].self
                         }
                     }
                     addImportTranslation {
                         self {
                             this.language = importEnglish
-                            this.key = this@addImport.data.importFiles[0].data.importKeys[1].self
+                            this.key = this@addImport.data.importFiles[0].data.importKeys[5].self
                         }
                     }
                 }

@@ -1,0 +1,74 @@
+package io.tolgee.service.dataImport
+
+import io.tolgee.AbstractSpringTest
+import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.development.testDataBuilder.data.ImportTestData
+import io.tolgee.exceptions.BadRequestException
+import org.assertj.core.api.Assertions
+import org.springframework.boot.test.context.SpringBootTest
+import org.testng.annotations.BeforeMethod
+import org.testng.annotations.Test
+
+@SpringBootTest
+class StoredDataImporterTest : AbstractSpringTest() {
+    lateinit var storedDataImporter: StoredDataImporter
+    lateinit var importTestData: ImportTestData
+
+    @BeforeMethod
+    fun setup() {
+        importTestData = ImportTestData()
+        storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import)
+    }
+
+    @Test
+    fun `it successfully imports valid data`() {
+        importTestData.translationWithConflict.override = true
+        setAllResolved()
+        testDataService.saveTestData(importTestData.root)
+        storedDataImporter.doImport()
+        translationService.find(importTestData.translationWithConflict.conflict!!.id!!)!!.let {
+            assertThat(it.text).isEqualTo(importTestData.translationWithConflict.text)
+        }
+        val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id!!)!!
+        val keptTranslation = importTestData.root.data.repositories[0].data.translations[1].self
+        assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
+        assertThat(keptTranslation.text).isEqualTo("What a text")
+    }
+
+    @Test
+    fun `it throws bad request`() {
+        testDataService.saveTestData(importTestData.root)
+        Assertions.assertThatExceptionOfType(BadRequestException::class.java).isThrownBy {
+            storedDataImporter.doImport()
+        }
+    }
+
+    @Test
+    fun `it checks for conflicts again`() {
+        setAllResolved()
+        importTestData.root.data.repositories[0].addTranslation {
+            self {
+                language = repositoryBuilder.data.languages[0].self
+                key = repositoryBuilder.data.keys[4].self
+                text = "Old translation text"
+            }
+        }
+
+        importTestData.importBuilder.data.importFiles[0].data.importTranslations[4].self {
+            resolved = false
+        }
+
+        testDataService.saveTestData(importTestData.root)
+        Assertions.assertThatExceptionOfType(BadRequestException::class.java).isThrownBy {
+            storedDataImporter.doImport()
+        }
+    }
+
+    private fun setAllResolved() {
+        importTestData.importBuilder.data.importFiles.forEach { file ->
+            file.data.importTranslations.forEach {
+                it.self { resolved = true }
+            }
+        }
+    }
+}
