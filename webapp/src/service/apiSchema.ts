@@ -22,6 +22,9 @@ export interface paths {
   "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
     put: operations["resolveTranslationSetKeepExisting_1"];
   };
+  "/v2/repositories/{repositoryId}/import/apply": {
+    put: operations["applyImport"];
+  };
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole"];
   };
@@ -67,11 +70,11 @@ export interface paths {
     post: operations["createOrUpdateTranslations_1"];
   };
   "/v2/repositories/{repositoryId}/import": {
-    post: operations["import"];
+    post: operations["addFiles"];
     delete: operations["cancelImport"];
   };
   "/v2/repositories/{repositoryId}/import/with-streaming-response": {
-    post: operations["importStreaming"];
+    post: operations["addFilesStreaming"];
   };
   "/v2/organizations": {
     get: operations["getAll_1"];
@@ -705,6 +708,17 @@ export interface operations {
       200: unknown;
     };
   };
+  applyImport: {
+    parameters: {
+      path: {
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
   setUserRole: {
     parameters: {
       path: {
@@ -1008,7 +1022,7 @@ export interface operations {
       };
     };
   };
-  import: {
+  addFiles: {
     parameters: {
       path: {
         repositoryId: number;
@@ -1041,7 +1055,7 @@ export interface operations {
       200: unknown;
     };
   };
-  importStreaming: {
+  addFilesStreaming: {
     parameters: {
       path: {
         repositoryId: number;

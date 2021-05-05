@@ -2,6 +2,7 @@ package io.tolgee.service.dataImport
 
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
@@ -32,10 +33,15 @@ class StoredDataImporter(
     private fun ImportTranslation.doImport() {
         this.checkConflictResolved()
         if (this.conflict == null || this.override) {
-            val key = keyService.getOrCreateKey(import.repository, this.key.name)
+            val key = this.conflict?.key ?: keyService.getOrCreateKey(import.repository, this.key.name)
             val language = this.language.existingLanguage
                     ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
-            translationService.setTranslation(key, language, this.text)
+            val translation = this.conflict ?: Translation().apply {
+                this.text = this@doImport.text
+                this.language = language
+                this.key = key
+            }
+            translationService.saveTranslation(translation)
         }
     }
 

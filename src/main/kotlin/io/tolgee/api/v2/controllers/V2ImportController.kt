@@ -101,6 +101,15 @@ class V2ImportController(
         return this.getImportResult(repositoryId, PageRequest.of(0, 100))
     }
 
+    @PutMapping("/apply")
+    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @Operation(summary = "Imports the data prepared in previous step")
+    fun applyImport(
+            @PathVariable("repositoryId") repositoryId: Long,
+    ) {
+        this.importService.import(repositoryId, authenticationFacade.userAccount.id!!)
+    }
+
     @GetMapping("/result")
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
     fun getImportResult(

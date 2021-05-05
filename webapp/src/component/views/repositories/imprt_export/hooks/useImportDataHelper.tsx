@@ -51,6 +51,7 @@ export const useImportDataHelper = () => {
         }
 
         try {
+            startLoading()
             const response = await service.addFiles(repository.id, files)
             const reader = response.body!.getReader()
             let done = false
@@ -62,6 +63,8 @@ export const useImportDataHelper = () => {
             }
         } catch (e) {
             console.error(e)
+        } finally {
+            stopLoading()
         }
     }
 

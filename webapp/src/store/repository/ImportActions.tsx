@@ -54,6 +54,11 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
             this.schemaService.schemaRequest(
                 "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-keep-existing", "put"
             ), undefined, <T>import_resolve_keep_all_existing_success</T>
+        ),
+        applyImport: this.createLoadableDefinition(
+            this.schemaService.schemaRequest(
+                "/v2/repositories/{repositoryId}/import/apply", "put"
+            ), undefined, <T>import_successfully_applied_message</T>
         )
     };
 

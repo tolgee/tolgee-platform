@@ -108,6 +108,10 @@ class TranslationService(private val translationRepository: TranslationRepositor
     fun setTranslation(key: Key, language: Language, text: String?) {
         val translation = getOrCreate(key, language)
         translation.text = text
+        saveTranslation(translation)
+    }
+
+    fun saveTranslation(translation: Translation){
         translationRepository.save(translation)
     }
 

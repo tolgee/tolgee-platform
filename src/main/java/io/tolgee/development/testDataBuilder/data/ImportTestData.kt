@@ -149,7 +149,7 @@ class ImportTestData {
                             this.key = addedKey.self
                             this.conflict = this@ImportTestData.conflict
                             this.text = "Overridden"
-                        }
+                         }
                     }.self
                     addImportTranslation {
                         self {
@@ -195,5 +195,21 @@ class ImportTestData {
     operator fun invoke(ft: DataBuilders.ImportBuilder.() -> Unit): TestDataBuilder {
         ft(importBuilder)
         return root
+    }
+
+    fun setAllResolved() {
+        this.importBuilder.data.importFiles.forEach { file ->
+            file.data.importTranslations.forEach {
+                it.self { resolved = true }
+            }
+        }
+    }
+
+    fun setAllOverride(){
+        this.importBuilder.data.importFiles.forEach { file ->
+            file.data.importTranslations.forEach {
+                it.self { override = true }
+            }
+        }
     }
 }

@@ -144,7 +144,7 @@ export class ApiHttpService {
 
 
     buildQuery(object: { [key: string]: any }): string {
-        return Object.keys(object).filter(k => object[k] !== undefined)
+        return Object.keys(object).filter(k => !!object[k])
             .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(object[k]))
             .join('&');
     }

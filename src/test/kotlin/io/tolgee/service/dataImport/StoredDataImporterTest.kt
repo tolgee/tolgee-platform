@@ -23,7 +23,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
     @Test
     fun `it successfully imports valid data`() {
         importTestData.translationWithConflict.override = true
-        setAllResolved()
+        importTestData.setAllResolved()
         testDataService.saveTestData(importTestData.root)
         storedDataImporter.doImport()
         translationService.find(importTestData.translationWithConflict.conflict!!.id!!)!!.let {
@@ -45,7 +45,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
 
     @Test
     fun `it checks for conflicts again`() {
-        setAllResolved()
+        importTestData.setAllResolved()
         importTestData.root.data.repositories[0].addTranslation {
             self {
                 language = repositoryBuilder.data.languages[0].self
@@ -64,11 +64,5 @@ class StoredDataImporterTest : AbstractSpringTest() {
         }
     }
 
-    private fun setAllResolved() {
-        importTestData.importBuilder.data.importFiles.forEach { file ->
-            file.data.importTranslations.forEach {
-                it.self { resolved = true }
-            }
-        }
-    }
+
 }

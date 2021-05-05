@@ -302,6 +302,23 @@ class V2ImportControllerTest : SignedInControllerTest() {
         assertThat(translation?.override).isFalse
     }
 
+
+    @Test
+    fun `it applies the import`() {
+        val testData = ImportTestData()
+        testData.setAllResolved()
+        testData.setAllOverride()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+        logAsUser(user.username!!, "admin")
+        val path = "/v2/repositories/${repositoryId}/import/apply"
+        performAuthPut(path, null).andIsOk
+        this.importService.find(repositoryId, user.id!!).let {
+            assertThat(it).isNull()
+        }
+    }
+
     private fun performImport(repositoryId: Long, files: Map<String?, Resource>): ResultActions {
         val builder = MockMvcRequestBuilders
                 .multipart("/v2/repositories/${repositoryId}/import")

@@ -107,6 +107,7 @@ class ImportService(
     @Transactional
     fun import(import: Import) {
         StoredDataImporter(applicationContext, import).doImport()
+        deleteImport(import)
     }
 
     fun save(import: Import): Import {

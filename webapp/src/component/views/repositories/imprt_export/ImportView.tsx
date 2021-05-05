@@ -8,12 +8,14 @@ import {ImportResult} from "./component/ImportResult";
 import {container} from "tsyringe";
 import {ImportActions} from "../../../../store/repository/ImportActions";
 import {useRepository} from "../../../../hooks/useRepository";
-
+import {ImportConflictNotResolvedErrorDialog} from "./component/ImportConflictNotResolvedErrorDialog";
+import {useApplyImportHelper} from "./hooks/useApplyImportHelper";
 
 const actions = container.resolve(ImportActions)
 export const ImportView: FunctionComponent = () => {
     const dataHelper = useImportDataHelper()
     const repository = useRepository()
+    const applyImportHelper = useApplyImportHelper(dataHelper)
 
     return (
         <BaseView title={<T>import_translations_title</T>} xs={12} md={10} lg={8}>
@@ -22,17 +24,28 @@ export const ImportView: FunctionComponent = () => {
                 <ImportResult onLoadData={dataHelper.loadData} result={dataHelper.result}/>
             </Box>
             {dataHelper.result &&
-            <Box>
-                <Button variant="outlined" color="primary" onClick={() => {
-                    actions.loadableActions.cancelImport.dispatch({
-                        path: {
-                            repositoryId: repository.id
-                        }
-                    })
-                }}>
-                    <T>import_cancel_button</T>
-                </Button>
+            <Box display="flex" mt={2} justifyContent="flex-end">
+                <Box mr={2}>
+                    <Button variant="outlined" color="primary" onClick={() => {
+                        actions.loadableActions.cancelImport.dispatch({
+                            path: {
+                                repositoryId: repository.id
+                            }
+                        })
+                    }}>
+                        <T>import_cancel_button</T>
+                    </Button>
+                </Box>
+                <Box>
+                    <Button variant="contained" color="primary" onClick={applyImportHelper.onApplyImport}>
+                        <T>import_apply_button</T>
+                    </Button>
+                </Box>
             </Box>}
+            <ImportConflictNotResolvedErrorDialog
+                open={applyImportHelper.conflictNotResolvedDialogOpen}
+                onClose={applyImportHelper.onDialogClose}
+            />
         </BaseView>
     );
 };
