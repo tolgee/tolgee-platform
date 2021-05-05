@@ -15,6 +15,7 @@ class ImportTestData {
     lateinit var german: Language
     lateinit var czech: Language
     lateinit var french: Language
+    lateinit var importFrench: ImportLanguage
     lateinit var importEnglish: ImportLanguage
     lateinit var translationWithConflict: ImportTranslation
     lateinit var repository: Repository
@@ -104,6 +105,20 @@ class ImportTestData {
                     this.text = "What a text"
                 }
             }.self
+            addTranslation {
+                self {
+                    this.language = french
+                    this.key = repositoryBuilder.data.keys[0].self
+                    this.text = "What a french text"
+                }
+            }.self
+            addTranslation {
+                self {
+                    this.language = french
+                    this.key = repositoryBuilder.data.keys[1].self
+                    this.text = "What a french text 2"
+                }
+            }.self
             importBuilder = addImport {
                 addImportFile {
                     self {
@@ -113,9 +128,8 @@ class ImportTestData {
                         self.name = "en"
                         self.existingLanguage = english
                     }.self
-                    addImportLanguage {
+                    importFrench = addImportLanguage {
                         self.name = "fr"
-                        self.existingLanguage = french
                     }.self
                     addImportLanguage {
                         self.name = "de"
@@ -149,7 +163,7 @@ class ImportTestData {
                             this.key = addedKey.self
                             this.conflict = this@ImportTestData.conflict
                             this.text = "Overridden"
-                         }
+                        }
                     }.self
                     addImportTranslation {
                         self {
@@ -186,6 +200,20 @@ class ImportTestData {
                             this.key = this@addImport.data.importFiles[0].data.importKeys[5].self
                         }
                     }
+                    addImportTranslation {
+                        self {
+                            this.language = importFrench
+                            this.key = this@addImport.data.importFiles[0].data.importKeys[0].self
+                            this.text = "French text"
+                        }
+                    }
+                    addImportTranslation {
+                        self {
+                            this.language = importFrench
+                            this.key = this@addImport.data.importFiles[0].data.importKeys[2].self
+                            this.text = "French text"
+                        }
+                    }
                 }
             }
             import = importBuilder.self
@@ -205,7 +233,7 @@ class ImportTestData {
         }
     }
 
-    fun setAllOverride(){
+    fun setAllOverride() {
         this.importBuilder.data.importFiles.forEach { file ->
             file.data.importTranslations.forEach {
                 it.self { override = true }

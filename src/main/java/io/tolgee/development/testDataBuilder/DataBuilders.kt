@@ -121,7 +121,9 @@ class DataBuilders {
     class LanguageBuilder(
             val repositoryBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Language> {
-        override var self: Language = Language()
+        override var self: Language = Language().apply {
+            repository = repositoryBuilder.self
+        }
     }
 
     class TranslationBuilder(

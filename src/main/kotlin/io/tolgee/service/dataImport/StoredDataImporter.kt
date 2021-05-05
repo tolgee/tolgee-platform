@@ -14,7 +14,7 @@ class StoredDataImporter(
         applicationContext: ApplicationContext,
         private val import: Import
 ) {
-    private val importDataCache = ImportDataCache(applicationContext, import)
+    private val importDataCache = ImportDataManager(applicationContext, import)
     private val translationService = applicationContext.getBean(TranslationService::class.java)
     private val keyService = applicationContext.getBean(KeyService::class.java)
 

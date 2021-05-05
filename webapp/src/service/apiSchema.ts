@@ -22,6 +22,9 @@ export interface paths {
   "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
     put: operations["resolveTranslationSetKeepExisting_1"];
   };
+  "/v2/repositories/{repositoryId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}": {
+    put: operations["selectExistingLanguage"];
+  };
   "/v2/repositories/{repositoryId}/import/apply": {
     put: operations["applyImport"];
   };
@@ -700,6 +703,19 @@ export interface operations {
     parameters: {
       path: {
         languageId: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  selectExistingLanguage: {
+    parameters: {
+      path: {
+        importLanguageId: number;
+        existingLanguageId: number;
         repositoryId: number;
       };
     };

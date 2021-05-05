@@ -20,11 +20,7 @@ import javax.persistence.*
                 name = "index_abbreviation"
         ), Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_repository")]
 )
-class Language : AuditModel() {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null
-
+class Language : StandardAuditModel() {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
     var translations: MutableSet<Translation>? = null
 

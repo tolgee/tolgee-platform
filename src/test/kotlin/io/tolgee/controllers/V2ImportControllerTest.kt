@@ -319,6 +319,22 @@ class V2ImportControllerTest : SignedInControllerTest() {
         }
     }
 
+    @Test
+    fun `it selects language`() {
+        val testData = ImportTestData()
+        testData.setAllResolved()
+        testData.setAllOverride()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+        logAsUser(user.username!!, "admin")
+        val path = "/v2/repositories/${repositoryId}/import/result/languages/${testData.importFrench.id}/" +
+                "select-existing/${testData.french.id}"
+        performAuthPut(path, null).andIsOk
+        assertThat(importService.findLanguage(testData.importFrench.id)?.existingLanguage)
+                .isEqualTo(testData.french)
+    }
+
     private fun performImport(repositoryId: Long, files: Map<String?, Resource>): ResultActions {
         val builder = MockMvcRequestBuilders
                 .multipart("/v2/repositories/${repositoryId}/import")

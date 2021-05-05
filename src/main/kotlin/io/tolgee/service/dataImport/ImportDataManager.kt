@@ -8,7 +8,7 @@ import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.service.TranslationService
 import org.springframework.context.ApplicationContext
 
-class ImportDataCache(
+class ImportDataManager(
         private val applicationContext: ApplicationContext,
         private val import: Import
 ) {
@@ -89,6 +89,12 @@ class ImportDataCache(
                             .forEach { translation -> put(translation.key!!.name!!, translation) }
                 }
             }
+        }
+    }
+
+    fun saveAllStoredTranslations() {
+        this.storedTranslations.values.asSequence().flatMap { it.values }.flatMap { it }.toList().let {
+            importService.saveTranslations(it)
         }
     }
 }

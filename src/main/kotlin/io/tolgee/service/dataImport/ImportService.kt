@@ -1,8 +1,10 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.ImportDto
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Key
 import io.tolgee.model.Language
@@ -108,6 +110,20 @@ class ImportService(
     fun import(import: Import) {
         StoredDataImporter(applicationContext, import).doImport()
         deleteImport(import)
+    }
+
+    @Transactional
+    fun selectExistingLanguage(importLanguage: ImportLanguage, existingLanguage: Language) {
+        val import = importLanguage.file.import
+        val dataManager = ImportDataManager(applicationContext, import)
+        if (dataManager.storedLanguages.any { it.existingLanguage?.id == existingLanguage.id }) {
+            throw BadRequestException(Message.LANGUAGE_ALREADY_SELECTED)
+        }
+        importLanguage.existingLanguage = existingLanguage
+        importLanguageRepository.save(importLanguage)
+        dataManager.populateStoredTranslations(importLanguage)
+        dataManager.handleConflicts()
+        dataManager.saveAllStoredTranslations()
     }
 
     fun save(import: Import): Import {

@@ -24,7 +24,7 @@ class CoreImportFilesProcessor(
     private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
     private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
     private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
-    private val importDataCache = ImportDataCache(applicationContext, import)
+    private val importDataManager = ImportDataManager(applicationContext, import)
 
     fun processFiles(files: List<ImportFileDto>?,
                      messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit) {
@@ -88,32 +88,26 @@ class CoreImportFilesProcessor(
         this.languages.forEach { entry ->
             val languageEntity = entry.value
             messageClient(FOUND_LANGUAGE, listOf(languageEntity.name))
-            val matchingStoredLanguage = importDataCache.storedLanguages.find {
+            val matchingStoredLanguage = importDataManager.storedLanguages.find {
                 it.name == entry.value.name && it.existingLanguage != null
             }
             if (matchingStoredLanguage == null) {
                 languageEntity.existingLanguage = languageEntity.findMatchingExisting()
             }
             importService.saveLanguages(this.languages.values)
-            importDataCache.storedLanguages.addAll(this.languages.values)
+            importDataManager.storedLanguages.addAll(this.languages.values)
         }
     }
 
     private fun addToStoredTranslations(translation: ImportTranslation) {
-        importDataCache.storedTranslations[translation.language]!!.let { it[translation.key]!!.add(translation) }
-    }
-
-    private fun saveAllStoredTranslations() {
-        importDataCache.storedTranslations.values.asSequence().flatMap { it.values }.flatMap { it }.toList().let {
-            importService.saveTranslations(it)
-        }
+        importDataManager.storedTranslations[translation.language]!!.let { it[translation.key]!!.add(translation) }
     }
 
     private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey {
-        var entity = importDataCache.storedKeys[name]
+        var entity = importDataManager.storedKeys[name]
         if (entity == null) {
             entity = ImportKey(name = name)
-            importDataCache.storedKeys[name] = entity
+            importDataManager.storedKeys[name] = entity
         }
 
         if (!entity.files.any { this.fileEntity == it }) {
@@ -133,7 +127,7 @@ class CoreImportFilesProcessor(
             val keyEntity = getOrCreateKey(entry.key)
             entry.value.forEach { newTranslation ->
                 newTranslation.key = keyEntity
-                val storedTranslations = importDataCache.getStoredTranslations(keyEntity, newTranslation.language)
+                val storedTranslations = importDataManager.getStoredTranslations(keyEntity, newTranslation.language)
                 if (storedTranslations.size > 1) {
                     storedTranslations.forEach { collidingTranslations ->
                         fileEntity.addIssue(FileIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE,
@@ -149,8 +143,8 @@ class CoreImportFilesProcessor(
             }
         }
 
-        importDataCache.handleConflicts()
-        this@CoreImportFilesProcessor.saveAllStoredTranslations()
+        importDataManager.handleConflicts()
+        importDataManager.saveAllStoredTranslations()
     }
 }
 

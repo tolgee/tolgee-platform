@@ -6,11 +6,12 @@ import {ImportActions} from "../../../../../store/repository/ImportActions";
 import {container} from "tsyringe";
 import {useRepository} from "../../../../../hooks/useRepository";
 import {confirmation} from "../../../../../hooks/confirmation";
+import {ImportRowLanguageMenu} from "./ImportRowLanguageMenu";
 
 const actions = container.resolve(ImportActions)
 export const ImportResultRow = (props: {
     row: components["schemas"]["ImportLanguageModel"]
-    onResolveConflicts: (row: components["schemas"]["ImportLanguageModel"]) => void
+    onResolveConflicts: (row: components["schemas"]["ImportLanguageModel"]) => void,
 }) => {
     const repository = useRepository()
 
@@ -24,7 +25,7 @@ export const ImportResultRow = (props: {
         <React.Fragment>
             <TableRow>
                 <TableCell scope="row">
-                    {props.row.existingLanguageName}
+                    <ImportRowLanguageMenu value={props.row.existingLanguageId} importLanguageId={props.row.id}/>
                 </TableCell>
                 <TableCell scope="row">
                     {props.row.importFileName}

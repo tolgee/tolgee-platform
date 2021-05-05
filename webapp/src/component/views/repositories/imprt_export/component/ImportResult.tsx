@@ -4,6 +4,7 @@ import {Box, makeStyles, Table, TableBody, TableCell, TableContainer, TableHead}
 import {T} from "@tolgee/react";
 import {ImportResultRow} from "./ImportResultRow";
 import {ImportConflictResolutionDialog} from "./ImportConflictResolutionDialog";
+import {RepositoryLanguageProvider} from "../../../../../hooks/RepositoryLanguagesProvider";
 
 type ImportResultProps = {
     result?: components["schemas"]["PagedModelImportLanguageModel"]
@@ -56,9 +57,11 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
                             <TableCell>
                             </TableCell>
                         </TableHead>
-                        <TableBody>
-                            {rows.map(row => <ImportResultRow onResolveConflicts={setResolveRow} key={row.id} row={row}/>)}
-                        </TableBody>
+                        <RepositoryLanguageProvider>
+                            <TableBody>
+                                {rows.map(row => <ImportResultRow onResolveConflicts={setResolveRow} key={row.id} row={row}/>)}
+                            </TableBody>
+                        </RepositoryLanguageProvider>
                     </Table>
                 </TableContainer>
             </Box>
