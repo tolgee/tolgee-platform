@@ -37,7 +37,8 @@ export const ImportView: FunctionComponent = () => {
     }, [resultLoadable.loading, addFilesLoadable.loading])
 
     useEffect(() => {
-        if ((deleteLanguageLoadable.loaded && !deleteLanguageLoadable.loading) || selectLanguageLoadable.loaded) {
+        if ((deleteLanguageLoadable.loaded && !deleteLanguageLoadable.loading) ||
+            (selectLanguageLoadable.loaded && !selectLanguageLoadable.loading)) {
             dataHelper.loadData()
         }
     }, [deleteLanguageLoadable.loading, selectLanguageLoadable.loading])
