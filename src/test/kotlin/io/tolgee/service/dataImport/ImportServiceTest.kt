@@ -14,6 +14,7 @@ class ImportServiceTest : AbstractSpringTest() {
     @BeforeMethod
     fun setup() {
         importTestData = ImportTestData()
+        importTestData.addFrenchTranslations()
     }
 
     @Test

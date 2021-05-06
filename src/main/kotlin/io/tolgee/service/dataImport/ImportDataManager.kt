@@ -76,6 +76,8 @@ class ImportDataManager(
                         ?.let { it[storedTranslation.key.name] }
                 if (existingTranslation != null) {
                     storedTranslation.conflict = existingTranslation
+                } else {
+                    storedTranslation.conflict = null
                 }
             }
         }
@@ -84,8 +86,8 @@ class ImportDataManager(
     private fun populateExistingTranslations() {
         this.storedLanguages.asSequence().map { it.existingLanguage }.toSet().forEach { language ->
             if (language != null && existingTranslations[language.id] == null) {
-                existingTranslations[language.id!!] = mutableMapOf<String, Translation>().apply {
-                    translationService.getAllByLanguageId(language.id!!)
+                existingTranslations[language.id] = mutableMapOf<String, Translation>().apply {
+                    translationService.getAllByLanguageId(language.id)
                             .forEach { translation -> put(translation.key!!.name!!, translation) }
                 }
             }

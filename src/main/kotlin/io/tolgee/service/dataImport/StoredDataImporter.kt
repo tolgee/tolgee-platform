@@ -12,7 +12,8 @@ import org.springframework.context.ApplicationContext
 
 class StoredDataImporter(
         applicationContext: ApplicationContext,
-        private val import: Import
+        private val import: Import,
+        private val forceMode: ForceMode = ForceMode.NO_FORCE
 ) {
     private val importDataCache = ImportDataManager(applicationContext, import)
     private val translationService = applicationContext.getBean(TranslationService::class.java)
@@ -32,21 +33,21 @@ class StoredDataImporter(
 
     private fun ImportTranslation.doImport() {
         this.checkConflictResolved()
-        if (this.conflict == null || this.override) {
+        if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
             val key = this.conflict?.key ?: keyService.getOrCreateKey(import.repository, this.key.name)
             val language = this.language.existingLanguage
                     ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
             val translation = this.conflict ?: Translation().apply {
-                this.text = this@doImport.text
                 this.language = language
                 this.key = key
             }
+            translation.text = this@doImport.text
             translationService.saveTranslation(translation)
         }
     }
 
     private fun ImportTranslation.checkConflictResolved() {
-        if (this.conflict != null && !this.resolved) {
+        if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {
             throw BadRequestException(
                     Message.CONFLICT_IS_NOT_RESOLVED,
                     listOf(this.key.name, this.language.name, this.text)

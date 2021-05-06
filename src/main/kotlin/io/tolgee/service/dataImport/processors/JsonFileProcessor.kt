@@ -1,7 +1,9 @@
 package io.tolgee.service.dataImport.processors
 
+import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType.KEY_IS_NOT_STRING
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
@@ -10,10 +12,14 @@ class JsonFileProcessor(
         override val context: FileProcessorContext
 ) : ImportFileProcessor {
     override fun process() {
-        val data = jacksonObjectMapper().readValue<Map<String, Any>>(context.file.inputStream)
-        val parsed = data.parse()
-        parsed.forEach {
-            context.addTranslation(it.key, guessLanguageName(), it.value)
+        try {
+            val data = jacksonObjectMapper().readValue<Map<String, Any>>(context.file.inputStream)
+            val parsed = data.parse()
+            parsed.forEach {
+                context.addTranslation(it.key, guessLanguageName(), it.value)
+            }
+        } catch (e: JsonParseException) {
+            throw ImportCannotParseFileException(context.file.name, e.message)
         }
     }
 
@@ -50,5 +56,4 @@ class JsonFileProcessor(
                 val issues: List<ImportFileIssue>
         )
     }
-
 }

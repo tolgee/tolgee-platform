@@ -30,6 +30,9 @@ class V2ImportControllerTest : SignedInControllerTest() {
     @Value("classpath:import/zipOfUnknown.zip")
     lateinit var zipOfUnknown: Resource
 
+    @Value("classpath:import/error.json")
+    lateinit var errorJson: Resource
+
     @Test
     fun `it parses zip file and saves issues`() {
         val repository = dbPopulator.createBase(generateUniqueString())
@@ -64,6 +67,20 @@ class V2ImportControllerTest : SignedInControllerTest() {
                 }
         validateSavedImportData(repository)
     }
+
+    @Test
+    fun `it returns error when json could not be parsed`() {
+        val repository = dbPopulator.createBase(generateUniqueString())
+        commitTransaction()
+
+        performImport(repositoryId = repository.id, mapOf(Pair("error.json", errorJson)))
+                .andIsBadRequest.andAssertThatJson {
+                    node("code").isEqualTo("cannot_parse_file")
+                    node("params[0]").isEqualTo("error.json")
+                    node("params[1]").isString.contains("Unrecognized token")
+                }
+    }
+
 
     @Test
     fun `it saves proper data and returns correct response (streamed)`() {
@@ -317,6 +334,31 @@ class V2ImportControllerTest : SignedInControllerTest() {
         this.importService.find(repositoryId, user.id!!).let {
             assertThat(it).isNull()
         }
+    }
+
+    @Test
+    fun `it applies the import with force override`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+        logAsUser(user.username!!, "admin")
+        val path = "/v2/repositories/${repositoryId}/import/apply?forceMode=OVERRIDE"
+        performAuthPut(path, null).andIsOk
+        this.importService.find(repositoryId, user.id!!).let {
+            assertThat(it).isNull()
+        }
+    }
+
+    @Test
+    fun `it applies the import with force keep`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+        logAsUser(user.username!!, "admin")
+        val path = "/v2/repositories/${repositoryId}/import/apply?forceMode=KEEP"
+        performAuthPut(path, null).andIsOk
     }
 
     @Test

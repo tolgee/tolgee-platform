@@ -1,5 +1,5 @@
 import React, {ChangeEvent, FunctionComponent} from 'react';
-import {FormControl, InputLabel, MenuItem, Select} from "@material-ui/core";
+import {Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, Typography} from "@material-ui/core";
 import {useRepositoryLanguages} from "../../../../../hooks/useRepositoryLanguages";
 import {T} from "@tolgee/react";
 import {container} from "tsyringe";
@@ -16,6 +16,7 @@ export const ImportRowLanguageMenu: FunctionComponent<{
     const importData = useImportDataHelper()
     const usedLanguages = importData.result!._embedded!.languages!.map(l => l.existingLanguageId).filter(l => !!l)
     const repository = useRepository()
+    const applyTouched = actions.useSelector(s => s.applyTouched)
 
     const onChange = (changeEvent: ChangeEvent<any>) => {
         actions.loadableActions.selectLanguage.dispatch({
@@ -27,9 +28,12 @@ export const ImportRowLanguageMenu: FunctionComponent<{
         })
     }
 
+    const availableLanguages = languages.filter(lang => props.value == lang.id || usedLanguages.indexOf(lang.id) < 0)
+
+
     return (
         <>
-            <FormControl fullWidth>
+            <FormControl fullWidth error={applyTouched && !props.value}>
                 <InputLabel shrink id="import_row_language_select">
                     <T>import_language_select</T>
                 </InputLabel>
@@ -38,11 +42,19 @@ export const ImportRowLanguageMenu: FunctionComponent<{
                     value={props.value}
                     onChange={onChange}
                     fullWidth
+
                 >
-                    {languages.filter(lang => props.value == lang.id || usedLanguages.indexOf(lang.id) < 0).map(l => <MenuItem value={l.id}>
-                        {l.name}
-                    </MenuItem>)}
+                    {availableLanguages.length ?
+                        availableLanguages.map(l => <MenuItem value={l.id}>
+                            {l.name}
+                        </MenuItem>) :
+                        <Box p={2}>
+                            <Typography variant="body1"><T>import_no_languages_to_choose_from</T></Typography>
+                        </Box>
+                    }
                 </Select>
+                {(applyTouched && !props.value) &&
+                <FormHelperText><T>import_existing_language_not_selected_error</T></FormHelperText>}
             </FormControl>
         </>
     );

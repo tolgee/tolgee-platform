@@ -11,6 +11,7 @@ export const useApplyImportHelper = (dataHelper: ReturnType<typeof useImportData
 
     const importApplyLoadable = actions.useSelector(s => s.loadables.applyImport)
     const repository = useRepository()
+    const error = importApplyLoadable.error
 
     useEffect(() => {
         if (importApplyLoadable.loading) {
@@ -38,6 +39,7 @@ export const useApplyImportHelper = (dataHelper: ReturnType<typeof useImportData
         if (error) {
             if (error.code == "conflict_is_not_resolved") {
                 setConflictNotResolvedDialogOpen(true)
+                return
             }
         }
     }, [importApplyLoadable.error])
@@ -52,5 +54,5 @@ export const useApplyImportHelper = (dataHelper: ReturnType<typeof useImportData
         setConflictNotResolvedDialogOpen(false)
     };
 
-    return {onDialogClose, onApplyImport, conflictNotResolvedDialogOpen}
+    return {onDialogClose, onApplyImport, conflictNotResolvedDialogOpen, error}
 }

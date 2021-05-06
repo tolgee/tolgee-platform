@@ -9,6 +9,10 @@ import {components} from "../../service/apiSchema";
 
 export class ImportState extends StateWithLoadables<ImportActions> {
     result?: components["schemas"]["PagedModelImportLanguageModel"] = undefined
+    /**
+     * Whether user already tried to apply import (Import button clicked)
+     **/
+    applyTouched?: Boolean
 }
 
 @singleton()
@@ -19,6 +23,10 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
 
     resetResult = this.createAction("RESET_RESULT").build.on((state) => {
         return {...state, result: undefined}
+    })
+
+    touchApply = this.createAction("TOUCH_APPLY").build.on((state) => {
+        return {...state, applyTouched: true}
     })
 
     loadableDefinitions = {

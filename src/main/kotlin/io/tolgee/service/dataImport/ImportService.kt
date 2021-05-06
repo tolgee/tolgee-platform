@@ -101,14 +101,14 @@ class ImportService(
     }
 
     @Transactional
-    fun import(repositoryId: Long, authorId: Long) {
-        import(findOrThrow(repositoryId, authorId))
+    fun import(repositoryId: Long, authorId: Long, forceMode: ForceMode = ForceMode.NO_FORCE) {
+        import(findOrThrow(repositoryId, authorId), forceMode)
     }
 
 
     @Transactional
-    fun import(import: Import) {
-        StoredDataImporter(applicationContext, import).doImport()
+    fun import(import: Import, forceMode: ForceMode = ForceMode.NO_FORCE) {
+        StoredDataImporter(applicationContext, import, forceMode).doImport()
         deleteImport(import)
     }
 

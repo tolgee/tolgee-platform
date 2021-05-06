@@ -168,7 +168,7 @@ class ImportTestData {
                     addImportTranslation {
                         self {
                             this.language = importEnglish
-                            this.key = this@addImport.data.importFiles[0].data.importKeys[1].self
+                            this.key = data.importKeys[1].self
                             this.conflict = repositoryBuilder.data.translations[1].self
                             this.text = "Imported text"
                         }
@@ -176,14 +176,14 @@ class ImportTestData {
                     addImportTranslation {
                         self {
                             this.language = importEnglish
-                            this.key = this@addImport.data.importFiles[0].data.importKeys[2].self
+                            this.key = data.importKeys[2].self
                             this.conflict = repositoryBuilder.data.translations[2].self
                         }
                     }
                     addImportTranslation {
                         self {
                             this.language = importEnglish
-                            this.key = this@addImport.data.importFiles[0].data.importKeys[3].self
+                            this.key = data.importKeys[3].self
                             this.conflict = repositoryBuilder.data.translations[3].self
 
                         }
@@ -191,33 +191,38 @@ class ImportTestData {
                     addImportTranslation {
                         self {
                             this.language = importEnglish
-                            this.key = this@addImport.data.importFiles[0].data.importKeys[4].self
+                            this.key = data.importKeys[4].self
                         }
                     }
                     addImportTranslation {
                         self {
                             this.language = importEnglish
-                            this.key = this@addImport.data.importFiles[0].data.importKeys[5].self
-                        }
-                    }
-                    addImportTranslation {
-                        self {
-                            this.language = importFrench
-                            this.key = this@addImport.data.importFiles[0].data.importKeys[0].self
-                            this.text = "French text"
-                        }
-                    }
-                    addImportTranslation {
-                        self {
-                            this.language = importFrench
-                            this.key = this@addImport.data.importFiles[0].data.importKeys[2].self
-                            this.text = "French text"
+                            this.key = data.importKeys[5].self
                         }
                     }
                 }
             }
             import = importBuilder.self
         }.self
+    }
+
+    fun addFrenchTranslations() {
+        this.importBuilder.data.importFiles[0].apply {
+            addImportTranslation {
+                self {
+                    this.language = importFrench
+                    this.key = data.importKeys[0].self
+                    this.text = "French text"
+                }
+            }
+            addImportTranslation {
+                self {
+                    this.language = importFrench
+                    this.key = data.importKeys[2].self
+                    this.text = "French text"
+                }
+            }
+        }
     }
 
     operator fun invoke(ft: DataBuilders.ImportBuilder.() -> Unit): TestDataBuilder {

@@ -11,8 +11,13 @@ import {useRepository} from "../../../../hooks/useRepository";
 import {ImportConflictNotResolvedErrorDialog} from "./component/ImportConflictNotResolvedErrorDialog";
 import {useApplyImportHelper} from "./hooks/useApplyImportHelper";
 import {stopLoading} from "../../../../hooks/loading";
+import {parseErrorResponse} from "../../../../fixtures/errorFIxtures";
+import {MessageService} from "../../../../service/MessageService";
+import {ImportAlertError} from './ImportAlertError';
 
 const actions = container.resolve(ImportActions)
+const messageService = container.resolve(MessageService)
+
 export const ImportView: FunctionComponent = () => {
     const dataHelper = useImportDataHelper()
     const repository = useRepository()
@@ -55,10 +60,26 @@ export const ImportView: FunctionComponent = () => {
         }
     }, [cancelLoadable.loading])
 
+    useEffect(() => {
+        if (applyImportHelper.error) {
+            const parsed = parseErrorResponse(applyImportHelper.error)
+            messageService.error(<T>{parsed[0]}</T>)
+            actions.loadableReset.applyImport.dispatch()
+        }
+    }, [applyImportHelper.error])
+
+    const onApply = () => {
+        actions.touchApply.dispatch()
+        if (dataHelper.isValid) {
+            applyImportHelper.onApplyImport()
+        }
+    }
+
     return (
         <BaseView title={<T>import_translations_title</T>} xs={12} md={10} lg={8}>
             <Box mt={2}>
                 <ImportFileInput onNewFiles={dataHelper.onNewFiles}/>
+                <ImportAlertError dataHelper={dataHelper} />
                 <ImportResult onLoadData={dataHelper.loadData} result={dataHelper.result}/>
             </Box>
             {dataHelper.result &&
@@ -75,7 +96,7 @@ export const ImportView: FunctionComponent = () => {
                     </Button>
                 </Box>
                 <Box>
-                    <Button variant="contained" color="primary" onClick={applyImportHelper.onApplyImport}>
+                    <Button variant="contained" color="primary" onClick={onApply}>
                         <T>import_apply_button</T>
                     </Button>
                 </Box>

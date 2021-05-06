@@ -42,6 +42,9 @@ export const useImportDataHelper = () => {
     }
 
     return {
-        onNewFiles, result, loadData, resetResult
+        onNewFiles, result, loadData, resetResult,
+        get isValid() {
+            return !!result?._embedded?.languages?.every(il => il.existingLanguageId)
+        }
     }
 }

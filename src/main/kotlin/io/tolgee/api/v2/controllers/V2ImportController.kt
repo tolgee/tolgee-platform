@@ -29,6 +29,7 @@ import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.repository_auth.AccessWithRepositoryPermission
 import io.tolgee.security.repository_auth.RepositoryHolder
 import io.tolgee.service.LanguageService
+import io.tolgee.service.dataImport.ForceMode
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -109,8 +110,10 @@ class V2ImportController(
     @Operation(summary = "Imports the data prepared in previous step")
     fun applyImport(
             @PathVariable("repositoryId") repositoryId: Long,
+            @Schema(description = "Whether override or keep all translations with unresolved conflicts")
+            @RequestParam("forceMode", defaultValue = "NO_FORCE") forceMode: ForceMode,
     ) {
-        this.importService.import(repositoryId, authenticationFacade.userAccount.id!!)
+        this.importService.import(repositoryId, authenticationFacade.userAccount.id!!, forceMode)
     }
 
     @GetMapping("/result")

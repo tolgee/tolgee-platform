@@ -64,5 +64,29 @@ class StoredDataImporterTest : AbstractSpringTest() {
         }
     }
 
+    @Test
+    fun `it force replaces translations`() {
+        storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import, ForceMode.OVERRIDE)
+        testDataService.saveTestData(importTestData.root)
+        storedDataImporter.doImport()
+        val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id!!)!!
+        val forceOverriddenTranslationId = importTestData.root.data.repositories[0].data.translations[1].self.id
+        val forceOverriddenTranslation = translationService.find(forceOverriddenTranslationId!!)!!
+        assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
+        assertThat(forceOverriddenTranslation.text).isEqualTo("Imported text")
+    }
 
+    @Test
+    fun `it force keeps translations`() {
+        importTestData.translationWithConflict.override = true
+        importTestData.translationWithConflict.resolved = true
+        storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import, ForceMode.KEEP)
+        testDataService.saveTestData(importTestData.root)
+        storedDataImporter.doImport()
+        val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id!!)!!
+        val forceKeptTranslationId = importTestData.root.data.repositories[0].data.translations[1].self.id
+        val forceKeptTranslation = translationService.find(forceKeptTranslationId!!)!!
+        assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
+        assertThat(forceKeptTranslation.text).isEqualTo("What a text")
+    }
 }
