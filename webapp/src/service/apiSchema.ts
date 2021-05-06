@@ -729,6 +729,9 @@ export interface operations {
       path: {
         repositoryId: number;
       };
+      query: {
+        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+      };
     };
     responses: {
       /** OK */

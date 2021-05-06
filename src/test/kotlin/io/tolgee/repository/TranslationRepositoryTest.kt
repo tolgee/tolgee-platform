@@ -29,7 +29,7 @@ class TranslationRepositoryTest : AbstractTransactionalTestNGSpringContextTests(
 
     @Test
     @Transactional
-    fun `remove of language removes existing language reference from import language`() {
+    fun `remove of translation removes existing translation reference from import translation`() {
         val testData = ImportTestData()
 
         testDataService.saveTestData(testData.root)

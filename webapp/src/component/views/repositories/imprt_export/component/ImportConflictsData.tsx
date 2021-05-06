@@ -18,7 +18,7 @@ export const ImportConflictsData: FunctionComponent<{
     const conflictsLoadable = actions.useSelector(s => s.loadables.conflicts)
     const repository = useRepository()
     const languageId = props.row.id
-    const [onlyUnresolved, setOnlyUnresolved] = useState(props.row.resolvedCount != props.row.conflictCount)
+    const [showResolved, setOnlyUnresolved] = useState(props.row.resolvedCount == props.row.conflictCount)
 
     const setOverrideLoadable = actions.useSelector(s => s.loadables.resolveTranslationConflictOverride)
     const setKeepLoadable = actions.useSelector(s => s.loadables.resolveTranslationConflictKeep)
@@ -32,7 +32,7 @@ export const ImportConflictsData: FunctionComponent<{
                 },
                 query: {
                     onlyConflicts: true,
-                    onlyUnresolved: onlyUnresolved,
+                    onlyUnresolved: !showResolved,
                     pageable: {
                         page: page,
                         size: 50
@@ -69,7 +69,7 @@ export const ImportConflictsData: FunctionComponent<{
 
     useEffect(() => {
         loadData(0)
-    }, [props.row, onlyUnresolved])
+    }, [props.row, showResolved])
 
     useEffect(() => {
         if (setOverrideLoadable.loaded || setKeepLoadable.loaded) {
@@ -104,25 +104,25 @@ export const ImportConflictsData: FunctionComponent<{
                 <FormControlLabel
                     control={
                         <Switch
-                            checked={onlyUnresolved}
-                            onChange={() => setOnlyUnresolved(!onlyUnresolved)}
+                            checked={showResolved}
+                            onChange={() => setOnlyUnresolved(!showResolved)}
                             name="filter_unresolved"
                             color="primary"
                         />
                     }
-                    label={<T>import_conflicts_filter_only_unresolved_label</T>}
+                    label={<T>import_conflicts_filter_show_resolved_label</T>}
                 />
             </Box>
             {conflictsLoadable.loaded && (data ?
                 <>
                     {data.map(t =>
                         <Box pt={2} pb={1} pl={2} pr={2}>
-                            <Grid container spacing={4}>
-                                <Grid item lg md>
-                                    <Typography variant={"body2"}><b>{t.keyName}</b></Typography>
-                                </Grid>
-                            </Grid>
                             <Grid container spacing={2}>
+                                <Grid item lg={3} md>
+                                    <Box p={1}>
+                                        <Typography style={{overflowWrap: "break-word"}} variant={"body2"}><b>{t.keyName}</b></Typography>
+                                    </Box>
+                                </Grid>
                                 {t.conflictId &&
                                 <Grid item lg md sm={12} xs={12}>
                                     <ImportConflictTranslation
@@ -148,12 +148,14 @@ export const ImportConflictsData: FunctionComponent<{
                 :
                 <EmptyListMessage><T>import_resolve_conflicts_empty_list_message</T></EmptyListMessage>)
             }
-            {totalPages!! > 1 &&
-            <Pagination
-                page={page!! + 1}
-                count={totalPages}
-                onChange={(_, page) => loadData(page - 1)}
-            />}
+            <Box display="flex" justifyContent="flex-end" p={4}>
+                {totalPages!! > 1 &&
+                <Pagination
+                    page={page!! + 1}
+                    count={totalPages}
+                    onChange={(_, page) => loadData(page - 1)}
+                />}
+            </Box>
         </>
     );
 }

@@ -27,21 +27,22 @@ export const useApplyImportHelper = (dataHelper: ReturnType<typeof useImportData
             actions.loadableActions.applyImport.dispatch({
                 path: {
                     repositoryId: repository.id
-                }
+                },
+                query: {}
             })
             return
         }
+        dataHelper.loadData()
         setConflictNotResolvedDialogOpen(true)
     }
 
     useEffect(() => {
         const error = importApplyLoadable.error
-        if (error) {
-            if (error.code == "conflict_is_not_resolved") {
-                setConflictNotResolvedDialogOpen(true)
-                return
-            }
+        if (error?.code == "conflict_is_not_resolved") {
+            setConflictNotResolvedDialogOpen(true)
+            return
         }
+
     }, [importApplyLoadable.error])
 
     useEffect(() => {

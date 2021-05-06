@@ -5,6 +5,7 @@ import io.tolgee.dtos.ImportDto
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Key
 import io.tolgee.model.Language
@@ -100,13 +101,13 @@ class ImportService(
         fileProcessor.processFiles(files, nonNullMessageClient)
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
     fun import(repositoryId: Long, authorId: Long, forceMode: ForceMode = ForceMode.NO_FORCE) {
         import(findOrThrow(repositoryId, authorId), forceMode)
     }
 
 
-    @Transactional
+    @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
     fun import(import: Import, forceMode: ForceMode = ForceMode.NO_FORCE) {
         StoredDataImporter(applicationContext, import, forceMode).doImport()
         deleteImport(import)
@@ -215,6 +216,6 @@ class ImportService(
     }
 
     fun resolveAllOfLanguage(language: ImportLanguage, override: Boolean) {
-        return this.translationRepository.resolveAllOfLanguage(language, override)
+        return this.importTranslationRepository.resolveAllOfLanguage(language, override)
     }
 }

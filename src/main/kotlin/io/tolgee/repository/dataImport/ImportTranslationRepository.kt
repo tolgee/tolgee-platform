@@ -2,6 +2,7 @@ package io.tolgee.repository.dataImport
 
 import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.Import
+import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.views.ImportTranslationView
 import org.springframework.data.domain.Page
@@ -40,4 +41,8 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
                                    onlyConflicts: Boolean = false,
                                    onlyUnresolved: Boolean = false
     ): Page<ImportTranslationView>
+
+    @Modifying
+    @Query("update ImportTranslation set resolved = true, override = :override where language = :language")
+    fun resolveAllOfLanguage(language: ImportLanguage?, override: Boolean)
 }

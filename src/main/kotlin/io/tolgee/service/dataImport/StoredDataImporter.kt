@@ -2,6 +2,8 @@ package io.tolgee.service.dataImport
 
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.ImportConflictNotResolvedException
+import io.tolgee.model.Key
 import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
@@ -15,26 +17,31 @@ class StoredDataImporter(
         private val import: Import,
         private val forceMode: ForceMode = ForceMode.NO_FORCE
 ) {
-    private val importDataCache = ImportDataManager(applicationContext, import)
-    private val translationService = applicationContext.getBean(TranslationService::class.java)
+    private val importDataManager = ImportDataManager(applicationContext, import)
     private val keyService = applicationContext.getBean(KeyService::class.java)
+    private val translationsToSave = mutableListOf<Translation>()
+    private val keysToSave = mutableListOf<Key>()
+    private val translationService = applicationContext.getBean(TranslationService::class.java)
 
     fun doImport() {
-        importDataCache.storedLanguages.forEach {
+        importDataManager.storedLanguages.forEach {
             it.doImport()
         }
+        translationService.saveAll(translationsToSave)
+        keyService.saveAll(keysToSave)
     }
 
     private fun ImportLanguage.doImport() {
-        importDataCache.populateStoredTranslations(this)
-        importDataCache.handleConflicts()
-        importDataCache.getStoredTranslations(this).forEach { it.doImport() }
+        importDataManager.populateStoredTranslations(this)
+        importDataManager.handleConflicts()
+        importDataManager.getStoredTranslations(this).forEach { it.doImport() }
     }
 
     private fun ImportTranslation.doImport() {
         this.checkConflictResolved()
         if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
-            val key = this.conflict?.key ?: keyService.getOrCreateKey(import.repository, this.key.name)
+            val key = this.conflict?.key ?: keyService.getOrCreateKeyNoPersist(import.repository, this.key.name)
+            keysToSave.add(key)
             val language = this.language.existingLanguage
                     ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
             val translation = this.conflict ?: Translation().apply {
@@ -42,15 +49,15 @@ class StoredDataImporter(
                 this.key = key
             }
             translation.text = this@doImport.text
-            translationService.saveTranslation(translation)
+            translationsToSave.add(translation)
         }
     }
 
     private fun ImportTranslation.checkConflictResolved() {
         if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {
-            throw BadRequestException(
-                    Message.CONFLICT_IS_NOT_RESOLVED,
-                    listOf(this.key.name, this.language.name, this.text)
+            importDataManager.saveAllStoredTranslations()
+            throw ImportConflictNotResolvedException(
+                    mutableListOf(this.key.name, this.language.name, this.text)
             )
         }
     }

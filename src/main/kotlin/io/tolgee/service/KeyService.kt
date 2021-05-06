@@ -33,12 +33,17 @@ class KeyService(
 
     @Transactional
     fun getOrCreateKey(repository: Repository, keyName: String): Key {
-        val key = get(repository.id, keyName)
+        val key = getOrCreateKeyNoPersist(repository, keyName)
+        entityManager.persist(key)
+        return key
+    }
+
+    @Transactional
+    fun getOrCreateKeyNoPersist(repository: Repository, keyName: String): Key {
+        return get(repository.id, keyName)
                 .orElseGet {
                     Key(name = keyName, repository = repository)
                 }
-        entityManager.persist(key)
-        return key
     }
 
     fun getAll(repositoryId: Long): Set<Key> {

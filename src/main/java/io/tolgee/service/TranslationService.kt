@@ -111,7 +111,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
         saveTranslation(translation)
     }
 
-    fun saveTranslation(translation: Translation){
+    fun saveTranslation(translation: Translation) {
         translationRepository.save(translation)
     }
 
@@ -146,19 +146,19 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     fun deleteAllByRepository(repositoryId: Long?) {
-        translationRepository.deleteAllByRepositoryId(repositoryId)
+        translationRepository.deleteAll(translationRepository.getAllByKeyRepositoryId(repositoryId))
     }
 
     fun deleteAllByLanguage(languageId: Long?) {
-        translationRepository.deleteAllByLanguageId(languageId)
+        translationRepository.deleteAll(translationRepository.getAllByLanguageId(languageId))
     }
 
     fun deleteAllByKeys(ids: Collection<Long?>?) {
-        translationRepository.deleteAllByKeyIds(ids)
+        translationRepository.deleteAll(translationRepository.getAllByKeyIdIn(ids))
     }
 
     fun deleteAllByKey(id: Long?) {
-        translationRepository.deleteAllByKeyId(id)
+        this.deleteAllByKeys(listOf(id))
     }
 
     @Autowired

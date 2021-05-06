@@ -78,14 +78,14 @@ data class Translation(
         }
 
         @Configurable
-        open class TranslationListeners {
+        class TranslationListeners {
 
             @Autowired
-            open lateinit var provider: ObjectFactory<ImportService>
+            lateinit var provider: ObjectFactory<ImportService>
 
             @PreRemove
             @Transactional
-            open fun preRemove(translation: Translation) {
+            fun preRemove(translation: Translation) {
                 provider.`object`.onTranslationConflictRemoved(translation)
             }
         }
