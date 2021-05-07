@@ -179,6 +179,9 @@ export interface paths {
   "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations": {
     get: operations["getImportTranslations"];
   };
+  "/v2/repositories/{repositoryId}/import/result/files/{importFileId}/issues": {
+    get: operations["getImportFileIssues"];
+  };
   "/v2/organizations/{organizationId}/invitations": {
     get: operations["getInvitations"];
   };
@@ -350,6 +353,7 @@ export interface components {
       existingLanguageName?: string;
       importFileName: string;
       importFileId: number;
+      importFileIssueCount: number;
       totalCount: number;
       conflictCount: number;
       resolvedCount: number;
@@ -532,6 +536,30 @@ export interface components {
     PagedModelImportTranslationModel: {
       _embedded?: {
         translations?: components["schemas"]["ImportTranslationModel"][];
+      };
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
+    };
+    EntityModelImportFileIssueView: {
+      id?: number;
+      type?:
+        | "NO_MATCHING_PROCESSOR"
+        | "NO_FILENAME_PROVIDED"
+        | "KEY_IS_NOT_STRING"
+        | "MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE"
+        | "VALUE_IS_NOT_STRING"
+        | "KEY_IS_EMPTY"
+        | "VALUE_IS_EMPTY";
+      params?: components["schemas"]["ImportFileIssueParamView"][];
+      _links?: components["schemas"]["Links"];
+    };
+    ImportFileIssueParamView: {
+      value?: string;
+      type: "KEY_NAME" | "KEY_ID" | "LANGUAGE_ID" | "KEY_INDEX" | "VALUE";
+    };
+    PagedModelEntityModelImportFileIssueView: {
+      _embedded?: {
+        importFileIssueViews?: components["schemas"]["EntityModelImportFileIssueView"][];
       };
       _links?: components["schemas"]["Links"];
       page?: components["schemas"]["PageMetadata"];
@@ -1671,6 +1699,25 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelImportTranslationModel"];
+        };
+      };
+    };
+  };
+  getImportFileIssues: {
+    parameters: {
+      path: {
+        importFileId: number;
+        repositoryId: number;
+      };
+      query: {
+        pageable: components["schemas"]["Pageable"];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelEntityModelImportFileIssueView"];
         };
       };
     };

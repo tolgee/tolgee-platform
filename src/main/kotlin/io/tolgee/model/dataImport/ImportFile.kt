@@ -51,13 +51,13 @@ class ImportFile(
     }
 
     fun addKeyIsEmptyIssue(keyIndex: Int) {
-        addIssue(FileIssueType.KEY_IS_NOT_STRING, mapOf(
+        addIssue(FileIssueType.KEY_IS_EMPTY, mapOf(
                 FileIssueParamType.KEY_INDEX to keyIndex.toString(),
         ))
     }
 
     fun addValueIsEmptyIssue(keyName: String) {
-        addIssue(FileIssueType.VALUE_IS_NOT_STRING, mapOf(
+        addIssue(FileIssueType.VALUE_IS_EMPTY, mapOf(
                 FileIssueParamType.KEY_NAME to keyName,
         ))
     }

@@ -64,7 +64,6 @@ export const ImportConflictsData: FunctionComponent<{
 
     const data = conflictsLoadable.data?._embedded?.translations
     const totalPages = conflictsLoadable.data?.page?.totalPages
-    const pageSize = conflictsLoadable.data?.page?.size
     const page = conflictsLoadable.data?.page?.number
 
     useEffect(() => {

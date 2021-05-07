@@ -5,6 +5,8 @@ import {T} from "@tolgee/react";
 import {ImportResultRow} from "./ImportResultRow";
 import {ImportConflictResolutionDialog} from "./ImportConflictResolutionDialog";
 import {RepositoryLanguagesProvider} from "../../../../../hooks/RepositoryLanguagesProvider";
+import {ImportFileIssuesDialog} from "./ImportFileIssuesDialog";
+import {ImportShowDataDialog} from "./ImportShowDataDialog";
 
 type ImportResultProps = {
     result?: components["schemas"]["PagedModelImportLanguageModel"]
@@ -25,8 +27,10 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
 
     const rows = props.result?._embedded?.languages
     const [resolveRow, setResolveRow] = useState(undefined as components["schemas"]["ImportLanguageModel"] | undefined)
+    const [viewFileIssuesRow, setViewFileIssuesRow] = useState(undefined as components["schemas"]["ImportLanguageModel"] | undefined)
+    const [showDataRow, setShowDataRow] = useState(undefined as components["schemas"]["ImportLanguageModel"] | undefined)
 
-    const onDialogClose = () => {
+    const onConflictResolutionDialogClose = () => {
         props.onLoadData()
         setResolveRow(undefined)
     }
@@ -37,7 +41,12 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
 
     return (
         <RepositoryLanguagesProvider>
-            <ImportConflictResolutionDialog row={resolveRow} onClose={onDialogClose}/>
+            <ImportConflictResolutionDialog row={resolveRow} onClose={onConflictResolutionDialogClose}/>
+            <ImportShowDataDialog row={showDataRow} onClose={() => setShowDataRow(undefined)}/>
+            <ImportFileIssuesDialog onClose={() => {
+                setViewFileIssuesRow(undefined)
+            }
+            } row={viewFileIssuesRow}/>
             <Box mt={5}>
                 <TableContainer>
                     <Table className={classes.table}>
@@ -60,7 +69,14 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {rows.map(row => <ImportResultRow onResolveConflicts={setResolveRow} key={row.id} row={row}/>)}
+                            {rows.map(row =>
+                                <ImportResultRow
+                                    onShowFileIssues={() => setViewFileIssuesRow(row)}
+                                    onResolveConflicts={() => setResolveRow(row)}
+                                    onShowData={() => setShowDataRow(row)}
+                                    key={row.id}
+                                    row={row}
+                                />)}
                         </TableBody>
                     </Table>
                 </TableContainer>

@@ -42,6 +42,12 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
                 "get"
             )
         ),
+        translations: this.createLoadableDefinition(
+            this.schemaService.schemaRequest(
+                "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations",
+                "get"
+            )
+        ),
         deleteLanguage: this.createLoadableDefinition(
             this.schemaService.schemaRequest(
                 "/v2/repositories/{repositoryId}/import/result/languages/{languageId}",
@@ -91,6 +97,9 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
             (state, action): ImportState => {
                 return {...state, result: action.payload}
             }
+        ),
+        getFileIssues: this.createLoadableDefinition(
+            this.schemaService.schemaRequest("/v2/repositories/{repositoryId}/import/result/files/{importFileId}/issues", "get")
         ),
     };
 

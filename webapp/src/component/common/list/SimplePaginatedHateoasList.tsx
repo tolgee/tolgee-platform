@@ -8,6 +8,9 @@ import {BoxLoading} from "../BoxLoading";
 import {Box, Grid, Typography} from "@material-ui/core";
 import SearchField from "../form/fields/SearchField";
 import {startLoading, stopLoading} from "../../../hooks/loading";
+import {Alert} from "@material-ui/lab";
+import {T} from "@tolgee/react";
+
 
 type EmbeddedDataItem<ActionsType extends AbstractLoadableActions<ResourceActionsStateType>, ResourceActionsStateType extends StateWithLoadables<ActionsType>, LoadableName extends keyof ResourceActionsStateType["loadables"]> =
     NonNullable<ResourceActionsStateType["loadables"][LoadableName]["data"]> extends HateoasPaginatedData<infer ItemDataType> ? ItemDataType : never
@@ -17,10 +20,13 @@ export interface SimplePaginatedHateoasListProps<ItemDataType, ActionsType exten
     renderItem: (itemData: EmbeddedDataItem<ActionsType, ResourceActionsStateType, LoadableName>) => ReactNode
     actions: ActionsType
     loadableName: LoadableName
-    dispatchParams?: [Omit<Parameters<ActionsType["loadableDefinitions"][LoadableName]["payloadProvider"]>[0], "query">, ...any[]]
+    dispatchParams?: [Omit<Parameters<ActionsType["loadableDefinitions"][LoadableName]["payloadProvider"]>[0], "query"> & {
+        query?: Omit<Parameters<ActionsType["loadableDefinitions"][LoadableName]["payloadProvider"]>[0]["query"], "pageable">
+    }, ...any[]]
     pageSize?: number,
     title?: ReactNode
     search?: boolean
+    sortBy?: string[]
 }
 
 export function SimplePaginatedHateoasList<ItemDataType,
@@ -31,6 +37,7 @@ export function SimplePaginatedHateoasList<ItemDataType,
     const loadable = props.actions.useSelector((state) => state.loadables[props.loadableName])
     const [currentPage, setCurrentPage] = useState(1)
     const [search, setSearch] = useState(undefined as string | undefined);
+    const [error, setError] = useState(false);
 
     const loadPage = (page: number) => {
         const [requestParam, ...otherParams] = props.dispatchParams ? [...props.dispatchParams] : [];
@@ -40,7 +47,7 @@ export function SimplePaginatedHateoasList<ItemDataType,
                 ...requestParam, pageable: {
                     page: page - 1,
                     size: props.pageSize || 20,
-                    sort: ["name"]
+                    sort: props.sortBy || ["name"]
                 },
                 search: search || undefined
             }
@@ -71,6 +78,13 @@ export function SimplePaginatedHateoasList<ItemDataType,
         setCurrentPage(page)
         loadPage(page)
     }
+
+    useEffect(() => {
+        if (loadable.error) {
+            setError(true)
+            console.error(error)
+        }
+    }, [loadable.error])
 
     const data = loadable.data as any
     const embedded = data?._embedded;
@@ -118,7 +132,8 @@ export function SimplePaginatedHateoasList<ItemDataType,
                 </Grid>}
             </Grid>
         </Box>}
-            {!embedded ? <EmptyListMessage/> : <SimplePaperList
+            {error && <Alert color="error"><T>simple_paginated_list_error_message</T></Alert>}
+            {!error && (!embedded ? <EmptyListMessage/> : <SimplePaperList
                 pagination={{
                     page: data.page?.number!! + 1,
                     onPageChange,
@@ -126,7 +141,7 @@ export function SimplePaginatedHateoasList<ItemDataType,
                 }}
                 data={items}
                 renderItem={props.renderItem}
-            />}
+            />)}
         </Box>
     )
 }
