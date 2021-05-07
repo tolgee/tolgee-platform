@@ -32,7 +32,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
 
     @Transactional
     @Suppress("UNCHECKED_CAST")
-    fun getTranslations(languageAbbreviations: Set<String?>?, repositoryId: Long?): Map<String, Any> {
+    fun getTranslations(languageAbbreviations: Set<String>, repositoryId: Long): Map<String, Any> {
         val allByLanguages = translationRepository.getTranslations(languageAbbreviations, repositoryId)
         val langTranslations: HashMap<String, Any> = LinkedHashMap()
         for (translation in allByLanguages) {
@@ -73,11 +73,11 @@ class TranslationService(private val translationRepository: TranslationRepositor
         } else LinkedHashSet()
     }
 
-    fun getOrCreate(key: Key?, language: Language?): Translation {
+    fun getOrCreate(key: Key, language: Language): Translation {
         return find(key, language).orElseGet { builder().language(language).key(key).build() }
     }
 
-    fun find(key: Key?, language: Language?): Optional<Translation> {
+    fun find(key: Key, language: Language): Optional<Translation> {
         return translationRepository.findOneByKeyAndLanguage(key, language)
     }
 
@@ -145,19 +145,20 @@ class TranslationService(private val translationRepository: TranslationRepositor
         currentMap[translation.key!!.path.name] = translation.text
     }
 
-    fun deleteAllByRepository(repositoryId: Long?) {
+    fun deleteAllByRepository(repositoryId: Long) {
+        translationRepository.deleteAll(translationRepository.getAllByLanguageRepositoryId(repositoryId))
         translationRepository.deleteAll(translationRepository.getAllByKeyRepositoryId(repositoryId))
     }
 
-    fun deleteAllByLanguage(languageId: Long?) {
+    fun deleteAllByLanguage(languageId: Long) {
         translationRepository.deleteAll(translationRepository.getAllByLanguageId(languageId))
     }
 
-    fun deleteAllByKeys(ids: Collection<Long?>?) {
+    fun deleteAllByKeys(ids: Collection<Long>) {
         translationRepository.deleteAll(translationRepository.getAllByKeyIdIn(ids))
     }
 
-    fun deleteAllByKey(id: Long?) {
+    fun deleteAllByKey(id: Long) {
         this.deleteAllByKeys(listOf(id))
     }
 

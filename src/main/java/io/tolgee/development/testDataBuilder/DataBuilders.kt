@@ -129,7 +129,7 @@ class DataBuilders {
     class TranslationBuilder(
             val repositoryBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Translation> {
-        override var self: Translation = Translation()
+        override var self: Translation = Translation().apply { text = "What a text" }
     }
 
     class UserAccountBuilder(

@@ -17,14 +17,17 @@ class ImportLanguageRepositoryTest : AbstractSpringTest() {
     @Test
     fun `view query returns correct result`() {
         val testData = ImportTestData()
+        testData.addFileIssues()
         testDataService.saveTestData(testData.root)
-        val result = importLanguageRepository.findImportLanguagesView(testData.import.id, PageRequest.of(0, 10)).content
+        val result = importLanguageRepository
+                .findImportLanguagesView(testData.import.id, PageRequest.of(0, 10)).content
 
         assertThat(result).hasSize(3)
         assertThat(result[0].existingLanguageName).isEqualTo("English")
         assertThat(result[0].conflictCount).isEqualTo(4)
         assertThat(result[0].totalCount).isEqualTo(6)
         assertThat(result[0].resolvedCount).isEqualTo(0)
+        assertThat(result[0].importFileIssueCount).isEqualTo(3)
     }
 
     @Test

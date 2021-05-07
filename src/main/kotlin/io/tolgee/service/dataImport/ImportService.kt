@@ -13,6 +13,7 @@ import io.tolgee.model.Repository
 import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
+import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.repository.KeyRepository
@@ -217,5 +218,13 @@ class ImportService(
 
     fun resolveAllOfLanguage(language: ImportLanguage, override: Boolean) {
         return this.importTranslationRepository.resolveAllOfLanguage(language, override)
+    }
+
+    fun findFile(fileId: Long): ImportFile? {
+        return importFileRepository.findById(fileId).orElse(null)
+    }
+
+    fun getFileIssues(fileId: Long, pageable: Pageable): Page<ImportFileIssueView> {
+        return importFileIssueRepository.findAllByFileIdView(fileId, pageable)
     }
 }

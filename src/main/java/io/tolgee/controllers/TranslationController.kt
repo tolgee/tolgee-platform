@@ -40,7 +40,7 @@ class TranslationController @Autowired constructor(
     @AccessWithAnyRepositoryPermission
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
     @Operation(summary = "Get all translations for specific languages")
-    fun getTranslations(@PathVariable("languages") languages: Set<String?>?): Map<String, Any> {
+    fun getTranslations(@PathVariable("languages") languages: Set<String>): Map<String, Any> {
         return translationService.getTranslations(languages, repositoryHolder.repository.id)
     }
 

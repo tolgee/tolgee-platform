@@ -34,4 +34,31 @@ class ImportFile(
             this.params = params.map { ImportFileIssueParam(this, it.key, it.value) }.toMutableList()
         })
     }
+
+    fun addKeyIsNotStringIssue(keyName: Any, keyIndex: Int) {
+        addIssue(FileIssueType.KEY_IS_NOT_STRING, mapOf(
+                FileIssueParamType.KEY_NAME to keyName.toString(),
+                FileIssueParamType.KEY_INDEX to keyIndex.toString()
+        ))
+    }
+
+    fun addValueIsNotStringIssue(keyName: String, keyIndex: Int, value: Any?) {
+        addIssue(FileIssueType.VALUE_IS_NOT_STRING, mapOf(
+                FileIssueParamType.KEY_NAME to keyName,
+                FileIssueParamType.KEY_INDEX to keyIndex.toString(),
+                FileIssueParamType.VALUE to value.toString()
+        ))
+    }
+
+    fun addKeyIsEmptyIssue(keyIndex: Int) {
+        addIssue(FileIssueType.KEY_IS_NOT_STRING, mapOf(
+                FileIssueParamType.KEY_INDEX to keyIndex.toString(),
+        ))
+    }
+
+    fun addValueIsEmptyIssue(keyName: String) {
+        addIssue(FileIssueType.VALUE_IS_NOT_STRING, mapOf(
+                FileIssueParamType.KEY_NAME to keyName,
+        ))
+    }
 }

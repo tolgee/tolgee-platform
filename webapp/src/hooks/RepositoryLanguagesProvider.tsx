@@ -10,7 +10,7 @@ import {FullPageLoading} from "../component/common/FullPageLoading";
 
 const languageActions = container.resolve(LanguageActions);
 
-export const RepositoryLanguageProvider: FunctionComponent = (props) => {
+export const RepositoryLanguagesProvider: FunctionComponent = (props) => {
 
     let repositoryDTO = useRepository();
 

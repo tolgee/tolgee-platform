@@ -34,8 +34,8 @@ class RepositoryService constructor(
         private val addressPartGenerator: AddressPartGenerator
 
 ) {
-    private var keyService: KeyService? = null
-
+    @set:Autowired
+    lateinit var keyService: KeyService
 
     @set:Autowired
     lateinit var organizationService: OrganizationService
@@ -121,15 +121,10 @@ class RepositoryService constructor(
         permissionService.deleteAllByRepository(repository.id)
         translationService.deleteAllByRepository(repository.id)
         screenshotService.deleteAllByRepository(repository.id)
-        keyService!!.deleteAllByRepository(repository.id)
+        keyService.deleteAllByRepository(repository.id)
         apiKeyService.deleteAllByRepository(repository.id)
         languageService.deleteAllByRepository(repository.id)
         repositoryRepository.delete(repository)
-    }
-
-    @Autowired
-    fun setKeyService(keyService: KeyService?) {
-        this.keyService = keyService
     }
 
     fun deleteAllByName(name: String) {

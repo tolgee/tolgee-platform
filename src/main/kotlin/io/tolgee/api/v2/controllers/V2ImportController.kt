@@ -9,10 +9,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModel
-import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModelAssembler
-import io.tolgee.api.v2.hateoas.dataImport.ImportTranslationModel
-import io.tolgee.api.v2.hateoas.dataImport.ImportTranslationModelAssembler
+import io.tolgee.api.v2.hateoas.dataImport.*
 import io.tolgee.constants.Message
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessage
@@ -21,8 +18,10 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
+import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.security.AuthenticationFacade
@@ -34,6 +33,7 @@ import io.tolgee.service.dataImport.ImportService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.hateoas.mediatype.hal.HalMediaTypeConfiguration
 import org.springframework.http.HttpStatus
@@ -54,12 +54,16 @@ class V2ImportController(
         private val authenticationFacade: AuthenticationFacade,
         private val importLanguageModelAssembler: ImportLanguageModelAssembler,
         private val importTranslationModelAssembler: ImportTranslationModelAssembler,
+        private val importFileIssueModelAssembler: ImportFileIssueModelAssembler,
 
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val pagedLanguagesResourcesAssembler: PagedResourcesAssembler<ImportLanguageView>,
 
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val pagedTranslationsResourcesAssembler: PagedResourcesAssembler<ImportTranslationView>,
+
+        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+        private val pagedImportFileIssueResourcesAssembler: PagedResourcesAssembler<ImportFileIssueView>,
 
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val halMediaTypeConfiguration: HalMediaTypeConfiguration,
@@ -202,6 +206,17 @@ class V2ImportController(
         this.importService.selectExistingLanguage(importLanguage, existingLanguage)
     }
 
+    @GetMapping("/result/files/{importFileId}/issues")
+    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    fun getImportFileIssues(
+            @PathVariable("importFileId") importFileId: Long,
+            pageable: Pageable
+    ): PagedModel<EntityModel<ImportFileIssueView>> {
+        checkFileFromRepository(importFileId)
+        val page = importService.getFileIssues(importFileId, pageable)
+        return pagedImportFileIssueResourcesAssembler.toModel(page)
+    }
+
     private fun resolveAllOfLanguage(languageId: Long, override: Boolean) {
         val language = checkImportLanguageInRepository(languageId)
         importService.resolveAllOfLanguage(language, override)
@@ -211,6 +226,14 @@ class V2ImportController(
         checkImportLanguageInRepository(languageId)
         val translation = checkTranslationOfLanguage(translationId, languageId)
         return importService.resolveTranslationConflict(translation, override)
+    }
+
+    private fun checkFileFromRepository(fileId: Long): ImportFile {
+        val file = importService.findFile(fileId) ?: throw NotFoundException()
+        if (file.import.repository.id != repositoryHolder.repository.id) {
+            throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
+        }
+        return file
     }
 
     private fun checkLanguageFromRepository(languageId: Long): Language {

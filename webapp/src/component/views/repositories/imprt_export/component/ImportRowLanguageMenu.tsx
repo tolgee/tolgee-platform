@@ -39,15 +39,17 @@ export const ImportRowLanguageMenu: FunctionComponent<{
                 </InputLabel>
                 <Select
                     labelId="import_row_language_select"
-                    value={props.value}
+                    value={props.value || ''}
                     onChange={onChange}
                     fullWidth
 
                 >
                     {availableLanguages.length ?
-                        availableLanguages.map(l => <MenuItem value={l.id}>
-                            {l.name}
-                        </MenuItem>) :
+                        availableLanguages.map(l =>
+                            <MenuItem value={l.id} key={l.id}>
+                                {l.name}
+                            </MenuItem>)
+                        :
                         <Box p={2}>
                             <Typography variant="body1"><T>import_no_languages_to_choose_from</T></Typography>
                         </Box>

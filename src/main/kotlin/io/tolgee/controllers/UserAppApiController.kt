@@ -31,7 +31,7 @@ class UserAppApiController(
     @GetMapping(value = ["/{languages}"])
     @AccessWithApiKey
     @Deprecated(message = "Use standard /api/repository/translations/...")
-    fun getTranslations(@PathVariable("languages") languages: Set<String?>?): Map<String, Any> {
+    fun getTranslations(@PathVariable("languages") languages: Set<String>): Map<String, Any> {
         val apiKey = authenticationFacade.apiKey
         securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_VIEW), apiKey)
         return translationService.getTranslations(languages, apiKey.repository!!.id)

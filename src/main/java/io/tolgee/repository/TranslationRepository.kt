@@ -1,30 +1,23 @@
-package io.tolgee.repository;
+package io.tolgee.repository
 
-import io.tolgee.model.Key;
-import io.tolgee.model.Language;
-import io.tolgee.model.Translation;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
+import io.tolgee.model.Key
+import io.tolgee.model.Language
+import io.tolgee.model.Translation
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
-public interface TranslationRepository extends JpaRepository<Translation, Long> {
-
+interface TranslationRepository : JpaRepository<Translation, Long> {
     @Query("from Translation t join fetch t.key where t.key.repository.id = :repositoryId and t.language.abbreviation in :languages")
-    Set<Translation> getTranslations(Set<String> languages, Long repositoryId);
+    fun getTranslations(languages: Set<String>, repositoryId: Long): Set<Translation>
 
     @Query("from Translation t join fetch Key k on t.key = k where k = :key and k.repository = :repository and t.language in :languages")
-    Set<Translation> getTranslations(Key key, io.tolgee.model.Repository repository, Collection<Language> languages);
-
-    Optional<Translation> findOneByKeyAndLanguage(Key key, Language language);
-
-    Set<Translation> getAllByLanguageId(Long languageId);
-
-    Iterable<Translation> getAllByKeyRepositoryId(Long repositoryId);
-
-    Iterable<Translation> getAllByKeyIdIn(Iterable<Long> keyIds);
+    fun getTranslations(key: Key, repository: io.tolgee.model.Repository, languages: Collection<Language>): Set<Translation>
+    fun findOneByKeyAndLanguage(key: Key, language: Language): Optional<Translation>
+    fun getAllByLanguageId(languageId: Long): Set<Translation>
+    fun getAllByKeyRepositoryId(repositoryId: Long): Iterable<Translation>
+    fun getAllByKeyIdIn(keyIds: Iterable<Long>): Iterable<Translation>
+    fun getAllByLanguageRepositoryId(repositoryId: Long): Iterable<Translation>
 }

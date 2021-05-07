@@ -8,6 +8,7 @@ interface ImportLanguageView {
     val existingLanguageName: String?
     val importFileName: String
     val importFileId: Long
+    val importFileIssueCount: Int
     val totalCount: Int
     val conflictCount: Int
     val resolvedCount: Int

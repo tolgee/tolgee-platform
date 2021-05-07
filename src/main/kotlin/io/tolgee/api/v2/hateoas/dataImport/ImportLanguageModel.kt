@@ -13,6 +13,7 @@ open class ImportLanguageModel(
         override val existingLanguageName: String?,
         override val importFileName: String,
         override val importFileId: Long,
+        override val importFileIssueCount: Int,
         override val totalCount: Int,
         override val conflictCount: Int,
         override val resolvedCount: Int

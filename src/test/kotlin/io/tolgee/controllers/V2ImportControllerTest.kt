@@ -377,6 +377,34 @@ class V2ImportControllerTest : SignedInControllerTest() {
                 .isEqualTo(testData.french)
     }
 
+    @Test
+    fun `it returns correct file issues`() {
+        val testData = ImportTestData()
+        testData.addManyFileIssues()
+        testData.setAllResolved()
+        testData.setAllOverride()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+        val fileId = testData.importBuilder.data.importFiles[0].self.id
+        logAsUser(user.username!!, "admin")
+        val path = "/v2/repositories/${repositoryId}/import/result/files/${fileId}/issues"
+        performAuthGet(path).andIsOk.andPrettyPrint.andAssertThatJson {
+            node("page.totalElements").isEqualTo(204)
+            node("page.size").isEqualTo(20)
+            node("_embedded.importFileIssues[0]").isEqualTo("""
+                {
+                    "id" : 1,
+                     "type" : "KEY_IS_NOT_STRING",
+                     "params" : [ {
+                        "value" : "1",
+                        "type" : "KEY_INDEX"
+                      }]
+                }
+            """.trimIndent())
+        }
+    }
+
     private fun performImport(repositoryId: Long, files: Map<String?, Resource>): ResultActions {
         val builder = MockMvcRequestBuilders
                 .multipart("/v2/repositories/${repositoryId}/import")

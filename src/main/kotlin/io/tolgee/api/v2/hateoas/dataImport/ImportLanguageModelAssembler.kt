@@ -17,6 +17,7 @@ class ImportLanguageModelAssembler : RepresentationModelAssemblerSupport<ImportL
                 existingLanguageName = view.existingLanguageName,
                 importFileName = view.importFileName,
                 importFileId = view.importFileId,
+                importFileIssueCount = view.importFileIssueCount,
                 totalCount = view.totalCount,
                 conflictCount = view.conflictCount,
                 resolvedCount = view.resolvedCount

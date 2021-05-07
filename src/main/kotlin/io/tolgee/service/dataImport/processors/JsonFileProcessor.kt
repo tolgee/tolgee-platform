@@ -4,9 +4,6 @@ import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.exceptions.ImportCannotParseFileException
-import io.tolgee.model.dataImport.issues.ImportFileIssue
-import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType.KEY_IS_NOT_STRING
-import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 
 class JsonFileProcessor(
         override val context: FileProcessorContext
@@ -25,19 +22,37 @@ class JsonFileProcessor(
 
     private fun Map<*, *>.parse(): Map<String, Any> {
         val data = mutableMapOf<String, Any>()
-        this.entries.forEach { entry ->
-            (entry.key as? String)?.also { key ->
-                (entry.value as? String)?.let { value ->
-                    data[key] = value
-                }
-                (entry.value as? Map<*, *>)?.let { embedded ->
-                    embedded.parse().forEach { embeddedEntry ->
-                        data["$key.${embeddedEntry.key}"] = embeddedEntry.value
-                    }
-                }
-            } ?: let {
-                context.fileEntity.addIssue(KEY_IS_NOT_STRING, mapOf(FileIssueParamType.KEY to entry.key.toString()))
+        this.entries.forEachIndexed { idx, entry ->
+            val key = entry.key
+            if (key !is String) {
+                context.fileEntity.addKeyIsNotStringIssue(key.toString(), idx)
+                return@forEachIndexed
             }
+
+            if (key.isEmpty()) {
+                context.fileEntity.addKeyIsEmptyIssue(idx)
+                return@forEachIndexed
+            }
+
+            val value = entry.value
+            if (value is String) {
+                if (value.isEmpty()) {
+                    context.fileEntity.addValueIsEmptyIssue(entry.key.toString())
+                    return@forEachIndexed
+                }
+
+                data[key] = value
+                return@forEachIndexed
+            }
+
+            (entry.value as? Map<*, *>)?.let { embedded ->
+                embedded.parse().forEach { embeddedEntry ->
+                    data["$key.${embeddedEntry.key}"] = embeddedEntry.value
+                }
+                return@forEachIndexed
+            }
+
+            context.fileEntity.addValueIsNotStringIssue(key, idx, value)
         }
         return data
     }
@@ -48,12 +63,5 @@ class JsonFileProcessor(
             return this.context.file.name
         }
         return guess
-    }
-
-    companion object {
-        data class ParseResult(
-                val data: Map<String, Any>,
-                val issues: List<ImportFileIssue>
-        )
     }
 }

@@ -20,7 +20,18 @@ class StoredDataImporter(
     private val importDataManager = ImportDataManager(applicationContext, import)
     private val keyService = applicationContext.getBean(KeyService::class.java)
     private val translationsToSave = mutableListOf<Translation>()
-    private val keysToSave = mutableListOf<Key>()
+
+    /**
+     * We need to persist data after everything is checked for resolved conflicts since
+     * thrown ImportConflictNotResolvedException commits the transaction,
+     * looking for key in this map is also faster then querying database
+     */
+    private val keysToSave = mutableMapOf<String, Key>()
+
+    /**
+     * We need to persist data after everything is checked for resolved conflicts since
+     * thrown ImportConflictNotResolvedException commits the transaction
+     */
     private val translationService = applicationContext.getBean(TranslationService::class.java)
 
     fun doImport() {
@@ -28,7 +39,7 @@ class StoredDataImporter(
             it.doImport()
         }
         translationService.saveAll(translationsToSave)
-        keyService.saveAll(keysToSave)
+        keyService.saveAll(keysToSave.values)
     }
 
     private fun ImportLanguage.doImport() {
@@ -40,18 +51,25 @@ class StoredDataImporter(
     private fun ImportTranslation.doImport() {
         this.checkConflictResolved()
         if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
-            val key = this.conflict?.key ?: keyService.getOrCreateKeyNoPersist(import.repository, this.key.name)
-            keysToSave.add(key)
             val language = this.language.existingLanguage
                     ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
             val translation = this.conflict ?: Translation().apply {
                 this.language = language
-                this.key = key
+                this.key = existingKey
             }
             translation.text = this@doImport.text
             translationsToSave.add(translation)
         }
     }
+
+    private val ImportTranslation.existingKey: Key
+        get() {
+            val key = keysToSave[this.key.name] ?: this.conflict?.key
+            ?: keyService.getOrCreateKeyNoPersist(import.repository, this.key.name)
+            val keyName = key.name ?: throw IllegalStateException("Key has no name")
+            keysToSave[keyName] = key
+            return key
+        }
 
     private fun ImportTranslation.checkConflictResolved() {
         if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {

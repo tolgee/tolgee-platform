@@ -18,8 +18,8 @@ class ImportTestData {
     lateinit var importFrench: ImportLanguage
     lateinit var importEnglish: ImportLanguage
     lateinit var translationWithConflict: ImportTranslation
-    lateinit var repository: Repository
-    lateinit var userAccount: UserAccount
+    var repository: Repository
+    var userAccount: UserAccount
 
     val root: TestDataBuilder = TestDataBuilder().apply {
         userAccount = addUserAccount {
@@ -81,28 +81,24 @@ class ImportTestData {
                 self {
                     this.language = english
                     this.key = key
-                    this.text = "What a text"
                 }
             }.self
             addTranslation {
                 self {
                     this.language = english
                     this.key = repositoryBuilder.data.keys[1].self
-                    this.text = "What a text"
                 }
             }.self
             addTranslation {
                 self {
                     this.language = english
                     this.key = repositoryBuilder.data.keys[2].self
-                    this.text = "What a text"
                 }
             }.self
             addTranslation {
                 self {
                     this.language = english
                     this.key = repositoryBuilder.data.keys[3].self
-                    this.text = "What a text"
                 }
             }.self
             addTranslation {
@@ -242,6 +238,24 @@ class ImportTestData {
         this.importBuilder.data.importFiles.forEach { file ->
             file.data.importTranslations.forEach {
                 it.self { override = true }
+            }
+        }
+    }
+
+    fun addFileIssues() {
+        this.importBuilder.data.importFiles[0].self {
+            addKeyIsEmptyIssue(1)
+            addKeyIsNotStringIssue(4, 2)
+            addValueIsEmptyIssue("value_is_emtpy_key")
+            addValueIsNotStringIssue("value_is_not_string_key", 5, 1)
+        }
+    }
+
+    fun addManyFileIssues() {
+        addFileIssues()
+        this.importBuilder.data.importFiles[0].self {
+            (1..200).forEach {
+                addKeyIsEmptyIssue(it)
             }
         }
     }

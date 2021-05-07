@@ -37,8 +37,8 @@ export const ImportResultRow = (props: {
                     <Button onClick={() => props.onResolveConflicts(props.row)} size="small">{props.row.resolvedCount}/{props.row.conflictCount}</Button>
                 </TableCell>
                 <TableCell scope="row" align={"right"}>
-                    <IconButton size="small" style={{padding: 0}}>
-                        <DeleteIcon onClick={deleteLanguage}/>
+                    <IconButton onClick={deleteLanguage} size="small" style={{padding: 0}}>
+                        <DeleteIcon/>
                     </IconButton>
                 </TableCell>
             </TableRow>

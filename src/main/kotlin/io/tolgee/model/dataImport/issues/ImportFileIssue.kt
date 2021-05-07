@@ -10,10 +10,10 @@ import javax.validation.constraints.NotNull
 class ImportFileIssue(
         @ManyToOne(optional = false)
         @field:NotNull
-        val file: ImportFile,
+        var file: ImportFile,
 
         @Enumerated
-        val type: FileIssueType,
+        var type: FileIssueType = FileIssueType.NO_MATCHING_PROCESSOR,
 
         @OneToMany(fetch = FetchType.EAGER, mappedBy = "issue", cascade = [CascadeType.ALL])
         var params: MutableList<ImportFileIssueParam>? = null,
