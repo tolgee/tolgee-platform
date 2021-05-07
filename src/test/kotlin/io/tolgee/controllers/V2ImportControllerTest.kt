@@ -392,15 +392,11 @@ class V2ImportControllerTest : SignedInControllerTest() {
         performAuthGet(path).andIsOk.andPrettyPrint.andAssertThatJson {
             node("page.totalElements").isEqualTo(204)
             node("page.size").isEqualTo(20)
-            node("_embedded.importFileIssues[0]").isEqualTo("""
-                {
-                    "id" : 1,
-                     "type" : "KEY_IS_NOT_STRING",
-                     "params" : [ {
-                        "value" : "1",
-                        "type" : "KEY_INDEX"
-                      }]
-                }
+            node("_embedded.importFileIssues[0].params").isEqualTo("""
+               [{
+                 "value" : "1",
+                 "type" : "KEY_INDEX"
+              }]
             """.trimIndent())
         }
     }
