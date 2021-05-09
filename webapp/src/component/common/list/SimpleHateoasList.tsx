@@ -57,7 +57,7 @@ export function SimpleHateoasList<ItemDataType,
 
     return (
         <SimpleList
-            data-cy="simple-hateoas-list"
+            wrapperComponentProps={{"data-cy": "simple-hateoas-list"}}
             data={embedded[key]}
             renderItem={props.renderItem}
         />

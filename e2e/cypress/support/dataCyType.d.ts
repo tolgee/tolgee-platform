@@ -55,7 +55,6 @@ declare namespace DataCy {
         "repository-owner-select-item" |
         "repository-settings-button" |
         "screenshot-box" |
-        "simple-hateoas-list" |
         "translations-add-key-dialog" |
         "translations-add-key-field" |
         "translations-delete-button" |

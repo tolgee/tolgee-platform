@@ -25,7 +25,8 @@ export const SimpleList = <DataItem,
     const {data, pagination} = props
 
     const Wrapper = props.wrapperComponent || Paper
-    const wrapperProps = props.wrapperComponentProps || {variant: "outlined"} as PaperProps
+    const baseProps = Wrapper === Paper ? {variant: "outlined"} as PaperProps : {}
+    const wrapperProps = {...baseProps, ...props.wrapperComponentProps}
     const ListWrapper = props.listComponent || List
 
     return (
