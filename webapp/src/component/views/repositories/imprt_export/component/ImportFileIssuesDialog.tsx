@@ -1,5 +1,5 @@
 import React, {FunctionComponent} from 'react';
-import {Dialog, DialogContent, DialogTitle} from "@material-ui/core";
+import {Box, Dialog, DialogContent, DialogTitle} from "@material-ui/core";
 import {T} from "@tolgee/react";
 import {useRepository} from "../../../../../hooks/useRepository";
 import {container} from "tsyringe";
@@ -36,6 +36,8 @@ export const ImportFileIssuesDialog: FunctionComponent<{
                                         importFileId: row.importFileId
                                     }
                                 }]}
+                                wrapperComponent={Box}
+                                listComponent={Box}
                                 sortBy={[]}
                                 renderItem={i => <>
                                     <Alert color="warning" icon={<Warning/>}>

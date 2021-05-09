@@ -1,7 +1,7 @@
 import * as React from "react";
 import {ReactNode, useEffect} from "react";
 import {EmptyListMessage} from "../EmptyListMessage";
-import {SimplePaperList} from "./SimplePaperList";
+import {SimpleList} from "./SimpleList";
 import {AbstractLoadableActions, StateWithLoadables} from "../../../store/AbstractLoadableActions";
 import {HateoasListData} from "../../../service/response.types";
 import {BoxLoading} from "../BoxLoading";
@@ -56,7 +56,7 @@ export function SimpleHateoasList<ItemDataType,
     const key = Object.keys(embedded)[0];
 
     return (
-        <SimplePaperList
+        <SimpleList
             data-cy="simple-hateoas-list"
             data={embedded[key]}
             renderItem={props.renderItem}
