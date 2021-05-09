@@ -27,7 +27,7 @@ class ImportLanguageRepositoryTest : AbstractSpringTest() {
         assertThat(result[0].conflictCount).isEqualTo(4)
         assertThat(result[0].totalCount).isEqualTo(6)
         assertThat(result[0].resolvedCount).isEqualTo(0)
-        assertThat(result[0].importFileIssueCount).isEqualTo(3)
+        assertThat(result[0].importFileIssueCount).isEqualTo(4)
     }
 
     @Test
