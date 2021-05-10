@@ -7,13 +7,13 @@ import io.tolgee.exceptions.ImportCannotParseFileException
 
 class JsonFileProcessor(
         override val context: FileProcessorContext
-) : ImportFileProcessor {
+) : ImportFileProcessor() {
     override fun process() {
         try {
             val data = jacksonObjectMapper().readValue<Map<String, Any>>(context.file.inputStream)
             val parsed = data.parse()
             parsed.forEach {
-                context.addTranslation(it.key, guessLanguageName(), it.value)
+                context.addTranslation(it.key, languageNameGuesses[0], it.value)
             }
         } catch (e: JsonParseException) {
             throw ImportCannotParseFileException(context.file.name, e.message)
@@ -55,13 +55,5 @@ class JsonFileProcessor(
             context.fileEntity.addValueIsNotStringIssue(key, idx, value)
         }
         return data
-    }
-
-    private fun guessLanguageName(): String {
-        val guess = context.file.name!!.replace("^(.*?)\\..*".toRegex(), "$1")
-        if (guess.isBlank()) {
-            return this.context.file.name
-        }
-        return guess
     }
 }
