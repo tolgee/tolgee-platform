@@ -70,7 +70,7 @@
     ]
   },
   "devDependencies": {
-    "concurrently": "^6.0.2",
+    "concurrently": "^6.1.0",
     "craco": "^0.0.3",
     "webpack": "4.44.2"
   }
