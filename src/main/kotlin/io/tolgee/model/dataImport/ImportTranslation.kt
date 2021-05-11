@@ -11,7 +11,7 @@ import javax.persistence.*
 
 @Entity
 class ImportTranslation(
-        @Column(columnDefinition = "text")
+        @Column(columnDefinition = "text", length = 2000)
         var text: String?,
 
         @ManyToOne
