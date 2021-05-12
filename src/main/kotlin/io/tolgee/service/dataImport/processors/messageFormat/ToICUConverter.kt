@@ -43,7 +43,7 @@ class ToICUConverter(
         var result = message
         var iterations = 0
         var keyIdx = 0
-        val regexp = "(.*?[^%]|^)%(?:(\\d+)\\\$)?([ds])(.*)".toRegex()
+        val regexp = "(.*?(?:[^%]|^))%(?:(\\d+)\\\$)?([ds])(.*)".toRegex()
         while (result.matches(regexp)) {
             //just to be sure to avoid infinite loop
             if (iterations > 1000) {

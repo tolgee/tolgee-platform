@@ -31,9 +31,18 @@ class ToICUConverterTest {
     }
 
     @Test
+    fun testPhpMessageMultiple() {
+        val result = ToICUConverter(ULocale("cs"), SupportedFormat.PHP)
+                .convert("%s %d %d %s")
+        assertThat(result).isEqualTo("{0} {1, number} {2, number} {3}")
+    }
+
+    @Test
     fun testPhpMessageKey() {
         val result = ToICUConverter(ULocale("cs"), SupportedFormat.PHP)
                 .convert("%3${'$'}d hello this is string %2${'$'}s, this is digit %1${'$'}d, and another digit %s")
-        assertThat(result).isEqualTo("{2, number} hello this is string {1}, this is digit {0, number}, and another digit {2}")
+
+        assertThat(result)
+                .isEqualTo("{2, number} hello this is string {1}, this is digit {0, number}, and another digit {2}")
     }
 }
