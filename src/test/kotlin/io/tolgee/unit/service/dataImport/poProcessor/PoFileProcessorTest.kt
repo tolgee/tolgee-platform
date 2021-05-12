@@ -1,5 +1,6 @@
 package io.tolgee.unit.service.dataImport.poProcessor
 
+import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
@@ -28,7 +29,14 @@ class PoFileProcessorTest {
     @Test
     fun testGetSequences() {
         PoFileProcessor(fileProcessorContext).process()
-
-
+        assertThat(fileProcessorContext.languages).hasSize(1)
+        assertThat(fileProcessorContext.translations).hasSize(8)
+        assertThat(fileProcessorContext.translations["%d pages read."]?.get(0)?.text)
+                .isEqualTo("{0, plural,\n" +
+                        "one {Eine Seite gelesen wurde.}\n" +
+                        "other {{0} Seiten gelesen wurden.}\n" +
+                        "}")
+        assertThat(fileProcessorContext.translations.values.toList()[2][0].text)
+                .isEqualTo("Willkommen zurück, {0}! Dein letzter Besuch war am {1}")
     }
 }

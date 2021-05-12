@@ -1,5 +1,11 @@
 package io.tolgee.service.dataImport.processors.messageFormat
 
 enum class SupportedFormat(val poFlag: String) {
-    PHP(poFlag = "php_format")
+    PHP(poFlag = "php-format")
+    ;
+
+    companion object {
+        fun findByFlag(poFlag: String) =
+                values().find { it.poFlag == poFlag }
+    }
 }

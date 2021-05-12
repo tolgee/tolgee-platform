@@ -30,7 +30,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     const classes = useStyles()
     const fileRef = React.createRef<HTMLInputElement>();
     const config = useConfig();
-    const ALLOWED_UPLOAD_TYPES = ["application/json", "application/zip"];
+    const ALLOWED_EXTENSIONS = ["json", "zip", "po"];
 
     React.useEffect(() => {
         const listener = (e) => {
@@ -100,7 +100,8 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
             if (file.size > config.maxUploadFileSize * 1024) {
                 result.errors.push(<T parameters={{filename: file.name}}>translations.screenshots.validation.file_too_big</T>)
             }
-            if (ALLOWED_UPLOAD_TYPES.indexOf(file.type) < 0) {
+            const extension = file.name.replace(/.*\.(.+)$/, "$1")
+            if (ALLOWED_EXTENSIONS.indexOf(extension) < 0) {
                 result.errors.push(<T parameters={{filename: file.name}}>translations.screenshots.validation.unsupported_format</T>)
             }
         })
@@ -112,7 +113,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     return (
         <ImportFileDropzone onNewFiles={onNewFiles}>
             <Box mt={4} className={classes.root} pt={5} pb={5} justifyContent="space-between" alignItems="center" flexDirection="column" display="flex">
-                <input type="file" style={{display: "none"}} ref={fileRef} onChange={e => onFileSelected(e)} multiple accept={ALLOWED_UPLOAD_TYPES.join(",")}/>
+                <input type="file" style={{display: "none"}} ref={fileRef} onChange={e => onFileSelected(e)} multiple accept={ALLOWED_EXTENSIONS.join(",")}/>
                 <Typography variant="body1"><T>import_file_input_drop_file_text</T></Typography>
                 <Box mt={2} mb={2}>
                     <Button

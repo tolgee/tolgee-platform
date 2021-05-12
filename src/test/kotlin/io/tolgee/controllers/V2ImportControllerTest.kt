@@ -33,6 +33,9 @@ class V2ImportControllerTest : SignedInControllerTest() {
     @Value("classpath:import/error.json")
     lateinit var errorJson: Resource
 
+    @Value("classpath:import/po/example.po")
+    lateinit var poFile: Resource
+
     @Test
     fun `it parses zip file and saves issues`() {
         val repository = dbPopulator.createBase(generateUniqueString())
@@ -65,7 +68,22 @@ class V2ImportControllerTest : SignedInControllerTest() {
                 .andPrettyPrint.andAssertThatJson {
                     node("_embedded.languages").isArray.hasSize(3)
                 }
-        validateSavedImportData(repository)
+        validateSavedJsonImportData(repository)
+    }
+
+    @Test
+    fun `it handles po file`() {
+        val repository = dbPopulator.createBase(generateUniqueString())
+        commitTransaction()
+
+        performImport(repositoryId = repository.id, mapOf(Pair("example.po", poFile)))
+                .andPrettyPrint.andAssertThatJson {
+                    node("_embedded.languages").isArray.hasSize(1)
+                }
+        importService.find(repository.id, repository.userOwner?.id!!)?.let {
+            assertThat(it.files).hasSize(1)
+            assertThat(it.files[0].languages[0].translations).hasSize(8)
+        }
     }
 
     @Test
@@ -92,10 +110,10 @@ class V2ImportControllerTest : SignedInControllerTest() {
                 .andAssertContainsMessage(FOUND_ARCHIVE).andPrettyPrintStreamingResult().andAssertStreamingResultJson {
                     node("_embedded.languages").isArray.hasSize(3)
                 }
-        validateSavedImportData(repository)
+        validateSavedJsonImportData(repository)
     }
 
-    private fun validateSavedImportData(repository: Repository) {
+    private fun validateSavedJsonImportData(repository: Repository) {
         importService.find(repository.id, repository.userOwner?.id!!)!!.let { importEntity ->
             entityManager.refresh(importEntity)
             assertThat(importEntity.files.size).isEqualTo(3)

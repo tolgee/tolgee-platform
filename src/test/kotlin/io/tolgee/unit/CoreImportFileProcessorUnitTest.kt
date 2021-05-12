@@ -57,7 +57,7 @@ class CoreImportFileProcessorUnitTest {
         whenever(applicationContextMock.getBean(ImportService::class.java)).thenReturn(importServiceMock)
         whenever(applicationContextMock.getBean(LanguageService::class.java)).thenReturn(languageServiceMock)
         whenever(applicationContextMock.getBean(TranslationService::class.java)).thenReturn(translationServiceMock)
-        whenever(processorFactoryMock.getProcessorByMimeType(eq("application/json"), any())).thenReturn(typeProcessorMock)
+        whenever(processorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
         fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
         fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
         whenever(typeProcessorMock.context).then { fileProcessorContext }

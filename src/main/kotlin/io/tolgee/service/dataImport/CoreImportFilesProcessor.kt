@@ -36,12 +36,10 @@ class CoreImportFilesProcessor(
     private fun processFileOrArchive(file: ImportFileDto,
                                      messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit) {
         try {
-            val mimeType = file.getContentMimeType()
-
-            if (isArchive(mimeType)) {
+            if (file.isArchive) {
                 messageClient(FOUND_ARCHIVE, null)
                 file.saveArchiveEntity()
-                val processor = processorFactory.getArchiveProcessorByMimeType(mimeType)
+                val processor = processorFactory.getArchiveProcessor(file)
                 processor.process(file).apply {
                     messageClient(FOUND_FILES_IN_ARCHIVE, listOf(size))
                     processFiles(this, messageClient)
@@ -51,7 +49,7 @@ class CoreImportFilesProcessor(
 
             val savedFileEntity = file.saveFileEntity()
             val fileProcessorContext = FileProcessorContext(file, savedFileEntity, messageClient)
-            val processor = processorFactory.getProcessorByMimeType(mimeType, fileProcessorContext)
+            val processor = processorFactory.getProcessor(file, fileProcessorContext)
             processor.process()
             processor.context.processResult()
         } catch (e: FileIssueException) {
@@ -61,12 +59,14 @@ class CoreImportFilesProcessor(
         }
     }
 
+    private val ImportFileDto.isArchive: Boolean
+        get() {
+            return this.name?.endsWith(".zip") ?: false
+        }
+
     private fun ImportFileDto.saveFileEntity() = importService.saveFile(ImportFile(this.name, import))
 
     private fun ImportFileDto.saveArchiveEntity() = importService.saveArchive(ImportArchive(this.name!!, import))
-
-
-    private fun isArchive(mimeType: String) = mimeType == "application/zip"
 
     private fun ImportFileDto.getContentMimeType(): String {
         this.name?.let { filename ->
