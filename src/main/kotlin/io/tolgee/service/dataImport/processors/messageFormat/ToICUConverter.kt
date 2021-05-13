@@ -2,36 +2,69 @@ package io.tolgee.service.dataImport.processors.messageFormat
 
 import com.ibm.icu.text.PluralRules
 import com.ibm.icu.util.ULocale
+import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.messageFormat.data.PluralData
 
 class ToICUConverter(
-        val locale: ULocale,
-        val format: SupportedFormat?
+        private val locale: ULocale,
+        private val format: SupportedFormat?,
+        private val context: FileProcessorContext
 ) {
 
-    fun convertPoPlural(pluralForms: Map<Int, String>): String {
-        return when (format) {
-            SupportedFormat.PHP -> convertPhpPlural(pluralForms)
-            else -> ""
-        }
+    companion object {
+        val PHP_PARAM_REGEX = """(?x)(
+            %
+            (?:(?<argnum>\d+)${"\\$"})?
+            (?<flags>(?:[-+\s0]|'.)+)?
+            (?<width>\d+)?
+            (?<precision>.\d+)?
+            (?<specifier>[bcdeEfFgGhHosuxX%])
+            )
+            """.trimIndent().toRegex()
+
+        val C_PARAM_REGEX = """(?x)(
+            %
+            (?:(?<argnum>\d+)${"\\$"})?
+            (?<flags>[-+\s0\#]+)?
+            (?<width>\d+)?
+            (?<precision>.\d+)?
+            (?<length>hh|h|l|ll|j|z|t|L)?
+            (?<specifier>[diuoxXfFeEgGaAcspn%])
+            )""".trimIndent().toRegex()
+
+        val PYTHON_PARAM_REGEX = """(?x)(
+            %
+            (?:\((?<argname>[\w-]+)\))?
+            (?<flags>[-+\s0\#]+)?
+            (?<width>[\d*]+)?
+            (?<precision>.[\d*]+)?
+            (?<length>[hlL])?
+            (?<specifier>[diouxXeEfFgGcrs%])
+            )""".trimIndent().toRegex()
+
+        val PHP_NUMBER_SPECIFIERS = "dfeEfFgGhH"
+        val C_NUMBER_SPECIFIERS = "diuoxXfFeEgG"
+        val PYTHON_NUMBER_SPECIFIERS = "diouxXeEfFgG"
     }
 
     fun convert(message: String): String {
         return when (format) {
             SupportedFormat.PHP -> convertPhp(message)
-            else -> ""
+            SupportedFormat.C -> convertC(message)
+            SupportedFormat.PYTHON -> convertPython(message)
+            else -> convertC(message)
         }
     }
 
-    private fun convertPhpPlural(pluralForms: Map<Int, String>): String {
+    fun convertPoPlural(pluralForms: Map<Int, String>): String {
         val icuMsg = StringBuffer("{0, plural,\n")
         pluralForms.entries.forEach { (key, value) ->
             val example = findSuitableExample(key)
             val keyword = PluralRules.forLocale(locale).select(example.toDouble())
-            icuMsg.append("$keyword {${value}}\n")
+            icuMsg.append("$keyword {${convert(value)}}\n")
         }
         icuMsg.append("}")
-        return icuMsg.replace("([^%]|^)%[d|s]".toRegex(), "$1{0}")
+        return icuMsg.toString()
     }
 
     private fun findSuitableExample(key: Int): Int {
@@ -40,35 +73,54 @@ class ToICUConverter(
     }
 
     private fun convertPhp(message: String): String {
+        return convertCLike(message, PHP_PARAM_REGEX, PHP_NUMBER_SPECIFIERS)
+    }
+
+    private fun convertC(message: String): String {
+        return convertCLike(message, C_PARAM_REGEX, C_NUMBER_SPECIFIERS)
+    }
+
+    private fun convertPython(message: String): String {
+        return convertCLike(message, PYTHON_PARAM_REGEX, PYTHON_NUMBER_SPECIFIERS)
+    }
+
+
+    private fun convertCLike(message: String, regex: Regex, numberSpecifiers: String): String {
         var result = message
-        var iterations = 0
         var keyIdx = 0
-        val regexp = "(.*?(?:[^%]|^))%(?:(\\d+)\\\$)?([ds])(.*)".toRegex()
-        while (result.matches(regexp)) {
-            //just to be sure to avoid infinite loop
-            if (iterations > 1000) {
-                break
+
+        result = result.replace(regex) {
+            var paramName = keyIdx.toString()
+            val specifier = it.groups["specifier"]!!.value
+
+            if (specifier == "%") {
+                return@replace "%"
             }
 
-            result = result.replace(regexp) {
-                var paramName = keyIdx
-                val type = it.groups[3]!!.value
-                try {
-                    it.groups[2]?.let { grp ->
-                        paramName = grp.value.toInt() - 1
-                    } ?: let {
-                        paramName = keyIdx
-                    }
-                } catch (e: NumberFormatException) {
-                    paramName = keyIdx
-                }
-                val typeStr = if (type == "d") ", number" else ""
-                "${it.groups[1]!!.value}{${paramName}${typeStr}}${it.groups[4]!!.value}"
+            it.groups.getGroupOrNull("argnum")?.let { grp ->
+                paramName = (grp.value.toInt() - 1).toString()
             }
+
+            it.groups.getGroupOrNull("argname")?.let { grp ->
+                paramName = grp.value
+            }
+
+            val typeStr = if (numberSpecifiers.contains(specifier)) ", number" else ""
             keyIdx++
-            iterations++
+            "{${paramName}${typeStr}}"
         }
 
         return result
+    }
+
+    fun MatchGroupCollection.getGroupOrNull(name: String): MatchGroup? {
+        try {
+            return this[name]
+        } catch (e: IllegalArgumentException) {
+            if (e.message?.contains("No group with name") != true) {
+                throw e
+            }
+            return null
+        }
     }
 }

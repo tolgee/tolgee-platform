@@ -1,17 +1,18 @@
-package io.tolgee.unit.service.dataImport.poProcessor
+package io.tolgee.unit.service.dataImport.processors.messageFormat
 
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.poProcessor.PoFileProcessor
+import io.tolgee.service.dataImport.processors.messageFormat.FormatDetector
+import io.tolgee.service.dataImport.processors.messageFormat.SupportedFormat
 import org.mockito.kotlin.mock
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import java.io.File
 
-class PoFileProcessorTest {
+class FormatDetectorTest {
     private lateinit var importMock: Import
     private lateinit var importFile: ImportFile
     private lateinit var importFileDto: ImportFileDto
@@ -27,16 +28,14 @@ class PoFileProcessorTest {
     }
 
     @Test
-    fun testGetSequences() {
-        PoFileProcessor(fileProcessorContext).process()
-        assertThat(fileProcessorContext.languages).hasSize(1)
-        assertThat(fileProcessorContext.translations).hasSize(8)
-        assertThat(fileProcessorContext.translations["%d pages read."]?.get(0)?.text)
-                .isEqualTo("{0, plural,\n" +
-                        "one {Eine Seite gelesen wurde.}\n" +
-                        "other {{0} Seiten gelesen wurden.}\n" +
-                        "}")
-        assertThat(fileProcessorContext.translations.values.toList()[2][0].text)
-                .isEqualTo("Willkommen zurück, {0}! Dein letzter Besuch war am {1}")
+    fun `returns C format`() {
+        val detector = FormatDetector(listOf("%jd %hhd", "%d %s", "d %s"))
+        assertThat(detector()).isEqualTo(SupportedFormat.C)
+    }
+
+    @Test
+    fun `returns PHP format`() {
+        val detector = FormatDetector(listOf("%b %d", "%d %s", "d %s"))
+        assertThat(detector()).isEqualTo(SupportedFormat.PHP)
     }
 }

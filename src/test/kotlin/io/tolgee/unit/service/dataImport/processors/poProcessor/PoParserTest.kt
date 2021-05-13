@@ -1,4 +1,4 @@
-package io.tolgee.unit.service.dataImport.poProcessor
+package io.tolgee.unit.service.dataImport.processors.poProcessor
 
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.dataImport.ImportFileDto
