@@ -36,6 +36,9 @@ class V2ImportControllerTest : SignedInControllerTest() {
     @Value("classpath:import/po/example.po")
     lateinit var poFile: Resource
 
+    @Value("classpath:import/xliff/example.xliff")
+    lateinit var xliffFile: Resource
+
     @Test
     fun `it parses zip file and saves issues`() {
         val repository = dbPopulator.createBase(generateUniqueString())
@@ -86,6 +89,16 @@ class V2ImportControllerTest : SignedInControllerTest() {
             assertThat(it.files).hasSize(1)
             assertThat(it.files[0].languages[0].translations).hasSize(8)
         }
+    }
+
+    @Test
+    fun `it handles xliff file`() {
+        val repository = dbPopulator.createBase(generateUniqueString())
+
+        performImport(repositoryId = repository.id, mapOf(Pair("example.xliff", xliffFile)))
+                .andPrettyPrint.andAssertThatJson {
+                    node("_embedded.languages").isArray.hasSize(2)
+                }.andReturn()
     }
 
     @Test

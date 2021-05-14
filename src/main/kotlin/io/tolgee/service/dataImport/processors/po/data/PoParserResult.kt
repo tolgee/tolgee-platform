@@ -1,4 +1,4 @@
-package io.tolgee.service.dataImport.processors.poProcessor.data
+package io.tolgee.service.dataImport.processors.po.data
 
 data class PoParserResult(
         val meta: PoParserMeta,

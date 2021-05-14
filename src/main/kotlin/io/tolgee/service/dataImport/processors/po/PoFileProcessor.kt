@@ -1,4 +1,4 @@
-package io.tolgee.service.dataImport.processors.poProcessor
+package io.tolgee.service.dataImport.processors.po
 
 import com.ibm.icu.util.ULocale
 import io.tolgee.exceptions.ImportCannotParseFileException
@@ -9,8 +9,8 @@ import io.tolgee.service.dataImport.processors.ImportFileProcessor
 import io.tolgee.service.dataImport.processors.messageFormat.FormatDetector
 import io.tolgee.service.dataImport.processors.messageFormat.SupportedFormat
 import io.tolgee.service.dataImport.processors.messageFormat.ToICUConverter
-import io.tolgee.service.dataImport.processors.poProcessor.data.PoParsedTranslation
-import io.tolgee.service.dataImport.processors.poProcessor.data.PoParserResult
+import io.tolgee.service.dataImport.processors.po.data.PoParsedTranslation
+import io.tolgee.service.dataImport.processors.po.data.PoParserResult
 
 class PoFileProcessor(
         override val context: FileProcessorContext

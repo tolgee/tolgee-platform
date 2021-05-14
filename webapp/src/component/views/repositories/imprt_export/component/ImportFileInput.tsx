@@ -30,7 +30,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     const classes = useStyles()
     const fileRef = React.createRef<HTMLInputElement>();
     const config = useConfig();
-    const ALLOWED_EXTENSIONS = ["json", "zip", "po"];
+    const ALLOWED_EXTENSIONS = ["json", "zip", "po", "xliff"];
 
     React.useEffect(() => {
         const listener = (e) => {

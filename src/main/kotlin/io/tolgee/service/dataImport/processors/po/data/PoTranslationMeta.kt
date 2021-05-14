@@ -1,4 +1,4 @@
-package io.tolgee.service.dataImport.processors.poProcessor.data
+package io.tolgee.service.dataImport.processors.po.data
 
 class PoTranslationMeta {
     var translatorComments: MutableList<String> = mutableListOf()

@@ -1,17 +1,17 @@
-package io.tolgee.unit.service.dataImport.processors.poProcessor
+package io.tolgee.unit.service.dataImport.processors.po
 
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.poProcessor.PoFileProcessor
+import io.tolgee.service.dataImport.processors.po.PoParser
 import org.mockito.kotlin.mock
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import java.io.File
 
-class PoFileProcessorTest {
+class PoParserTest {
     private lateinit var importMock: Import
     private lateinit var importFile: ImportFile
     private lateinit var importFileDto: ImportFileDto
@@ -27,16 +27,14 @@ class PoFileProcessorTest {
     }
 
     @Test
-    fun testGetSequences() {
-        PoFileProcessor(fileProcessorContext).process()
-        assertThat(fileProcessorContext.languages).hasSize(1)
-        assertThat(fileProcessorContext.translations).hasSize(8)
-        assertThat(fileProcessorContext.translations["%d pages read."]?.get(0)?.text)
-                .isEqualTo("{0, plural,\n" +
-                        "one {Eine Seite gelesen wurde.}\n" +
-                        "other {{0, number} Seiten gelesen wurden.}\n" +
-                        "}")
-        assertThat(fileProcessorContext.translations.values.toList()[2][0].text)
-                .isEqualTo("Willkommen zurück, {0}! Dein letzter Besuch war am {1}")
+    fun `returns correct parsed result`() {
+        val result = PoParser(fileProcessorContext)()
+        assertThat(result.translations).hasSizeGreaterThan(8)
+        assertThat(result.translations[5].msgstrPlurals).hasSize(2)
+        assertThat(result.translations[5].msgstrPlurals!![0].toString()).isEqualTo("Eine Seite gelesen wurde.")
+        assertThat(result.translations[5].msgstrPlurals!![1].toString()).isEqualTo("%d Seiten gelesen wurden.")
+        assertThat(result.translations[2].meta.translatorComments).hasSize(2)
+        assertThat(result.translations[2].meta.translatorComments[0]).isEqualTo("some other comment")
+        assertThat(result.translations[2].meta.extractedComments).hasSize(4)
     }
 }

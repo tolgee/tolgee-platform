@@ -1,12 +1,12 @@
-package io.tolgee.service.dataImport.processors.poProcessor
+package io.tolgee.service.dataImport.processors.po
 
 import io.tolgee.exceptions.PoParserException
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
-import io.tolgee.service.dataImport.processors.poProcessor.data.PoParsedTranslation
-import io.tolgee.service.dataImport.processors.poProcessor.data.PoParserMeta
-import io.tolgee.service.dataImport.processors.poProcessor.data.PoParserResult
+import io.tolgee.service.dataImport.processors.po.data.PoParsedTranslation
+import io.tolgee.service.dataImport.processors.po.data.PoParserMeta
+import io.tolgee.service.dataImport.processors.po.data.PoParserResult
 
 class PoParser(
         private val context: FileProcessorContext

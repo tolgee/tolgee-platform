@@ -6,5 +6,6 @@ enum class FileIssueParamType {
     LANGUAGE_ID,
     KEY_INDEX,
     VALUE,
-    LINE
+    LINE,
+    FILE_NODE_ORIGINAL
 }

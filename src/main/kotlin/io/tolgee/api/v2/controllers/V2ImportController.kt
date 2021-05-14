@@ -99,7 +99,7 @@ class V2ImportController(
 
     @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
-    @Operation(summary = "Prepares provided files to import, streams operation progress")
+    @Operation(summary = "Prepares provided files to import")
     fun addFiles(
             @PathVariable("repositoryId") repositoryId: Long,
             @RequestPart("files") files: Array<MultipartFile>,
