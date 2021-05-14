@@ -74,12 +74,14 @@ class V2ImportControllerTest : SignedInControllerTest() {
     @Test
     fun `it handles po file`() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        commitTransaction()
 
         performImport(repositoryId = repository.id, mapOf(Pair("example.po", poFile)))
                 .andPrettyPrint.andAssertThatJson {
                     node("_embedded.languages").isArray.hasSize(1)
-                }
+                }.andReturn()
+
+        entityManager.clear()
+
         importService.find(repository.id, repository.userOwner?.id!!)?.let {
             assertThat(it.files).hasSize(1)
             assertThat(it.files[0].languages[0].translations).hasSize(8)
@@ -89,7 +91,6 @@ class V2ImportControllerTest : SignedInControllerTest() {
     @Test
     fun `it returns error when json could not be parsed`() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        commitTransaction()
 
         performImport(repositoryId = repository.id, mapOf(Pair("error.json", errorJson)))
                 .andIsBadRequest.andAssertThatJson {
@@ -484,7 +485,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
     }
 
     private fun asyncDispatch(mvcResult: MvcResult): RequestBuilder {
-        mvcResult.getAsyncResult(10000)
+        mvcResult.getAsyncResult(10000000)
         return RequestBuilder {
             val request = mvcResult.request
             request.dispatcherType = DispatcherType.ASYNC

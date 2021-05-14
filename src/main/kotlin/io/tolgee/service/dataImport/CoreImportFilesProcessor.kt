@@ -34,26 +34,27 @@ class CoreImportFilesProcessor(
     }
 
     private fun processFileOrArchive(file: ImportFileDto,
-                                     messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit) {
-        try {
-            if (file.isArchive) {
-                messageClient(FOUND_ARCHIVE, null)
-                file.saveArchiveEntity()
-                val processor = processorFactory.getArchiveProcessor(file)
-                processor.process(file).apply {
-                    messageClient(FOUND_FILES_IN_ARCHIVE, listOf(size))
-                    processFiles(this, messageClient)
-                }
-                return
+                                     messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit
+    ) {
+        if (file.isArchive) {
+            messageClient(FOUND_ARCHIVE, null)
+            file.saveArchiveEntity()
+            val processor = processorFactory.getArchiveProcessor(file)
+            processor.process(file).apply {
+                messageClient(FOUND_FILES_IN_ARCHIVE, listOf(size))
+                processFiles(this, messageClient)
             }
+            return
+        }
 
-            val savedFileEntity = file.saveFileEntity()
+        val savedFileEntity = file.saveFileEntity()
+        try {
             val fileProcessorContext = FileProcessorContext(file, savedFileEntity, messageClient)
             val processor = processorFactory.getProcessor(file, fileProcessorContext)
             processor.process()
             processor.context.processResult()
         } catch (e: FileIssueException) {
-            file.saveFileEntity().let { fileEntity ->
+            savedFileEntity.let { fileEntity ->
                 importService.saveFileIssue(ImportFileIssue(file = fileEntity, type = e.type))
             }
         }
