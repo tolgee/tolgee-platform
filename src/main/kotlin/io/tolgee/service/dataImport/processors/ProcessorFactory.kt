@@ -21,6 +21,7 @@ class ProcessorFactory {
             "json" -> JsonFileProcessor(context)
             "po" -> PoFileProcessor(context)
             "xliff" -> XliffFileProcessor(context)
+            "xlf" -> XliffFileProcessor(context)
             else -> throw FileIssueException(FileIssueType.NO_MATCHING_PROCESSOR)
         }
     }
