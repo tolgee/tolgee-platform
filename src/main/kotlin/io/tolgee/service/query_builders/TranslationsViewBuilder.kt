@@ -1,7 +1,8 @@
 package io.tolgee.service.query_builders
 
 import io.tolgee.model.*
-import java.util.*
+import io.tolgee.model.key.Key
+import io.tolgee.model.key.Key_
 import javax.persistence.EntityManager
 import javax.persistence.criteria.*
 

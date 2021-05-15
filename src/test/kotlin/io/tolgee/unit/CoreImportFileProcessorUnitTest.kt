@@ -2,13 +2,13 @@ package io.tolgee.unit
 
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.model.Key
 import io.tolgee.model.Language
 import io.tolgee.model.Repository
 import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
+import io.tolgee.model.key.Key
 import io.tolgee.service.LanguageService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.dataImport.CoreImportFilesProcessor

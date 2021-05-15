@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import io.tolgee.model.key.Key
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired

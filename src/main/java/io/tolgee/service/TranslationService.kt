@@ -9,11 +9,11 @@ import io.tolgee.dtos.response.ViewDataResponse
 import io.tolgee.dtos.response.translations_view.ResponseParams
 import io.tolgee.exceptions.InternalException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Key
 import io.tolgee.model.Language
 import io.tolgee.model.Repository
 import io.tolgee.model.Translation
 import io.tolgee.model.Translation.Companion.builder
+import io.tolgee.model.key.Key
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.query_builders.TranslationsViewBuilder.Companion.getData
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,6 +1,9 @@
-package io.tolgee.model
+package io.tolgee.model.key
 
 import io.tolgee.dtos.PathDTO
+import io.tolgee.model.AuditModel
+import io.tolgee.model.Repository
+import io.tolgee.model.Translation
 import java.util.*
 import javax.persistence.*
 import javax.validation.constraints.NotBlank

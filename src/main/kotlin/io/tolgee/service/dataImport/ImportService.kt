@@ -7,12 +7,12 @@ import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Key
 import io.tolgee.model.Language
 import io.tolgee.model.Repository
 import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
+import io.tolgee.model.key.Key
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView

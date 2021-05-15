@@ -7,6 +7,7 @@ import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.*
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.model.key.Key
 import io.tolgee.repository.ApiKeyRepository
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.RepositoryRepository

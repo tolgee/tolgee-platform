@@ -9,8 +9,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.fixtures.LoggedRequestFactory.addToken
-import io.tolgee.model.Key
 import io.tolgee.model.Repository
+import io.tolgee.model.key.Key
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.mock.web.MockMultipartFile

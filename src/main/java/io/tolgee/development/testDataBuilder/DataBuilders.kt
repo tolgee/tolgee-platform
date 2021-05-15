@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder
 
 import io.tolgee.model.*
 import io.tolgee.model.dataImport.*
+import io.tolgee.model.key.Key
 
 typealias FT<T> = T.() -> Unit
 

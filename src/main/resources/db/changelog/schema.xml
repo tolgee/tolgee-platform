@@ -728,4 +728,89 @@
     <changeSet author="jenik (generated)" id="1619693094685-34">
         <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="import_translation" constraintName="FKrtx4aq0bqg6m83cdbi8vcuyve" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_key" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1621076058866-2">
+        <createTable tableName="key_code_reference">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="key_code_referencePK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="from_import" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="line" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="path" type="VARCHAR(300)"/>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_meta_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1621076058866-3">
+        <createTable tableName="key_comment">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="key_commentPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="from_import" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text" type="CLOB"/>
+            <column name="author_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_meta_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1621076058866-4">
+        <createTable tableName="key_meta">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="key_metaPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="import_key_id" type="BIGINT"/>
+            <column name="key_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1621076058866-5">
+        <addForeignKeyConstraint baseColumnNames="key_meta_id" baseTableName="key_comment" constraintName="FKapx5aa95fl74isypara87i0oe" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key_meta" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1621076058866-6">
+        <addForeignKeyConstraint baseColumnNames="key_meta_id" baseTableName="key_code_reference" constraintName="FKcrettb2iyas70c96411bncjb7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key_meta" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1621076058866-7">
+        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="key_meta" constraintName="FKgdb4y0up36tyubhysfpbru11b" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1621076058866-8">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="key_comment" constraintName="FKnhtysiwn7w2tn04nr4smmc6af" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1621076058866-9">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="key_code_reference" constraintName="FKnus5ewftf9lxhm520whg3msnh" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1621076058866-10">
+        <addForeignKeyConstraint baseColumnNames="import_key_id" baseTableName="key_meta" constraintName="FKqpyb4896knd8m41ffn1f7wgeo" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_key" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1621076058866-1">
+        <addNotNullConstraint columnDataType="bigint" columnName="repository_id" tableName="key" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

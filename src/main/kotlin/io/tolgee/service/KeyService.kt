@@ -8,8 +8,8 @@ import io.tolgee.dtos.request.SetTranslationsDTO
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Key
 import io.tolgee.model.Repository
+import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
