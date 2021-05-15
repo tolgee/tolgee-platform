@@ -68,6 +68,8 @@ export const ImportConflictResolutionDialog: FunctionComponent<{
     useEffect(() => {
         if (keepAllExistingLoadable.loaded || overrideAllLoadable.loading) {
             props.onClose()
+            actions.loadableReset.resolveAllKeepExisting.dispatch()
+            actions.loadableReset.resolveAllOverride.dispatch()
         }
     }, [keepAllExistingLoadable.loading, overrideAllLoadable.loading])
 
