@@ -4,7 +4,6 @@ import io.tolgee.dtos.PathDTO
 import io.tolgee.model.AuditModel
 import io.tolgee.model.Repository
 import io.tolgee.model.Translation
-import java.util.*
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
@@ -29,6 +28,9 @@ data class Key(
     @OneToMany(mappedBy = "key")
     var translations: MutableSet<Translation> = HashSet()
 
+    @OneToOne(mappedBy = "key", cascade = [CascadeType.ALL])
+    var keyMeta: KeyMeta? = null
+
     constructor(id: Long? = null,
                 name: String? = null,
                 repository: Repository? = null,
@@ -36,10 +38,6 @@ data class Key(
     ) : this(id, name) {
         this.repository = repository
         this.translations = translations
-    }
-
-    fun getTranslation(abbr: String): Optional<Translation> {
-        return translations.stream().filter { t: Translation -> t.language!!.abbreviation == abbr }.findFirst()
     }
 
     val path: PathDTO

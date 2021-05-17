@@ -105,7 +105,7 @@ class CoreImportFilesProcessor(
     }
 
     private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey {
-        var entity = importDataManager.storedKeys[name]
+        var entity = importDataManager.storedKeys[name] ?: this.keys[name]
         if (entity == null) {
             entity = ImportKey(name = name)
             importDataManager.storedKeys[name] = entity

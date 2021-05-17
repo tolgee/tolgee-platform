@@ -13,6 +13,7 @@ class TestDataService(
         private val languageService: LanguageService,
         private val importService: ImportService,
         private val keyService: KeyService,
+        private val keyMetaService: KeyMetaService,
         private val translationService: TranslationService,
         private val permissionService: PermissionService,
         private val entityManager: EntityManager

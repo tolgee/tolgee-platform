@@ -77,6 +77,30 @@ class StoredDataImporterTest : AbstractSpringTest() {
     }
 
     @Test
+    fun `it imports metadata`() {
+        importTestData.addKeyMetadata()
+        testDataService.saveTestData(importTestData.root)
+        storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import, ForceMode.OVERRIDE)
+        testDataService.saveTestData(importTestData.root)
+        storedDataImporter.doImport()
+        entityManager.flush()
+        entityManager.clear()
+        val key1 = entityManager.merge(importTestData.root.data.repositories[0].data.keys[2].self)
+        entityManager.refresh(key1)
+        entityManager.refresh(key1.keyMeta)
+
+        val comments = key1.keyMeta?.comments
+        assertThat(comments).hasSize(3)
+        assertThat(comments!![0].text).isEqualTo("Hello I am first comment (I exist)")
+        assertThat(comments[1].text).isEqualTo("Hello I am second comment (I dont exist)")
+        assertThat(comments[2].text).isEqualTo("One more")
+        val references = key1.keyMeta?.codeReferences
+        assertThat(references).hasSize(2)
+        assertThat(references!![0].path).isEqualTo("./code/exist.extension")
+        assertThat(references[0].line).isEqualTo(10)
+    }
+
+    @Test
     fun `it force keeps translations`() {
         importTestData.translationWithConflict.override = true
         importTestData.translationWithConflict.resolved = true

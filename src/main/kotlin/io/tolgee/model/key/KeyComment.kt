@@ -6,20 +6,25 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.ManyToOne
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.NotNull
 
 @Entity
 class KeyComment(
         @ManyToOne(optional = false)
-        var keyMeta: KeyMeta,
+        override var keyMeta: KeyMeta,
 
+        @field:NotNull
         @ManyToOne(optional = false, fetch = FetchType.LAZY)
-        var author: UserAccount,
+        var author: UserAccount? = null
+) : StandardAuditModel(), WithKeyMetaReference {
 
-        @Column(columnDefinition = "text", length = 2000)
-        var text: String,
+    var fromImport: Boolean = false
 
-        var fromImport: Boolean = false
-) : StandardAuditModel() {
+    @field:NotBlank
+    @Column(columnDefinition = "text", length = 2000)
+    var text: String = ""
+
     override fun toString(): String {
         return "KeyComment(text='$text', fromImport=$fromImport)"
     }

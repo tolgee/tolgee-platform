@@ -1,6 +1,7 @@
 package io.tolgee.model.dataImport
 
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.key.KeyMeta
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotEmpty
@@ -19,6 +20,9 @@ class ImportKey(
 
     @OneToMany(mappedBy = "key", cascade = [CascadeType.ALL])
     var translations: MutableList<ImportTranslation> = mutableListOf()
+
+    @OneToOne(mappedBy = "importKey", cascade = [CascadeType.ALL])
+    var keyMeta: KeyMeta? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

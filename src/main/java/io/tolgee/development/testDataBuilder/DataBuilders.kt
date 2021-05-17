@@ -3,6 +3,7 @@ package io.tolgee.development.testDataBuilder
 import io.tolgee.model.*
 import io.tolgee.model.dataImport.*
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta
 
 typealias FT<T> = T.() -> Unit
 
@@ -83,10 +84,37 @@ class DataBuilders {
     class ImportKeyBuilder(
             importFileBuilder: ImportFileBuilder
     ) : EntityDataBuilder<ImportKey> {
+
+        class DATA {
+            var meta: KeyMetaBuilder? = null
+        }
+
+        val data = DATA()
+
         override var self: ImportKey = ImportKey("testKey").apply {
             files.add(importFileBuilder.self)
         }
 
+        fun addMeta(ft: FT<KeyMetaBuilder>) {
+            data.meta = KeyMetaBuilder(this).apply(ft)
+        }
+    }
+
+    class KeyMetaBuilder(
+            importKeyBuilder: ImportKeyBuilder? = null,
+            keyBuilder: KeyBuilder? = null
+    ) : EntityDataBuilder<KeyMeta> {
+        override var self: KeyMeta = KeyMeta(
+                key = keyBuilder?.self,
+                importKey = importKeyBuilder?.self
+        ).also {
+            keyBuilder?.self {
+                keyMeta = it
+            }
+            importKeyBuilder?.self {
+                keyMeta = it
+            }
+        }
     }
 
     class ImportLanguageBuilder(
@@ -114,8 +142,19 @@ class DataBuilders {
     class KeyBuilder(
             val repositoryBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Key> {
+
+        class DATA {
+            var meta: KeyMetaBuilder? = null
+        }
+
+        val data = DATA()
+
         override var self: Key = Key().also {
             it.repository = repositoryBuilder.self
+        }
+
+        fun addMeta(ft: FT<KeyMetaBuilder>) {
+            data.meta = KeyMetaBuilder(keyBuilder = this).apply(ft)
         }
     }
 

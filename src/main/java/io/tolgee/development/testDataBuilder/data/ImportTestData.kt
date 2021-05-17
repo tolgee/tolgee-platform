@@ -259,4 +259,61 @@ class ImportTestData {
             }
         }
     }
+
+    fun addKeyMetadata() {
+        root.data.repositories[0].data.keys[2].addMeta {
+            self {
+                addComment(userAccount) {
+                    text = "Hello I am first comment (I exist)"
+                    fromImport = true
+                }
+                addCodeReference(userAccount) {
+                    path = "./code/exist.extension"
+                    line = 10
+                    fromImport = true
+                }
+            }
+        }
+
+        root.data.repositories[0].data.imports[0].data.importFiles[0].data.importKeys[2].addMeta {
+            self {
+                addComment(userAccount) {
+                    text = "Hello I am first comment (I exist)"
+                    fromImport = true
+                }
+                addComment(userAccount) {
+                    text = "Hello I am second comment (I dont exist)"
+                    fromImport = true
+                }
+                addComment(userAccount) {
+                    text = "One more"
+                    fromImport = true
+                }
+                addCodeReference(userAccount) {
+                    path = "./code/exist.extension"
+                    line = 10
+                    fromImport = true
+                }
+                addCodeReference(userAccount) {
+                    path = "./code/notExist.extendison"
+                    fromImport = false
+                }
+            }
+        }
+
+        root.data.repositories[0].data.imports[0].data.importFiles[0].data.importKeys[3].addMeta {
+            self {
+                addComment(userAccount) {
+                    text = "Hello!"
+                    fromImport = true
+                }
+                addCodeReference(userAccount) {
+                    path = "./code/exist.extension"
+                    line = 10
+                    fromImport = true
+                }
+
+            }
+        }
+    }
 }

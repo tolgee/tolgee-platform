@@ -8,6 +8,7 @@ import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.key.Key
+import io.tolgee.service.KeyMetaService
 import io.tolgee.service.KeyService
 import io.tolgee.service.TranslationService
 import org.springframework.context.ApplicationContext
@@ -19,6 +20,7 @@ class StoredDataImporter(
 ) {
     private val importDataManager = ImportDataManager(applicationContext, import)
     private val keyService = applicationContext.getBean(KeyService::class.java)
+    private val keyMetaService = applicationContext.getBean(KeyMetaService::class.java)
     private val translationsToSave = mutableListOf<Translation>()
 
     /**
@@ -40,6 +42,14 @@ class StoredDataImporter(
         }
         translationService.saveAll(translationsToSave)
         keyService.saveAll(keysToSave.values)
+
+        keysToSave.values.flatMap {
+            it.keyMeta?.comments ?: emptyList()
+        }.also { keyMetaService.saveAllComments(it) }
+
+        keysToSave.values.flatMap {
+            it.keyMeta?.codeReferences ?: emptyList()
+        }.also { keyMetaService.saveAllCodeReferences(it) }
     }
 
     private fun ImportLanguage.doImport() {
@@ -55,8 +65,8 @@ class StoredDataImporter(
                     ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
             val translation = this.conflict ?: Translation().apply {
                 this.language = language
-                this.key = existingKey
             }
+            translation.key = existingKey
             translation.text = this@doImport.text
             translationsToSave.add(translation)
         }
@@ -64,12 +74,33 @@ class StoredDataImporter(
 
     private val ImportTranslation.existingKey: Key
         get() {
-            val key = keysToSave[this.key.name] ?: this.conflict?.key
-            ?: keyService.getOrCreateKeyNoPersist(import.repository, this.key.name)
+            //get key from already saved keys to save
+            val key = keysToSave[this.key.name] ?: let {
+                //or get it from conflict or create new one
+                val newKey = this.conflict?.key ?: keyService.getOrCreateKeyNoPersist(import.repository, this.key.name)
+                val importedKeyMeta = this.key.keyMeta
+                //dont touch key meta when imported key has no meta
+                if (importedKeyMeta != null) {
+                    //if key is obtained or created and meta exists, take it and import the data from the imported one
+                    //persist is cascaded on key, so it should be fine
+                    val keyMeta = newKey.keyMeta?.also {
+                        keyMetaService.import(it, importedKeyMeta)
+                    } ?: this.key.keyMeta
+                    //also set key and remove import key
+                    keyMeta?.also {
+                        it.key = newKey
+                        it.importKey = null
+                    }
+                    //set new meta to the key
+                    newKey.keyMeta = keyMeta
+                }
+                newKey
+            }
             val keyName = key.name ?: throw IllegalStateException("Key has no name")
             keysToSave[keyName] = key
             return key
         }
+
 
     private fun ImportTranslation.checkConflictResolved() {
         if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {

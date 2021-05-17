@@ -1,6 +1,7 @@
 package io.tolgee.model.key
 
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.ImportKey
 import javax.persistence.*
 
@@ -11,8 +12,27 @@ class KeyMeta(
         var key: Key? = null,
 
         @OneToOne
-        var importKey: ImportKey? = null
+        var importKey: ImportKey? = null,
 ) : StandardAuditModel() {
+
+    @OneToMany(mappedBy = "keyMeta", cascade = [CascadeType.ALL])
+    var comments = mutableListOf<KeyComment>()
+
+    @OneToMany(mappedBy = "keyMeta", cascade = [CascadeType.ALL])
+    var codeReferences = mutableListOf<KeyCodeReference>()
+
+    fun addComment(author: UserAccount? = null, ft: KeyComment.() -> Unit) {
+        KeyComment(this, author).apply(ft).also {
+            this.comments.add(it)
+        }
+    }
+
+    fun addCodeReference(author: UserAccount? = null, ft: KeyCodeReference.() -> Unit) {
+        KeyCodeReference(this, author).apply(ft).also {
+            this.codeReferences.add(it)
+        }
+    }
+
     companion object {
         class KeyMetaListener {
             @PrePersist

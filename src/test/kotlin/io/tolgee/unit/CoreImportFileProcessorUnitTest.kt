@@ -90,4 +90,21 @@ class CoreImportFileProcessorUnitTest {
             true
         })
     }
+
+    @Test
+    fun `stores key meta`() {
+        fileProcessorContext.addTranslation("test_key", "lng", "value")
+        fileProcessorContext.addKeyCodeReference("test_key", "hello.php", 10)
+        fileProcessorContext.addKeyCodeReference("test_key", "hello2.php", 10)
+        fileProcessorContext.addKeyComment("test_key", "test comment")
+        whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(setOf())
+
+        processor.processFiles(listOf(importFileDto), messageClient = mock())
+        verify(importServiceMock).saveTranslations(argThat {
+            assertThat(this[0].key.keyMeta).isNotNull
+            assertThat(this[0].key.keyMeta?.codeReferences).hasSize(2)
+            assertThat(this[0].key.keyMeta?.comments).hasSize(1)
+            true
+        })
+    }
 }
