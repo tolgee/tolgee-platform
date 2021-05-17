@@ -7,13 +7,15 @@ import io.tolgee.model.key.WithKeyMetaReference
 import io.tolgee.repository.KeyCommentRepository
 import io.tolgee.repository.KeyCoreReferenceRepository
 import io.tolgee.repository.KeyMetaRepository
+import io.tolgee.security.AuthenticationFacade
 import org.springframework.stereotype.Service
 
 @Service
 class KeyMetaService(
         private val keyMetaRepository: KeyMetaRepository,
         private val keyCodeReferenceRepository: KeyCoreReferenceRepository,
-        private val keyCommentRepository: KeyCommentRepository
+        private val keyCommentRepository: KeyCommentRepository,
+        private val authenticationFacade: AuthenticationFacade
 ) {
     fun saveAll(entities: Iterable<KeyMeta>): MutableList<KeyMeta> = keyMetaRepository.saveAll(entities)
 

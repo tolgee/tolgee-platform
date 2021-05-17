@@ -40,8 +40,6 @@ class StoredDataImporter(
         importDataManager.storedLanguages.forEach {
             it.doImport()
         }
-        translationService.saveAll(translationsToSave)
-        keyService.saveAll(keysToSave.values)
 
         keysToSave.values.flatMap {
             it.keyMeta?.comments ?: emptyList()
@@ -50,6 +48,9 @@ class StoredDataImporter(
         keysToSave.values.flatMap {
             it.keyMeta?.codeReferences ?: emptyList()
         }.also { keyMetaService.saveAllCodeReferences(it) }
+
+        translationService.saveAll(translationsToSave)
+        keyService.saveAll(keysToSave.values)
     }
 
     private fun ImportLanguage.doImport() {

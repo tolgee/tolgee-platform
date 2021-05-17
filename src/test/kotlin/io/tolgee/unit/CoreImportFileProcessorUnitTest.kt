@@ -5,10 +5,12 @@ import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.Language
 import io.tolgee.model.Repository
 import io.tolgee.model.Translation
+import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.key.Key
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.dataImport.CoreImportFilesProcessor
@@ -37,6 +39,7 @@ class CoreImportFileProcessorUnitTest {
     private lateinit var translationServiceMock: TranslationService
     private lateinit var existingLanguage: Language
     private lateinit var existingTranslation: Translation
+    private lateinit var authenticationFacadeMock: AuthenticationFacade
 
     @BeforeMethod
     fun setup() {
@@ -47,6 +50,7 @@ class CoreImportFileProcessorUnitTest {
         languageServiceMock = mock()
         translationServiceMock = mock()
         typeProcessorMock = mock()
+        authenticationFacadeMock = mock()
 
         importFile = ImportFile("lgn.json", importMock)
         importFileDto = ImportFileDto("lng.json", "".toByteArray().inputStream())
@@ -57,6 +61,7 @@ class CoreImportFileProcessorUnitTest {
         whenever(applicationContextMock.getBean(ImportService::class.java)).thenReturn(importServiceMock)
         whenever(applicationContextMock.getBean(LanguageService::class.java)).thenReturn(languageServiceMock)
         whenever(applicationContextMock.getBean(TranslationService::class.java)).thenReturn(translationServiceMock)
+        whenever(applicationContextMock.getBean(AuthenticationFacade::class.java)).thenReturn(authenticationFacadeMock)
         whenever(processorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
         fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
         fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
@@ -65,6 +70,7 @@ class CoreImportFileProcessorUnitTest {
         whenever(importServiceMock.saveFile(any())).thenReturn(importFile)
         whenever(languageServiceMock.findByAbbreviation(eq("lng"), any<Long>()))
                 .thenReturn(Optional.of(existingLanguage))
+        whenever(authenticationFacadeMock.userAccount).thenReturn(UserAccount())
     }
 
     @Test

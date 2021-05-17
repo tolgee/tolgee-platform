@@ -9,12 +9,11 @@ import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ProcessorFactory
 import org.springframework.context.ApplicationContext
-import java.net.FileNameMap
-import java.net.URLConnection
 
 
 class CoreImportFilesProcessor(
@@ -24,6 +23,9 @@ class CoreImportFilesProcessor(
     private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
     private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
     private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
+    private val authenticationFacade: AuthenticationFacade by lazy {
+        applicationContext.getBean(AuthenticationFacade::class.java)
+    }
     private val importDataManager = ImportDataManager(applicationContext, import)
 
     fun processFiles(files: List<ImportFileDto>?,
@@ -69,17 +71,6 @@ class CoreImportFilesProcessor(
 
     private fun ImportFileDto.saveArchiveEntity() = importService.saveArchive(ImportArchive(this.name!!, import))
 
-    private fun ImportFileDto.getContentMimeType(): String {
-        this.name?.let { filename ->
-            if (filename.endsWith(".json")) {
-                return "application/json"
-            }
-            val fileNameMap: FileNameMap = URLConnection.getFileNameMap()
-            return fileNameMap.getContentTypeFor(filename)
-                    ?: throw FileIssueException(FileIssueType.NO_MATCHING_PROCESSOR)
-        } ?: throw FileIssueException(FileIssueType.NO_FILENAME_PROVIDED)
-    }
-
     private fun FileProcessorContext.processResult() {
         this.processLanguages()
         this.processTranslations()
@@ -105,7 +96,12 @@ class CoreImportFilesProcessor(
     }
 
     private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey {
-        var entity = importDataManager.storedKeys[name] ?: this.keys[name]
+        var entity = importDataManager.storedKeys[name] ?: this.keys[name].also {
+            it?.keyMeta?.let { meta ->
+                meta.comments.onEach { comment -> comment.author = comment.author ?: authenticationFacade.userAccount }
+                meta.codeReferences.onEach { ref -> ref.author = ref.author ?: authenticationFacade.userAccount }
+            }
+        }
         if (entity == null) {
             entity = ImportKey(name = name)
             importDataManager.storedKeys[name] = entity
