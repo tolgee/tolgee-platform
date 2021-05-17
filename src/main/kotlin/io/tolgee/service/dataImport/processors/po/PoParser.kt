@@ -187,7 +187,7 @@ class PoParser(
         when {
             expectTranslatorComments -> createdTranslation.meta.translatorComments.add(currentSequence.trim().toString())
             expectExtractedComments -> createdTranslation.meta.extractedComments.add(currentSequence.trim().toString())
-            expectReference -> createdTranslation.meta.reference.add(currentSequence.trim().toString())
+            expectReference -> createdTranslation.meta.references.addAll(currentSequence.trim().split(" "))
             expectFlags -> createdTranslation.meta.flags.addAll(currentSequence.trim().split(" "))
             expectContext -> createdTranslation.meta.context.add(currentSequence.trim().toString())
         }

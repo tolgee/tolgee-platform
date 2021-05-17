@@ -24,6 +24,15 @@ class Xliff12FileProcessor(override val context: FileProcessorContext, private v
                         transUnitNode.findNodeByXPath(".//source")?.textContent?.let { source ->
                             context.addTranslation(key, sourceLanguage, source)
                         }
+
+                        transUnitNode.findNodeByXPath(".//note")?.textContent?.let { note ->
+                            context.addKeyComment(key, note)
+                        }
+
+                        fileOriginal?.let { fileOriginal ->
+                            context.addKeyCodeReference(key, fileOriginal)
+                        }
+
                         transUnitNode.findNodeByXPath(".//target")?.textContent?.let { target ->
                             context.addTranslation(key, targetLanguage, target)
                         } ?: let {

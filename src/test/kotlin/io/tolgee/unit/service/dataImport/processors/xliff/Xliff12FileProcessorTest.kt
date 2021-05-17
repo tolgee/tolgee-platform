@@ -48,6 +48,13 @@ class Xliff12FileProcessorTest {
         assertThat(fileProcessorContext.translations["vpn.devices.removeA11Y"]!![0].language.name).isEqualTo("en")
         assertThat(fileProcessorContext.translations["vpn.devices.removeA11Y"]!![1].text).isEqualTo("Eliminar %1")
         assertThat(fileProcessorContext.translations["vpn.devices.removeA11Y"]!![1].language.name).isEqualTo("es-MX")
+
+        val keyMeta = fileProcessorContext.keys["vpn.aboutUs.releaseVersion"]!!.keyMeta!!
+        assertThat(keyMeta.comments).hasSize(1)
+        assertThat(keyMeta.comments[0].text).isEqualTo("Refers to the installed version." +
+                " For example: \"Release Version: 1.23\"")
+        assertThat(keyMeta.codeReferences).hasSize(1)
+        assertThat(keyMeta.codeReferences[0].path).isEqualTo("../src/ui/components/VPNAboutUs.qml")
     }
 
     @Test

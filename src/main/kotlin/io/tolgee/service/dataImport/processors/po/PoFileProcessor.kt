@@ -27,6 +27,8 @@ class PoFileProcessor(
             context.languages[languageId] = ImportLanguage(languageId, context.fileEntity)
 
             parsed.translations.forEach { poTranslation ->
+                val keyName = poTranslation.msgid.toString()
+
                 if (poTranslation.msgidPlural.isNotEmpty()) {
                     addPlural(poTranslation)
                     return@forEach
@@ -34,10 +36,27 @@ class PoFileProcessor(
                 if (poTranslation.msgid.isNotBlank() && poTranslation.msgstr.isNotBlank()) {
                     val icuMessage = getToIcuConverter(poTranslation)
                             .convert(poTranslation.msgstr.toString())
-                    context.addTranslation(poTranslation.msgid.toString(), languageId, icuMessage)
+                    context.addTranslation(keyName, languageId, icuMessage)
+
+                    poTranslation.meta.references.forEach { reference ->
+                        val split = reference.split(":")
+                        val file = split.getOrNull(0)
+                        val line = split.getOrNull(1)?.toIntOrNull()
+                        file?.let {
+                            context.addKeyCodeReference(keyName, it, line?.toLong())
+                        }
+                    }
+                    if (poTranslation.meta.extractedComments.isNotEmpty()) {
+                        val extractedComments = poTranslation.meta.extractedComments.joinToString(" ")
+                        context.addKeyComment(keyName, extractedComments)
+                    }
+
+                    if (poTranslation.meta.translatorComments.isNotEmpty()) {
+                        val translatorComments = poTranslation.meta.translatorComments.joinToString(" ")
+                        context.addKeyComment(keyName, translatorComments)
+                    }
                 }
             }
-
         } catch (e: PoParserException) {
             throw ImportCannotParseFileException(context.file.name, e.message)
         }

@@ -39,4 +39,22 @@ class PoFileProcessorTest {
         assertThat(fileProcessorContext.translations.values.toList()[2][0].text)
                 .isEqualTo("Willkommen zurück, {0}! Dein letzter Besuch war am {1}")
     }
+
+    @Test
+    fun `adds metadata`() {
+        PoFileProcessor(fileProcessorContext).process()
+        val keyMeta = fileProcessorContext.keys[
+                "We connect developers and translators around the globe " +
+                        "in Tolgee for a fantastic localization experience."
+        ]!!.keyMeta!!
+        assertThat(keyMeta.comments).hasSize(2)
+        assertThat(keyMeta.comments[0].text).isEqualTo("This is the text that should appear next to menu accelerators" +
+                " * that use the super key. If the text on this key isn't typically" +
+                " * translated on keyboards used for your language, don't translate * this."
+        )
+        assertThat(keyMeta.comments[1].text).isEqualTo("some other comment and other")
+        assertThat(keyMeta.codeReferences).hasSize(6)
+        assertThat(keyMeta.codeReferences[0].path).isEqualTo("light_interface.c")
+        assertThat(keyMeta.codeReferences[0].line).isEqualTo(196)
+    }
 }

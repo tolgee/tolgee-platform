@@ -45,7 +45,7 @@ data class FileProcessorContext(
         }
     }
 
-    fun addKeyCodeReference(key: String, path: String, line: Long) {
+    fun addKeyCodeReference(key: String, path: String, line: Long? = null) {
         val keyMeta = getOrCreateKeyMeta(key)
         keyMeta.addCodeReference {
             this.path = path
