@@ -18,7 +18,11 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     @Query("from Translation t join fetch Key k on t.key = k where k = :key and k.repository = :repository and t.language in :languages")
     fun getTranslations(key: Key, repository: io.tolgee.model.Repository, languages: Collection<Language>): Set<Translation>
     fun findOneByKeyAndLanguage(key: Key, language: Language): Optional<Translation>
-    fun getAllByLanguageId(languageId: Long): Set<Translation>
+
+    @Query("""
+        from Translation t join fetch t.key k left join fetch k.keyMeta where t.language.id = :languageId
+    """)
+    fun getAllByLanguageId(languageId: Long): List<Translation>
     fun getAllByKeyRepositoryId(repositoryId: Long): Iterable<Translation>
     fun getAllByKeyIdIn(keyIds: Iterable<Long>): Iterable<Translation>
     fun getAllByLanguageRepositoryId(repositoryId: Long): Iterable<Translation>

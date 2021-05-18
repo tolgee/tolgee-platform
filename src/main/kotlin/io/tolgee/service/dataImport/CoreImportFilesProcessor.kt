@@ -44,7 +44,6 @@ class CoreImportFilesProcessor(
     ) {
         if (file.isArchive) {
             messageClient(FOUND_ARCHIVE, null)
-            file.saveArchiveEntity()
             val processor = processorFactory.getArchiveProcessor(file)
             processor.process(file).apply {
                 messageClient(FOUND_FILES_IN_ARCHIVE, listOf(size))
@@ -72,8 +71,6 @@ class CoreImportFilesProcessor(
         }
 
     private fun ImportFileDto.saveFileEntity() = importService.saveFile(ImportFile(this.name, import))
-
-    private fun ImportFileDto.saveArchiveEntity() = importService.saveArchive(ImportArchive(this.name!!, import))
 
     private fun FileProcessorContext.processResult() {
         this.processLanguages()

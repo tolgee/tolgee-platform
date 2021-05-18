@@ -44,7 +44,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
         return langTranslations
     }
 
-    fun getAllByLanguageId(languageId: Long): Set<Translation> {
+    fun getAllByLanguageId(languageId: Long): List<Translation> {
         return translationRepository.getAllByLanguageId(languageId)
     }
 

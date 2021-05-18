@@ -52,8 +52,6 @@ class V2ImportControllerTest : SignedInControllerTest() {
 
         importService.find(repository.id, repository.userOwner?.id!!)!!.let { import ->
             assertThat(import.files.size).isEqualTo(3)
-            assertThat(import.archives.size).isEqualTo(1)
-            assertThat(import.archives[0].name).isEqualTo("zipOfUnknown.zip")
             import.files.forEach {
                 assertThat(it.issues).hasSize(1)
                 assertThat(it.issues[0].type).isEqualTo(FileIssueType.NO_MATCHING_PROCESSOR)
@@ -131,8 +129,6 @@ class V2ImportControllerTest : SignedInControllerTest() {
         importService.find(repository.id, repository.userOwner?.id!!)!!.let { importEntity ->
             entityManager.refresh(importEntity)
             assertThat(importEntity.files.size).isEqualTo(3)
-            assertThat(importEntity.archives.size).isEqualTo(1)
-            assertThat(importEntity.archives[0].name).isEqualTo("zipOfJsons.zip")
             assertThat(importEntity.files.map { it.name }).containsAll(listOf("en.json", "cs.json", "fr.json"))
             val keys = importService.findKeys(importEntity)
             keys.forEach { key ->

@@ -17,8 +17,6 @@ class Import(
         @ManyToOne(optional = false)
         val repository: Repository
 ) : StandardAuditModel() {
-    @OneToMany(mappedBy = "import")
-    var archives = mutableListOf<ImportArchive>()
 
     @OneToMany(mappedBy = "import")
     var files = mutableListOf<ImportFile>()

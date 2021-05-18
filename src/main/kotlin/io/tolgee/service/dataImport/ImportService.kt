@@ -48,7 +48,6 @@ class ImportService(
         private val authenticationFacade: AuthenticationFacade,
         private val repositoryHolder: RepositoryHolder,
         private val importFileIssueRepository: ImportFileIssueRepository,
-        private val importArchiveRepository: ImportArchiveRepository,
         private val importLanguageRepository: ImportLanguageRepository,
         private val importKeyRepository: ImportKeyRepository,
         private val applicationContext: ApplicationContext,
@@ -147,8 +146,6 @@ class ImportService(
 
     fun findOrThrow(repositoryId: Long, authorId: Long) =
             this.find(repositoryId, authorId) ?: throw NotFoundException()
-
-    fun saveArchive(importArchive: ImportArchive): ImportArchive = importArchiveRepository.save(importArchive)
 
     fun findLanguages(import: Import) = importLanguageRepository.findAllByImport(import.id)
 
