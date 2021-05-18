@@ -17,22 +17,16 @@ import javax.persistence.*
         )]
 )
 data class Translation(
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        var id: Long? = null,
-
         @Column(columnDefinition = "text")
         var text: String? = null
-) : AuditModel() {
-
-
+) : StandardAuditModel() {
     @ManyToOne
     var key: Key? = null
 
     @ManyToOne
     var language: Language? = null
 
-    constructor(id: Long?, text: String?, key: Key?, language: Language?) : this(id, text) {
+    constructor(text: String?, key: Key?, language: Language?) : this(text) {
         this.key = key
         this.language = language
     }
@@ -42,10 +36,6 @@ data class Translation(
         private var text: String? = null
         private var key: Key? = null
         private var language: Language? = null
-        fun id(id: Long?): TranslationBuilder {
-            this.id = id
-            return this
-        }
 
         fun text(text: String?): TranslationBuilder {
             this.text = text
@@ -63,7 +53,7 @@ data class Translation(
         }
 
         fun build(): Translation {
-            return Translation(id, text, key, language)
+            return Translation(text, key, language)
         }
 
         override fun toString(): String {

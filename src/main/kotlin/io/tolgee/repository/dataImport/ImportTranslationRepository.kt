@@ -18,8 +18,10 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
     @Query("""
         select distinct it from ImportTranslation it
         join fetch it.key ik
-        left join fetch it.conflict ic
         left join fetch ik.keyMeta
+        left join fetch it.conflict ic
+        left join fetch ic.key ick
+        left join fetch ick.keyMeta
         join it.language il on il.id = :languageId
         join il.file if
         join if.import i on i = :import

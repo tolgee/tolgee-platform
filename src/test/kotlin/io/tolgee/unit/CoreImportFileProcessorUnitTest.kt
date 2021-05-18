@@ -55,7 +55,7 @@ class CoreImportFileProcessorUnitTest {
         importFile = ImportFile("lgn.json", importMock)
         importFileDto = ImportFileDto("lng.json", "".toByteArray().inputStream())
         existingLanguage = Language().also { it.name = "lng" }
-        existingTranslation = Translation(1, "helllo").also { it.key = Key(name = "colliding key") }
+        existingTranslation = Translation("helllo").also { it.key = Key(name = "colliding key") }
         processor = CoreImportFilesProcessor(applicationContextMock, importMock)
         whenever(applicationContextMock.getBean(ProcessorFactory::class.java)).thenReturn(processorFactoryMock)
         whenever(applicationContextMock.getBean(ImportService::class.java)).thenReturn(importServiceMock)

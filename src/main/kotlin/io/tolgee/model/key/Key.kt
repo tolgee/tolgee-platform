@@ -1,8 +1,8 @@
 package io.tolgee.model.key
 
 import io.tolgee.dtos.PathDTO
-import io.tolgee.model.AuditModel
 import io.tolgee.model.Repository
+import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.Translation
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
@@ -12,15 +12,11 @@ import javax.validation.constraints.Size
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["repository_id", "name"], name = "key_repository_id_name")])
 data class Key(
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        var id: Long? = null,
-
         @field:NotBlank
         @field:Size(max = 2000)
         @Column(length = 2000)
         var name: String? = null,
-) : AuditModel() {
+) : StandardAuditModel() {
     @field:NotNull
     @ManyToOne(optional = false)
     var repository: Repository? = null
@@ -31,11 +27,10 @@ data class Key(
     @OneToOne(mappedBy = "key")
     var keyMeta: KeyMeta? = null
 
-    constructor(id: Long? = null,
-                name: String? = null,
+    constructor(name: String? = null,
                 repository: Repository? = null,
                 translations: MutableSet<Translation> = HashSet()
-    ) : this(id, name) {
+    ) : this(name) {
         this.repository = repository
         this.translations = translations
     }

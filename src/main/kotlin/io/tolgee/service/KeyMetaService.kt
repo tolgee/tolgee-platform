@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.model.Repository
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.KeyCodeReference
 import io.tolgee.model.key.KeyComment
@@ -69,6 +70,29 @@ class KeyMetaService(
             join ikm.importKey ik
             left join fetch ikm.codeReferences ikc
             join ik.files if
+            where ikm in :metas 
+        """).setParameter("metas", result)
+                .setHint(PASS_DISTINCT_THROUGH, false)
+                .resultList as List<KeyMeta>
+
+        return result
+    }
+
+    fun getWithFetchedData(repository: Repository): List<KeyMeta> {
+        var result: List<KeyMeta> = entityManager.createQuery("""
+            select distinct ikm from KeyMeta ikm
+            join fetch ikm.key k
+            left join fetch ikm.comments ikc
+            where k.repository = :repository 
+            """)
+                .setParameter("repository", repository)
+                .setHint(PASS_DISTINCT_THROUGH, false)
+                .resultList as List<KeyMeta>
+
+        result = entityManager.createQuery("""
+            select distinct ikm from KeyMeta ikm
+            join ikm.key k
+            left join fetch ikm.codeReferences ikc
             where ikm in :metas 
         """).setParameter("metas", result)
                 .setHint(PASS_DISTINCT_THROUGH, false)

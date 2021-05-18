@@ -45,7 +45,13 @@ class ImportDataManager(
     }
 
     val storedMetas: MutableMap<String, KeyMeta> by lazy {
-        keyMetaService.getWithFetchedData(this.import).asSequence().map { it.importKey!!.name!! to it }.toMap().toMutableMap()
+        keyMetaService.getWithFetchedData(this.import).asSequence().map { it.importKey!!.name to it }
+                .toMap().toMutableMap()
+    }
+
+    val existingMetas: MutableMap<String, KeyMeta> by lazy {
+        keyMetaService.getWithFetchedData(this.import.repository).asSequence().map { it.key!!.name!! to it }
+                .toMap().toMutableMap()
     }
 
     /**

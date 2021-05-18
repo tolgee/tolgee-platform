@@ -42,21 +42,21 @@ class StoredDataImporter(
         }
 
         this.importDataManager.storedKeys.values.onEach { importKey ->
-            val importedKeyMeta = importKey.keyMeta
+            val importedKeyMeta = importDataManager.storedMetas[importKey.name]
             //dont touch key meta when imported key has no meta
             if (importedKeyMeta != null) {
                 keysToSave[importKey.name]?.let { newKey ->
                     //if key is obtained or created and meta exists, take it and import the data from the imported one
                     //persist is cascaded on key, so it should be fine
-                    val keyMeta = newKey.keyMeta?.also {
+                    val keyMeta = importDataManager.existingMetas[importKey.name]?.also {
                         keyMetaService.import(it, importedKeyMeta)
-                    } ?: importKey.keyMeta
+                    } ?: importedKeyMeta
                     //also set key and remove import key
-                    keyMeta?.also {
+                    keyMeta.also {
                         it.key = newKey
                         it.importKey = null
                     }
-                    //set new meta to the key
+                    //assign new meta
                     newKey.keyMeta = keyMeta
                 }
             }
