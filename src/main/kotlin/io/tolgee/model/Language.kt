@@ -58,6 +58,5 @@ class Language : StandardAuditModel() {
                 provider.`object`.onExistingLanguageRemoved(language)
             }
         }
-
     }
 }
