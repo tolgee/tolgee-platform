@@ -27,4 +27,13 @@ class ImportServiceTest : AbstractSpringTest() {
         assertThat(translations[0].conflict).isNotNull
         assertThat(translations[1].conflict).isNull()
     }
+
+    @Test
+    fun `deletes import language`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        assertThat(importService.findLanguage(testData.importEnglish.id)).isNotNull
+        importService.deleteLanguage(testData.importEnglish)
+        assertThat(importService.findLanguage(testData.importEnglish.id)).isNull()
+    }
 }
