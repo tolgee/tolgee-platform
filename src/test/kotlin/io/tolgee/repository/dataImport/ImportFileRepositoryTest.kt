@@ -36,7 +36,7 @@ class ImportFileRepositoryTest : AbstractSpringTest() {
         val import = createBaseImport()
 
         val longName = StringBuilder().let { builder ->
-            repeat((1..2001).count()) {
+            repeat((1..2010).count()) {
                 builder.append("a")
             }
             builder.toString()
@@ -44,7 +44,10 @@ class ImportFileRepositoryTest : AbstractSpringTest() {
 
         ImportFile(import = import, name = longName).let {
             assertThatExceptionOfType(ConstraintViolationException::class.java)
-                    .isThrownBy { importFileRepository.save(it) }
+                    .isThrownBy {
+                        importFileRepository.save(it)
+                        entityManager.flush()
+                    }
         }
     }
 
