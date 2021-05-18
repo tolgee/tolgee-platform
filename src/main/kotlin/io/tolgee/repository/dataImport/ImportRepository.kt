@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ImportRepository : JpaRepository<Import, Long> {
     fun findByRepositoryIdAndAuthorId(repositoryId: Long, authorId: Long): Import?
+
+    fun findAllByRepositoryId(repositoryId: Long): List<Import>
 }

@@ -14,14 +14,14 @@ class ImportKey(
         @Column(length = 2000)
         var name: String,
 ) : StandardAuditModel() {
-    @ManyToMany(mappedBy = "keys", cascade = [CascadeType.PERSIST])
+    @ManyToMany(mappedBy = "keys")
     @field:NotEmpty
     var files: MutableList<ImportFile> = mutableListOf()
 
-    @OneToMany(mappedBy = "key", cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "key")
     var translations: MutableList<ImportTranslation> = mutableListOf()
 
-    @OneToOne(mappedBy = "importKey", cascade = [CascadeType.ALL])
+    @OneToOne(mappedBy = "importKey")
     var keyMeta: KeyMeta? = null
 
     override fun equals(other: Any?): Boolean {

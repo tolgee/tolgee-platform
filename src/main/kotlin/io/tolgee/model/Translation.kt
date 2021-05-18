@@ -37,7 +37,6 @@ data class Translation(
         this.language = language
     }
 
-
     class TranslationBuilder internal constructor() {
         private var id: Long? = null
         private var text: String? = null

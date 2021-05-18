@@ -21,7 +21,8 @@ import javax.persistence.EntityManager
 class KeyService(
         private val keyRepository: KeyRepository,
         private val entityManager: EntityManager,
-        private val screenshotService: ScreenshotService
+        private val screenshotService: ScreenshotService,
+        private val keyMetaService: KeyMetaService
 ) {
 
     private var translationService: TranslationService? = null
@@ -118,7 +119,8 @@ class KeyService(
         keyRepository.deleteAllByIdIn(ids)
     }
 
-    fun deleteAllByRepository(repositoryId: Long?) {
+    fun deleteAllByRepository(repositoryId: Long) {
+        keyMetaService.deleteAllByRepositoryId(repositoryId)
         keyRepository.deleteAllByRepositoryId(repositoryId)
     }
 

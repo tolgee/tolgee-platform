@@ -15,10 +15,10 @@ class KeyMeta(
         var importKey: ImportKey? = null,
 ) : StandardAuditModel() {
 
-    @OneToMany(mappedBy = "keyMeta", cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "keyMeta")
     var comments = mutableListOf<KeyComment>()
 
-    @OneToMany(mappedBy = "keyMeta", cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "keyMeta")
     var codeReferences = mutableListOf<KeyCodeReference>()
 
     fun addComment(author: UserAccount? = null, ft: KeyComment.() -> Unit) {

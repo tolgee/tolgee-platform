@@ -1,21 +1,23 @@
 package io.tolgee.service
 
+import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.KeyCodeReference
 import io.tolgee.model.key.KeyComment
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.key.WithKeyMetaReference
+import io.tolgee.repository.KeyCodeReferenceRepository
 import io.tolgee.repository.KeyCommentRepository
-import io.tolgee.repository.KeyCoreReferenceRepository
 import io.tolgee.repository.KeyMetaRepository
-import io.tolgee.security.AuthenticationFacade
+import org.hibernate.annotations.QueryHints.PASS_DISTINCT_THROUGH
 import org.springframework.stereotype.Service
+import javax.persistence.EntityManager
 
 @Service
 class KeyMetaService(
         private val keyMetaRepository: KeyMetaRepository,
-        private val keyCodeReferenceRepository: KeyCoreReferenceRepository,
+        private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
         private val keyCommentRepository: KeyCommentRepository,
-        private val authenticationFacade: AuthenticationFacade
+        private val entityManager: EntityManager
 ) {
     fun saveAll(entities: Iterable<KeyMeta>): MutableList<KeyMeta> = keyMetaRepository.saveAll(entities)
 
@@ -48,5 +50,44 @@ class KeyMetaService(
             }
         }
         other.removeAll(toRemove)
+    }
+
+    fun getWithFetchedData(import: Import): List<KeyMeta> {
+        var result: List<KeyMeta> = entityManager.createQuery("""
+            select distinct ikm from KeyMeta ikm
+            join fetch ikm.importKey ik
+            left join fetch ikm.comments ikc
+            join ik.files if
+            where if.import = :import 
+            """)
+                .setParameter("import", import)
+                .setHint(PASS_DISTINCT_THROUGH, false)
+                .resultList as List<KeyMeta>
+
+        result = entityManager.createQuery("""
+            select distinct ikm from KeyMeta ikm
+            join ikm.importKey ik
+            left join fetch ikm.codeReferences ikc
+            join ik.files if
+            where ikm in :metas 
+        """).setParameter("metas", result)
+                .setHint(PASS_DISTINCT_THROUGH, false)
+                .resultList as List<KeyMeta>
+
+        return result
+    }
+
+    fun deleteAllByRepositoryId(repositoryId: Long) {
+        keyMetaRepository.deleteAllKeyCodeReferencesByRepositoryId(repositoryId)
+        keyMetaRepository.deleteAllKeyCommentsByRepositoryId(repositoryId)
+        keyMetaRepository.deleteAllByRepositoryId(repositoryId)
+    }
+
+    fun save(meta: KeyMeta): KeyMeta = this.keyMetaRepository.save(meta)
+
+    fun deleteAllByImportKeyIdIn(keyIds: List<Long>) {
+        keyCommentRepository.deleteAllByImportKeyIds(keyIds)
+        keyCodeReferenceRepository.deleteAllByImportKeyIds(keyIds)
+        this.keyMetaRepository.deleteAllByImportKeyIdIn(keyIds)
     }
 }

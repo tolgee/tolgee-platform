@@ -45,4 +45,15 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
     @Modifying
     @Query("update ImportTranslation set resolved = true, override = :override where language = :language")
     fun resolveAllOfLanguage(language: ImportLanguage?, override: Boolean)
+
+    @Transactional
+    @Query("delete from ImportTranslation it where it.language = :language")
+    @Modifying
+    fun deleteAllByLanguage(language: ImportLanguage)
+
+    @Transactional
+    @Query("""delete from ImportTranslation it where it.key.id in 
+        (select k.id from ImportKey k join k.files f where f.import = :import)""")
+    @Modifying
+    fun deleteAllByImport(import: Import)
 }

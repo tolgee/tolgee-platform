@@ -10,6 +10,7 @@ import io.tolgee.model.views.RepositoryView
 import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.RepositoryRepository
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.dataImport.ImportService
 import io.tolgee.util.AddressPartGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
@@ -31,8 +32,7 @@ class RepositoryService constructor(
         private val screenshotService: ScreenshotService,
         private val organizationRoleService: OrganizationRoleService,
         private val authenticationFacade: AuthenticationFacade,
-        private val addressPartGenerator: AddressPartGenerator
-
+        private val addressPartGenerator: AddressPartGenerator,
 ) {
     @set:Autowired
     lateinit var keyService: KeyService
@@ -45,6 +45,9 @@ class RepositoryService constructor(
 
     @set:Autowired
     lateinit var translationService: TranslationService
+
+    @set:Autowired
+    lateinit var importService: ImportService
 
     @Transactional
     fun get(id: Long): Optional<Repository?> {
@@ -101,7 +104,8 @@ class RepositoryService constructor(
                             organization?.basePermissions,
                             permission?.type
                     )
-                            ?: throw IllegalStateException("Repository repository should not return repository with no permission for provided user")
+                            ?: throw IllegalStateException("Repository repository should not" +
+                                    " return repository with no permission for provided user")
 
                     fromEntityAndPermission(repository, permissionType)
                 }.toList()
@@ -112,7 +116,10 @@ class RepositoryService constructor(
     }
 
     fun findAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<RepositoryView> {
-        return this.repositoryRepository.findAllPermittedInOrganization(authenticationFacade.userAccount.id!!, organizationId, pageable, search)
+        return this.repositoryRepository
+                .findAllPermittedInOrganization(
+                        authenticationFacade.userAccount.id!!, organizationId, pageable, search
+                )
     }
 
     @Transactional
@@ -124,6 +131,11 @@ class RepositoryService constructor(
         keyService.deleteAllByRepository(repository.id)
         apiKeyService.deleteAllByRepository(repository.id)
         languageService.deleteAllByRepository(repository.id)
+
+        importService.getAllByRepository(id).forEach {
+            importService.deleteImport(it)
+        }
+
         repositoryRepository.delete(repository)
     }
 

@@ -1,6 +1,7 @@
 package io.tolgee.repository.dataImport
 
 import io.tolgee.model.Language
+import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.views.ImportLanguageView
 import org.springframework.data.domain.Page
@@ -31,7 +32,13 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             sum(case when (it.conflict is null or it.resolved != true) then 0 else 1 end) as resolvedCount
             from ImportLanguage il join il.file if left join il.existingLanguage el left join il.translations it
             where if.import.id = :importId
-            group by il.id, if.id
+            group by il.id, if.id, el.id
             """)
     fun findImportLanguagesView(importId: Long, pageable: Pageable): Page<ImportLanguageView>
+
+    @Modifying
+    @Transactional
+    @Query("""delete from ImportLanguage l where l.file in 
+        (select f from ImportFile f where f.import = :import)""")
+    fun deleteAllByImport(import: Import)
 }

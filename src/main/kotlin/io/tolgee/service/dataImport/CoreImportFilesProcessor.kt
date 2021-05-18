@@ -10,6 +10,7 @@ import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.KeyMetaService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ProcessorFactory
@@ -21,11 +22,14 @@ class CoreImportFilesProcessor(
         val import: Import
 ) {
     private val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
+    private val keyMetaService: KeyMetaService by lazy { applicationContext.getBean(KeyMetaService::class.java) }
     private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
     private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
+
     private val authenticationFacade: AuthenticationFacade by lazy {
         applicationContext.getBean(AuthenticationFacade::class.java)
     }
+
     private val importDataManager = ImportDataManager(applicationContext, import)
 
     fun processFiles(files: List<ImportFileDto>?,
@@ -73,7 +77,24 @@ class CoreImportFilesProcessor(
 
     private fun FileProcessorContext.processResult() {
         this.processLanguages()
+
+        importDataManager.storedKeys //populate keys first
+        this.mergeKeyMetas()
+        importDataManager.storedMetas.values.forEach {
+            it.let { meta ->
+                if (meta.id == 0L) {
+                    keyMetaService.save(meta)
+                }
+                meta.comments.onEach { comment -> comment.author = comment.author ?: authenticationFacade.userAccount }
+                keyMetaService.saveAllComments(meta.comments)
+                meta.codeReferences.onEach { ref -> ref.author = ref.author ?: authenticationFacade.userAccount }
+                keyMetaService.saveAllCodeReferences(meta.codeReferences)
+            }
+        }
+        importDataManager.saveAllStoredKeys()
         this.processTranslations()
+
+        importService.saveAllFileIssues(this.fileEntity.issues)
     }
 
     private fun FileProcessorContext.processLanguages() {
@@ -88,6 +109,7 @@ class CoreImportFilesProcessor(
             }
             importService.saveLanguages(this.languages.values)
             importDataManager.storedLanguages.addAll(this.languages.values)
+            importDataManager.populateStoredTranslations(entry.value)
         }
     }
 
@@ -96,20 +118,16 @@ class CoreImportFilesProcessor(
     }
 
     private fun FileProcessorContext.getOrCreateKey(name: String): ImportKey {
-        var entity = importDataManager.storedKeys[name] ?: this.keys[name].also {
-            it?.keyMeta?.let { meta ->
-                meta.comments.onEach { comment -> comment.author = comment.author ?: authenticationFacade.userAccount }
-                meta.codeReferences.onEach { ref -> ref.author = ref.author ?: authenticationFacade.userAccount }
-            }
-        }
+        var entity = importDataManager.storedKeys[name]
         if (entity == null) {
-            entity = ImportKey(name = name)
+            entity = this.keys[name] ?: ImportKey(name = name)
             importDataManager.storedKeys[name] = entity
         }
 
         if (!entity.files.any { this.fileEntity == it }) {
             entity.files.add(fileEntity)
             fileEntity.keys.add(entity)
+            importService.saveKey(entity)
         }
 
         return entity
@@ -123,8 +141,8 @@ class CoreImportFilesProcessor(
         this.translations.forEach { entry ->
             val keyEntity = getOrCreateKey(entry.key)
             entry.value.forEach { newTranslation ->
-                newTranslation.key = keyEntity
                 val storedTranslations = importDataManager.getStoredTranslations(keyEntity, newTranslation.language)
+                newTranslation.key = keyEntity
                 if (storedTranslations.size > 1) {
                     storedTranslations.forEach { collidingTranslations ->
                         fileEntity.addIssue(FileIssueType.MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE,
@@ -140,8 +158,24 @@ class CoreImportFilesProcessor(
             }
         }
 
+        importDataManager.saveAllStoredKeys()
         importDataManager.handleConflicts()
         importDataManager.saveAllStoredTranslations()
     }
+
+    private fun FileProcessorContext.mergeKeyMetas() {
+        val storedMetas = importDataManager.storedMetas
+        this.keys.values.forEach { newKey ->
+            val storedMeta = storedMetas[newKey.name]
+            val newMeta = newKey.keyMeta
+            if (storedMeta != null && newMeta != null) {
+                keyMetaService.import(storedMeta, newMeta)
+            }
+            if (storedMeta == null && newMeta != null) {
+                storedMetas[newKey.name] = newMeta
+            }
+        }
+    }
 }
+
 

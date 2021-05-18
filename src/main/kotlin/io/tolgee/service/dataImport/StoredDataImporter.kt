@@ -41,6 +41,30 @@ class StoredDataImporter(
             it.doImport()
         }
 
+        this.importDataManager.storedKeys.values.onEach { importKey ->
+            val importedKeyMeta = importKey.keyMeta
+            //dont touch key meta when imported key has no meta
+            if (importedKeyMeta != null) {
+                keysToSave[importKey.name]?.let { newKey ->
+                    //if key is obtained or created and meta exists, take it and import the data from the imported one
+                    //persist is cascaded on key, so it should be fine
+                    val keyMeta = newKey.keyMeta?.also {
+                        keyMetaService.import(it, importedKeyMeta)
+                    } ?: importKey.keyMeta
+                    //also set key and remove import key
+                    keyMeta?.also {
+                        it.key = newKey
+                        it.importKey = null
+                    }
+                    //set new meta to the key
+                    newKey.keyMeta = keyMeta
+                }
+            }
+        }
+
+        translationService.saveAll(translationsToSave)
+        keyService.saveAll(keysToSave.values)
+
         keysToSave.values.flatMap {
             it.keyMeta?.comments ?: emptyList()
         }.also { keyMetaService.saveAllComments(it) }
@@ -48,9 +72,6 @@ class StoredDataImporter(
         keysToSave.values.flatMap {
             it.keyMeta?.codeReferences ?: emptyList()
         }.also { keyMetaService.saveAllCodeReferences(it) }
-
-        translationService.saveAll(translationsToSave)
-        keyService.saveAll(keysToSave.values)
     }
 
     private fun ImportLanguage.doImport() {
@@ -78,23 +99,8 @@ class StoredDataImporter(
             //get key from already saved keys to save
             val key = keysToSave[this.key.name] ?: let {
                 //or get it from conflict or create new one
-                val newKey = this.conflict?.key ?: keyService.getOrCreateKeyNoPersist(import.repository, this.key.name)
-                val importedKeyMeta = this.key.keyMeta
-                //dont touch key meta when imported key has no meta
-                if (importedKeyMeta != null) {
-                    //if key is obtained or created and meta exists, take it and import the data from the imported one
-                    //persist is cascaded on key, so it should be fine
-                    val keyMeta = newKey.keyMeta?.also {
-                        keyMetaService.import(it, importedKeyMeta)
-                    } ?: this.key.keyMeta
-                    //also set key and remove import key
-                    keyMeta?.also {
-                        it.key = newKey
-                        it.importKey = null
-                    }
-                    //set new meta to the key
-                    newKey.keyMeta = keyMeta
-                }
+                val newKey = this.conflict?.key ?: importDataManager.existingKeys[this.key.name]
+                ?: Key(name = this.key.name).apply { repository = import.repository }
                 newKey
             }
             val keyName = key.name ?: throw IllegalStateException("Key has no name")

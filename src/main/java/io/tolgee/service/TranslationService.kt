@@ -146,8 +146,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     fun deleteAllByRepository(repositoryId: Long) {
-        translationRepository.deleteAll(translationRepository.getAllByLanguageRepositoryId(repositoryId))
-        translationRepository.deleteAll(translationRepository.getAllByKeyRepositoryId(repositoryId))
+        translationRepository.deleteAllByRepositoryId(repositoryId)
     }
 
     fun deleteAllByLanguage(languageId: Long) {

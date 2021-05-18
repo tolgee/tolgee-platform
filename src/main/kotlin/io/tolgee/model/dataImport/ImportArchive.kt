@@ -1,8 +1,10 @@
 package io.tolgee.model.dataImport
 
 import io.tolgee.model.StandardAuditModel
-import io.tolgee.model.dataImport.issues.ImportArchiveIssue
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
 import javax.validation.constraints.Size
 
 @Entity
@@ -11,11 +13,9 @@ class ImportArchive(
         @field:Size(max = 2000)
         val name: String,
 
-        @ManyToOne(cascade = [CascadeType.ALL], optional = false)
+        @ManyToOne(optional = false)
         val import: Import,
 ) : StandardAuditModel() {
-    @OneToMany(mappedBy = "archive")
-    var issues: MutableList<ImportArchiveIssue> = mutableListOf()
 
     @OneToMany(mappedBy = "archive")
     var files: MutableList<ImportFile> = mutableListOf()

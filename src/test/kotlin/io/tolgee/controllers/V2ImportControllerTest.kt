@@ -139,10 +139,6 @@ class V2ImportControllerTest : SignedInControllerTest() {
                 assertThat(keys.filter { it.name == key.name })
                         .describedAs("Each key is stored just once")
                         .hasSizeLessThan(2)
-
-                key.translations.forEach {
-                    assertThat(it.issues).hasSize(0)
-                }
             }
             importEntity.files.forEach {
                 assertThat(it.issues).hasSize(0)

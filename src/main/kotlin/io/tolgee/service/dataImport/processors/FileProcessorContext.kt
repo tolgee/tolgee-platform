@@ -6,7 +6,6 @@ import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
-import io.tolgee.model.dataImport.issues.issueTypes.TranslationIssueType
 import io.tolgee.model.key.KeyMeta
 
 data class FileProcessorContext(
@@ -32,10 +31,6 @@ data class FileProcessorContext(
         val entity = ImportTranslation(value as? String?, language)
 
         translations[keyName]!!.add(entity)
-
-        if (value != null && value !is String) {
-            entity.addIssue(TranslationIssueType.VALUE_NOT_STRING)
-        }
     }
 
     fun addKeyComment(key: String, text: String) {

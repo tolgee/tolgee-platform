@@ -5,6 +5,10 @@ import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta
+import io.tolgee.service.KeyMetaService
+import io.tolgee.service.KeyService
 import io.tolgee.service.TranslationService
 import org.springframework.context.ApplicationContext
 
@@ -13,6 +17,12 @@ class ImportDataManager(
         private val import: Import
 ) {
     val importService: ImportService by lazy { applicationContext.getBean(ImportService::class.java) }
+
+    val keyService: KeyService by lazy { applicationContext.getBean(KeyService::class.java) }
+
+    private val keyMetaService: KeyMetaService by lazy {
+        applicationContext.getBean(KeyMetaService::class.java)
+    }
 
     val storedKeys by lazy {
         importService.findKeys(import).asSequence().map { it.name to it }.toMap(mutableMapOf())
@@ -26,8 +36,16 @@ class ImportDataManager(
 
     private val existingTranslations = mutableMapOf<Long, MutableMap<String, Translation>>()
 
+    val existingKeys: MutableMap<String, Key> by lazy {
+        keyService.getAll(import.repository.id).asSequence().map { it.name!! to it }.toMap().toMutableMap()
+    }
+
     private val translationService: TranslationService by lazy {
         applicationContext.getBean(TranslationService::class.java)
+    }
+
+    val storedMetas: MutableMap<String, KeyMeta> by lazy {
+        keyMetaService.getWithFetchedData(this.import).asSequence().map { it.importKey!!.name!! to it }.toMap().toMutableMap()
     }
 
     /**
@@ -98,5 +116,9 @@ class ImportDataManager(
         this.storedTranslations.values.asSequence().flatMap { it.values }.flatMap { it }.toList().let {
             importService.saveTranslations(it)
         }
+    }
+
+    fun saveAllStoredKeys() {
+        this.importService.saveAllKeys(this.storedKeys.values)
     }
 }

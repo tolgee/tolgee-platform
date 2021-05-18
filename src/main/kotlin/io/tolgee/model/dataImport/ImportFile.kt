@@ -17,13 +17,13 @@ class ImportFile(
         @ManyToOne(optional = false)
         val import: Import,
 ) : StandardAuditModel() {
-    @OneToMany(mappedBy = "file", cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "file")
     var issues: MutableList<ImportFileIssue> = mutableListOf()
 
-    @ManyToMany(cascade = [CascadeType.ALL])
+    @ManyToMany
     var keys: MutableList<ImportKey> = mutableListOf()
 
-    @OneToMany(mappedBy = "file", cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "file")
     var languages: MutableList<ImportLanguage> = mutableListOf()
 
     @ManyToOne

@@ -22,6 +22,7 @@ import io.tolgee.repository.dataImport.*
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.repository_auth.RepositoryHolder
+import io.tolgee.service.KeyMetaService
 import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.TranslationService
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.OutputStream
 import java.util.stream.Collectors
+import javax.persistence.EntityManager
 
 @Service
 @Transactional
@@ -50,7 +52,9 @@ class ImportService(
         private val importLanguageRepository: ImportLanguageRepository,
         private val importKeyRepository: ImportKeyRepository,
         private val applicationContext: ApplicationContext,
-        private val importTranslationRepository: ImportTranslationRepository
+        private val importTranslationRepository: ImportTranslationRepository,
+        private val entityManager: EntityManager,
+        private val keyMetaService: KeyMetaService
 ) {
     @Autowired
     private lateinit var translationService: TranslationService
@@ -192,14 +196,25 @@ class ImportService(
         return importTranslationRepository.findImportTranslationsView(languageId, pageable, onlyConflicts, onlyUnresolved)
     }
 
-    fun deleteImport(import: Import) =
-            this.importRepository.delete(import)
+    fun deleteImport(import: Import) {
+        this.importTranslationRepository.deleteAllByImport(import)
+        this.importLanguageRepository.deleteAllByImport(import)
+        val keyIds = this.importKeyRepository.getAllIdsByImport(import)
+        this.keyMetaService.deleteAllByImportKeyIdIn(keyIds)
+        this.importKeyRepository.deleteByIdIn(keyIds)
+        this.importFileIssueRepository.deleteAllByImport(import)
+        this.importFileRepository.deleteAllByImport(import)
+        this.importRepository.delete(import)
+    }
 
+    @Transactional
     fun deleteImport(repositoryId: Long, authorId: Long) =
             this.deleteImport(findOrThrow(repositoryId, authorId))
 
+    @Transactional
     fun deleteLanguage(language: ImportLanguage) {
         val import = language.file.import
+        this.importTranslationRepository.deleteAllByLanguage(language)
         this.importLanguageRepository.delete(language)
         if (this.findLanguages(import = language.file.import).isEmpty()) {
             deleteImport(import)
@@ -227,4 +242,15 @@ class ImportService(
     fun getFileIssues(fileId: Long, pageable: Pageable): Page<ImportFileIssueView> {
         return importFileIssueRepository.findAllByFileIdView(fileId, pageable)
     }
+
+    fun saveAllKeys(keys: MutableCollection<ImportKey>): MutableList<ImportKey> = this.importKeyRepository.saveAll(keys)
+
+    fun saveKey(entity: ImportKey): ImportKey = this.importKeyRepository.save(entity)
+
+    fun saveAllFileIssues(issues: Iterable<ImportFileIssue>) {
+        this.importFileIssueRepository.saveAll(issues)
+    }
+
+    fun getAllByRepository(repositoryId: Long) =
+            this.importRepository.findAllByRepositoryId(repositoryId)
 }

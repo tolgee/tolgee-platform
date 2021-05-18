@@ -28,7 +28,7 @@ data class Key(
     @OneToMany(mappedBy = "key")
     var translations: MutableSet<Translation> = HashSet()
 
-    @OneToOne(mappedBy = "key", cascade = [CascadeType.ALL])
+    @OneToOne(mappedBy = "key")
     var keyMeta: KeyMeta? = null
 
     constructor(id: Long? = null,
