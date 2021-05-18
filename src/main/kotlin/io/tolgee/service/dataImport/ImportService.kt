@@ -12,6 +12,7 @@ import io.tolgee.model.Repository
 import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
+import io.tolgee.model.dataImport.issues.ImportFileIssueParam
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
@@ -19,6 +20,7 @@ import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.repository.dataImport.*
+import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.repository_auth.RepositoryHolder
@@ -52,6 +54,7 @@ class ImportService(
         private val importKeyRepository: ImportKeyRepository,
         private val applicationContext: ApplicationContext,
         private val importTranslationRepository: ImportTranslationRepository,
+        private val importFileIssueParamRepository: ImportFileIssueParamRepository,
         private val entityManager: EntityManager,
         private val keyMetaService: KeyMetaService
 ) {
@@ -240,7 +243,7 @@ class ImportService(
         return importFileIssueRepository.findAllByFileIdView(fileId, pageable)
     }
 
-    fun saveAllKeys(keys: MutableCollection<ImportKey>): MutableList<ImportKey> = this.importKeyRepository.saveAll(keys)
+    fun saveAllKeys(keys: Iterable<ImportKey>): MutableList<ImportKey> = this.importKeyRepository.saveAll(keys)
 
     fun saveKey(entity: ImportKey): ImportKey = this.importKeyRepository.save(entity)
 
@@ -250,4 +253,7 @@ class ImportService(
 
     fun getAllByRepository(repositoryId: Long) =
             this.importRepository.findAllByRepositoryId(repositoryId)
+
+    fun saveAllFileIssueParams(params: List<ImportFileIssueParam>): MutableList<ImportFileIssueParam> =
+            importFileIssueParamRepository.saveAll(params)
 }

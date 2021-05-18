@@ -11,6 +11,7 @@ import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.key.Key
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.KeyMetaService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.dataImport.CoreImportFilesProcessor
@@ -40,6 +41,7 @@ class CoreImportFileProcessorUnitTest {
     private lateinit var existingLanguage: Language
     private lateinit var existingTranslation: Translation
     private lateinit var authenticationFacadeMock: AuthenticationFacade
+    private lateinit var keyMetaService: KeyMetaService
 
     @BeforeMethod
     fun setup() {
@@ -51,6 +53,7 @@ class CoreImportFileProcessorUnitTest {
         translationServiceMock = mock()
         typeProcessorMock = mock()
         authenticationFacadeMock = mock()
+        keyMetaService = mock()
 
         importFile = ImportFile("lgn.json", importMock)
         importFileDto = ImportFileDto("lng.json", "".toByteArray().inputStream())
@@ -62,6 +65,7 @@ class CoreImportFileProcessorUnitTest {
         whenever(applicationContextMock.getBean(LanguageService::class.java)).thenReturn(languageServiceMock)
         whenever(applicationContextMock.getBean(TranslationService::class.java)).thenReturn(translationServiceMock)
         whenever(applicationContextMock.getBean(AuthenticationFacade::class.java)).thenReturn(authenticationFacadeMock)
+        whenever(applicationContextMock.getBean(KeyMetaService::class.java)).thenReturn(keyMetaService)
         whenever(processorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
         fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
         fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
@@ -106,6 +110,12 @@ class CoreImportFileProcessorUnitTest {
         whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(listOf())
 
         processor.processFiles(listOf(importFileDto), messageClient = mock())
+        verify(keyMetaService).save(argThat {
+            this.comments.any { it.text == "test comment" }
+        })
+        verify(keyMetaService).save(argThat {
+            this.codeReferences.any { it.path == "hello.php" }
+        })
         verify(importServiceMock).saveTranslations(argThat {
             assertThat(this[0].key.keyMeta).isNotNull
             assertThat(this[0].key.keyMeta?.codeReferences).hasSize(2)

@@ -92,6 +92,7 @@ class CoreImportFilesProcessor(
         this.processTranslations()
 
         importService.saveAllFileIssues(this.fileEntity.issues)
+        importService.saveAllFileIssueParams(this.fileEntity.issues.flatMap { it.params ?: emptyList() })
     }
 
     private fun FileProcessorContext.processLanguages() {

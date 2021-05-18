@@ -40,7 +40,21 @@ class TestDataService(
         val importBuilders = builder.data.repositories.flatMap { repoBuilder -> repoBuilder.data.imports }
         importService.saveAllImports(importBuilders.map { it.self })
         val importFileBuilders = importBuilders.flatMap { it.data.importFiles }
-        importService.saveAllFiles(importFileBuilders.map { it.self })
+        importService.saveAllKeys(importFileBuilders.flatMap { it.data.importKeys.map { it.self } })
+
+
+        val keyMetas = importFileBuilders.flatMap { it.data.importKeys.map { it.self.keyMeta } }.filterNotNull()
+        keyMetaService.saveAll(keyMetas)
+
+        keyMetaService.saveAllCodeReferences(keyMetas.flatMap { it.codeReferences })
+        keyMetaService.saveAllComments(keyMetas.flatMap { it.comments })
+
+        val importFiles = importFileBuilders.map { it.self }
+        importService.saveAllFiles(importFiles)
+
+        val fileIssues = importFiles.flatMap { it.issues }
+        importService.saveAllFileIssues(fileIssues)
+        importService.saveAllFileIssueParams(fileIssues.flatMap { it.params ?: emptyList() })
         importService.saveTranslations(importFileBuilders.flatMap { it.data.importTranslations.map { it.self } })
         importService.saveLanguages(importFileBuilders.flatMap { it.data.importLanguages.map { it.self } })
         entityManager.flush()
