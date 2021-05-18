@@ -76,8 +76,17 @@ class DataBuilders {
 
         val data = DATA()
 
-        fun addImportKey(ft: FT<ImportKeyBuilder>) = addOperation(data.importKeys, ft)
-        fun addImportLanguage(ft: FT<ImportLanguageBuilder>) = addOperation(data.importLanguages, ft)
+        fun addImportKey(ft: FT<ImportKeyBuilder>) = addOperation(data.importKeys, ft).also {
+            it.self {
+                this@ImportFileBuilder.self.keys.add(this)
+                this.files.add(this@ImportFileBuilder.self)
+            }
+        }
+
+        fun addImportLanguage(ft: FT<ImportLanguageBuilder>) = addOperation(data.importLanguages, ft).also {
+            it.self { this.file = this@ImportFileBuilder.self }
+        }
+
         fun addImportTranslation(ft: FT<ImportTranslationBuilder>) = addOperation(data.importTranslations, ft)
     }
 

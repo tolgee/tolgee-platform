@@ -34,6 +34,20 @@ class ImportServiceTest : AbstractSpringTest() {
         testDataService.saveTestData(testData.root)
         assertThat(importService.findLanguage(testData.importEnglish.id)).isNotNull
         importService.deleteLanguage(testData.importEnglish)
+        entityManager.flush()
+        entityManager.clear()
         assertThat(importService.findLanguage(testData.importEnglish.id)).isNull()
+    }
+
+    @Test
+    fun `deletes import`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        entityManager.flush()
+        entityManager.clear()
+        importService.deleteImport(testData.import)
+        entityManager.flush()
+        entityManager.clear()
+        assertThat(importService.find(testData.import.repository.id, testData.import.author.id!!)).isNull()
     }
 }
