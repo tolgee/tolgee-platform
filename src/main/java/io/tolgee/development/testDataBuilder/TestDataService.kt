@@ -29,9 +29,10 @@ class TestDataService(
         val languages = builder.data.repositories.flatMap { it.data.languages.map { it.self } }
         languageService.saveAll(languages)
 
-        builder.data.repositories.flatMap { it.data.keys.map { it.self } }.let {
-            keyService.saveAll(it)
-        }
+
+        val keyBuilders = builder.data.repositories.flatMap { it.data.keys.map { it } }
+        keyService.saveAll(keyBuilders.map { it.self })
+        keyMetaService.saveAll(keyBuilders.map { it.data.meta?.self }.filterNotNull())
 
         builder.data.repositories.flatMap { it.data.translations.map { it.self } }.let {
             translationService.saveAll(it)
@@ -39,15 +40,15 @@ class TestDataService(
 
         val importBuilders = builder.data.repositories.flatMap { repoBuilder -> repoBuilder.data.imports }
         importService.saveAllImports(importBuilders.map { it.self })
+
         val importFileBuilders = importBuilders.flatMap { it.data.importFiles }
+
+        val importKeyMetas = importFileBuilders.flatMap { it.data.importKeys.map { it.self.keyMeta } }.filterNotNull()
+        keyMetaService.saveAll(importKeyMetas)
+        keyMetaService.saveAllCodeReferences(importKeyMetas.flatMap { it.codeReferences })
+        keyMetaService.saveAllComments(importKeyMetas.flatMap { it.comments })
+
         importService.saveAllKeys(importFileBuilders.flatMap { it.data.importKeys.map { it.self } })
-
-
-        val keyMetas = importFileBuilders.flatMap { it.data.importKeys.map { it.self.keyMeta } }.filterNotNull()
-        keyMetaService.saveAll(keyMetas)
-
-        keyMetaService.saveAllCodeReferences(keyMetas.flatMap { it.codeReferences })
-        keyMetaService.saveAllComments(keyMetas.flatMap { it.comments })
 
         val importFiles = importFileBuilders.map { it.self }
         importService.saveAllFiles(importFiles)
