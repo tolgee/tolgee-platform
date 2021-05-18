@@ -426,7 +426,7 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621339314277-2">
-        <createSequence incrementBy="1000000000" sequenceName="hibernate_sequence" startValue="1"/>
+        <createSequence incrementBy="100" sequenceName="hibernate_sequence" startValue="1000000000"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621339314277-3">
         <createTable tableName="import">

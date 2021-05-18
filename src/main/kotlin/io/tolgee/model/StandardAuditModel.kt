@@ -17,8 +17,8 @@ abstract class StandardAuditModel : AuditModel() {
             parameters = [
                 Parameter(name = "sequence_name", value = "hibernate_sequence"),
                 Parameter(name = "optimizer", value = "pooled"),
-                Parameter(name = "initial_value", value = "1"),
-                Parameter(name = "increment_size", value = "1000000000")
+                Parameter(name = "initial_value", value = "1000000000"),
+                Parameter(name = "increment_size", value = "100")
             ]
     )
     @GeneratedValue(
