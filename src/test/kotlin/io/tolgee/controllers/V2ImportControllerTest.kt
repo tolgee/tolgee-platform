@@ -490,7 +490,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
     }
 
     private fun asyncDispatch(mvcResult: MvcResult): RequestBuilder {
-        mvcResult.getAsyncResult(10000000)
+        mvcResult.getAsyncResult(10000)
         return RequestBuilder {
             val request = mvcResult.request
             request.dispatcherType = DispatcherType.ASYNC
