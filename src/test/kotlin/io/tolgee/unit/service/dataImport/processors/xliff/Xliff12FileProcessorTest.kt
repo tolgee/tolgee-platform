@@ -11,18 +11,17 @@ import io.tolgee.service.dataImport.processors.xliff.Xliff12FileProcessor
 import org.mockito.kotlin.mock
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
-import org.w3c.dom.Document
 import java.io.File
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.stream.XMLInputFactory
+import javax.xml.stream.XMLStreamReader
 
 class Xliff12FileProcessorTest {
     private lateinit var importMock: Import
     private lateinit var importFile: ImportFile
     private lateinit var importFileDto: ImportFileDto
     private lateinit var fileProcessorContext: FileProcessorContext
-    private lateinit var document: Document
-    private lateinit var documentBuilder: DocumentBuilder
+    private val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
+    private lateinit var xmlStreamReader: XMLStreamReader
 
     @BeforeMethod
     fun setup() {
@@ -33,15 +32,13 @@ class Xliff12FileProcessorTest {
                 File("src/test/resources/import/xliff/example.xliff")
                         .inputStream()
         )
+        xmlStreamReader = inputFactory.createXMLStreamReader(importFileDto.inputStream)
         fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
-        val builderFactory = DocumentBuilderFactory.newInstance()
-        documentBuilder = builderFactory.newDocumentBuilder()
-        document = documentBuilder.parse(fileProcessorContext.file.inputStream)
     }
 
     @Test
     fun `processes xliff 12 file correctly`() {
-        Xliff12FileProcessor(fileProcessorContext, document).process()
+        Xliff12FileProcessor(fileProcessorContext, xmlStreamReader).process()
         assertThat(fileProcessorContext.languages).hasSize(2)
         assertThat(fileProcessorContext.translations).hasSize(176)
         assertThat(fileProcessorContext.translations["vpn.devices.removeA11Y"]!![0].text).isEqualTo("Remove %1")
@@ -58,15 +55,29 @@ class Xliff12FileProcessorTest {
     }
 
     @Test
+    fun `processes xliff 12 fast enough`() {
+        importFileDto = ImportFileDto(
+                "exmample.xliff",
+                File("src/test/resources/import/xliff/larger.xlf")
+                        .inputStream()
+        )
+        fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
+        xmlStreamReader = inputFactory.createXMLStreamReader(importFileDto.inputStream)
+        val start = System.currentTimeMillis()
+        Xliff12FileProcessor(fileProcessorContext, xmlStreamReader).process()
+        assertThat(System.currentTimeMillis() - start).isLessThan(4000)
+    }
+
+    @Test
     fun `handles errors correctly`() {
         importFileDto = ImportFileDto(
                 "exmample.xliff",
                 File("src/test/resources/import/xliff/error_example.xliff")
                         .inputStream()
         )
+        xmlStreamReader = inputFactory.createXMLStreamReader(importFileDto.inputStream)
         fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
-        document = documentBuilder.parse(fileProcessorContext.file.inputStream)
-        Xliff12FileProcessor(fileProcessorContext, document).process()
+        Xliff12FileProcessor(fileProcessorContext, xmlStreamReader).process()
         assertThat(fileProcessorContext.translations).hasSize(2)
         fileProcessorContext.fileEntity.issues.let { issues ->
             assertThat(issues).hasSize(4)

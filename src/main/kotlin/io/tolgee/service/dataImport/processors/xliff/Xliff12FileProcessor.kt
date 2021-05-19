@@ -4,70 +4,93 @@ import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
-import org.w3c.dom.Document
-import org.w3c.dom.Node
-import org.w3c.dom.NodeList
-import javax.xml.xpath.XPathConstants
-import javax.xml.xpath.XPathFactory
+import javax.xml.stream.XMLStreamReader
 
-class Xliff12FileProcessor(override val context: FileProcessorContext, private val document: Document)
-    : ImportFileProcessor() {
+class Xliff12FileProcessor(override val context: FileProcessorContext,
+                           override val xmlStreamReader: XMLStreamReader
+) : ImportFileProcessor() {
+
+    val openElements = mutableListOf<String>()
+    val currentOpenElement: String?
+        get() = openElements.lastOrNull()
+
     override fun process() {
-        document.getElementsByTagName("file").asSequence().forEach { fileNode ->
-            val sourceLanguage = fileNode.attributes.getNamedItem("source-language").textContent
-            val targetLanguage = fileNode.attributes.getNamedItem("target-language").textContent
-            val fileOriginal = fileNode.attributes.getNamedItem("original")?.textContent
+        var fileOriginal: String? = null
+        var sourceLanguage: String? = null
+        var targetLanguage: String? = null
+        var id: String? = null
+        var currentTextValue: String? = null
+        var targetProvided = false
 
-            fileNode.findNodesByXPath(".//trans-unit").asSequence().forEach { transUnitNode ->
-                transUnitNode.attributes.getNamedItem("id").let { keyNode ->
-                    keyNode?.textContent?.let { key ->
-                        transUnitNode.findNodeByXPath(".//source")?.textContent?.let { source ->
-                            context.addTranslation(key, sourceLanguage, source)
+        while (xmlStreamReader.hasNext()) {
+            xmlStreamReader.next()
+            if (xmlStreamReader.isStartElement) {
+                openElements.add(xmlStreamReader.localName.toLowerCase())
+                when (currentOpenElement) {
+                    "file" -> {
+                        fileOriginal = xmlStreamReader.getAttributeValue(null, "original")
+                        sourceLanguage = xmlStreamReader.getAttributeValue(null, "source-language")
+                        targetLanguage = xmlStreamReader.getAttributeValue(null, "target-language")
+                    }
+                    "trans-unit" -> {
+                        id = xmlStreamReader.getAttributeValue(null, "id")
+                        if (id != null && fileOriginal != null) {
+                            context.addKeyCodeReference(id, fileOriginal, null)
                         }
-
-                        transUnitNode.findNodeByXPath(".//note")?.textContent?.let { note ->
-                            context.addKeyComment(key, note)
-                        }
-
-                        fileOriginal?.let { fileOriginal ->
-                            context.addKeyCodeReference(key, fileOriginal)
-                        }
-
-                        transUnitNode.findNodeByXPath(".//target")?.textContent?.let { target ->
-                            context.addTranslation(key, targetLanguage, target)
-                        } ?: let {
+                        if (fileOriginal != null && id == null) {
                             context.fileEntity.addIssue(
-                                    FileIssueType.TARGET_NOT_PROVIDED,
-                                    mapOf(FileIssueParamType.KEY_NAME to key)
-                            )
+                                    FileIssueType.ID_ATTRIBUTE_NOT_PROVIDED,
+                                    mapOf(FileIssueParamType.FILE_NODE_ORIGINAL to fileOriginal))
                         }
-
-                    } ?: fileOriginal?.also {
-                        context.fileEntity.addIssue(
-                                FileIssueType.ID_ATTRIBUTE_NOT_PROVIDED,
-                                mapOf(FileIssueParamType.FILE_NODE_ORIGINAL to fileOriginal)
-                        )
                     }
                 }
             }
-        }
-    }
+            if (xmlStreamReader.isCharacters) {
+                if (currentOpenElement != null)
+                    when (currentOpenElement!!) {
+                        in "source", "target", "note" -> {
+                            currentTextValue = (currentTextValue ?: "") + xmlStreamReader.text
+                        }
+                    }
+            }
 
-    fun NodeList.asSequence(): Sequence<Node> {
-        return sequence<Node> {
-            (0 until this@asSequence.length).forEach {
-                yield(item(it))
+            if (xmlStreamReader.isEndElement) {
+                when (currentOpenElement) {
+                    "file" -> {
+                        fileOriginal = null
+                        sourceLanguage = null
+                        targetLanguage = null
+                    }
+                    "trans-unit" -> {
+                        if (id != null && !targetProvided) {
+                            context.fileEntity.addIssue(
+                                    FileIssueType.TARGET_NOT_PROVIDED,
+                                    mapOf(FileIssueParamType.KEY_NAME to id)
+                            )
+                            id = null
+                        }
+                        targetProvided = false
+                    }
+                    "source" -> {
+                        if (sourceLanguage != null && id != null) {
+                            context.addTranslation(id, sourceLanguage, currentTextValue)
+                        }
+                    }
+                    "target" -> {
+                        if (targetLanguage != null && id != null) {
+                            targetProvided = true
+                            context.addTranslation(id, targetLanguage, currentTextValue)
+                        }
+                    }
+                    "note" -> {
+                        if (currentTextValue != null && currentTextValue.isNotBlank() && id != null) {
+                            context.addKeyComment(id, currentTextValue)
+                        }
+                    }
+                }
+                currentTextValue = null
+                openElements.removeLast()
             }
         }
-    }
-
-    private fun Node.findNodesByXPath(expression: String): Sequence<Node> {
-        val xPath = XPathFactory.newInstance().newXPath()
-        return (xPath.compile(expression).evaluate(this, XPathConstants.NODESET) as NodeList).asSequence()
-    }
-
-    private fun Node.findNodeByXPath(expression: String): Node? {
-        val xPath = XPathFactory.newInstance().newXPath()
-        return (xPath.compile(expression).evaluate(this, XPathConstants.NODE) as Node?)
     }
 }
