@@ -10,7 +10,7 @@ class Xliff12FileProcessor(override val context: FileProcessorContext,
                            override val xmlStreamReader: XMLStreamReader
 ) : ImportFileProcessor() {
 
-    val openElements = mutableListOf<String>()
+    val openElements = mutableListOf("xliff")
     val currentOpenElement: String?
         get() = openElements.lastOrNull()
 

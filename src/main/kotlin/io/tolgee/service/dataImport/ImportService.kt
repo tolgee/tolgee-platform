@@ -151,6 +151,7 @@ class ImportService(
         val keyIds = this.importKeyRepository.getAllIdsByImport(import)
         this.keyMetaService.deleteAllByImportKeyIdIn(keyIds)
         this.importKeyRepository.deleteByIdIn(keyIds)
+        this.importFileIssueParamRepository.deleteAllByImport(import)
         this.importFileIssueRepository.deleteAllByImport(import)
         this.importFileRepository.deleteAllByImport(import)
         this.importRepository.delete(import)

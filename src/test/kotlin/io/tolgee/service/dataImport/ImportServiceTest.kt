@@ -42,6 +42,8 @@ class ImportServiceTest : AbstractSpringTest() {
     @Test
     fun `deletes import`() {
         val testData = ImportTestData()
+        testData.addFileIssues()
+        testData.addKeyMetadata()
         testDataService.saveTestData(testData.root)
         entityManager.flush()
         entityManager.clear()
