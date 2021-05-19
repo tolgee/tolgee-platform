@@ -3,7 +3,9 @@ package io.tolgee.service.dataImport
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.*
+import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.FileIssueException
+import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.model.Language
 import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
@@ -33,10 +35,17 @@ class CoreImportFilesProcessor(
     private val importDataManager = ImportDataManager(applicationContext, import)
 
     fun processFiles(files: List<ImportFileDto>?,
-                     messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit) {
+                     messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit): MutableList<ErrorResponseBody> {
+
+        val errors = mutableListOf<ErrorResponseBody>()
         files?.forEach {
-            processFileOrArchive(it, messageClient)
+            try {
+                processFileOrArchive(it, messageClient)
+            } catch (e: ImportCannotParseFileException) {
+                errors.add(ErrorResponseBody(e.code, e.params))
+            }
         }
+        return errors
     }
 
     private fun processFileOrArchive(file: ImportFileDto,

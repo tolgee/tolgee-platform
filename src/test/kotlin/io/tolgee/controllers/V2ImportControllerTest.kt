@@ -67,7 +67,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
 
         performImport(repositoryId = repository.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
                 .andPrettyPrint.andAssertThatJson {
-                    node("_embedded.languages").isArray.hasSize(3)
+                    node("result._embedded.languages").isArray.hasSize(3)
                 }
         validateSavedJsonImportData(repository)
     }
@@ -78,7 +78,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
 
         performImport(repositoryId = repository.id, mapOf(Pair("example.po", poFile)))
                 .andPrettyPrint.andAssertThatJson {
-                    node("_embedded.languages").isArray.hasSize(1)
+                    node("result._embedded.languages").isArray.hasSize(1)
                 }.andReturn()
 
         entityManager.clear()
@@ -95,7 +95,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
 
         performImport(repositoryId = repository.id, mapOf(Pair("example.xliff", xliffFile)))
                 .andPrettyPrint.andAssertThatJson {
-                    node("_embedded.languages").isArray.hasSize(2)
+                    node("result._embedded.languages").isArray.hasSize(2)
                 }.andReturn()
     }
 
@@ -104,10 +104,10 @@ class V2ImportControllerTest : SignedInControllerTest() {
         val repository = dbPopulator.createBase(generateUniqueString())
 
         performImport(repositoryId = repository.id, mapOf(Pair("error.json", errorJson)))
-                .andIsBadRequest.andAssertThatJson {
-                    node("code").isEqualTo("cannot_parse_file")
-                    node("params[0]").isEqualTo("error.json")
-                    node("params[1]").isString.contains("Unrecognized token")
+                .andIsOk.andAssertThatJson {
+                    node("errors[0].code").isEqualTo("cannot_parse_file")
+                    node("errors[0].params[0]").isEqualTo("error.json")
+                    node("errors[0].params[1]").isString.contains("Unrecognized token")
                 }
     }
 

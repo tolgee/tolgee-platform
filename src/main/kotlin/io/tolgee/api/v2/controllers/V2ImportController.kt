@@ -103,10 +103,11 @@ class V2ImportController(
     fun addFiles(
             @PathVariable("repositoryId") repositoryId: Long,
             @RequestPart("files") files: Array<MultipartFile>,
-    ): PagedModel<ImportLanguageModel> {
+    ): ImportAddFilesResultModel {
         val fileDtos = files.map { ImportFileDto(it.originalFilename, it.inputStream) }
-        importService.addFiles(files = fileDtos)
-        return this.getImportResult(repositoryId, PageRequest.of(0, 100))
+        val errors = importService.addFiles(files = fileDtos)
+        val result = this.getImportResult(repositoryId, PageRequest.of(0, 100))
+        return ImportAddFilesResultModel(errors, result)
     }
 
     @PutMapping("/apply")

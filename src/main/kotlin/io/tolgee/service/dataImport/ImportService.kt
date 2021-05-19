@@ -4,6 +4,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
@@ -43,7 +44,8 @@ class ImportService(
 ) {
     @Transactional
     fun addFiles(files: List<ImportFileDto>,
-                 messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null) {
+                 messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null
+    ): List<ErrorResponseBody> {
         val import = find(repositoryHolder.repository.id, authenticationFacade.userAccount.id!!)
                 ?: Import(authenticationFacade.userAccount, repositoryHolder.repository)
 
@@ -54,7 +56,7 @@ class ImportService(
                 applicationContext = applicationContext,
                 import = import
         )
-        fileProcessor.processFiles(files, nonNullMessageClient)
+        return fileProcessor.processFiles(files, nonNullMessageClient)
     }
 
     @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
