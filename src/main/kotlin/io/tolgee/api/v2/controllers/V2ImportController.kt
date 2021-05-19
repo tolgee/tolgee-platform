@@ -15,6 +15,7 @@ import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessage
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
@@ -86,11 +87,13 @@ class V2ImportController(
                 responseStream.flush()
             }
             val fileDtos = files.map { ImportFileDto(it.originalFilename, it.inputStream) }
-            importService.addFiles(files = fileDtos, messageClient)
-            val result = this.getImportResult(repositoryId, PageRequest.of(0, 100))
+            val errors = importService.addFiles(files = fileDtos, messageClient)
+            val result = getImportAddFilesResultModel(repositoryId, errors)
+
             val mapper = jacksonObjectMapper()
             halMediaTypeConfiguration.configureObjectMapper(mapper)
             val jsonByteResult = mapper.writeValueAsBytes(result)
+
             responseStream.write(jsonByteResult)
         }
 
@@ -106,7 +109,15 @@ class V2ImportController(
     ): ImportAddFilesResultModel {
         val fileDtos = files.map { ImportFileDto(it.originalFilename, it.inputStream) }
         val errors = importService.addFiles(files = fileDtos)
-        val result = this.getImportResult(repositoryId, PageRequest.of(0, 100))
+        return getImportAddFilesResultModel(repositoryId, errors)
+    }
+
+    private fun getImportAddFilesResultModel(repositoryId: Long, errors: List<ErrorResponseBody>): ImportAddFilesResultModel {
+        val result: PagedModel<ImportLanguageModel>? = try {
+            this.getImportResult(repositoryId, PageRequest.of(0, 100))
+        } catch (e: NotFoundException) {
+            null
+        }
         return ImportAddFilesResultModel(errors, result)
     }
 

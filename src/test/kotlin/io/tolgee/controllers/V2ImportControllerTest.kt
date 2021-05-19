@@ -10,7 +10,6 @@ import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIV
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_FILES_IN_ARCHIVE
 import io.tolgee.fixtures.*
 import io.tolgee.model.Repository
-import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.springframework.beans.factory.annotation.Value
@@ -47,17 +46,8 @@ class V2ImportControllerTest : SignedInControllerTest() {
         performStreamingImport(repositoryId = repository.id, mapOf(Pair("zipOfUnknown.zip", zipOfUnknown)))
                 .andAssertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
                 .andAssertContainsMessage(FOUND_ARCHIVE).andPrettyPrintStreamingResult().andAssertStreamingResultJson {
-                    node("page.totalElements").isEqualTo(0)
+                    node("errors[2].code").isEqualTo("cannot_parse_file")
                 }
-
-        importService.find(repository.id, repository.userOwner?.id!!)!!.let { import ->
-            assertThat(import.files.size).isEqualTo(3)
-            import.files.forEach {
-                assertThat(it.issues).hasSize(1)
-                assertThat(it.issues[0].type).isEqualTo(FileIssueType.NO_MATCHING_PROCESSOR)
-            }
-            assertThat(import.files.map { it.name }).containsAll(listOf("aaaa.unkwn", "aaaa2.unkwn", "aaaa4.unkwn"))
-        }
     }
 
     @Test
@@ -120,7 +110,7 @@ class V2ImportControllerTest : SignedInControllerTest() {
         performStreamingImport(repositoryId = repository.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
                 .andAssertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
                 .andAssertContainsMessage(FOUND_ARCHIVE).andPrettyPrintStreamingResult().andAssertStreamingResultJson {
-                    node("_embedded.languages").isArray.hasSize(3)
+                    node("result._embedded.languages").isArray.hasSize(3)
                 }
         validateSavedJsonImportData(repository)
     }

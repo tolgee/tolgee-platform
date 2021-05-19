@@ -26,6 +26,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.interceptor.TransactionInterceptor
+import javax.persistence.EntityManager
 
 @Service
 @Transactional
@@ -40,7 +42,8 @@ class ImportService(
         private val applicationContext: ApplicationContext,
         private val importTranslationRepository: ImportTranslationRepository,
         private val importFileIssueParamRepository: ImportFileIssueParamRepository,
-        private val keyMetaService: KeyMetaService
+        private val keyMetaService: KeyMetaService,
+        private val entityManager: EntityManager
 ) {
     @Transactional
     fun addFiles(files: List<ImportFileDto>,
@@ -56,7 +59,12 @@ class ImportService(
                 applicationContext = applicationContext,
                 import = import
         )
-        return fileProcessor.processFiles(files, nonNullMessageClient)
+        val errors = fileProcessor.processFiles(files, nonNullMessageClient)
+
+        if (findLanguages(import).isEmpty()) {
+            TransactionInterceptor.currentTransactionStatus().setRollbackOnly()
+        }
+        return errors
     }
 
     @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])

@@ -87,7 +87,7 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
         addFiles: this.createLoadableDefinition(
             this.schemaService.schemaRequest("/v2/repositories/{repositoryId}/import", "post"),
             (state, action): ImportState => {
-                return {...state, result: action.payload}
+                return {...state, result: action.payload.result}
             }
         ),
         getResult: this.createLoadableDefinition(

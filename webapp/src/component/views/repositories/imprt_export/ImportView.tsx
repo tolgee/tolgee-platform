@@ -79,7 +79,7 @@ export const ImportView: FunctionComponent = () => {
         <BaseView title={<T>import_translations_title</T>} xs={12} md={10} lg={8}>
             <Box mt={2}>
                 <ImportFileInput onNewFiles={dataHelper.onNewFiles}/>
-                <ImportAlertError dataHelper={dataHelper} />
+                {addFilesLoadable.data?.errors?.map((e, idx) => <ImportAlertError key={idx} error={e}/>)}
                 <ImportResult onLoadData={dataHelper.loadData} result={dataHelper.result}/>
             </Box>
             {dataHelper.result &&

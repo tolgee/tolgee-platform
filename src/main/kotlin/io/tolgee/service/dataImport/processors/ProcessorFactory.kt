@@ -1,8 +1,7 @@
 package io.tolgee.service.dataImport.processors
 
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.exceptions.FileIssueException
-import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
+import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.service.dataImport.processors.po.PoFileProcessor
 import io.tolgee.service.dataImport.processors.xliff.XliffFileProcessor
 import org.springframework.stereotype.Component
@@ -12,7 +11,7 @@ class ProcessorFactory {
     fun getArchiveProcessor(file: ImportFileDto): ImportArchiveProcessor {
         return when (file.name.fileNameExtension) {
             "zip" -> ZipTypeProcessor()
-            else -> throw FileIssueException(FileIssueType.NO_MATCHING_PROCESSOR)
+            else -> throw ImportCannotParseFileException(file.name, "No matching processor")
         }
     }
 
@@ -22,7 +21,7 @@ class ProcessorFactory {
             "po" -> PoFileProcessor(context)
             "xliff" -> XliffFileProcessor(context)
             "xlf" -> XliffFileProcessor(context)
-            else -> throw FileIssueException(FileIssueType.NO_MATCHING_PROCESSOR)
+            else -> throw ImportCannotParseFileException(file.name, "No matching processor")
         }
     }
 

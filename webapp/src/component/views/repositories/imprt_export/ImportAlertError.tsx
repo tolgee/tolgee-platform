@@ -1,32 +1,35 @@
 import React, {FunctionComponent, ReactNode, useEffect, useState} from 'react';
-import {useImportDataHelper} from "./hooks/useImportDataHelper";
 import {Box, Button, Collapse, IconButton} from "@material-ui/core";
 import {container} from "tsyringe";
 import {ImportActions} from "../../../../store/repository/ImportActions";
 import {Alert, AlertTitle} from "@material-ui/lab";
 import {T} from "@tolgee/react";
 import CloseIcon from "@material-ui/icons/Close";
+import {components} from "../../../../service/apiSchema";
 
 const actions = container.resolve(ImportActions)
 export const ImportAlertError: FunctionComponent<{
-    dataHelper: ReturnType<typeof useImportDataHelper>
-}> = () => {
+    error: components["schemas"]["ImportAddFilesResultModel"]["errors"][0]
+}> = (props) => {
     const [moreOpen, setMoreOpen] = useState(false)
     const [collapsed, setCollapsed] = useState(false)
 
     const addFilesLoadable = actions.useSelector(s => s.loadables.addFiles)
 
-    const error = addFilesLoadable?.error
     let text = undefined as ReactNode | undefined
     let params = [] as string[]
 
-    if (error?.code === "cannot_parse_file") {
+    if (props.error?.code === "cannot_parse_file") {
         text = <T>import_error_cannot_parse_file</T>
-        params = error.params;
+        params = props.error.params as any as string[];
     }
 
     useEffect(() => {
-        setCollapsed(false)
+        setCollapsed(true)
+        if (addFilesLoadable.loaded && !addFilesLoadable.loading) {
+            setCollapsed(false)
+            setMoreOpen(false)
+        }
     }, [addFilesLoadable.loading])
 
     const open = !collapsed && !!text

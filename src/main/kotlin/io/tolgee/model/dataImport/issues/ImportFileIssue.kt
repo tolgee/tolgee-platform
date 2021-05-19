@@ -16,7 +16,7 @@ class ImportFileIssue(
         var file: ImportFile,
 
         @Enumerated
-        var type: FileIssueType = FileIssueType.NO_MATCHING_PROCESSOR,
+        var type: FileIssueType = FileIssueType.ID_ATTRIBUTE_NOT_PROVIDED,
 
         @OneToMany(mappedBy = "issue")
         var params: MutableList<ImportFileIssueParam>? = null,

@@ -113,9 +113,6 @@ export interface paths {
   "/api/repository/{repositoryId}/keys/create": {
     post: operations["create_2"];
   };
-  "/api/repository/{repositoryId}/import": {
-    post: operations["doImport"];
-  };
   "/api/repository/{repositoryId}/languages/edit": {
     post: operations["editLanguage"];
   };
@@ -345,6 +342,15 @@ export interface components {
       key: string;
       translations: { [key: string]: string };
     };
+    ErrorResponseBody: {
+      code?: string;
+      params?: { [key: string]: any }[];
+    };
+    ImportAddFilesResultModel: {
+      errors: components["schemas"]["ErrorResponseBody"][];
+      result?: components["schemas"]["PagedModelImportLanguageModel"];
+      _links?: components["schemas"]["Links"];
+    };
     ImportLanguageModel: {
       id: number;
       name: string;
@@ -390,10 +396,6 @@ export interface components {
     DeprecatedEditKeyDTO: {
       oldFullPathString: string;
       newFullPathString: string;
-    };
-    ImportDto: {
-      languageAbbreviation: string;
-      data: { [key: string]: string };
     };
     LanguageDTO: {
       id?: number;
@@ -549,13 +551,23 @@ export interface components {
         | "MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE"
         | "VALUE_IS_NOT_STRING"
         | "KEY_IS_EMPTY"
-        | "VALUE_IS_EMPTY";
+        | "VALUE_IS_EMPTY"
+        | "PO_MSGCTXT_NOT_SUPPORTED"
+        | "ID_ATTRIBUTE_NOT_PROVIDED"
+        | "TARGET_NOT_PROVIDED";
       params?: components["schemas"]["ImportFileIssueParamView"][];
       _links?: components["schemas"]["Links"];
     };
     ImportFileIssueParamView: {
       value?: string;
-      type: "KEY_NAME" | "KEY_ID" | "LANGUAGE_ID" | "KEY_INDEX" | "VALUE";
+      type:
+        | "KEY_NAME"
+        | "KEY_ID"
+        | "LANGUAGE_ID"
+        | "KEY_INDEX"
+        | "VALUE"
+        | "LINE"
+        | "FILE_NODE_ORIGINAL";
     };
     PagedModelEntityModelImportFileIssueView: {
       _embedded?: {
@@ -1079,7 +1091,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelImportLanguageModel"];
+          "*/*": components["schemas"]["ImportAddFilesResultModel"];
         };
       };
     };
@@ -1318,26 +1330,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetTranslationsDTO"];
-      };
-    };
-  };
-  doImport: {
-    parameters: {
-      path: {
-        repositoryId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["StreamingResponseBody"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ImportDto"];
       };
     };
   };

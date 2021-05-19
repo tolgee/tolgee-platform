@@ -4,11 +4,9 @@ import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.*
 import io.tolgee.exceptions.ErrorResponseBody
-import io.tolgee.exceptions.FileIssueException
 import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.model.Language
 import io.tolgee.model.dataImport.*
-import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.security.AuthenticationFacade
@@ -40,7 +38,7 @@ class CoreImportFilesProcessor(
         val errors = mutableListOf<ErrorResponseBody>()
         files?.forEach {
             try {
-                processFileOrArchive(it, messageClient)
+                errors.addAll(processFileOrArchive(it, messageClient))
             } catch (e: ImportCannotParseFileException) {
                 errors.add(ErrorResponseBody(e.code, e.params))
             }
@@ -50,28 +48,25 @@ class CoreImportFilesProcessor(
 
     private fun processFileOrArchive(file: ImportFileDto,
                                      messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit
-    ) {
+    ): MutableList<ErrorResponseBody> {
+        val errors = mutableListOf<ErrorResponseBody>()
+
         if (file.isArchive) {
             messageClient(FOUND_ARCHIVE, null)
             val processor = processorFactory.getArchiveProcessor(file)
             processor.process(file).apply {
                 messageClient(FOUND_FILES_IN_ARCHIVE, listOf(size))
-                processFiles(this, messageClient)
+                errors.addAll(processFiles(this, messageClient))
             }
-            return
+            return errors
         }
 
         val savedFileEntity = file.saveFileEntity()
-        try {
-            val fileProcessorContext = FileProcessorContext(file, savedFileEntity, messageClient)
-            val processor = processorFactory.getProcessor(file, fileProcessorContext)
-            processor.process()
-            processor.context.processResult()
-        } catch (e: FileIssueException) {
-            savedFileEntity.let { fileEntity ->
-                importService.saveFileIssue(ImportFileIssue(file = fileEntity, type = e.type))
-            }
-        }
+        val fileProcessorContext = FileProcessorContext(file, savedFileEntity, messageClient)
+        val processor = processorFactory.getProcessor(file, fileProcessorContext)
+        processor.process()
+        processor.context.processResult()
+        return errors
     }
 
     private val ImportFileDto.isArchive: Boolean
