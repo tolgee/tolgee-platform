@@ -1,13 +1,47 @@
 import {components} from "../../../../../service/apiSchema";
 import React from "react";
-import {Box, Button, IconButton, TableCell, TableRow, useTheme} from "@material-ui/core";
+import {Box, Button, IconButton, Link, makeStyles, TableCell, TableRow, useTheme} from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {ImportActions} from "../../../../../store/repository/ImportActions";
 import {container} from "tsyringe";
 import {useRepository} from "../../../../../hooks/useRepository";
 import {confirmation} from "../../../../../hooks/confirmation";
 import {ImportRowLanguageMenu} from "./ImportRowLanguageMenu";
-import {Warning} from "@material-ui/icons";
+import {CheckCircle, Warning} from "@material-ui/icons";
+import EditIcon from "@material-ui/icons/Edit";
+
+const useStyles = makeStyles(theme => ({
+    root: {
+        "&:hover": {
+            backgroundColor: theme.palette.grey["50"]
+        },
+        "&:hover $pencil": {
+            opacity: 1
+        }
+    },
+    resolvedIcon: {
+        fontSize: 16,
+        marginRight: 4,
+        color: theme.palette.success.main
+    },
+    conflictsIcon: {
+        fontSize: 16,
+        marginRight: 4,
+        marginLeft: 8,
+        color: theme.palette.warning.main
+    },
+    resolveButton: {
+        marginLeft: 25,
+        paddingRight: 25 + theme.spacing(0.5)
+    },
+    pencil: {
+        fontSize: 20,
+        opacity: 0,
+        color: theme.palette.grey["500"],
+        position: "absolute",
+        right: theme.spacing(0.5)
+    }
+}))
 
 const actions = container.resolve(ImportActions)
 export const ImportResultRow = (props: {
@@ -17,6 +51,8 @@ export const ImportResultRow = (props: {
     onShowData: () => void
 }) => {
     const repository = useRepository()
+
+    const classes = useStyles()
 
     const deleteLanguage = () => {
         confirmation({
@@ -28,7 +64,7 @@ export const ImportResultRow = (props: {
 
     return (
         <React.Fragment>
-            <TableRow>
+            <TableRow className={classes.root}>
                 <TableCell scope="row">
                     <ImportRowLanguageMenu value={props.row.existingLanguageId} importLanguageId={props.row.id}/>
                 </TableCell>
@@ -47,13 +83,19 @@ export const ImportResultRow = (props: {
                             </Button>
                         </Box> : <></>}
                 </TableCell>
-                <TableCell scope="row">
-                    <Button onClick={() => {
+                <TableCell scope="row" align="center">
+                    <Link href="#" onClick={() => {
                         props.onShowData()
-                    }} size="small">{props.row.totalCount}</Button>
+                    }}>{props.row.totalCount}</Link>
                 </TableCell>
-                <TableCell scope="row">
-                    <Button onClick={() => props.onResolveConflicts()} size="small">{props.row.resolvedCount}/{props.row.conflictCount}</Button>
+                <TableCell scope="row" align="center">
+                    <Button onClick={() => props.onResolveConflicts()} size="small" className={classes.resolveButton}>
+                        <CheckCircle className={classes.resolvedIcon}/>
+                        {props.row.conflictCount}
+                        <Warning className={classes.conflictsIcon}/>
+                        {props.row.resolvedCount}
+                        <EditIcon className={classes.pencil}/>
+                    </Button>
                 </TableCell>
                 <TableCell scope="row" align={"right"}>
                     <IconButton onClick={deleteLanguage} size="small" style={{padding: 0}}>

@@ -4,12 +4,14 @@ import {container} from "tsyringe";
 import {ImportActions} from "../../../../../store/repository/ImportActions";
 import {useRepository} from "../../../../../hooks/useRepository";
 import {Box, FormControlLabel, Grid, Switch, Typography} from "@material-ui/core";
-import {ImportConflictTranslation} from "./ImportConflictTranslation";
 import {BoxLoading} from "../../../../common/BoxLoading";
 import {EmptyListMessage} from "../../../../common/EmptyListMessage";
 import {T} from "@tolgee/react";
 import {Pagination} from "@material-ui/lab";
 import {startLoading, stopLoading} from "../../../../../hooks/loading";
+import {ImportConflictTranslationsPair} from "./ImportConflictTranslationsPair";
+import {SecondaryBar} from "../../../../layout/SecondaryBar";
+import {ImportConflictsDataHeader} from "./ImportConflictsDataHeader";
 
 const actions = container.resolve(ImportActions)
 export const ImportConflictsData: FunctionComponent<{
@@ -18,7 +20,7 @@ export const ImportConflictsData: FunctionComponent<{
     const conflictsLoadable = actions.useSelector(s => s.loadables.conflicts)
     const repository = useRepository()
     const languageId = props.row.id
-    const [showResolved, setOnlyUnresolved] = useState(props.row.resolvedCount == props.row.conflictCount)
+    const [showResolved, setOnlyUnresolved] = useState(true)
 
     const setOverrideLoadable = actions.useSelector(s => s.loadables.resolveTranslationConflictOverride)
     const setKeepLoadable = actions.useSelector(s => s.loadables.resolveTranslationConflictKeep)
@@ -40,26 +42,6 @@ export const ImportConflictsData: FunctionComponent<{
                 }
             }
         )
-    }
-
-    const setOverride = (translationId: number) => {
-        actions.loadableActions.resolveTranslationConflictOverride.dispatch({
-            path: {
-                repositoryId: repository.id,
-                languageId: languageId,
-                translationId: translationId
-            }
-        })
-    }
-
-    const setKeepExisting = (translationId: number) => {
-        actions.loadableActions.resolveTranslationConflictKeep.dispatch({
-            path: {
-                repositoryId: repository.id,
-                languageId: languageId,
-                translationId: translationId
-            }
-        })
     }
 
     const data = conflictsLoadable.data?._embedded?.translations
@@ -92,14 +74,9 @@ export const ImportConflictsData: FunctionComponent<{
         return <BoxLoading/>
     }
 
-    const isKeepExistingLoading = (translationId) => setKeepLoadable.dispatchParams?.[0].path.translationId === translationId && setKeepLoadable.loading
-    const isOverrideLoading = (translationId) => setOverrideLoadable.dispatchParams?.[0].path.translationId === translationId && setOverrideLoadable.loading
-    const isKeepExistingLoaded = (translationId) => setKeepLoadable.dispatchParams?.[0].path.translationId === translationId && setKeepLoadable.loaded
-    const isOverrideLoaded = (translationId) => setOverrideLoadable.dispatchParams?.[0].path.translationId === translationId && setOverrideLoadable.loaded
-
     return (
         <>
-            <Box p={2}>
+            <SecondaryBar>
                 <FormControlLabel
                     control={
                         <Switch
@@ -111,36 +88,19 @@ export const ImportConflictsData: FunctionComponent<{
                     }
                     label={<T>import_conflicts_filter_show_resolved_label</T>}
                 />
-            </Box>
+            </SecondaryBar>
             {conflictsLoadable.loaded && (data ?
                 <>
+                    <ImportConflictsDataHeader language={props.row}/>
                     {data.map(t =>
-                        <Box pt={2} pb={1} pl={2} pr={2}>
+                        <Box pt={1} pb={1} pl={2} pr={2} key={t.id}>
                             <Grid container spacing={2}>
                                 <Grid item lg={3} md>
                                     <Box p={1}>
                                         <Typography style={{overflowWrap: "break-word"}} variant={"body2"}><b>{t.keyName}</b></Typography>
                                     </Box>
                                 </Grid>
-                                {t.conflictId &&
-                                <Grid item lg md sm={12} xs={12}>
-                                    <ImportConflictTranslation
-                                        loading={isKeepExistingLoading(t.id)}
-                                        loaded={isKeepExistingLoaded(t.id)}
-                                        text={t.conflictText!}
-                                        selected={!t.override && t.resolved}
-                                        onSelect={() => setKeepExisting(t.id)}
-                                    />
-                                </Grid>}
-                                <Grid item lg md sm={12} xs={12}>
-                                    <ImportConflictTranslation
-                                        loading={isOverrideLoading(t.id)}
-                                        loaded={isOverrideLoaded(t.id)}
-                                        text={t.text}
-                                        selected={(t.override && t.resolved) || !t.conflictId}
-                                        onSelect={() => setOverride(t.id)}
-                                    />
-                                </Grid>
+                                <ImportConflictTranslationsPair translation={t} languageId={languageId}/>
                             </Grid>
                         </Box>)}
                 </>
@@ -156,5 +116,5 @@ export const ImportConflictsData: FunctionComponent<{
                 />}
             </Box>
         </>
-    );
+    )
 }

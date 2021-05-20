@@ -58,10 +58,10 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
                                 <TableCell>
                                     <T>import_result_file_name_header</T>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell align="center">
                                     <T>import_result_total_count_header</T>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell align="center">
                                     <T>import_result_total_conflict_count_header</T>
                                 </TableCell>
                                 <TableCell>

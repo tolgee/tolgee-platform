@@ -100,7 +100,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
             if (file.size > config.maxUploadFileSize * 1024) {
                 result.errors.push(<T parameters={{filename: file.name}}>translations.screenshots.validation.file_too_big</T>)
             }
-            const extension = file.name.replace(/.*\.(.+)$/, "$1")
+            const extension = file.name.indexOf(".") > -1 ? file.name.replace(/.*\.(.+)$/, "$1") : ""
             if (ALLOWED_EXTENSIONS.indexOf(extension) < 0) {
                 result.errors.push(<T parameters={{filename: file.name}}>translations.screenshots.validation.unsupported_format</T>)
             }
