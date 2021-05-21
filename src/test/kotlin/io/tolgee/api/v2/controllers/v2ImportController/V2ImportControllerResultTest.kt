@@ -148,11 +148,11 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
         testData {
             data.importFiles[0].addImportTranslation {
                 self {
+                    conflict = testData.conflict
                     this.resolve()
                     key = data.importFiles[0].data.importKeys[0].self
                     text = resolvedText
                     language = testData.importEnglish
-                    conflict = testData.conflict
                 }
             }.self
         }
