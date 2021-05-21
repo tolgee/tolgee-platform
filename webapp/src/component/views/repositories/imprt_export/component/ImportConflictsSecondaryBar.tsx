@@ -35,6 +35,7 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
     const languageDataLoadable = actions.useSelector(s => s.loadables.resolveConflictsLanguage)
 
     const classes = useStyles()
+    const resolvedCount = languageDataLoadable.data?.resolvedCount
 
     return (
         <SecondaryBar>
@@ -44,16 +45,15 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
                         <CheckCircle className={clsx(classes.icon, classes.resolvedIcon)}/>
 
                         <Typography variant="body1">
-                            {languageDataLoadable.data?.resolvedCount || "??"}
+                            {resolvedCount !== undefined ? resolvedCount : "??"}
                         </Typography>
 
                         <Warning className={clsx(classes.icon, classes.conflictsIcon)}/>
 
                         <Typography variant="body1">
-                            {languageDataLoadable.data?.conflictCount || "??"}
+                            {languageDataLoadable.data?.conflictCount}
                         </Typography>
                     </Box>
-
                 </Grid>
                 <Grid item>
                     <FormControlLabel
