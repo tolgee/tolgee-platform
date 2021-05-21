@@ -38,8 +38,8 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
 
     return (
         <SecondaryBar>
-            <Grid container spacing={4}>
-                <Grid item alignItems="center">
+            <Grid container spacing={4} alignItems="center">
+                <Grid item>
                     {languageDataLoadable.data &&
                     <Box className={classes.counter}>
                         <CheckCircle className={clsx(classes.icon, classes.resolvedIcon)}/>
