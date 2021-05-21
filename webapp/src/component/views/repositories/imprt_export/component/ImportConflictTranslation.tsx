@@ -55,7 +55,8 @@ export const ImportConflictTranslation = (props: ImportConflictTranslationProps)
     const classes = useStyles()
     const textRef = React.createRef<HTMLDivElement>()
 
-    useEffect(() => {
+
+    const detectExpandability = () => {
         const textElement = textRef.current
         if (textElement != null) {
             const clone = textRef.current?.cloneNode(true) as HTMLDivElement
@@ -65,7 +66,18 @@ export const ImportConflictTranslation = (props: ImportConflictTranslationProps)
             props.onDetectedExpandability(textElement.clientWidth < clone.clientWidth)
             textElement.parentElement?.removeChild(clone)
         }
+    }
+
+    useEffect(() => {
+        detectExpandability()
     }, [props.text, textRef.current])
+
+    useEffect(() => {
+        window.addEventListener("resize", detectExpandability)
+        return () => {
+            window.removeEventListener("resize", detectExpandability)
+        }
+    })
 
     return (
         <Box position="relative"

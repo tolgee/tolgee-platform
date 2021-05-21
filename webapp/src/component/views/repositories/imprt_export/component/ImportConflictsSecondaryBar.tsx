@@ -40,21 +40,20 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
         <SecondaryBar>
             <Grid container spacing={4} alignItems="center">
                 <Grid item>
-                    {languageDataLoadable.data &&
                     <Box className={classes.counter}>
                         <CheckCircle className={clsx(classes.icon, classes.resolvedIcon)}/>
 
                         <Typography variant="body1">
-                            {languageDataLoadable.data.resolvedCount}
+                            {languageDataLoadable.data?.resolvedCount || "??"}
                         </Typography>
 
                         <Warning className={clsx(classes.icon, classes.conflictsIcon)}/>
 
                         <Typography variant="body1">
-                            {languageDataLoadable.data.conflictCount}
+                            {languageDataLoadable.data?.conflictCount || "??"}
                         </Typography>
                     </Box>
-                    }
+
                 </Grid>
                 <Grid item>
                     <FormControlLabel

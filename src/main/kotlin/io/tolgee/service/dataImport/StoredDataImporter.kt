@@ -82,7 +82,7 @@ class StoredDataImporter(
 
     private fun ImportTranslation.doImport() {
         this.checkConflictResolved()
-        if (this.conflict == null || (this.override && this.resolved) || forceMode == ForceMode.OVERRIDE) {
+        if (this.conflict == null || (this.override && this.resolvedHash) || forceMode == ForceMode.OVERRIDE) {
             val language = this.language.existingLanguage
                     ?: throw BadRequestException(Message.EXISTING_LANGUAGE_NOT_SELECTED)
             val translation = this.conflict ?: Translation().apply {
@@ -110,7 +110,7 @@ class StoredDataImporter(
 
 
     private fun ImportTranslation.checkConflictResolved() {
-        if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolved) {
+        if (forceMode == ForceMode.NO_FORCE && this.conflict != null && !this.resolvedHash) {
             importDataManager.saveAllStoredTranslations()
             throw ImportConflictNotResolvedException(
                     mutableListOf(this.key.name, this.language.name, this.text)

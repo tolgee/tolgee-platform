@@ -43,7 +43,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
                 "/translations/${testData.translationWithConflict.id}/resolve/set-override"
         performAuthPut(path, null).andIsOk
         val translation = importService.findTranslation(testData.translationWithConflict.id)
-        assertThat(translation?.resolved).isTrue
+        assertThat(translation?.resolvedHash).isTrue
         assertThat(translation?.override).isTrue
     }
 
@@ -59,7 +59,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
                 "/translations/${testData.translationWithConflict.id}/resolve/set-keep-existing"
         performAuthPut(path, null).andIsOk
         val translation = importService.findTranslation(testData.translationWithConflict.id)
-        assertThat(translation?.resolved).isTrue
+        assertThat(translation?.resolvedHash).isTrue
         assertThat(translation?.override).isFalse
     }
 
@@ -73,7 +73,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
         val path = "/v2/repositories/${repositoryId}/import/result/languages/${testData.importEnglish.id}/resolve-all/set-override"
         performAuthPut(path, null).andIsOk
         val translation = importService.findTranslation(testData.translationWithConflict.id)
-        assertThat(translation?.resolved).isTrue
+        assertThat(translation?.resolvedHash).isTrue
         assertThat(translation?.override).isTrue
     }
 
@@ -87,7 +87,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
         val path = "/v2/repositories/${repositoryId}/import/result/languages/${testData.importEnglish.id}/resolve-all/set-keep-existing"
         performAuthPut(path, null).andIsOk
         val translation = importService.findTranslation(testData.translationWithConflict.id)
-        assertThat(translation?.resolved).isTrue
+        assertThat(translation?.resolvedHash).isTrue
         assertThat(translation?.override).isFalse
     }
 

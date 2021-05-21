@@ -13,7 +13,6 @@ import {T} from "@tolgee/react";
 import {ImportConflictsData} from "./ImportConflictsData";
 import {container} from "tsyringe";
 import {ImportActions} from "../../../../../store/repository/ImportActions";
-import {useRepository} from "../../../../../hooks/useRepository";
 
 const actions = container.resolve(ImportActions)
 const useStyles = makeStyles((theme: Theme) =>
@@ -40,7 +39,6 @@ export const ImportConflictResolutionDialog: FunctionComponent<{
     onClose: () => void
 }> = (props) => {
     const classes = useStyles();
-    const repository = useRepository()
 
     const keepAllExistingLoadable = actions.useSelector(s => s.loadables.resolveAllKeepExisting)
     const overrideAllLoadable = actions.useSelector(s => s.loadables.resolveAllOverride)

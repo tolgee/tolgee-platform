@@ -193,7 +193,7 @@ class ImportService(
 
     fun resolveTranslationConflict(translation: ImportTranslation, override: Boolean) {
         translation.override = override
-        translation.resolved = true
+        translation.resolvedHash = true
         importTranslationRepository.save(translation)
     }
 

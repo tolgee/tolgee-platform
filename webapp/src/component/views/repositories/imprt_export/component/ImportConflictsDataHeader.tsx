@@ -14,7 +14,6 @@ export const ImportConflictsDataHeader: FunctionComponent<{
     const repository = useRepository()
 
     const theme = useTheme();
-    const isMdOrGreater = useMediaQuery(theme.breakpoints.up('md'));
     const isSmOrLower = useMediaQuery(theme.breakpoints.down('sm'));
 
     const keepAllExisting = () => {
@@ -35,22 +34,24 @@ export const ImportConflictsDataHeader: FunctionComponent<{
         })
     }
 
-    const keepAllButton = <Button fullWidth={!isMdOrGreater} startIcon={<DoneAll/>} variant="outlined" color="inherit"
+    const keepAllButton = <Button fullWidth={isSmOrLower} startIcon={<DoneAll/>} variant="outlined" color="inherit"
                                   onClick={keepAllExisting}><T>import_resolution_accept_old</T></Button>
-    const overrideAllButton = <Button fullWidth={!isMdOrGreater} startIcon={<DoneAll/>} variant="outlined" color="inherit"
+    const overrideAllButton = <Button fullWidth={isSmOrLower} startIcon={<DoneAll/>} variant="outlined" color="inherit"
                                       onClick={overrideAll}><T>import_resolution_accept_imported</T></Button>
 
     return (
-        <Box pl={2} pt={2} pb={1} pr={2}>
-            {isMdOrGreater ?
-                <Grid container spacing={2}>
+        <Box pl={2} pt={2} pb={2} pr={2} mb={1} style={{
+            borderBottom: `1px solid ${theme.palette.grey["200"]}`
+        }}>
+            {!isSmOrLower ?
+                <Grid container spacing={2} alignContent="center" alignItems="center">
                     <Grid item lg={3} md>
-                        <Box>
+                        <Box pl={1}>
                             <Typography><b><T>import_resolve_header_key</T></b></Typography>
                         </Box>
                     </Grid>
                     <Grid item lg md sm={12} xs={12}>
-                        <Box display="flex">
+                        <Box display="flex" alignItems="center">
                             <Box pl={1} flexGrow={1}>
                                 <Typography><b><T>import_resolve_header_existing</T></b></Typography>
                             </Box>
@@ -58,7 +59,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
                         </Box>
                     </Grid>
                     <Grid item lg md sm={12} xs={12}>
-                        <Box display="flex">
+                        <Box display="flex" alignItems="center">
                             <Box flexGrow={1}>
                                 <Typography><b><T>import_resolve_header_new</T></b></Typography>
                             </Box>
@@ -66,15 +67,15 @@ export const ImportConflictsDataHeader: FunctionComponent<{
                         </Box>
                     </Grid>
                 </Grid>
-                : (isSmOrLower &&
-                    <Grid container spacing={4}>
-                        <Grid item lg md sm xs>
-                            {keepAllButton}
-                        </Grid>
-                        <Grid item lg md sm xs>
-                            {overrideAllButton}
-                        </Grid>
-                    </Grid>)
+                :
+                <Grid container spacing={4}>
+                    <Grid item lg md sm xs>
+                        {keepAllButton}
+                    </Grid>
+                    <Grid item lg md sm xs>
+                        {overrideAllButton}
+                    </Grid>
+                </Grid>
             }
         </Box>
     )

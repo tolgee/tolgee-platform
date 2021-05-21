@@ -55,7 +55,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
         }
 
         importTestData.importBuilder.data.importFiles[0].data.importTranslations[4].self {
-            resolved = false
+            resolvedHash = false
         }
 
         testDataService.saveTestData(importTestData.root)
@@ -103,7 +103,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
     @Test
     fun `it force keeps translations`() {
         importTestData.translationWithConflict.override = true
-        importTestData.translationWithConflict.resolved = true
+        importTestData.translationWithConflict.resolvedHash = true
         storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import, ForceMode.KEEP)
         testDataService.saveTestData(importTestData.root)
         storedDataImporter.doImport()

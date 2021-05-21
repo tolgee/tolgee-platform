@@ -229,7 +229,7 @@ class ImportTestData {
     fun setAllResolved() {
         this.importBuilder.data.importFiles.forEach { file ->
             file.data.importTranslations.forEach {
-                it.self { resolved = true }
+                it.self { resolvedHash = true }
             }
         }
     }

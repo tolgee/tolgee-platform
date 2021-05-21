@@ -148,7 +148,7 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
         testData {
             data.importFiles[0].addImportTranslation {
                 self {
-                    this.resolved = true
+                    this.resolvedHash = true
                     key = data.importFiles[0].data.importKeys[0].self
                     text = resolvedText
                     language = testData.importEnglish
