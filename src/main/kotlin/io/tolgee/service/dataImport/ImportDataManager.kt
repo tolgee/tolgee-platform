@@ -94,15 +94,15 @@ class ImportDataManager(
 
     fun handleConflicts() {
         populateExistingTranslations()
-        this.storedTranslations.asSequence().flatMap { it.value.values }.flatMap { it }.forEach { storedTranslation ->
-            val existingLanguage = storedTranslation.language.existingLanguage
+        this.storedTranslations.asSequence().flatMap { it.value.values }.flatMap { it }.forEach { importedTranslaton ->
+            val existingLanguage = importedTranslaton.language.existingLanguage
             if (existingLanguage != null) {
                 val existingTranslation = existingTranslations[existingLanguage.id]
-                        ?.let { it[storedTranslation.key.name] }
-                if (existingTranslation != null) {
-                    storedTranslation.conflict = existingTranslation
+                        ?.let { it[importedTranslaton.key.name] }
+                if (existingTranslation != null && existingTranslation.text != importedTranslaton.text) {
+                    importedTranslaton.conflict = existingTranslation
                 } else {
-                    storedTranslation.conflict = null
+                    importedTranslaton.conflict = null
                 }
             }
         }
