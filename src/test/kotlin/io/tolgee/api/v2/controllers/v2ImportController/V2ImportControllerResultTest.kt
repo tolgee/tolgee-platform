@@ -1,4 +1,4 @@
-package io.tolgee.controllers.v2ImportController
+package io.tolgee.api.v2.controllers.v2ImportController
 
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.development.testDataBuilder.data.ImportTestData
@@ -148,7 +148,7 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
         testData {
             data.importFiles[0].addImportTranslation {
                 self {
-                    this.resolvedHash = true
+                    this.resolve()
                     key = data.importFiles[0].data.importKeys[0].self
                     text = resolvedText
                     language = testData.importEnglish

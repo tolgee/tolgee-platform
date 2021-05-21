@@ -3,6 +3,9 @@ package io.tolgee.model.dataImport
 import com.sun.istack.NotNull
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.Translation
+import org.apache.commons.codec.digest.MurmurHash3
+import java.nio.ByteBuffer
+import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
@@ -31,6 +34,26 @@ class ImportTranslation(
     /**
      * Whether user explicitely resolved this conflict
      */
-    @field:NotNull
-    var resolved: Boolean = false
+    val resolved: Boolean
+        get() = this.conflict?.text?.computeMurmur() == this.resolvedHash
+
+    /**
+     * If user resolved the conflict, this field stores hash of existing translation text
+     * This field is then used to check whether the translation was not changed in meantime
+     */
+    @Column
+    var resolvedHash: String? = null
+
+    fun resolve() {
+        resolvedHash = conflict?.text?.computeMurmur()
+    }
+
+    private fun String.computeMurmur(): String? {
+        val hash = MurmurHash3.hash128(this.toByteArray()).asSequence().flatMap {
+            val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
+            buffer.putLong(it)
+            buffer.array().asSequence()
+        }.toList().toByteArray()
+        return Base64.getEncoder().encodeToString(hash)
+    }
 }

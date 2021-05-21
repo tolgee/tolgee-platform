@@ -24,7 +24,7 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             (select count(*) from if.issues) as importFileIssueCount,
             count(it) as totalCount, 
             sum(case when it.conflict is null then 0 else 1 end) as conflictCount,
-            sum(case when (it.conflict is null or it.resolved != true) then 0 else 1 end) as resolvedCount
+            sum(case when (it.conflict is null or it.resolvedHash is null) then 0 else 1 end) as resolvedCount
             from ImportLanguage il join il.file if left join il.existingLanguage el left join il.translations it
         """
 

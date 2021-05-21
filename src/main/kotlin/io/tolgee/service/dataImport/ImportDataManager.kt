@@ -81,7 +81,7 @@ class ImportDataManager(
 
         languageData = mutableMapOf()
         storedTranslations[language] = languageData
-        val translations = importService.findTranslations(import, language.id)
+        val translations = importService.findTranslations(language.id)
         translations.forEach { importTranslation ->
             val keyTranslations = languageData[importTranslation.key] ?: let {
                 languageData[importTranslation.key] = mutableListOf()

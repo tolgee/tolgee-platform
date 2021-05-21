@@ -17,7 +17,7 @@ class ImportTranslationModelAssembler() : RepresentationModelAssemblerSupport<Im
                 conflictId = view.conflictId,
                 conflictText = view.conflictText,
                 override = view.override,
-                resolved = view.resolved
+                resolved = view.resolvedHash != null
         )
     }
 }

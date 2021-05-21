@@ -23,7 +23,7 @@ class ImportServiceTest : AbstractSpringTest() {
         testDataService.saveTestData(importTestData.root)
         importService.selectExistingLanguage(importTestData.importFrench, importTestData.french)
         assertThat(importTestData.importFrench.existingLanguage).isEqualTo(importTestData.french)
-        val translations = importService.findTranslations(importTestData.import, importTestData.importFrench.id)
+        val translations = importService.findTranslations(importTestData.importFrench.id)
         assertThat(translations[0].conflict).isNotNull
         assertThat(translations[1].conflict).isNull()
     }

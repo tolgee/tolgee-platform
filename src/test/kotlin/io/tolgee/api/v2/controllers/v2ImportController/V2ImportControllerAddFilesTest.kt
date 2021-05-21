@@ -1,4 +1,4 @@
-package io.tolgee.controllers.v2ImportController
+package io.tolgee.api.v2.controllers.v2ImportController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue

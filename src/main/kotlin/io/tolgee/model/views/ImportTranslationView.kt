@@ -8,5 +8,5 @@ interface ImportTranslationView {
     val conflictId: Long?
     val conflictText: String?
     val override: Boolean
-    val resolved: Boolean
+    val resolvedHash: String?
 }

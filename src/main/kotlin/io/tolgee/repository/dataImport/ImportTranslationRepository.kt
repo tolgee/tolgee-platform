@@ -24,9 +24,8 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
         left join fetch ick.keyMeta
         join it.language il on il.id = :languageId
         join il.file if
-        join if.import i on i = :import
         """)
-    fun findAllByImportAndLanguageId(import: Import, languageId: Long): List<ImportTranslation>
+    fun findAllByImportAndLanguageId(languageId: Long): List<ImportTranslation>
 
     @Modifying
     @Transactional
@@ -35,10 +34,10 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
 
 
     @Query(""" select it.id as id, it.text as text, ik.name as keyName, ik.id as keyId,
-        itc.id as conflictId, itc.text as conflictText, it.override as override, it.resolvedHash as resolved
+        itc.id as conflictId, itc.text as conflictText, it.override as override, it.resolvedHash as resolvedHash
         from ImportTranslation it left join it.conflict itc join it.key ik
         where (itc.id is not null or :onlyConflicts = false)
-        and ((itc.id is not null and it.resolvedHash = false) or :onlyUnresolved = false)
+        and ((itc.id is not null and it.resolvedHash is not null) or :onlyUnresolved = false)
         and it.language.id = :languageId
         and (:search is null or lower(it.text) like lower(concat('%', cast(:search as text), '%'))
         or lower(ik.name) like lower(concat('%', cast(:search as text), '%')))
@@ -49,10 +48,6 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
                                    onlyUnresolved: Boolean = false,
                                    search: String? = null
     ): Page<ImportTranslationView>
-
-    @Modifying
-    @Query("update ImportTranslation set resolvedHash = true, override = :override where language = :language")
-    fun resolveAllOfLanguage(language: ImportLanguage?, override: Boolean)
 
     @Transactional
     @Query("delete from ImportTranslation it where it.language = :language")

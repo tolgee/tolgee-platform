@@ -1,4 +1,4 @@
-package io.tolgee.controllers.v2ImportController
+package io.tolgee.api.v2.controllers.v2ImportController
 
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.controllers.SignedInControllerTest

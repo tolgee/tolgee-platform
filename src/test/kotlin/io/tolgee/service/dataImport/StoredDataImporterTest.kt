@@ -55,7 +55,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
         }
 
         importTestData.importBuilder.data.importFiles[0].data.importTranslations[4].self {
-            resolvedHash = false
+            resolve()
         }
 
         testDataService.saveTestData(importTestData.root)
@@ -103,13 +103,13 @@ class StoredDataImporterTest : AbstractSpringTest() {
     @Test
     fun `it force keeps translations`() {
         importTestData.translationWithConflict.override = true
-        importTestData.translationWithConflict.resolvedHash = true
+        importTestData.translationWithConflict.resolve()
         storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import, ForceMode.KEEP)
         testDataService.saveTestData(importTestData.root)
         storedDataImporter.doImport()
-        val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id!!)!!
+        val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
         val forceKeptTranslationId = importTestData.root.data.repositories[0].data.translations[1].self.id
-        val forceKeptTranslation = translationService.find(forceKeptTranslationId!!)!!
+        val forceKeptTranslation = translationService.find(forceKeptTranslationId)!!
         assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
         assertThat(forceKeptTranslation.text).isEqualTo("What a text")
     }

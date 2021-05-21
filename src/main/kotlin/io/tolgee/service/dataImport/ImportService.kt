@@ -114,8 +114,8 @@ class ImportService(
         importLanguageRepository.saveAll(entries)
     }
 
-    fun findTranslations(import: Import, languageId: Long) =
-            this.importTranslationRepository.findAllByImportAndLanguageId(import, languageId)
+    fun findTranslations(languageId: Long) =
+            this.importTranslationRepository.findAllByImportAndLanguageId(languageId)
 
     fun saveTranslations(translations: List<ImportTranslation>) {
         this.importTranslationRepository.saveAll(translations)
@@ -193,12 +193,17 @@ class ImportService(
 
     fun resolveTranslationConflict(translation: ImportTranslation, override: Boolean) {
         translation.override = override
-        translation.resolvedHash = true
+        translation.resolve()
         importTranslationRepository.save(translation)
     }
 
     fun resolveAllOfLanguage(language: ImportLanguage, override: Boolean) {
-        return this.importTranslationRepository.resolveAllOfLanguage(language, override)
+        val translations = findTranslations(language.id)
+        translations.forEach {
+            it.resolve()
+            it.override = override
+        }
+        this.importTranslationRepository.saveAll(translations)
     }
 
     fun findFile(fileId: Long): ImportFile? {
