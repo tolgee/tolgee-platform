@@ -37,7 +37,7 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
         itc.id as conflictId, itc.text as conflictText, it.override as override, it.resolvedHash as resolvedHash
         from ImportTranslation it left join it.conflict itc join it.key ik
         where (itc.id is not null or :onlyConflicts = false)
-        and ((itc.id is not null and it.resolvedHash is not null) or :onlyUnresolved = false)
+        and ((itc.id is not null and it.resolvedHash is null) or :onlyUnresolved = false)
         and it.language.id = :languageId
         and (:search is null or lower(it.text) like lower(concat('%', cast(:search as text), '%'))
         or lower(ik.name) like lower(concat('%', cast(:search as text), '%')))
