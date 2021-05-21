@@ -161,7 +161,7 @@ class CoreImportFilesProcessor(
         }
 
         importDataManager.saveAllStoredKeys()
-        importDataManager.handleConflicts()
+        importDataManager.handleConflicts(false)
         importDataManager.saveAllStoredTranslations()
     }
 

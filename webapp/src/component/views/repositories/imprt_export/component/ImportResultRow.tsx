@@ -85,7 +85,7 @@ export const ImportResultRow = (props: {
                 <TableCell scope="row" align="center">
                     <Button onClick={() => props.onResolveConflicts()} size="small" className={classes.resolveButton}>
                         <CheckCircle className={classes.resolvedIcon}/>
-                        {props.row.conflictCount} / {props.row.resolvedCount}
+                        {props.row.resolvedCount} / {props.row.conflictCount}
                         <EditIcon className={classes.pencil}/>
                     </Button>
                 </TableCell>

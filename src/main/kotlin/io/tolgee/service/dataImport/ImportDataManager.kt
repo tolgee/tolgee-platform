@@ -92,18 +92,32 @@ class ImportDataManager(
         return languageData
     }
 
-    fun handleConflicts() {
+    /**
+     * @param removeEqual Whether translations with equal texts should be removed
+     */
+    fun handleConflicts(removeEqual: Boolean) {
         populateExistingTranslations()
-        this.storedTranslations.asSequence().flatMap { it.value.values }.flatMap { it }.forEach { importedTranslaton ->
-            val existingLanguage = importedTranslaton.language.existingLanguage
-            if (existingLanguage != null) {
-                val existingTranslation = existingTranslations[existingLanguage.id]
-                        ?.let { it[importedTranslaton.key.name] }
-                if (existingTranslation != null && existingTranslation.text != importedTranslaton.text) {
-                    importedTranslaton.conflict = existingTranslation
-                } else {
-                    importedTranslaton.conflict = null
+        this.storedTranslations.asSequence().flatMap { it.value.values }.forEach { languageTranslations ->
+            val toRemove = mutableListOf<ImportTranslation>()
+            languageTranslations.forEach { importedTranslaton ->
+                val existingLanguage = importedTranslaton.language.existingLanguage
+                if (existingLanguage != null) {
+                    val existingTranslation = existingTranslations[existingLanguage.id]
+                            ?.let { it[importedTranslaton.key.name] }
+                    if (existingTranslation != null) {
+                        //remove if text is the same
+                        if (existingTranslation.text == importedTranslaton.text) {
+                            toRemove.add(importedTranslaton)
+                        } else {
+                            importedTranslaton.conflict = existingTranslation
+                        }
+                    } else {
+                        importedTranslaton.conflict = null
+                    }
                 }
+            }
+            if (removeEqual) {
+                languageTranslations.removeAll(toRemove)
             }
         }
     }

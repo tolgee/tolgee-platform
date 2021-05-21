@@ -76,7 +76,7 @@ class StoredDataImporter(
 
     private fun ImportLanguage.doImport() {
         importDataManager.populateStoredTranslations(this)
-        importDataManager.handleConflicts()
+        importDataManager.handleConflicts(true)
         importDataManager.getStoredTranslations(this).forEach { it.doImport() }
     }
 
