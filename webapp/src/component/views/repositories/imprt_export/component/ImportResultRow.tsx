@@ -83,10 +83,10 @@ export const ImportResultRow = (props: {
                     }}>{props.row.totalCount}</Link>
                 </TableCell>
                 <TableCell scope="row" align="center">
-                    <Button onClick={() => props.onResolveConflicts()} size="small" className={classes.resolveButton}>
+                    <Button disabled={props.row.conflictCount < 1} onClick={() => props.onResolveConflicts()} size="small" className={classes.resolveButton}>
                         <CheckCircle className={classes.resolvedIcon}/>
                         {props.row.resolvedCount} / {props.row.conflictCount}
-                        <EditIcon className={classes.pencil}/>
+                        {props.row.conflictCount > 0 && <EditIcon className={classes.pencil}/>}
                     </Button>
                 </TableCell>
                 <TableCell scope="row" align={"right"}>
