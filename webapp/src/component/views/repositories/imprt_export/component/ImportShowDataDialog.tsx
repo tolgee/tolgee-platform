@@ -1,5 +1,5 @@
-import React, {FunctionComponent} from 'react';
-import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
+import React, {FunctionComponent, useState} from 'react';
+import {createStyles, makeStyles, Theme, useTheme} from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -15,6 +15,8 @@ import {container} from "tsyringe";
 import {ImportActions} from "../../../../../store/repository/ImportActions";
 import {useRepository} from "../../../../../hooks/useRepository";
 import {SimplePaginatedHateoasList} from "../../../../common/list/SimplePaginatedHateoasList";
+import {SecondaryBar} from "../../../../layout/SecondaryBar";
+import SearchField from "../../../../common/form/fields/SearchField";
 
 const actions = container.resolve(ImportActions)
 const useStyles = makeStyles((theme: Theme) =>
@@ -42,6 +44,8 @@ export const ImportShowDataDialog: FunctionComponent<{
 }> = (props) => {
     const classes = useStyles();
     const repository = useRepository()
+    const theme = useTheme()
+    const [search, setSearch] = useState(undefined as string | undefined)
 
     return (
         <div>
@@ -56,10 +60,17 @@ export const ImportShowDataDialog: FunctionComponent<{
                         </Typography>
                     </Toolbar>
                 </AppBar>
+                <SecondaryBar>
+                    <SearchField onSearch={setSearch}/>
+                </SecondaryBar>
                 {!!props.row &&
                 <SimplePaginatedHateoasList
+                    wrapperComponent={Box}
+                    wrapperComponentProps={{m: 2}}
                     actions={actions} loadableName="translations"
+                    searchText={search}
                     sortBy={[]}
+                    pageSize={50}
                     dispatchParams={[
                         {
                             path: {
@@ -72,19 +83,18 @@ export const ImportShowDataDialog: FunctionComponent<{
                         }
                     ]}
                     renderItem={i =>
-                        <Box pt={1} pl={2} pr={2}>
-                            <Grid container>
-                                <Grid item lg md sm xs>
+                        <Box pt={1} pl={2} pr={2} style={{
+                            borderBottom: `1px solid ${theme.palette.grey["100"]}`,
+                            wordBreak: "break-all"
+                        }}>
+                            <Grid container spacing={2}>
+                                <Grid item lg={4} md={3} sm xs>
                                     <Box>
-                                        <Typography
-                                            style={{
-                                                wordBreak: "break-all"
-                                            }}
-                                            variant="body1">{i.keyName}</Typography>
+                                        {i.keyName}
                                     </Box>
                                 </Grid>
                                 <Grid item lg md sm xs>
-                                    <Typography variant="body1">{i.text}</Typography>
+                                    {i.text}
                                 </Grid>
                             </Grid>
                         </Box>

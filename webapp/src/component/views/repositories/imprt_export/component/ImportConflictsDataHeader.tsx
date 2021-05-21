@@ -15,6 +15,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
 
     const theme = useTheme();
     const isMdOrGreater = useMediaQuery(theme.breakpoints.up('md'));
+    const isSmOrLower = useMediaQuery(theme.breakpoints.down('sm'));
 
     const keepAllExisting = () => {
         actions.loadableActions.resolveAllKeepExisting.dispatch({
@@ -65,15 +66,15 @@ export const ImportConflictsDataHeader: FunctionComponent<{
                         </Box>
                     </Grid>
                 </Grid>
-                :
-                <Grid container spacing={4}>
-                    <Grid item lg md sm xs>
-                        {keepAllButton}
-                    </Grid>
-                    <Grid item lg md sm xs>
-                        {overrideAllButton}
-                    </Grid>
-                </Grid>
+                : (isSmOrLower &&
+                    <Grid container spacing={4}>
+                        <Grid item lg md sm xs>
+                            {keepAllButton}
+                        </Grid>
+                        <Grid item lg md sm xs>
+                            {overrideAllButton}
+                        </Grid>
+                    </Grid>)
             }
         </Box>
     )

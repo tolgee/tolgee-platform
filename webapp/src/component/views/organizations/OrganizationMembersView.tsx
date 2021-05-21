@@ -41,7 +41,7 @@ export const OrganizationMembersView: FunctionComponent = () => {
     return (
         <BaseOrganizationSettingsView>
             <SimplePaginatedHateoasList
-                search
+                searchField
                 title={<T>organization_members_view_title</T>}
                 pageSize={10}
                 renderItem={(i) =>

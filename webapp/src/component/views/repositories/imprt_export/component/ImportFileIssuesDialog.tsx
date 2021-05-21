@@ -37,6 +37,7 @@ export const ImportFileIssuesDialog: FunctionComponent<{
                                     }
                                 }]}
                                 wrapperComponent={Box}
+                                wrapperComponentProps={{mb: 2}}
                                 listComponent={Box}
                                 sortBy={[]}
                                 renderItem={i => <>

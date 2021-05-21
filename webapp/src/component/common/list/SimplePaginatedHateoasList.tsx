@@ -14,8 +14,7 @@ import {EmbeddedDataItem, usePaginatedHateoasDataHelper} from "../../../hooks/us
 export type SimplePaginatedHateoasListProps<ActionsType extends AbstractLoadableActions<StateWithLoadables<ActionsType>>,
     LoadableName extends keyof ActionsType["loadableDefinitions"],
     WrapperComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>,
-    ListComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>
-    > = {
+    ListComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>> = {
     renderItem: (itemData: EmbeddedDataItem<ActionsType, LoadableName>) => ReactNode
     actions: ActionsType
     loadableName: LoadableName
@@ -24,19 +23,19 @@ export type SimplePaginatedHateoasListProps<ActionsType extends AbstractLoadable
     }, ...any[]]
     pageSize?: number,
     title?: ReactNode
-    search?: boolean
+    searchField?: boolean
     sortBy?: string[],
+    searchText?: string
 } & OverridableListWrappers<WrapperComponent, ListComponent>
 
 export function SimplePaginatedHateoasList<ActionsType extends AbstractLoadableActions<any>,
     LoadableName extends keyof ActionsType["loadableDefinitions"],
     WrapperComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>,
-    ListComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>
-    >
+    ListComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>>
 (props: SimplePaginatedHateoasListProps<ActionsType, LoadableName, WrapperComponent, ListComponent>) {
     const [search, setSearch] = useState(undefined as string | undefined);
 
-    const helper = usePaginatedHateoasDataHelper({...props, search: search})
+    const helper = usePaginatedHateoasDataHelper({...props, search: search || props.searchText})
 
     useEffect(() => {
         //to trigger global loading just when data are present (when loading for the first time, BoxLoading is rendered lower)
@@ -49,19 +48,23 @@ export function SimplePaginatedHateoasList<ActionsType extends AbstractLoadableA
         }
     })
 
+    useEffect(() => {
+        setSearch(props.searchText)
+    }, [props.searchText])
+
     if (helper.loading && !helper.items) {
         return <BoxLoading/>
     }
 
     return (
-        <Box data-cy="global-paginated-list"> {(props.title || props.search) &&
+        <Box data-cy="global-paginated-list"> {(props.title || props.searchField) &&
         <Box mb={1}>
             <Grid container alignItems="center">
                 <Grid item lg md sm xs>
                     {props.title &&
                     <Box><Typography variant="h6">{props.title}</Typography></Box>}
                 </Grid>
-                {props.search &&
+                {props.searchField &&
                 <Grid item lg={4} md={5} sm={12} xs={12}>
                     <SearchField data-cy="global-list-search" fullWidth initial={search || ""} onSearch={val => {
                         setSearch(val)

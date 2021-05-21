@@ -24,12 +24,6 @@ const useStyles = makeStyles(theme => ({
         marginRight: 4,
         color: theme.palette.success.main
     },
-    conflictsIcon: {
-        fontSize: 16,
-        marginRight: 4,
-        marginLeft: 8,
-        color: theme.palette.warning.main
-    },
     resolveButton: {
         marginLeft: 25,
         paddingRight: 25 + theme.spacing(0.5)
@@ -91,9 +85,7 @@ export const ImportResultRow = (props: {
                 <TableCell scope="row" align="center">
                     <Button onClick={() => props.onResolveConflicts()} size="small" className={classes.resolveButton}>
                         <CheckCircle className={classes.resolvedIcon}/>
-                        {props.row.conflictCount}
-                        <Warning className={classes.conflictsIcon}/>
-                        {props.row.resolvedCount}
+                        {props.row.conflictCount} / {props.row.resolvedCount}
                         <EditIcon className={classes.pencil}/>
                     </Button>
                 </TableCell>

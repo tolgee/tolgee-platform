@@ -61,6 +61,12 @@ export const ImportConflictsData: FunctionComponent<{
     }, [setOverrideLoadable.loading, setKeepLoadable.loading])
 
     useEffect(() => {
+        return () => {
+            actions.loadableReset.conflicts.dispatch()
+        }
+    }, [])
+
+    useEffect(() => {
         if (!conflictsLoadable.loading) {
             stopLoading()
             actions.loadableReset.resolveTranslationConflictKeep.dispatch()
