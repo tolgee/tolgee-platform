@@ -3,15 +3,15 @@ import {components} from "../../../../../service/apiSchema";
 import {container} from "tsyringe";
 import {ImportActions} from "../../../../../store/repository/ImportActions";
 import {useRepository} from "../../../../../hooks/useRepository";
-import {Box, FormControlLabel, Grid, Switch, Typography} from "@material-ui/core";
+import {Box, Grid, Typography} from "@material-ui/core";
 import {BoxLoading} from "../../../../common/BoxLoading";
 import {EmptyListMessage} from "../../../../common/EmptyListMessage";
 import {T} from "@tolgee/react";
 import {Pagination} from "@material-ui/lab";
 import {startLoading, stopLoading} from "../../../../../hooks/loading";
 import {ImportConflictTranslationsPair} from "./ImportConflictTranslationsPair";
-import {SecondaryBar} from "../../../../layout/SecondaryBar";
 import {ImportConflictsDataHeader} from "./ImportConflictsDataHeader";
+import {ImportConflictsSecondaryBar} from "./ImportConflictsSecondaryBar";
 
 const actions = container.resolve(ImportActions)
 export const ImportConflictsData: FunctionComponent<{
@@ -20,8 +20,7 @@ export const ImportConflictsData: FunctionComponent<{
     const conflictsLoadable = actions.useSelector(s => s.loadables.conflicts)
     const repository = useRepository()
     const languageId = props.row.id
-    const [showResolved, setOnlyUnresolved] = useState(true)
-
+    const [showResolved, setShowResolved] = useState(true)
     const setOverrideLoadable = actions.useSelector(s => s.loadables.resolveTranslationConflictOverride)
     const setKeepLoadable = actions.useSelector(s => s.loadables.resolveTranslationConflictKeep)
 
@@ -39,6 +38,14 @@ export const ImportConflictsData: FunctionComponent<{
                         page: page,
                         size: 50
                     }
+                }
+            }
+        )
+        actions.loadableActions.resolveConflictsLanguage.dispatch(
+            {
+                path: {
+                    languageId: languageId,
+                    repositoryId: repository.id
                 }
             }
         )
@@ -63,6 +70,7 @@ export const ImportConflictsData: FunctionComponent<{
     useEffect(() => {
         return () => {
             actions.loadableReset.conflicts.dispatch()
+            actions.loadableReset.resolveConflictsLanguage.dispatch()
         }
     }, [])
 
@@ -82,19 +90,10 @@ export const ImportConflictsData: FunctionComponent<{
 
     return (
         <>
-            <SecondaryBar>
-                <FormControlLabel
-                    control={
-                        <Switch
-                            checked={showResolved}
-                            onChange={() => setOnlyUnresolved(!showResolved)}
-                            name="filter_unresolved"
-                            color="primary"
-                        />
-                    }
-                    label={<T>import_conflicts_filter_show_resolved_label</T>}
-                />
-            </SecondaryBar>
+            <ImportConflictsSecondaryBar
+                showResolved={showResolved}
+                onShowResolvedToggle={() => setShowResolved(!showResolved)}
+            />
             {conflictsLoadable.loaded && (data ?
                 <>
                     <ImportConflictsDataHeader language={props.row}/>

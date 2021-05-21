@@ -55,8 +55,6 @@ class V2ImportController(
         private val authenticationFacade: AuthenticationFacade,
         private val importLanguageModelAssembler: ImportLanguageModelAssembler,
         private val importTranslationModelAssembler: ImportTranslationModelAssembler,
-        private val importFileIssueModelAssembler: ImportFileIssueModelAssembler,
-
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val pagedLanguagesResourcesAssembler: PagedResourcesAssembler<ImportLanguageView>,
 
@@ -143,6 +141,17 @@ class V2ImportController(
         return pagedLanguagesResourcesAssembler.toModel(languages, importLanguageModelAssembler)
     }
 
+    @GetMapping("/result/languages/{languageId}")
+    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    fun getImportLanguage(
+            @PathVariable("languageId") languageId: Long,
+            @PathVariable("repositoryId") repositoryId: Long,
+    ): ImportLanguageModel {
+        checkImportLanguageInRepository(languageId)
+        val language = importService.findLanguageView(languageId) ?: throw NotFoundException()
+        return importLanguageModelAssembler.toModel(language)
+    }
+
     @GetMapping("/result/languages/{languageId}/translations")
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
     fun getImportTranslations(
@@ -154,10 +163,12 @@ class V2ImportController(
             @Schema(description = "Whether only translations with unresolved conflicts" +
                     "with existing translations should be returned")
             @RequestParam("onlyUnresolved", defaultValue = "false") onlyUnresolved: Boolean = false,
+            @Schema(description = "String to search in translation text or key")
+            @RequestParam("search") search: String? = null,
             pageable: Pageable
     ): PagedModel<ImportTranslationModel> {
         checkImportLanguageInRepository(languageId)
-        val translations = importService.getTranslations(languageId, pageable, onlyConflicts, onlyUnresolved)
+        val translations = importService.getTranslationsView(languageId, pageable, onlyConflicts, onlyUnresolved, search)
         return pagedTranslationsResourcesAssembler.toModel(translations, importTranslationModelAssembler)
     }
 

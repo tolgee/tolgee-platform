@@ -173,6 +173,10 @@ export interface paths {
   "/v2/repositories/{repositoryId}/import/result": {
     get: operations["getImportResult"];
   };
+  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}": {
+    get: operations["getImportLanguage"];
+    delete: operations["deleteLanguage"];
+  };
   "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations": {
     get: operations["getImportTranslations"];
   };
@@ -279,9 +283,6 @@ export interface paths {
   };
   "/api/apiKeys/availableScopes": {
     get: operations["getScopes"];
-  };
-  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}": {
-    delete: operations["deleteLanguage"];
   };
   "/v2/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser"];
@@ -526,7 +527,7 @@ export interface components {
     };
     ImportTranslationModel: {
       id: number;
-      text: string;
+      text?: string;
       keyName: string;
       keyId: number;
       conflictId?: number;
@@ -543,10 +544,9 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params?: components["schemas"]["ImportFileIssueParamView"][];
       id?: number;
       type?:
-        | "NO_MATCHING_PROCESSOR"
-        | "NO_FILENAME_PROVIDED"
         | "KEY_IS_NOT_STRING"
         | "MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE"
         | "VALUE_IS_NOT_STRING"
@@ -555,7 +555,6 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
-      params?: components["schemas"]["ImportFileIssueParamView"][];
       _links?: components["schemas"]["Links"];
     };
     ImportFileIssueParamView: {
@@ -1674,6 +1673,34 @@ export interface operations {
       };
     };
   };
+  getImportLanguage: {
+    parameters: {
+      path: {
+        languageId: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ImportLanguageModel"];
+        };
+      };
+    };
+  };
+  deleteLanguage: {
+    parameters: {
+      path: {
+        languageId: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
   getImportTranslations: {
     parameters: {
       path: {
@@ -1683,6 +1710,7 @@ export interface operations {
       query: {
         onlyConflicts?: boolean;
         onlyUnresolved?: boolean;
+        search?: string;
         pageable: components["schemas"]["Pageable"];
       };
     };
@@ -2266,18 +2294,6 @@ export interface operations {
           "*/*": { [key: string]: string[] };
         };
       };
-    };
-  };
-  deleteLanguage: {
-    parameters: {
-      path: {
-        languageId: number;
-        repositoryId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
     };
   };
   removeUser: {

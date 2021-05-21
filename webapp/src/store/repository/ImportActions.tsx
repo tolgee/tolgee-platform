@@ -48,6 +48,12 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
                 "get"
             )
         ),
+        resolveConflictsLanguage: this.createLoadableDefinition(
+            this.schemaService.schemaRequest(
+                "/v2/repositories/{repositoryId}/import/result/languages/{languageId}",
+                "get"
+            )
+        ),
         deleteLanguage: this.createLoadableDefinition(
             this.schemaService.schemaRequest(
                 "/v2/repositories/{repositoryId}/import/result/languages/{languageId}",

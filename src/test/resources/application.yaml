@@ -7,12 +7,7 @@ spring:
     drop-first: true
     change-log: classpath:db/changelog/schema.xml
   jpa:
-#    show-sql: true
-    properties:
-      hibernate:
-        jdbc:
-          batch_size: 50
-        order_inserts: true
+    show-sql: true
 tolgee:
   data-path: ./build/test_data
   authentication:

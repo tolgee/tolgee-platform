@@ -100,9 +100,6 @@ class ImportService(
     fun saveFile(importFile: ImportFile): ImportFile =
             importFileRepository.save(importFile)
 
-    fun saveFileIssue(importFileIssue: ImportFileIssue): ImportFileIssue =
-            importFileIssueRepository.save(importFileIssue)
-
     fun find(repositoryId: Long, authorId: Long) =
             this.importRepository.findByRepositoryIdAndAuthorId(repositoryId, authorId)
 
@@ -150,9 +147,18 @@ class ImportService(
         return importLanguageRepository.findById(languageId).orElse(null)
     }
 
-    fun getTranslations(languageId: Long, pageable: Pageable, onlyConflicts: Boolean, onlyUnresolved: Boolean):
-            Page<ImportTranslationView> {
-        return importTranslationRepository.findImportTranslationsView(languageId, pageable, onlyConflicts, onlyUnresolved)
+    fun findLanguageView(languageId: Long): ImportLanguageView? {
+        return importLanguageRepository.findViewById(languageId).orElse(null)
+    }
+
+    fun getTranslationsView(languageId: Long,
+                            pageable: Pageable,
+                            onlyConflicts: Boolean,
+                            onlyUnresolved: Boolean,
+                            search: String? = null
+    ): Page<ImportTranslationView> {
+        return importTranslationRepository.findImportTranslationsView(
+                languageId, pageable, onlyConflicts, onlyUnresolved, search)
     }
 
     fun deleteImport(import: Import) {

@@ -40,11 +40,14 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
         where (itc.id is not null or :onlyConflicts = false)
         and ((itc.id is not null and it.resolved = false) or :onlyUnresolved = false)
         and it.language.id = :languageId
+        and (:search is null or lower(it.text) like lower(concat('%', cast(:search as text), '%'))
+        or lower(ik.name) like lower(concat('%', cast(:search as text), '%')))
     """)
     fun findImportTranslationsView(languageId: Long,
                                    pageable: Pageable,
                                    onlyConflicts: Boolean = false,
-                                   onlyUnresolved: Boolean = false
+                                   onlyUnresolved: Boolean = false,
+                                   search: String? = null
     ): Page<ImportTranslationView>
 
     @Modifying

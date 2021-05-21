@@ -7,7 +7,7 @@ import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import {KeyboardArrowUp} from "@material-ui/icons";
 
 type ImportConflictTranslationProps = {
-    text: string,
+    text?: string,
     selected?: boolean,
     onSelect?: () => void,
     loading?: boolean
