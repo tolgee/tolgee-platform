@@ -9,6 +9,7 @@ import {confirmation} from "../../../../../hooks/confirmation";
 import {ImportRowLanguageMenu} from "./ImportRowLanguageMenu";
 import {CheckCircle, Warning} from "@material-ui/icons";
 import EditIcon from "@material-ui/icons/Edit";
+import {T} from "@tolgee/react";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -50,7 +51,16 @@ export const ImportResultRow = (props: {
 
     const deleteLanguage = () => {
         confirmation({
-            onConfirm: () => actions.loadableActions.deleteLanguage.dispatch({path: {languageId: props.row.id, repositoryId: repository.id}})
+            onConfirm: () =>
+                actions.loadableActions.deleteLanguage.dispatch({
+                    path:
+                        {
+                            languageId: props.row.id,
+                            repositoryId: repository.id
+                        }
+                }),
+            title: <T>import_delete_language_dialog_title</T>,
+            message: <T parameters={{languageName: props.row.name}}>import_delete_language_dialog_message</T>
         })
     };
 
@@ -63,7 +73,7 @@ export const ImportResultRow = (props: {
                     <ImportRowLanguageMenu value={props.row.existingLanguageId} importLanguageId={props.row.id}/>
                 </TableCell>
                 <TableCell scope="row">
-                    {props.row.importFileName}
+                    {props.row.importFileName} ({props.row.name})
                     {props.row.importFileIssueCount ?
                         <Box pt={1} ml={-1}>
                             <Button

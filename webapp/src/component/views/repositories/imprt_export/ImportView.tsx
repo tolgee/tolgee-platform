@@ -14,6 +14,7 @@ import {stopLoading} from "../../../../hooks/loading";
 import {parseErrorResponse} from "../../../../fixtures/errorFIxtures";
 import {MessageService} from "../../../../service/MessageService";
 import {ImportAlertError} from './ImportAlertError';
+import {confirmation} from "../../../../hooks/confirmation";
 
 const actions = container.resolve(ImportActions)
 const messageService = container.resolve(MessageService)
@@ -79,18 +80,26 @@ export const ImportView: FunctionComponent = () => {
         <BaseView title={<T>import_translations_title</T>} xs={12} md={10} lg={8}>
             <Box mt={2}>
                 <ImportFileInput onNewFiles={dataHelper.onNewFiles}/>
-                {addFilesLoadable.data?.errors?.map((e, idx) => <ImportAlertError key={idx} error={e}/>)}
+                {addFilesLoadable.data?.errors?.map((e, idx) =>
+                    <ImportAlertError key={idx} error={e}/>
+                )}
                 <ImportResult onLoadData={dataHelper.loadData} result={dataHelper.result}/>
             </Box>
             {dataHelper.result &&
             <Box display="flex" mt={2} justifyContent="flex-end">
                 <Box mr={2}>
                     <Button variant="outlined" color="primary" onClick={() => {
-                        actions.loadableActions.cancelImport.dispatch({
-                            path: {
-                                repositoryId: repository.id
+                        confirmation({
+                                onConfirm: () => actions.loadableActions.cancelImport.dispatch({
+                                    path: {
+                                        repositoryId: repository.id
+                                    }
+                                }),
+                                title: <T>import_cancel_confirmation_title</T>,
+                                message: <T>import_cancel_confirmation_message</T>
                             }
-                        })
+                        )
+
                     }}>
                         <T>import_cancel_button</T>
                     </Button>
