@@ -12,7 +12,6 @@ import {ApiV2HttpService} from "../../service/http/ApiV2HttpService";
 import {ApiSchemaHttpService} from "../../service/http/ApiSchemaHttpService";
 
 export class RepositoriesState extends StateWithLoadables<RepositoryActions> {
-    repositoriesLoading: boolean = true;
     repositories: RepositoryDTO[] | undefined = undefined;
 }
 

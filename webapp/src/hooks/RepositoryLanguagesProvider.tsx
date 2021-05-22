@@ -25,7 +25,7 @@ export const RepositoryLanguagesProvider: FunctionComponent = (props) => {
         if (init || idChanged) {
             languageActions.loadableActions.list.dispatch(repositoryDTO.id);
         }
-    }, []);
+    }, [init]);
 
     if (init || idChanged || languagesLoadable.loading) {
         return <FullPageLoading/>

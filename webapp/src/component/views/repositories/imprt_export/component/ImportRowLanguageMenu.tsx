@@ -1,13 +1,33 @@
 import React, {ChangeEvent, FunctionComponent} from 'react';
-import {Box, FormControl, FormHelperText, InputLabel, MenuItem, Select, Typography} from "@material-ui/core";
+import {Dialog, DialogContent, DialogTitle, FormControl, FormHelperText, InputLabel, makeStyles, MenuItem, Select} from "@material-ui/core";
 import {useRepositoryLanguages} from "../../../../../hooks/useRepositoryLanguages";
 import {T} from "@tolgee/react";
 import {container} from "tsyringe";
 import {ImportActions} from "../../../../../store/repository/ImportActions";
 import {useImportDataHelper} from "../hooks/useImportDataHelper";
 import {useRepository} from "../../../../../hooks/useRepository";
+import {Add} from "@material-ui/icons";
+import clsx from "clsx";
+import {useStateObject} from "../../../../../fixtures/useStateObject";
+import {CreateLanguageForm} from "../../../../languages/CreateLanguageForm";
+import {Loadable} from "../../../../../store/AbstractLoadableActions";
 
 const actions = container.resolve(ImportActions)
+
+const useStyles = makeStyles(theme => ({
+    item: {
+        padding: `${theme.spacing(1)}, ${theme.spacing(2)}`
+    },
+    addNewItem: {
+        color: theme.palette.primary.main
+    },
+    addIcon: {
+        marginRight: theme.spacing(1),
+        marginLeft: -2
+    }
+}))
+
+const NEW_LANGUAGE_VALUE = "__new_language";
 export const ImportRowLanguageMenu: FunctionComponent<{
     value?: number,
     importLanguageId: number
@@ -17,19 +37,44 @@ export const ImportRowLanguageMenu: FunctionComponent<{
     const usedLanguages = importData.result!._embedded!.languages!.map(l => l.existingLanguageId).filter(l => !!l)
     const repository = useRepository()
     const applyTouched = actions.useSelector(s => s.applyTouched)
+    const classes = useStyles()
+    const state = useStateObject({addNewLanguageDialogOpen: false})
 
-    const onChange = (changeEvent: ChangeEvent<any>) => {
+    const dispatchChange = (value) => {
         actions.loadableActions.selectLanguage.dispatch({
             path: {
                 repositoryId: repository.id,
                 importLanguageId: props.importLanguageId,
-                existingLanguageId: changeEvent.target.value
+                existingLanguageId: value
             }
         })
     }
 
+    const onChange = (changeEvent: ChangeEvent<any>) => {
+        const value = changeEvent.target.value;
+        if (value == NEW_LANGUAGE_VALUE) {
+            state.addNewLanguageDialogOpen = true
+            return
+        }
+        dispatchChange(value)
+    }
+
     const availableLanguages = languages.filter(lang => props.value == lang.id || usedLanguages.indexOf(lang.id) < 0)
 
+    const items = availableLanguages.map(l =>
+        <MenuItem value={l.id} key={l.id} className={clsx(classes.item)}>
+            {l.name}
+        </MenuItem>)
+
+    items.push(
+        <MenuItem key={0}
+                  value={NEW_LANGUAGE_VALUE}
+                  className={clsx(classes.item, classes.addNewItem)}
+        >
+            <Add fontSize="small" className={classes.addIcon}/>
+            <T>import_result_language_menu_add_new</T>
+        </MenuItem>
+    )
 
     return (
         <>
@@ -42,22 +87,22 @@ export const ImportRowLanguageMenu: FunctionComponent<{
                     value={props.value || ''}
                     onChange={onChange}
                     fullWidth
-
                 >
-                    {availableLanguages.length ?
-                        availableLanguages.map(l =>
-                            <MenuItem value={l.id} key={l.id}>
-                                {l.name}
-                            </MenuItem>)
-                        :
-                        <Box p={2}>
-                            <Typography variant="body1"><T>import_no_languages_to_choose_from</T></Typography>
-                        </Box>
-                    }
+                    {items}
                 </Select>
                 {(applyTouched && !props.value) &&
                 <FormHelperText><T>import_existing_language_not_selected_error</T></FormHelperText>}
             </FormControl>
+            <Dialog open={state.addNewLanguageDialogOpen} aria-labelledby="form-dialog-title">
+                <DialogTitle id="form-dialog-title"><T>import_add_new_language_dialog_title</T></DialogTitle>
+                <DialogContent>
+                    <CreateLanguageForm
+                        onSubmit={() => {}}
+                        loadable={null as any as Loadable}
+                        onCancel={() => state.addNewLanguageDialogOpen = false}
+                    />
+                </DialogContent>
+            </Dialog>
         </>
     );
 };
