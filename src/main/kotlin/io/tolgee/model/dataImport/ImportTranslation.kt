@@ -35,7 +35,7 @@ class ImportTranslation(
      * Whether user explicitely resolved this conflict
      */
     val resolved: Boolean
-        get() = this.conflict?.text?.computeMurmur() == this.resolvedHash
+        get() = this.conflict?.text.computeMurmur() == this.resolvedHash
 
     /**
      * If user resolved the conflict, this field stores hash of existing translation text
@@ -45,10 +45,13 @@ class ImportTranslation(
     var resolvedHash: String? = null
 
     fun resolve() {
-        resolvedHash = conflict?.text?.computeMurmur()
+        resolvedHash = conflict?.text.computeMurmur()
     }
 
-    private fun String.computeMurmur(): String? {
+    private fun String?.computeMurmur(): String? {
+        if (this == null) {
+            return "__null_value"
+        }
         val hash = MurmurHash3.hash128(this.toByteArray()).asSequence().flatMap {
             val buffer = ByteBuffer.allocate(java.lang.Long.BYTES)
             buffer.putLong(it)

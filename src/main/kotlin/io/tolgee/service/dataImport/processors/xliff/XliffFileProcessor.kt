@@ -4,12 +4,14 @@ import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.exceptions.UnsupportedXliffVersionException
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
+import javax.xml.namespace.QName
+import javax.xml.stream.events.StartElement
 
 class XliffFileProcessor(override val context: FileProcessorContext) : ImportFileProcessor() {
     override fun process() {
         try {
             when (version) {
-                "1.2" -> Xliff12FileProcessor(context, xmlStreamReader).process()
+                "1.2" -> Xliff12FileProcessor(context, xmlEventReader).process()
                 else -> throw UnsupportedXliffVersionException(version)
             }
         } catch (e: Exception) {
@@ -18,10 +20,13 @@ class XliffFileProcessor(override val context: FileProcessorContext) : ImportFil
     }
 
     private val version: String by lazy {
-        while (xmlStreamReader.hasNext()) {
-            xmlStreamReader.next()
-            if (xmlStreamReader.isStartElement && xmlStreamReader.localName.toLowerCase() == "xliff") {
-                return@lazy xmlStreamReader.getAttributeValue(null, "version")
+        while (xmlEventReader.hasNext()) {
+            val event = xmlEventReader.nextEvent()
+            if (event.isStartElement && (event as? StartElement)?.name?.localPart?.toLowerCase() == "xliff") {
+                val versionAttr = event.getAttributeByName(QName(null, "version"))
+                if (versionAttr != null) {
+                    return@lazy versionAttr.value
+                }
             }
         }
         throw ImportCannotParseFileException(context.file.name, "No version information")

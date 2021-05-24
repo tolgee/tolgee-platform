@@ -12,8 +12,8 @@ import org.mockito.kotlin.mock
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import java.io.File
+import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
-import javax.xml.stream.XMLStreamReader
 
 class Xliff12FileProcessorTest {
     private lateinit var importMock: Import
@@ -21,7 +21,7 @@ class Xliff12FileProcessorTest {
     private lateinit var importFileDto: ImportFileDto
     private lateinit var fileProcessorContext: FileProcessorContext
     private val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
-    private lateinit var xmlStreamReader: XMLStreamReader
+    private lateinit var xmlStreamReader: XMLEventReader
 
     @BeforeMethod
     fun setup() {
@@ -32,7 +32,7 @@ class Xliff12FileProcessorTest {
                 File("src/test/resources/import/xliff/example.xliff")
                         .inputStream()
         )
-        xmlStreamReader = inputFactory.createXMLStreamReader(importFileDto.inputStream)
+        xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
         fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
     }
 
@@ -52,6 +52,12 @@ class Xliff12FileProcessorTest {
                 " For example: \"Release Version: 1.23\"")
         assertThat(keyMeta.codeReferences).hasSize(1)
         assertThat(keyMeta.codeReferences[0].path).isEqualTo("../src/ui/components/VPNAboutUs.qml")
+        assertThat(fileProcessorContext.translations["systray.quit"]!![0].text).isEqualTo(
+                "<x equiv-text=\"{{ favorite ?  'Remove from favorites' :" +
+                        " 'Add to favorites'}}\" id=\"INTERPOLATION\"></x>")
+        assertThat(fileProcessorContext.translations["systray.quit"]!![1].text)
+                .isEqualTo("<x equiv-text=\"{{ favorite ?  'Remove from favorites' :" +
+                        " 'Add to favorites'}}\" id=\"INTERPOLATION\"></x>")
     }
 
     @Test
@@ -62,7 +68,7 @@ class Xliff12FileProcessorTest {
                         .inputStream()
         )
         fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
-        xmlStreamReader = inputFactory.createXMLStreamReader(importFileDto.inputStream)
+        xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
         val start = System.currentTimeMillis()
         Xliff12FileProcessor(fileProcessorContext, xmlStreamReader).process()
         assertThat(System.currentTimeMillis() - start).isLessThan(4000)
@@ -75,7 +81,7 @@ class Xliff12FileProcessorTest {
                 File("src/test/resources/import/xliff/error_example.xliff")
                         .inputStream()
         )
-        xmlStreamReader = inputFactory.createXMLStreamReader(importFileDto.inputStream)
+        xmlStreamReader = inputFactory.createXMLEventReader(importFileDto.inputStream)
         fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
         Xliff12FileProcessor(fileProcessorContext, xmlStreamReader).process()
         assertThat(fileProcessorContext.translations).hasSize(2)
@@ -88,6 +94,5 @@ class Xliff12FileProcessorTest {
             assertThat(issues[1].params!![0].type).isEqualTo(FileIssueParamType.FILE_NODE_ORIGINAL)
             assertThat(issues[1].params!![0].value).isEqualTo("../src/platforms/android/androidauthenticationview.qml")
         }
-
     }
 }

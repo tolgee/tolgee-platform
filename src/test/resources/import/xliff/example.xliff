@@ -904,8 +904,8 @@
         <target>Preferencias…</target>
       </trans-unit>
       <trans-unit id="systray.quit" xml:space="preserve">
-        <source>Quit Mozilla VPN</source>
-        <target>Salir de Mozilla VPN</target>
+        <source><x id="INTERPOLATION" equiv-text="{{ favorite ?  'Remove from favorites' : 'Add to favorites'}}"/></source>
+        <target><x id="INTERPOLATION" equiv-text="{{ favorite ?  'Remove from favorites' : 'Add to favorites'}}"/></target>
       </trans-unit>
     </body>
   </file>
