@@ -89,6 +89,7 @@ class ImportService(
         importLanguage.existingLanguage = existingLanguage
         importLanguageRepository.save(importLanguage)
         dataManager.populateStoredTranslations(importLanguage)
+        dataManager.resetConflicts(importLanguage)
         dataManager.handleConflicts(false)
         dataManager.saveAllStoredTranslations()
     }

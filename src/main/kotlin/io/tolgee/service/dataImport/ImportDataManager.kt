@@ -142,4 +142,11 @@ class ImportDataManager(
     fun saveAllStoredKeys() {
         this.importService.saveAllKeys(this.storedKeys.values)
     }
+
+    fun resetConflicts(importLanguage: ImportLanguage) {
+        this.storedTranslations[importLanguage]?.values?.asSequence()?.flatMap { it }?.forEach {
+            it.conflict = null
+            it.resolvedHash = null
+        }
+    }
 }
