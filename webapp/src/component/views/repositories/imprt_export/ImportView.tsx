@@ -88,7 +88,7 @@ export const ImportView: FunctionComponent = () => {
             {dataHelper.result &&
             <Box display="flex" mt={2} justifyContent="flex-end">
                 <Box mr={2}>
-                    <Button variant="outlined" color="primary" onClick={() => {
+                    <Button data-cy="import_cancel_import_button" variant="outlined" color="primary" onClick={() => {
                         confirmation({
                                 onConfirm: () => actions.loadableActions.cancelImport.dispatch({
                                     path: {
@@ -105,7 +105,7 @@ export const ImportView: FunctionComponent = () => {
                     </Button>
                 </Box>
                 <Box>
-                    <Button variant="contained" color="primary" onClick={onApply}>
+                    <Button variant="contained" color="primary" data-cy="import_apply_import_button" onClick={onApply}>
                         <T>import_apply_button</T>
                     </Button>
                 </Box>

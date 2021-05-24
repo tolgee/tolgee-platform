@@ -1,6 +1,6 @@
 import {components} from "../../../../../service/apiSchema";
 import React from "react";
-import {Box, Button, IconButton, Link, makeStyles, TableCell, TableRow, useTheme} from "@material-ui/core";
+import {Box, Button, IconButton, Link, makeStyles, TableCell, TableRow} from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {ImportActions} from "../../../../../store/repository/ImportActions";
 import {container} from "tsyringe";
@@ -82,15 +82,13 @@ export const ImportResultRow = (props: {
         })
     };
 
-    const theme = useTheme()
-
     return (
         <React.Fragment>
-            <TableRow className={classes.root}>
-                <TableCell scope="row">
+            <TableRow className={classes.root} data-cy="import-result-row">
+                <TableCell scope="row" data-cy="import-result-language-menu-cell">
                     <ImportRowLanguageMenu value={props.row.existingLanguageId} importLanguageId={props.row.id}/>
                 </TableCell>
-                <TableCell scope="row">
+                <TableCell scope="row" data-cy="import-result-file-cell">
                     {props.row.importFileName} ({props.row.name})
                     {props.row.importFileIssueCount ?
                         <Link
@@ -98,7 +96,7 @@ export const ImportResultRow = (props: {
                             onClick={() => {
                                 props.onShowFileIssues()
                             }}>
-                            <Box display="flex" alignItems="center" pt={1}>
+                            <Box display="flex" alignItems="center" pt={1} data-cy="import-result-file-warnings">
                                 <Warning className={classes.warningIcon}/>
                                 {props.row.importFileIssueCount}
                                 <Visibility className={clsx(classes.helperIcon, classes.issuesHelperIcon)}/>
@@ -106,7 +104,7 @@ export const ImportResultRow = (props: {
                         </Link>
                         : <></>}
                 </TableCell>
-                <TableCell scope="row" align="center">
+                <TableCell scope="row" align="center" data-cy="import-result-total-count-cell">
                     <Box position="relative" display="inline">
                         <Link href="#" onClick={() => {
                             props.onShowData()
@@ -114,15 +112,16 @@ export const ImportResultRow = (props: {
                         <Visibility className={clsx(classes.helperIcon, classes.totalHelperIcon)}/>
                     </Box>
                 </TableCell>
-                <TableCell scope="row" align="center">
-                    <Button disabled={props.row.conflictCount < 1} onClick={() => props.onResolveConflicts()} size="small" className={classes.resolveButton}>
+                <TableCell scope="row" align="center" data-cy="import-result-resolved-conflicts-cell">
+                    <Button data-cy="import-result-resolve-button" disabled={props.row.conflictCount < 1}
+                            onClick={() => props.onResolveConflicts()} size="small" className={classes.resolveButton}>
                         <CheckCircle className={classes.resolvedIcon}/>
                         {props.row.resolvedCount} / {props.row.conflictCount}
                         {props.row.conflictCount > 0 && <EditIcon className={clsx(classes.pencil, classes.helperIcon)}/>}
                     </Button>
                 </TableCell>
                 <TableCell scope="row" align={"right"}>
-                    <IconButton onClick={deleteLanguage} size="small" style={{padding: 0}}>
+                    <IconButton onClick={deleteLanguage} size="small" style={{padding: 0}} data-cy="import-result-delete-language-button">
                         <DeleteIcon/>
                     </IconButton>
                 </TableCell>

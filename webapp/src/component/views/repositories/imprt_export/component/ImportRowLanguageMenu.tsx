@@ -78,7 +78,7 @@ export const ImportRowLanguageMenu: FunctionComponent<{
 
     return (
         <>
-            <FormControl fullWidth error={applyTouched && !props.value}>
+            <FormControl fullWidth error={applyTouched && !props.value} data-cy="import-row-language-select-form-control">
                 <InputLabel shrink id="import_row_language_select">
                     <T>import_language_select</T>
                 </InputLabel>

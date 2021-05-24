@@ -1,7 +1,6 @@
 import {API_URL, PASSWORD, USERNAME} from "./constants";
 import {ArgumentTypes, Scope} from "./types";
 import {ApiKeyDTO, LanguageDTO} from "../../../webapp/src/service/response.types";
-import {assertMessage} from "./shared";
 
 const bcrypt = require('bcryptjs');
 
@@ -151,6 +150,9 @@ export const getParsedResetPasswordEmail = () => getAllEmails().then(r => {
 
 export const cleanOrganizationData = () => internalFetch("e2e-data/organizations/clean")
 export const createOrganizationData = () => internalFetch("e2e-data/organizations/create")
+
+export const cleanImportData = () => internalFetch("e2e-data/import/clean")
+export const generateImportData = () => internalFetch("e2e-data/import/generate")
 
 export const cleanRepositoriesData = () => internalFetch("e2e-data/repositories/clean")
 export const createRepositoriesData = () => internalFetch("e2e-data/repositories/create")

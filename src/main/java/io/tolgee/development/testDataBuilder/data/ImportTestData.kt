@@ -23,7 +23,10 @@ class ImportTestData {
 
     val root: TestDataBuilder = TestDataBuilder().apply {
         userAccount = addUserAccount {
-            self { username = "franta" }
+            self {
+                username = "franta"
+                name = "Frantisek Dobrota"
+            }
         }.self
         repository = addRepository {
             self { name = "test" }

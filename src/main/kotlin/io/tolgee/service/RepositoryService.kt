@@ -125,17 +125,15 @@ class RepositoryService constructor(
     @Transactional
     fun deleteRepository(id: Long) {
         val repository = get(id).orElseThrow { NotFoundException() }!!
+        importService.getAllByRepository(id).forEach {
+            importService.deleteImport(it)
+        }
         permissionService.deleteAllByRepository(repository.id)
         translationService.deleteAllByRepository(repository.id)
         screenshotService.deleteAllByRepository(repository.id)
         keyService.deleteAllByRepository(repository.id)
         apiKeyService.deleteAllByRepository(repository.id)
         languageService.deleteAllByRepository(repository.id)
-
-        importService.getAllByRepository(id).forEach {
-            importService.deleteImport(it)
-        }
-
         repositoryRepository.delete(repository)
     }
 

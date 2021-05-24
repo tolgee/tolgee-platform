@@ -1,38 +1,10 @@
 /// <reference types="cypress" />
-import {getAnyContainingAriaLabelAttribute, getAnyContainingText, getInput} from "./xPath";
-import {HOST} from "./constants";
+import {getAnyContainingAriaLabelAttribute} from "./xPath";
 import {Scope} from "./types";
 import Value = DataCy.Value;
+import Chainable = Cypress.Chainable;
 
 export const allScopes: Scope[] = ["keys.edit", "translations.edit", "translations.view"];
-
-export const createRepository = (name = "Repository", languages = [{name: "English", abbreviation: "en"}]) => {
-    cy.visit(HOST + "/repositories");
-    cy.wait(500);
-    clickAdd();
-    cy.xpath(getInput("name")).type(name);
-    languages.forEach((language, index) => {
-        cy.xpath(getInput(`languages.${index}.name`)).type(language.name);
-        cy.xpath(getInput(`languages.${index}.abbreviation`)).type(language.abbreviation);
-        if (index !== languages.length - 1) {
-
-        }
-    })
-    cy.xpath(getAnyContainingText("SAVE")).click();
-};
-
-export const deleteRepository = (name = "Repository", force: boolean) => {
-    cy.visit(HOST + "/repositories");
-    cy.wait(1000)
-    cy.contains("Repositories").should("be.visible");
-    cy.xpath(getAnyContainingText(name)).click({force});
-    cy.wait(100);
-    cy.xpath(getAnyContainingText("Repository settings")).click({force});
-    cy.xpath(getAnyContainingText("Delete repository")).click({force});
-    const label = cy.xpath(getAnyContainingText("Rewrite text:") + "/ancestor::*[1]//input");
-    label.type(name.toUpperCase(), {force});
-    cy.xpath(getAnyContainingText("CONFIRM")).click({force});
-};
 
 export const clickAdd = () => {
     cy.wait(100);
@@ -74,4 +46,9 @@ export const assertMessage = (message: string) => {
 
 export const selectInRepositoryMenu = (itemName: string) => {
     gcy("repository-menu-items").contains(itemName).click()
+}
+
+export const selectInSelect = (chainable: Chainable, renderedValue: string) => {
+    chainable.find("div").first().click()
+    getPopover().contains(renderedValue).click()
 }

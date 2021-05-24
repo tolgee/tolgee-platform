@@ -24,6 +24,17 @@ declare namespace DataCy {
         "global-plus-button" |
         "global-snackbars" |
         "global-user-menu-button" |
+        "import-result-delete-language-button" |
+        "import-result-file-cell" |
+        "import-result-file-warnings" |
+        "import-result-language-menu-cell" |
+        "import-result-resolve-button" |
+        "import-result-resolved-conflicts-cell" |
+        "import-result-row" |
+        "import-result-total-count-cell" |
+        "import-row-language-select-form-control" |
+        "import_apply_import_button" |
+        "import_cancel_import_button" |
         "leave-organization-button" |
         "organization-address-part-field" |
         "organization-delete-button" |

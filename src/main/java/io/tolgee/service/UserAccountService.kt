@@ -42,6 +42,10 @@ class UserAccountService(
         }
     }
 
+    fun delete(userAccount: UserAccount) {
+        userAccountRepository.delete(userAccount)
+    }
+
     fun dtoToEntity(request: SignUpDto): UserAccount {
         val encodedPassword = encodePassword(request.password!!)
         return UserAccount(name = request.name, username = request.email, password = encodedPassword)
