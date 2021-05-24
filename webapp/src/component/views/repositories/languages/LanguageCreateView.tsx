@@ -2,26 +2,18 @@ import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {T} from "@tolgee/react";
 import {BaseView} from "../../../layout/BaseView";
-import {CreateLanguageForm} from "../../../languages/CreateLanguageForm";
+import {LanguageCreateForm} from "../../../languages/LanguageCreateForm";
 import {container} from "tsyringe";
 import {LanguageActions} from "../../../../store/languages/LanguageActions";
 import {useRedirect} from "../../../../hooks/useRedirect";
 import {LINKS, PARAMS} from "../../../../constants/links";
 import {useRepository} from "../../../../hooks/useRepository";
-import {LanguageDTO} from "../../../../service/response.types";
 
 const actions = container.resolve(LanguageActions);
 export const LanguageCreateView = () => {
     let createLoadable = actions.useSelector(s => s.loadables.create);
     const [cancelled, setCancelled] = useState(false);
     const repository = useRepository()
-
-    const onSubmit = (values) => {
-        const dto: LanguageDTO = {
-            ...values,
-        };
-        actions.loadableActions.create.dispatch(repository.id, dto);
-    };
 
     useEffect(() => {
         if (createLoadable.loaded) {
@@ -32,6 +24,7 @@ export const LanguageCreateView = () => {
     useEffect(() => {
         if (createLoadable.loaded || cancelled) {
             setCancelled(false);
+            actions.loadableReset.list.dispatch()
             useRedirect(LINKS.REPOSITORY_LANGUAGES, {[PARAMS.REPOSITORY_ID]: repository.id});
         }
     })
@@ -39,7 +32,7 @@ export const LanguageCreateView = () => {
     return (
         <>
             <BaseView lg={6} md={8} xs={12} title={<T>create_language_title</T>}>
-                <CreateLanguageForm loadable={createLoadable} onSubmit={onSubmit} onCancel={() => setCancelled(true)}/>
+                <LanguageCreateForm onCancel={() => setCancelled(true)}/>
             </BaseView>
         </>
     );

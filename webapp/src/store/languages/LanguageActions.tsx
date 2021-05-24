@@ -23,9 +23,7 @@ export class LanguageActions extends AbstractLoadableActions<LanguagesState> {
     loadableDefinitions = {
         list: this.createLoadableDefinition(this.service.getLanguages),
         language: this.createLoadableDefinition(this.service.get),
-        create: this.createLoadableDefinition(
-            this.service.create, (state): LanguagesState => this.resetLoadable(state, "list"),
-            <T>language_created_message</T>),
+        create: this.createLoadableDefinition(this.service.create, undefined, <T>language_created_message</T>),
         edit: this.createLoadableDefinition(this.service.editLanguage, undefined, <T>language_edited_message</T>),
         delete: this.createLoadableDefinition(this.service.delete, undefined, <T>language_deleted_message</T>)
     }

@@ -55,6 +55,18 @@ export const ImportConflictsData: FunctionComponent<{
     const totalPages = conflictsLoadable.data?.page?.totalPages
     const page = conflictsLoadable.data?.page?.number
 
+    const keepAllExistingLoadable = actions.useSelector(s => s.loadables.resolveAllKeepExisting)
+    const overrideAllLoadable = actions.useSelector(s => s.loadables.resolveAllOverride)
+
+    useEffect(() => {
+        if (keepAllExistingLoadable.loaded || overrideAllLoadable.loaded) {
+            actions.loadableReset.resolveAllKeepExisting.dispatch()
+            actions.loadableReset.resolveAllOverride.dispatch()
+            loadData()
+        }
+    }, [keepAllExistingLoadable.loading, overrideAllLoadable.loading])
+
+
     useEffect(() => {
         loadData(0)
     }, [props.row, showResolved])

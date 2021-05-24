@@ -1,5 +1,5 @@
 import React, {ChangeEvent, FunctionComponent} from 'react';
-import {Dialog, DialogContent, DialogTitle, FormControl, FormHelperText, InputLabel, makeStyles, MenuItem, Select} from "@material-ui/core";
+import {Box, Dialog, DialogContent, DialogTitle, FormControl, FormHelperText, InputLabel, makeStyles, MenuItem, Select} from "@material-ui/core";
 import {useRepositoryLanguages} from "../../../../../hooks/useRepositoryLanguages";
 import {T} from "@tolgee/react";
 import {container} from "tsyringe";
@@ -9,11 +9,11 @@ import {useRepository} from "../../../../../hooks/useRepository";
 import {Add} from "@material-ui/icons";
 import clsx from "clsx";
 import {useStateObject} from "../../../../../fixtures/useStateObject";
-import {CreateLanguageForm} from "../../../../languages/CreateLanguageForm";
-import {Loadable} from "../../../../../store/AbstractLoadableActions";
+import {LanguageCreateForm} from "../../../../languages/LanguageCreateForm";
+import {LanguageActions} from "../../../../../store/languages/LanguageActions";
 
 const actions = container.resolve(ImportActions)
-
+const languageActions = container.resolve(LanguageActions)
 const useStyles = makeStyles(theme => ({
     item: {
         padding: `${theme.spacing(1)}, ${theme.spacing(2)}`
@@ -96,11 +96,16 @@ export const ImportRowLanguageMenu: FunctionComponent<{
             <Dialog open={state.addNewLanguageDialogOpen} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title"><T>import_add_new_language_dialog_title</T></DialogTitle>
                 <DialogContent>
-                    <CreateLanguageForm
-                        onSubmit={() => {}}
-                        loadable={null as any as Loadable}
-                        onCancel={() => state.addNewLanguageDialogOpen = false}
-                    />
+                    <Box mt={-4}>
+                        <LanguageCreateForm
+                            onCreated={(language) => {
+                                languageActions.loadableReset.list.dispatch()
+                                dispatchChange(language.id)
+                                languageActions.loadableReset.create.dispatch()
+                            }}
+                            onCancel={() => state.addNewLanguageDialogOpen = false}
+                        />
+                    </Box>
                 </DialogContent>
             </Dialog>
         </>

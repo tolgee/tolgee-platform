@@ -1,4 +1,4 @@
-import React, {FunctionComponent, useEffect} from 'react';
+import React, {FunctionComponent} from 'react';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import AppBar from '@material-ui/core/AppBar';
@@ -39,17 +39,6 @@ export const ImportConflictResolutionDialog: FunctionComponent<{
     onClose: () => void
 }> = (props) => {
     const classes = useStyles();
-
-    const keepAllExistingLoadable = actions.useSelector(s => s.loadables.resolveAllKeepExisting)
-    const overrideAllLoadable = actions.useSelector(s => s.loadables.resolveAllOverride)
-
-    useEffect(() => {
-        if (keepAllExistingLoadable.loaded || overrideAllLoadable.loading) {
-            props.onClose()
-            actions.loadableReset.resolveAllKeepExisting.dispatch()
-            actions.loadableReset.resolveAllOverride.dispatch()
-        }
-    }, [keepAllExistingLoadable.loading, overrideAllLoadable.loading])
 
     return (
         <div>
