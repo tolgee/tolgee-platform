@@ -7,16 +7,17 @@ import {container} from "tsyringe";
 import {useRepository} from "../../../../../hooks/useRepository";
 import {confirmation} from "../../../../../hooks/confirmation";
 import {ImportRowLanguageMenu} from "./ImportRowLanguageMenu";
-import {CheckCircle, Warning} from "@material-ui/icons";
+import {CheckCircle, Visibility, Warning} from "@material-ui/icons";
 import EditIcon from "@material-ui/icons/Edit";
 import {T} from "@tolgee/react";
+import clsx from "clsx";
 
 const useStyles = makeStyles(theme => ({
     root: {
         "&:hover": {
             backgroundColor: theme.palette.grey["50"]
         },
-        "&:hover $pencil": {
+        "&:hover $helperIcon": {
             opacity: 1
         }
     },
@@ -30,11 +31,28 @@ const useStyles = makeStyles(theme => ({
         paddingRight: 25 + theme.spacing(0.5)
     },
     pencil: {
+        position: "absolute",
+        right: theme.spacing(0.5),
+    },
+    helperIcon: {
         fontSize: 20,
         opacity: 0,
         color: theme.palette.grey["500"],
+    },
+    totalHelperIcon: {
         position: "absolute",
-        right: theme.spacing(0.5)
+        right: -20 - theme.spacing(0.5),
+        fontSize: 20,
+        opacity: 0,
+        color: theme.palette.grey["500"],
+    },
+    warningIcon: {
+        fontSize: 16,
+        marginRight: theme.spacing(0.5),
+        color: theme.palette.warning.main
+    },
+    issuesHelperIcon: {
+        marginLeft: theme.spacing(0.5),
     }
 }))
 
@@ -75,28 +93,32 @@ export const ImportResultRow = (props: {
                 <TableCell scope="row">
                     {props.row.importFileName} ({props.row.name})
                     {props.row.importFileIssueCount ?
-                        <Box pt={1} ml={-1}>
-                            <Button
-                                onClick={() => {
-                                    props.onShowFileIssues()
-                                }}
-                                style={{
-                                    color: theme.palette.warning.main,
-                                }} startIcon={<Warning/>} size="small">
+                        <Link
+                            href="#"
+                            onClick={() => {
+                                props.onShowFileIssues()
+                            }}>
+                            <Box display="flex" alignItems="center" pt={1}>
+                                <Warning className={classes.warningIcon}/>
                                 {props.row.importFileIssueCount}
-                            </Button>
-                        </Box> : <></>}
+                                <Visibility className={clsx(classes.helperIcon, classes.issuesHelperIcon)}/>
+                            </Box>
+                        </Link>
+                        : <></>}
                 </TableCell>
                 <TableCell scope="row" align="center">
-                    <Link href="#" onClick={() => {
-                        props.onShowData()
-                    }}>{props.row.totalCount}</Link>
+                    <Box position="relative" display="inline">
+                        <Link href="#" onClick={() => {
+                            props.onShowData()
+                        }}>{props.row.totalCount}</Link>
+                        <Visibility className={clsx(classes.helperIcon, classes.totalHelperIcon)}/>
+                    </Box>
                 </TableCell>
                 <TableCell scope="row" align="center">
                     <Button disabled={props.row.conflictCount < 1} onClick={() => props.onResolveConflicts()} size="small" className={classes.resolveButton}>
                         <CheckCircle className={classes.resolvedIcon}/>
                         {props.row.resolvedCount} / {props.row.conflictCount}
-                        {props.row.conflictCount > 0 && <EditIcon className={classes.pencil}/>}
+                        {props.row.conflictCount > 0 && <EditIcon className={clsx(classes.pencil, classes.helperIcon)}/>}
                     </Button>
                 </TableCell>
                 <TableCell scope="row" align={"right"}>
