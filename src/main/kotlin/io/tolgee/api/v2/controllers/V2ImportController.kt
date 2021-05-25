@@ -229,6 +229,15 @@ class V2ImportController(
         this.importService.selectExistingLanguage(importLanguage, existingLanguage)
     }
 
+    @PutMapping("/result/languages/{importLanguageId}/reset-existing")
+    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    fun resetExistingLanguage(
+            @PathVariable("importLanguageId") importLanguageId: Long,
+    ) {
+        val importLanguage = checkImportLanguageInRepository(importLanguageId)
+        this.importService.selectExistingLanguage(importLanguage, null)
+    }
+
     @GetMapping("/result/files/{importFileId}/issues")
     @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
     fun getImportFileIssues(

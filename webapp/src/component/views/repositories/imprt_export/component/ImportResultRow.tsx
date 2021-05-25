@@ -1,16 +1,17 @@
 import {components} from "../../../../../service/apiSchema";
 import React from "react";
-import {Box, Button, IconButton, Link, makeStyles, TableCell, TableRow} from "@material-ui/core";
+import {Box, Button, IconButton, makeStyles, TableCell, TableRow} from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {ImportActions} from "../../../../../store/repository/ImportActions";
 import {container} from "tsyringe";
 import {useRepository} from "../../../../../hooks/useRepository";
 import {confirmation} from "../../../../../hooks/confirmation";
 import {ImportRowLanguageMenu} from "./ImportRowLanguageMenu";
-import {CheckCircle, Visibility, Warning} from "@material-ui/icons";
+import {CheckCircle, Error, Warning} from "@material-ui/icons";
 import EditIcon from "@material-ui/icons/Edit";
 import {T} from "@tolgee/react";
 import clsx from "clsx";
+import {ChipButton} from "../../../../common/buttons/ChipButton";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -24,7 +25,12 @@ const useStyles = makeStyles(theme => ({
     resolvedIcon: {
         fontSize: 16,
         marginRight: 4,
+    },
+    resolvedSuccessIcon: {
         color: theme.palette.success.main
+    },
+    resolvedErrorIcon: {
+        color: theme.palette.error.main
     },
     resolveButton: {
         marginLeft: 25,
@@ -39,20 +45,8 @@ const useStyles = makeStyles(theme => ({
         opacity: 0,
         color: theme.palette.grey["500"],
     },
-    totalHelperIcon: {
-        position: "absolute",
-        right: -20 - theme.spacing(0.5),
-        fontSize: 20,
-        opacity: 0,
-        color: theme.palette.grey["500"],
-    },
     warningIcon: {
-        fontSize: 16,
-        marginRight: theme.spacing(0.5),
         color: theme.palette.warning.main
-    },
-    issuesHelperIcon: {
-        marginLeft: theme.spacing(0.5),
     }
 }))
 
@@ -91,31 +85,32 @@ export const ImportResultRow = (props: {
                 <TableCell scope="row" data-cy="import-result-file-cell">
                     {props.row.importFileName} ({props.row.name})
                     {props.row.importFileIssueCount ?
-                        <Link
-                            href="#"
-                            onClick={() => {
-                                props.onShowFileIssues()
-                            }}>
-                            <Box display="flex" alignItems="center" pt={1} data-cy="import-result-file-warnings">
-                                <Warning className={classes.warningIcon}/>
+                        <Box>
+                            <ChipButton
+                                onClick={() => {
+                                    props.onShowFileIssues()
+                                }}
+                                beforeIcon={<Warning className={classes.warningIcon}/>}
+                            >
                                 {props.row.importFileIssueCount}
-                                <Visibility className={clsx(classes.helperIcon, classes.issuesHelperIcon)}/>
-                            </Box>
-                        </Link>
+                            </ChipButton>
+                        </Box>
                         : <></>}
                 </TableCell>
                 <TableCell scope="row" align="center" data-cy="import-result-total-count-cell">
-                    <Box position="relative" display="inline">
-                        <Link href="#" onClick={() => {
-                            props.onShowData()
-                        }}>{props.row.totalCount}</Link>
-                        <Visibility className={clsx(classes.helperIcon, classes.totalHelperIcon)}/>
-                    </Box>
+                    <ChipButton onClick={() => {
+                        props.onShowData()
+                    }}>{props.row.totalCount}
+                    </ChipButton>
                 </TableCell>
                 <TableCell scope="row" align="center" data-cy="import-result-resolved-conflicts-cell">
                     <Button data-cy="import-result-resolve-button" disabled={props.row.conflictCount < 1}
                             onClick={() => props.onResolveConflicts()} size="small" className={classes.resolveButton}>
-                        <CheckCircle className={classes.resolvedIcon}/>
+                        {props.row.resolvedCount < props.row.conflictCount ?
+                            <Error className={clsx(classes.resolvedIcon, classes.resolvedErrorIcon)}/>
+                            :
+                            <CheckCircle className={clsx(classes.resolvedIcon, classes.resolvedSuccessIcon)}/>
+                        }
                         {props.row.resolvedCount} / {props.row.conflictCount}
                         {props.row.conflictCount > 0 && <EditIcon className={clsx(classes.pencil, classes.helperIcon)}/>}
                     </Button>

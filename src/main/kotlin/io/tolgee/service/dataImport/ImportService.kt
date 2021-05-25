@@ -80,11 +80,13 @@ class ImportService(
     }
 
     @Transactional
-    fun selectExistingLanguage(importLanguage: ImportLanguage, existingLanguage: Language) {
+    fun selectExistingLanguage(importLanguage: ImportLanguage, existingLanguage: Language?) {
         val import = importLanguage.file.import
         val dataManager = ImportDataManager(applicationContext, import)
-        if (dataManager.storedLanguages.any { it.existingLanguage?.id == existingLanguage.id }) {
-            throw BadRequestException(Message.LANGUAGE_ALREADY_SELECTED)
+        existingLanguage?.let {
+            if (dataManager.storedLanguages.any { it.existingLanguage?.id == existingLanguage.id }) {
+                throw BadRequestException(Message.LANGUAGE_ALREADY_SELECTED)
+            }
         }
         importLanguage.existingLanguage = existingLanguage
         importLanguageRepository.save(importLanguage)

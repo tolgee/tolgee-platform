@@ -90,6 +90,11 @@ export class ImportActions extends AbstractLoadableActions<ImportState> {
                 "/v2/repositories/{repositoryId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}", "put"
             )
         ),
+        resetExistingLanguage: this.createLoadableDefinition(
+            this.schemaService.schemaRequest(
+                "/v2/repositories/{repositoryId}/import/result/languages/{importLanguageId}/reset-existing", "put"
+            )
+        ),
         addFiles: this.createLoadableDefinition(
             this.schemaService.schemaRequest("/v2/repositories/{repositoryId}/import", "post"),
             (state, action): ImportState => {

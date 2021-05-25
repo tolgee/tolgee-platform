@@ -106,4 +106,19 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
         assertThat(importService.findLanguage(testData.importFrench.id)?.existingLanguage)
                 .isEqualTo(testData.french)
     }
+
+    @Test
+    fun `it resets selected language`() {
+        val testData = ImportTestData()
+        testData.setAllResolved()
+        testData.setAllOverride()
+        testDataService.saveTestData(testData.root)
+        val user = testData.root.data.userAccounts[0].self
+        val repositoryId = testData.repository.id
+        logAsUser(user.username!!, "admin")
+        val path = "/v2/repositories/${repositoryId}/import/result/languages/${testData.importEnglish.id}/reset-existing"
+        performAuthPut(path, null).andIsOk
+        assertThat(importService.findLanguage(testData.importEnglish.id)?.existingLanguage)
+                .isNull()
+    }
 }

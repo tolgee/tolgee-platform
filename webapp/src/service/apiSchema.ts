@@ -25,6 +25,9 @@ export interface paths {
   "/v2/repositories/{repositoryId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}": {
     put: operations["selectExistingLanguage"];
   };
+  "/v2/repositories/{repositoryId}/import/result/languages/{importLanguageId}/reset-existing": {
+    put: operations["resetExistingLanguage"];
+  };
   "/v2/repositories/{repositoryId}/import/apply": {
     put: operations["applyImport"];
   };
@@ -544,7 +547,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params?: components["schemas"]["ImportFileIssueParamView"][];
       id?: number;
       type?:
         | "KEY_IS_NOT_STRING"
@@ -555,6 +557,7 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
+      params?: components["schemas"]["ImportFileIssueParamView"][];
       _links?: components["schemas"]["Links"];
     };
     ImportFileIssueParamView: {
@@ -755,6 +758,18 @@ export interface operations {
       path: {
         importLanguageId: number;
         existingLanguageId: number;
+        repositoryId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  resetExistingLanguage: {
+    parameters: {
+      path: {
+        importLanguageId: number;
         repositoryId: number;
       };
     };

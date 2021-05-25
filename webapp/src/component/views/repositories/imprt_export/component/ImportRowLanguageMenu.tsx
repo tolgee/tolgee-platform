@@ -1,12 +1,25 @@
 import React, {ChangeEvent, FunctionComponent} from 'react';
-import {Box, Dialog, DialogContent, DialogTitle, FormControl, FormHelperText, InputLabel, makeStyles, MenuItem, Select} from "@material-ui/core";
+import {
+    Box,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    FormHelperText,
+    IconButton,
+    InputAdornment,
+    InputLabel,
+    makeStyles,
+    MenuItem,
+    Select
+} from "@material-ui/core";
 import {useRepositoryLanguages} from "../../../../../hooks/useRepositoryLanguages";
 import {T} from "@tolgee/react";
 import {container} from "tsyringe";
 import {ImportActions} from "../../../../../store/repository/ImportActions";
 import {useImportDataHelper} from "../hooks/useImportDataHelper";
 import {useRepository} from "../../../../../hooks/useRepository";
-import {Add} from "@material-ui/icons";
+import {Add, Clear} from "@material-ui/icons";
 import clsx from "clsx";
 import {useStateObject} from "../../../../../fixtures/useStateObject";
 import {LanguageCreateForm} from "../../../../languages/LanguageCreateForm";
@@ -24,6 +37,9 @@ const useStyles = makeStyles(theme => ({
     addIcon: {
         marginRight: theme.spacing(1),
         marginLeft: -2
+    },
+    selectAdornment: {
+        marginRight: theme.spacing(3)
     }
 }))
 
@@ -46,6 +62,15 @@ export const ImportRowLanguageMenu: FunctionComponent<{
                 repositoryId: repository.id,
                 importLanguageId: props.importLanguageId,
                 existingLanguageId: value
+            }
+        })
+    }
+
+    const onReset = () => {
+        actions.loadableActions.resetExistingLanguage.dispatch({
+            path: {
+                repositoryId: repository.id,
+                importLanguageId: props.importLanguageId,
             }
         })
     }
@@ -83,6 +108,13 @@ export const ImportRowLanguageMenu: FunctionComponent<{
                     <T>import_language_select</T>
                 </InputLabel>
                 <Select
+                    endAdornment={props.value ?
+                        <InputAdornment position="end" className={classes.selectAdornment}>
+                            <IconButton onClick={onReset} size="small">
+                                <Clear/>
+                            </IconButton>
+                        </InputAdornment> : <></>
+                    }
                     labelId="import_row_language_select"
                     value={props.value || ''}
                     onChange={onChange}

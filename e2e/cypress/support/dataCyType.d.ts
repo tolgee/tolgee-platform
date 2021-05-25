@@ -26,7 +26,6 @@ declare namespace DataCy {
         "global-user-menu-button" |
         "import-result-delete-language-button" |
         "import-result-file-cell" |
-        "import-result-file-warnings" |
         "import-result-language-menu-cell" |
         "import-result-resolve-button" |
         "import-result-resolved-conflicts-cell" |

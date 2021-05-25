@@ -10,7 +10,7 @@ import {ImportActions} from "../../../../store/repository/ImportActions";
 import {useRepository} from "../../../../hooks/useRepository";
 import {ImportConflictNotResolvedErrorDialog} from "./component/ImportConflictNotResolvedErrorDialog";
 import {useApplyImportHelper} from "./hooks/useApplyImportHelper";
-import {stopLoading} from "../../../../hooks/loading";
+import {startLoading, stopLoading} from "../../../../hooks/loading";
 import {parseErrorResponse} from "../../../../fixtures/errorFIxtures";
 import {MessageService} from "../../../../service/MessageService";
 import {ImportAlertError} from './ImportAlertError';
@@ -29,6 +29,7 @@ export const ImportView: FunctionComponent = () => {
     const resultLoadable = actions.useSelector(s => s.loadables.getResult)
     const resultLoading = resultLoadable.loading || addFilesLoadable.loading
     const selectLanguageLoadable = actions.useSelector(s => s.loadables.selectLanguage)
+    const resetExistingLanguageLoadable = actions.useSelector(s => s.loadables.resetExistingLanguage)
 
     useEffect(() => {
         if (!resultLoading) {
@@ -43,11 +44,15 @@ export const ImportView: FunctionComponent = () => {
     }, [resultLoadable.loading, addFilesLoadable.loading])
 
     useEffect(() => {
+        startLoading()
         if ((deleteLanguageLoadable.loaded && !deleteLanguageLoadable.loading) ||
-            (selectLanguageLoadable.loaded && !selectLanguageLoadable.loading)) {
+            (selectLanguageLoadable.loaded && !selectLanguageLoadable.loading) ||
+            (resetExistingLanguageLoadable.loaded && !resetExistingLanguageLoadable.loading)
+        ) {
+            stopLoading()
             dataHelper.loadData()
         }
-    }, [deleteLanguageLoadable.loading, selectLanguageLoadable.loading])
+    }, [deleteLanguageLoadable.loading, selectLanguageLoadable.loading, resetExistingLanguageLoadable.loading])
 
     useEffect(() => {
         if (!resultLoading) {
