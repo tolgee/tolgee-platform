@@ -1,18 +1,5 @@
 import React, {ChangeEvent, FunctionComponent} from 'react';
-import {
-    Box,
-    Dialog,
-    DialogContent,
-    DialogTitle,
-    FormControl,
-    FormHelperText,
-    IconButton,
-    InputAdornment,
-    InputLabel,
-    makeStyles,
-    MenuItem,
-    Select
-} from "@material-ui/core";
+import {FormControl, FormHelperText, IconButton, InputAdornment, InputLabel, makeStyles, MenuItem, Select} from "@material-ui/core";
 import {useRepositoryLanguages} from "../../../../../hooks/useRepositoryLanguages";
 import {T} from "@tolgee/react";
 import {container} from "tsyringe";
@@ -22,11 +9,12 @@ import {useRepository} from "../../../../../hooks/useRepository";
 import {Add, Clear} from "@material-ui/icons";
 import clsx from "clsx";
 import {useStateObject} from "../../../../../fixtures/useStateObject";
-import {LanguageCreateForm} from "../../../../languages/LanguageCreateForm";
+import {ImportLanguageCreateDialog} from "./ImportLanguageCreateDialog";
 import {LanguageActions} from "../../../../../store/languages/LanguageActions";
 
 const actions = container.resolve(ImportActions)
 const languageActions = container.resolve(LanguageActions)
+
 const useStyles = makeStyles(theme => ({
     item: {
         padding: `${theme.spacing(1)}, ${theme.spacing(2)}`
@@ -42,7 +30,6 @@ const useStyles = makeStyles(theme => ({
         marginRight: theme.spacing(3)
     }
 }))
-
 const NEW_LANGUAGE_VALUE = "__new_language";
 export const ImportRowLanguageMenu: FunctionComponent<{
     value?: number,
@@ -125,21 +112,11 @@ export const ImportRowLanguageMenu: FunctionComponent<{
                 {(applyTouched && !props.value) &&
                 <FormHelperText><T>import_existing_language_not_selected_error</T></FormHelperText>}
             </FormControl>
-            <Dialog open={state.addNewLanguageDialogOpen} aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title"><T>import_add_new_language_dialog_title</T></DialogTitle>
-                <DialogContent>
-                    <Box mt={-4}>
-                        <LanguageCreateForm
-                            onCreated={(language) => {
-                                languageActions.loadableReset.list.dispatch()
-                                dispatchChange(language.id)
-                                languageActions.loadableReset.create.dispatch()
-                            }}
-                            onCancel={() => state.addNewLanguageDialogOpen = false}
-                        />
-                    </Box>
-                </DialogContent>
-            </Dialog>
+            <ImportLanguageCreateDialog open={state.addNewLanguageDialogOpen} onCreated={(id) => {
+                languageActions.loadableReset.list.dispatch()
+                dispatchChange(id)
+                languageActions.loadableReset.create.dispatch()
+            }} onClose={() => state.addNewLanguageDialogOpen = false}/>
         </>
     );
 };
