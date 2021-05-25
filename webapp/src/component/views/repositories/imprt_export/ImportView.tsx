@@ -1,4 +1,4 @@
-import {default as React, FunctionComponent, useEffect} from 'react';
+import {default as React, FunctionComponent, useEffect, useState} from 'react';
 import {Box, Button} from '@material-ui/core';
 import {BaseView} from '../../../layout/BaseView';
 import {T} from '@tolgee/react';
@@ -15,6 +15,8 @@ import {parseErrorResponse} from "../../../../fixtures/errorFIxtures";
 import {MessageService} from "../../../../service/MessageService";
 import {ImportAlertError} from './ImportAlertError';
 import {confirmation} from "../../../../hooks/confirmation";
+import {components} from "../../../../service/apiSchema";
+import {ImportConflictResolutionDialog} from "./component/ImportConflictResolutionDialog";
 
 const actions = container.resolve(ImportActions)
 const messageService = container.resolve(MessageService)
@@ -30,6 +32,17 @@ export const ImportView: FunctionComponent = () => {
     const resultLoading = resultLoadable.loading || addFilesLoadable.loading
     const selectLanguageLoadable = actions.useSelector(s => s.loadables.selectLanguage)
     const resetExistingLanguageLoadable = actions.useSelector(s => s.loadables.resetExistingLanguage)
+    const [resolveRow, setResolveRow] = useState(undefined as components["schemas"]["ImportLanguageModel"] | undefined)
+
+    const onConflictResolutionDialogClose = () => {
+        dataHelper.loadData()
+        setResolveRow(undefined)
+    }
+
+    const resolveFirstUnresolved = () => {
+        const row = dataHelper.result?._embedded?.languages?.find(l => l.conflictCount > l.resolvedCount)
+        setResolveRow(row)
+    }
 
     useEffect(() => {
         if (!resultLoading) {
@@ -83,12 +96,13 @@ export const ImportView: FunctionComponent = () => {
 
     return (
         <BaseView title={<T>import_translations_title</T>} xs={12} md={10} lg={8}>
+            <ImportConflictResolutionDialog row={resolveRow} onClose={onConflictResolutionDialogClose}/>
             <Box mt={2}>
                 <ImportFileInput onNewFiles={dataHelper.onNewFiles}/>
                 {addFilesLoadable.data?.errors?.map((e, idx) =>
                     <ImportAlertError key={idx} error={e}/>
                 )}
-                <ImportResult onLoadData={dataHelper.loadData} result={dataHelper.result}/>
+                <ImportResult onResolveRow={setResolveRow} onLoadData={dataHelper.loadData} result={dataHelper.result}/>
             </Box>
             {dataHelper.result &&
             <Box display="flex" mt={2} justifyContent="flex-end">
@@ -116,6 +130,10 @@ export const ImportView: FunctionComponent = () => {
                 </Box>
             </Box>}
             <ImportConflictNotResolvedErrorDialog
+                onResolve={() => {
+                    resolveFirstUnresolved()
+                    applyImportHelper.onDialogClose()
+                }}
                 open={applyImportHelper.conflictNotResolvedDialogOpen}
                 onClose={applyImportHelper.onDialogClose}
             />
