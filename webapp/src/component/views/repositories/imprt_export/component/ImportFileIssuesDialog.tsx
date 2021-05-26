@@ -20,7 +20,9 @@ export const ImportFileIssuesDialog: FunctionComponent<{
 
         return (
             <div>
-                <Dialog maxWidth="lg" open={!!row} onClose={props.onClose} aria-labelledby="import-file-issues-dialog">
+                <Dialog maxWidth="lg" open={!!row} onClose={props.onClose} aria-labelledby="import-file-issues-dialog"
+                data-cy="import-file-issues-dialog"
+                >
                     {row &&
                     <>
                         <DialogTitle id="import-file-issues-dialog">

@@ -6,9 +6,22 @@ const bcrypt = require('bcryptjs');
 
 let token = null;
 
+const v2apiFetch = (input: string, init?: ArgumentTypes<typeof cy.request>[0], headers = {}) => {
+    return cy.request({
+        url: API_URL + "/v2/" + input,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': "Bearer " + token,
+            ...headers
+        },
+        ...init
+    })
+}
+
+
 const apiFetch = (input: string, init?: ArgumentTypes<typeof cy.request>[0], headers = {}) => {
     return cy.request({
-        url: API_URL + input,
+        url: API_URL + "/api/" + input,
         headers: {
             'Content-Type': 'application/json',
             'Authorization': "Bearer " + token,
@@ -20,7 +33,7 @@ const apiFetch = (input: string, init?: ArgumentTypes<typeof cy.request>[0], hea
 
 const internalFetch = (input: string, init?: ArgumentTypes<typeof cy.request>[0]) => {
     return cy.request({
-        url: API_URL.replace("/api/", "/internal/") + input,
+        url: API_URL + "/internal/" + input,
         headers: {
             'Content-Type': 'application/json',
         },
@@ -31,7 +44,7 @@ const internalFetch = (input: string, init?: ArgumentTypes<typeof cy.request>[0]
 
 export const login = (username = USERNAME, password = PASSWORD) => {
     return cy.request({
-        url: API_URL + "public/generatetoken",
+        url: API_URL + "/api/public/generatetoken",
         method: "POST",
         headers: {
             'Content-Type': 'application/json',
@@ -74,29 +87,36 @@ export const createUser = (username: string = "test", password: string = "test",
 
     return deleteUser(username).then(() => {
         const sql = `insert into user_account (username, name, password, created_at, updated_at)
-            values ('${username}', '${fullName}', '${password}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
+                     values ('${username}', '${fullName}', '${password}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
         return internalFetch(`sql/execute`, {method: "POST", body: sql});
     });
 }
 
 export const deleteUser = (username: string) => {
-    const deleteUserSql = `delete from user_account where username='${username}'`;
+    const deleteUserSql = `delete
+                           from user_account
+                           where username = '${username}'`;
     return internalFetch(`sql/execute`, {method: "POST", body: deleteUserSql})
 }
 
 export const deleteUserWithEmailVerification = (username: string) => {
     const sql = `
-        delete from email_verification where user_account_id in (select id from user_account where username='${username}');
-        delete from user_account where username='${username}';
+        delete
+        from email_verification
+        where user_account_id in (select id from user_account where username = '${username}');
+        delete
+        from user_account
+        where username = '${username}';
     `;
 
     return internalFetch(`sql/execute`, {method: "POST", body: sql})
 }
 
 export const getUser = (username: string) => {
-    const sql = `select user_account.username, email_verification.id from user_account 
-    join email_verification on email_verification.user_account_id = user_account.id
-    where username='${username}'`;
+    const sql = `select user_account.username, email_verification.id
+                 from user_account
+                          join email_verification on email_verification.user_account_id = user_account.id
+                 where username = '${username}'`;
     return internalFetch(`sql/list`, {method: "POST", body: sql}).then((r) => {
         return r.body[0];
     })
@@ -112,7 +132,7 @@ export const addScreenshot = (repositoryId: number, key: string, path: string) =
         data.append("screenshot", blob);
         data.append("key", key);
         cy.log("Uploading screenshot: " + path);
-        return fetch(`${API_URL}repository/${repositoryId}/screenshots`, {
+        return fetch(`${API_URL}/api/repository/${repositoryId}/screenshots`, {
             headers: {
                 'Authorization': "Bearer " + token,
             },
@@ -153,6 +173,9 @@ export const createOrganizationData = () => internalFetch("e2e-data/organization
 
 export const cleanImportData = () => internalFetch("e2e-data/import/clean")
 export const generateImportData = () => internalFetch("e2e-data/import/generate")
+export const generateApplicableImportData = () => internalFetch("e2e-data/import/generate-applicable")
+export const generateAllSelectedImportData = () => internalFetch("e2e-data/import/generate-all-selected")
+export const generateLotOfImportData = () => internalFetch("e2e-data/import/generate-lot-of-data")
 
 export const cleanRepositoriesData = () => internalFetch("e2e-data/repositories/clean")
 export const createRepositoriesData = () => internalFetch("e2e-data/repositories/create")

@@ -97,7 +97,7 @@ export const ImportRowLanguageMenu: FunctionComponent<{
                 <Select
                     endAdornment={props.value ?
                         <InputAdornment position="end" className={classes.selectAdornment}>
-                            <IconButton onClick={onReset} size="small">
+                            <IconButton onClick={onReset} size="small" data-cy="import-row-language-select-clear-button">
                                 <Clear/>
                             </IconButton>
                         </InputAdornment> : <></>

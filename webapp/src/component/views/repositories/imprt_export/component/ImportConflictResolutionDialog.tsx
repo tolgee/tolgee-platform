@@ -42,7 +42,9 @@ export const ImportConflictResolutionDialog: FunctionComponent<{
 
     return (
         <div>
-            <Dialog fullScreen open={!!props.row} onClose={props.onClose} TransitionComponent={Transition}>
+            <Dialog fullScreen open={!!props.row} onClose={props.onClose} TransitionComponent={Transition}
+            data-cy="import-conflict-resolution-dialog"
+            >
                 <AppBar className={classes.appBar}>
                     <Toolbar>
                         <IconButton edge="start" color="inherit" onClick={props.onClose} aria-label="close">

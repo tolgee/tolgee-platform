@@ -49,7 +49,9 @@ export const ImportShowDataDialog: FunctionComponent<{
 
     return (
         <div>
-            <Dialog fullScreen open={!!props.row} onClose={props.onClose} TransitionComponent={Transition}>
+            <Dialog fullScreen open={!!props.row} onClose={props.onClose} TransitionComponent={Transition}
+                    data-cy="import-show-data-dialog"
+            >
                 <AppBar className={classes.appBar}>
                     <Toolbar>
                         <IconButton edge="start" color="inherit" onClick={props.onClose} aria-label="close">

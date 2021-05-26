@@ -15,13 +15,10 @@ export const getPopover = () => {
     return cy.xpath("//*[contains(@class, 'MuiPopover-root') and not(contains(@style, 'visibility'))]")
 }
 
-export const getDialog = () => {
-    return cy.xpath("//*[contains(@class, 'MuiDialog-root')]")
-}
-
 export const gcy = (dataCy: Value) => cy.get('[data-cy="' + dataCy + '"]')
 export const goToPage = (page: number) => gcy("global-list-pagination").within(() => cy.xpath(".//button[text() = '" + page + "']").click())
-
+export const contextGoToPage = (chainable: Chainable, page: number) =>
+    chainable.findDcy("global-list-pagination").within(() => cy.xpath(".//button[text() = '" + page + "']").click())
 
 export const clickGlobalSave = () => {
     gcy("global-form-save-button").click()
@@ -51,4 +48,12 @@ export const selectInRepositoryMenu = (itemName: string) => {
 export const selectInSelect = (chainable: Chainable, renderedValue: string) => {
     chainable.find("div").first().click()
     getPopover().contains(renderedValue).click()
+}
+
+export const toggleInMultiselect = (chainable: Chainable, renderedValues: string[]) => {
+    chainable.find("div").first().click()
+    renderedValues.forEach(v => {
+        getPopover().contains(v).click()
+    })
+    cy.get('body').click(0, 0)
 }

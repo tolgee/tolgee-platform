@@ -22,16 +22,27 @@ declare namespace DataCy {
         "global-list-search" |
         "global-paginated-list" |
         "global-plus-button" |
+        "global-search-field" |
         "global-snackbars" |
         "global-user-menu-button" |
+        "import-conflict-resolution-dialog" |
+        "import-conflicts-not-resolved-dialog" |
+        "import-conflicts-not-resolved-dialog-cancel-button" |
+        "import-conflicts-not-resolved-dialog-resolve-button" |
+        "import-file-issues-button" |
+        "import-file-issues-dialog" |
         "import-result-delete-language-button" |
         "import-result-file-cell" |
+        "import-result-file-warnings" |
         "import-result-language-menu-cell" |
         "import-result-resolve-button" |
         "import-result-resolved-conflicts-cell" |
         "import-result-row" |
+        "import-result-show-all-translations-button" |
         "import-result-total-count-cell" |
+        "import-row-language-select-clear-button" |
         "import-row-language-select-form-control" |
+        "import-show-data-dialog" |
         "import_apply_import_button" |
         "import_cancel_import_button" |
         "leave-organization-button" |
@@ -70,6 +81,7 @@ declare namespace DataCy {
         "translations-delete-button" |
         "translations-editable-cell" |
         "translations-editable-cell-editing" |
+        "translations-language-select-form-control" |
         "translations-row-checkbox" |
         "user-account-side-menu" |
         "user-organizations-settings-subtitle-link"

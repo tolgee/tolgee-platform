@@ -85,8 +85,9 @@ export const ImportResultRow = (props: {
                 <TableCell scope="row" data-cy="import-result-file-cell">
                     {props.row.importFileName} ({props.row.name})
                     {props.row.importFileIssueCount ?
-                        <Box>
+                        <Box data-cy="import-result-file-warnings">
                             <ChipButton
+                                data-cy="import-file-issues-button"
                                 onClick={() => {
                                     props.onShowFileIssues()
                                 }}
@@ -98,7 +99,9 @@ export const ImportResultRow = (props: {
                         : <></>}
                 </TableCell>
                 <TableCell scope="row" align="center" data-cy="import-result-total-count-cell">
-                    <ChipButton onClick={() => {
+                    <ChipButton
+                        data-cy="import-result-show-all-translations-button"
+                        onClick={() => {
                         props.onShowData()
                     }}>{props.row.totalCount}
                     </ChipButton>

@@ -263,6 +263,49 @@ class ImportTestData {
         }
     }
 
+    fun addManyTranslations() {
+        addFileIssues()
+        val repositoryBuilder = this.root.data.repositories[0]
+        val import = repositoryBuilder.data.imports[0]
+        import.addImportFile {
+            self { name = "another.json" }
+            val fr = addImportLanguage {
+                self {
+                    name = "fr"
+                    existingLanguage = french
+                }
+            }.self
+            (1..300).forEach { num ->
+                repositoryBuilder.addKey {
+                    val key = self {
+                        name = "this_is_key_$num"
+                    }
+                    repositoryBuilder.addTranslation {
+                        val translation = self {
+                            this.key = key
+                            this.language = english
+                            this.text = "I am translation $num"
+                        }
+                        addImportKey {
+                            self {
+                                this.name = key.name!!
+                            }
+                            addImportTranslation {
+                                self {
+                                    language = fr
+                                    this.key = this@addImportKey.self
+                                    text = "I am import translation $num"
+                                    conflict = translation
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     fun addKeyMetadata() {
         root.data.repositories[0].data.keys[2].addMeta {
             self {

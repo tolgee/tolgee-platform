@@ -28,13 +28,43 @@ class ImportE2eDataController(
         private val repositoryService: RepositoryService,
         private val userAccountService: UserAccountService
 ) {
-
-
     @GetMapping(value = ["/generate"])
     @Transactional
     fun generateBasicTestData(): Import {
         val data = ImportTestData()
         data.addFileIssues()
+        testDataService.saveTestData(data.root)
+        return data.importBuilder.self
+    }
+
+    @GetMapping(value = ["/generate-applicable"])
+    @Transactional
+    fun generateApplicableTestData(): Import {
+        val data = ImportTestData()
+        data.setAllResolved()
+        data.addFileIssues()
+        data.importFrench.existingLanguage = data.french
+        testDataService.saveTestData(data.root)
+        return data.importBuilder.self
+    }
+
+    @GetMapping(value = ["/generate-all-selected"])
+    @Transactional
+    fun generateAllSelectedTestData(): Import {
+        val data = ImportTestData()
+        data.addFileIssues()
+        data.importFrench.existingLanguage = data.french
+        testDataService.saveTestData(data.root)
+        return data.importBuilder.self
+    }
+
+    @GetMapping(value = ["/generate-lot-of-data"])
+    @Transactional
+    fun generateLotTestData(): Import {
+        val data = ImportTestData()
+        data.addFileIssues()
+        data.addManyFileIssues()
+        data.addManyTranslations()
         testDataService.saveTestData(data.root)
         return data.importBuilder.self
     }

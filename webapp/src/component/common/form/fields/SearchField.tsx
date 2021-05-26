@@ -1,7 +1,7 @@
 import React, {ComponentProps, useEffect, useState} from 'react';
 import {InputAdornment, TextField} from "@material-ui/core";
 import {Search} from "@material-ui/icons";
-import { T } from '@tolgee/react';
+import {T} from '@tolgee/react';
 
 const SearchField = (props: {
     initial?: string,
@@ -24,6 +24,7 @@ const SearchField = (props: {
 
     return (
         <TextField type="search"
+                   data-cy="global-search-field"
                    label={<T>standard_search_label</T>}
                    InputProps={{
                        startAdornment: (

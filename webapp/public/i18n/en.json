@@ -227,8 +227,6 @@
   "import_not_resolved_error_dialog_title" : "Conflicts not resolved",
   "import_not_resolved_error_dialog_message_text" : "Some conflicts were not resolved. Do you want to override existing translations?",
   "import_not_resolved_error_dialog_cancel_button" : "Back",
-  "import_keep_existing_for_all_button" : "Keep existing",
-  "import_override_all_button" : "Override all",
   "import_successfully_applied_message" : "Import succeeded!",
   "existing_language_not_selected" : "Language not selected",
   "import_existing_language_not_selected_error" : "Select existing language",
@@ -267,5 +265,6 @@
   "import_result_language_menu_add_new" : "Add new",
   "import_add_new_language_dialog_title" : "Add new language",
   "language_abbreviation_exists" : "Language abbreviation exists",
-  "language_name_exists" : "Language with this name exists"
+  "language_name_exists" : "Language with this name exists",
+  "import_resolve_conflicts_button" : "Resolve conflicts"
 }

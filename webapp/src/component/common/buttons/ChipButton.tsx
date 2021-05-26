@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {FunctionComponent, ReactNode} from 'react';
 import Box from "@material-ui/core/Box";
-import {Button, makeStyles} from "@material-ui/core";
+import {Button, ButtonProps, makeStyles} from "@material-ui/core";
 import clsx from "clsx";
 
 const useStyles = makeStyles(theme => ({
@@ -28,16 +28,18 @@ const useStyles = makeStyles(theme => ({
 export const ChipButton: FunctionComponent<{
     beforeIcon?: ReactNode,
     onClick: () => void
-}> = (props) => {
+} & ButtonProps> = (props) => {
+
+    const {beforeIcon, children, ...buttonProps} = props
 
     const classes = useStyles()
 
     return (
-        <Button onClick={props.onClick} className={classes.root}>
-            {props.beforeIcon && <Box display="inline-flex" className={clsx(classes.beforeIcon, classes.icon)}>
-                {props.beforeIcon}
+        <Button className={classes.root} {...buttonProps}>
+            {beforeIcon && <Box display="inline-flex" className={clsx(classes.beforeIcon, classes.icon)}>
+                {beforeIcon}
             </Box>}
-            {props.children}
+            {children}
         </Button>
     )
 }

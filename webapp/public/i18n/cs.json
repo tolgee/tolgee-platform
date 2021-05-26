@@ -227,8 +227,6 @@
   "import_result_total_conflict_count_header" : "Vyřešeno/Konfliktů",
   "import_not_resolved_error_dialog_title" : "Konflikty nevyřešeny",
   "import_not_resolved_error_dialog_message_text" : "Některé konflikty nebyly vyřešeny. Chcete přepsat existující překlady?",
-  "import_keep_existing_for_all_button" : "Zachovat původní",
-  "import_override_all_button" : "Přepsat vše",
   "import_successfully_applied_message" : "Import byl úspěšně dokončen!",
   "existing_language_not_selected" : "Nebyl vybrán žádný jazyk",
   "import_existing_language_not_selected_error" : "Zvolte existující jazyk",
@@ -267,5 +265,6 @@
   "import_result_language_menu_add_new" : "Přidat nový",
   "import_add_new_language_dialog_title" : "Přidat jazyk",
   "language_abbreviation_exists" : "Zkratka jazyka existuje",
-  "language_name_exists" : "Jazyk s tímto názvem již existuje"
+  "language_name_exists" : "Jazyk s tímto názvem již existuje",
+  "import_resolve_conflicts_button" : "Vyřešit konflikty"
 }

@@ -10,7 +10,11 @@ export const ImportConflictNotResolvedErrorDialog: FunctionComponent<{
 
     return (
         <div>
-            <Dialog open={props.open} onClose={props.onClose} aria-labelledby="import-not-resolved-error-dialog-title">
+            <Dialog open={props.open}
+                    onClose={props.onClose}
+                    aria-labelledby="import-not-resolved-error-dialog-title"
+                    data-cy="import-conflicts-not-resolved-dialog"
+            >
                 <DialogTitle id="import-not-resolved-error-dialog-title"><T>import_not_resolved_error_dialog_title</T></DialogTitle>
                 <DialogContent>
                     <DialogContentText>
@@ -18,10 +22,14 @@ export const ImportConflictNotResolvedErrorDialog: FunctionComponent<{
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={props.onClose} color="secondary">
+                    <Button onClick={props.onClose} color="secondary"
+                            data-cy="import-conflicts-not-resolved-dialog-cancel-button"
+                    >
                         <T>import_not_resolved_error_dialog_cancel_button</T>
                     </Button>
-                    <Button onClick={props.onResolve} color="primary">
+                    <Button onClick={props.onResolve} color="primary"
+                        data-cy="import-conflicts-not-resolved-dialog-resolve-button"
+                    >
                         <T>import_resolve_conflicts_button</T>
                     </Button>
                 </DialogActions>
