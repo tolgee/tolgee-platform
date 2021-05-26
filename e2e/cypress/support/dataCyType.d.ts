@@ -31,6 +31,18 @@ declare namespace DataCy {
         "import-conflicts-not-resolved-dialog-resolve-button" |
         "import-file-issues-button" |
         "import-file-issues-dialog" |
+        "import-resolution-dialog-accept-imported-button" |
+        "import-resolution-dialog-accept-old-button" |
+        "import-resolution-dialog-close-button" |
+        "import-resolution-dialog-conflict-count" |
+        "import-resolution-dialog-data-row" |
+        "import-resolution-dialog-existing-translation" |
+        "import-resolution-dialog-key-name" |
+        "import-resolution-dialog-new-translation" |
+        "import-resolution-dialog-resolved-count" |
+        "import-resolution-dialog-show-resolved-switch" |
+        "import-resolution-dialog-translation-check" |
+        "import-resolution-dialog-translation-loading" |
         "import-result-delete-language-button" |
         "import-result-file-cell" |
         "import-result-file-warnings" |

@@ -16,6 +16,7 @@ type ImportConflictTranslationProps = {
     onToggle: () => void
     onDetectedExpandability: (expandable: boolean) => void
     expandable: boolean
+    "data-cy": string
 }
 
 const useStyles = makeStyles(theme => ({
@@ -79,19 +80,23 @@ export const ImportConflictTranslation = (props: ImportConflictTranslationProps)
         }
     })
 
+    const dataCySelected = {"data-cy-selected": props.selected || undefined}
+
     return (
         <Box position="relative"
              onClick={props.onSelect}
              className={clsx(classes.root, {[classes.selected]: props.selected || props.loaded}, {[classes.expanded]: props.expanded})}
              display="flex"
+             {...dataCySelected}
+             data-cy={props["data-cy"]}
         >
             {props.loading &&
-            <Box className={classes.loading} p={1}>
+            <Box className={classes.loading} p={1} data-cy="import-resolution-dialog-translation-loading">
                 <CircularProgress size={20}/>
             </Box>
             }
             {props.loaded &&
-            <Box className={classes.loading} p={1}>
+            <Box className={classes.loading} p={1} data-cy="import-resolution-dialog-translation-check">
                 <CheckIcon/>
             </Box>
             }

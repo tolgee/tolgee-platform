@@ -110,11 +110,14 @@ export const ImportConflictsData: FunctionComponent<{
                 <>
                     <ImportConflictsDataHeader language={props.row}/>
                     {data.map(t =>
-                        <Box pt={1} pb={1} pl={2} pr={2} key={t.id}>
+                        <Box pt={1} pb={1} pl={2} pr={2} key={t.id}
+                             data-cy="import-resolution-dialog-data-row">
                             <Grid container spacing={2}>
                                 <Grid item lg={3} md>
                                     <Box p={1}>
-                                        <Typography style={{overflowWrap: "break-word"}} variant={"body2"}><b>{t.keyName}</b></Typography>
+                                        <Typography style={{overflowWrap: "break-word"}} variant={"body2"} data-cy="import-resolution-dialog-key-name">
+                                            <b>{t.keyName}</b>
+                                        </Typography>
                                     </Box>
                                 </Grid>
                                 <ImportConflictTranslationsPair translation={t} languageId={languageId}/>
@@ -127,6 +130,7 @@ export const ImportConflictsData: FunctionComponent<{
             <Box display="flex" justifyContent="flex-end" p={4}>
                 {totalPages!! > 1 &&
                 <Pagination
+                    data-cy="global-list-pagination"
                     page={page!! + 1}
                     count={totalPages}
                     onChange={(_, page) => loadData(page - 1)}

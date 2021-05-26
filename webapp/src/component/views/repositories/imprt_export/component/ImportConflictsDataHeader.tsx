@@ -34,10 +34,13 @@ export const ImportConflictsDataHeader: FunctionComponent<{
         })
     }
 
-    const keepAllButton = <Button fullWidth={isSmOrLower} startIcon={<DoneAll/>} variant="outlined" color="inherit"
+    const keepAllButton = <Button data-cy="import-resolution-dialog-accept-old-button"
+                                  fullWidth={isSmOrLower} startIcon={<DoneAll/>} variant="outlined" color="inherit"
                                   onClick={keepAllExisting}><T>import_resolution_accept_old</T></Button>
-    const overrideAllButton = <Button fullWidth={isSmOrLower} startIcon={<DoneAll/>} variant="outlined" color="inherit"
-                                      onClick={overrideAll}><T>import_resolution_accept_imported</T></Button>
+    const overrideAllButton = <Button
+        data-cy="import-resolution-dialog-accept-imported-button"
+        fullWidth={isSmOrLower} startIcon={<DoneAll/>} variant="outlined" color="inherit"
+        onClick={overrideAll}><T>import_resolution_accept_imported</T></Button>
 
     return (
         <Box pl={2} pt={2} pb={2} pr={2} mb={1} style={{

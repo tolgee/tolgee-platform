@@ -44,13 +44,13 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
                     <Box className={classes.counter}>
                         <CheckCircle className={clsx(classes.icon, classes.resolvedIcon)}/>
 
-                        <Typography variant="body1">
+                        <Typography variant="body1" data-cy="import-resolution-dialog-resolved-count">
                             {resolvedCount !== undefined ? resolvedCount : "??"}
                         </Typography>
 
                         <Warning className={clsx(classes.icon, classes.conflictsIcon)}/>
 
-                        <Typography variant="body1">
+                        <Typography variant="body1" data-cy="import-resolution-dialog-conflict-count">
                             {languageDataLoadable.data?.conflictCount}
                         </Typography>
                     </Box>
@@ -59,6 +59,7 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
                     <FormControlLabel
                         control={
                             <Switch
+                                data-cy="import-resolution-dialog-show-resolved-switch"
                                 checked={props.showResolved}
                                 onChange={props.onShowResolvedToggle}
                                 name="filter_unresolved"

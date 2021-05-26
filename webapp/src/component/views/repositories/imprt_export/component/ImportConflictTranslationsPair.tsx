@@ -61,6 +61,7 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
         <>
             <Grid item lg md sm={12} xs={12} zeroMinWidth>
                 <ImportConflictTranslation
+                    data-cy="import-resolution-dialog-existing-translation"
                     loading={isKeepExistingLoading}
                     loaded={isKeepExistingLoaded}
                     text={translation.conflictText!}
@@ -74,6 +75,7 @@ export const ImportConflictTranslationsPair: FunctionComponent<{
             </Grid>
             <Grid item lg md sm={12} xs={12} zeroMinWidth>
                 <ImportConflictTranslation
+                    data-cy="import-resolution-dialog-new-translation"
                     loading={isOverrideLoading}
                     loaded={isOverrideLoaded}
                     text={translation.text}

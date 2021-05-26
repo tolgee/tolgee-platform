@@ -107,6 +107,56 @@ describe('Import', () => {
                 getLanguageSelect(filename).should("contain.text", "Select existing language")
             }
         )
+
+        describe("Resolving", () => {
+            it("shows correct initial data", () => {
+                getLanguageRow("multilang.json (en)").findDcy("import-result-resolve-button").click()
+                gcy("import-resolution-dialog-resolved-count").should("have.text", "0")
+                gcy("import-resolution-dialog-conflict-count").should("have.text", "4")
+                gcy("import-resolution-dialog-show-resolved-switch").find("input").should("be.checked")
+                gcy("import-resolution-dialog-data-row").should("have.length", 4)
+                gcy("import-resolution-dialog-data-row").should("contain.text", "What a text")
+            })
+
+            it("resolves row (one by one)", () => {
+                getLanguageRow("multilang.json (en)").findDcy("import-result-resolve-button").click()
+                gcy("import-resolution-dialog-data-row").contains("Overridden").click()
+                cy.xpath("//*[@data-cy-selected]").should("have.length", 1)
+                findResolutionRow("what a key").findDcy("import-resolution-dialog-existing-translation")
+                    .should("not.have.attr", "data-cy-selected")
+                findResolutionRow("what a key").findDcy("import-resolution-dialog-new-translation")
+                    .should("have.attr", "data-cy-selected")
+
+                findResolutionRow("what a nice key").contains("What a text").click()
+                cy.xpath("//*[@data-cy-selected]").should("have.length", 2)
+                findResolutionRow("what a nice key").findDcy("import-resolution-dialog-new-translation")
+                    .should("not.have.attr", "data-cy-selected")
+                findResolutionRow("what a nice key").findDcy("import-resolution-dialog-existing-translation")
+                    .should("have.attr", "data-cy-selected")
+
+                gcy("import-resolution-dialog-resolved-count").should("have.text", "2")
+            })
+
+            it("accept all new", () => {
+                getLanguageRow("multilang.json (en)").findDcy("import-result-resolve-button").click()
+                gcy("import-resolution-dialog-accept-imported-button").click()
+                cy.xpath("//*[@data-cy-selected]").should("have.length", 4)
+                gcy("import-resolution-dialog-new-translation").each(($el) => {
+                    cy.wrap($el).should("have.attr", "data-cy-selected")
+                })
+                gcy("import-resolution-dialog-resolved-count").should("have.text", "4")
+            })
+
+            it("accept all old", () => {
+                getLanguageRow("multilang.json (en)").findDcy("import-result-resolve-button").click()
+                gcy("import-resolution-dialog-accept-old-button").click()
+                cy.xpath("//*[@data-cy-selected]").should("have.length", 4)
+                gcy("import-resolution-dialog-existing-translation").each(($el) => {
+                    cy.wrap($el).should("have.attr", "data-cy-selected")
+                })
+                gcy("import-resolution-dialog-resolved-count").should("have.text", "4")
+            })
+        })
     })
 
     describe("All selected", () => {
@@ -185,6 +235,17 @@ describe('Import', () => {
                 assertInResultDialog("I am import translation 145")
             }
         )
+
+        it("Paginates in resolution dialog", () => {
+                getLanguageRow("another.json (fr)").findDcy("import-result-resolve-button").click()
+                getResolutionDialog().contains("Resolve conflicts").should("be.visible")
+                assertInResolutionDialog("this_is_key_1")
+                assertInResolutionDialog("I am translation 1")
+                assertInResolutionDialog("I am import translation 1")
+                contextGoToPage(getResolutionDialog(), 6)
+                assertInResolutionDialog("I am import translation 300")
+            }
+        )
     })
 
     after(() => {
@@ -211,9 +272,23 @@ describe('Import', () => {
         return gcy("import-show-data-dialog")
     }
 
+    const getResolutionDialog = () => {
+        return gcy("import-conflict-resolution-dialog")
+    }
+
     const assertInResultDialog = (text: string) => {
         getShowDataDialog().contains(text).scrollIntoView().should("be.visible")
+    }
 
+    const assertInResolutionDialog = (text: string) => {
+        getResolutionDialog().contains(text).scrollIntoView().should("be.visible")
+    }
+
+    const findResolutionRow = (key: string) => {
+        return gcy("import-resolution-dialog-data-row")
+            .findDcy("import-resolution-dialog-key-name")
+            .contains(key)
+            .closestDcy("import-resolution-dialog-data-row")
     }
 })
 

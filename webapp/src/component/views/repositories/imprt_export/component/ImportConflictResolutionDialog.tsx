@@ -47,7 +47,9 @@ export const ImportConflictResolutionDialog: FunctionComponent<{
             >
                 <AppBar className={classes.appBar}>
                     <Toolbar>
-                        <IconButton edge="start" color="inherit" onClick={props.onClose} aria-label="close">
+                        <IconButton edge="start" color="inherit" onClick={props.onClose} aria-label="close"
+                            data-cy="import-resolution-dialog-close-button"
+                            >
                             <CloseIcon/>
                         </IconButton>
                         <Typography variant="h6" className={classes.title}>
