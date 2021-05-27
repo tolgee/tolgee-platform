@@ -2,6 +2,7 @@ import {
     cleanImportData,
     generateAllSelectedImportData,
     generateApplicableImportData,
+    generateBaseImportData,
     generateImportData,
     generateLotOfImportData,
     login
@@ -82,6 +83,16 @@ describe('Import', () => {
                 getLanguageRow(filename).gcy("import-result-resolved-conflicts-cell").should("contain.text", "0 / 0")
             }
         )
+
+        it("Adds new language", () => {
+            const filename = "multilang.json (en)"
+            let select = getLanguageSelect(filename)
+            selectInSelect(select, "Add new")
+            cy.xpath("//input[@name='name']").type("New language")
+            cy.xpath("//input[@name='abbreviation']").type("nl")
+            gcy("global-form-save-button").click()
+            getLanguageSelect(filename).should("contain.text", "New language")
+        })
 
         it("Deletes language", () => {
                 getLanguageRow("multilang.json (en)").findDcy("import-result-delete-language-button").click()
@@ -248,6 +259,48 @@ describe('Import', () => {
         )
     })
 
+    describe("file types", () => {
+        beforeEach(() => {
+            generateBaseImportData().then(repository => {
+                login("franta")
+                visit(repository.body.id);
+            })
+        })
+
+
+        it("uploads .po", () => {
+            cy.get("[data-cy=dropzone]")
+                .attachFile("import/po/example.po", {subjectType: 'drag-n-drop'})
+            gcy("import-result-total-count-cell").should("contain.text", "8")
+        })
+
+        it("uploads multiple xliffs", () => {
+            cy.get("[data-cy=dropzone]")
+                .attachFile(
+                    ["import/xliff/larger.xlf", "import/xliff/example.xliff", "import/xliff/error_example.xliff"],
+                    {subjectType: 'drag-n-drop'})
+
+            gcy("import-result-total-count-cell", {timeout: 10000}).should("exist")
+            getLanguageRow("larger.xlf (en)").should("contain.text", "1151")
+            getLanguageRow("larger.xlf (cs)").should("contain.text", "1151")
+            getLanguageRow("example.xliff (en)").findDcy("import-result-total-count-cell").should("contain.text", "176")
+        })
+
+        it("has valid xliff errors", () => {
+            cy.get("[data-cy=dropzone]")
+                .attachFile(
+                    "import/xliff/error_example.xliff",
+                    {subjectType: 'drag-n-drop'})
+
+            gcy("import-result-file-cell").findDcy("import-result-file-warnings").should("contain.text", "4")
+            gcy("import-result-file-cell").findDcy("import-file-issues-button").click()
+            getFileIssuesDialog().contains("Target translation not provided (key name: vpn.main.back)").should("be.visible")
+            getFileIssuesDialog().contains("Translation id attribute not provided " +
+                "(File original: ../src/platforms/android/androidauthenticationview.qml)")
+                .should("be.visible")
+        })
+    })
+
     after(() => {
         //  cleanImportData()
     })
@@ -257,11 +310,13 @@ describe('Import', () => {
     }
 
     const getLanguageRow = (filename: string) => {
-        return cy.gcy("import-result-row").contains(filename).closestDcy("import-result-row")
+        return cy.xpath(`//*[@data-cy='import-result-row']//*[. = '${filename}']`).closestDcy("import-result-row")
     }
 
     const getLanguageSelect = (filename: string) => {
-        return getLanguageRow(filename).findDcy("import-row-language-select-form-control")
+        return cy.xpath(`//*[@data-cy='import-result-row']//*[. = '${filename}']` +
+            `/ancestor::*[@data-cy='import-result-row']`
+            + `//*[@data-cy='import-row-language-select-form-control']`)
     }
 
     const getFileIssuesDialog = () => {

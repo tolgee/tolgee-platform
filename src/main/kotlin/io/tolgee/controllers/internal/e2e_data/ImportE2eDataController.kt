@@ -3,6 +3,8 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ImportTestData
+import io.tolgee.model.Permission
+import io.tolgee.model.Repository
 import io.tolgee.model.dataImport.Import
 import io.tolgee.security.InternalController
 import io.tolgee.service.RepositoryService
@@ -67,6 +69,35 @@ class ImportE2eDataController(
         data.addManyTranslations()
         testDataService.saveTestData(data.root)
         return data.importBuilder.self
+    }
+
+    @GetMapping(value = ["/generate-base"])
+    @Transactional
+    fun generateBaseData(): Repository {
+        val data = testDataService.saveTestData {
+            addUserAccount {
+                self {
+                    username = "franta"
+                    name = "Frantisek Dobrota"
+                }
+                addRepository {
+                    self {
+                        userOwner = this@addUserAccount.self
+                        name = "Repo"
+                    }
+                    addPermission {
+                        self {
+                            type = Permission.RepositoryPermissionType.MANAGE
+                            user = this@addUserAccount.self
+                            repository = this@addRepository.self
+                        }
+                    }
+                }
+            }
+        }
+
+        testDataService.saveTestData(data)
+        return data.data.repositories[0].self
     }
 
     @GetMapping(value = ["/clean"])

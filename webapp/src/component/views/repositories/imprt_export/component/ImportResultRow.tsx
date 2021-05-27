@@ -83,7 +83,7 @@ export const ImportResultRow = (props: {
                     <ImportRowLanguageMenu value={props.row.existingLanguageId} importLanguageId={props.row.id}/>
                 </TableCell>
                 <TableCell scope="row" data-cy="import-result-file-cell">
-                    {props.row.importFileName} ({props.row.name})
+                    <span>{props.row.importFileName} ({props.row.name})</span>
                     {props.row.importFileIssueCount ?
                         <Box data-cy="import-result-file-warnings">
                             <ChipButton
@@ -102,8 +102,9 @@ export const ImportResultRow = (props: {
                     <ChipButton
                         data-cy="import-result-show-all-translations-button"
                         onClick={() => {
-                        props.onShowData()
-                    }}>{props.row.totalCount}
+                            props.onShowData()
+                        }}>
+                        {props.row.totalCount}
                     </ChipButton>
                 </TableCell>
                 <TableCell scope="row" align="center" data-cy="import-result-resolved-conflicts-cell">

@@ -176,6 +176,7 @@ export const generateImportData = () => internalFetch("e2e-data/import/generate"
 export const generateApplicableImportData = () => internalFetch("e2e-data/import/generate-applicable")
 export const generateAllSelectedImportData = () => internalFetch("e2e-data/import/generate-all-selected")
 export const generateLotOfImportData = () => internalFetch("e2e-data/import/generate-lot-of-data")
+export const generateBaseImportData = () => internalFetch("e2e-data/import/generate-base")
 
 export const cleanRepositoriesData = () => internalFetch("e2e-data/repositories/clean")
 export const createRepositoriesData = () => internalFetch("e2e-data/repositories/create")

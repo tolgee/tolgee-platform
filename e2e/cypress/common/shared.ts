@@ -15,7 +15,7 @@ export const getPopover = () => {
     return cy.xpath("//*[contains(@class, 'MuiPopover-root') and not(contains(@style, 'visibility'))]")
 }
 
-export const gcy = (dataCy: Value) => cy.get('[data-cy="' + dataCy + '"]')
+export const gcy = (dataCy: Value, options?: Parameters<typeof cy.get>[1]) => cy.get('[data-cy="' + dataCy + '"]', options)
 export const goToPage = (page: number) => gcy("global-list-pagination").within(() => cy.xpath(".//button[text() = '" + page + "']").click())
 export const contextGoToPage = (chainable: Chainable, page: number) =>
     chainable.findDcy("global-list-pagination").within(() => cy.xpath(".//button[text() = '" + page + "']").click())
