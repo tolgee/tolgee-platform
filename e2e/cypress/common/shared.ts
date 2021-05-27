@@ -52,8 +52,33 @@ export const selectInSelect = (chainable: Chainable, renderedValue: string) => {
 
 export const toggleInMultiselect = (chainable: Chainable, renderedValues: string[]) => {
     chainable.find("div").first().click()
-    renderedValues.forEach(v => {
-        getPopover().contains(v).click()
+
+
+    getPopover().within(() => {
+        renderedValues.forEach(val => {
+            cy.xpath(`.//*[text() = '${val}']/ancestor::li//input`).each($input => {
+                cy.wrap($input).click()
+            })
+        })
+
+
+        cy.get("li").each(($li) => {
+            const input = cy.wrap($li).find("input")
+            input.each($input => {
+                let isInValues = false
+                for (let i = 0; i < renderedValues.length; i++) {
+                    const val = renderedValues[i];
+                    if (!!document.evaluate(`.//*[text() = '${val}']`, $li.get(0)).iterateNext()) {
+                        isInValues = true
+                        break
+                    }
+                }
+                const isChecked = $input.is(":checked");
+                if ((isChecked && !isInValues) || (!isChecked && isInValues)) {
+                    input.click()
+                }
+            })
+        })
     })
     cy.get('body').click(0, 0)
 }
