@@ -171,6 +171,37 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
     }
 
     @Test
+    fun `import is isolated`() {
+        val testData = ImportTestData()
+        testDataService.saveTestData(testData.root)
+        logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
+
+        performAuthGet("/v2/repositories/${testData.repository.id}/import/result").andIsOk
+
+        val testData2 = ImportTestData()
+        testData2.userAccount.username = "user2"
+        testDataService.saveTestData(testData2.root)
+        logAsUser(testData2.root.data.userAccounts[0].self.username!!, "admin")
+
+        performAuthGet("/v2/repositories/${testData2.repository.id}/import/result").andIsOk
+                .andPrettyPrint.andAssertThatJson.node("_embedded.languages").let {
+                    it.isArray.hasSize(3)
+                    it.node("[0].totalCount").isEqualTo(6)
+                }
+
+        performAuthDelete("/v2/repositories/${testData2.repository.id}/import", null).andIsOk
+
+        logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
+
+        performAuthGet("/v2/repositories/${testData.repository.id}/import/result").andIsOk
+                .andPrettyPrint.andAssertThatJson.node("_embedded.languages").let {
+                    it.isArray.hasSize(3)
+                    it.node("[0].totalCount").isEqualTo(6)
+                }
+    }
+
+
+    @Test
     fun `it returns correct file issues`() {
         val testData = ImportTestData()
         testData.addManyFileIssues()
