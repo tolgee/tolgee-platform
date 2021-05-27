@@ -184,7 +184,7 @@ describe('Import', () => {
             })
         })
 
-        it.only("Applies import", () => {
+        it("Applies import", () => {
                 gcy("import_apply_import_button").click()
                 cy.gcy("import-result-row").should("not.exist")
                 selectInRepositoryMenu("Translations")
