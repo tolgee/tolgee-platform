@@ -36,11 +36,11 @@ export const ImportAlertError: FunctionComponent<{
 
     return (
         <Collapse in={open}>
-            <Box mt={4}>
+            <Box mt={4} data-cy="import-file-error">
                 <Alert color="error" action={
                     <>
                         <Box display="inline" mr={1}>
-                            <Button color="inherit" size="small" onClick={() => setMoreOpen(!moreOpen)}>
+                            <Button color="inherit" size="small" onClick={() => setMoreOpen(!moreOpen)} data-cy="import-file-error-more-less-button">
                                 {moreOpen ?
                                     <T>import_error_less_button</T>
                                     :
@@ -48,6 +48,7 @@ export const ImportAlertError: FunctionComponent<{
                             </Button>
                         </Box>
                         <IconButton
+                            data-cy="import-file-error-collapse-button"
                             aria-label="close"
                             color="inherit"
                             size="small"

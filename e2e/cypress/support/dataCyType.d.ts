@@ -29,6 +29,9 @@ declare namespace DataCy {
         "import-conflicts-not-resolved-dialog" |
         "import-conflicts-not-resolved-dialog-cancel-button" |
         "import-conflicts-not-resolved-dialog-resolve-button" |
+        "import-file-error" |
+        "import-file-error-collapse-button" |
+        "import-file-error-more-less-button" |
         "import-file-issues-button" |
         "import-file-issues-dialog" |
         "import-resolution-dialog-accept-imported-button" |
