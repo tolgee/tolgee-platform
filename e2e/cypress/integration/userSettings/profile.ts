@@ -1,6 +1,6 @@
 import {
     createUser,
-    deleteAllEmails, deleteUser,
+    deleteAllEmails,
     deleteUserWithEmailVerification,
     disableEmailVerification,
     enableEmailVerification,
@@ -83,7 +83,7 @@ describe('User profile', () => {
         cy.xpath("//*[@name='email']").should("have.value", INITIAL_EMAIL);
     })
 
-    it.only("changes password", () => {
+    it("changes password", () => {
         cy.visit(`${HOST}/user`);
         let superNewPassword = "super_new_password";
         cy.xpath("//*[@name='password']").clear().type(superNewPassword)

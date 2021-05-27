@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import {HOST, PASSWORD, USERNAME} from "../common/constants";
 import {getAnyContainingText} from "../common/xPath";
-import {createUser, deleteAllEmails, getAllEmails, getParsedResetPasswordEmail, login} from "../common/apiCalls";
+import {createUser, deleteAllEmails, getParsedResetPasswordEmail, login} from "../common/apiCalls";
 import {assertMessage, getPopover} from "../common/shared";
 
 context('Login', () => {
@@ -48,7 +48,7 @@ context('Login', () => {
 
     });
 
-    it.only("will reset password", () => {
+    it("will reset password", () => {
         deleteAllEmails()
         let username = "test@testuser.com";
         createUser(username)

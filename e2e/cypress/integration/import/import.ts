@@ -84,7 +84,7 @@ describe('Import', () => {
             }
         )
 
-        it.only("Adds new language", () => {
+        it("Adds new language", () => {
             const filename = "multilang.json (en)"
             let select = getLanguageSelect(filename)
             selectInSelect(select, "Add new")
