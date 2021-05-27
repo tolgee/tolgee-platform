@@ -84,7 +84,7 @@ describe('Import', () => {
             }
         )
 
-        it("Adds new language", () => {
+        it.only("Adds new language", () => {
             const filename = "multilang.json (en)"
             let select = getLanguageSelect(filename)
             selectInSelect(select, "Add new")
@@ -92,6 +92,8 @@ describe('Import', () => {
             cy.xpath("//input[@name='abbreviation']").type("nl")
             gcy("global-form-save-button").click()
             getLanguageSelect(filename).should("contain.text", "New language")
+            selectInRepositoryMenu("Languages")
+            cy.contains("New language").should("be.visible")
         })
 
         it("Deletes language", () => {
