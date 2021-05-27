@@ -94,11 +94,16 @@ export const ImportView: FunctionComponent = () => {
         }
     }
 
+    if (addFilesLoadable.error?.code === "cannot_add_more_then_100_languages") {
+        messageService.error(<T parameters={{n: "100"}}>import_error_cannot_add_more_then_n_languages</T>)
+    }
+
     return (
         <BaseView title={<T>import_translations_title</T>} xs={12} md={10} lg={8}>
             <ImportConflictResolutionDialog row={resolveRow} onClose={onConflictResolutionDialogClose}/>
             <Box mt={2}>
                 <ImportFileInput onNewFiles={dataHelper.onNewFiles}/>
+
                 {addFilesLoadable.data?.errors?.map((e, idx) =>
                     <ImportAlertError key={idx} error={e}/>
                 )}

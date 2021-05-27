@@ -5,11 +5,12 @@ import {
     generateBaseImportData,
     generateImportData,
     generateLotOfImportData,
+    generateManyLanguagesImportData,
     login
 } from "../../common/apiCalls";
 import {HOST} from "../../common/constants";
 import 'cypress-file-upload';
-import {confirmStandard, contextGoToPage, gcy, selectInRepositoryMenu, selectInSelect, toggleInMultiselect} from "../../common/shared";
+import {assertMessage, confirmStandard, contextGoToPage, gcy, selectInRepositoryMenu, selectInSelect, toggleInMultiselect} from "../../common/shared";
 
 describe('Import', () => {
     beforeEach(() => {
@@ -261,6 +262,22 @@ describe('Import', () => {
         )
     })
 
+    it.only("does not add too many languages", () => {
+        generateManyLanguagesImportData().then(importData => {
+            login("franta")
+            visit(importData.body.repository.id);
+        })
+
+        const files = []
+        for (let i = 1; i <= 20; i++) {
+            files.push("import/simple.json")
+        }
+
+        cy.get("[data-cy=dropzone]")
+            .attachFile(files, {subjectType: 'drag-n-drop'})
+        assertMessage("Cannot add more then 100 languages")
+    })
+
     describe("file types", () => {
         beforeEach(() => {
             generateBaseImportData().then(repository => {
@@ -269,12 +286,12 @@ describe('Import', () => {
             })
         })
 
-
         it("uploads .po", () => {
             cy.get("[data-cy=dropzone]")
                 .attachFile("import/po/example.po", {subjectType: 'drag-n-drop'})
             gcy("import-result-total-count-cell").should("contain.text", "8")
         })
+
 
         it("uploads multiple xliffs", () => {
             cy.get("[data-cy=dropzone]")

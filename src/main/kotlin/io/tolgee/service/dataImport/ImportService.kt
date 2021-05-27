@@ -27,7 +27,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.interceptor.TransactionInterceptor
-import javax.persistence.EntityManager
 
 @Service
 @Transactional
@@ -43,7 +42,6 @@ class ImportService(
         private val importTranslationRepository: ImportTranslationRepository,
         private val importFileIssueParamRepository: ImportFileIssueParamRepository,
         private val keyMetaService: KeyMetaService,
-        private val entityManager: EntityManager
 ) {
     @Transactional
     fun addFiles(files: List<ImportFileDto>,
@@ -53,6 +51,11 @@ class ImportService(
                 ?: Import(authenticationFacade.userAccount, repositoryHolder.repository)
 
         val nonNullMessageClient = messageClient ?: { _, _ -> }
+        val languages = findLanguages(import)
+
+        if (languages.count() + files.size > 100) {
+            throw BadRequestException(Message.CANNOT_ADD_MORE_THEN_100_LANGUAGES)
+        }
 
         importRepository.save(import)
         val fileProcessor = CoreImportFilesProcessor(

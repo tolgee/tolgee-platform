@@ -35,6 +35,9 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
     @Value("classpath:import/po/example.po")
     lateinit var poFile: Resource
 
+    @Value("classpath:import/simple.json")
+    lateinit var simpleJson: Resource
+
     @Value("classpath:import/xliff/example.xliff")
     lateinit var xliffFile: Resource
 
@@ -101,6 +104,18 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
                 }
     }
 
+
+    @Test
+    fun `it throws when more then 100 languages`() {
+        val repository = dbPopulator.createBase(generateUniqueString())
+
+        val data = (1..101).associate { "simple$it.json" as String? to simpleJson }
+
+        performImport(repositoryId = repository.id, data)
+                .andIsBadRequest.andPrettyPrint.andAssertThatJson {
+                    node("code").isEqualTo("cannot_add_more_then_100_languages")
+                }
+    }
 
     @Test
     fun `it saves proper data and returns correct response (streamed)`() {

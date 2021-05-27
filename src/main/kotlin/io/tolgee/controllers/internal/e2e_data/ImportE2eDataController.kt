@@ -71,6 +71,22 @@ class ImportE2eDataController(
         return data.importBuilder.self
     }
 
+    @GetMapping(value = ["/generate-many-languages"])
+    @Transactional
+    fun addManyLanguages(): Import {
+        val data = ImportTestData()
+        val file = data.importBuilder.data.importFiles[0]
+        (0..90).forEach {
+            file.addImportLanguage {
+                self {
+                    name = "lng $it"
+                }
+            }
+        }
+        testDataService.saveTestData(data.root)
+        return data.importBuilder.self
+    }
+
     @GetMapping(value = ["/generate-base"])
     @Transactional
     fun generateBaseData(): Repository {
