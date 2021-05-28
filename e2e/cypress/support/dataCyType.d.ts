@@ -46,6 +46,7 @@ declare namespace DataCy {
         "import-resolution-dialog-show-resolved-switch" |
         "import-resolution-dialog-translation-check" |
         "import-resolution-dialog-translation-loading" |
+        "import-resolution-translation-expand-button" |
         "import-result-delete-language-button" |
         "import-result-file-cell" |
         "import-result-file-warnings" |

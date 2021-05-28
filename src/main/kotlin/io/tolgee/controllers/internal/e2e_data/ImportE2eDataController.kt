@@ -39,6 +39,23 @@ class ImportE2eDataController(
         return data.importBuilder.self
     }
 
+    @GetMapping(value = ["/generate-with-long-text"])
+    @Transactional
+    fun generateWithLongText(): Import {
+        val data = ImportTestData()
+        data.importBuilder.data.importFiles[0].data.importTranslations[0].self {
+            text = "Hello, I am translation, with pretty long long long long long long long long long " +
+                    "long long long long long long long long long long long long long long long long " +
+                    "long long long long long long long long long long text"
+            conflict!!.text = "Hello, I am old translation, with pretty long long long long long long long long long " +
+                    "long long long long long long long long long long long long long long long long " +
+                    "long long long long long long long long long long text"
+        }
+        data.addFileIssues()
+        testDataService.saveTestData(data.root)
+        return data.importBuilder.self
+    }
+
     @GetMapping(value = ["/generate-applicable"])
     @Transactional
     fun generateApplicableTestData(): Import {

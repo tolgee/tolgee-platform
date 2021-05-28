@@ -107,11 +107,13 @@ export const ImportConflictTranslation = (props: ImportConflictTranslationProps)
             <Box style={{
                 opacity: props.loading || props.loaded ? 0 : 1
             }}>
-                <IconButton className={classes.toggleButton} onClick={(e) => {
-                    e.stopPropagation()
-                    props.onToggle()
-                }
-                }>
+                <IconButton data-cy="import-resolution-translation-expand-button"
+                            className={classes.toggleButton}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                props.onToggle()
+                            }
+                            }>
                     {!props.expanded ?
                         <KeyboardArrowDownIcon/>
                         :
