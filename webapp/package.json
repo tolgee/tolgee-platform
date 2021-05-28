@@ -41,7 +41,7 @@
     "typeface-roboto": "1.1.13",
     "typescript": "^4.3.2",
     "use-debounce": "^6.0.1",
-    "web-vitals": "^1.1.1",
+    "web-vitals": "^1.1.2",
     "yup": "^0.32.9"
   },
   "scripts": {
