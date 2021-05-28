@@ -13,7 +13,7 @@ const useStyles = makeStyles(theme => ({
         alignItems: "center",
         borderRadius: 20
     },
-    icon: {
+    validIcon: {
         fontSize: 20,
         marginRight: 4,
     },
@@ -42,13 +42,13 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
             <Grid container spacing={4} alignItems="center">
                 <Grid item>
                     <Box className={classes.counter}>
-                        <CheckCircle className={clsx(classes.icon, classes.resolvedIcon)}/>
+                        <CheckCircle className={clsx(classes.validIcon, classes.resolvedIcon)}/>
 
                         <Typography variant="body1" data-cy="import-resolution-dialog-resolved-count">
                             {resolvedCount !== undefined ? resolvedCount : "??"}
                         </Typography>
 
-                        <Warning className={clsx(classes.icon, classes.conflictsIcon)}/>
+                        <Warning className={clsx(classes.validIcon, classes.conflictsIcon)}/>
 
                         <Typography variant="body1" data-cy="import-resolution-dialog-conflict-count">
                             {languageDataLoadable.data?.conflictCount}

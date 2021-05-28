@@ -113,7 +113,9 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
     return (
         <ImportFileDropzone onNewFiles={onNewFiles}>
             <Box mt={4} className={classes.root} pt={5} pb={5} justifyContent="space-between" alignItems="center" flexDirection="column" display="flex">
-                <input type="file" style={{display: "none"}} ref={fileRef} onChange={e => onFileSelected(e)} multiple accept={ALLOWED_EXTENSIONS.join(",")}/>
+                <input
+                    data-cy={"import-file-input"}
+                    type="file" style={{display: "none"}} ref={fileRef} onChange={e => onFileSelected(e)} multiple accept={ALLOWED_EXTENSIONS.join(",")}/>
                 <Typography variant="body1"><T>import_file_input_drop_file_text</T></Typography>
                 <Box mt={2} mb={2}>
                     <Button

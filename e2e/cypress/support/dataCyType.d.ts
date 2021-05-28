@@ -6,6 +6,7 @@ declare namespace DataCy {
         "api-keys-repository-select-item" |
         "camera-button" |
         "dropzone" |
+        "dropzone-inner" |
         "global-base-view-title" |
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |
@@ -32,6 +33,7 @@ declare namespace DataCy {
         "import-file-error" |
         "import-file-error-collapse-button" |
         "import-file-error-more-less-button" |
+        "import-file-input" |
         "import-file-issues-button" |
         "import-file-issues-dialog" |
         "import-resolution-dialog-accept-imported-button" |

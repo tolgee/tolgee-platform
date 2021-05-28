@@ -13,7 +13,7 @@ const useStyles = makeStyles(theme => ({
         cursor: "pointer",
         minWidth: "0",
     },
-    icon: {
+    validIcon: {
         display: "inline-flex",
         alignItems: "center",
         "& svg": {
@@ -36,7 +36,7 @@ export const ChipButton: FunctionComponent<{
 
     return (
         <Button className={classes.root} {...buttonProps}>
-            {beforeIcon && <Box display="inline-flex" className={clsx(classes.beforeIcon, classes.icon)}>
+            {beforeIcon && <Box display="inline-flex" className={clsx(classes.beforeIcon, classes.validIcon)}>
                 {beforeIcon}
             </Box>}
             {children}

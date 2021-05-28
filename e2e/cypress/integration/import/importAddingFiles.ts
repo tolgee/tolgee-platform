@@ -19,6 +19,10 @@ describe('Import Adding files', () => {
         gcy("import-result-total-count-cell").should("contain.text", "8")
     })
 
+    it("uploads with input", () => {
+        gcy("import-file-input").attachFile("import/po/example.po")
+        gcy("import-result-total-count-cell").should("contain.text", "8")
+    })
 
     it("uploads multiple xliffs", () => {
         cy.get("[data-cy=dropzone]")
@@ -45,6 +49,46 @@ describe('Import Adding files', () => {
             "(File original: ../src/platforms/android/androidauthenticationview.qml)")
             .should("be.visible")
     })
+
+    it("dropzone highlights on drag over", () => {
+        cy.fixture("import/simple.json").then(json => {
+            console.log(json)
+            const dt = new DataTransfer() || new ClipboardEvent('').clipboardData;
+            const blob = new Blob([JSON.stringify(json, null, 2)], {type: 'application/json'})
+            let file = new File([blob], "sample.jpg", {type: 'image/png'})
+            dt.items.add(file)
+            cy.get("[data-cy=dropzone]").trigger("dragenter", {
+                dataTransfer: dt
+            })
+            cy.get("[data-cy=dropzone-inner]").should("have.css", "background-color", "rgb(232, 245, 233)")
+            cy.get("[data-cy=dropzone]").trigger("dragleave", {
+                dataTransfer: dt
+            })
+            cy.get("[data-cy=dropzone-inner]").should("have.css", "background-color", "rgba(0, 0, 0, 0)")
+        })
+    })
+
+
+    it("dropzone highlights on drag over (error)", () => {
+        cy.fixture("import/simple.json").then(json => {
+            console.log(json)
+            const dt = new DataTransfer() || new ClipboardEvent('').clipboardData;
+            const blob = new Blob([JSON.stringify(json, null, 2)], {type: 'application/json'})
+            let file = new File([blob], "sample.jpg", {type: 'image/png'})
+            for (let i = 0; i < 21; i++) {
+                dt.items.add(file)
+            }
+            cy.get("[data-cy=dropzone]").trigger("dragenter", {
+                dataTransfer: dt
+            })
+            cy.get("[data-cy=dropzone-inner]").should("have.css", "background-color", "rgb(255, 235, 238)")
+            cy.get("[data-cy=dropzone]").trigger("dragleave", {
+                dataTransfer: dt
+            })
+            cy.get("[data-cy=dropzone-inner]").should("have.css", "background-color", "rgba(0, 0, 0, 0)")
+        })
+    })
+
 
     after(() => {
         cleanImportData()
