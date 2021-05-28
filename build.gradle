@@ -169,7 +169,7 @@ dependencies {
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.1029'
     compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
     implementation('org.reflections:reflections:0.9.12')
-    implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.25.0'
+    implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.26.0'
     testImplementation('org.mockito.kotlin:mockito-kotlin:3.1.0')
     testCompile("io.findify:s3mock_2.13:0.2.6")
 }
