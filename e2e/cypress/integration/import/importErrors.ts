@@ -64,8 +64,7 @@ describe('Import errors', () => {
         })
 
         it("collapses error", () => {
-            gcy("import-file-error").findDcy("import-file-error-collapse-button").click()
-            gcy("import-file-error").should("not.be.visible")
+            gcy("import-file-error").findDcy("import-file-error-collapse-button").click().should("not.be.visible")
         })
     })
 
