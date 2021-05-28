@@ -46,10 +46,11 @@ export const useApplyImportHelper = (dataHelper: ReturnType<typeof useImportData
     }, [importApplyLoadable.error])
 
     useEffect(() => {
+        startLoading()
         if (importApplyLoadable.loaded) {
             dataHelper.loadData()
         }
-    }, [importApplyLoadable.loaded, importApplyLoadable.loading])
+    }, [importApplyLoadable.loading])
 
     const onDialogClose = () => {
         setConflictNotResolvedDialogOpen(false)
