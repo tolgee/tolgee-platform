@@ -12,7 +12,7 @@
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^13.1.9",
     "@tolgee/react": "^1.0.0-alpha.45",
-    "@tolgee/ui": "^1.0.0-alpha.42",
+    "@tolgee/ui": "^1.0.0-alpha.45",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.6.1",
     "@types/react": "^17.0.8",
