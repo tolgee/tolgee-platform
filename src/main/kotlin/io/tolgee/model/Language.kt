@@ -1,24 +1,26 @@
 package io.tolgee.model
 
 import io.tolgee.dtos.request.LanguageDTO
+import io.tolgee.service.dataImport.ImportService
+import org.springframework.beans.factory.ObjectFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
+import org.springframework.transaction.annotation.Transactional
 import javax.persistence.*
 
 @Entity
+@EntityListeners(Language.Companion.LanguageListeners::class)
 @Table(
-    uniqueConstraints = [UniqueConstraint(
-        columnNames = ["repository_id", "name"],
-        name = "language_repository_name"
-    ), UniqueConstraint(columnNames = ["repository_id", "abbreviation"], name = "language_abbreviation_name")],
-    indexes = [Index(
-        columnList = "abbreviation",
-        name = "index_abbreviation"
-    ), Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_repository")]
+        uniqueConstraints = [UniqueConstraint(
+                columnNames = ["repository_id", "name"],
+                name = "language_repository_name"
+        ), UniqueConstraint(columnNames = ["repository_id", "abbreviation"], name = "language_abbreviation_name")],
+        indexes = [Index(
+                columnList = "abbreviation",
+                name = "index_abbreviation"
+        ), Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_repository")]
 )
-class Language : AuditModel() {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null
-
+class Language : StandardAuditModel() {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
     var translations: MutableSet<Translation>? = null
 
@@ -42,6 +44,19 @@ class Language : AuditModel() {
             language.name = dto.name
             language.abbreviation = dto.abbreviation
             return language
+        }
+
+        @Configurable
+        class LanguageListeners {
+
+            @Autowired
+            lateinit var provider: ObjectFactory<ImportService>
+
+            @PreRemove
+            @Transactional
+            fun preRemove(language: Language) {
+                provider.`object`.onExistingLanguageRemoved(language)
+            }
         }
     }
 }

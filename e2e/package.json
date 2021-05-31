@@ -13,7 +13,7 @@
     "bcryptjs": "^2.4.3",
     "cypress": "^7.1.0",
     "cypress-dotenv": "^1.2.2",
-    "cypress-file-upload": "^4.1.1",
+    "cypress-file-upload": "^5.0.7",
     "cypress-promise": "^1.1.0",
     "cypress-xpath": "^1.6.1",
     "dotenv": "^8.2.0",

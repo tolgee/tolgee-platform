@@ -55,7 +55,15 @@ export const TranslationsGrid: FunctionComponent = (props) => {
     const title = <Typography variant="h5"><T>translations_view_title</T></Typography>
 
     return (
-        <BaseView customHeader={isSearch || !isEmpty ? <>{title}<Box mt={2}><MenuBar/></Box></> : title}
+        <BaseView customHeader={
+            isSearch || !isEmpty ?
+                <>
+                    {title}
+                    <Box mt={2}>
+                        <MenuBar/>
+                    </Box>
+                </>
+                : title}
                   loading={listContext.listLoadable.loading}
         >
             {isEmpty ? onEmptyInner : onNotEmptyInner}

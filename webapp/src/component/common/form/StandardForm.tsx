@@ -1,18 +1,18 @@
 import {default as React, FunctionComponent, ReactNode} from 'react';
-import {Form, Formik, FormikBag, FormikProps} from 'formik';
+import {Form, Formik, FormikProps} from 'formik';
 import {Box, Button} from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import {ObjectSchema} from 'yup';
 import {useHistory} from 'react-router-dom';
 import {T} from "@tolgee/react";
 import {ResourceErrorComponent} from "./ResourceErrorComponent";
-import {BaseView} from "../../layout/BaseView";
 import {Loadable} from "../../../store/AbstractLoadableActions";
 import LoadingButton from "./LoadingButton";
+import {FormikHelpers} from "formik/dist/types";
 
 interface FormProps<T> {
     initialValues: T;
-    onSubmit: (values: T, formikBag: FormikBag<any, any>) => void | Promise<any>;
+    onSubmit: (values: T, formikHelpers: FormikHelpers<T>) => void | Promise<any>;
     onCancel?: () => void;
     loading?: boolean;
     validationSchema?: ObjectSchema<any>;
@@ -31,8 +31,7 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({initialValues, 
         return (
             <>
                 {props.saveActionLoadable && props.saveActionLoadable.error && <ResourceErrorComponent error={props.saveActionLoadable.error}/>}
-                {/*
-            @ts-ignore*/}
+
                 <Formik initialValues={initialValues} onSubmit={props.onSubmit} validationSchema={validationSchema} enableReinitialize>
                     {(formikProps: FormikProps<any>) => {
                         return (

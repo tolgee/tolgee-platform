@@ -8,8 +8,6 @@ import {MessageService} from "../MessageService";
 import * as Sentry from '@sentry/browser';
 import React from "react";
 import {T} from "@tolgee/react";
-import {SecurityService} from "../SecurityService";
-import {components, paths} from "../apiSchema";
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -26,6 +24,9 @@ const detectLoop = (url) => {
     }, 20000)
 };
 
+export class RequestOptions {
+    disableNotFoundHandling: boolean = false
+}
 
 @singleton()
 export class ApiHttpService {
@@ -34,7 +35,7 @@ export class ApiHttpService {
 
     apiUrl = process.env.REACT_APP_API_URL + "/api/"
 
-    fetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+    fetch(input: RequestInfo, init?: RequestInit, options: RequestOptions = new RequestOptions()): Promise<Response> {
         if (detectLoop(input)) {
             //if we get into loop, maybe something went wrong in login requests etc, rather start over
             this.tokenService.disposeToken();
@@ -70,7 +71,7 @@ export class ApiHttpService {
                     ApiHttpService.getResObject(r).then(b => reject({...b, __handled: true}));
                     return;
                 }
-                if (r.status == 404) {
+                if (r.status == 404 && !options.disableNotFoundHandling) {
                     redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
                     this.messageService.error(<T>resource_not_found_message</T>);
                 }
@@ -140,8 +141,6 @@ export class ApiHttpService {
             },
         });
     }
-
-
 
 
     buildQuery(object: { [key: string]: any }): string {

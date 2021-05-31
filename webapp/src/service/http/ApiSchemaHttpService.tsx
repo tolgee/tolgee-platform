@@ -2,10 +2,9 @@ import {singleton} from 'tsyringe';
 import {TokenService} from '../TokenService';
 import {MessageService} from "../MessageService";
 import React from "react";
-import {ApiV1HttpService} from "./ApiV1HttpService";
 import {RedirectionActions} from "../../store/global/RedirectionActions";
 import {paths} from "../apiSchema";
-import {ApiHttpService} from "./ApiHttpService";
+import {ApiHttpService, RequestOptions} from "./ApiHttpService";
 
 @singleton()
 export class ApiSchemaHttpService extends ApiHttpService {
@@ -15,15 +14,39 @@ export class ApiSchemaHttpService extends ApiHttpService {
 
     apiUrl = process.env.REACT_APP_API_URL as string
 
-    schemaRequest<Url extends keyof paths, Method extends keyof paths[Url]>(url: Url, method: Method) {
+    schemaRequest<Url extends keyof paths, Method extends keyof paths[Url]>(url: Url, method: Method, options?: RequestOptions) {
+        return async (request: RequestParamsType<Url, Method>) => {
+            const response = await ApiHttpService.getResObject(await this.schemaRequestRaw(url, method, options)(request))
+            return response as Promise<ResponseContent<Url, Method>>
+        }
+    }
 
-        return async (request: OperationSchema<Url, Method>["parameters"]) => {
+    schemaRequestRaw<Url extends keyof paths, Method extends keyof paths[Url]>(url: Url, method: Method, options?: RequestOptions) {
+        return async (request: RequestParamsType<Url, Method>) => {
             const pathParams = request?.path;
             let urlResult = url as string;
 
             if (pathParams) {
                 Object.entries(pathParams).forEach(([key, value]) => {
                     urlResult = urlResult.replace(`{${key}}`, value)
+                })
+            }
+
+            const formData = request?.content?.["multipart/form-data"] as {};
+            let body: FormData | undefined = undefined
+            if (formData) {
+                body = new FormData();
+                Object.entries(formData).forEach(([key, value]) => {
+                    if (Array.isArray(value)) {
+                        let fileName: undefined | string = undefined
+                        if (Object.prototype.toString.call(value) === '[object File]') {
+                            fileName = (value as any as File).name
+                        }
+
+                        value.forEach(item => body!.append(key, item as any, fileName))
+                        return
+                    }
+                    body!.append(key, value as any)
                 })
             }
 
@@ -37,16 +60,19 @@ export class ApiSchemaHttpService extends ApiHttpService {
                 queryString = "?" + this.buildQuery(params)
             }
 
-            const response = await ApiHttpService.getResObject(await this.fetch(urlResult + queryString, {method: method as string}))
-            return response as Promise<ResponseContent<Url, Method>>
+            return await this.fetch(urlResult + queryString, {method: method as string, body: body}, options)
         }
     }
 }
 
+type RequestParamsType<Url extends keyof paths, Method extends keyof paths[Url]> =
+    OperationSchema<Url, Method>["parameters"] &
+    OperationSchema<Url, Method>["requestBody"]
+
 type ResponseContent<Url extends keyof paths, Method extends keyof paths[Url]> =
     OperationSchema<Url, Method>["responses"][200] extends NotNullAnyContent ? OperationSchema<Url, Method>["responses"][200]["content"]["*/*"] :
-    OperationSchema<Url, Method>["responses"][200] extends NotNullJsonHalContent ? OperationSchema<Url, Method>["responses"][200]["content"]["application/hal+json"] :
-    OperationSchema<Url, Method>["responses"][200] extends NotNullJsonContent ? OperationSchema<Url, Method>["responses"][200]["content"]["application/json"] : void;
+        OperationSchema<Url, Method>["responses"][200] extends NotNullJsonHalContent ? OperationSchema<Url, Method>["responses"][200]["content"]["application/hal+json"] :
+            OperationSchema<Url, Method>["responses"][200] extends NotNullJsonContent ? OperationSchema<Url, Method>["responses"][200]["content"]["application/json"] : void;
 
 type NotNullAnyContent = {
     content: {
@@ -77,9 +103,14 @@ type ResponseType = {
 }
 
 type OperationSchemaType = {
+    requestBody?: {
+        content?: {
+            "multipart/form-data"?: { [key: string]: any }
+        }
+    }
     parameters?: {
         path?: { [key: string]: any },
-        query?: { [key: string]: { [key: string]: any } | string }
+        query?: { [key: string]: { [key: string]: any } | any }
     }
     responses: ResponseType
 }

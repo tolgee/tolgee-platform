@@ -19,10 +19,8 @@ import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.test.annotation.Rollback
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.testng.annotations.Test
-import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -104,7 +102,6 @@ class RepositoryControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    @Rollback
     fun deleteRepository() {
         val base = dbPopulator.createBase(generateUniqueString())
         mvc.perform(

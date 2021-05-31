@@ -3,8 +3,6 @@ package io.tolgee.controllers
 import io.tolgee.ITest
 import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.assertions.UserApiAppAction
-import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.LoggedRequestFactory
@@ -15,8 +13,6 @@ import io.tolgee.helpers.JsonHelper
 import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -66,7 +62,7 @@ class LanguageControllerTest : RepositoryAuthControllerTest(), ITest {
         val test = dbPopulator.createBase(generateUniqueString())
         val en = test.getLanguage("en").orElseThrow { NotFoundException() }
         performDelete(test.id, en.id!!).andExpect(MockMvcResultMatchers.status().isOk)
-        Assertions.assertThat(languageService.findById(en.id)).isEmpty
+        Assertions.assertThat(languageService.findById(en.id!!)).isEmpty
         repositoryService.deleteRepository(test.id)
     }
 

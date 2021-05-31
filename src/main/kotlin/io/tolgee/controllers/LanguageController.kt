@@ -43,7 +43,7 @@ open class LanguageController(
         val repository = repositoryService.get(repositoryId).orElseThrow { NotFoundException() }
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.MANAGE)
         languageValidator.validateCreate(dto, repository)
-        val language = languageService.createLanguage(dto, repository)
+        val language = languageService.createLanguage(dto, repository!!)
         return LanguageDTO.fromEntity(language)
     }
 
@@ -51,7 +51,7 @@ open class LanguageController(
     @PostMapping(value = ["/edit"])
     fun editLanguage(@RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
         languageValidator.validateEdit(dto)
-        val language = languageService.findById(dto!!.id).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+        val language = languageService.findById(dto!!.id!!).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         securityService.checkRepositoryPermission(language.repository!!.id, Permission.RepositoryPermissionType.MANAGE)
         return LanguageDTO.fromEntity(languageService.editLanguage(dto))
     }
@@ -69,14 +69,14 @@ open class LanguageController(
     @GetMapping(value = ["{id}"])
     @Operation(summary = "Returns specific language")
     operator fun get(@PathVariable("id") id: Long?): LanguageDTO {
-        val language = languageService.findById(id).orElseThrow { NotFoundException() }
+        val language = languageService.findById(id!!).orElseThrow { NotFoundException() }
         securityService.checkAnyRepositoryPermission(language.repository!!.id)
         return LanguageDTO.fromEntity(language)
     }
 
     @Operation(summary = "Deletes specific language")
     @DeleteMapping(value = ["/{id}"])
-    fun deleteLanguage(@PathVariable id: Long?) {
+    fun deleteLanguage(@PathVariable id: Long) {
         val language = languageService.findById(id).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         securityService.checkRepositoryPermission(language.repository!!.id, Permission.RepositoryPermissionType.MANAGE)
         languageService.deleteLanguage(id)

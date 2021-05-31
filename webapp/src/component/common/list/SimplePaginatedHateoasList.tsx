@@ -1,116 +1,70 @@
 import * as React from "react";
-import {ReactNode, useEffect, useState} from "react";
+import {JSXElementConstructor, ReactNode, useEffect, useState} from "react";
 import {EmptyListMessage} from "../EmptyListMessage";
-import {SimplePaperList} from "./SimplePaperList";
+import {OverridableListWrappers, SimpleList} from "./SimpleList";
 import {AbstractLoadableActions, StateWithLoadables} from "../../../store/AbstractLoadableActions";
-import {HateoasPaginatedData} from "../../../service/response.types";
 import {BoxLoading} from "../BoxLoading";
 import {Box, Grid, Typography} from "@material-ui/core";
 import SearchField from "../form/fields/SearchField";
 import {startLoading, stopLoading} from "../../../hooks/loading";
+import {Alert} from "@material-ui/lab";
+import {T} from "@tolgee/react";
+import {EmbeddedDataItem, usePaginatedHateoasDataHelper} from "../../../hooks/usePaginatedHateoasDataHelper";
 
-type EmbeddedDataItem<ActionsType extends AbstractLoadableActions<ResourceActionsStateType>, ResourceActionsStateType extends StateWithLoadables<ActionsType>, LoadableName extends keyof ResourceActionsStateType["loadables"]> =
-    NonNullable<ResourceActionsStateType["loadables"][LoadableName]["data"]> extends HateoasPaginatedData<infer ItemDataType> ? ItemDataType : never
-
-export interface SimplePaginatedHateoasListProps<ItemDataType, ActionsType extends AbstractLoadableActions<ResourceActionsStateType>, ResourceActionsStateType extends StateWithLoadables<any>,
-    LoadableName extends keyof ActionsType["loadableDefinitions"]> {
-    renderItem: (itemData: EmbeddedDataItem<ActionsType, ResourceActionsStateType, LoadableName>) => ReactNode
+export type SimplePaginatedHateoasListProps<ActionsType extends AbstractLoadableActions<StateWithLoadables<ActionsType>>,
+    LoadableName extends keyof ActionsType["loadableDefinitions"],
+    WrapperComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>,
+    ListComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>> = {
+    renderItem: (itemData: EmbeddedDataItem<ActionsType, LoadableName>) => ReactNode
     actions: ActionsType
     loadableName: LoadableName
-    dispatchParams?: [Omit<Parameters<ActionsType["loadableDefinitions"][LoadableName]["payloadProvider"]>[0], "query">, ...any[]]
+    dispatchParams?: [Omit<Parameters<ActionsType["loadableDefinitions"][LoadableName]["payloadProvider"]>[0], "query"> & {
+        query?: Omit<Parameters<ActionsType["loadableDefinitions"][LoadableName]["payloadProvider"]>[0]["query"], "pageable">
+    }, ...any[]]
     pageSize?: number,
     title?: ReactNode
-    search?: boolean
-}
+    searchField?: boolean
+    sortBy?: string[],
+    searchText?: string
+} & OverridableListWrappers<WrapperComponent, ListComponent>
 
-export function SimplePaginatedHateoasList<ItemDataType,
-    ActionsType extends AbstractLoadableActions<any>,
-    ResourceActionsStateType extends StateWithLoadables<ActionsType>,
-    LoadableName extends keyof ActionsType["loadableDefinitions"]>
-(props: SimplePaginatedHateoasListProps<ItemDataType, ActionsType, ResourceActionsStateType, LoadableName>) {
-    const loadable = props.actions.useSelector((state) => state.loadables[props.loadableName])
-    const [currentPage, setCurrentPage] = useState(1)
+export function SimplePaginatedHateoasList<ActionsType extends AbstractLoadableActions<any>,
+    LoadableName extends keyof ActionsType["loadableDefinitions"],
+    WrapperComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>,
+    ListComponent extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>>
+(props: SimplePaginatedHateoasListProps<ActionsType, LoadableName, WrapperComponent, ListComponent>) {
     const [search, setSearch] = useState(undefined as string | undefined);
 
-    const loadPage = (page: number) => {
-        const [requestParam, ...otherParams] = props.dispatchParams ? [...props.dispatchParams] : [];
-
-        const params = [{
-            ...requestParam, query: {
-                ...requestParam, pageable: {
-                    page: page - 1,
-                    size: props.pageSize || 20,
-                    sort: ["name"]
-                },
-                search: search || undefined
-            }
-        }, ...otherParams] as Parameters<(typeof props.actions.loadableActions[LoadableName])["dispatch"]>
-
-        return props.actions.loadableActions[props.loadableName].dispatch(...params)
-    }
-
-    useEffect(() => {
-        if (search != undefined) {
-            loadPage(1)
-        }
-    }, [search])
-
-    useEffect(() => {
-        if (!loadable.touched) {
-            loadPage(currentPage)
-        }
-    }, [loadable.touched])
-
-    useEffect(() => {
-        return () => {
-            (props.actions.loadableReset as any)[props.loadableName].dispatch()
-        }
-    }, [])
-
-    const onPageChange = (page) => {
-        setCurrentPage(page)
-        loadPage(page)
-    }
-
-    const data = loadable.data as any
-    const embedded = data?._embedded;
-    const key = embedded ? Object.keys(embedded)?.[0] : null
-    const pageCount = data ? Math.ceil(data.page?.totalElements!! / data.page?.size!!) : undefined
-    const items = key ? embedded?.[key] : null
-
-    useEffect(() => {
-            //move user to last page when pageCount is less then currentPage
-            if (pageCount && pageCount < currentPage) {
-                setCurrentPage(pageCount)
-                loadPage(pageCount)
-            }
-        }, [loadable.data]
-    )
+    const helper = usePaginatedHateoasDataHelper({...props, search: search || props.searchText})
 
     useEffect(() => {
         //to trigger global loading just when data are present (when loading for the first time, BoxLoading is rendered lower)
-        if (loadable.loading && loadable.data) {
+        if (helper.loading && helper.items) {
             startLoading()
         }
 
-        if (!loadable.loading) {
+        if (!helper.loading) {
             stopLoading()
         }
     })
 
-    if (loadable.loading && !loadable.data) {
+    useEffect(() => {
+        setSearch(props.searchText)
+    }, [props.searchText])
+
+    if (helper.loading && !helper.items) {
         return <BoxLoading/>
     }
 
     return (
-        <Box data-cy="global-paginated-list"> {(props.title || props.search) &&
+        <Box data-cy="global-paginated-list"> {(props.title || props.searchField) &&
         <Box mb={1}>
             <Grid container alignItems="center">
                 <Grid item lg md sm xs>
                     {props.title &&
                     <Box><Typography variant="h6">{props.title}</Typography></Box>}
                 </Grid>
-                {props.search &&
+                {props.searchField &&
                 <Grid item lg={4} md={5} sm={12} xs={12}>
                     <SearchField data-cy="global-list-search" fullWidth initial={search || ""} onSearch={val => {
                         setSearch(val)
@@ -118,15 +72,20 @@ export function SimplePaginatedHateoasList<ItemDataType,
                 </Grid>}
             </Grid>
         </Box>}
-            {!embedded ? <EmptyListMessage/> : <SimplePaperList
+            {helper.error && <Alert color="error"><T>simple_paginated_list_error_message</T></Alert>}
+            {!helper.error && (!helper.items ? <EmptyListMessage/> : <SimpleList
                 pagination={{
-                    page: data.page?.number!! + 1,
-                    onPageChange,
-                    pageCount: pageCount!
+                    page: helper.page?.number!! + 1,
+                    onPageChange: helper.onPageChange,
+                    pageCount: helper.page.totalPages || 0
                 }}
-                data={items}
+                data={helper.items}
                 renderItem={props.renderItem}
-            />}
+                wrapperComponent={props.wrapperComponent}
+                wrapperComponentProps={props.wrapperComponentProps}
+                listComponent={props.listComponent}
+                listComponentProps={props.listComponentProps}
+            />)}
         </Box>
     )
 }

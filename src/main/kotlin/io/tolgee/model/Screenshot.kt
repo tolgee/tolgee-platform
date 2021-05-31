@@ -4,6 +4,7 @@
 
 package io.tolgee.model
 
+import io.tolgee.model.key.Key
 import org.apache.commons.codec.digest.DigestUtils
 import javax.persistence.*
 

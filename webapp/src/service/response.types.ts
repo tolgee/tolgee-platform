@@ -1,5 +1,4 @@
 import {components} from "./apiSchema";
-import {SimpleHateoasList} from "../component/common/list/SimpleHateoasList";
 
 export type TranslationsObject = { [abbreviation: string]: string };
 
@@ -58,7 +57,7 @@ export type ErrorResponseDTO = {
     CUSTOM_VALIDATION?: { [key: string]: any[] };
     STANDARD_VALIDATION?: { [key: string]: any[] };
     code: string;
-    params: [];
+    params: any[];
     __handled: boolean;
 }
 

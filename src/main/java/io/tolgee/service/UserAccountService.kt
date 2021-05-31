@@ -17,37 +17,41 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
-open class UserAccountService(
+class UserAccountService(
         private val userAccountRepository: UserAccountRepository,
         private val tolgeeProperties: TolgeeProperties,
         private val emailVerificationService: EmailVerificationService
 ) {
-    open fun getByUserName(username: String?): Optional<UserAccount> {
+    fun getByUserName(username: String?): Optional<UserAccount> {
         return userAccountRepository.findByUsername(username)
     }
 
-    open operator fun get(id: Long): Optional<UserAccount?> {
+    operator fun get(id: Long): Optional<UserAccount?> {
         return userAccountRepository.findById(id)
     }
 
-    open fun createUser(userAccount: UserAccount): UserAccount {
+    fun createUser(userAccount: UserAccount): UserAccount {
         userAccountRepository.save(userAccount)
         return userAccount
     }
 
-    open fun createUser(request: SignUpDto): UserAccount {
+    fun createUser(request: SignUpDto): UserAccount {
         dtoToEntity(request).let {
             this.createUser(it)
             return it
         }
     }
 
-    open fun dtoToEntity(request: SignUpDto): UserAccount {
+    fun delete(userAccount: UserAccount) {
+        userAccountRepository.delete(userAccount)
+    }
+
+    fun dtoToEntity(request: SignUpDto): UserAccount {
         val encodedPassword = encodePassword(request.password!!)
         return UserAccount(name = request.name, username = request.email, password = encodedPassword)
     }
 
-    open val implicitUser: UserAccount
+    val implicitUser: UserAccount
         get() {
             val username = "___implicit_user"
             return userAccountRepository.findByUsername(username).orElseGet {
@@ -57,50 +61,50 @@ open class UserAccountService(
             }
         }
 
-    open fun findByThirdParty(type: String?, id: String?): Optional<UserAccount> {
+    fun findByThirdParty(type: String?, id: String?): Optional<UserAccount> {
         return userAccountRepository.findByThirdPartyAuthTypeAndThirdPartyAuthId(type!!, id!!)
     }
 
     @Transactional
-    open fun setResetPasswordCode(userAccount: UserAccount, code: String?) {
+    fun setResetPasswordCode(userAccount: UserAccount, code: String?) {
         val bCryptPasswordEncoder = BCryptPasswordEncoder()
         userAccount.resetPasswordCode = bCryptPasswordEncoder.encode(code)
         userAccountRepository.save(userAccount)
     }
 
     @Transactional
-    open fun setUserPassword(userAccount: UserAccount, password: String?) {
+    fun setUserPassword(userAccount: UserAccount, password: String?) {
         val bCryptPasswordEncoder = BCryptPasswordEncoder()
         userAccount.password = bCryptPasswordEncoder.encode(password)
         userAccountRepository.save(userAccount)
     }
 
     @Transactional
-    open fun isResetCodeValid(userAccount: UserAccount, code: String?): Boolean {
+    fun isResetCodeValid(userAccount: UserAccount, code: String?): Boolean {
         val bCryptPasswordEncoder = BCryptPasswordEncoder()
         return bCryptPasswordEncoder.matches(code, userAccount.resetPasswordCode)
     }
 
     @Transactional
-    open fun removeResetCode(userAccount: UserAccount) {
+    fun removeResetCode(userAccount: UserAccount) {
         userAccount.resetPasswordCode = null
     }
 
-    open fun getAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<UserAccountWithOrganizationRoleView> {
+    fun getAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<UserAccountWithOrganizationRoleView> {
         return userAccountRepository.getAllInOrganization(organizationId, pageable, search = search ?: "")
     }
 
-    open fun getAllInRepository(repositoryId: Long, pageable: Pageable, search: String?): Page<UserAccountInRepositoryView> {
+    fun getAllInRepository(repositoryId: Long, pageable: Pageable, search: String?): Page<UserAccountInRepositoryView> {
         return userAccountRepository.getAllInRepository(repositoryId, pageable, search = search)
     }
 
-    private fun encodePassword(rawPassword: String): String {
+    fun encodePassword(rawPassword: String): String {
         val bCryptPasswordEncoder = BCryptPasswordEncoder()
         return bCryptPasswordEncoder.encode(rawPassword)
     }
 
     @Transactional
-    open fun update(userAccount: UserAccount, dto: UserUpdateRequestDTO) {
+    fun update(userAccount: UserAccount, dto: UserUpdateRequestDTO) {
         if (userAccount.username != dto.email) {
             getByUserName(dto.email).ifPresent { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
             if (tolgeeProperties.authentication.needsEmailVerification) {
@@ -120,6 +124,9 @@ open class UserAccountService(
         userAccountRepository.save(userAccount)
     }
 
-    open val isAnyUserAccount: Boolean
+    fun saveAll(userAccounts: Collection<UserAccount>): MutableList<UserAccount> =
+            userAccountRepository.saveAll(userAccounts)
+
+    val isAnyUserAccount: Boolean
         get() = userAccountRepository.count() > 0
 }

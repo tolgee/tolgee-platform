@@ -1,152 +1,147 @@
-import {ChangeEvent, default as React, FunctionComponent, useEffect, useState} from 'react';
-import {useRouteMatch} from 'react-router-dom';
-import {PARAMS} from '../../../../constants/links';
-import {Box, Button, FormHelperText, Input, LinearProgress} from '@material-ui/core';
+import {default as React, FunctionComponent, useEffect, useState} from 'react';
+import {Box, Button} from '@material-ui/core';
 import {BaseView} from '../../../layout/BaseView';
-import {useSelector} from 'react-redux';
-import {AppState} from '../../../../store';
-
-import {StandardForm} from "../../../common/form/StandardForm";
-import {TextField} from "../../../common/form/fields/TextField";
-import {object, string} from "yup";
-import {ImportExportActions} from "../../../../store/repository/ImportExportActions";
-import {container} from "tsyringe";
 import {T} from '@tolgee/react';
+import ImportFileInput from "./component/ImportFileInput";
+import {useImportDataHelper} from "./hooks/useImportDataHelper";
+import {ImportResult} from "./component/ImportResult";
+import {container} from "tsyringe";
+import {ImportActions} from "../../../../store/repository/ImportActions";
+import {useRepository} from "../../../../hooks/useRepository";
+import {ImportConflictNotResolvedErrorDialog} from "./component/ImportConflictNotResolvedErrorDialog";
+import {useApplyImportHelper} from "./hooks/useApplyImportHelper";
+import {startLoading, stopLoading} from "../../../../hooks/loading";
+import {parseErrorResponse} from "../../../../fixtures/errorFIxtures";
+import {MessageService} from "../../../../service/MessageService";
+import {ImportAlertError} from './ImportAlertError';
+import {confirmation} from "../../../../hooks/confirmation";
+import {components} from "../../../../service/apiSchema";
+import {ImportConflictResolutionDialog} from "./component/ImportConflictResolutionDialog";
 
-type SubtreeType = { [key: string]: string | object };
-const actions = container.resolve(ImportExportActions);
+const actions = container.resolve(ImportActions)
+const messageService = container.resolve(MessageService)
 
 export const ImportView: FunctionComponent = () => {
-    let match = useRouteMatch();
+    const dataHelper = useImportDataHelper()
+    const repository = useRepository()
+    const applyImportHelper = useApplyImportHelper(dataHelper)
+    const cancelLoadable = actions.useSelector(s => s.loadables.cancelImport)
+    const deleteLanguageLoadable = actions.useSelector(s => s.loadables.deleteLanguage)
+    const addFilesLoadable = actions.useSelector(s => s.loadables.addFiles)
+    const resultLoadable = actions.useSelector(s => s.loadables.getResult)
+    const resultLoading = resultLoadable.loading || addFilesLoadable.loading
+    const selectLanguageLoadable = actions.useSelector(s => s.loadables.selectLanguage)
+    const resetExistingLanguageLoadable = actions.useSelector(s => s.loadables.resetExistingLanguage)
+    const [resolveRow, setResolveRow] = useState(undefined as components["schemas"]["ImportLanguageModel"] | undefined)
 
-    const repositoryId = match.params[PARAMS.REPOSITORY_ID];
+    const onConflictResolutionDialogClose = () => {
+        dataHelper.loadData()
+        setResolveRow(undefined)
+    }
 
-    let state = useSelector((state: AppState) => state.importExport.loadables.import);
-
-
-    const [data, setData] = useState(null as any);
-    const [suggestedName, setSuggestedName] = useState("");
-
-    const fileSelected = (event: ChangeEvent) => {
-        let target = event.target as HTMLInputElement;
-        if(!target.files){
-            return;
-        }
-        if (target.files.length > 0) {
-            const file = target.files[0];
-            let fileReader = new FileReader();
-            fileReader.onloadend = (e) => {
-                const target = e.target as FileReader;
-                const indexOfDot = file.name.indexOf(".");
-                if (indexOfDot > -1) {
-                    setSuggestedName(file.name.substr(0, indexOfDot))
-                }
-                const data = parseData(target.result as string);
-                setData(data);
-            };
-            fileReader.readAsText(file);
-        }
-    };
-
-
-    const parseSubTree = (path: string[], subtree: SubtreeType): { [key: string]: string } => {
-        return Object.entries(subtree).reduce((result, [key, value]) => {
-            const subPath = [...path, key];
-            if (typeof value === "object") {
-                return {...result, ...parseSubTree(subPath, value as SubtreeType)};
-            }
-            if (typeof value === "string") {
-                return {...result, [subPath.join(".")]: value}
-            }
-            //todo handle errors here!
-            return result;
-        }, {});
-    };
-
-    const parseData = (json: string) => {
-        const data = JSON.parse(json);
-        return parseSubTree([], data);
-    };
-
-
-    const entries = data && Object.entries(data);
-
-    const Line = ([key, translation]) => <Box>{key}: {translation}</Box>;
-
-    const Preview = () => {
-
-        const [expanded, setExpanded] = useState(false);
-
-        const expand = () => {
-            setExpanded(true);
-        };
-
-        return (
-            <Box color="text.disabled">
-                {expanded ? <> {entries.map(Line)} </>
-                    :
-                    <>
-                        {entries.slice(0, 10).map(Line)}
-                        {entries.length > 10 &&
-                        <>
-                            <Box justifyItems="center"><Button onClick={() => expand()}>...</Button></Box>
-                            {
-                                //render last item
-                                entries.slice(entries.length - 1).map(Line)}
-                        </>}
-                    </>}
-            </Box>
-        )
-    };
+    const resolveFirstUnresolved = () => {
+        const row = dataHelper.result?._embedded?.languages?.find(l => l.conflictCount > l.resolvedCount)
+        setResolveRow(row)
+    }
 
     useEffect(() => {
-        if (state.loaded) {
-            actions.loadableReset.import.dispatch();
+        if (!resultLoading) {
+            stopLoading()
         }
-    }, [state.loaded]);
 
-    const onImportSubmit = (value) => {
-        actions.loadableActions.import.dispatch(repositoryId, {...value, data});
-    };
+        const error = resultLoadable.error
+        if (error?.code === "resource_not_found") {
+            dataHelper.resetResult()
+        }
+
+    }, [resultLoadable.loading, addFilesLoadable.loading])
+
+    useEffect(() => {
+        startLoading()
+        if ((deleteLanguageLoadable.loaded && !deleteLanguageLoadable.loading) ||
+            (selectLanguageLoadable.loaded && !selectLanguageLoadable.loading) ||
+            (resetExistingLanguageLoadable.loaded && !resetExistingLanguageLoadable.loading)
+        ) {
+            stopLoading()
+            dataHelper.loadData()
+        }
+    }, [deleteLanguageLoadable.loading, selectLanguageLoadable.loading, resetExistingLanguageLoadable.loading])
+
+    useEffect(() => {
+        if (!resultLoading) {
+            dataHelper.loadData()
+        }
+    }, [])
+
+    useEffect(() => {
+        if (cancelLoadable.loaded) {
+            dataHelper.resetResult()
+        }
+    }, [cancelLoadable.loading])
+
+    useEffect(() => {
+        if (applyImportHelper.error) {
+            const parsed = parseErrorResponse(applyImportHelper.error)
+            messageService.error(<T>{parsed[0]}</T>)
+            actions.loadableReset.applyImport.dispatch()
+        }
+    }, [applyImportHelper.error])
+
+    const onApply = () => {
+        actions.touchApply.dispatch()
+        if (dataHelper.isValid) {
+            applyImportHelper.onApplyImport()
+        }
+    }
+
+    if (addFilesLoadable.error?.code === "cannot_add_more_then_100_languages") {
+        messageService.error(<T parameters={{n: "100"}}>import_error_cannot_add_more_then_n_languages</T>)
+    }
 
     return (
         <BaseView title={<T>import_translations_title</T>} xs={12} md={10} lg={8}>
+            <ImportConflictResolutionDialog row={resolveRow} onClose={onConflictResolutionDialogClose}/>
             <Box mt={2}>
-                {
-                    (data &&
-                        <>
-                            <Preview/>
-                            <Box color="success.main" fontSize={21} fontWeight="400" mt={1}>
-                                <T parameters={{length: entries.length + ""}}>import_translations_loaded_message</T>
-                            </Box>
-                            {!state.loaded &&
-                            <>
-                                <StandardForm initialValues={{languageAbbreviation: suggestedName}}
-                                              validationSchema={object().shape({
-                                                  languageAbbreviation: string().required()
-                                              })}
-                                              onSubmit={onImportSubmit}
-                                              onCancel={() => setData(null)}
-                                              loading={state.loading}
-                                              submitButtonInner={<T>import_do_import_button</T>}>
-                                    <TextField label={<T>import_language_abbreviation</T>} name={"languageAbbreviation"}/>
-                                </StandardForm>
-                                {state.loading &&
-                                <>
-                                    <Box justifyContent="center" display="flex" fontSize={20} color="text.secondary"><T>import_importing_text</T></Box>
-                                    <LinearProgress/>
-                                </>}
-                            </>
-                            }
-                        </>
-                    )
-                    ||
-                    <>
-                        <FormHelperText><T>import_select_file</T></FormHelperText>
-                        <Input type="file" onChange={fileSelected}/>
-                    </>
-                }
+                <ImportFileInput onNewFiles={dataHelper.onNewFiles}/>
+
+                {addFilesLoadable.data?.errors?.map((e, idx) =>
+                    <ImportAlertError key={idx} error={e}/>
+                )}
+                <ImportResult onResolveRow={setResolveRow} onLoadData={dataHelper.loadData} result={dataHelper.result}/>
             </Box>
+            {dataHelper.result &&
+            <Box display="flex" mt={2} justifyContent="flex-end">
+                <Box mr={2}>
+                    <Button data-cy="import_cancel_import_button" variant="outlined" color="primary" onClick={() => {
+                        confirmation({
+                                onConfirm: () => actions.loadableActions.cancelImport.dispatch({
+                                    path: {
+                                        repositoryId: repository.id
+                                    }
+                                }),
+                                title: <T>import_cancel_confirmation_title</T>,
+                                message: <T>import_cancel_confirmation_message</T>
+                            }
+                        )
+
+                    }}>
+                        <T>import_cancel_button</T>
+                    </Button>
+                </Box>
+                <Box>
+                    <Button variant="contained" color="primary" data-cy="import_apply_import_button" onClick={onApply}>
+                        <T>import_apply_button</T>
+                    </Button>
+                </Box>
+            </Box>}
+            <ImportConflictNotResolvedErrorDialog
+                onResolve={() => {
+                    resolveFirstUnresolved()
+                    applyImportHelper.onDialogClose()
+                }}
+                open={applyImportHelper.conflictNotResolvedDialogOpen}
+                onClose={applyImportHelper.onDialogClose}
+            />
         </BaseView>
     );
 };

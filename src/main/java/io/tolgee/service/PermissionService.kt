@@ -156,6 +156,10 @@ open class PermissionService @Autowired constructor(private val permissionReposi
         permissionRepository.save(permission)
     }
 
+    fun saveAll(permissions: Iterable<Permission>) {
+        this.permissionRepository.saveAll(permissions)
+    }
+
     open fun revoke(repositoryId: Long, userId: Long) {
         val data = this.getRepositoryPermissionData(repositoryId, userId)
         if (data.organizationRole != null) {

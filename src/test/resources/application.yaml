@@ -6,6 +6,8 @@ spring:
   liquibase:
     drop-first: true
     change-log: classpath:db/changelog/schema.xml
+  jpa:
+    show-sql: true
 tolgee:
   data-path: ./build/test_data
   authentication:
@@ -14,3 +16,8 @@ tolgee:
     create-initial-user: false
   internal:
     populate: false
+#logging:
+#  level:
+#    org.springframework.orm.jpa: DEBUG
+#    org.springframework.transaction: DEBUG
+#    org.hibernate.type: TRACE

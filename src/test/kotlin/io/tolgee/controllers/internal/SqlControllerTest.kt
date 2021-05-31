@@ -15,7 +15,8 @@ import org.testng.annotations.Test
 @SpringBootTest(properties = ["tolgee.internal.controllerEnabled=true"])
 class SqlControllerTest : AbstractControllerTest() {
 
-    inline fun <reified T> MvcResult.parseResponseTo(): T {
+    @Suppress("RedundantModalityModifier")
+    final inline fun <reified T> MvcResult.parseResponseTo(): T {
         return jacksonObjectMapper().readValue(this.response.contentAsString)
     }
 
