@@ -1,0 +1,48 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Tolgee 1.0.1\n"
+"Report-Msgid-Bugs-To: info@tolgee.io \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Localization tools"
+msgstr "Lokalizační nástroje"
+
+# some other comment
+# and other
+#. This is the text that should appear next to menu accelerators
+#. * that use the super key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#: light_interface.c:196 light_interface.c:202 light_interface.c:209
+#: light_interface.c:215 light_interface.c:221 light_interface.c:227
+#, php-format no-c-format
+#| msgid "aaa"
+#| msgid_plural "aaa"
+msgid "We connect developers and translators around the globe "
+"in Tolgee for a fantastic localization experience."
+msgstr "Wir verbinden Entwickler mit Übersetzern weltweit "
+"auf Tolgee für ein fantastisches Lokalisierungs-Erlebnis."
+
+msgid "Welcome back, %1$s! Your last visit was on %2$s"
+msgstr "Willkommen zurück, %1$s! Dein letzter Besuch war am %2$s"
+
+msgid "escaping_test"
+msgstr "\"- beginning \\ - escaped escape, \" - another quoute \\\\\", end\""
+
+msgid "%d page read."
+msgid_plural "%d pages read."
+msgstr[0] "Eine Seite gelesen wurde."
+msgstr[1] "%d Seiten gelesen wurden."
+
+msgid "no_newline_between"
+msgstr "aaa"
+msgid "no_newline_between2"
+msgstr "aaa"
+# some other comment
+# and other
+msgid "no_newline_between2_with_hashed"
+msgstr "aaa"

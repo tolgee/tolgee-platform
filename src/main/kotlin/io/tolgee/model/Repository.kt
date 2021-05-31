@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import io.tolgee.model.key.Key
 import java.util.*
 import javax.persistence.*
 import javax.validation.constraints.NotBlank

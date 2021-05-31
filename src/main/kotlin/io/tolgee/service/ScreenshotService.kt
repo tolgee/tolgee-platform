@@ -6,8 +6,8 @@ package io.tolgee.service
 
 import com.amazonaws.services.s3.AmazonS3
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.model.Key
 import io.tolgee.model.Screenshot
+import io.tolgee.model.key.Key
 import io.tolgee.repository.ScreenshotRepository
 import org.springframework.core.io.InputStreamSource
 import org.springframework.data.domain.PageRequest

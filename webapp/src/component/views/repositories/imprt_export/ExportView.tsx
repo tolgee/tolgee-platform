@@ -4,19 +4,19 @@ import {PARAMS} from '../../../../constants/links';
 import {BaseView} from '../../../layout/BaseView';
 import {Box, Button} from "@material-ui/core";
 import {container} from "tsyringe";
-import {ImportExportActions} from "../../../../store/repository/ImportExportActions";
+import {ExportActions} from "../../../../store/repository/ExportActions";
 import {useSelector} from "react-redux";
 import {AppState} from "../../../../store";
 import {useRepository} from "../../../../hooks/useRepository";
 import {T} from "@tolgee/react";
 
-const actions = container.resolve(ImportExportActions);
+const actions = container.resolve(ExportActions);
 
 export const ExportView: FunctionComponent = () => {
     const match = useRouteMatch();
     const repository = useRepository();
     const repositoryId = match.params[PARAMS.REPOSITORY_ID];
-    const state = useSelector((state: AppState) => state.importExport.loadables.export);
+    const state = useSelector((state: AppState) => state.export.loadables.export);
 
     useEffect(() => {
         if (state.loaded) {

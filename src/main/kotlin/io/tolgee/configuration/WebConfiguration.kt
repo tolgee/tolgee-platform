@@ -22,7 +22,7 @@ import javax.servlet.MultipartConfigElement
 
 
 @Configuration
-open class WebConfiguration(
+class WebConfiguration(
         private val tolgeeProperties: TolgeeProperties
 ) : WebMvcConfigurer {
     override fun addViewControllers(registry: ViewControllerRegistry) {
@@ -48,22 +48,22 @@ open class WebConfiguration(
     }
 
     @Bean
-    open fun restTemplate(): RestTemplate {
+    fun restTemplate(): RestTemplate {
         return RestTemplate()
     }
 
     @Bean
-    open fun secureRandom(): SecureRandom {
+    fun secureRandom(): SecureRandom {
         return SecureRandom()
     }
 
     @Bean
-    open fun objectMapper(): ObjectMapper {
+    fun objectMapper(): ObjectMapper {
         return ObjectMapper()
     }
 
     @Bean
-    open fun multipartConfigElement(): MultipartConfigElement {
+    fun multipartConfigElement(): MultipartConfigElement {
         val factory = MultipartConfigFactory()
         factory.setMaxFileSize(DataSize.ofKilobytes(tolgeeProperties.maxUploadFileSize.toLong()))
         factory.setMaxRequestSize(DataSize.ofKilobytes(tolgeeProperties.maxUploadFileSize.toLong()))

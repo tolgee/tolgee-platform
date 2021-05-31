@@ -61,7 +61,7 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
 
     return (
         <Box display="flex" alignItems="right">
-            <FormControl>
+            <FormControl data-cy="translations-language-select-form-control">
                 <InputLabel id="languages"><T>translations_language_select_label</T></InputLabel>
                 <Select
                     labelId={`languages-${props.context}`}

@@ -36,7 +36,7 @@ export const RepositoryPermissionsView: FunctionComponent = () => {
 
             </Box>}
 
-            <SimplePaginatedHateoasList search
+            <SimplePaginatedHateoasList searchField
                                         actions={repositoryActions}
                                         dispatchParams={[{path: {repositoryId: repository.id}}]}
                                         loadableName="listUsersForPermissions"

@@ -1,4 +1,4 @@
-import {container, singleton} from 'tsyringe';
+import {singleton} from 'tsyringe';
 
 import {RepositoryService} from '../../service/RepositoryService';
 import {RepositoryDTO} from '../../service/response.types';
@@ -8,12 +8,10 @@ import React from "react";
 import {T} from "@tolgee/react";
 import {AppState} from "../index";
 import {useSelector} from 'react-redux';
-import {ApiV1HttpService} from "../../service/http/ApiV1HttpService";
 import {ApiV2HttpService} from "../../service/http/ApiV2HttpService";
 import {ApiSchemaHttpService} from "../../service/http/ApiSchemaHttpService";
 
 export class RepositoriesState extends StateWithLoadables<RepositoryActions> {
-    repositoriesLoading: boolean = true;
     repositories: RepositoryDTO[] | undefined = undefined;
 }
 

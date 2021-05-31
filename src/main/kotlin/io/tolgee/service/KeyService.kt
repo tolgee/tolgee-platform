@@ -9,7 +9,7 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Repository
-import io.tolgee.model.Key
+import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -18,45 +18,60 @@ import java.util.*
 import javax.persistence.EntityManager
 
 @Service
-open class KeyService(
+class KeyService(
         private val keyRepository: KeyRepository,
         private val entityManager: EntityManager,
-        private val screenshotService: ScreenshotService
+        private val screenshotService: ScreenshotService,
+        private val keyMetaService: KeyMetaService
 ) {
 
     private var translationService: TranslationService? = null
 
     @Transactional
-    open fun getOrCreateKey(repository: Repository, path: PathDTO): Key {
-        val key = get(repository, path)
-                .orElseGet {
-                    Key(name = path.fullPathString, repository = repository)
-                }
+    fun getOrCreateKey(repository: Repository, path: PathDTO): Key {
+        return getOrCreateKey(repository, path.fullPathString)
+    }
+
+    @Transactional
+    fun getOrCreateKey(repository: Repository, keyName: String): Key {
+        val key = getOrCreateKeyNoPersist(repository, keyName)
         entityManager.persist(key)
         return key
     }
 
-    open fun getAll(repositoryId: Long): Set<Key> {
+    @Transactional
+    fun getOrCreateKeyNoPersist(repository: Repository, keyName: String): Key {
+        return get(repository.id, keyName)
+                .orElseGet {
+                    Key(name = keyName, repository = repository)
+                }
+    }
+
+    fun getAll(repositoryId: Long): Set<Key> {
         return keyRepository.getAllByRepositoryId(repositoryId)
     }
 
-    open fun get(repositoryId: Long, pathDTO: PathDTO): Optional<Key> {
+    fun get(repositoryId: Long, name: String): Optional<Key> {
+        return keyRepository.getByNameAndRepositoryId(name, repositoryId)
+    }
+
+    fun get(repositoryId: Long, pathDTO: PathDTO): Optional<Key> {
         return keyRepository.getByNameAndRepositoryId(pathDTO.fullPathString, repositoryId)
     }
 
-    open fun get(repository: Repository, pathDTO: PathDTO): Optional<Key> {
+    fun get(repository: Repository, pathDTO: PathDTO): Optional<Key> {
         return keyRepository.getByNameAndRepository(pathDTO.fullPathString, repository)
     }
 
-    open fun get(id: Long): Optional<Key> {
+    fun get(id: Long): Optional<Key> {
         return keyRepository.findById(id)
     }
 
-    open fun get(ids: Set<Long>): List<Key> {
+    fun get(ids: Set<Long>): List<Key> {
         return keyRepository.findAllById(ids)
     }
 
-    open fun create(repository: Repository, dto: DeprecatedKeyDto): Key {
+    fun create(repository: Repository, dto: DeprecatedKeyDto): Key {
         if (this.get(repository, dto.pathDto).isPresent) {
             throw ValidationException(Message.KEY_EXISTS)
         }
@@ -65,7 +80,7 @@ open class KeyService(
     }
 
     @Deprecated("Ugly naming")
-    open fun edit(repository: Repository, dto: DeprecatedEditKeyDTO) {
+    fun edit(repository: Repository, dto: DeprecatedEditKeyDTO) {
         //do nothing on no change
         if (dto.newFullPathString == dto.oldFullPathString) {
             return
@@ -78,7 +93,7 @@ open class KeyService(
         keyRepository.save(key)
     }
 
-    open fun edit(repository: Repository, dto: EditKeyDTO) {
+    fun edit(repository: Repository, dto: EditKeyDTO) {
         //do nothing on no change
         if (dto.newName == dto.currentName) {
             return
@@ -91,37 +106,39 @@ open class KeyService(
         keyRepository.save(key)
     }
 
-    open fun delete(id: Long) {
+    fun delete(id: Long) {
         val key = get(id).orElseThrow { NotFoundException() }
         translationService!!.deleteAllByKey(id)
         screenshotService.deleteAllByKeyId(id)
         keyRepository.delete(key)
     }
 
-    open fun deleteMultiple(ids: Collection<Long>) {
+    fun deleteMultiple(ids: Collection<Long>) {
         translationService!!.deleteAllByKeys(ids)
         screenshotService.deleteAllByKeyId(ids)
         keyRepository.deleteAllByIdIn(ids)
     }
 
-    open fun deleteAllByRepository(repositoryId: Long?) {
+    fun deleteAllByRepository(repositoryId: Long) {
+        keyMetaService.deleteAllByRepositoryId(repositoryId)
         keyRepository.deleteAllByRepositoryId(repositoryId)
     }
 
     @Transactional
-    open fun create(repository: Repository, dto: SetTranslationsDTO): Key {
+    fun create(repository: Repository, dto: SetTranslationsDTO): Key {
         if (this.get(repository, PathDTO.fromFullPath(dto.key)).isPresent) {
             throw ValidationException(Message.KEY_EXISTS)
         }
         val key = Key(name = dto.key, repository = repository)
         keyRepository.save(key)
-        translationService!!.setForKey(key, dto.translations)
+        translationService!!.setForKey(key, dto.translations!!)
         return key
     }
 
     @Autowired
-    open fun setTranslationService(translationService: TranslationService?) {
+    fun setTranslationService(translationService: TranslationService?) {
         this.translationService = translationService
     }
 
+    fun saveAll(entities: Collection<Key>) = this.keyRepository.saveAll(entities)
 }

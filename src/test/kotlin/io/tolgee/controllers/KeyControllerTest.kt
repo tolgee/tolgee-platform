@@ -15,11 +15,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.transaction.annotation.Transactional
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class KeyControllerTest : SignedInControllerTest(), ITest {
     private val keyDto = SetTranslationsDTO("test string", mapOf(Pair("en", "Hello")))
     private val keyDto2 = SetTranslationsDTO("test string 2", mapOf(Pair("en", "Hello 2")))

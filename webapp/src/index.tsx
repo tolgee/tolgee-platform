@@ -115,6 +115,11 @@ ReactDOM.render(
             filesUrlPrefix="/i18n/"
             loadingFallback={<FullPageLoading/>}
             availableLanguages={["en", "cs"]}
+            tagAttributes={{
+                'textarea': ['placeholder'],
+                'input': ['value', 'placeholder'],
+                '*': ["aria-label"],
+            }}
         >
             <ThemeProvider theme={theme}>
                 <Provider store={store}>

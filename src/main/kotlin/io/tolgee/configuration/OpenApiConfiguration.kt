@@ -1,6 +1,11 @@
 package io.tolgee.configuration
 
 import io.swagger.v3.oas.models.*
+import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.media.ArraySchema
+import io.swagger.v3.oas.models.media.Content
+import io.swagger.v3.oas.models.media.IntegerSchema
+import io.swagger.v3.oas.models.parameters.Parameter
 import io.tolgee.openapi_fixtures.InternalIgnorePaths
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import org.reflections.Reflections
@@ -8,17 +13,17 @@ import org.springdoc.core.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.HandlerMethod
-import io.swagger.v3.oas.models.info.Info
-import io.swagger.v3.oas.models.media.ArraySchema
-import io.swagger.v3.oas.models.media.Content
-import io.swagger.v3.oas.models.media.Schema
 
 
 @Configuration
-open class OpenApiConfiguration() {
+class OpenApiConfiguration {
+
+    companion object {
+        private const val REPOSITORY_ID_PARAMETER = "repositoryId"
+    }
 
     @Bean
-    open fun springShopOpenAPI(): OpenAPI? {
+    fun springShopOpenAPI(): OpenAPI? {
         return OpenAPI()
                 .info(Info().title("Tolgee API ")
                         .description("Tolgee Server API reference")
@@ -30,23 +35,24 @@ open class OpenApiConfiguration() {
     }
 
     @Bean
-    open fun internalV1OpenApi(): GroupedOpenApi? {
+    fun internalV1OpenApi(): GroupedOpenApi? {
         return internalGroupForPaths(arrayOf("/api/**"), "V1 Internal - for Tolgee Web application")
     }
 
 
     @Bean
-    open fun internalV2OpenApi(): GroupedOpenApi? {
+    fun internalV2OpenApi(): GroupedOpenApi? {
         return internalGroupForPaths(arrayOf("/v2/**"), "V2 Internal - for Tolgee Web application")
     }
 
     @Bean
-    open fun internalAllOpenApi(): GroupedOpenApi? {
+    fun internalAllOpenApi(): GroupedOpenApi? {
         return internalGroupForPaths(arrayOf("/v2/**", "/api/**"), "All Internal - for Tolgee Web application")
     }
 
+
     @Bean
-    open fun apiKeyOpenApi(): GroupedOpenApi? {
+    fun apiKeyOpenApi(): GroupedOpenApi? {
         val operationHandlers = HashMap<Operation, HandlerMethod>()
 
         return GroupedOpenApi.builder().group("Accessible with API key")
@@ -58,12 +64,15 @@ open class OpenApiConfiguration() {
                         val newPathItem = PathItem()
                         val oldPathItem = pathEntry.value
                         oldPathItem.readOperations().forEach { operation ->
-                            val annotation = operationHandlers[operation]?.getMethodAnnotation(AccessWithApiKey::class.java)
+                            val annotation = operationHandlers[operation]
+                                    ?.getMethodAnnotation(AccessWithApiKey::class.java)
+
                             if (annotation != null) {
-                                val containsRepositoryIdParam = pathEntry.key.contains("{repositoryId}")
-                                if (!pathEntry.key.startsWith("/api/repository/{repositoryId}")) {
+                                val containsRepositoryIdParam = pathEntry.key
+                                        .contains("{${REPOSITORY_ID_PARAMETER}}")
+                                if (!pathEntry.key.startsWith("/api/repository/{${REPOSITORY_ID_PARAMETER}}")) {
                                     if (!containsRepositoryIdParam) {
-                                        operation.parameters.removeIf { it.name == "repositoryId" }
+                                        operation.parameters.removeIf { it.name == REPOSITORY_ID_PARAMETER }
                                     }
                                     operations.add(operation)
                                 }
@@ -163,13 +172,27 @@ open class OpenApiConfiguration() {
                         val newPathItem = PathItem()
                         val oldPathItem = pathEntry.value
                         oldPathItem.readOperations().forEach { operation ->
-                            val isParameterConsumed = operation?.parameters?.any { it.name == "repositoryId" } == true
-                            val pathContainsRepositoryIdParam = pathEntry.key.contains("{repositoryId}")
-                            val paramIsConsumedAndInPath = isParameterConsumed && pathContainsRepositoryIdParam
-                            val parameterIsMissingAtAll = !pathContainsRepositoryIdParam && !isParameterConsumed
+                            val isParameterConsumed = operation?.parameters?.any { it.name == REPOSITORY_ID_PARAMETER } == true
+                            val pathContainsParam = pathEntry.key.contains("{${REPOSITORY_ID_PARAMETER}}")
+                            val parameterIsMissingAtAll = !pathContainsParam && !isParameterConsumed
 
-                            if (paramIsConsumedAndInPath || parameterIsMissingAtAll) {
+                            if (pathContainsParam || parameterIsMissingAtAll) {
                                 operations.add(operation)
+                            }
+
+                            if (!isParameterConsumed && pathContainsParam) {
+                                val param = Parameter().apply {
+                                    name(REPOSITORY_ID_PARAMETER)
+                                    `in` = "path"
+                                    required = true
+                                    allowEmptyValue = false
+                                    schema = IntegerSchema().apply { format = "int64" }
+                                }
+                                operation.parameters?.apply {
+                                    add(param)
+                                } ?: let {
+                                    operation.parameters = mutableListOf(param)
+                                }
                             }
 
                             operation.parameters?.removeIf { it.name == "ak" && it.`in` == "query" }
@@ -185,7 +208,7 @@ open class OpenApiConfiguration() {
                     }
                     openApi.paths = newPaths
                 }
-                .pathsToExclude(*apiPaths.toTypedArray(), "/api/repository/{repositoryId}/sources/**")
+                .pathsToExclude(*apiPaths.toTypedArray(), "/api/repository/{${REPOSITORY_ID_PARAMETER}}/sources/**")
                 .build()
     }
 }

@@ -30,7 +30,7 @@ class DataCyPlugin {
         for (let file of files) {
             if (/.*\.tsx$/.test(file)) {
                 const content = (await readFile(file)).toString()
-                const matches = content.matchAll(/data-cy={?["'`]([A-Za-z0-9-_\s]+)["'`]?}?/g)
+                const matches = content.matchAll(/"?data-cy"?\s*[=:]\s*{?["'`]([A-Za-z0-9-_\s]+)["'`]?}?/g)
                 this.fileItems[file] = []
                 for (let match of matches) {
                     this.fileItems[file] = [...this.fileItems[file], match[1]]

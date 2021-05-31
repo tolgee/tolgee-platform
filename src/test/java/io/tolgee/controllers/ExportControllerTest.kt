@@ -8,15 +8,16 @@ import io.tolgee.model.Language
 import org.assertj.core.api.Assertions
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.transaction.annotation.Transactional
 import org.testng.annotations.Test
 import java.io.ByteArrayInputStream
-import java.util.*
 import java.util.function.Consumer
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
 class ExportControllerTest : RepositoryAuthControllerTest() {
     @Test
+    @Transactional
     fun exportZipJson() {
         val repository = dbPopulator.populate(generateUniqueString())
         commitTransaction()
@@ -33,6 +34,7 @@ class ExportControllerTest : RepositoryAuthControllerTest() {
     }
 
     @Test
+    @Transactional
     @RepositoryApiKeyAuthTestMethod
     fun exportZipJsonWithApiKey() {
         repositorySupplier = { dbPopulator.populate(generateUniqueString()).also { commitTransaction() } }

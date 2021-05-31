@@ -22,7 +22,7 @@ export const OrganizationsRepositoryListView = () => {
 
     return (
         <BaseView title={t("organization_repositories_title", {name: organization.name})} containerMaxWidth="md" hideChildrenOnLoading={false} loading={loadable.loading}>
-            <SimplePaginatedHateoasList pageSize={20} dispatchParams={[{path: {addressPart: organization.addressPart}}]} actions={actions} search
+            <SimplePaginatedHateoasList pageSize={20} dispatchParams={[{path: {addressPart: organization.addressPart}}]} actions={actions} searchField
                                         loadableName="listRepositories" renderItem={r =>
                 <RepositoryListItem {...r} />
             }/>

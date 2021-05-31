@@ -10,7 +10,7 @@ import {FullPageLoading} from "../component/common/FullPageLoading";
 
 const languageActions = container.resolve(LanguageActions);
 
-export const RepositoryLanguageProvider: FunctionComponent = (props) => {
+export const RepositoryLanguagesProvider: FunctionComponent = (props) => {
 
     let repositoryDTO = useRepository();
 
@@ -25,7 +25,7 @@ export const RepositoryLanguageProvider: FunctionComponent = (props) => {
         if (init || idChanged) {
             languageActions.loadableActions.list.dispatch(repositoryDTO.id);
         }
-    }, []);
+    }, [init]);
 
     if (init || idChanged || languagesLoadable.loading) {
         return <FullPageLoading/>

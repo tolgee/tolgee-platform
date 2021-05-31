@@ -16,10 +16,11 @@ import {SecurityService} from "../service/SecurityService";
 import {MessageService} from "../service/MessageService";
 import {TranslationActions} from "./repository/TranslationActions";
 import {UserApiKeysActions} from "./api_keys/UserApiKeysActions";
-import {ImportExportActions} from "./repository/ImportExportActions";
+import {ExportActions} from "./repository/ExportActions";
 import {UserActions} from "./global/UserActions";
 import {ScreenshotActions} from "./repository/ScreenshotActions";
 import {OrganizationActions} from "./organization/OrganizationActions";
+import {ImportActions} from "./repository/ImportActions";
 
 const implicitReducer = container.resolve(ImplicitReducer);
 const repositoryActions = container.resolve(RepositoryActions);
@@ -38,11 +39,13 @@ const appReducer = (appState, action) => combineReducers({
     message: implicitReducer.create(container.resolve(MessageActions)),
     signUp: implicitReducer.create(container.resolve(SignUpActions)),
     repositoryInvitation: implicitReducer.create(container.resolve(RepositoryInvitationActions)),
-    importExport: implicitReducer.create(container.resolve(ImportExportActions)),
+    export: implicitReducer.create(container.resolve(ExportActions)),
     userApiKey: implicitReducer.create(container.resolve(UserApiKeysActions)),
     user: implicitReducer.create(container.resolve(UserActions)),
     screenshots: implicitReducer.create(container.resolve(ScreenshotActions)),
     organizations: implicitReducer.create(container.resolve(OrganizationActions)),
+    import: implicitReducer.create(container.resolve(ImportActions)),
+
 })(appState, action);
 
 const rootReducer = (state, action): ReturnType<typeof appReducer> => {

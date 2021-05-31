@@ -4,6 +4,7 @@ import {Box, Container, LinearProgress} from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import grey from '@material-ui/core/colors/grey';
 import {useLoading} from "../../hooks/loading";
+import {SecondaryBar} from "./SecondaryBar";
 
 export interface BaseViewProps {
     loading?: boolean;
@@ -31,7 +32,7 @@ export const BaseView = (props: BaseViewProps) => {
                        padding: 0,
                    }}>
             <Box minHeight="100%">
-                <Box style={{backgroundColor: grey[50], borderBottom: `1px solid ${grey[200]}`}} p={4} pb={2} pt={2}>
+                <SecondaryBar>
                     <Container maxWidth={props.containerMaxWidth || false}>
                         <Grid container justify="center" alignItems="center">
                             <Grid data-cy="global-base-view-title" item xs={props.xs || 12} md={props.md || 12} lg={props.lg || 12} sm={props.sm || 12}>
@@ -39,7 +40,7 @@ export const BaseView = (props: BaseViewProps) => {
                             </Grid>
                         </Grid>
                     </Container>
-                </Box>
+                </SecondaryBar>
                 <Box position="relative" overflow="visible">
                     <Box position="absolute" width="100%">
                         {(globalLoading || props.loading) && <LinearProgress style={{height: "2px"}}/>}

@@ -3,9 +3,11 @@ package io.tolgee
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
+import org.hibernate.QueryException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.FieldError
@@ -74,4 +76,11 @@ class ExceptionHandlers {
         return ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED)
     }
 
+    @ExceptionHandler(QueryException::class)
+    fun handleQueryException(ex: QueryException): ResponseEntity<ErrorResponseBody> {
+        if (ex.message!!.contains("could not resolve property")) {
+            return handleServerError(BadRequestException(Message.COULD_NOT_RESOLVE_PROPERTY))
+        }
+        throw ex
+    }
 }

@@ -5,6 +5,13 @@ spring:
   #    password: sa
   liquibase:
     change-log: classpath:db/changelog/schema.xml
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 100
+        order_inserts: true
+        order_updates: true
 tolgee:
   authentication:
     enabled: false

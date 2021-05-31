@@ -6,9 +6,15 @@ buildscript {
     repositories {
         mavenCentral()
     }
+    ext {
+        kotlinVersion = '1.5.10'
+        springBootVersion = '2.4.5'
+    }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.5")
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.32"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
     }
 }
 
@@ -19,9 +25,9 @@ plugins {
     id 'org.springframework.boot' version '2.4.5'
     id 'java'
     id 'org.liquibase.gradle' version '2.0.4'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.32'
-    id "org.jetbrains.kotlin.plugin.jpa" version "1.4.32"
-    id "org.jetbrains.kotlin.kapt" version "1.4.32"
+    id 'org.jetbrains.kotlin.jvm' version "${kotlinVersion}"
+    id "org.jetbrains.kotlin.plugin.jpa" version "${kotlinVersion}"
+    id "org.jetbrains.kotlin.kapt" version "${kotlinVersion}"
 }
 
 group = 'io.tolgee'
@@ -45,11 +51,14 @@ apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
+apply plugin: "kotlin-allopen"
 
 repositories {
     mavenCentral()
     jcenter()
 }
+
+sourceCompatibility = 11
 
 idea {
     module {
@@ -57,6 +66,15 @@ idea {
     }
 }
 
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
+    annotation("org.springframework.stereotype.Service")
+    annotation("org.springframework.stereotype.Component")
+    annotation("org.springframework.transaction.annotation.Transactional")
+    annotation("org.springframework.beans.factory.annotation.Configurable")
+}
 
 def liveDbPostgres = [
         url         : 'jdbc:postgresql://localhost:5432/postgres',
@@ -70,7 +88,7 @@ def liveDbPostgres = [
 ]
 
 def liveDbH2 = [
-        url         : 'jdbc:h2:~/.tolgee/db.h2;AUTO_SERVER=TRUE',
+        url         : "jdbc:h2:${project.projectDir}/build/tmp_db_schema_updates/db.h2;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE",
         referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.H2Dialect' +
                 '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
@@ -78,7 +96,7 @@ def liveDbH2 = [
         driver      : 'org.h2.Driver'
 ]
 
-def liveDb = liveDbPostgres
+def liveDb = liveDbH2
 
 liquibase {
     activities {
@@ -111,10 +129,10 @@ compileKotlin {
     }
 }
 
-def LIQUIBASE_VERSION = "4.3.3"
-def LIQUIBASE_HIBERNATE_VERSION = "4.3.3"
+def LIQUIBASE_VERSION = "4.3.5"
+def LIQUIBASE_HIBERNATE_VERSION = "4.3.5"
 def JJWT_VERSION = "0.11.2"
-def SPRING_DOC_VERSION = "1.5.7"
+def SPRING_DOC_VERSION = "1.5.9"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -148,11 +166,11 @@ dependencies {
     compile("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime 'org.postgresql:postgresql'
-    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.0')
+    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.1')
     liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:$LIQUIBASE_HIBERNATE_VERSION")
     liquibaseRuntime('org.springframework.boot:spring-boot-starter-data-jpa')
     liquibaseRuntime sourceSets.main.output
-    implementation 'com.github.javafaker:javafaker:1.0.1'
+    implementation 'com.github.javafaker:javafaker:1.0.2'
     implementation 'org.hibernate:hibernate-jpamodelgen'
     testCompile group: 'org.testng', name: 'testng', version: '7.4.0'
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
@@ -160,18 +178,19 @@ dependencies {
     implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-data-rest', version: "${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-hateoas', version: "${SPRING_DOC_VERSION}"
-    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.3-native-mt'
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.5.0-native-mt'
     kapt "org.hibernate:hibernate-jpamodelgen"
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.32'
-    liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.31'
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
+    liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3'
     implementation 'commons-codec:commons-codec:1.15'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.1000'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.1029'
     compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
     implementation('org.reflections:reflections:0.9.12')
-    implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.25.0'
-    testImplementation('org.mockito.kotlin:mockito-kotlin:3.1.0')
+    implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.26.0'
+    testImplementation('org.mockito.kotlin:mockito-kotlin:3.2.0')
     testCompile("io.findify:s3mock_2.13:0.2.6")
+    implementation group: 'com.ibm.icu', name: 'icu4j', version: '69.1'
 }
 
 test {
