@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
+import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.PathDTO
@@ -12,19 +12,18 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.helpers.JsonHelper
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testng.annotations.Test
-import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationControllerTest()
-    : RepositoryAuthControllerTest() {
+    : ProjectAuthControllerTest() {
 
     @Test
     fun getViewDataSearch() {
@@ -49,9 +48,9 @@ class TranslationControllerTest()
         assertThat(result.data).isNotEmpty
     }
 
-    private fun performValidViewRequest(repository: Repository, queryString: String):
+    private fun performValidViewRequest(project: Project, queryString: String):
             ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-        val mvcResult = performGetDataForView(repository.id, queryString).andExpect(status().isOk).andReturn()
+        val mvcResult = performGetDataForView(project.id, queryString).andExpect(status().isOk).andReturn()
         return mvcResult.mapResponseTo()
     }
 
@@ -113,7 +112,7 @@ class TranslationControllerTest()
     }
 
     @Test
-    @RepositoryApiKeyAuthTestMethod
+    @ProjectApiKeyAuthTestMethod
     fun setTranslationsWithApiKey() {
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 
@@ -122,7 +121,7 @@ class TranslationControllerTest()
         )).andExpect(status().isOk)
 
         val fromService = translationService.getKeyTranslationsResult(
-                repository.id,
+                project.id,
                 PathDTO.fromFullPath("hello"),
                 setOf("en", "de")
         )
@@ -131,7 +130,7 @@ class TranslationControllerTest()
     }
 
     @Test
-    @RepositoryApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT])
+    @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT])
     fun setTranslationsWithApiKeyForbidden() {
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 

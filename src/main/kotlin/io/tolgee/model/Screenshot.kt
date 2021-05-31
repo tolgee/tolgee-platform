@@ -26,6 +26,6 @@ data class Screenshot(
         get() {
             val nameToHash = "${this.id}_${this.createdAt!!.toInstant().toEpochMilli()}"
             val fileName = DigestUtils.sha256Hex(nameToHash.toByteArray())
-            return "${key.repository!!.id}/${key.id}/${fileName}.jpg"
+            return "${key.project!!.id}/${key.id}/${fileName}.jpg"
         }
 }

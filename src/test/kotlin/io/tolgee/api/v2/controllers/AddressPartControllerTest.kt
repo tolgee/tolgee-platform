@@ -1,18 +1,14 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.controllers.SignedInControllerTest
-import io.tolgee.dtos.request.CreateRepositoryDTO
 import io.tolgee.dtos.request.GenerateAddressPathDto
-import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Organization
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.Test
-
-import org.testng.Assert.*
 
 @SpringBootTest
 @AutoConfigureWebMvc
@@ -33,8 +29,8 @@ class AddressPartControllerTest : SignedInControllerTest() {
     @Test
     fun testValidateRepositoryAddressPart() {
         performAuthGet("/v2/address-part/validate-repository/hello-1").andIsOk.andAssertThatJson.isEqualTo(true)
-        repositoryRepository.save(
-                Repository(
+        projectRepository.save(
+                Project(
                         name = "aaa",
                         addressPart = "hello-1"
                 ).also { it.userOwner = dbPopulator.createUserIfNotExists("hello") }
@@ -74,8 +70,8 @@ class AddressPartControllerTest : SignedInControllerTest() {
 
     @Test
     fun testGenerateRepositoryAddressPart() {
-        repositoryRepository.save(
-                Repository(
+        projectRepository.save(
+                Project(
                         name = "aaa",
                         addressPart = "hello-world"
                 ).also { it.userOwner = dbPopulator.createUserIfNotExists("hello") }

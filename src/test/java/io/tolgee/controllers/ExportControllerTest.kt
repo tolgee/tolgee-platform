@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
+import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.constants.ApiScope
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.generateUniqueString
@@ -15,7 +15,7 @@ import java.util.function.Consumer
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-class ExportControllerTest : RepositoryAuthControllerTest() {
+class ExportControllerTest : ProjectAuthControllerTest() {
     @Test
     @Transactional
     fun exportZipJson() {
@@ -35,23 +35,23 @@ class ExportControllerTest : RepositoryAuthControllerTest() {
 
     @Test
     @Transactional
-    @RepositoryApiKeyAuthTestMethod
+    @ProjectApiKeyAuthTestMethod
     fun exportZipJsonWithApiKey() {
-        repositorySupplier = { dbPopulator.populate(generateUniqueString()).also { commitTransaction() } }
+        projectSupplier = { dbPopulator.populate(generateUniqueString()).also { commitTransaction() } }
         val mvcResult = performRepositoryAuthGet("export/jsonZip")
                 .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
         mvcResult.response
         val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
-        repository.languages.forEach(Consumer { l: Language ->
+        project.languages.forEach(Consumer { l: Language ->
             val name = l.abbreviation + ".json"
             Assertions.assertThat(fileSizes).containsKey(name)
         })
         //cleanup
-        repositoryService.deleteRepository(repository.id)
+        repositoryService.deleteRepository(project.id)
     }
 
     @Test
-    @RepositoryApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT])
+    @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT])
     fun exportZipJsonApiKeyPermissionFail() {
         performRepositoryAuthGet("export/jsonZip").andIsForbidden
     }

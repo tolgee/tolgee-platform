@@ -7,11 +7,11 @@ import io.tolgee.dtos.request.SetTranslationsDTO
 import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.PermissionRepository
-import io.tolgee.repository.RepositoryRepository
+import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InternalController
 import io.tolgee.service.*
@@ -34,7 +34,7 @@ open class RepositoriesE2eDataController(
         private val organizationRoleService: OrganizationRoleService,
         private val organizationRepository: OrganizationRepository,
         private val repositoryService: RepositoryService,
-        private val repositoryRepository: RepositoryRepository,
+        private val projectRepository: ProjectRepository,
         private val permissionService: PermissionService,
         private val userAccountRepository: UserAccountRepository,
         private val permissionRepository: PermissionRepository,
@@ -85,7 +85,7 @@ open class RepositoriesE2eDataController(
                 organizationService.get(repositoryData.organizationOwner) else null
 
 
-            val repository = repositoryRepository.save(Repository(
+            val repository = projectRepository.save(Project(
                     name = repositoryData.name,
                     addressPart = repositoryService.generateAddressPart(repositoryData.name),
                     userOwner = userOwner,
@@ -95,7 +95,7 @@ open class RepositoriesE2eDataController(
 
             repositoryData.permittedUsers.forEach {
                 val user = createdUsers[it.userName]!!
-                permissionRepository.save(Permission(repository = repository, user = user, type = it.permission))
+                permissionRepository.save(Permission(project = repository, user = user, type = it.permission))
             }
 
             val createdLanguages = mutableListOf<String>()
@@ -135,7 +135,7 @@ open class RepositoriesE2eDataController(
     companion object {
         data class PermittedUserData(
                 val userName: String,
-                val permission: Permission.RepositoryPermissionType,
+                val permission: Permission.ProjectPermissionType,
         )
 
         data class UserData(
@@ -144,7 +144,7 @@ open class RepositoriesE2eDataController(
         )
 
         data class OrganizationData(
-                val basePermission: Permission.RepositoryPermissionType,
+                val basePermission: Permission.ProjectPermissionType,
                 val name: String,
                 val owners: MutableList<String> = mutableListOf(),
                 val members: MutableList<String> = mutableListOf(),
@@ -169,13 +169,13 @@ open class RepositoriesE2eDataController(
         val organizations = mutableListOf(
                 OrganizationData(
                         name = "Facebook",
-                        basePermission = Permission.RepositoryPermissionType.MANAGE,
+                        basePermission = Permission.ProjectPermissionType.MANAGE,
                         owners = mutableListOf("cukrberg@facebook.com"),
                         members = mutableListOf("john@doe.com")
                 ),
                 OrganizationData(
                         name = "Microsoft",
-                        basePermission = Permission.RepositoryPermissionType.EDIT,
+                        basePermission = Permission.ProjectPermissionType.EDIT,
                         owners = mutableListOf("gates@microsoft.com"),
                         members = mutableListOf("john@doe.com", "cukrberg@facebook.com")
                 )
@@ -188,7 +188,7 @@ open class RepositoriesE2eDataController(
                         permittedUsers = mutableListOf(
                                 PermittedUserData(
                                         "vaclav.novak@fake.com",
-                                        Permission.RepositoryPermissionType.TRANSLATE
+                                        Permission.ProjectPermissionType.TRANSLATE
                                 )
                         )
                 ),
@@ -198,7 +198,7 @@ open class RepositoriesE2eDataController(
                         permittedUsers = mutableListOf(
                                 PermittedUserData(
                                         "vaclav.novak@fake.com",
-                                        Permission.RepositoryPermissionType.MANAGE
+                                        Permission.ProjectPermissionType.MANAGE
                                 )
                         )
                 ),
@@ -208,7 +208,7 @@ open class RepositoriesE2eDataController(
                         permittedUsers = mutableListOf(
                                 PermittedUserData(
                                         "vaclav.novak@fake.com",
-                                        Permission.RepositoryPermissionType.EDIT
+                                        Permission.ProjectPermissionType.EDIT
                                 )
                         )
                 ),
@@ -218,7 +218,7 @@ open class RepositoriesE2eDataController(
                         permittedUsers = mutableListOf(
                                 PermittedUserData(
                                         "vaclav.novak@fake.com",
-                                        Permission.RepositoryPermissionType.TRANSLATE
+                                        Permission.ProjectPermissionType.TRANSLATE
                                 )
                         ),
                         keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
@@ -229,7 +229,7 @@ open class RepositoriesE2eDataController(
                         permittedUsers = mutableListOf(
                                 PermittedUserData(
                                         "vaclav.novak@fake.com",
-                                        Permission.RepositoryPermissionType.VIEW
+                                        Permission.ProjectPermissionType.VIEW
                                 )
                         )
                 ),
@@ -239,7 +239,7 @@ open class RepositoriesE2eDataController(
                         permittedUsers = mutableListOf(
                                 PermittedUserData(
                                         "cukrberg@facebook.com",
-                                        Permission.RepositoryPermissionType.VIEW
+                                        Permission.ProjectPermissionType.VIEW
                                 )
                         )
                 ),
@@ -249,7 +249,7 @@ open class RepositoriesE2eDataController(
                         permittedUsers = mutableListOf(
                                 PermittedUserData(
                                         "cukrberg@facebook.com",
-                                        Permission.RepositoryPermissionType.MANAGE
+                                        Permission.ProjectPermissionType.MANAGE
                                 )
                         )
                 )
@@ -260,7 +260,7 @@ open class RepositoriesE2eDataController(
                 val email = "owner@zzzcool${number}.com";
                 users.add(UserData(email))
                 repositories.find { item -> item.name == "Microsoft Word" }!!.permittedUsers.add(
-                        PermittedUserData(email, Permission.RepositoryPermissionType.EDIT)
+                        PermittedUserData(email, Permission.ProjectPermissionType.EDIT)
                 )
             }
         }

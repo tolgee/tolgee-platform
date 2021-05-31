@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.util.*
 import java.util.stream.Collectors
 
 @RestController
@@ -38,7 +37,7 @@ open class InvitationController @Autowired constructor(
     @Operation(summary = "Prints all invitations to repository")
     open fun getRepositoryInvitations(@PathVariable("repositoryId") id: Long): Set<InvitationDTO> {
         val repository = repositoryService.get(id).orElseThrow { NotFoundException() }!!
-        securityService.checkRepositoryPermission(id, Permission.RepositoryPermissionType.MANAGE)
+        securityService.checkRepositoryPermission(id, Permission.ProjectPermissionType.MANAGE)
         return invitationService.getForRepository(repository).stream().map { invitation: Invitation? ->
             InvitationDTO.fromEntity(invitation)
         }.collect(Collectors.toCollection { LinkedHashSet() })
@@ -51,8 +50,8 @@ open class InvitationController @Autowired constructor(
             NotFoundException()
         }
         invitation.permission?.let {
-            securityService.checkRepositoryPermission(invitation.permission!!.repository!!.id,
-                    Permission.RepositoryPermissionType.MANAGE)
+            securityService.checkRepositoryPermission(invitation.permission!!.project!!.id,
+                    Permission.ProjectPermissionType.MANAGE)
         }
 
         invitation.organizationRole?.let {

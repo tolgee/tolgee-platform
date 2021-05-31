@@ -5,11 +5,13 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModel
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModelAssembler
-import io.tolgee.api.v2.hateoas.organization.*
+import io.tolgee.api.v2.hateoas.organization.OrganizationModel
+import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
+import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModel
+import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
 import io.tolgee.api.v2.hateoas.repository.RepositoryModel
 import io.tolgee.api.v2.hateoas.repository.RepositoryModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -21,10 +23,11 @@ import io.tolgee.dtos.request.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.*
+import io.tolgee.model.Organization
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
-import io.tolgee.model.views.RepositoryView
+import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.*
@@ -49,7 +52,7 @@ open class OrganizationController(
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val pagedResourcesAssembler: PagedResourcesAssembler<Organization>,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        private val pagedRepositoryResourcesAssembler: PagedResourcesAssembler<RepositoryView>,
+        private val pagedProjectResourcesAssembler: PagedResourcesAssembler<ProjectView>,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -174,7 +177,7 @@ open class OrganizationController(
         return organizationService.get(id)?.let {
             organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
             repositoryService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
-                pagedRepositoryResourcesAssembler.toModel(repositories, repositoryModelAssembler)
+                pagedProjectResourcesAssembler.toModel(repositories, repositoryModelAssembler)
             }
         } ?: throw NotFoundException()
     }
@@ -189,7 +192,7 @@ open class OrganizationController(
         return organizationService.get(addressPart)?.let {
             organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
             repositoryService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
-                pagedRepositoryResourcesAssembler.toModel(repositories, repositoryModelAssembler)
+                pagedProjectResourcesAssembler.toModel(repositories, repositoryModelAssembler)
             }
         } ?: throw NotFoundException()
     }

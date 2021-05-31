@@ -8,14 +8,13 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.repository.RepositoryModel
 import io.tolgee.api.v2.hateoas.repository.RepositoryModelAssembler
-import io.tolgee.api.v2.hateoas.user_account.UserAccountInRepositoryModel
+import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInRepositoryModelAssembler
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
-import io.tolgee.model.views.RepositoryView
-import io.tolgee.model.views.UserAccountInRepositoryView
+import io.tolgee.model.views.ProjectView
+import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.repository_auth.AccessWithAnyRepositoryPermission
@@ -38,9 +37,9 @@ open class V2RepositoriesController(
         val repositoryService: RepositoryService,
         val repositoryHolder: RepositoryHolder,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        val arrayResourcesAssembler: PagedResourcesAssembler<RepositoryView>,
+        val arrayResourcesAssembler: PagedResourcesAssembler<ProjectView>,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        val userArrayResourcesAssembler: PagedResourcesAssembler<UserAccountInRepositoryView>,
+        val userArrayResourcesAssembler: PagedResourcesAssembler<UserAccountInProjectView>,
         val userAccountInRepositoryModelAssembler: UserAccountInRepositoryModelAssembler,
         val repositoryModelAssembler: RepositoryModelAssembler,
         val userAccountService: UserAccountService,
@@ -66,23 +65,23 @@ open class V2RepositoriesController(
 
     @GetMapping("/{repositoryId}/users")
     @Operation(summary = "Returns repository all users, who have permission to access repository")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.MANAGE)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.MANAGE)
     open fun getAllUsers(@PathVariable("repositoryId") repositoryId: Long,
                          pageable: Pageable,
                          @RequestParam("search", required = false) search: String?
-    ): PagedModel<UserAccountInRepositoryModel> {
+    ): PagedModel<UserAccountInProjectModel> {
         return userAccountService.getAllInRepository(repositoryId, pageable, search).let { users ->
             userArrayResourcesAssembler.toModel(users, userAccountInRepositoryModelAssembler)
         }
     }
 
     @PutMapping("/{repositoryId}/users/{userId}/set-permissions/{permissionType}")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.MANAGE)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.MANAGE)
     @Operation(summary = "Sets user's direct permission")
     open fun setUsersPermissions(
             @PathVariable("repositoryId") repositoryId: Long,
             @PathVariable("userId") userId: Long,
-            @PathVariable("permissionType") permissionType: Permission.RepositoryPermissionType,
+            @PathVariable("permissionType") permissionType: Permission.ProjectPermissionType,
     ) {
         if (userId == authenticationFacade.userAccount.id) {
             throw BadRequestException(Message.CANNOT_SET_YOUR_OWN_PERMISSIONS)
@@ -91,7 +90,7 @@ open class V2RepositoriesController(
     }
 
     @PutMapping("/{repositoryId}/users/{userId}/revoke-access")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.MANAGE)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.MANAGE)
     @Operation(summary = "Revokes user's access")
     fun revokePermission(
             @PathVariable("repositoryId") repositoryId: Long,

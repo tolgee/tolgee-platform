@@ -1,7 +1,7 @@
 package io.tolgee.controllers
 
 import io.tolgee.ITest
-import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
+import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.exceptions.NotFoundException
@@ -20,7 +20,7 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class LanguageControllerTest : RepositoryAuthControllerTest(), ITest {
+class LanguageControllerTest : ProjectAuthControllerTest(), ITest {
     private val languageDTO = LanguageDTO(null, "en", "en")
     private val languageDTOBlank = LanguageDTO(null, "")
     private val languageDTOCorrect = LanguageDTO(null, "Espanol", "es")
@@ -100,7 +100,7 @@ class LanguageControllerTest : RepositoryAuthControllerTest(), ITest {
     }
 
     @Test
-    @RepositoryApiKeyAuthTestMethod
+    @ProjectApiKeyAuthTestMethod
     fun findAllLanguagesApiKey() {
         val contentAsString = performRepositoryAuthGet("languages").andIsOk.andReturn().mapResponseTo<Set<Any>>()
         assertThat(contentAsString).hasSize(2)

@@ -41,25 +41,25 @@ class KeyController(
 ) : IController {
 
     @PostMapping(value = ["/create", ""])
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.TRANSLATE)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.TRANSLATE)
     @Operation(summary = "Creates new key with specified translation data")
     fun create(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody @Valid dto: SetTranslationsDTO?) {
-        keyService.create(repositoryHolder.repository, dto!!)
+        keyService.create(repositoryHolder.project, dto!!)
     }
 
     @PostMapping(value = ["/edit"])
     @Operation(summary = "Edits key name")
     @Deprecated("Uses wrong naming in body object, use \"PUT .\" - will be removed in 2.0")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun editDeprecated(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody @Valid dto: DeprecatedEditKeyDTO?) {
-        keyService.edit(repositoryHolder.repository, dto!!)
+        keyService.edit(repositoryHolder.project, dto!!)
     }
 
     @PutMapping(value = [""])
     @Operation(summary = "Edits key name")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun edit(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody @Valid dto: EditKeyDTO) {
-        keyService.edit(repositoryHolder.repository, dto)
+        keyService.edit(repositoryHolder.project, dto)
     }
 
     @GetMapping(value = ["{id}"])
@@ -67,7 +67,7 @@ class KeyController(
     @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
     fun getDeprecated(@PathVariable("id") id: Long?): DeprecatedKeyDto {
         val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-        securityService.checkAnyRepositoryPermission(key.repository!!.id)
+        securityService.checkAnyRepositoryPermission(key.project!!.id)
         return DeprecatedKeyDto(key.name)
     }
 
@@ -75,7 +75,7 @@ class KeyController(
     @Operation(summary = "Deletes key with specified id")
     fun delete(@PathVariable id: Long?) {
         val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-        securityService.checkRepositoryPermission(key.repository!!.id, Permission.RepositoryPermissionType.EDIT)
+        securityService.checkRepositoryPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
         keyService.delete(id)
     }
 
@@ -84,7 +84,7 @@ class KeyController(
     @Operation(summary = "Deletes multiple kdys by their IDs")
     fun delete(@RequestBody ids: Set<Long>?) {
         for (key in keyService.get(ids!!)) {
-            securityService.checkRepositoryPermission(key.repository!!.id, Permission.RepositoryPermissionType.EDIT)
+            securityService.checkRepositoryPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
         }
         keyService.deleteMultiple(ids)
     }
@@ -101,7 +101,7 @@ class KeyController(
             @RequestBody body: GetKeyTranslationsReqDto,
             @PathVariable("languages") languages: Set<String>?
     ): Map<String, String?> {
-        val repositoryId = repositoryHolder.repository.id
+        val repositoryId = repositoryHolder.project.id
         val pathDTO = PathDTO.fromFullPath(body.key)
         return translationService.getKeyTranslationsResult(repositoryId, pathDTO, languages)
     }

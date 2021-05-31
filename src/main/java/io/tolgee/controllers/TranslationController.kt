@@ -41,13 +41,13 @@ class TranslationController @Autowired constructor(
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
     @Operation(summary = "Get all translations for specific languages")
     fun getTranslations(@PathVariable("languages") languages: Set<String>): Map<String, Any> {
-        return translationService.getTranslations(languages, repositoryHolder.repository.id)
+        return translationService.getTranslations(languages, repositoryHolder.project.id)
     }
 
     @Suppress("DeprecatedCallableAddReplaceWith")
     @PostMapping("/set")
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    @AccessWithRepositoryPermission(permission = Permission.RepositoryPermissionType.TRANSLATE)
+    @AccessWithRepositoryPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
     @Deprecated(message = "Use put method to /api/repository/{repositoryId}/translations or /api/repository/translations")
     @Hidden
     fun setTranslationsPost(@RequestBody @Valid dto: SetTranslationsDTO?) {
@@ -56,11 +56,11 @@ class TranslationController @Autowired constructor(
 
     @PutMapping("")
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    @AccessWithRepositoryPermission(permission = Permission.RepositoryPermissionType.TRANSLATE)
+    @AccessWithRepositoryPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
     @Operation(summary = "Sets translations for existing key")
     fun setTranslations(@RequestBody @Valid dto: SetTranslationsDTO?) {
         val key = keyService.get(
-                repositoryHolder.repository.id,
+                repositoryHolder.project.id,
                 PathDTO.fromFullPath(dto!!.key)
         ).orElseThrow { NotFoundException() }
 
@@ -69,10 +69,10 @@ class TranslationController @Autowired constructor(
 
     @PostMapping("")
     @AccessWithApiKey([ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
-    @AccessWithRepositoryPermission(permission = Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(permission = Permission.ProjectPermissionType.EDIT)
     @Operation(summary = "Sets translations for existing or not existing key")
     fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsDTO) {
-        val repository = repositoryService.get(repositoryHolder.repository.id).get()
+        val repository = repositoryService.get(repositoryHolder.project.id).get()
         val key = keyService.getOrCreateKey(repository, PathDTO.fromFullPath(dto.key))
         translationService.setForKey(key, dto.translations!!)
     }
@@ -85,7 +85,7 @@ class TranslationController @Autowired constructor(
                     @RequestParam(name = "offset", defaultValue = "0") offset: Int,
                     @RequestParam(name = "search", required = false) search: String?
     ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-        securityService.checkRepositoryPermission(repositoryId!!, Permission.RepositoryPermissionType.VIEW)
+        securityService.checkRepositoryPermission(repositoryId!!, Permission.ProjectPermissionType.VIEW)
         return translationService.getViewData(languages, repositoryId, limit, offset, search)
     }
 }

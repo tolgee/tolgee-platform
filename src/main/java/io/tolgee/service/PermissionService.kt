@@ -7,8 +7,8 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.Permission.Companion.builder
-import io.tolgee.model.Permission.RepositoryPermissionType
-import io.tolgee.model.Repository
+import io.tolgee.model.Permission.ProjectPermissionType
+import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.PermissionRepository
@@ -25,8 +25,8 @@ open class PermissionService @Autowired constructor(private val permissionReposi
     @set:Autowired
     lateinit var repositoryService: RepositoryService
 
-    open fun getAllOfRepository(repository: Repository?): Set<Permission> {
-        return permissionRepository.getAllByRepositoryAndUserNotNull(repository)
+    open fun getAllOfRepository(project: Project?): Set<Permission> {
+        return permissionRepository.getAllByProjectAndUserNotNull(project)
     }
 
     open fun findById(id: Long): Permission? {
@@ -35,13 +35,13 @@ open class PermissionService @Autowired constructor(private val permissionReposi
 
     open fun getRepositoryPermissionType(repositoryId: Long, userAccount: UserAccount) = getRepositoryPermissionType(repositoryId, userAccount.id!!)
 
-    open fun getRepositoryPermissionType(repositoryId: Long, userAccountId: Long): RepositoryPermissionType? {
+    open fun getRepositoryPermissionType(repositoryId: Long, userAccountId: Long): ProjectPermissionType? {
         return getRepositoryPermissionData(repositoryId, userAccountId).computedPermissions
     }
 
     open fun getRepositoryPermissionData(repositoryId: Long, userAccountId: Long): RepositoryPermissionData {
         val repository = repositoryService.get(repositoryId).orElseThrow { NotFoundException() }!!
-        val repositoryPermission = permissionRepository.findOneByRepositoryIdAndUserId(repositoryId, userAccountId)
+        val repositoryPermission = permissionRepository.findOneByProjectIdAndUserId(repositoryId, userAccountId)
 
         val organization = repository.organizationOwner
         val organizationRole = organization?.let { organizationRoleService.getType(userAccountId, organization.id!!) }
@@ -49,7 +49,7 @@ open class PermissionService @Autowired constructor(private val permissionReposi
         val computed = computeRepositoryPermissionType(organizationRole, organizationBasePermissionType, repositoryPermission?.type)
 
         return RepositoryPermissionData(
-                repository = repository,
+                project = repository,
                 organization = organization,
                 organizationRole = organizationRole,
                 organizationBasePermissions = organizationBasePermissionType,
@@ -59,7 +59,7 @@ open class PermissionService @Autowired constructor(private val permissionReposi
     }
 
     open fun create(permission: Permission) {
-        permission.repository!!.permissions.add(permission)
+        permission.project!!.permissions.add(permission)
         permissionRepository.save(permission)
     }
 
@@ -68,57 +68,57 @@ open class PermissionService @Autowired constructor(private val permissionReposi
     }
 
     open fun deleteAllByRepository(repositoryId: Long?) {
-        permissionRepository.deleteAllByRepositoryId(repositoryId)
+        permissionRepository.deleteAllByProjectId(repositoryId)
     }
 
     @Transactional
-    open fun grantFullAccessToRepo(userAccount: UserAccount?, repository: Repository?) {
-        val permission = builder().type(RepositoryPermissionType.MANAGE).repository(repository).user(userAccount).build()
+    open fun grantFullAccessToRepo(userAccount: UserAccount?, project: Project?) {
+        val permission = builder().type(ProjectPermissionType.MANAGE).project(project).user(userAccount).build()
         create(permission)
     }
 
     @Transactional
-    open fun editPermission(permission: Permission, type: RepositoryPermissionType?) {
+    open fun editPermission(permission: Permission, type: ProjectPermissionType?) {
         permission.type = type
         permissionRepository.save(permission)
     }
 
     open fun computeRepositoryPermissionType(
             organizationRole: OrganizationRoleType?,
-            organizationBasePermissionType: RepositoryPermissionType?,
-            repositoryPermissionType: RepositoryPermissionType?
-    ): RepositoryPermissionType? {
+            organizationBasePermissionType: ProjectPermissionType?,
+            projectPermissionType: ProjectPermissionType?
+    ): ProjectPermissionType? {
         if (organizationRole == null) {
-            return repositoryPermissionType
+            return projectPermissionType
         }
 
         if (organizationRole == OrganizationRoleType.OWNER) {
-            return RepositoryPermissionType.MANAGE
+            return ProjectPermissionType.MANAGE
         }
 
         if (organizationRole == OrganizationRoleType.MEMBER) {
-            if (repositoryPermissionType == null) {
+            if (projectPermissionType == null) {
                 return organizationBasePermissionType
             }
             if (organizationBasePermissionType == null) {
-                return repositoryPermissionType
+                return projectPermissionType
             }
 
-            if (repositoryPermissionType.power > organizationBasePermissionType.power) {
-                return repositoryPermissionType
+            if (projectPermissionType.power > organizationBasePermissionType.power) {
+                return projectPermissionType
             }
         }
         return organizationBasePermissionType
     }
 
-    open fun createForInvitation(invitation: Invitation, repository: Repository, type: RepositoryPermissionType): Permission {
-        return Permission(invitation = invitation, repository = repository, type = type).let {
+    open fun createForInvitation(invitation: Invitation, project: Project, type: ProjectPermissionType): Permission {
+        return Permission(invitation = invitation, project = project, type = type).let {
             permissionRepository.save(it)
         }
     }
 
     open fun findOneByRepositoryIdAndUserId(repositoryId: Long, userId: Long): Permission? {
-        return permissionRepository.findOneByRepositoryIdAndUserId(repositoryId, userId)
+        return permissionRepository.findOneByProjectIdAndUserId(repositoryId, userId)
     }
 
     open fun acceptInvitation(permission: Permission, userAccount: UserAccount) {
@@ -127,7 +127,7 @@ open class PermissionService @Autowired constructor(private val permissionReposi
         permissionRepository.save(permission)
     }
 
-    open fun setUserDirectPermission(repositoryId: Long, userId: Long, newPermissionType: RepositoryPermissionType) {
+    open fun setUserDirectPermission(repositoryId: Long, userId: Long, newPermissionType: ProjectPermissionType) {
         val data = this.getRepositoryPermissionData(repositoryId, userId)
 
         data.computedPermissions ?: throw BadRequestException(Message.USER_HAS_NO_REPOSITORY_ACCESS)
@@ -149,7 +149,7 @@ open class PermissionService @Autowired constructor(private val permissionReposi
 
         val permission = data.directPermissions ?: let {
             val userAccount = userAccountService[userId].get()
-            Permission(user = userAccount, repository = data.repository, type = newPermissionType)
+            Permission(user = userAccount, project = data.project, type = newPermissionType)
         }
 
         permission.type = newPermissionType

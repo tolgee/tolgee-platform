@@ -10,7 +10,7 @@ import io.tolgee.dtos.response.translations_view.ResponseParams
 import io.tolgee.exceptions.InternalException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.model.Translation
 import io.tolgee.model.Translation.Companion.builder
 import io.tolgee.model.key.Key
@@ -67,9 +67,9 @@ class TranslationService(private val translationRepository: TranslationRepositor
         return translationsMap
     }
 
-    private fun getKeyTranslations(languages: Set<Language>, repository: Repository, key: Key?): Set<Translation> {
+    private fun getKeyTranslations(languages: Set<Language>, project: Project, key: Key?): Set<Translation> {
         return if (key != null) {
-            translationRepository.getTranslations(key, repository, languages)
+            translationRepository.getTranslations(key, project, languages)
         } else LinkedHashSet()
     }
 
@@ -100,7 +100,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     fun setTranslation(key: Key, languageAbbreviation: String?, text: String?) {
-        val language = languageService!!.findByAbbreviation(languageAbbreviation!!, key.repository!!)
+        val language = languageService!!.findByAbbreviation(languageAbbreviation!!, key.project!!)
                 .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         setTranslation(key, language, text)
     }
@@ -125,7 +125,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     fun deleteIfExists(key: Key, languageAbbreviation: String?) {
-        val language = languageService!!.findByAbbreviation(languageAbbreviation!!, key.repository!!)
+        val language = languageService!!.findByAbbreviation(languageAbbreviation!!, key.project!!)
                 .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         translationRepository.findOneByKeyAndLanguage(key, language)
                 .ifPresent { entity: Translation -> translationRepository.delete(entity) }
@@ -146,7 +146,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     fun deleteAllByRepository(repositoryId: Long) {
-        translationRepository.deleteAllByRepositoryId(repositoryId)
+        translationRepository.deleteAllByProjectId(repositoryId)
     }
 
     fun deleteAllByLanguage(languageId: Long) {

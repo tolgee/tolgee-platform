@@ -57,7 +57,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun getAllUsers() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
         permissionService.grantFullAccessToRepo(user, repo)
 
@@ -74,29 +74,29 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun setUsersPermissions() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
 
-        permissionService.create(Permission(user = user, repository = repo, type = Permission.RepositoryPermissionType.VIEW))
+        permissionService.create(Permission(user = user, project = repo, type = Permission.ProjectPermissionType.VIEW))
 
         logAsUser(usersAndOrganizations[1].name!!)
 
         performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
         permissionService.getRepositoryPermissionType(repo.id, user)
-                .let { assertThat(it).isEqualTo(Permission.RepositoryPermissionType.EDIT) }
+                .let { assertThat(it).isEqualTo(Permission.ProjectPermissionType.EDIT) }
     }
 
     @Test
     fun setUsersPermissionsDeletesPermission() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
 
         organizationRoleService.grantMemberRoleToUser(user, repo.organizationOwner!!)
-        permissionService.create(Permission(user = user, repository = repo, type = Permission.RepositoryPermissionType.VIEW))
+        permissionService.create(Permission(user = user, project = repo, type = Permission.ProjectPermissionType.VIEW))
 
-        repo.organizationOwner!!.basePermissions = Permission.RepositoryPermissionType.EDIT
+        repo.organizationOwner!!.basePermissions = Permission.ProjectPermissionType.EDIT
         organizationRepository.save(repo.organizationOwner!!)
 
         logAsUser(usersAndOrganizations[1].name!!)
@@ -110,7 +110,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun setUsersPermissionsNoAccess() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
 
         logAsUser(usersAndOrganizations[1].name!!)
@@ -125,7 +125,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun setUsersPermissionsOwner() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
         organizationRoleService.grantOwnerRoleToUser(user, repo.organizationOwner!!)
 
@@ -140,11 +140,11 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun setUsersPermissionsHigherBase() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
         organizationRoleService.grantMemberRoleToUser(user, repo.organizationOwner!!)
 
-        repo.organizationOwner!!.basePermissions = Permission.RepositoryPermissionType.EDIT
+        repo.organizationOwner!!.basePermissions = Permission.ProjectPermissionType.EDIT
         organizationRepository.save(repo.organizationOwner!!)
 
         logAsUser(usersAndOrganizations[1].name!!)
@@ -159,7 +159,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun setUsersPermissionsOwn() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
 
         logAsUser(usersAndOrganizations[1].name!!)
 
@@ -172,10 +172,10 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun revokeUsersAccess() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
 
-        permissionService.create(Permission(user = user, repository = repo, type = Permission.RepositoryPermissionType.VIEW))
+        permissionService.create(Permission(user = user, project = repo, type = Permission.ProjectPermissionType.VIEW))
 
         logAsUser(usersAndOrganizations[1].name!!)
 
@@ -200,7 +200,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun revokeUsersAccessIsOrganizationMember() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
 
         organizationRoleService.grantMemberRoleToUser(user, repo.organizationOwner!!)

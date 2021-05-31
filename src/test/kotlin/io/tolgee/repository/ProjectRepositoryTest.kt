@@ -6,7 +6,7 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import org.assertj.core.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -15,10 +15,10 @@ import org.springframework.test.context.testng.AbstractTransactionalTestNGSpring
 import org.testng.annotations.Test
 
 @SpringBootTest
-class RepositoryRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
+class ProjectRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
 
     @Autowired
-    lateinit var repositoryRepository: RepositoryRepository
+    lateinit var projectRepository: ProjectRepository
 
     @Autowired
     lateinit var dbPopulatorReal: DbPopulatorReal
@@ -26,20 +26,20 @@ class RepositoryRepositoryTest : AbstractTransactionalTestNGSpringContextTests()
     @Test
     fun testRepositoryPreSaveHookBothSet() {
         val user = dbPopulatorReal.createUserIfNotExists("hello")
-        val repo = Repository(name = "Test", addressPart = "hello", userOwner = user)
+        val repo = Project(name = "Test", addressPart = "hello", userOwner = user)
         val organization = Organization(
                 name = "Test org",
                 addressPart = "null",
-                basePermissions = Permission.RepositoryPermissionType.VIEW)
+                basePermissions = Permission.ProjectPermissionType.VIEW)
         repo.organizationOwner = organization
-        Assertions.assertThatExceptionOfType(Exception::class.java).isThrownBy { repositoryRepository.save(repo) }
+        Assertions.assertThatExceptionOfType(Exception::class.java).isThrownBy { projectRepository.save(repo) }
                 .withMessage("java.lang.Exception: Exactly one of organizationOwner or userOwner must be set!")
     }
 
     @Test
     fun testRepositoryPreSaveHookNorSet() {
-        val repo = Repository(name = "Test", addressPart = "hello", userOwner = null)
-        Assertions.assertThatExceptionOfType(Exception::class.java).isThrownBy { repositoryRepository.save(repo) }
+        val repo = Project(name = "Test", addressPart = "hello", userOwner = null)
+        Assertions.assertThatExceptionOfType(Exception::class.java).isThrownBy { projectRepository.save(repo) }
                 .withMessage("java.lang.Exception: Exactly one of organizationOwner or userOwner must be set!")
     }
 
@@ -47,20 +47,20 @@ class RepositoryRepositoryTest : AbstractTransactionalTestNGSpringContextTests()
     fun testPermittedRepositories() {
         val users = dbPopulatorReal.createUsersAndOrganizations()
         dbPopulatorReal.createBase("No org repo", users[3].username!!)
-        val result = repositoryRepository.findAllPermitted(users[3].id!!)
+        val result = projectRepository.findAllPermitted(users[3].id!!)
         assertThat(result).hasSize(10)
         assertThat(result[9][2]).isNull()
-        assertThat(result[9][0]).isInstanceOf(Repository::class.java)
+        assertThat(result[9][0]).isInstanceOf(Project::class.java)
         assertThat(result[9][1]).isInstanceOf(Permission::class.java)
         assertThat(result[8][1]).isNull()
-        assertThat(result[8][0]).isInstanceOf(Repository::class.java)
+        assertThat(result[8][0]).isInstanceOf(Project::class.java)
         assertThat(result[8][3]).isInstanceOf(OrganizationRole::class.java)
     }
 
     @Test
     fun testPermittedRepositoriesJustNoOrg() {
         val base = dbPopulatorReal.createBase("No org repo", generateUniqueString())
-        val result = repositoryRepository.findAllPermitted(base.userOwner!!.id!!)
+        val result = projectRepository.findAllPermitted(base.userOwner!!.id!!)
         assertThat(result).hasSize(1)
     }
 
@@ -69,7 +69,7 @@ class RepositoryRepositoryTest : AbstractTransactionalTestNGSpringContextTests()
     fun testPermittedJustOrg() {
         val users = dbPopulatorReal.createUsersAndOrganizations()
         dbPopulatorReal.createBase("No org repo", users[1].username!!)
-        val result = repositoryRepository.findAllPermitted(users[3].id!!)
+        val result = projectRepository.findAllPermitted(users[3].id!!)
         assertThat(result).hasSize(9)
     }
 
@@ -77,7 +77,7 @@ class RepositoryRepositoryTest : AbstractTransactionalTestNGSpringContextTests()
     fun findAllPermittedPaged(){
         val users = dbPopulatorReal.createUsersAndOrganizations()
         dbPopulatorReal.createBase("No org repo", users[3].username!!)
-        val result = repositoryRepository.findAllPermitted(users[3].id!!, PageRequest.of(0, 20))
+        val result = projectRepository.findAllPermitted(users[3].id!!, PageRequest.of(0, 20))
         assertThat(result).hasSize(10)
         assertThat(result.content[0].organizationOwnerName).isNotNull
         assertThat(result.content[8].organizationOwnerAddressPart).isNotNull

@@ -1,6 +1,5 @@
 package io.tolgee.controllers
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -33,19 +32,19 @@ class ExportController @Autowired constructor(private val translationService: Tr
 ) : IController {
     @GetMapping(value = ["/jsonZip"], produces = ["application/zip"])
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.VIEW)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.VIEW)
     @Operation(summary = "Exports data as ZIP of jsons")
     fun doExportJsonZip(@PathVariable("repositoryId") repositoryId: Long?): ResponseEntity<StreamingResponseBody> {
-        securityService.checkRepositoryPermission(repositoryHolder.repository.id, Permission.RepositoryPermissionType.VIEW)
-        val languages = languageService.findAll(repositoryHolder.repository.id)
+        securityService.checkRepositoryPermission(repositoryHolder.project.id, Permission.ProjectPermissionType.VIEW)
+        val languages = languageService.findAll(repositoryHolder.project.id)
         return ResponseEntity
                 .ok()
                 .header("Content-Disposition",
-                        String.format("attachment; filename=\"%s.zip\"", repositoryHolder.repository.name))
+                        String.format("attachment; filename=\"%s.zip\"", repositoryHolder.project.name))
                 .body(StreamingResponseBody { out: OutputStream ->
                     val zipOutputStream = ZipOutputStream(out)
                     val translations = translationService.getTranslations(languages.abbreviations,
-                            repositoryHolder.repository.id)
+                            repositoryHolder.project.id)
                     for ((key, value) in translations) {
                         zipOutputStream.putNextEntry(ZipEntry(String.format("%s.json", key)))
                         val data = jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(value)

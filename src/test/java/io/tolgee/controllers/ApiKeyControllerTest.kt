@@ -2,7 +2,7 @@ package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.type.TypeFactory
 import io.tolgee.ITest
-import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
+import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.request.CreateApiKeyDTO
@@ -11,7 +11,7 @@ import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -22,7 +22,7 @@ import java.util.stream.Collectors
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class ApiKeyControllerTest : RepositoryAuthControllerTest(), ITest {
+class ApiKeyControllerTest : ProjectAuthControllerTest(), ITest {
 
     @Test
     fun create_success() {
@@ -36,9 +36,9 @@ class ApiKeyControllerTest : RepositoryAuthControllerTest(), ITest {
         return doCreate(dbPopulator.createBase(generateUniqueString(), username))
     }
 
-    private fun doCreate(repository: Repository = dbPopulator.createBase(generateUniqueString())): ApiKeyDTO {
+    private fun doCreate(project: Project = dbPopulator.createBase(generateUniqueString())): ApiKeyDTO {
         val requestDto = CreateApiKeyDTO.builder()
-                .repositoryId(repository.id)
+                .repositoryId(project.id)
                 .scopes(setOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.KEYS_EDIT))
                 .build()
         val mvcResult = performAuthPost("/api/apiKeys", requestDto).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
@@ -123,7 +123,7 @@ class ApiKeyControllerTest : RepositoryAuthControllerTest(), ITest {
     }
 
     @Test
-    @RepositoryApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT])
+    @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT])
     fun getApiKeyScopes() {
         val scopes = performGet("/api/apiKeys/scopes?ak=" + apiKey.key).andIsOk.andReturn().mapResponseTo<Set<String>>()
         assertThat(scopes).containsAll(setOf(ApiScope.TRANSLATIONS_EDIT.value, ApiScope.KEYS_EDIT.value))

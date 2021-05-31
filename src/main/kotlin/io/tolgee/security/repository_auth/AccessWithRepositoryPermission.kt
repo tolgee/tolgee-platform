@@ -4,5 +4,5 @@ import io.tolgee.model.Permission
 
 @Target(AnnotationTarget.FUNCTION)
 annotation class AccessWithRepositoryPermission(
-        val permission: Permission.RepositoryPermissionType
+        val permission: Permission.ProjectPermissionType
 )

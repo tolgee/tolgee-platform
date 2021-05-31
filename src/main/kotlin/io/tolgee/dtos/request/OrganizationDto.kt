@@ -22,5 +22,5 @@ data class OrganizationDto(
         var addressPart: String? = null,
 
         @Enumerated(EnumType.STRING)
-        var basePermissions: Permission.RepositoryPermissionType = Permission.RepositoryPermissionType.VIEW,
+        var basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
 )

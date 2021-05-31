@@ -3,7 +3,7 @@ package io.tolgee.api.v2.hateoas.repository
 import io.tolgee.api.v2.controllers.OrganizationController
 import io.tolgee.api.v2.controllers.V2RepositoriesController
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
-import io.tolgee.model.views.RepositoryView
+import io.tolgee.model.views.ProjectView
 import io.tolgee.service.PermissionService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.hateoas.server.mvc.linkTo
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component
 class RepositoryModelAssembler(
         private val userAccountModelAssembler: UserAccountModelAssembler,
         private val permissionService: PermissionService
-) : RepresentationModelAssemblerSupport<RepositoryView, RepositoryModel>(
+) : RepresentationModelAssemblerSupport<ProjectView, RepositoryModel>(
         V2RepositoriesController::class.java, RepositoryModel::class.java) {
-    override fun toModel(view: RepositoryView): RepositoryModel {
+    override fun toModel(view: ProjectView): RepositoryModel {
         val link = linkTo<V2RepositoriesController> { get(view.id) }.withSelfRel()
         return RepositoryModel(
                 id = view.id,

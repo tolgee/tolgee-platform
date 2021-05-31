@@ -1,7 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.model.UserAccount
-import io.tolgee.model.views.UserAccountInRepositoryView
+import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -25,14 +25,14 @@ interface UserAccountRepository : JpaRepository<UserAccount?, Long?> {
 
     @Query("""
         select ua.id as id, ua.name as name, ua.username as username, p.type as directPermissions, orl.type as organizationRole,
-        orl.organization.id as oid, o.basePermissions as organizationBasePermissions from UserAccount ua, Repository r 
-        left join Permission p on ua = p.user and p.repository.id = :repositoryId
+        orl.organization.id as oid, o.basePermissions as organizationBasePermissions from UserAccount ua, Project r 
+        left join Permission p on ua = p.user and p.project.id = :projectId
         left join OrganizationRole orl on orl.user = ua and r.organizationOwner = orl.organization
         left join Organization  o on orl.organization = o
-        where r.id = :repositoryId and (p is not null or orl is not null)
+        where r.id = :projectId and (p is not null or orl is not null)
         and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
     """)
-    fun getAllInRepository(repositoryId: Long, pageable: Pageable, search: String? = ""): Page<UserAccountInRepositoryView>
+    fun getAllInProject(projectId: Long, pageable: Pageable, search: String? = ""): Page<UserAccountInProjectView>
 }

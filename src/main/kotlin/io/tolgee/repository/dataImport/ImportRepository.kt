@@ -1,4 +1,4 @@
-package io.tolgee.repository.dataImport
+package io.tolgee.project.dataImport
 
 import io.tolgee.model.dataImport.Import
 import org.springframework.data.jpa.repository.JpaRepository
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ImportRepository : JpaRepository<Import, Long> {
-    fun findByRepositoryIdAndAuthorId(repositoryId: Long, authorId: Long): Import?
+    fun findByRepositoryIdAndAuthorId(projectId: Long, authorId: Long): Import?
 
-    fun findAllByRepositoryId(repositoryId: Long): List<Import>
+    fun findAllByRepositoryId(projectId: Long): List<Import>
 }

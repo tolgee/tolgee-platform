@@ -4,9 +4,9 @@ import io.tolgee.model.Permission;
 
 public class PermissionEditDto {
     private Long permissionId;
-    private Permission.RepositoryPermissionType type;
+    private Permission.ProjectPermissionType type;
 
-    public PermissionEditDto(Long permissionId, Permission.RepositoryPermissionType type) {
+    public PermissionEditDto(Long permissionId, Permission.ProjectPermissionType type) {
         this.permissionId = permissionId;
         this.type = type;
     }
@@ -22,7 +22,7 @@ public class PermissionEditDto {
         return this.permissionId;
     }
 
-    public Permission.RepositoryPermissionType getType() {
+    public Permission.ProjectPermissionType getType() {
         return this.type;
     }
 
@@ -30,7 +30,7 @@ public class PermissionEditDto {
         this.permissionId = permissionId;
     }
 
-    public void setType(Permission.RepositoryPermissionType type) {
+    public void setType(Permission.ProjectPermissionType type) {
         this.type = type;
     }
 
@@ -68,7 +68,7 @@ public class PermissionEditDto {
 
     public static class PermissionEditDtoBuilder {
         private Long permissionId;
-        private Permission.RepositoryPermissionType type;
+        private Permission.ProjectPermissionType type;
 
         PermissionEditDtoBuilder() {
         }
@@ -78,7 +78,7 @@ public class PermissionEditDto {
             return this;
         }
 
-        public PermissionEditDto.PermissionEditDtoBuilder type(Permission.RepositoryPermissionType type) {
+        public PermissionEditDto.PermissionEditDtoBuilder type(Permission.ProjectPermissionType type) {
             this.type = type;
             return this;
         }

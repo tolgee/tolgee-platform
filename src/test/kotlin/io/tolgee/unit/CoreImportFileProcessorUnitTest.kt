@@ -3,7 +3,7 @@ package io.tolgee.unit
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.Language
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.model.Translation
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
@@ -70,7 +70,7 @@ class CoreImportFileProcessorUnitTest {
         fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
         fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
         whenever(typeProcessorMock.context).then { fileProcessorContext }
-        whenever(importMock.repository).thenReturn(Repository(1, "test repo"))
+        whenever(importMock.project).thenReturn(Project(1, "test repo"))
         whenever(importServiceMock.saveFile(any())).thenReturn(importFile)
         whenever(languageServiceMock.findByAbbreviation(eq("lng"), any<Long>()))
                 .thenReturn(Optional.of(existingLanguage))

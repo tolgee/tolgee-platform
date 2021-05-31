@@ -1,10 +1,13 @@
 package io.tolgee.controllers
 
-import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
-import io.tolgee.annotations.RepositoryJWTAuthTestMethod
+import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
-import io.tolgee.fixtures.*
-import io.tolgee.model.Repository
+import io.tolgee.fixtures.AuthRequestPerformer
+import io.tolgee.fixtures.RepositoryApiKeyAuthRequestPerformer
+import io.tolgee.fixtures.RepositoryAuthRequestPerformer
+import io.tolgee.fixtures.RepositoryJwtAuthRequestPerformer
+import io.tolgee.model.Project
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions
@@ -14,7 +17,7 @@ import java.lang.reflect.Method
 
 @SpringBootTest
 @AutoConfigureMockMvc
-abstract class RepositoryAuthControllerTest : SignedInControllerTest(), AuthRequestPerformer {
+abstract class ProjectAuthControllerTest : SignedInControllerTest(), AuthRequestPerformer {
 
     //for api key auth methods
     val apiKey: ApiKeyDTO
@@ -25,13 +28,13 @@ abstract class RepositoryAuthControllerTest : SignedInControllerTest(), AuthRequ
                 throw Exception("Method not annotated with ApiKeyAccessTestMethod?")
         }
 
-    val repository: Repository
-        get() = this.repositoryAuthRequestPerformer.repository
+    val project: Project
+        get() = this.repositoryAuthRequestPerformer.project
 
-    var repositorySupplier: (() -> Repository)?
-        get() = this.repositoryAuthRequestPerformer.repositorySupplier
+    var projectSupplier: (() -> Project)?
+        get() = this.repositoryAuthRequestPerformer.projectSupplier
         set(value) {
-            this.repositoryAuthRequestPerformer.repositorySupplier = value
+            this.repositoryAuthRequestPerformer.projectSupplier = value
         }
 
     private var _repositoryAuthRequestPerformer: RepositoryAuthRequestPerformer? = null;
@@ -47,16 +50,16 @@ abstract class RepositoryAuthControllerTest : SignedInControllerTest(), AuthRequ
 
     @BeforeMethod
     fun beforeEach(method: Method) {
-        with(method.getAnnotation(RepositoryApiKeyAuthTestMethod::class.java)) {
+        with(method.getAnnotation(ProjectApiKeyAuthTestMethod::class.java)) {
             if (this != null) {
-                this@RepositoryAuthControllerTest.repositoryAuthRequestPerformer =
+                this@ProjectAuthControllerTest.repositoryAuthRequestPerformer =
                         applicationContext!!.getBean(RepositoryApiKeyAuthRequestPerformer::class.java, userAccount, this.scopes)
             }
         }
 
-        with(method.getAnnotation(RepositoryJWTAuthTestMethod::class.java)) {
+        with(method.getAnnotation(ProjectJWTAuthTestMethod::class.java)) {
             if (this != null) {
-                this@RepositoryAuthControllerTest.repositoryAuthRequestPerformer =
+                this@ProjectAuthControllerTest.repositoryAuthRequestPerformer =
                         applicationContext!!.getBean(RepositoryJwtAuthRequestPerformer::class.java, userAccount)
             }
         }

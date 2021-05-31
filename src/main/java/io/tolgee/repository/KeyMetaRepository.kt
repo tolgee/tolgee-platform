@@ -13,20 +13,20 @@ interface KeyMetaRepository : JpaRepository<KeyMeta?, Long?> {
     @Modifying
     @Transactional
     @Query("""delete from KeyComment kc where kc.keyMeta in 
-        (select km from kc.keyMeta km join km.key k where k.repository.id = :repositoryId)""")
+        (select km from kc.keyMeta km join km.key k where k.project.id = :projectId)""")
     fun deleteAllKeyCommentsByRepositoryId(repositoryId: Long)
 
 
     @Modifying
     @Transactional
     @Query("""delete from KeyCodeReference kcr where kcr.keyMeta in 
-        (select km from kcr.keyMeta km join km.key k where k.repository.id = :repositoryId)""")
+        (select km from kcr.keyMeta km join km.key k where k.project.id = :projectId)""")
     fun deleteAllKeyCodeReferencesByRepositoryId(repositoryId: Long)
 
 
     @Modifying
     @Transactional
-    @Query("delete from KeyMeta km where km.key in (select k from km.key k where k.repository.id = :repositoryId)")
+    @Query("delete from KeyMeta km where km.key in (select k from km.key k where k.project.id = :projectId)")
     fun deleteAllByRepositoryId(repositoryId: Long)
 
     @Modifying

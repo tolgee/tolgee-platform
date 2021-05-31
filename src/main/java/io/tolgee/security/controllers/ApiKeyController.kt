@@ -10,7 +10,7 @@ import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
-import io.tolgee.model.Permission.RepositoryPermissionType
+import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.service.ApiKeyService
@@ -41,7 +41,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
     @GetMapping(path = ["/repository/{repositoryId}"])
     @Operation(summary = "Returns all API keys for repository")
     fun allByRepository(@PathVariable("repositoryId") repositoryId: Long?): Set<ApiKeyDTO> {
-        securityService.checkRepositoryPermission(repositoryId!!, RepositoryPermissionType.MANAGE)
+        securityService.checkRepositoryPermission(repositoryId!!, ProjectPermissionType.MANAGE)
         return apiKeyService.getAllByRepository(repositoryId).stream()
                 .map { apiKey: ApiKey? -> ApiKeyDTO.fromEntity(apiKey) }
                 .collect(Collectors.toCollection { LinkedHashSet() })
@@ -59,7 +59,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
     @Operation(summary = "Edits existing API key")
     fun edit(@RequestBody @Valid dto: EditApiKeyDTO?) {
         val apiKey = apiKeyService.getApiKey(dto!!.id).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
-        securityService.checkApiKeyScopes(dto.scopes, apiKey.repository)
+        securityService.checkApiKeyScopes(dto.scopes, apiKey.project)
         apiKey.scopesEnum = dto.scopes
         apiKeyService.editApiKey(apiKey)
     }
@@ -69,7 +69,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
     fun delete(@PathVariable("key") key: String?) {
         val apiKey = apiKeyService.getApiKey(key).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
         try {
-            securityService.checkRepositoryPermission(apiKey.repository!!.id, RepositoryPermissionType.MANAGE)
+            securityService.checkRepositoryPermission(apiKey.project!!.id, ProjectPermissionType.MANAGE)
         } catch (e: PermissionException) {
             //user can delete their own api keys
             if (apiKey.userAccount!!.id != authenticationFacade.userAccount.id) {
@@ -81,9 +81,9 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
 
     @GetMapping(path = ["/availableScopes"])
     @Operation(summary = "Returns API key scopes for every permission type")
-    fun getScopes(): Map<String, Set<String>> = Arrays.stream(RepositoryPermissionType.values())
-            .collect(Collectors.toMap({ obj: RepositoryPermissionType -> obj.name },
-                    { type: RepositoryPermissionType ->
+    fun getScopes(): Map<String, Set<String>> = Arrays.stream(ProjectPermissionType.values())
+            .collect(Collectors.toMap({ obj: ProjectPermissionType -> obj.name },
+                    { type: ProjectPermissionType ->
                         Arrays.stream(type.availableScopes)
                                 .map { obj: ApiScope -> obj.value }
                                 .collect(Collectors.toSet())

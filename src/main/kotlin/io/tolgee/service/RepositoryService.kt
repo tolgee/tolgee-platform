@@ -6,9 +6,9 @@ import io.tolgee.dtos.response.RepositoryDTO
 import io.tolgee.dtos.response.RepositoryDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.*
-import io.tolgee.model.views.RepositoryView
+import io.tolgee.model.views.ProjectView
 import io.tolgee.repository.PermissionRepository
-import io.tolgee.repository.RepositoryRepository
+import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.util.AddressPartGenerator
@@ -23,7 +23,7 @@ import javax.persistence.EntityManager
 @Transactional
 @Service
 class RepositoryService constructor(
-        private val repositoryRepository: RepositoryRepository,
+        private val projectRepository: ProjectRepository,
         private val entityManager: EntityManager,
         private val securityService: SecurityService,
         private val permissionRepository: PermissionRepository,
@@ -50,18 +50,18 @@ class RepositoryService constructor(
     lateinit var importService: ImportService
 
     @Transactional
-    fun get(id: Long): Optional<Repository?> {
-        return repositoryRepository.findById(id)
+    fun get(id: Long): Optional<Project?> {
+        return projectRepository.findById(id)
     }
 
     @Transactional
-    fun getView(id: Long): RepositoryView? {
-        return repositoryRepository.findViewById(authenticationFacade.userAccount.id!!, id)
+    fun getView(id: Long): ProjectView? {
+        return projectRepository.findViewById(authenticationFacade.userAccount.id!!, id)
     }
 
     @Transactional
-    fun createRepository(dto: CreateRepositoryDTO): Repository {
-        val repository = Repository()
+    fun createRepository(dto: CreateRepositoryDTO): Project {
+        val repository = Project()
         repository.name = dto.name
         dto.organizationId?.also {
             organizationRoleService.checkUserIsOwner(it)
@@ -84,8 +84,8 @@ class RepositoryService constructor(
     }
 
     @Transactional
-    fun editRepository(dto: EditRepositoryDTO): Repository {
-        val repository = repositoryRepository.findById(dto.repositoryId!!)
+    fun editRepository(dto: EditRepositoryDTO): Project {
+        val repository = projectRepository.findById(dto.repositoryId!!)
                 .orElseThrow { NotFoundException() }!!
         repository.name = dto.name
         entityManager.persist(repository)
@@ -93,9 +93,9 @@ class RepositoryService constructor(
     }
 
     fun findAllPermitted(userAccount: UserAccount): List<RepositoryDTO> {
-        return repositoryRepository.findAllPermitted(userAccount.id!!).asSequence()
+        return projectRepository.findAllPermitted(userAccount.id!!).asSequence()
                 .map { result ->
-                    val repository = result[0] as Repository
+                    val repository = result[0] as Project
                     val permission = result[1] as Permission?
                     val organization = result[2] as Organization?
                     val organizationRole = result[3] as OrganizationRole?
@@ -111,12 +111,12 @@ class RepositoryService constructor(
                 }.toList()
     }
 
-    fun findAllInOrganization(organizationId: Long): List<Repository> {
-        return this.repositoryRepository.findAllByOrganizationOwnerId(organizationId)
+    fun findAllInOrganization(organizationId: Long): List<Project> {
+        return this.projectRepository.findAllByOrganizationOwnerId(organizationId)
     }
 
-    fun findAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<RepositoryView> {
-        return this.repositoryRepository
+    fun findAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<ProjectView> {
+        return this.projectRepository
                 .findAllPermittedInOrganization(
                         authenticationFacade.userAccount.id!!, organizationId, pageable, search
                 )
@@ -134,17 +134,17 @@ class RepositoryService constructor(
         keyService.deleteAllByRepository(repository.id)
         apiKeyService.deleteAllByRepository(repository.id)
         languageService.deleteAllByRepository(repository.id)
-        repositoryRepository.delete(repository)
+        projectRepository.delete(repository)
     }
 
     fun deleteAllByName(name: String) {
-        repositoryRepository.findAllByName(name).forEach {
+        projectRepository.findAllByName(name).forEach {
             this.deleteRepository(it.id)
         }
     }
 
     fun validateAddressPartUniqueness(addressPart: String): Boolean {
-        return repositoryRepository.countAllByAddressPart(addressPart) < 1
+        return projectRepository.countAllByAddressPart(addressPart) < 1
     }
 
     fun generateAddressPart(name: String, oldAddressPart: String? = null): String {
@@ -156,10 +156,10 @@ class RepositoryService constructor(
         }
     }
 
-    fun findPermittedPaged(pageable: Pageable, search: String?): Page<RepositoryView> {
-        return repositoryRepository.findAllPermitted(authenticationFacade.userAccount.id!!, pageable, search)
+    fun findPermittedPaged(pageable: Pageable, search: String?): Page<ProjectView> {
+        return projectRepository.findAllPermitted(authenticationFacade.userAccount.id!!, pageable, search)
     }
 
-    fun saveAll(repositories: Collection<Repository>): MutableList<Repository> =
-            repositoryRepository.saveAll(repositories)
+    fun saveAll(projects: Collection<Project>): MutableList<Project> =
+            projectRepository.saveAll(projects)
 }

@@ -50,6 +50,6 @@ class ImportServiceTest : AbstractSpringTest() {
         importService.deleteImport(testData.import)
         entityManager.flush()
         entityManager.clear()
-        assertThat(importService.find(testData.import.repository.id, testData.import.author.id!!)).isNull()
+        assertThat(importService.find(testData.import.project.id, testData.import.author.id!!)).isNull()
     }
 }

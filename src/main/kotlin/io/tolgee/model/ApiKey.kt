@@ -29,7 +29,7 @@ data class ApiKey(
 
     @ManyToOne
     @NotNull
-    var repository: Repository? = null
+    var project: Project? = null
 
     @Deprecated(level = DeprecationLevel.WARNING,
             message = "Scopes field is deprecated, it should not persist string values",
@@ -44,7 +44,7 @@ data class ApiKey(
             userAccount: UserAccount?,
 
             @NotNull
-            repository: Repository?,
+            project: Project?,
 
             @NotEmpty @NotNull
             key: String?,
@@ -55,7 +55,7 @@ data class ApiKey(
             scopesEnum: Set<ApiScope>
     ) : this(id, key, scopesEnum) {
         this.userAccount = userAccount
-        this.repository = repository
+        this.project = project
         @Suppress("DEPRECATION")
         this.scopes = scopes
     }

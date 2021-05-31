@@ -14,7 +14,7 @@ class V2ImportControllerApplicationTest : SignedInControllerTest() {
         testData.setAllOverride()
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
-        val repositoryId = testData.repository.id
+        val repositoryId = testData.project.id
         logAsUser(user.username!!, "admin")
         val path = "/v2/repositories/${repositoryId}/import/apply"
         performAuthPut(path, null).andIsOk
@@ -28,7 +28,7 @@ class V2ImportControllerApplicationTest : SignedInControllerTest() {
         val testData = ImportTestData()
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
-        val repositoryId = testData.repository.id
+        val repositoryId = testData.project.id
         logAsUser(user.username!!, "admin")
         val path = "/v2/repositories/${repositoryId}/import/apply?forceMode=OVERRIDE"
         performAuthPut(path, null).andIsOk
@@ -42,7 +42,7 @@ class V2ImportControllerApplicationTest : SignedInControllerTest() {
         val testData = ImportTestData()
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
-        val repositoryId = testData.repository.id
+        val repositoryId = testData.project.id
         logAsUser(user.username!!, "admin")
         val path = "/v2/repositories/${repositoryId}/import/apply?forceMode=KEEP"
         performAuthPut(path, null).andIsOk

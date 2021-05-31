@@ -37,13 +37,13 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                 "Test org",
                 "This is description",
                 "test-org",
-                Permission.RepositoryPermissionType.VIEW)
+                Permission.ProjectPermissionType.VIEW)
 
         dummyDto2 = OrganizationDto(
                 "Test org 2",
                 "This is description 2",
                 "test-org-2",
-                Permission.RepositoryPermissionType.VIEW)
+                Permission.ProjectPermissionType.VIEW)
     }
 
     @Test
@@ -222,7 +222,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                     dummyDto.also { organization ->
                         organization.name = "Hello"
                         organization.addressPart = "hello-1"
-                        organization.basePermissions = Permission.RepositoryPermissionType.TRANSLATE
+                        organization.basePermissions = Permission.ProjectPermissionType.TRANSLATE
                         organization.description = "This is changed description"
                     }
             ).andIsOk.andPrettyPrint.andAssertThatJson.let {

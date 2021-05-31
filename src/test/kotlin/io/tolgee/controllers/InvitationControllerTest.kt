@@ -19,7 +19,7 @@ class InvitationControllerTest : SignedInControllerTest() {
     @Test
     fun getRepositoryInvitations() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        val invitation = invitationService.create(repository, Permission.RepositoryPermissionType.MANAGE)
+        val invitation = invitationService.create(repository, Permission.ProjectPermissionType.MANAGE)
         val response = performAuthGet("/api/invitation/list/${repository.id}").andExpect(status().isOk).andReturn()
         val list: List<InvitationDTO> = response.mapResponseTo()
         assertThat(list).hasSize(1)
@@ -29,7 +29,7 @@ class InvitationControllerTest : SignedInControllerTest() {
     @Test
     fun acceptInvitation() {
         val repository = dbPopulator.createBase(generateUniqueString())
-        val invitation = invitationService.create(repository, Permission.RepositoryPermissionType.EDIT)
+        val invitation = invitationService.create(repository, Permission.ProjectPermissionType.EDIT)
 
         val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
         logAsUser(newUser.username!!, "pwd")
@@ -38,6 +38,6 @@ class InvitationControllerTest : SignedInControllerTest() {
         assertThat(invitationService.getForRepository(repository)).hasSize(0)
         assertThat(permissionService.getRepositoryPermissionType(repository.id, newUser)).isNotNull
         val type = permissionService.getRepositoryPermissionType(repository.id, newUser)!!
-        assertThat(type).isEqualTo(Permission.RepositoryPermissionType.EDIT)
+        assertThat(type).isEqualTo(Permission.ProjectPermissionType.EDIT)
     }
 }

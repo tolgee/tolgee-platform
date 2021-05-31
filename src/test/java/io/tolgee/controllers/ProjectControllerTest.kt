@@ -14,7 +14,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.helpers.JsonHelper
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -24,7 +24,7 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class RepositoryControllerTest : SignedInControllerTest() {
+class ProjectControllerTest : SignedInControllerTest() {
     private val languageDTO = LanguageDTO(null, "English", "en")
 
     @Test
@@ -86,7 +86,7 @@ class RepositoryControllerTest : SignedInControllerTest() {
         testEditCorrectRequest(test)
     }
 
-    private fun testEditCorrectRequest(test: Repository) {
+    private fun testEditCorrectRequest(test: Project) {
         val request = EditRepositoryDTO(test.id, "new test")
         val mvcResult = mvc.perform(
                 loggedPost("/api/repositories/edit")

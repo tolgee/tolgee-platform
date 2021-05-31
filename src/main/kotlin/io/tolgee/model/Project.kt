@@ -8,9 +8,9 @@ import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
 @Entity
-@EntityListeners(Repository.Companion.RepositoryListener::class)
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "repository_address_part_unique")])
-data class Repository(
+@EntityListeners(Project.Companion.ProjectListener::class)
+@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
+data class Project(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         var id: Long = 0L,
@@ -29,16 +29,16 @@ data class Repository(
 ) : AuditModel() {
 
     @OrderBy("abbreviation")
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "repository")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
     var languages: MutableSet<Language> = LinkedHashSet()
 
-    @OneToMany(mappedBy = "repository")
+    @OneToMany(mappedBy = "project")
     var permissions: MutableSet<Permission> = LinkedHashSet()
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "repository")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
     var keys: MutableSet<Key> = LinkedHashSet()
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "repository")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
     var apiKeys: MutableSet<ApiKey> = LinkedHashSet()
 
     @ManyToOne(optional = true)
@@ -67,11 +67,11 @@ data class Repository(
     }
 
     companion object {
-        class RepositoryListener {
+        class ProjectListener {
             @PrePersist
             @PreUpdate
-            fun preSave(repository: Repository) {
-                if (!(repository.organizationOwner == null).xor(repository.userOwner == null)) {
+            fun preSave(project: Project) {
+                if (!(project.organizationOwner == null).xor(project.userOwner == null)) {
                     throw Exception("Exactly one of organizationOwner or userOwner must be set!")
                 }
             }

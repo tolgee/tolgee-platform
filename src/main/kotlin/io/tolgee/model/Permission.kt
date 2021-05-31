@@ -16,15 +16,15 @@ data class Permission(
         var invitation: Invitation? = null,
 
         @Enumerated(EnumType.STRING)
-        var type: RepositoryPermissionType? = null
+        var type: ProjectPermissionType? = null
 ) : AuditModel() {
 
-    constructor(id: Long? = null, user: UserAccount? = null, invitation: Invitation? = null, repository: Repository?,
-                type: RepositoryPermissionType?) : this(id, user, invitation, type) {
-        this.repository = repository
+    constructor(id: Long? = null, user: UserAccount? = null, invitation: Invitation? = null, project: Project?,
+                type: ProjectPermissionType?) : this(id, user, invitation, type) {
+        this.project = project
     }
 
-    enum class RepositoryPermissionType(val power: Int, val availableScopes: Array<ApiScope>) {
+    enum class ProjectPermissionType(val power: Int, val availableScopes: Array<ApiScope>) {
         VIEW(1, arrayOf(ApiScope.TRANSLATIONS_VIEW)),
         TRANSLATE(2, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT)),
         EDIT(3, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT)),
@@ -32,14 +32,14 @@ data class Permission(
     }
 
     @ManyToOne
-    var repository: Repository? = null
+    var project: Project? = null
 
     class PermissionBuilder internal constructor() {
         private var id: Long? = null
         private var user: UserAccount? = null
         private var invitation: Invitation? = null
-        private var repository: Repository? = null
-        private var type: RepositoryPermissionType? = null
+        private var project: Project? = null
+        private var type: ProjectPermissionType? = null
         fun id(id: Long?): PermissionBuilder {
             this.id = id
             return this
@@ -55,22 +55,22 @@ data class Permission(
             return this
         }
 
-        fun repository(repository: Repository?): PermissionBuilder {
-            this.repository = repository
+        fun project(project: Project?): PermissionBuilder {
+            this.project = project
             return this
         }
 
-        fun type(type: RepositoryPermissionType?): PermissionBuilder {
+        fun type(type: ProjectPermissionType?): PermissionBuilder {
             this.type = type
             return this
         }
 
         fun build(): Permission {
-            return Permission(id, user, invitation, repository, type)
+            return Permission(id, user, invitation, project, type)
         }
 
         override fun toString(): String {
-            return "Permission.PermissionBuilder(id=" + id + ", user=" + user + ", invitation=" + invitation + ", repository=" + repository + ", type=" + type + ")"
+            return "Permission.PermissionBuilder(id=" + id + ", user=" + user + ", invitation=" + invitation + ", project=" + project + ", type=" + type + ")"
         }
     }
 

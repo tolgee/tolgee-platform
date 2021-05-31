@@ -9,7 +9,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.fixtures.LoggedRequestFactory.addToken
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
@@ -29,8 +29,8 @@ abstract class AbstractScreenshotControllerTest : SignedInControllerTest() {
         File("${tolgeeProperties.fileStorage.fsDataPath}/screenshots").deleteRecursively()
     }
 
-    protected fun performStoreScreenshot(repository: Repository, key: Key): ScreenshotDTO {
-        return mvc.perform(addToken(multipart("/api/repository/${repository.id}/screenshots")
+    protected fun performStoreScreenshot(project: Project, key: Key): ScreenshotDTO {
+        return mvc.perform(addToken(multipart("/api/repository/${project.id}/screenshots")
                 .file(MockMultipartFile("screenshot", "originalShot.png", "image/png",
                         screenshotFile.file.readBytes()))
                 .param("key", key.name)))

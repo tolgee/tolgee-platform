@@ -72,7 +72,7 @@ class V2ImportController(
 
     @PostMapping("/with-streaming-response", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @RequestBody
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     @Operation(summary = "Prepares provided files to import, streams operation progress")
     fun addFilesStreaming(
             @PathVariable("repositoryId") repositoryId: Long,
@@ -99,7 +99,7 @@ class V2ImportController(
     }
 
     @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     @Operation(summary = "Prepares provided files to import")
     fun addFiles(
             @PathVariable("repositoryId") repositoryId: Long,
@@ -120,7 +120,7 @@ class V2ImportController(
     }
 
     @PutMapping("/apply")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     @Operation(summary = "Imports the data prepared in previous step")
     fun applyImport(
             @PathVariable("repositoryId") repositoryId: Long,
@@ -131,7 +131,7 @@ class V2ImportController(
     }
 
     @GetMapping("/result")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun getImportResult(
             @PathVariable("repositoryId") repositoryId: Long,
             pageable: Pageable
@@ -142,7 +142,7 @@ class V2ImportController(
     }
 
     @GetMapping("/result/languages/{languageId}")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun getImportLanguage(
             @PathVariable("languageId") languageId: Long,
             @PathVariable("repositoryId") repositoryId: Long,
@@ -153,7 +153,7 @@ class V2ImportController(
     }
 
     @GetMapping("/result/languages/{languageId}/translations")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun getImportTranslations(
             @PathVariable("repositoryId") repositoryId: Long,
             @PathVariable("languageId") languageId: Long,
@@ -173,20 +173,20 @@ class V2ImportController(
     }
 
     @DeleteMapping("")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun cancelImport() {
-        this.importService.deleteImport(repositoryHolder.repository.id, authenticationFacade.userAccount.id!!)
+        this.importService.deleteImport(repositoryHolder.project.id, authenticationFacade.userAccount.id!!)
     }
 
     @DeleteMapping("/result/languages/{languageId}")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun deleteLanguage(@PathVariable("languageId") languageId: Long) {
         val language = checkImportLanguageInRepository(languageId)
         this.importService.deleteLanguage(language)
     }
 
     @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-override")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun resolveTranslationSetOverride(
             @PathVariable("languageId") languageId: Long,
             @PathVariable("translationId") translationId: Long
@@ -195,7 +195,7 @@ class V2ImportController(
     }
 
     @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun resolveTranslationSetKeepExisting(@PathVariable("languageId") languageId: Long,
                                           @PathVariable("translationId") translationId: Long
     ) {
@@ -203,7 +203,7 @@ class V2ImportController(
     }
 
     @PutMapping("/result/languages/{languageId}/resolve-all/set-override")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun resolveTranslationSetOverride(
             @PathVariable("languageId") languageId: Long
     ) {
@@ -211,7 +211,7 @@ class V2ImportController(
     }
 
     @PutMapping("/result/languages/{languageId}/resolve-all/set-keep-existing")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun resolveTranslationSetKeepExisting(
             @PathVariable("languageId") languageId: Long,
     ) {
@@ -219,7 +219,7 @@ class V2ImportController(
     }
 
     @PutMapping("/result/languages/{importLanguageId}/select-existing/{existingLanguageId}")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun selectExistingLanguage(
             @PathVariable("importLanguageId") importLanguageId: Long,
             @PathVariable("existingLanguageId") existingLanguageId: Long,
@@ -230,7 +230,7 @@ class V2ImportController(
     }
 
     @PutMapping("/result/languages/{importLanguageId}/reset-existing")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun resetExistingLanguage(
             @PathVariable("importLanguageId") importLanguageId: Long,
     ) {
@@ -239,7 +239,7 @@ class V2ImportController(
     }
 
     @GetMapping("/result/files/{importFileId}/issues")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
+    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
     fun getImportFileIssues(
             @PathVariable("importFileId") importFileId: Long,
             pageable: Pageable
@@ -262,7 +262,7 @@ class V2ImportController(
 
     private fun checkFileFromRepository(fileId: Long): ImportFile {
         val file = importService.findFile(fileId) ?: throw NotFoundException()
-        if (file.import.repository.id != repositoryHolder.repository.id) {
+        if (file.import.project.id != repositoryHolder.project.id) {
             throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
         }
         return file
@@ -270,7 +270,7 @@ class V2ImportController(
 
     private fun checkLanguageFromRepository(languageId: Long): Language {
         val existingLanguage = languageService.findById(languageId).orElse(null) ?: throw NotFoundException()
-        if (existingLanguage.repository!!.id != repositoryHolder.repository.id) {
+        if (existingLanguage.project!!.id != repositoryHolder.project.id) {
             throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
         }
         return existingLanguage
@@ -278,8 +278,8 @@ class V2ImportController(
 
     private fun checkImportLanguageInRepository(languageId: Long): ImportLanguage {
         val language = importService.findLanguage(languageId) ?: throw NotFoundException()
-        val languageRepositoryId = language.file.import.repository.id
-        if (languageRepositoryId != repositoryHolder.repository.id) {
+        val languageRepositoryId = language.file.import.project.id
+        if (languageRepositoryId != repositoryHolder.project.id) {
             throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
         }
         return language

@@ -1,7 +1,7 @@
 package io.tolgee.service;
 
 import io.tolgee.development.DbPopulatorReal;
-import io.tolgee.model.Repository;
+import io.tolgee.model.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
@@ -35,7 +35,7 @@ public class TranslationServiceTest extends AbstractTransactionalTestNGSpringCon
     @Transactional
     void getTranslations() {
 
-        Repository app = dbPopulator.populate("App");
+        Project app = dbPopulator.populate("App");
 
 
         Map<String, Object> viewData = translationService.getTranslations(new HashSet<>(Arrays.asList("en", "de")), app.getId());

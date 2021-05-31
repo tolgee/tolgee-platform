@@ -18,7 +18,7 @@ class ImportTestData {
     lateinit var importFrench: ImportLanguage
     lateinit var importEnglish: ImportLanguage
     lateinit var translationWithConflict: ImportTranslation
-    var repository: Repository
+    var project: Project
     var userAccount: UserAccount
 
     val root: TestDataBuilder = TestDataBuilder().apply {
@@ -28,13 +28,13 @@ class ImportTestData {
                 name = "Frantisek Dobrota"
             }
         }.self
-        repository = addRepository {
+        project = addRepository {
             self { name = "test" }
             addPermission {
                 self {
-                    repository = this@addRepository.self
+                    project = this@addRepository.self
                     user = this@ImportTestData.userAccount
-                    type = Permission.RepositoryPermissionType.MANAGE
+                    type = Permission.ProjectPermissionType.MANAGE
                 }
             }
 

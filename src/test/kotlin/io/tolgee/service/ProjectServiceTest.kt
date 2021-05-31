@@ -16,7 +16,7 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-open class RepositoryServiceTest : AbstractSpringTest() {
+open class ProjectServiceTest : AbstractSpringTest() {
 
     @Test
     open fun testFindAllPermitted() {
@@ -41,7 +41,7 @@ open class RepositoryServiceTest : AbstractSpringTest() {
         val repo = dbPopulator.createBase("Hello world", generateUniqueString())
         val repositories = repositoryService.findAllPermitted(repo.userOwner!!)
         assertThat(repositories).hasSize(1)
-        assertThat(repositories[0].permissionType).isEqualTo(Permission.RepositoryPermissionType.MANAGE)
+        assertThat(repositories[0].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
     }
 
     @Test
@@ -60,9 +60,9 @@ open class RepositoryServiceTest : AbstractSpringTest() {
         organizationRoleService.grantRoleToUser(repo.userOwner!!, organization2!!, OrganizationRoleType.OWNER)
         val repositories = repositoryService.findAllPermitted(repo.userOwner!!)
         assertThat(repositories).hasSize(7)
-        assertThat(repositories[6].permissionType).isEqualTo(Permission.RepositoryPermissionType.MANAGE)
-        assertThat(repositories[1].permissionType).isEqualTo(Permission.RepositoryPermissionType.VIEW)
-        assertThat(repositories[5].permissionType).isEqualTo(Permission.RepositoryPermissionType.MANAGE)
+        assertThat(repositories[6].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
+        assertThat(repositories[1].permissionType).isEqualTo(Permission.ProjectPermissionType.VIEW)
+        assertThat(repositories[5].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
     }
 
     @Test
@@ -79,26 +79,26 @@ open class RepositoryServiceTest : AbstractSpringTest() {
         val organization2 = user3.organizationRoles[0].organization
         organizationRoleService.grantRoleToUser(repo.userOwner!!, organization2!!, OrganizationRoleType.OWNER)
 
-        val customPermissionRepo = usersWithOrganizations[0].organizationRoles[0].organization!!.repositories[2]
-        val customPermissionRepo2 = user3.organizationRoles[0].organization!!.repositories[2]
+        val customPermissionRepo = usersWithOrganizations[0].organizationRoles[0].organization!!.projects[2]
+        val customPermissionRepo2 = user3.organizationRoles[0].organization!!.projects[2]
         permissionService.create(
                 Permission(
                         user = repo.userOwner,
-                        repository = customPermissionRepo,
-                        type = Permission.RepositoryPermissionType.TRANSLATE)
+                        project = customPermissionRepo,
+                        type = Permission.ProjectPermissionType.TRANSLATE)
         )
         permissionService.create(
                 Permission(
                         user = repo.userOwner,
-                        repository = customPermissionRepo2,
-                        type = Permission.RepositoryPermissionType.TRANSLATE)
+                        project = customPermissionRepo2,
+                        type = Permission.ProjectPermissionType.TRANSLATE)
         )
 
         val repositories = repositoryService.findAllPermitted(repo.userOwner!!)
         assertThat(repositories).hasSize(7)
-        assertThat(repositories[6].permissionType).isEqualTo(Permission.RepositoryPermissionType.MANAGE)
-        assertThat(repositories[2].permissionType).isEqualTo(Permission.RepositoryPermissionType.TRANSLATE)
-        assertThat(repositories[1].permissionType).isEqualTo(Permission.RepositoryPermissionType.VIEW)
-        assertThat(repositories[5].permissionType).isEqualTo(Permission.RepositoryPermissionType.MANAGE)
+        assertThat(repositories[6].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
+        assertThat(repositories[2].permissionType).isEqualTo(Permission.ProjectPermissionType.TRANSLATE)
+        assertThat(repositories[1].permissionType).isEqualTo(Permission.ProjectPermissionType.VIEW)
+        assertThat(repositories[5].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
     }
 }

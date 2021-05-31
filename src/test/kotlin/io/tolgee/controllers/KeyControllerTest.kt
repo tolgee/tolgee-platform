@@ -10,7 +10,7 @@ import io.tolgee.dtos.request.SetTranslationsDTO
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions
@@ -26,25 +26,25 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     private val keyDto = SetTranslationsDTO("test string", mapOf(Pair("en", "Hello")))
     private val keyDto2 = SetTranslationsDTO("test string 2", mapOf(Pair("en", "Hello 2")))
 
-    private lateinit var repository: Repository
+    private lateinit var project: Project
 
     @BeforeMethod
     fun setup() {
-        this.repository = dbPopulator.createBase(generateUniqueString())
+        this.project = dbPopulator.createBase(generateUniqueString())
     }
 
     @Test
     fun create() {
-        performCreate(repositoryId = repository.id, content = keyDto).andExpect(status().`is`(200))
+        performCreate(repositoryId = project.id, content = keyDto).andExpect(status().`is`(200))
                 .andReturn()
 
-        assertThat(keyService.get(repository, PathDTO.fromFullPath("test string"))).isNotEmpty
+        assertThat(keyService.get(project, PathDTO.fromFullPath("test string"))).isNotEmpty
     }
 
     @Test
     fun createValidation() {
         val result = performCreate(
-                repositoryId = repository.id,
+                repositoryId = project.id,
                 content = SetTranslationsDTO("", mapOf(Pair("en", "aaa"))))
                 .andExpect(status().isBadRequest)
                 .andReturn()
@@ -53,24 +53,24 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
 
     @Test
     fun editDeprecated() {
-        keyService.create(repository, keyDto)
+        keyService.create(project, keyDto)
 
-        performAuthPost("/api/repository/${repository.id}/keys/edit", DeprecatedEditKeyDTO(
+        performAuthPost("/api/repository/${project.id}/keys/edit", DeprecatedEditKeyDTO(
                 oldFullPathString = "test string",
                 newFullPathString = "hello"
         )).andExpect(status().`is`(200))
         .andReturn()
 
-        assertThat(keyService.get(repository, PathDTO.fromFullPath("test string"))).isEmpty
-        assertThat(keyService.get(repository, PathDTO.fromFullPath("hello"))).isNotEmpty
+        assertThat(keyService.get(project, PathDTO.fromFullPath("test string"))).isEmpty
+        assertThat(keyService.get(project, PathDTO.fromFullPath("hello"))).isNotEmpty
     }
 
     @Test
     fun edit() {
-        keyService.create(repository, keyDto)
+        keyService.create(project, keyDto)
 
         performEdit(
-                repositoryId = repository.id,
+                repositoryId = project.id,
                 content = EditKeyDTO(
                         currentName = "test string",
                         newName = "hello"
@@ -78,41 +78,41 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
                 .andExpect(status().`is`(200))
                 .andReturn()
 
-        assertThat(keyService.get(repository, PathDTO.fromFullPath("test string"))).isEmpty
-        assertThat(keyService.get(repository, PathDTO.fromFullPath("hello"))).isNotEmpty
+        assertThat(keyService.get(project, PathDTO.fromFullPath("test string"))).isEmpty
+        assertThat(keyService.get(project, PathDTO.fromFullPath("hello"))).isNotEmpty
     }
 
     @Test
     fun delete() {
-        keyService.create(repository, keyDto)
-        keyService.create(repository, keyDto2)
+        keyService.create(project, keyDto)
+        keyService.create(project, keyDto2)
 
-        val keyInstance = keyService.get(repository, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
+        val keyInstance = keyService.get(project, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
 
-        performDelete(repositoryId = repository.id, keyInstance.id!!)
+        performDelete(repositoryId = project.id, keyInstance.id!!)
 
-        assertThat(keyService.get(repository, PathDTO.fromFullPath(keyDto.key))).isEmpty
-        assertThat(keyService.get(repository, PathDTO.fromFullPath(keyDto2.key))).isNotEmpty
+        assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto.key))).isEmpty
+        assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto2.key))).isNotEmpty
     }
 
     @Test
     fun deleteMultiple() {
-        keyService.create(repository, keyDto)
-        keyService.create(repository, keyDto2)
+        keyService.create(project, keyDto)
+        keyService.create(project, keyDto2)
 
-        val keyInstance = keyService.get(repository, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
-        val keyInstance2 = keyService.get(repository, PathDTO.fromFullPath(keyDto2.key)).orElseGet(null)
+        val keyInstance = keyService.get(project, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
+        val keyInstance2 = keyService.get(project, PathDTO.fromFullPath(keyDto2.key)).orElseGet(null)
 
-        performDelete(repositoryId = repository.id, setOf(keyInstance.id!!, keyInstance2.id!!))
+        performDelete(repositoryId = project.id, setOf(keyInstance.id!!, keyInstance2.id!!))
 
-        assertThat(keyService.get(repository, PathDTO.fromFullPath(keyDto.key))).isEmpty
-        assertThat(keyService.get(repository, PathDTO.fromFullPath(keyDto2.key))).isEmpty
+        assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto.key))).isEmpty
+        assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto2.key))).isEmpty
     }
 
     @Test
     fun get() {
-        val key = keyService.create(repository, keyDto)
-        val got = performGet(key.repository!!.id, key.id!!)
+        val key = keyService.create(project, keyDto)
+        val got = performGet(key.project!!.id, key.id!!)
                 .andExpect(status().isOk)
                 .andReturn()
                 .mapResponseTo<DeprecatedKeyDto>()

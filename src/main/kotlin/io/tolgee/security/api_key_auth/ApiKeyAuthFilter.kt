@@ -41,7 +41,7 @@ class ApiKeyAuthFilter(
                     try {
                         val key = ak.get()
                         securityService.checkApiKeyScopes(setOf(*apiScopes), key)
-                        repositoryHolder.repository = key.repository ?: throw NotFoundException()
+                        repositoryHolder.project = key.project ?: throw NotFoundException()
                     } catch (e: PermissionException) {
                         resolver.resolveException(request, response, null, e)
                         return

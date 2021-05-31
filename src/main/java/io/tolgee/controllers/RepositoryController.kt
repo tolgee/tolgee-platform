@@ -58,7 +58,7 @@ open class RepositoryController @Autowired constructor(private val repositorySer
     @Operation(summary = "Modifies repository")
     @PostMapping(value = ["/edit"])
     open fun editRepository(@RequestBody @Valid dto: EditRepositoryDTO?): RepositoryDTO {
-        val permission = securityService.checkRepositoryPermission(dto!!.repositoryId!!, Permission.RepositoryPermissionType.MANAGE)
+        val permission = securityService.checkRepositoryPermission(dto!!.repositoryId!!, Permission.ProjectPermissionType.MANAGE)
         val repository = repositoryService.editRepository(dto)
         return fromEntityAndPermission(repository, permission)
     }
@@ -70,14 +70,14 @@ open class RepositoryController @Autowired constructor(private val repositorySer
     @DeleteMapping(value = ["/{id}"])
     @Operation(summary = "Deletes repository by id")
     open fun deleteRepository(@PathVariable id: Long?) {
-        securityService.checkRepositoryPermission(id!!, Permission.RepositoryPermissionType.MANAGE)
+        securityService.checkRepositoryPermission(id!!, Permission.ProjectPermissionType.MANAGE)
         repositoryService.deleteRepository(id)
     }
 
     @PostMapping("/invite")
     @Operation(summary = "Generates user invitation link for repository")
     open fun inviteUser(@RequestBody @Valid invitation: RepositoryInviteUserDto): String {
-        securityService.checkRepositoryPermission(invitation.repositoryId!!, Permission.RepositoryPermissionType.MANAGE)
+        securityService.checkRepositoryPermission(invitation.repositoryId!!, Permission.ProjectPermissionType.MANAGE)
         val repository = repositoryService.get(invitation.repositoryId!!).orElseThrow { NotFoundException() }!!
         return invitationService.create(repository, invitation.type!!)
     }

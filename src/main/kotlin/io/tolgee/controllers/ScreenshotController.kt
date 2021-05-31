@@ -53,7 +53,7 @@ class ScreenshotController(
         }
 
         repositoryService.get(repositoryId).orElseThrow { NotFoundException() }
-        securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.TRANSLATE)
+        securityService.checkRepositoryPermission(repositoryId, Permission.ProjectPermissionType.TRANSLATE)
         val keyEntity = keyService.get(repositoryId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
         val screenShotEntity = screenshotService.store(screenshot, keyEntity)
         return screenShotEntity.toDTO()
@@ -74,8 +74,8 @@ class ScreenshotController(
         val screenshots = screenshotService.findByIdIn(ids)
         screenshots.forEach {
             securityService.checkRepositoryPermission(
-                    it.key.repository!!.id,
-                    Permission.RepositoryPermissionType.TRANSLATE
+                    it.key.project!!.id,
+                    Permission.ProjectPermissionType.TRANSLATE
             )
         }
         screenshotService.delete(screenshots)

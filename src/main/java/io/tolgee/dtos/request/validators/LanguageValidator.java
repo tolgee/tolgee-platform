@@ -5,7 +5,7 @@ import io.tolgee.dtos.request.LanguageDTO;
 import io.tolgee.dtos.request.validators.exceptions.ValidationException;
 import io.tolgee.exceptions.NotFoundException;
 import io.tolgee.model.Language;
-import io.tolgee.model.Repository;
+import io.tolgee.model.Project;
 import io.tolgee.service.LanguageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,13 +28,13 @@ public class LanguageValidator {
         //handle edit validation
         Language language = languageService.findById(dto.getId()).orElseThrow(NotFoundException::new);
 
-        Repository repository = language.getRepository();
+        Project project = language.getProject();
 
         if (!language.getName().equals(dto.getName())) {
-            validateNameUniqueness(dto, repository).ifPresent(validationErrors::add);
+            validateNameUniqueness(dto, project).ifPresent(validationErrors::add);
         }
         if (!language.getAbbreviation().equals(dto.getAbbreviation())) {
-            validateAbbreviationUniqueness(dto, repository).ifPresent(validationErrors::add);
+            validateAbbreviationUniqueness(dto, project).ifPresent(validationErrors::add);
         }
 
         if (!validationErrors.isEmpty()) {
@@ -42,27 +42,27 @@ public class LanguageValidator {
         }
     }
 
-    public void validateCreate(LanguageDTO dto, Repository repository) {
+    public void validateCreate(LanguageDTO dto, Project project) {
         LinkedHashSet<ValidationError> validationErrors = new LinkedHashSet<>();
 
         //handle create validation
-        validateAbbreviationUniqueness(dto, repository).ifPresent(validationErrors::add);
-        validateNameUniqueness(dto, repository).ifPresent(validationErrors::add);
+        validateAbbreviationUniqueness(dto, project).ifPresent(validationErrors::add);
+        validateNameUniqueness(dto, project).ifPresent(validationErrors::add);
 
         if (!validationErrors.isEmpty()) {
             throw new ValidationException(validationErrors);
         }
     }
 
-    private Optional<ValidationError> validateNameUniqueness(LanguageDTO dto, Repository repository) {
-        if (languageService.findByName(dto.getName(), repository).isPresent()) {
+    private Optional<ValidationError> validateNameUniqueness(LanguageDTO dto, Project project) {
+        if (languageService.findByName(dto.getName(), project).isPresent()) {
             return Optional.of(new ValidationError(ValidationErrorType.CUSTOM_VALIDATION, Message.LANGUAGE_NAME_EXISTS));
         }
         return Optional.empty();
     }
 
-    private Optional<ValidationError> validateAbbreviationUniqueness(LanguageDTO dto, Repository repository) {
-        if (languageService.findByAbbreviation(dto.getAbbreviation(), repository).isPresent()) {
+    private Optional<ValidationError> validateAbbreviationUniqueness(LanguageDTO dto, Project project) {
+        if (languageService.findByAbbreviation(dto.getAbbreviation(), project).isPresent()) {
             return Optional.of(new ValidationError(ValidationErrorType.CUSTOM_VALIDATION, Message.LANGUAGE_ABBREVIATION_EXISTS));
         }
         return Optional.empty();

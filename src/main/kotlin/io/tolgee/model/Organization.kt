@@ -23,18 +23,18 @@ open class Organization(
         open var addressPart: String? = null,
 
         @Enumerated(EnumType.STRING)
-        open var basePermissions: Permission.RepositoryPermissionType = Permission.RepositoryPermissionType.VIEW,
+        open var basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
 ) {
     constructor(
             name: String?,
             description: String? = null,
             addressPart: String?,
-            basePermissions: Permission.RepositoryPermissionType = Permission.RepositoryPermissionType.VIEW,
+            basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
     ) : this(null, name, description, addressPart, basePermissions)
 
     @OneToMany(mappedBy = "organization")
     open var memberRoles: MutableList<OrganizationRole> = mutableListOf()
 
     @OneToMany(mappedBy = "organizationOwner")
-    open var repositories: MutableList<Repository> = mutableListOf()
+    open var projects: MutableList<Project> = mutableListOf()
 }

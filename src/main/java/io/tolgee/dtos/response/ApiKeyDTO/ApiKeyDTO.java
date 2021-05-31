@@ -39,8 +39,8 @@ public class ApiKeyDTO {
                 .key(apiKey.getKey())
                 .id(apiKey.getId())
                 .userName(apiKey.getUserAccount().getName())
-                .repositoryId(apiKey.getRepository().getId())
-                .repositoryName(apiKey.getRepository().getName())
+                .repositoryId(apiKey.getProject().getId())
+                .repositoryName(apiKey.getProject().getName())
                 .scopes(apiKey.getScopesEnum().stream().map(ApiScope::getValue).collect(Collectors.toSet()))
                 .build();
     }

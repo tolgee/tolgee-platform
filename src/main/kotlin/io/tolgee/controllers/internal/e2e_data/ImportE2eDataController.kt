@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.model.Permission
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.model.dataImport.Import
 import io.tolgee.security.InternalController
 import io.tolgee.service.RepositoryService
@@ -106,7 +106,7 @@ class ImportE2eDataController(
 
     @GetMapping(value = ["/generate-base"])
     @Transactional
-    fun generateBaseData(): Repository {
+    fun generateBaseData(): Project {
         val data = testDataService.saveTestData {
             addUserAccount {
                 self {
@@ -120,9 +120,9 @@ class ImportE2eDataController(
                     }
                     addPermission {
                         self {
-                            type = Permission.RepositoryPermissionType.MANAGE
+                            type = Permission.ProjectPermissionType.MANAGE
                             user = this@addUserAccount.self
-                            repository = this@addRepository.self
+                            project = this@addRepository.self
                         }
                     }
                 }

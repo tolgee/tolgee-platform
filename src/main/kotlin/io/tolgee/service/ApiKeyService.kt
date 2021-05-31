@@ -4,7 +4,7 @@ import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.ApiKey
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.ApiKeyRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,10 +20,10 @@ open class ApiKeyService @Autowired constructor(private val apiKeyRepository: Ap
     @set:Autowired
     lateinit var permissionService: PermissionService
 
-    open fun createApiKey(userAccount: UserAccount?, scopes: Set<ApiScope>, repository: Repository?): ApiKeyDTO {
+    open fun createApiKey(userAccount: UserAccount?, scopes: Set<ApiScope>, project: Project?): ApiKeyDTO {
         val apiKey = ApiKey(
                 key = BigInteger(130, random).toString(32),
-                repository = repository,
+                project = project,
                 userAccount = userAccount,
                 scopesEnum = scopes
         )
@@ -36,7 +36,7 @@ open class ApiKeyService @Autowired constructor(private val apiKeyRepository: Ap
     }
 
     open fun getAllByRepository(repositoryId: Long?): Set<ApiKey> {
-        return apiKeyRepository.getAllByRepositoryId(repositoryId)
+        return apiKeyRepository.getAllByProjectId(repositoryId)
     }
 
     open fun getApiKey(apiKey: String?): Optional<ApiKey> {
@@ -51,8 +51,8 @@ open class ApiKeyService @Autowired constructor(private val apiKeyRepository: Ap
         apiKeyRepository.delete(apiKey)
     }
 
-    open fun getAvailableScopes(userAccount: UserAccount, repository: Repository): Set<ApiScope> {
-        return permissionService.getRepositoryPermissionType(repository.id, userAccount)?.availableScopes?.toSet()
+    open fun getAvailableScopes(userAccount: UserAccount, project: Project): Set<ApiScope> {
+        return permissionService.getRepositoryPermissionType(project.id, userAccount)?.availableScopes?.toSet()
                 ?: throw NotFoundException()
     }
 
@@ -61,6 +61,6 @@ open class ApiKeyService @Autowired constructor(private val apiKeyRepository: Ap
     }
 
     open fun deleteAllByRepository(repositoryId: Long?) {
-        apiKeyRepository.deleteAllByRepositoryId(repositoryId)
+        apiKeyRepository.deleteAllByProjectId(repositoryId)
     }
 }

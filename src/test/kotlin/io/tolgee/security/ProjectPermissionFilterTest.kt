@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.testng.annotations.Test
 
 @AutoConfigureMockMvc
-class RepositoryPermissionFilterTest : SignedInControllerTest() {
+class ProjectPermissionFilterTest : SignedInControllerTest() {
 
     @field:Autowired
     lateinit var repositoryHolder: RepositoryHolder

@@ -12,20 +12,20 @@ import javax.persistence.*
 @EntityListeners(Language.Companion.LanguageListeners::class)
 @Table(
         uniqueConstraints = [UniqueConstraint(
-                columnNames = ["repository_id", "name"],
-                name = "language_repository_name"
-        ), UniqueConstraint(columnNames = ["repository_id", "abbreviation"], name = "language_abbreviation_name")],
+                columnNames = ["project_id", "name"],
+                name = "language_project_name"
+        ), UniqueConstraint(columnNames = ["project_id", "abbreviation"], name = "language_abbreviation_name")],
         indexes = [Index(
                 columnList = "abbreviation",
                 name = "index_abbreviation"
-        ), Index(columnList = "abbreviation, repository_id", name = "index_abbreviation_repository")]
+        ), Index(columnList = "abbreviation, project_id", name = "index_abbreviation_project")]
 )
 class Language : StandardAuditModel() {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
     var translations: MutableSet<Translation>? = null
 
     @ManyToOne
-    var repository: Repository? = null
+    var project: Project? = null
     var abbreviation: String? = null
     var name: String? = null
     fun updateByDTO(dto: LanguageDTO) {
@@ -48,7 +48,6 @@ class Language : StandardAuditModel() {
 
         @Configurable
         class LanguageListeners {
-
             @Autowired
             lateinit var provider: ObjectFactory<ImportService>
 

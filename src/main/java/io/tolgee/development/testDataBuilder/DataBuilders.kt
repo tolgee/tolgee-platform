@@ -11,8 +11,8 @@ class DataBuilders {
     class RepositoryBuilder(userOwner: UserAccount? = null,
                             organizationOwner: Organization? = null,
                             val testDataBuilder: TestDataBuilder
-    ) : BaseEntityDataBuilder<Repository>() {
-        override var self: Repository = Repository().apply {
+    ) : BaseEntityDataBuilder<Project>() {
+        override var self: Project = Project().apply {
             if (userOwner == null && organizationOwner == null) {
                 if (testDataBuilder.data.userAccounts.size > 0) {
                     this.userOwner = testDataBuilder.data.userAccounts.first().self
@@ -157,7 +157,7 @@ class DataBuilders {
         val data = DATA()
 
         override var self: Key = Key().also {
-            it.repository = repositoryBuilder.self
+            it.project = repositoryBuilder.self
         }
 
         fun addMeta(ft: FT<KeyMetaBuilder>) {
@@ -169,7 +169,7 @@ class DataBuilders {
             val repositoryBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Language> {
         override var self: Language = Language().apply {
-            repository = repositoryBuilder.self
+            project = repositoryBuilder.self
         }
     }
 

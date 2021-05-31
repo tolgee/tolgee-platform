@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
     fun findAllByKey(key: Key, pageRequest: Pageable? = null): List<Screenshot>
 
-    fun getAllByKeyRepositoryId(repositoryId: Long): List<Screenshot>
+    fun getAllByKeyRepositoryId(projectId: Long): List<Screenshot>
     fun getAllByKeyId(id: Long): List<Screenshot>
     fun getAllByKeyIdIn(keyIds: Collection<Long>): List<Screenshot>
 }

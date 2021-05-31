@@ -9,7 +9,7 @@ import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIVE
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_FILES_IN_ARCHIVE
 import io.tolgee.fixtures.*
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.springframework.beans.factory.annotation.Value
@@ -130,8 +130,8 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
         validateSavedJsonImportData(repository)
     }
 
-    private fun validateSavedJsonImportData(repository: Repository) {
-        importService.find(repository.id, repository.userOwner?.id!!)!!.let { importEntity ->
+    private fun validateSavedJsonImportData(project: Project) {
+        importService.find(project.id, project.userOwner?.id!!)!!.let { importEntity ->
             entityManager.refresh(importEntity)
             assertThat(importEntity.files.size).isEqualTo(3)
             assertThat(importEntity.files.map { it.name }).containsAll(listOf("en.json", "cs.json", "fr.json"))

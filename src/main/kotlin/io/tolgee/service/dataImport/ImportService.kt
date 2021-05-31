@@ -15,7 +15,11 @@ import io.tolgee.model.dataImport.issues.ImportFileIssueParam
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
-import io.tolgee.repository.dataImport.*
+import io.tolgee.project.dataImport.ImportRepository
+import io.tolgee.repository.dataImport.ImportFileRepository
+import io.tolgee.repository.dataImport.ImportKeyRepository
+import io.tolgee.repository.dataImport.ImportLanguageRepository
+import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.security.AuthenticationFacade
@@ -47,8 +51,8 @@ class ImportService(
     fun addFiles(files: List<ImportFileDto>,
                  messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null
     ): List<ErrorResponseBody> {
-        val import = find(repositoryHolder.repository.id, authenticationFacade.userAccount.id!!)
-                ?: Import(authenticationFacade.userAccount, repositoryHolder.repository)
+        val import = find(repositoryHolder.project.id, authenticationFacade.userAccount.id!!)
+                ?: Import(authenticationFacade.userAccount, repositoryHolder.project)
 
         val nonNullMessageClient = messageClient ?: { _, _ -> }
         val languages = findLanguages(import)

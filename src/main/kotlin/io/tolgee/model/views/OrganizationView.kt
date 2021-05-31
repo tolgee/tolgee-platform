@@ -9,7 +9,7 @@ interface OrganizationView {
     val name: String
     val description: String?
     val addressPart: String
-    val basePermissions: Permission.RepositoryPermissionType
+    val basePermissions: Permission.ProjectPermissionType
     val currentUserRole: OrganizationRoleType
 
     companion object {

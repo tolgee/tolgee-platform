@@ -1,10 +1,7 @@
 package io.tolgee.fixtures
 
 import io.tolgee.constants.ApiScope
-import io.tolgee.development.DbPopulatorReal
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
-import io.tolgee.fixtures.RepositoryAuthRequestPerformer.Companion.API_REPOSITORY_URL_PREFIX
-import io.tolgee.model.Repository
 import io.tolgee.model.UserAccount
 import io.tolgee.service.ApiKeyService
 import org.springframework.beans.factory.annotation.Autowired
@@ -25,7 +22,7 @@ class RepositoryApiKeyAuthRequestPerformer(
     lateinit var apiKeyService: ApiKeyService
 
     val apiKey: ApiKeyDTO by lazy {
-        apiKeyService.createApiKey(userAccount, scopes = this.scopes.toSet(), repository)
+        apiKeyService.createApiKey(userAccount, scopes = this.scopes.toSet(), project)
     }
 
     override fun performRepositoryAuthPut(url: String, content: Any?): ResultActions {
