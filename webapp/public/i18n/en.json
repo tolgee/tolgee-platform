@@ -266,5 +266,6 @@
   "import_add_new_language_dialog_title" : "Add new language",
   "language_abbreviation_exists" : "Language abbreviation exists",
   "language_name_exists" : "Language with this name exists",
-  "import_resolve_conflicts_button" : "Resolve conflicts"
+  "import_resolve_conflicts_button" : "Resolve conflicts",
+  "import_error_cannot_add_more_then_n_languages" : "Cannot add more then {n} languages"
 }

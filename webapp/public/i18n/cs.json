@@ -266,5 +266,6 @@
   "import_add_new_language_dialog_title" : "Přidat jazyk",
   "language_abbreviation_exists" : "Zkratka jazyka existuje",
   "language_name_exists" : "Jazyk s tímto názvem již existuje",
-  "import_resolve_conflicts_button" : "Vyřešit konflikty"
+  "import_resolve_conflicts_button" : "Vyřešit konflikty",
+  "import_error_cannot_add_more_then_n_languages" : "Nelze přidat více než {n} jazyků"
 }
