@@ -1,5 +1,4 @@
 import {default as React, FunctionComponent, ReactNode, useEffect, useState} from "react";
-import {parseError} from "../common/form/ResourceErrorComponent";
 import {container} from "tsyringe";
 import {MessageService} from "../../service/MessageService";
 import {TranslationActions} from "../../store/repository/TranslationActions";
@@ -10,6 +9,7 @@ import {T, useTranslate} from "@tolgee/react";
 import {FullPageLoading} from "../common/FullPageLoading";
 import {useRepositoryLanguages} from "../../hooks/useRepositoryLanguages";
 import {useLeaveEditConfirmationOtherEdit} from "./useLeaveEditConfirmation";
+import {parseErrorResponse} from "../../fixtures/errorFIxtures";
 
 //@ts-ignore
 export const TranslationListContext = React.createContext<TranslationListContextType>(null);
@@ -31,7 +31,6 @@ export type TranslationListContextType = {
     isAllChecked: () => boolean,
     isSomeChecked: () => boolean
     checkedKeys: Set<number>
-    showCheckBoxes: boolean
     showKeys: boolean,
     setShowKeys: (showKeys: boolean) => void
     offset: number;
@@ -93,7 +92,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
     useEffect(() => {
         if (translationSaveLoadable.error) {
             actions.loadableReset.setTranslations.dispatch();
-            for (const error of parseError(translationSaveLoadable.error)) {
+            for (const error of parseErrorResponse(translationSaveLoadable.error)) {
                 messaging.error(<T>{error}</T>);
             }
         }
@@ -105,7 +104,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
         }
 
         if (keySaveLoadable.error) {
-            for (const error of parseError(keySaveLoadable.error)) {
+            for (const error of parseErrorResponse(keySaveLoadable.error)) {
                 messaging.error(<T>{error}</T>);
             }
             actions.loadableReset.editKey.dispatch();
@@ -119,7 +118,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
 
         if (deleteLoadable.error) {
             actions.loadableReset.delete.dispatch();
-            for (const error of parseError(deleteLoadable.error)) {
+            for (const error of parseErrorResponse(deleteLoadable.error)) {
                 messaging.error(<T>{error}</T>);
             }
         }
@@ -191,7 +190,6 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
         isAllChecked,
         isSomeChecked,
         checkedKeys: checkedKeys,
-        showCheckBoxes: repositoryDTO.permissionType === RepositoryPermissionType.MANAGE,
         showKeys,
         setShowKeys,
     };

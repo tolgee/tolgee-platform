@@ -8,6 +8,6 @@ interface ListItemLinkProps {
 }
 
 export const ListItemLink: FunctionComponent<ListItemLinkProps> = (props) => (
-    <ListItem button component={Link} to={props.to} selected={props.selected}>
+    <ListItem data-cy="global-list-item" button component={Link} to={props.to} selected={props.selected}>
         {props.children}
     </ListItem>);

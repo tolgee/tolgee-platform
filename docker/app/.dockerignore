@@ -1,1 +1,2 @@
-**/application-*.yaml
+**/application-dev.yaml
+**/application-postgres.yaml

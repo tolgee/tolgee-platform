@@ -1,8 +1,8 @@
-import {default as React, FunctionComponent} from 'react';
+import {default as React, FunctionComponent, useEffect, useState} from 'react';
 import {DashboardPage} from '../layout/DashboardPage';
 import {BaseView} from '../layout/BaseView';
 import GitHubIcon from '@material-ui/icons/GitHub';
-import {Button} from '@material-ui/core';
+import {Button, Fade, Slide} from '@material-ui/core';
 import {useSelector} from 'react-redux';
 import {AppState} from '../../store';
 import {LINKS, PARAMS} from '../../constants/links';
@@ -16,19 +16,24 @@ import {Alert} from '../common/Alert';
 import {SecurityService} from '../../service/SecurityService';
 import {useConfig} from "../../hooks/useConfig";
 import {T} from "@tolgee/react";
+import {MessageService} from "../../service/MessageService";
+import LoadingButton from "../common/form/LoadingButton";
 
 interface LoginProps {
 
 }
+
 const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const globalActions = container.resolve(GlobalActions);
 const securityServiceIns = container.resolve(SecurityService);
-
+const messageService = container.resolve(MessageService)
 // noinspection JSUnusedLocalSymbols
 export const LoginView: FunctionComponent<LoginProps> = (props) => {
 
     const security = useSelector((state: AppState) => state.global.security);
+    const authLoading = useSelector((state: AppState) => state.global.authLoading);
     const remoteConfig = useConfig();
+    const [showError, setShowError] = useState(true)
 
     if (!remoteConfig.authentication || security.allowPrivate) {
         return (<Redirect to={LINKS.AFTER_LOGIN.build()}/>);
@@ -36,21 +41,22 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
 
     const githubRedirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({[PARAMS.SERVICE_TYPE]: 'github'});
     const clientId = remoteConfig.authMethods.github.clientId;
-    const gitHubUrl = GITHUB_BASE + `?client_id=${clientId}&redirect_uri=${githubRedirectUri}&scope=user%3Aemail`;
+    const gitHubUrl = GITHUB_BASE + `?client_id=${clientId}&redirect_uri=${githubRedirectUri}?scope=user%3Aemail`;
 
     const history = useHistory();
     if (history.location.state && (history.location.state as any).from) {
         securityServiceIns.saveAfterLoginLink((history.location.state as any).from);
     }
 
+    useEffect(() => {
+        if (!authLoading && security.loginErrorCode) {
+            messageService.error(<T>{security.loginErrorCode}</T>)
+        }
+    }, [security.loginErrorCode, authLoading])
+
     return (
         <DashboardPage>
             <BaseView title={<T>login_title</T>} lg={4} md={6} sm={8} xs={12}>
-                {security.loginErrorCode &&
-                <Box mt={1} ml={-2} mr={-2}>
-                    <Alert severity="error"><T>{security.loginErrorCode}</T></Alert>
-                </Box>
-                }
                 <StandardForm initialValues={{username: '', password: ''}}
                               submitButtons={
                                   <Box ml={-1.5}>
@@ -78,7 +84,8 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
                                               )}
                                           </Box>
                                           <Box display="flex" flexGrow={0}>
-                                              <Button variant="contained" color="primary" type="submit"><T>login_login_button</T></Button>
+                                              <LoadingButton loading={authLoading}
+                                                             variant="contained" color="primary" type="submit"><T>login_login_button</T></LoadingButton>
                                           </Box>
                                       </Box>
                                   </Box>}

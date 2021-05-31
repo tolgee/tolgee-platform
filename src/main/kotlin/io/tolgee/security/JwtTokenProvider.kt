@@ -14,9 +14,7 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.service.UserAccountService
 import org.slf4j.LoggerFactory
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Component
 import java.util.*
 import javax.crypto.SecretKey
@@ -25,7 +23,9 @@ import javax.servlet.http.HttpServletRequest
 @Component
 class JwtTokenProvider(private val configuration: TolgeeProperties,
                        private val userAccountService: UserAccountService,
-                       private val jwtSecretProvider: JwtSecretProvider) {
+                       private val jwtSecretProvider: JwtSecretProvider,
+                       private val authenticationProvider: AuthenticationProvider
+) {
 
     private val logger = LoggerFactory.getLogger(JwtTokenProvider::class.java)
 
@@ -61,11 +61,8 @@ class JwtTokenProvider(private val configuration: TolgeeProperties,
     }
 
     fun getAuthentication(token: JwtToken): Authentication {
-        val userDetails = userAccountService[token.id].orElseThrow { AuthenticationException(Message.USER_NOT_FOUND) }
-        val authorities: MutableList<GrantedAuthority> = LinkedList()
-        val grantedAuthority = GrantedAuthority { "user" }
-        authorities.add(grantedAuthority)
-        return UsernamePasswordAuthenticationToken(userDetails, null, authorities)
+        val user = userAccountService[token.id].orElseThrow { AuthenticationException(Message.USER_NOT_FOUND) }
+        return authenticationProvider.getAuthentication(user!!)
     }
 
     fun resolveToken(req: HttpServletRequest): JwtToken? {

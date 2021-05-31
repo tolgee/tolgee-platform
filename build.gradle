@@ -7,8 +7,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.4")
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.32"
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.4.5")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.10"
     }
 }
 
@@ -16,12 +16,12 @@ plugins {
     id "com.palantir.docker" version "0.26.0"
     id 'com.palantir.docker-compose' version "0.26.0"
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.springframework.boot' version '2.4.4'
+    id 'org.springframework.boot' version '2.4.5'
     id 'java'
     id 'org.liquibase.gradle' version '2.0.4'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.32'
-    id "org.jetbrains.kotlin.plugin.jpa" version "1.4.32"
-    id "org.jetbrains.kotlin.kapt" version "1.4.32"
+    id 'org.jetbrains.kotlin.jvm' version '1.5.10'
+    id "org.jetbrains.kotlin.plugin.jpa" version "1.5.10"
+    id "org.jetbrains.kotlin.kapt" version "1.5.10"
 }
 
 group = 'io.tolgee'
@@ -48,6 +48,7 @@ apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 idea {
@@ -57,7 +58,7 @@ idea {
 }
 
 
-def liveDbH2 = [
+def liveDbPostgres = [
         url         : 'jdbc:postgresql://localhost:5432/postgres',
         referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.PostgreSQL95Dialect' +
@@ -68,12 +69,13 @@ def liveDbH2 = [
         driver      : "org.postgresql.Driver"
 ]
 
-def liveDbPostgres = [
+def liveDbH2 = [
         url         : 'jdbc:h2:~/.tolgee/db.h2;AUTO_SERVER=TRUE',
         referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.H2Dialect' +
                 '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
                 '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
+        driver      : 'org.h2.Driver'
 ]
 
 def liveDb = liveDbPostgres
@@ -85,9 +87,14 @@ liquibase {
             changeLogFile 'src/main/resources/db/changelog/schema.xml'
             url liveDb.url
             referenceUrl liveDb.referenceUrl
-            username liveDb.username
-            password liveDb.password
-            driver "org.postgresql.Driver"
+            if (liveDb.username) {
+                username liveDb.username
+            }
+            if (liveDb.password) {
+                password liveDb.password
+            }
+
+            driver liveDb.driver
         }
     }
 }
@@ -95,10 +102,19 @@ liquibase {
 diff.dependsOn compileKotlin
 diffChangeLog.dependsOn compileKotlin
 
-def LIQUIBASE_VERSION = "4.3.2"
-def LIQUIBASE_HIBERNATE_VERSION = "4.3.1"
+compileKotlin {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+def LIQUIBASE_VERSION = "4.3.5"
+def LIQUIBASE_HIBERNATE_VERSION = "4.3.5"
 def JJWT_VERSION = "0.11.2"
-def SPRING_DOC_VERSION = "1.5.7"
+def SPRING_DOC_VERSION = "1.5.9"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -107,6 +123,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-starter-hateoas"
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     compile "org.springframework.boot:spring-boot-configuration-processor"
     testCompile "org.springframework.boot:spring-boot-configuration-processor"
@@ -131,25 +148,30 @@ dependencies {
     compile("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime 'org.postgresql:postgresql'
-    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.0')
+    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.1')
     liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:$LIQUIBASE_HIBERNATE_VERSION")
     liquibaseRuntime('org.springframework.boot:spring-boot-starter-data-jpa')
     liquibaseRuntime sourceSets.main.output
-    implementation 'com.github.javafaker:javafaker:1.0.1'
+    implementation 'com.github.javafaker:javafaker:1.0.2'
     implementation 'org.hibernate:hibernate-jpamodelgen'
     testCompile group: 'org.testng', name: 'testng', version: '7.4.0'
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
     implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
-    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.4.3-native-mt'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-data-rest', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-hateoas', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-core', version: '1.5.0-native-mt'
     kapt "org.hibernate:hibernate-jpamodelgen"
-    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.32'
-    liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.4.31'
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.2'
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.5.10'
+    liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.5.10'
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3'
     implementation 'commons-codec:commons-codec:1.15'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.982'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.1029'
     compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
     implementation('org.reflections:reflections:0.9.12')
+    implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.26.0'
+    testImplementation('org.mockito.kotlin:mockito-kotlin:3.2.0')
+    testCompile("io.findify:s3mock_2.13:0.2.6")
 }
 
 test {
@@ -190,7 +212,7 @@ task packWebapp(type: Zip) {
     dependsOn "unpack"
     dependsOn "copyDist"
     from "${project.projectDir}/build/dependency"
-    archiveFileName = "tolgee-${project.version}-test.jar"
+    archiveFileName = "tolgee-${project.version}.jar"
     destinationDirectory = file("$buildDir/libs")
     entryCompression ZipEntryCompression.STORED
 }

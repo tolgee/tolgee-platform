@@ -4,15 +4,25 @@ services:
     container_name: tolgee_e2e
     image: tolgee/tolgee:local
     ports:
-      - 8201:8080
+      - 8201:8201
       - 8091:8091
     environment:
-      - tolgee.internal.populate=true
-      - tolgee.internal.controllerEnabled=true
-      - "tolgee.screenshots-url=http://localhost:8201/screenshots"
-      - tolgee.authentication.needs-email-verification=true
-      - tolgee.authentication.registrations-allowed=true
-      - tolgee.internal.fake-emails-sent=true
-      - tolgee.authentication.initialPassword=admin
-      - tolgee.authentication.enabled=true
-      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=*:8091,server=y,suspend=n
+      - spring.profiles.active=e2e
+      - spring.datasource.url=jdbc:postgresql://postgres:5432/postgres
+      - tolgee.smtp.host=fakesmtp
+      - tolgee.smtp.port=1025
+  postgres:
+    image: postgres:13
+    volumes:
+      - e2e-db-data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "25432:5432"
+  fakesmtp:
+    image: reachfive/fake-smtp-server:0.8.1
+    ports:
+      - "21025:1025"
+      - "21080:1080"
+volumes:
+  e2e-db-data:

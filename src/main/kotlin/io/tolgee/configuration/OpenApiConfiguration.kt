@@ -30,43 +30,19 @@ open class OpenApiConfiguration() {
     }
 
     @Bean
-    open fun internalOpenApi(): GroupedOpenApi? {
-        val paths = arrayOf("/api/**")
-        val apiPaths = this.apiKeyPaths
+    open fun internalV1OpenApi(): GroupedOpenApi? {
+        return internalGroupForPaths(arrayOf("/api/**"), "V1 Internal - for Tolgee Web application")
+    }
 
-        return GroupedOpenApi.builder().group("Internal - for Tolgee Web application")
-                .pathsToMatch(*paths)
-                .addOpenApiCustomiser { openApi ->
-                    val newPaths = Paths()
-                    openApi.paths.forEach { pathEntry ->
-                        val operations = ArrayList<Operation>()
-                        val newPathItem = PathItem()
-                        val oldPathItem = pathEntry.value
-                        oldPathItem.readOperations().forEach { operation ->
-                            val isParameterConsumed = operation?.parameters?.any { it.name == "repositoryId" } == true
-                            val pathContainsRepositoryIdParam = pathEntry.key.contains("{repositoryId}")
-                            val paramIsConsumedAndInPath = isParameterConsumed && pathContainsRepositoryIdParam
-                            val parameterIsMissingAtAll = !pathContainsRepositoryIdParam && !isParameterConsumed
 
-                            if (paramIsConsumedAndInPath || parameterIsMissingAtAll) {
-                                operations.add(operation)
-                            }
+    @Bean
+    open fun internalV2OpenApi(): GroupedOpenApi? {
+        return internalGroupForPaths(arrayOf("/v2/**"), "V2 Internal - for Tolgee Web application")
+    }
 
-                            operation.parameters?.removeIf { it.name == "ak" && it.`in` == "query" }
-                        }
-
-                        operations.forEach { operation ->
-                            newPathItem.operation(oldPathItem.getHttpMethod(operation), operation)
-                        }
-
-                        if (operations.isNotEmpty()) {
-                            newPaths.addPathItem(pathEntry.key, newPathItem)
-                        }
-                    }
-                    openApi.paths = newPaths
-                }
-                .pathsToExclude(*apiPaths.toTypedArray(), "/api/repository/{repositoryId}/sources/**")
-                .build()
+    @Bean
+    open fun internalAllOpenApi(): GroupedOpenApi? {
+        return internalGroupForPaths(arrayOf("/v2/**", "/api/**"), "All Internal - for Tolgee Web application")
     }
 
     @Bean
@@ -173,6 +149,44 @@ open class OpenApiConfiguration() {
 
                     if (withMethods.isNotEmpty()) withMethods else classPaths.toList()
                 }
+    }
+
+    private fun internalGroupForPaths(paths: Array<String>, name: String): GroupedOpenApi? {
+        val apiPaths = this.apiKeyPaths
+
+        return GroupedOpenApi.builder().group(name)
+                .pathsToMatch(*paths)
+                .addOpenApiCustomiser { openApi ->
+                    val newPaths = Paths()
+                    openApi.paths.forEach { pathEntry ->
+                        val operations = ArrayList<Operation>()
+                        val newPathItem = PathItem()
+                        val oldPathItem = pathEntry.value
+                        oldPathItem.readOperations().forEach { operation ->
+                            val isParameterConsumed = operation?.parameters?.any { it.name == "repositoryId" } == true
+                            val pathContainsRepositoryIdParam = pathEntry.key.contains("{repositoryId}")
+                            val paramIsConsumedAndInPath = isParameterConsumed && pathContainsRepositoryIdParam
+                            val parameterIsMissingAtAll = !pathContainsRepositoryIdParam && !isParameterConsumed
+
+                            if (paramIsConsumedAndInPath || parameterIsMissingAtAll) {
+                                operations.add(operation)
+                            }
+
+                            operation.parameters?.removeIf { it.name == "ak" && it.`in` == "query" }
+                        }
+
+                        operations.forEach { operation ->
+                            newPathItem.operation(oldPathItem.getHttpMethod(operation), operation)
+                        }
+
+                        if (operations.isNotEmpty()) {
+                            newPaths.addPathItem(pathEntry.key, newPathItem)
+                        }
+                    }
+                    openApi.paths = newPaths
+                }
+                .pathsToExclude(*apiPaths.toTypedArray(), "/api/repository/{repositoryId}/sources/**")
+                .build()
     }
 }
 

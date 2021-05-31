@@ -1,5 +1,5 @@
 import {singleton} from 'tsyringe';
-import {ApiHttpService} from './ApiHttpService';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
 import {ApiKeyDTO} from "./response.types";
 import {MessageService} from "./MessageService";
 import {EditApiKeyDTO} from "./request.types";
@@ -11,7 +11,7 @@ const BASE = "apiKeys";
 @singleton()
 export class ApiKeysService {
 
-    constructor(private http: ApiHttpService, private messages: MessageService) {
+    constructor(private http: ApiV1HttpService, private messages: MessageService) {
     }
 
     getListForLoggedUser: () => Promise<ApiKeyDTO[]> = () =>

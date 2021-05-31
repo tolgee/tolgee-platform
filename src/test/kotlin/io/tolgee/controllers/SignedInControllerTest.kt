@@ -23,7 +23,7 @@ abstract class SignedInControllerTest : AbstractControllerTest(), AuthRequestPer
     @BeforeMethod
     fun beforeEach() {
         //populate to create the user if not created
-        dbPopulator.autoPopulate()
+        dbPopulator.createUserIfNotExists(tolgeeProperties.authentication.initialUsername)
         if (userAccount == null) {
             logAsUser(tolgeeProperties.authentication.initialUsername, initialPassword)
         }
@@ -35,7 +35,7 @@ abstract class SignedInControllerTest : AbstractControllerTest(), AuthRequestPer
         logout()
     }
 
-    fun logAsUser(userName: String, password: String) {
+    fun logAsUser(userName: String, password: String = initialPassword) {
         val defaultAuthenticationResult = login(userName, password)
         init(defaultAuthenticationResult.token)
         userAccount = defaultAuthenticationResult.entity

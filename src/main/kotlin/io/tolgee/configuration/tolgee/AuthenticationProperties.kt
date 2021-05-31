@@ -12,11 +12,13 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 @ConfigurationProperties(prefix = "tolgee.authentication")
 class AuthenticationProperties(
+        @E2eRuntimeMutable
         var enabled: Boolean = true,
         var jwtSecret: String? = null,
         var jwtExpiration: Int = 604800000,
         var nativeEnabled: Boolean = true,
         var registrationsAllowed: Boolean = false,
+        @E2eRuntimeMutable
         var needsEmailVerification: Boolean = false,
         var createInitialUser: Boolean = true,
         var initialUsername: String = "admin",
@@ -25,6 +27,9 @@ class AuthenticationProperties(
         var timestampMaxAge: Long = 604800000, //one week
         var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
         var ldap: LdapAuthenticationProperties = LdapAuthenticationProperties(),
+        var userCanCreateRepositories: Boolean = true,
+        var userCanCreateOrganizations: Boolean = true
+
 ) {
     fun checkAllowedRegistrations() {
         if (!this.registrationsAllowed) {

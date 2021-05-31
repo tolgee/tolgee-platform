@@ -29,5 +29,5 @@ export const useUser = (): UserDTO | null => {
         return null;
     }
 
-    return userDTO;
+    return userDTO as UserDTO | null;
 };

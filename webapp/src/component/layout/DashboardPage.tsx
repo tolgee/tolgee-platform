@@ -58,13 +58,11 @@ export const DashboardPage: FunctionComponent<DashboardPageProps> = ({children, 
                 <Box display="flex" flexDirection="column" flexGrow={1} minHeight="100%">
                     {!props.repositoryName && <div className={classes.appBarSpacer}/>}
                     <Box flexGrow={1} display={"flex"} flexDirection="column">
-                        <Container maxWidth={false} className={classes.container}>
-                            <Grid container spacing={3}>
-                                {children}
-                            </Grid>
-                        </Container>
+                        <Box className={classes.container}>
+                            {children}
+                        </Box>
                     </Box>
-                    <Box pt={2}>
+                    <Box>
                         <Copyright/>
                     </Box>
                 </Box>

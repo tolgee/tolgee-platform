@@ -15,6 +15,8 @@ class PublicConfigurationDTO(
     val maxUploadFileSize = properties.maxUploadFileSize
     val clientSentryDsn = if (properties.sentry.enabled) properties.sentry.clientDsn else null
     val needsEmailVerification = properties.authentication.needsEmailVerification
+    val userCanCreateRepositories = properties.authentication.userCanCreateRepositories
+    val userCanCreateOrganizations = properties.authentication.userCanCreateOrganizations
 
     class AuthMethodsDTO(val github: GithubPublicConfigDTO)
     data class GithubPublicConfigDTO(val clientId: String?) {

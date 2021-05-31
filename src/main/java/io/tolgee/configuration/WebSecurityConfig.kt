@@ -1,6 +1,7 @@
 package io.tolgee.configuration
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.security.DisabledAuthenticationFilter
 import io.tolgee.security.InternalDenyFilter
 import io.tolgee.security.JwtTokenFilter
 import io.tolgee.security.api_key_auth.ApiKeyAuthFilter
@@ -21,13 +22,15 @@ open class WebSecurityConfig @Autowired constructor(private val jwtTokenFilter: 
                                                     private val configuration: TolgeeProperties,
                                                     private val apiKeyAuthFilter: ApiKeyAuthFilter,
                                                     private val internalDenyFilter: InternalDenyFilter,
-                                                    private val repositoryPermissionFilter: RepositoryPermissionFilter
+                                                    private val repositoryPermissionFilter: RepositoryPermissionFilter,
+                                                    private val disabledAuthenticationFilter: DisabledAuthenticationFilter
 ) : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
         if (configuration.authentication.enabled) {
             http
                     .csrf().disable().cors().and()
                     .addFilterBefore(internalDenyFilter, UsernamePasswordAuthenticationFilter::class.java)
+                    .addFilterBefore(disabledAuthenticationFilter, InternalDenyFilter::class.java)
                     //if jwt token is provided in header, this filter will authorize user, so the request is not gonna reach the ldap auth
                     .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter::class.java)
                     //this is used to authorize user's app calls with generated api key
@@ -35,7 +38,7 @@ open class WebSecurityConfig @Autowired constructor(private val jwtTokenFilter: 
                     .addFilterAfter(repositoryPermissionFilter, JwtTokenFilter::class.java)
                     .authorizeRequests()
                     .antMatchers("/api/public/**", "/webjars/**", "/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs").permitAll()
-                    .antMatchers("/api/**", "/uaa", "/uaa/**").authenticated()
+                    .antMatchers("/api/**", "/uaa", "/uaa/**", "/v2/**").authenticated()
                     .and().sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             return

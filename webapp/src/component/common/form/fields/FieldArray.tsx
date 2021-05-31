@@ -30,6 +30,7 @@ export const FieldArray: FunctionComponent<FAProps> = (props) => {
                                         {props.children((name) => `${props.name}.${index}.${name}`)}
                                         <Box display="flex" alignItems="center">
                                             <IconButton
+                                                data-cy="global-field-array-minus-button"
                                                 type="button"
                                                 onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
                                             >
@@ -41,6 +42,7 @@ export const FieldArray: FunctionComponent<FAProps> = (props) => {
                             ))}
                             <Box display="flex" alignItems="center" justifyContent="flex-end">
                                 <IconButton
+                                    data-cy="global-field-array-plus-button"
                                     type="button"
                                     onClick={() => arrayHelpers.insert(values.length, props.initialValue)} // insert an empty string at a position
                                 >
@@ -52,7 +54,8 @@ export const FieldArray: FunctionComponent<FAProps> = (props) => {
                     ) : (
                         <>
                             <Box>
-                                <Button variant="outlined" onClick={() => arrayHelpers.push('')}>
+                                <Button data-cy="global-field-array-add-button"
+                                        variant="outlined" onClick={() => arrayHelpers.push('')}>
                                     Add {field.name}
                                 </Button>
                             </Box>

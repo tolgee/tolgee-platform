@@ -7,8 +7,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class MailSender(properties: TolgeeProperties) : JavaMailSenderImpl() {
-    private val fake = properties.internal.fakeEmailsSent
-
     init {
         val mailConfiguration = properties.smtp
 
@@ -25,9 +23,6 @@ class MailSender(properties: TolgeeProperties) : JavaMailSenderImpl() {
     }
 
     override fun send(simpleMessage: SimpleMailMessage) {
-        if (this.fake) {
-            return
-        }
         super.send(simpleMessage)
     }
 }

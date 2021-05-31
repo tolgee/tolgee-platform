@@ -6,5 +6,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 class InternalProperties {
     var populate: Boolean = false
     var controllerEnabled = false
-    var fakeEmailsSent = false
+    var fakeGithubLogin = false
 }

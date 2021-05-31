@@ -97,6 +97,12 @@ const theme = createMuiTheme({
                 borderRadius: 3,
             },
         },
+        MuiList: {
+            padding: {
+                paddingTop: 0,
+                paddingBottom: 0
+            }
+        }
     },
 });
 
@@ -115,7 +121,7 @@ ReactDOM.render(
                     {/*
                     // @ts-ignore --  Type '{ children: Element; }' has no properties ... */}
                     <ErrorBoundary>
-                        <SnackbarProvider>
+                        <SnackbarProvider data-cy="global-snackbars">
                             <App/>
                         </SnackbarProvider>
                     </ErrorBoundary>

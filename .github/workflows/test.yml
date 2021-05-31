@@ -32,5 +32,5 @@ jobs:
           name: test
           path: |
             ./e2e/cypress/videos/**/*
-            ./e2e/screenshots/**/*
+            ./e2e/cypress/screenshots/**/*
             ./build/reports/**/*

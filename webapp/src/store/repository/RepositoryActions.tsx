@@ -6,6 +6,11 @@ import {LINKS} from "../../constants/links";
 import {AbstractLoadableActions, createLoadable, Loadable, StateWithLoadables} from "../AbstractLoadableActions";
 import React from "react";
 import {T} from "@tolgee/react";
+import {AppState} from "../index";
+import {useSelector} from 'react-redux';
+import {ApiV1HttpService} from "../../service/http/ApiV1HttpService";
+import {ApiV2HttpService} from "../../service/http/ApiV2HttpService";
+import {ApiSchemaHttpService} from "../../service/http/ApiSchemaHttpService";
 
 export class RepositoriesState extends StateWithLoadables<RepositoryActions> {
     repositoriesLoading: boolean = true;
@@ -14,32 +19,40 @@ export class RepositoriesState extends StateWithLoadables<RepositoryActions> {
 
 @singleton()
 export class RepositoryActions extends AbstractLoadableActions<RepositoriesState> {
-    constructor() {
+    constructor(private apiV2HttpService: ApiV2HttpService,
+                private apiSchemaHttpService: ApiSchemaHttpService,
+                private service: RepositoryService) {
         super(new RepositoriesState());
     }
 
-    private service = container.resolve(RepositoryService);
-
-    public loadRepositories = this.createPromiseAction<RepositoryDTO[], any>('LOAD_ALL', this.service.getRepositories)
-        .build.onFullFilled((state, action) => {
-            return {...state, repositories: action.payload, repositoriesLoading: false};
-        }).build.onPending((state) => {
-            return {...state, repositoriesLoading: true};
-        });
-
 
     loadableDefinitions = {
+        listPermitted: this.createLoadableDefinition(this.apiSchemaHttpService.schemaRequest("/v2/repositories", "get")),
+        listUsersForPermissions: this.createLoadableDefinition(this.apiSchemaHttpService.schemaRequest("/v2/repositories/{repositoryId}/users", "get")),
         editRepository: this.createLoadableDefinition((id, values) => this.service.editRepository(id, values), undefined,
-            <T>repository_successfully_edited_message</T>, LINKS.REPOSITORIES),
-        createRepository: this.createLoadableDefinition((values) => this.service.createRepository(values),
-            undefined, <T>repository_created_message</T>, LINKS.REPOSITORIES),
+            <T>repository_successfully_edited_message</T>, LINKS.REPOSITORIES.build()),
+        createRepository: this.createLoadableDefinition(this.service.createRepository,
+            undefined, <T>repository_created_message</T>, LINKS.REPOSITORIES.build()),
         repository: this.createLoadableDefinition(this.service.loadRepository),
-        deleteRepository: this.createLoadableDefinition(this.service.deleteRepository, (state): RepositoriesState =>
-            (
-                {...state, loadables: {...state.loadables!, repository: {...createLoadable()} as Loadable<RepositoryDTO>}}
-            ), <T>repository_deleted_message</T>)
+        deleteRepository: this.createLoadableDefinition(this.service.deleteRepository, (state: RepositoriesState): RepositoriesState =>
+            ({...state, loadables: {...state.loadables!, repository: {...createLoadable()} as Loadable<RepositoryDTO>}}), <T>repository_deleted_message</T>),
+        setUsersPermissions: this.createLoadableDefinition(
+            this.apiSchemaHttpService.schemaRequest(
+                "/v2/repositories/{repositoryId}/users/{userId}/set-permissions/{permissionType}",
+                "put"),
+            ((state: RepositoriesState, action): RepositoriesState => {
+                return this.resetLoadable(state, "listUsersForPermissions")
+            }), <T>permissions_set_message</T>),
+        revokeAccess: this.createLoadableDefinition(
+            this.apiSchemaHttpService.schemaRequest("/v2/repositories/{repositoryId}/users/{userId}/revoke-access", "put"),
+            (state: RepositoriesState, action): RepositoriesState => {
+                return this.resetLoadable(state, "listUsersForPermissions")
+            }, <T>access_revoked_message</T>)
     };
 
+    useSelector<T>(selector: (state: RepositoriesState) => T): T {
+        return useSelector((state: AppState) => selector(state.repositories))
+    }
 
     get prefix(): string {
         return 'REPOSITORIES';

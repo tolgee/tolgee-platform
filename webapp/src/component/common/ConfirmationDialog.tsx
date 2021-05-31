@@ -12,10 +12,10 @@ import {T} from '@tolgee/react';
 
 export class ConfirmationDialogProps {
     open?: boolean = true;
-    message?: ReactNode = <T>Are you sure?</T>;
-    confirmButtonText?: ReactNode = <T>Confirm</T>;
-    cancelButtonText?: ReactNode = <T>Cancel</T>;
-    title?: ReactNode = <T>Confirmation</T>;
+    message?: ReactNode = <T>confirmation_dialog_message</T>;
+    confirmButtonText?: ReactNode = <T>confirmation_dialog_confirm</T>;
+    cancelButtonText?: ReactNode = <T>confirmation_dialog_cancel</T>;
+    title?: ReactNode = <T>confirmation_dialog_title</T>;
     hardModeText?: string | null = null;
     confirmButtonColor?: PropTypes.Color = "primary";
     cancelButtonColor?: PropTypes.Color = "default";
@@ -48,6 +48,7 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
             <DialogTitle id="alert-dialog-title">{props.title}</DialogTitle>
             <form onSubmit={(e) => {
                 if (!disabled && props.onConfirm) {
+                    setInput("");
                     props.onConfirm();
                 }
                 e.preventDefault();
@@ -58,17 +59,24 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
                     </DialogContentText>
                     {props.hardModeText &&
                     <Box>
-                        <TextField fullWidth={true} label={<T parameters={{text: props.hardModeText}}>hard_mode_confirmation_rewrite_text</T>}
+                        <TextField data-cy={"global-confirmation-hard-mode-text-field"}
+                                   fullWidth={true} label={<T parameters={{text: props.hardModeText}}>hard_mode_confirmation_rewrite_text</T>}
                                    value={input}
                                    onChange={(e) => setInput(e.target.value)}/>
                     </Box>
                     }
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={props.onCancel} type="button" color={props.cancelButtonColor}>
+                    <Button
+                        data-cy="global-confirmation-cancel"
+                        onClick={() => {
+                        setInput("")
+                        props.onCancel && props.onCancel();
+                    }} type="button" color={props.cancelButtonColor}>
                         {props.cancelButtonText}
                     </Button>
                     <Button
+                        data-cy="global-confirmation-confirm"
                         color={props.confirmButtonColor}
                         autoFocus
                         disabled={!!disabled}

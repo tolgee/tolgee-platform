@@ -3,34 +3,35 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@material-ui/core": "^4.11.3",
+    "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
-    "@material-ui/lab": "^4.0.0-alpha.57",
-    "@sentry/browser": "^6.2.1",
-    "@sentry/types": "^6.2.5",
-    "@testing-library/jest-dom": "^5.11.10",
-    "@testing-library/react": "^11.2.5",
-    "@testing-library/user-event": "^13.1.2",
-    "@tolgee/react": "^1.0.0-alpha.40",
-    "@tolgee/ui": "^1.0.0-alpha.40",
-    "@types/jest": "^26.0.21",
-    "@types/node": "^14.14.36",
-    "@types/react": "^17.0.3",
-    "@types/react-dom": "^17.0.3",
+    "@material-ui/lab": "^4.0.0-alpha.58",
+    "@sentry/browser": "^6.4.1",
+    "@sentry/types": "^6.3.1",
+    "@testing-library/jest-dom": "^5.12.0",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^13.1.9",
+    "@tolgee/react": "^1.0.0-alpha.45",
+    "@tolgee/ui": "^1.0.0-alpha.45",
+    "@types/jest": "^26.0.23",
+    "@types/node": "^15.6.1",
+    "@types/react": "^17.0.8",
+    "@types/react-dom": "^17.0.5",
     "@types/react-redux": "^7.1.16",
     "@types/react-router-dom": "^5.1.7",
     "@types/yup": "^0.29.11",
     "babel-plugin-transform-typescript-metadata": "^0.3.2",
     "clsx": "^1.1.1",
-    "formik": "^2.2.6",
+    "formik": "^2.2.8",
     "formik-material-ui": "^3.0.1",
-    "notistack": "^1.0.5",
+    "notistack": "^1.0.9",
+    "openapi-typescript": "^3.3.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.2",
-    "react-redux": "^7.2.3",
+    "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
-    "redux": "^4.0.5",
+    "redux": "^4.1.0",
     "redux-devtools-extension": "^2.13.9",
     "redux-promise-middleware": "^6.1.2",
     "redux-thunk": "^2.3.0",
@@ -38,14 +39,17 @@
     "regenerator-runtime": "^0.13.7",
     "tsyringe": "^4.5.0",
     "typeface-roboto": "1.1.13",
-    "typescript": "^4.2.4",
-    "web-vitals": "^1.1.1",
+    "typescript": "^4.3.2",
+    "use-debounce": "^6.0.1",
+    "web-vitals": "^1.1.2",
     "yup": "^0.32.9"
   },
   "scripts": {
     "start": "craco start",
+    "startConcurrently": "concurrently \"craco start\"",
     "build": "craco build",
-    "test": "craco test"
+    "test": "craco test",
+    "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.ts"
   },
   "eslintConfig": {
     "extends": [
@@ -66,6 +70,8 @@
     ]
   },
   "devDependencies": {
-    "craco": "^0.0.3"
+    "concurrently": "^6.2.0",
+    "craco": "^0.0.3",
+    "webpack": "4.44.2"
   }
 }

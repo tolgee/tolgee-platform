@@ -22,7 +22,7 @@
     "noImplicitAny": false,
     "experimentalDecorators": true,
     "downlevelIteration": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
   },
   "include": [
     "src"

@@ -1,7 +1,7 @@
 package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.tolgee.dtos.request.AbstractRepositoryDTO
+import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.CreateRepositoryDTO
 import io.tolgee.dtos.request.EditRepositoryDTO
 import io.tolgee.dtos.request.LanguageDTO
@@ -9,6 +9,8 @@ import io.tolgee.dtos.response.RepositoryDTO
 import io.tolgee.fixtures.LoggedRequestFactory.loggedDelete
 import io.tolgee.fixtures.LoggedRequestFactory.loggedGet
 import io.tolgee.fixtures.LoggedRequestFactory.loggedPost
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.helpers.JsonHelper
@@ -30,9 +32,21 @@ class RepositoryControllerTest : SignedInControllerTest() {
     @Test
     fun createRepository() {
         dbPopulator.createBase("test")
-        testCreateValidationSize()
-        testCreateValidationUniqueness()
+        testCreateValidationSizeShort()
+        testCreateValidationSizeLong()
         testCreateCorrectRequest()
+    }
+
+    @Test
+    fun createRepositoryOrganization() {
+        val userAccount = dbPopulator.createUserIfNotExists("testuser")
+        val organization = dbPopulator.createOrganization("Test Organization", userAccount)
+        logAsUser("testuser", initialPasswordManager.initialPassword)
+        val request = CreateRepositoryDTO("aaa", setOf(languageDTO), organizationId = organization.id)
+        val result = performAuthPost("/api/repositories", request).andIsOk.andReturn().mapResponseTo<RepositoryDTO>()
+        repositoryService.get(result.id!!).get().let {
+            assertThat(it.organizationOwner?.id).isEqualTo(organization.id)
+        }
     }
 
     private fun testCreateCorrectRequest() {
@@ -43,54 +57,39 @@ class RepositoryControllerTest : SignedInControllerTest() {
                                 JsonHelper.asJsonString(request)))
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn()
-        val aa: Optional<Repository> = repositoryService.findByName("aaa", userAccount)
-        Assertions.assertThat(aa).isPresent
-        val repository = aa.orElse(null)
-        Assertions.assertThat(repository!!.languages).isNotEmpty
+        val repositoryDto = repositoryService.findAllPermitted(userAccount!!).find { it.name == "aaa" }
+        Assertions.assertThat(repositoryDto).isNotNull
+        val repository = repositoryService.get(repositoryDto!!.id!!).get()
+        Assertions.assertThat(repository.languages).isNotEmpty
         val language = repository.languages.stream().findFirst().orElse(null)
         Assertions.assertThat(language).isNotNull
         Assertions.assertThat(language.abbreviation).isEqualTo("en")
         Assertions.assertThat(language.name).isEqualTo("English")
     }
 
-    private fun testCreateValidationSize() {
+    private fun testCreateValidationSizeShort() {
         val request = CreateRepositoryDTO("aa", setOf(languageDTO))
-
-        //test validation
-        val mvcResult = mvc.perform(
-                loggedPost("/api/repositories")
-                        .contentType(MediaType.APPLICATION_JSON).content(
-                                JsonHelper.asJsonString(request)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest)
-                .andReturn()
-        Assertions.assertThat(mvcResult.response.contentAsString).contains("name")
-        Assertions.assertThat(mvcResult.response.contentAsString).contains("STANDARD_VALIDATION")
+        val mvcResult = performAuthPost("/api/repositories", request).andIsBadRequest.andReturn()
+        assertThat(mvcResult).error().isStandardValidation
     }
 
-    private fun testCreateValidationUniqueness() {
-        val request = CreateRepositoryDTO("test", setOf(languageDTO))
-
-        //test validation
-        val mvcResult = mvc.perform(
-                loggedPost("/api/repositories")
-                        .contentType(MediaType.APPLICATION_JSON).content(
-                                JsonHelper.asJsonString(request)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest)
-                .andReturn()
-        Assertions.assertThat(mvcResult.response.contentAsString)
-                .isEqualTo("{\"STANDARD_VALIDATION\":{\"name\":\"NAME_EXISTS\"}}")
+    private fun testCreateValidationSizeLong() {
+        val request = CreateRepositoryDTO(
+                "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
+                setOf(languageDTO)
+        )
+        val mvcResult = performAuthPost("/api/repositories", request).andIsBadRequest.andReturn()
+        assertThat(mvcResult).error().isStandardValidation
     }
 
     @Test
     fun editRepository() {
         val test = dbPopulator.createBase(generateUniqueString())
-        val (name) = dbPopulator.createBase(generateUniqueString())
-        testEditValidationUniqueness(test, name)
         testEditCorrectRequest(test)
     }
 
     private fun testEditCorrectRequest(test: Repository) {
-        val request: AbstractRepositoryDTO = EditRepositoryDTO(test.id, "new test")
+        val request = EditRepositoryDTO(test.id, "new test")
         val mvcResult = mvc.perform(
                 loggedPost("/api/repositories/edit")
                         .contentType(MediaType.APPLICATION_JSON).content(
@@ -100,22 +99,8 @@ class RepositoryControllerTest : SignedInControllerTest() {
         val response = mapper.readValue(mvcResult.response.contentAsString, RepositoryDTO::class.java)
         Assertions.assertThat(response.name).isEqualTo("new test")
         Assertions.assertThat(response.id).isEqualTo(test.id)
-        val found = repositoryService.findByName("new test", userAccount)
-        Assertions.assertThat(found).isPresent
-    }
-
-    private fun testEditValidationUniqueness(repository: Repository, nonUniqueName: String?) {
-        val request = EditRepositoryDTO(repository.id, nonUniqueName)
-
-        //test validation
-        val mvcResult = mvc.perform(
-                loggedPost("/api/repositories/edit")
-                        .contentType(MediaType.APPLICATION_JSON).content(
-                                JsonHelper.asJsonString(request)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest)
-                .andReturn()
-        Assertions.assertThat(mvcResult.response.contentAsString)
-                .isEqualTo("{\"STANDARD_VALIDATION\":{\"name\":\"NAME_EXISTS\"}}")
+        val found = repositoryService.findAllPermitted(userAccount!!).find { it.name == "new test" }
+        Assertions.assertThat(found).isNotNull
     }
 
     @Test
@@ -127,7 +112,7 @@ class RepositoryControllerTest : SignedInControllerTest() {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn()
-        val repository = repositoryService.getById(base.id)
+        val repository = repositoryService.get(base.id)
         Assertions.assertThat(repository).isEmpty
     }
 

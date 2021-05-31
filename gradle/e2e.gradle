@@ -1,4 +1,7 @@
+import java.time.Duration
+
 def E2E_DIR = "${project.projectDir}/e2e"
+def WEBAPP_DIR = "${project.projectDir}/webapp"
 
 task waitForRunningContainer(type: Task) {
     doLast {
@@ -12,7 +15,7 @@ task waitForRunningContainer(type: Task) {
             String s = null
             proc.waitFor()
             while ((s = stdInput.readLine()) != null) {
-                if (s.contains("Tomcat started on port(s): 8080 (http) with context path")) {
+                if (s.contains("Tomcat started on port(s):")) {
                     return
                 }
             }
@@ -21,6 +24,7 @@ task waitForRunningContainer(type: Task) {
             }
         }
     }
+    timeout = Duration.ofSeconds(120)
 }
 
 task installE2eDeps(type: Exec, group: "e2e") {
@@ -52,12 +56,32 @@ task openE2e(type: Exec, group: "e2e") {
     finalizedBy "stopDockerE2e", "cleanupDockerE2e"
 }
 
+task openE2eDev(type: Exec, group: "e2e") {
+    commandLine "npm", "run", "cy:open"
+
+    environment "CYPRESS_HOST", "http://localhost:8081"
+
+    workingDir E2E_DIR
+}
+
+task runWebAppNpmStartE2eDev(type: Exec, group: "e2e") {
+    commandLine "npm", "run", "startConcurrently"
+
+    environment "REACT_APP_API_URL", "http://localhost:8201"
+
+    workingDir WEBAPP_DIR
+}
 
 task runDockerE2e(type: Exec, group: "e2e") {
     dependsOn "tagDockerLocal"
     commandLine "docker-compose", "up", "-d"
     workingDir E2E_DIR
     finalizedBy "waitForRunningContainer"
+}
+
+task runDockerE2eDev(type: Exec, group: "e2e") {
+    commandLine "docker-compose", "up", "-d", "postgres", "fakesmtp"
+    workingDir E2E_DIR
 }
 
 task stopDockerE2e(type: Exec, group: "e2e") {

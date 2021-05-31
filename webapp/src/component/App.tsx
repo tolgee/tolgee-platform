@@ -12,12 +12,14 @@ import {ErrorActions} from '../store/global/ErrorActions';
 import {RedirectionActions} from '../store/global/RedirectionActions';
 import {useConfig} from "../hooks/useConfig";
 import {useUser} from "../hooks/useUser";
-import {ApiKeysView} from "./security/apiKeys/ApiKeysView";
-import {UserSettings} from "./views/UserSettings";
 import {RepositoriesRouter} from "./views/repositories/RepositoriesRouter";
 import {FullPageLoading} from "./common/FullPageLoading";
 import * as Sentry from '@sentry/browser';
 import {GlobalError} from "../error/GlobalError";
+import {OrganizationsRouter} from "./views/organizations/OrganizationsRouter";
+import {ApiKeysView} from "./views/userSettings/apiKeys/ApiKeysView";
+import ConfirmationDialog from "./common/ConfirmationDialog";
+import { UserProfileView } from './views/userSettings/UserProfileView';
 
 const LoginRouter = React.lazy(() => import(/* webpackChunkName: "login" */'./security/LoginRouter'));
 const SignUpView = React.lazy(() => import(/* webpackChunkName: "sign-up-view" */'./security/SignUpView'));
@@ -25,7 +27,6 @@ const SignUpView = React.lazy(() => import(/* webpackChunkName: "sign-up-view" *
 const PasswordResetSetView = React.lazy(() => import(/* webpackChunkName: "reset-password-set-view" */'./security/ResetPasswordSetView'));
 const PasswordResetView = React.lazy(() => import(/* webpackChunkName: "reset-password-view" */'./security/ResetPasswordView'));
 const AcceptInvitationHandler = React.lazy(() => import(/* webpackChunkName: "accept-invitation-handler" */'./security/AcceptInvitationHandler'));
-const ConfirmationDialog = React.lazy(() => import(/* webpackChunkName: "confirmation-dialog" */'./common/ConfirmationDialog'));
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -126,13 +127,16 @@ export class App extends React.Component {
                             <Redirect to={LINKS.REPOSITORIES.template}/>
                         </PrivateRoute>
                         <PrivateRoute exact path={LINKS.USER_SETTINGS.template}>
-                            <UserSettings/>
+                            <UserProfileView/>
                         </PrivateRoute>
                         <PrivateRoute path={LINKS.REPOSITORIES.template}>
                             <RepositoriesRouter/>
                         </PrivateRoute>
                         <PrivateRoute path={`${LINKS.USER_API_KEYS.template}`}>
                             <ApiKeysView/>
+                        </PrivateRoute>
+                        <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
+                            <OrganizationsRouter/>
                         </PrivateRoute>
                     </Switch>
                     <SnackBar/>

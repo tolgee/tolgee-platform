@@ -6,7 +6,6 @@ import {container} from 'tsyringe';
 import {RepositoryActions} from '../../../../store/repository/RepositoryActions';
 import {LINKS} from '../../../../constants/links';
 import {Redirect} from 'react-router-dom';
-import * as Yup from 'yup';
 import {TextField} from '../../../common/form/fields/TextField';
 import {BaseFormView} from '../../../layout/BaseFormView';
 import {useRepository} from "../../../../hooks/useRepository";
@@ -14,6 +13,7 @@ import {Button} from "@material-ui/core";
 import {confirmation} from "../../../../hooks/confirmation";
 import {T} from "@tolgee/react";
 import {ConfirmationDialogProps} from "../../../common/ConfirmationDialog";
+import {Validation} from "../../../../constants/GlobalValidationSchema";
 
 const actions = container.resolve(RepositoryActions);
 
@@ -60,10 +60,7 @@ export const RepositorySettingsView: FunctionComponent = () => {
         <BaseFormView lg={6} md={8} title={<T>repository_settings_title</T>} initialValues={initialValues} onSubmit={onSubmit}
                       onCancel={() => setCancelled(true)}
                       saveActionLoadable={loadable}
-                      validationSchema={Yup.object().shape(
-                          {
-                              name: Yup.string().required().min(3).max(100)
-                          })}
+                      validationSchema={Validation.REPOSITORY_SETTINGS}
                       customActions={
                           <Button color="secondary" variant="outlined" onClick={() => {
                               confirm({

@@ -26,17 +26,24 @@ open class EmailVerificationService(private val tolgeeProperties: TolgeeProperti
                                     private val mailSender: MailSender
 ) {
     @Transactional
-    open fun createForUser(userAccount: UserAccount, callbackUrl: String? = null): EmailVerification? {
+    open fun createForUser(userAccount: UserAccount, callbackUrl: String? = null, newEmail: String? = null): EmailVerification? {
         if (tolgeeProperties.authentication.needsEmailVerification) {
             val resultCallbackUrl = getCallbackUrl(callbackUrl)
-
             val code = generateCode()
-            val emailVerification = EmailVerification(userAccount = userAccount, code = code)
+
+            val emailVerification = userAccount.emailVerification?.also {
+                it.newEmail = newEmail
+                it.code = code
+            } ?: EmailVerification(userAccount = userAccount, code = code, newEmail = newEmail)
 
             emailVerificationRepository.save(emailVerification)
             userAccount.emailVerification = emailVerification
 
-            sendMail(userAccount, resultCallbackUrl, code)
+            if (newEmail != null) {
+                sendMail(userAccount.id!!, newEmail, resultCallbackUrl, code, false)
+            } else {
+                sendMail(userAccount.id!!, userAccount.username!!, resultCallbackUrl, code)
+            }
 
             return emailVerification
         }
@@ -54,25 +61,30 @@ open class EmailVerificationService(private val tolgeeProperties: TolgeeProperti
 
     open fun verify(userId: Long, code: String) {
         val user = userAccountRepository.findById(userId).orElseThrow { NotFoundException() }
-        if (user.emailVerification == null || user.emailVerification?.code != code) {
+        if (user!!.emailVerification == null || user.emailVerification?.code != code) {
             throw NotFoundException()
         }
+
+        user.emailVerification?.newEmail?.let {
+            user.username = user.emailVerification?.newEmail
+        }
+
         emailVerificationRepository.delete(user.emailVerification!!)
     }
 
-    private fun sendMail(userAccount: UserAccount, resultCallbackUrl: String?, code: String) {
+    private fun sendMail(userId: Long, email: String, resultCallbackUrl: String?, code: String, isSignUp: Boolean = true) {
         val message = SimpleMailMessage()
-        message.setTo(userAccount.username!!)
+        message.setTo(email)
         message.subject = "Tolgee e-mail verification"
-        val url = "$resultCallbackUrl/${userAccount.id}/$code"
+        val url = "$resultCallbackUrl/${userId}/$code"
         message.text = """
                     Hello!
-                    Welcome to Tolgee!
+                    ${if (isSignUp) "Welcome to Tolgee!" else ""}
                     
                     To verify your e-mail click on this link: 
                     $url
                     
-                    Regards, 
+                    Regards,
                     Tolgee
                     """.trimIndent()
         message.from = tolgeeProperties.smtp.from

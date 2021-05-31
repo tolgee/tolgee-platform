@@ -40,7 +40,7 @@ open class LanguageController(
     @Operation(summary = "Creates language")
     fun createLanguage(@PathVariable("repositoryId") repositoryId: Long,
                        @RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
-        val repository = repositoryService.getById(repositoryId).orElseThrow { NotFoundException() }
+        val repository = repositoryService.get(repositoryId).orElseThrow { NotFoundException() }
         securityService.checkRepositoryPermission(repositoryId, Permission.RepositoryPermissionType.MANAGE)
         languageValidator.validateCreate(dto, repository)
         val language = languageService.createLanguage(dto, repository)
@@ -61,7 +61,7 @@ open class LanguageController(
     @Operation(summary = "Returns all repository languages", tags = ["API KEY", "Languages"])
     fun getAll(@PathVariable("repositoryId") pathRepositoryId: Long?): Set<LanguageDTO> {
         val repositoryId = if (pathRepositoryId === null) authenticationFacade.apiKey.repository!!.id else pathRepositoryId
-        securityService.getAnyRepositoryPermissionOrThrow(repositoryId)
+        securityService.checkAnyRepositoryPermission(repositoryId)
         return languageService.findAll(repositoryId).stream().map { LanguageDTO.fromEntity(it) }
                 .collect(Collectors.toCollection { LinkedHashSet() })
     }
@@ -70,7 +70,7 @@ open class LanguageController(
     @Operation(summary = "Returns specific language")
     operator fun get(@PathVariable("id") id: Long?): LanguageDTO {
         val language = languageService.findById(id).orElseThrow { NotFoundException() }
-        securityService.getAnyRepositoryPermissionOrThrow(language.repository!!.id)
+        securityService.checkAnyRepositoryPermission(language.repository!!.id)
         return LanguageDTO.fromEntity(language)
     }
 

@@ -18,7 +18,10 @@ export class UserActions extends AbstractLoadableActions<UserState> {
 
     readonly loadableDefinitions = {
         userData: this.createLoadableDefinition(this.userService.getUserData),
-        updateUser: this.createLoadableDefinition(this.userService.updateUserData),
+        updateUser: this.createLoadableDefinition((v) => {
+            v.callbackUrl = window.location.protocol + "//" + window.location.host
+            return this.userService.updateUserData(v)
+        }),
     };
 
 

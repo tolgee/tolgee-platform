@@ -7,12 +7,3 @@ declare module '*.woff2' {
     const content: any;
     export default content;
 }
-
-declare const environment: {
-    tolgeeApiKey: string;
-    tolgeeApiUrl: string;
-    tolgeeWithUI: string;
-    sentryDsn: string,
-    mode: "production" | "development",
-    apiUrl: string,
-};
