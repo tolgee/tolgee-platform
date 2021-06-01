@@ -14,7 +14,7 @@ import io.tolgee.dtos.response.translations_view.ResponseParams
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.security.api_key_auth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithAnyRepositoryPermission
+import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyService
@@ -37,7 +37,7 @@ class TranslationController @Autowired constructor(
         private val projectService: ProjectService
 ) : IController {
     @GetMapping(value = ["/{languages}"])
-    @AccessWithAnyRepositoryPermission
+    @AccessWithAnyProjectPermission
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
     @Operation(summary = "Get all translations for specific languages")
     fun getTranslations(@PathVariable("languages") languages: Set<String>): Map<String, Any> {
@@ -85,7 +85,7 @@ class TranslationController @Autowired constructor(
                     @RequestParam(name = "offset", defaultValue = "0") offset: Int,
                     @RequestParam(name = "search", required = false) search: String?
     ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-        securityService.checkRepositoryPermission(projectId!!, Permission.ProjectPermissionType.VIEW)
+        securityService.checkProjectPermission(projectId!!, Permission.ProjectPermissionType.VIEW)
         return translationService.getViewData(languages, projectId, limit, offset, search)
     }
 }

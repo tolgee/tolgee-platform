@@ -5,7 +5,7 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.enums.OrganizationRoleType
 
-data class RepositoryPermissionData(
+data class ProjectPermissionData(
         val project: Project,
         val organization: Organization?,
         val directPermissions: Permission?,

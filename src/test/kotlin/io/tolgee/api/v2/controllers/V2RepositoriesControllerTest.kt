@@ -20,7 +20,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
         logAsUser("kim")
 
         dbPopulator.createOrganization("cool", userAccount!!).let { org ->
-            dbPopulator.createRepositoryWithOrganization("org repo", org)
+            dbPopulator.createProjectWithOrganization("org repo", org)
         }
 
         performAuthGet("/v2/repositories").andPrettyPrint.andAssertThatJson.node("_embedded.repositories").let {
@@ -83,7 +83,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
 
         performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
-        permissionService.getRepositoryPermissionType(repo.id, user)
+        permissionService.getProjectPermissionType(repo.id, user)
                 .let { assertThat(it).isEqualTo(Permission.ProjectPermissionType.EDIT) }
     }
 
@@ -103,7 +103,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
 
         performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
-        permissionService.getRepositoryPermissionData(repo.id, user.id!!)
+        permissionService.getProjectPermissionData(repo.id, user.id!!)
                 .let { assertThat(it.directPermissions).isEqualTo(null) }
     }
 
@@ -181,7 +181,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
 
         performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/revoke-access", null).andIsOk
 
-        permissionService.getRepositoryPermissionType(repo.id, user)
+        permissionService.getProjectPermissionType(repo.id, user)
                 .let { assertThat(it).isNull() }
     }
 

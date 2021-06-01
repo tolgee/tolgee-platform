@@ -17,7 +17,7 @@ class InvitationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    fun getRepositoryInvitations() {
+    fun getProjectInvitations() {
         val project = dbPopulator.createBase(generateUniqueString())
         val invitation = invitationService.create(project, Permission.ProjectPermissionType.MANAGE)
         val response = performAuthGet("/api/invitation/list/${project.id}").andExpect(status().isOk).andReturn()
@@ -35,9 +35,9 @@ class InvitationControllerTest : SignedInControllerTest() {
         logAsUser(newUser.username!!, "pwd")
         performAuthGet("/api/invitation/accept/${invitation}").andExpect(status().isOk).andReturn()
 
-        assertThat(invitationService.getForRepository(project)).hasSize(0)
-        assertThat(permissionService.getRepositoryPermissionType(project.id, newUser)).isNotNull
-        val type = permissionService.getRepositoryPermissionType(project.id, newUser)!!
+        assertThat(invitationService.getForProject(project)).hasSize(0)
+        assertThat(permissionService.getProjectPermissionType(project.id, newUser)).isNotNull
+        val type = permissionService.getProjectPermissionType(project.id, newUser)!!
         assertThat(type).isEqualTo(Permission.ProjectPermissionType.EDIT)
     }
 }

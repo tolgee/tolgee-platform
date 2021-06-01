@@ -1,7 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.constants.Message
-import io.tolgee.dtos.RepositoryPermissionData
+import io.tolgee.dtos.ProjectPermissionData
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Invitation
@@ -25,7 +25,7 @@ class PermissionService @Autowired constructor(private val permissionRepository:
     @set:Autowired
     lateinit var projectService: ProjectService
 
-    fun getAllOfRepository(project: Project?): Set<Permission> {
+    fun getAllOfProject(project: Project?): Set<Permission> {
         return permissionRepository.getAllByProjectAndUserNotNull(project)
     }
 
@@ -33,22 +33,22 @@ class PermissionService @Autowired constructor(private val permissionRepository:
         return permissionRepository.findById(id).orElse(null)
     }
 
-    fun getRepositoryPermissionType(projectId: Long, userAccount: UserAccount) = getRepositoryPermissionType(projectId, userAccount.id!!)
+    fun getProjectPermissionType(projectId: Long, userAccount: UserAccount) = getProjectPermissionType(projectId, userAccount.id!!)
 
-    fun getRepositoryPermissionType(projectId: Long, userAccountId: Long): ProjectPermissionType? {
-        return getRepositoryPermissionData(projectId, userAccountId).computedPermissions
+    fun getProjectPermissionType(projectId: Long, userAccountId: Long): ProjectPermissionType? {
+        return getProjectPermissionData(projectId, userAccountId).computedPermissions
     }
 
-    fun getRepositoryPermissionData(projectId: Long, userAccountId: Long): RepositoryPermissionData {
+    fun getProjectPermissionData(projectId: Long, userAccountId: Long): ProjectPermissionData {
         val project = projectService.get(projectId).orElseThrow { NotFoundException() }!!
         val projectPermission = permissionRepository.findOneByProjectIdAndUserId(projectId, userAccountId)
 
         val organization = project.organizationOwner
         val organizationRole = organization?.let { organizationRoleService.getType(userAccountId, organization.id!!) }
         val organizationBasePermissionType = organization?.basePermissions
-        val computed = computeRepositoryPermissionType(organizationRole, organizationBasePermissionType, projectPermission?.type)
+        val computed = computeProjectPermissionType(organizationRole, organizationBasePermissionType, projectPermission?.type)
 
-        return RepositoryPermissionData(
+        return ProjectPermissionData(
                 project = project,
                 organization = organization,
                 organizationRole = organizationRole,
@@ -67,7 +67,7 @@ class PermissionService @Autowired constructor(private val permissionRepository:
         permissionRepository.delete(permission)
     }
 
-    fun deleteAllByRepository(projectId: Long?) {
+    fun deleteAllByProject(projectId: Long?) {
         permissionRepository.deleteAllByProjectId(projectId)
     }
 
@@ -83,7 +83,7 @@ class PermissionService @Autowired constructor(private val permissionRepository:
         permissionRepository.save(permission)
     }
 
-    fun computeRepositoryPermissionType(
+    fun computeProjectPermissionType(
             organizationRole: OrganizationRoleType?,
             organizationBasePermissionType: ProjectPermissionType?,
             projectPermissionType: ProjectPermissionType?
@@ -117,7 +117,7 @@ class PermissionService @Autowired constructor(private val permissionRepository:
         }
     }
 
-    fun findOneByRepositoryIdAndUserId(projectId: Long, userId: Long): Permission? {
+    fun findOneByProjectIdAndUserId(projectId: Long, userId: Long): Permission? {
         return permissionRepository.findOneByProjectIdAndUserId(projectId, userId)
     }
 
@@ -128,7 +128,7 @@ class PermissionService @Autowired constructor(private val permissionRepository:
     }
 
     fun setUserDirectPermission(projectId: Long, userId: Long, newPermissionType: ProjectPermissionType) {
-        val data = this.getRepositoryPermissionData(projectId, userId)
+        val data = this.getProjectPermissionData(projectId, userId)
 
         data.computedPermissions ?: throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
 
@@ -161,7 +161,7 @@ class PermissionService @Autowired constructor(private val permissionRepository:
     }
 
     fun revoke(projectId: Long, userId: Long) {
-        val data = this.getRepositoryPermissionData(projectId, userId)
+        val data = this.getProjectPermissionData(projectId, userId)
         if (data.organizationRole != null) {
             throw BadRequestException(Message.USER_IS_ORGANIZATION_MEMBER)
         }

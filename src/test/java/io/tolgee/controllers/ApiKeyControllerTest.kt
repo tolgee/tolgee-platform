@@ -102,7 +102,7 @@ class ApiKeyControllerTest : ProjectAuthControllerTest(), ITest {
     }
 
     @Test
-    fun allByRepository() {
+    fun allByProject() {
         val project = dbPopulator.createBase(generateUniqueString())
         val apiKeyDTO = doCreate(project)
         val apiKey1 = apiKeyService.createApiKey(project.permissions.first().user, setOf(ApiScope.KEYS_EDIT), project)

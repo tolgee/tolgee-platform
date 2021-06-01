@@ -4,13 +4,10 @@
 
 package io.tolgee.service
 
-import com.amazonaws.services.s3.AmazonS3
-import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
 import io.tolgee.repository.ScreenshotRepository
 import org.springframework.core.io.InputStreamSource
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.awt.Dimension
@@ -27,16 +24,14 @@ import kotlin.math.sqrt
 
 
 @Service
-open class ScreenshotService(
+class ScreenshotService(
         private val screenshotRepository: ScreenshotRepository,
-        private val tolgeeProperties: TolgeeProperties,
-        private val s3: AmazonS3?,
         private val fileStorageService: FileStorageService
 ) {
     private val screenshotFolderName = "screenshots"
 
     @Transactional
-    open fun store(screenshotImage: InputStreamSource, key: Key): Screenshot {
+    fun store(screenshotImage: InputStreamSource, key: Key): Screenshot {
         val screenshotEntity = Screenshot(key = key)
         screenshotRepository.save(screenshotEntity)
         val image = prepareImage(screenshotImage.inputStream)
@@ -44,35 +39,35 @@ open class ScreenshotService(
         return screenshotEntity
     }
 
-    open fun findAll(key: Key, pageRequest: PageRequest? = null): List<Screenshot> {
-        return screenshotRepository.findAllByKey(key, pageRequest)
+    fun findAll(key: Key): List<Screenshot> {
+        return screenshotRepository.findAllByKey(key)
     }
 
     @Transactional
-    open fun delete(screenshots: Collection<Screenshot>) {
+    fun delete(screenshots: Collection<Screenshot>) {
         screenshots.forEach {
             screenshotRepository.deleteById(it.id!!)
             deleteFile(it)
         }
     }
 
-    open fun findByIdIn(ids: Collection<Long>): MutableList<Screenshot> {
+    fun findByIdIn(ids: Collection<Long>): MutableList<Screenshot> {
         return screenshotRepository.findAllById(ids)
     }
 
-    open fun deleteAllByRepository(projectId: Long) {
+    fun deleteAllByProject(projectId: Long) {
         val all = screenshotRepository.getAllByKeyProjectId(projectId)
         all.forEach { this.deleteFile(it) }
         screenshotRepository.deleteInBatch(all)
     }
 
-    open fun deleteAllByKeyId(keyId: Long) {
+    fun deleteAllByKeyId(keyId: Long) {
         val all = screenshotRepository.getAllByKeyId(keyId)
         all.forEach { this.deleteFile(it) }
         screenshotRepository.deleteInBatch(all)
     }
 
-    open fun deleteAllByKeyId(keyIds: Collection<Long>) {
+    fun deleteAllByKeyId(keyIds: Collection<Long>) {
         val all = screenshotRepository.getAllByKeyIdIn(keyIds)
         all.forEach { this.deleteFile(it) }
         screenshotRepository.deleteInBatch(all)

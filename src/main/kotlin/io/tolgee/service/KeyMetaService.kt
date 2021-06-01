@@ -101,7 +101,7 @@ class KeyMetaService(
         return result
     }
 
-    fun deleteAllByRepositoryId(projectId: Long) {
+    fun deleteAllByProjectId(projectId: Long) {
         keyMetaRepository.deleteAllKeyCodeReferencesByProjectId(projectId)
         keyMetaRepository.deleteAllKeyCommentsByProjectId(projectId)
         keyMetaRepository.deleteAllByProjectId(projectId)

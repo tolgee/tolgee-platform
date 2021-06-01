@@ -15,7 +15,7 @@ import org.springframework.test.context.testng.AbstractTransactionalTestNGSpring
 import org.testng.annotations.Test
 
 @SpringBootTest
-class ProjectRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
+class ProjectProjectTest : AbstractTransactionalTestNGSpringContextTests() {
 
     @Autowired
     lateinit var projectRepository: ProjectRepository
@@ -24,7 +24,7 @@ class ProjectRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
     lateinit var dbPopulatorReal: DbPopulatorReal
 
     @Test
-    fun testRepositoryPreSaveHookBothSet() {
+    fun testProjectPreSaveHookBothSet() {
         val user = dbPopulatorReal.createUserIfNotExists("hello")
         val repo = Project(name = "Test", addressPart = "hello", userOwner = user)
         val organization = Organization(
@@ -37,7 +37,7 @@ class ProjectRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
     }
 
     @Test
-    fun testRepositoryPreSaveHookNorSet() {
+    fun testProjectPreSaveHookNorSet() {
         val repo = Project(name = "Test", addressPart = "hello", userOwner = null)
         Assertions.assertThatExceptionOfType(Exception::class.java).isThrownBy { projectRepository.save(repo) }
                 .withMessage("java.lang.Exception: Exactly one of organizationOwner or userOwner must be set!")

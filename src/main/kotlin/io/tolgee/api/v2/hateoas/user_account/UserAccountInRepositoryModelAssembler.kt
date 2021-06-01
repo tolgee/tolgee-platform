@@ -7,7 +7,7 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class UserAccountInRepositoryModelAssembler(
+class UserAccountInProjectModelAssembler(
         val permissionService: PermissionService
 ) : RepresentationModelAssemblerSupport<UserAccountInProjectView, UserAccountInProjectModel>(
         UserController::class.java, UserAccountInProjectModel::class.java) {
@@ -19,7 +19,7 @@ class UserAccountInRepositoryModelAssembler(
                 view.organizationRole,
                 view.organizationBasePermissions,
                 view.directPermissions,
-                permissionService.computeRepositoryPermissionType(view.organizationRole, view.organizationBasePermissions, view.directPermissions)!!
+                permissionService.computeProjectPermissionType(view.organizationRole, view.organizationBasePermissions, view.directPermissions)!!
         )
     }
 }

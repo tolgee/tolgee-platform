@@ -36,8 +36,8 @@ class ProjectPermissionFilter(
             val anyPermissionAnnotation = getAnyPermissionAnnotation(request)
 
             if (specificPermissionAnnotation != null && anyPermissionAnnotation != null) {
-                throw Exception("Cannot use both AccessWithRepositoryPermission" +
-                        " and AccessWithAnyRepositoryPermission annotations.")
+                throw Exception("Cannot use both AccessWithProjectPermission" +
+                        " and AccessWithAnyProjectPermission annotations.")
             }
 
             try {
@@ -45,11 +45,11 @@ class ProjectPermissionFilter(
                 projectHolder.project = projectService.get(projectId).orElseThrow { NotFoundException() }!!
 
                 if (specificPermissionAnnotation != null) {
-                    securityService.checkRepositoryPermission(projectId, specificPermissionAnnotation.permission)
+                    securityService.checkProjectPermission(projectId, specificPermissionAnnotation.permission)
                 }
 
                 if (anyPermissionAnnotation != null) {
-                    securityService.checkRepositoryPermission(projectId, Permission.ProjectPermissionType.VIEW)
+                    securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.VIEW)
                 }
             } catch (e: Exception) {
                 resolver.resolveException(request, response, null, e)
@@ -68,8 +68,8 @@ class ProjectPermissionFilter(
         return handlerMethod?.getMethodAnnotation(AccessWithProjectPermission::class.java)
     }
 
-    private fun getAnyPermissionAnnotation(request: HttpServletRequest): AccessWithAnyRepositoryPermission? {
+    private fun getAnyPermissionAnnotation(request: HttpServletRequest): AccessWithAnyProjectPermission? {
         val handlerMethod = (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
-        return handlerMethod?.getMethodAnnotation(AccessWithAnyRepositoryPermission::class.java)
+        return handlerMethod?.getMethodAnnotation(AccessWithAnyProjectPermission::class.java)
     }
 }

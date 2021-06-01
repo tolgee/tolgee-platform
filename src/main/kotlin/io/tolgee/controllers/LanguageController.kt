@@ -41,7 +41,7 @@ open class LanguageController(
     fun createLanguage(@PathVariable("projectId") projectId: Long,
                        @RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
         val project = projectService.get(projectId).orElseThrow { NotFoundException() }
-        securityService.checkRepositoryPermission(projectId, Permission.ProjectPermissionType.MANAGE)
+        securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.MANAGE)
         languageValidator.validateCreate(dto, project)
         val language = languageService.createLanguage(dto, project!!)
         return LanguageDTO.fromEntity(language)
@@ -52,16 +52,16 @@ open class LanguageController(
     fun editLanguage(@RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
         languageValidator.validateEdit(dto)
         val language = languageService.findById(dto!!.id!!).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-        securityService.checkRepositoryPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
+        securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
         return LanguageDTO.fromEntity(languageService.editLanguage(dto))
     }
 
     @GetMapping(value = [""])
     @AccessWithApiKey
     @Operation(summary = "Returns all project languages", tags = ["API KEY", "Languages"])
-    fun getAll(@PathVariable("projectId") pathRepositoryId: Long?): Set<LanguageDTO> {
-        val projectId = if (pathRepositoryId === null) authenticationFacade.apiKey.project!!.id else pathRepositoryId
-        securityService.checkAnyRepositoryPermission(projectId)
+    fun getAll(@PathVariable("projectId") pathProjectId: Long?): Set<LanguageDTO> {
+        val projectId = if (pathProjectId === null) authenticationFacade.apiKey.project!!.id else pathProjectId
+        securityService.checkAnyProjectPermission(projectId)
         return languageService.findAll(projectId).stream().map { LanguageDTO.fromEntity(it) }
                 .collect(Collectors.toCollection { LinkedHashSet() })
     }
@@ -70,7 +70,7 @@ open class LanguageController(
     @Operation(summary = "Returns specific language")
     operator fun get(@PathVariable("id") id: Long?): LanguageDTO {
         val language = languageService.findById(id!!).orElseThrow { NotFoundException() }
-        securityService.checkAnyRepositoryPermission(language.project!!.id)
+        securityService.checkAnyProjectPermission(language.project!!.id)
         return LanguageDTO.fromEntity(language)
     }
 
@@ -78,7 +78,7 @@ open class LanguageController(
     @DeleteMapping(value = ["/{id}"])
     fun deleteLanguage(@PathVariable id: Long) {
         val language = languageService.findById(id).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-        securityService.checkRepositoryPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
+        securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
         languageService.deleteLanguage(id)
     }
 }

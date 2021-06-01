@@ -28,7 +28,7 @@ class ProjectModelAssembler(
                 organizationRole = view.organizationRole,
                 userOwner = view.userOwner?.let { userAccountModelAssembler.toModel(it) },
                 directPermissions = view.directPermissions,
-                computedPermissions = permissionService.computeRepositoryPermissionType(
+                computedPermissions = permissionService.computeProjectPermissionType(
                         view.organizationRole, view.organizationBasePermissions, view.directPermissions
                 )
         ).add(link).also { model ->

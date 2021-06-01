@@ -19,7 +19,7 @@ import org.springframework.web.method.HandlerMethod
 class OpenApiConfiguration {
 
     companion object {
-        private const val REPOSITORY_ID_PARAMETER = "projectId"
+        private const val PROJECT_ID_PARAMETER = "projectId"
     }
 
     @Bean
@@ -68,11 +68,11 @@ class OpenApiConfiguration {
                                     ?.getMethodAnnotation(AccessWithApiKey::class.java)
 
                             if (annotation != null) {
-                                val containsRepositoryIdParam = pathEntry.key
-                                        .contains("{${REPOSITORY_ID_PARAMETER}}")
-                                if (!pathEntry.key.startsWith("/api/project/{${REPOSITORY_ID_PARAMETER}}")) {
-                                    if (!containsRepositoryIdParam) {
-                                        operation.parameters.removeIf { it.name == REPOSITORY_ID_PARAMETER }
+                                val containsProjectIdParam = pathEntry.key
+                                        .contains("{${PROJECT_ID_PARAMETER}}")
+                                if (!pathEntry.key.startsWith("/api/project/{${PROJECT_ID_PARAMETER}}")) {
+                                    if (!containsProjectIdParam) {
+                                        operation.parameters.removeIf { it.name == PROJECT_ID_PARAMETER }
                                     }
                                     operations.add(operation)
                                 }
@@ -172,8 +172,8 @@ class OpenApiConfiguration {
                         val newPathItem = PathItem()
                         val oldPathItem = pathEntry.value
                         oldPathItem.readOperations().forEach { operation ->
-                            val isParameterConsumed = operation?.parameters?.any { it.name == REPOSITORY_ID_PARAMETER } == true
-                            val pathContainsParam = pathEntry.key.contains("{${REPOSITORY_ID_PARAMETER}}")
+                            val isParameterConsumed = operation?.parameters?.any { it.name == PROJECT_ID_PARAMETER } == true
+                            val pathContainsParam = pathEntry.key.contains("{${PROJECT_ID_PARAMETER}}")
                             val parameterIsMissingAtAll = !pathContainsParam && !isParameterConsumed
 
                             if (pathContainsParam || parameterIsMissingAtAll) {
@@ -182,7 +182,7 @@ class OpenApiConfiguration {
 
                             if (!isParameterConsumed && pathContainsParam) {
                                 val param = Parameter().apply {
-                                    name(REPOSITORY_ID_PARAMETER)
+                                    name(PROJECT_ID_PARAMETER)
                                     `in` = "path"
                                     required = true
                                     allowEmptyValue = false
@@ -208,7 +208,7 @@ class OpenApiConfiguration {
                     }
                     openApi.paths = newPaths
                 }
-                .pathsToExclude(*apiPaths.toTypedArray(), "/api/project/{${REPOSITORY_ID_PARAMETER}}/sources/**")
+                .pathsToExclude(*apiPaths.toTypedArray(), "/api/project/{${PROJECT_ID_PARAMETER}}/sources/**")
                 .build()
     }
 }

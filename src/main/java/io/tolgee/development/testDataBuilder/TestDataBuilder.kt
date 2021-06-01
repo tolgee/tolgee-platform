@@ -6,7 +6,7 @@ import io.tolgee.model.UserAccount
 class TestDataBuilder {
     class DATA {
         val userAccounts = mutableListOf<DataBuilders.UserAccountBuilder>()
-        val repositories = mutableListOf<DataBuilders.RepositoryBuilder>()
+        val repositories = mutableListOf<DataBuilders.ProjectBuilder>()
         val organizations = mutableListOf<DataBuilders.OrganizationBuilder>()
     }
 
@@ -19,10 +19,10 @@ class TestDataBuilder {
         return builder
     }
 
-    fun addRepository(userOwner: UserAccount? = null,
+    fun addProject(userOwner: UserAccount? = null,
                       organizationOwner: Organization? = null,
-                      ft: DataBuilders.RepositoryBuilder.() -> Unit): DataBuilders.RepositoryBuilder {
-        val project = DataBuilders.RepositoryBuilder(userOwner, organizationOwner, testDataBuilder = this)
+                      ft: DataBuilders.ProjectBuilder.() -> Unit): DataBuilders.ProjectBuilder {
+        val project = DataBuilders.ProjectBuilder(userOwner, organizationOwner, testDataBuilder = this)
         data.repositories.add(project)
         ft(project)
         return project

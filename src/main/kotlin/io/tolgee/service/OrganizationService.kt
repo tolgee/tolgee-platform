@@ -21,7 +21,7 @@ import javax.persistence.EntityManager
 
 @Service
 @Transactional
-open class OrganizationService(
+class OrganizationService(
         private val organizationRepository: OrganizationRepository,
         private val authenticationFacade: AuthenticationFacade,
         private val addressPartGenerator: AddressPartGenerator,
@@ -32,12 +32,12 @@ open class OrganizationService(
 ) {
 
     @Transactional
-    open fun create(createDto: OrganizationDto): Organization {
+    fun create(createDto: OrganizationDto): Organization {
         return this.create(createDto, authenticationFacade.userAccount)
     }
 
     @Transactional
-    open fun create(createDto: OrganizationDto, userAccount: UserAccount): Organization {
+    fun create(createDto: OrganizationDto, userAccount: UserAccount): Organization {
         if (createDto.addressPart != null && !validateAddressPartUniqueness(createDto.addressPart!!)) {
             throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
         }
@@ -59,7 +59,7 @@ open class OrganizationService(
         }
     }
 
-    open fun findPermittedPaged(pageable: Pageable, requestParamsDto: OrganizationRequestParamsDto): Page<OrganizationView> {
+    fun findPermittedPaged(pageable: Pageable, requestParamsDto: OrganizationRequestParamsDto): Page<OrganizationView> {
         if (requestParamsDto.filterCurrentUserOwner) {
             return organizationRepository.findAllPermitted(authenticationFacade.userAccount.id, pageable, OrganizationRoleType.OWNER)
         }
@@ -67,15 +67,15 @@ open class OrganizationService(
     }
 
 
-    open fun get(id: Long): Organization? {
+    fun get(id: Long): Organization? {
         return organizationRepository.findByIdOrNull(id)
     }
 
-    open fun get(addressPart: String): Organization? {
+    fun get(addressPart: String): Organization? {
         return organizationRepository.getOneByAddressPart(addressPart)
     }
 
-    open fun edit(id: Long, editDto: OrganizationDto): OrganizationView {
+    fun edit(id: Long, editDto: OrganizationDto): OrganizationView {
         val organization = this.get(id) ?: throw NotFoundException()
 
         if (editDto.addressPart == null) {
@@ -95,11 +95,11 @@ open class OrganizationService(
     }
 
     @Transactional
-    open fun delete(id: Long) {
+    fun delete(id: Long) {
         val organization = this.get(id) ?: throw NotFoundException()
 
         projectService.findAllInOrganization(id).forEach {
-            projectService.deleteRepository(it.id)
+            projectService.deleteProject(it.id)
         }
 
         invitationService.getForOrganization(organization).forEach { invitation ->
@@ -116,15 +116,15 @@ open class OrganizationService(
      * Checks address part uniqueness
      * @return Returns true if valid
      */
-    open fun validateAddressPartUniqueness(addressPart: String): Boolean {
+    fun validateAddressPartUniqueness(addressPart: String): Boolean {
         return organizationRepository.countAllByAddressPart(addressPart) < 1
     }
 
-    open fun isThereAnotherOwner(id: Long): Boolean {
+    fun isThereAnotherOwner(id: Long): Boolean {
         return organizationRoleService.isAnotherOwnerInOrganization(id)
     }
 
-    open fun generateAddressPart(name: String, oldAddressPart: String? = null): String {
+    fun generateAddressPart(name: String, oldAddressPart: String? = null): String {
         return addressPartGenerator.generate(name, 3, 60) {
             if (it == oldAddressPart) {
                 return@generate true
@@ -133,7 +133,7 @@ open class OrganizationService(
         }
     }
 
-    open fun deleteAllByName(name: String) {
+    fun deleteAllByName(name: String) {
         organizationRepository.findAllByName(name).forEach {
             this.delete(it.id!!)
         }

@@ -1,9 +1,9 @@
 package io.tolgee.service
 
-import io.tolgee.dtos.request.CreateRepositoryDTO
-import io.tolgee.dtos.request.EditRepositoryDTO
-import io.tolgee.dtos.response.RepositoryDTO
-import io.tolgee.dtos.response.RepositoryDTO.Companion.fromEntityAndPermission
+import io.tolgee.dtos.request.CreateProjectDTO
+import io.tolgee.dtos.request.EditProjectDTO
+import io.tolgee.dtos.response.ProjectDTO
+import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.*
 import io.tolgee.model.views.ProjectView
@@ -60,7 +60,7 @@ class ProjectService constructor(
     }
 
     @Transactional
-    fun createRepository(dto: CreateRepositoryDTO): Project {
+    fun createProject(dto: CreateProjectDTO): Project {
         val project = Project()
         project.name = dto.name
         dto.organizationId?.also {
@@ -84,7 +84,7 @@ class ProjectService constructor(
     }
 
     @Transactional
-    fun editRepository(dto: EditRepositoryDTO): Project {
+    fun editProject(dto: EditProjectDTO): Project {
         val project = projectRepository.findById(dto.projectId!!)
                 .orElseThrow { NotFoundException() }!!
         project.name = dto.name
@@ -92,19 +92,19 @@ class ProjectService constructor(
         return project
     }
 
-    fun findAllPermitted(userAccount: UserAccount): List<RepositoryDTO> {
+    fun findAllPermitted(userAccount: UserAccount): List<ProjectDTO> {
         return projectRepository.findAllPermitted(userAccount.id!!).asSequence()
                 .map { result ->
                     val project = result[0] as Project
                     val permission = result[1] as Permission?
                     val organization = result[2] as Organization?
                     val organizationRole = result[3] as OrganizationRole?
-                    val permissionType = permissionService.computeRepositoryPermissionType(
+                    val permissionType = permissionService.computeProjectPermissionType(
                             organizationRole?.type,
                             organization?.basePermissions,
                             permission?.type
                     )
-                            ?: throw IllegalStateException("Repository project should not" +
+                            ?: throw IllegalStateException("Project project should not" +
                                     " return project with no permission for provided user")
 
                     fromEntityAndPermission(project, permissionType)
@@ -123,23 +123,23 @@ class ProjectService constructor(
     }
 
     @Transactional
-    fun deleteRepository(id: Long) {
+    fun deleteProject(id: Long) {
         val project = get(id).orElseThrow { NotFoundException() }!!
-        importService.getAllByRepository(id).forEach {
+        importService.getAllByProject(id).forEach {
             importService.deleteImport(it)
         }
-        permissionService.deleteAllByRepository(project.id)
-        translationService.deleteAllByRepository(project.id)
-        screenshotService.deleteAllByRepository(project.id)
-        keyService.deleteAllByRepository(project.id)
-        apiKeyService.deleteAllByRepository(project.id)
-        languageService.deleteAllByRepository(project.id)
+        permissionService.deleteAllByProject(project.id)
+        translationService.deleteAllByProject(project.id)
+        screenshotService.deleteAllByProject(project.id)
+        keyService.deleteAllByProject(project.id)
+        apiKeyService.deleteAllByProject(project.id)
+        languageService.deleteAllByProject(project.id)
         projectRepository.delete(project)
     }
 
     fun deleteAllByName(name: String) {
         projectRepository.findAllByName(name).forEach {
-            this.deleteRepository(it.id)
+            this.deleteProject(it.id)
         }
     }
 

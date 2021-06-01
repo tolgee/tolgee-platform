@@ -64,7 +64,7 @@ open class InvitationService @Autowired constructor(
         }
 
         permission?.let {
-            if (permissionService.findOneByRepositoryIdAndUserId(permission.project!!.id, userAccount.id!!) != null) {
+            if (permissionService.findOneByProjectIdAndUserId(permission.project!!.id, userAccount.id!!) != null) {
                 throw BadRequestException(Message.USER_ALREADY_HAS_PERMISSIONS)
             }
             permissionService.acceptInvitation(permission, userAccount)
@@ -94,7 +94,7 @@ open class InvitationService @Autowired constructor(
         return invitationRepository.findById(id) as Optional<Invitation>
     }
 
-    open fun getForRepository(project: Project): Set<Invitation> {
+    open fun getForProject(project: Project): Set<Invitation> {
         return invitationRepository.findAllByPermissionProjectOrderByCreatedAt(project)
     }
 

@@ -232,7 +232,7 @@ class ImportService(
         this.importFileIssueRepository.saveAll(issues)
     }
 
-    fun getAllByRepository(projectId: Long) =
+    fun getAllByProject(projectId: Long) =
             this.importRepository.findAllByProjectId(projectId)
 
     fun saveAllFileIssueParams(params: List<ImportFileIssueParam>): MutableList<ImportFileIssueParam> =

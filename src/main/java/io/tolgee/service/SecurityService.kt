@@ -25,12 +25,12 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
         permissionService.grantFullAccessToRepo(activeUser, project)
     }
 
-    fun checkAnyRepositoryPermission(projectId: Long): ProjectPermissionType {
-        return getRepositoryPermission(projectId) ?: throw PermissionException()
+    fun checkAnyProjectPermission(projectId: Long): ProjectPermissionType {
+        return getProjectPermission(projectId) ?: throw PermissionException()
     }
 
-    fun checkRepositoryPermission(projectId: Long, requiredPermission: ProjectPermissionType): ProjectPermissionType {
-        val usersPermission = checkAnyRepositoryPermission(projectId)
+    fun checkProjectPermission(projectId: Long, requiredPermission: ProjectPermissionType): ProjectPermissionType {
+        val usersPermission = checkAnyProjectPermission(projectId)
         if (requiredPermission.power > usersPermission.power) {
             throw PermissionException()
         }
@@ -50,8 +50,8 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
         }
     }
 
-    private fun getRepositoryPermission(projectId: Long): ProjectPermissionType? {
-        return permissionService.getRepositoryPermissionType(projectId, activeUser)
+    private fun getProjectPermission(projectId: Long): ProjectPermissionType? {
+        return permissionService.getProjectPermissionType(projectId, activeUser)
     }
 
     private val activeUser: UserAccount

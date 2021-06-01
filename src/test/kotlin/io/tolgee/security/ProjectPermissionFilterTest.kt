@@ -27,7 +27,7 @@ class ProjectPermissionFilterTest : SignedInControllerTest() {
         val base = dbPopulator.createBase(generateUniqueString())
         performAuthGet("/api/project/${base.id}/translations/en")
                 .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-        assertThat(projectHolder.isRepositoryInitialized).isFalse
+        assertThat(projectHolder.isProjectInitialized).isFalse
     }
 
 
@@ -39,7 +39,7 @@ class ProjectPermissionFilterTest : SignedInControllerTest() {
     }
 
     @Test
-    fun returnsNotFoundWhenRepositoryNotExist() {
+    fun returnsNotFoundWhenProjectNotExist() {
         val user = dbPopulator.createUserIfNotExists("newUser")
         performAuthGet("/api/project/${user.id}/translations/en")
                 .andExpect(MockMvcResultMatchers.status().isNotFound).andReturn()

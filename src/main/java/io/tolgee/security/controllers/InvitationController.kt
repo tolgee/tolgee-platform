@@ -35,10 +35,10 @@ open class InvitationController @Autowired constructor(
 
     @GetMapping("/list/{projectId}")
     @Operation(summary = "Prints all invitations to project")
-    open fun getRepositoryInvitations(@PathVariable("projectId") id: Long): Set<InvitationDTO> {
+    open fun getProjectInvitations(@PathVariable("projectId") id: Long): Set<InvitationDTO> {
         val repository = projectService.get(id).orElseThrow { NotFoundException() }!!
-        securityService.checkRepositoryPermission(id, Permission.ProjectPermissionType.MANAGE)
-        return invitationService.getForRepository(repository).stream().map { invitation: Invitation? ->
+        securityService.checkProjectPermission(id, Permission.ProjectPermissionType.MANAGE)
+        return invitationService.getForProject(repository).stream().map { invitation: Invitation? ->
             InvitationDTO.fromEntity(invitation)
         }.collect(Collectors.toCollection { LinkedHashSet() })
     }
@@ -50,7 +50,7 @@ open class InvitationController @Autowired constructor(
             NotFoundException()
         }
         invitation.permission?.let {
-            securityService.checkRepositoryPermission(invitation.permission!!.project!!.id,
+            securityService.checkProjectPermission(invitation.permission!!.project!!.id,
                     Permission.ProjectPermissionType.MANAGE)
         }
 

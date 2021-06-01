@@ -119,8 +119,8 @@ class KeyService(
         keyRepository.deleteAllByIdIn(ids)
     }
 
-    fun deleteAllByRepository(projectId: Long) {
-        keyMetaService.deleteAllByRepositoryId(projectId)
+    fun deleteAllByProject(projectId: Long) {
+        keyMetaService.deleteAllByProjectId(projectId)
         keyRepository.deleteAllByProjectId(projectId)
     }
 

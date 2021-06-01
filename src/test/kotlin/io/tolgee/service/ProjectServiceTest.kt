@@ -36,7 +36,7 @@ open class ProjectServiceTest : AbstractSpringTest() {
     }
 
     @Test
-    open fun testFindAllSingleRepository() {
+    open fun testFindAllSingleProject() {
         dbPopulator.createUsersAndOrganizations() //create some data
         val repo = dbPopulator.createBase("Hello world", generateUniqueString())
         val repositories = projectService.findAllPermitted(repo.userOwner!!)

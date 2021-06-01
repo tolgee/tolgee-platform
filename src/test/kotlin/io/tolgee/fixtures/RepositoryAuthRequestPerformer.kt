@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.ResultActions
 
 
-abstract class RepositoryAuthRequestPerformer(userAccount: UserAccount) : SignedInRequestPerformer() {
+abstract class ProjectAuthRequestPerformer(userAccount: UserAccount) : SignedInRequestPerformer() {
 
     @field:Autowired
     lateinit var dbPopulator: DbPopulatorReal
@@ -20,11 +20,11 @@ abstract class RepositoryAuthRequestPerformer(userAccount: UserAccount) : Signed
     var projectSupplier: (() -> Project)? = null
 
     companion object {
-        const val API_REPOSITORY_URL_PREFIX = "/api/project/"
+        const val API_PROJECT_URL_PREFIX = "/api/project/"
     }
 
-    abstract fun performRepositoryAuthPut(url: String, content: Any?): ResultActions
-    abstract fun performRepositoryAuthPost(url: String, content: Any?): ResultActions
-    abstract fun performRepositoryAuthGet(url: String): ResultActions
-    abstract fun performRepositoryAuthDelete(url: String, content: Any?): ResultActions
+    abstract fun performProjectAuthPut(url: String, content: Any?): ResultActions
+    abstract fun performProjectAuthPost(url: String, content: Any?): ResultActions
+    abstract fun performProjectAuthGet(url: String): ResultActions
+    abstract fun performProjectAuthDelete(url: String, content: Any?): ResultActions
 }

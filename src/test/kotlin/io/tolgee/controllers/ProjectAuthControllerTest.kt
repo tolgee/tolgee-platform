@@ -4,9 +4,9 @@ import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.fixtures.AuthRequestPerformer
-import io.tolgee.fixtures.RepositoryApiKeyAuthRequestPerformer
-import io.tolgee.fixtures.RepositoryAuthRequestPerformer
-import io.tolgee.fixtures.RepositoryJwtAuthRequestPerformer
+import io.tolgee.fixtures.ProjectApiKeyAuthRequestPerformer
+import io.tolgee.fixtures.ProjectAuthRequestPerformer
+import io.tolgee.fixtures.ProjectJwtAuthRequestPerformer
 import io.tolgee.model.Project
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -23,7 +23,7 @@ abstract class ProjectAuthControllerTest : SignedInControllerTest(), AuthRequest
     val apiKey: ApiKeyDTO
         get() {
             val performer = this.projectAuthRequestPerformer
-            return if (performer is RepositoryApiKeyAuthRequestPerformer)
+            return if (performer is ProjectApiKeyAuthRequestPerformer)
                 performer.apiKey else
                 throw Exception("Method not annotated with ApiKeyAccessTestMethod?")
         }
@@ -37,12 +37,12 @@ abstract class ProjectAuthControllerTest : SignedInControllerTest(), AuthRequest
             this.projectAuthRequestPerformer.projectSupplier = value
         }
 
-    private var _projectAuthRequestPerformer: RepositoryAuthRequestPerformer? = null;
+    private var _projectAuthRequestPerformer: ProjectAuthRequestPerformer? = null;
 
-    private var projectAuthRequestPerformer: RepositoryAuthRequestPerformer
+    private var projectAuthRequestPerformer: ProjectAuthRequestPerformer
         get() {
             return _projectAuthRequestPerformer
-                    ?: throw Exception("Method not annotated with ApiKeyAccessTestMethod nor RepositoryJWTAuthTestMethod?")
+                    ?: throw Exception("Method not annotated with ApiKeyAccessTestMethod nor ProjectJWTAuthTestMethod?")
         }
         set(value) {
             _projectAuthRequestPerformer = value
@@ -53,32 +53,32 @@ abstract class ProjectAuthControllerTest : SignedInControllerTest(), AuthRequest
         with(method.getAnnotation(ProjectApiKeyAuthTestMethod::class.java)) {
             if (this != null) {
                 this@ProjectAuthControllerTest.projectAuthRequestPerformer =
-                        applicationContext!!.getBean(RepositoryApiKeyAuthRequestPerformer::class.java, userAccount, this.scopes)
+                        applicationContext!!.getBean(ProjectApiKeyAuthRequestPerformer::class.java, userAccount, this.scopes)
             }
         }
 
         with(method.getAnnotation(ProjectJWTAuthTestMethod::class.java)) {
             if (this != null) {
                 this@ProjectAuthControllerTest.projectAuthRequestPerformer =
-                        applicationContext!!.getBean(RepositoryJwtAuthRequestPerformer::class.java, userAccount)
+                        applicationContext!!.getBean(ProjectJwtAuthRequestPerformer::class.java, userAccount)
             }
         }
     }
 
-    fun performRepositoryAuthPut(url: String, content: Any?): ResultActions {
-        return projectAuthRequestPerformer.performRepositoryAuthPut(url, content)
+    fun performProjectAuthPut(url: String, content: Any?): ResultActions {
+        return projectAuthRequestPerformer.performProjectAuthPut(url, content)
     }
 
-    fun performRepositoryAuthPost(url: String, content: Any?): ResultActions {
-        return projectAuthRequestPerformer.performRepositoryAuthPost(url, content)
+    fun performProjectAuthPost(url: String, content: Any?): ResultActions {
+        return projectAuthRequestPerformer.performProjectAuthPost(url, content)
     }
 
-    fun performRepositoryAuthGet(url: String): ResultActions {
-        return projectAuthRequestPerformer.performRepositoryAuthGet(url)
+    fun performProjectAuthGet(url: String): ResultActions {
+        return projectAuthRequestPerformer.performProjectAuthGet(url)
     }
 
-    fun performRepositoryAuthDelete(url: String, content: Any?): ResultActions {
-        return projectAuthRequestPerformer.performRepositoryAuthDelete(url, content)
+    fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
+        return projectAuthRequestPerformer.performProjectAuthDelete(url, content)
     }
 
 }

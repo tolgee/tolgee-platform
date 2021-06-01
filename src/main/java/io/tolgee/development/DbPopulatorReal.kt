@@ -77,7 +77,7 @@ class DbPopulatorReal(private val entityManager: EntityManager,
                 }
                 (1..3).forEach { projectNum ->
                     val name = "${user.name}'s organization $organizationNum project $projectNum"
-                    createRepositoryWithOrganization(name, org)
+                    createProjectWithOrganization(name, org)
                 }
             }
         }
@@ -86,7 +86,7 @@ class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     @Transactional
-    fun createRepositoryWithOrganization(projectName: String, organization: Organization): Project {
+    fun createProjectWithOrganization(projectName: String, organization: Organization): Project {
         val project = Project()
         project.name = projectName
         project.organizationOwner = organization

@@ -2,10 +2,10 @@ package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.dtos.request.CreateRepositoryDTO
-import io.tolgee.dtos.request.EditRepositoryDTO
+import io.tolgee.dtos.request.CreateProjectDTO
+import io.tolgee.dtos.request.EditProjectDTO
 import io.tolgee.dtos.request.LanguageDTO
-import io.tolgee.dtos.response.RepositoryDTO
+import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.fixtures.LoggedRequestFactory.loggedDelete
 import io.tolgee.fixtures.LoggedRequestFactory.loggedGet
 import io.tolgee.fixtures.LoggedRequestFactory.loggedPost
@@ -28,7 +28,7 @@ class ProjectControllerTest : SignedInControllerTest() {
     private val languageDTO = LanguageDTO(null, "English", "en")
 
     @Test
-    fun createRepository() {
+    fun createProject() {
         dbPopulator.createBase("test")
         testCreateValidationSizeShort()
         testCreateValidationSizeLong()
@@ -36,19 +36,19 @@ class ProjectControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    fun createRepositoryOrganization() {
+    fun createProjectOrganization() {
         val userAccount = dbPopulator.createUserIfNotExists("testuser")
         val organization = dbPopulator.createOrganization("Test Organization", userAccount)
         logAsUser("testuser", initialPasswordManager.initialPassword)
-        val request = CreateRepositoryDTO("aaa", setOf(languageDTO), organizationId = organization.id)
-        val result = performAuthPost("/api/repositories", request).andIsOk.andReturn().mapResponseTo<RepositoryDTO>()
+        val request = CreateProjectDTO("aaa", setOf(languageDTO), organizationId = organization.id)
+        val result = performAuthPost("/api/repositories", request).andIsOk.andReturn().mapResponseTo<ProjectDTO>()
         projectService.get(result.id!!).get().let {
             assertThat(it.organizationOwner?.id).isEqualTo(organization.id)
         }
     }
 
     private fun testCreateCorrectRequest() {
-        val request = CreateRepositoryDTO("aaa", setOf(languageDTO))
+        val request = CreateProjectDTO("aaa", setOf(languageDTO))
         val mvcResult = mvc.perform(
                 loggedPost("/api/repositories")
                         .contentType(MediaType.APPLICATION_JSON).content(
@@ -66,13 +66,13 @@ class ProjectControllerTest : SignedInControllerTest() {
     }
 
     private fun testCreateValidationSizeShort() {
-        val request = CreateRepositoryDTO("aa", setOf(languageDTO))
+        val request = CreateProjectDTO("aa", setOf(languageDTO))
         val mvcResult = performAuthPost("/api/repositories", request).andIsBadRequest.andReturn()
         assertThat(mvcResult).error().isStandardValidation
     }
 
     private fun testCreateValidationSizeLong() {
-        val request = CreateRepositoryDTO(
+        val request = CreateProjectDTO(
                 "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
                 setOf(languageDTO)
         )
@@ -81,20 +81,20 @@ class ProjectControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    fun editRepository() {
+    fun editProject() {
         val test = dbPopulator.createBase(generateUniqueString())
         testEditCorrectRequest(test)
     }
 
     private fun testEditCorrectRequest(test: Project) {
-        val request = EditRepositoryDTO(test.id, "new test")
+        val request = EditProjectDTO(test.id, "new test")
         val mvcResult = mvc.perform(
                 loggedPost("/api/repositories/edit")
                         .contentType(MediaType.APPLICATION_JSON).content(
                                 JsonHelper.asJsonString(request)))
                 .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
         val mapper = ObjectMapper()
-        val response = mapper.readValue(mvcResult.response.contentAsString, RepositoryDTO::class.java)
+        val response = mapper.readValue(mvcResult.response.contentAsString, ProjectDTO::class.java)
         Assertions.assertThat(response.name).isEqualTo("new test")
         Assertions.assertThat(response.id).isEqualTo(test.id)
         val found = projectService.findAllPermitted(userAccount!!).find { it.name == "new test" }
@@ -102,7 +102,7 @@ class ProjectControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    fun deleteRepository() {
+    fun deleteProject() {
         val base = dbPopulator.createBase(generateUniqueString())
         mvc.perform(
                 loggedDelete("/api/repositories/${base.id}")
@@ -124,7 +124,7 @@ class ProjectControllerTest : SignedInControllerTest() {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn()
-        val set: Set<RepositoryDTO> = mvcResult.mapResponseTo()
+        val set: Set<ProjectDTO> = mvcResult.mapResponseTo()
         Assertions.assertThat(set).extracting("name").containsAll(repos)
     }
 }

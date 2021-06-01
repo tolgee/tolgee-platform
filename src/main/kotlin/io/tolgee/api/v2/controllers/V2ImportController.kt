@@ -147,7 +147,7 @@ class V2ImportController(
             @PathVariable("languageId") languageId: Long,
             @PathVariable("projectId") projectId: Long,
     ): ImportLanguageModel {
-        checkImportLanguageInRepository(languageId)
+        checkImportLanguageInProject(languageId)
         val language = importService.findLanguageView(languageId) ?: throw NotFoundException()
         return importLanguageModelAssembler.toModel(language)
     }
@@ -167,7 +167,7 @@ class V2ImportController(
             @RequestParam("search") search: String? = null,
             pageable: Pageable
     ): PagedModel<ImportTranslationModel> {
-        checkImportLanguageInRepository(languageId)
+        checkImportLanguageInProject(languageId)
         val translations = importService.getTranslationsView(languageId, pageable, onlyConflicts, onlyUnresolved, search)
         return pagedTranslationsResourcesAssembler.toModel(translations, importTranslationModelAssembler)
     }
@@ -181,7 +181,7 @@ class V2ImportController(
     @DeleteMapping("/result/languages/{languageId}")
     @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun deleteLanguage(@PathVariable("languageId") languageId: Long) {
-        val language = checkImportLanguageInRepository(languageId)
+        val language = checkImportLanguageInProject(languageId)
         this.importService.deleteLanguage(language)
     }
 
@@ -224,8 +224,8 @@ class V2ImportController(
             @PathVariable("importLanguageId") importLanguageId: Long,
             @PathVariable("existingLanguageId") existingLanguageId: Long,
     ) {
-        val existingLanguage = checkLanguageFromRepository(existingLanguageId)
-        val importLanguage = checkImportLanguageInRepository(importLanguageId)
+        val existingLanguage = checkLanguageFromProject(existingLanguageId)
+        val importLanguage = checkImportLanguageInProject(importLanguageId)
         this.importService.selectExistingLanguage(importLanguage, existingLanguage)
     }
 
@@ -234,7 +234,7 @@ class V2ImportController(
     fun resetExistingLanguage(
             @PathVariable("importLanguageId") importLanguageId: Long,
     ) {
-        val importLanguage = checkImportLanguageInRepository(importLanguageId)
+        val importLanguage = checkImportLanguageInProject(importLanguageId)
         this.importService.selectExistingLanguage(importLanguage, null)
     }
 
@@ -244,43 +244,43 @@ class V2ImportController(
             @PathVariable("importFileId") importFileId: Long,
             pageable: Pageable
     ): PagedModel<EntityModel<ImportFileIssueView>> {
-        checkFileFromRepository(importFileId)
+        checkFileFromProject(importFileId)
         val page = importService.getFileIssues(importFileId, pageable)
         return pagedImportFileIssueResourcesAssembler.toModel(page)
     }
 
     private fun resolveAllOfLanguage(languageId: Long, override: Boolean) {
-        val language = checkImportLanguageInRepository(languageId)
+        val language = checkImportLanguageInProject(languageId)
         importService.resolveAllOfLanguage(language, override)
     }
 
     private fun resolveTranslation(languageId: Long, translationId: Long, override: Boolean) {
-        checkImportLanguageInRepository(languageId)
+        checkImportLanguageInProject(languageId)
         val translation = checkTranslationOfLanguage(translationId, languageId)
         return importService.resolveTranslationConflict(translation, override)
     }
 
-    private fun checkFileFromRepository(fileId: Long): ImportFile {
+    private fun checkFileFromProject(fileId: Long): ImportFile {
         val file = importService.findFile(fileId) ?: throw NotFoundException()
         if (file.import.project.id != projectHolder.project.id) {
-            throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
+            throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_PROJECT)
         }
         return file
     }
 
-    private fun checkLanguageFromRepository(languageId: Long): Language {
+    private fun checkLanguageFromProject(languageId: Long): Language {
         val existingLanguage = languageService.findById(languageId).orElse(null) ?: throw NotFoundException()
         if (existingLanguage.project!!.id != projectHolder.project.id) {
-            throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
+            throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_PROJECT)
         }
         return existingLanguage
     }
 
-    private fun checkImportLanguageInRepository(languageId: Long): ImportLanguage {
+    private fun checkImportLanguageInProject(languageId: Long): ImportLanguage {
         val language = importService.findLanguage(languageId) ?: throw NotFoundException()
-        val languageRepositoryId = language.file.import.project.id
-        if (languageRepositoryId != projectHolder.project.id) {
-            throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
+        val languageProjectId = language.file.import.project.id
+        if (languageProjectId != projectHolder.project.id) {
+            throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_PROJECT)
         }
         return language
     }
@@ -289,7 +289,7 @@ class V2ImportController(
         val translation = importService.findTranslation(translationId) ?: throw NotFoundException()
 
         if (translation.language.id != languageId) {
-            throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
+            throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_PROJECT)
         }
         return translation
     }

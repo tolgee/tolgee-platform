@@ -63,7 +63,7 @@ class LanguageControllerTest : ProjectAuthControllerTest(), ITest {
         val en = test.getLanguage("en").orElseThrow { NotFoundException() }
         performDelete(test.id, en.id!!).andExpect(MockMvcResultMatchers.status().isOk)
         Assertions.assertThat(languageService.findById(en.id!!)).isEmpty
-        projectService.deleteRepository(test.id)
+        projectService.deleteProject(test.id)
     }
 
     @Test
@@ -102,7 +102,7 @@ class LanguageControllerTest : ProjectAuthControllerTest(), ITest {
     @Test
     @ProjectApiKeyAuthTestMethod
     fun findAllLanguagesApiKey() {
-        val contentAsString = performRepositoryAuthGet("languages").andIsOk.andReturn().mapResponseTo<Set<Any>>()
+        val contentAsString = performProjectAuthGet("languages").andIsOk.andReturn().mapResponseTo<Set<Any>>()
         assertThat(contentAsString).hasSize(2)
     }
 

@@ -13,7 +13,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.openapi_fixtures.InternalIgnorePaths
 import io.tolgee.security.api_key_auth.AccessWithApiKey
-import io.tolgee.security.project_auth.AccessWithAnyRepositoryPermission
+import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyService
@@ -67,7 +67,7 @@ class KeyController(
     @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
     fun getDeprecated(@PathVariable("id") id: Long?): DeprecatedKeyDto {
         val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-        securityService.checkAnyRepositoryPermission(key.project!!.id)
+        securityService.checkAnyProjectPermission(key.project!!.id)
         return DeprecatedKeyDto(key.name)
     }
 
@@ -75,7 +75,7 @@ class KeyController(
     @Operation(summary = "Deletes key with specified id")
     fun delete(@PathVariable id: Long?) {
         val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-        securityService.checkRepositoryPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
+        securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
         keyService.delete(id)
     }
 
@@ -84,14 +84,14 @@ class KeyController(
     @Operation(summary = "Deletes multiple kdys by their IDs")
     fun delete(@RequestBody ids: Set<Long>?) {
         for (key in keyService.get(ids!!)) {
-            securityService.checkRepositoryPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
+            securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
         }
         keyService.deleteMultiple(ids)
     }
 
     @PostMapping(value = ["/translations/{languages}"])
     @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-    @AccessWithAnyRepositoryPermission
+    @AccessWithAnyProjectPermission
     @Operation(
             summary = "Returns translations for specific key by its name",
             description = "Key name must be provided in method body, since it can be long and can contain characters hard to " +

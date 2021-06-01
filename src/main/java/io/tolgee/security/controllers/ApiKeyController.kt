@@ -40,9 +40,9 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
 
     @GetMapping(path = ["/project/{projectId}"])
     @Operation(summary = "Returns all API keys for project")
-    fun allByRepository(@PathVariable("projectId") repositoryId: Long?): Set<ApiKeyDTO> {
-        securityService.checkRepositoryPermission(repositoryId!!, ProjectPermissionType.MANAGE)
-        return apiKeyService.getAllByRepository(repositoryId).stream()
+    fun allByProject(@PathVariable("projectId") repositoryId: Long?): Set<ApiKeyDTO> {
+        securityService.checkProjectPermission(repositoryId!!, ProjectPermissionType.MANAGE)
+        return apiKeyService.getAllByProject(repositoryId).stream()
                 .map { apiKey: ApiKey? -> ApiKeyDTO.fromEntity(apiKey) }
                 .collect(Collectors.toCollection { LinkedHashSet() })
     }
@@ -51,7 +51,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
     @Operation(summary = "Creates new API key with provided scopes")
     fun create(@RequestBody @Valid createApiKeyDTO: CreateApiKeyDTO?): ApiKeyDTO {
         val repository = projectService.get(createApiKeyDTO!!.projectId!!)
-                .orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
+                .orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }
         securityService.checkApiKeyScopes(createApiKeyDTO.scopes!!, repository)
         return apiKeyService.createApiKey(authenticationFacade.userAccount, createApiKeyDTO.scopes!!, repository)
     }
@@ -70,7 +70,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
     fun delete(@PathVariable("key") key: String?) {
         val apiKey = apiKeyService.getApiKey(key).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
         try {
-            securityService.checkRepositoryPermission(apiKey.project!!.id, ProjectPermissionType.MANAGE)
+            securityService.checkProjectPermission(apiKey.project!!.id, ProjectPermissionType.MANAGE)
         } catch (e: PermissionException) {
             //user can delete their own api keys
             if (apiKey.userAccount!!.id != authenticationFacade.userAccount.id) {

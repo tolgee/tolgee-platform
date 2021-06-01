@@ -145,7 +145,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
         currentMap[translation.key!!.path.name] = translation.text
     }
 
-    fun deleteAllByRepository(projectId: Long) {
+    fun deleteAllByProject(projectId: Long) {
         translationRepository.deleteAllByProjectId(projectId)
     }
 

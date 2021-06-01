@@ -34,7 +34,7 @@ open class AddressPartController(
 
     @GetMapping("/validate-project/{addressPart}")
     @Operation(summary = "Validate project address part")
-    open fun validateRepositoryAddressPart(
+    open fun validateProjectAddressPart(
             @PathVariable("addressPart") addressPart: String
     ): Boolean {
         return projectService.validateAddressPartUniqueness(addressPart)
@@ -51,7 +51,7 @@ open class AddressPartController(
 
     @PostMapping("/generate-project", produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(summary = "Generate project address part")
-    open fun generateRepositoryAddressPart(
+    open fun generateProjectAddressPart(
             @RequestBody @Valid dto: GenerateAddressPathDto
     ): String {
         return """"${projectService.generateAddressPart(dto.name!!, dto.oldAddressPart)}""""

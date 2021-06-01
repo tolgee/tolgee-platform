@@ -116,7 +116,7 @@ class TranslationControllerTest()
     fun setTranslationsWithApiKey() {
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 
-        performRepositoryAuthPost("translations", SetTranslationsDTO("hello",
+        performProjectAuthPost("translations", SetTranslationsDTO("hello",
                 translationsMap
         )).andExpect(status().isOk)
 
@@ -134,7 +134,7 @@ class TranslationControllerTest()
     fun setTranslationsWithApiKeyForbidden() {
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 
-        performRepositoryAuthPost("translations", SetTranslationsDTO("hello",
+        performProjectAuthPost("translations", SetTranslationsDTO("hello",
                 translationsMap
         )).andIsForbidden
     }

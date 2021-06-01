@@ -54,7 +54,7 @@ open class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
 
     @Test
     @Transactional
-    open fun createsRepository() {
+    open fun createsProject() {
         entityManager.refresh(userAccount)
         val found = projectRepository.findAll().asSequence()
                 .flatMap { it!!.permissions.map { it.user } }

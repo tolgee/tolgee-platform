@@ -11,12 +11,12 @@ import org.springframework.test.web.servlet.ResultActions
 
 @Component
 @Scope("prototype")
-class RepositoryApiKeyAuthRequestPerformer(
+class ProjectApiKeyAuthRequestPerformer(
         //bean is created manually
         @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val userAccount: UserAccount,
         //bean is created manually
         @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val scopes: Array<ApiScope>,
-) : RepositoryAuthRequestPerformer(userAccount) {
+) : ProjectAuthRequestPerformer(userAccount) {
 
     @field:Autowired
     lateinit var apiKeyService: ApiKeyService
@@ -25,20 +25,20 @@ class RepositoryApiKeyAuthRequestPerformer(
         apiKeyService.createApiKey(userAccount, scopes = this.scopes.toSet(), project)
     }
 
-    override fun performRepositoryAuthPut(url: String, content: Any?): ResultActions {
-        return performPut(API_REPOSITORY_URL_PREFIX + url.withApiKey, content)
+    override fun performProjectAuthPut(url: String, content: Any?): ResultActions {
+        return performPut(API_PROJECT_URL_PREFIX + url.withApiKey, content)
     }
 
-    override fun performRepositoryAuthPost(url: String, content: Any?): ResultActions {
-        return performPost(API_REPOSITORY_URL_PREFIX + url.withApiKey, content)
+    override fun performProjectAuthPost(url: String, content: Any?): ResultActions {
+        return performPost(API_PROJECT_URL_PREFIX + url.withApiKey, content)
     }
 
-    override fun performRepositoryAuthGet(url: String): ResultActions {
-        return performGet(API_REPOSITORY_URL_PREFIX + url.withApiKey)
+    override fun performProjectAuthGet(url: String): ResultActions {
+        return performGet(API_PROJECT_URL_PREFIX + url.withApiKey)
     }
 
-    override fun performRepositoryAuthDelete(url: String, content: Any?): ResultActions {
-        return performDelete(API_REPOSITORY_URL_PREFIX + url.withApiKey, content)
+    override fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
+        return performDelete(API_PROJECT_URL_PREFIX + url.withApiKey, content)
     }
 
     private val String.withApiKey: String

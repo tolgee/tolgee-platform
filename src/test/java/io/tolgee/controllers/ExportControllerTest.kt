@@ -30,7 +30,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
             Assertions.assertThat(fileSizes).containsKey(name)
         })
         //cleanup
-        projectService.deleteRepository(project.id)
+        projectService.deleteProject(project.id)
     }
 
     @Test
@@ -38,7 +38,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     @ProjectApiKeyAuthTestMethod
     fun exportZipJsonWithApiKey() {
         projectSupplier = { dbPopulator.populate(generateUniqueString()).also { commitTransaction() } }
-        val mvcResult = performRepositoryAuthGet("export/jsonZip")
+        val mvcResult = performProjectAuthGet("export/jsonZip")
                 .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
         mvcResult.response
         val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
@@ -47,13 +47,13 @@ class ExportControllerTest : ProjectAuthControllerTest() {
             Assertions.assertThat(fileSizes).containsKey(name)
         })
         //cleanup
-        projectService.deleteRepository(project.id)
+        projectService.deleteProject(project.id)
     }
 
     @Test
     @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT])
     fun exportZipJsonApiKeyPermissionFail() {
-        performRepositoryAuthGet("export/jsonZip").andIsForbidden
+        performProjectAuthGet("export/jsonZip").andIsForbidden
     }
 
     private fun parseZip(responseContent: ByteArray): Map<String, Long> {

@@ -28,11 +28,11 @@ class ImportTestData {
                 name = "Frantisek Dobrota"
             }
         }.self
-        project = addRepository {
+        project = addProject {
             self { name = "test" }
             addPermission {
                 self {
-                    project = this@addRepository.self
+                    project = this@addProject.self
                     user = this@ImportTestData.userAccount
                     type = Permission.ProjectPermissionType.MANAGE
                 }

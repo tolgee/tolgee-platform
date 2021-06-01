@@ -94,7 +94,7 @@ class UserAccountService(
         return userAccountRepository.getAllInOrganization(organizationId, pageable, search = search ?: "")
     }
 
-    fun getAllInRepository(projectId: Long, pageable: Pageable, search: String?): Page<UserAccountInProjectView> {
+    fun getAllInProject(projectId: Long, pageable: Pageable, search: String?): Page<UserAccountInProjectView> {
         return userAccountRepository.getAllInProject(projectId, pageable, search = search)
     }
 

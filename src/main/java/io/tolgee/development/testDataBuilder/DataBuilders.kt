@@ -8,7 +8,7 @@ import io.tolgee.model.key.KeyMeta
 typealias FT<T> = T.() -> Unit
 
 class DataBuilders {
-    class RepositoryBuilder(userOwner: UserAccount? = null,
+    class ProjectBuilder(userOwner: UserAccount? = null,
                             organizationOwner: Organization? = null,
                             val testDataBuilder: TestDataBuilder
     ) : BaseEntityDataBuilder<Project>() {
@@ -51,7 +51,7 @@ class DataBuilders {
     }
 
     class ImportBuilder(
-            val projectBuilder: RepositoryBuilder,
+            val projectBuilder: ProjectBuilder,
             author: UserAccount? = null
     ) : BaseEntityDataBuilder<Import>() {
         class DATA {
@@ -147,7 +147,7 @@ class DataBuilders {
     }
 
     class KeyBuilder(
-            val projectBuilder: RepositoryBuilder
+            val projectBuilder: ProjectBuilder
     ) : EntityDataBuilder<Key> {
 
         class DATA {
@@ -166,7 +166,7 @@ class DataBuilders {
     }
 
     class LanguageBuilder(
-            val projectBuilder: RepositoryBuilder
+            val projectBuilder: ProjectBuilder
     ) : EntityDataBuilder<Language> {
         override var self: Language = Language().apply {
             project = projectBuilder.self
@@ -174,7 +174,7 @@ class DataBuilders {
     }
 
     class TranslationBuilder(
-            val projectBuilder: RepositoryBuilder
+            val projectBuilder: ProjectBuilder
     ) : EntityDataBuilder<Translation> {
         override var self: Translation = Translation().apply { text = "What a text" }
     }
@@ -187,7 +187,7 @@ class DataBuilders {
     }
 
     class PermissionBuilder(
-            val projectBuilder: RepositoryBuilder
+            val projectBuilder: ProjectBuilder
     ) : EntityDataBuilder<Permission> {
         override var self: Permission = Permission()
     }

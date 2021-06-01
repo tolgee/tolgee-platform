@@ -16,7 +16,7 @@ import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
-import io.tolgee.security.project_auth.AccessWithAnyRepositoryPermission
+import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.service.KeyService
 import io.tolgee.service.ProjectService
 import io.tolgee.service.ScreenshotService
@@ -53,7 +53,7 @@ class ScreenshotController(
         }
 
         projectService.get(projectId).orElseThrow { NotFoundException() }
-        securityService.checkRepositoryPermission(projectId, Permission.ProjectPermissionType.TRANSLATE)
+        securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.TRANSLATE)
         val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
         val screenShotEntity = screenshotService.store(screenshot, keyEntity)
         return screenShotEntity.toDTO()
@@ -61,7 +61,7 @@ class ScreenshotController(
 
     @PostMapping("/get")
     @Operation(summary = "Returns all screenshots for specific key")
-    @AccessWithAnyRepositoryPermission
+    @AccessWithAnyProjectPermission
     fun getKeyScreenshots(@PathVariable("projectId") projectId: Long,
                           @RequestBody @Valid dto: GetScreenshotsByKeyDTO): List<ScreenshotDTO> {
         val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(dto.key)).orElseThrow { NotFoundException() }
@@ -73,7 +73,7 @@ class ScreenshotController(
     fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
         val screenshots = screenshotService.findByIdIn(ids)
         screenshots.forEach {
-            securityService.checkRepositoryPermission(
+            securityService.checkProjectPermission(
                     it.key.project!!.id,
                     Permission.ProjectPermissionType.TRANSLATE
             )

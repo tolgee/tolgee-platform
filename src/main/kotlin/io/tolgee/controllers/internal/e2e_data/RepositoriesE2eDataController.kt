@@ -150,7 +150,7 @@ open class RepositoriesE2eDataController(
                 val members: MutableList<String> = mutableListOf(),
         )
 
-        data class RepositoryDataItem(
+        data class ProjectDataItem(
                 val name: String,
                 val organizationOwner: String? = null,
                 val userOwner: String? = null,
@@ -182,7 +182,7 @@ open class RepositoriesE2eDataController(
         )
 
         val repositories = mutableListOf(
-                RepositoryDataItem(
+                ProjectDataItem(
                         name = "Facebook itself",
                         organizationOwner = "facebook",
                         permittedUsers = mutableListOf(
@@ -192,7 +192,7 @@ open class RepositoriesE2eDataController(
                                 )
                         )
                 ),
-                RepositoryDataItem(
+                ProjectDataItem(
                         name = "Microsoft Word",
                         organizationOwner = "microsoft",
                         permittedUsers = mutableListOf(
@@ -202,7 +202,7 @@ open class RepositoriesE2eDataController(
                                 )
                         )
                 ),
-                RepositoryDataItem(
+                ProjectDataItem(
                         name = "Microsoft Excel",
                         organizationOwner = "microsoft",
                         permittedUsers = mutableListOf(
@@ -212,7 +212,7 @@ open class RepositoriesE2eDataController(
                                 )
                         )
                 ),
-                RepositoryDataItem(
+                ProjectDataItem(
                         name = "Microsoft Powerpoint",
                         organizationOwner = "microsoft",
                         permittedUsers = mutableListOf(
@@ -223,7 +223,7 @@ open class RepositoriesE2eDataController(
                         ),
                         keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
                 ),
-                RepositoryDataItem(
+                ProjectDataItem(
                         name = "Microsoft Frontpage",
                         organizationOwner = "microsoft",
                         permittedUsers = mutableListOf(
@@ -233,7 +233,7 @@ open class RepositoriesE2eDataController(
                                 )
                         )
                 ),
-                RepositoryDataItem(
+                ProjectDataItem(
                         name = "Vaclav's cool project",
                         userOwner = "vaclav.novak@fake.com",
                         permittedUsers = mutableListOf(
@@ -243,7 +243,7 @@ open class RepositoriesE2eDataController(
                                 )
                         )
                 ),
-                RepositoryDataItem(
+                ProjectDataItem(
                         name = "Vaclav's funny project",
                         userOwner = "vaclav.novak@fake.com",
                         permittedUsers = mutableListOf(

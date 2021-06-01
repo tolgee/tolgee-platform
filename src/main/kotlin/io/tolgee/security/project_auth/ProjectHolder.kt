@@ -8,6 +8,6 @@ import org.springframework.web.context.annotation.RequestScope
 @RequestScope
 class ProjectHolder {
     lateinit var project: Project
-    val isRepositoryInitialized
+    val isProjectInitialized
         get() = this::project.isInitialized
 }

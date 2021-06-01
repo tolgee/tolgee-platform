@@ -29,7 +29,7 @@ class AddressPartGeneratorTest : AbstractTestNGSpringContextTests() {
     @Test
     fun throwsWhenTooHard() {
         assertThatThrownBy {
-            addressPartGenerator.generate("Hello I am cool Repository name", 3, 50) { false }
+            addressPartGenerator.generate("Hello I am cool Project name", 3, 50) { false }
         }.isInstanceOf(BadRequestException::class.java)
     }
 

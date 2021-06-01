@@ -113,7 +113,7 @@ class ImportE2eDataController(
                     username = "franta"
                     name = "Frantisek Dobrota"
                 }
-                addRepository {
+                addProject {
                     self {
                         userOwner = this@addUserAccount.self
                         name = "Repo"
@@ -122,7 +122,7 @@ class ImportE2eDataController(
                         self {
                             type = Permission.ProjectPermissionType.MANAGE
                             user = this@addUserAccount.self
-                            project = this@addRepository.self
+                            project = this@addProject.self
                         }
                     }
                 }
@@ -141,7 +141,7 @@ class ImportE2eDataController(
         }
         userAccountService.getByUserName("franta").orElse(null)?.let {
             projectService.findAllPermitted(it).forEach { repo ->
-                projectService.deleteRepository(repo.id!!)
+                projectService.deleteProject(repo.id!!)
             }
             userAccountService.delete(it)
         }

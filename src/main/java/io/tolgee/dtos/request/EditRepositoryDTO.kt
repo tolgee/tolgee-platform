@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
-data class EditRepositoryDTO(
+data class EditProjectDTO(
         @field:NotNull
         var projectId: Long? = null,
 

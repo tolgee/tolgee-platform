@@ -42,7 +42,7 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
 
 
     @Test
-    fun getAllInRepository() {
+    fun getAllInProject() {
         val franta = dbPopulatorReal.createUserIfNotExists("franta")
         val usersAndOrganizations = dbPopulatorReal.createUsersAndOrganizations()
         val repo = usersAndOrganizations[0].organizationRoles[0].organization!!.projects[0]
@@ -57,7 +57,7 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
     }
 
     @Test
-    fun getAllInRepositorySearch() {
+    fun getAllInProjectSearch() {
         val franta = dbPopulatorReal.createUserIfNotExists("franta")
         val usersAndOrganizations = dbPopulatorReal.createUsersAndOrganizations()
         val repo = usersAndOrganizations[0].organizationRoles[0].organization!!.projects[0]

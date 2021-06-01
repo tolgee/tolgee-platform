@@ -93,7 +93,7 @@ class LanguageService(
         return languageRepository.findByNameAndProject(name, project)
     }
 
-    fun deleteAllByRepository(projectId: Long?) {
+    fun deleteAllByProject(projectId: Long?) {
         languageRepository.deleteAllByProjectId(projectId)
     }
 

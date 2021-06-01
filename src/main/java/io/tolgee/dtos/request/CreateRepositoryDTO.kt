@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
-data class CreateRepositoryDTO(
+data class CreateProjectDTO(
         @field:NotNull @field:Size(min = 3, max = 50)
         var name: String? = null,
 
