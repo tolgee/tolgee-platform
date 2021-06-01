@@ -111,7 +111,7 @@ class ImportService(
             importFileRepository.save(importFile)
 
     fun find(repositoryId: Long, authorId: Long) =
-            this.importRepository.findByRepositoryIdAndAuthorId(repositoryId, authorId)
+            this.importRepository.findByProjectIdAndAuthorId(repositoryId, authorId)
 
     fun findOrThrow(repositoryId: Long, authorId: Long) =
             this.find(repositoryId, authorId) ?: throw NotFoundException()
@@ -233,7 +233,7 @@ class ImportService(
     }
 
     fun getAllByRepository(repositoryId: Long) =
-            this.importRepository.findAllByRepositoryId(repositoryId)
+            this.importRepository.findAllByProjectId(repositoryId)
 
     fun saveAllFileIssueParams(params: List<ImportFileIssueParam>): MutableList<ImportFileIssueParam> =
             importFileIssueParamRepository.saveAll(params)

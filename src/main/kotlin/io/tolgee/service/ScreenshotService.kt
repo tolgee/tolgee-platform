@@ -61,7 +61,7 @@ open class ScreenshotService(
     }
 
     open fun deleteAllByRepository(repositoryId: Long) {
-        val all = screenshotRepository.getAllByKeyRepositoryId(repositoryId)
+        val all = screenshotRepository.getAllByKeyProjectId(repositoryId)
         all.forEach { this.deleteFile(it) }
         screenshotRepository.deleteInBatch(all)
     }

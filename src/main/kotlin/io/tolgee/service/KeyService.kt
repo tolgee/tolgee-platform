@@ -121,7 +121,7 @@ class KeyService(
 
     fun deleteAllByRepository(repositoryId: Long) {
         keyMetaService.deleteAllByRepositoryId(repositoryId)
-        keyRepository.deleteAllByRepositoryId(repositoryId)
+        keyRepository.deleteAllByProjectId(repositoryId)
     }
 
     @Transactional

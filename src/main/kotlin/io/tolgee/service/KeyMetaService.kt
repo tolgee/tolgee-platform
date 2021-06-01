@@ -102,9 +102,9 @@ class KeyMetaService(
     }
 
     fun deleteAllByRepositoryId(repositoryId: Long) {
-        keyMetaRepository.deleteAllKeyCodeReferencesByRepositoryId(repositoryId)
-        keyMetaRepository.deleteAllKeyCommentsByRepositoryId(repositoryId)
-        keyMetaRepository.deleteAllByRepositoryId(repositoryId)
+        keyMetaRepository.deleteAllKeyCodeReferencesByProjectId(repositoryId)
+        keyMetaRepository.deleteAllKeyCommentsByProjectId(repositoryId)
+        keyMetaRepository.deleteAllByProjectId(repositoryId)
     }
 
     fun save(meta: KeyMeta): KeyMeta = this.keyMetaRepository.save(meta)
