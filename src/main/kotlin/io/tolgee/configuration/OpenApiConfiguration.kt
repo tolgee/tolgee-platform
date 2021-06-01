@@ -19,7 +19,7 @@ import org.springframework.web.method.HandlerMethod
 class OpenApiConfiguration {
 
     companion object {
-        private const val REPOSITORY_ID_PARAMETER = "repositoryId"
+        private const val REPOSITORY_ID_PARAMETER = "projectId"
     }
 
     @Bean
@@ -70,7 +70,7 @@ class OpenApiConfiguration {
                             if (annotation != null) {
                                 val containsRepositoryIdParam = pathEntry.key
                                         .contains("{${REPOSITORY_ID_PARAMETER}}")
-                                if (!pathEntry.key.startsWith("/api/repository/{${REPOSITORY_ID_PARAMETER}}")) {
+                                if (!pathEntry.key.startsWith("/api/project/{${REPOSITORY_ID_PARAMETER}}")) {
                                     if (!containsRepositoryIdParam) {
                                         operation.parameters.removeIf { it.name == REPOSITORY_ID_PARAMETER }
                                     }
@@ -208,7 +208,7 @@ class OpenApiConfiguration {
                     }
                     openApi.paths = newPaths
                 }
-                .pathsToExclude(*apiPaths.toTypedArray(), "/api/repository/{${REPOSITORY_ID_PARAMETER}}/sources/**")
+                .pathsToExclude(*apiPaths.toTypedArray(), "/api/project/{${REPOSITORY_ID_PARAMETER}}/sources/**")
                 .build()
     }
 }

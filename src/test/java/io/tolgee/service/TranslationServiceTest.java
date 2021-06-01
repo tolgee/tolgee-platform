@@ -29,7 +29,7 @@ public class TranslationServiceTest extends AbstractTransactionalTestNGSpringCon
     DbPopulatorReal dbPopulator;
 
     @Autowired
-    RepositoryService repositoryService;
+    ProjectService projectService;
 
     @Test
     @Transactional

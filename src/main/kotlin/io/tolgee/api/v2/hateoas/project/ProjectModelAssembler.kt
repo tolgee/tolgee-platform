@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.hateoas.repository
+package io.tolgee.api.v2.hateoas.project
 
 import io.tolgee.api.v2.controllers.OrganizationController
 import io.tolgee.api.v2.controllers.V2RepositoriesController
@@ -10,14 +10,14 @@ import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.stereotype.Component
 
 @Component
-class RepositoryModelAssembler(
+class ProjectModelAssembler(
         private val userAccountModelAssembler: UserAccountModelAssembler,
         private val permissionService: PermissionService
-) : RepresentationModelAssemblerSupport<ProjectView, RepositoryModel>(
-        V2RepositoriesController::class.java, RepositoryModel::class.java) {
-    override fun toModel(view: ProjectView): RepositoryModel {
+) : RepresentationModelAssemblerSupport<ProjectView, ProjectModel>(
+        V2RepositoriesController::class.java, ProjectModel::class.java) {
+    override fun toModel(view: ProjectView): ProjectModel {
         val link = linkTo<V2RepositoriesController> { get(view.id) }.withSelfRel()
-        return RepositoryModel(
+        return ProjectModel(
                 id = view.id,
                 name = view.name,
                 description = view.description,

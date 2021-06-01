@@ -22,63 +22,63 @@ abstract class ProjectAuthControllerTest : SignedInControllerTest(), AuthRequest
     //for api key auth methods
     val apiKey: ApiKeyDTO
         get() {
-            val performer = this.repositoryAuthRequestPerformer
+            val performer = this.projectAuthRequestPerformer
             return if (performer is RepositoryApiKeyAuthRequestPerformer)
                 performer.apiKey else
                 throw Exception("Method not annotated with ApiKeyAccessTestMethod?")
         }
 
     val project: Project
-        get() = this.repositoryAuthRequestPerformer.project
+        get() = this.projectAuthRequestPerformer.project
 
     var projectSupplier: (() -> Project)?
-        get() = this.repositoryAuthRequestPerformer.projectSupplier
+        get() = this.projectAuthRequestPerformer.projectSupplier
         set(value) {
-            this.repositoryAuthRequestPerformer.projectSupplier = value
+            this.projectAuthRequestPerformer.projectSupplier = value
         }
 
-    private var _repositoryAuthRequestPerformer: RepositoryAuthRequestPerformer? = null;
+    private var _projectAuthRequestPerformer: RepositoryAuthRequestPerformer? = null;
 
-    private var repositoryAuthRequestPerformer: RepositoryAuthRequestPerformer
+    private var projectAuthRequestPerformer: RepositoryAuthRequestPerformer
         get() {
-            return _repositoryAuthRequestPerformer
+            return _projectAuthRequestPerformer
                     ?: throw Exception("Method not annotated with ApiKeyAccessTestMethod nor RepositoryJWTAuthTestMethod?")
         }
         set(value) {
-            _repositoryAuthRequestPerformer = value
+            _projectAuthRequestPerformer = value
         }
 
     @BeforeMethod
     fun beforeEach(method: Method) {
         with(method.getAnnotation(ProjectApiKeyAuthTestMethod::class.java)) {
             if (this != null) {
-                this@ProjectAuthControllerTest.repositoryAuthRequestPerformer =
+                this@ProjectAuthControllerTest.projectAuthRequestPerformer =
                         applicationContext!!.getBean(RepositoryApiKeyAuthRequestPerformer::class.java, userAccount, this.scopes)
             }
         }
 
         with(method.getAnnotation(ProjectJWTAuthTestMethod::class.java)) {
             if (this != null) {
-                this@ProjectAuthControllerTest.repositoryAuthRequestPerformer =
+                this@ProjectAuthControllerTest.projectAuthRequestPerformer =
                         applicationContext!!.getBean(RepositoryJwtAuthRequestPerformer::class.java, userAccount)
             }
         }
     }
 
     fun performRepositoryAuthPut(url: String, content: Any?): ResultActions {
-        return repositoryAuthRequestPerformer.performRepositoryAuthPut(url, content)
+        return projectAuthRequestPerformer.performRepositoryAuthPut(url, content)
     }
 
     fun performRepositoryAuthPost(url: String, content: Any?): ResultActions {
-        return repositoryAuthRequestPerformer.performRepositoryAuthPost(url, content)
+        return projectAuthRequestPerformer.performRepositoryAuthPost(url, content)
     }
 
     fun performRepositoryAuthGet(url: String): ResultActions {
-        return repositoryAuthRequestPerformer.performRepositoryAuthGet(url)
+        return projectAuthRequestPerformer.performRepositoryAuthGet(url)
     }
 
     fun performRepositoryAuthDelete(url: String, content: Any?): ResultActions {
-        return repositoryAuthRequestPerformer.performRepositoryAuthDelete(url, content)
+        return projectAuthRequestPerformer.performRepositoryAuthDelete(url, content)
     }
 
 }

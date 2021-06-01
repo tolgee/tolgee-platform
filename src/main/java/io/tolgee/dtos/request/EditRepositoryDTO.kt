@@ -6,7 +6,7 @@ import javax.validation.constraints.Size
 
 data class EditRepositoryDTO(
         @field:NotNull
-        var repositoryId: Long? = null,
+        var projectId: Long? = null,
 
         @field:NotNull @field:Size(min = 3, max = 500)
         var name: String? = null,

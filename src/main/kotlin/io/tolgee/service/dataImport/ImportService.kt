@@ -23,7 +23,7 @@ import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.repository_auth.RepositoryHolder
+import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyMetaService
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
@@ -38,7 +38,7 @@ class ImportService(
         private val importRepository: ImportRepository,
         private val importFileRepository: ImportFileRepository,
         private val authenticationFacade: AuthenticationFacade,
-        private val repositoryHolder: RepositoryHolder,
+        private val projectHolder: ProjectHolder,
         private val importFileIssueRepository: ImportFileIssueRepository,
         private val importLanguageRepository: ImportLanguageRepository,
         private val importKeyRepository: ImportKeyRepository,
@@ -51,8 +51,8 @@ class ImportService(
     fun addFiles(files: List<ImportFileDto>,
                  messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null
     ): List<ErrorResponseBody> {
-        val import = find(repositoryHolder.project.id, authenticationFacade.userAccount.id!!)
-                ?: Import(authenticationFacade.userAccount, repositoryHolder.project)
+        val import = find(projectHolder.project.id, authenticationFacade.userAccount.id!!)
+                ?: Import(authenticationFacade.userAccount, projectHolder.project)
 
         val nonNullMessageClient = messageClient ?: { _, _ -> }
         val languages = findLanguages(import)
@@ -75,8 +75,8 @@ class ImportService(
     }
 
     @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
-    fun import(repositoryId: Long, authorId: Long, forceMode: ForceMode = ForceMode.NO_FORCE) {
-        import(findOrThrow(repositoryId, authorId), forceMode)
+    fun import(projectId: Long, authorId: Long, forceMode: ForceMode = ForceMode.NO_FORCE) {
+        import(findOrThrow(projectId, authorId), forceMode)
     }
 
 
@@ -110,11 +110,11 @@ class ImportService(
     fun saveFile(importFile: ImportFile): ImportFile =
             importFileRepository.save(importFile)
 
-    fun find(repositoryId: Long, authorId: Long) =
-            this.importRepository.findByProjectIdAndAuthorId(repositoryId, authorId)
+    fun find(projectId: Long, authorId: Long) =
+            this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
 
-    fun findOrThrow(repositoryId: Long, authorId: Long) =
-            this.find(repositoryId, authorId) ?: throw NotFoundException()
+    fun findOrThrow(projectId: Long, authorId: Long) =
+            this.find(projectId, authorId) ?: throw NotFoundException()
 
     fun findLanguages(import: Import) = importLanguageRepository.findAllByImport(import.id)
 
@@ -147,8 +147,8 @@ class ImportService(
         this.importTranslationRepository.removeExistingTranslationConflictReference(translation)
     }
 
-    fun getResult(repositoryId: Long, userId: Long, pageable: Pageable): Page<ImportLanguageView> {
-        return this.find(repositoryId, userId)?.let {
+    fun getResult(projectId: Long, userId: Long, pageable: Pageable): Page<ImportLanguageView> {
+        return this.find(projectId, userId)?.let {
             this.importLanguageRepository.findImportLanguagesView(it.id, pageable)
         } ?: throw NotFoundException()
     }
@@ -184,8 +184,8 @@ class ImportService(
     }
 
     @Transactional
-    fun deleteImport(repositoryId: Long, authorId: Long) =
-            this.deleteImport(findOrThrow(repositoryId, authorId))
+    fun deleteImport(projectId: Long, authorId: Long) =
+            this.deleteImport(findOrThrow(projectId, authorId))
 
     @Transactional
     fun deleteLanguage(language: ImportLanguage) {
@@ -232,8 +232,8 @@ class ImportService(
         this.importFileIssueRepository.saveAll(issues)
     }
 
-    fun getAllByRepository(repositoryId: Long) =
-            this.importRepository.findAllByProjectId(repositoryId)
+    fun getAllByRepository(projectId: Long) =
+            this.importRepository.findAllByProjectId(projectId)
 
     fun saveAllFileIssueParams(params: List<ImportFileIssueParam>): MutableList<ImportFileIssueParam> =
             importFileIssueParamRepository.saveAll(params)

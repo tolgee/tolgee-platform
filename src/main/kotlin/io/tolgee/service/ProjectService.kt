@@ -22,7 +22,7 @@ import javax.persistence.EntityManager
 
 @Transactional
 @Service
-class RepositoryService constructor(
+class ProjectService constructor(
         private val projectRepository: ProjectRepository,
         private val entityManager: EntityManager,
         private val securityService: SecurityService,
@@ -61,41 +61,41 @@ class RepositoryService constructor(
 
     @Transactional
     fun createRepository(dto: CreateRepositoryDTO): Project {
-        val repository = Project()
-        repository.name = dto.name
+        val project = Project()
+        project.name = dto.name
         dto.organizationId?.also {
             organizationRoleService.checkUserIsOwner(it)
-            repository.organizationOwner = organizationService.get(it) ?: throw NotFoundException()
+            project.organizationOwner = organizationService.get(it) ?: throw NotFoundException()
 
             if (dto.addressPart == null) {
-                repository.addressPart = generateAddressPart(dto.name!!, null)
+                project.addressPart = generateAddressPart(dto.name!!, null)
             }
 
         } ?: let {
-            repository.userOwner = authenticationFacade.userAccount
-            securityService.grantFullAccessToRepo(repository)
+            project.userOwner = authenticationFacade.userAccount
+            securityService.grantFullAccessToRepo(project)
         }
         for (language in dto.languages!!) {
-            languageService.createLanguage(language, repository)
+            languageService.createLanguage(language, project)
         }
 
-        entityManager.persist(repository)
-        return repository
+        entityManager.persist(project)
+        return project
     }
 
     @Transactional
     fun editRepository(dto: EditRepositoryDTO): Project {
-        val repository = projectRepository.findById(dto.repositoryId!!)
+        val project = projectRepository.findById(dto.projectId!!)
                 .orElseThrow { NotFoundException() }!!
-        repository.name = dto.name
-        entityManager.persist(repository)
-        return repository
+        project.name = dto.name
+        entityManager.persist(project)
+        return project
     }
 
     fun findAllPermitted(userAccount: UserAccount): List<RepositoryDTO> {
         return projectRepository.findAllPermitted(userAccount.id!!).asSequence()
                 .map { result ->
-                    val repository = result[0] as Project
+                    val project = result[0] as Project
                     val permission = result[1] as Permission?
                     val organization = result[2] as Organization?
                     val organizationRole = result[3] as OrganizationRole?
@@ -104,10 +104,10 @@ class RepositoryService constructor(
                             organization?.basePermissions,
                             permission?.type
                     )
-                            ?: throw IllegalStateException("Repository repository should not" +
-                                    " return repository with no permission for provided user")
+                            ?: throw IllegalStateException("Repository project should not" +
+                                    " return project with no permission for provided user")
 
-                    fromEntityAndPermission(repository, permissionType)
+                    fromEntityAndPermission(project, permissionType)
                 }.toList()
     }
 
@@ -124,17 +124,17 @@ class RepositoryService constructor(
 
     @Transactional
     fun deleteRepository(id: Long) {
-        val repository = get(id).orElseThrow { NotFoundException() }!!
+        val project = get(id).orElseThrow { NotFoundException() }!!
         importService.getAllByRepository(id).forEach {
             importService.deleteImport(it)
         }
-        permissionService.deleteAllByRepository(repository.id)
-        translationService.deleteAllByRepository(repository.id)
-        screenshotService.deleteAllByRepository(repository.id)
-        keyService.deleteAllByRepository(repository.id)
-        apiKeyService.deleteAllByRepository(repository.id)
-        languageService.deleteAllByRepository(repository.id)
-        projectRepository.delete(repository)
+        permissionService.deleteAllByRepository(project.id)
+        translationService.deleteAllByRepository(project.id)
+        screenshotService.deleteAllByRepository(project.id)
+        keyService.deleteAllByRepository(project.id)
+        apiKeyService.deleteAllByRepository(project.id)
+        languageService.deleteAllByRepository(project.id)
+        projectRepository.delete(project)
     }
 
     fun deleteAllByName(name: String) {

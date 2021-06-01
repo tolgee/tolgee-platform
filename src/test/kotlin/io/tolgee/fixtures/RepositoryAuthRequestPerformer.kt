@@ -20,7 +20,7 @@ abstract class RepositoryAuthRequestPerformer(userAccount: UserAccount) : Signed
     var projectSupplier: (() -> Project)? = null
 
     companion object {
-        const val API_REPOSITORY_URL_PREFIX = "/api/repository/"
+        const val API_REPOSITORY_URL_PREFIX = "/api/project/"
     }
 
     abstract fun performRepositoryAuthPut(url: String, content: Any?): ResultActions

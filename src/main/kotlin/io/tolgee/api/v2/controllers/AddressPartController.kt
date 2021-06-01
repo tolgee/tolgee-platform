@@ -7,7 +7,8 @@ package io.tolgee.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.GenerateAddressPathDto
-import io.tolgee.service.*
+import io.tolgee.service.OrganizationService
+import io.tolgee.service.ProjectService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -19,7 +20,7 @@ import javax.validation.Valid
 @Tag(name = "Address Part generation")
 open class AddressPartController(
         private val organizationService: OrganizationService,
-        private val repositoryService: RepositoryService,
+        private val projectService: ProjectService,
 ) {
 
     @GetMapping("/validate-organization/{addressPart}")
@@ -31,12 +32,12 @@ open class AddressPartController(
     }
 
 
-    @GetMapping("/validate-repository/{addressPart}")
-    @Operation(summary = "Validate repository address part")
+    @GetMapping("/validate-project/{addressPart}")
+    @Operation(summary = "Validate project address part")
     open fun validateRepositoryAddressPart(
             @PathVariable("addressPart") addressPart: String
     ): Boolean {
-        return repositoryService.validateAddressPartUniqueness(addressPart)
+        return projectService.validateAddressPartUniqueness(addressPart)
     }
 
     @PostMapping("/generate-organization", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -48,11 +49,11 @@ open class AddressPartController(
     }
 
 
-    @PostMapping("/generate-repository", produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Operation(summary = "Generate repository address part")
+    @PostMapping("/generate-project", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(summary = "Generate project address part")
     open fun generateRepositoryAddressPart(
             @RequestBody @Valid dto: GenerateAddressPathDto
     ): String {
-        return """"${repositoryService.generateAddressPart(dto.name!!, dto.oldAddressPart)}""""
+        return """"${projectService.generateAddressPart(dto.name!!, dto.oldAddressPart)}""""
     }
 }

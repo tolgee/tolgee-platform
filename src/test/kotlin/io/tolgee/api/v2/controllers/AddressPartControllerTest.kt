@@ -28,14 +28,14 @@ class AddressPartControllerTest : SignedInControllerTest() {
 
     @Test
     fun testValidateRepositoryAddressPart() {
-        performAuthGet("/v2/address-part/validate-repository/hello-1").andIsOk.andAssertThatJson.isEqualTo(true)
+        performAuthGet("/v2/address-part/validate-project/hello-1").andIsOk.andAssertThatJson.isEqualTo(true)
         projectRepository.save(
                 Project(
                         name = "aaa",
                         addressPart = "hello-1"
                 ).also { it.userOwner = dbPopulator.createUserIfNotExists("hello") }
         )
-        performAuthGet("/v2/address-part/validate-repository/hello-1").andIsOk.andAssertThatJson.isEqualTo(false)
+        performAuthGet("/v2/address-part/validate-project/hello-1").andIsOk.andAssertThatJson.isEqualTo(false)
     }
 
 
@@ -76,7 +76,7 @@ class AddressPartControllerTest : SignedInControllerTest() {
                         addressPart = "hello-world"
                 ).also { it.userOwner = dbPopulator.createUserIfNotExists("hello") }
         )
-        performAuthPost("/v2/address-part/generate-repository", GenerateAddressPathDto("Hello world"))
+        performAuthPost("/v2/address-part/generate-project", GenerateAddressPathDto("Hello world"))
                 .andIsOk.andAssertThatJson.isEqualTo("hello-world1")
     }
 }

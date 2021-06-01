@@ -16,9 +16,9 @@ import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
-import io.tolgee.security.repository_auth.AccessWithAnyRepositoryPermission
+import io.tolgee.security.project_auth.AccessWithAnyRepositoryPermission
 import io.tolgee.service.KeyService
-import io.tolgee.service.RepositoryService
+import io.tolgee.service.ProjectService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.SecurityService
 import org.springframework.web.bind.annotation.*
@@ -30,19 +30,19 @@ import javax.validation.constraints.NotBlank
 @Suppress("MVCPathVariableInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/api/repository/screenshots", "/api/repository/{repositoryId:[0-9]+}/screenshots"])
+@RequestMapping(value = ["/api/project/screenshots", "/api/project/{projectId:[0-9]+}/screenshots"])
 @Tag(name = "Screenshots")
 class ScreenshotController(
         private val screenshotService: ScreenshotService,
         private val keyService: KeyService,
-        private val repositoryService: RepositoryService,
+        private val projectService: ProjectService,
         private val securityService: SecurityService,
         private val tolgeeProperties: TolgeeProperties,
         private val timestampValidation: TimestampValidation
 ) {
     @PostMapping("")
     @Operation(summary = "Upload screenshot for specific key")
-    fun uploadScreenshot(@PathVariable("repositoryId") repositoryId: Long,
+    fun uploadScreenshot(@PathVariable("projectId") projectId: Long,
                          @RequestParam("screenshot") screenshot: MultipartFile,
                          @NotBlank @RequestParam key: String): ScreenshotDTO {
 
@@ -52,9 +52,9 @@ class ScreenshotController(
             throw ValidationException(Message.FILE_NOT_IMAGE)
         }
 
-        repositoryService.get(repositoryId).orElseThrow { NotFoundException() }
-        securityService.checkRepositoryPermission(repositoryId, Permission.ProjectPermissionType.TRANSLATE)
-        val keyEntity = keyService.get(repositoryId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
+        projectService.get(projectId).orElseThrow { NotFoundException() }
+        securityService.checkRepositoryPermission(projectId, Permission.ProjectPermissionType.TRANSLATE)
+        val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
         val screenShotEntity = screenshotService.store(screenshot, keyEntity)
         return screenShotEntity.toDTO()
     }
@@ -62,9 +62,9 @@ class ScreenshotController(
     @PostMapping("/get")
     @Operation(summary = "Returns all screenshots for specific key")
     @AccessWithAnyRepositoryPermission
-    fun getKeyScreenshots(@PathVariable("repositoryId") repositoryId: Long,
+    fun getKeyScreenshots(@PathVariable("projectId") projectId: Long,
                           @RequestBody @Valid dto: GetScreenshotsByKeyDTO): List<ScreenshotDTO> {
-        val keyEntity = keyService.get(repositoryId, PathDTO.fromFullPath(dto.key)).orElseThrow { NotFoundException() }
+        val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(dto.key)).orElseThrow { NotFoundException() }
         return screenshotService.findAll(keyEntity).map { it.toDTO() }
     }
 

@@ -30,7 +30,7 @@ abstract class AbstractScreenshotControllerTest : SignedInControllerTest() {
     }
 
     protected fun performStoreScreenshot(project: Project, key: Key): ScreenshotDTO {
-        return mvc.perform(addToken(multipart("/api/repository/${project.id}/screenshots")
+        return mvc.perform(addToken(multipart("/api/project/${project.id}/screenshots")
                 .file(MockMultipartFile("screenshot", "originalShot.png", "image/png",
                         screenshotFile.file.readBytes()))
                 .param("key", key.name)))

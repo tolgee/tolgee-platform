@@ -5,7 +5,7 @@ import io.tolgee.security.DisabledAuthenticationFilter
 import io.tolgee.security.InternalDenyFilter
 import io.tolgee.security.JwtTokenFilter
 import io.tolgee.security.api_key_auth.ApiKeyAuthFilter
-import io.tolgee.security.repository_auth.RepositoryPermissionFilter
+import io.tolgee.security.project_auth.ProjectPermissionFilter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,7 +22,7 @@ open class WebSecurityConfig @Autowired constructor(private val jwtTokenFilter: 
                                                     private val configuration: TolgeeProperties,
                                                     private val apiKeyAuthFilter: ApiKeyAuthFilter,
                                                     private val internalDenyFilter: InternalDenyFilter,
-                                                    private val repositoryPermissionFilter: RepositoryPermissionFilter,
+                                                    private val projectPermissionFilter: ProjectPermissionFilter,
                                                     private val disabledAuthenticationFilter: DisabledAuthenticationFilter
 ) : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
@@ -35,7 +35,7 @@ open class WebSecurityConfig @Autowired constructor(private val jwtTokenFilter: 
                     .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter::class.java)
                     //this is used to authorize user's app calls with generated api key
                     .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
-                    .addFilterAfter(repositoryPermissionFilter, JwtTokenFilter::class.java)
+                    .addFilterAfter(projectPermissionFilter, JwtTokenFilter::class.java)
                     .authorizeRequests()
                     .antMatchers("/api/public/**", "/webjars/**", "/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs").permitAll()
                     .antMatchers("/api/**", "/uaa", "/uaa/**", "/v2/**").authenticated()

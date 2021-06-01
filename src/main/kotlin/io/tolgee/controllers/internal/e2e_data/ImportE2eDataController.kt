@@ -7,7 +7,7 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.dataImport.Import
 import io.tolgee.security.InternalController
-import io.tolgee.service.RepositoryService
+import io.tolgee.service.ProjectService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.transaction.annotation.Transactional
@@ -27,7 +27,7 @@ class ImportE2eDataController(
         private val importService: ImportService,
         private val entityManager: EntityManager,
         private val testDataService: TestDataService,
-        private val repositoryService: RepositoryService,
+        private val projectService: ProjectService,
         private val userAccountService: UserAccountService
 ) {
     @GetMapping(value = ["/generate"])
@@ -140,8 +140,8 @@ class ImportE2eDataController(
             importService.deleteImport(it as Import)
         }
         userAccountService.getByUserName("franta").orElse(null)?.let {
-            repositoryService.findAllPermitted(it).forEach { repo ->
-                repositoryService.deleteRepository(repo.id!!)
+            projectService.findAllPermitted(it).forEach { repo ->
+                projectService.deleteRepository(repo.id!!)
             }
             userAccountService.delete(it)
         }

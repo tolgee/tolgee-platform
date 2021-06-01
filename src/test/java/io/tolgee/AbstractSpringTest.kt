@@ -19,7 +19,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     protected lateinit var dbPopulator: DbPopulatorReal
 
     @Autowired
-    protected lateinit var repositoryService: RepositoryService
+    protected lateinit var projectService: ProjectService
 
     @Autowired
     protected lateinit var translationService: TranslationService

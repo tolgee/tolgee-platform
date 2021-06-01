@@ -1,8 +1,8 @@
-package io.tolgee.security.repository_auth
+package io.tolgee.security.project_auth
 
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
-import io.tolgee.service.RepositoryService
+import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
@@ -15,18 +15,18 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
-class RepositoryPermissionFilter(
+class ProjectPermissionFilter(
         private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
         private val securityService: SecurityService,
         @param:Qualifier("handlerExceptionResolver")
         private val resolver: HandlerExceptionResolver,
-        private val repositoryHolder: RepositoryHolder,
-        private val repositoryService: RepositoryService
+        private val projectHolder: ProjectHolder,
+        private val projectService: ProjectService
 
 ) : OncePerRequestFilter() {
 
     companion object{
-        const val REGEX = "/(?:v2|api)/repositor(?:y|ies)/([0-9]+)/?.*"
+        const val REGEX = "/(?:v2|api)/(?:repositor(?:y|ies)|projects?)/([0-9]+)/?.*"
     }
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
@@ -41,15 +41,15 @@ class RepositoryPermissionFilter(
             }
 
             try {
-                val repositoryId = request.repositoryId
-                repositoryHolder.project = repositoryService.get(repositoryId).orElseThrow { NotFoundException() }!!
+                val projectId = request.projectId
+                projectHolder.project = projectService.get(projectId).orElseThrow { NotFoundException() }!!
 
                 if (specificPermissionAnnotation != null) {
-                    securityService.checkRepositoryPermission(repositoryId, specificPermissionAnnotation.permission)
+                    securityService.checkRepositoryPermission(projectId, specificPermissionAnnotation.permission)
                 }
 
                 if (anyPermissionAnnotation != null) {
-                    securityService.checkRepositoryPermission(repositoryId, Permission.ProjectPermissionType.VIEW)
+                    securityService.checkRepositoryPermission(projectId, Permission.ProjectPermissionType.VIEW)
                 }
             } catch (e: Exception) {
                 resolver.resolveException(request, response, null, e)
@@ -59,13 +59,13 @@ class RepositoryPermissionFilter(
         filterChain.doFilter(request, response)
     }
 
-    private val HttpServletRequest.repositoryId
+    private val HttpServletRequest.projectId
         get() = this.requestURI
                 .replace(REGEX.toRegex(), "$1").toLong()
 
-    private fun getSpecificPermissionAnnotation(request: HttpServletRequest): AccessWithRepositoryPermission? {
+    private fun getSpecificPermissionAnnotation(request: HttpServletRequest): AccessWithProjectPermission? {
         val handlerMethod = (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
-        return handlerMethod?.getMethodAnnotation(AccessWithRepositoryPermission::class.java)
+        return handlerMethod?.getMethodAnnotation(AccessWithProjectPermission::class.java)
     }
 
     private fun getAnyPermissionAnnotation(request: HttpServletRequest): AccessWithAnyRepositoryPermission? {

@@ -15,7 +15,7 @@ data class UserAccountInProjectModel(
         override val organizationRole: OrganizationRoleType?,
         override val organizationBasePermissions: Permission.ProjectPermissionType?,
         override val directPermissions: Permission.ProjectPermissionType?,
-        @Schema(description = "Actual user's permissions on selected repository. You can not sort data by this column!", example = "EDIT")
+        @Schema(description = "Actual user's permissions on selected project. You can not sort data by this column!", example = "EDIT")
         val computedPermissions: Permission.ProjectPermissionType
 ) : RepresentationModel<UserAccountInProjectModel>(), UserAccountInProjectView
 

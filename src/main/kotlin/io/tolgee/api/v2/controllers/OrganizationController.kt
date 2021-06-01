@@ -12,8 +12,8 @@ import io.tolgee.api.v2.hateoas.organization.OrganizationModel
 import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
-import io.tolgee.api.v2.hateoas.repository.RepositoryModel
-import io.tolgee.api.v2.hateoas.repository.RepositoryModelAssembler
+import io.tolgee.api.v2.hateoas.project.ProjectModel
+import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.OrganizationDto
@@ -63,8 +63,8 @@ open class OrganizationController(
         private val authenticationFacade: AuthenticationFacade,
         private val organizationRoleService: OrganizationRoleService,
         private val userAccountService: UserAccountService,
-        private val repositoryService: RepositoryService,
-        private val repositoryModelAssembler: RepositoryModelAssembler,
+        private val projectService: ProjectService,
+        private val projectModelAssembler: ProjectModelAssembler,
         private val invitationService: InvitationService,
         private val organizationInvitationModelAssembler: OrganizationInvitationModelAssembler
 ) {
@@ -173,11 +173,11 @@ open class OrganizationController(
             @PathVariable("id") id: Long,
             pageable: Pageable,
             @RequestParam("search") search: String?
-    ): PagedModel<RepositoryModel> {
+    ): PagedModel<ProjectModel> {
         return organizationService.get(id)?.let {
             organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
-            repositoryService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
-                pagedProjectResourcesAssembler.toModel(repositories, repositoryModelAssembler)
+            projectService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
+                pagedProjectResourcesAssembler.toModel(repositories, projectModelAssembler)
             }
         } ?: throw NotFoundException()
     }
@@ -188,11 +188,11 @@ open class OrganizationController(
             @PathVariable("addressPart") addressPart: String,
             pageable: Pageable,
             @RequestParam("search") search: String?
-    ): PagedModel<RepositoryModel> {
+    ): PagedModel<ProjectModel> {
         return organizationService.get(addressPart)?.let {
             organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
-            repositoryService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
-                pagedProjectResourcesAssembler.toModel(repositories, repositoryModelAssembler)
+            projectService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
+                pagedProjectResourcesAssembler.toModel(repositories, projectModelAssembler)
             }
         } ?: throw NotFoundException()
     }

@@ -47,16 +47,16 @@ class KeyService(
                 }
     }
 
-    fun getAll(repositoryId: Long): Set<Key> {
-        return keyRepository.getAllByProjectId(repositoryId)
+    fun getAll(projectId: Long): Set<Key> {
+        return keyRepository.getAllByProjectId(projectId)
     }
 
-    fun get(repositoryId: Long, name: String): Optional<Key> {
-        return keyRepository.getByNameAndProjectId(name, repositoryId)
+    fun get(projectId: Long, name: String): Optional<Key> {
+        return keyRepository.getByNameAndProjectId(name, projectId)
     }
 
-    fun get(repositoryId: Long, pathDTO: PathDTO): Optional<Key> {
-        return keyRepository.getByNameAndProjectId(pathDTO.fullPathString, repositoryId)
+    fun get(projectId: Long, pathDTO: PathDTO): Optional<Key> {
+        return keyRepository.getByNameAndProjectId(pathDTO.fullPathString, projectId)
     }
 
     fun get(project: Project, pathDTO: PathDTO): Optional<Key> {
@@ -119,9 +119,9 @@ class KeyService(
         keyRepository.deleteAllByIdIn(ids)
     }
 
-    fun deleteAllByRepository(repositoryId: Long) {
-        keyMetaService.deleteAllByRepositoryId(repositoryId)
-        keyRepository.deleteAllByProjectId(repositoryId)
+    fun deleteAllByRepository(projectId: Long) {
+        keyMetaService.deleteAllByRepositoryId(projectId)
+        keyRepository.deleteAllByProjectId(projectId)
     }
 
     @Transactional

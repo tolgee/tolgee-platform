@@ -13,7 +13,7 @@ import io.tolgee.model.Permission
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.service.LanguageService
-import io.tolgee.service.RepositoryService
+import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import org.springframework.web.bind.annotation.*
 import java.util.stream.Collectors
@@ -22,15 +22,15 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = [
-    "/api/repository/{repositoryId:[0-9]+}/languages",
-    "/api/repository/languages"
+    "/api/project/{projectId:[0-9]+}/languages",
+    "/api/project/languages"
 ])
 @Tags(value = [
     Tag(name = "Languages", description = "Languages"),
 ])
 open class LanguageController(
         private val languageService: LanguageService,
-        private val repositoryService: RepositoryService,
+        private val projectService: ProjectService,
         private val languageValidator: LanguageValidator,
         private val securityService: SecurityService,
         private val authenticationFacade: AuthenticationFacade
@@ -38,12 +38,12 @@ open class LanguageController(
 
     @PostMapping(value = [""])
     @Operation(summary = "Creates language")
-    fun createLanguage(@PathVariable("repositoryId") repositoryId: Long,
+    fun createLanguage(@PathVariable("projectId") projectId: Long,
                        @RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
-        val repository = repositoryService.get(repositoryId).orElseThrow { NotFoundException() }
-        securityService.checkRepositoryPermission(repositoryId, Permission.ProjectPermissionType.MANAGE)
-        languageValidator.validateCreate(dto, repository)
-        val language = languageService.createLanguage(dto, repository!!)
+        val project = projectService.get(projectId).orElseThrow { NotFoundException() }
+        securityService.checkRepositoryPermission(projectId, Permission.ProjectPermissionType.MANAGE)
+        languageValidator.validateCreate(dto, project)
+        val language = languageService.createLanguage(dto, project!!)
         return LanguageDTO.fromEntity(language)
     }
 
@@ -58,11 +58,11 @@ open class LanguageController(
 
     @GetMapping(value = [""])
     @AccessWithApiKey
-    @Operation(summary = "Returns all repository languages", tags = ["API KEY", "Languages"])
-    fun getAll(@PathVariable("repositoryId") pathRepositoryId: Long?): Set<LanguageDTO> {
-        val repositoryId = if (pathRepositoryId === null) authenticationFacade.apiKey.project!!.id else pathRepositoryId
-        securityService.checkAnyRepositoryPermission(repositoryId)
-        return languageService.findAll(repositoryId).stream().map { LanguageDTO.fromEntity(it) }
+    @Operation(summary = "Returns all project languages", tags = ["API KEY", "Languages"])
+    fun getAll(@PathVariable("projectId") pathRepositoryId: Long?): Set<LanguageDTO> {
+        val projectId = if (pathRepositoryId === null) authenticationFacade.apiKey.project!!.id else pathRepositoryId
+        securityService.checkAnyRepositoryPermission(projectId)
+        return languageService.findAll(projectId).stream().map { LanguageDTO.fromEntity(it) }
                 .collect(Collectors.toCollection { LinkedHashSet() })
     }
 

@@ -26,8 +26,8 @@ import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.repository_auth.AccessWithRepositoryPermission
-import io.tolgee.security.repository_auth.RepositoryHolder
+import io.tolgee.security.project_auth.AccessWithProjectPermission
+import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ForceMode
 import io.tolgee.service.dataImport.ImportService
@@ -48,7 +48,7 @@ import java.io.OutputStream
 @Suppress("MVCPathVariableInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/repositories/{repositoryId}/import"])
+@RequestMapping(value = ["/v2/repositories/{projectId}/import"])
 @Tag(name = "Import")
 class V2ImportController(
         private val importService: ImportService,
@@ -66,16 +66,16 @@ class V2ImportController(
 
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val halMediaTypeConfiguration: HalMediaTypeConfiguration,
-        private val repositoryHolder: RepositoryHolder,
+        private val projectHolder: ProjectHolder,
         private val languageService: LanguageService
 ) {
 
     @PostMapping("/with-streaming-response", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @RequestBody
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     @Operation(summary = "Prepares provided files to import, streams operation progress")
     fun addFilesStreaming(
-            @PathVariable("repositoryId") repositoryId: Long,
+            @PathVariable("projectId") projectId: Long,
             @RequestPart("files") files: Array<MultipartFile>,
     ): ResponseEntity<StreamingResponseBody> {
         val stream = StreamingResponseBody { responseStream: OutputStream ->
@@ -86,7 +86,7 @@ class V2ImportController(
             }
             val fileDtos = files.map { ImportFileDto(it.originalFilename, it.inputStream) }
             val errors = importService.addFiles(files = fileDtos, messageClient)
-            val result = getImportAddFilesResultModel(repositoryId, errors)
+            val result = getImportAddFilesResultModel(projectId, errors)
 
             val mapper = jacksonObjectMapper()
             halMediaTypeConfiguration.configureObjectMapper(mapper)
@@ -99,20 +99,20 @@ class V2ImportController(
     }
 
     @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     @Operation(summary = "Prepares provided files to import")
     fun addFiles(
-            @PathVariable("repositoryId") repositoryId: Long,
+            @PathVariable("projectId") projectId: Long,
             @RequestPart("files") files: Array<MultipartFile>,
     ): ImportAddFilesResultModel {
         val fileDtos = files.map { ImportFileDto(it.originalFilename, it.inputStream) }
         val errors = importService.addFiles(files = fileDtos)
-        return getImportAddFilesResultModel(repositoryId, errors)
+        return getImportAddFilesResultModel(projectId, errors)
     }
 
-    private fun getImportAddFilesResultModel(repositoryId: Long, errors: List<ErrorResponseBody>): ImportAddFilesResultModel {
+    private fun getImportAddFilesResultModel(projectId: Long, errors: List<ErrorResponseBody>): ImportAddFilesResultModel {
         val result: PagedModel<ImportLanguageModel>? = try {
-            this.getImportResult(repositoryId, PageRequest.of(0, 100))
+            this.getImportResult(projectId, PageRequest.of(0, 100))
         } catch (e: NotFoundException) {
             null
         }
@@ -120,32 +120,32 @@ class V2ImportController(
     }
 
     @PutMapping("/apply")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     @Operation(summary = "Imports the data prepared in previous step")
     fun applyImport(
-            @PathVariable("repositoryId") repositoryId: Long,
+            @PathVariable("projectId") projectId: Long,
             @Schema(description = "Whether override or keep all translations with unresolved conflicts")
             @RequestParam("forceMode", defaultValue = "NO_FORCE") forceMode: ForceMode,
     ) {
-        this.importService.import(repositoryId, authenticationFacade.userAccount.id!!, forceMode)
+        this.importService.import(projectId, authenticationFacade.userAccount.id!!, forceMode)
     }
 
     @GetMapping("/result")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun getImportResult(
-            @PathVariable("repositoryId") repositoryId: Long,
+            @PathVariable("projectId") projectId: Long,
             pageable: Pageable
     ): PagedModel<ImportLanguageModel> {
         val userId = authenticationFacade.userAccount.id!!
-        val languages = importService.getResult(repositoryId, userId, pageable)
+        val languages = importService.getResult(projectId, userId, pageable)
         return pagedLanguagesResourcesAssembler.toModel(languages, importLanguageModelAssembler)
     }
 
     @GetMapping("/result/languages/{languageId}")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun getImportLanguage(
             @PathVariable("languageId") languageId: Long,
-            @PathVariable("repositoryId") repositoryId: Long,
+            @PathVariable("projectId") projectId: Long,
     ): ImportLanguageModel {
         checkImportLanguageInRepository(languageId)
         val language = importService.findLanguageView(languageId) ?: throw NotFoundException()
@@ -153,9 +153,9 @@ class V2ImportController(
     }
 
     @GetMapping("/result/languages/{languageId}/translations")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun getImportTranslations(
-            @PathVariable("repositoryId") repositoryId: Long,
+            @PathVariable("projectId") projectId: Long,
             @PathVariable("languageId") languageId: Long,
             @Schema(description = "Whether only translations, which are in conflict " +
                     "with existing translations should be returned")
@@ -173,20 +173,20 @@ class V2ImportController(
     }
 
     @DeleteMapping("")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun cancelImport() {
-        this.importService.deleteImport(repositoryHolder.project.id, authenticationFacade.userAccount.id!!)
+        this.importService.deleteImport(projectHolder.project.id, authenticationFacade.userAccount.id!!)
     }
 
     @DeleteMapping("/result/languages/{languageId}")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun deleteLanguage(@PathVariable("languageId") languageId: Long) {
         val language = checkImportLanguageInRepository(languageId)
         this.importService.deleteLanguage(language)
     }
 
     @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-override")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun resolveTranslationSetOverride(
             @PathVariable("languageId") languageId: Long,
             @PathVariable("translationId") translationId: Long
@@ -195,7 +195,7 @@ class V2ImportController(
     }
 
     @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun resolveTranslationSetKeepExisting(@PathVariable("languageId") languageId: Long,
                                           @PathVariable("translationId") translationId: Long
     ) {
@@ -203,7 +203,7 @@ class V2ImportController(
     }
 
     @PutMapping("/result/languages/{languageId}/resolve-all/set-override")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun resolveTranslationSetOverride(
             @PathVariable("languageId") languageId: Long
     ) {
@@ -211,7 +211,7 @@ class V2ImportController(
     }
 
     @PutMapping("/result/languages/{languageId}/resolve-all/set-keep-existing")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun resolveTranslationSetKeepExisting(
             @PathVariable("languageId") languageId: Long,
     ) {
@@ -219,7 +219,7 @@ class V2ImportController(
     }
 
     @PutMapping("/result/languages/{importLanguageId}/select-existing/{existingLanguageId}")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun selectExistingLanguage(
             @PathVariable("importLanguageId") importLanguageId: Long,
             @PathVariable("existingLanguageId") existingLanguageId: Long,
@@ -230,7 +230,7 @@ class V2ImportController(
     }
 
     @PutMapping("/result/languages/{importLanguageId}/reset-existing")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun resetExistingLanguage(
             @PathVariable("importLanguageId") importLanguageId: Long,
     ) {
@@ -239,7 +239,7 @@ class V2ImportController(
     }
 
     @GetMapping("/result/files/{importFileId}/issues")
-    @AccessWithRepositoryPermission(Permission.ProjectPermissionType.EDIT)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun getImportFileIssues(
             @PathVariable("importFileId") importFileId: Long,
             pageable: Pageable
@@ -262,7 +262,7 @@ class V2ImportController(
 
     private fun checkFileFromRepository(fileId: Long): ImportFile {
         val file = importService.findFile(fileId) ?: throw NotFoundException()
-        if (file.import.project.id != repositoryHolder.project.id) {
+        if (file.import.project.id != projectHolder.project.id) {
             throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
         }
         return file
@@ -270,7 +270,7 @@ class V2ImportController(
 
     private fun checkLanguageFromRepository(languageId: Long): Language {
         val existingLanguage = languageService.findById(languageId).orElse(null) ?: throw NotFoundException()
-        if (existingLanguage.project!!.id != repositoryHolder.project.id) {
+        if (existingLanguage.project!!.id != projectHolder.project.id) {
             throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
         }
         return existingLanguage
@@ -279,7 +279,7 @@ class V2ImportController(
     private fun checkImportLanguageInRepository(languageId: Long): ImportLanguage {
         val language = importService.findLanguage(languageId) ?: throw NotFoundException()
         val languageRepositoryId = language.file.import.project.id
-        if (languageRepositoryId != repositoryHolder.project.id) {
+        if (languageRepositoryId != projectHolder.project.id) {
             throw BadRequestException(Message.IMPORT_LANGUAGE_NOT_FROM_REPOSITORY)
         }
         return language

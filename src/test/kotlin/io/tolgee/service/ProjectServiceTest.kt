@@ -22,7 +22,7 @@ open class ProjectServiceTest : AbstractSpringTest() {
     open fun testFindAllPermitted() {
         val users = dbPopulator.createUsersAndOrganizations()
         dbPopulator.createBase("Test", users[3].username!!)
-        val repositories = repositoryService.findAllPermitted(users[3])
+        val repositories = projectService.findAllPermitted(users[3])
         assertThat(repositories).hasSize(10)
     }
 
@@ -31,7 +31,7 @@ open class ProjectServiceTest : AbstractSpringTest() {
     open fun testFindAllEmpty() {
         dbPopulator.createUsersAndOrganizations() //create some data
         val user = dbPopulator.createUserIfNotExists("user")
-        val repositories = repositoryService.findAllPermitted(user)
+        val repositories = projectService.findAllPermitted(user)
         assertThat(repositories).hasSize(0)
     }
 
@@ -39,7 +39,7 @@ open class ProjectServiceTest : AbstractSpringTest() {
     open fun testFindAllSingleRepository() {
         dbPopulator.createUsersAndOrganizations() //create some data
         val repo = dbPopulator.createBase("Hello world", generateUniqueString())
-        val repositories = repositoryService.findAllPermitted(repo.userOwner!!)
+        val repositories = projectService.findAllPermitted(repo.userOwner!!)
         assertThat(repositories).hasSize(1)
         assertThat(repositories[0].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
     }
@@ -58,7 +58,7 @@ open class ProjectServiceTest : AbstractSpringTest() {
 
         val organization2 = user3.organizationRoles[0].organization
         organizationRoleService.grantRoleToUser(repo.userOwner!!, organization2!!, OrganizationRoleType.OWNER)
-        val repositories = repositoryService.findAllPermitted(repo.userOwner!!)
+        val repositories = projectService.findAllPermitted(repo.userOwner!!)
         assertThat(repositories).hasSize(7)
         assertThat(repositories[6].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
         assertThat(repositories[1].permissionType).isEqualTo(Permission.ProjectPermissionType.VIEW)
@@ -94,7 +94,7 @@ open class ProjectServiceTest : AbstractSpringTest() {
                         type = Permission.ProjectPermissionType.TRANSLATE)
         )
 
-        val repositories = repositoryService.findAllPermitted(repo.userOwner!!)
+        val repositories = projectService.findAllPermitted(repo.userOwner!!)
         assertThat(repositories).hasSize(7)
         assertThat(repositories[6].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
         assertThat(repositories[2].permissionType).isEqualTo(Permission.ProjectPermissionType.TRANSLATE)

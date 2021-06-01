@@ -25,7 +25,7 @@ open class OrganizationService(
         private val organizationRepository: OrganizationRepository,
         private val authenticationFacade: AuthenticationFacade,
         private val addressPartGenerator: AddressPartGenerator,
-        private val repositoryService: RepositoryService,
+        private val projectService: ProjectService,
         private val organizationRoleService: OrganizationRoleService,
         private val invitationService: InvitationService,
         private val entityManager: EntityManager
@@ -98,8 +98,8 @@ open class OrganizationService(
     open fun delete(id: Long) {
         val organization = this.get(id) ?: throw NotFoundException()
 
-        repositoryService.findAllInOrganization(id).forEach {
-            repositoryService.deleteRepository(it.id)
+        projectService.findAllInOrganization(id).forEach {
+            projectService.deleteRepository(it.id)
         }
 
         invitationService.getForOrganization(organization).forEach { invitation ->

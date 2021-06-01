@@ -17,6 +17,6 @@ data class CreateRepositoryDTO(
         @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
         var addressPart: String? = null,
 
-        @Schema(description = "If not provided, repository will be created as users")
+        @Schema(description = "If not provided, project will be created as users")
         var organizationId: Long? = null
 )

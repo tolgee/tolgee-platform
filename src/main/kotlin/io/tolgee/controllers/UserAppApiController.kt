@@ -23,14 +23,14 @@ import javax.validation.Valid
 class UserAppApiController(
         private val translationService: TranslationService,
         private val keyService: KeyService,
-        private val repositoryService: RepositoryService,
+        private val projectService: ProjectService,
         private val securityService: SecurityService,
         private val authenticationFacade: AuthenticationFacade,
         private val languageService: LanguageService,
 ) {
     @GetMapping(value = ["/{languages}"])
     @AccessWithApiKey
-    @Deprecated(message = "Use standard /api/repository/translations/...")
+    @Deprecated(message = "Use standard /api/project/translations/...")
     fun getTranslations(@PathVariable("languages") languages: Set<String>): Map<String, Any> {
         val apiKey = authenticationFacade.apiKey
         securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_VIEW), apiKey)
@@ -77,12 +77,12 @@ class UserAppApiController(
     @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
     fun setTranslations(@RequestBody @Valid dto: SetTranslationsDTO) {
         val apiKey = authenticationFacade.apiKey
-        val repository = repositoryService.get(apiKey.project!!.id).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }!!
-        val key = keyService.getOrCreateKey(repository, PathDTO.fromFullPath(dto.key))
+        val project = projectService.get(apiKey.project!!.id).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }!!
+        val key = keyService.getOrCreateKey(project, PathDTO.fromFullPath(dto.key))
         translationService.setForKey(key, dto.translations!!)
     }
 
-    @Deprecated(message = "Use /api/repository/languages")
+    @Deprecated(message = "Use /api/project/languages")
     @AccessWithApiKey
     @GetMapping("/languages")
     fun getLanguages(): Set<String> {

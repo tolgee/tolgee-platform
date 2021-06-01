@@ -42,7 +42,7 @@ class ProjectControllerTest : SignedInControllerTest() {
         logAsUser("testuser", initialPasswordManager.initialPassword)
         val request = CreateRepositoryDTO("aaa", setOf(languageDTO), organizationId = organization.id)
         val result = performAuthPost("/api/repositories", request).andIsOk.andReturn().mapResponseTo<RepositoryDTO>()
-        repositoryService.get(result.id!!).get().let {
+        projectService.get(result.id!!).get().let {
             assertThat(it.organizationOwner?.id).isEqualTo(organization.id)
         }
     }
@@ -55,11 +55,11 @@ class ProjectControllerTest : SignedInControllerTest() {
                                 JsonHelper.asJsonString(request)))
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn()
-        val repositoryDto = repositoryService.findAllPermitted(userAccount!!).find { it.name == "aaa" }
-        Assertions.assertThat(repositoryDto).isNotNull
-        val repository = repositoryService.get(repositoryDto!!.id!!).get()
-        Assertions.assertThat(repository.languages).isNotEmpty
-        val language = repository.languages.stream().findFirst().orElse(null)
+        val projectDto = projectService.findAllPermitted(userAccount!!).find { it.name == "aaa" }
+        Assertions.assertThat(projectDto).isNotNull
+        val project = projectService.get(projectDto!!.id!!).get()
+        Assertions.assertThat(project.languages).isNotEmpty
+        val language = project.languages.stream().findFirst().orElse(null)
         Assertions.assertThat(language).isNotNull
         Assertions.assertThat(language.abbreviation).isEqualTo("en")
         Assertions.assertThat(language.name).isEqualTo("English")
@@ -97,7 +97,7 @@ class ProjectControllerTest : SignedInControllerTest() {
         val response = mapper.readValue(mvcResult.response.contentAsString, RepositoryDTO::class.java)
         Assertions.assertThat(response.name).isEqualTo("new test")
         Assertions.assertThat(response.id).isEqualTo(test.id)
-        val found = repositoryService.findAllPermitted(userAccount!!).find { it.name == "new test" }
+        val found = projectService.findAllPermitted(userAccount!!).find { it.name == "new test" }
         Assertions.assertThat(found).isNotNull
     }
 
@@ -109,8 +109,8 @@ class ProjectControllerTest : SignedInControllerTest() {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn()
-        val repository = repositoryService.get(base.id)
-        Assertions.assertThat(repository).isEmpty
+        val project = projectService.get(base.id)
+        Assertions.assertThat(project).isEmpty
     }
 
     @Test

@@ -89,32 +89,32 @@ class ImportTestData {
             addTranslation {
                 self {
                     this.language = english
-                    this.key = repositoryBuilder.data.keys[1].self
+                    this.key = projectBuilder.data.keys[1].self
                 }
             }.self
             addTranslation {
                 self {
                     this.language = english
-                    this.key = repositoryBuilder.data.keys[2].self
+                    this.key = projectBuilder.data.keys[2].self
                 }
             }.self
             addTranslation {
                 self {
                     this.language = english
-                    this.key = repositoryBuilder.data.keys[3].self
+                    this.key = projectBuilder.data.keys[3].self
                 }
             }.self
             addTranslation {
                 self {
                     this.language = french
-                    this.key = repositoryBuilder.data.keys[0].self
+                    this.key = projectBuilder.data.keys[0].self
                     this.text = "What a french text"
                 }
             }.self
             addTranslation {
                 self {
                     this.language = french
-                    this.key = repositoryBuilder.data.keys[1].self
+                    this.key = projectBuilder.data.keys[1].self
                     this.text = "What a french text 2"
                 }
             }.self
@@ -168,7 +168,7 @@ class ImportTestData {
                         self {
                             this.language = importEnglish
                             this.key = data.importKeys[1].self
-                            this.conflict = repositoryBuilder.data.translations[1].self
+                            this.conflict = projectBuilder.data.translations[1].self
                             this.text = "Imported text"
                         }
                     }
@@ -176,14 +176,14 @@ class ImportTestData {
                         self {
                             this.language = importEnglish
                             this.key = data.importKeys[2].self
-                            this.conflict = repositoryBuilder.data.translations[2].self
+                            this.conflict = projectBuilder.data.translations[2].self
                         }
                     }
                     addImportTranslation {
                         self {
                             this.language = importEnglish
                             this.key = data.importKeys[3].self
-                            this.conflict = repositoryBuilder.data.translations[3].self
+                            this.conflict = projectBuilder.data.translations[3].self
 
                         }
                     }
@@ -265,8 +265,8 @@ class ImportTestData {
 
     fun addManyTranslations() {
         addFileIssues()
-        val repositoryBuilder = this.root.data.repositories[0]
-        val import = repositoryBuilder.data.imports[0]
+        val projectBuilder = this.root.data.repositories[0]
+        val import = projectBuilder.data.imports[0]
         import.addImportFile {
             self { name = "another.json" }
             val fr = addImportLanguage {
@@ -276,11 +276,11 @@ class ImportTestData {
                 }
             }.self
             (1..300).forEach { num ->
-                repositoryBuilder.addKey {
+                projectBuilder.addKey {
                     val key = self {
                         name = "this_is_key_$num"
                     }
-                    repositoryBuilder.addTranslation {
+                    projectBuilder.addTranslation {
                         val translation = self {
                             this.key = key
                             this.language = english

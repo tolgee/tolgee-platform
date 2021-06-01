@@ -22,10 +22,10 @@ class TestDataBuilder {
     fun addRepository(userOwner: UserAccount? = null,
                       organizationOwner: Organization? = null,
                       ft: DataBuilders.RepositoryBuilder.() -> Unit): DataBuilders.RepositoryBuilder {
-        val repository = DataBuilders.RepositoryBuilder(userOwner, organizationOwner, testDataBuilder = this)
-        data.repositories.add(repository)
-        ft(repository)
-        return repository
+        val project = DataBuilders.RepositoryBuilder(userOwner, organizationOwner, testDataBuilder = this)
+        data.repositories.add(project)
+        ft(project)
+        return project
     }
 
     fun addOrganization(ft: DataBuilders.OrganizationBuilder.() -> Unit): DataBuilders.OrganizationBuilder {

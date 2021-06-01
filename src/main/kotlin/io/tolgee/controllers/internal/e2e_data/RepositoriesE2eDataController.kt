@@ -33,7 +33,7 @@ open class RepositoriesE2eDataController(
         private val dbPopulatorReal: DbPopulatorReal,
         private val organizationRoleService: OrganizationRoleService,
         private val organizationRepository: OrganizationRepository,
-        private val repositoryService: RepositoryService,
+        private val projectService: ProjectService,
         private val projectRepository: ProjectRepository,
         private val permissionService: PermissionService,
         private val userAccountRepository: UserAccountRepository,
@@ -76,38 +76,38 @@ open class RepositoriesE2eDataController(
             }
         }
 
-        repositories.forEach { repositoryData ->
+        repositories.forEach { projectData ->
 
-            val userOwner = if (repositoryData.userOwner != null)
-                createdUsers[repositoryData.userOwner]!! else null
+            val userOwner = if (projectData.userOwner != null)
+                createdUsers[projectData.userOwner]!! else null
 
-            val organizationOwner = if (repositoryData.organizationOwner != null)
-                organizationService.get(repositoryData.organizationOwner) else null
+            val organizationOwner = if (projectData.organizationOwner != null)
+                organizationService.get(projectData.organizationOwner) else null
 
 
-            val repository = projectRepository.save(Project(
-                    name = repositoryData.name,
-                    addressPart = repositoryService.generateAddressPart(repositoryData.name),
+            val project = projectRepository.save(Project(
+                    name = projectData.name,
+                    addressPart = projectService.generateAddressPart(projectData.name),
                     userOwner = userOwner,
                     organizationOwner = organizationOwner
             ))
 
 
-            repositoryData.permittedUsers.forEach {
+            projectData.permittedUsers.forEach {
                 val user = createdUsers[it.userName]!!
-                permissionRepository.save(Permission(project = repository, user = user, type = it.permission))
+                permissionRepository.save(Permission(project = project, user = user, type = it.permission))
             }
 
             val createdLanguages = mutableListOf<String>()
 
-            repositoryData.keyData.forEach {
+            projectData.keyData.forEach {
                 it.value.keys.forEach {
                     if (!createdLanguages.contains(it)) {
-                        languageService.createLanguage(LanguageDTO(name = it, abbreviation = it), repository)
+                        languageService.createLanguage(LanguageDTO(name = it, abbreviation = it), project)
                         createdLanguages.add(it)
                     }
                 }
-                keyService.create(repository, SetTranslationsDTO(it.key, it.value))
+                keyService.create(project, SetTranslationsDTO(it.key, it.value))
             }
         }
     }
@@ -115,10 +115,10 @@ open class RepositoriesE2eDataController(
     @GetMapping(value = ["/clean"])
     @Transactional
     open fun cleanupRepositories() {
-        repositoryService.deleteAllByName("I am a great repository")
+        projectService.deleteAllByName("I am a great project")
 
         repositories.forEach {
-            repositoryService.deleteAllByName(it.name)
+            projectService.deleteAllByName(it.name)
         }
 
         organizations.forEach {
@@ -234,7 +234,7 @@ open class RepositoriesE2eDataController(
                         )
                 ),
                 RepositoryDataItem(
-                        name = "Vaclav's cool repository",
+                        name = "Vaclav's cool project",
                         userOwner = "vaclav.novak@fake.com",
                         permittedUsers = mutableListOf(
                                 PermittedUserData(
@@ -244,7 +244,7 @@ open class RepositoriesE2eDataController(
                         )
                 ),
                 RepositoryDataItem(
-                        name = "Vaclav's funny repository",
+                        name = "Vaclav's funny project",
                         userOwner = "vaclav.novak@fake.com",
                         permittedUsers = mutableListOf(
                                 PermittedUserData(

@@ -209,10 +209,10 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
         testData.setAllOverride()
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
-        val repositoryId = testData.project.id
+        val projectId = testData.project.id
         val fileId = testData.importBuilder.data.importFiles[0].self.id
         logAsUser(user.username!!, "admin")
-        val path = "/v2/repositories/${repositoryId}/import/result/files/${fileId}/issues"
+        val path = "/v2/repositories/${projectId}/import/result/files/${fileId}/issues"
         performAuthGet(path).andIsOk.andPrettyPrint.andAssertThatJson {
             node("page.totalElements").isEqualTo(204)
             node("page.size").isEqualTo(20)

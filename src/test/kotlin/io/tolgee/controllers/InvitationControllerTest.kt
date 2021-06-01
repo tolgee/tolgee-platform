@@ -18,9 +18,9 @@ class InvitationControllerTest : SignedInControllerTest() {
 
     @Test
     fun getRepositoryInvitations() {
-        val repository = dbPopulator.createBase(generateUniqueString())
-        val invitation = invitationService.create(repository, Permission.ProjectPermissionType.MANAGE)
-        val response = performAuthGet("/api/invitation/list/${repository.id}").andExpect(status().isOk).andReturn()
+        val project = dbPopulator.createBase(generateUniqueString())
+        val invitation = invitationService.create(project, Permission.ProjectPermissionType.MANAGE)
+        val response = performAuthGet("/api/invitation/list/${project.id}").andExpect(status().isOk).andReturn()
         val list: List<InvitationDTO> = response.mapResponseTo()
         assertThat(list).hasSize(1)
         assertThat(list[0].code).isEqualTo(invitation)
@@ -28,16 +28,16 @@ class InvitationControllerTest : SignedInControllerTest() {
 
     @Test
     fun acceptInvitation() {
-        val repository = dbPopulator.createBase(generateUniqueString())
-        val invitation = invitationService.create(repository, Permission.ProjectPermissionType.EDIT)
+        val project = dbPopulator.createBase(generateUniqueString())
+        val invitation = invitationService.create(project, Permission.ProjectPermissionType.EDIT)
 
         val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
         logAsUser(newUser.username!!, "pwd")
         performAuthGet("/api/invitation/accept/${invitation}").andExpect(status().isOk).andReturn()
 
-        assertThat(invitationService.getForRepository(repository)).hasSize(0)
-        assertThat(permissionService.getRepositoryPermissionType(repository.id, newUser)).isNotNull
-        val type = permissionService.getRepositoryPermissionType(repository.id, newUser)!!
+        assertThat(invitationService.getForRepository(project)).hasSize(0)
+        assertThat(permissionService.getRepositoryPermissionType(project.id, newUser)).isNotNull
+        val type = permissionService.getRepositoryPermissionType(project.id, newUser)!!
         assertThat(type).isEqualTo(Permission.ProjectPermissionType.EDIT)
     }
 }

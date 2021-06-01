@@ -1,8 +1,8 @@
-package io.tolgee.security.repository_auth
+package io.tolgee.security.project_auth
 
 import io.tolgee.model.Permission
 
 @Target(AnnotationTarget.FUNCTION)
-annotation class AccessWithRepositoryPermission(
+annotation class AccessWithProjectPermission(
         val permission: Permission.ProjectPermissionType
 )

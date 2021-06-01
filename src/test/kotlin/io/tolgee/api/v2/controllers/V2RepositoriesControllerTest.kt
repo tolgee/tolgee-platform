@@ -117,7 +117,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
 
         performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/set-permissions/EDIT", null)
                 .andIsBadRequest.andReturn().let{
-                    assertThat(it).error().hasCode("user_has_no_repository_access")
+                    assertThat(it).error().hasCode("user_has_no_project_access")
                 }
     }
 

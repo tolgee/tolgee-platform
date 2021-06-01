@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.hateoas.repository
+package io.tolgee.api.v2.hateoas.project
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModel
@@ -7,8 +7,8 @@ import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
-@Relation(collectionRelation = "repositories", itemRelation = "repository")
-open class RepositoryModel(
+@Relation(collectionRelation = "repositories", itemRelation = "project")
+open class ProjectModel(
         val id: Long,
         val name: String,
         val description: String?,
@@ -20,6 +20,6 @@ open class RepositoryModel(
         val organizationRole: OrganizationRoleType?,
         @Schema(description = "Current user's direct permission", example = "MANAGE")
       val directPermissions: Permission.ProjectPermissionType?,
-        @Schema(description = "Actual current user's permissions on this repository. You can not sort data by this column!", example = "EDIT")
+        @Schema(description = "Actual current user's permissions on this project. You can not sort data by this column!", example = "EDIT")
       val computedPermissions: Permission.ProjectPermissionType?
-) : RepresentationModel<RepositoryModel>()
+) : RepresentationModel<ProjectModel>()

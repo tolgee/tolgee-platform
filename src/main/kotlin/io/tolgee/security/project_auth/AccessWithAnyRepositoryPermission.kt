@@ -1,4 +1,4 @@
-package io.tolgee.security.repository_auth
+package io.tolgee.security.project_auth
 
 @Target(AnnotationTarget.FUNCTION)
 annotation class AccessWithAnyRepositoryPermission

@@ -9,7 +9,7 @@ import javax.persistence.EntityManager
 @Service
 class TestDataService(
         private val userAccountService: UserAccountService,
-        private val repositoryService: RepositoryService,
+        private val projectService: ProjectService,
         private val languageService: LanguageService,
         private val importService: ImportService,
         private val keyService: KeyService,
@@ -24,7 +24,7 @@ class TestDataService(
             it.self.password = userAccountService.encodePassword(it.rawPassword)
             it.self
         })
-        repositoryService.saveAll(builder.data.repositories.map { it.self })
+        projectService.saveAll(builder.data.repositories.map { it.self })
         permissionService.saveAll(builder.data.repositories.flatMap { it.data.permissions.map { it.self } })
         val languages = builder.data.repositories.flatMap { it.data.languages.map { it.self } }
         languageService.saveAll(languages)

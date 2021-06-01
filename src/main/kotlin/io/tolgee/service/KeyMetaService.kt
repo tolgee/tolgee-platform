@@ -83,9 +83,9 @@ class KeyMetaService(
             select distinct ikm from KeyMeta ikm
             join fetch ikm.key k
             left join fetch ikm.comments ikc
-            where k.project = :repository 
+            where k.project = :project 
             """)
-                .setParameter("repository", project)
+                .setParameter("project", project)
                 .setHint(PASS_DISTINCT_THROUGH, false)
                 .resultList as List<KeyMeta>
 
@@ -101,10 +101,10 @@ class KeyMetaService(
         return result
     }
 
-    fun deleteAllByRepositoryId(repositoryId: Long) {
-        keyMetaRepository.deleteAllKeyCodeReferencesByProjectId(repositoryId)
-        keyMetaRepository.deleteAllKeyCommentsByProjectId(repositoryId)
-        keyMetaRepository.deleteAllByProjectId(repositoryId)
+    fun deleteAllByRepositoryId(projectId: Long) {
+        keyMetaRepository.deleteAllKeyCodeReferencesByProjectId(projectId)
+        keyMetaRepository.deleteAllKeyCommentsByProjectId(projectId)
+        keyMetaRepository.deleteAllByProjectId(projectId)
     }
 
     fun save(meta: KeyMeta): KeyMeta = this.keyMetaRepository.save(meta)

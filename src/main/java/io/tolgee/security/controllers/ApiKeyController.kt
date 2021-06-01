@@ -14,7 +14,7 @@ import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.service.ApiKeyService
-import io.tolgee.service.RepositoryService
+import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -26,7 +26,7 @@ import javax.validation.Valid
 @RequestMapping("/api/apiKeys")
 @Tag(name = "API keys")
 class ApiKeyController(private val apiKeyService: ApiKeyService,
-                       private val repositoryService: RepositoryService,
+                       private val projectService: ProjectService,
                        private val authenticationFacade: AuthenticationFacade,
                        private val securityService: SecurityService
 ) {
@@ -38,9 +38,9 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
                 .collect(Collectors.toCollection { LinkedHashSet() })
     }
 
-    @GetMapping(path = ["/repository/{repositoryId}"])
-    @Operation(summary = "Returns all API keys for repository")
-    fun allByRepository(@PathVariable("repositoryId") repositoryId: Long?): Set<ApiKeyDTO> {
+    @GetMapping(path = ["/project/{projectId}"])
+    @Operation(summary = "Returns all API keys for project")
+    fun allByRepository(@PathVariable("projectId") repositoryId: Long?): Set<ApiKeyDTO> {
         securityService.checkRepositoryPermission(repositoryId!!, ProjectPermissionType.MANAGE)
         return apiKeyService.getAllByRepository(repositoryId).stream()
                 .map { apiKey: ApiKey? -> ApiKeyDTO.fromEntity(apiKey) }
@@ -50,9 +50,10 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
     @PostMapping(path = [""])
     @Operation(summary = "Creates new API key with provided scopes")
     fun create(@RequestBody @Valid createApiKeyDTO: CreateApiKeyDTO?): ApiKeyDTO {
-        val repository = repositoryService.get(createApiKeyDTO!!.repositoryId).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
-        securityService.checkApiKeyScopes(createApiKeyDTO.scopes, repository)
-        return apiKeyService.createApiKey(authenticationFacade.userAccount, createApiKeyDTO.scopes, repository)
+        val repository = projectService.get(createApiKeyDTO!!.projectId!!)
+                .orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
+        securityService.checkApiKeyScopes(createApiKeyDTO.scopes!!, repository)
+        return apiKeyService.createApiKey(authenticationFacade.userAccount, createApiKeyDTO.scopes!!, repository)
     }
 
     @PostMapping(path = ["/edit"])

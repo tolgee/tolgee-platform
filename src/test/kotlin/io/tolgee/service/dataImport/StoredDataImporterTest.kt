@@ -48,8 +48,8 @@ class StoredDataImporterTest : AbstractSpringTest() {
         importTestData.setAllResolved()
         importTestData.root.data.repositories[0].addTranslation {
             self {
-                language = repositoryBuilder.data.languages[0].self
-                key = repositoryBuilder.data.keys[4].self
+                language = projectBuilder.data.languages[0].self
+                key = projectBuilder.data.keys[4].self
                 text = "Old translation text"
             }
         }

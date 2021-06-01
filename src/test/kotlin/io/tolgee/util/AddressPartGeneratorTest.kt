@@ -22,8 +22,8 @@ class AddressPartGeneratorTest : AbstractTestNGSpringContextTests() {
 
     @Test
     fun testValidInput() {
-        assertThat(addressPartGenerator.generate("Hello I am cool Repository name", 3, 50) { true })
-                .isEqualTo("hello-i-am-cool-repository-name")
+        assertThat(addressPartGenerator.generate("Hello I am cool Project name", 3, 50) { true })
+                .isEqualTo("hello-i-am-cool-project-name")
     }
 
     @Test

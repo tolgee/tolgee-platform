@@ -43,10 +43,10 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
 
     @Test
     fun `it parses zip file and saves issues`() {
-        val repository = dbPopulator.createBase(generateUniqueString())
+        val project = dbPopulator.createBase(generateUniqueString())
         commitTransaction()
 
-        performStreamingImport(repositoryId = repository.id, mapOf(Pair("zipOfUnknown.zip", zipOfUnknown)))
+        performStreamingImport(projectId = project.id, mapOf(Pair("zipOfUnknown.zip", zipOfUnknown)))
                 .andAssertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
                 .andAssertContainsMessage(FOUND_ARCHIVE).andPrettyPrintStreamingResult().andAssertStreamingResultJson {
                     node("errors[2].code").isEqualTo("cannot_parse_file")
@@ -55,28 +55,28 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
 
     @Test
     fun `it saves proper data and returns correct response `() {
-        val repository = dbPopulator.createBase(generateUniqueString())
+        val project = dbPopulator.createBase(generateUniqueString())
         commitTransaction()
 
-        performImport(repositoryId = repository.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
+        performImport(projectId = project.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
                 .andPrettyPrint.andAssertThatJson {
                     node("result._embedded.languages").isArray.hasSize(3)
                 }
-        validateSavedJsonImportData(repository)
+        validateSavedJsonImportData(project)
     }
 
     @Test
     fun `it handles po file`() {
-        val repository = dbPopulator.createBase(generateUniqueString())
+        val project = dbPopulator.createBase(generateUniqueString())
 
-        performImport(repositoryId = repository.id, mapOf(Pair("example.po", poFile)))
+        performImport(projectId = project.id, mapOf(Pair("example.po", poFile)))
                 .andPrettyPrint.andAssertThatJson {
                     node("result._embedded.languages").isArray.hasSize(1)
                 }.andReturn()
 
         entityManager.clear()
 
-        importService.find(repository.id, repository.userOwner?.id!!)?.let {
+        importService.find(project.id, project.userOwner?.id!!)?.let {
             assertThat(it.files).hasSize(1)
             assertThat(it.files[0].languages[0].translations).hasSize(8)
         }
@@ -84,9 +84,9 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
 
     @Test
     fun `it handles xliff file`() {
-        val repository = dbPopulator.createBase(generateUniqueString())
+        val project = dbPopulator.createBase(generateUniqueString())
 
-        performImport(repositoryId = repository.id, mapOf(Pair("example.xliff", xliffFile)))
+        performImport(projectId = project.id, mapOf(Pair("example.xliff", xliffFile)))
                 .andPrettyPrint.andAssertThatJson {
                     node("result._embedded.languages").isArray.hasSize(2)
                 }.andReturn()
@@ -94,9 +94,9 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
 
     @Test
     fun `it returns error when json could not be parsed`() {
-        val repository = dbPopulator.createBase(generateUniqueString())
+        val project = dbPopulator.createBase(generateUniqueString())
 
-        performImport(repositoryId = repository.id, mapOf(Pair("error.json", errorJson)))
+        performImport(projectId = project.id, mapOf(Pair("error.json", errorJson)))
                 .andIsOk.andAssertThatJson {
                     node("errors[0].code").isEqualTo("cannot_parse_file")
                     node("errors[0].params[0]").isEqualTo("error.json")
@@ -107,11 +107,11 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
 
     @Test
     fun `it throws when more then 100 languages`() {
-        val repository = dbPopulator.createBase(generateUniqueString())
+        val project = dbPopulator.createBase(generateUniqueString())
 
         val data = (1..101).associate { "simple$it.json" as String? to simpleJson }
 
-        performImport(repositoryId = repository.id, data)
+        performImport(projectId = project.id, data)
                 .andIsBadRequest.andPrettyPrint.andAssertThatJson {
                     node("code").isEqualTo("cannot_add_more_then_100_languages")
                 }
@@ -119,15 +119,15 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
 
     @Test
     fun `it saves proper data and returns correct response (streamed)`() {
-        val repository = dbPopulator.createBase(generateUniqueString())
+        val project = dbPopulator.createBase(generateUniqueString())
         commitTransaction()
 
-        performStreamingImport(repositoryId = repository.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
+        performStreamingImport(projectId = project.id, mapOf(Pair("zipOfJsons.zip", zipOfJsons)))
                 .andAssertContainsMessage(FOUND_FILES_IN_ARCHIVE, listOf(3))
                 .andAssertContainsMessage(FOUND_ARCHIVE).andPrettyPrintStreamingResult().andAssertStreamingResultJson {
                     node("result._embedded.languages").isArray.hasSize(3)
                 }
-        validateSavedJsonImportData(repository)
+        validateSavedJsonImportData(project)
     }
 
     private fun validateSavedJsonImportData(project: Project) {
@@ -148,9 +148,9 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
         }
     }
 
-    private fun performImport(repositoryId: Long, files: Map<String?, Resource>): ResultActions {
+    private fun performImport(projectId: Long, files: Map<String?, Resource>): ResultActions {
         val builder = MockMvcRequestBuilders
-                .multipart("/v2/repositories/${repositoryId}/import")
+                .multipart("/v2/repositories/${projectId}/import")
 
         files.forEach {
             builder.file(MockMultipartFile(
@@ -162,9 +162,9 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
         return mvc.perform(LoggedRequestFactory.addToken(builder))
     }
 
-    private fun performStreamingImport(repositoryId: Long, files: Map<String?, Resource>): ResultActions {
+    private fun performStreamingImport(projectId: Long, files: Map<String?, Resource>): ResultActions {
         val builder = MockMvcRequestBuilders
-                .multipart("/v2/repositories/${repositoryId}/import/with-streaming-response")
+                .multipart("/v2/repositories/${projectId}/import/with-streaming-response")
 
         files.forEach {
             builder.file(MockMultipartFile(

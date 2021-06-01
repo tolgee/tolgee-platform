@@ -19,18 +19,18 @@ class ExportControllerTest : ProjectAuthControllerTest() {
     @Test
     @Transactional
     fun exportZipJson() {
-        val repository = dbPopulator.populate(generateUniqueString())
+        val project = dbPopulator.populate(generateUniqueString())
         commitTransaction()
-        val mvcResult = performAuthGet("/api/repository/" + repository.id + "/export/jsonZip")
+        val mvcResult = performAuthGet("/api/project/" + project.id + "/export/jsonZip")
                 .andExpect(MockMvcResultMatchers.status().isOk).andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
         mvcResult.response
         val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
-        repository.languages.forEach(Consumer { l: Language ->
+        project.languages.forEach(Consumer { l: Language ->
             val name = l.abbreviation + ".json"
             Assertions.assertThat(fileSizes).containsKey(name)
         })
         //cleanup
-        repositoryService.deleteRepository(repository.id)
+        projectService.deleteRepository(project.id)
     }
 
     @Test
@@ -47,7 +47,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
             Assertions.assertThat(fileSizes).containsKey(name)
         })
         //cleanup
-        repositoryService.deleteRepository(project.id)
+        projectService.deleteRepository(project.id)
     }
 
     @Test

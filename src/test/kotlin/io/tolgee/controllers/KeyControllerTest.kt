@@ -35,7 +35,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
 
     @Test
     fun create() {
-        performCreate(repositoryId = project.id, content = keyDto).andExpect(status().`is`(200))
+        performCreate(projectId = project.id, content = keyDto).andExpect(status().`is`(200))
                 .andReturn()
 
         assertThat(keyService.get(project, PathDTO.fromFullPath("test string"))).isNotEmpty
@@ -44,7 +44,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     @Test
     fun createValidation() {
         val result = performCreate(
-                repositoryId = project.id,
+                projectId = project.id,
                 content = SetTranslationsDTO("", mapOf(Pair("en", "aaa"))))
                 .andExpect(status().isBadRequest)
                 .andReturn()
@@ -55,7 +55,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     fun editDeprecated() {
         keyService.create(project, keyDto)
 
-        performAuthPost("/api/repository/${project.id}/keys/edit", DeprecatedEditKeyDTO(
+        performAuthPost("/api/project/${project.id}/keys/edit", DeprecatedEditKeyDTO(
                 oldFullPathString = "test string",
                 newFullPathString = "hello"
         )).andExpect(status().`is`(200))
@@ -70,7 +70,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
         keyService.create(project, keyDto)
 
         performEdit(
-                repositoryId = project.id,
+                projectId = project.id,
                 content = EditKeyDTO(
                         currentName = "test string",
                         newName = "hello"
@@ -89,7 +89,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
 
         val keyInstance = keyService.get(project, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
 
-        performDelete(repositoryId = project.id, keyInstance.id!!)
+        performDelete(projectId = project.id, keyInstance.id!!)
 
         assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto.key))).isEmpty
         assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto2.key))).isNotEmpty
@@ -103,7 +103,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
         val keyInstance = keyService.get(project, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
         val keyInstance2 = keyService.get(project, PathDTO.fromFullPath(keyDto2.key)).orElseGet(null)
 
-        performDelete(repositoryId = project.id, setOf(keyInstance.id!!, keyInstance2.id!!))
+        performDelete(projectId = project.id, setOf(keyInstance.id!!, keyInstance2.id!!))
 
         assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto.key))).isEmpty
         assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto2.key))).isEmpty
@@ -122,30 +122,30 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     @Test
     fun getKeyTranslations() {
         val base = dbPopulator.populate(generateUniqueString())
-        val got = performAuthPost("/api/repository/${base.id}/keys/translations/en,de",
+        val got = performAuthPost("/api/project/${base.id}/keys/translations/en,de",
                 GetKeyTranslationsReqDto("sampleApp.hello_world!")).andReturn()
                 .mapResponseTo<Map<String, String>>()
         assertThat(got["en"]).isEqualTo("Hello world!")
         assertThat(got["de"]).isEqualTo("Hallo Welt!")
     }
 
-    private fun performCreate(repositoryId: Long, content: SetTranslationsDTO): ResultActions {
-        return performAuthPost("/api/repository/$repositoryId/keys", content)
+    private fun performCreate(projectId: Long, content: SetTranslationsDTO): ResultActions {
+        return performAuthPost("/api/project/$projectId/keys", content)
     }
 
-    private fun performEdit(repositoryId: Long, content: EditKeyDTO): ResultActions {
-        return performAuthPut("/api/repository/$repositoryId/keys", content)
+    private fun performEdit(projectId: Long, content: EditKeyDTO): ResultActions {
+        return performAuthPut("/api/project/$projectId/keys", content)
     }
 
-    private fun performDelete(repositoryId: Long, ids: Set<Long>): ResultActions {
-        return performAuthDelete("/api/repository/$repositoryId/keys", ids)
+    private fun performDelete(projectId: Long, ids: Set<Long>): ResultActions {
+        return performAuthDelete("/api/project/$projectId/keys", ids)
     }
 
-    private fun performDelete(repositoryId: Long, id: Long): ResultActions {
-        return performAuthDelete("/api/repository/$repositoryId/keys/$id", null)
+    private fun performDelete(projectId: Long, id: Long): ResultActions {
+        return performAuthDelete("/api/project/$projectId/keys/$id", null)
     }
 
-    private fun performGet(repositoryId: Long, id: Long): ResultActions {
-        return performAuthGet("/api/repository/$repositoryId/keys/$id")
+    private fun performGet(projectId: Long, id: Long): ResultActions {
+        return performAuthGet("/api/project/$projectId/keys/$id")
     }
 }

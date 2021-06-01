@@ -51,8 +51,8 @@ class LanguageService(
     }
 
     @Transactional
-    fun findAll(repositoryId: Long?): LanguageSet {
-        return LanguageSet(languageRepository.findAllByProjectId(repositoryId))
+    fun findAll(projectId: Long?): LanguageSet {
+        return LanguageSet(languageRepository.findAllByProjectId(projectId))
     }
 
     fun findById(id: Long): Optional<Language> {
@@ -63,12 +63,12 @@ class LanguageService(
         return languageRepository.findByAbbreviationAndProject(abbreviation, project)
     }
 
-    fun findByAbbreviation(abbreviation: String?, repositoryId: Long): Optional<Language> {
-        return languageRepository.findByAbbreviationAndProjectId(abbreviation, repositoryId)
+    fun findByAbbreviation(abbreviation: String?, projectId: Long): Optional<Language> {
+        return languageRepository.findByAbbreviationAndProjectId(abbreviation, projectId)
     }
 
-    fun findByAbbreviations(abbreviations: Collection<String>?, repositoryId: Long?): LanguageSet {
-        val langs = languageRepository.findAllByAbbreviationInAndProjectId(abbreviations, repositoryId)
+    fun findByAbbreviations(abbreviations: Collection<String>?, projectId: Long?): LanguageSet {
+        val langs = languageRepository.findAllByAbbreviationInAndProjectId(abbreviations, projectId)
         if (!langs.stream().map(Language::abbreviation).collect(Collectors.toSet()).containsAll(abbreviations!!)) {
             throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
         }
@@ -93,8 +93,8 @@ class LanguageService(
         return languageRepository.findByNameAndProject(name, project)
     }
 
-    fun deleteAllByRepository(repositoryId: Long?) {
-        languageRepository.deleteAllByProjectId(repositoryId)
+    fun deleteAllByRepository(projectId: Long?) {
+        languageRepository.deleteAllByProjectId(projectId)
     }
 
     @Autowired

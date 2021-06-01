@@ -51,7 +51,7 @@ class DataBuilders {
     }
 
     class ImportBuilder(
-            val repositoryBuilder: RepositoryBuilder,
+            val projectBuilder: RepositoryBuilder,
             author: UserAccount? = null
     ) : BaseEntityDataBuilder<Import>() {
         class DATA {
@@ -60,7 +60,7 @@ class DataBuilders {
 
         val data = DATA()
 
-        override var self: Import = Import(author ?: repositoryBuilder.self.userOwner!!, repositoryBuilder.self)
+        override var self: Import = Import(author ?: projectBuilder.self.userOwner!!, projectBuilder.self)
 
         fun addImportFile(ft: FT<ImportFileBuilder>) = addOperation(data.importFiles, ft)
     }
@@ -147,7 +147,7 @@ class DataBuilders {
     }
 
     class KeyBuilder(
-            val repositoryBuilder: RepositoryBuilder
+            val projectBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Key> {
 
         class DATA {
@@ -157,7 +157,7 @@ class DataBuilders {
         val data = DATA()
 
         override var self: Key = Key().also {
-            it.project = repositoryBuilder.self
+            it.project = projectBuilder.self
         }
 
         fun addMeta(ft: FT<KeyMetaBuilder>) {
@@ -166,15 +166,15 @@ class DataBuilders {
     }
 
     class LanguageBuilder(
-            val repositoryBuilder: RepositoryBuilder
+            val projectBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Language> {
         override var self: Language = Language().apply {
-            project = repositoryBuilder.self
+            project = projectBuilder.self
         }
     }
 
     class TranslationBuilder(
-            val repositoryBuilder: RepositoryBuilder
+            val projectBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Translation> {
         override var self: Translation = Translation().apply { text = "What a text" }
     }
@@ -187,7 +187,7 @@ class DataBuilders {
     }
 
     class PermissionBuilder(
-            val repositoryBuilder: RepositoryBuilder
+            val projectBuilder: RepositoryBuilder
     ) : EntityDataBuilder<Permission> {
         override var self: Permission = Permission()
     }

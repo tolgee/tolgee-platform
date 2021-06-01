@@ -94,8 +94,8 @@ class UserAccountService(
         return userAccountRepository.getAllInOrganization(organizationId, pageable, search = search ?: "")
     }
 
-    fun getAllInRepository(repositoryId: Long, pageable: Pageable, search: String?): Page<UserAccountInProjectView> {
-        return userAccountRepository.getAllInProject(repositoryId, pageable, search = search)
+    fun getAllInRepository(projectId: Long, pageable: Pageable, search: String?): Page<UserAccountInProjectView> {
+        return userAccountRepository.getAllInProject(projectId, pageable, search = search)
     }
 
     fun encodePassword(rawPassword: String): String {

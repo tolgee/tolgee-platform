@@ -35,8 +35,8 @@ open class ApiKeyService @Autowired constructor(private val apiKeyRepository: Ap
         return apiKeyRepository.getAllByUserAccountOrderById(userAccount)
     }
 
-    open fun getAllByRepository(repositoryId: Long?): Set<ApiKey> {
-        return apiKeyRepository.getAllByProjectId(repositoryId)
+    open fun getAllByRepository(projectId: Long?): Set<ApiKey> {
+        return apiKeyRepository.getAllByProjectId(projectId)
     }
 
     open fun getApiKey(apiKey: String?): Optional<ApiKey> {
@@ -60,7 +60,7 @@ open class ApiKeyService @Autowired constructor(private val apiKeyRepository: Ap
         apiKeyRepository.save(apiKey)
     }
 
-    open fun deleteAllByRepository(repositoryId: Long?) {
-        apiKeyRepository.deleteAllByProjectId(repositoryId)
+    open fun deleteAllByRepository(projectId: Long?) {
+        apiKeyRepository.deleteAllByProjectId(projectId)
     }
 }
