@@ -1,16 +1,20 @@
-import {default as React, FunctionComponent} from 'react';
-import {TextField} from '../common/form/fields/TextField';
-import {T} from "@tolgee/react";
+import { default as React, FunctionComponent } from 'react';
+import { TextField } from '../common/form/fields/TextField';
+import { T } from '@tolgee/react';
 
-interface SetPasswordFieldsProps {
+interface SetPasswordFieldsProps {}
 
-}
-
-export const SetPasswordFields: FunctionComponent<SetPasswordFieldsProps> = (props) => {
-    return (
-        <>
-            <TextField name="password" type="password" label={<T>Password</T>}/>
-            <TextField name="passwordRepeat" type="password" label={<T>Password confirmation</T>}/>
-        </>
-    );
+export const SetPasswordFields: FunctionComponent<SetPasswordFieldsProps> = (
+  props
+) => {
+  return (
+    <>
+      <TextField name="password" type="password" label={<T>Password</T>} />
+      <TextField
+        name="passwordRepeat"
+        type="password"
+        label={<T>Password confirmation</T>}
+      />
+    </>
+  );
 };

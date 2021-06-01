@@ -1,26 +1,26 @@
-import {applyMiddleware, combineReducers, createStore} from 'redux';
+import { applyMiddleware, combineReducers, createStore } from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import {composeWithDevTools} from 'redux-devtools-extension';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import promise from 'redux-promise-middleware';
-import {container} from 'tsyringe';
-import {ImplicitReducer} from './ImplicitReducer';
-import {RepositoryActions} from './repository/RepositoryActions';
-import {LanguageActions} from './languages/LanguageActions';
-import {GlobalActions} from './global/GlobalActions';
-import {ErrorActions} from './global/ErrorActions';
-import {RedirectionActions} from './global/RedirectionActions';
-import {MessageActions} from './global/MessageActions';
-import {SignUpActions} from './global/SignUpActions';
-import {RepositoryInvitationActions} from './repository/invitations/RepositoryInvitationActions';
-import {SecurityService} from "../service/SecurityService";
-import {MessageService} from "../service/MessageService";
-import {TranslationActions} from "./repository/TranslationActions";
-import {UserApiKeysActions} from "./api_keys/UserApiKeysActions";
-import {ExportActions} from "./repository/ExportActions";
-import {UserActions} from "./global/UserActions";
-import {ScreenshotActions} from "./repository/ScreenshotActions";
-import {OrganizationActions} from "./organization/OrganizationActions";
-import {ImportActions} from "./repository/ImportActions";
+import { container } from 'tsyringe';
+import { ImplicitReducer } from './ImplicitReducer';
+import { RepositoryActions } from './repository/RepositoryActions';
+import { LanguageActions } from './languages/LanguageActions';
+import { GlobalActions } from './global/GlobalActions';
+import { ErrorActions } from './global/ErrorActions';
+import { RedirectionActions } from './global/RedirectionActions';
+import { MessageActions } from './global/MessageActions';
+import { SignUpActions } from './global/SignUpActions';
+import { RepositoryInvitationActions } from './repository/invitations/RepositoryInvitationActions';
+import { SecurityService } from '../service/SecurityService';
+import { MessageService } from '../service/MessageService';
+import { TranslationActions } from './repository/TranslationActions';
+import { UserApiKeysActions } from './api_keys/UserApiKeysActions';
+import { ExportActions } from './repository/ExportActions';
+import { UserActions } from './global/UserActions';
+import { ScreenshotActions } from './repository/ScreenshotActions';
+import { OrganizationActions } from './organization/OrganizationActions';
+import { ImportActions } from './repository/ImportActions';
 
 const implicitReducer = container.resolve(ImplicitReducer);
 const repositoryActions = container.resolve(RepositoryActions);
@@ -29,8 +29,12 @@ const globalActions = container.resolve(GlobalActions);
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
 
-const appReducer = (appState, action) => combineReducers({
-    translations: implicitReducer.create(container.resolve(TranslationActions), appState),
+const appReducer = (appState, action) =>
+  combineReducers({
+    translations: implicitReducer.create(
+      container.resolve(TranslationActions),
+      appState
+    ),
     global: implicitReducer.create(globalActions),
     repositories: implicitReducer.create(repositoryActions),
     languages: implicitReducer.create(languageActions),
@@ -38,53 +42,71 @@ const appReducer = (appState, action) => combineReducers({
     redirection: implicitReducer.create(redirectionActions),
     message: implicitReducer.create(container.resolve(MessageActions)),
     signUp: implicitReducer.create(container.resolve(SignUpActions)),
-    repositoryInvitation: implicitReducer.create(container.resolve(RepositoryInvitationActions)),
+    repositoryInvitation: implicitReducer.create(
+      container.resolve(RepositoryInvitationActions)
+    ),
     export: implicitReducer.create(container.resolve(ExportActions)),
     userApiKey: implicitReducer.create(container.resolve(UserApiKeysActions)),
     user: implicitReducer.create(container.resolve(UserActions)),
     screenshots: implicitReducer.create(container.resolve(ScreenshotActions)),
-    organizations: implicitReducer.create(container.resolve(OrganizationActions)),
+    organizations: implicitReducer.create(
+      container.resolve(OrganizationActions)
+    ),
     import: implicitReducer.create(container.resolve(ImportActions)),
-
-})(appState, action);
+  })(appState, action);
 
 const rootReducer = (state, action): ReturnType<typeof appReducer> => {
-    /**
-     * reset state on logout
-     */
-    if (action.type === globalActions.logout.type) {
-        state = undefined;
-        //remove after login link to avoid buggy behaviour
-        container.resolve(SecurityService).setLogoutMark();
-    }
+  /**
+   * reset state on logout
+   */
+  if (action.type === globalActions.logout.type) {
+    state = undefined;
+    //remove after login link to avoid buggy behaviour
+    container.resolve(SecurityService).setLogoutMark();
+  }
 
-    return appReducer(state, action);
+  return appReducer(state, action);
 };
 
-const successMessageMiddleware = store => next => action => {
-    if (action.meta && action.meta.successMessage && action.type.indexOf("_PENDING") <= -1 && action.type.indexOf("_REJECTED") <= -1) {
-        container.resolve(MessageService).success(action.meta.successMessage);
-    }
+const successMessageMiddleware = (store) => (next) => (action) => {
+  if (
+    action.meta &&
+    action.meta.successMessage &&
+    action.type.indexOf('_PENDING') <= -1 &&
+    action.type.indexOf('_REJECTED') <= -1
+  ) {
+    container.resolve(MessageService).success(action.meta.successMessage);
+  }
 
-    next(action);
+  next(action);
 };
 
-const redirectAfterMiddleware = store => next => action => {
-    if (action.meta && action.meta.redirectAfter && action.type.indexOf("_PENDING") <= -1 && action.type.indexOf("_REJECTED") <= -1) {
-        const path = typeof action.meta.redirectAfter === "function" ? action.meta.redirectAfter(action) : action.meta.redirectAfter;
-        redirectionActions.redirect.dispatch(path);
-    }
-    next(action);
+const redirectAfterMiddleware = (store) => (next) => (action) => {
+  if (
+    action.meta &&
+    action.meta.redirectAfter &&
+    action.type.indexOf('_PENDING') <= -1 &&
+    action.type.indexOf('_REJECTED') <= -1
+  ) {
+    const path =
+      typeof action.meta.redirectAfter === 'function'
+        ? action.meta.redirectAfter(action)
+        : action.meta.redirectAfter;
+    redirectionActions.redirect.dispatch(path);
+  }
+  next(action);
 };
 
 export type AppState = ReturnType<typeof appReducer>;
 
 export default function configureStore() {
-    const middlewares = [thunkMiddleware, promise, redirectAfterMiddleware, successMessageMiddleware];
-    const middleWareEnhancer = applyMiddleware(...middlewares);
+  const middlewares = [
+    thunkMiddleware,
+    promise,
+    redirectAfterMiddleware,
+    successMessageMiddleware,
+  ];
+  const middleWareEnhancer = applyMiddleware(...middlewares);
 
-    return createStore(
-        rootReducer,
-        composeWithDevTools(middleWareEnhancer)
-    );
+  return createStore(rootReducer, composeWithDevTools(middleWareEnhancer));
 }
