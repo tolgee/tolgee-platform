@@ -2,14 +2,17 @@ const standardValidationProp = 'STANDARD_VALIDATION';
 const customValidationProp = 'CUSTOM_VALIDATION';
 
 const isStandardValidationError = (error) => {
+  // eslint-disable-next-line no-prototype-builtins
   return error.hasOwnProperty(standardValidationProp);
 };
 
 const isCustomValidationError = (error) => {
+  // eslint-disable-next-line no-prototype-builtins
   return error.hasOwnProperty(customValidationProp);
 };
 
 const isErrorResponseDTO = (error) => {
+  // eslint-disable-next-line no-prototype-builtins
   return error.hasOwnProperty('code');
 };
 

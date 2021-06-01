@@ -12,6 +12,8 @@ export type StateModifier<StateType, PayloadType> = (
   action: ActionType<PayloadType>
 ) => StateType;
 
+const a = 'heello';
+
 export abstract class AbstractAction<
   PayloadType = any,
   StateType = any,

@@ -51,7 +51,7 @@
     "test": "craco test",
     "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.ts",
     "prettier": "prettier --write ./src",
-    "eslint": "eslint */**/*.{ts,tsx}"
+    "eslint": "eslint . --ext .ts --ext .tsx"
   },
   "eslintConfig": {
     "extends": [

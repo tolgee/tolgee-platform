@@ -9,7 +9,6 @@ import {
   Loadable,
   StateWithLoadables,
 } from '../AbstractLoadableActions';
-import React from 'react';
 import { T } from '@tolgee/react';
 import { AppState } from '../index';
 import { useSelector } from 'react-redux';

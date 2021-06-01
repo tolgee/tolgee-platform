@@ -17,7 +17,7 @@ export class RepositoryInvitationActions extends AbstractLoadableActions<Reposit
     (repositoryId, type) =>
       this.invitationService.generateInvitationCode(repositoryId, type)
   )
-    .build.onPending((state, action) => {
+    .build.onPending((state) => {
       return { ...state, invitationCode: null, invitationLoading: true };
     })
     .build.onFullFilled((state, action) => {
@@ -27,7 +27,7 @@ export class RepositoryInvitationActions extends AbstractLoadableActions<Reposit
         invitationLoading: false,
       };
     })
-    .build.onRejected((state, action) => {
+    .build.onRejected((state) => {
       return { ...state, invitationCode: null, invitationLoading: false };
     });
 
