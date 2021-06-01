@@ -878,7 +878,7 @@
         <dropUniqueConstraint constraintName="language_repository_name" tableName="language"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-31">
-        <dropUniqueConstraint constraintName="repository_address_part_unique" tableName="repository"/>
+        <dropUniqueConstraint constraintName="repository_address_part_unique" tableName="project"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-32">
         <dropUniqueConstraint constraintName="source_repository_id_name" tableName="key"/>
