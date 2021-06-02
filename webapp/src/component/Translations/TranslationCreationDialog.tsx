@@ -1,21 +1,21 @@
 import * as React from 'react';
-import { useContext, useEffect } from 'react';
+import {useContext, useEffect} from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { useRepository } from '../../hooks/useRepository';
-import { LINKS, PARAMS } from '../../constants/links';
-import { container } from 'tsyringe';
-import { RedirectionActions } from '../../store/global/RedirectionActions';
-import { StandardForm } from '../common/form/StandardForm';
-import { LanguagesMenu } from '../common/form/LanguagesMenu';
-import { TranslationActions } from '../../store/repository/TranslationActions';
-import { TextField } from '../common/form/fields/TextField';
-import { ResourceErrorComponent } from '../common/form/ResourceErrorComponent';
-import { MessageService } from '../../service/MessageService';
-import { Validation } from '../../constants/GlobalValidationSchema';
-import { TranslationListContext } from './TtranslationsGridContextProvider';
-import { useTranslate } from '@tolgee/react';
+import {useProject} from '../../hooks/useProject';
+import {LINKS, PARAMS} from '../../constants/links';
+import {container} from 'tsyringe';
+import {RedirectionActions} from '../../store/global/RedirectionActions';
+import {StandardForm} from '../common/form/StandardForm';
+import {LanguagesMenu} from '../common/form/LanguagesMenu';
+import {TranslationActions} from '../../store/project/TranslationActions';
+import {TextField} from '../common/form/fields/TextField';
+import {ResourceErrorComponent} from '../common/form/ResourceErrorComponent';
+import {MessageService} from '../../service/MessageService';
+import {Validation} from '../../constants/GlobalValidationSchema';
+import {TranslationListContext} from './TtranslationsGridContextProvider';
+import {useTranslate} from '@tolgee/react';
 
 export type TranslationCreationValue = {
   key: string;
@@ -27,7 +27,7 @@ const translationActions = container.resolve(TranslationActions);
 const messaging = container.resolve(MessageService);
 
 export function TranslationCreationDialog() {
-  const repositoryDTO = useRepository();
+  const projectDTO = useProject();
 
   const t = useTranslate();
 
@@ -45,7 +45,7 @@ export function TranslationCreationDialog() {
     translationActions.loadableReset.createKey.dispatch();
     redirectionActions.redirect.dispatch(
       LINKS.REPOSITORY_TRANSLATIONS.build({
-        [PARAMS.REPOSITORY_ID]: repositoryDTO.id,
+        [PARAMS.REPOSITORY_ID]: projectDTO.id,
       })
     );
   }
@@ -59,7 +59,7 @@ export function TranslationCreationDialog() {
   }, [saveLoadable.error, saveLoadable.loaded]);
 
   function onSubmit(v) {
-    translationActions.loadableActions.createKey.dispatch(repositoryDTO.id, v);
+    translationActions.loadableActions.createKey.dispatch(projectDTO.id, v);
   }
 
   const initialTranslations = selectedLanguages.reduce(

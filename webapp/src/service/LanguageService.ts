@@ -1,30 +1,30 @@
-import { container, singleton } from 'tsyringe';
-import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { LanguageDTO } from './response.types';
+import {container, singleton} from 'tsyringe';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
+import {LanguageDTO} from './response.types';
 
 const http = container.resolve(ApiV1HttpService);
 
 @singleton()
 export class LanguageService {
-  public getLanguages = async (repositoryId: number): Promise<LanguageDTO[]> =>
-    (await http.fetch(`repository/${repositoryId}/languages`)).json();
+  public getLanguages = async (projectId: number): Promise<LanguageDTO[]> =>
+    (await http.fetch(`project/${projectId}/languages`)).json();
 
-  get = (repositoryId, languageId): Promise<LanguageDTO> =>
-    http.get(`repository/${repositoryId}/languages/${languageId}`);
+  get = (projectId, languageId): Promise<LanguageDTO> =>
+    http.get(`project/${projectId}/languages/${languageId}`);
 
-  create = (repositoryId, value: LanguageDTO): Promise<LanguageDTO> =>
-    http.post(`repository/${repositoryId}/languages`, value);
+  create = (projectId, value: LanguageDTO): Promise<LanguageDTO> =>
+    http.post(`project/${projectId}/languages`, value);
 
   async editLanguage(
-    repositoryId: number,
+    projectId: number,
     data: LanguageDTO
   ): Promise<LanguageDTO> {
     return await (
-      await http.postNoJson(`repository/${repositoryId}/languages/edit`, data)
+      await http.postNoJson(`project/${projectId}/languages/edit`, data)
     ).json();
   }
 
-  delete(repositoryId: number, id: number): Promise<null> {
-    return http.delete('repository/' + repositoryId + '/languages/' + id);
+  delete(projectId: number, id: number): Promise<null> {
+    return http.delete('project/' + projectId + '/languages/' + id);
   }
 }

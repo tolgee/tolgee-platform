@@ -1,25 +1,25 @@
-import { Button, Menu, MenuItem } from '@material-ui/core';
-import { ArrowDropDown } from '@material-ui/icons';
-import { T } from '@tolgee/react';
+import {Button, Menu, MenuItem} from '@material-ui/core';
+import {ArrowDropDown} from '@material-ui/icons';
+import {T} from '@tolgee/react';
 import * as React from 'react';
-import { ComponentProps, FunctionComponent } from 'react';
+import {ComponentProps, FunctionComponent} from 'react';
 
-import { components } from '../../service/apiSchema';
-import { RepositoryPermissionType } from '../../service/response.types';
-import { RepositoryPermissions } from '../../hooks/useRepositoryPermissions';
+import {components} from '../../service/apiSchema';
+import {ProjectPermissionType} from '../../service/response.types';
+import {ProjectPermissions} from '../../hooks/useProjectPermissions';
 
 export const PermissionsMenu: FunctionComponent<{
   selected: NonNullable<
-    components['schemas']['RepositoryModel']['computedPermissions']
+    components['schemas']['ProjectModel']['computedPermissions']
   >;
   onSelect: (
     value: NonNullable<
-      components['schemas']['RepositoryModel']['computedPermissions']
+      components['schemas']['ProjectModel']['computedPermissions']
     >
   ) => void;
   buttonProps?: ComponentProps<typeof Button>;
   minPermissions?: NonNullable<
-    components['schemas']['RepositoryModel']['computedPermissions']
+    components['schemas']['ProjectModel']['computedPermissions']
   >;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -32,11 +32,11 @@ export const PermissionsMenu: FunctionComponent<{
     setAnchorEl(event.currentTarget);
   };
 
-  let types = Object.keys(RepositoryPermissionType);
+  let types = Object.keys(ProjectPermissionType);
 
   if (props.minPermissions) {
     types = types.filter((k) =>
-      new RepositoryPermissions(k as any).satisfiesPermission(
+      new ProjectPermissions(k as any).satisfiesPermission(
         props.minPermissions as any
       )
     );

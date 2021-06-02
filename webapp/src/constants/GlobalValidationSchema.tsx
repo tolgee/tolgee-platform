@@ -1,9 +1,9 @@
 import * as Yup from 'yup';
-import { container } from 'tsyringe';
-import { SignUpService } from '../service/SignUpService';
+import {container} from 'tsyringe';
+import {SignUpService} from '../service/SignUpService';
 import React from 'react';
-import { T } from '@tolgee/react';
-import { OrganizationService } from '../service/OrganizationService';
+import {T} from '@tolgee/react';
+import {OrganizationService} from '../service/OrganizationService';
 
 Yup.setLocale({
   // use constant translation keys for messages without values
@@ -92,7 +92,7 @@ export class Validation {
   });
 
   static readonly CREATE_API_KEY = Yup.object().shape({
-    repositoryId: Yup.number().required(),
+    projectId: Yup.number().required(),
     scopes: Yup.mixed().test(
       'is-set',
       'Set at least one scope',

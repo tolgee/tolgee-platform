@@ -1,22 +1,15 @@
 import * as React from 'react';
-import { FunctionComponent, useState } from 'react';
-import {
-  Box,
-  Checkbox,
-  ListItemText,
-  MenuItem,
-  Select,
-  Theme,
-} from '@material-ui/core';
+import {FunctionComponent, useState} from 'react';
+import {Box, Checkbox, ListItemText, MenuItem, Select, Theme,} from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
-import { useRepositoryLanguages } from '../../../hooks/useRepositoryLanguages';
-import { container } from 'tsyringe';
-import { TranslationActions } from '../../../store/repository/TranslationActions';
+import {useProjectLanguages} from '../../../hooks/useProjectLanguages';
+import {container} from 'tsyringe';
+import {TranslationActions} from '../../../store/project/TranslationActions';
 import Input from '@material-ui/core/Input';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import { MessageService } from '../../../service/MessageService';
-import { T } from '@tolgee/react';
+import {MessageService} from '../../../service/MessageService';
+import {T} from '@tolgee/react';
 
 export interface LanguagesMenuProps {
   context: string;
@@ -35,7 +28,7 @@ const messaging = container.resolve(MessageService);
 export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
   const classes = useStyles({});
 
-  let languageDTOS = useRepositoryLanguages();
+  let languageDTOS = useProjectLanguages();
 
   let selected = actions.useSelector((s) => s.selectedLanguages);
 

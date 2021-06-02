@@ -1,22 +1,22 @@
 import * as React from 'react';
-import { FunctionComponent, useContext } from 'react';
-import { Box, Checkbox } from '@material-ui/core';
-import { TableCell } from './TableCell';
-import { RowContext } from './TranslationsRow';
-import { TranslationListContext } from './TtranslationsGridContextProvider';
-import { useRepositoryPermissions } from '../../hooks/useRepositoryPermissions';
-import { RepositoryPermissionType } from '../../service/response.types';
+import {FunctionComponent, useContext} from 'react';
+import {Box, Checkbox} from '@material-ui/core';
+import {TableCell} from './TableCell';
+import {RowContext} from './TranslationsRow';
+import {TranslationListContext} from './TtranslationsGridContextProvider';
+import {useProjectPermissions} from '../../hooks/useProjectPermissions';
+import {ProjectPermissionType} from '../../service/response.types';
 
 export const Header: FunctionComponent = () => {
   const listContext = useContext(TranslationListContext);
-  const permissions = useRepositoryPermissions();
+  const permissions = useProjectPermissions();
 
   return (
     <Box display="flex" height={40}>
       {/*
             @ts-ignore*/}
       <RowContext.Provider value={{ data: null, lastRendered: 0 }}>
-        {permissions.satisfiesPermission(RepositoryPermissionType.EDIT) && (
+        {permissions.satisfiesPermission(ProjectPermissionType.EDIT) && (
           <Box width={40} display="flex" alignItems="center">
             <Checkbox
               checked={listContext?.isAllChecked()}

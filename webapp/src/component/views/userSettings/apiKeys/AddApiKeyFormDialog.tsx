@@ -1,29 +1,23 @@
-import { useRedirect } from '../../../../hooks/useRedirect';
-import { LINKS } from '../../../../constants/links';
-import {
-  Box,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-} from '@material-ui/core';
-import { StandardForm } from '../../../common/form/StandardForm';
-import { Select } from '../../../common/form/fields/Select';
-import { default as React, FunctionComponent, useEffect } from 'react';
-import { container } from 'tsyringe';
-import { UserApiKeysActions } from '../../../../store/api_keys/UserApiKeysActions';
-import { BoxLoading } from '../../../common/BoxLoading';
-import { FormikProps } from 'formik';
-import { CheckBoxGroupMultiSelect } from '../../../common/form/fields/CheckBoxGroupMultiSelect';
-import { ApiKeyDTO } from '../../../../service/response.types';
-import { EditApiKeyDTO } from '../../../../service/request.types';
-import { Validation } from '../../../../constants/GlobalValidationSchema';
-import { FullPageLoading } from '../../../common/FullPageLoading';
-import { T } from '@tolgee/react';
+import {useRedirect} from '../../../../hooks/useRedirect';
+import {LINKS} from '../../../../constants/links';
+import {Box, Dialog, DialogContent, DialogTitle, MenuItem,} from '@material-ui/core';
+import {StandardForm} from '../../../common/form/StandardForm';
+import {Select} from '../../../common/form/fields/Select';
+import {default as React, FunctionComponent, useEffect} from 'react';
+import {container} from 'tsyringe';
+import {UserApiKeysActions} from '../../../../store/api_keys/UserApiKeysActions';
+import {BoxLoading} from '../../../common/BoxLoading';
+import {FormikProps} from 'formik';
+import {CheckBoxGroupMultiSelect} from '../../../common/form/fields/CheckBoxGroupMultiSelect';
+import {ApiKeyDTO} from '../../../../service/response.types';
+import {EditApiKeyDTO} from '../../../../service/request.types';
+import {Validation} from '../../../../constants/GlobalValidationSchema';
+import {FullPageLoading} from '../../../common/FullPageLoading';
+import {T} from '@tolgee/react';
 
 interface Value {
   scopes: string[];
-  repositoryId: number;
+  projectId: number;
 }
 
 interface Props {
@@ -36,22 +30,22 @@ const actions = container.resolve(UserApiKeysActions);
 export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
   const onDialogClose = () => useRedirect(LINKS.USER_API_KEYS);
 
-  let repositories = actions.useSelector((s) => s.loadables.repositories);
+  let projects = actions.useSelector((s) => s.loadables.projects);
   let scopes = actions.useSelector((s) => s.loadables.scopes);
   let editLoadable = actions.useSelector((s) => s.loadables.edit);
   let generateLoadable = actions.useSelector((s) => s.loadables.generateApiKey);
 
   useEffect(() => {
-    actions.loadableActions.repositories.dispatch();
+    actions.loadableActions.projects.dispatch();
     actions.loadableActions.scopes.dispatch();
   }, []);
 
-  const getAvailableScopes = (repositoryId: number): Set<string> => {
+  const getAvailableScopes = (projectId: number): Set<string> => {
     return new Set(
       // @ts-ignore
       scopes.data[
         // @ts-ignore
-        repositories.data.find((r) => r.id === repositoryId).permissionType
+        projects.data.find((r) => r.id === projectId).permissionType
       ]
     );
   };
@@ -89,20 +83,20 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
   const getInitialValues = () => {
     if (props.editKey) {
       return {
-        repositoryId: props.editKey.repositoryId,
+        projectId: props.editKey.projectId,
         //check all scopes by default
         scopes: new Set(props.editKey.scopes),
       };
     }
 
     return {
-      repositoryId: repositories.data![0].id,
+      projectId: projects.data![0].id,
       //check all scopes checked by default
-      scopes: getAvailableScopes(repositories.data![0].id),
+      scopes: getAvailableScopes(projects.data![0].id),
     };
   };
 
-  if (repositories.loading || scopes.loading) {
+  if (projects.loading || scopes.loading) {
     return <FullPageLoading />;
   }
 
@@ -122,20 +116,20 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
         )}
       </DialogTitle>
       <DialogContent>
-        {(repositories.loaded && repositories.data!.length === 0 && (
-          <T>cannot_add_api_key_without_repository_message</T>
+        {(projects.loaded && projects.data!.length === 0 && (
+          <T>cannot_add_api_key_without_project_message</T>
         )) || (
           <>
-            {(repositories.loading || scopes.loading || props.loading) && (
+            {(projects.loading || scopes.loading || props.loading) && (
               <BoxLoading />
             )}
-            {repositories.loaded && scopes.loaded && (
+            {projects.loaded && scopes.loaded && (
               <StandardForm
                 onSubmit={onSubmit}
                 onCancel={() => onDialogClose()}
                 initialValues={getInitialValues()}
                 validationSchema={
-                  props.editKey && props.editKey.repositoryId
+                  props.editKey && props.editKey.projectId
                     ? Validation.EDIT_API_KEY
                     : Validation.CREATE_API_KEY
                 }
@@ -144,25 +138,25 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
                   useEffect(() => {
                     formikProps.setFieldValue(
                       'scopes',
-                      getAvailableScopes(formikProps.values.repositoryId)
+                      getAvailableScopes(formikProps.values.projectId)
                     );
-                  }, [formikProps.values.repositoryId]);
+                  }, [formikProps.values.projectId]);
 
                   return (
                     <>
                       {!props.editKey && (
                         <Select
                           fullWidth
-                          name="repositoryId"
-                          label="Repository"
+                          name="projectId"
+                          label="Project"
                           renderValue={(v) =>
                             // @ts-ignore
-                            repositories.data.find((r) => r.id === v).name
+                            projects.data.find((r) => r.id === v).name
                           }
                         >
-                          {repositories.data!.map((r) => (
+                          {projects.data!.map((r) => (
                             <MenuItem
-                              data-cy="api-keys-repository-select-item"
+                              data-cy="api-keys-project-select-item"
                               key={r.id}
                               value={r.id}
                             >
@@ -176,7 +170,7 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
                           label="Scopes"
                           name="scopes"
                           options={getAvailableScopes(
-                            formikProps.values.repositoryId
+                            formikProps.values.projectId
                           )}
                         />
                       </Box>

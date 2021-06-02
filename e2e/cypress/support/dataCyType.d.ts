@@ -3,7 +3,7 @@ declare namespace DataCy {
         "add-box" |
         "api-keys-create-edit-dialog" |
         "api-keys-edit-button" |
-        "api-keys-repository-select-item" |
+        "api-keys-project-select-item" |
         "camera-button" |
         "dropzone" |
         "dropzone-inner" |
@@ -85,14 +85,14 @@ declare namespace DataCy {
         "permissions-menu" |
         "permissions-menu-button" |
         "permissions-revoke-button" |
-        "repository-language-abbreviation-field" |
-        "repository-language-name-field" |
-        "repository-list-owner" |
-        "repository-menu-items" |
-        "repository-name-field" |
-        "repository-owner-select" |
-        "repository-owner-select-item" |
-        "repository-settings-button" |
+        "project-language-abbreviation-field" |
+        "project-language-name-field" |
+        "project-list-owner" |
+        "project-menu-items" |
+        "project-name-field" |
+        "project-owner-select" |
+        "project-owner-select-item" |
+        "project-settings-button" |
         "screenshot-box" |
         "translations-add-key-dialog" |
         "translations-add-key-field" |

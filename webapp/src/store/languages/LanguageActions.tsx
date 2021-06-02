@@ -1,16 +1,13 @@
-import { container, singleton } from 'tsyringe';
+import {container, singleton} from 'tsyringe';
 
-import { LanguageService } from '../../service/LanguageService';
-import {
-  AbstractLoadableActions,
-  StateWithLoadables,
-} from '../AbstractLoadableActions';
-import { useSelector } from 'react-redux';
-import { AppState } from '../index';
-import { ActionType } from '../Action';
-import { RepositoryActions } from '../repository/RepositoryActions';
+import {LanguageService} from '../../service/LanguageService';
+import {AbstractLoadableActions, StateWithLoadables,} from '../AbstractLoadableActions';
+import {useSelector} from 'react-redux';
+import {AppState} from '../index';
+import {ActionType} from '../Action';
+import {ProjectActions} from '../project/ProjectActions';
 import React from 'react';
-import { T } from '@tolgee/react';
+import {T} from '@tolgee/react';
 
 export class LanguagesState extends StateWithLoadables<LanguageActions> {}
 
@@ -53,7 +50,7 @@ export class LanguageActions extends AbstractLoadableActions<LanguagesState> {
   ): LanguagesState {
     if (
       action.type ===
-      container.resolve(RepositoryActions).loadableActions.repository
+      container.resolve(ProjectActions).loadableActions.project
         .fulfilledType
     ) {
       this.resetLoadable(state, 'list');

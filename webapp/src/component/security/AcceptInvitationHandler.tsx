@@ -1,10 +1,10 @@
-import { default as React, FunctionComponent, useEffect } from 'react';
-import { useRouteMatch } from 'react-router-dom';
-import { PARAMS } from '../../constants/links';
-import { container } from 'tsyringe';
-import { RepositoryInvitationActions } from '../../store/repository/invitations/RepositoryInvitationActions';
-import { SecurityService } from '../../service/SecurityService';
-import { FullPageLoading } from '../common/FullPageLoading';
+import {default as React, FunctionComponent, useEffect} from 'react';
+import {useRouteMatch} from 'react-router-dom';
+import {PARAMS} from '../../constants/links';
+import {container} from 'tsyringe';
+import {SecurityService} from '../../service/SecurityService';
+import {FullPageLoading} from '../common/FullPageLoading';
+import {ProjectInvitationActions} from "../../store/project/invitations/ProjectInvitationActions";
 
 interface AcceptInvitationHandlerProps {}
 
@@ -16,7 +16,7 @@ const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
 
     const code = match.params[PARAMS.INVITATION_CODE];
 
-    const actions = container.resolve(RepositoryInvitationActions);
+    const actions = container.resolve(ProjectInvitationActions);
 
     useEffect(() => actions.acceptInvitation.dispatch(code), []);
 

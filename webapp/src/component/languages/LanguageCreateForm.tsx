@@ -1,12 +1,12 @@
-import React, { FunctionComponent, useEffect, useState } from 'react';
-import { StandardForm } from '../common/form/StandardForm';
-import { Validation } from '../../constants/GlobalValidationSchema';
-import { TextField } from '../common/form/fields/TextField';
-import { T } from '@tolgee/react';
-import { LanguageDTO } from '../../service/response.types';
-import { container } from 'tsyringe';
-import { LanguageActions } from '../../store/languages/LanguageActions';
-import { useRepository } from '../../hooks/useRepository';
+import React, {FunctionComponent, useEffect, useState} from 'react';
+import {StandardForm} from '../common/form/StandardForm';
+import {Validation} from '../../constants/GlobalValidationSchema';
+import {TextField} from '../common/form/fields/TextField';
+import {T} from '@tolgee/react';
+import {LanguageDTO} from '../../service/response.types';
+import {container} from 'tsyringe';
+import {LanguageActions} from '../../store/languages/LanguageActions';
+import {useProject} from '../../hooks/useProject';
 
 const actions = container.resolve(LanguageActions);
 export const LanguageCreateForm: FunctionComponent<{
@@ -14,7 +14,7 @@ export const LanguageCreateForm: FunctionComponent<{
   onCreated?: (language: LanguageDTO) => void;
 }> = (props) => {
   let createLoadable = actions.useSelector((s) => s.loadables.create);
-  const repository = useRepository();
+  const project = useProject();
   const [submitted, setSubmitted] = useState(false);
 
   const onSubmit = (values) => {
@@ -22,7 +22,7 @@ export const LanguageCreateForm: FunctionComponent<{
     const dto: LanguageDTO = {
       ...values,
     };
-    actions.loadableActions.create.dispatch(repository.id, dto);
+    actions.loadableActions.create.dispatch(project.id, dto);
   };
 
   useEffect(() => {

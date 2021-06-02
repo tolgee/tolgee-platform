@@ -1,19 +1,17 @@
-import { Switch } from 'react-router-dom';
+import {Switch} from 'react-router-dom';
 import * as React from 'react';
-import { PrivateRoute } from '../../common/PrivateRoute';
-import { OrganizationsListView } from './OrganizationListView';
-import { OrganizationCreateView } from './OrganizationCreateView';
-import { LINKS } from '../../../constants/links';
-import { OrganizationProfileView } from './OrganizationProfileView';
-import { BoxLoading } from '../../common/BoxLoading';
-import { DashboardPage } from '../../layout/DashboardPage';
-import { OrganizationMembersView } from './OrganizationMembersView';
-import { useOrganization } from '../../../hooks/organizations/useOrganization';
-import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivilegesView';
-import { OrganizationInvitationsView } from './OrganizationInvitationsView';
-import { container } from 'tsyringe';
-import { OrganizationActions } from '../../../store/organization/OrganizationActions';
-import { OrganizationsRepositoryListView } from './OrganizationRepositoryListView';
+import {PrivateRoute} from '../../common/PrivateRoute';
+import {OrganizationsListView} from './OrganizationListView';
+import {OrganizationCreateView} from './OrganizationCreateView';
+import {LINKS} from '../../../constants/links';
+import {OrganizationProfileView} from './OrganizationProfileView';
+import {BoxLoading} from '../../common/BoxLoading';
+import {DashboardPage} from '../../layout/DashboardPage';
+import {OrganizationMembersView} from './OrganizationMembersView';
+import {useOrganization} from '../../../hooks/organizations/useOrganization';
+import {OrganizationMemberPrivilegesView} from './OrganizationMemberPrivilegesView';
+import {OrganizationInvitationsView} from './OrganizationInvitationsView';
+import {OrganizationsProjectListView} from './OrganizationProjectListView';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
@@ -37,8 +35,8 @@ const SpecificOrganizationRouter = () => {
           <PrivateRoute exact path={LINKS.ORGANIZATION_INVITATIONS.template}>
             <OrganizationInvitationsView />
           </PrivateRoute>
-          <PrivateRoute exact path={LINKS.ORGANIZATION_REPOSITORIES.template}>
-            <OrganizationsRepositoryListView />
+          <PrivateRoute exact path={LINKS.ORGANIZATION_PROJECTS.template}>
+            <OrganizationsProjectListView />
           </PrivateRoute>
         </>
       ) : (

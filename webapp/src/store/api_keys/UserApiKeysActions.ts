@@ -1,12 +1,9 @@
-import { singleton } from 'tsyringe';
-import {
-  AbstractLoadableActions,
-  StateWithLoadables,
-} from '../AbstractLoadableActions';
-import { ApiKeysService } from '../../service/ApiKeysService';
-import { AppState } from '../index';
-import { useSelector } from 'react-redux';
-import { RepositoryService } from '../../service/RepositoryService';
+import {singleton} from 'tsyringe';
+import {AbstractLoadableActions, StateWithLoadables,} from '../AbstractLoadableActions';
+import {ApiKeysService} from '../../service/ApiKeysService';
+import {AppState} from '../index';
+import {useSelector} from 'react-redux';
+import {ProjectService} from '../../service/ProjectService';
 
 export class UserApiKeysState extends StateWithLoadables<UserApiKeysActions> {}
 
@@ -16,8 +13,8 @@ export class UserApiKeysActions extends AbstractLoadableActions<UserApiKeysState
     list: this.createLoadableDefinition(
       this.apiKeysService.getListForLoggedUser
     ),
-    repositories: this.createLoadableDefinition(
-      this.repositoryService.getRepositories
+    projects: this.createLoadableDefinition(
+      this.projectService.getProjects
     ),
     scopes: this.createLoadableDefinition(
       this.apiKeysService.getAvailableScopes
@@ -31,7 +28,7 @@ export class UserApiKeysActions extends AbstractLoadableActions<UserApiKeysState
 
   constructor(
     private apiKeysService: ApiKeysService,
-    private repositoryService: RepositoryService
+    private projectService: ProjectService
   ) {
     super(new UserApiKeysState());
   }
