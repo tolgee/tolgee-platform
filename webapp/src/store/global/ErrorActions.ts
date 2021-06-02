@@ -1,23 +1,22 @@
-import {AbstractActions} from '../AbstractActions';
-import {singleton} from 'tsyringe';
-import {GlobalError} from "../../error/GlobalError";
+import { AbstractActions } from '../AbstractActions';
+import { singleton } from 'tsyringe';
+import { GlobalError } from '../../error/GlobalError';
 
 export class ErrorState {
-    error: GlobalError | null = null;
+  error: GlobalError | null = null;
 }
 
 @singleton()
 export class ErrorActions extends AbstractActions<ErrorState> {
+  constructor() {
+    super(new ErrorState());
+  }
 
-    constructor() {
-        super(new ErrorState());
-    }
+  globalError = this.createAction('ERROR', (e: GlobalError) => e).build.on(
+    (state, action) => ({ ...state, error: action.payload })
+  );
 
-    globalError = this.createAction('ERROR', (e: GlobalError) => e).build.on((state, action) =>
-        ({...state, error: action.payload}));
-
-    get prefix(): string {
-        return 'ERROR';
-    }
+  get prefix(): string {
+    return 'ERROR';
+  }
 }
-

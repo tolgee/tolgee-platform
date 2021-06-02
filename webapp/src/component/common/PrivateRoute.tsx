@@ -1,41 +1,41 @@
-import {default as React, FunctionComponent} from 'react';
-import {Redirect, Route} from 'react-router-dom';
-import {useSelector} from 'react-redux';
-import {AppState} from '../../store';
-import {LINKS} from '../../constants/links';
-import {SecurityService} from '../../service/SecurityService';
-import {container} from 'tsyringe';
+import { default as React, FunctionComponent } from 'react';
+import { Redirect, Route } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { AppState } from '../../store';
+import { LINKS } from '../../constants/links';
+import { SecurityService } from '../../service/SecurityService';
+import { container } from 'tsyringe';
 
-interface PrivateRouteProps {
+interface PrivateRouteProps {}
 
-}
+export const PrivateRoute: FunctionComponent<
+  PrivateRouteProps & React.ComponentProps<typeof Route>
+> = (props) => {
+  const allowPrivate = useSelector(
+    (state: AppState) => state.global.security.allowPrivate
+  );
+  const ss = container.resolve(SecurityService);
+  const afterLoginLink = ss.getAfterLoginLink();
 
-export const PrivateRoute: FunctionComponent<PrivateRouteProps & React.ComponentProps<typeof Route>> =
-    (props) => {
+  if (allowPrivate && afterLoginLink) {
+    ss.removeAfterLoginLink();
+    return <Redirect to={afterLoginLink} />;
+  }
 
-        const allowPrivate = useSelector((state: AppState) => state.global.security.allowPrivate);
-        const ss = container.resolve(SecurityService);
-        const afterLoginLink = ss.getAfterLoginLink();
+  if (allowPrivate) {
+    return <Route {...props} />;
+  }
 
-        if (allowPrivate && afterLoginLink) {
-            ss.removeAfterLoginLink();
-            return <Redirect to={afterLoginLink}/>;
-        }
-
-        if (allowPrivate) {
-            return <Route {...props} />
-        }
-
-        return (
-            <Route
-                render={({location}) =>
-                    <Redirect
-                        to={{
-                            pathname: LINKS.LOGIN.build(),
-                            state: {from: location}
-                        }}
-                    />
-                }
-            />
-        );
-    };
+  return (
+    <Route
+      render={({ location }) => (
+        <Redirect
+          to={{
+            pathname: LINKS.LOGIN.build(),
+            state: { from: location },
+          }}
+        />
+      )}
+    />
+  );
+};

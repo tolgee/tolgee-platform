@@ -49,7 +49,9 @@
     "startConcurrently": "concurrently \"craco start\"",
     "build": "craco build",
     "test": "craco test",
-    "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.ts"
+    "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.ts",
+    "prettier": "prettier --write ./src",
+    "eslint": "eslint . --ext .ts --ext .tsx"
   },
   "eslintConfig": {
     "extends": [
@@ -72,6 +74,8 @@
   "devDependencies": {
     "concurrently": "^6.2.0",
     "craco": "^0.0.3",
+    "eslint": "^7.27.0",
+    "prettier": "^2.3.0",
     "webpack": "4.44.2"
   }
 }

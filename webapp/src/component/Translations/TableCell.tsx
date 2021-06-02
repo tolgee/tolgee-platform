@@ -1,25 +1,24 @@
 import * as React from 'react';
-import {FunctionComponent, useContext} from 'react';
-import {Box} from "@material-ui/core";
-import {RowContext} from "./TranslationsRow";
-import {TranslationListContext} from "./TtranslationsGridContextProvider";
+import { FunctionComponent, useContext } from 'react';
+import { Box } from '@material-ui/core';
+import { RowContext } from './TranslationsRow';
+import { TranslationListContext } from './TtranslationsGridContextProvider';
 
-export interface TranslationsTableCellProps {
+export interface TranslationsTableCellProps {}
 
-}
+export const TableCell: FunctionComponent<TranslationsTableCellProps> = (
+  props
+) => {
+  let rowContext = useContext(RowContext);
+  let listContext = useContext(TranslationListContext);
 
-export const TableCell: FunctionComponent<TranslationsTableCellProps> = (props) => {
+  const width = listContext.cellWidths[rowContext.lastRendered];
 
-    let rowContext = useContext(RowContext);
-    let listContext = useContext(TranslationListContext);
+  rowContext.lastRendered++;
 
-    const width = listContext.cellWidths[rowContext.lastRendered];
-
-    rowContext.lastRendered++;
-
-    return (
-        <Box width={width + "%"} p={0.5} display="flex" alignItems="center">
-            {props.children}
-        </Box>
-    )
+  return (
+    <Box width={width + '%'} p={0.5} display="flex" alignItems="center">
+      {props.children}
+    </Box>
+  );
 };

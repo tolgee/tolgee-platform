@@ -4,339 +4,339 @@
  */
 
 export interface paths {
-  "/v2/repositories/{repositoryId}/users/{userId}/set-permissions/{permissionType}": {
-    put: operations["setUsersPermissions"];
+  '/v2/repositories/{repositoryId}/users/{userId}/set-permissions/{permissionType}': {
+    put: operations['setUsersPermissions'];
   };
-  "/v2/repositories/{repositoryId}/users/{userId}/revoke-access": {
-    put: operations["revokePermission"];
+  '/v2/repositories/{repositoryId}/users/{userId}/revoke-access': {
+    put: operations['revokePermission'];
   };
-  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
-    put: operations["resolveTranslationSetOverride"];
+  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override': {
+    put: operations['resolveTranslationSetOverride'];
   };
-  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing": {
-    put: operations["resolveTranslationSetKeepExisting"];
+  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing': {
+    put: operations['resolveTranslationSetKeepExisting'];
   };
-  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-override": {
-    put: operations["resolveTranslationSetOverride_1"];
+  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-override': {
+    put: operations['resolveTranslationSetOverride_1'];
   };
-  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
-    put: operations["resolveTranslationSetKeepExisting_1"];
+  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-keep-existing': {
+    put: operations['resolveTranslationSetKeepExisting_1'];
   };
-  "/v2/repositories/{repositoryId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}": {
-    put: operations["selectExistingLanguage"];
+  '/v2/repositories/{repositoryId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}': {
+    put: operations['selectExistingLanguage'];
   };
-  "/v2/repositories/{repositoryId}/import/result/languages/{importLanguageId}/reset-existing": {
-    put: operations["resetExistingLanguage"];
+  '/v2/repositories/{repositoryId}/import/result/languages/{importLanguageId}/reset-existing': {
+    put: operations['resetExistingLanguage'];
   };
-  "/v2/repositories/{repositoryId}/import/apply": {
-    put: operations["applyImport"];
+  '/v2/repositories/{repositoryId}/import/apply': {
+    put: operations['applyImport'];
   };
-  "/v2/organizations/{organizationId}/users/{userId}/set-role": {
-    put: operations["setUserRole"];
+  '/v2/organizations/{organizationId}/users/{userId}/set-role': {
+    put: operations['setUserRole'];
   };
-  "/api/organizations/{organizationId}/users/{userId}/set-role": {
-    put: operations["setUserRole_1"];
+  '/api/organizations/{organizationId}/users/{userId}/set-role': {
+    put: operations['setUserRole_1'];
   };
-  "/v2/organizations/{id}/leave": {
-    put: operations["leaveOrganization"];
+  '/v2/organizations/{id}/leave': {
+    put: operations['leaveOrganization'];
   };
-  "/api/organizations/{id}/leave": {
-    put: operations["leaveOrganization_1"];
+  '/api/organizations/{id}/leave': {
+    put: operations['leaveOrganization_1'];
   };
-  "/v2/organizations/{id}/invite": {
-    put: operations["inviteUser"];
+  '/v2/organizations/{id}/invite': {
+    put: operations['inviteUser'];
   };
-  "/api/organizations/{id}/invite": {
-    put: operations["inviteUser_1"];
+  '/api/organizations/{id}/invite': {
+    put: operations['inviteUser_1'];
   };
-  "/v2/organizations/{id}": {
-    get: operations["get_1"];
-    put: operations["update"];
-    delete: operations["delete"];
+  '/v2/organizations/{id}': {
+    get: operations['get_1'];
+    put: operations['update'];
+    delete: operations['delete'];
   };
-  "/api/organizations/{id}": {
-    get: operations["get_2"];
-    put: operations["update_1"];
-    delete: operations["delete_1"];
+  '/api/organizations/{id}': {
+    get: operations['get_2'];
+    put: operations['update_1'];
+    delete: operations['delete_1'];
   };
-  "/api/repository/{repositoryId}/keys": {
-    put: operations["edit"];
-    post: operations["create_3"];
-    delete: operations["delete_4"];
+  '/api/repository/{repositoryId}/keys': {
+    put: operations['edit'];
+    post: operations['create_3'];
+    delete: operations['delete_4'];
   };
-  "/api/repository/keys": {
-    delete: operations["delete_5"];
+  '/api/repository/keys': {
+    delete: operations['delete_5'];
   };
-  "/api/repository/{repositoryId}/translations": {
-    put: operations["setTranslations"];
-    post: operations["createOrUpdateTranslations"];
+  '/api/repository/{repositoryId}/translations': {
+    put: operations['setTranslations'];
+    post: operations['createOrUpdateTranslations'];
   };
-  "/api/repository/translations": {
-    put: operations["setTranslations_1"];
-    post: operations["createOrUpdateTranslations_1"];
+  '/api/repository/translations': {
+    put: operations['setTranslations_1'];
+    post: operations['createOrUpdateTranslations_1'];
   };
-  "/v2/repositories/{repositoryId}/import": {
-    post: operations["addFiles"];
-    delete: operations["cancelImport"];
+  '/v2/repositories/{repositoryId}/import': {
+    post: operations['addFiles'];
+    delete: operations['cancelImport'];
   };
-  "/v2/repositories/{repositoryId}/import/with-streaming-response": {
-    post: operations["addFilesStreaming"];
+  '/v2/repositories/{repositoryId}/import/with-streaming-response': {
+    post: operations['addFilesStreaming'];
   };
-  "/v2/organizations": {
-    get: operations["getAll_1"];
-    post: operations["create"];
+  '/v2/organizations': {
+    get: operations['getAll_1'];
+    post: operations['create'];
   };
-  "/api/organizations": {
-    get: operations["getAll_2"];
-    post: operations["create_1"];
+  '/api/organizations': {
+    get: operations['getAll_2'];
+    post: operations['create_1'];
   };
-  "/v2/address-part/generate-repository": {
-    post: operations["generateRepositoryAddressPart"];
+  '/v2/address-part/generate-repository': {
+    post: operations['generateRepositoryAddressPart'];
   };
-  "/api/address-part/generate-repository": {
-    post: operations["generateRepositoryAddressPart_1"];
+  '/api/address-part/generate-repository': {
+    post: operations['generateRepositoryAddressPart_1'];
   };
-  "/v2/address-part/generate-organization": {
-    post: operations["generateOrganizationAddressPart"];
+  '/v2/address-part/generate-organization': {
+    post: operations['generateOrganizationAddressPart'];
   };
-  "/api/address-part/generate-organization": {
-    post: operations["generateOrganizationAddressPart_1"];
+  '/api/address-part/generate-organization': {
+    post: operations['generateOrganizationAddressPart_1'];
   };
-  "/api/user": {
-    get: operations["getInfo"];
-    post: operations["updateUser"];
+  '/api/user': {
+    get: operations['getInfo'];
+    post: operations['updateUser'];
   };
-  "/api/repository/{repositoryId}/keys/translations/{languages}": {
+  '/api/repository/{repositoryId}/keys/translations/{languages}': {
     /** Key name must be provided in method body, since it can be long and can contain characters hard to encode */
-    post: operations["getKeyTranslationsPost"];
+    post: operations['getKeyTranslationsPost'];
   };
-  "/api/repository/{repositoryId}/keys/edit": {
-    post: operations["editDeprecated"];
+  '/api/repository/{repositoryId}/keys/edit': {
+    post: operations['editDeprecated'];
   };
-  "/api/repository/{repositoryId}/keys/create": {
-    post: operations["create_2"];
+  '/api/repository/{repositoryId}/keys/create': {
+    post: operations['create_2'];
   };
-  "/api/repository/{repositoryId}/languages/edit": {
-    post: operations["editLanguage"];
+  '/api/repository/{repositoryId}/languages/edit': {
+    post: operations['editLanguage'];
   };
-  "/api/repository/languages/edit": {
-    post: operations["editLanguage_1"];
+  '/api/repository/languages/edit': {
+    post: operations['editLanguage_1'];
   };
-  "/api/repository/{repositoryId}/languages": {
-    get: operations["getAll_3"];
-    post: operations["createLanguage"];
+  '/api/repository/{repositoryId}/languages': {
+    get: operations['getAll_3'];
+    post: operations['createLanguage'];
   };
-  "/api/repository/{repositoryId}/screenshots/get": {
-    post: operations["getKeyScreenshots_1"];
+  '/api/repository/{repositoryId}/screenshots/get': {
+    post: operations['getKeyScreenshots_1'];
   };
-  "/api/repository/{repositoryId}/screenshots": {
-    post: operations["uploadScreenshot_1"];
+  '/api/repository/{repositoryId}/screenshots': {
+    post: operations['uploadScreenshot_1'];
   };
-  "/api/repositories": {
-    get: operations["getAll_5"];
-    post: operations["createRepository"];
+  '/api/repositories': {
+    get: operations['getAll_5'];
+    post: operations['createRepository'];
   };
-  "/api/repositories/invite": {
-    post: operations["inviteUser_2"];
+  '/api/repositories/invite': {
+    post: operations['inviteUser_2'];
   };
-  "/api/repositories/edit": {
-    post: operations["editRepository"];
+  '/api/repositories/edit': {
+    post: operations['editRepository'];
   };
-  "/api/public/validate_email": {
-    post: operations["validateEmail"];
+  '/api/public/validate_email': {
+    post: operations['validateEmail'];
   };
-  "/api/public/sign_up": {
-    post: operations["signUp"];
+  '/api/public/sign_up': {
+    post: operations['signUp'];
   };
-  "/api/public/reset_password_set": {
-    post: operations["resetPasswordSet"];
+  '/api/public/reset_password_set': {
+    post: operations['resetPasswordSet'];
   };
-  "/api/public/reset_password_request": {
-    post: operations["resetPasswordRequest"];
+  '/api/public/reset_password_request': {
+    post: operations['resetPasswordRequest'];
   };
-  "/api/public/generatetoken": {
-    post: operations["authenticateUser"];
+  '/api/public/generatetoken': {
+    post: operations['authenticateUser'];
   };
-  "/api/apiKeys": {
-    get: operations["allByUser"];
-    post: operations["create_6"];
+  '/api/apiKeys': {
+    get: operations['allByUser'];
+    post: operations['create_6'];
   };
-  "/api/apiKeys/edit": {
-    post: operations["edit_2"];
+  '/api/apiKeys/edit': {
+    post: operations['edit_2'];
   };
-  "/v2/repositories": {
-    get: operations["getAll"];
+  '/v2/repositories': {
+    get: operations['getAll'];
   };
-  "/v2/repositories/{repositoryId}": {
-    get: operations["get"];
+  '/v2/repositories/{repositoryId}': {
+    get: operations['get'];
   };
-  "/v2/repositories/{repositoryId}/users": {
-    get: operations["getAllUsers"];
+  '/v2/repositories/{repositoryId}/users': {
+    get: operations['getAllUsers'];
   };
-  "/v2/repositories/{repositoryId}/import/result": {
-    get: operations["getImportResult"];
+  '/v2/repositories/{repositoryId}/import/result': {
+    get: operations['getImportResult'];
   };
-  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}": {
-    get: operations["getImportLanguage"];
-    delete: operations["deleteLanguage"];
+  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}': {
+    get: operations['getImportLanguage'];
+    delete: operations['deleteLanguage'];
   };
-  "/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations": {
-    get: operations["getImportTranslations"];
+  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations': {
+    get: operations['getImportTranslations'];
   };
-  "/v2/repositories/{repositoryId}/import/result/files/{importFileId}/issues": {
-    get: operations["getImportFileIssues"];
+  '/v2/repositories/{repositoryId}/import/result/files/{importFileId}/issues': {
+    get: operations['getImportFileIssues'];
   };
-  "/v2/organizations/{organizationId}/invitations": {
-    get: operations["getInvitations"];
+  '/v2/organizations/{organizationId}/invitations': {
+    get: operations['getInvitations'];
   };
-  "/api/organizations/{organizationId}/invitations": {
-    get: operations["getInvitations_1"];
+  '/api/organizations/{organizationId}/invitations': {
+    get: operations['getInvitations_1'];
   };
-  "/v2/organizations/{id}/users": {
-    get: operations["getAllUsers_1"];
+  '/v2/organizations/{id}/users': {
+    get: operations['getAllUsers_1'];
   };
-  "/api/organizations/{id}/users": {
-    get: operations["getAllUsers_2"];
+  '/api/organizations/{id}/users': {
+    get: operations['getAllUsers_2'];
   };
-  "/v2/organizations/{id}/repositories": {
-    get: operations["getAllRepositories"];
+  '/v2/organizations/{id}/repositories': {
+    get: operations['getAllRepositories'];
   };
-  "/api/organizations/{id}/repositories": {
-    get: operations["getAllRepositories_1"];
+  '/api/organizations/{id}/repositories': {
+    get: operations['getAllRepositories_1'];
   };
-  "/v2/organizations/{addressPart}/repositories": {
-    get: operations["getAllRepositories_2"];
+  '/v2/organizations/{addressPart}/repositories': {
+    get: operations['getAllRepositories_2'];
   };
-  "/api/organizations/{addressPart}/repositories": {
-    get: operations["getAllRepositories_3"];
+  '/api/organizations/{addressPart}/repositories': {
+    get: operations['getAllRepositories_3'];
   };
-  "/v2/organizations/{addressPart}": {
-    get: operations["get_3"];
+  '/v2/organizations/{addressPart}': {
+    get: operations['get_3'];
   };
-  "/api/organizations/{addressPart}": {
-    get: operations["get_4"];
+  '/api/organizations/{addressPart}': {
+    get: operations['get_4'];
   };
-  "/v2/address-part/validate-repository/{addressPart}": {
-    get: operations["validateRepositoryAddressPart"];
+  '/v2/address-part/validate-repository/{addressPart}': {
+    get: operations['validateRepositoryAddressPart'];
   };
-  "/api/address-part/validate-repository/{addressPart}": {
-    get: operations["validateRepositoryAddressPart_1"];
+  '/api/address-part/validate-repository/{addressPart}': {
+    get: operations['validateRepositoryAddressPart_1'];
   };
-  "/v2/address-part/validate-organization/{addressPart}": {
-    get: operations["validateOrganizationAddressPart"];
+  '/v2/address-part/validate-organization/{addressPart}': {
+    get: operations['validateOrganizationAddressPart'];
   };
-  "/api/address-part/validate-organization/{addressPart}": {
-    get: operations["validateOrganizationAddressPart_1"];
+  '/api/address-part/validate-organization/{addressPart}': {
+    get: operations['validateOrganizationAddressPart_1'];
   };
-  "/api/repository/{repositoryId}/keys/{id}": {
-    get: operations["getDeprecated"];
-    delete: operations["delete_2"];
+  '/api/repository/{repositoryId}/keys/{id}': {
+    get: operations['getDeprecated'];
+    delete: operations['delete_2'];
   };
-  "/api/repository/keys/{id}": {
-    get: operations["getDeprecated_1"];
-    delete: operations["delete_3"];
+  '/api/repository/keys/{id}': {
+    get: operations['getDeprecated_1'];
+    delete: operations['delete_3'];
   };
-  "/api/repository/{repositoryId}/export/jsonZip": {
-    get: operations["doExportJsonZip"];
+  '/api/repository/{repositoryId}/export/jsonZip': {
+    get: operations['doExportJsonZip'];
   };
-  "/api/repository/{repositoryId}/translations/{languages}": {
-    get: operations["getTranslations"];
+  '/api/repository/{repositoryId}/translations/{languages}': {
+    get: operations['getTranslations'];
   };
-  "/api/repository/translations/{languages}": {
-    get: operations["getTranslations_1"];
+  '/api/repository/translations/{languages}': {
+    get: operations['getTranslations_1'];
   };
-  "/api/repository/{repositoryId}/translations/view": {
-    get: operations["getViewData"];
+  '/api/repository/{repositoryId}/translations/view': {
+    get: operations['getViewData'];
   };
-  "/api/repository/{repositoryId}/languages/{id}": {
-    get: operations["get_5"];
-    delete: operations["deleteLanguage_1"];
+  '/api/repository/{repositoryId}/languages/{id}': {
+    get: operations['get_5'];
+    delete: operations['deleteLanguage_1'];
   };
-  "/api/repository/languages/{id}": {
-    get: operations["get_6"];
-    delete: operations["deleteLanguage_2"];
+  '/api/repository/languages/{id}': {
+    get: operations['get_6'];
+    delete: operations['deleteLanguage_2'];
   };
-  "/api/repositories/{id}": {
-    get: operations["getRepository"];
-    delete: operations["deleteRepository"];
+  '/api/repositories/{id}': {
+    get: operations['getRepository'];
+    delete: operations['deleteRepository'];
   };
-  "/api/public/verify_email/{userId}/{code}": {
-    get: operations["verifyEmail"];
+  '/api/public/verify_email/{userId}/{code}': {
+    get: operations['verifyEmail'];
   };
-  "/api/public/reset_password_validate/{email}/{code}": {
-    get: operations["resetPasswordValidate"];
+  '/api/public/reset_password_validate/{email}/{code}': {
+    get: operations['resetPasswordValidate'];
   };
-  "/api/public/configuration": {
-    get: operations["getPublicConfiguration"];
+  '/api/public/configuration': {
+    get: operations['getPublicConfiguration'];
   };
-  "/api/public/authorize_oauth/{serviceType}/{code}": {
-    get: operations["authenticateUser_1"];
+  '/api/public/authorize_oauth/{serviceType}/{code}': {
+    get: operations['authenticateUser_1'];
   };
-  "/api/invitation/list/{repositoryId}": {
-    get: operations["getRepositoryInvitations"];
+  '/api/invitation/list/{repositoryId}': {
+    get: operations['getRepositoryInvitations'];
   };
-  "/api/invitation/accept/{code}": {
-    get: operations["acceptInvitation"];
+  '/api/invitation/accept/{code}': {
+    get: operations['acceptInvitation'];
   };
-  "/api/apiKeys/scopes": {
-    get: operations["getApiKeyScopes"];
+  '/api/apiKeys/scopes': {
+    get: operations['getApiKeyScopes'];
   };
-  "/api/apiKeys/repository/{repositoryId}": {
-    get: operations["allByRepository"];
+  '/api/apiKeys/repository/{repositoryId}': {
+    get: operations['allByRepository'];
   };
-  "/api/apiKeys/availableScopes": {
-    get: operations["getScopes"];
+  '/api/apiKeys/availableScopes': {
+    get: operations['getScopes'];
   };
-  "/v2/organizations/{organizationId}/users/{userId}": {
-    delete: operations["removeUser"];
+  '/v2/organizations/{organizationId}/users/{userId}': {
+    delete: operations['removeUser'];
   };
-  "/api/organizations/{organizationId}/users/{userId}": {
-    delete: operations["removeUser_1"];
+  '/api/organizations/{organizationId}/users/{userId}': {
+    delete: operations['removeUser_1'];
   };
-  "/api/repository/screenshots/{ids}": {
-    delete: operations["deleteScreenshots"];
+  '/api/repository/screenshots/{ids}': {
+    delete: operations['deleteScreenshots'];
   };
-  "/api/repository/{repositoryId}/screenshots/{ids}": {
-    delete: operations["deleteScreenshots_1"];
+  '/api/repository/{repositoryId}/screenshots/{ids}': {
+    delete: operations['deleteScreenshots_1'];
   };
-  "/api/invitation/{invitationId}": {
-    delete: operations["deleteInvitation"];
+  '/api/invitation/{invitationId}': {
+    delete: operations['deleteInvitation'];
   };
-  "/api/apiKeys/{key}": {
-    delete: operations["delete_6"];
+  '/api/apiKeys/{key}': {
+    delete: operations['delete_6'];
   };
 }
 
 export interface components {
   schemas: {
     SetOrganizationRoleDto: {
-      roleType: "MEMBER" | "OWNER";
+      roleType: 'MEMBER' | 'OWNER';
     };
     OrganizationInviteUserDto: {
-      roleType: "MEMBER" | "OWNER";
+      roleType: 'MEMBER' | 'OWNER';
     };
-    Links: { [key: string]: components["schemas"]["Link"] };
+    Links: { [key: string]: components['schemas']['Link'] };
     OrganizationInvitationModel: {
       id: number;
       code: string;
-      type: "MEMBER" | "OWNER";
+      type: 'MEMBER' | 'OWNER';
       createdAt: string;
-      _links?: components["schemas"]["Links"];
+      _links?: components['schemas']['Links'];
     };
     OrganizationDto: {
       name: string;
       description?: string;
       addressPart?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      basePermissions: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
     };
     OrganizationModel: {
       id: number;
       name: string;
       addressPart: string;
       description?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      currentUserRole: "MEMBER" | "OWNER";
-      _links?: components["schemas"]["Links"];
+      basePermissions: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
+      currentUserRole: 'MEMBER' | 'OWNER';
+      _links?: components['schemas']['Links'];
     };
     EditKeyDTO: {
       currentName: string;
@@ -351,9 +351,9 @@ export interface components {
       params?: { [key: string]: any }[];
     };
     ImportAddFilesResultModel: {
-      errors: components["schemas"]["ErrorResponseBody"][];
-      result?: components["schemas"]["PagedModelImportLanguageModel"];
-      _links?: components["schemas"]["Links"];
+      errors: components['schemas']['ErrorResponseBody'][];
+      result?: components['schemas']['PagedModelImportLanguageModel'];
+      _links?: components['schemas']['Links'];
     };
     ImportLanguageModel: {
       id: number;
@@ -367,7 +367,7 @@ export interface components {
       totalCount: number;
       conflictCount: number;
       resolvedCount: number;
-      _links?: components["schemas"]["Links"];
+      _links?: components['schemas']['Links'];
     };
     PageMetadata: {
       size?: number;
@@ -377,10 +377,10 @@ export interface components {
     };
     PagedModelImportLanguageModel: {
       _embedded?: {
-        languages?: components["schemas"]["ImportLanguageModel"][];
+        languages?: components['schemas']['ImportLanguageModel'][];
       };
-      _links?: components["schemas"]["Links"];
-      page?: components["schemas"]["PageMetadata"];
+      _links?: components['schemas']['Links'];
+      page?: components['schemas']['PageMetadata'];
     };
     StreamingResponseBody: { [key: string]: any };
     GenerateAddressPathDto: {
@@ -416,7 +416,7 @@ export interface components {
     };
     CreateRepositoryDTO: {
       name: string;
-      languages: components["schemas"]["LanguageDTO"][];
+      languages: components['schemas']['LanguageDTO'][];
       addressPart?: string;
       /** If not provided, repository will be created as users */
       organizationId?: number;
@@ -424,11 +424,11 @@ export interface components {
     RepositoryDTO: {
       id?: number;
       name?: string;
-      permissionType?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      permissionType?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
     };
     RepositoryInviteUserDto: {
       repositoryId: number;
-      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      type: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
     };
     EditRepositoryDTO: {
       repositoryId: number;
@@ -479,54 +479,54 @@ export interface components {
     };
     PagedModelRepositoryModel: {
       _embedded?: {
-        repositories?: components["schemas"]["RepositoryModel"][];
+        repositories?: components['schemas']['RepositoryModel'][];
       };
-      _links?: components["schemas"]["Links"];
-      page?: components["schemas"]["PageMetadata"];
+      _links?: components['schemas']['Links'];
+      page?: components['schemas']['PageMetadata'];
     };
     RepositoryModel: {
       id: number;
       name: string;
       description?: string;
       addressPart?: string;
-      userOwner?: components["schemas"]["UserAccountModel"];
+      userOwner?: components['schemas']['UserAccountModel'];
       organizationOwnerName?: string;
       organizationOwnerAddressPart?: string;
       organizationOwnerBasePermissions?:
-        | "VIEW"
-        | "TRANSLATE"
-        | "EDIT"
-        | "MANAGE";
-      organizationRole?: "MEMBER" | "OWNER";
+        | 'VIEW'
+        | 'TRANSLATE'
+        | 'EDIT'
+        | 'MANAGE';
+      organizationRole?: 'MEMBER' | 'OWNER';
       /** Current user's direct permission */
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      directPermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
       /** Actual current user's permissions on this repository. You can not sort data by this column! */
-      computedPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      _links?: components["schemas"]["Links"];
+      computedPermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
+      _links?: components['schemas']['Links'];
     };
     UserAccountModel: {
       id: number;
       username: string;
       name?: string;
-      _links?: components["schemas"]["Links"];
+      _links?: components['schemas']['Links'];
     };
     PagedModelUserAccountInRepositoryModel: {
       _embedded?: {
-        users?: components["schemas"]["UserAccountInRepositoryModel"][];
+        users?: components['schemas']['UserAccountInRepositoryModel'][];
       };
-      _links?: components["schemas"]["Links"];
-      page?: components["schemas"]["PageMetadata"];
+      _links?: components['schemas']['Links'];
+      page?: components['schemas']['PageMetadata'];
     };
     UserAccountInRepositoryModel: {
       id: number;
       username: string;
       name?: string;
-      organizationRole?: "MEMBER" | "OWNER";
-      organizationBasePermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      organizationRole?: 'MEMBER' | 'OWNER';
+      organizationBasePermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
+      directPermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
       /** Actual user's permissions on selected repository. You can not sort data by this column! */
-      computedPermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      _links?: components["schemas"]["Links"];
+      computedPermissions: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
+      _links?: components['schemas']['Links'];
     };
     ImportTranslationModel: {
       id: number;
@@ -537,76 +537,76 @@ export interface components {
       conflictText?: string;
       override: boolean;
       resolved: boolean;
-      _links?: components["schemas"]["Links"];
+      _links?: components['schemas']['Links'];
     };
     PagedModelImportTranslationModel: {
       _embedded?: {
-        translations?: components["schemas"]["ImportTranslationModel"][];
+        translations?: components['schemas']['ImportTranslationModel'][];
       };
-      _links?: components["schemas"]["Links"];
-      page?: components["schemas"]["PageMetadata"];
+      _links?: components['schemas']['Links'];
+      page?: components['schemas']['PageMetadata'];
     };
     EntityModelImportFileIssueView: {
       id?: number;
       type?:
-        | "KEY_IS_NOT_STRING"
-        | "MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE"
-        | "VALUE_IS_NOT_STRING"
-        | "KEY_IS_EMPTY"
-        | "VALUE_IS_EMPTY"
-        | "PO_MSGCTXT_NOT_SUPPORTED"
-        | "ID_ATTRIBUTE_NOT_PROVIDED"
-        | "TARGET_NOT_PROVIDED";
-      params?: components["schemas"]["ImportFileIssueParamView"][];
-      _links?: components["schemas"]["Links"];
+        | 'KEY_IS_NOT_STRING'
+        | 'MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE'
+        | 'VALUE_IS_NOT_STRING'
+        | 'KEY_IS_EMPTY'
+        | 'VALUE_IS_EMPTY'
+        | 'PO_MSGCTXT_NOT_SUPPORTED'
+        | 'ID_ATTRIBUTE_NOT_PROVIDED'
+        | 'TARGET_NOT_PROVIDED';
+      params?: components['schemas']['ImportFileIssueParamView'][];
+      _links?: components['schemas']['Links'];
     };
     ImportFileIssueParamView: {
       value?: string;
       type:
-        | "KEY_NAME"
-        | "KEY_ID"
-        | "LANGUAGE_ID"
-        | "KEY_INDEX"
-        | "VALUE"
-        | "LINE"
-        | "FILE_NODE_ORIGINAL";
+        | 'KEY_NAME'
+        | 'KEY_ID'
+        | 'LANGUAGE_ID'
+        | 'KEY_INDEX'
+        | 'VALUE'
+        | 'LINE'
+        | 'FILE_NODE_ORIGINAL';
     };
     PagedModelEntityModelImportFileIssueView: {
       _embedded?: {
-        importFileIssueViews?: components["schemas"]["EntityModelImportFileIssueView"][];
+        importFileIssueViews?: components['schemas']['EntityModelImportFileIssueView'][];
       };
-      _links?: components["schemas"]["Links"];
-      page?: components["schemas"]["PageMetadata"];
+      _links?: components['schemas']['Links'];
+      page?: components['schemas']['PageMetadata'];
     };
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
-        organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
+        organizationInvitations?: components['schemas']['OrganizationInvitationModel'][];
       };
-      _links?: components["schemas"]["Links"];
+      _links?: components['schemas']['Links'];
     };
     PagedModelUserAccountWithOrganizationRoleModel: {
       _embedded?: {
-        usersInOrganization?: components["schemas"]["UserAccountWithOrganizationRoleModel"][];
+        usersInOrganization?: components['schemas']['UserAccountWithOrganizationRoleModel'][];
       };
-      _links?: components["schemas"]["Links"];
-      page?: components["schemas"]["PageMetadata"];
+      _links?: components['schemas']['Links'];
+      page?: components['schemas']['PageMetadata'];
     };
     UserAccountWithOrganizationRoleModel: {
       id: number;
       name: string;
       username: string;
-      organizationRole: "MEMBER" | "OWNER";
-      _links?: components["schemas"]["Links"];
+      organizationRole: 'MEMBER' | 'OWNER';
+      _links?: components['schemas']['Links'];
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
-        organizations?: components["schemas"]["OrganizationModel"][];
+        organizations?: components['schemas']['OrganizationModel'][];
       };
-      _links?: components["schemas"]["Links"];
-      page?: components["schemas"]["PageMetadata"];
+      _links?: components['schemas']['Links'];
+      page?: components['schemas']['PageMetadata'];
     };
     UserResponseDTO: {
       id?: number;
@@ -632,16 +632,16 @@ export interface components {
       languages?: string[];
     };
     ViewDataResponseLinkedHashSetKeyWithTranslationsResponseDtoResponseParams: {
-      paginationMeta?: components["schemas"]["PaginationMeta"];
-      params?: components["schemas"]["ResponseParams"];
-      data?: components["schemas"]["KeyWithTranslationsResponseDto"][];
+      paginationMeta?: components['schemas']['PaginationMeta'];
+      params?: components['schemas']['ResponseParams'];
+      data?: components['schemas']['KeyWithTranslationsResponseDto'][];
     };
     JwtAuthenticationResponse: {
       accessToken?: string;
       tokenType?: string;
     };
     AuthMethodsDTO: {
-      github: components["schemas"]["GithubPublicConfigDTO"];
+      github: components['schemas']['GithubPublicConfigDTO'];
     };
     GithubPublicConfigDTO: {
       clientId?: string;
@@ -649,7 +649,7 @@ export interface components {
     };
     PublicConfigurationDTO: {
       isAuthentication: boolean;
-      authMethods?: components["schemas"]["AuthMethodsDTO"];
+      authMethods?: components['schemas']['AuthMethodsDTO'];
       isPasswordResettable: boolean;
       isAllowRegistrations: boolean;
       screenshotsUrl: string;
@@ -662,7 +662,7 @@ export interface components {
     InvitationDTO: {
       id?: number;
       code?: string;
-      type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      type?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
     };
     Link: {
       href?: string;
@@ -683,7 +683,7 @@ export interface operations {
       path: {
         repositoryId: number;
         userId: number;
-        permissionType: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+        permissionType: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
       };
     };
     responses: {
@@ -784,7 +784,7 @@ export interface operations {
         repositoryId: number;
       };
       query: {
-        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+        forceMode?: 'OVERRIDE' | 'KEEP' | 'NO_FORCE';
       };
     };
     responses: {
@@ -805,7 +805,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetOrganizationRoleDto"];
+        'application/json': components['schemas']['SetOrganizationRoleDto'];
       };
     };
   };
@@ -822,7 +822,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetOrganizationRoleDto"];
+        'application/json': components['schemas']['SetOrganizationRoleDto'];
       };
     };
   };
@@ -858,13 +858,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationInvitationModel"];
+          '*/*': components['schemas']['OrganizationInvitationModel'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["OrganizationInviteUserDto"];
+        'application/json': components['schemas']['OrganizationInviteUserDto'];
       };
     };
   };
@@ -878,13 +878,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationInvitationModel"];
+          '*/*': components['schemas']['OrganizationInvitationModel'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["OrganizationInviteUserDto"];
+        'application/json': components['schemas']['OrganizationInviteUserDto'];
       };
     };
   };
@@ -898,7 +898,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          '*/*': components['schemas']['OrganizationModel'];
         };
       };
     };
@@ -913,13 +913,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          '*/*': components['schemas']['OrganizationModel'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["OrganizationDto"];
+        'application/json': components['schemas']['OrganizationDto'];
       };
     };
   };
@@ -944,7 +944,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          '*/*': components['schemas']['OrganizationModel'];
         };
       };
     };
@@ -959,13 +959,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          '*/*': components['schemas']['OrganizationModel'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["OrganizationDto"];
+        'application/json': components['schemas']['OrganizationDto'];
       };
     };
   };
@@ -992,7 +992,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["EditKeyDTO"];
+        'application/json': components['schemas']['EditKeyDTO'];
       };
     };
   };
@@ -1008,7 +1008,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
+        'application/json': components['schemas']['SetTranslationsDTO'];
       };
     };
   };
@@ -1024,7 +1024,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": number[];
+        'application/json': number[];
       };
     };
   };
@@ -1035,7 +1035,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": number[];
+        'application/json': number[];
       };
     };
   };
@@ -1051,7 +1051,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
+        'application/json': components['schemas']['SetTranslationsDTO'];
       };
     };
   };
@@ -1067,7 +1067,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
+        'application/json': components['schemas']['SetTranslationsDTO'];
       };
     };
   };
@@ -1079,7 +1079,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
+        'application/json': components['schemas']['SetTranslationsDTO'];
       };
     };
   };
@@ -1091,7 +1091,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
+        'application/json': components['schemas']['SetTranslationsDTO'];
       };
     };
   };
@@ -1105,13 +1105,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ImportAddFilesResultModel"];
+          '*/*': components['schemas']['ImportAddFilesResultModel'];
         };
       };
     };
     requestBody: {
       content: {
-        "multipart/form-data": {
+        'multipart/form-data': {
           files: string[];
         };
       };
@@ -1138,13 +1138,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["StreamingResponseBody"];
+          '*/*': components['schemas']['StreamingResponseBody'];
         };
       };
     };
     requestBody: {
       content: {
-        "multipart/form-data": {
+        'multipart/form-data': {
           files: string[];
         };
       };
@@ -1153,15 +1153,15 @@ export interface operations {
   getAll_1: {
     parameters: {
       query: {
-        pageable: components["schemas"]["Pageable"];
-        params: components["schemas"]["OrganizationRequestParamsDto"];
+        pageable: components['schemas']['Pageable'];
+        params: components['schemas']['OrganizationRequestParamsDto'];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
+          'application/hal+json': components['schemas']['PagedModelOrganizationModel'];
         };
       };
     };
@@ -1171,28 +1171,28 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          '*/*': components['schemas']['OrganizationModel'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["OrganizationDto"];
+        'application/json': components['schemas']['OrganizationDto'];
       };
     };
   };
   getAll_2: {
     parameters: {
       query: {
-        pageable: components["schemas"]["Pageable"];
-        params: components["schemas"]["OrganizationRequestParamsDto"];
+        pageable: components['schemas']['Pageable'];
+        params: components['schemas']['OrganizationRequestParamsDto'];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
+          'application/hal+json': components['schemas']['PagedModelOrganizationModel'];
         };
       };
     };
@@ -1202,13 +1202,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          '*/*': components['schemas']['OrganizationModel'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["OrganizationDto"];
+        'application/json': components['schemas']['OrganizationDto'];
       };
     };
   };
@@ -1217,13 +1217,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": string;
+          'application/json': string;
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["GenerateAddressPathDto"];
+        'application/json': components['schemas']['GenerateAddressPathDto'];
       };
     };
   };
@@ -1232,13 +1232,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": string;
+          'application/json': string;
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["GenerateAddressPathDto"];
+        'application/json': components['schemas']['GenerateAddressPathDto'];
       };
     };
   };
@@ -1247,13 +1247,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": string;
+          'application/json': string;
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["GenerateAddressPathDto"];
+        'application/json': components['schemas']['GenerateAddressPathDto'];
       };
     };
   };
@@ -1262,13 +1262,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/json": string;
+          'application/json': string;
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["GenerateAddressPathDto"];
+        'application/json': components['schemas']['GenerateAddressPathDto'];
       };
     };
   };
@@ -1277,7 +1277,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["UserResponseDTO"];
+          '*/*': components['schemas']['UserResponseDTO'];
         };
       };
     };
@@ -1289,7 +1289,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UserUpdateRequestDTO"];
+        'application/json': components['schemas']['UserUpdateRequestDTO'];
       };
     };
   };
@@ -1305,13 +1305,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": { [key: string]: string };
+          '*/*': { [key: string]: string };
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["GetKeyTranslationsReqDto"];
+        'application/json': components['schemas']['GetKeyTranslationsReqDto'];
       };
     };
   };
@@ -1327,7 +1327,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["DeprecatedEditKeyDTO"];
+        'application/json': components['schemas']['DeprecatedEditKeyDTO'];
       };
     };
   };
@@ -1343,7 +1343,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
+        'application/json': components['schemas']['SetTranslationsDTO'];
       };
     };
   };
@@ -1357,13 +1357,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["LanguageDTO"];
+          '*/*': components['schemas']['LanguageDTO'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LanguageDTO"];
+        'application/json': components['schemas']['LanguageDTO'];
       };
     };
   };
@@ -1372,13 +1372,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["LanguageDTO"];
+          '*/*': components['schemas']['LanguageDTO'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LanguageDTO"];
+        'application/json': components['schemas']['LanguageDTO'];
       };
     };
   };
@@ -1392,7 +1392,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["LanguageDTO"][];
+          '*/*': components['schemas']['LanguageDTO'][];
         };
       };
     };
@@ -1407,13 +1407,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["LanguageDTO"];
+          '*/*': components['schemas']['LanguageDTO'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LanguageDTO"];
+        'application/json': components['schemas']['LanguageDTO'];
       };
     };
   };
@@ -1427,13 +1427,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ScreenshotDTO"][];
+          '*/*': components['schemas']['ScreenshotDTO'][];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["GetScreenshotsByKeyDTO"];
+        'application/json': components['schemas']['GetScreenshotsByKeyDTO'];
       };
     };
   };
@@ -1450,13 +1450,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ScreenshotDTO"];
+          '*/*': components['schemas']['ScreenshotDTO'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": {
+        'application/json': {
           screenshot: string;
         };
       };
@@ -1467,7 +1467,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["RepositoryDTO"][];
+          '*/*': components['schemas']['RepositoryDTO'][];
         };
       };
     };
@@ -1477,13 +1477,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["RepositoryDTO"];
+          '*/*': components['schemas']['RepositoryDTO'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateRepositoryDTO"];
+        'application/json': components['schemas']['CreateRepositoryDTO'];
       };
     };
   };
@@ -1492,13 +1492,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": string;
+          '*/*': string;
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["RepositoryInviteUserDto"];
+        'application/json': components['schemas']['RepositoryInviteUserDto'];
       };
     };
   };
@@ -1507,13 +1507,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["RepositoryDTO"];
+          '*/*': components['schemas']['RepositoryDTO'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["EditRepositoryDTO"];
+        'application/json': components['schemas']['EditRepositoryDTO'];
       };
     };
   };
@@ -1522,13 +1522,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": boolean;
+          '*/*': boolean;
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["TextNode"];
+        'application/json': components['schemas']['TextNode'];
       };
     };
   };
@@ -1537,13 +1537,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": { [key: string]: any };
+          '*/*': { [key: string]: any };
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SignUpDto"];
+        'application/json': components['schemas']['SignUpDto'];
       };
     };
   };
@@ -1554,7 +1554,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["ResetPassword"];
+        'application/json': components['schemas']['ResetPassword'];
       };
     };
   };
@@ -1565,7 +1565,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["ResetPasswordRequest"];
+        'application/json': components['schemas']['ResetPasswordRequest'];
       };
     };
   };
@@ -1574,13 +1574,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": { [key: string]: any };
+          '*/*': { [key: string]: any };
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["LoginRequest"];
+        'application/json': components['schemas']['LoginRequest'];
       };
     };
   };
@@ -1589,7 +1589,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ApiKeyDTO"][];
+          '*/*': components['schemas']['ApiKeyDTO'][];
         };
       };
     };
@@ -1599,13 +1599,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ApiKeyDTO"];
+          '*/*': components['schemas']['ApiKeyDTO'];
         };
       };
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateApiKeyDTO"];
+        'application/json': components['schemas']['CreateApiKeyDTO'];
       };
     };
   };
@@ -1616,14 +1616,14 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["EditApiKeyDTO"];
+        'application/json': components['schemas']['EditApiKeyDTO'];
       };
     };
   };
   getAll: {
     parameters: {
       query: {
-        pageable: components["schemas"]["Pageable"];
+        pageable: components['schemas']['Pageable'];
         search?: string;
       };
     };
@@ -1631,7 +1631,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelRepositoryModel"];
+          'application/hal+json': components['schemas']['PagedModelRepositoryModel'];
         };
       };
     };
@@ -1646,7 +1646,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["RepositoryModel"];
+          '*/*': components['schemas']['RepositoryModel'];
         };
       };
     };
@@ -1657,7 +1657,7 @@ export interface operations {
         repositoryId: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        pageable: components['schemas']['Pageable'];
         search?: string;
       };
     };
@@ -1665,7 +1665,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelUserAccountInRepositoryModel"];
+          '*/*': components['schemas']['PagedModelUserAccountInRepositoryModel'];
         };
       };
     };
@@ -1676,14 +1676,14 @@ export interface operations {
         repositoryId: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        pageable: components['schemas']['Pageable'];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelImportLanguageModel"];
+          '*/*': components['schemas']['PagedModelImportLanguageModel'];
         };
       };
     };
@@ -1699,7 +1699,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ImportLanguageModel"];
+          '*/*': components['schemas']['ImportLanguageModel'];
         };
       };
     };
@@ -1726,14 +1726,14 @@ export interface operations {
         onlyConflicts?: boolean;
         onlyUnresolved?: boolean;
         search?: string;
-        pageable: components["schemas"]["Pageable"];
+        pageable: components['schemas']['Pageable'];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelImportTranslationModel"];
+          '*/*': components['schemas']['PagedModelImportTranslationModel'];
         };
       };
     };
@@ -1745,14 +1745,14 @@ export interface operations {
         repositoryId: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        pageable: components['schemas']['Pageable'];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelEntityModelImportFileIssueView"];
+          '*/*': components['schemas']['PagedModelEntityModelImportFileIssueView'];
         };
       };
     };
@@ -1767,7 +1767,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
+          '*/*': components['schemas']['CollectionModelOrganizationInvitationModel'];
         };
       };
     };
@@ -1782,7 +1782,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
+          '*/*': components['schemas']['CollectionModelOrganizationInvitationModel'];
         };
       };
     };
@@ -1793,7 +1793,7 @@ export interface operations {
         id: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        pageable: components['schemas']['Pageable'];
         search?: string;
       };
     };
@@ -1801,7 +1801,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+          '*/*': components['schemas']['PagedModelUserAccountWithOrganizationRoleModel'];
         };
       };
     };
@@ -1812,7 +1812,7 @@ export interface operations {
         id: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        pageable: components['schemas']['Pageable'];
         search?: string;
       };
     };
@@ -1820,7 +1820,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+          '*/*': components['schemas']['PagedModelUserAccountWithOrganizationRoleModel'];
         };
       };
     };
@@ -1831,7 +1831,7 @@ export interface operations {
         id: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        pageable: components['schemas']['Pageable'];
         search?: string;
       };
     };
@@ -1839,7 +1839,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelRepositoryModel"];
+          '*/*': components['schemas']['PagedModelRepositoryModel'];
         };
       };
     };
@@ -1850,7 +1850,7 @@ export interface operations {
         id: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        pageable: components['schemas']['Pageable'];
         search?: string;
       };
     };
@@ -1858,7 +1858,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelRepositoryModel"];
+          '*/*': components['schemas']['PagedModelRepositoryModel'];
         };
       };
     };
@@ -1869,7 +1869,7 @@ export interface operations {
         addressPart: string;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        pageable: components['schemas']['Pageable'];
         search?: string;
       };
     };
@@ -1877,7 +1877,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelRepositoryModel"];
+          '*/*': components['schemas']['PagedModelRepositoryModel'];
         };
       };
     };
@@ -1888,7 +1888,7 @@ export interface operations {
         addressPart: string;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        pageable: components['schemas']['Pageable'];
         search?: string;
       };
     };
@@ -1896,7 +1896,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelRepositoryModel"];
+          '*/*': components['schemas']['PagedModelRepositoryModel'];
         };
       };
     };
@@ -1911,7 +1911,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          '*/*': components['schemas']['OrganizationModel'];
         };
       };
     };
@@ -1926,7 +1926,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          '*/*': components['schemas']['OrganizationModel'];
         };
       };
     };
@@ -1941,7 +1941,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": boolean;
+          '*/*': boolean;
         };
       };
     };
@@ -1956,7 +1956,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": boolean;
+          '*/*': boolean;
         };
       };
     };
@@ -1971,7 +1971,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": boolean;
+          '*/*': boolean;
         };
       };
     };
@@ -1986,7 +1986,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": boolean;
+          '*/*': boolean;
         };
       };
     };
@@ -2002,7 +2002,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["DeprecatedKeyDto"];
+          '*/*': components['schemas']['DeprecatedKeyDto'];
         };
       };
     };
@@ -2029,7 +2029,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["DeprecatedKeyDto"];
+          '*/*': components['schemas']['DeprecatedKeyDto'];
         };
       };
     };
@@ -2055,7 +2055,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/zip": components["schemas"]["StreamingResponseBody"];
+          'application/zip': components['schemas']['StreamingResponseBody'];
         };
       };
     };
@@ -2071,7 +2071,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": { [key: string]: { [key: string]: any } };
+          '*/*': { [key: string]: { [key: string]: any } };
         };
       };
     };
@@ -2086,7 +2086,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": { [key: string]: { [key: string]: any } };
+          '*/*': { [key: string]: { [key: string]: any } };
         };
       };
     };
@@ -2107,7 +2107,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ViewDataResponseLinkedHashSetKeyWithTranslationsResponseDtoResponseParams"];
+          '*/*': components['schemas']['ViewDataResponseLinkedHashSetKeyWithTranslationsResponseDtoResponseParams'];
         };
       };
     };
@@ -2123,7 +2123,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["LanguageDTO"];
+          '*/*': components['schemas']['LanguageDTO'];
         };
       };
     };
@@ -2150,7 +2150,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["LanguageDTO"];
+          '*/*': components['schemas']['LanguageDTO'];
         };
       };
     };
@@ -2176,7 +2176,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["RepositoryDTO"];
+          '*/*': components['schemas']['RepositoryDTO'];
         };
       };
     };
@@ -2203,7 +2203,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+          '*/*': components['schemas']['JwtAuthenticationResponse'];
         };
       };
     };
@@ -2225,7 +2225,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PublicConfigurationDTO"];
+          '*/*': components['schemas']['PublicConfigurationDTO'];
         };
       };
     };
@@ -2244,7 +2244,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+          '*/*': components['schemas']['JwtAuthenticationResponse'];
         };
       };
     };
@@ -2259,7 +2259,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["InvitationDTO"][];
+          '*/*': components['schemas']['InvitationDTO'][];
         };
       };
     };
@@ -2281,7 +2281,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": string[];
+          '*/*': string[];
         };
       };
     };
@@ -2296,7 +2296,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ApiKeyDTO"][];
+          '*/*': components['schemas']['ApiKeyDTO'][];
         };
       };
     };
@@ -2306,7 +2306,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": { [key: string]: string[] };
+          '*/*': { [key: string]: string[] };
         };
       };
     };
