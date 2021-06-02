@@ -48,7 +48,7 @@ import java.io.OutputStream
 @Suppress("MVCPathVariableInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/repositories/{projectId}/import"])
+@RequestMapping(value = ["/v2/projects/{projectId}/import"])
 @Tag(name = "Import")
 class V2ImportController(
         private val importService: ImportService,

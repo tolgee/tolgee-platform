@@ -27,7 +27,7 @@ class AuthenticationProperties(
         var timestampMaxAge: Long = 604800000, //one week
         var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
         var ldap: LdapAuthenticationProperties = LdapAuthenticationProperties(),
-        var userCanCreateRepositories: Boolean = true,
+        var userCanCreateProjects: Boolean = true,
         var userCanCreateOrganizations: Boolean = true
 
 ) {

@@ -332,17 +332,17 @@ class OrganizationControllerTest : SignedInControllerTest() {
 
 
     @Test
-    fun testGetAllRepositories() {
+    fun testGetAllProjects() {
         val users = dbPopulator.createUsersAndOrganizations()
         logAsUser(users[1].username!!, initialPassword)
         users[1].organizationRoles[0].organization.let { organization ->
-            performAuthGet("/v2/organizations/${organization!!.addressPart}/repositories")
+            performAuthGet("/v2/organizations/${organization!!.addressPart}/projects")
                     .andIsOk.andAssertThatJson.let {
-                        it.node("_embedded.repositories").let { repositoriesNode ->
-                            repositoriesNode.isArray.hasSize(3)
-                            repositoriesNode.node("[1].name").isEqualTo("user 2's organization 1 project 2")
-                            repositoriesNode.node("[1].organizationOwnerAddressPart").isEqualTo("user-2-s-organization-1")
-                            repositoriesNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
+                        it.node("_embedded.projects").let { projectsNode ->
+                            projectsNode.isArray.hasSize(3)
+                            projectsNode.node("[1].name").isEqualTo("user 2's organization 1 project 2")
+                            projectsNode.node("[1].organizationOwnerAddressPart").isEqualTo("user-2-s-organization-1")
+                            projectsNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
                         }
                     }
         }
@@ -357,9 +357,9 @@ class OrganizationControllerTest : SignedInControllerTest() {
             logAsUser("hellouser", initialPassword)
             performAuthGet("/v2/organizations/${organization.id}/invitations")
                     .andIsOk.andAssertThatJson.let {
-                        it.node("_embedded.organizationInvitations").let { repositoriesNode ->
-                            repositoriesNode.isArray.hasSize(1)
-                            repositoriesNode.node("[0].id").isEqualTo(invitation.id)
+                        it.node("_embedded.organizationInvitations").let { projectsNode ->
+                            projectsNode.isArray.hasSize(1)
+                            projectsNode.node("[0].id").isEqualTo(invitation.id)
                         }
                     }
         }

@@ -7,7 +7,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
-@Relation(collectionRelation = "repositories", itemRelation = "project")
+@Relation(collectionRelation = "projects", itemRelation = "project")
 open class ProjectModel(
         val id: Long,
         val name: String,

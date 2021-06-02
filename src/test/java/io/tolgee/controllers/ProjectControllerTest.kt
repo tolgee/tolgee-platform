@@ -41,7 +41,7 @@ class ProjectControllerTest : SignedInControllerTest() {
         val organization = dbPopulator.createOrganization("Test Organization", userAccount)
         logAsUser("testuser", initialPasswordManager.initialPassword)
         val request = CreateProjectDTO("aaa", setOf(languageDTO), organizationId = organization.id)
-        val result = performAuthPost("/api/repositories", request).andIsOk.andReturn().mapResponseTo<ProjectDTO>()
+        val result = performAuthPost("/api/projects", request).andIsOk.andReturn().mapResponseTo<ProjectDTO>()
         projectService.get(result.id!!).get().let {
             assertThat(it.organizationOwner?.id).isEqualTo(organization.id)
         }
@@ -50,7 +50,7 @@ class ProjectControllerTest : SignedInControllerTest() {
     private fun testCreateCorrectRequest() {
         val request = CreateProjectDTO("aaa", setOf(languageDTO))
         val mvcResult = mvc.perform(
-                loggedPost("/api/repositories")
+                loggedPost("/api/projects")
                         .contentType(MediaType.APPLICATION_JSON).content(
                                 JsonHelper.asJsonString(request)))
                 .andExpect(MockMvcResultMatchers.status().isOk)
@@ -67,7 +67,7 @@ class ProjectControllerTest : SignedInControllerTest() {
 
     private fun testCreateValidationSizeShort() {
         val request = CreateProjectDTO("aa", setOf(languageDTO))
-        val mvcResult = performAuthPost("/api/repositories", request).andIsBadRequest.andReturn()
+        val mvcResult = performAuthPost("/api/projects", request).andIsBadRequest.andReturn()
         assertThat(mvcResult).error().isStandardValidation
     }
 
@@ -76,7 +76,7 @@ class ProjectControllerTest : SignedInControllerTest() {
                 "Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...",
                 setOf(languageDTO)
         )
-        val mvcResult = performAuthPost("/api/repositories", request).andIsBadRequest.andReturn()
+        val mvcResult = performAuthPost("/api/projects", request).andIsBadRequest.andReturn()
         assertThat(mvcResult).error().isStandardValidation
     }
 
@@ -89,7 +89,7 @@ class ProjectControllerTest : SignedInControllerTest() {
     private fun testEditCorrectRequest(test: Project) {
         val request = EditProjectDTO(test.id, "new test")
         val mvcResult = mvc.perform(
-                loggedPost("/api/repositories/edit")
+                loggedPost("/api/projects/edit")
                         .contentType(MediaType.APPLICATION_JSON).content(
                                 JsonHelper.asJsonString(request)))
                 .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
@@ -105,7 +105,7 @@ class ProjectControllerTest : SignedInControllerTest() {
     fun deleteProject() {
         val base = dbPopulator.createBase(generateUniqueString())
         mvc.perform(
-                loggedDelete("/api/repositories/${base.id}")
+                loggedDelete("/api/projects/${base.id}")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn()
@@ -120,7 +120,7 @@ class ProjectControllerTest : SignedInControllerTest() {
             repos.add(dbPopulator.createBase(generateUniqueString()).name)
         }
         val mvcResult = mvc.perform(
-                loggedGet("/api/repositories/")
+                loggedGet("/api/projects/")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk)
                 .andReturn()

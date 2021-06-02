@@ -789,25 +789,25 @@
                                  validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-23">
-        <dropForeignKeyConstraint baseTableName="permission" constraintName="fk4eao8empmjkh4djn65mgpo0xy"/>
+        <dropForeignKeyConstraint baseTableName="permission" constraintName="FK4eao8empmjkh4djn65mgpo0xy"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-24">
-        <dropForeignKeyConstraint baseTableName="key" constraintName="fk4w7p5ffylu2s25r0fvcg7m16m"/>
+        <dropForeignKeyConstraint baseTableName="key" constraintName="FK4w7p5ffylu2s25r0fvcg7m16m"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-25">
-        <dropForeignKeyConstraint baseTableName="project" constraintName="fke8q5ar4olfji1mw1p0163ctyk"/>
+        <dropForeignKeyConstraint baseTableName="project" constraintName="FKe8q5ar4olfji1mw1p0163ctyk"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-26">
-        <dropForeignKeyConstraint baseTableName="language" constraintName="fkk3nnt1okbdkvp7igkexvbyxnf"/>
+        <dropForeignKeyConstraint baseTableName="language" constraintName="FKk3nnt1okbdkvp7igkexvbyxnf"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-27">
-        <dropForeignKeyConstraint baseTableName="api_key" constraintName="fkl6qxgkp6jih1aup8laua5ime9"/>
+        <dropForeignKeyConstraint baseTableName="api_key" constraintName="FKl6qxgkp6jih1aup8laua5ime9"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-28">
-        <dropForeignKeyConstraint baseTableName="project" constraintName="fkp2q5w860n1uai6oyel74udi83"/>
+        <dropForeignKeyConstraint baseTableName="project" constraintName="FKp2q5w860n1uai6oyel74udi83"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-29">
-        <dropForeignKeyConstraint baseTableName="import" constraintName="fkr3w7b3sw9aiegenlgjjnjt2yi"/>
+        <dropForeignKeyConstraint baseTableName="import" constraintName="FKr3w7b3sw9aiegenlgjjnjt2yi"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-30">
         <dropUniqueConstraint constraintName="language_repository_name" tableName="language"/>
@@ -819,7 +819,7 @@
         <dropUniqueConstraint constraintName="source_repository_id_name" tableName="key"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-33">
-        <dropUniqueConstraint constraintName="ukiiys1nq2g2sdg7alh8oelygkh" tableName="import"/>
+        <dropUniqueConstraint constraintName="UKiiys1nq2g2sdg7alh8oelygkh" tableName="import"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1622541022896-2">
         <dropUniqueConstraint constraintName="language_abbreviation_name" tableName="language"/>

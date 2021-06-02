@@ -150,7 +150,7 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
 
     private fun performImport(projectId: Long, files: Map<String?, Resource>): ResultActions {
         val builder = MockMvcRequestBuilders
-                .multipart("/v2/repositories/${projectId}/import")
+                .multipart("/v2/projects/${projectId}/import")
 
         files.forEach {
             builder.file(MockMultipartFile(
@@ -164,7 +164,7 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
 
     private fun performStreamingImport(projectId: Long, files: Map<String?, Resource>): ResultActions {
         val builder = MockMvcRequestBuilders
-                .multipart("/v2/repositories/${projectId}/import/with-streaming-response")
+                .multipart("/v2/projects/${projectId}/import/with-streaming-response")
 
         files.forEach {
             builder.file(MockMultipartFile(

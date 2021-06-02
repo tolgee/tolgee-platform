@@ -23,7 +23,7 @@ import javax.validation.Valid
 
 @RestController("_projectController")
 @CrossOrigin(origins = ["*"])
-@RequestMapping("/api/repositories")
+@RequestMapping("/api/projects")
 @Tag(name = "Project")
 open class ProjectController @Autowired constructor(private val projectService: ProjectService,
                                                        private val authenticationFacade: AuthenticationFacade,
@@ -37,7 +37,7 @@ open class ProjectController @Autowired constructor(private val projectService: 
     @Operation(summary = "Creates project with specified languages")
     open fun createProject(@RequestBody @Valid dto: CreateProjectDTO?): ProjectDTO {
         val userAccount = authenticationFacade.userAccount
-        if (!this.tolgeeProperties.authentication.userCanCreateRepositories
+        if (!this.tolgeeProperties.authentication.userCanCreateProjects
                 && userAccount.role != UserAccount.Role.ADMIN) {
             throw PermissionException()
         }
@@ -64,7 +64,7 @@ open class ProjectController @Autowired constructor(private val projectService: 
     }
 
     @GetMapping(value = [""])
-    @Operation(summary = "Return all repositories, where use has any access")
+    @Operation(summary = "Return all projects, where use has any access")
     open fun getAll(): List<ProjectDTO> = projectService.findAllPermitted(authenticationFacade.userAccount)
 
     @DeleteMapping(value = ["/{id}"])

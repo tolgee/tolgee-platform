@@ -117,7 +117,7 @@ open class OrganizationController(
     }
 
     @DeleteMapping("/{id:[0-9]+}")
-    @Operation(summary = "Deletes organization and all its repositories")
+    @Operation(summary = "Deletes organization and all its projects")
     open fun delete(@PathVariable("id") id: Long) {
         organizationRoleService.checkUserIsOwner(id)
         organizationService.delete(id)
@@ -167,32 +167,32 @@ open class OrganizationController(
         organizationRoleService.removeUser(organizationId, userId)
     }
 
-    @GetMapping("/{id:[0-9]+]}/repositories")
-    @Operation(summary = "Returns all organization repositories")
-    open fun getAllRepositories(
+    @GetMapping("/{id:[0-9]+]}/projects")
+    @Operation(summary = "Returns all organization projects")
+    open fun getAllProjects(
             @PathVariable("id") id: Long,
             pageable: Pageable,
             @RequestParam("search") search: String?
     ): PagedModel<ProjectModel> {
         return organizationService.get(id)?.let {
             organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
-            projectService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
-                pagedProjectResourcesAssembler.toModel(repositories, projectModelAssembler)
+            projectService.findAllInOrganization(it.id!!, pageable, search).let { projects ->
+                pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
             }
         } ?: throw NotFoundException()
     }
 
-    @GetMapping("/{addressPart:.*[a-z].*}/repositories")
-    @Operation(summary = "Returns all organization repositories")
-    open fun getAllRepositories(
+    @GetMapping("/{addressPart:.*[a-z].*}/projects")
+    @Operation(summary = "Returns all organization projects")
+    open fun getAllProjects(
             @PathVariable("addressPart") addressPart: String,
             pageable: Pageable,
             @RequestParam("search") search: String?
     ): PagedModel<ProjectModel> {
         return organizationService.get(addressPart)?.let {
             organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
-            projectService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
-                pagedProjectResourcesAssembler.toModel(repositories, projectModelAssembler)
+            projectService.findAllInOrganization(it.id!!, pageable, search).let { projects ->
+                pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
             }
         } ?: throw NotFoundException()
     }

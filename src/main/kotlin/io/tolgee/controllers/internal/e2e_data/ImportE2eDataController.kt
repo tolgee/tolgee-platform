@@ -130,7 +130,7 @@ class ImportE2eDataController(
         }
 
         testDataService.saveTestData(data)
-        return data.data.repositories[0].self
+        return data.data.projects[0].self
     }
 
     @GetMapping(value = ["/clean"])

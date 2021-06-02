@@ -265,7 +265,7 @@ class ImportTestData {
 
     fun addManyTranslations() {
         addFileIssues()
-        val projectBuilder = this.root.data.repositories[0]
+        val projectBuilder = this.root.data.projects[0]
         val import = projectBuilder.data.imports[0]
         import.addImportFile {
             self { name = "another.json" }
@@ -307,7 +307,7 @@ class ImportTestData {
 
 
     fun addKeyMetadata() {
-        root.data.repositories[0].data.keys[2].addMeta {
+        root.data.projects[0].data.keys[2].addMeta {
             self {
                 addComment(userAccount) {
                     text = "Hello I am first comment (I exist)"
@@ -321,7 +321,7 @@ class ImportTestData {
             }
         }
 
-        root.data.repositories[0].data.imports[0].data.importFiles[0].data.importKeys[2].addMeta {
+        root.data.projects[0].data.imports[0].data.importFiles[0].data.importKeys[2].addMeta {
             self {
                 addComment(userAccount) {
                     text = "Hello I am first comment (I exist)"
@@ -347,7 +347,7 @@ class ImportTestData {
             }
         }
 
-        root.data.repositories[0].data.imports[0].data.importFiles[0].data.importKeys[3].addMeta {
+        root.data.projects[0].data.imports[0].data.importFiles[0].data.importKeys[3].addMeta {
             self {
                 addComment(userAccount) {
                     text = "Hello!"

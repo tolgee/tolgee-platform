@@ -31,9 +31,9 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/repositories"])
-@Tag(name = "Repositories")
-class V2RepositoriesController(
+@RequestMapping(value = ["/v2/projects"])
+@Tag(name = "Projects")
+class V2ProjectsController(
         val projectService: ProjectService,
         val projectHolder: ProjectHolder,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -46,11 +46,11 @@ class V2RepositoriesController(
         val permissionService: PermissionService,
         val authenticationFacade: AuthenticationFacade
 ) {
-    @Operation(summary = "Returns all repositories, which are current user permitted to view")
+    @Operation(summary = "Returns all projects, which are current user permitted to view")
     @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
     fun getAll(pageable: Pageable, @RequestParam("search") search: String?): PagedModel<ProjectModel>? {
-        val repositories = projectService.findPermittedPaged(pageable, search)
-        return arrayResourcesAssembler.toModel(repositories, projectModelAssembler)
+        val projects = projectService.findPermittedPaged(pageable, search)
+        return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
     }
 
     @GetMapping("/{projectId}")

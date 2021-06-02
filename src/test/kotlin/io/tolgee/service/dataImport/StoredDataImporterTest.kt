@@ -30,7 +30,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
             assertThat(it.text).isEqualTo(importTestData.translationWithConflict.text)
         }
         val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id!!)!!
-        val keptTranslation = importTestData.root.data.repositories[0].data.translations[1].self
+        val keptTranslation = importTestData.root.data.projects[0].data.translations[1].self
         assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
         assertThat(keptTranslation.text).isEqualTo("What a text")
     }
@@ -46,7 +46,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
     @Test
     fun `it checks for conflicts again`() {
         importTestData.setAllResolved()
-        importTestData.root.data.repositories[0].addTranslation {
+        importTestData.root.data.projects[0].addTranslation {
             self {
                 language = projectBuilder.data.languages[0].self
                 key = projectBuilder.data.keys[4].self
@@ -70,7 +70,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
         testDataService.saveTestData(importTestData.root)
         storedDataImporter.doImport()
         val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id!!)!!
-        val forceOverriddenTranslationId = importTestData.root.data.repositories[0].data.translations[1].self.id
+        val forceOverriddenTranslationId = importTestData.root.data.projects[0].data.translations[1].self.id
         val forceOverriddenTranslation = translationService.find(forceOverriddenTranslationId!!)!!
         assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
         assertThat(forceOverriddenTranslation.text).isEqualTo("Imported text")
@@ -85,7 +85,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
         storedDataImporter.doImport()
         entityManager.flush()
         entityManager.clear()
-        val key1 = entityManager.merge(importTestData.root.data.repositories[0].data.keys[2].self)
+        val key1 = entityManager.merge(importTestData.root.data.projects[0].data.keys[2].self)
         entityManager.refresh(key1)
         entityManager.refresh(key1.keyMeta)
 
@@ -108,7 +108,7 @@ class StoredDataImporterTest : AbstractSpringTest() {
         testDataService.saveTestData(importTestData.root)
         storedDataImporter.doImport()
         val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
-        val forceKeptTranslationId = importTestData.root.data.repositories[0].data.translations[1].self.id
+        val forceKeptTranslationId = importTestData.root.data.projects[0].data.translations[1].self.id
         val forceKeptTranslation = translationService.find(forceKeptTranslationId)!!
         assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
         assertThat(forceKeptTranslation.text).isEqualTo("What a text")

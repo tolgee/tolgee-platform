@@ -24,21 +24,21 @@ class TestDataService(
             it.self.password = userAccountService.encodePassword(it.rawPassword)
             it.self
         })
-        projectService.saveAll(builder.data.repositories.map { it.self })
-        permissionService.saveAll(builder.data.repositories.flatMap { it.data.permissions.map { it.self } })
-        val languages = builder.data.repositories.flatMap { it.data.languages.map { it.self } }
+        projectService.saveAll(builder.data.projects.map { it.self })
+        permissionService.saveAll(builder.data.projects.flatMap { it.data.permissions.map { it.self } })
+        val languages = builder.data.projects.flatMap { it.data.languages.map { it.self } }
         languageService.saveAll(languages)
 
 
-        val keyBuilders = builder.data.repositories.flatMap { it.data.keys.map { it } }
+        val keyBuilders = builder.data.projects.flatMap { it.data.keys.map { it } }
         keyService.saveAll(keyBuilders.map { it.self })
         keyMetaService.saveAll(keyBuilders.map { it.data.meta?.self }.filterNotNull())
 
-        builder.data.repositories.flatMap { it.data.translations.map { it.self } }.let {
+        builder.data.projects.flatMap { it.data.translations.map { it.self } }.let {
             translationService.saveAll(it)
         }
 
-        val importBuilders = builder.data.repositories.flatMap { repoBuilder -> repoBuilder.data.imports }
+        val importBuilders = builder.data.projects.flatMap { repoBuilder -> repoBuilder.data.imports }
         importService.saveAllImports(importBuilders.map { it.self })
 
         val importFileBuilders = importBuilders.flatMap { it.data.importFiles }

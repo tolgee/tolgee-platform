@@ -44,7 +44,7 @@ class ProjectProjectTest : AbstractTransactionalTestNGSpringContextTests() {
     }
 
     @Test
-    fun testPermittedRepositories() {
+    fun testPermittedProjects() {
         val users = dbPopulatorReal.createUsersAndOrganizations()
         dbPopulatorReal.createBase("No org repo", users[3].username!!)
         val result = projectRepository.findAllPermitted(users[3].id!!)
@@ -58,7 +58,7 @@ class ProjectProjectTest : AbstractTransactionalTestNGSpringContextTests() {
     }
 
     @Test
-    fun testPermittedRepositoriesJustNoOrg() {
+    fun testPermittedProjectsJustNoOrg() {
         val base = dbPopulatorReal.createBase("No org repo", generateUniqueString())
         val result = projectRepository.findAllPermitted(base.userOwner!!.id!!)
         assertThat(result).hasSize(1)

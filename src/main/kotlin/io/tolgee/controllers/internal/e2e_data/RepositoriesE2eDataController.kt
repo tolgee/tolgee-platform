@@ -24,10 +24,10 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin(origins = ["*"])
 @Hidden
-@RequestMapping(value = ["internal/e2e-data/repositories"])
+@RequestMapping(value = ["internal/e2e-data/projects"])
 @Transactional
 @InternalController
-open class RepositoriesE2eDataController(
+open class ProjectsE2eDataController(
         private val organizationService: OrganizationService,
         private val userAccountService: UserAccountService,
         private val dbPopulatorReal: DbPopulatorReal,
@@ -43,7 +43,7 @@ open class RepositoriesE2eDataController(
 ) {
     @GetMapping(value = ["/create"])
     @Transactional
-    open fun createRepositories() {
+    open fun createProjects() {
         val createdUsers = mutableMapOf<String, UserAccount>()
 
         users.forEach {
@@ -76,7 +76,7 @@ open class RepositoriesE2eDataController(
             }
         }
 
-        repositories.forEach { projectData ->
+        projects.forEach { projectData ->
 
             val userOwner = if (projectData.userOwner != null)
                 createdUsers[projectData.userOwner]!! else null
@@ -114,10 +114,10 @@ open class RepositoriesE2eDataController(
 
     @GetMapping(value = ["/clean"])
     @Transactional
-    open fun cleanupRepositories() {
+    open fun cleanupProjects() {
         projectService.deleteAllByName("I am a great project")
 
-        repositories.forEach {
+        projects.forEach {
             projectService.deleteAllByName(it.name)
         }
 
@@ -181,7 +181,7 @@ open class RepositoriesE2eDataController(
                 )
         )
 
-        val repositories = mutableListOf(
+        val projects = mutableListOf(
                 ProjectDataItem(
                         name = "Facebook itself",
                         organizationOwner = "facebook",
@@ -259,7 +259,7 @@ open class RepositoriesE2eDataController(
             (1..20).forEach { number ->
                 val email = "owner@zzzcool${number}.com";
                 users.add(UserData(email))
-                repositories.find { item -> item.name == "Microsoft Word" }!!.permittedUsers.add(
+                projects.find { item -> item.name == "Microsoft Word" }!!.permittedUsers.add(
                         PermittedUserData(email, Permission.ProjectPermissionType.EDIT)
                 )
             }

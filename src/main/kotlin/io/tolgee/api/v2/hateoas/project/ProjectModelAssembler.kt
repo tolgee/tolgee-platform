@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.hateoas.project
 
 import io.tolgee.api.v2.controllers.OrganizationController
-import io.tolgee.api.v2.controllers.V2RepositoriesController
+import io.tolgee.api.v2.controllers.V2ProjectsController
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
 import io.tolgee.model.views.ProjectView
 import io.tolgee.service.PermissionService
@@ -14,9 +14,9 @@ class ProjectModelAssembler(
         private val userAccountModelAssembler: UserAccountModelAssembler,
         private val permissionService: PermissionService
 ) : RepresentationModelAssemblerSupport<ProjectView, ProjectModel>(
-        V2RepositoriesController::class.java, ProjectModel::class.java) {
+        V2ProjectsController::class.java, ProjectModel::class.java) {
     override fun toModel(view: ProjectView): ProjectModel {
-        val link = linkTo<V2RepositoriesController> { get(view.id) }.withSelfRel()
+        val link = linkTo<V2ProjectsController> { get(view.id) }.withSelfRel()
         return ProjectModel(
                 id = view.id,
                 name = view.name,
