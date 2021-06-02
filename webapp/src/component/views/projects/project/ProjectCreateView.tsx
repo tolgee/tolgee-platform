@@ -11,7 +11,7 @@ import { TextField } from '../../../common/form/fields/TextField';
 import { BaseFormView } from '../../../layout/BaseFormView';
 import { FieldArray } from '../../../common/form/fields/FieldArray';
 import { Validation } from '../../../../constants/GlobalValidationSchema';
-import { PossibleProjectPage } from '../../PossibleProjectPage';
+import { DashboardPage } from '../../../layout/DashboardPage';
 import { T } from '@tolgee/react';
 import { Grid } from '@material-ui/core';
 import OwnerSelect from './components/OwnerSelect';
@@ -57,7 +57,7 @@ export const ProjectCreateView: FunctionComponent = () => {
   }
 
   return (
-    <PossibleProjectPage>
+    <DashboardPage>
       <BaseFormView
         lg={6}
         md={8}
@@ -107,6 +107,6 @@ export const ProjectCreateView: FunctionComponent = () => {
           </FieldArray>
         </>
       </BaseFormView>
-    </PossibleProjectPage>
+    </DashboardPage>
   );
 };

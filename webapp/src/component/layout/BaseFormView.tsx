@@ -1,8 +1,7 @@
-import { default as React, FunctionComponent, ReactNode } from 'react';
+import { FunctionComponent, ReactNode } from 'react';
 import { BaseView, BaseViewProps } from './BaseView';
 import { StandardForm } from '../common/form/StandardForm';
 import { ObjectSchema } from 'yup';
-import { ResourceErrorComponent } from '../common/form/ResourceErrorComponent';
 import { Link } from '../../constants/links';
 import { Loadable } from '../../store/AbstractLoadableActions';
 

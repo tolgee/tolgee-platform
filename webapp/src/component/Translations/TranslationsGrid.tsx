@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { FunctionComponent, useContext } from 'react';
 import { useProject } from '../../hooks/useProject';
 import { Box } from '@material-ui/core';
@@ -12,9 +11,12 @@ import { EmptyListMessage } from '../common/EmptyListMessage';
 import { FabAddButtonLink } from '../common/buttons/FabAddButtonLink';
 import { MenuBar } from './MenuBar';
 import { BaseView } from '../layout/BaseView';
-import { useProjectPermissions } from '../../hooks/useProjectPermissions';
-import { ProjectPermissionType } from '../../service/response.types';
-import { T } from '@tolgee/react';
+import { useRepositoryPermissions } from '../../hooks/useRepositoryPermissions';
+import { RepositoryPermissionType } from '../../service/response.types';
+import { T, useTranslate } from '@tolgee/react';
+
+import { Navigation } from '../navigation/Navigation';
+import { Path } from '../navigation/Path';
 import Typography from '@material-ui/core/Typography';
 
 export const TranslationsGrid: FunctionComponent = (props) => {
@@ -24,6 +26,8 @@ export const TranslationsGrid: FunctionComponent = (props) => {
   const isEmpty = listContext.listLoadable.data!.paginationMeta.allCount === 0;
   const isSearch = listContext.listLoadable.data!.params.search;
   const projectPermissions = useProjectPermissions();
+
+  const t = useTranslate();
 
   const onEmptyInner = (
     <>
@@ -67,10 +71,29 @@ export const TranslationsGrid: FunctionComponent = (props) => {
 
   return (
     <BaseView
+      navigation={
+        <Navigation>
+          <Path
+            path={[
+              [
+                repositoryDTO.name,
+                LINKS.REPOSITORY.build({
+                  [PARAMS.REPOSITORY_ID]: repositoryDTO.id,
+                }),
+              ],
+              [
+                t('translations_view_title'),
+                LINKS.REPOSITORY_TRANSLATIONS.build({
+                  [PARAMS.REPOSITORY_ID]: repositoryDTO.id,
+                }),
+              ],
+            ]}
+          />
+        </Navigation>
+      }
       customHeader={
         isSearch || !isEmpty ? (
           <>
-            {title}
             <Box mt={2}>
               <MenuBar />
             </Box>

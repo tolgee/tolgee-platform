@@ -1,55 +1,22 @@
-import * as React from 'react';
 import { FunctionComponent, ReactElement } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Box from '@material-ui/core/Box';
-import { MainMenu } from './MainMenu';
-import { Link } from 'react-router-dom';
-import { LINKS } from '../../constants/links';
-import { TolgeeLogo } from '../common/icons/TolgeeLogo';
-
-const FOOTER_IMAGE_HEIGHT = 30;
-const FOOTER_PADDING = 1;
-
-function Copyright() {
-  return (
-    <>
-      <Box
-        display="flex"
-        p={1}
-        alignItems="center"
-        justifyContent="center"
-        fontWeight="500"
-      >
-        <Link to={LINKS.ROOT.build()} style={{ color: 'inherit', height: 30 }}>
-          <TolgeeLogo
-            opacity={0.2}
-            style={{
-              width: 30,
-              height: 30,
-              filter: 'drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.2))',
-            }}
-          />
-        </Link>
-      </Box>
-    </>
-  );
-}
+import { TopBar } from './TopBar';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
+    height: '100vh',
+    flexDirection: 'column',
+    overflowY: 'hidden',
+    alignItems: 'stretch',
   },
-  appBarSpacer: theme.mixins.toolbar,
   content: {
     flexGrow: 1,
-    height: `100vh`,
-    overflow: 'auto',
-  },
-  container: {
-    flexGrow: 1,
+    position: 'relative',
     display: 'flex',
+    overflowY: 'auto',
   },
+  appBarSpacer: theme.mixins.toolbar,
 }));
 
 interface DashboardPageProps {
@@ -67,24 +34,9 @@ export const DashboardPage: FunctionComponent<DashboardPageProps> = ({
 
   return (
     <div className={classes.root}>
-      <CssBaseline />
-      <MainMenu projectName={props.projectName} sideMenuItems={sideMenuItems} />
-      <main className={classes.content}>
-        <Box
-          display="flex"
-          flexDirection="column"
-          flexGrow={1}
-          minHeight="100%"
-        >
-          {!props.projectName && <div className={classes.appBarSpacer} />}
-          <Box flexGrow={1} display={'flex'} flexDirection="column">
-            <Box className={classes.container}>{children}</Box>
-          </Box>
-          <Box>
-            <Copyright />
-          </Box>
-        </Box>
-      </main>
+      <TopBar />
+      <div className={classes.appBarSpacer} />
+      <main className={classes.content}>{children}</main>
     </div>
   );
 };

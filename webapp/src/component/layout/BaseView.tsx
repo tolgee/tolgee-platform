@@ -14,6 +14,7 @@ export interface BaseViewProps {
   sm?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   md?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   lg?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  navigation?: ReactNode;
   customHeader?: ReactNode;
   hideChildrenOnLoading?: boolean;
   containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
@@ -35,6 +36,7 @@ export const BaseView = (props: BaseViewProps) => {
       }}
     >
       <Box minHeight="100%">
+        {props.navigation}
         <SecondaryBar>
           <Container maxWidth={props.containerMaxWidth || false}>
             <Grid container justify="center" alignItems="center">

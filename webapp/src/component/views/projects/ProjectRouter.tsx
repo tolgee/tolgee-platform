@@ -1,5 +1,4 @@
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
-import * as React from 'react';
 import { LanguageListView } from './languages/LanguageListView';
 import { LINKS, PARAMS } from '../../../constants/links';
 import { LanguageEditView } from './languages/LanguageEditView';
@@ -11,29 +10,27 @@ import { LanguageCreateView } from './languages/LanguageCreateView';
 import { PrivateRoute } from '../../common/PrivateRoute';
 import { ImportView } from './imprt_export/ImportView';
 import { ExportView } from './imprt_export/ExportView';
-import { ProjectPage } from './ProjectPage';
-import { Box } from '@material-ui/core';
-import { BoxLoading } from '../../common/BoxLoading';
+import { RepositoryPage } from './RepositoryPage';
 import { TranslationView } from './translations/TranslationView';
+import Overview from './overview/Overview';
 
 export const ProjectRouter = () => {
   let match = useRouteMatch();
 
+  const repositoryId = match.params[PARAMS.REPOSITORY_ID];
+
   return (
     <Switch>
-      <ProjectProvider id={match.params[PARAMS.REPOSITORY_ID]}>
-        <ProjectPage fullWidth={true}>
-          <Route path={LINKS.REPOSITORY_TRANSLATIONS.template}>
-            <React.Suspense
-              fallback={
-                <Box>
-                  <BoxLoading />
-                </Box>
-              }
-            >
-              <TranslationView />
-            </React.Suspense>
+      <RepositoryProvider id={repositoryId}>
+        <RepositoryPage fullWidth={true}>
+          <Route exact path={LINKS.REPOSITORY.template}>
+            <Overview />
           </Route>
+
+          <Route path={LINKS.REPOSITORY_TRANSLATIONS.template}>
+            <TranslationView />
+          </Route>
+
           <Route exact path={LINKS.REPOSITORY_EDIT.template}>
             <ProjectSettingsView />
           </Route>
