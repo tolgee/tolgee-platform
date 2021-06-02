@@ -91,16 +91,16 @@ export interface paths {
     post: operations['create_1'];
   };
   '/v2/address-part/generate-project': {
-    post: operations['generateProjectAddressPart'];
+    post: operations['generateProjectSlug'];
   };
   '/api/address-part/generate-project': {
-    post: operations['generateProjectAddressPart_1'];
+    post: operations['generateProjectSlug_1'];
   };
   '/v2/address-part/generate-organization': {
-    post: operations['generateOrganizationAddressPart'];
+    post: operations['generateOrganizationSlug'];
   };
   '/api/address-part/generate-organization': {
-    post: operations['generateOrganizationAddressPart_1'];
+    post: operations['generateOrganizationSlug_1'];
   };
   '/api/user': {
     get: operations['getInfo'];
@@ -204,29 +204,29 @@ export interface paths {
   '/api/organizations/{id}/projects': {
     get: operations['getAllProjects_1'];
   };
-  '/v2/organizations/{addressPart}/projects': {
+  '/v2/organizations/{slug}/projects': {
     get: operations['getAllProjects_2'];
   };
-  '/api/organizations/{addressPart}/projects': {
+  '/api/organizations/{slug}/projects': {
     get: operations['getAllProjects_3'];
   };
-  '/v2/organizations/{addressPart}': {
+  '/v2/organizations/{slug}': {
     get: operations['get_3'];
   };
-  '/api/organizations/{addressPart}': {
+  '/api/organizations/{slug}': {
     get: operations['get_4'];
   };
-  '/v2/address-part/validate-project/{addressPart}': {
-    get: operations['validateProjectAddressPart'];
+  '/v2/address-part/validate-project/{slug}': {
+    get: operations['validateProjectSlug'];
   };
-  '/api/address-part/validate-project/{addressPart}': {
-    get: operations['validateProjectAddressPart_1'];
+  '/api/address-part/validate-project/{slug}': {
+    get: operations['validateProjectSlug_1'];
   };
-  '/v2/address-part/validate-organization/{addressPart}': {
-    get: operations['validateOrganizationAddressPart'];
+  '/v2/address-part/validate-organization/{slug}': {
+    get: operations['validateOrganizationSlug'];
   };
-  '/api/address-part/validate-organization/{addressPart}': {
-    get: operations['validateOrganizationAddressPart_1'];
+  '/api/address-part/validate-organization/{slug}': {
+    get: operations['validateOrganizationSlug_1'];
   };
   '/api/project/{projectId}/keys/{id}': {
     get: operations['getDeprecated'];
@@ -326,13 +326,13 @@ export interface components {
     OrganizationDto: {
       name: string;
       description?: string;
-      addressPart?: string;
+      slug?: string;
       basePermissions: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
     };
     OrganizationModel: {
       id: number;
       name: string;
-      addressPart: string;
+      slug: string;
       description?: string;
       basePermissions: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
       currentUserRole: 'MEMBER' | 'OWNER';
@@ -385,7 +385,7 @@ export interface components {
     StreamingResponseBody: { [key: string]: any };
     GenerateAddressPathDto: {
       name: string;
-      oldAddressPart?: string;
+      oldSlug?: string;
     };
     UserUpdateRequestDTO: {
       name: string;
@@ -417,7 +417,7 @@ export interface components {
     CreateProjectDTO: {
       name: string;
       languages: components['schemas']['LanguageDTO'][];
-      addressPart?: string;
+      slug?: string;
       /** If not provided, project will be created as users */
       organizationId?: number;
     };
@@ -433,7 +433,7 @@ export interface components {
     EditProjectDTO: {
       projectId: number;
       name: string;
-      addressPart?: string;
+      slug?: string;
     };
     TextNode: { [key: string]: any };
     SignUpDto: {
@@ -488,10 +488,10 @@ export interface components {
       id: number;
       name: string;
       description?: string;
-      addressPart?: string;
+      slug?: string;
       userOwner?: components['schemas']['UserAccountModel'];
       organizationOwnerName?: string;
-      organizationOwnerAddressPart?: string;
+      organizationOwnerSlug?: string;
       organizationOwnerBasePermissions?:
         | 'VIEW'
         | 'TRANSLATE'
@@ -1212,7 +1212,7 @@ export interface operations {
       };
     };
   };
-  generateProjectAddressPart: {
+  generateProjectSlug: {
     responses: {
       /** OK */
       200: {
@@ -1227,7 +1227,7 @@ export interface operations {
       };
     };
   };
-  generateProjectAddressPart_1: {
+  generateProjectSlug_1: {
     responses: {
       /** OK */
       200: {
@@ -1242,7 +1242,7 @@ export interface operations {
       };
     };
   };
-  generateOrganizationAddressPart: {
+  generateOrganizationSlug: {
     responses: {
       /** OK */
       200: {
@@ -1257,7 +1257,7 @@ export interface operations {
       };
     };
   };
-  generateOrganizationAddressPart_1: {
+  generateOrganizationSlug_1: {
     responses: {
       /** OK */
       200: {
@@ -1866,7 +1866,7 @@ export interface operations {
   getAllProjects_2: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
       query: {
         pageable: components['schemas']['Pageable'];
@@ -1885,7 +1885,7 @@ export interface operations {
   getAllProjects_3: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
       query: {
         pageable: components['schemas']['Pageable'];
@@ -1904,7 +1904,7 @@ export interface operations {
   get_3: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {
@@ -1919,7 +1919,7 @@ export interface operations {
   get_4: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {
@@ -1931,10 +1931,10 @@ export interface operations {
       };
     };
   };
-  validateProjectAddressPart: {
+  validateProjectSlug: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {
@@ -1946,10 +1946,10 @@ export interface operations {
       };
     };
   };
-  validateProjectAddressPart_1: {
+  validateProjectSlug_1: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {
@@ -1961,10 +1961,10 @@ export interface operations {
       };
     };
   };
-  validateOrganizationAddressPart: {
+  validateOrganizationSlug: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {
@@ -1976,10 +1976,10 @@ export interface operations {
       };
     };
   };
-  validateOrganizationAddressPart_1: {
+  validateOrganizationSlug_1: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {

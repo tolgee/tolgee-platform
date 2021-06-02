@@ -9,39 +9,39 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 import org.testng.annotations.Test
 
 @SpringBootTest
-class AddressPartGeneratorTest : AbstractTestNGSpringContextTests() {
+class SlugGeneratorTest : AbstractTestNGSpringContextTests() {
 
 
     @field:Autowired
-    lateinit var addressPartGenerator: AddressPartGenerator
+    lateinit var slugGenerator: SlugGenerator
 
     @Test
     fun testGenerateEmpty() {
-        assertThat(addressPartGenerator.generate("", 3, 10) { true }).isEqualTo("a10")
+        assertThat(slugGenerator.generate("", 3, 10) { true }).isEqualTo("a10")
     }
 
     @Test
     fun testValidInput() {
-        assertThat(addressPartGenerator.generate("Hello I am cool Project name", 3, 50) { true })
+        assertThat(slugGenerator.generate("Hello I am cool Project name", 3, 50) { true })
                 .isEqualTo("hello-i-am-cool-project-name")
     }
 
     @Test
     fun throwsWhenTooHard() {
         assertThatThrownBy {
-            addressPartGenerator.generate("Hello I am cool Project name", 3, 50) { false }
+            slugGenerator.generate("Hello I am cool Project name", 3, 50) { false }
         }.isInstanceOf(BadRequestException::class.java)
     }
 
     @Test
     fun removesAccents() {
-        assertThat(addressPartGenerator.generate("Toto je český žlutý koníček", 3, 50) { true })
+        assertThat(slugGenerator.generate("Toto je český žlutý koníček", 3, 50) { true })
                 .isEqualTo("toto-je-cesky-zluty-konicek")
     }
 
     @Test
     fun shortenString() {
-        assertThat(addressPartGenerator.generate("Toto je český žlutý koníček", 3, 6) { true })
+        assertThat(slugGenerator.generate("Toto je český žlutý koníček", 3, 6) { true })
                 .isEqualTo("toto-j")
     }
 
@@ -56,24 +56,24 @@ class AddressPartGeneratorTest : AbstractTestNGSpringContextTests() {
             }
         }
 
-        assertThat(addressPartGenerator.generate("Hello world", 3, 7, callback)).isEqualTo("hello3")
+        assertThat(slugGenerator.generate("Hello world", 3, 7, callback)).isEqualTo("hello3")
     }
 
     @Test
     fun shortensAfterNumbers() {
-        val callback = { addressPart: String ->
+        val callback = { slug: String ->
             (0..9).map { "hello$it" to false }
                     .toMap()
                     .toMutableMap()
-                    .also { it["hello-w"] = false }[addressPart] != false
+                    .also { it["hello-w"] = false }[slug] != false
         }
 
-        assertThat(addressPartGenerator.generate("Hello world", 3, 7, callback)).isEqualTo("hello10")
+        assertThat(slugGenerator.generate("Hello world", 3, 7, callback)).isEqualTo("hello10")
     }
 
     @Test
     fun removesSpecialChars() {
-        assertThat(addressPartGenerator.generate("+--%%\\---normál|____!!`", 3, 50, { true }))
+        assertThat(slugGenerator.generate("+--%%\\---normál|____!!`", 3, 50, { true }))
                 .isEqualTo("normal")
     }
 }

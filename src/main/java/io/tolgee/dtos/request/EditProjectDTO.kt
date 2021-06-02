@@ -13,5 +13,5 @@ data class EditProjectDTO(
 
         @field:Size(min = 3, max = 60)
         @field:Pattern(regexp = "^[a-z0-9]*[a-z]+[a-z0-9]*$", message = "invalid_pattern")
-        var addressPart: String? = null
+        var slug: String? = null
 )

@@ -141,7 +141,7 @@
   "organizations_title" : "Organizations",
   "create_organization_title" : "Create organization",
   "create_organization_name_label" : "Name",
-  "create_organization_addressPart_label" : "Address",
+  "create_organization_slug_label" : "Address",
   "create_organization_description_label" : "Description",
   "address_part_not_unique" : "Address is not unique",
   "address_part_validation_can_contain_just_lowercase_numbers_hyphens" : "This field may contain just lowercase letters, numbers and hyphens",

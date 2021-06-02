@@ -21,8 +21,8 @@ class ProjectModelAssembler(
                 id = view.id,
                 name = view.name,
                 description = view.description,
-                addressPart = view.addressPart,
-                organizationOwnerAddressPart = view.organizationOwnerAddressPart,
+                slug = view.slug,
+                organizationOwnerSlug = view.organizationOwnerSlug,
                 organizationOwnerName = view.organizationOwnerName,
                 organizationOwnerBasePermissions = view.organizationBasePermissions,
                 organizationRole = view.organizationRole,
@@ -32,7 +32,7 @@ class ProjectModelAssembler(
                         view.organizationRole, view.organizationBasePermissions, view.directPermissions
                 )
         ).add(link).also { model ->
-            view.organizationOwnerAddressPart?.let {
+            view.organizationOwnerSlug?.let {
                 model.add(linkTo<OrganizationController> { get(it) }.withRel("organizationOwner"))
             }
         }

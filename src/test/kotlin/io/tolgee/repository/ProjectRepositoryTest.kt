@@ -26,10 +26,10 @@ class ProjectProjectTest : AbstractTransactionalTestNGSpringContextTests() {
     @Test
     fun testProjectPreSaveHookBothSet() {
         val user = dbPopulatorReal.createUserIfNotExists("hello")
-        val repo = Project(name = "Test", addressPart = "hello", userOwner = user)
+        val repo = Project(name = "Test", slug = "hello", userOwner = user)
         val organization = Organization(
                 name = "Test org",
-                addressPart = "null",
+                slug = "null",
                 basePermissions = Permission.ProjectPermissionType.VIEW)
         repo.organizationOwner = organization
         Assertions.assertThatExceptionOfType(Exception::class.java).isThrownBy { projectRepository.save(repo) }
@@ -38,7 +38,7 @@ class ProjectProjectTest : AbstractTransactionalTestNGSpringContextTests() {
 
     @Test
     fun testProjectPreSaveHookNorSet() {
-        val repo = Project(name = "Test", addressPart = "hello", userOwner = null)
+        val repo = Project(name = "Test", slug = "hello", userOwner = null)
         Assertions.assertThatExceptionOfType(Exception::class.java).isThrownBy { projectRepository.save(repo) }
                 .withMessage("java.lang.Exception: Exactly one of organizationOwner or userOwner must be set!")
     }
@@ -80,7 +80,7 @@ class ProjectProjectTest : AbstractTransactionalTestNGSpringContextTests() {
         val result = projectRepository.findAllPermitted(users[3].id!!, PageRequest.of(0, 20))
         assertThat(result).hasSize(10)
         assertThat(result.content[0].organizationOwnerName).isNotNull
-        assertThat(result.content[8].organizationOwnerAddressPart).isNotNull
+        assertThat(result.content[8].organizationOwnerSlug).isNotNull
         assertThat(result.content[9].userOwner).isNotNull
         assertThat(result.content[9].directPermissions).isNotNull
     }

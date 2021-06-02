@@ -110,7 +110,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
     @Test
     fun testGetOneWithUrl() {
         this.organizationService.create(dummyDto, userAccount!!).let {
-            performAuthGet("/v2/organizations/${it.addressPart}").andIsOk.andAssertThatJson.let {
+            performAuthGet("/v2/organizations/${it.slug}").andIsOk.andAssertThatJson.let {
                 it.node("name").isEqualTo(dummyDto.name)
                 it.node("description").isEqualTo(dummyDto.description)
             }
@@ -125,7 +125,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
                 it.node("id").isEqualTo(organization.id)
                 it.node("description").isEqualTo(dummyDto.description)
                 it.node("basePermissions").isEqualTo(dummyDto.basePermissions.name)
-                it.node("addressPart").isEqualTo(dummyDto.addressPart)
+                it.node("slug").isEqualTo(dummyDto.slug)
             }
         }
     }
@@ -154,7 +154,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
                 dummyDto
         ).andIsCreated.andPrettyPrint.andAssertThatJson.let {
             it.node("name").isEqualTo("Test org")
-            it.node("addressPart").isEqualTo("test-org")
+            it.node("slug").isEqualTo("test-org")
             it.node("_links.self.href").isEqualTo("http://localhost/v2/organizations/test-org")
             it.node("id").isNumber.satisfies {
                 organizationService.get(it.toLong()) is Organization
@@ -163,12 +163,12 @@ class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    fun testCreateAddressPartValidation() {
-        this.organizationService.create(dummyDto2.also { it.addressPart = "hello-1" }, userAccount!!)
+    fun testCreateSlugValidation() {
+        this.organizationService.create(dummyDto2.also { it.slug = "hello-1" }, userAccount!!)
 
         performAuthPost(
                 "/v2/organizations",
-                dummyDto.also { it.addressPart = "hello-1" }
+                dummyDto.also { it.slug = "hello-1" }
         ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("address_part_not_unique")
     }
 
@@ -184,9 +184,9 @@ class OrganizationControllerTest : SignedInControllerTest() {
     @Test
     fun testCreateValidation() {
         performAuthPost("/v2/organizations",
-                dummyDto.also { it.addressPart = "" }
+                dummyDto.also { it.slug = "" }
         ).andIsBadRequest.let {
-            assertThat(it.andReturn()).error().isStandardValidation.onField("addressPart")
+            assertThat(it.andReturn()).error().isStandardValidation.onField("slug")
         }
         performAuthPost("/v2/organizations",
                 dummyDto.also { it.name = "" }
@@ -195,23 +195,23 @@ class OrganizationControllerTest : SignedInControllerTest() {
         }
 
         performAuthPost("/v2/organizations",
-                dummyDto.also { it.addressPart = "sahsaldlasfhl " }
+                dummyDto.also { it.slug = "sahsaldlasfhl " }
         ).andIsBadRequest.let {
-            assertThat(it.andReturn()).error().isStandardValidation.onField("addressPart")
+            assertThat(it.andReturn()).error().isStandardValidation.onField("slug")
         }
 
         performAuthPost("/v2/organizations",
-                dummyDto.also { it.addressPart = "a" }
+                dummyDto.also { it.slug = "a" }
         ).andIsBadRequest.let {
-            assertThat(it.andReturn()).error().isStandardValidation.onField("addressPart")
+            assertThat(it.andReturn()).error().isStandardValidation.onField("slug")
         }
     }
 
     @Test
-    fun testCreateGeneratesAddressPart() {
+    fun testCreateGeneratesSlug() {
         performAuthPost("/v2/organizations",
-                dummyDto.also { it.addressPart = null }
-        ).andIsCreated.andAssertThatJson.node("addressPart").isEqualTo("test-org")
+                dummyDto.also { it.slug = null }
+        ).andIsCreated.andAssertThatJson.node("slug").isEqualTo("test-org")
     }
 
     @Test
@@ -221,13 +221,13 @@ class OrganizationControllerTest : SignedInControllerTest() {
                     "/v2/organizations/${it.id}",
                     dummyDto.also { organization ->
                         organization.name = "Hello"
-                        organization.addressPart = "hello-1"
+                        organization.slug = "hello-1"
                         organization.basePermissions = Permission.ProjectPermissionType.TRANSLATE
                         organization.description = "This is changed description"
                     }
             ).andIsOk.andPrettyPrint.andAssertThatJson.let {
                 it.node("name").isEqualTo("Hello")
-                it.node("addressPart").isEqualTo("hello-1")
+                it.node("slug").isEqualTo("hello-1")
                 it.node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
                 it.node("basePermissions").isEqualTo("TRANSLATE")
                 it.node("description").isEqualTo("This is changed description")
@@ -236,14 +236,14 @@ class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    fun testEditAddressPartValidation() {
-        this.organizationService.create(dummyDto2.also { it.addressPart = "hello-1" }, userAccount!!)
+    fun testEditSlugValidation() {
+        this.organizationService.create(dummyDto2.also { it.slug = "hello-1" }, userAccount!!)
 
         this.organizationService.create(dummyDto, userAccount!!).let { organization ->
             performAuthPut(
                     "/v2/organizations/${organization.id}",
                     dummyDto.also { organizationDto ->
-                        organizationDto.addressPart = "hello-1"
+                        organizationDto.slug = "hello-1"
                     }
             ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("address_part_not_unique")
         }
@@ -336,12 +336,12 @@ class OrganizationControllerTest : SignedInControllerTest() {
         val users = dbPopulator.createUsersAndOrganizations()
         logAsUser(users[1].username!!, initialPassword)
         users[1].organizationRoles[0].organization.let { organization ->
-            performAuthGet("/v2/organizations/${organization!!.addressPart}/projects")
+            performAuthGet("/v2/organizations/${organization!!.slug}/projects")
                     .andIsOk.andAssertThatJson.let {
                         it.node("_embedded.projects").let { projectsNode ->
                             projectsNode.isArray.hasSize(3)
                             projectsNode.node("[1].name").isEqualTo("user 2's organization 1 project 2")
-                            projectsNode.node("[1].organizationOwnerAddressPart").isEqualTo("user-2-s-organization-1")
+                            projectsNode.node("[1].organizationOwnerSlug").isEqualTo("user-2-s-organization-1")
                             projectsNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
                         }
                     }

@@ -56,7 +56,7 @@ class ProjectsE2eDataController(
         organizations.forEach {
             val organization = organizationRepository.save(Organization(
                     name = it.name,
-                    addressPart = organizationService.generateAddressPart(it.name),
+                    slug = organizationService.generateSlug(it.name),
                     basePermissions = it.basePermission
             ))
 
@@ -84,7 +84,7 @@ class ProjectsE2eDataController(
 
             val project = projectRepository.save(Project(
                     name = projectData.name,
-                    addressPart = projectService.generateAddressPart(projectData.name),
+                    slug = projectService.generateSlug(projectData.name),
                     userOwner = userOwner,
                     organizationOwner = organizationOwner
             ))

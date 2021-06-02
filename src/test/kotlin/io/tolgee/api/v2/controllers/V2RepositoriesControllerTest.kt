@@ -29,7 +29,7 @@ class V2ProjectsControllerTest : SignedInControllerTest() {
             it.node("[0].directPermissions").isEqualTo("MANAGE")
             it.node("[2].userOwner").isEqualTo("null")
             it.node("[2].organizationOwnerName").isEqualTo("cool")
-            it.node("[2].organizationOwnerAddressPart").isEqualTo("cool")
+            it.node("[2].organizationOwnerSlug").isEqualTo("cool")
         }
     }
 

@@ -11,7 +11,7 @@ import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.dataImport.ImportService
-import io.tolgee.util.AddressPartGenerator
+import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -32,7 +32,7 @@ class ProjectService constructor(
         private val screenshotService: ScreenshotService,
         private val organizationRoleService: OrganizationRoleService,
         private val authenticationFacade: AuthenticationFacade,
-        private val addressPartGenerator: AddressPartGenerator,
+        private val slugGenerator: SlugGenerator,
 ) {
     @set:Autowired
     lateinit var keyService: KeyService
@@ -67,8 +67,8 @@ class ProjectService constructor(
             organizationRoleService.checkUserIsOwner(it)
             project.organizationOwner = organizationService.get(it) ?: throw NotFoundException()
 
-            if (dto.addressPart == null) {
-                project.addressPart = generateAddressPart(dto.name!!, null)
+            if (dto.slug == null) {
+                project.slug = generateSlug(dto.name!!, null)
             }
 
         } ?: let {
@@ -143,16 +143,16 @@ class ProjectService constructor(
         }
     }
 
-    fun validateAddressPartUniqueness(addressPart: String): Boolean {
-        return projectRepository.countAllByAddressPart(addressPart) < 1
+    fun validateSlugUniqueness(slug: String): Boolean {
+        return projectRepository.countAllBySlug(slug) < 1
     }
 
-    fun generateAddressPart(name: String, oldAddressPart: String? = null): String {
-        return addressPartGenerator.generate(name, 3, 60) {
-            if (oldAddressPart == it) {
+    fun generateSlug(name: String, oldSlug: String? = null): String {
+        return slugGenerator.generate(name, 3, 60) {
+            if (oldSlug == it) {
                 return@generate true
             }
-            this.validateAddressPartUniqueness(it)
+            this.validateSlugUniqueness(it)
         }
     }
 

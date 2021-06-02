@@ -24,7 +24,7 @@ export const OrganizationBasePermissionMenu: FunctionComponent<{
       onConfirm: () => {
         const dto: components['schemas']['OrganizationDto'] = {
           name: organization.name,
-          addressPart: organization.addressPart,
+          slug: organization.slug,
           basePermissions: type,
           description: organization.description,
         };

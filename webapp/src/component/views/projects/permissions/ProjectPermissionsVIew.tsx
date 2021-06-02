@@ -34,7 +34,7 @@ export const ProjectPermissionsView: FunctionComponent = () => {
       loading={listLoadable.loading}
       hideChildrenOnLoading={false}
     >
-      {project.organizationOwnerAddressPart && (
+      {project.organizationOwnerSlug && (
         <Box mb={2}>
           <Typography component={Box} alignItems={'center'} variant={'body1'}>
             <T>project_permission_information_text_base_permission_before</T>{' '}

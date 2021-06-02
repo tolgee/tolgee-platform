@@ -6,7 +6,7 @@ package io.tolgee.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.dtos.request.GenerateAddressPathDto
+import io.tolgee.dtos.request.GenerateSlugDto
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.ProjectService
 import org.springframework.http.MediaType
@@ -18,42 +18,42 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/address-part", "/api/address-part"])
 @Tag(name = "Address Part generation")
-open class AddressPartController(
+open class SlugController(
         private val organizationService: OrganizationService,
         private val projectService: ProjectService,
 ) {
 
-    @GetMapping("/validate-organization/{addressPart}")
+    @GetMapping("/validate-organization/{slug}")
     @Operation(summary = "Validate organization address part")
-    open fun validateOrganizationAddressPart(
-            @PathVariable("addressPart") addressPart: String
+    open fun validateOrganizationSlug(
+            @PathVariable("slug") slug: String
     ): Boolean {
-        return organizationService.validateAddressPartUniqueness(addressPart)
+        return organizationService.validateSlugUniqueness(slug)
     }
 
 
-    @GetMapping("/validate-project/{addressPart}")
+    @GetMapping("/validate-project/{slug}")
     @Operation(summary = "Validate project address part")
-    open fun validateProjectAddressPart(
-            @PathVariable("addressPart") addressPart: String
+    open fun validateProjectSlug(
+            @PathVariable("slug") slug: String
     ): Boolean {
-        return projectService.validateAddressPartUniqueness(addressPart)
+        return projectService.validateSlugUniqueness(slug)
     }
 
     @PostMapping("/generate-organization", produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(summary = "Generate organization address part")
-    open fun generateOrganizationAddressPart(
-            @RequestBody @Valid dto: GenerateAddressPathDto
+    open fun generateOrganizationSlug(
+            @RequestBody @Valid dto: GenerateSlugDto
     ): String {
-        return """"${organizationService.generateAddressPart(dto.name!!, dto.oldAddressPart)}""""
+        return """"${organizationService.generateSlug(dto.name!!, dto.oldSlug)}""""
     }
 
 
     @PostMapping("/generate-project", produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(summary = "Generate project address part")
-    open fun generateProjectAddressPart(
-            @RequestBody @Valid dto: GenerateAddressPathDto
+    open fun generateProjectSlug(
+            @RequestBody @Valid dto: GenerateSlugDto
     ): String {
-        return """"${projectService.generateAddressPart(dto.name!!, dto.oldAddressPart)}""""
+        return """"${projectService.generateSlug(dto.name!!, dto.oldSlug)}""""
     }
 }

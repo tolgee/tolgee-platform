@@ -8,10 +8,10 @@ interface ProjectView {
     val id: Long
     val name: String
     val description: String?
-    val addressPart: String?
+    val slug: String?
     val userOwner: UserAccount?
     val organizationOwnerName: String?
-    val organizationOwnerAddressPart: String?
+    val organizationOwnerSlug: String?
     val organizationBasePermissions: Permission.ProjectPermissionType?
     val organizationRole: OrganizationRoleType?
     val directPermissions: Permission.ProjectPermissionType?

@@ -12,8 +12,8 @@ import org.springframework.stereotype.Repository
 interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
     companion object {
         const val BASE_ALL_PERMITTED_QUERY = """select r.id as id, r.name as name, r.description as description,
-        r.addressPart as addressPart, 
-        ua as userOwner, o.name as organizationOwnerName, o.addressPart as organizationOwnerAddressPart, 
+        r.slug as slug, 
+        ua as userOwner, o.name as organizationOwnerName, o.slug as organizationOwnerSlug, 
         o.basePermissions as organizationBasePermissions, role.type as organizationRole, p.type as directPermissions
         from Project r 
         left join UserAccount ua on ua.id = r.userOwner.id
@@ -48,7 +48,7 @@ interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
         """)
     fun findAllPermittedInOrganization(userAccountId: Long, organizationOwnerId: Long, pageable: Pageable, search: String?): Page<ProjectView>
 
-    fun countAllByAddressPart(addressPart: String): Long
+    fun countAllBySlug(slug: String): Long
 
     @Query("""$BASE_ALL_PERMITTED_QUERY and r.id = :projectId""")
     fun findViewById(userAccountId: Long, projectId: Long): ProjectView?

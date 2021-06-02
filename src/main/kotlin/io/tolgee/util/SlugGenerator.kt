@@ -8,7 +8,7 @@ import java.lang.Integer.min
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
-class AddressPartGenerator {
+class SlugGenerator {
 
     companion object {
         const val DELIMITER = "-"

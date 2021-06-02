@@ -38,7 +38,7 @@ export const OrganizationsListView = () => {
             component={Link}
             key={item.id}
             to={LINKS.ORGANIZATION_PROJECTS.build({
-              [PARAMS.ORGANIZATION_ADDRESS_PART]: item.addressPart,
+              [PARAMS.ORGANIZATION_SLUG]: item.slug,
             })}
           >
             <ListItemText data-cy="global-list-item-text">
@@ -62,7 +62,7 @@ export const OrganizationsListView = () => {
                   component={Link}
                   size="small"
                   to={LINKS.ORGANIZATION_PROFILE.build({
-                    [PARAMS.ORGANIZATION_ADDRESS_PART]: item.addressPart,
+                    [PARAMS.ORGANIZATION_SLUG]: item.slug,
                   })}
                 >
                   <T>organization_settings_button</T>

@@ -17,7 +17,7 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.PermissionService
 import io.tolgee.service.UserAccountService
-import io.tolgee.util.AddressPartGenerator
+import io.tolgee.util.SlugGenerator
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
@@ -33,7 +33,7 @@ class DbPopulatorReal(private val entityManager: EntityManager,
                       private val tolgeeProperties: TolgeeProperties,
                       private val initialPasswordManager: InitialPasswordManager,
                       private val organizationRepository: OrganizationRepository,
-                      private val addressPartGenerator: AddressPartGenerator,
+                      private val slugGenerator: SlugGenerator,
                       private val organizationRoleService: OrganizationRoleService
 ) {
     private var de: Language? = null
@@ -56,8 +56,8 @@ class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     fun createOrganization(name: String, userAccount: UserAccount): Organization {
-        val addressPart = addressPartGenerator.generate(name, 3, 100) { true }
-        val organization = Organization(name = name, addressPart = addressPart, basePermissions = Permission.ProjectPermissionType.VIEW)
+        val slug = slugGenerator.generate(name, 3, 100) { true }
+        val organization = Organization(name = name, slug = slug, basePermissions = Permission.ProjectPermissionType.VIEW)
         return organizationRepository.save(organization).also {
             organizationRoleService.grantOwnerRoleToUser(userAccount, organization)
         }
@@ -90,7 +90,7 @@ class DbPopulatorReal(private val entityManager: EntityManager,
         val project = Project()
         project.name = projectName
         project.organizationOwner = organization
-        project.addressPart = addressPartGenerator.generate(projectName, 3, 60) { true }
+        project.slug = slugGenerator.generate(projectName, 3, 60) { true }
         en = createLanguage("en", project)
         de = createLanguage("de", project)
         projectRepository.saveAndFlush(project)

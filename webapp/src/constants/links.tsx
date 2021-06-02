@@ -57,7 +57,7 @@ export enum PARAMS {
   API_KEY_ID = 'languageId',
   USER_ID = 'userID',
   VERIFICATION_CODE = 'verificationCode',
-  ORGANIZATION_ADDRESS_PART = 'addressPart',
+  ORGANIZATION_SLUG = 'slug',
 }
 
 export class LINKS {
@@ -120,7 +120,7 @@ export class LINKS {
 
   static ORGANIZATION = Link.ofParent(
     LINKS.ORGANIZATIONS,
-    p(PARAMS.ORGANIZATION_ADDRESS_PART)
+    p(PARAMS.ORGANIZATION_SLUG)
   );
 
   static ORGANIZATION_PROFILE = Link.ofParent(LINKS.ORGANIZATION, 'profile');

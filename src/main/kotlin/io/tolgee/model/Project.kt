@@ -25,7 +25,7 @@ data class Project(
         @Column(name = "address_part")
         @field:Size(min = 3, max = 60)
         @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
-        var addressPart: String? = null,
+        var slug: String? = null,
 ) : AuditModel() {
 
     @OrderBy("abbreviation")
@@ -47,17 +47,17 @@ data class Project(
     @ManyToOne(optional = true)
     var organizationOwner: Organization? = null
 
-    constructor(name: String?, description: String? = null, addressPart: String?, userOwner: UserAccount?)
-            : this(id = 0L, name, description, addressPart) {
+    constructor(name: String?, description: String? = null, slug: String?, userOwner: UserAccount?)
+            : this(id = 0L, name, description, slug) {
         this.userOwner = userOwner
     }
 
     constructor(name: String?,
                 description: String? = null,
-                addressPart: String?,
+                slug: String?,
                 organizationOwner: Organization?,
                 userOwner: UserAccount? = null)
-            : this(id = 0L, name, description, addressPart) {
+            : this(id = 0L, name, description, slug) {
         this.organizationOwner = organizationOwner
         this.userOwner = userOwner
     }

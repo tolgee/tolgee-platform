@@ -12,10 +12,10 @@ open class ProjectModel(
         val id: Long,
         val name: String,
         val description: String?,
-        val addressPart: String?,
+        val slug: String?,
         val userOwner: UserAccountModel?,
         val organizationOwnerName: String?,
-        val organizationOwnerAddressPart: String?,
+        val organizationOwnerSlug: String?,
         val organizationOwnerBasePermissions: Permission.ProjectPermissionType?,
         val organizationRole: OrganizationRoleType?,
         @Schema(description = "Current user's direct permission", example = "MANAGE")

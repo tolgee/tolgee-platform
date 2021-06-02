@@ -55,7 +55,7 @@ export class OrganizationActions extends AbstractLoadableActions<OrganizationSta
       <T>organization_updated_message</T>,
       (action) => {
         return LINKS.ORGANIZATION_PROFILE.build({
-          [PARAMS.ORGANIZATION_ADDRESS_PART]: action.payload.addressPart,
+          [PARAMS.ORGANIZATION_SLUG]: action.payload.slug,
         });
       }
     ),
@@ -69,7 +69,7 @@ export class OrganizationActions extends AbstractLoadableActions<OrganizationSta
       <T>organization_member_privileges_set</T>,
       (action) => {
         return LINKS.ORGANIZATION_MEMBER_PRIVILEGES.build({
-          [PARAMS.ORGANIZATION_ADDRESS_PART]: action.payload.addressPart,
+          [PARAMS.ORGANIZATION_SLUG]: action.payload.slug,
         });
       }
     ),
@@ -110,7 +110,7 @@ export class OrganizationActions extends AbstractLoadableActions<OrganizationSta
     ),
     listProjects: this.createLoadableDefinition(
       this.apiSchemaHttpService.schemaRequest(
-        '/api/organizations/{addressPart}/projects',
+        '/api/organizations/{slug}/projects',
         'get'
       )
     ),

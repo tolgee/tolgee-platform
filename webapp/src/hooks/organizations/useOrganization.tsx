@@ -1,26 +1,26 @@
-import { useRouteMatch } from 'react-router-dom';
-import { container } from 'tsyringe';
-import { useEffect } from 'react';
-import { OrganizationActions } from '../../store/organization/OrganizationActions';
-import { PARAMS } from '../../constants/links';
+import {useRouteMatch} from 'react-router-dom';
+import {container} from 'tsyringe';
+import {useEffect} from 'react';
+import {OrganizationActions} from '../../store/organization/OrganizationActions';
+import {PARAMS} from '../../constants/links';
 
 const actions = container.resolve(OrganizationActions);
 
 export const useOrganization = () => {
   const match = useRouteMatch();
 
-  const organizationAddressPart =
-    match.params[PARAMS.ORGANIZATION_ADDRESS_PART];
+  const organizationSlug =
+    match.params[PARAMS.ORGANIZATION_SLUG];
   const resourceLoadable = actions.useSelector((state) => state.loadables.get);
 
   useEffect(() => {
     if (
       !resourceLoadable.touched ||
-      resourceLoadable.data?.addressPart !== organizationAddressPart
+      resourceLoadable.data?.slug !== organizationSlug
     ) {
-      actions.loadableActions.get.dispatch(organizationAddressPart);
+      actions.loadableActions.get.dispatch(organizationSlug);
     }
-  }, [organizationAddressPart, resourceLoadable.touched]);
+  }, [organizationSlug, resourceLoadable.touched]);
 
   return resourceLoadable.data as NonNullable<typeof resourceLoadable.data>;
 };

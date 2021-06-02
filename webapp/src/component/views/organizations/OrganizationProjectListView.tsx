@@ -30,7 +30,7 @@ export const OrganizationsProjectListView = () => {
     >
       <SimplePaginatedHateoasList
         pageSize={20}
-        dispatchParams={[{ path: { addressPart: organization.addressPart } }]}
+        dispatchParams={[{ path: { slug: organization.slug } }]}
         actions={actions}
         searchField
         loadableName="listProjects"

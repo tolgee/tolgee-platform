@@ -20,7 +20,7 @@ open class Organization(
         @Column(name = "address_part")
         @field:NotBlank @field:Size(min = 3, max = 60)
         @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
-        open var addressPart: String? = null,
+        open var slug: String? = null,
 
         @Enumerated(EnumType.STRING)
         open var basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
@@ -28,9 +28,9 @@ open class Organization(
     constructor(
             name: String?,
             description: String? = null,
-            addressPart: String?,
+            slug: String?,
             basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
-    ) : this(null, name, description, addressPart, basePermissions)
+    ) : this(null, name, description, slug, basePermissions)
 
     @OneToMany(mappedBy = "organization")
     open var memberRoles: MutableList<OrganizationRole> = mutableListOf()

@@ -28,7 +28,7 @@ export const OrganizationCreateView: FunctionComponent = () => {
 
   const initialValues: components['schemas']['OrganizationDto'] = {
     name: '',
-    addressPart: '',
+    slug: '',
     description: '',
     basePermissions: ProjectPermissionType.VIEW,
   };

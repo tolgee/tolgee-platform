@@ -92,10 +92,10 @@ open class OrganizationController(
                 ?: throw NotFoundException()
     }
 
-    @GetMapping("/{addressPart:.*[a-z].*}")
+    @GetMapping("/{slug:.*[a-z].*}")
     @Operation(summary = "Returns organization by address part")
-    open fun get(@PathVariable("addressPart") addressPart: String): OrganizationModel {
-        organizationService.get(addressPart)?.let {
+    open fun get(@PathVariable("slug") slug: String): OrganizationModel {
+        organizationService.get(slug)?.let {
             val roleType = organizationRoleService.getTypeOrThrow(it.id!!)
             return OrganizationView.of(it, roleType).toModel()
         }
@@ -182,14 +182,14 @@ open class OrganizationController(
         } ?: throw NotFoundException()
     }
 
-    @GetMapping("/{addressPart:.*[a-z].*}/projects")
+    @GetMapping("/{slug:.*[a-z].*}/projects")
     @Operation(summary = "Returns all organization projects")
     open fun getAllProjects(
-            @PathVariable("addressPart") addressPart: String,
+            @PathVariable("slug") slug: String,
             pageable: Pageable,
             @RequestParam("search") search: String?
     ): PagedModel<ProjectModel> {
-        return organizationService.get(addressPart)?.let {
+        return organizationService.get(slug)?.let {
             organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
             projectService.findAllInOrganization(it.id!!, pageable, search).let { projects ->
                 pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)

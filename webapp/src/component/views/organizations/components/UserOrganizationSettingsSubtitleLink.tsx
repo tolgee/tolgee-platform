@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
-import { Box, Link, MenuItem, Popover } from '@material-ui/core';
-import { T } from '@tolgee/react';
-import { ArrowDropDown } from '@material-ui/icons';
-import { useUser } from '../../../../hooks/useUser';
-import { LINKS, PARAMS } from '../../../../constants/links';
-import { Link as RouterLink } from 'react-router-dom';
-import { container } from 'tsyringe';
-import { OrganizationActions } from '../../../../store/organization/OrganizationActions';
+import React, {useEffect} from 'react';
+import {Box, Link, MenuItem, Popover} from '@material-ui/core';
+import {T} from '@tolgee/react';
+import {ArrowDropDown} from '@material-ui/icons';
+import {useUser} from '../../../../hooks/useUser';
+import {LINKS, PARAMS} from '../../../../constants/links';
+import {Link as RouterLink} from 'react-router-dom';
+import {container} from 'tsyringe';
+import {OrganizationActions} from '../../../../store/organization/OrganizationActions';
 
 type UserOrganizationSettingsSubtitleLinkProps = {
   isUser: boolean;
@@ -56,7 +56,7 @@ const UserOrganizationSettingsSubtitleLink = (
       data.push({
         name: i.name,
         linkTo: LINKS.ORGANIZATION_PROFILE.build({
-          [PARAMS.ORGANIZATION_ADDRESS_PART]: i.addressPart,
+          [PARAMS.ORGANIZATION_SLUG]: i.slug,
         }),
       });
     });
