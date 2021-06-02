@@ -52,12 +52,12 @@ export enum PARAMS {
   INVITATION_CODE = 'invitation_code',
   ENCODED_EMAIL_AND_CODE = 'email_and_code',
   SERVICE_TYPE = 'serviceType',
-  REPOSITORY_ID = 'repositoryId',
+  REPOSITORY_ID = 'projectId',
   LANGUAGE_ID = 'languageId',
   API_KEY_ID = 'languageId',
   USER_ID = 'userID',
   VERIFICATION_CODE = 'verificationCode',
-  ORGANIZATION_ADDRESS_PART = 'addressPart',
+  ORGANIZATION_SLUG = 'slug',
 }
 
 export class LINKS {
@@ -120,7 +120,7 @@ export class LINKS {
 
   static ORGANIZATION = Link.ofParent(
     LINKS.ORGANIZATIONS,
-    p(PARAMS.ORGANIZATION_ADDRESS_PART)
+    p(PARAMS.ORGANIZATION_SLUG)
   );
 
   static ORGANIZATION_PROFILE = Link.ofParent(LINKS.ORGANIZATION, 'profile');
@@ -137,29 +137,29 @@ export class LINKS {
     'invitations'
   );
 
-  static ORGANIZATION_REPOSITORIES = Link.ofParent(
+  static ORGANIZATION_PROJECTS = Link.ofParent(
     LINKS.ORGANIZATION,
-    'repositories'
+    'projects'
   );
 
   /**
-   * Repository stuff
+   * Project stuff
    */
 
-  static REPOSITORIES = Link.ofRoot('repositories');
+  static PROJECTS = Link.ofRoot('projects');
 
   /**
    * Visible with view permissions
    */
 
-  static AFTER_LOGIN = LINKS.REPOSITORIES;
+  static AFTER_LOGIN = LINKS.PROJECTS;
 
   static REPOSITORY = Link.ofParent(
-    LINKS.REPOSITORIES,
+    LINKS.PROJECTS,
     p(PARAMS.REPOSITORY_ID)
   );
 
-  static REPOSITORY_ADD = Link.ofParent(LINKS.REPOSITORIES, 'add');
+  static REPOSITORY_ADD = Link.ofParent(LINKS.PROJECTS, 'add');
 
   static REPOSITORY_TRANSLATIONS = Link.ofParent(
     LINKS.REPOSITORY,

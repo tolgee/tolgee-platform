@@ -44,7 +44,7 @@ context('Login', () => {
         disableEmailVerification()
         fillAndSubmitForm()
         assertMessage("Thanks for your sign up!")
-        cy.gcy("global-base-view-title").contains("Repositories")
+        cy.gcy("global-base-view-title").contains("Projects")
     })
 });
 

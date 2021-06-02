@@ -1,6 +1,6 @@
-import { singleton } from 'tsyringe';
-import { ApiV2HttpService } from './http/ApiV2HttpService';
-import { components } from './apiSchema';
+import {singleton} from 'tsyringe';
+import {ApiV2HttpService} from './http/ApiV2HttpService';
+import {components} from './apiSchema';
 
 @singleton()
 export class OrganizationService {
@@ -19,21 +19,21 @@ export class OrganizationService {
       components['schemas']['OrganizationModel']
     >;
 
-  public generateAddressPart = (name: string, oldAddressPart?: string) =>
+  public generateSlug = (name: string, oldSlug?: string) =>
     this.v2http.post(`address-part/generate-organization`, {
       name: name,
-      oldAddressPart: oldAddressPart,
+      oldSlug: oldSlug,
     }) as Promise<string>;
 
-  public validateAddressPart = (addressPart: String) =>
+  public validateSlug = (slug: String) =>
     this.v2http.get(
-      `address-part/validate-organization/${addressPart}`
+      `address-part/validate-organization/${slug}`
     ) as Promise<boolean>;
 
   public getOrganization = (
-    addressPart: string
+    slug: string
   ): Promise<components['schemas']['OrganizationModel']> =>
-    this.v2http.get(`organizations/${addressPart}`);
+    this.v2http.get(`organizations/${slug}`);
 
   public editOrganization = (
     id,

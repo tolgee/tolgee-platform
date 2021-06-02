@@ -8,8 +8,8 @@ interface OrganizationView {
     val id: Long
     val name: String
     val description: String?
-    val addressPart: String
-    val basePermissions: Permission.RepositoryPermissionType
+    val slug: String
+    val basePermissions: Permission.ProjectPermissionType
     val currentUserRole: OrganizationRoleType
 
     companion object {
@@ -18,7 +18,7 @@ interface OrganizationView {
                 override val id = entity.id!!
                 override val name = entity.name!!
                 override val description = entity.description
-                override val addressPart = entity.addressPart!!
+                override val slug = entity.slug!!
                 override val basePermissions = entity.basePermissions
                 override val currentUserRole = currentUserRole
             }

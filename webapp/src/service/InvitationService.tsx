@@ -1,14 +1,14 @@
-import { container, singleton } from 'tsyringe';
-import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { ErrorResponseDTO, InvitationDTO } from './response.types';
-import { RedirectionActions } from '../store/global/RedirectionActions';
-import { LINKS } from '../constants/links';
-import { MessageService } from './MessageService';
-import { TokenService } from './TokenService';
-import { InvitationCodeService } from './InvitationCodeService';
-import { GlobalActions } from '../store/global/GlobalActions';
+import {container, singleton} from 'tsyringe';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
+import {ErrorResponseDTO, InvitationDTO} from './response.types';
+import {RedirectionActions} from '../store/global/RedirectionActions';
+import {LINKS} from '../constants/links';
+import {MessageService} from './MessageService';
+import {TokenService} from './TokenService';
+import {InvitationCodeService} from './InvitationCodeService';
+import {GlobalActions} from '../store/global/GlobalActions';
 import React from 'react';
-import { T } from '@tolgee/react';
+import {T} from '@tolgee/react';
 
 const http = container.resolve(ApiV1HttpService);
 
@@ -22,11 +22,11 @@ export class InvitationService {
   ) {}
 
   public generateInvitationCode = async (
-    repositoryId: number,
+    projectId: number,
     type: string
   ): Promise<string> =>
-    await http.post('repositories/invite', {
-      repositoryId,
+    await http.post('projects/invite', {
+      projectId,
       type,
     });
 
@@ -47,11 +47,11 @@ export class InvitationService {
         this.messaging.error(<T>{e.code}</T>);
       }
     }
-    this.redirectActions.redirect.dispatch(LINKS.REPOSITORIES.build());
+    this.redirectActions.redirect.dispatch(LINKS.PROJECTS.build());
   };
 
-  public getInvitations = async (repositoryId): Promise<InvitationDTO[]> =>
-    http.get('invitation/list/' + repositoryId);
+  public getInvitations = async (projectId): Promise<InvitationDTO[]> =>
+    http.get('invitation/list/' + projectId);
 
   public deleteInvitation = async (invitationId): Promise<void> =>
     http.delete('invitation/' + invitationId);

@@ -1,9 +1,9 @@
 import * as Yup from 'yup';
-import { container } from 'tsyringe';
-import { SignUpService } from '../service/SignUpService';
+import {container} from 'tsyringe';
+import {SignUpService} from '../service/SignUpService';
 import React from 'react';
-import { T } from '@tolgee/react';
-import { OrganizationService } from '../service/OrganizationService';
+import {T} from '@tolgee/react';
+import {OrganizationService} from '../service/OrganizationService';
 
 Yup.setLocale({
   // use constant translation keys for messages without values
@@ -92,7 +92,7 @@ export class Validation {
   });
 
   static readonly CREATE_API_KEY = Yup.object().shape({
-    repositoryId: Yup.number().required(),
+    projectId: Yup.number().required(),
     scopes: Yup.mixed().test(
       'is-set',
       'Set at least one scope',
@@ -146,42 +146,42 @@ export class Validation {
 
   static readonly ORGANIZATION_CREATE_OR_EDIT = (
     t: (key: string) => string,
-    addressPartInitialValue?: string
+    slugInitialValue?: string
   ) => {
-    const addressPartSyncValidation = Yup.string()
+    const slugSyncValidation = Yup.string()
       .required()
       .min(3)
       .max(60)
       .matches(/^[a-z0-9-]*[a-z]+[a-z0-9-]*$/, {
         message: (
           <T>
-            address_part_validation_can_contain_just_lowercase_numbers_hyphens
+            slug_validation_can_contain_just_lowercase_numbers_hyphens
           </T>
         ),
       });
 
-    const addressPartUniqueDebouncedAsyncValidation = (v) => {
-      if (addressPartInitialValue === v) {
+    const slugUniqueDebouncedAsyncValidation = (v) => {
+      if (slugInitialValue === v) {
         return true;
       }
       return debouncedValidation(
         (v) => {
           try {
-            addressPartSyncValidation.validateSync(v);
+            slugSyncValidation.validateSync(v);
             return true;
           } catch (e) {
             return false;
           }
         },
-        (v) => container.resolve(OrganizationService).validateAddressPart(v)
+        (v) => container.resolve(OrganizationService).validateSlug(v)
       )(v);
     };
     return Yup.object().shape({
       name: Yup.string().required().min(3).max(50),
-      addressPart: addressPartSyncValidation.test(
-        'addressPartUnique',
-        t('validation_address_part_not_unique'),
-        addressPartUniqueDebouncedAsyncValidation
+      slug: slugSyncValidation.test(
+        'slugUnique',
+        t('validation_slug_not_unique'),
+        slugUniqueDebouncedAsyncValidation
       ),
       description: Yup.string().nullable(),
     });

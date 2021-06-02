@@ -1,25 +1,15 @@
 import * as React from 'react';
-import { FunctionComponent, useState } from 'react';
-import { useConfig } from '../../../hooks/useConfig';
-import {
-  Box,
-  createStyles,
-  IconButton,
-  makeStyles,
-  Theme,
-  Tooltip,
-} from '@material-ui/core';
-import {
-  RepositoryPermissionType,
-  ScreenshotDTO,
-} from '../../../service/response.types';
+import {FunctionComponent, useState} from 'react';
+import {useConfig} from '../../../hooks/useConfig';
+import {Box, createStyles, IconButton, makeStyles, Theme, Tooltip,} from '@material-ui/core';
+import {ProjectPermissionType, ScreenshotDTO,} from '../../../service/response.types';
 import clsx from 'clsx';
 import ClearIcon from '@material-ui/icons/Clear';
-import { ScreenshotActions } from '../../../store/repository/ScreenshotActions';
-import { container } from 'tsyringe';
-import { confirmation } from '../../../hooks/confirmation';
-import { T } from '@tolgee/react';
-import { useRepositoryPermissions } from '../../../hooks/useRepositoryPermissions';
+import {ScreenshotActions} from '../../../store/project/ScreenshotActions';
+import {container} from 'tsyringe';
+import {confirmation} from '../../../hooks/confirmation';
+import {T} from '@tolgee/react';
+import {useProjectPermissions} from '../../../hooks/useProjectPermissions';
 
 export interface ScreenshotThumbnailProps {
   onClick: () => void;
@@ -89,7 +79,7 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
     const config = useConfig();
     const classes = useStyles({});
     const [hover, setHover] = useState(false);
-    const repositoryPermissions = useRepositoryPermissions();
+    const projectPermissions = useProjectPermissions();
 
     const onMouseOver = () => {
       setHover(true);
@@ -117,8 +107,8 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
           onMouseOut={onMouseOut}
           data-cy="screenshot-box"
         >
-          {repositoryPermissions.satisfiesPermission(
-            RepositoryPermissionType.TRANSLATE
+          {projectPermissions.satisfiesPermission(
+            ProjectPermissionType.TRANSLATE
           ) && (
             <Tooltip
               title={<T noWrap>translations.screenshots.delete_tooltip</T>}

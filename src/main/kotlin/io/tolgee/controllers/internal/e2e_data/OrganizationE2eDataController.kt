@@ -1,15 +1,18 @@
 package io.tolgee.controllers.internal.e2e_data
 
-import io.tolgee.security.InternalController
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.dtos.request.OrganizationDto
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.security.InternalController
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.UserAccountService
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @CrossOrigin(origins = ["*"])
@@ -34,7 +37,7 @@ open class OrganizationE2eDataController(
         }
 
         data.forEach {
-            val organization = organizationService.get(it.dto.addressPart!!)
+            val organization = organizationService.get(it.dto.slug!!)
             it.members.forEach { memberUserName ->
                 userAccountService.getByUserName(memberUserName).orElseThrow { NotFoundException() }.let { user ->
                     organizationRoleService.grantMemberRoleToUser(user, organization!!)
@@ -56,7 +59,7 @@ open class OrganizationE2eDataController(
             organizationService.delete(it.id!!)
         }
         data.forEach {
-            organizationService.get(it.dto.addressPart!!)?.let { organization ->
+            organizationService.get(it.dto.slug!!)?.let { organization ->
                 organizationService.delete(organization.id!!)
             }
         }
@@ -80,21 +83,21 @@ open class OrganizationE2eDataController(
                         dto = OrganizationDto(
                                 name = "Google",
                                 description = "An organization made by google company",
-                                addressPart = "google"),
+                                slug = "google"),
                         owner = UserData("admin")
                 ),
                 OrganizationDataItem(
                         dto = OrganizationDto(
                                 name = "Netsuite",
                                 description = "A system for everything",
-                                addressPart = "netsuite"),
+                                slug = "netsuite"),
                         owner = UserData("evan@netsuite.com", "Evan Goldberg")
                 ),
                 OrganizationDataItem(
                         dto = OrganizationDto(
                                 name = "Microsoft",
                                 description = "A first software company ever or something like that.",
-                                addressPart = "microsoft"
+                                slug = "microsoft"
                         ),
                         owner = UserData("gates@microsoft.com", "Bill Gates"),
                         members = mutableListOf("admin")
@@ -103,7 +106,7 @@ open class OrganizationE2eDataController(
                         dto = OrganizationDto(
                                 name = "Tolgee",
                                 description = "This is us",
-                                addressPart = "tolgee"
+                                slug = "tolgee"
                         ),
                         owner = UserData("admin"),
                         otherOwners = mutableListOf("evan@netsuite.com"),
@@ -117,7 +120,7 @@ open class OrganizationE2eDataController(
                             |They also develop amazing things like react and other open source stuff.
                             |However, they sell our data to companies.
                         """.trimMargin(),
-                                addressPart = "facebook"
+                                slug = "facebook"
                         ),
                         owner = UserData("cukrberg@facebook.com", "Mark Cukrberg"),
                         otherOwners = mutableListOf("admin")
@@ -126,7 +129,7 @@ open class OrganizationE2eDataController(
                         dto = OrganizationDto(
                                 name = "Unknown company",
                                 description = "We are very unknown.",
-                                addressPart = "unknown-company"
+                                slug = "unknown-company"
                         ),
                         owner = UserData("admin")
                 ),
@@ -134,7 +137,7 @@ open class OrganizationE2eDataController(
                         dto = OrganizationDto(
                                 name = "Techfides solutions s.r.o",
                                 description = "Lets develop the future",
-                                addressPart = "techfides-solutions"
+                                slug = "techfides-solutions"
 
                         ),
                         owner = UserData("admin")
@@ -148,12 +151,12 @@ open class OrganizationE2eDataController(
                         dto = OrganizationDto(
                                 name = "ZZZ Cool company $number",
                                 description = "We are Z Cool company $number. What a nice day!",
-                                addressPart = "zzz-cool-company-$number"
+                                slug = "zzz-cool-company-$number"
                         ),
                         otherOwners = mutableListOf("admin"),
                         owner = UserData(email),
                 ))
-                data.find{ item -> item.dto.addressPart == "facebook"}!!.otherOwners.add(email)
+                data.find{ item -> item.dto.slug == "facebook"}!!.otherOwners.add(email)
             }
         }
     }

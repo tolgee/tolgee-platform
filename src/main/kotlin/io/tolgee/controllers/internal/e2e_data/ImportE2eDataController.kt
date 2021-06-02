@@ -4,10 +4,10 @@ import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.model.Permission
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.model.dataImport.Import
 import io.tolgee.security.InternalController
-import io.tolgee.service.RepositoryService
+import io.tolgee.service.ProjectService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.transaction.annotation.Transactional
@@ -27,7 +27,7 @@ class ImportE2eDataController(
         private val importService: ImportService,
         private val entityManager: EntityManager,
         private val testDataService: TestDataService,
-        private val repositoryService: RepositoryService,
+        private val projectService: ProjectService,
         private val userAccountService: UserAccountService
 ) {
     @GetMapping(value = ["/generate"])
@@ -106,23 +106,23 @@ class ImportE2eDataController(
 
     @GetMapping(value = ["/generate-base"])
     @Transactional
-    fun generateBaseData(): Repository {
+    fun generateBaseData(): Project {
         val data = testDataService.saveTestData {
             addUserAccount {
                 self {
                     username = "franta"
                     name = "Frantisek Dobrota"
                 }
-                addRepository {
+                addProject {
                     self {
                         userOwner = this@addUserAccount.self
                         name = "Repo"
                     }
                     addPermission {
                         self {
-                            type = Permission.RepositoryPermissionType.MANAGE
+                            type = Permission.ProjectPermissionType.MANAGE
                             user = this@addUserAccount.self
-                            repository = this@addRepository.self
+                            project = this@addProject.self
                         }
                     }
                 }
@@ -130,7 +130,7 @@ class ImportE2eDataController(
         }
 
         testDataService.saveTestData(data)
-        return data.data.repositories[0].self
+        return data.data.projects[0].self
     }
 
     @GetMapping(value = ["/clean"])
@@ -140,8 +140,8 @@ class ImportE2eDataController(
             importService.deleteImport(it as Import)
         }
         userAccountService.getByUserName("franta").orElse(null)?.let {
-            repositoryService.findAllPermitted(it).forEach { repo ->
-                repositoryService.deleteRepository(repo.id!!)
+            projectService.findAllPermitted(it).forEach { repo ->
+                projectService.deleteProject(repo.id!!)
             }
             userAccountService.delete(it)
         }

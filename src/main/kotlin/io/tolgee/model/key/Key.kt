@@ -1,7 +1,7 @@
 package io.tolgee.model.key
 
 import io.tolgee.dtos.PathDTO
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.Translation
 import javax.persistence.*
@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
 @Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["repository_id", "name"], name = "key_repository_id_name")])
+@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name"], name = "key_project_id_name")])
 data class Key(
         @field:NotBlank
         @field:Size(max = 2000)
@@ -19,7 +19,7 @@ data class Key(
 ) : StandardAuditModel() {
     @field:NotNull
     @ManyToOne(optional = false)
-    var repository: Repository? = null
+    var project: Project? = null
 
     @OneToMany(mappedBy = "key")
     var translations: MutableSet<Translation> = HashSet()
@@ -28,10 +28,10 @@ data class Key(
     var keyMeta: KeyMeta? = null
 
     constructor(name: String? = null,
-                repository: Repository? = null,
+                project: Project? = null,
                 translations: MutableSet<Translation> = HashSet()
     ) : this(name) {
-        this.repository = repository
+        this.project = project
         this.translations = translations
     }
 

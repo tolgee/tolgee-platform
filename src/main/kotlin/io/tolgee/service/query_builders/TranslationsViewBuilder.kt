@@ -7,10 +7,10 @@ import javax.persistence.EntityManager
 import javax.persistence.criteria.*
 
 class TranslationsViewBuilder(
-    private val cb: CriteriaBuilder,
-    private val repository: Repository?,
-    private val languages: Set<Language>,
-    private val searchString: String?
+        private val cb: CriteriaBuilder,
+        private val project: Project?,
+        private val languages: Set<Language>,
+        private val searchString: String?
 ) {
     var selection: MutableSet<Selection<*>> = LinkedHashSet()
     var fullTextFields: MutableSet<Expression<String>> = HashSet()
@@ -20,9 +20,9 @@ class TranslationsViewBuilder(
         val fullPath: Expression<String> = key.get("name")
         selection.add(key.get<Any>("id"))
         selection.add(fullPath)
-        val repositoryJoin = key.join(Key_.repository)
+        val project = key.join(Key_.project)
         for (language in languages) {
-            val languagesJoin = repositoryJoin.join<Repository, Language>("languages")
+            val languagesJoin = project.join<Project, Language>("languages")
             languagesJoin.on(cb.equal(languagesJoin.get(Language_.abbreviation), language.abbreviation))
             val translations = key.join<Key, Translation>("translations", JoinType.LEFT)
             translations.on(cb.equal(translations.get(Translation_.language), languagesJoin))
@@ -30,7 +30,7 @@ class TranslationsViewBuilder(
             selection.add(translations.get(Translation_.text))
             fullTextFields.add(translations.get(Translation_.text))
         }
-        restrictions.add(cb.equal(key.get<Any>("repository"), repository))
+        restrictions.add(cb.equal(key.get<Any>(Key_.PROJECT), this.project))
         val fullTextRestrictions: MutableSet<Predicate> = HashSet()
         fullTextFields.add(fullPath)
         if (searchString != null && searchString.isNotEmpty()) {
@@ -67,17 +67,17 @@ class TranslationsViewBuilder(
     companion object {
         @JvmStatic
         fun getData(
-            em: EntityManager,
-            repository: Repository?,
-            languages: Set<Language>,
-            searchString: String?,
-            limit: Int,
-            offset: Int
+                em: EntityManager,
+                project: Project?,
+                languages: Set<Language>,
+                searchString: String?,
+                limit: Int,
+                offset: Int
         ): Result {
             var translationsViewBuilder =
-                TranslationsViewBuilder(em.criteriaBuilder, repository, languages, searchString)
+                    TranslationsViewBuilder(em.criteriaBuilder, project, languages, searchString)
             val count = em.createQuery(translationsViewBuilder.countQuery).singleResult
-            translationsViewBuilder = TranslationsViewBuilder(em.criteriaBuilder, repository, languages, searchString)
+            translationsViewBuilder = TranslationsViewBuilder(em.criteriaBuilder, project, languages, searchString)
             val query = em.createQuery(translationsViewBuilder.dataQuery).setFirstResult(offset).setMaxResults(limit)
             val resultList = query.resultList
             return Result(count, resultList)

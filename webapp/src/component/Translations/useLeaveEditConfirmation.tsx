@@ -1,8 +1,8 @@
-import { confirmation } from '../../hooks/confirmation';
+import {confirmation} from '../../hooks/confirmation';
 import React from 'react';
-import { T } from '@tolgee/react';
-import { TranslationActions } from '../../store/repository/TranslationActions';
-import { container } from 'tsyringe';
+import {T} from '@tolgee/react';
+import {TranslationActions} from '../../store/project/TranslationActions';
+import {container} from 'tsyringe';
 
 const actions = container.resolve(TranslationActions);
 

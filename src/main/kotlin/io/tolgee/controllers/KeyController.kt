@@ -13,9 +13,9 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.openapi_fixtures.InternalIgnorePaths
 import io.tolgee.security.api_key_auth.AccessWithApiKey
-import io.tolgee.security.repository_auth.AccessWithAnyRepositoryPermission
-import io.tolgee.security.repository_auth.AccessWithRepositoryPermission
-import io.tolgee.security.repository_auth.RepositoryHolder
+import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
+import io.tolgee.security.project_auth.AccessWithProjectPermission
+import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyService
 import io.tolgee.service.SecurityService
 import io.tolgee.service.TranslationService
@@ -27,39 +27,39 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = [
-    "/api/repository/{repositoryId}/sources",
-    "/api/repository/{repositoryId}/keys",
-    "/api/repository/keys"
+    "/api/project/{projectId}/sources",
+    "/api/project/{projectId}/keys",
+    "/api/project/keys"
 ])
-@InternalIgnorePaths(["/api/repository/keys"])
+@InternalIgnorePaths(["/api/project/keys"])
 @Tag(name = "Localization keys", description = "Manipulates localization keys and their translations and metadata")
 class KeyController(
         private val keyService: KeyService,
         private val securityService: SecurityService,
-        private val repositoryHolder: RepositoryHolder,
+        private val projectHolder: ProjectHolder,
         private val translationService: TranslationService,
 ) : IController {
 
     @PostMapping(value = ["/create", ""])
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.TRANSLATE)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
     @Operation(summary = "Creates new key with specified translation data")
-    fun create(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody @Valid dto: SetTranslationsDTO?) {
-        keyService.create(repositoryHolder.repository, dto!!)
+    fun create(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: SetTranslationsDTO?) {
+        keyService.create(projectHolder.project, dto!!)
     }
 
     @PostMapping(value = ["/edit"])
     @Operation(summary = "Edits key name")
     @Deprecated("Uses wrong naming in body object, use \"PUT .\" - will be removed in 2.0")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
-    fun editDeprecated(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody @Valid dto: DeprecatedEditKeyDTO?) {
-        keyService.edit(repositoryHolder.repository, dto!!)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+    fun editDeprecated(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: DeprecatedEditKeyDTO?) {
+        keyService.edit(projectHolder.project, dto!!)
     }
 
     @PutMapping(value = [""])
     @Operation(summary = "Edits key name")
-    @AccessWithRepositoryPermission(Permission.RepositoryPermissionType.EDIT)
-    fun edit(@PathVariable("repositoryId") repositoryId: Long?, @RequestBody @Valid dto: EditKeyDTO) {
-        keyService.edit(repositoryHolder.repository, dto)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+    fun edit(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: EditKeyDTO) {
+        keyService.edit(projectHolder.project, dto)
     }
 
     @GetMapping(value = ["{id}"])
@@ -67,7 +67,7 @@ class KeyController(
     @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
     fun getDeprecated(@PathVariable("id") id: Long?): DeprecatedKeyDto {
         val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-        securityService.checkAnyRepositoryPermission(key.repository!!.id)
+        securityService.checkAnyProjectPermission(key.project!!.id)
         return DeprecatedKeyDto(key.name)
     }
 
@@ -75,7 +75,7 @@ class KeyController(
     @Operation(summary = "Deletes key with specified id")
     fun delete(@PathVariable id: Long?) {
         val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-        securityService.checkRepositoryPermission(key.repository!!.id, Permission.RepositoryPermissionType.EDIT)
+        securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
         keyService.delete(id)
     }
 
@@ -84,14 +84,14 @@ class KeyController(
     @Operation(summary = "Deletes multiple kdys by their IDs")
     fun delete(@RequestBody ids: Set<Long>?) {
         for (key in keyService.get(ids!!)) {
-            securityService.checkRepositoryPermission(key.repository!!.id, Permission.RepositoryPermissionType.EDIT)
+            securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
         }
         keyService.deleteMultiple(ids)
     }
 
     @PostMapping(value = ["/translations/{languages}"])
     @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-    @AccessWithAnyRepositoryPermission
+    @AccessWithAnyProjectPermission
     @Operation(
             summary = "Returns translations for specific key by its name",
             description = "Key name must be provided in method body, since it can be long and can contain characters hard to " +
@@ -101,8 +101,8 @@ class KeyController(
             @RequestBody body: GetKeyTranslationsReqDto,
             @PathVariable("languages") languages: Set<String>?
     ): Map<String, String?> {
-        val repositoryId = repositoryHolder.repository.id
+        val projectId = projectHolder.project.id
         val pathDTO = PathDTO.fromFullPath(body.key)
-        return translationService.getKeyTranslationsResult(repositoryId, pathDTO, languages)
+        return translationService.getKeyTranslationsResult(projectId, pathDTO, languages)
     }
 }

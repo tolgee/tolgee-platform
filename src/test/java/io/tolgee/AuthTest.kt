@@ -1,7 +1,6 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.ninjasquad.springmockk.MockkBean
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.constants.Message
 import io.tolgee.controllers.AbstractControllerTest
@@ -22,7 +21,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
@@ -68,7 +66,7 @@ class AuthTest : AbstractControllerTest() {
         val response = doAuthentication(initialUsername, initialPassword)
                 .response.contentAsString
         val token = mapper.readValue(response, HashMap::class.java)["accessToken"] as String?
-        val mvcResult = mvc.perform(MockMvcRequestBuilders.get("/api/repositories")
+        val mvcResult = mvc.perform(MockMvcRequestBuilders.get("/api/projects")
                 .accept(MediaType.ALL)
                 .header("Authorization", String.format("Bearer %s", token))
                 .contentType(MediaType.APPLICATION_JSON))

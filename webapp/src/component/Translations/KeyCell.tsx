@@ -1,22 +1,22 @@
 import * as React from 'react';
-import { FunctionComponent, useContext } from 'react';
-import { RowContext } from './TranslationsRow';
-import { useRepository } from '../../hooks/useRepository';
-import { RepositoryPermissionType } from '../../service/response.types';
-import { EditableCell } from './EditableCell';
-import { container } from 'tsyringe';
-import { TranslationActions } from '../../store/repository/TranslationActions';
-import { Validation } from '../../constants/GlobalValidationSchema';
+import {FunctionComponent, useContext} from 'react';
+import {RowContext} from './TranslationsRow';
+import {useProject} from '../../hooks/useProject';
+import {ProjectPermissionType} from '../../service/response.types';
+import {EditableCell} from './EditableCell';
+import {container} from 'tsyringe';
+import {TranslationActions} from '../../store/project/TranslationActions';
+import {Validation} from '../../constants/GlobalValidationSchema';
 
 let actions = container.resolve(TranslationActions);
 
 export const KeyCell: FunctionComponent = (props) => {
-  let repository = useRepository();
+  let project = useProject();
 
   let context = useContext(RowContext);
 
   const handleSubmit = (v) => {
-    actions.loadableActions.editKey.dispatch(repository.id, {
+    actions.loadableActions.editKey.dispatch(project.id, {
       oldFullPathString: context.data.name,
       newFullPathString: v,
     });
@@ -34,8 +34,8 @@ export const KeyCell: FunctionComponent = (props) => {
       validationSchema={Validation.TRANSLATION_KEY}
       onSubmit={handleSubmit}
       editEnabled={
-        repository.computedPermissions === RepositoryPermissionType.MANAGE ||
-        repository.computedPermissions === RepositoryPermissionType.EDIT
+        project.computedPermissions === ProjectPermissionType.MANAGE ||
+        project.computedPermissions === ProjectPermissionType.EDIT
       }
       onChange={(value) => actions.setEditingValue.dispatch(value)}
       onEditClick={() => {

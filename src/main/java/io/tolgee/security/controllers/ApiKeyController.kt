@@ -10,11 +10,11 @@ import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
-import io.tolgee.model.Permission.RepositoryPermissionType
+import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.service.ApiKeyService
-import io.tolgee.service.RepositoryService
+import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -26,7 +26,7 @@ import javax.validation.Valid
 @RequestMapping("/api/apiKeys")
 @Tag(name = "API keys")
 class ApiKeyController(private val apiKeyService: ApiKeyService,
-                       private val repositoryService: RepositoryService,
+                       private val projectService: ProjectService,
                        private val authenticationFacade: AuthenticationFacade,
                        private val securityService: SecurityService
 ) {
@@ -38,11 +38,11 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
                 .collect(Collectors.toCollection { LinkedHashSet() })
     }
 
-    @GetMapping(path = ["/repository/{repositoryId}"])
-    @Operation(summary = "Returns all API keys for repository")
-    fun allByRepository(@PathVariable("repositoryId") repositoryId: Long?): Set<ApiKeyDTO> {
-        securityService.checkRepositoryPermission(repositoryId!!, RepositoryPermissionType.MANAGE)
-        return apiKeyService.getAllByRepository(repositoryId).stream()
+    @GetMapping(path = ["/project/{projectId}"])
+    @Operation(summary = "Returns all API keys for project")
+    fun allByProject(@PathVariable("projectId") repositoryId: Long?): Set<ApiKeyDTO> {
+        securityService.checkProjectPermission(repositoryId!!, ProjectPermissionType.MANAGE)
+        return apiKeyService.getAllByProject(repositoryId).stream()
                 .map { apiKey: ApiKey? -> ApiKeyDTO.fromEntity(apiKey) }
                 .collect(Collectors.toCollection { LinkedHashSet() })
     }
@@ -50,16 +50,17 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
     @PostMapping(path = [""])
     @Operation(summary = "Creates new API key with provided scopes")
     fun create(@RequestBody @Valid createApiKeyDTO: CreateApiKeyDTO?): ApiKeyDTO {
-        val repository = repositoryService.get(createApiKeyDTO!!.repositoryId).orElseThrow { NotFoundException(Message.REPOSITORY_NOT_FOUND) }
-        securityService.checkApiKeyScopes(createApiKeyDTO.scopes, repository)
-        return apiKeyService.createApiKey(authenticationFacade.userAccount, createApiKeyDTO.scopes, repository)
+        val repository = projectService.get(createApiKeyDTO!!.projectId!!)
+                .orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }
+        securityService.checkApiKeyScopes(createApiKeyDTO.scopes!!, repository)
+        return apiKeyService.createApiKey(authenticationFacade.userAccount, createApiKeyDTO.scopes!!, repository)
     }
 
     @PostMapping(path = ["/edit"])
     @Operation(summary = "Edits existing API key")
     fun edit(@RequestBody @Valid dto: EditApiKeyDTO?) {
         val apiKey = apiKeyService.getApiKey(dto!!.id).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
-        securityService.checkApiKeyScopes(dto.scopes, apiKey.repository)
+        securityService.checkApiKeyScopes(dto.scopes, apiKey.project)
         apiKey.scopesEnum = dto.scopes
         apiKeyService.editApiKey(apiKey)
     }
@@ -69,7 +70,7 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
     fun delete(@PathVariable("key") key: String?) {
         val apiKey = apiKeyService.getApiKey(key).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
         try {
-            securityService.checkRepositoryPermission(apiKey.repository!!.id, RepositoryPermissionType.MANAGE)
+            securityService.checkProjectPermission(apiKey.project!!.id, ProjectPermissionType.MANAGE)
         } catch (e: PermissionException) {
             //user can delete their own api keys
             if (apiKey.userAccount!!.id != authenticationFacade.userAccount.id) {
@@ -81,9 +82,9 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
 
     @GetMapping(path = ["/availableScopes"])
     @Operation(summary = "Returns API key scopes for every permission type")
-    fun getScopes(): Map<String, Set<String>> = Arrays.stream(RepositoryPermissionType.values())
-            .collect(Collectors.toMap({ obj: RepositoryPermissionType -> obj.name },
-                    { type: RepositoryPermissionType ->
+    fun getScopes(): Map<String, Set<String>> = Arrays.stream(ProjectPermissionType.values())
+            .collect(Collectors.toMap({ obj: ProjectPermissionType -> obj.name },
+                    { type: ProjectPermissionType ->
                         Arrays.stream(type.availableScopes)
                                 .map { obj: ApiScope -> obj.value }
                                 .collect(Collectors.toSet())

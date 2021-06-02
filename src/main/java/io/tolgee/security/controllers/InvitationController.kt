@@ -8,38 +8,37 @@ import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.service.InvitationService
 import io.tolgee.service.OrganizationRoleService
-import io.tolgee.service.RepositoryService
+import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.util.*
 import java.util.stream.Collectors
 
 @RestController
 @RequestMapping("/api/invitation")
-@Tag(name = "User invitations to repository")
+@Tag(name = "User invitations to project")
 open class InvitationController @Autowired constructor(
         private val invitationService: InvitationService,
         private val securityService: SecurityService,
-        private val repositoryService: RepositoryService,
+        private val projectService: ProjectService,
         private val organizationRoleService: OrganizationRoleService
 ) {
     @GetMapping("/accept/{code}")
-    @Operation(summary = "Accepts invitation to repository")
+    @Operation(summary = "Accepts invitation to project")
     open fun acceptInvitation(@PathVariable("code") code: String?): ResponseEntity<Void> {
         invitationService.removeExpired()
         invitationService.accept(code)
         return ResponseEntity(HttpStatus.OK)
     }
 
-    @GetMapping("/list/{repositoryId}")
-    @Operation(summary = "Prints all invitations to repository")
-    open fun getRepositoryInvitations(@PathVariable("repositoryId") id: Long): Set<InvitationDTO> {
-        val repository = repositoryService.get(id).orElseThrow { NotFoundException() }!!
-        securityService.checkRepositoryPermission(id, Permission.RepositoryPermissionType.MANAGE)
-        return invitationService.getForRepository(repository).stream().map { invitation: Invitation? ->
+    @GetMapping("/list/{projectId}")
+    @Operation(summary = "Prints all invitations to project")
+    open fun getProjectInvitations(@PathVariable("projectId") id: Long): Set<InvitationDTO> {
+        val repository = projectService.get(id).orElseThrow { NotFoundException() }!!
+        securityService.checkProjectPermission(id, Permission.ProjectPermissionType.MANAGE)
+        return invitationService.getForProject(repository).stream().map { invitation: Invitation? ->
             InvitationDTO.fromEntity(invitation)
         }.collect(Collectors.toCollection { LinkedHashSet() })
     }
@@ -51,8 +50,8 @@ open class InvitationController @Autowired constructor(
             NotFoundException()
         }
         invitation.permission?.let {
-            securityService.checkRepositoryPermission(invitation.permission!!.repository!!.id,
-                    Permission.RepositoryPermissionType.MANAGE)
+            securityService.checkProjectPermission(invitation.permission!!.project!!.id,
+                    Permission.ProjectPermissionType.MANAGE)
         }
 
         invitation.organizationRole?.let {

@@ -4,31 +4,31 @@
  */
 
 export interface paths {
-  '/v2/repositories/{repositoryId}/users/{userId}/set-permissions/{permissionType}': {
+  '/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}': {
     put: operations['setUsersPermissions'];
   };
-  '/v2/repositories/{repositoryId}/users/{userId}/revoke-access': {
+  '/v2/projects/{projectId}/users/{userId}/revoke-access': {
     put: operations['revokePermission'];
   };
-  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override': {
+  '/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override': {
     put: operations['resolveTranslationSetOverride'];
   };
-  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing': {
+  '/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing': {
     put: operations['resolveTranslationSetKeepExisting'];
   };
-  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-override': {
+  '/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override': {
     put: operations['resolveTranslationSetOverride_1'];
   };
-  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}/resolve-all/set-keep-existing': {
+  '/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-keep-existing': {
     put: operations['resolveTranslationSetKeepExisting_1'];
   };
-  '/v2/repositories/{repositoryId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}': {
+  '/v2/projects/{projectId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}': {
     put: operations['selectExistingLanguage'];
   };
-  '/v2/repositories/{repositoryId}/import/result/languages/{importLanguageId}/reset-existing': {
+  '/v2/projects/{projectId}/import/result/languages/{importLanguageId}/reset-existing': {
     put: operations['resetExistingLanguage'];
   };
-  '/v2/repositories/{repositoryId}/import/apply': {
+  '/v2/projects/{projectId}/import/apply': {
     put: operations['applyImport'];
   };
   '/v2/organizations/{organizationId}/users/{userId}/set-role': {
@@ -59,27 +59,27 @@ export interface paths {
     put: operations['update_1'];
     delete: operations['delete_1'];
   };
-  '/api/repository/{repositoryId}/keys': {
+  '/api/project/{projectId}/keys': {
     put: operations['edit'];
     post: operations['create_3'];
     delete: operations['delete_4'];
   };
-  '/api/repository/keys': {
+  '/api/project/keys': {
     delete: operations['delete_5'];
   };
-  '/api/repository/{repositoryId}/translations': {
+  '/api/project/{projectId}/translations': {
     put: operations['setTranslations'];
     post: operations['createOrUpdateTranslations'];
   };
-  '/api/repository/translations': {
+  '/api/project/translations': {
     put: operations['setTranslations_1'];
     post: operations['createOrUpdateTranslations_1'];
   };
-  '/v2/repositories/{repositoryId}/import': {
+  '/v2/projects/{projectId}/import': {
     post: operations['addFiles'];
     delete: operations['cancelImport'];
   };
-  '/v2/repositories/{repositoryId}/import/with-streaming-response': {
+  '/v2/projects/{projectId}/import/with-streaming-response': {
     post: operations['addFilesStreaming'];
   };
   '/v2/organizations': {
@@ -90,57 +90,57 @@ export interface paths {
     get: operations['getAll_2'];
     post: operations['create_1'];
   };
-  '/v2/address-part/generate-repository': {
-    post: operations['generateRepositoryAddressPart'];
+  '/v2/address-part/generate-project': {
+    post: operations['generateProjectSlug'];
   };
-  '/api/address-part/generate-repository': {
-    post: operations['generateRepositoryAddressPart_1'];
+  '/api/address-part/generate-project': {
+    post: operations['generateProjectSlug_1'];
   };
   '/v2/address-part/generate-organization': {
-    post: operations['generateOrganizationAddressPart'];
+    post: operations['generateOrganizationSlug'];
   };
   '/api/address-part/generate-organization': {
-    post: operations['generateOrganizationAddressPart_1'];
+    post: operations['generateOrganizationSlug_1'];
   };
   '/api/user': {
     get: operations['getInfo'];
     post: operations['updateUser'];
   };
-  '/api/repository/{repositoryId}/keys/translations/{languages}': {
+  '/api/project/{projectId}/keys/translations/{languages}': {
     /** Key name must be provided in method body, since it can be long and can contain characters hard to encode */
     post: operations['getKeyTranslationsPost'];
   };
-  '/api/repository/{repositoryId}/keys/edit': {
+  '/api/project/{projectId}/keys/edit': {
     post: operations['editDeprecated'];
   };
-  '/api/repository/{repositoryId}/keys/create': {
+  '/api/project/{projectId}/keys/create': {
     post: operations['create_2'];
   };
-  '/api/repository/{repositoryId}/languages/edit': {
+  '/api/project/{projectId}/languages/edit': {
     post: operations['editLanguage'];
   };
-  '/api/repository/languages/edit': {
+  '/api/project/languages/edit': {
     post: operations['editLanguage_1'];
   };
-  '/api/repository/{repositoryId}/languages': {
+  '/api/project/{projectId}/languages': {
     get: operations['getAll_3'];
     post: operations['createLanguage'];
   };
-  '/api/repository/{repositoryId}/screenshots/get': {
+  '/api/project/{projectId}/screenshots/get': {
     post: operations['getKeyScreenshots_1'];
   };
-  '/api/repository/{repositoryId}/screenshots': {
+  '/api/project/{projectId}/screenshots': {
     post: operations['uploadScreenshot_1'];
   };
-  '/api/repositories': {
+  '/api/projects': {
     get: operations['getAll_5'];
-    post: operations['createRepository'];
+    post: operations['createProject'];
   };
-  '/api/repositories/invite': {
+  '/api/projects/invite': {
     post: operations['inviteUser_2'];
   };
-  '/api/repositories/edit': {
-    post: operations['editRepository'];
+  '/api/projects/edit': {
+    post: operations['editProject'];
   };
   '/api/public/validate_email': {
     post: operations['validateEmail'];
@@ -164,26 +164,26 @@ export interface paths {
   '/api/apiKeys/edit': {
     post: operations['edit_2'];
   };
-  '/v2/repositories': {
+  '/v2/projects': {
     get: operations['getAll'];
   };
-  '/v2/repositories/{repositoryId}': {
+  '/v2/projects/{projectId}': {
     get: operations['get'];
   };
-  '/v2/repositories/{repositoryId}/users': {
+  '/v2/projects/{projectId}/users': {
     get: operations['getAllUsers'];
   };
-  '/v2/repositories/{repositoryId}/import/result': {
+  '/v2/projects/{projectId}/import/result': {
     get: operations['getImportResult'];
   };
-  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}': {
+  '/v2/projects/{projectId}/import/result/languages/{languageId}': {
     get: operations['getImportLanguage'];
     delete: operations['deleteLanguage'];
   };
-  '/v2/repositories/{repositoryId}/import/result/languages/{languageId}/translations': {
+  '/v2/projects/{projectId}/import/result/languages/{languageId}/translations': {
     get: operations['getImportTranslations'];
   };
-  '/v2/repositories/{repositoryId}/import/result/files/{importFileId}/issues': {
+  '/v2/projects/{projectId}/import/result/files/{importFileId}/issues': {
     get: operations['getImportFileIssues'];
   };
   '/v2/organizations/{organizationId}/invitations': {
@@ -198,67 +198,67 @@ export interface paths {
   '/api/organizations/{id}/users': {
     get: operations['getAllUsers_2'];
   };
-  '/v2/organizations/{id}/repositories': {
-    get: operations['getAllRepositories'];
+  '/v2/organizations/{id}/projects': {
+    get: operations['getAllProjects'];
   };
-  '/api/organizations/{id}/repositories': {
-    get: operations['getAllRepositories_1'];
+  '/api/organizations/{id}/projects': {
+    get: operations['getAllProjects_1'];
   };
-  '/v2/organizations/{addressPart}/repositories': {
-    get: operations['getAllRepositories_2'];
+  '/v2/organizations/{slug}/projects': {
+    get: operations['getAllProjects_2'];
   };
-  '/api/organizations/{addressPart}/repositories': {
-    get: operations['getAllRepositories_3'];
+  '/api/organizations/{slug}/projects': {
+    get: operations['getAllProjects_3'];
   };
-  '/v2/organizations/{addressPart}': {
+  '/v2/organizations/{slug}': {
     get: operations['get_3'];
   };
-  '/api/organizations/{addressPart}': {
+  '/api/organizations/{slug}': {
     get: operations['get_4'];
   };
-  '/v2/address-part/validate-repository/{addressPart}': {
-    get: operations['validateRepositoryAddressPart'];
+  '/v2/address-part/validate-project/{slug}': {
+    get: operations['validateProjectSlug'];
   };
-  '/api/address-part/validate-repository/{addressPart}': {
-    get: operations['validateRepositoryAddressPart_1'];
+  '/api/address-part/validate-project/{slug}': {
+    get: operations['validateProjectSlug_1'];
   };
-  '/v2/address-part/validate-organization/{addressPart}': {
-    get: operations['validateOrganizationAddressPart'];
+  '/v2/address-part/validate-organization/{slug}': {
+    get: operations['validateOrganizationSlug'];
   };
-  '/api/address-part/validate-organization/{addressPart}': {
-    get: operations['validateOrganizationAddressPart_1'];
+  '/api/address-part/validate-organization/{slug}': {
+    get: operations['validateOrganizationSlug_1'];
   };
-  '/api/repository/{repositoryId}/keys/{id}': {
+  '/api/project/{projectId}/keys/{id}': {
     get: operations['getDeprecated'];
     delete: operations['delete_2'];
   };
-  '/api/repository/keys/{id}': {
+  '/api/project/keys/{id}': {
     get: operations['getDeprecated_1'];
     delete: operations['delete_3'];
   };
-  '/api/repository/{repositoryId}/export/jsonZip': {
+  '/api/project/{projectId}/export/jsonZip': {
     get: operations['doExportJsonZip'];
   };
-  '/api/repository/{repositoryId}/translations/{languages}': {
+  '/api/project/{projectId}/translations/{languages}': {
     get: operations['getTranslations'];
   };
-  '/api/repository/translations/{languages}': {
+  '/api/project/translations/{languages}': {
     get: operations['getTranslations_1'];
   };
-  '/api/repository/{repositoryId}/translations/view': {
+  '/api/project/{projectId}/translations/view': {
     get: operations['getViewData'];
   };
-  '/api/repository/{repositoryId}/languages/{id}': {
+  '/api/project/{projectId}/languages/{id}': {
     get: operations['get_5'];
     delete: operations['deleteLanguage_1'];
   };
-  '/api/repository/languages/{id}': {
+  '/api/project/languages/{id}': {
     get: operations['get_6'];
     delete: operations['deleteLanguage_2'];
   };
-  '/api/repositories/{id}': {
-    get: operations['getRepository'];
-    delete: operations['deleteRepository'];
+  '/api/projects/{id}': {
+    get: operations['getProject'];
+    delete: operations['deleteProject'];
   };
   '/api/public/verify_email/{userId}/{code}': {
     get: operations['verifyEmail'];
@@ -272,8 +272,8 @@ export interface paths {
   '/api/public/authorize_oauth/{serviceType}/{code}': {
     get: operations['authenticateUser_1'];
   };
-  '/api/invitation/list/{repositoryId}': {
-    get: operations['getRepositoryInvitations'];
+  '/api/invitation/list/{projectId}': {
+    get: operations['getProjectInvitations'];
   };
   '/api/invitation/accept/{code}': {
     get: operations['acceptInvitation'];
@@ -281,8 +281,8 @@ export interface paths {
   '/api/apiKeys/scopes': {
     get: operations['getApiKeyScopes'];
   };
-  '/api/apiKeys/repository/{repositoryId}': {
-    get: operations['allByRepository'];
+  '/api/apiKeys/project/{projectId}': {
+    get: operations['allByProject'];
   };
   '/api/apiKeys/availableScopes': {
     get: operations['getScopes'];
@@ -293,10 +293,10 @@ export interface paths {
   '/api/organizations/{organizationId}/users/{userId}': {
     delete: operations['removeUser_1'];
   };
-  '/api/repository/screenshots/{ids}': {
+  '/api/project/screenshots/{ids}': {
     delete: operations['deleteScreenshots'];
   };
-  '/api/repository/{repositoryId}/screenshots/{ids}': {
+  '/api/project/{projectId}/screenshots/{ids}': {
     delete: operations['deleteScreenshots_1'];
   };
   '/api/invitation/{invitationId}': {
@@ -326,13 +326,13 @@ export interface components {
     OrganizationDto: {
       name: string;
       description?: string;
-      addressPart?: string;
+      slug?: string;
       basePermissions: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
     };
     OrganizationModel: {
       id: number;
       name: string;
-      addressPart: string;
+      slug: string;
       description?: string;
       basePermissions: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
       currentUserRole: 'MEMBER' | 'OWNER';
@@ -385,7 +385,7 @@ export interface components {
     StreamingResponseBody: { [key: string]: any };
     GenerateAddressPathDto: {
       name: string;
-      oldAddressPart?: string;
+      oldSlug?: string;
     };
     UserUpdateRequestDTO: {
       name: string;
@@ -414,26 +414,26 @@ export interface components {
       filename: string;
       createdAt: string;
     };
-    CreateRepositoryDTO: {
+    CreateProjectDTO: {
       name: string;
       languages: components['schemas']['LanguageDTO'][];
-      addressPart?: string;
-      /** If not provided, repository will be created as users */
+      slug?: string;
+      /** If not provided, project will be created as users */
       organizationId?: number;
     };
-    RepositoryDTO: {
+    ProjectDTO: {
       id?: number;
       name?: string;
       permissionType?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
     };
-    RepositoryInviteUserDto: {
-      repositoryId: number;
+    ProjectInviteUserDto: {
+      projectId: number;
       type: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
     };
-    EditRepositoryDTO: {
-      repositoryId: number;
+    EditProjectDTO: {
+      projectId: number;
       name: string;
-      addressPart?: string;
+      slug?: string;
     };
     TextNode: { [key: string]: any };
     SignUpDto: {
@@ -457,15 +457,15 @@ export interface components {
       password?: string;
     };
     CreateApiKeyDTO: {
-      repositoryId: number;
+      projectId: number;
       scopes?: string[];
     };
     ApiKeyDTO: {
       id?: number;
       "Resulting user's api key"?: string;
       userName?: string;
-      repositoryId?: number;
-      repositoryName?: string;
+      projectId?: number;
+      projectName?: string;
       scopes?: string[];
     };
     EditApiKeyDTO: {
@@ -477,21 +477,21 @@ export interface components {
       size?: number;
       sort?: string[];
     };
-    PagedModelRepositoryModel: {
+    PagedModelProjectModel: {
       _embedded?: {
-        repositories?: components['schemas']['RepositoryModel'][];
+        projects?: components['schemas']['ProjectModel'][];
       };
       _links?: components['schemas']['Links'];
       page?: components['schemas']['PageMetadata'];
     };
-    RepositoryModel: {
+    ProjectModel: {
       id: number;
       name: string;
       description?: string;
-      addressPart?: string;
+      slug?: string;
       userOwner?: components['schemas']['UserAccountModel'];
       organizationOwnerName?: string;
-      organizationOwnerAddressPart?: string;
+      organizationOwnerSlug?: string;
       organizationOwnerBasePermissions?:
         | 'VIEW'
         | 'TRANSLATE'
@@ -500,7 +500,7 @@ export interface components {
       organizationRole?: 'MEMBER' | 'OWNER';
       /** Current user's direct permission */
       directPermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
-      /** Actual current user's permissions on this repository. You can not sort data by this column! */
+      /** Actual current user's permissions on this project. You can not sort data by this column! */
       computedPermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
       _links?: components['schemas']['Links'];
     };
@@ -510,21 +510,21 @@ export interface components {
       name?: string;
       _links?: components['schemas']['Links'];
     };
-    PagedModelUserAccountInRepositoryModel: {
+    PagedModelUserAccountInProjectModel: {
       _embedded?: {
-        users?: components['schemas']['UserAccountInRepositoryModel'][];
+        users?: components['schemas']['UserAccountInProjectModel'][];
       };
       _links?: components['schemas']['Links'];
       page?: components['schemas']['PageMetadata'];
     };
-    UserAccountInRepositoryModel: {
+    UserAccountInProjectModel: {
       id: number;
       username: string;
       name?: string;
       organizationRole?: 'MEMBER' | 'OWNER';
       organizationBasePermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
       directPermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
-      /** Actual user's permissions on selected repository. You can not sort data by this column! */
+      /** Actual user's permissions on selected project. You can not sort data by this column! */
       computedPermissions: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
       _links?: components['schemas']['Links'];
     };
@@ -656,7 +656,7 @@ export interface components {
       maxUploadFileSize: number;
       clientSentryDsn?: string;
       needsEmailVerification: boolean;
-      userCanCreateRepositories: boolean;
+      userCanCreateProjects: boolean;
       userCanCreateOrganizations: boolean;
     };
     InvitationDTO: {
@@ -681,7 +681,7 @@ export interface operations {
   setUsersPermissions: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
         userId: number;
         permissionType: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
       };
@@ -694,7 +694,7 @@ export interface operations {
   revokePermission: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
         userId: number;
       };
     };
@@ -708,7 +708,7 @@ export interface operations {
       path: {
         languageId: number;
         translationId: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -721,7 +721,7 @@ export interface operations {
       path: {
         languageId: number;
         translationId: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -733,7 +733,7 @@ export interface operations {
     parameters: {
       path: {
         languageId: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -745,7 +745,7 @@ export interface operations {
     parameters: {
       path: {
         languageId: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -758,7 +758,7 @@ export interface operations {
       path: {
         importLanguageId: number;
         existingLanguageId: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -770,7 +770,7 @@ export interface operations {
     parameters: {
       path: {
         importLanguageId: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -781,7 +781,7 @@ export interface operations {
   applyImport: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
       query: {
         forceMode?: 'OVERRIDE' | 'KEEP' | 'NO_FORCE';
@@ -983,7 +983,7 @@ export interface operations {
   edit: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -999,7 +999,7 @@ export interface operations {
   create_3: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1015,7 +1015,7 @@ export interface operations {
   delete_4: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1042,7 +1042,7 @@ export interface operations {
   setTranslations: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1058,7 +1058,7 @@ export interface operations {
   createOrUpdateTranslations: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1098,7 +1098,7 @@ export interface operations {
   addFiles: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1120,7 +1120,7 @@ export interface operations {
   cancelImport: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1131,7 +1131,7 @@ export interface operations {
   addFilesStreaming: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1212,7 +1212,7 @@ export interface operations {
       };
     };
   };
-  generateRepositoryAddressPart: {
+  generateProjectSlug: {
     responses: {
       /** OK */
       200: {
@@ -1227,7 +1227,7 @@ export interface operations {
       };
     };
   };
-  generateRepositoryAddressPart_1: {
+  generateProjectSlug_1: {
     responses: {
       /** OK */
       200: {
@@ -1242,7 +1242,7 @@ export interface operations {
       };
     };
   };
-  generateOrganizationAddressPart: {
+  generateOrganizationSlug: {
     responses: {
       /** OK */
       200: {
@@ -1257,7 +1257,7 @@ export interface operations {
       };
     };
   };
-  generateOrganizationAddressPart_1: {
+  generateOrganizationSlug_1: {
     responses: {
       /** OK */
       200: {
@@ -1298,7 +1298,7 @@ export interface operations {
     parameters: {
       path: {
         languages: string[];
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1318,7 +1318,7 @@ export interface operations {
   editDeprecated: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1334,7 +1334,7 @@ export interface operations {
   create_2: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1350,7 +1350,7 @@ export interface operations {
   editLanguage: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1385,7 +1385,7 @@ export interface operations {
   getAll_3: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1400,7 +1400,7 @@ export interface operations {
   createLanguage: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1420,7 +1420,7 @@ export interface operations {
   getKeyScreenshots_1: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1440,7 +1440,7 @@ export interface operations {
   uploadScreenshot_1: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
       query: {
         key: string;
@@ -1467,23 +1467,23 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['RepositoryDTO'][];
+          '*/*': components['schemas']['ProjectDTO'][];
         };
       };
     };
   };
-  createRepository: {
+  createProject: {
     responses: {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['RepositoryDTO'];
+          '*/*': components['schemas']['ProjectDTO'];
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateRepositoryDTO'];
+        'application/json': components['schemas']['CreateProjectDTO'];
       };
     };
   };
@@ -1498,22 +1498,22 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['RepositoryInviteUserDto'];
+        'application/json': components['schemas']['ProjectInviteUserDto'];
       };
     };
   };
-  editRepository: {
+  editProject: {
     responses: {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['RepositoryDTO'];
+          '*/*': components['schemas']['ProjectDTO'];
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['EditRepositoryDTO'];
+        'application/json': components['schemas']['EditProjectDTO'];
       };
     };
   };
@@ -1631,7 +1631,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          'application/hal+json': components['schemas']['PagedModelRepositoryModel'];
+          'application/hal+json': components['schemas']['PagedModelProjectModel'];
         };
       };
     };
@@ -1639,14 +1639,14 @@ export interface operations {
   get: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['RepositoryModel'];
+          '*/*': components['schemas']['ProjectModel'];
         };
       };
     };
@@ -1654,7 +1654,7 @@ export interface operations {
   getAllUsers: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
       query: {
         pageable: components['schemas']['Pageable'];
@@ -1665,7 +1665,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['PagedModelUserAccountInRepositoryModel'];
+          '*/*': components['schemas']['PagedModelUserAccountInProjectModel'];
         };
       };
     };
@@ -1673,7 +1673,7 @@ export interface operations {
   getImportResult: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
       query: {
         pageable: components['schemas']['Pageable'];
@@ -1692,7 +1692,7 @@ export interface operations {
     parameters: {
       path: {
         languageId: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1708,7 +1708,7 @@ export interface operations {
     parameters: {
       path: {
         languageId: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -1719,7 +1719,7 @@ export interface operations {
   getImportTranslations: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
         languageId: number;
       };
       query: {
@@ -1742,7 +1742,7 @@ export interface operations {
     parameters: {
       path: {
         importFileId: number;
-        repositoryId: number;
+        projectId: number;
       };
       query: {
         pageable: components['schemas']['Pageable'];
@@ -1825,7 +1825,7 @@ export interface operations {
       };
     };
   };
-  getAllRepositories: {
+  getAllProjects: {
     parameters: {
       path: {
         id: number;
@@ -1839,12 +1839,12 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['PagedModelRepositoryModel'];
+          '*/*': components['schemas']['PagedModelProjectModel'];
         };
       };
     };
   };
-  getAllRepositories_1: {
+  getAllProjects_1: {
     parameters: {
       path: {
         id: number;
@@ -1858,15 +1858,15 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['PagedModelRepositoryModel'];
+          '*/*': components['schemas']['PagedModelProjectModel'];
         };
       };
     };
   };
-  getAllRepositories_2: {
+  getAllProjects_2: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
       query: {
         pageable: components['schemas']['Pageable'];
@@ -1877,15 +1877,15 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['PagedModelRepositoryModel'];
+          '*/*': components['schemas']['PagedModelProjectModel'];
         };
       };
     };
   };
-  getAllRepositories_3: {
+  getAllProjects_3: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
       query: {
         pageable: components['schemas']['Pageable'];
@@ -1896,7 +1896,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['PagedModelRepositoryModel'];
+          '*/*': components['schemas']['PagedModelProjectModel'];
         };
       };
     };
@@ -1904,7 +1904,7 @@ export interface operations {
   get_3: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {
@@ -1919,7 +1919,7 @@ export interface operations {
   get_4: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {
@@ -1931,10 +1931,10 @@ export interface operations {
       };
     };
   };
-  validateRepositoryAddressPart: {
+  validateProjectSlug: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {
@@ -1946,10 +1946,10 @@ export interface operations {
       };
     };
   };
-  validateRepositoryAddressPart_1: {
+  validateProjectSlug_1: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {
@@ -1961,10 +1961,10 @@ export interface operations {
       };
     };
   };
-  validateOrganizationAddressPart: {
+  validateOrganizationSlug: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {
@@ -1976,10 +1976,10 @@ export interface operations {
       };
     };
   };
-  validateOrganizationAddressPart_1: {
+  validateOrganizationSlug_1: {
     parameters: {
       path: {
-        addressPart: string;
+        slug: string;
       };
     };
     responses: {
@@ -1995,7 +1995,7 @@ export interface operations {
     parameters: {
       path: {
         id: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -2011,7 +2011,7 @@ export interface operations {
     parameters: {
       path: {
         id: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -2048,7 +2048,7 @@ export interface operations {
   doExportJsonZip: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -2064,7 +2064,7 @@ export interface operations {
     parameters: {
       path: {
         languages: string[];
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -2094,7 +2094,7 @@ export interface operations {
   getViewData: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
       query: {
         languages?: string[];
@@ -2116,7 +2116,7 @@ export interface operations {
     parameters: {
       path: {
         id: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -2132,7 +2132,7 @@ export interface operations {
     parameters: {
       path: {
         id: number;
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -2166,7 +2166,7 @@ export interface operations {
       200: unknown;
     };
   };
-  getRepository: {
+  getProject: {
     parameters: {
       path: {
         id: number;
@@ -2176,12 +2176,12 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['RepositoryDTO'];
+          '*/*': components['schemas']['ProjectDTO'];
         };
       };
     };
   };
-  deleteRepository: {
+  deleteProject: {
     parameters: {
       path: {
         id: number;
@@ -2249,10 +2249,10 @@ export interface operations {
       };
     };
   };
-  getRepositoryInvitations: {
+  getProjectInvitations: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -2286,10 +2286,10 @@ export interface operations {
       };
     };
   };
-  allByRepository: {
+  allByProject: {
     parameters: {
       path: {
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {
@@ -2350,7 +2350,7 @@ export interface operations {
     parameters: {
       path: {
         ids: number[];
-        repositoryId: number;
+        projectId: number;
       };
     };
     responses: {

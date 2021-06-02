@@ -8,7 +8,7 @@ import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
-import io.tolgee.repository.RepositoryRepository
+import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.*
 import io.tolgee.service.dataImport.ImportService
@@ -19,7 +19,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     protected lateinit var dbPopulator: DbPopulatorReal
 
     @Autowired
-    protected lateinit var repositoryService: RepositoryService
+    protected lateinit var projectService: ProjectService
 
     @Autowired
     protected lateinit var translationService: TranslationService
@@ -72,7 +72,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
     @Autowired lateinit var organizationRoleRepository: OrganizationRoleRepository
 
-    @Autowired lateinit var repositoryRepository: RepositoryRepository
+    @Autowired lateinit var projectRepository: ProjectRepository
 
     @Autowired lateinit var importService: ImportService
 

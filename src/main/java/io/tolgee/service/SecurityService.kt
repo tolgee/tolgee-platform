@@ -3,8 +3,8 @@ package io.tolgee.service
 import io.tolgee.constants.ApiScope
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
-import io.tolgee.model.Permission.RepositoryPermissionType
-import io.tolgee.model.Repository
+import io.tolgee.model.Permission.ProjectPermissionType
+import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.security.AuthenticationFacade
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,37 +21,37 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
     lateinit var permissionService: PermissionService
 
     @Transactional
-    fun grantFullAccessToRepo(repository: Repository?) {
-        permissionService.grantFullAccessToRepo(activeUser, repository)
+    fun grantFullAccessToRepo(project: Project?) {
+        permissionService.grantFullAccessToRepo(activeUser, project)
     }
 
-    fun checkAnyRepositoryPermission(repositoryId: Long): RepositoryPermissionType {
-        return getRepositoryPermission(repositoryId) ?: throw PermissionException()
+    fun checkAnyProjectPermission(projectId: Long): ProjectPermissionType {
+        return getProjectPermission(projectId) ?: throw PermissionException()
     }
 
-    fun checkRepositoryPermission(repositoryId: Long, requiredPermission: RepositoryPermissionType): RepositoryPermissionType {
-        val usersPermission = checkAnyRepositoryPermission(repositoryId)
+    fun checkProjectPermission(projectId: Long, requiredPermission: ProjectPermissionType): ProjectPermissionType {
+        val usersPermission = checkAnyProjectPermission(projectId)
         if (requiredPermission.power > usersPermission.power) {
             throw PermissionException()
         }
         return usersPermission
     }
 
-    fun checkApiKeyScopes(scopes: Set<ApiScope>, repository: Repository?) {
-        if (!apiKeyService.getAvailableScopes(activeUser, repository!!).containsAll(scopes)) {
+    fun checkApiKeyScopes(scopes: Set<ApiScope>, project: Project?) {
+        if (!apiKeyService.getAvailableScopes(activeUser, project!!).containsAll(scopes)) {
             throw PermissionException()
         }
     }
 
     fun checkApiKeyScopes(scopes: Set<ApiScope>, apiKey: ApiKey) {
-        checkApiKeyScopes(scopes, apiKey.repository) // checks if user's has permissions to use api key with api key's permissions
+        checkApiKeyScopes(scopes, apiKey.project) // checks if user's has permissions to use api key with api key's permissions
         if (!apiKey.scopesEnum.containsAll(scopes)) {
             throw PermissionException()
         }
     }
 
-    private fun getRepositoryPermission(repositoryId: Long): RepositoryPermissionType? {
-        return permissionService.getRepositoryPermissionType(repositoryId, activeUser)
+    private fun getProjectPermission(projectId: Long): ProjectPermissionType? {
+        return permissionService.getProjectPermissionType(projectId, activeUser)
     }
 
     private val activeUser: UserAccount

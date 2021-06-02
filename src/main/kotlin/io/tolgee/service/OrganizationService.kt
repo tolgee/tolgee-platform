@@ -11,7 +11,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.util.AddressPartGenerator
+import io.tolgee.util.SlugGenerator
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -21,36 +21,36 @@ import javax.persistence.EntityManager
 
 @Service
 @Transactional
-open class OrganizationService(
+class OrganizationService(
         private val organizationRepository: OrganizationRepository,
         private val authenticationFacade: AuthenticationFacade,
-        private val addressPartGenerator: AddressPartGenerator,
-        private val repositoryService: RepositoryService,
+        private val slugGenerator: SlugGenerator,
+        private val projectService: ProjectService,
         private val organizationRoleService: OrganizationRoleService,
         private val invitationService: InvitationService,
         private val entityManager: EntityManager
 ) {
 
     @Transactional
-    open fun create(createDto: OrganizationDto): Organization {
+    fun create(createDto: OrganizationDto): Organization {
         return this.create(createDto, authenticationFacade.userAccount)
     }
 
     @Transactional
-    open fun create(createDto: OrganizationDto, userAccount: UserAccount): Organization {
-        if (createDto.addressPart != null && !validateAddressPartUniqueness(createDto.addressPart!!)) {
+    fun create(createDto: OrganizationDto, userAccount: UserAccount): Organization {
+        if (createDto.slug != null && !validateSlugUniqueness(createDto.slug!!)) {
             throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
         }
 
-        val addressPart = createDto.addressPart
-                ?: addressPartGenerator.generate(createDto.name!!, 3, 60) {
-                    this.validateAddressPartUniqueness(it)
+        val slug = createDto.slug
+                ?: slugGenerator.generate(createDto.name!!, 3, 60) {
+                    this.validateSlugUniqueness(it)
                 }
 
         Organization(
                 name = createDto.name,
                 description = createDto.description,
-                addressPart = addressPart,
+                slug = slug,
                 basePermissions = createDto.basePermissions
         ).let {
             organizationRepository.save(it)
@@ -59,7 +59,7 @@ open class OrganizationService(
         }
     }
 
-    open fun findPermittedPaged(pageable: Pageable, requestParamsDto: OrganizationRequestParamsDto): Page<OrganizationView> {
+    fun findPermittedPaged(pageable: Pageable, requestParamsDto: OrganizationRequestParamsDto): Page<OrganizationView> {
         if (requestParamsDto.filterCurrentUserOwner) {
             return organizationRepository.findAllPermitted(authenticationFacade.userAccount.id, pageable, OrganizationRoleType.OWNER)
         }
@@ -67,39 +67,39 @@ open class OrganizationService(
     }
 
 
-    open fun get(id: Long): Organization? {
+    fun get(id: Long): Organization? {
         return organizationRepository.findByIdOrNull(id)
     }
 
-    open fun get(addressPart: String): Organization? {
-        return organizationRepository.getOneByAddressPart(addressPart)
+    fun get(slug: String): Organization? {
+        return organizationRepository.getOneBySlug(slug)
     }
 
-    open fun edit(id: Long, editDto: OrganizationDto): OrganizationView {
+    fun edit(id: Long, editDto: OrganizationDto): OrganizationView {
         val organization = this.get(id) ?: throw NotFoundException()
 
-        if (editDto.addressPart == null) {
-            editDto.addressPart = organization.addressPart
+        if (editDto.slug == null) {
+            editDto.slug = organization.slug
         }
 
-        if (editDto.addressPart != organization.addressPart && !validateAddressPartUniqueness(editDto.addressPart!!)) {
+        if (editDto.slug != organization.slug && !validateSlugUniqueness(editDto.slug!!)) {
             throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
         }
 
         organization.name = editDto.name
         organization.description = editDto.description
-        organization.addressPart = editDto.addressPart
+        organization.slug = editDto.slug
         organization.basePermissions = editDto.basePermissions
         organizationRepository.save(organization)
         return OrganizationView.of(organization, OrganizationRoleType.OWNER)
     }
 
     @Transactional
-    open fun delete(id: Long) {
+    fun delete(id: Long) {
         val organization = this.get(id) ?: throw NotFoundException()
 
-        repositoryService.findAllInOrganization(id).forEach {
-            repositoryService.deleteRepository(it.id)
+        projectService.findAllInOrganization(id).forEach {
+            projectService.deleteProject(it.id)
         }
 
         invitationService.getForOrganization(organization).forEach { invitation ->
@@ -116,24 +116,24 @@ open class OrganizationService(
      * Checks address part uniqueness
      * @return Returns true if valid
      */
-    open fun validateAddressPartUniqueness(addressPart: String): Boolean {
-        return organizationRepository.countAllByAddressPart(addressPart) < 1
+    fun validateSlugUniqueness(slug: String): Boolean {
+        return organizationRepository.countAllBySlug(slug) < 1
     }
 
-    open fun isThereAnotherOwner(id: Long): Boolean {
+    fun isThereAnotherOwner(id: Long): Boolean {
         return organizationRoleService.isAnotherOwnerInOrganization(id)
     }
 
-    open fun generateAddressPart(name: String, oldAddressPart: String? = null): String {
-        return addressPartGenerator.generate(name, 3, 60) {
-            if (it == oldAddressPart) {
+    fun generateSlug(name: String, oldSlug: String? = null): String {
+        return slugGenerator.generate(name, 3, 60) {
+            if (it == oldSlug) {
                 return@generate true
             }
-            this.validateAddressPartUniqueness(it)
+            this.validateSlugUniqueness(it)
         }
     }
 
-    open fun deleteAllByName(name: String) {
+    fun deleteAllByName(name: String) {
         organizationRepository.findAllByName(name).forEach {
             this.delete(it.id!!)
         }

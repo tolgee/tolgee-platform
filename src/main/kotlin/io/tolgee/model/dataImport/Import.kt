@@ -1,13 +1,13 @@
 package io.tolgee.model.dataImport
 
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
 @Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["author_id", "repository_id"])])
+@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["author_id", "project_id"])])
 class Import(
         @field:NotNull
         @ManyToOne(optional = false)
@@ -15,7 +15,7 @@ class Import(
 
         @field:NotNull
         @ManyToOne(optional = false)
-        val repository: Repository
+        val project: Project
 ) : StandardAuditModel() {
 
     @OneToMany(mappedBy = "import")

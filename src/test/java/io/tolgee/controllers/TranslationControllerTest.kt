@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
+import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.PathDTO
@@ -12,19 +12,18 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.helpers.JsonHelper
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testng.annotations.Test
-import java.util.*
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class TranslationControllerTest()
-    : RepositoryAuthControllerTest() {
+    : ProjectAuthControllerTest() {
 
     @Test
     fun getViewDataSearch() {
@@ -37,34 +36,34 @@ class TranslationControllerTest()
 
     @Test
     fun getViewDataQueryLanguages() {
-        val repository = dbPopulator.populate(generateUniqueString())
-        val response = performValidViewRequest(repository, "?languages=en")
+        val project = dbPopulator.populate(generateUniqueString())
+        val response = performValidViewRequest(project, "?languages=en")
         Assertions.assertThat(response.data.size).isGreaterThan(8)
         for ((_, _, translations) in response.data) {
             Assertions.assertThat(translations).doesNotContainKeys("de")
         }
-        performGetDataForView(repository.id, "?languages=langNotExists").andExpect(status().isNotFound)
+        performGetDataForView(project.id, "?languages=langNotExists").andExpect(status().isNotFound)
 
-        val result = performValidViewRequest(repository, "?languages=en,en")
+        val result = performValidViewRequest(project, "?languages=en,en")
         assertThat(result.data).isNotEmpty
     }
 
-    private fun performValidViewRequest(repository: Repository, queryString: String):
+    private fun performValidViewRequest(project: Project, queryString: String):
             ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-        val mvcResult = performGetDataForView(repository.id, queryString).andExpect(status().isOk).andReturn()
+        val mvcResult = performGetDataForView(project.id, queryString).andExpect(status().isOk).andReturn()
         return mvcResult.mapResponseTo()
     }
 
     @Test
     fun getViewDataQueryPagination() {
-        val repository = dbPopulator.populate(generateUniqueString())
+        val project = dbPopulator.populate(generateUniqueString())
         val limit = 5
-        val response = performValidViewRequest(repository, String.format("?limit=%d", limit))
+        val response = performValidViewRequest(project, String.format("?limit=%d", limit))
         Assertions.assertThat(response.data.size).isEqualTo(limit)
         Assertions.assertThat(response.paginationMeta.allCount).isEqualTo(12)
         Assertions.assertThat(response.paginationMeta.offset).isZero
         val offset = 3
-        val responseOffset = performValidViewRequest(repository, String.format("?limit=%d&offset=%d", limit, offset))
+        val responseOffset = performValidViewRequest(project, String.format("?limit=%d&offset=%d", limit, offset))
         Assertions.assertThat(responseOffset.data.size).isEqualTo(limit)
         Assertions.assertThat(responseOffset.paginationMeta.offset).isEqualTo(offset)
         response.data.stream().limit(offset.toLong())
@@ -79,16 +78,16 @@ class TranslationControllerTest()
 
     @Test
     fun getViewDataMetadata() {
-        val repository = dbPopulator.populate(generateUniqueString())
+        val project = dbPopulator.populate(generateUniqueString())
         val limit = 5
-        val response = performValidViewRequest(repository, String.format("?limit=%d", limit))
+        val response = performValidViewRequest(project, String.format("?limit=%d", limit))
         Assertions.assertThat(response.params.languages).contains("en", "de")
     }
 
     @Test
     fun getTranslations() {
-        val repository = dbPopulator.populate(generateUniqueString())
-        val mvcResult = performAuthGet("/api/repository/${repository.id}/translations/en,de")
+        val project = dbPopulator.populate(generateUniqueString())
+        val mvcResult = performAuthGet("/api/project/${project.id}/translations/en,de")
                 .andExpect(status().isOk).andReturn()
         val result: Map<String, Any> = mvcResult.mapResponseTo()
         assertThat(result).containsKeys("en", "de")
@@ -96,15 +95,15 @@ class TranslationControllerTest()
 
     @Test
     fun setTranslations() {
-        val repository = dbPopulator.createBase(generateUniqueString())
+        val project = dbPopulator.createBase(generateUniqueString())
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 
-        performAuthPost("/api/repository/${repository.id}/translations", SetTranslationsDTO("hello",
+        performAuthPost("/api/project/${project.id}/translations", SetTranslationsDTO("hello",
                 translationsMap
         )).andExpect(status().isOk)
 
         val fromService = translationService.getKeyTranslationsResult(
-                repository.id,
+                project.id,
                 PathDTO.fromFullPath("hello"),
                 setOf("en", "de")
         )
@@ -113,16 +112,16 @@ class TranslationControllerTest()
     }
 
     @Test
-    @RepositoryApiKeyAuthTestMethod
+    @ProjectApiKeyAuthTestMethod
     fun setTranslationsWithApiKey() {
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 
-        performRepositoryAuthPost("translations", SetTranslationsDTO("hello",
+        performProjectAuthPost("translations", SetTranslationsDTO("hello",
                 translationsMap
         )).andExpect(status().isOk)
 
         val fromService = translationService.getKeyTranslationsResult(
-                repository.id,
+                project.id,
                 PathDTO.fromFullPath("hello"),
                 setOf("en", "de")
         )
@@ -131,29 +130,29 @@ class TranslationControllerTest()
     }
 
     @Test
-    @RepositoryApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT])
+    @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT])
     fun setTranslationsWithApiKeyForbidden() {
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 
-        performRepositoryAuthPost("translations", SetTranslationsDTO("hello",
+        performProjectAuthPost("translations", SetTranslationsDTO("hello",
                 translationsMap
         )).andIsForbidden
     }
 
     @Test
     fun updateTranslations() {
-        val repository = dbPopulator.createBase(generateUniqueString())
+        val project = dbPopulator.createBase(generateUniqueString())
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
-        keyService.create(repository, SetTranslationsDTO(key = "hello", translations = translationsMap));
+        keyService.create(project, SetTranslationsDTO(key = "hello", translations = translationsMap));
 
 
         val updatedTranslationsMap = mapOf(Pair("en", "Hello you!"), Pair("de", "Hallo dich!"))
-        performAuthPut("/api/repository/${repository.id}/translations", SetTranslationsDTO("hello",
+        performAuthPut("/api/project/${project.id}/translations", SetTranslationsDTO("hello",
                 updatedTranslationsMap
         )).andExpect(status().isOk)
 
         val fromService = translationService.getKeyTranslationsResult(
-                repository.id,
+                project.id,
                 PathDTO.fromFullPath("hello"),
                 setOf("en", "de")
         )
@@ -161,7 +160,7 @@ class TranslationControllerTest()
         assertThat(fromService).isEqualTo(updatedTranslationsMap)
     }
 
-    private fun performGetDataForView(repositoryId: Long, queryString: String): ResultActions {
-        return performAuthGet("/api/repository/$repositoryId/translations/view$queryString")
+    private fun performGetDataForView(projectId: Long, queryString: String): ResultActions {
+        return performAuthGet("/api/project/$projectId/translations/view$queryString")
     }
 }

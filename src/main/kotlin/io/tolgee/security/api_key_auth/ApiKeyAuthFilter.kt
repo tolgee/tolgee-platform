@@ -3,7 +3,7 @@ package io.tolgee.security.api_key_auth
 import io.tolgee.ExceptionHandlers
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.security.repository_auth.RepositoryHolder
+import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.ApiKeyService
 import io.tolgee.service.SecurityService
 import org.springframework.beans.factory.annotation.Qualifier
@@ -23,7 +23,7 @@ class ApiKeyAuthFilter(
         private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
         private val securityService: SecurityService,
         private val exceptionHandlers: ExceptionHandlers,
-        private val repositoryHolder: RepositoryHolder,
+        private val projectHolder: ProjectHolder,
         @param:Qualifier("handlerExceptionResolver")
         private val resolver: HandlerExceptionResolver,
 ) : OncePerRequestFilter() {
@@ -41,7 +41,7 @@ class ApiKeyAuthFilter(
                     try {
                         val key = ak.get()
                         securityService.checkApiKeyScopes(setOf(*apiScopes), key)
-                        repositoryHolder.repository = key.repository ?: throw NotFoundException()
+                        projectHolder.project = key.project ?: throw NotFoundException()
                     } catch (e: PermissionException) {
                         resolver.resolveException(request, response, null, e)
                         return

@@ -1,18 +1,18 @@
 import * as React from 'react';
-import { FunctionComponent, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { container } from 'tsyringe';
-import { T, useTranslate } from '@tolgee/react';
-import { DashboardPage } from '../../layout/DashboardPage';
-import { OrganizationActions } from '../../../store/organization/OrganizationActions';
-import { AppState } from '../../../store';
-import { LINKS } from '../../../constants/links';
-import { Redirect } from 'react-router-dom';
-import { components } from '../../../service/apiSchema';
-import { RepositoryPermissionType } from '../../../service/response.types';
-import { BaseFormView } from '../../layout/BaseFormView';
-import { Validation } from '../../../constants/GlobalValidationSchema';
-import { OrganizationFields } from './components/OrganizationFields';
+import {FunctionComponent, useEffect, useState} from 'react';
+import {useSelector} from 'react-redux';
+import {container} from 'tsyringe';
+import {T, useTranslate} from '@tolgee/react';
+import {DashboardPage} from '../../layout/DashboardPage';
+import {OrganizationActions} from '../../../store/organization/OrganizationActions';
+import {AppState} from '../../../store';
+import {LINKS} from '../../../constants/links';
+import {Redirect} from 'react-router-dom';
+import {components} from '../../../service/apiSchema';
+import {ProjectPermissionType} from '../../../service/response.types';
+import {BaseFormView} from '../../layout/BaseFormView';
+import {Validation} from '../../../constants/GlobalValidationSchema';
+import {OrganizationFields} from './components/OrganizationFields';
 
 const actions = container.resolve(OrganizationActions);
 
@@ -28,9 +28,9 @@ export const OrganizationCreateView: FunctionComponent = () => {
 
   const initialValues: components['schemas']['OrganizationDto'] = {
     name: '',
-    addressPart: '',
+    slug: '',
     description: '',
-    basePermissions: RepositoryPermissionType.VIEW,
+    basePermissions: ProjectPermissionType.VIEW,
   };
 
   const [cancelled, setCancelled] = useState(false);

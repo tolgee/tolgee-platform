@@ -7,9 +7,9 @@ describe('Import Adding files', () => {
     beforeEach(() => {
         cleanImportData()
 
-        generateBaseImportData().then(repository => {
+        generateBaseImportData().then(project => {
             login("franta")
-            visitImport(repository.body.id);
+            visitImport(project.body.id);
         })
     })
 

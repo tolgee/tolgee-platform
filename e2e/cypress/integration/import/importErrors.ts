@@ -12,7 +12,7 @@ describe('Import errors', () => {
         beforeEach(() => {
             generateAllSelectedImportData().then(importData => {
                 login("franta")
-                visitImport(importData.body.repository.id);
+                visitImport(importData.body.project.id);
             })
         })
 
@@ -28,7 +28,7 @@ describe('Import errors', () => {
     it("does not add too many languages", () => {
         generateManyLanguagesImportData().then(importData => {
             login("franta")
-            visitImport(importData.body.repository.id);
+            visitImport(importData.body.project.id);
         })
 
         const files = []

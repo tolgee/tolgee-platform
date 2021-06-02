@@ -9,9 +9,9 @@ public class InvitationDTO {
 
     private String code;
 
-    private Permission.RepositoryPermissionType type;
+    private Permission.ProjectPermissionType type;
 
-    public InvitationDTO(Long id, String code, Permission.RepositoryPermissionType type) {
+    public InvitationDTO(Long id, String code, Permission.ProjectPermissionType type) {
         this.id = id;
         this.code = code;
         this.type = type;
@@ -36,7 +36,7 @@ public class InvitationDTO {
         return this.code;
     }
 
-    public Permission.RepositoryPermissionType getType() {
+    public Permission.ProjectPermissionType getType() {
         return this.type;
     }
 
@@ -48,7 +48,7 @@ public class InvitationDTO {
         this.code = code;
     }
 
-    public void setType(Permission.RepositoryPermissionType type) {
+    public void setType(Permission.ProjectPermissionType type) {
         this.type = type;
     }
 
@@ -92,7 +92,7 @@ public class InvitationDTO {
     public static class InvitationDTOBuilder {
         private Long id;
         private String code;
-        private Permission.RepositoryPermissionType type;
+        private Permission.ProjectPermissionType type;
 
         InvitationDTOBuilder() {
         }
@@ -107,7 +107,7 @@ public class InvitationDTO {
             return this;
         }
 
-        public InvitationDTO.InvitationDTOBuilder type(Permission.RepositoryPermissionType type) {
+        public InvitationDTO.InvitationDTOBuilder type(Permission.ProjectPermissionType type) {
             this.type = type;
             return this;
         }

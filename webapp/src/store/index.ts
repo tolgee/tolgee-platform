@@ -1,29 +1,29 @@
-import { applyMiddleware, combineReducers, createStore } from 'redux';
+import {applyMiddleware, combineReducers, createStore} from 'redux';
 import thunkMiddleware from 'redux-thunk';
-import { composeWithDevTools } from 'redux-devtools-extension';
+import {composeWithDevTools} from 'redux-devtools-extension';
 import promise from 'redux-promise-middleware';
-import { container } from 'tsyringe';
-import { ImplicitReducer } from './ImplicitReducer';
-import { RepositoryActions } from './repository/RepositoryActions';
-import { LanguageActions } from './languages/LanguageActions';
-import { GlobalActions } from './global/GlobalActions';
-import { ErrorActions } from './global/ErrorActions';
-import { RedirectionActions } from './global/RedirectionActions';
-import { MessageActions } from './global/MessageActions';
-import { SignUpActions } from './global/SignUpActions';
-import { RepositoryInvitationActions } from './repository/invitations/RepositoryInvitationActions';
-import { SecurityService } from '../service/SecurityService';
-import { MessageService } from '../service/MessageService';
-import { TranslationActions } from './repository/TranslationActions';
-import { UserApiKeysActions } from './api_keys/UserApiKeysActions';
-import { ExportActions } from './repository/ExportActions';
-import { UserActions } from './global/UserActions';
-import { ScreenshotActions } from './repository/ScreenshotActions';
-import { OrganizationActions } from './organization/OrganizationActions';
-import { ImportActions } from './repository/ImportActions';
+import {container} from 'tsyringe';
+import {ImplicitReducer} from './ImplicitReducer';
+import {ProjectActions} from './project/ProjectActions';
+import {LanguageActions} from './languages/LanguageActions';
+import {GlobalActions} from './global/GlobalActions';
+import {ErrorActions} from './global/ErrorActions';
+import {RedirectionActions} from './global/RedirectionActions';
+import {MessageActions} from './global/MessageActions';
+import {SignUpActions} from './global/SignUpActions';
+import {ProjectInvitationActions} from './project/invitations/ProjectInvitationActions';
+import {SecurityService} from '../service/SecurityService';
+import {MessageService} from '../service/MessageService';
+import {TranslationActions} from './project/TranslationActions';
+import {UserApiKeysActions} from './api_keys/UserApiKeysActions';
+import {ExportActions} from './project/ExportActions';
+import {UserActions} from './global/UserActions';
+import {ScreenshotActions} from './project/ScreenshotActions';
+import {OrganizationActions} from './organization/OrganizationActions';
+import {ImportActions} from './project/ImportActions';
 
 const implicitReducer = container.resolve(ImplicitReducer);
-const repositoryActions = container.resolve(RepositoryActions);
+const projectActions = container.resolve(ProjectActions);
 const languageActions = container.resolve(LanguageActions);
 const globalActions = container.resolve(GlobalActions);
 const errorActions = container.resolve(ErrorActions);
@@ -36,14 +36,14 @@ const appReducer = (appState, action) =>
       appState
     ),
     global: implicitReducer.create(globalActions),
-    repositories: implicitReducer.create(repositoryActions),
+    projects: implicitReducer.create(projectActions),
     languages: implicitReducer.create(languageActions),
     error: implicitReducer.create(errorActions),
     redirection: implicitReducer.create(redirectionActions),
     message: implicitReducer.create(container.resolve(MessageActions)),
     signUp: implicitReducer.create(container.resolve(SignUpActions)),
-    repositoryInvitation: implicitReducer.create(
-      container.resolve(RepositoryInvitationActions)
+    projectInvitation: implicitReducer.create(
+      container.resolve(ProjectInvitationActions)
     ),
     export: implicitReducer.create(container.resolve(ExportActions)),
     userApiKey: implicitReducer.create(container.resolve(UserApiKeysActions)),

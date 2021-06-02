@@ -1,14 +1,14 @@
 import * as React from 'react';
-import { FunctionComponent, useState } from 'react';
+import {FunctionComponent, useState} from 'react';
 import BackupTwoToneIcon from '@material-ui/icons/BackupTwoTone';
 import HighlightOffTwoToneIcon from '@material-ui/icons/HighlightOffTwoTone';
 import clsx from 'clsx';
-import { Box, createStyles, makeStyles, Theme } from '@material-ui/core';
-import { FileUploadFixtures } from '../../../fixtures/FileUploadFixtures';
-import { MAX_FILE_COUNT } from './ScreenshotGallery';
-import { green, red } from '@material-ui/core/colors';
-import { useRepositoryPermissions } from '../../../hooks/useRepositoryPermissions';
-import { RepositoryPermissionType } from '../../../service/response.types';
+import {Box, createStyles, makeStyles, Theme} from '@material-ui/core';
+import {FileUploadFixtures} from '../../../fixtures/FileUploadFixtures';
+import {MAX_FILE_COUNT} from './ScreenshotGallery';
+import {green, red} from '@material-ui/core/colors';
+import {useProjectPermissions} from '../../../hooks/useProjectPermissions';
+import {ProjectPermissionType} from '../../../service/response.types';
 
 export interface ScreenshotDropzoneProps {
   validateAndUpload: (files: File[]) => void;
@@ -45,7 +45,7 @@ export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
     null as EventTarget | null
   );
   const classes = useStyles({});
-  const repositoryPermissions = useRepositoryPermissions();
+  const projectPermissions = useProjectPermissions();
 
   const onDragEnter = (e: React.DragEvent) => {
     e.stopPropagation();
@@ -85,8 +85,8 @@ export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
 
   let dropZoneAllowedProps = {};
   if (
-    repositoryPermissions.satisfiesPermission(
-      RepositoryPermissionType.TRANSLATE
+    projectPermissions.satisfiesPermission(
+      ProjectPermissionType.TRANSLATE
     )
   ) {
     dropZoneAllowedProps = { onDrop, onDragEnter, onDragLeave };

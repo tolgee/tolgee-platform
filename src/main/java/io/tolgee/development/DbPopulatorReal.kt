@@ -10,11 +10,14 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.key.Key
 import io.tolgee.repository.ApiKeyRepository
 import io.tolgee.repository.OrganizationRepository
-import io.tolgee.repository.RepositoryRepository
+import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.security.InitialPasswordManager
-import io.tolgee.service.*
-import io.tolgee.util.AddressPartGenerator
+import io.tolgee.service.LanguageService
+import io.tolgee.service.OrganizationRoleService
+import io.tolgee.service.PermissionService
+import io.tolgee.service.UserAccountService
+import io.tolgee.util.SlugGenerator
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
@@ -25,13 +28,12 @@ class DbPopulatorReal(private val entityManager: EntityManager,
                       private val permissionService: PermissionService,
                       private val userAccountService: UserAccountService,
                       private val languageService: LanguageService,
-                      private val repositoryRepository: RepositoryRepository,
+                      private val projectRepository: ProjectRepository,
                       private val apiKeyRepository: ApiKeyRepository,
                       private val tolgeeProperties: TolgeeProperties,
                       private val initialPasswordManager: InitialPasswordManager,
-                      private val organizationService: OrganizationService,
                       private val organizationRepository: OrganizationRepository,
-                      private val addressPartGenerator: AddressPartGenerator,
+                      private val slugGenerator: SlugGenerator,
                       private val organizationRoleService: OrganizationRoleService
 ) {
     private var de: Language? = null
@@ -54,8 +56,8 @@ class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     fun createOrganization(name: String, userAccount: UserAccount): Organization {
-        val addressPart = addressPartGenerator.generate(name, 3, 100) { true }
-        val organization = Organization(name = name, addressPart = addressPart, basePermissions = Permission.RepositoryPermissionType.VIEW)
+        val slug = slugGenerator.generate(name, 3, 100) { true }
+        val organization = Organization(name = name, slug = slug, basePermissions = Permission.ProjectPermissionType.VIEW)
         return organizationRepository.save(organization).also {
             organizationRoleService.grantOwnerRoleToUser(userAccount, organization)
         }
@@ -73,9 +75,9 @@ class DbPopulatorReal(private val entityManager: EntityManager,
                 (0 until listUserIdx).forEach { userIdx ->
                     organizationRoleService.grantRoleToUser(users[userIdx], org, OrganizationRoleType.MEMBER)
                 }
-                (1..3).forEach { repositoryNum ->
-                    val name = "${user.name}'s organization $organizationNum repository $repositoryNum"
-                    createRepositoryWithOrganization(name, org)
+                (1..3).forEach { projectNum ->
+                    val name = "${user.name}'s organization $organizationNum project $projectNum"
+                    createProjectWithOrganization(name, org)
                 }
             }
         }
@@ -84,103 +86,103 @@ class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     @Transactional
-    fun createRepositoryWithOrganization(repositoryName: String, organization: Organization): Repository {
-        val repository = Repository()
-        repository.name = repositoryName
-        repository.organizationOwner = organization
-        repository.addressPart = addressPartGenerator.generate(repositoryName, 3, 60) { true }
-        en = createLanguage("en", repository)
-        de = createLanguage("de", repository)
-        repositoryRepository.saveAndFlush(repository)
-        organization.repositories.add(repository)
+    fun createProjectWithOrganization(projectName: String, organization: Organization): Project {
+        val project = Project()
+        project.name = projectName
+        project.organizationOwner = organization
+        project.slug = slugGenerator.generate(projectName, 3, 60) { true }
+        en = createLanguage("en", project)
+        de = createLanguage("de", project)
+        projectRepository.saveAndFlush(project)
+        organization.projects.add(project)
         entityManager.flush()
         entityManager.clear()
-        return repository
+        return project
     }
 
     @Transactional
-    fun createBase(repositoryName: String?, username: String, password: String? = null): Repository {
+    fun createBase(projectName: String?, username: String, password: String? = null): Project {
         val userAccount = createUserIfNotExists(username, password)
-        val repository = Repository()
-        repository.name = repositoryName
-        repository.userOwner = userAccount
-        en = createLanguage("en", repository)
-        de = createLanguage("de", repository)
-        permissionService.grantFullAccessToRepo(userAccount, repository)
-        repositoryRepository.saveAndFlush(repository)
+        val project = Project()
+        project.name = projectName
+        project.userOwner = userAccount
+        en = createLanguage("en", project)
+        de = createLanguage("de", project)
+        permissionService.grantFullAccessToRepo(userAccount, project)
+        projectRepository.saveAndFlush(project)
         entityManager.flush()
         entityManager.clear()
-        return repository
+        return project
     }
 
     @Transactional
-    fun createBase(repositoryName: String?, username: String): Repository {
-        return createBase(repositoryName, username, null)
+    fun createBase(projectName: String?, username: String): Project {
+        return createBase(projectName, username, null)
     }
 
     @Transactional
-    fun createBase(repositoryName: String?): Repository {
-        return createBase(repositoryName, tolgeeProperties.authentication.initialUsername)
+    fun createBase(projectName: String?): Project {
+        return createBase(projectName, tolgeeProperties.authentication.initialUsername)
     }
 
     @Transactional
-    fun populate(repositoryName: String?): Repository {
-        return populate(repositoryName, tolgeeProperties.authentication.initialUsername)
+    fun populate(projectName: String?): Project {
+        return populate(projectName, tolgeeProperties.authentication.initialUsername)
     }
 
     @Transactional
-    fun populate(repositoryName: String?, userName: String): Repository {
-        val repository = createBase(repositoryName, userName)
-        createApiKey(repository)
-        createTranslation(repository, "Hello world!", "Hallo Welt!", en, de)
-        createTranslation(repository, "English text one.", "Deutsch text einz.", en, de)
-        createTranslation(repository, "This is translation in home folder",
+    fun populate(projectName: String?, userName: String): Project {
+        val project = createBase(projectName, userName)
+        createApiKey(project)
+        createTranslation(project, "Hello world!", "Hallo Welt!", en, de)
+        createTranslation(project, "English text one.", "Deutsch text einz.", en, de)
+        createTranslation(project, "This is translation in home folder",
                 "Das ist die Übersetzung im Home-Ordner", en, de)
-        createTranslation(repository, "This is translation in news folder",
+        createTranslation(project, "This is translation in news folder",
                 "Das ist die Übersetzung im News-Ordner", en, de)
-        createTranslation(repository, "This is another translation in news folder",
+        createTranslation(project, "This is another translation in news folder",
                 "Das ist eine weitere Übersetzung im Nachrichtenordner", en, de)
-        createTranslation(repository, "This is standard text somewhere in DOM.",
+        createTranslation(project, "This is standard text somewhere in DOM.",
                 "Das ist Standardtext irgendwo im DOM.", en, de)
-        createTranslation(repository, "This is another standard text somewhere in DOM.",
+        createTranslation(project, "This is another standard text somewhere in DOM.",
                 "Das ist ein weiterer Standardtext irgendwo in DOM.", en, de)
-        createTranslation(repository, "This is translation retrieved by service.",
+        createTranslation(project, "This is translation retrieved by service.",
                 "Dase Übersetzung wird vom Service abgerufen.", en, de)
-        createTranslation(repository, "This is textarea with placeholder and value.",
+        createTranslation(project, "This is textarea with placeholder and value.",
                 "Das ist ein Textarea mit Placeholder und Value.", en, de)
-        createTranslation(repository, "This is textarea with placeholder.",
+        createTranslation(project, "This is textarea with placeholder.",
                 "Das ist ein Textarea mit Placeholder.", en, de)
-        createTranslation(repository, "This is input with value.",
+        createTranslation(project, "This is input with value.",
                 "Das ist ein Input mit value.", en, de)
-        createTranslation(repository, "This is input with placeholder.",
+        createTranslation(project, "This is input with placeholder.",
                 "Das ist ein Input mit Placeholder.", en, de)
-        return repository
+        return project
     }
 
-    private fun createApiKey(repository: Repository) {
-        val (_, user) = repository.permissions.stream().findAny().orElseThrow { NotFoundException() }
+    private fun createApiKey(project: Project) {
+        val (_, user) = project.permissions.stream().findAny().orElseThrow { NotFoundException() }
         if (apiKeyRepository.findByKey(API_KEY).isEmpty) {
             val apiKey = ApiKey(
-                    repository = repository,
+                    project = project,
                     key = API_KEY,
                     userAccount = user,
                     scopesEnum = ApiScope.values().toSet()
             )
-            repository.apiKeys.add(apiKey)
+            project.apiKeys.add(apiKey)
             apiKeyRepository.save(apiKey)
         }
     }
 
-    private fun createLanguage(name: String, repository: Repository): Language {
-        return languageService.createLanguage(LanguageDTO(null, name, name), repository)
+    private fun createLanguage(name: String, project: Project): Language {
+        return languageService.createLanguage(LanguageDTO(null, name, name), project)
     }
 
-    private fun createTranslation(repository: Repository, english: String,
+    private fun createTranslation(project: Project, english: String,
                                   deutsch: String, en: Language?, de: Language?) {
         val key = Key()
         key.name = "sampleApp." + english.replace(" ", "_")
                 .toLowerCase().replace("\\.+$".toRegex(), "")
-        key.repository = repository
+        key.project = project
         val translation = Translation()
         translation.language = en
         translation.key = key

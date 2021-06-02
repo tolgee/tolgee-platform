@@ -14,11 +14,11 @@ open class OrganizationModel(
         val name: String,
 
         @Schema(example = "btforg")
-        val addressPart: String,
+        val slug: String,
 
         @Schema(example = "This is a beautiful organization full of beautiful and clever people")
         val description: String?,
-        val basePermissions: Permission.RepositoryPermissionType,
+        val basePermissions: Permission.ProjectPermissionType,
 
         val currentUserRole: OrganizationRoleType
 ) : RepresentationModel<OrganizationModel>()

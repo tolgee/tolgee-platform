@@ -1,24 +1,15 @@
-import {
-  default as React,
-  FunctionComponent,
-  ReactNode,
-  useEffect,
-  useState,
-} from 'react';
-import { container } from 'tsyringe';
-import { MessageService } from '../../service/MessageService';
-import { TranslationActions } from '../../store/repository/TranslationActions';
-import { useRepository } from '../../hooks/useRepository';
-import { Loadable } from '../../store/AbstractLoadableActions';
-import {
-  RepositoryPermissionType,
-  TranslationsDataResponse,
-} from '../../service/response.types';
-import { T, useTranslate } from '@tolgee/react';
-import { FullPageLoading } from '../common/FullPageLoading';
-import { useRepositoryLanguages } from '../../hooks/useRepositoryLanguages';
-import { useLeaveEditConfirmationOtherEdit } from './useLeaveEditConfirmation';
-import { parseErrorResponse } from '../../fixtures/errorFIxtures';
+import {default as React, FunctionComponent, ReactNode, useEffect, useState,} from 'react';
+import {container} from 'tsyringe';
+import {MessageService} from '../../service/MessageService';
+import {TranslationActions} from '../../store/project/TranslationActions';
+import {useProject} from '../../hooks/useProject';
+import {Loadable} from '../../store/AbstractLoadableActions';
+import {TranslationsDataResponse,} from '../../service/response.types';
+import {T, useTranslate} from '@tolgee/react';
+import {FullPageLoading} from '../common/FullPageLoading';
+import {useProjectLanguages} from '../../hooks/useProjectLanguages';
+import {useLeaveEditConfirmationOtherEdit} from './useLeaveEditConfirmation';
+import {parseErrorResponse} from '../../fixtures/errorFIxtures';
 
 export const TranslationListContext =
   // @ts-ignore
@@ -49,7 +40,7 @@ export type TranslationListContextType = {
 const messaging = container.resolve(MessageService);
 
 export const TranslationGridContextProvider: FunctionComponent = (props) => {
-  let repositoryDTO = useRepository();
+  let projectDTO = useProject();
 
   let listLoadable = actions.useSelector((s) => s.loadables.translations);
   let selectedLanguages = actions.useSelector((s) => s.selectedLanguages);
@@ -59,7 +50,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
   let keySaveLoadable = actions.useSelector((s) => s.loadables.editKey);
   let deleteLoadable = actions.useSelector((s) => s.loadables.delete);
 
-  const repositoryLanguages = useRepositoryLanguages().reduce(
+  const projectLanguages = useProjectLanguages().reduce(
     (acc, curr) => ({ ...acc, [curr.abbreviation]: curr.name }),
     {}
   );
@@ -77,7 +68,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
     const lastLoadOffset = listLoadable?.dispatchParams?.[4];
     offset = offset !== undefined ? offset : lastLoadOffset;
     actions.loadableActions.translations.dispatch(
-      repositoryDTO.id,
+      projectDTO.id,
       selectedLanguages.length ? selectedLanguages : null,
       search,
       limit || perPage,
@@ -181,7 +172,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
   const headerCells = showKeys ? [<b>{t('translation_grid_key_text')}</b>] : [];
   headerCells.push(
     ...listLoadable.data.params.languages.map((abbr, index) => (
-      <b key={index}>{repositoryLanguages[abbr]}</b>
+      <b key={index}>{projectLanguages[abbr]}</b>
     ))
   );
 

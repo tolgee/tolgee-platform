@@ -2,7 +2,6 @@ import {cleanOrganizationData, createOrganizationData, login} from "../../common
 import {HOST} from "../../common/constants";
 import 'cypress-file-upload';
 import {clickGlobalSave, gcy, goToPage} from "../../common/shared";
-import {RepositoryDTO} from "../../../../webapp/src/service/response.types";
 
 describe('Organization List', () => {
     beforeEach(() => {

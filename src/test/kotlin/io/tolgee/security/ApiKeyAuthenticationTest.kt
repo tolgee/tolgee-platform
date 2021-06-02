@@ -42,10 +42,10 @@ class ApiKeyAuthenticationTest : AbstractUserAppApiTest() {
         val apiKey = apiKeyService.createApiKey(base.permissions.first().user, setOf(*ApiScope.values()), base)
         performAction(UserApiAppAction(
                 apiKey = apiKey.key,
-                url = "/api/repositories",
+                url = "/api/projects",
                 expectedStatus = HttpStatus.FORBIDDEN
         ))
-        mvc.perform(MockMvcRequestBuilders.get("/api/repositories"))
+        mvc.perform(MockMvcRequestBuilders.get("/api/projects"))
                 .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
     }
 

@@ -6,7 +6,7 @@ import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.repository.LanguageRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -23,10 +23,10 @@ class LanguageService(
     private var translationService: TranslationService? = null
 
     @Transactional
-    fun createLanguage(dto: LanguageDTO?, repository: Repository): Language {
+    fun createLanguage(dto: LanguageDTO?, project: Project): Language {
         val language = fromRequestDTO(dto!!)
-        language.repository = repository
-        repository.languages.add(language)
+        language.project = project
+        project.languages.add(language)
         languageRepository.save(language)
         return language
     }
@@ -46,29 +46,29 @@ class LanguageService(
         return language
     }
 
-    fun getImplicitLanguages(repository: Repository): LanguageSet {
-        return repository.languages.stream().limit(2).collect(Collectors.toCollection { LanguageSet() })
+    fun getImplicitLanguages(project: Project): LanguageSet {
+        return project.languages.stream().limit(2).collect(Collectors.toCollection { LanguageSet() })
     }
 
     @Transactional
-    fun findAll(repositoryId: Long?): LanguageSet {
-        return LanguageSet(languageRepository.findAllByRepositoryId(repositoryId))
+    fun findAll(projectId: Long?): LanguageSet {
+        return LanguageSet(languageRepository.findAllByProjectId(projectId))
     }
 
     fun findById(id: Long): Optional<Language> {
         return languageRepository.findById(id)
     }
 
-    fun findByAbbreviation(abbreviation: String, repository: Repository): Optional<Language> {
-        return languageRepository.findByAbbreviationAndRepository(abbreviation, repository)
+    fun findByAbbreviation(abbreviation: String, project: Project): Optional<Language> {
+        return languageRepository.findByAbbreviationAndProject(abbreviation, project)
     }
 
-    fun findByAbbreviation(abbreviation: String?, repositoryId: Long): Optional<Language> {
-        return languageRepository.findByAbbreviationAndRepositoryId(abbreviation, repositoryId)
+    fun findByAbbreviation(abbreviation: String?, projectId: Long): Optional<Language> {
+        return languageRepository.findByAbbreviationAndProjectId(abbreviation, projectId)
     }
 
-    fun findByAbbreviations(abbreviations: Collection<String>?, repositoryId: Long?): LanguageSet {
-        val langs = languageRepository.findAllByAbbreviationInAndRepositoryId(abbreviations, repositoryId)
+    fun findByAbbreviations(abbreviations: Collection<String>?, projectId: Long?): LanguageSet {
+        val langs = languageRepository.findAllByAbbreviationInAndProjectId(abbreviations, projectId)
         if (!langs.stream().map(Language::abbreviation).collect(Collectors.toSet()).containsAll(abbreviations!!)) {
             throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
         }
@@ -76,25 +76,25 @@ class LanguageService(
     }
 
     @Transactional
-    fun getOrCreate(repository: Repository, languageAbbreviation: String): Language {
-        return this.findByAbbreviation(languageAbbreviation, repository)
+    fun getOrCreate(project: Project, languageAbbreviation: String): Language {
+        return this.findByAbbreviation(languageAbbreviation, project)
                 .orElseGet {
-                    createLanguage(LanguageDTO(null, languageAbbreviation, languageAbbreviation), repository)
+                    createLanguage(LanguageDTO(null, languageAbbreviation, languageAbbreviation), project)
                 }
     }
 
-    fun getLanguagesForTranslationsView(languages: Set<String>?, repository: Repository): LanguageSet {
+    fun getLanguagesForTranslationsView(languages: Set<String>?, project: Project): LanguageSet {
         return if (languages == null) {
-            getImplicitLanguages(repository)
-        } else findByAbbreviations(languages, repository.id)
+            getImplicitLanguages(project)
+        } else findByAbbreviations(languages, project.id)
     }
 
-    fun findByName(name: String?, repository: Repository): Optional<Language> {
-        return languageRepository.findByNameAndRepository(name, repository)
+    fun findByName(name: String?, project: Project): Optional<Language> {
+        return languageRepository.findByNameAndProject(name, project)
     }
 
-    fun deleteAllByRepository(repositoryId: Long?) {
-        languageRepository.deleteAllByRepositoryId(repositoryId)
+    fun deleteAllByProject(projectId: Long?) {
+        languageRepository.deleteAllByProjectId(projectId)
     }
 
     @Autowired

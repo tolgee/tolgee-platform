@@ -1,4 +1,4 @@
-import { components } from './apiSchema';
+import {components} from './apiSchema';
 
 export type TranslationsObject = { [abbreviation: string]: string };
 
@@ -25,10 +25,10 @@ export type TranslationsDataResponse = {
   data: KeyTranslationsDTO[];
 };
 
-export type RepositoryDTO = {
+export type ProjectDTO = {
   id: number;
   name: string;
-  permissionType: RepositoryPermissionType;
+  permissionType: ProjectPermissionType;
 };
 
 export interface RemoteConfigurationDTO {
@@ -46,7 +46,7 @@ export interface RemoteConfigurationDTO {
   maxUploadFileSize: number;
   needsEmailVerification: boolean;
   userCanCreateOrganizations: boolean;
-  userCanCreateRepositories: boolean;
+  userCanCreateProjects: boolean;
 }
 
 export interface TokenDTO {
@@ -61,7 +61,7 @@ export type ErrorResponseDTO = {
   __handled: boolean;
 };
 
-export enum RepositoryPermissionType {
+export enum ProjectPermissionType {
   MANAGE = 'MANAGE',
   EDIT = 'EDIT',
   TRANSLATE = 'TRANSLATE',
@@ -76,7 +76,7 @@ export enum OrganizationRoleType {
 export interface InvitationDTO {
   id: number;
   code: string;
-  type: RepositoryPermissionType;
+  type: ProjectPermissionType;
 }
 
 export interface PermissionDTO {
@@ -84,7 +84,7 @@ export interface PermissionDTO {
   username: string;
   userId: number;
   userFullName: string;
-  type: RepositoryPermissionType;
+  type: ProjectPermissionType;
 }
 
 export interface UserDTO {
@@ -105,13 +105,13 @@ export interface ApiKeyDTO {
   key: string;
   userName: string;
   scopes: string[];
-  repositoryId: number;
-  repositoryName: string;
+  projectId: number;
+  projectName: string;
 }
 
 export interface PermissionEditDTO {
   permissionId: number;
-  type: RepositoryPermissionType;
+  type: ProjectPermissionType;
 }
 
 export interface ScreenshotDTO {

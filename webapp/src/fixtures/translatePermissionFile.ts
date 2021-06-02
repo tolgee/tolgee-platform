@@ -1,11 +1,11 @@
-import { useTranslate } from '@tolgee/react';
-import { repositoryPermissionTypes } from '../constants/repositoryPermissionTypes';
+import {useTranslate} from '@tolgee/react';
+import {projectPermissionTypes} from '../constants/projectPermissionTypes';
 
 export const translatedPermissionType = (type: string, noWrap = false) => {
   const t = useTranslate();
 
   return t(
-    `permission_type_${repositoryPermissionTypes[type]}`,
+    `permission_type_${projectPermissionTypes[type]}`,
     undefined,
     noWrap
   );

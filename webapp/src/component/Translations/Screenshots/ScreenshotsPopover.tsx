@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { FunctionComponent, useEffect } from 'react';
-import { Box, Popover, Typography } from '@material-ui/core';
-import { KeyTranslationsDTO } from '../../../service/response.types';
-import { ScreenshotActions } from '../../../store/repository/ScreenshotActions';
-import { container } from 'tsyringe';
-import { useRepository } from '../../../hooks/useRepository';
-import { T } from '@tolgee/react';
-import { Alert } from '../../common/Alert';
-import { ScreenshotGallery } from './ScreenshotGallery';
+import {FunctionComponent, useEffect} from 'react';
+import {Box, Popover, Typography} from '@material-ui/core';
+import {KeyTranslationsDTO} from '../../../service/response.types';
+import {ScreenshotActions} from '../../../store/project/ScreenshotActions';
+import {container} from 'tsyringe';
+import {useProject} from '../../../hooks/useProject';
+import {T} from '@tolgee/react';
+import {Alert} from '../../common/Alert';
+import {ScreenshotGallery} from './ScreenshotGallery';
 
 export interface ScreenshotsPopoverProps {
   data: KeyTranslationsDTO;
@@ -23,11 +23,11 @@ export const ScreenshotsPopover: FunctionComponent<ScreenshotsPopoverProps> = (
     (s) => s.loadables.uploadScreenshot
   );
 
-  const repository = useRepository();
+  const project = useProject();
   const id = `screenshot-popover-${props.data.id}`;
 
   useEffect(() => {
-    actions.loadableActions.getForKey.dispatch(repository.id, props.data.name);
+    actions.loadableActions.getForKey.dispatch(project.id, props.data.name);
     return () => {
       actions.loadableReset.uploadScreenshot.dispatch();
     };

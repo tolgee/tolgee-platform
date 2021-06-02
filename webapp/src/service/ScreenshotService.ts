@@ -1,6 +1,6 @@
-import { singleton } from 'tsyringe';
-import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { ErrorResponseDTO, ScreenshotDTO } from './response.types';
+import {singleton} from 'tsyringe';
+import {ApiV1HttpService} from './http/ApiV1HttpService';
+import {ErrorResponseDTO, ScreenshotDTO} from './response.types';
 
 type UploadResult = { stored: ScreenshotDTO[]; errors: ErrorResponseDTO[] };
 
@@ -8,15 +8,15 @@ type UploadResult = { stored: ScreenshotDTO[]; errors: ErrorResponseDTO[] };
 export class ScreenshotService {
   constructor(private http: ApiV1HttpService) {}
 
-  async getForKey(repositoryId, key: string): Promise<ScreenshotDTO[]> {
-    return this.http.post(`repository/${repositoryId}/screenshots/get`, {
+  async getForKey(projectId, key: string): Promise<ScreenshotDTO[]> {
+    return this.http.post(`project/${projectId}/screenshots/get`, {
       key,
     });
   }
 
   async upload(
     files: Blob[],
-    repositoryId: number,
+    projectId: number,
     key: string
   ): Promise<UploadResult> {
     const responses = await Promise.all(
@@ -25,7 +25,7 @@ export class ScreenshotService {
         formData.append('screenshot', file);
         formData.append('key', key);
         return (await this.http
-          .postMultipart(`repository/${repositoryId}/screenshots`, formData)
+          .postMultipart(`project/${projectId}/screenshots`, formData)
           .then((r) => ({ stored: r }))
           .catch((e) => ({ error: e }))) as {
           error?: ErrorResponseDTO;
@@ -44,7 +44,7 @@ export class ScreenshotService {
   }
 
   async delete(id: number) {
-    await this.http.delete(`repository/screenshots/${id}`);
+    await this.http.delete(`project/screenshots/${id}`);
     return id;
   }
 }

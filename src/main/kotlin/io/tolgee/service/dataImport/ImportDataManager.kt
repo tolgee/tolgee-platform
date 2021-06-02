@@ -37,7 +37,7 @@ class ImportDataManager(
     private val existingTranslations = mutableMapOf<Long, MutableMap<String, Translation>>()
 
     val existingKeys: MutableMap<String, Key> by lazy {
-        keyService.getAll(import.repository.id).asSequence().map { it.name!! to it }.toMap().toMutableMap()
+        keyService.getAll(import.project.id).asSequence().map { it.name!! to it }.toMap().toMutableMap()
     }
 
     private val translationService: TranslationService by lazy {
@@ -50,7 +50,7 @@ class ImportDataManager(
     }
 
     val existingMetas: MutableMap<String, KeyMeta> by lazy {
-        keyMetaService.getWithFetchedData(this.import.repository).asSequence().map { it.key!!.name!! to it }
+        keyMetaService.getWithFetchedData(this.import.project).asSequence().map { it.key!!.name!! to it }
                 .toMap().toMutableMap()
     }
 

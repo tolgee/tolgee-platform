@@ -16,7 +16,7 @@ describe("Import with lot of data", () => {
             cleanImportData()
             generateLotOfImportData().then(importData => {
                 login("franta")
-                visitImport(importData.body.repository.id);
+                visitImport(importData.body.project.id);
             })
         })
 

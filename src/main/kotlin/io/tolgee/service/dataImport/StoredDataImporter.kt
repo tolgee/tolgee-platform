@@ -100,7 +100,7 @@ class StoredDataImporter(
             val key = keysToSave[this.key.name] ?: let {
                 //or get it from conflict or create new one
                 val newKey = this.conflict?.key ?: importDataManager.existingKeys[this.key.name]
-                ?: Key(name = this.key.name).apply { repository = import.repository }
+                ?: Key(name = this.key.name).apply { project = import.project }
                 newKey
             }
             val keyName = key.name ?: throw IllegalStateException("Key has no name")

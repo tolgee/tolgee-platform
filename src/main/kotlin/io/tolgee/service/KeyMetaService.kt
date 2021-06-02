@@ -1,6 +1,6 @@
 package io.tolgee.service
 
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.KeyCodeReference
 import io.tolgee.model.key.KeyComment
@@ -78,14 +78,14 @@ class KeyMetaService(
         return result
     }
 
-    fun getWithFetchedData(repository: Repository): List<KeyMeta> {
+    fun getWithFetchedData(project: Project): List<KeyMeta> {
         var result: List<KeyMeta> = entityManager.createQuery("""
             select distinct ikm from KeyMeta ikm
             join fetch ikm.key k
             left join fetch ikm.comments ikc
-            where k.repository = :repository 
+            where k.project = :project 
             """)
-                .setParameter("repository", repository)
+                .setParameter("project", project)
                 .setHint(PASS_DISTINCT_THROUGH, false)
                 .resultList as List<KeyMeta>
 
@@ -101,10 +101,10 @@ class KeyMetaService(
         return result
     }
 
-    fun deleteAllByRepositoryId(repositoryId: Long) {
-        keyMetaRepository.deleteAllKeyCodeReferencesByRepositoryId(repositoryId)
-        keyMetaRepository.deleteAllKeyCommentsByRepositoryId(repositoryId)
-        keyMetaRepository.deleteAllByRepositoryId(repositoryId)
+    fun deleteAllByProjectId(projectId: Long) {
+        keyMetaRepository.deleteAllKeyCodeReferencesByProjectId(projectId)
+        keyMetaRepository.deleteAllKeyCommentsByProjectId(projectId)
+        keyMetaRepository.deleteAllByProjectId(projectId)
     }
 
     fun save(meta: KeyMeta): KeyMeta = this.keyMetaRepository.save(meta)

@@ -15,7 +15,7 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
 
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
-        performAuthGet("/v2/repositories/${testData.repository.id}/import/result")
+        performAuthGet("/v2/projects/${testData.project.id}/import/result")
                 .andPrettyPrint.andAssertThatJson.node("_embedded.languages").let { languages ->
                     languages.isArray.isNotEmpty
                     languages.node("[0]").let {
@@ -35,7 +35,7 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
 
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
-        performAuthGet("/v2/repositories/${testData.repository.id}" +
+        performAuthGet("/v2/projects/${testData.project.id}" +
                 "/import/result/languages/${testData.importEnglish.id}")
                 .andPrettyPrint.andAssertThatJson.let { it ->
                     it.node("name").isEqualTo("en")
@@ -53,7 +53,7 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
 
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
-        performAuthGet("/v2/repositories/${testData.repository.id}/import/result?page=0&size=2")
+        performAuthGet("/v2/projects/${testData.project.id}/import/result?page=0&size=2")
                 .andPrettyPrint.andAssertThatJson.node("_embedded.languages").isArray.isNotEmpty.hasSize(2)
     }
 
@@ -64,7 +64,7 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
 
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
-        performAuthGet("/v2/repositories/${testData.repository.id}" +
+        performAuthGet("/v2/projects/${testData.project.id}" +
                 "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=true").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").let { translations ->
                     translations.isArray.isNotEmpty.hasSize(4)
@@ -88,7 +88,7 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
 
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
-        performAuthGet("/v2/repositories/${testData.repository.id}" +
+        performAuthGet("/v2/projects/${testData.project.id}" +
                 "/import/result/languages/${testData.importEnglish.id}" +
                 "/translations?search=extraordinary").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").let { translations ->
@@ -98,7 +98,7 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
                     }
                 }
 
-        performAuthGet("/v2/repositories/${testData.repository.id}" +
+        performAuthGet("/v2/projects/${testData.project.id}" +
                 "/import/result/languages/${testData.importEnglish.id}" +
                 "/translations?search=Imported").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").let { translations ->
@@ -117,7 +117,7 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
 
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
-        performAuthGet("/v2/repositories/${testData.repository.id}" +
+        performAuthGet("/v2/projects/${testData.project.id}" +
                 "/import/result/languages/${testData.importEnglish.id}/translations?size=2").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(2)
     }
@@ -130,12 +130,12 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
 
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
-        performAuthGet("/v2/repositories/${testData.repository.id}" +
+        performAuthGet("/v2/projects/${testData.project.id}" +
                 "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=false").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(6)
 
 
-        performAuthGet("/v2/repositories/${testData.repository.id}" +
+        performAuthGet("/v2/projects/${testData.project.id}" +
                 "/import/result/languages/${testData.importEnglish.id}/translations?onlyConflicts=true").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(4)
     }
@@ -160,12 +160,12 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
-        performAuthGet("/v2/repositories/${testData.repository.id}" +
+        performAuthGet("/v2/projects/${testData.project.id}" +
                 "/import/result/languages/${testData.importEnglish.id}/" +
                 "translations?onlyConflicts=true").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(5)
 
-        performAuthGet("/v2/repositories/${testData.repository.id}" +
+        performAuthGet("/v2/projects/${testData.project.id}" +
                 "/import/result/languages/${testData.importEnglish.id}/translations?onlyUnresolved=true").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.translations").isArray.hasSize(4)
     }
@@ -176,24 +176,24 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
-        performAuthGet("/v2/repositories/${testData.repository.id}/import/result").andIsOk
+        performAuthGet("/v2/projects/${testData.project.id}/import/result").andIsOk
 
         val testData2 = ImportTestData()
         testData2.userAccount.username = "user2"
         testDataService.saveTestData(testData2.root)
         logAsUser(testData2.root.data.userAccounts[0].self.username!!, "admin")
 
-        performAuthGet("/v2/repositories/${testData2.repository.id}/import/result").andIsOk
+        performAuthGet("/v2/projects/${testData2.project.id}/import/result").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.languages").let {
                     it.isArray.hasSize(3)
                     it.node("[0].totalCount").isEqualTo(6)
                 }
 
-        performAuthDelete("/v2/repositories/${testData2.repository.id}/import", null).andIsOk
+        performAuthDelete("/v2/projects/${testData2.project.id}/import", null).andIsOk
 
         logAsUser(testData.root.data.userAccounts[0].self.username!!, "admin")
 
-        performAuthGet("/v2/repositories/${testData.repository.id}/import/result").andIsOk
+        performAuthGet("/v2/projects/${testData.project.id}/import/result").andIsOk
                 .andPrettyPrint.andAssertThatJson.node("_embedded.languages").let {
                     it.isArray.hasSize(3)
                     it.node("[0].totalCount").isEqualTo(6)
@@ -209,10 +209,10 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
         testData.setAllOverride()
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
-        val repositoryId = testData.repository.id
+        val projectId = testData.project.id
         val fileId = testData.importBuilder.data.importFiles[0].self.id
         logAsUser(user.username!!, "admin")
-        val path = "/v2/repositories/${repositoryId}/import/result/files/${fileId}/issues"
+        val path = "/v2/projects/${projectId}/import/result/files/${fileId}/issues"
         performAuthGet(path).andIsOk.andPrettyPrint.andAssertThatJson {
             node("page.totalElements").isEqualTo(204)
             node("page.size").isEqualTo(20)

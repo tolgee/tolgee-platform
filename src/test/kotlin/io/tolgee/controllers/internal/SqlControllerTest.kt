@@ -37,6 +37,6 @@ class SqlControllerTest : AbstractControllerTest() {
                 .content("delete from permission"))
                 .andExpect(status().isOk).andReturn()
 
-        assertThat(permissionService.getAllOfRepository(repo)).isEmpty()
+        assertThat(permissionService.getAllOfProject(repo)).isEmpty()
     }
 }

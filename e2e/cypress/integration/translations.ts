@@ -1,15 +1,15 @@
 import {clickAdd, getPopover} from "../common/shared";
 import {getAnyContainingAriaLabelAttribute, getAnyContainingText, getClosestContainingText} from "../common/xPath";
-import {createRepository, deleteRepository, login, setTranslations} from "../common/apiCalls";
+import {createProject, deleteProject, login, setTranslations} from "../common/apiCalls";
 import {HOST} from "../common/constants";
-import { RepositoryDTO } from "../../../webapp/src/service/response.types";
+import {ProjectDTO} from "../../../webapp/src/service/response.types";
 
 describe('Translations', () => {
-    let repository: RepositoryDTO = null
+    let project: ProjectDTO = null
 
     beforeEach(() => {
         cy.wrap(null).then(() => login().then(() => {
-            cy.wrap(null).then(() => createRepository({
+            cy.wrap(null).then(() => createProject({
                     name: "Test",
                     languages: [
                         {
@@ -23,21 +23,21 @@ describe('Translations', () => {
                     ]
                 }
             ).then(r => {
-                repository = r.body as RepositoryDTO;
-                window.localStorage.setItem('selectedLanguages', `{"${repository.id}":["en"]}`);
+                project = r.body as ProjectDTO;
+                window.localStorage.setItem('selectedLanguages', `{"${project.id}":["en"]}`);
                 visit();
             }))
         }));
     });
 
     afterEach(() => {
-        cy.wrap(null).then(() => deleteRepository(repository.id));
+        cy.wrap(null).then(() => deleteProject(project.id));
     })
 
     it("will paginate", () => {
         const promises = []
         for (let i = 1; i < 21; i++) {
-            promises.push(setTranslations(repository.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}))
+            promises.push(setTranslations(project.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}))
         }
         Cypress.Promise.all(promises).then(() => {
             setPerPage(20, 10)
@@ -54,7 +54,7 @@ describe('Translations', () => {
     it("will ask for confirmation on page change", () => {
         const promises = []
         for (let i = 1; i < 15; i++) {
-            promises.push(setTranslations(repository.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}))
+            promises.push(setTranslations(project.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}))
         }
         Cypress.Promise.all(promises).then(() => {
             visit();
@@ -83,7 +83,7 @@ describe('Translations', () => {
         beforeEach(() => {
             const promises = []
             for (let i = 1; i < 5; i++) {
-                promises.push(setTranslations(repository.id, `Cool key ${i.toString().padStart(2, "0")}`, {
+                promises.push(setTranslations(project.id, `Cool key ${i.toString().padStart(2, "0")}`, {
                     "en": `Cool translated text ${i}`,
                     "cs": `Studený přeložený text ${i}`
                 }))
@@ -170,7 +170,7 @@ describe('Translations', () => {
     })
 
     const visit = () => {
-        cy.visit(`${HOST}/repositories/${repository.id}/translations`)
+        cy.visit(`${HOST}/projects/${project.id}/translations`)
     }
 });
 

@@ -6,7 +6,7 @@ import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.dtos.request.UserUpdateRequestDTO
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.model.UserAccount
-import io.tolgee.model.views.UserAccountInRepositoryView
+import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
 import org.springframework.data.domain.Page
@@ -94,8 +94,8 @@ class UserAccountService(
         return userAccountRepository.getAllInOrganization(organizationId, pageable, search = search ?: "")
     }
 
-    fun getAllInRepository(repositoryId: Long, pageable: Pageable, search: String?): Page<UserAccountInRepositoryView> {
-        return userAccountRepository.getAllInRepository(repositoryId, pageable, search = search)
+    fun getAllInProject(projectId: Long, pageable: Pageable, search: String?): Page<UserAccountInProjectView> {
+        return userAccountRepository.getAllInProject(projectId, pageable, search = search)
     }
 
     fun encodePassword(rawPassword: String): String {

@@ -136,7 +136,7 @@ class CoreImportFilesProcessor(
     }
 
     private fun ImportLanguage.findMatchingExisting(): Language? {
-        return languageService.findByAbbreviation(this.name, import.repository.id).orElse(null)
+        return languageService.findByAbbreviation(this.name, import.project.id).orElse(null)
     }
 
     private fun FileProcessorContext.processTranslations() {

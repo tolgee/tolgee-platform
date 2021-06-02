@@ -1,13 +1,13 @@
-import { container, singleton } from 'tsyringe';
-import { ErrorActions } from '../../store/global/ErrorActions';
-import { RedirectionActions } from '../../store/global/RedirectionActions';
-import { LINKS } from '../../constants/links';
-import { TokenService } from '../TokenService';
-import { GlobalError } from '../../error/GlobalError';
-import { MessageService } from '../MessageService';
+import {container, singleton} from 'tsyringe';
+import {ErrorActions} from '../../store/global/ErrorActions';
+import {RedirectionActions} from '../../store/global/RedirectionActions';
+import {LINKS} from '../../constants/links';
+import {TokenService} from '../TokenService';
+import {GlobalError} from '../../error/GlobalError';
+import {MessageService} from '../MessageService';
 import * as Sentry from '@sentry/browser';
 import React from 'react';
-import { T } from '@tolgee/react';
+import {T} from '@tolgee/react';
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -46,7 +46,7 @@ export class ApiHttpService {
     if (detectLoop(input)) {
       //if we get into loop, maybe something went wrong in login requests etc, rather start over
       this.tokenService.disposeToken();
-      this.redirectionActions.redirect.dispatch(LINKS.REPOSITORIES.build());
+      this.redirectionActions.redirect.dispatch(LINKS.PROJECTS.build());
       location.reload();
     }
     return new Promise((resolve, reject) => {

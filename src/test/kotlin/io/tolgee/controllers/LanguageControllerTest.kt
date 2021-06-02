@@ -1,7 +1,7 @@
 package io.tolgee.controllers
 
 import io.tolgee.ITest
-import io.tolgee.annotations.RepositoryApiKeyAuthTestMethod
+import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.LanguageDTO
 import io.tolgee.exceptions.NotFoundException
@@ -20,16 +20,16 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class LanguageControllerTest : RepositoryAuthControllerTest(), ITest {
+class LanguageControllerTest : ProjectAuthControllerTest(), ITest {
     private val languageDTO = LanguageDTO(null, "en", "en")
     private val languageDTOBlank = LanguageDTO(null, "")
     private val languageDTOCorrect = LanguageDTO(null, "Espanol", "es")
 
     @Test
     fun createLanguage() {
-        val repository = dbPopulator.createBase(generateUniqueString())
-        createLanguageTestValidation(repository.id)
-        createLanguageCorrectRequest(repository.id)
+        val project = dbPopulator.createBase(generateUniqueString())
+        createLanguageTestValidation(project.id)
+        createLanguageCorrectRequest(project.id)
     }
 
     @Test
@@ -51,9 +51,9 @@ class LanguageControllerTest : RepositoryAuthControllerTest(), ITest {
 
     @Test
     fun findAllLanguages() {
-        val repository = dbPopulator.createBase(generateUniqueString(), "ben", "pwd")
+        val project = dbPopulator.createBase(generateUniqueString(), "ben", "pwd")
         logAsUser("ben", "pwd")
-        val mvcResult = performFindAll(repository.id).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+        val mvcResult = performFindAll(project.id).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
         assertThat(decodeJson(mvcResult.response.contentAsString, Set::class.java)).hasSize(2)
     }
 
@@ -63,13 +63,13 @@ class LanguageControllerTest : RepositoryAuthControllerTest(), ITest {
         val en = test.getLanguage("en").orElseThrow { NotFoundException() }
         performDelete(test.id, en.id!!).andExpect(MockMvcResultMatchers.status().isOk)
         Assertions.assertThat(languageService.findById(en.id!!)).isEmpty
-        repositoryService.deleteRepository(test.id)
+        projectService.deleteProject(test.id)
     }
 
     @Test
     fun createLanguageTestValidationComa() {
-        val repository = dbPopulator.createBase(generateUniqueString())
-        val mvcResult = performCreate(repository.id, LanguageDTO(name = "Name", abbreviation = "aa,aa"))
+        val project = dbPopulator.createBase(generateUniqueString())
+        val mvcResult = performCreate(project.id, LanguageDTO(name = "Name", abbreviation = "aa,aa"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
         Assertions.assertThat(mvcResult.response.contentAsString)
                 .isEqualTo("{\"STANDARD_VALIDATION\":" +
@@ -100,35 +100,35 @@ class LanguageControllerTest : RepositoryAuthControllerTest(), ITest {
     }
 
     @Test
-    @RepositoryApiKeyAuthTestMethod
+    @ProjectApiKeyAuthTestMethod
     fun findAllLanguagesApiKey() {
-        val contentAsString = performRepositoryAuthGet("languages").andIsOk.andReturn().mapResponseTo<Set<Any>>()
+        val contentAsString = performProjectAuthGet("languages").andIsOk.andReturn().mapResponseTo<Set<Any>>()
         assertThat(contentAsString).hasSize(2)
     }
 
-    private fun performCreate(repositoryId: Long, content: LanguageDTO): ResultActions {
+    private fun performCreate(projectId: Long, content: LanguageDTO): ResultActions {
         return mvc.perform(
-                LoggedRequestFactory.loggedPost("/api/repository/$repositoryId/languages")
+                LoggedRequestFactory.loggedPost("/api/project/$projectId/languages")
                         .contentType(MediaType.APPLICATION_JSON).content(
                                 JsonHelper.asJsonString(content)))
     }
 
-    private fun performEdit(repositoryId: Long, content: LanguageDTO): ResultActions {
+    private fun performEdit(projectId: Long, content: LanguageDTO): ResultActions {
         return mvc.perform(
-                LoggedRequestFactory.loggedPost("/api/repository/$repositoryId/languages/edit")
+                LoggedRequestFactory.loggedPost("/api/project/$projectId/languages/edit")
                         .contentType(MediaType.APPLICATION_JSON).content(
                                 JsonHelper.asJsonString(content)))
     }
 
-    private fun performDelete(repositoryId: Long, languageId: Long): ResultActions {
+    private fun performDelete(projectId: Long, languageId: Long): ResultActions {
         return mvc.perform(
-                LoggedRequestFactory.loggedDelete("/api/repository/$repositoryId/languages/$languageId")
+                LoggedRequestFactory.loggedDelete("/api/project/$projectId/languages/$languageId")
                         .contentType(MediaType.APPLICATION_JSON))
     }
 
-    private fun performFindAll(repositoryId: Long): ResultActions {
+    private fun performFindAll(projectId: Long): ResultActions {
         return mvc.perform(
-                LoggedRequestFactory.loggedGet("/api/repository/$repositoryId/languages")
+                LoggedRequestFactory.loggedGet("/api/project/$projectId/languages")
                         .contentType(MediaType.APPLICATION_JSON))
     }
 }

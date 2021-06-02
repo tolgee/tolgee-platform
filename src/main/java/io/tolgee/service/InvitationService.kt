@@ -4,8 +4,8 @@ import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
 import io.tolgee.model.Organization
-import io.tolgee.model.Permission.RepositoryPermissionType
-import io.tolgee.model.Repository
+import io.tolgee.model.Permission.ProjectPermissionType
+import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.InvitationRepository
@@ -26,10 +26,10 @@ open class InvitationService @Autowired constructor(
         private val permissionService: PermissionService
 ) {
     @Transactional
-    open fun create(repository: Repository, type: RepositoryPermissionType): String {
+    open fun create(project: Project, type: ProjectPermissionType): String {
         val code = RandomStringUtils.randomAlphabetic(50)
         val invitation = Invitation(null, code)
-        invitation.permission = permissionService.createForInvitation(invitation, repository, type)
+        invitation.permission = permissionService.createForInvitation(invitation, project, type)
         invitationRepository.save(invitation)
         return code
     }
@@ -64,7 +64,7 @@ open class InvitationService @Autowired constructor(
         }
 
         permission?.let {
-            if (permissionService.findOneByRepositoryIdAndUserId(permission.repository!!.id, userAccount.id!!) != null) {
+            if (permissionService.findOneByProjectIdAndUserId(permission.project!!.id, userAccount.id!!) != null) {
                 throw BadRequestException(Message.USER_ALREADY_HAS_PERMISSIONS)
             }
             permissionService.acceptInvitation(permission, userAccount)
@@ -94,8 +94,8 @@ open class InvitationService @Autowired constructor(
         return invitationRepository.findById(id) as Optional<Invitation>
     }
 
-    open fun getForRepository(repository: Repository): Set<Invitation> {
-        return invitationRepository.findAllByPermissionRepositoryOrderByCreatedAt(repository)
+    open fun getForProject(project: Project): Set<Invitation> {
+        return invitationRepository.findAllByPermissionProjectOrderByCreatedAt(project)
     }
 
     @Transactional

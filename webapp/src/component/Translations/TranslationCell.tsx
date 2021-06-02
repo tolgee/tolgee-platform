@@ -1,15 +1,12 @@
 import * as React from 'react';
-import { FunctionComponent, useContext } from 'react';
-import { RowContext } from './TranslationsRow';
-import { useRepository } from '../../hooks/useRepository';
-import { RepositoryPermissionType } from '../../service/response.types';
-import { EditableCell } from './EditableCell';
-import { container } from 'tsyringe';
-import {
-  TranslationActions,
-  TranslationEditingType,
-} from '../../store/repository/TranslationActions';
-import { Validation } from '../../constants/GlobalValidationSchema';
+import {FunctionComponent, useContext} from 'react';
+import {RowContext} from './TranslationsRow';
+import {useProject} from '../../hooks/useProject';
+import {ProjectPermissionType} from '../../service/response.types';
+import {EditableCell} from './EditableCell';
+import {container} from 'tsyringe';
+import {TranslationActions, TranslationEditingType,} from '../../store/project/TranslationActions';
+import {Validation} from '../../constants/GlobalValidationSchema';
 
 export interface TranslationsTableCellProps {
   abbreviation: string;
@@ -20,11 +17,11 @@ let actions = container.resolve(TranslationActions);
 export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
   props
 ) => {
-  let repositoryDTO = useRepository();
+  let projectDTO = useProject();
   let context = useContext(RowContext);
 
   const handleSubmit = (v) => {
-    actions.loadableActions.setTranslations.dispatch(repositoryDTO.id, {
+    actions.loadableActions.setTranslations.dispatch(projectDTO.id, {
       key: context.data.name,
       translations: { [props.abbreviation]: v },
     });
@@ -47,9 +44,9 @@ export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
       validationSchema={Validation.TRANSLATION_TRANSLATION}
       onSubmit={handleSubmit}
       editEnabled={
-        repositoryDTO.computedPermissions === RepositoryPermissionType.MANAGE ||
-        repositoryDTO.computedPermissions === RepositoryPermissionType.EDIT ||
-        repositoryDTO.computedPermissions === RepositoryPermissionType.TRANSLATE
+        projectDTO.computedPermissions === ProjectPermissionType.MANAGE ||
+        projectDTO.computedPermissions === ProjectPermissionType.EDIT ||
+        projectDTO.computedPermissions === ProjectPermissionType.TRANSLATE
       }
       onChange={(value) => actions.setEditingValue.dispatch(value)}
       onEditClick={() => {

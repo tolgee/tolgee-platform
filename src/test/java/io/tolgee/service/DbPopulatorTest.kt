@@ -5,7 +5,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
-import io.tolgee.repository.RepositoryRepository
+import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import org.assertj.core.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,7 +27,7 @@ open class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
     lateinit var userAccountRepository: UserAccountRepository
 
     @Autowired
-    lateinit var repositoryRepository: RepositoryRepository
+    lateinit var projectRepository: ProjectRepository
 
     @Autowired
     lateinit var apiKeyService: ApiKeyService
@@ -54,9 +54,9 @@ open class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
 
     @Test
     @Transactional
-    open fun createsRepository() {
+    open fun createsProject() {
         entityManager.refresh(userAccount)
-        val found = repositoryRepository.findAll().asSequence()
+        val found = projectRepository.findAll().asSequence()
                 .flatMap { it!!.permissions.map { it.user } }
                 .find { it == userAccount }
         assertThat(found).isNotNull

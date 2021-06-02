@@ -21,13 +21,13 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
-open class OrganizationControllerTest : SignedInControllerTest() {
+class OrganizationControllerTest : SignedInControllerTest() {
 
     lateinit var dummyDto: OrganizationDto
     lateinit var dummyDto2: OrganizationDto
 
     @BeforeMethod
-    open fun setup() {
+    fun setup() {
         resetDto()
         this.userAccount = userAccountService.getByUserName(username = userAccount!!.username).get()
     }
@@ -37,17 +37,17 @@ open class OrganizationControllerTest : SignedInControllerTest() {
                 "Test org",
                 "This is description",
                 "test-org",
-                Permission.RepositoryPermissionType.VIEW)
+                Permission.ProjectPermissionType.VIEW)
 
         dummyDto2 = OrganizationDto(
                 "Test org 2",
                 "This is description 2",
                 "test-org-2",
-                Permission.RepositoryPermissionType.VIEW)
+                Permission.ProjectPermissionType.VIEW)
     }
 
     @Test
-    open fun testGetAll() {
+    fun testGetAll() {
         val users = dbPopulator.createUsersAndOrganizations()
 
         logAsUser(users[1].name!!, initialPassword)
@@ -64,7 +64,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testGetAllFilterOwned() {
+    fun testGetAllFilterOwned() {
         val users = dbPopulator.createUsersAndOrganizations()
 
         logAsUser(users[1].name!!, initialPassword)
@@ -81,7 +81,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testGetAllSort() {
+    fun testGetAllSort() {
         val users = dbPopulator.createUsersAndOrganizations()
 
         logAsUser(users[1].name!!, initialPassword)
@@ -93,7 +93,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testGetAllUsers() {
+    fun testGetAllUsers() {
         val users = dbPopulator.createUsersAndOrganizations()
         logAsUser(users[0].username!!, initialPassword)
         val organizationId = users[1].organizationRoles[0].organization!!.id
@@ -108,9 +108,9 @@ open class OrganizationControllerTest : SignedInControllerTest() {
 
 
     @Test
-    open fun testGetOneWithUrl() {
+    fun testGetOneWithUrl() {
         this.organizationService.create(dummyDto, userAccount!!).let {
-            performAuthGet("/v2/organizations/${it.addressPart}").andIsOk.andAssertThatJson.let {
+            performAuthGet("/v2/organizations/${it.slug}").andIsOk.andAssertThatJson.let {
                 it.node("name").isEqualTo(dummyDto.name)
                 it.node("description").isEqualTo(dummyDto.description)
             }
@@ -118,20 +118,20 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testGetOneWithId() {
+    fun testGetOneWithId() {
         this.organizationService.create(dummyDto, userAccount!!).let { organization ->
             performAuthGet("/v2/organizations/${organization.id}").andIsOk.andAssertThatJson.let {
                 it.node("name").isEqualTo(dummyDto.name)
                 it.node("id").isEqualTo(organization.id)
                 it.node("description").isEqualTo(dummyDto.description)
                 it.node("basePermissions").isEqualTo(dummyDto.basePermissions.name)
-                it.node("addressPart").isEqualTo(dummyDto.addressPart)
+                it.node("slug").isEqualTo(dummyDto.slug)
             }
         }
     }
 
     @Test
-    open fun testGetOnePermissions() {
+    fun testGetOnePermissions() {
         this.organizationService.create(dummyDto, userAccount!!).let {
             performAuthGet("/v2/organizations/${it.id}").andIsOk.andAssertThatJson.let {
                 it.node("name").isEqualTo(dummyDto.name)
@@ -141,20 +141,20 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testGetAllUsersNotPermitted() {
+    fun testGetAllUsersNotPermitted() {
         val users = dbPopulator.createUsersAndOrganizations()
         val organizationId = users[1].organizationRoles[0].organization!!.id
         performAuthGet("/v2/organizations/$organizationId/users").andIsForbidden
     }
 
     @Test
-    open fun testCreate() {
+    fun testCreate() {
         performAuthPost(
                 "/v2/organizations",
                 dummyDto
         ).andIsCreated.andPrettyPrint.andAssertThatJson.let {
             it.node("name").isEqualTo("Test org")
-            it.node("addressPart").isEqualTo("test-org")
+            it.node("slug").isEqualTo("test-org")
             it.node("_links.self.href").isEqualTo("http://localhost/v2/organizations/test-org")
             it.node("id").isNumber.satisfies {
                 organizationService.get(it.toLong()) is Organization
@@ -163,17 +163,17 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testCreateAddressPartValidation() {
-        this.organizationService.create(dummyDto2.also { it.addressPart = "hello-1" }, userAccount!!)
+    fun testCreateSlugValidation() {
+        this.organizationService.create(dummyDto2.also { it.slug = "hello-1" }, userAccount!!)
 
         performAuthPost(
                 "/v2/organizations",
-                dummyDto.also { it.addressPart = "hello-1" }
+                dummyDto.also { it.slug = "hello-1" }
         ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("address_part_not_unique")
     }
 
     @Test
-    open fun testCreateNotAllowed() {
+    fun testCreateNotAllowed() {
         this.tolgeeProperties.authentication.userCanCreateOrganizations = false
         performAuthPost("/v2/organizations",
                 dummyDto
@@ -182,11 +182,11 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testCreateValidation() {
+    fun testCreateValidation() {
         performAuthPost("/v2/organizations",
-                dummyDto.also { it.addressPart = "" }
+                dummyDto.also { it.slug = "" }
         ).andIsBadRequest.let {
-            assertThat(it.andReturn()).error().isStandardValidation.onField("addressPart")
+            assertThat(it.andReturn()).error().isStandardValidation.onField("slug")
         }
         performAuthPost("/v2/organizations",
                 dummyDto.also { it.name = "" }
@@ -195,39 +195,39 @@ open class OrganizationControllerTest : SignedInControllerTest() {
         }
 
         performAuthPost("/v2/organizations",
-                dummyDto.also { it.addressPart = "sahsaldlasfhl " }
+                dummyDto.also { it.slug = "sahsaldlasfhl " }
         ).andIsBadRequest.let {
-            assertThat(it.andReturn()).error().isStandardValidation.onField("addressPart")
+            assertThat(it.andReturn()).error().isStandardValidation.onField("slug")
         }
 
         performAuthPost("/v2/organizations",
-                dummyDto.also { it.addressPart = "a" }
+                dummyDto.also { it.slug = "a" }
         ).andIsBadRequest.let {
-            assertThat(it.andReturn()).error().isStandardValidation.onField("addressPart")
+            assertThat(it.andReturn()).error().isStandardValidation.onField("slug")
         }
     }
 
     @Test
-    open fun testCreateGeneratesAddressPart() {
+    fun testCreateGeneratesSlug() {
         performAuthPost("/v2/organizations",
-                dummyDto.also { it.addressPart = null }
-        ).andIsCreated.andAssertThatJson.node("addressPart").isEqualTo("test-org")
+                dummyDto.also { it.slug = null }
+        ).andIsCreated.andAssertThatJson.node("slug").isEqualTo("test-org")
     }
 
     @Test
-    open fun testEdit() {
+    fun testEdit() {
         this.organizationService.create(dummyDto, userAccount!!).let {
             performAuthPut(
                     "/v2/organizations/${it.id}",
                     dummyDto.also { organization ->
                         organization.name = "Hello"
-                        organization.addressPart = "hello-1"
-                        organization.basePermissions = Permission.RepositoryPermissionType.TRANSLATE
+                        organization.slug = "hello-1"
+                        organization.basePermissions = Permission.ProjectPermissionType.TRANSLATE
                         organization.description = "This is changed description"
                     }
             ).andIsOk.andPrettyPrint.andAssertThatJson.let {
                 it.node("name").isEqualTo("Hello")
-                it.node("addressPart").isEqualTo("hello-1")
+                it.node("slug").isEqualTo("hello-1")
                 it.node("_links.self.href").isEqualTo("http://localhost/v2/organizations/hello-1")
                 it.node("basePermissions").isEqualTo("TRANSLATE")
                 it.node("description").isEqualTo("This is changed description")
@@ -236,21 +236,21 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testEditAddressPartValidation() {
-        this.organizationService.create(dummyDto2.also { it.addressPart = "hello-1" }, userAccount!!)
+    fun testEditSlugValidation() {
+        this.organizationService.create(dummyDto2.also { it.slug = "hello-1" }, userAccount!!)
 
         this.organizationService.create(dummyDto, userAccount!!).let { organization ->
             performAuthPut(
                     "/v2/organizations/${organization.id}",
                     dummyDto.also { organizationDto ->
-                        organizationDto.addressPart = "hello-1"
+                        organizationDto.slug = "hello-1"
                     }
             ).andIsBadRequest.andAssertError.isCustomValidation.hasMessage("address_part_not_unique")
         }
     }
 
     @Test
-    open fun testDelete() {
+    fun testDelete() {
         val organization2 = this.organizationService.create(dummyDto2, userAccount!!)
         this.organizationService.create(dummyDto, userAccount!!).let {
             performAuthDelete("/v2/organizations/${it.id}", null)
@@ -260,7 +260,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testLeaveOrganization() {
+    fun testLeaveOrganization() {
         this.organizationService.create(dummyDto, userAccount!!).let {
             organizationRepository.findAllPermitted(userAccount!!.id!!, PageRequest.of(0, 20)).content.let {
                 assertThat(it).isNotEmpty
@@ -277,7 +277,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testLeaveOrganizationNoOtherOwner() {
+    fun testLeaveOrganizationNoOtherOwner() {
         this.organizationService.create(dummyDto, userAccount!!).let {
             organizationRepository.findAllPermitted(userAccount!!.id!!, PageRequest.of(0, 20)).content.let {
                 assertThat(it).isNotEmpty
@@ -291,7 +291,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testSetUserRole() {
+    fun testSetUserRole() {
         this.organizationService.create(dummyDto, userAccount!!).let { organization ->
             dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
                 OrganizationRole(
@@ -310,7 +310,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testRemoveUser() {
+    fun testRemoveUser() {
         this.organizationService.create(dummyDto, userAccount!!).let { organization ->
             dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
                 OrganizationRole(
@@ -332,24 +332,24 @@ open class OrganizationControllerTest : SignedInControllerTest() {
 
 
     @Test
-    open fun testGetAllRepositories() {
+    fun testGetAllProjects() {
         val users = dbPopulator.createUsersAndOrganizations()
         logAsUser(users[1].username!!, initialPassword)
         users[1].organizationRoles[0].organization.let { organization ->
-            performAuthGet("/v2/organizations/${organization!!.addressPart}/repositories")
+            performAuthGet("/v2/organizations/${organization!!.slug}/projects")
                     .andIsOk.andAssertThatJson.let {
-                        it.node("_embedded.repositories").let { repositoriesNode ->
-                            repositoriesNode.isArray.hasSize(3)
-                            repositoriesNode.node("[1].name").isEqualTo("user 2's organization 1 repository 2")
-                            repositoriesNode.node("[1].organizationOwnerAddressPart").isEqualTo("user-2-s-organization-1")
-                            repositoriesNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
+                        it.node("_embedded.projects").let { projectsNode ->
+                            projectsNode.isArray.hasSize(3)
+                            projectsNode.node("[1].name").isEqualTo("user 2's organization 1 project 2")
+                            projectsNode.node("[1].organizationOwnerSlug").isEqualTo("user-2-s-organization-1")
+                            projectsNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
                         }
                     }
         }
     }
 
     @Test
-    open fun testGetAllInvitations() {
+    fun testGetAllInvitations() {
         val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
         this.organizationService.create(dummyDto, helloUser).let { organization ->
@@ -357,9 +357,9 @@ open class OrganizationControllerTest : SignedInControllerTest() {
             logAsUser("hellouser", initialPassword)
             performAuthGet("/v2/organizations/${organization.id}/invitations")
                     .andIsOk.andAssertThatJson.let {
-                        it.node("_embedded.organizationInvitations").let { repositoriesNode ->
-                            repositoriesNode.isArray.hasSize(1)
-                            repositoriesNode.node("[0].id").isEqualTo(invitation.id)
+                        it.node("_embedded.organizationInvitations").let { projectsNode ->
+                            projectsNode.isArray.hasSize(1)
+                            projectsNode.node("[0].id").isEqualTo(invitation.id)
                         }
                     }
         }
@@ -367,7 +367,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
 
 
     @Test
-    open fun testInviteUser() {
+    fun testInviteUser() {
         val helloUser = dbPopulator.createUserIfNotExists("hellouser")
         logAsUser(helloUser.username!!, initialPassword)
 
@@ -383,7 +383,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testAcceptInvitation() {
+    fun testAcceptInvitation() {
         val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
         this.organizationService.create(dummyDto, helloUser).let { organization ->
@@ -400,7 +400,7 @@ open class OrganizationControllerTest : SignedInControllerTest() {
     }
 
     @Test
-    open fun testDeleteInvitation() {
+    fun testDeleteInvitation() {
         val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
         this.organizationService.create(dummyDto, helloUser).let { organization ->

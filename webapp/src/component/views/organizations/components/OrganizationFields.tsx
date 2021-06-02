@@ -1,45 +1,45 @@
-import { useFormikContext } from 'formik';
-import { useDebounce } from 'use-debounce';
+import {useFormikContext} from 'formik';
+import {useDebounce} from 'use-debounce';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { TextField } from '../../../common/form/fields/TextField';
-import { Box, FormHelperText } from '@material-ui/core';
-import { LINKS, PARAMS } from '../../../../constants/links';
-import { container } from 'tsyringe';
-import { OrganizationService } from '../../../../service/OrganizationService';
-import { T } from '@tolgee/react';
+import {useEffect, useState} from 'react';
+import {TextField} from '../../../common/form/fields/TextField';
+import {Box, FormHelperText} from '@material-ui/core';
+import {LINKS, PARAMS} from '../../../../constants/links';
+import {container} from 'tsyringe';
+import {OrganizationService} from '../../../../service/OrganizationService';
+import {T} from '@tolgee/react';
 
 const organizationService = container.resolve(OrganizationService);
 
 export const OrganizationFields = () => {
-  const [addressPartDisabled, setAddressPartDisabled] = useState(true);
+  const [slugDisabled, setSlugDisabled] = useState(true);
 
   let formik = useFormikContext();
   const [value] = useDebounce(formik.getFieldProps('name').value, 500);
-  const addressPartValue = formik.getFieldProps('addressPart').value;
+  const slugValue = formik.getFieldProps('slug').value;
 
   useEffect(() => {
     const nameMeta = formik.getFieldMeta('name');
-    const addressPartMeta = formik.getFieldMeta('addressPart');
+    const slugMeta = formik.getFieldMeta('slug');
     const nameChanged = nameMeta.initialValue !== nameMeta.value;
-    //const addressPartChanged = addressPartMeta.initialValue !== addressPartMeta.value
+    //const slugChanged = slugMeta.initialValue !== slugMeta.value
 
     if (nameChanged) {
-      const initialAddressPart =
-        formik.getFieldMeta('addressPart').initialValue;
-      const addressPartNotTouchedOrEmpty =
-        !formik.getFieldMeta('addressPart').touched || addressPartValue === '';
-      //autogenerate the addressPart just when not touched and name is valid
+      const initialSlug =
+        formik.getFieldMeta('slug').initialValue;
+      const slugNotTouchedOrEmpty =
+        !formik.getFieldMeta('slug').touched || slugValue === '';
+      //autogenerate the slug just when not touched and name is valid
       if (
         formik.getFieldMeta('name').error == undefined &&
         value != '' &&
-        addressPartNotTouchedOrEmpty
+        slugNotTouchedOrEmpty
       ) {
         organizationService
-          .generateAddressPart(value, initialAddressPart as string)
-          .then((addressPart) => {
-            formik.getFieldHelpers('addressPart').setValue(addressPart);
-            formik.getFieldHelpers('addressPart').setTouched(false);
+          .generateSlug(value, initialSlug as string)
+          .then((slug) => {
+            formik.getFieldHelpers('slug').setValue(slug);
+            formik.getFieldHelpers('slug').setTouched(false);
           });
       }
     }
@@ -55,22 +55,22 @@ export const OrganizationFields = () => {
         required={true}
       />
       <Box
-        onClick={() => setAddressPartDisabled(false)}
-        style={{ cursor: addressPartDisabled ? 'pointer' : 'initial' }}
+        onClick={() => setSlugDisabled(false)}
+        style={{ cursor: slugDisabled ? 'pointer' : 'initial' }}
       >
         <TextField
           data-cy={'organization-address-part-field'}
-          disabled={addressPartDisabled}
+          disabled={slugDisabled}
           fullWidth
-          label={<T>create_organization_addressPart_label</T>}
-          name="addressPart"
+          label={<T>create_organization_slug_label</T>}
+          name="slug"
           required={true}
         />
         <FormHelperText>
           <T
             parameters={{
               address: LINKS.ORGANIZATION.buildWithOrigin({
-                [PARAMS.ORGANIZATION_ADDRESS_PART]: addressPartValue,
+                [PARAMS.ORGANIZATION_SLUG]: slugValue,
               }),
             }}
           >

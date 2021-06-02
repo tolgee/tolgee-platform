@@ -10,7 +10,7 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2RepositoriesControllerTest : SignedInControllerTest() {
+class V2ProjectsControllerTest : SignedInControllerTest() {
 
     @Test
     fun getAll() {
@@ -20,16 +20,16 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
         logAsUser("kim")
 
         dbPopulator.createOrganization("cool", userAccount!!).let { org ->
-            dbPopulator.createRepositoryWithOrganization("org repo", org)
+            dbPopulator.createProjectWithOrganization("org repo", org)
         }
 
-        performAuthGet("/v2/repositories").andPrettyPrint.andAssertThatJson.node("_embedded.repositories").let {
+        performAuthGet("/v2/projects").andPrettyPrint.andAssertThatJson.node("_embedded.projects").let {
             it.isArray.hasSize(3)
             it.node("[0].userOwner.name").isEqualTo("kim")
             it.node("[0].directPermissions").isEqualTo("MANAGE")
             it.node("[2].userOwner").isEqualTo("null")
             it.node("[2].organizationOwnerName").isEqualTo("cool")
-            it.node("[2].organizationOwnerAddressPart").isEqualTo("cool")
+            it.node("[2].organizationOwnerSlug").isEqualTo("cool")
         }
     }
 
@@ -38,7 +38,7 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     fun get() {
         val base = dbPopulator.createBase("one")
 
-        performAuthGet("/v2/repositories/${base.id}").andPrettyPrint.andAssertThatJson.let {
+        performAuthGet("/v2/projects/${base.id}").andPrettyPrint.andAssertThatJson.let {
             it.node("userOwner.name").isEqualTo("admin")
             it.node("directPermissions").isEqualTo("MANAGE")
         }
@@ -51,19 +51,19 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
         val account = dbPopulator.createUserIfNotExists("peter")
         logAsUser(account.name!!, initialPassword)
 
-        performAuthGet("/v2/repositories/${base.id}").andIsForbidden
+        performAuthGet("/v2/projects/${base.id}").andIsForbidden
     }
 
     @Test
     fun getAllUsers() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
         permissionService.grantFullAccessToRepo(user, repo)
 
         logAsUser(usersAndOrganizations[1].name!!)
 
-        performAuthGet("/v2/repositories/${repo.id}/users").andPrettyPrint.andAssertThatJson.node("_embedded.users").let {
+        performAuthGet("/v2/projects/${repo.id}/users").andPrettyPrint.andAssertThatJson.node("_embedded.users").let {
             it.isArray.hasSize(3)
             it.node("[0].organizationRole").isEqualTo("MEMBER")
             it.node("[1].organizationRole").isEqualTo("OWNER")
@@ -74,50 +74,50 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun setUsersPermissions() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
 
-        permissionService.create(Permission(user = user, repository = repo, type = Permission.RepositoryPermissionType.VIEW))
+        permissionService.create(Permission(user = user, project = repo, type = Permission.ProjectPermissionType.VIEW))
 
         logAsUser(usersAndOrganizations[1].name!!)
 
-        performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
+        performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
-        permissionService.getRepositoryPermissionType(repo.id, user)
-                .let { assertThat(it).isEqualTo(Permission.RepositoryPermissionType.EDIT) }
+        permissionService.getProjectPermissionType(repo.id, user)
+                .let { assertThat(it).isEqualTo(Permission.ProjectPermissionType.EDIT) }
     }
 
     @Test
     fun setUsersPermissionsDeletesPermission() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
 
         organizationRoleService.grantMemberRoleToUser(user, repo.organizationOwner!!)
-        permissionService.create(Permission(user = user, repository = repo, type = Permission.RepositoryPermissionType.VIEW))
+        permissionService.create(Permission(user = user, project = repo, type = Permission.ProjectPermissionType.VIEW))
 
-        repo.organizationOwner!!.basePermissions = Permission.RepositoryPermissionType.EDIT
+        repo.organizationOwner!!.basePermissions = Permission.ProjectPermissionType.EDIT
         organizationRepository.save(repo.organizationOwner!!)
 
         logAsUser(usersAndOrganizations[1].name!!)
 
-        performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
+        performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
-        permissionService.getRepositoryPermissionData(repo.id, user.id!!)
+        permissionService.getProjectPermissionData(repo.id, user.id!!)
                 .let { assertThat(it.directPermissions).isEqualTo(null) }
     }
 
     @Test
     fun setUsersPermissionsNoAccess() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
 
         logAsUser(usersAndOrganizations[1].name!!)
 
-        performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/set-permissions/EDIT", null)
-                .andIsBadRequest.andReturn().let{
-                    assertThat(it).error().hasCode("user_has_no_repository_access")
+        performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null)
+                .andIsBadRequest.andReturn().let {
+                    assertThat(it).error().hasCode("user_has_no_project_access")
                 }
     }
 
@@ -125,14 +125,14 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun setUsersPermissionsOwner() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
         organizationRoleService.grantOwnerRoleToUser(user, repo.organizationOwner!!)
 
         logAsUser(usersAndOrganizations[1].name!!)
 
-        performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/set-permissions/EDIT", null)
-                .andIsBadRequest.andReturn().let{
+        performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null)
+                .andIsBadRequest.andReturn().let {
                     assertThat(it).error().hasCode("user_is_organization_owner")
                 }
     }
@@ -140,17 +140,17 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun setUsersPermissionsHigherBase() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
         organizationRoleService.grantMemberRoleToUser(user, repo.organizationOwner!!)
 
-        repo.organizationOwner!!.basePermissions = Permission.RepositoryPermissionType.EDIT
+        repo.organizationOwner!!.basePermissions = Permission.ProjectPermissionType.EDIT
         organizationRepository.save(repo.organizationOwner!!)
 
         logAsUser(usersAndOrganizations[1].name!!)
 
-        performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/set-permissions/TRANSLATE", null)
-                .andIsBadRequest.andReturn().let{
+        performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/TRANSLATE", null)
+                .andIsBadRequest.andReturn().let {
                     assertThat(it).error().hasCode("cannot_set_lower_than_organization_base_permissions")
                 }
     }
@@ -159,12 +159,12 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun setUsersPermissionsOwn() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
 
         logAsUser(usersAndOrganizations[1].name!!)
 
-        performAuthPut("/v2/repositories/${repo.id}/users/${usersAndOrganizations[1].id!!}/set-permissions/EDIT", null)
-                .andIsBadRequest.andReturn().let{
+        performAuthPut("/v2/projects/${repo.id}/users/${usersAndOrganizations[1].id!!}/set-permissions/EDIT", null)
+                .andIsBadRequest.andReturn().let {
                     assertThat(it).error().hasCode("cannot_set_your_own_permissions")
                 }
     }
@@ -172,16 +172,16 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
     @Test
     fun revokeUsersAccess() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
 
-        permissionService.create(Permission(user = user, repository = repo, type = Permission.RepositoryPermissionType.VIEW))
+        permissionService.create(Permission(user = user, project = repo, type = Permission.ProjectPermissionType.VIEW))
 
         logAsUser(usersAndOrganizations[1].name!!)
 
-        performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/revoke-access", null).andIsOk
+        performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null).andIsOk
 
-        permissionService.getRepositoryPermissionType(repo.id, user)
+        permissionService.getProjectPermissionType(repo.id, user)
                 .let { assertThat(it).isNull() }
     }
 
@@ -192,23 +192,20 @@ class V2RepositoriesControllerTest : SignedInControllerTest() {
 
         logAsUser("jirina")
 
-        performAuthPut("/v2/repositories/${repo.id}/users/${repo.userOwner!!.id}/revoke-access", null)
-                .andIsBadRequest.andReturn().let{ assertThat(it).error().hasCode("can_not_revoke_own_permissions")}
-
+        performAuthPut("/v2/projects/${repo.id}/users/${repo.userOwner!!.id}/revoke-access", null)
+                .andIsBadRequest.andReturn().let { assertThat(it).error().hasCode("can_not_revoke_own_permissions") }
     }
 
     @Test
     fun revokeUsersAccessIsOrganizationMember() {
         val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.repositories[0]
+        val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
         val user = dbPopulator.createUserIfNotExists("jirina")
 
         organizationRoleService.grantMemberRoleToUser(user, repo.organizationOwner!!)
         logAsUser(usersAndOrganizations[1].name!!)
 
-        performAuthPut("/v2/repositories/${repo.id}/users/${user.id}/revoke-access", null)
-                .andIsBadRequest.andReturn().let{ assertThat(it).error().hasCode("user_is_organization_member")}
+        performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null)
+                .andIsBadRequest.andReturn().let { assertThat(it).error().hasCode("user_is_organization_member") }
     }
-
-
 }

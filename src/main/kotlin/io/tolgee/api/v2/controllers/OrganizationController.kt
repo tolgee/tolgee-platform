@@ -5,13 +5,15 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModel
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModelAssembler
-import io.tolgee.api.v2.hateoas.organization.*
-import io.tolgee.api.v2.hateoas.repository.RepositoryModel
-import io.tolgee.api.v2.hateoas.repository.RepositoryModelAssembler
+import io.tolgee.api.v2.hateoas.organization.OrganizationModel
+import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
+import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModel
+import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
+import io.tolgee.api.v2.hateoas.project.ProjectModel
+import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.OrganizationDto
@@ -21,10 +23,11 @@ import io.tolgee.dtos.request.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.*
+import io.tolgee.model.Organization
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
-import io.tolgee.model.views.RepositoryView
+import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.*
@@ -49,7 +52,7 @@ open class OrganizationController(
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val pagedResourcesAssembler: PagedResourcesAssembler<Organization>,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        private val pagedRepositoryResourcesAssembler: PagedResourcesAssembler<RepositoryView>,
+        private val pagedProjectResourcesAssembler: PagedResourcesAssembler<ProjectView>,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
         private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection")
@@ -60,8 +63,8 @@ open class OrganizationController(
         private val authenticationFacade: AuthenticationFacade,
         private val organizationRoleService: OrganizationRoleService,
         private val userAccountService: UserAccountService,
-        private val repositoryService: RepositoryService,
-        private val repositoryModelAssembler: RepositoryModelAssembler,
+        private val projectService: ProjectService,
+        private val projectModelAssembler: ProjectModelAssembler,
         private val invitationService: InvitationService,
         private val organizationInvitationModelAssembler: OrganizationInvitationModelAssembler
 ) {
@@ -89,10 +92,10 @@ open class OrganizationController(
                 ?: throw NotFoundException()
     }
 
-    @GetMapping("/{addressPart:.*[a-z].*}")
+    @GetMapping("/{slug:.*[a-z].*}")
     @Operation(summary = "Returns organization by address part")
-    open fun get(@PathVariable("addressPart") addressPart: String): OrganizationModel {
-        organizationService.get(addressPart)?.let {
+    open fun get(@PathVariable("slug") slug: String): OrganizationModel {
+        organizationService.get(slug)?.let {
             val roleType = organizationRoleService.getTypeOrThrow(it.id!!)
             return OrganizationView.of(it, roleType).toModel()
         }
@@ -114,7 +117,7 @@ open class OrganizationController(
     }
 
     @DeleteMapping("/{id:[0-9]+}")
-    @Operation(summary = "Deletes organization and all its repositories")
+    @Operation(summary = "Deletes organization and all its projects")
     open fun delete(@PathVariable("id") id: Long) {
         organizationRoleService.checkUserIsOwner(id)
         organizationService.delete(id)
@@ -164,32 +167,32 @@ open class OrganizationController(
         organizationRoleService.removeUser(organizationId, userId)
     }
 
-    @GetMapping("/{id:[0-9]+]}/repositories")
-    @Operation(summary = "Returns all organization repositories")
-    open fun getAllRepositories(
+    @GetMapping("/{id:[0-9]+]}/projects")
+    @Operation(summary = "Returns all organization projects")
+    open fun getAllProjects(
             @PathVariable("id") id: Long,
             pageable: Pageable,
             @RequestParam("search") search: String?
-    ): PagedModel<RepositoryModel> {
+    ): PagedModel<ProjectModel> {
         return organizationService.get(id)?.let {
             organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
-            repositoryService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
-                pagedRepositoryResourcesAssembler.toModel(repositories, repositoryModelAssembler)
+            projectService.findAllInOrganization(it.id!!, pageable, search).let { projects ->
+                pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
             }
         } ?: throw NotFoundException()
     }
 
-    @GetMapping("/{addressPart:.*[a-z].*}/repositories")
-    @Operation(summary = "Returns all organization repositories")
-    open fun getAllRepositories(
-            @PathVariable("addressPart") addressPart: String,
+    @GetMapping("/{slug:.*[a-z].*}/projects")
+    @Operation(summary = "Returns all organization projects")
+    open fun getAllProjects(
+            @PathVariable("slug") slug: String,
             pageable: Pageable,
             @RequestParam("search") search: String?
-    ): PagedModel<RepositoryModel> {
-        return organizationService.get(addressPart)?.let {
+    ): PagedModel<ProjectModel> {
+        return organizationService.get(slug)?.let {
             organizationRoleService.checkUserIsMemberOrOwner(it.id!!)
-            repositoryService.findAllInOrganization(it.id!!, pageable, search).let { repositories ->
-                pagedRepositoryResourcesAssembler.toModel(repositories, repositoryModelAssembler)
+            projectService.findAllInOrganization(it.id!!, pageable, search).let { projects ->
+                pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
             }
         } ?: throw NotFoundException()
     }

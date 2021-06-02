@@ -10,7 +10,7 @@ import io.tolgee.dtos.response.translations_view.ResponseParams
 import io.tolgee.exceptions.InternalException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
-import io.tolgee.model.Repository
+import io.tolgee.model.Project
 import io.tolgee.model.Translation
 import io.tolgee.model.Translation.Companion.builder
 import io.tolgee.model.key.Key
@@ -28,12 +28,12 @@ import javax.persistence.EntityManager
 class TranslationService(private val translationRepository: TranslationRepository, private val entityManager: EntityManager) {
     private var languageService: LanguageService? = null
     private var keyService: KeyService? = null
-    private var repositoryService: RepositoryService? = null
+    private var projectService: ProjectService? = null
 
     @Transactional
     @Suppress("UNCHECKED_CAST")
-    fun getTranslations(languageAbbreviations: Set<String>, repositoryId: Long): Map<String, Any> {
-        val allByLanguages = translationRepository.getTranslations(languageAbbreviations, repositoryId)
+    fun getTranslations(languageAbbreviations: Set<String>, projectId: Long): Map<String, Any> {
+        val allByLanguages = translationRepository.getTranslations(languageAbbreviations, projectId)
         val langTranslations: HashMap<String, Any> = LinkedHashMap()
         for (translation in allByLanguages) {
             val map = langTranslations
@@ -48,15 +48,15 @@ class TranslationService(private val translationRepository: TranslationRepositor
         return translationRepository.getAllByLanguageId(languageId)
     }
 
-    fun getKeyTranslationsResult(repositoryId: Long, path: PathDTO?, languageAbbreviations: Set<String>?): Map<String, String?> {
-        val repository = repositoryService!!.get(repositoryId).orElseThrow { NotFoundException() }!!
-        val key = keyService!!.get(repository, path!!).orElse(null)
+    fun getKeyTranslationsResult(projectId: Long, path: PathDTO?, languageAbbreviations: Set<String>?): Map<String, String?> {
+        val project = projectService!!.get(projectId).orElseThrow { NotFoundException() }!!
+        val key = keyService!!.get(project, path!!).orElse(null)
         val languages: Set<Language> = if (languageAbbreviations == null) {
-            languageService!!.getImplicitLanguages(repository)
+            languageService!!.getImplicitLanguages(project)
         } else {
-            languageService!!.findByAbbreviations(languageAbbreviations, repositoryId)
+            languageService!!.findByAbbreviations(languageAbbreviations, projectId)
         }
-        val translations = getKeyTranslations(languages, repository, key)
+        val translations = getKeyTranslations(languages, project, key)
         val translationsMap = translations.stream()
                 .collect(Collectors.toMap({ v: Translation -> v.language!!.abbreviation!! }, Translation::text))
         for (language in languages) {
@@ -67,9 +67,9 @@ class TranslationService(private val translationRepository: TranslationRepositor
         return translationsMap
     }
 
-    private fun getKeyTranslations(languages: Set<Language>, repository: Repository, key: Key?): Set<Translation> {
+    private fun getKeyTranslations(languages: Set<Language>, project: Project, key: Key?): Set<Translation> {
         return if (key != null) {
-            translationRepository.getTranslations(key, repository, languages)
+            translationRepository.getTranslations(key, project, languages)
         } else LinkedHashSet()
     }
 
@@ -87,11 +87,11 @@ class TranslationService(private val translationRepository: TranslationRepositor
 
     @Suppress("UNCHECKED_CAST")
     fun getViewData(
-            languageAbbreviations: Set<String>?, repositoryId: Long?, limit: Int, offset: Int, search: String?
+            languageAbbreviations: Set<String>?, projectId: Long?, limit: Int, offset: Int, search: String?
     ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-        val repository = repositoryService!!.get(repositoryId!!).orElseThrow { NotFoundException() }!!
-        val languages: Set<Language> = languageService!!.getLanguagesForTranslationsView(languageAbbreviations, repository)
-        val (count, data1) = getData(entityManager, repository, languages, search, limit, offset)
+        val project = projectService!!.get(projectId!!).orElseThrow { NotFoundException() }!!
+        val languages: Set<Language> = languageService!!.getLanguagesForTranslationsView(languageAbbreviations, project)
+        val (count, data1) = getData(entityManager, project, languages, search, limit, offset)
         return ViewDataResponse(data1
                 .stream()
                 .map { queryResult: Any? -> fromQueryResult(KeyWithTranslationsDto((queryResult as Array<Any?>))) }
@@ -100,7 +100,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     fun setTranslation(key: Key, languageAbbreviation: String?, text: String?) {
-        val language = languageService!!.findByAbbreviation(languageAbbreviation!!, key.repository!!)
+        val language = languageService!!.findByAbbreviation(languageAbbreviation!!, key.project!!)
                 .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         setTranslation(key, language, text)
     }
@@ -125,7 +125,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     fun deleteIfExists(key: Key, languageAbbreviation: String?) {
-        val language = languageService!!.findByAbbreviation(languageAbbreviation!!, key.repository!!)
+        val language = languageService!!.findByAbbreviation(languageAbbreviation!!, key.project!!)
                 .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         translationRepository.findOneByKeyAndLanguage(key, language)
                 .ifPresent { entity: Translation -> translationRepository.delete(entity) }
@@ -145,8 +145,8 @@ class TranslationService(private val translationRepository: TranslationRepositor
         currentMap[translation.key!!.path.name] = translation.text
     }
 
-    fun deleteAllByRepository(repositoryId: Long) {
-        translationRepository.deleteAllByRepositoryId(repositoryId)
+    fun deleteAllByProject(projectId: Long) {
+        translationRepository.deleteAllByProjectId(projectId)
     }
 
     fun deleteAllByLanguage(languageId: Long) {
@@ -172,8 +172,8 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     @Autowired
-    fun setRepositoryService(repositoryService: RepositoryService?) {
-        this.repositoryService = repositoryService
+    fun setRepositoryService(projectService: ProjectService?) {
+        this.projectService = projectService
     }
 
     fun saveAll(entities: Iterable<Translation?>) {

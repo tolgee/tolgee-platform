@@ -10,7 +10,7 @@ describe('Import Resolving', () => {
             cleanImportData()
             generateImportData().then(importData => {
                 login("franta")
-                visitImport(importData.body.repository.id);
+                visitImport(importData.body.project.id);
             })
         })
 
@@ -68,7 +68,7 @@ describe('Import Resolving', () => {
             cleanImportData()
             generateWithLongTextImportData().then(importData => {
                 login("franta")
-                visitImport(importData.body.repository.id);
+                visitImport(importData.body.project.id);
             })
         })
 

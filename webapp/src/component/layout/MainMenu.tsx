@@ -1,17 +1,17 @@
-import { TopBar } from './TopBar';
-import { SideMenu } from './sideMenu/SideMenu';
+import {TopBar} from './TopBar';
+import {SideMenu} from './sideMenu/SideMenu';
 import * as React from 'react';
-import { ReactElement } from 'react';
-import { Box } from '@material-ui/core';
-import { useSelector } from 'react-redux';
-import { AppState } from '../../store';
-import { container } from 'tsyringe';
-import { GlobalActions } from '../../store/global/GlobalActions';
-import { UserMenu } from '../security/UserMenu';
+import {ReactElement} from 'react';
+import {Box} from '@material-ui/core';
+import {useSelector} from 'react-redux';
+import {AppState} from '../../store';
+import {container} from 'tsyringe';
+import {GlobalActions} from '../../store/global/GlobalActions';
+import {UserMenu} from '../security/UserMenu';
 
 interface MainMenuProps {
   sideMenuItems?: ReactElement;
-  repositoryName?: string;
+  projectName?: string;
 }
 
 const actions = container.resolve(GlobalActions);
@@ -21,14 +21,14 @@ export const MainMenu = ({ sideMenuItems, ...props }: MainMenuProps) => {
 
   return (
     <>
-      {(!props.repositoryName && <TopBar />) || (
+      {(!props.projectName && <TopBar />) || (
         <SideMenu
           onSideMenuToggle={() => actions.toggleSideMenu.dispatch()}
           open={open}
         >
           <Box display="flex" justifyContent="center" mt={2} mb={2} p={1}>
             <Box display="flex" flexDirection="column">
-              {props.repositoryName && (
+              {props.projectName && (
                 <Box
                   fontWeight="bold"
                   display="flex"
@@ -37,8 +37,8 @@ export const MainMenu = ({ sideMenuItems, ...props }: MainMenuProps) => {
                   whiteSpace="normal"
                   justifyContent={(!open && 'center') || 'initial'}
                 >
-                  {(open && props.repositoryName) ||
-                    props.repositoryName.substr(0, 1)}
+                  {(open && props.projectName) ||
+                    props.projectName.substr(0, 1)}
                 </Box>
               )}
 
