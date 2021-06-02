@@ -25,17 +25,17 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/api/projects")
 @Tag(name = "Project")
-open class ProjectController @Autowired constructor(private val projectService: ProjectService,
-                                                       private val authenticationFacade: AuthenticationFacade,
-                                                       private val securityService: SecurityService,
-                                                       private val invitationService: InvitationService,
-                                                       private val permissionService: PermissionService,
-                                                       private val tolgeeProperties: TolgeeProperties
+class ProjectController @Autowired constructor(private val projectService: ProjectService,
+                                               private val authenticationFacade: AuthenticationFacade,
+                                               private val securityService: SecurityService,
+                                               private val invitationService: InvitationService,
+                                               private val permissionService: PermissionService,
+                                               private val tolgeeProperties: TolgeeProperties
 ) : IController {
 
     @PostMapping(value = [""])
     @Operation(summary = "Creates project with specified languages")
-    open fun createProject(@RequestBody @Valid dto: CreateProjectDTO?): ProjectDTO {
+    fun createProject(@RequestBody @Valid dto: CreateProjectDTO?): ProjectDTO {
         val userAccount = authenticationFacade.userAccount
         if (!this.tolgeeProperties.authentication.userCanCreateProjects
                 && userAccount.role != UserAccount.Role.ADMIN) {
@@ -49,7 +49,7 @@ open class ProjectController @Autowired constructor(private val projectService: 
 
     @GetMapping(value = ["/{id}"])
     @Operation(summary = "Returns project by id")
-    open fun getProject(@PathVariable("id") id: Long?): ProjectDTO {
+    fun getProject(@PathVariable("id") id: Long?): ProjectDTO {
         val permission = securityService.checkAnyProjectPermission(id!!)
         val project = projectService.get(id).orElseThrow { NotFoundException() }!!
         return fromEntityAndPermission(project, permission)
@@ -57,7 +57,7 @@ open class ProjectController @Autowired constructor(private val projectService: 
 
     @Operation(summary = "Modifies project")
     @PostMapping(value = ["/edit"])
-    open fun editProject(@RequestBody @Valid dto: EditProjectDTO?): ProjectDTO {
+    fun editProject(@RequestBody @Valid dto: EditProjectDTO?): ProjectDTO {
         val permission = securityService.checkProjectPermission(dto!!.projectId!!, Permission.ProjectPermissionType.MANAGE)
         val project = projectService.editProject(dto)
         return fromEntityAndPermission(project, permission)
@@ -65,18 +65,18 @@ open class ProjectController @Autowired constructor(private val projectService: 
 
     @GetMapping(value = [""])
     @Operation(summary = "Return all projects, where use has any access")
-    open fun getAll(): List<ProjectDTO> = projectService.findAllPermitted(authenticationFacade.userAccount)
+    fun getAll(): List<ProjectDTO> = projectService.findAllPermitted(authenticationFacade.userAccount)
 
     @DeleteMapping(value = ["/{id}"])
     @Operation(summary = "Deletes project by id")
-    open fun deleteProject(@PathVariable id: Long?) {
+    fun deleteProject(@PathVariable id: Long?) {
         securityService.checkProjectPermission(id!!, Permission.ProjectPermissionType.MANAGE)
         projectService.deleteProject(id)
     }
 
     @PostMapping("/invite")
     @Operation(summary = "Generates user invitation link for project")
-    open fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): String {
+    fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): String {
         securityService.checkProjectPermission(invitation.projectId!!, Permission.ProjectPermissionType.MANAGE)
         val project = projectService.get(invitation.projectId!!).orElseThrow { NotFoundException() }!!
         return invitationService.create(project, invitation.type!!)
