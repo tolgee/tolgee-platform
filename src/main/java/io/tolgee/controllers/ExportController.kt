@@ -23,7 +23,8 @@ import java.util.zip.ZipOutputStream
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping("/api/project/{projectId}/export", "/api/project/export")
+@RequestMapping("/api/project/{projectId}/export", "/api/project/export",
+        "/api/repository/{projectId}/export", "/api/repository/export")
 @Tag(name = "Export")
 class ExportController @Autowired constructor(private val translationService: TranslationService,
                                               private val securityService: SecurityService,
