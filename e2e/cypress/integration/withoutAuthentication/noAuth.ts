@@ -1,23 +1,23 @@
 import {HOST} from "../../common/constants";
 import 'cypress-file-upload';
-import {createTestRepository, disableAuthentication, enableAuthentication, login} from "../../common/apiCalls";
+import {createTestProject, disableAuthentication, enableAuthentication, login} from "../../common/apiCalls";
 import {gcy} from "../../common/shared";
 
 describe('Test no authentication mode', () => {
     beforeEach(() => {
         enableAuthentication()
         login().then(() => {
-            createTestRepository()
+            createTestProject()
         })
         cy.visit(`${HOST}`)
     })
 
-    it("Has API keys item in repository menu", () => {
+    it("Has API keys item in project menu", () => {
         disableAuthentication()
-        createTestRepository()
+        createTestProject()
         cy.reload()
-        gcy("repository-settings-button").click()
-        gcy("repository-menu-items").should("contain", "API keys")
+        gcy("project-settings-button").click()
+        gcy("project-menu-items").should("contain", "API keys")
     })
 
     it("Has no user menu", () => {
@@ -26,7 +26,7 @@ describe('Test no authentication mode', () => {
         gcy(globalUserMenuDataCy).should("be.visible")
         disableAuthentication()
         cy.reload()
-        cy.contains("Repositories").should("be.visible")
+        cy.contains("Projects").should("be.visible")
         gcy(globalUserMenuDataCy).should("not.exist")
     })
 

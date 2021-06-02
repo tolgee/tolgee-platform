@@ -36,7 +36,7 @@ context('Login', () => {
         cy.contains("Github login").click()
         cy.contains("Fake GitHub").should("be.visible")
         cy.visit(HOST + "/login/auth_callback/github?scope=user%3Aemail&code=this_is_dummy_code")
-        cy.contains("Repositories").should("be.visible")
+        cy.contains("Projects").should("be.visible")
     });
 
     it('Will logout', () => {

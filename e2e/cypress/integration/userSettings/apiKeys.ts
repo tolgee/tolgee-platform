@@ -1,25 +1,25 @@
 import {allScopes, assertMessage, clickAdd, getPopover} from "../../common/shared";
 import {getAnyContainingText, getClosestContainingText} from "../../common/xPath";
 import {HOST} from "../../common/constants";
-import {cleanRepositoriesData, createApiKey, createRepositoriesData, createRepository, deleteRepository, login} from "../../common/apiCalls";
+import {cleanProjectsData, createApiKey, createProject, createProjectsData, deleteProject, login} from "../../common/apiCalls";
 import {Scope} from "../../common/types";
 import {ApiKeyDTO} from "../../../../webapp/src/service/response.types";
 
 describe('Api keys', () => {
-    let repository;
+    let project;
 
 
     describe("As admin", () => {
         beforeEach(() => {
             login()
-            createRepository({
+            createProject({
                 name: "Test", languages: [{abbreviation: "en", name: "English"}]
-            }).then(r => repository = r.body);
+            }).then(r => project = r.body);
             cy.visit(HOST + '/apiKeys');
         });
 
         afterEach(() => {
-            cy.wrap(null).then(() => deleteRepository(repository.id));
+            cy.wrap(null).then(() => deleteProject(project.id));
         })
 
         it('Will add an api key', () => {
@@ -31,7 +31,7 @@ describe('Api keys', () => {
 
         it('Will delete an api key', () => {
             createApiKey({
-                repositoryId: repository.id,
+                projectId: project.id,
                 scopes: ["keys.edit", "keys.edit", "translations.view"]
             }).then((key: ApiKeyDTO) => {
                 cy.reload()
@@ -43,7 +43,7 @@ describe('Api keys', () => {
 
         it('Will edit an api key', () => {
             createApiKey({
-                repositoryId: repository.id,
+                projectId: project.id,
                 scopes: ["keys.edit", "keys.edit", "translations.view"]
             }).then((key: ApiKeyDTO) => {
                 cy.reload()
@@ -58,13 +58,13 @@ describe('Api keys', () => {
     })
 
     it("will create API Key for user with lower permissions", () => {
-        cleanRepositoriesData()
-        createRepositoriesData()
+        cleanProjectsData()
+        createProjectsData()
         login("cukrberg@facebook.com", "admin")
         visit()
         clickAdd()
         cy.gcy("global-form-select").contains("Facebook itself").click()
-        cy.gcy("api-keys-repository-select-item").contains("Vaclav's cool repository").click()
+        cy.gcy("api-keys-project-select-item").contains("Vaclav's cool project").click()
         cy.gcy("global-form-save-button").click()
         assertMessage("API key successfully created")
     })
@@ -75,10 +75,10 @@ const visit = () => {
     cy.visit(HOST + '/apiKeys');
 }
 
-const create = (repository: string, scopes: Scope[]) => {
+const create = (project: string, scopes: Scope[]) => {
     clickAdd();
     cy.gcy("global-form-select").click()
-    getPopover().contains(repository).click();
+    getPopover().contains(project).click();
     const toRemove = new Set(allScopes);
     scopes.forEach(s => toRemove.delete(s));
     toRemove.forEach(s => cy.contains("Generate API key").xpath(getClosestContainingText(s)).click())

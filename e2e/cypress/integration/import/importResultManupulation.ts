@@ -1,6 +1,6 @@
 import {cleanImportData, generateImportData, login} from "../../common/apiCalls";
 import 'cypress-file-upload';
-import {confirmStandard, gcy, selectInRepositoryMenu, selectInSelect} from "../../common/shared";
+import {confirmStandard, gcy, selectInProjectMenu, selectInSelect} from "../../common/shared";
 import {getLanguageRow, getLanguageSelect, visitImport} from "../../common/import";
 
 describe('Import result & manipulation', () => {
@@ -9,7 +9,7 @@ describe('Import result & manipulation', () => {
 
         generateImportData().then(importData => {
             login("franta")
-            visitImport(importData.body.repository.id);
+            visitImport(importData.body.project.id);
         })
     })
 
@@ -81,7 +81,7 @@ describe('Import result & manipulation', () => {
         cy.xpath("//input[@name='abbreviation']").type("nl")
         gcy("global-form-save-button").click()
         getLanguageSelect(filename).should("contain.text", "New language")
-        selectInRepositoryMenu("Languages")
+        selectInProjectMenu("Languages")
         cy.contains("New language").should("be.visible")
     })
 

@@ -59,27 +59,27 @@ export const login = (username = USERNAME, password = PASSWORD) => {
     })
 }
 
-export const createRepository = (createRepositoryDto: { name: string, languages: Partial<LanguageDTO>[] }) => {
-    const create = () => apiFetch("repositories", {body: JSON.stringify(createRepositoryDto), method: "POST"});
-    return apiFetch("repositories").then(res => {
-        const test = res.body.find(i => i.name === createRepositoryDto.name)
+export const createProject = (createProjectDto: { name: string, languages: Partial<LanguageDTO>[] }) => {
+    const create = () => apiFetch("projects", {body: JSON.stringify(createProjectDto), method: "POST"});
+    return apiFetch("projects").then(res => {
+        const test = res.body.find(i => i.name === createProjectDto.name)
         if (test) {
-            return deleteRepository(test.id).then(() => create());
+            return deleteProject(test.id).then(() => create());
         }
 
         return create();
     })
 }
 
-export const createTestRepository = () => createRepository({
+export const createTestProject = () => createProject({
     name: "Test", languages: [{abbreviation: "en", name: "English"}]
 });
 
-export const setTranslations = (repositoryId, key: string, translations: { [lang: string]: string }) =>
-    apiFetch(`repository/${repositoryId}/keys/create`, {body: {key, translations}, method: "POST"});
+export const setTranslations = (projectId, key: string, translations: { [lang: string]: string }) =>
+    apiFetch(`project/${projectId}/keys/create`, {body: {key, translations}, method: "POST"});
 
-export const deleteRepository = (id: number) => {
-    return apiFetch(`repositories/${id}`, {method: "DELETE"});
+export const deleteProject = (id: number) => {
+    return apiFetch(`projects/${id}`, {method: "DELETE"});
 }
 
 export const createUser = (username: string = "test", password: string = "test", fullName = "Test Full Name") => {
@@ -122,17 +122,17 @@ export const getUser = (username: string) => {
     })
 }
 
-export const createApiKey = (body: { repositoryId: number, scopes: Scope[] }) =>
+export const createApiKey = (body: { projectId: number, scopes: Scope[] }) =>
     apiFetch(`apiKeys`, {method: "POST", body}).then(r => r.body) as any as Promise<ApiKeyDTO>
 
-export const addScreenshot = (repositoryId: number, key: string, path: string) => {
+export const addScreenshot = (projectId: number, key: string, path: string) => {
     return cy.fixture(path).then(f => {
         const blob = Cypress.Blob.base64StringToBlob(f, 'image/png')
         const data = new FormData();
         data.append("screenshot", blob);
         data.append("key", key);
         cy.log("Uploading screenshot: " + path);
-        return fetch(`${API_URL}/api/repository/${repositoryId}/screenshots`, {
+        return fetch(`${API_URL}/api/project/${projectId}/screenshots`, {
             headers: {
                 'Authorization': "Bearer " + token,
             },
@@ -180,8 +180,8 @@ export const generateBaseImportData = () => internalFetch("e2e-data/import/gener
 export const generateManyLanguagesImportData = () => internalFetch("e2e-data/import/generate-many-languages")
 export const generateWithLongTextImportData = () => internalFetch("e2e-data/import/generate-with-long-text")
 
-export const cleanRepositoriesData = () => internalFetch("e2e-data/repositories/clean")
-export const createRepositoriesData = () => internalFetch("e2e-data/repositories/create")
+export const cleanProjectsData = () => internalFetch("e2e-data/projects/clean")
+export const createProjectsData = () => internalFetch("e2e-data/projects/create")
 
 export const enableEmailVerification = () => setProperty("authentication.needsEmailVerification", true)
 export const disableEmailVerification = () => setProperty("authentication.needsEmailVerification", false)

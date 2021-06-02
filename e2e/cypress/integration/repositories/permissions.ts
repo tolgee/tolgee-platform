@@ -1,8 +1,7 @@
-import {cleanOrganizationData, cleanRepositoriesData, createOrganizationData, createRepositoriesData, login} from "../../common/apiCalls";
+import {cleanProjectsData, createProjectsData, login} from "../../common/apiCalls";
 import {HOST} from "../../common/constants";
 import 'cypress-file-upload';
-import {assertMessage, clickGlobalSave, confirmHardMode, confirmStandard, gcy, goToPage, selectInRepositoryMenu} from "../../common/shared";
-import {RepositoryDTO} from "../../../../webapp/src/service/response.types";
+import {assertMessage, confirmStandard, gcy, goToPage, selectInProjectMenu} from "../../common/shared";
 
 describe('Organization Settings', () => {
     beforeEach(() => {
@@ -11,8 +10,8 @@ describe('Organization Settings', () => {
 
     describe("Cukrberg's permissions", () => {
         before(() => {
-            cleanRepositoriesData()
-            createRepositoriesData()
+            cleanProjectsData()
+            createProjectsData()
         })
 
         beforeEach(() => {
@@ -28,18 +27,18 @@ describe('Organization Settings', () => {
         })
 
         it("Has manage permissions (direct manage permissions)", () => {
-            validateManagePermissions("Vaclav's funny repository")
+            validateManagePermissions("Vaclav's funny project")
         })
 
         it("Has view permissions on facebook (direct view permissions)", () => {
-            validateViewPermissions("Vaclav's cool repository")
+            validateViewPermissions("Vaclav's cool project")
         })
     })
 
     describe("Vaclav's permissions", () => {
         before(() => {
-            cleanRepositoriesData()
-            createRepositoriesData()
+            cleanProjectsData()
+            createProjectsData()
         })
 
         beforeEach(() => {
@@ -58,8 +57,8 @@ describe('Organization Settings', () => {
     describe("Permission settings", () => {
         describe("Not modifying", () => {
             before(() => {
-                cleanRepositoriesData()
-                createRepositoriesData()
+                cleanProjectsData()
+                createProjectsData()
             })
 
             beforeEach(() => {
@@ -68,8 +67,8 @@ describe('Organization Settings', () => {
 
             it("Can search in permissions", () => {
                 visitList()
-                enterRepositorySettings("Facebook itself")
-                selectInRepositoryMenu("Permissions")
+                enterProjectSettings("Facebook itself")
+                selectInProjectMenu("Permissions")
                 gcy("global-list-search").find("input").type("Doe")
                 gcy("global-paginated-list").within(() => {
                     gcy("global-list-item").should("have.length", 1).should("contain", "John Doe")
@@ -80,16 +79,16 @@ describe('Organization Settings', () => {
             it("Can paginate", () => {
                 visitList()
                 login("gates@microsoft.com", "admin")
-                enterRepositorySettings("Microsoft Word")
-                selectInRepositoryMenu("Permissions")
+                enterProjectSettings("Microsoft Word")
+                selectInProjectMenu("Permissions")
                 goToPage(2)
                 cy.contains("owner@zzzcool9.com (owner@zzzcool9.com)").should("be.visible")
             })
 
             it("Has enabled proper options for each user", () => {
                 visitList()
-                enterRepositorySettings("Facebook itself")
-                selectInRepositoryMenu("Permissions")
+                enterProjectSettings("Facebook itself")
+                selectInProjectMenu("Permissions")
                 gcy("global-paginated-list").within(() => {
                     gcy("global-list-item").contains("John Doe").closest("li").within(() => {
                         gcy("permissions-revoke-button").should("be.disabled")
@@ -105,15 +104,15 @@ describe('Organization Settings', () => {
 
         describe("Modifying", () => {
             beforeEach(() => {
-                cleanRepositoriesData()
-                createRepositoriesData()
+                cleanProjectsData()
+                createProjectsData()
                 login("cukrberg@facebook.com", "admin")
             })
 
             it("Can modify permissions", () => {
                 visitList()
-                enterRepositorySettings("Facebook itself")
-                selectInRepositoryMenu("Permissions")
+                enterProjectSettings("Facebook itself")
+                selectInProjectMenu("Permissions")
                 gcy("global-paginated-list").within(() => {
                     gcy("global-list-item").contains("Vaclav Novak").closest("li").within(() => {
                         gcy("permissions-menu-button").click()
@@ -129,8 +128,8 @@ describe('Organization Settings', () => {
 
             it("Can revoke permissions", () => {
                 visitList()
-                enterRepositorySettings("Facebook itself")
-                selectInRepositoryMenu("Permissions")
+                enterProjectSettings("Facebook itself")
+                selectInProjectMenu("Permissions")
                 gcy("global-paginated-list").within(() => {
                     gcy("global-list-item").contains("Vaclav Novak").closest("li").within(() => {
                         gcy("permissions-revoke-button").click()
@@ -148,18 +147,18 @@ describe('Organization Settings', () => {
     })
 })
 
-const enterRepositorySettings = (repositoryName: string) => {
+const enterProjectSettings = (projectName: string) => {
     visitList()
 
-    gcy("global-paginated-list").contains(repositoryName).closest("li").within(() => {
-        cy.gcy("repository-settings-button").should("be.visible").click()
+    gcy("global-paginated-list").contains(projectName).closest("li").within(() => {
+        cy.gcy("project-settings-button").should("be.visible").click()
     })
 }
 
-const enterRepository = (repositoryName: string) => {
+const enterProject = (projectName: string) => {
     visitList()
 
-    gcy("global-paginated-list").contains(repositoryName).closest("a").click()
+    gcy("global-paginated-list").contains(projectName).closest("a").click()
     gcy("global-base-view-title").contains("Translations").should("be.visible")
 }
 
@@ -167,37 +166,37 @@ const visitList = () => {
     cy.visit(`${HOST}`)
 }
 
-const MANAGE_REPOSITORY_ITEMS = ["Permissions", "Languages"]
-const OTHER_REPOSITORY_ITEMS = ["Repositories", "Export"]
+const MANAGE_PROJECT_ITEMS = ["Permissions", "Languages"]
+const OTHER_PROJECT_ITEMS = ["Projects", "Export"]
 
 const assertManageMenuItemsNotVisible = () => {
-    MANAGE_REPOSITORY_ITEMS.forEach(item => {
-        gcy("repository-menu-items").should("not.contain", item)
+    MANAGE_PROJECT_ITEMS.forEach(item => {
+        gcy("project-menu-items").should("not.contain", item)
     })
 }
 
 const assertOtherMenuItemsVisible = () => {
-    OTHER_REPOSITORY_ITEMS.forEach(item => {
-        gcy("repository-menu-items").should("contain", item)
+    OTHER_PROJECT_ITEMS.forEach(item => {
+        gcy("project-menu-items").should("contain", item)
     })
 }
 
-const validateManagePermissions = (repositoryName: string) => {
+const validateManagePermissions = (projectName: string) => {
     visitList()
-    enterRepositorySettings(repositoryName)
+    enterProjectSettings(projectName)
     cy.gcy("global-form-save-button").click()
-    assertMessage("Repository settings are successfully saved.")
-    enterRepository(repositoryName)
-    MANAGE_REPOSITORY_ITEMS.forEach(item => {
-        gcy("repository-menu-items").should("contain", item)
+    assertMessage("Project settings are successfully saved.")
+    enterProject(projectName)
+    MANAGE_PROJECT_ITEMS.forEach(item => {
+        gcy("project-menu-items").should("contain", item)
     })
     assertOtherMenuItemsVisible()
 }
 
-const validateEditPermissions = (repositoryName: string) => {
+const validateEditPermissions = (projectName: string) => {
     visitList()
-    enterRepository(repositoryName)
-    selectInRepositoryMenu("Translations")
+    enterProject(projectName)
+    selectInProjectMenu("Translations")
     assertManageMenuItemsNotVisible()
     assertOtherMenuItemsVisible()
     gcy("global-plus-button").should("be.visible").click()
@@ -210,10 +209,10 @@ const validateEditPermissions = (repositoryName: string) => {
     assertMessage("Translations deleted!")
 }
 
-const validateTranslatePermissions = (repositoryName: string) => {
+const validateTranslatePermissions = (projectName: string) => {
     visitList()
-    enterRepository(repositoryName)
-    selectInRepositoryMenu("Translations")
+    enterProject(projectName)
+    selectInProjectMenu("Translations")
     assertManageMenuItemsNotVisible()
     assertOtherMenuItemsVisible()
     gcy("global-plus-button").should("not.exist")
@@ -223,13 +222,13 @@ const validateTranslatePermissions = (repositoryName: string) => {
 }
 
 
-const validateViewPermissions = (repositoryName: string) => {
+const validateViewPermissions = (projectName: string) => {
     visitList()
-    enterRepository(repositoryName)
-    gcy("repository-menu-items").should("contain", "Repositories")
-    gcy("repository-menu-items").should("contain", "Export")
+    enterProject(projectName)
+    gcy("project-menu-items").should("contain", "Projects")
+    gcy("project-menu-items").should("contain", "Export")
     assertManageMenuItemsNotVisible()
     assertOtherMenuItemsVisible()
-    selectInRepositoryMenu("Translations")
+    selectInProjectMenu("Translations")
     gcy("global-plus-button").should("not.exist")
 }

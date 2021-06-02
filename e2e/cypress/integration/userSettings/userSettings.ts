@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import {getAnyContainingText} from "../../common/xPath";
 import {HOST} from "../../common/constants";
-import {createTestRepository, login} from "../../common/apiCalls";
+import {createTestProject, login} from "../../common/apiCalls";
 import {getPopover} from "../../common/shared";
 
 
@@ -16,9 +16,9 @@ describe('User settings', () => {
         cy.xpath(getAnyContainingText("Api keys")).click();
     });
 
-    it('will open user menu from repositories', () => {
-        createTestRepository().then(r => {
-            cy.visit(`${HOST}/repositories/${r.body.id}`);
+    it('will open user menu from projects', () => {
+        createTestProject().then(r => {
+            cy.visit(`${HOST}/projects/${r.body.id}`);
             cy.xpath("//*[@aria-controls='user-menu']").click();
             getPopover().contains("settings").click();
             cy.contains("User profile").should("be.visible");

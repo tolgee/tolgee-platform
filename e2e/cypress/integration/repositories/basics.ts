@@ -1,12 +1,12 @@
-import {cleanRepositoriesData, createRepositoriesData, login} from "../../common/apiCalls";
+import {cleanProjectsData, createProjectsData, login} from "../../common/apiCalls";
 import {HOST} from "../../common/constants";
 import 'cypress-file-upload';
 import {assertMessage, gcy} from "../../common/shared";
 
-describe('Repositories Basics', () => {
+describe('Projects Basics', () => {
     beforeEach(() => {
-        cleanRepositoriesData()
-        createRepositoriesData()
+        cleanProjectsData()
+        createProjectsData()
         login("cukrberg@facebook.com", "admin")
         cy.visit(`${HOST}`)
     })
@@ -16,31 +16,31 @@ describe('Repositories Basics', () => {
         gcy("global-paginated-list").within(() => gcy("global-list-item").should("have.length", 1)).contains("Facebook itself")
     })
 
-    it("Creates repository with user owner", () => {
-        createRepository("I am a great repository", "Mark Cukrberg")
+    it("Creates project with user owner", () => {
+        createProject("I am a great project", "Mark Cukrberg")
     })
 
     it("Creates with organization owner", () => {
-        createRepository("I am a great repository", "Facebook")
+        createProject("I am a great project", "Facebook")
     })
 
-    const createRepository = (name: string, owner: string) => {
+    const createProject = (name: string, owner: string) => {
         gcy("global-plus-button").click()
-        gcy("repository-owner-select").click()
-        gcy("repository-owner-select-item").contains(owner).click()
-        gcy("repository-name-field").find("input").type(name)
-        gcy("repository-language-name-field").find("input").type("English")
-        gcy("repository-language-abbreviation-field").find("input").type("en")
+        gcy("project-owner-select").click()
+        gcy("project-owner-select-item").contains(owner).click()
+        gcy("project-name-field").find("input").type(name)
+        gcy("project-language-name-field").find("input").type("English")
+        gcy("project-language-abbreviation-field").find("input").type("en")
         gcy("global-field-array-plus-button").click()
-        gcy("repository-language-name-field").eq(1).find("input").type("Deutsch")
-        gcy("repository-language-abbreviation-field").eq(1).find("input").type("de")
+        gcy("project-language-name-field").eq(1).find("input").type("Deutsch")
+        gcy("project-language-abbreviation-field").eq(1).find("input").type("de")
         gcy("global-field-array-plus-button").click()
-        gcy("repository-language-name-field").eq(2).find("input").type("Česky")
-        gcy("repository-language-abbreviation-field").eq(2).find("input").type("cs")
+        gcy("project-language-name-field").eq(2).find("input").type("Česky")
+        gcy("project-language-abbreviation-field").eq(2).find("input").type("cs")
         gcy("global-form-save-button").click()
-        assertMessage("Repository created")
+        assertMessage("Project created")
         gcy("global-paginated-list").contains(name).closest("li").within(() => {
-            gcy("repository-list-owner").contains(owner).should("be.visible")
+            gcy("project-list-owner").contains(owner).should("be.visible")
         })
     }
 

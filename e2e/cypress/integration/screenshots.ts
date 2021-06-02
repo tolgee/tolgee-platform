@@ -1,15 +1,15 @@
-import {addScreenshot, createRepository, deleteRepository, login, setTranslations} from "../common/apiCalls";
+import {addScreenshot, createProject, deleteProject, login, setTranslations} from "../common/apiCalls";
 import {HOST} from "../common/constants";
 import 'cypress-file-upload';
 import {getPopover} from "../common/shared";
-import {RepositoryDTO} from "../../../webapp/src/service/response.types";
+import {ProjectDTO} from "../../../webapp/src/service/response.types";
 
 describe('Key screenshots', () => {
-    let repository: RepositoryDTO = null
+    let project: ProjectDTO = null
 
     beforeEach(() => {
         login().then(() => {
-            createRepository({
+            createProject({
                     name: "Test",
                     languages: [
                         {
@@ -23,14 +23,14 @@ describe('Key screenshots', () => {
                     ]
                 }
             ).then(r => {
-                repository = r.body as RepositoryDTO;
-                window.localStorage.setItem('selectedLanguages', `{"${repository.id}":["en"]}`);
+                project = r.body as ProjectDTO;
+                window.localStorage.setItem('selectedLanguages', `{"${project.id}":["en"]}`);
                 const promises = []
                 for (let i = 1; i < 5; i++) {
-                    promises.push(setTranslations(repository.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}))
+                    promises.push(setTranslations(project.id, `Cool key ${i.toString().padStart(2, "0")}`, {"en": "Cool"}))
                 }
                 return Cypress.Promise.all(promises).then(() => {
-                    visit(repository.id)
+                    visit(project.id)
                 })
             })
         })
@@ -75,7 +75,7 @@ describe('Key screenshots', () => {
     })
 
     it("images and plus button is visible", () => {
-        addScreenshot(repository.id, "Cool key 04", "screenshots/test_1.png").then(() => {
+        addScreenshot(project.id, "Cool key 04", "screenshots/test_1.png").then(() => {
                 getCameraButton(4).click()
                 cy.xpath("//img[@alt='Screenshot']").should("be.visible").and($img => {
                     expect($img.length).to.be.equal(1)
@@ -90,7 +90,7 @@ describe('Key screenshots', () => {
         const promises = [];
 
         for (let i = 0; i < 10; i++) {
-            promises.push(addScreenshot(repository.id, "Cool key 02", "screenshots/test_1.png"))
+            promises.push(addScreenshot(project.id, "Cool key 02", "screenshots/test_1.png"))
         }
 
         Cypress.Promise.all(promises).then(() => {
@@ -109,7 +109,7 @@ describe('Key screenshots', () => {
         const promises = [];
 
         for (let i = 0; i < 10; i++) {
-            promises.push(addScreenshot(repository.id, "Cool key 02", "screenshots/test_1.png"))
+            promises.push(addScreenshot(project.id, "Cool key 02", "screenshots/test_1.png"))
         }
 
 
@@ -138,13 +138,13 @@ describe('Key screenshots', () => {
     });
 
     afterEach(() => {
-        if (repository) {
-            deleteRepository(repository.id)
+        if (project) {
+            deleteProject(project.id)
         }
     })
 
-    const visit = (repositoryId) => {
-        cy.visit(`${HOST}/repositories/${repositoryId}/translations`)
+    const visit = (projectId) => {
+        cy.visit(`${HOST}/projects/${projectId}/translations`)
     }
 })
 

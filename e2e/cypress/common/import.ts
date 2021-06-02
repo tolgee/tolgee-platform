@@ -28,8 +28,8 @@ export const findResolutionRow = (key: string) => {
         .closestDcy("import-resolution-dialog-data-row")
 }
 
-export const visitImport = (repositoryId: number) => {
-    cy.visit(`${HOST}/repositories/${repositoryId}/import`)
+export const visitImport = (projectId: number) => {
+    cy.visit(`${HOST}/projects/${projectId}/import`)
 }
 
 export const getLanguageRow = (filename: string) => {

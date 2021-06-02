@@ -41,8 +41,8 @@ export const assertMessage = (message: string) => {
     gcy("global-snackbars").should("contain", message)
 }
 
-export const selectInRepositoryMenu = (itemName: string) => {
-    gcy("repository-menu-items").contains(itemName).click()
+export const selectInProjectMenu = (itemName: string) => {
+    gcy("project-menu-items").contains(itemName).click()
 }
 
 export const selectInSelect = (chainable: Chainable, renderedValue: string) => {
