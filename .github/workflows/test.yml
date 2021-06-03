@@ -6,7 +6,7 @@ on:
       "main"
 
 jobs:
-  main:
+  backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -20,8 +20,21 @@ jobs:
         with:
           node-version: '12.x'
 
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew test
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
@@ -34,12 +47,55 @@ jobs:
             ./e2e/cypress/videos/**/*
             ./e2e/cypress/screenshots/**/*
             ./build/reports/**/*
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Build with Gradle
+        run: ./gradlew runE2e
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: test
+          path: |
+            ./e2e/cypress/videos/**/*
+            ./e2e/cypress/screenshots/**/*
+            ./build/reports/**/*
+
   frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup node 
+      - name: Setup node
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
@@ -49,7 +105,7 @@ jobs:
         with:
           path: ~/.npm
           key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-        
+
       - name: Install dependencies
         run: npm ci
         working-directory: ./webapp

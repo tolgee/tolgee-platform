@@ -2,7 +2,6 @@ docker {
     dockerfile file('docker/app/Dockerfile')
     name "tolgee/tolgee"
     copySpec.from(tasks.unpack.outputs, 'docker/app').into("dependency")
-    //copySpec.from('docker/app/.dockerignore').into(".")
     buildArgs(['DEPENDENCY': "dependency"])
 }
 
