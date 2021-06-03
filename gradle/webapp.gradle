@@ -12,7 +12,7 @@ task copyDist(type: Copy) {
 }
 
 task installWebappDeps(type: Exec) {
-    commandLine "npm", "install"
+    commandLine "npm", "ci"
     workingDir = webappPath
     inputs.file("${project.projectDir}/webapp/package.json")
     inputs.file("${project.projectDir}/webapp/package-lock.json")

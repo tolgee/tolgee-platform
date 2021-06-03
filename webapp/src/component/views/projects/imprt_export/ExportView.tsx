@@ -1,14 +1,14 @@
-import {default as React, FunctionComponent, useEffect} from 'react';
-import {useRouteMatch} from 'react-router-dom';
-import {PARAMS} from '../../../../constants/links';
-import {BaseView} from '../../../layout/BaseView';
-import {Box, Button} from '@material-ui/core';
-import {container} from 'tsyringe';
-import {ExportActions} from '../../../../store/project/ExportActions';
-import {useSelector} from 'react-redux';
-import {AppState} from '../../../../store';
-import {useProject} from '../../../../hooks/useProject';
-import {T} from '@tolgee/react';
+import { default as React, FunctionComponent, useEffect } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { PARAMS } from '../../../../constants/links';
+import { BaseView } from '../../../layout/BaseView';
+import { Box, Button } from '@material-ui/core';
+import { container } from 'tsyringe';
+import { ExportActions } from '../../../../store/project/ExportActions';
+import { useSelector } from 'react-redux';
+import { AppState } from '../../../../store';
+import { useProject } from '../../../../hooks/useProject';
+import { T } from '@tolgee/react';
 
 const actions = container.resolve(ExportActions);
 

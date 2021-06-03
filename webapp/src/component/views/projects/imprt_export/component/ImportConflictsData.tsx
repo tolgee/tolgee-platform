@@ -1,17 +1,17 @@
-import React, {FunctionComponent, useEffect, useState} from 'react';
-import {components} from '../../../../../service/apiSchema';
-import {container} from 'tsyringe';
-import {ImportActions} from '../../../../../store/project/ImportActions';
-import {useProject} from '../../../../../hooks/useProject';
-import {Box, Grid, Typography} from '@material-ui/core';
-import {BoxLoading} from '../../../../common/BoxLoading';
-import {EmptyListMessage} from '../../../../common/EmptyListMessage';
-import {T} from '@tolgee/react';
-import {Pagination} from '@material-ui/lab';
-import {startLoading, stopLoading} from '../../../../../hooks/loading';
-import {ImportConflictTranslationsPair} from './ImportConflictTranslationsPair';
-import {ImportConflictsDataHeader} from './ImportConflictsDataHeader';
-import {ImportConflictsSecondaryBar} from './ImportConflictsSecondaryBar';
+import React, { FunctionComponent, useEffect, useState } from 'react';
+import { components } from '../../../../../service/apiSchema';
+import { container } from 'tsyringe';
+import { ImportActions } from '../../../../../store/project/ImportActions';
+import { useProject } from '../../../../../hooks/useProject';
+import { Box, Grid, Typography } from '@material-ui/core';
+import { BoxLoading } from '../../../../common/BoxLoading';
+import { EmptyListMessage } from '../../../../common/EmptyListMessage';
+import { T } from '@tolgee/react';
+import { Pagination } from '@material-ui/lab';
+import { startLoading, stopLoading } from '../../../../../hooks/loading';
+import { ImportConflictTranslationsPair } from './ImportConflictTranslationsPair';
+import { ImportConflictsDataHeader } from './ImportConflictsDataHeader';
+import { ImportConflictsSecondaryBar } from './ImportConflictsSecondaryBar';
 
 const actions = container.resolve(ImportActions);
 export const ImportConflictsData: FunctionComponent<{

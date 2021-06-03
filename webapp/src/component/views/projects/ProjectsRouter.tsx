@@ -1,10 +1,10 @@
-import {Switch, useRouteMatch} from 'react-router-dom';
+import { Switch, useRouteMatch } from 'react-router-dom';
 import * as React from 'react';
-import {ProjectListView} from './ProjectListView';
-import {ProjectCreateView} from './project/ProjectCreateView';
-import {LINKS} from '../../../constants/links';
-import {PrivateRoute} from '../../common/PrivateRoute';
-import {ProjectRouter} from './ProjectRouter';
+import { ProjectListView } from './ProjectListView';
+import { ProjectCreateView } from './project/ProjectCreateView';
+import { LINKS } from '../../../constants/links';
+import { PrivateRoute } from '../../common/PrivateRoute';
+import { ProjectRouter } from './ProjectRouter';
 
 export const ProjectsRouter = () => {
   let match = useRouteMatch();

@@ -1,17 +1,15 @@
 import * as React from 'react';
-import {FunctionComponent, useEffect} from 'react';
-import {container} from 'tsyringe';
-import {ProjectActions} from '../store/project/ProjectActions';
-import {useSelector} from 'react-redux';
-import {AppState} from '../store';
-import {GlobalError} from '../error/GlobalError';
-import {FullPageLoading} from '../component/common/FullPageLoading';
+import { FunctionComponent, useEffect } from 'react';
+import { container } from 'tsyringe';
+import { ProjectActions } from '../store/project/ProjectActions';
+import { useSelector } from 'react-redux';
+import { AppState } from '../store';
+import { GlobalError } from '../error/GlobalError';
+import { FullPageLoading } from '../component/common/FullPageLoading';
 
 const projectActions = container.resolve(ProjectActions);
 
-export const ProjectProvider: FunctionComponent<{ id: number }> = (
-  props
-) => {
+export const ProjectProvider: FunctionComponent<{ id: number }> = (props) => {
   let projectDTOLoadable = useSelector(
     (state: AppState) => state.projects.loadables.project
   );

@@ -1,14 +1,19 @@
-import {singleton} from 'tsyringe';
+import { singleton } from 'tsyringe';
 
-import {ProjectService} from '../../service/ProjectService';
-import {ProjectDTO} from '../../service/response.types';
-import {LINKS} from '../../constants/links';
-import {AbstractLoadableActions, createLoadable, Loadable, StateWithLoadables,} from '../AbstractLoadableActions';
-import {T} from '@tolgee/react';
-import {AppState} from '../index';
-import {useSelector} from 'react-redux';
-import {ApiV2HttpService} from '../../service/http/ApiV2HttpService';
-import {ApiSchemaHttpService} from '../../service/http/ApiSchemaHttpService';
+import { ProjectService } from '../../service/ProjectService';
+import { ProjectDTO } from '../../service/response.types';
+import { LINKS } from '../../constants/links';
+import {
+  AbstractLoadableActions,
+  createLoadable,
+  Loadable,
+  StateWithLoadables,
+} from '../AbstractLoadableActions';
+import { T } from '@tolgee/react';
+import { AppState } from '../index';
+import { useSelector } from 'react-redux';
+import { ApiV2HttpService } from '../../service/http/ApiV2HttpService';
+import { ApiSchemaHttpService } from '../../service/http/ApiSchemaHttpService';
 
 export class ProjectsState extends StateWithLoadables<ProjectActions> {
   projects: ProjectDTO[] | undefined = undefined;

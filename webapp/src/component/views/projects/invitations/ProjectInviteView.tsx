@@ -1,24 +1,24 @@
-import {default as React, FunctionComponent, useEffect} from 'react';
-import {useRouteMatch} from 'react-router-dom';
-import {LINKS, PARAMS} from '../../../../constants/links';
-import {Button, TextField} from '@material-ui/core';
-import {BaseView} from '../../../layout/BaseView';
-import {useSelector} from 'react-redux';
-import {AppState} from '../../../../store';
-import {container} from 'tsyringe';
-import {ProjectInvitationActions} from '../../../../store/project/invitations/ProjectInvitationActions';
-import {projectPermissionTypes} from '../../../../constants/projectPermissionTypes';
-import {StandardForm} from '../../../common/form/StandardForm';
+import { default as React, FunctionComponent, useEffect } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { LINKS, PARAMS } from '../../../../constants/links';
+import { Button, TextField } from '@material-ui/core';
+import { BaseView } from '../../../layout/BaseView';
+import { useSelector } from 'react-redux';
+import { AppState } from '../../../../store';
+import { container } from 'tsyringe';
+import { ProjectInvitationActions } from '../../../../store/project/invitations/ProjectInvitationActions';
+import { projectPermissionTypes } from '../../../../constants/projectPermissionTypes';
+import { StandardForm } from '../../../common/form/StandardForm';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import {BoxLoading} from '../../../common/BoxLoading';
-import {EmptyListMessage} from '../../../common/EmptyListMessage';
-import {T} from '@tolgee/react';
-import {PermissionSelect} from '../../../security/PermissionSelect';
+import { BoxLoading } from '../../../common/BoxLoading';
+import { EmptyListMessage } from '../../../common/EmptyListMessage';
+import { T } from '@tolgee/react';
+import { PermissionSelect } from '../../../security/PermissionSelect';
 
 const actions = container.resolve(ProjectInvitationActions);
 
@@ -52,9 +52,7 @@ export const ProjectInviteView: FunctionComponent<{}> = (props) => {
                 <T>invite_user_generate_invitation_link</T>
               </Button>
             }
-            onSubmit={(v) =>
-              actions.generateCode.dispatch(projectId, v.type)
-            }
+            onSubmit={(v) => actions.generateCode.dispatch(projectId, v.type)}
             initialValues={{ type: 'MANAGE' }}
           >
             <PermissionSelect

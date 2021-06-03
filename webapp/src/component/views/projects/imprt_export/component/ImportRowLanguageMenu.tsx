@@ -1,16 +1,25 @@
-import React, {ChangeEvent, FunctionComponent} from 'react';
-import {FormControl, FormHelperText, IconButton, InputAdornment, InputLabel, makeStyles, MenuItem, Select,} from '@material-ui/core';
-import {useProjectLanguages} from '../../../../../hooks/useProjectLanguages';
-import {T} from '@tolgee/react';
-import {container} from 'tsyringe';
-import {ImportActions} from '../../../../../store/project/ImportActions';
-import {useImportDataHelper} from '../hooks/useImportDataHelper';
-import {useProject} from '../../../../../hooks/useProject';
-import {Add, Clear} from '@material-ui/icons';
+import React, { ChangeEvent, FunctionComponent } from 'react';
+import {
+  FormControl,
+  FormHelperText,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  makeStyles,
+  MenuItem,
+  Select,
+} from '@material-ui/core';
+import { useProjectLanguages } from '../../../../../hooks/useProjectLanguages';
+import { T } from '@tolgee/react';
+import { container } from 'tsyringe';
+import { ImportActions } from '../../../../../store/project/ImportActions';
+import { useImportDataHelper } from '../hooks/useImportDataHelper';
+import { useProject } from '../../../../../hooks/useProject';
+import { Add, Clear } from '@material-ui/icons';
 import clsx from 'clsx';
-import {useStateObject} from '../../../../../fixtures/useStateObject';
-import {ImportLanguageCreateDialog} from './ImportLanguageCreateDialog';
-import {LanguageActions} from '../../../../../store/languages/LanguageActions';
+import { useStateObject } from '../../../../../fixtures/useStateObject';
+import { ImportLanguageCreateDialog } from './ImportLanguageCreateDialog';
+import { LanguageActions } from '../../../../../store/languages/LanguageActions';
 
 const actions = container.resolve(ImportActions);
 const languageActions = container.resolve(LanguageActions);

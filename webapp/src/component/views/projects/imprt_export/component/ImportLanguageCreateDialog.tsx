@@ -1,7 +1,7 @@
-import React, {FunctionComponent} from 'react';
-import {Box, Dialog, DialogContent, DialogTitle} from '@material-ui/core';
-import {T} from '@tolgee/react';
-import {LanguageCreateForm} from '../../../../languages/LanguageCreateForm';
+import React, { FunctionComponent } from 'react';
+import { Box, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
+import { T } from '@tolgee/react';
+import { LanguageCreateForm } from '../../../../languages/LanguageCreateForm';
 
 export const ImportLanguageCreateDialog: FunctionComponent<{
   open: boolean;

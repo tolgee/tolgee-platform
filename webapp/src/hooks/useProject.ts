@@ -1,7 +1,7 @@
-import {useSelector} from 'react-redux';
-import {AppState} from '../store';
-import {GlobalError} from '../error/GlobalError';
-import {components} from '../service/apiSchema';
+import { useSelector } from 'react-redux';
+import { AppState } from '../store';
+import { GlobalError } from '../error/GlobalError';
+import { components } from '../service/apiSchema';
 
 export const useProject = (): components['schemas']['ProjectModel'] => {
   let projectDTOLoadable = useSelector(

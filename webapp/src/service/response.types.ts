@@ -1,4 +1,4 @@
-import {components} from './apiSchema';
+import { components } from './apiSchema';
 
 export type TranslationsObject = { [abbreviation: string]: string };
 

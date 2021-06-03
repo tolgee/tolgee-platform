@@ -1,5 +1,5 @@
-import React, {FunctionComponent} from 'react';
-import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
+import React, { FunctionComponent } from 'react';
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -7,12 +7,12 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
-import {TransitionProps} from '@material-ui/core/transitions';
-import {components} from '../../../../../service/apiSchema';
-import {T} from '@tolgee/react';
-import {ImportConflictsData} from './ImportConflictsData';
-import {container} from 'tsyringe';
-import {ImportActions} from '../../../../../store/project/ImportActions';
+import { TransitionProps } from '@material-ui/core/transitions';
+import { components } from '../../../../../service/apiSchema';
+import { T } from '@tolgee/react';
+import { ImportConflictsData } from './ImportConflictsData';
+import { container } from 'tsyringe';
+import { ImportActions } from '../../../../../store/project/ImportActions';
 
 const actions = container.resolve(ImportActions);
 const useStyles = makeStyles((theme: Theme) =>

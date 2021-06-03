@@ -3,6 +3,7 @@
   "ignorePatterns": ["node_modules", "*.d.ts"],
   "parser": "@typescript-eslint/parser",
   "extends": ["eslint:recommended"],
+  "plugins": ["prettier"],
   "env": {
     "browser": true,
     "node": true
@@ -14,6 +15,7 @@
     "RequestInit": true
   },
   "rules": {
-    "no-unused-vars": "off"
+    "no-unused-vars": "off",
+    "prettier/prettier": "error"
   }
 }

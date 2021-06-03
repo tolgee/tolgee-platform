@@ -1,11 +1,11 @@
 import * as React from 'react';
-import {FunctionComponent, useContext} from 'react';
-import {Box, Checkbox} from '@material-ui/core';
-import {TableCell} from './TableCell';
-import {RowContext} from './TranslationsRow';
-import {TranslationListContext} from './TtranslationsGridContextProvider';
-import {useProjectPermissions} from '../../hooks/useProjectPermissions';
-import {ProjectPermissionType} from '../../service/response.types';
+import { FunctionComponent, useContext } from 'react';
+import { Box, Checkbox } from '@material-ui/core';
+import { TableCell } from './TableCell';
+import { RowContext } from './TranslationsRow';
+import { TranslationListContext } from './TtranslationsGridContextProvider';
+import { useProjectPermissions } from '../../hooks/useProjectPermissions';
+import { ProjectPermissionType } from '../../service/response.types';
 
 export const Header: FunctionComponent = () => {
   const listContext = useContext(TranslationListContext);

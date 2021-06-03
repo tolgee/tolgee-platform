@@ -1,11 +1,18 @@
-import React, {FunctionComponent} from 'react';
-import {Box, Button, Grid, Typography, useMediaQuery, useTheme,} from '@material-ui/core';
-import {T} from '@tolgee/react';
-import {DoneAll} from '@material-ui/icons';
-import {container} from 'tsyringe';
-import {ImportActions} from '../../../../../store/project/ImportActions';
-import {useProject} from '../../../../../hooks/useProject';
-import {components} from '../../../../../service/apiSchema';
+import React, { FunctionComponent } from 'react';
+import {
+  Box,
+  Button,
+  Grid,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@material-ui/core';
+import { T } from '@tolgee/react';
+import { DoneAll } from '@material-ui/icons';
+import { container } from 'tsyringe';
+import { ImportActions } from '../../../../../store/project/ImportActions';
+import { useProject } from '../../../../../hooks/useProject';
+import { components } from '../../../../../service/apiSchema';
 
 const actions = container.resolve(ImportActions);
 export const ImportConflictsDataHeader: FunctionComponent<{

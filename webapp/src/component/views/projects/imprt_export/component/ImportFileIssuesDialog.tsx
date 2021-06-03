@@ -1,13 +1,13 @@
-import React, {FunctionComponent} from 'react';
-import {Box, Dialog, DialogContent, DialogTitle} from '@material-ui/core';
-import {T} from '@tolgee/react';
-import {useProject} from '../../../../../hooks/useProject';
-import {container} from 'tsyringe';
-import {ImportActions} from '../../../../../store/project/ImportActions';
-import {components} from '../../../../../service/apiSchema';
-import {SimplePaginatedHateoasList} from '../../../../common/list/SimplePaginatedHateoasList';
-import {Alert} from '@material-ui/lab';
-import {Warning} from '@material-ui/icons';
+import React, { FunctionComponent } from 'react';
+import { Box, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
+import { T } from '@tolgee/react';
+import { useProject } from '../../../../../hooks/useProject';
+import { container } from 'tsyringe';
+import { ImportActions } from '../../../../../store/project/ImportActions';
+import { components } from '../../../../../service/apiSchema';
+import { SimplePaginatedHateoasList } from '../../../../common/list/SimplePaginatedHateoasList';
+import { Alert } from '@material-ui/lab';
+import { Warning } from '@material-ui/icons';
 
 const actions = container.resolve(ImportActions);
 export const ImportFileIssuesDialog: FunctionComponent<{

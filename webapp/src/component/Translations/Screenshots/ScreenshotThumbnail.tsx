@@ -1,15 +1,25 @@
 import * as React from 'react';
-import {FunctionComponent, useState} from 'react';
-import {useConfig} from '../../../hooks/useConfig';
-import {Box, createStyles, IconButton, makeStyles, Theme, Tooltip,} from '@material-ui/core';
-import {ProjectPermissionType, ScreenshotDTO,} from '../../../service/response.types';
+import { FunctionComponent, useState } from 'react';
+import { useConfig } from '../../../hooks/useConfig';
+import {
+  Box,
+  createStyles,
+  IconButton,
+  makeStyles,
+  Theme,
+  Tooltip,
+} from '@material-ui/core';
+import {
+  ProjectPermissionType,
+  ScreenshotDTO,
+} from '../../../service/response.types';
 import clsx from 'clsx';
 import ClearIcon from '@material-ui/icons/Clear';
-import {ScreenshotActions} from '../../../store/project/ScreenshotActions';
-import {container} from 'tsyringe';
-import {confirmation} from '../../../hooks/confirmation';
-import {T} from '@tolgee/react';
-import {useProjectPermissions} from '../../../hooks/useProjectPermissions';
+import { ScreenshotActions } from '../../../store/project/ScreenshotActions';
+import { container } from 'tsyringe';
+import { confirmation } from '../../../hooks/confirmation';
+import { T } from '@tolgee/react';
+import { useProjectPermissions } from '../../../hooks/useProjectPermissions';
 
 export interface ScreenshotThumbnailProps {
   onClick: () => void;

@@ -1,13 +1,13 @@
 import * as React from 'react';
-import {useEffect, useState} from 'react';
-import {T} from '@tolgee/react';
-import {BaseView} from '../../../layout/BaseView';
-import {LanguageCreateForm} from '../../../languages/LanguageCreateForm';
-import {container} from 'tsyringe';
-import {LanguageActions} from '../../../../store/languages/LanguageActions';
-import {useRedirect} from '../../../../hooks/useRedirect';
-import {LINKS, PARAMS} from '../../../../constants/links';
-import {useProject} from '../../../../hooks/useProject';
+import { useEffect, useState } from 'react';
+import { T } from '@tolgee/react';
+import { BaseView } from '../../../layout/BaseView';
+import { LanguageCreateForm } from '../../../languages/LanguageCreateForm';
+import { container } from 'tsyringe';
+import { LanguageActions } from '../../../../store/languages/LanguageActions';
+import { useRedirect } from '../../../../hooks/useRedirect';
+import { LINKS, PARAMS } from '../../../../constants/links';
+import { useProject } from '../../../../hooks/useProject';
 
 const actions = container.resolve(LanguageActions);
 export const LanguageCreateView = () => {

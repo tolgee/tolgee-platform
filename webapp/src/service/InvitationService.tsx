@@ -1,14 +1,14 @@
-import {container, singleton} from 'tsyringe';
-import {ApiV1HttpService} from './http/ApiV1HttpService';
-import {ErrorResponseDTO, InvitationDTO} from './response.types';
-import {RedirectionActions} from '../store/global/RedirectionActions';
-import {LINKS} from '../constants/links';
-import {MessageService} from './MessageService';
-import {TokenService} from './TokenService';
-import {InvitationCodeService} from './InvitationCodeService';
-import {GlobalActions} from '../store/global/GlobalActions';
+import { container, singleton } from 'tsyringe';
+import { ApiV1HttpService } from './http/ApiV1HttpService';
+import { ErrorResponseDTO, InvitationDTO } from './response.types';
+import { RedirectionActions } from '../store/global/RedirectionActions';
+import { LINKS } from '../constants/links';
+import { MessageService } from './MessageService';
+import { TokenService } from './TokenService';
+import { InvitationCodeService } from './InvitationCodeService';
+import { GlobalActions } from '../store/global/GlobalActions';
 import React from 'react';
-import {T} from '@tolgee/react';
+import { T } from '@tolgee/react';
 
 const http = container.resolve(ApiV1HttpService);
 

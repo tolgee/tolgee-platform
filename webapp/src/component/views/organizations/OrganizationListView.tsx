@@ -1,19 +1,19 @@
 import * as React from 'react';
-import {container} from 'tsyringe';
-import {T, useTranslate} from '@tolgee/react';
-import {OrganizationActions} from '../../../store/organization/OrganizationActions';
-import {SimplePaginatedHateoasList} from '../../common/list/SimplePaginatedHateoasList';
-import {LINKS, PARAMS} from '../../../constants/links';
+import { container } from 'tsyringe';
+import { T, useTranslate } from '@tolgee/react';
+import { OrganizationActions } from '../../../store/organization/OrganizationActions';
+import { SimplePaginatedHateoasList } from '../../common/list/SimplePaginatedHateoasList';
+import { LINKS, PARAMS } from '../../../constants/links';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import {Link} from 'react-router-dom';
-import {OrganizationRoleType} from '../../../service/response.types';
-import {FabAddButtonLink} from '../../common/buttons/FabAddButtonLink';
+import { Link } from 'react-router-dom';
+import { OrganizationRoleType } from '../../../service/response.types';
+import { FabAddButtonLink } from '../../common/buttons/FabAddButtonLink';
 import Box from '@material-ui/core/Box';
-import {BaseUserSettingsView} from '../userSettings/BaseUserSettingsView';
-import {SimpleListItem} from '../../common/list/SimpleListItem';
-import {Button} from '@material-ui/core';
-import {useLeaveOrganization} from '../../../hooks/organizations/useLeaveOrganization';
+import { BaseUserSettingsView } from '../userSettings/BaseUserSettingsView';
+import { SimpleListItem } from '../../common/list/SimpleListItem';
+import { Button } from '@material-ui/core';
+import { useLeaveOrganization } from '../../../hooks/organizations/useLeaveOrganization';
 
 const actions = container.resolve(OrganizationActions);
 

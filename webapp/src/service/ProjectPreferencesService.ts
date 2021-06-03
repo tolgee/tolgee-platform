@@ -1,4 +1,4 @@
-import {singleton} from 'tsyringe';
+import { singleton } from 'tsyringe';
 
 const LOCAL_STORAGE_KEY = 'selectedLanguages';
 

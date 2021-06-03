@@ -1,19 +1,28 @@
-import {default as React, FunctionComponent, useContext} from 'react';
-import {Box, Button, FormControlLabel, FormGroup, IconButton, Slide, Switch, Tooltip,} from '@material-ui/core';
-import {confirmation} from '../../hooks/confirmation';
+import { default as React, FunctionComponent, useContext } from 'react';
+import {
+  Box,
+  Button,
+  FormControlLabel,
+  FormGroup,
+  IconButton,
+  Slide,
+  Switch,
+  Tooltip,
+} from '@material-ui/core';
+import { confirmation } from '../../hooks/confirmation';
 import DeleteIcon from '@material-ui/icons/Delete';
-import {LanguagesMenu} from '../common/form/LanguagesMenu';
-import {TranslationsSearchField} from './TranslationsSearchField';
-import {Link} from 'react-router-dom';
-import {LINKS, PARAMS} from '../../constants/links';
+import { LanguagesMenu } from '../common/form/LanguagesMenu';
+import { TranslationsSearchField } from './TranslationsSearchField';
+import { Link } from 'react-router-dom';
+import { LINKS, PARAMS } from '../../constants/links';
 import AddIcon from '@material-ui/icons/Add';
-import {TranslationListContext} from './TtranslationsGridContextProvider';
-import {useProject} from '../../hooks/useProject';
-import {container} from 'tsyringe';
-import {TranslationActions} from '../../store/project/TranslationActions';
-import {T, useTranslate} from '@tolgee/react';
-import {useProjectPermissions} from '../../hooks/useProjectPermissions';
-import {ProjectPermissionType} from '../../service/response.types';
+import { TranslationListContext } from './TtranslationsGridContextProvider';
+import { useProject } from '../../hooks/useProject';
+import { container } from 'tsyringe';
+import { TranslationActions } from '../../store/project/TranslationActions';
+import { T, useTranslate } from '@tolgee/react';
+import { useProjectPermissions } from '../../hooks/useProjectPermissions';
+import { ProjectPermissionType } from '../../service/response.types';
 
 export const MenuBar: FunctionComponent = () => {
   let projectDTO = useProject();
@@ -90,9 +99,7 @@ export const MenuBar: FunctionComponent = () => {
             </FormGroup>
           </Box>
         </Box>
-        {projectPermissions.satisfiesPermission(
-          ProjectPermissionType.EDIT
-        ) && (
+        {projectPermissions.satisfiesPermission(ProjectPermissionType.EDIT) && (
           <Box display="flex" alignItems="flex-end">
             <Button
               component={Link}

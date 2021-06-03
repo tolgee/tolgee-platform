@@ -1,6 +1,6 @@
-import {container, singleton} from 'tsyringe';
-import {ApiV1HttpService} from './http/ApiV1HttpService';
-import {LanguageDTO} from './response.types';
+import { container, singleton } from 'tsyringe';
+import { ApiV1HttpService } from './http/ApiV1HttpService';
+import { LanguageDTO } from './response.types';
 
 const http = container.resolve(ApiV1HttpService);
 

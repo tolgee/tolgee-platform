@@ -1,21 +1,21 @@
 import * as React from 'react';
-import {useContext, useEffect} from 'react';
+import { useContext, useEffect } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import {useProject} from '../../hooks/useProject';
-import {LINKS, PARAMS} from '../../constants/links';
-import {container} from 'tsyringe';
-import {RedirectionActions} from '../../store/global/RedirectionActions';
-import {StandardForm} from '../common/form/StandardForm';
-import {LanguagesMenu} from '../common/form/LanguagesMenu';
-import {TranslationActions} from '../../store/project/TranslationActions';
-import {TextField} from '../common/form/fields/TextField';
-import {ResourceErrorComponent} from '../common/form/ResourceErrorComponent';
-import {MessageService} from '../../service/MessageService';
-import {Validation} from '../../constants/GlobalValidationSchema';
-import {TranslationListContext} from './TtranslationsGridContextProvider';
-import {useTranslate} from '@tolgee/react';
+import { useProject } from '../../hooks/useProject';
+import { LINKS, PARAMS } from '../../constants/links';
+import { container } from 'tsyringe';
+import { RedirectionActions } from '../../store/global/RedirectionActions';
+import { StandardForm } from '../common/form/StandardForm';
+import { LanguagesMenu } from '../common/form/LanguagesMenu';
+import { TranslationActions } from '../../store/project/TranslationActions';
+import { TextField } from '../common/form/fields/TextField';
+import { ResourceErrorComponent } from '../common/form/ResourceErrorComponent';
+import { MessageService } from '../../service/MessageService';
+import { Validation } from '../../constants/GlobalValidationSchema';
+import { TranslationListContext } from './TtranslationsGridContextProvider';
+import { useTranslate } from '@tolgee/react';
 
 export type TranslationCreationValue = {
   key: string;

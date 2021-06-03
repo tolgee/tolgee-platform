@@ -1,12 +1,15 @@
 import * as React from 'react';
-import {FunctionComponent, useContext} from 'react';
-import {RowContext} from './TranslationsRow';
-import {useProject} from '../../hooks/useProject';
-import {ProjectPermissionType} from '../../service/response.types';
-import {EditableCell} from './EditableCell';
-import {container} from 'tsyringe';
-import {TranslationActions, TranslationEditingType,} from '../../store/project/TranslationActions';
-import {Validation} from '../../constants/GlobalValidationSchema';
+import { FunctionComponent, useContext } from 'react';
+import { RowContext } from './TranslationsRow';
+import { useProject } from '../../hooks/useProject';
+import { ProjectPermissionType } from '../../service/response.types';
+import { EditableCell } from './EditableCell';
+import { container } from 'tsyringe';
+import {
+  TranslationActions,
+  TranslationEditingType,
+} from '../../store/project/TranslationActions';
+import { Validation } from '../../constants/GlobalValidationSchema';
 
 export interface TranslationsTableCellProps {
   abbreviation: string;

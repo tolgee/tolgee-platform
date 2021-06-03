@@ -1,14 +1,14 @@
-import {default as React, FunctionComponent, useEffect} from 'react';
-import {container} from 'tsyringe';
-import {UserApiKeysActions} from '../../../../store/api_keys/UserApiKeysActions';
-import {Route, Switch, useRouteMatch} from 'react-router-dom';
-import {LINKS, PARAMS} from '../../../../constants/links';
-import {FabAddButtonLink} from '../../../common/buttons/FabAddButtonLink';
-import {AddApiKeyFormDialog} from './AddApiKeyFormDialog';
-import {ApiKeysList} from './ApiKeysList';
-import {EmptyListMessage} from '../../../common/EmptyListMessage';
-import {T} from '@tolgee/react';
-import {BaseUserSettingsView} from '../BaseUserSettingsView';
+import { default as React, FunctionComponent, useEffect } from 'react';
+import { container } from 'tsyringe';
+import { UserApiKeysActions } from '../../../../store/api_keys/UserApiKeysActions';
+import { Route, Switch, useRouteMatch } from 'react-router-dom';
+import { LINKS, PARAMS } from '../../../../constants/links';
+import { FabAddButtonLink } from '../../../common/buttons/FabAddButtonLink';
+import { AddApiKeyFormDialog } from './AddApiKeyFormDialog';
+import { ApiKeysList } from './ApiKeysList';
+import { EmptyListMessage } from '../../../common/EmptyListMessage';
+import { T } from '@tolgee/react';
+import { BaseUserSettingsView } from '../BaseUserSettingsView';
 
 export const ApiKeysView: FunctionComponent = () => {
   const actions = container.resolve(UserApiKeysActions);

@@ -1,13 +1,13 @@
 import * as React from 'react';
 import Box from '@material-ui/core/Box';
-import {container} from 'tsyringe';
-import {ProjectActions} from '../../../store/project/ProjectActions';
-import {LINKS} from '../../../constants/links';
-import {FabAddButtonLink} from '../../common/buttons/FabAddButtonLink';
-import {BaseView} from '../../layout/BaseView';
-import {PossibleProjectPage} from '../PossibleProjectPage';
-import {useTranslate} from '@tolgee/react';
-import {SimplePaginatedHateoasList} from '../../common/list/SimplePaginatedHateoasList';
+import { container } from 'tsyringe';
+import { ProjectActions } from '../../../store/project/ProjectActions';
+import { LINKS } from '../../../constants/links';
+import { FabAddButtonLink } from '../../common/buttons/FabAddButtonLink';
+import { BaseView } from '../../layout/BaseView';
+import { PossibleProjectPage } from '../PossibleProjectPage';
+import { useTranslate } from '@tolgee/react';
+import { SimplePaginatedHateoasList } from '../../common/list/SimplePaginatedHateoasList';
 import ProjectListItem from './ProjectListItem';
 
 const actions = container.resolve(ProjectActions);

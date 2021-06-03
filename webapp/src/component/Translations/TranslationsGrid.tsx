@@ -1,20 +1,20 @@
 import * as React from 'react';
-import {FunctionComponent, useContext} from 'react';
-import {useProject} from '../../hooks/useProject';
-import {Box} from '@material-ui/core';
-import {TranslationsRow} from './TranslationsRow';
-import {Header} from './Header';
-import {BoxLoading} from '../common/BoxLoading';
-import {Pagination} from './Pagination';
-import {LINKS, PARAMS} from '../../constants/links';
-import {TranslationListContext} from './TtranslationsGridContextProvider';
-import {EmptyListMessage} from '../common/EmptyListMessage';
-import {FabAddButtonLink} from '../common/buttons/FabAddButtonLink';
-import {MenuBar} from './MenuBar';
-import {BaseView} from '../layout/BaseView';
-import {useProjectPermissions} from '../../hooks/useProjectPermissions';
-import {ProjectPermissionType} from '../../service/response.types';
-import {T} from '@tolgee/react';
+import { FunctionComponent, useContext } from 'react';
+import { useProject } from '../../hooks/useProject';
+import { Box } from '@material-ui/core';
+import { TranslationsRow } from './TranslationsRow';
+import { Header } from './Header';
+import { BoxLoading } from '../common/BoxLoading';
+import { Pagination } from './Pagination';
+import { LINKS, PARAMS } from '../../constants/links';
+import { TranslationListContext } from './TtranslationsGridContextProvider';
+import { EmptyListMessage } from '../common/EmptyListMessage';
+import { FabAddButtonLink } from '../common/buttons/FabAddButtonLink';
+import { MenuBar } from './MenuBar';
+import { BaseView } from '../layout/BaseView';
+import { useProjectPermissions } from '../../hooks/useProjectPermissions';
+import { ProjectPermissionType } from '../../service/response.types';
+import { T } from '@tolgee/react';
 import Typography from '@material-ui/core/Typography';
 
 export const TranslationsGrid: FunctionComponent = (props) => {
@@ -29,9 +29,7 @@ export const TranslationsGrid: FunctionComponent = (props) => {
     <>
       <EmptyListMessage />
       {!isSearch &&
-        projectPermissions.satisfiesPermission(
-          ProjectPermissionType.EDIT
-        ) && (
+        projectPermissions.satisfiesPermission(ProjectPermissionType.EDIT) && (
           <Box display="flex" justifyContent="center">
             <FabAddButtonLink
               to={LINKS.REPOSITORY_TRANSLATIONS_ADD.build({

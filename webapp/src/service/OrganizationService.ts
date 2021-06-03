@@ -1,6 +1,6 @@
-import {singleton} from 'tsyringe';
-import {ApiV2HttpService} from './http/ApiV2HttpService';
-import {components} from './apiSchema';
+import { singleton } from 'tsyringe';
+import { ApiV2HttpService } from './http/ApiV2HttpService';
+import { components } from './apiSchema';
 
 @singleton()
 export class OrganizationService {

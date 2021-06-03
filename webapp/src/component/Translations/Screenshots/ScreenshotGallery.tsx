@@ -1,24 +1,28 @@
 import * as React from 'react';
-import {FunctionComponent, ReactNode, useEffect} from 'react';
-import {BoxLoading} from '../../common/BoxLoading';
-import {ScreenshotThumbnail} from './ScreenshotThumbnail';
+import { FunctionComponent, ReactNode, useEffect } from 'react';
+import { BoxLoading } from '../../common/BoxLoading';
+import { ScreenshotThumbnail } from './ScreenshotThumbnail';
 import Box from '@material-ui/core/Box';
 
-import {KeyTranslationsDTO, ProjectPermissionType, ScreenshotDTO,} from '../../../service/response.types';
-import {ScreenshotActions} from '../../../store/project/ScreenshotActions';
-import {container} from 'tsyringe';
+import {
+  KeyTranslationsDTO,
+  ProjectPermissionType,
+  ScreenshotDTO,
+} from '../../../service/response.types';
+import { ScreenshotActions } from '../../../store/project/ScreenshotActions';
+import { container } from 'tsyringe';
 import AddIcon from '@material-ui/icons/Add';
-import {Message} from '../../../store/global/types';
-import {T} from '@tolgee/react';
-import {MessageActions} from '../../../store/global/MessageActions';
-import {useConfig} from '../../../hooks/useConfig';
-import {useProject} from '../../../hooks/useProject';
-import {createStyles, makeStyles, Theme} from '@material-ui/core';
-import {ScreenshotDetail} from './ScreenshotDetail';
-import {ScreenshotDropzone} from './ScreenshotDropzone';
-import {useProjectPermissions} from '../../../hooks/useProjectPermissions';
-import {Skeleton} from '@material-ui/lab';
-import {startLoading, stopLoading} from '../../../hooks/loading';
+import { Message } from '../../../store/global/types';
+import { T } from '@tolgee/react';
+import { MessageActions } from '../../../store/global/MessageActions';
+import { useConfig } from '../../../hooks/useConfig';
+import { useProject } from '../../../hooks/useProject';
+import { createStyles, makeStyles, Theme } from '@material-ui/core';
+import { ScreenshotDetail } from './ScreenshotDetail';
+import { ScreenshotDropzone } from './ScreenshotDropzone';
+import { useProjectPermissions } from '../../../hooks/useProjectPermissions';
+import { Skeleton } from '@material-ui/lab';
+import { startLoading, stopLoading } from '../../../hooks/loading';
 
 export interface ScreenshotGalleryProps {
   data: KeyTranslationsDTO;

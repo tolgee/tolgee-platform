@@ -1,20 +1,20 @@
-import {Route, Switch, useRouteMatch} from 'react-router-dom';
+import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import * as React from 'react';
-import {LanguageListView} from './languages/LanguageListView';
-import {LINKS, PARAMS} from '../../../constants/links';
-import {LanguageEditView} from './languages/LanguageEditView';
-import {ProjectInviteView} from './invitations/ProjectInviteView';
-import {ProjectPermissionsView} from './permissions/ProjectPermissionsVIew';
-import {ProjectSettingsView} from './project/ProjectSettingsView';
-import {ProjectProvider} from '../../../hooks/ProjectProvider';
-import {LanguageCreateView} from './languages/LanguageCreateView';
-import {PrivateRoute} from '../../common/PrivateRoute';
-import {ImportView} from './imprt_export/ImportView';
-import {ExportView} from './imprt_export/ExportView';
-import {ProjectPage} from './ProjectPage';
-import {Box} from '@material-ui/core';
-import {BoxLoading} from '../../common/BoxLoading';
-import {TranslationView} from './translations/TranslationView';
+import { LanguageListView } from './languages/LanguageListView';
+import { LINKS, PARAMS } from '../../../constants/links';
+import { LanguageEditView } from './languages/LanguageEditView';
+import { ProjectInviteView } from './invitations/ProjectInviteView';
+import { ProjectPermissionsView } from './permissions/ProjectPermissionsVIew';
+import { ProjectSettingsView } from './project/ProjectSettingsView';
+import { ProjectProvider } from '../../../hooks/ProjectProvider';
+import { LanguageCreateView } from './languages/LanguageCreateView';
+import { PrivateRoute } from '../../common/PrivateRoute';
+import { ImportView } from './imprt_export/ImportView';
+import { ExportView } from './imprt_export/ExportView';
+import { ProjectPage } from './ProjectPage';
+import { Box } from '@material-ui/core';
+import { BoxLoading } from '../../common/BoxLoading';
+import { TranslationView } from './translations/TranslationView';
 
 export const ProjectRouter = () => {
   let match = useRouteMatch();

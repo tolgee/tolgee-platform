@@ -1,6 +1,13 @@
-import React, {FunctionComponent} from 'react';
-import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,} from '@material-ui/core';
-import {T} from '@tolgee/react';
+import React, { FunctionComponent } from 'react';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@material-ui/core';
+import { T } from '@tolgee/react';
 
 export const ImportConflictNotResolvedErrorDialog: FunctionComponent<{
   open: boolean;

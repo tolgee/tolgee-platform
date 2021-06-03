@@ -1,10 +1,16 @@
-import React, {FunctionComponent, LegacyRef, useEffect} from 'react';
-import {Box, BoxProps, CircularProgress, IconButton, makeStyles,} from '@material-ui/core';
+import React, { FunctionComponent, LegacyRef, useEffect } from 'react';
+import {
+  Box,
+  BoxProps,
+  CircularProgress,
+  IconButton,
+  makeStyles,
+} from '@material-ui/core';
 import clsx from 'clsx';
-import {green} from '@material-ui/core/colors';
+import { green } from '@material-ui/core/colors';
 import CheckIcon from '@material-ui/icons/Check';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import {KeyboardArrowUp} from '@material-ui/icons';
+import { KeyboardArrowUp } from '@material-ui/icons';
 
 type ImportConflictTranslationProps = {
   text?: string;

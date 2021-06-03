@@ -1,9 +1,9 @@
-import {singleton} from 'tsyringe';
-import {ApiV1HttpService} from './http/ApiV1HttpService';
-import {MessageService} from './MessageService';
-import {TranslationsDataResponse, TranslationsObject} from './response.types';
-import {TranslationCreationValue} from '../component/Translations/TranslationCreationDialog';
-import {ProjectPreferencesService} from './ProjectPreferencesService';
+import { singleton } from 'tsyringe';
+import { ApiV1HttpService } from './http/ApiV1HttpService';
+import { MessageService } from './MessageService';
+import { TranslationsDataResponse, TranslationsObject } from './response.types';
+import { TranslationCreationValue } from '../component/Translations/TranslationCreationDialog';
+import { ProjectPreferencesService } from './ProjectPreferencesService';
 
 @singleton()
 export class TranslationService {

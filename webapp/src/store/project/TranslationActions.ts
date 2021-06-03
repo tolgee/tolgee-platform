@@ -1,12 +1,15 @@
-import {container, singleton} from 'tsyringe';
-import {AbstractLoadableActions, StateWithLoadables,} from '../AbstractLoadableActions';
-import {TranslationService} from '../../service/TranslationService';
-import {AppState} from '../index';
-import {useSelector} from 'react-redux';
-import {LanguageDTO} from '../../service/response.types';
-import {ActionType} from '../Action';
-import {LanguageActions} from '../languages/LanguageActions';
-import {ProjectPreferencesService} from '../../service/ProjectPreferencesService';
+import { container, singleton } from 'tsyringe';
+import {
+  AbstractLoadableActions,
+  StateWithLoadables,
+} from '../AbstractLoadableActions';
+import { TranslationService } from '../../service/TranslationService';
+import { AppState } from '../index';
+import { useSelector } from 'react-redux';
+import { LanguageDTO } from '../../service/response.types';
+import { ActionType } from '../Action';
+import { LanguageActions } from '../languages/LanguageActions';
+import { ProjectPreferencesService } from '../../service/ProjectPreferencesService';
 
 export type TranslationEditingType = {
   key: string;
