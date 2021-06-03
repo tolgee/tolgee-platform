@@ -26,6 +26,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Cache node modules
         uses: actions/cache@v2
@@ -69,11 +70,13 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
 
-      - name: Cache node modules
+      - name: Cache Gradle packages
         uses: actions/cache@v2
         with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Build with Gradle
         run: ./gradlew runE2e
