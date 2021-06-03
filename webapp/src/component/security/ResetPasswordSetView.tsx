@@ -58,13 +58,7 @@ const PasswordResetSetView: FunctionComponent = () => {
 
   return (
     <DashboardPage>
-      <BaseView
-        title="Reset password"
-        lg={6}
-        md={8}
-        xs={12}
-        loading={passwordResetSetLoading}
-      >
+      <BaseView lg={6} md={8} xs={12} loading={passwordResetSetLoading}>
         {passwordResetSetError && (
           <Box mt={1}>
             <Alert severity="error">{passwordResetSetError}</Alert>

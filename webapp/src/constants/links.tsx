@@ -52,7 +52,7 @@ export enum PARAMS {
   INVITATION_CODE = 'invitation_code',
   ENCODED_EMAIL_AND_CODE = 'email_and_code',
   SERVICE_TYPE = 'serviceType',
-  REPOSITORY_ID = 'projectId',
+  PROJECT_ID = 'projectId',
   LANGUAGE_ID = 'languageId',
   API_KEY_ID = 'languageId',
   USER_ID = 'userID',
@@ -151,21 +151,18 @@ export class LINKS {
 
   static AFTER_LOGIN = LINKS.PROJECTS;
 
-  static REPOSITORY = Link.ofParent(LINKS.PROJECTS, p(PARAMS.REPOSITORY_ID));
+  static PROJECT = Link.ofParent(LINKS.PROJECTS, p(PARAMS.PROJECT_ID));
 
-  static REPOSITORY_ADD = Link.ofParent(LINKS.PROJECTS, 'add');
+  static PROJECT_ADD = Link.ofParent(LINKS.PROJECTS, 'add');
 
-  static REPOSITORY_TRANSLATIONS = Link.ofParent(
-    LINKS.REPOSITORY,
-    'translations'
-  );
+  static PROJECT_TRANSLATIONS = Link.ofParent(LINKS.PROJECT, 'translations');
 
   /**
    * Visible with edit permissions
    */
 
-  static REPOSITORY_TRANSLATIONS_ADD = Link.ofParent(
-    LINKS.REPOSITORY_TRANSLATIONS,
+  static PROJECT_TRANSLATIONS_ADD = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS,
     'add'
   );
 
@@ -173,36 +170,30 @@ export class LINKS {
    * Visible with manage permissions
    */
 
-  static REPOSITORY_MANAGE = Link.ofParent(LINKS.REPOSITORY, 'manage');
+  static PROJECT_MANAGE = Link.ofParent(LINKS.PROJECT, 'manage');
 
-  static REPOSITORY_EDIT = Link.ofParent(LINKS.REPOSITORY_MANAGE, 'edit');
+  static PROJECT_EDIT = Link.ofParent(LINKS.PROJECT_MANAGE, 'edit');
 
-  static REPOSITORY_LANGUAGES = Link.ofParent(
-    LINKS.REPOSITORY_MANAGE,
-    'languages'
-  );
+  static PROJECT_LANGUAGES = Link.ofParent(LINKS.PROJECT_MANAGE, 'languages');
 
-  static REPOSITORY_LANGUAGE_EDIT = Link.ofParent(
-    LINKS.REPOSITORY_LANGUAGES,
+  static PROJECT_LANGUAGE_EDIT = Link.ofParent(
+    LINKS.PROJECT_LANGUAGES,
     'edit/' + p(PARAMS.LANGUAGE_ID)
   );
 
-  static REPOSITORY_INVITATION = Link.ofParent(
-    LINKS.REPOSITORY_MANAGE,
-    'invite'
-  );
+  static PROJECT_INVITATION = Link.ofParent(LINKS.PROJECT_MANAGE, 'invite');
 
-  static REPOSITORY_PERMISSIONS = Link.ofParent(
-    LINKS.REPOSITORY_MANAGE,
+  static PROJECT_PERMISSIONS = Link.ofParent(
+    LINKS.PROJECT_MANAGE,
     'permissions'
   );
 
-  static REPOSITORY_LANGUAGES_CREATE = Link.ofParent(
-    LINKS.REPOSITORY_LANGUAGES,
+  static PROJECT_LANGUAGES_CREATE = Link.ofParent(
+    LINKS.PROJECT_LANGUAGES,
     'add'
   );
 
-  static REPOSITORY_IMPORT = Link.ofParent(LINKS.REPOSITORY, 'import');
+  static PROJECT_IMPORT = Link.ofParent(LINKS.PROJECT, 'import');
 
-  static REPOSITORY_EXPORT = Link.ofParent(LINKS.REPOSITORY, 'export');
+  static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');
 }

@@ -3,10 +3,11 @@ import { BaseView } from '../../../layout/BaseView';
 import { useSelector } from 'react-redux';
 import { AppState } from '../../../../store';
 import { container } from 'tsyringe';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { SimplePaginatedHateoasList } from '../../../common/list/SimplePaginatedHateoasList';
 import { ProjectActions } from '../../../../store/project/ProjectActions';
 import { SimpleListItem } from '../../../common/list/SimpleListItem';
+import { LINKS, PARAMS } from '../../../../constants/links';
 import {
   Box,
   Chip,
@@ -18,11 +19,14 @@ import RevokePermissionsButton from './component/RevokePermissionsButton';
 import { useProject } from '../../../../hooks/useProject';
 import { translatedPermissionType } from '../../../../fixtures/translatePermissionFile';
 import ProjectPermissionMenu from './component/ProjectPermissionMenu';
+import { Navigation } from '../../../navigation/Navigation';
 
 const projectActions = container.resolve(ProjectActions);
 
 export const ProjectPermissionsView: FunctionComponent = () => {
   const project = useProject();
+
+  const t = useTranslate();
 
   let listLoadable = useSelector(
     (state: AppState) => state.projects.loadables.listUsersForPermissions
@@ -35,7 +39,24 @@ export const ProjectPermissionsView: FunctionComponent = () => {
 
   return (
     <BaseView
-      title={<T>edit_project_permissions_title</T>}
+      navigation={
+        <Navigation
+          path={[
+            [
+              project.name,
+              LINKS.PROJECT.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+            [
+              t('edit_project_permissions_title'),
+              LINKS.PROJECT_TRANSLATIONS.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+          ]}
+        />
+      }
       containerMaxWidth="lg"
       loading={listLoadable.loading}
       hideChildrenOnLoading={false}

@@ -37,24 +37,26 @@ export const BaseView = (props: BaseViewProps) => {
     >
       <Box minHeight="100%">
         {props.navigation}
-        <SecondaryBar>
-          <Container maxWidth={props.containerMaxWidth || false}>
-            <Grid container justify="center" alignItems="center">
-              <Grid
-                data-cy="global-base-view-title"
-                item
-                xs={props.xs || 12}
-                md={props.md || 12}
-                lg={props.lg || 12}
-                sm={props.sm || 12}
-              >
-                {props.customHeader || (
-                  <Typography variant="h5">{props.title}</Typography>
-                )}
+        {(props.title || props.customHeader) && (
+          <SecondaryBar>
+            <Container maxWidth={props.containerMaxWidth || false}>
+              <Grid container justify="center" alignItems="center">
+                <Grid
+                  data-cy="global-base-view-title"
+                  item
+                  xs={props.xs || 12}
+                  md={props.md || 12}
+                  lg={props.lg || 12}
+                  sm={props.sm || 12}
+                >
+                  {props.customHeader || (
+                    <Typography variant="h5">{props.title}</Typography>
+                  )}
+                </Grid>
               </Grid>
-            </Grid>
-          </Container>
-        </SecondaryBar>
+            </Container>
+          </SecondaryBar>
+        )}
         <Box position="relative" overflow="visible">
           <Box position="absolute" width="100%">
             {(globalLoading || props.loading) && (

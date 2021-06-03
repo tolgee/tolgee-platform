@@ -44,8 +44,8 @@ export function TranslationCreationDialog() {
   function onClose() {
     translationActions.loadableReset.createKey.dispatch();
     redirectionActions.redirect.dispatch(
-      LINKS.REPOSITORY_TRANSLATIONS.build({
-        [PARAMS.REPOSITORY_ID]: projectDTO.id,
+      LINKS.PROJECT_TRANSLATIONS.build({
+        [PARAMS.PROJECT_ID]: projectDTO.id,
       })
     );
   }

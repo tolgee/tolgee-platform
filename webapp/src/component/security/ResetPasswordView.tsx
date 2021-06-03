@@ -47,13 +47,7 @@ const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
 
   return (
     <DashboardPage>
-      <BaseView
-        title={<T>reset_password_title</T>}
-        lg={6}
-        md={8}
-        xs={12}
-        loading={loadable.loading}
-      >
+      <BaseView lg={6} md={8} xs={12} loading={loadable.loading}>
         {loadable.error ||
           (loadable.loaded && (
             <Box mt={1}>

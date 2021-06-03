@@ -20,14 +20,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface DashboardPageProps {
-  sideMenuItems?: ReactElement;
   projectName?: string;
   fullWidth?: boolean;
 }
 
 export const DashboardPage: FunctionComponent<DashboardPageProps> = ({
   children,
-  sideMenuItems,
   ...props
 }) => {
   const classes = useStyles({});

@@ -1,6 +1,6 @@
 import { default as React, FunctionComponent, useEffect } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { PARAMS } from '../../../../constants/links';
+import { LINKS, PARAMS } from '../../../../constants/links';
 import { BaseView } from '../../../layout/BaseView';
 import { Box, Button } from '@material-ui/core';
 import { container } from 'tsyringe';
@@ -8,15 +8,17 @@ import { ExportActions } from '../../../../store/project/ExportActions';
 import { useSelector } from 'react-redux';
 import { AppState } from '../../../../store';
 import { useProject } from '../../../../hooks/useProject';
-import { T } from '@tolgee/react';
+import { Navigation } from '../../../navigation/Navigation';
+import { T, useTranslate } from '@tolgee/react';
 
 const actions = container.resolve(ExportActions);
 
 export const ExportView: FunctionComponent = () => {
   const match = useRouteMatch();
   const project = useProject();
-  const projectId = match.params[PARAMS.REPOSITORY_ID];
+  const projectId = match.params[PARAMS.PROJECT_ID];
   const state = useSelector((state: AppState) => state.export.loadables.export);
+  const t = useTranslate();
 
   useEffect(() => {
     if (state.loaded) {
@@ -41,7 +43,29 @@ export const ExportView: FunctionComponent = () => {
   };
 
   return (
-    <BaseView title={<T>export_translations_title</T>} xs={12} md={10} lg={8}>
+    <BaseView
+      navigation={
+        <Navigation
+          path={[
+            [
+              project.name,
+              LINKS.PROJECT.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+            [
+              t('export_translations_title'),
+              LINKS.PROJECT_EXPORT.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+          ]}
+        />
+      }
+      xs={12}
+      md={10}
+      lg={8}
+    >
       <Box mt={2}>
         <Button
           component="a"

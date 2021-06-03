@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useEffect } from 'react';
 import { ListItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
@@ -12,15 +11,21 @@ import { SettingsIconButton } from '../../../common/buttons/SettingsIconButton';
 import { Link, useRouteMatch } from 'react-router-dom';
 import { LanguageActions } from '../../../../store/languages/LanguageActions';
 import { BaseView } from '../../../layout/BaseView';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
+import { useProject } from '../../../../hooks/useProject';
+import { Navigation } from '../../../navigation/Navigation';
 
 const actions = container.resolve(LanguageActions);
 
 export const LanguageListView = () => {
   const match = useRouteMatch();
-  const projectId = match.params[PARAMS.REPOSITORY_ID];
+  const projectId = match.params[PARAMS.PROJECT_ID];
 
   let loadable = actions.useSelector((s) => s.loadables.list);
+
+  const project = useProject();
+
+  const t = useTranslate();
 
   useEffect(() => {
     actions.loadableActions.list.dispatch(projectId);
@@ -28,7 +33,24 @@ export const LanguageListView = () => {
 
   return (
     <BaseView
-      title={<T>languages_title</T>}
+      navigation={
+        <Navigation
+          path={[
+            [
+              project.name,
+              LINKS.PROJECT.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+            [
+              t('languages_title'),
+              LINKS.PROJECT_TRANSLATIONS.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+          ]}
+        />
+      }
       loading={loadable.loading || !loadable.touched}
       lg={5}
       md={7}
@@ -43,8 +65,8 @@ export const LanguageListView = () => {
                 </ListItemText>
                 <ListItemSecondaryAction>
                   <Link
-                    to={LINKS.REPOSITORY_LANGUAGE_EDIT.build({
-                      [PARAMS.REPOSITORY_ID]: projectId,
+                    to={LINKS.PROJECT_LANGUAGE_EDIT.build({
+                      [PARAMS.PROJECT_ID]: projectId,
                       [PARAMS.LANGUAGE_ID]: l.id,
                     })}
                   >
@@ -62,8 +84,8 @@ export const LanguageListView = () => {
             mt={5}
           >
             <FabAddButtonLink
-              to={LINKS.REPOSITORY_LANGUAGES_CREATE.build({
-                [PARAMS.REPOSITORY_ID]: projectId,
+              to={LINKS.PROJECT_LANGUAGES_CREATE.build({
+                [PARAMS.PROJECT_ID]: projectId,
               })}
             />
           </Box>

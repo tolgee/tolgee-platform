@@ -1,5 +1,4 @@
 import { Switch, useRouteMatch } from 'react-router-dom';
-import * as React from 'react';
 import { ProjectListView } from './ProjectListView';
 import { ProjectCreateView } from './project/ProjectCreateView';
 import { LINKS } from '../../../constants/links';
@@ -15,11 +14,11 @@ export const ProjectsRouter = () => {
         <ProjectListView />
       </PrivateRoute>
 
-      <PrivateRoute exact path={`${LINKS.REPOSITORY_ADD.template}`}>
+      <PrivateRoute exact path={`${LINKS.PROJECT_ADD.template}`}>
         <ProjectCreateView />
       </PrivateRoute>
 
-      <PrivateRoute path={LINKS.REPOSITORY.template}>
+      <PrivateRoute path={LINKS.PROJECT.template}>
         <ProjectRouter />
       </PrivateRoute>
     </Switch>

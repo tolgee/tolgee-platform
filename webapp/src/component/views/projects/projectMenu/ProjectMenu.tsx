@@ -4,14 +4,13 @@ import { useSelector } from 'react-redux';
 import { SideMenuItem } from './SideMenuItem';
 import { LINKS, PARAMS } from '../../../../constants/links';
 import DynamicFeedIcon from '@material-ui/icons/DynamicFeed';
-import DashboardIcon from '@material-ui/icons/Dashboard';
 import LanguageIcon from '@material-ui/icons/Language';
 import SettingsIcon from '@material-ui/icons/Settings';
 import FlagIcon from '@material-ui/icons/Flag';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import SupervisedUserCircleIcon from '@material-ui/icons/SupervisedUserCircle';
-import { useRepository } from '../../../../hooks/useRepository';
-import { RepositoryPermissionType } from '../../../../service/response.types';
+import { useProject } from '../../../../hooks/useProject';
+import { ProjectPermissionType } from '../../../../service/response.types';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import { useConfig } from '../../../../hooks/useConfig';
@@ -24,8 +23,8 @@ import { SideMenu } from './SideMenu';
 
 const actions = container.resolve(GlobalActions);
 
-export const RepositoryMenu = ({ id }) => {
-  const repositoryDTO = useRepository();
+export const ProjectMenu = ({ id }) => {
+  const projectDTO = useProject();
   const config = useConfig();
 
   const open = useSelector((state: AppState) => state.global.sideMenuOpen);
@@ -37,87 +36,77 @@ export const RepositoryMenu = ({ id }) => {
       onSideMenuToggle={() => actions.toggleSideMenu.dispatch()}
       open={open}
     >
-      <div data-cy="repository-menu-items">
+      <div data-cy="project-menu-items">
         <List>
           <SideMenuItem
-            linkTo={LINKS.REPOSITORIES.build({ [PARAMS.REPOSITORY_ID]: id })}
+            linkTo={LINKS.PROJECTS.build({ [PARAMS.PROJECT_ID]: id })}
             icon={<DynamicFeedIcon />}
-            text={t('repository_menu_repositories')}
+            text={t('project_menu_projects')}
           />
         </List>
         <Divider />
         <List>
           <SideMenuItem
-            linkTo={LINKS.REPOSITORY.build({
-              [PARAMS.REPOSITORY_ID]: id,
-            })}
-            icon={<DashboardIcon />}
-            text={t('repository_menu_overview')}
-          />
-        </List>
-        <List>
-          <SideMenuItem
-            linkTo={LINKS.REPOSITORY_TRANSLATIONS.build({
-              [PARAMS.REPOSITORY_ID]: id,
+            linkTo={LINKS.PROJECT_TRANSLATIONS.build({
+              [PARAMS.PROJECT_ID]: id,
             })}
             icon={<LanguageIcon />}
-            text={t('repository_menu_translations')}
+            text={t('project_menu_translations')}
           />
         </List>
         <Divider />
         <List>
-          {repositoryDTO.computedPermissions ===
-            RepositoryPermissionType.MANAGE && (
+          {projectDTO.computedPermissions === ProjectPermissionType.MANAGE && (
             <>
               <SideMenuItem
-                linkTo={LINKS.REPOSITORY_EDIT.build({
-                  [PARAMS.REPOSITORY_ID]: id,
+                linkTo={LINKS.PROJECT_EDIT.build({
+                  [PARAMS.PROJECT_ID]: id,
                 })}
                 icon={<SettingsIcon />}
-                text={t('repository_menu_repository_settings')}
+                text={t('project_menu_project_settings')}
               />
               <SideMenuItem
-                linkTo={LINKS.REPOSITORY_LANGUAGES.build({
-                  [PARAMS.REPOSITORY_ID]: id,
+                linkTo={LINKS.PROJECT_LANGUAGES.build({
+                  [PARAMS.PROJECT_ID]: id,
                 })}
                 icon={<FlagIcon />}
-                text={t('repository_menu_languages')}
+                text={t('project_menu_languages')}
               />
 
               {config.authentication && (
                 <>
                   <SideMenuItem
-                    linkTo={LINKS.REPOSITORY_INVITATION.build({
-                      [PARAMS.REPOSITORY_ID]: id,
+                    linkTo={LINKS.PROJECT_INVITATION.build({
+                      [PARAMS.PROJECT_ID]: id,
                     })}
                     icon={<PersonAddIcon />}
-                    text={t('repository_menu_invite_user')}
+                    text={t('project_menu_invite_user')}
                   />
                   <SideMenuItem
-                    linkTo={LINKS.REPOSITORY_PERMISSIONS.build({
-                      [PARAMS.REPOSITORY_ID]: id,
+                    linkTo={LINKS.PROJECT_PERMISSIONS.build({
+                      [PARAMS.PROJECT_ID]: id,
                     })}
                     icon={<SupervisedUserCircleIcon />}
-                    text={t('repository_menu_permissions')}
+                    text={t('project_menu_permissions')}
                   />
                 </>
               )}
 
               <SideMenuItem
-                linkTo={LINKS.REPOSITORY_IMPORT.build({
-                  [PARAMS.REPOSITORY_ID]: id,
+                linkTo={LINKS.PROJECT_IMPORT.build({
+                  [PARAMS.PROJECT_ID]: id,
                 })}
                 icon={<ImportExportIcon />}
-                text={t('repository_menu_import')}
+                text={t('project_menu_import')}
               />
             </>
           )}
           <SideMenuItem
-            linkTo={LINKS.REPOSITORY_EXPORT.build({
-              [PARAMS.REPOSITORY_ID]: id,
+            linkTo={LINKS.PROJECT_EXPORT.build({
+              [PARAMS.PROJECT_ID]: id,
             })}
             icon={<SaveAltIcon />}
-            text={t('repository_menu_export')}
+            text={t('project_menu_export')}
           />
         </List>
         {!config.authentication && (
@@ -127,7 +116,7 @@ export const RepositoryMenu = ({ id }) => {
               <SideMenuItem
                 linkTo={LINKS.USER_API_KEYS.build()}
                 icon={<VpnKeyIcon />}
-                text={t('repository_menu_api_keys')}
+                text={t('project_menu_api_keys')}
               />
             </List>
           </>

@@ -11,12 +11,11 @@ import { EmptyListMessage } from '../common/EmptyListMessage';
 import { FabAddButtonLink } from '../common/buttons/FabAddButtonLink';
 import { MenuBar } from './MenuBar';
 import { BaseView } from '../layout/BaseView';
-import { useRepositoryPermissions } from '../../hooks/useRepositoryPermissions';
-import { RepositoryPermissionType } from '../../service/response.types';
+import { useProjectPermissions } from '../../hooks/useProjectPermissions';
+import { ProjectPermissionType } from '../../service/response.types';
 import { T, useTranslate } from '@tolgee/react';
 
 import { Navigation } from '../navigation/Navigation';
-import { Path } from '../navigation/Path';
 import Typography from '@material-ui/core/Typography';
 
 export const TranslationsGrid: FunctionComponent = (props) => {
@@ -36,8 +35,8 @@ export const TranslationsGrid: FunctionComponent = (props) => {
         projectPermissions.satisfiesPermission(ProjectPermissionType.EDIT) && (
           <Box display="flex" justifyContent="center">
             <FabAddButtonLink
-              to={LINKS.REPOSITORY_TRANSLATIONS_ADD.build({
-                [PARAMS.REPOSITORY_ID]: projectDTO.id,
+              to={LINKS.PROJECT_TRANSLATIONS_ADD.build({
+                [PARAMS.PROJECT_ID]: projectDTO.id,
               })}
             />
           </Box>
@@ -72,24 +71,22 @@ export const TranslationsGrid: FunctionComponent = (props) => {
   return (
     <BaseView
       navigation={
-        <Navigation>
-          <Path
-            path={[
-              [
-                repositoryDTO.name,
-                LINKS.REPOSITORY.build({
-                  [PARAMS.REPOSITORY_ID]: repositoryDTO.id,
-                }),
-              ],
-              [
-                t('translations_view_title'),
-                LINKS.REPOSITORY_TRANSLATIONS.build({
-                  [PARAMS.REPOSITORY_ID]: repositoryDTO.id,
-                }),
-              ],
-            ]}
-          />
-        </Navigation>
+        <Navigation
+          path={[
+            [
+              projectDTO.name,
+              LINKS.PROJECT.build({
+                [PARAMS.PROJECT_ID]: projectDTO.id,
+              }),
+            ],
+            [
+              t('translations_view_title'),
+              LINKS.PROJECT_TRANSLATIONS.build({
+                [PARAMS.PROJECT_ID]: projectDTO.id,
+              }),
+            ],
+          ]}
+        />
       }
       customHeader={
         isSearch || !isEmpty ? (

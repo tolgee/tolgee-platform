@@ -40,7 +40,7 @@ export const ProjectListView = () => {
           mt={2}
           pr={2}
         >
-          <FabAddButtonLink to={LINKS.REPOSITORY_ADD.build()} />
+          <FabAddButtonLink to={LINKS.PROJECT_ADD.build()} />
         </Box>
       </BaseView>
     </DashboardPage>
