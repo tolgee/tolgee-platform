@@ -1,5 +1,10 @@
-import React, {FunctionComponent, useState} from 'react';
-import {createStyles, makeStyles, Theme, useTheme,} from '@material-ui/core/styles';
+import React, { FunctionComponent, useState } from 'react';
+import {
+  createStyles,
+  makeStyles,
+  Theme,
+  useTheme,
+} from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -7,15 +12,15 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
-import {TransitionProps} from '@material-ui/core/transitions';
-import {components} from '../../../../../service/apiSchema';
-import {T} from '@tolgee/react';
-import {Box, Grid} from '@material-ui/core';
-import {container} from 'tsyringe';
-import {ImportActions} from '../../../../../store/project/ImportActions';
-import {useProject} from '../../../../../hooks/useProject';
-import {SimplePaginatedHateoasList} from '../../../../common/list/SimplePaginatedHateoasList';
-import {SecondaryBar} from '../../../../layout/SecondaryBar';
+import { TransitionProps } from '@material-ui/core/transitions';
+import { components } from '../../../../../service/apiSchema';
+import { T } from '@tolgee/react';
+import { Box, Grid } from '@material-ui/core';
+import { container } from 'tsyringe';
+import { ImportActions } from '../../../../../store/project/ImportActions';
+import { useProject } from '../../../../../hooks/useProject';
+import { SimplePaginatedHateoasList } from '../../../../common/list/SimplePaginatedHateoasList';
+import { SecondaryBar } from '../../../../layout/SecondaryBar';
 import SearchField from '../../../../common/form/fields/SearchField';
 
 const actions = container.resolve(ImportActions);

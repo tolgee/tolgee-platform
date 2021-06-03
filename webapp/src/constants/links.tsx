@@ -137,10 +137,7 @@ export class LINKS {
     'invitations'
   );
 
-  static ORGANIZATION_PROJECTS = Link.ofParent(
-    LINKS.ORGANIZATION,
-    'projects'
-  );
+  static ORGANIZATION_PROJECTS = Link.ofParent(LINKS.ORGANIZATION, 'projects');
 
   /**
    * Project stuff
@@ -154,10 +151,7 @@ export class LINKS {
 
   static AFTER_LOGIN = LINKS.PROJECTS;
 
-  static REPOSITORY = Link.ofParent(
-    LINKS.PROJECTS,
-    p(PARAMS.REPOSITORY_ID)
-  );
+  static REPOSITORY = Link.ofParent(LINKS.PROJECTS, p(PARAMS.REPOSITORY_ID));
 
   static REPOSITORY_ADD = Link.ofParent(LINKS.PROJECTS, 'add');
 

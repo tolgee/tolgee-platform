@@ -1,13 +1,13 @@
-import {useFormikContext} from 'formik';
-import {useDebounce} from 'use-debounce';
+import { useFormikContext } from 'formik';
+import { useDebounce } from 'use-debounce';
 import * as React from 'react';
-import {useEffect, useState} from 'react';
-import {TextField} from '../../../common/form/fields/TextField';
-import {Box, FormHelperText} from '@material-ui/core';
-import {LINKS, PARAMS} from '../../../../constants/links';
-import {container} from 'tsyringe';
-import {OrganizationService} from '../../../../service/OrganizationService';
-import {T} from '@tolgee/react';
+import { useEffect, useState } from 'react';
+import { TextField } from '../../../common/form/fields/TextField';
+import { Box, FormHelperText } from '@material-ui/core';
+import { LINKS, PARAMS } from '../../../../constants/links';
+import { container } from 'tsyringe';
+import { OrganizationService } from '../../../../service/OrganizationService';
+import { T } from '@tolgee/react';
 
 const organizationService = container.resolve(OrganizationService);
 
@@ -25,8 +25,7 @@ export const OrganizationFields = () => {
     //const slugChanged = slugMeta.initialValue !== slugMeta.value
 
     if (nameChanged) {
-      const initialSlug =
-        formik.getFieldMeta('slug').initialValue;
+      const initialSlug = formik.getFieldMeta('slug').initialValue;
       const slugNotTouchedOrEmpty =
         !formik.getFieldMeta('slug').touched || slugValue === '';
       //autogenerate the slug just when not touched and name is valid

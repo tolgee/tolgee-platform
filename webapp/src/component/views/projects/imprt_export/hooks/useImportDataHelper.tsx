@@ -1,7 +1,7 @@
-import {useProject} from '../../../../../hooks/useProject';
-import {container} from 'tsyringe';
-import {startLoading} from '../../../../../hooks/loading';
-import {ImportActions} from '../../../../../store/project/ImportActions';
+import { useProject } from '../../../../../hooks/useProject';
+import { container } from 'tsyringe';
+import { startLoading } from '../../../../../hooks/loading';
+import { ImportActions } from '../../../../../store/project/ImportActions';
 
 const actions = container.resolve(ImportActions);
 

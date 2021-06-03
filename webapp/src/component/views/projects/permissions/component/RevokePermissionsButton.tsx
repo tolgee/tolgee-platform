@@ -1,12 +1,12 @@
-import React, {FunctionComponent, ReactElement} from 'react';
-import {Button, Tooltip} from '@material-ui/core';
-import {confirmation} from '../../../../../hooks/confirmation';
-import {T} from '@tolgee/react';
-import {components} from '../../../../../service/apiSchema';
-import {useUser} from '../../../../../hooks/useUser';
-import {container} from 'tsyringe';
-import {ProjectActions} from '../../../../../store/project/ProjectActions';
-import {useProject} from '../../../../../hooks/useProject';
+import React, { FunctionComponent, ReactElement } from 'react';
+import { Button, Tooltip } from '@material-ui/core';
+import { confirmation } from '../../../../../hooks/confirmation';
+import { T } from '@tolgee/react';
+import { components } from '../../../../../service/apiSchema';
+import { useUser } from '../../../../../hooks/useUser';
+import { container } from 'tsyringe';
+import { ProjectActions } from '../../../../../store/project/ProjectActions';
+import { useProject } from '../../../../../hooks/useProject';
 
 const projectActions = container.resolve(ProjectActions);
 

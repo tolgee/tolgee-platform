@@ -1,12 +1,12 @@
-import React, {FunctionComponent, useEffect, useState} from 'react';
-import {StandardForm} from '../common/form/StandardForm';
-import {Validation} from '../../constants/GlobalValidationSchema';
-import {TextField} from '../common/form/fields/TextField';
-import {T} from '@tolgee/react';
-import {LanguageDTO} from '../../service/response.types';
-import {container} from 'tsyringe';
-import {LanguageActions} from '../../store/languages/LanguageActions';
-import {useProject} from '../../hooks/useProject';
+import React, { FunctionComponent, useEffect, useState } from 'react';
+import { StandardForm } from '../common/form/StandardForm';
+import { Validation } from '../../constants/GlobalValidationSchema';
+import { TextField } from '../common/form/fields/TextField';
+import { T } from '@tolgee/react';
+import { LanguageDTO } from '../../service/response.types';
+import { container } from 'tsyringe';
+import { LanguageActions } from '../../store/languages/LanguageActions';
+import { useProject } from '../../hooks/useProject';
 
 const actions = container.resolve(LanguageActions);
 export const LanguageCreateForm: FunctionComponent<{

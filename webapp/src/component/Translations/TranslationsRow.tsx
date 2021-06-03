@@ -1,15 +1,18 @@
 import * as React from 'react';
-import {FunctionComponent, useContext} from 'react';
-import {KeyTranslationsDTO, ProjectPermissionType,} from '../../service/response.types';
-import {Box, Checkbox} from '@material-ui/core';
-import {TableCell} from './TableCell';
-import {KeyCell} from './KeyCell';
-import {TranslationCell} from './TranslationCell';
-import {grey} from '@material-ui/core/colors';
-import {TranslationListContext} from './TtranslationsGridContextProvider';
-import {createStyles, makeStyles} from '@material-ui/core/styles';
-import {KeyScreenshots} from './Screenshots/KeySreenshots';
-import {useProjectPermissions} from '../../hooks/useProjectPermissions';
+import { FunctionComponent, useContext } from 'react';
+import {
+  KeyTranslationsDTO,
+  ProjectPermissionType,
+} from '../../service/response.types';
+import { Box, Checkbox } from '@material-ui/core';
+import { TableCell } from './TableCell';
+import { KeyCell } from './KeyCell';
+import { TranslationCell } from './TranslationCell';
+import { grey } from '@material-ui/core/colors';
+import { TranslationListContext } from './TtranslationsGridContextProvider';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
+import { KeyScreenshots } from './Screenshots/KeySreenshots';
+import { useProjectPermissions } from '../../hooks/useProjectPermissions';
 
 export interface TranslationProps {
   data: KeyTranslationsDTO;

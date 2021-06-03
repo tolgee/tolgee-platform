@@ -1,9 +1,9 @@
-import {singleton} from 'tsyringe';
-import {ApiV1HttpService} from './http/ApiV1HttpService';
-import {ApiKeyDTO} from './response.types';
-import {MessageService} from './MessageService';
-import {EditApiKeyDTO} from './request.types';
-import {T} from '@tolgee/react';
+import { singleton } from 'tsyringe';
+import { ApiV1HttpService } from './http/ApiV1HttpService';
+import { ApiKeyDTO } from './response.types';
+import { MessageService } from './MessageService';
+import { EditApiKeyDTO } from './request.types';
+import { T } from '@tolgee/react';
 import React from 'react';
 
 const BASE = 'apiKeys';

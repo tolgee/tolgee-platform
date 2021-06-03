@@ -1,19 +1,25 @@
-import {useRedirect} from '../../../../hooks/useRedirect';
-import {LINKS} from '../../../../constants/links';
-import {Box, Dialog, DialogContent, DialogTitle, MenuItem,} from '@material-ui/core';
-import {StandardForm} from '../../../common/form/StandardForm';
-import {Select} from '../../../common/form/fields/Select';
-import {default as React, FunctionComponent, useEffect} from 'react';
-import {container} from 'tsyringe';
-import {UserApiKeysActions} from '../../../../store/api_keys/UserApiKeysActions';
-import {BoxLoading} from '../../../common/BoxLoading';
-import {FormikProps} from 'formik';
-import {CheckBoxGroupMultiSelect} from '../../../common/form/fields/CheckBoxGroupMultiSelect';
-import {ApiKeyDTO} from '../../../../service/response.types';
-import {EditApiKeyDTO} from '../../../../service/request.types';
-import {Validation} from '../../../../constants/GlobalValidationSchema';
-import {FullPageLoading} from '../../../common/FullPageLoading';
-import {T} from '@tolgee/react';
+import { useRedirect } from '../../../../hooks/useRedirect';
+import { LINKS } from '../../../../constants/links';
+import {
+  Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+} from '@material-ui/core';
+import { StandardForm } from '../../../common/form/StandardForm';
+import { Select } from '../../../common/form/fields/Select';
+import { default as React, FunctionComponent, useEffect } from 'react';
+import { container } from 'tsyringe';
+import { UserApiKeysActions } from '../../../../store/api_keys/UserApiKeysActions';
+import { BoxLoading } from '../../../common/BoxLoading';
+import { FormikProps } from 'formik';
+import { CheckBoxGroupMultiSelect } from '../../../common/form/fields/CheckBoxGroupMultiSelect';
+import { ApiKeyDTO } from '../../../../service/response.types';
+import { EditApiKeyDTO } from '../../../../service/request.types';
+import { Validation } from '../../../../constants/GlobalValidationSchema';
+import { FullPageLoading } from '../../../common/FullPageLoading';
+import { T } from '@tolgee/react';
 
 interface Value {
   scopes: string[];

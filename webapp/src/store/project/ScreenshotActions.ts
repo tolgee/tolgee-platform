@@ -1,9 +1,12 @@
-import {singleton} from 'tsyringe';
-import {AbstractLoadableActions, StateWithLoadables,} from '../AbstractLoadableActions';
-import {AppState} from '../index';
-import {useSelector} from 'react-redux';
-import {ScreenshotService} from '../../service/ScreenshotService';
-import {ScreenshotDTO} from '../../service/response.types';
+import { singleton } from 'tsyringe';
+import {
+  AbstractLoadableActions,
+  StateWithLoadables,
+} from '../AbstractLoadableActions';
+import { AppState } from '../index';
+import { useSelector } from 'react-redux';
+import { ScreenshotService } from '../../service/ScreenshotService';
+import { ScreenshotDTO } from '../../service/response.types';
 
 export class ScreenshotState extends StateWithLoadables<ScreenshotActions> {}
 

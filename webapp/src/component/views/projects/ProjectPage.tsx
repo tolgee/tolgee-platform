@@ -1,9 +1,9 @@
 import * as React from 'react';
-import {FunctionComponent} from 'react';
+import { FunctionComponent } from 'react';
 
-import {DashboardPage} from '../../layout/DashboardPage';
-import {useProject} from '../../../hooks/useProject';
-import {ProjectMenu} from './ProjectMenu';
+import { DashboardPage } from '../../layout/DashboardPage';
+import { useProject } from '../../../hooks/useProject';
+import { ProjectMenu } from './ProjectMenu';
 
 interface Props {
   fullWidth?: boolean;

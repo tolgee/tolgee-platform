@@ -1,7 +1,7 @@
-import {LanguageDTO} from '../service/response.types';
-import {useSelector} from 'react-redux';
-import {AppState} from '../store';
-import {GlobalError} from '../error/GlobalError';
+import { LanguageDTO } from '../service/response.types';
+import { useSelector } from 'react-redux';
+import { AppState } from '../store';
+import { GlobalError } from '../error/GlobalError';
 
 export const useProjectLanguages = (): LanguageDTO[] => {
   let languagesLoadable = useSelector(

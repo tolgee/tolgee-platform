@@ -1,12 +1,12 @@
 import * as React from 'react';
-import {FunctionComponent, ReactElement} from 'react';
-import {makeStyles} from '@material-ui/core/styles';
+import { FunctionComponent, ReactElement } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Box from '@material-ui/core/Box';
-import {MainMenu} from './MainMenu';
-import {Link} from 'react-router-dom';
-import {LINKS} from '../../constants/links';
-import {TolgeeLogo} from '../common/icons/TolgeeLogo';
+import { MainMenu } from './MainMenu';
+import { Link } from 'react-router-dom';
+import { LINKS } from '../../constants/links';
+import { TolgeeLogo } from '../common/icons/TolgeeLogo';
 
 const FOOTER_IMAGE_HEIGHT = 30;
 const FOOTER_PADDING = 1;
@@ -68,10 +68,7 @@ export const DashboardPage: FunctionComponent<DashboardPageProps> = ({
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <MainMenu
-        projectName={props.projectName}
-        sideMenuItems={sideMenuItems}
-      />
+      <MainMenu projectName={props.projectName} sideMenuItems={sideMenuItems} />
       <main className={classes.content}>
         <Box
           display="flex"

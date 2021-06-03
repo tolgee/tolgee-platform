@@ -1,11 +1,20 @@
-import React, {FunctionComponent, useState} from 'react';
-import {components} from '../../../../../service/apiSchema';
-import {Box, makeStyles, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,} from '@material-ui/core';
-import {T} from '@tolgee/react';
-import {ImportResultRow} from './ImportResultRow';
-import {ProjectLanguagesProvider} from '../../../../../hooks/ProjectLanguagesProvider';
-import {ImportFileIssuesDialog} from './ImportFileIssuesDialog';
-import {ImportShowDataDialog} from './ImportShowDataDialog';
+import React, { FunctionComponent, useState } from 'react';
+import { components } from '../../../../../service/apiSchema';
+import {
+  Box,
+  makeStyles,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@material-ui/core';
+import { T } from '@tolgee/react';
+import { ImportResultRow } from './ImportResultRow';
+import { ProjectLanguagesProvider } from '../../../../../hooks/ProjectLanguagesProvider';
+import { ImportFileIssuesDialog } from './ImportFileIssuesDialog';
+import { ImportShowDataDialog } from './ImportShowDataDialog';
 
 type ImportResultProps = {
   result?: components['schemas']['PagedModelImportLanguageModel'];

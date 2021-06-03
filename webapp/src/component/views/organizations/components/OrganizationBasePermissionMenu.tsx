@@ -1,12 +1,12 @@
-import {T} from '@tolgee/react';
+import { T } from '@tolgee/react';
 import * as React from 'react';
-import {FunctionComponent} from 'react';
-import {components} from '../../../../service/apiSchema';
-import {container} from 'tsyringe';
-import {OrganizationActions} from '../../../../store/organization/OrganizationActions';
-import {useOrganization} from '../../../../hooks/organizations/useOrganization';
-import {confirmation} from '../../../../hooks/confirmation';
-import {PermissionsMenu} from '../../../security/PermissionsMenu';
+import { FunctionComponent } from 'react';
+import { components } from '../../../../service/apiSchema';
+import { container } from 'tsyringe';
+import { OrganizationActions } from '../../../../store/organization/OrganizationActions';
+import { useOrganization } from '../../../../hooks/organizations/useOrganization';
+import { confirmation } from '../../../../hooks/confirmation';
+import { PermissionsMenu } from '../../../security/PermissionsMenu';
 
 const actions = container.resolve(OrganizationActions);
 

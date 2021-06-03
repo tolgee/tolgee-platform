@@ -1,10 +1,17 @@
-import React, {FunctionComponent} from 'react';
-import {SecondaryBar} from '../../../../layout/SecondaryBar';
-import {Box, FormControlLabel, Grid, makeStyles, Switch, Typography,} from '@material-ui/core';
-import {T} from '@tolgee/react';
-import {CheckCircle, Warning} from '@material-ui/icons';
-import {container} from 'tsyringe';
-import {ImportActions} from '../../../../../store/project/ImportActions';
+import React, { FunctionComponent } from 'react';
+import { SecondaryBar } from '../../../../layout/SecondaryBar';
+import {
+  Box,
+  FormControlLabel,
+  Grid,
+  makeStyles,
+  Switch,
+  Typography,
+} from '@material-ui/core';
+import { T } from '@tolgee/react';
+import { CheckCircle, Warning } from '@material-ui/icons';
+import { container } from 'tsyringe';
+import { ImportActions } from '../../../../../store/project/ImportActions';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({

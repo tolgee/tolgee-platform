@@ -1,19 +1,19 @@
 import * as React from 'react';
-import {FunctionComponent, useEffect, useState} from 'react';
-import {useSelector} from 'react-redux';
-import {AppState} from '../../../../store';
-import {container} from 'tsyringe';
-import {ProjectActions} from '../../../../store/project/ProjectActions';
-import {LINKS} from '../../../../constants/links';
-import {Redirect} from 'react-router-dom';
-import {TextField} from '../../../common/form/fields/TextField';
-import {BaseFormView} from '../../../layout/BaseFormView';
-import {useProject} from '../../../../hooks/useProject';
-import {Button} from '@material-ui/core';
-import {confirmation} from '../../../../hooks/confirmation';
-import {T} from '@tolgee/react';
-import {ConfirmationDialogProps} from '../../../common/ConfirmationDialog';
-import {Validation} from '../../../../constants/GlobalValidationSchema';
+import { FunctionComponent, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { AppState } from '../../../../store';
+import { container } from 'tsyringe';
+import { ProjectActions } from '../../../../store/project/ProjectActions';
+import { LINKS } from '../../../../constants/links';
+import { Redirect } from 'react-router-dom';
+import { TextField } from '../../../common/form/fields/TextField';
+import { BaseFormView } from '../../../layout/BaseFormView';
+import { useProject } from '../../../../hooks/useProject';
+import { Button } from '@material-ui/core';
+import { confirmation } from '../../../../hooks/confirmation';
+import { T } from '@tolgee/react';
+import { ConfirmationDialogProps } from '../../../common/ConfirmationDialog';
+import { Validation } from '../../../../constants/GlobalValidationSchema';
 
 const actions = container.resolve(ProjectActions);
 
@@ -81,9 +81,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
                 </T>
               ),
               onConfirm: () =>
-                actions.loadableActions.deleteProject.dispatch(
-                  project.id
-                ),
+                actions.loadableActions.deleteProject.dispatch(project.id),
               hardModeText: project.name.toUpperCase(),
             });
           }}

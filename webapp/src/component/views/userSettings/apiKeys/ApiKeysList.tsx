@@ -1,14 +1,14 @@
-import {default as React, FunctionComponent} from 'react';
-import {ApiKeyDTO} from '../../../../service/response.types';
-import {Box, Grid, Paper, Theme,} from '@material-ui/core';
-import {EditIconButton} from '../../../common/buttons/EditIconButton';
-import {DeleteIconButton} from '../../../common/buttons/DeleteIconButton';
-import {Link} from 'react-router-dom';
-import {LINKS, PARAMS} from '../../../../constants/links';
-import {container} from 'tsyringe';
-import {UserApiKeysActions} from '../../../../store/api_keys/UserApiKeysActions';
-import {confirmation} from '../../../../hooks/confirmation';
-import {T} from '@tolgee/react';
+import { default as React, FunctionComponent } from 'react';
+import { ApiKeyDTO } from '../../../../service/response.types';
+import { Box, Grid, Paper, Theme } from '@material-ui/core';
+import { EditIconButton } from '../../../common/buttons/EditIconButton';
+import { DeleteIconButton } from '../../../common/buttons/DeleteIconButton';
+import { Link } from 'react-router-dom';
+import { LINKS, PARAMS } from '../../../../constants/links';
+import { container } from 'tsyringe';
+import { UserApiKeysActions } from '../../../../store/api_keys/UserApiKeysActions';
+import { confirmation } from '../../../../hooks/confirmation';
+import { T } from '@tolgee/react';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import createStyles from '@material-ui/core/styles/createStyles';
 

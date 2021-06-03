@@ -1,10 +1,10 @@
-import {container, singleton} from 'tsyringe';
-import {ApiV1HttpService} from './http/ApiV1HttpService';
-import {PermissionDTO, PermissionEditDTO, ProjectDTO,} from './response.types';
-import {useRedirect} from '../hooks/useRedirect';
-import {LINKS} from '../constants/links';
-import {components} from './apiSchema';
-import {ApiV2HttpService} from './http/ApiV2HttpService';
+import { container, singleton } from 'tsyringe';
+import { ApiV1HttpService } from './http/ApiV1HttpService';
+import { PermissionDTO, PermissionEditDTO, ProjectDTO } from './response.types';
+import { useRedirect } from '../hooks/useRedirect';
+import { LINKS } from '../constants/links';
+import { components } from './apiSchema';
+import { ApiV2HttpService } from './http/ApiV2HttpService';
 
 const http = container.resolve(ApiV1HttpService);
 

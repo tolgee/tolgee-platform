@@ -1,11 +1,17 @@
-import React, {useEffect} from 'react';
-import {Box, FormControl, InputLabel, MenuItem, Select,} from '@material-ui/core';
-import {T} from '@tolgee/react';
-import {container} from 'tsyringe';
-import {OrganizationActions} from '../../../../../store/organization/OrganizationActions';
-import {useUser} from '../../../../../hooks/useUser';
-import {useField} from 'formik';
-import {BoxLoading} from '../../../../common/BoxLoading';
+import React, { useEffect } from 'react';
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+} from '@material-ui/core';
+import { T } from '@tolgee/react';
+import { container } from 'tsyringe';
+import { OrganizationActions } from '../../../../../store/organization/OrganizationActions';
+import { useUser } from '../../../../../hooks/useUser';
+import { useField } from 'formik';
+import { BoxLoading } from '../../../../common/BoxLoading';
 
 const organizationActions = container.resolve(OrganizationActions);
 

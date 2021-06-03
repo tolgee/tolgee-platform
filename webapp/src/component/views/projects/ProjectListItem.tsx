@@ -1,13 +1,13 @@
 import React from 'react';
-import {ListItemLink} from '../../common/list/ListItemLink';
-import {LINKS, PARAMS} from '../../../constants/links';
+import { ListItemLink } from '../../common/list/ListItemLink';
+import { LINKS, PARAMS } from '../../../constants/links';
 import ListItemText from '@material-ui/core/ListItemText';
-import {Button, Chip} from '@material-ui/core';
-import {ProjectPermissionType,} from '../../../service/response.types';
+import { Button, Chip } from '@material-ui/core';
+import { ProjectPermissionType } from '../../../service/response.types';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import {Link} from 'react-router-dom';
-import {T} from '@tolgee/react';
-import {components} from '../../../service/apiSchema';
+import { Link } from 'react-router-dom';
+import { T } from '@tolgee/react';
+import { components } from '../../../service/apiSchema';
 
 const ProjectListItem = (r: components['schemas']['ProjectModel']) => {
   return (

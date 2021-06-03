@@ -1,7 +1,7 @@
-import {Divider} from '@material-ui/core';
+import { Divider } from '@material-ui/core';
 import List from '@material-ui/core/List';
-import {SideMenuItem} from '../../layout/sideMenu/SideMenuItem';
-import {LINKS, PARAMS} from '../../../constants/links';
+import { SideMenuItem } from '../../layout/sideMenu/SideMenuItem';
+import { LINKS, PARAMS } from '../../../constants/links';
 import DynamicFeedIcon from '@material-ui/icons/DynamicFeed';
 import LanguageIcon from '@material-ui/icons/Language';
 import SettingsIcon from '@material-ui/icons/Settings';
@@ -9,13 +9,13 @@ import FlagIcon from '@material-ui/icons/Flag';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import SupervisedUserCircleIcon from '@material-ui/icons/SupervisedUserCircle';
 import * as React from 'react';
-import {useProject} from '../../../hooks/useProject';
-import {ProjectPermissionType} from '../../../service/response.types';
+import { useProject } from '../../../hooks/useProject';
+import { ProjectPermissionType } from '../../../service/response.types';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import SaveAltIcon from '@material-ui/icons/SaveAlt';
-import {useConfig} from '../../../hooks/useConfig';
+import { useConfig } from '../../../hooks/useConfig';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
-import {useTranslate} from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 
 export const ProjectMenu = ({ id }) => {
   let projectDTO = useProject();
@@ -44,8 +44,7 @@ export const ProjectMenu = ({ id }) => {
       </List>
       <Divider />
       <List>
-        {projectDTO.computedPermissions ===
-          ProjectPermissionType.MANAGE && (
+        {projectDTO.computedPermissions === ProjectPermissionType.MANAGE && (
           <>
             <SideMenuItem
               linkTo={LINKS.REPOSITORY_EDIT.build({

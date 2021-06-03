@@ -1,7 +1,7 @@
-import {LINKS, PARAMS} from '../../constants/links';
-import {default as React} from 'react';
-import {useRouteMatch} from 'react-router-dom';
-import {useOrganization} from './useOrganization';
+import { LINKS, PARAMS } from '../../constants/links';
+import { default as React } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { useOrganization } from './useOrganization';
 
 export class OrganizationMenuItem {
   constructor(

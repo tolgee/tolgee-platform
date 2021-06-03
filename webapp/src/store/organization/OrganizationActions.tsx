@@ -1,13 +1,17 @@
-import {singleton} from 'tsyringe';
-import {AbstractLoadableActions, createLoadable, StateWithLoadables,} from '../AbstractLoadableActions';
+import { singleton } from 'tsyringe';
+import {
+  AbstractLoadableActions,
+  createLoadable,
+  StateWithLoadables,
+} from '../AbstractLoadableActions';
 import React from 'react';
-import {OrganizationService} from '../../service/OrganizationService';
-import {AppState} from '../index';
-import {useSelector} from 'react-redux';
-import {T} from '@tolgee/react';
-import {LINKS, PARAMS} from '../../constants/links';
-import {InvitationService} from '../../service/InvitationService';
-import {ApiSchemaHttpService} from '../../service/http/ApiSchemaHttpService';
+import { OrganizationService } from '../../service/OrganizationService';
+import { AppState } from '../index';
+import { useSelector } from 'react-redux';
+import { T } from '@tolgee/react';
+import { LINKS, PARAMS } from '../../constants/links';
+import { InvitationService } from '../../service/InvitationService';
+import { ApiSchemaHttpService } from '../../service/http/ApiSchemaHttpService';
 
 export class OrganizationState extends StateWithLoadables<OrganizationActions> {}
 

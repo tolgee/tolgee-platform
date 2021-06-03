@@ -1,16 +1,22 @@
-import {default as React, FunctionComponent} from 'react';
-import {BaseView} from '../../../layout/BaseView';
-import {useSelector} from 'react-redux';
-import {AppState} from '../../../../store';
-import {container} from 'tsyringe';
-import {T} from '@tolgee/react';
-import {SimplePaginatedHateoasList} from '../../../common/list/SimplePaginatedHateoasList';
-import {ProjectActions} from '../../../../store/project/ProjectActions';
-import {SimpleListItem} from '../../../common/list/SimpleListItem';
-import {Box, Chip, ListItemSecondaryAction, ListItemText, Typography,} from '@material-ui/core';
+import { default as React, FunctionComponent } from 'react';
+import { BaseView } from '../../../layout/BaseView';
+import { useSelector } from 'react-redux';
+import { AppState } from '../../../../store';
+import { container } from 'tsyringe';
+import { T } from '@tolgee/react';
+import { SimplePaginatedHateoasList } from '../../../common/list/SimplePaginatedHateoasList';
+import { ProjectActions } from '../../../../store/project/ProjectActions';
+import { SimpleListItem } from '../../../common/list/SimpleListItem';
+import {
+  Box,
+  Chip,
+  ListItemSecondaryAction,
+  ListItemText,
+  Typography,
+} from '@material-ui/core';
 import RevokePermissionsButton from './component/RevokePermissionsButton';
-import {useProject} from '../../../../hooks/useProject';
-import {translatedPermissionType} from '../../../../fixtures/translatePermissionFile';
+import { useProject } from '../../../../hooks/useProject';
+import { translatedPermissionType } from '../../../../fixtures/translatePermissionFile';
 import ProjectPermissionMenu from './component/ProjectPermissionMenu';
 
 const projectActions = container.resolve(ProjectActions);

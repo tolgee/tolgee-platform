@@ -1,15 +1,21 @@
-import {default as React, FunctionComponent, ReactNode, useEffect, useState,} from 'react';
-import {container} from 'tsyringe';
-import {MessageService} from '../../service/MessageService';
-import {TranslationActions} from '../../store/project/TranslationActions';
-import {useProject} from '../../hooks/useProject';
-import {Loadable} from '../../store/AbstractLoadableActions';
-import {TranslationsDataResponse,} from '../../service/response.types';
-import {T, useTranslate} from '@tolgee/react';
-import {FullPageLoading} from '../common/FullPageLoading';
-import {useProjectLanguages} from '../../hooks/useProjectLanguages';
-import {useLeaveEditConfirmationOtherEdit} from './useLeaveEditConfirmation';
-import {parseErrorResponse} from '../../fixtures/errorFIxtures';
+import {
+  default as React,
+  FunctionComponent,
+  ReactNode,
+  useEffect,
+  useState,
+} from 'react';
+import { container } from 'tsyringe';
+import { MessageService } from '../../service/MessageService';
+import { TranslationActions } from '../../store/project/TranslationActions';
+import { useProject } from '../../hooks/useProject';
+import { Loadable } from '../../store/AbstractLoadableActions';
+import { TranslationsDataResponse } from '../../service/response.types';
+import { T, useTranslate } from '@tolgee/react';
+import { FullPageLoading } from '../common/FullPageLoading';
+import { useProjectLanguages } from '../../hooks/useProjectLanguages';
+import { useLeaveEditConfirmationOtherEdit } from './useLeaveEditConfirmation';
+import { parseErrorResponse } from '../../fixtures/errorFIxtures';
 
 export const TranslationListContext =
   // @ts-ignore

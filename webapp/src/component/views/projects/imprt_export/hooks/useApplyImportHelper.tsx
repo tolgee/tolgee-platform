@@ -1,9 +1,9 @@
-import {useEffect, useState} from 'react';
-import {startLoading, stopLoading} from '../../../../../hooks/loading';
-import {container} from 'tsyringe';
-import {ImportActions} from '../../../../../store/project/ImportActions';
-import {useImportDataHelper} from './useImportDataHelper';
-import {useProject} from '../../../../../hooks/useProject';
+import { useEffect, useState } from 'react';
+import { startLoading, stopLoading } from '../../../../../hooks/loading';
+import { container } from 'tsyringe';
+import { ImportActions } from '../../../../../store/project/ImportActions';
+import { useImportDataHelper } from './useImportDataHelper';
+import { useProject } from '../../../../../hooks/useProject';
 
 const actions = container.resolve(ImportActions);
 export const useApplyImportHelper = (

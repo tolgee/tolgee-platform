@@ -1,18 +1,18 @@
 import * as React from 'react';
-import {useEffect} from 'react';
-import {container} from 'tsyringe';
-import {LINKS, PARAMS} from '../../../../constants/links';
-import {useRouteMatch} from 'react-router-dom';
-import {TextField} from '../../../common/form/fields/TextField';
-import {BaseFormView} from '../../../layout/BaseFormView';
-import {LanguageActions} from '../../../../store/languages/LanguageActions';
-import {Button} from '@material-ui/core';
-import {confirmation} from '../../../../hooks/confirmation';
-import {LanguageDTO} from '../../../../service/response.types';
-import {Validation} from '../../../../constants/GlobalValidationSchema';
-import {useRedirect} from '../../../../hooks/useRedirect';
-import {T} from '@tolgee/react';
-import {ConfirmationDialogProps} from '../../../common/ConfirmationDialog';
+import { useEffect } from 'react';
+import { container } from 'tsyringe';
+import { LINKS, PARAMS } from '../../../../constants/links';
+import { useRouteMatch } from 'react-router-dom';
+import { TextField } from '../../../common/form/fields/TextField';
+import { BaseFormView } from '../../../layout/BaseFormView';
+import { LanguageActions } from '../../../../store/languages/LanguageActions';
+import { Button } from '@material-ui/core';
+import { confirmation } from '../../../../hooks/confirmation';
+import { LanguageDTO } from '../../../../service/response.types';
+import { Validation } from '../../../../constants/GlobalValidationSchema';
+import { useRedirect } from '../../../../hooks/useRedirect';
+import { T } from '@tolgee/react';
+import { ConfirmationDialogProps } from '../../../common/ConfirmationDialog';
 
 const actions = container.resolve(LanguageActions);
 
@@ -82,10 +82,7 @@ export const LanguageEditView = () => {
               confirmButtonText: <T>global_delete_button</T>,
               confirmButtonColor: 'secondary',
               onConfirm: () => {
-                actions.loadableActions.delete.dispatch(
-                  projectId,
-                  languageId
-                );
+                actions.loadableActions.delete.dispatch(projectId, languageId);
               },
             })
           }

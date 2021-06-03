@@ -1,13 +1,13 @@
-import {TopBar} from './TopBar';
-import {SideMenu} from './sideMenu/SideMenu';
+import { TopBar } from './TopBar';
+import { SideMenu } from './sideMenu/SideMenu';
 import * as React from 'react';
-import {ReactElement} from 'react';
-import {Box} from '@material-ui/core';
-import {useSelector} from 'react-redux';
-import {AppState} from '../../store';
-import {container} from 'tsyringe';
-import {GlobalActions} from '../../store/global/GlobalActions';
-import {UserMenu} from '../security/UserMenu';
+import { ReactElement } from 'react';
+import { Box } from '@material-ui/core';
+import { useSelector } from 'react-redux';
+import { AppState } from '../../store';
+import { container } from 'tsyringe';
+import { GlobalActions } from '../../store/global/GlobalActions';
+import { UserMenu } from '../security/UserMenu';
 
 interface MainMenuProps {
   sideMenuItems?: ReactElement;

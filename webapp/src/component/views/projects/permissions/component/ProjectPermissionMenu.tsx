@@ -1,12 +1,12 @@
 import React from 'react';
-import {PermissionsMenu} from '../../../../security/PermissionsMenu';
-import {useProject} from '../../../../../hooks/useProject';
-import {components} from '../../../../../service/apiSchema';
-import {useUser} from '../../../../../hooks/useUser';
-import {container} from 'tsyringe';
-import {ProjectActions} from '../../../../../store/project/ProjectActions';
-import {confirmation} from '../../../../../hooks/confirmation';
-import {T} from '@tolgee/react';
+import { PermissionsMenu } from '../../../../security/PermissionsMenu';
+import { useProject } from '../../../../../hooks/useProject';
+import { components } from '../../../../../service/apiSchema';
+import { useUser } from '../../../../../hooks/useUser';
+import { container } from 'tsyringe';
+import { ProjectActions } from '../../../../../store/project/ProjectActions';
+import { confirmation } from '../../../../../hooks/confirmation';
+import { T } from '@tolgee/react';
 
 const projectActions = container.resolve(ProjectActions);
 const ProjectPermissionMenu = (props: {

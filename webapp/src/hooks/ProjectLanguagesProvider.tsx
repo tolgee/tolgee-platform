@@ -1,12 +1,12 @@
 import * as React from 'react';
-import {FunctionComponent, useEffect} from 'react';
-import {container} from 'tsyringe';
-import {useSelector} from 'react-redux';
-import {AppState} from '../store';
-import {GlobalError} from '../error/GlobalError';
-import {LanguageActions} from '../store/languages/LanguageActions';
-import {useProject} from './useProject';
-import {FullPageLoading} from '../component/common/FullPageLoading';
+import { FunctionComponent, useEffect } from 'react';
+import { container } from 'tsyringe';
+import { useSelector } from 'react-redux';
+import { AppState } from '../store';
+import { GlobalError } from '../error/GlobalError';
+import { LanguageActions } from '../store/languages/LanguageActions';
+import { useProject } from './useProject';
+import { FullPageLoading } from '../component/common/FullPageLoading';
 
 const languageActions = container.resolve(LanguageActions);
 

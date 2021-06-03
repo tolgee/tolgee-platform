@@ -1,18 +1,18 @@
 import * as React from 'react';
-import {useEffect} from 'react';
-import {ListItem} from '@material-ui/core';
+import { useEffect } from 'react';
+import { ListItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
-import {container} from 'tsyringe';
-import {LINKS, PARAMS} from '../../../../constants/links';
-import {FabAddButtonLink} from '../../../common/buttons/FabAddButtonLink';
+import { container } from 'tsyringe';
+import { LINKS, PARAMS } from '../../../../constants/links';
+import { FabAddButtonLink } from '../../../common/buttons/FabAddButtonLink';
 import List from '@material-ui/core/List';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import {SettingsIconButton} from '../../../common/buttons/SettingsIconButton';
-import {Link, useRouteMatch} from 'react-router-dom';
-import {LanguageActions} from '../../../../store/languages/LanguageActions';
-import {BaseView} from '../../../layout/BaseView';
-import {T} from '@tolgee/react';
+import { SettingsIconButton } from '../../../common/buttons/SettingsIconButton';
+import { Link, useRouteMatch } from 'react-router-dom';
+import { LanguageActions } from '../../../../store/languages/LanguageActions';
+import { BaseView } from '../../../layout/BaseView';
+import { T } from '@tolgee/react';
 
 const actions = container.resolve(LanguageActions);
 

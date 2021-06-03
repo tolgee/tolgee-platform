@@ -1,9 +1,9 @@
 import * as Yup from 'yup';
-import {container} from 'tsyringe';
-import {SignUpService} from '../service/SignUpService';
+import { container } from 'tsyringe';
+import { SignUpService } from '../service/SignUpService';
 import React from 'react';
-import {T} from '@tolgee/react';
-import {OrganizationService} from '../service/OrganizationService';
+import { T } from '@tolgee/react';
+import { OrganizationService } from '../service/OrganizationService';
 
 Yup.setLocale({
   // use constant translation keys for messages without values
@@ -154,9 +154,7 @@ export class Validation {
       .max(60)
       .matches(/^[a-z0-9-]*[a-z]+[a-z0-9-]*$/, {
         message: (
-          <T>
-            slug_validation_can_contain_just_lowercase_numbers_hyphens
-          </T>
+          <T>slug_validation_can_contain_just_lowercase_numbers_hyphens</T>
         ),
       });
 

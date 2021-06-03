@@ -1,22 +1,27 @@
-import {default as React, FunctionComponent, useEffect, useState,} from 'react';
-import {Box, Button} from '@material-ui/core';
-import {BaseView} from '../../../layout/BaseView';
-import {T} from '@tolgee/react';
+import {
+  default as React,
+  FunctionComponent,
+  useEffect,
+  useState,
+} from 'react';
+import { Box, Button } from '@material-ui/core';
+import { BaseView } from '../../../layout/BaseView';
+import { T } from '@tolgee/react';
 import ImportFileInput from './component/ImportFileInput';
-import {useImportDataHelper} from './hooks/useImportDataHelper';
-import {ImportResult} from './component/ImportResult';
-import {container} from 'tsyringe';
-import {ImportActions} from '../../../../store/project/ImportActions';
-import {useProject} from '../../../../hooks/useProject';
-import {ImportConflictNotResolvedErrorDialog} from './component/ImportConflictNotResolvedErrorDialog';
-import {useApplyImportHelper} from './hooks/useApplyImportHelper';
-import {startLoading, stopLoading} from '../../../../hooks/loading';
-import {parseErrorResponse} from '../../../../fixtures/errorFIxtures';
-import {MessageService} from '../../../../service/MessageService';
-import {ImportAlertError} from './ImportAlertError';
-import {confirmation} from '../../../../hooks/confirmation';
-import {components} from '../../../../service/apiSchema';
-import {ImportConflictResolutionDialog} from './component/ImportConflictResolutionDialog';
+import { useImportDataHelper } from './hooks/useImportDataHelper';
+import { ImportResult } from './component/ImportResult';
+import { container } from 'tsyringe';
+import { ImportActions } from '../../../../store/project/ImportActions';
+import { useProject } from '../../../../hooks/useProject';
+import { ImportConflictNotResolvedErrorDialog } from './component/ImportConflictNotResolvedErrorDialog';
+import { useApplyImportHelper } from './hooks/useApplyImportHelper';
+import { startLoading, stopLoading } from '../../../../hooks/loading';
+import { parseErrorResponse } from '../../../../fixtures/errorFIxtures';
+import { MessageService } from '../../../../service/MessageService';
+import { ImportAlertError } from './ImportAlertError';
+import { confirmation } from '../../../../hooks/confirmation';
+import { components } from '../../../../service/apiSchema';
+import { ImportConflictResolutionDialog } from './component/ImportConflictResolutionDialog';
 
 const actions = container.resolve(ImportActions);
 const messageService = container.resolve(MessageService);
