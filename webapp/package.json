@@ -63,7 +63,7 @@
     ]
   },
   "devDependencies": {
-    "@sentry/types": "^6.3.1",
+    "@sentry/types": "^6.5.1",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.6.1",
     "@types/react": "^17.0.8",
