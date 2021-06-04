@@ -62,12 +62,6 @@ export const TranslationsGrid: FunctionComponent = (props) => {
     </>
   );
 
-  const title = (
-    <Typography variant="h5">
-      <T>translations_view_title</T>
-    </Typography>
-  );
-
   return (
     <BaseView
       navigation={
@@ -75,7 +69,7 @@ export const TranslationsGrid: FunctionComponent = (props) => {
           path={[
             [
               projectDTO.name,
-              LINKS.PROJECT.build({
+              LINKS.PROJECT_TRANSLATIONS.build({
                 [PARAMS.PROJECT_ID]: projectDTO.id,
               }),
             ],
@@ -89,15 +83,14 @@ export const TranslationsGrid: FunctionComponent = (props) => {
         />
       }
       customHeader={
-        isSearch || !isEmpty ? (
+        isSearch ||
+        (!isEmpty && (
           <>
             <Box mt={2}>
               <MenuBar />
             </Box>
           </>
-        ) : (
-          title
-        )
+        ))
       }
       loading={listContext.listLoadable.loading}
     >

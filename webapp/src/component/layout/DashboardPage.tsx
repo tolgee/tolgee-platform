@@ -1,21 +1,22 @@
 import { FunctionComponent, ReactElement } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { TopBar } from './TopBar';
+import { Box } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    height: '100vh',
-    flexDirection: 'column',
-    overflowY: 'hidden',
-    alignItems: 'stretch',
-  },
-  content: {
-    flexGrow: 1,
-    position: 'relative',
-    display: 'flex',
-    overflowY: 'auto',
-  },
+  // root: {
+  //   display: 'flex',
+  //   height: '100vh',
+  //   flexDirection: 'column',
+  //   overflowY: 'hidden',
+  //   alignItems: 'stretch',
+  // },
+  // content: {
+  //   flexGrow: 1,
+  //   position: 'relative',
+  //   display: 'flex',
+  //   overflowY: 'auto',
+  // },
   appBarSpacer: theme.mixins.toolbar,
 }));
 
@@ -26,15 +27,28 @@ interface DashboardPageProps {
 
 export const DashboardPage: FunctionComponent<DashboardPageProps> = ({
   children,
-  ...props
 }) => {
   const classes = useStyles({});
 
   return (
-    <div className={classes.root}>
+    <Box
+      display="flex"
+      height="100vh"
+      alignItems="stretch"
+      overflow="hidden"
+      flexDirection="column"
+    >
       <TopBar />
       <div className={classes.appBarSpacer} />
-      <main className={classes.content}>{children}</main>
-    </div>
+      <Box
+        component="main"
+        display="flex"
+        overflow="auto"
+        flexGrow="1"
+        position="relative"
+      >
+        {children}
+      </Box>
+    </Box>
   );
 };

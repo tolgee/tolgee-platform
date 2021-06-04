@@ -133,7 +133,7 @@ export const ImportView: FunctionComponent = () => {
           path={[
             [
               project.name,
-              LINKS.PROJECT.build({
+              LINKS.PROJECT_TRANSLATIONS.build({
                 [PARAMS.PROJECT_ID]: project.id,
               }),
             ],

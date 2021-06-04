@@ -30,7 +30,7 @@ export const BaseView = (props: BaseViewProps) => {
     <Container
       maxWidth={false}
       style={{
-        backgroundColor: 'rgb(253,253,253)',
+        backgroundColor: 'white',
         borderBottom: `1px solid ${grey[100]}`,
         padding: 0,
         minHeight: '100%',
