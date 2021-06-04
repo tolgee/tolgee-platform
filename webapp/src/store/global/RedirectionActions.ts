@@ -3,7 +3,7 @@ import { singleton } from 'tsyringe';
 
 export class RedirectionState {
   to: string | null = null;
-  redirecting: boolean = false;
+  redirecting = false;
 }
 
 @singleton()

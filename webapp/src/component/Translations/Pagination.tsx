@@ -51,7 +51,7 @@ export const Pagination: FunctionComponent = (props) => {
           labelDisplayedRows={(props) => (
             <T
               parameters={Object.entries(props).reduce(
-                (acc: object, curr) => ({
+                (acc, curr) => ({
                   ...acc,
                   [curr[0]]: curr[1].toString(),
                 }),

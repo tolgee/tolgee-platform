@@ -12,17 +12,16 @@ export type StateModifier<StateType, PayloadType> = (
   action: ActionType<PayloadType>
 ) => StateType;
 
-const a = 'heello';
-
 export abstract class AbstractAction<
   PayloadType = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   StateType = any,
   DispatchParams extends any[] = any[]
 > {
   protected constructor(
     public type: string,
     public payloadProvider?: (...params: DispatchParams) => PayloadType,
-    public meta?: object
+    public meta?: Record<string, unknown>
   ) {}
 
   dispatch(...params: DispatchParams) {
@@ -111,7 +110,7 @@ export class PromiseAction<
   constructor(
     type: string,
     payloadProvider: (...params: DispatchParams) => Promise<PayloadType>,
-    meta?: object
+    meta?: Record<string, unknown>
   ) {
     super(type, payloadProvider, meta);
   }

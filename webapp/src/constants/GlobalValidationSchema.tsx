@@ -1,7 +1,6 @@
 import * as Yup from 'yup';
 import { container } from 'tsyringe';
 import { SignUpService } from '../service/SignUpService';
-import React from 'react';
 import { T } from '@tolgee/react';
 import { OrganizationService } from '../service/OrganizationService';
 
@@ -9,17 +8,21 @@ Yup.setLocale({
   // use constant translation keys for messages without values
   mixed: {
     default: 'field_invalid',
-    required: ({ path }) => {
+    // eslint-disable-next-line react/display-name
+    required: () => {
       return <T>{'Validation - required field'}</T>;
     },
   },
   string: {
+    // eslint-disable-next-line react/display-name
     email: () => <T>validation_email_is_not_valid</T>,
+    // eslint-disable-next-line react/display-name
     min: ({ min }) => (
       <T parameters={{ min: min.toString() }}>
         Field should have at least n chars
       </T>
     ),
+    // eslint-disable-next-line react/display-name
     max: ({ max }) => (
       <T parameters={{ max: max.toString() }}>
         Field should have maximum of n chars
@@ -114,7 +117,7 @@ export class Validation {
   });
 
   static readonly KEY_TRANSLATION_CREATION = (langs: string[]) => {
-    let translationValidation = langs.reduce(
+    const translationValidation = langs.reduce(
       (validation, lang) => ({
         ...validation,
         ['translations.' + lang]: Validation.TRANSLATION_TRANSLATION,

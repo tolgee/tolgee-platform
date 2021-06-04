@@ -1,9 +1,9 @@
-import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Button, Menu, MenuItem } from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
 import { T } from '@tolgee/react';
 import * as React from 'react';
 import { useUser } from '../../../../hooks/useUser';
-import { components } from '../../../../service/apiSchema';
+import { components } from '../../../../service/apiSchema.generated';
 import { FunctionComponent } from 'react';
 import { OrganizationRoleType } from '../../../../service/response.types';
 import { container } from 'tsyringe';

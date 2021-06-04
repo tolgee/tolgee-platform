@@ -25,7 +25,7 @@ import { useProjectPermissions } from '../../hooks/useProjectPermissions';
 import { ProjectPermissionType } from '../../service/response.types';
 
 export const MenuBar: FunctionComponent = () => {
-  let projectDTO = useProject();
+  const projectDTO = useProject();
   const actions = container.resolve(TranslationActions);
   const listContext = useContext(TranslationListContext);
   const projectPermissions = useProjectPermissions();

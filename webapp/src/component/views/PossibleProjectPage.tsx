@@ -6,7 +6,7 @@ import { ProjectPage } from './projects/ProjectPage';
 import { DashboardPage } from '../layout/DashboardPage';
 
 export const PossibleProjectPage: FunctionComponent = (props) => {
-  let project = useSelector(
+  const project = useSelector(
     (state: AppState) => state.projects.loadables.project.loaded
   );
 

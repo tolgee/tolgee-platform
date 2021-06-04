@@ -1,6 +1,6 @@
-import { default as React, FunctionComponent, useEffect } from 'react';
+import { FunctionComponent, useEffect } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { GlobalActions, GlobalState } from '../../store/global/GlobalActions';
+import { GlobalState } from '../../store/global/GlobalActions';
 import { LINKS, PARAMS } from '../../constants/links';
 import { useSelector } from 'react-redux';
 import { AppState } from '../../store';

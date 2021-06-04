@@ -30,9 +30,9 @@ export const ProjectSettingsView: FunctionComponent = () => {
     (state: AppState) => state.projects.loadables.editProject
   );
 
-  let project = useProject();
+  const project = useProject();
 
-  let confirm = (options: ConfirmationDialogProps) =>
+  const confirm = (options: ConfirmationDialogProps) =>
     confirmation({ title: <T>delete_project_dialog_title</T>, ...options });
 
   const onSubmit = (values) => {

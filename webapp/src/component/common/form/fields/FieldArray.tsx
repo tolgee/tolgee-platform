@@ -15,7 +15,7 @@ export interface FAProps {
 }
 
 export const FieldArray: FunctionComponent<FAProps> = (props) => {
-  const [field, meta, helpers] = useField(props.name);
+  const [field, meta] = useField(props.name);
   const values = field.value;
   return (
     <FormikFieldArray

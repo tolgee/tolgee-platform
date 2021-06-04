@@ -11,7 +11,7 @@ export class DispatchService {
   dispatch(action: {
     type: string;
     payload: any;
-    meta?: object;
+    meta?: Record<string, unknown>;
     params?: any[];
   }): void {
     if (this._store !== undefined) {

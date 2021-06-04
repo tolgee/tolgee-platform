@@ -135,7 +135,7 @@ export function SimplePaginatedHateoasList<
         ) : (
           <SimpleList
             pagination={{
-              page: helper.page?.number!! + 1,
+              page: (helper.page?.number as number) + 1,
               onPageChange: helper.onPageChange,
               pageCount: helper.page.totalPages || 0,
             }}

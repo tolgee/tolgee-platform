@@ -11,7 +11,7 @@ import { useProject } from '../../../../hooks/useProject';
 
 const actions = container.resolve(LanguageActions);
 export const LanguageCreateView = () => {
-  let createLoadable = actions.useSelector((s) => s.loadables.create);
+  const createLoadable = actions.useSelector((s) => s.loadables.create);
   const [cancelled, setCancelled] = useState(false);
   const project = useProject();
 

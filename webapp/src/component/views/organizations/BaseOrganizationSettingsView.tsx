@@ -1,5 +1,4 @@
 import { BaseView, BaseViewProps } from '../../layout/BaseView';
-import * as React from 'react';
 import { FunctionComponent, PropsWithChildren } from 'react';
 import { Box, Grid, Typography } from '@material-ui/core';
 import { OrganizationSettingsMenu } from './components/OrganizationSettingsMenu';
@@ -7,7 +6,6 @@ import { useOrganization } from '../../../hooks/organizations/useOrganization';
 import UserOrganizationSettingsSubtitleLink from './components/UserOrganizationSettingsSubtitleLink';
 import { container } from 'tsyringe';
 import { OrganizationActions } from '../../../store/organization/OrganizationActions';
-import SearchField from '../../common/form/fields/SearchField';
 
 const actions = container.resolve(OrganizationActions);
 

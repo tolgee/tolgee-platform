@@ -17,7 +17,7 @@ export function SideMenuItem({
   text,
   selected,
 }: SideMenuItemProps) {
-  let match = useRouteMatch();
+  const match = useRouteMatch();
 
   return (
     <ListItemLink

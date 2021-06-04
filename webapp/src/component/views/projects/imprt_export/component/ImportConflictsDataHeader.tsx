@@ -12,7 +12,7 @@ import { DoneAll } from '@material-ui/icons';
 import { container } from 'tsyringe';
 import { ImportActions } from '../../../../../store/project/ImportActions';
 import { useProject } from '../../../../../hooks/useProject';
-import { components } from '../../../../../service/apiSchema';
+import { components } from '../../../../../service/apiSchema.generated';
 
 const actions = container.resolve(ImportActions);
 export const ImportConflictsDataHeader: FunctionComponent<{

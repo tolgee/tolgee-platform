@@ -1,13 +1,8 @@
-import {
-  default as React,
-  FunctionComponent,
-  useEffect,
-  useState,
-} from 'react';
+import { FunctionComponent, useEffect } from 'react';
 import { DashboardPage } from '../layout/DashboardPage';
 import { BaseView } from '../layout/BaseView';
 import GitHubIcon from '@material-ui/icons/GitHub';
-import { Button, Fade, Slide } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import { useSelector } from 'react-redux';
 import { AppState } from '../../store';
 import { LINKS, PARAMS } from '../../constants/links';
@@ -36,7 +31,6 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
     (state: AppState) => state.global.authLoading
   );
   const remoteConfig = useConfig();
-  const [showError, setShowError] = useState(true);
 
   if (!remoteConfig.authentication || security.allowPrivate) {
     return <Redirect to={LINKS.AFTER_LOGIN.build()} />;

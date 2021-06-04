@@ -22,7 +22,7 @@ import { parseErrorResponse } from '../../../../fixtures/errorFIxtures';
 import { MessageService } from '../../../../service/MessageService';
 import { ImportAlertError } from './ImportAlertError';
 import { confirmation } from '../../../../hooks/confirmation';
-import { components } from '../../../../service/apiSchema';
+import { components } from '../../../../service/apiSchema.generated';
 import { ImportConflictResolutionDialog } from './component/ImportConflictResolutionDialog';
 
 const actions = container.resolve(ImportActions);

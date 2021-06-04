@@ -3,7 +3,7 @@ import { ApiV1HttpService } from './http/ApiV1HttpService';
 import { PermissionDTO, PermissionEditDTO, ProjectDTO } from './response.types';
 import { useRedirect } from '../hooks/useRedirect';
 import { LINKS } from '../constants/links';
-import { components } from './apiSchema';
+import { components } from './apiSchema.generated';
 import { ApiV2HttpService } from './http/ApiV2HttpService';
 
 const http = container.resolve(ApiV1HttpService);
@@ -29,7 +29,7 @@ export class ProjectService {
   public getProjects = async (): Promise<ProjectDTO[]> =>
     await http.get(`projects`);
 
-  public editProject = async (id: number, values: {}) =>
+  public editProject = async (id: number, values: Record<string, unknown>) =>
     (
       await http.postNoJson(`projects/edit`, {
         ...values,

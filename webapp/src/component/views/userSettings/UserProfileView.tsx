@@ -21,10 +21,10 @@ const actions = container.resolve(UserActions);
 const userActions = container.resolve(UserActions);
 
 export const UserProfileView: FunctionComponent = () => {
-  let saveLoadable = useSelector(
+  const saveLoadable = useSelector(
     (state: AppState) => state.user.loadables.updateUser
   );
-  let resourceLoadable = useSelector(
+  const resourceLoadable = useSelector(
     (state: AppState) => state.user.loadables.userData
   );
 

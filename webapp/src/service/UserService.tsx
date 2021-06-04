@@ -1,10 +1,10 @@
 import { singleton } from 'tsyringe';
 import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { UserDTO, UserUpdateDTO } from './response.types';
+import { UserUpdateDTO } from './response.types';
 import { MessageService } from './MessageService';
 import { T } from '@tolgee/react';
 import React from 'react';
-import { components } from './apiSchema';
+import { components } from './apiSchema.generated';
 
 @singleton()
 export class UserService {

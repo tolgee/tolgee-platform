@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { ReactNode, useEffect } from 'react';
 import { EmptyListMessage } from '../EmptyListMessage';
 import { SimpleList } from './SimpleList';
@@ -19,6 +18,7 @@ type EmbeddedDataItem<
   : never;
 
 export interface SimpleHateoasListProps<
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ItemDataType,
   ActionsType extends AbstractLoadableActions<ResourceActionsStateType>,
   ResourceActionsStateType extends StateWithLoadables<any>,

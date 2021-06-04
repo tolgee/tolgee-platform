@@ -15,13 +15,13 @@ export interface TranslationsTableCellProps {
   abbreviation: string;
 }
 
-let actions = container.resolve(TranslationActions);
+const actions = container.resolve(TranslationActions);
 
 export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
   props
 ) => {
-  let projectDTO = useProject();
-  let context = useContext(RowContext);
+  const projectDTO = useProject();
+  const context = useContext(RowContext);
 
   const handleSubmit = (v) => {
     actions.loadableActions.setTranslations.dispatch(projectDTO.id, {

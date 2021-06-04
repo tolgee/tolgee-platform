@@ -11,9 +11,9 @@ import { FullPageLoading } from '../component/common/FullPageLoading';
 const languageActions = container.resolve(LanguageActions);
 
 export const ProjectLanguagesProvider: FunctionComponent = (props) => {
-  let projectDTO = useProject();
+  const projectDTO = useProject();
 
-  let languagesLoadable = useSelector(
+  const languagesLoadable = useSelector(
     (state: AppState) => state.languages.loadables.list
   );
 

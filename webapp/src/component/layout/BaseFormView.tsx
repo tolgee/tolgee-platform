@@ -6,9 +6,9 @@ import { Link } from '../../constants/links';
 import { Loadable } from '../../store/AbstractLoadableActions';
 
 interface BaseFormViewProps {
-  onInit?: () => {};
+  onInit?: () => Record<string, unknown>;
   saving?: boolean;
-  initialValues: object;
+  initialValues: Record<string, unknown>;
   onSubmit: (v: any) => void;
   onCancel?: () => void;
   validationSchema: ObjectSchema<any>;

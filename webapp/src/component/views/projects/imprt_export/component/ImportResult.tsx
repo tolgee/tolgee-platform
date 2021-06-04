@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from 'react';
-import { components } from '../../../../../service/apiSchema';
+import { components } from '../../../../../service/apiSchema.generated';
 import {
   Box,
   makeStyles,

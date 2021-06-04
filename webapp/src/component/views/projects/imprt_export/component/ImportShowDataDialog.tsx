@@ -13,7 +13,7 @@ import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
 import { TransitionProps } from '@material-ui/core/transitions';
-import { components } from '../../../../../service/apiSchema';
+import { components } from '../../../../../service/apiSchema.generated';
 import { T } from '@tolgee/react';
 import { Box, Grid } from '@material-ui/core';
 import { container } from 'tsyringe';
@@ -91,7 +91,7 @@ export const ImportShowDataDialog: FunctionComponent<{
             dispatchParams={[
               {
                 path: {
-                  languageId: props.row?.id!,
+                  languageId: props.row?.id,
                   projectId: project.id,
                 },
                 query: {

@@ -3,7 +3,7 @@ import { Grid } from '@material-ui/core';
 import { ImportConflictTranslation } from './ImportConflictTranslation';
 import { container } from 'tsyringe';
 import { ImportActions } from '../../../../../store/project/ImportActions';
-import { components } from '../../../../../service/apiSchema';
+import { components } from '../../../../../service/apiSchema.generated';
 import { useProject } from '../../../../../hooks/useProject';
 
 const actions = container.resolve(ImportActions);

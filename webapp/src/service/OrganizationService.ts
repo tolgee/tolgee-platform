@@ -1,6 +1,6 @@
 import { singleton } from 'tsyringe';
 import { ApiV2HttpService } from './http/ApiV2HttpService';
-import { components } from './apiSchema';
+import { components } from './apiSchema.generated';
 
 @singleton()
 export class OrganizationService {
@@ -25,7 +25,7 @@ export class OrganizationService {
       oldSlug: oldSlug,
     }) as Promise<string>;
 
-  public validateSlug = (slug: String) =>
+  public validateSlug = (slug: string) =>
     this.v2http.get(
       `address-part/validate-organization/${slug}`
     ) as Promise<boolean>;

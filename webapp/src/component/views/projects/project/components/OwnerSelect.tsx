@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import {
   Box,
   FormControl,
@@ -39,7 +39,7 @@ const OwnerSelect = () => {
       {item.render}
     </MenuItem>
   ));
-  const [fieldProps, fieldMeta, fieldHelpers] = useField('owner');
+  const [fieldProps, _fieldMeta, fieldHelpers] = useField('owner');
 
   return (
     <Box mt={2}>

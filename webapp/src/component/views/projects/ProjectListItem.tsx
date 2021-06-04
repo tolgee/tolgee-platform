@@ -7,7 +7,7 @@ import { ProjectPermissionType } from '../../../service/response.types';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { Link } from 'react-router-dom';
 import { T } from '@tolgee/react';
-import { components } from '../../../service/apiSchema';
+import { components } from '../../../service/apiSchema.generated';
 
 const ProjectListItem = (r: components['schemas']['ProjectModel']) => {
   return (

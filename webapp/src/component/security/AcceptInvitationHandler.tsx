@@ -2,13 +2,10 @@ import { default as React, FunctionComponent, useEffect } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { PARAMS } from '../../constants/links';
 import { container } from 'tsyringe';
-import { SecurityService } from '../../service/SecurityService';
 import { FullPageLoading } from '../common/FullPageLoading';
 import { ProjectInvitationActions } from '../../store/project/invitations/ProjectInvitationActions';
 
 interface AcceptInvitationHandlerProps {}
-
-const securityServiceIns = container.resolve(SecurityService);
 
 const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
   (props) => {

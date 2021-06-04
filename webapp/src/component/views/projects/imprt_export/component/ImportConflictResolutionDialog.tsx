@@ -8,13 +8,13 @@ import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
 import { TransitionProps } from '@material-ui/core/transitions';
-import { components } from '../../../../../service/apiSchema';
+import { components } from '../../../../../service/apiSchema.generated';
 import { T } from '@tolgee/react';
 import { ImportConflictsData } from './ImportConflictsData';
 import { container } from 'tsyringe';
 import { ImportActions } from '../../../../../store/project/ImportActions';
 
-const actions = container.resolve(ImportActions);
+container.resolve(ImportActions);
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     appBar: {

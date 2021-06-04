@@ -14,7 +14,7 @@ import { ProjectPermissionsView } from './permissions/ProjectPermissionsVIew';
 import { ProjectInviteView } from './invitations/ProjectInviteView';
 
 export const ProjectRouter = () => {
-  let match = useRouteMatch();
+  const match = useRouteMatch();
 
   const projectId = match.params[PARAMS.PROJECT_ID];
 
