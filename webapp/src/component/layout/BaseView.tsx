@@ -33,6 +33,7 @@ export const BaseView = (props: BaseViewProps) => {
         backgroundColor: 'rgb(253,253,253)',
         borderBottom: `1px solid ${grey[100]}`,
         padding: 0,
+        minHeight: '100%',
       }}
     >
       <Box minHeight="100%">
@@ -75,7 +76,7 @@ export const BaseView = (props: BaseViewProps) => {
                 sm={props.sm || 12}
               >
                 {!props.loading || !hideChildrenOnLoading ? (
-                  <Box>
+                  <Box data-cy="global-base-view-content">
                     {typeof props.children === 'function'
                       ? props.children()
                       : props.children}

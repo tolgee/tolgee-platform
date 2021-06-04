@@ -7,6 +7,7 @@ declare namespace DataCy {
         "camera-button" |
         "dropzone" |
         "dropzone-inner" |
+        "global-base-view-content" |
         "global-base-view-title" |
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |

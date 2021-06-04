@@ -1,5 +1,6 @@
 {
   "scrollBehavior": "center",
   "video": false,
-  "chromeWebSecurity": false
+  "chromeWebSecurity": false,
+  "viewportHeight": 1080
 }

@@ -159,7 +159,7 @@ const enterProject = (projectName: string) => {
     visitList()
 
     gcy("global-paginated-list").contains(projectName).closest("a").click()
-    gcy("global-base-view-title").contains("Translations").should("be.visible")
+    gcy("global-base-view-content").should('be.visible')
 }
 
 const visitList = () => {
