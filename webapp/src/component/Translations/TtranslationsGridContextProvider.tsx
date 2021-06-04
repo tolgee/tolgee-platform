@@ -16,6 +16,7 @@ import { FullPageLoading } from '../common/FullPageLoading';
 import { useProjectLanguages } from '../../hooks/useProjectLanguages';
 import { useLeaveEditConfirmationOtherEdit } from './useLeaveEditConfirmation';
 import { parseErrorResponse } from '../../fixtures/errorFIxtures';
+import { BoxLoading } from '../common/BoxLoading';
 
 export const TranslationListContext =
   // @ts-ignore

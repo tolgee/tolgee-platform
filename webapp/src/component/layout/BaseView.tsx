@@ -14,6 +14,7 @@ export interface BaseViewProps {
   sm?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   md?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   lg?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  navigation?: ReactNode;
   customHeader?: ReactNode;
   hideChildrenOnLoading?: boolean;
   containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
@@ -29,30 +30,34 @@ export const BaseView = (props: BaseViewProps) => {
     <Container
       maxWidth={false}
       style={{
-        backgroundColor: 'rgb(253,253,253)',
+        backgroundColor: 'white',
         borderBottom: `1px solid ${grey[100]}`,
         padding: 0,
+        minHeight: '100%',
       }}
     >
       <Box minHeight="100%">
-        <SecondaryBar>
-          <Container maxWidth={props.containerMaxWidth || false}>
-            <Grid container justify="center" alignItems="center">
-              <Grid
-                data-cy="global-base-view-title"
-                item
-                xs={props.xs || 12}
-                md={props.md || 12}
-                lg={props.lg || 12}
-                sm={props.sm || 12}
-              >
-                {props.customHeader || (
-                  <Typography variant="h5">{props.title}</Typography>
-                )}
+        {props.navigation}
+        {(props.title || props.customHeader) && (
+          <SecondaryBar>
+            <Container maxWidth={props.containerMaxWidth || false}>
+              <Grid container justify="center" alignItems="center">
+                <Grid
+                  data-cy="global-base-view-title"
+                  item
+                  xs={props.xs || 12}
+                  md={props.md || 12}
+                  lg={props.lg || 12}
+                  sm={props.sm || 12}
+                >
+                  {props.customHeader || (
+                    <Typography variant="h5">{props.title}</Typography>
+                  )}
+                </Grid>
               </Grid>
-            </Grid>
-          </Container>
-        </SecondaryBar>
+            </Container>
+          </SecondaryBar>
+        )}
         <Box position="relative" overflow="visible">
           <Box position="absolute" width="100%">
             {(globalLoading || props.loading) && (
@@ -71,7 +76,7 @@ export const BaseView = (props: BaseViewProps) => {
                 sm={props.sm || 12}
               >
                 {!props.loading || !hideChildrenOnLoading ? (
-                  <Box>
+                  <Box data-cy="global-base-view-content">
                     {typeof props.children === 'function'
                       ? props.children()
                       : props.children}

@@ -13,7 +13,7 @@ const ProjectListItem = (r: components['schemas']['ProjectModel']) => {
   return (
     <ListItemLink
       key={r.id}
-      to={LINKS.REPOSITORY_TRANSLATIONS.build({ [PARAMS.REPOSITORY_ID]: r.id })}
+      to={LINKS.PROJECT_TRANSLATIONS.build({ [PARAMS.PROJECT_ID]: r.id })}
     >
       <ListItemText>
         {r.name}{' '}
@@ -30,7 +30,7 @@ const ProjectListItem = (r: components['schemas']['ProjectModel']) => {
             component={Link}
             size="small"
             variant="outlined"
-            to={LINKS.REPOSITORY_EDIT.build({ [PARAMS.REPOSITORY_ID]: r.id })}
+            to={LINKS.PROJECT_EDIT.build({ [PARAMS.PROJECT_ID]: r.id })}
           >
             <T>project_settings_button</T>
           </Button>

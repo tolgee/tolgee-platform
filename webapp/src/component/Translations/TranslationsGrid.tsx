@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { FunctionComponent, useContext } from 'react';
 import { useProject } from '../../hooks/useProject';
 import { Box } from '@material-ui/core';
@@ -14,7 +13,9 @@ import { MenuBar } from './MenuBar';
 import { BaseView } from '../layout/BaseView';
 import { useProjectPermissions } from '../../hooks/useProjectPermissions';
 import { ProjectPermissionType } from '../../service/response.types';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
+
+import { Navigation } from '../navigation/Navigation';
 import Typography from '@material-ui/core/Typography';
 
 export const TranslationsGrid: FunctionComponent = (props) => {
@@ -25,6 +26,8 @@ export const TranslationsGrid: FunctionComponent = (props) => {
   const isSearch = listContext.listLoadable.data!.params.search;
   const projectPermissions = useProjectPermissions();
 
+  const t = useTranslate();
+
   const onEmptyInner = (
     <>
       <EmptyListMessage />
@@ -32,8 +35,8 @@ export const TranslationsGrid: FunctionComponent = (props) => {
         projectPermissions.satisfiesPermission(ProjectPermissionType.EDIT) && (
           <Box display="flex" justifyContent="center">
             <FabAddButtonLink
-              to={LINKS.REPOSITORY_TRANSLATIONS_ADD.build({
-                [PARAMS.REPOSITORY_ID]: projectDTO.id,
+              to={LINKS.PROJECT_TRANSLATIONS_ADD.build({
+                [PARAMS.PROJECT_ID]: projectDTO.id,
               })}
             />
           </Box>
@@ -59,25 +62,35 @@ export const TranslationsGrid: FunctionComponent = (props) => {
     </>
   );
 
-  const title = (
-    <Typography variant="h5">
-      <T>translations_view_title</T>
-    </Typography>
-  );
-
   return (
     <BaseView
+      navigation={
+        <Navigation
+          path={[
+            [
+              projectDTO.name,
+              LINKS.PROJECT_TRANSLATIONS.build({
+                [PARAMS.PROJECT_ID]: projectDTO.id,
+              }),
+            ],
+            [
+              t('translations_view_title'),
+              LINKS.PROJECT_TRANSLATIONS.build({
+                [PARAMS.PROJECT_ID]: projectDTO.id,
+              }),
+            ],
+          ]}
+        />
+      }
       customHeader={
-        isSearch || !isEmpty ? (
+        isSearch ||
+        (!isEmpty && (
           <>
-            {title}
             <Box mt={2}>
               <MenuBar />
             </Box>
           </>
-        ) : (
-          title
-        )
+        ))
       }
       loading={listContext.listLoadable.loading}
     >

@@ -1,11 +1,10 @@
-import * as React from 'react';
 import Box from '@material-ui/core/Box';
 import { container } from 'tsyringe';
 import { ProjectActions } from '../../../store/project/ProjectActions';
 import { LINKS } from '../../../constants/links';
 import { FabAddButtonLink } from '../../common/buttons/FabAddButtonLink';
 import { BaseView } from '../../layout/BaseView';
-import { PossibleProjectPage } from '../PossibleProjectPage';
+import { DashboardPage } from '../../layout/DashboardPage';
 import { useTranslate } from '@tolgee/react';
 import { SimplePaginatedHateoasList } from '../../common/list/SimplePaginatedHateoasList';
 import ProjectListItem from './ProjectListItem';
@@ -20,7 +19,7 @@ export const ProjectListView = () => {
   const t = useTranslate();
 
   return (
-    <PossibleProjectPage>
+    <DashboardPage>
       <BaseView
         title={t('projects_title')}
         containerMaxWidth="md"
@@ -41,9 +40,9 @@ export const ProjectListView = () => {
           mt={2}
           pr={2}
         >
-          <FabAddButtonLink to={LINKS.REPOSITORY_ADD.build()} />
+          <FabAddButtonLink to={LINKS.PROJECT_ADD.build()} />
         </Box>
       </BaseView>
-    </PossibleProjectPage>
+    </DashboardPage>
   );
 };

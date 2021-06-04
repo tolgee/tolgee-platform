@@ -106,8 +106,8 @@ export const MenuBar: FunctionComponent = () => {
               variant="outlined"
               color="primary"
               size={'small'}
-              to={LINKS.REPOSITORY_TRANSLATIONS_ADD.build({
-                [PARAMS.REPOSITORY_ID]: projectDTO.id,
+              to={LINKS.PROJECT_TRANSLATIONS_ADD.build({
+                [PARAMS.PROJECT_ID]: projectDTO.id,
               })}
               startIcon={<AddIcon />}
             >

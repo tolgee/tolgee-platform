@@ -4,16 +4,17 @@ import { useSelector } from 'react-redux';
 import { AppState } from '../../../../store';
 import { container } from 'tsyringe';
 import { ProjectActions } from '../../../../store/project/ProjectActions';
-import { LINKS } from '../../../../constants/links';
+import { LINKS, PARAMS } from '../../../../constants/links';
 import { Redirect } from 'react-router-dom';
 import { TextField } from '../../../common/form/fields/TextField';
 import { BaseFormView } from '../../../layout/BaseFormView';
 import { useProject } from '../../../../hooks/useProject';
 import { Button } from '@material-ui/core';
 import { confirmation } from '../../../../hooks/confirmation';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { ConfirmationDialogProps } from '../../../common/ConfirmationDialog';
 import { Validation } from '../../../../constants/GlobalValidationSchema';
+import { Navigation } from '../../../navigation/Navigation';
 
 const actions = container.resolve(ProjectActions);
 
@@ -37,6 +38,8 @@ export const ProjectSettingsView: FunctionComponent = () => {
   const onSubmit = (values) => {
     actions.loadableActions.editProject.dispatch(project.id, values);
   };
+
+  const t = useTranslate();
 
   useEffect(() => {
     if (saveLoadable.touched) {
@@ -63,12 +66,29 @@ export const ProjectSettingsView: FunctionComponent = () => {
     <BaseFormView
       lg={6}
       md={8}
-      title={<T>project_settings_title</T>}
       initialValues={initialValues}
       onSubmit={onSubmit}
       onCancel={() => setCancelled(true)}
       saveActionLoadable={loadable}
       validationSchema={Validation.REPOSITORY_SETTINGS}
+      navigation={
+        <Navigation
+          path={[
+            [
+              project.name,
+              LINKS.PROJECT_TRANSLATIONS.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+            [
+              t('project_settings_title'),
+              LINKS.PROJECT_TRANSLATIONS.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+          ]}
+        />
+      }
       customActions={
         <Button
           color="secondary"

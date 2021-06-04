@@ -5,8 +5,10 @@ import {
   useState,
 } from 'react';
 import { Box, Button } from '@material-ui/core';
+import { LINKS, PARAMS } from '../../../../constants/links';
+import { Navigation } from '../../../navigation/Navigation';
 import { BaseView } from '../../../layout/BaseView';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import ImportFileInput from './component/ImportFileInput';
 import { useImportDataHelper } from './hooks/useImportDataHelper';
 import { ImportResult } from './component/ImportResult';
@@ -46,6 +48,8 @@ export const ImportView: FunctionComponent = () => {
   const [resolveRow, setResolveRow] = useState(
     undefined as components['schemas']['ImportLanguageModel'] | undefined
   );
+
+  const t = useTranslate();
 
   const onConflictResolutionDialogClose = () => {
     dataHelper.loadData();
@@ -123,7 +127,29 @@ export const ImportView: FunctionComponent = () => {
   }
 
   return (
-    <BaseView title={<T>import_translations_title</T>} xs={12} md={10} lg={8}>
+    <BaseView
+      navigation={
+        <Navigation
+          path={[
+            [
+              project.name,
+              LINKS.PROJECT_TRANSLATIONS.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+            [
+              t('import_translations_title'),
+              LINKS.PROJECT_IMPORT.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+          ]}
+        />
+      }
+      xs={12}
+      md={10}
+      lg={8}
+    >
       <ImportConflictResolutionDialog
         row={resolveRow}
         onClose={onConflictResolutionDialogClose}
