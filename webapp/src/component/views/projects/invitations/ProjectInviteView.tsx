@@ -17,14 +17,16 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { BoxLoading } from '../../../common/BoxLoading';
 import { EmptyListMessage } from '../../../common/EmptyListMessage';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { PermissionSelect } from '../../../security/PermissionSelect';
+import { useProject } from '../../../../hooks/useProject';
+import { Navigation } from '../../../navigation/Navigation';
 
 const actions = container.resolve(ProjectInvitationActions);
 
 export const ProjectInviteView: FunctionComponent<{}> = (props) => {
   let match = useRouteMatch();
-  const projectId = match.params[PARAMS.REPOSITORY_ID];
+  const projectId = match.params[PARAMS.PROJECT_ID];
 
   let state = useSelector((state: AppState) => state.projectInvitation);
 
@@ -32,12 +34,38 @@ export const ProjectInviteView: FunctionComponent<{}> = (props) => {
     actions.loadableActions.list.dispatch(projectId);
   }, [state.invitationCode]);
 
+  const project = useProject();
+
+  const t = useTranslate();
+
   const onCancel = (id: number) => {
     actions.loadableActions.delete.dispatch(id);
   };
 
   return (
-    <BaseView title={<T>invite_user_title</T>} xs={12} md={8} lg={6}>
+    <BaseView
+      navigation={
+        <Navigation
+          path={[
+            [
+              project.name,
+              LINKS.PROJECT_TRANSLATIONS.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+            [
+              t('invite_user_title'),
+              LINKS.PROJECT_TRANSLATIONS.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+          ]}
+        />
+      }
+      xs={12}
+      md={8}
+      lg={6}
+    >
       {() => (
         <>
           <StandardForm

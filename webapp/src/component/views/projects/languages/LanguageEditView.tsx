@@ -22,7 +22,7 @@ export const LanguageEditView = () => {
 
   let match = useRouteMatch();
 
-  const projectId = match.params[PARAMS.REPOSITORY_ID];
+  const projectId = match.params[PARAMS.PROJECT_ID];
   const languageId = match.params[PARAMS.LANGUAGE_ID];
 
   let languageLoadable = actions.useSelector((s) => s.loadables.language);
@@ -41,8 +41,8 @@ export const LanguageEditView = () => {
 
   useEffect(() => {
     if (deleteLoadable.loaded) {
-      useRedirect(LINKS.REPOSITORY_LANGUAGES, {
-        [PARAMS.REPOSITORY_ID]: projectId,
+      useRedirect(LINKS.PROJECT_LANGUAGES, {
+        [PARAMS.PROJECT_ID]: projectId,
       });
     }
     return () => actions.loadableReset.delete.dispatch();

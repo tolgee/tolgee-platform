@@ -17,6 +17,7 @@ import RighteousLatinWoff2 from './fonts/Righteous/righteous-latin.woff2';
 import RighteousLatinExtWoff2 from './fonts/Righteous/righteous-latin-ext.woff2';
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import { TolgeeProvider } from '@tolgee/react';
 import { UI } from '@tolgee/ui';
 import { App } from './component/App';
@@ -124,10 +125,10 @@ ReactDOM.render(
         '*': ['aria-label'],
       }}
     >
+      <CssBaseline />
       <ThemeProvider theme={theme}>
         <Provider store={store}>
-          {/*
-                    // @ts-ignore --  Type '{ children: Element; }' has no properties ... */}
+          {/* @ts-ignore */}
           <ErrorBoundary>
             <SnackbarProvider data-cy="global-snackbars">
               <App />

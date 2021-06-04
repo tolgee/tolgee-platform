@@ -11,7 +11,7 @@ export const TranslationView = () => {
     <ProjectLanguagesProvider>
       <TranslationGridContextProvider>
         <TranslationsGrid />
-        <Route path={LINKS.REPOSITORY_TRANSLATIONS_ADD.template}>
+        <Route path={LINKS.PROJECT_TRANSLATIONS_ADD.template}>
           <TranslationCreationDialog />
         </Route>
       </TranslationGridContextProvider>

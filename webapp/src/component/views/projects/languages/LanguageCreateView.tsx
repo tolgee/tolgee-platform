@@ -25,8 +25,8 @@ export const LanguageCreateView = () => {
     if (createLoadable.loaded || cancelled) {
       setCancelled(false);
       actions.loadableReset.list.dispatch();
-      useRedirect(LINKS.REPOSITORY_LANGUAGES, {
-        [PARAMS.REPOSITORY_ID]: project.id,
+      useRedirect(LINKS.PROJECT_LANGUAGES, {
+        [PARAMS.PROJECT_ID]: project.id,
       });
     }
   });

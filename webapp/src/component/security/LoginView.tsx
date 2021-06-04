@@ -17,7 +17,6 @@ import { TextField } from '../common/form/fields/TextField';
 import Box from '@material-ui/core/Box';
 import { container } from 'tsyringe';
 import { GlobalActions } from '../../store/global/GlobalActions';
-import { Alert } from '../common/Alert';
 import { SecurityService } from '../../service/SecurityService';
 import { useConfig } from '../../hooks/useConfig';
 import { T } from '@tolgee/react';
@@ -64,7 +63,7 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
 
   return (
     <DashboardPage>
-      <BaseView title={<T>login_title</T>} lg={4} md={6} sm={8} xs={12}>
+      <BaseView lg={4} md={6} sm={8} xs={12}>
         <StandardForm
           initialValues={{ username: '', password: '' }}
           submitButtons={
