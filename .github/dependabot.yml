@@ -3,12 +3,12 @@ updates:
 - package-ecosystem: gradle
   directory: "/"
   schedule:
-    interval: daily
+    interval: monthly
   open-pull-requests-limit: 20
   target-branch: develop
 - package-ecosystem: npm
   directory: "/webapp/"
   schedule:
-    interval: daily
+    interval: monthly
   open-pull-requests-limit: 20
   target-branch: develop
