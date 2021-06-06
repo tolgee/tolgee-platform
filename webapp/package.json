@@ -31,7 +31,7 @@
     "tsyringe": "^4.5.0",
     "typeface-roboto": "1.1.13",
     "use-debounce": "^6.0.1",
-    "web-vitals": "^1.1.2",
+    "web-vitals": "^2.0.1",
     "yup": "^0.32.9"
   },
   "scripts": {
