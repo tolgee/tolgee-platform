@@ -13,7 +13,7 @@ import { BaseUserSettingsView } from '../BaseUserSettingsView';
 export const ApiKeysView: FunctionComponent = () => {
   const actions = container.resolve(UserApiKeysActions);
 
-  let list = actions.useSelector((state) => state.loadables.list);
+  const list = actions.useSelector((state) => state.loadables.list);
 
   useEffect(() => {
     if (!list.loading && !list.loaded) {
@@ -25,7 +25,7 @@ export const ApiKeysView: FunctionComponent = () => {
     <>
       {list.loaded && (
         <AddApiKeyFormDialog
-          editKey={list.data!.find(
+          editKey={list.data?.find(
             (key) =>
               key.id === parseInt(useRouteMatch().params[PARAMS.API_KEY_ID])
           )}
@@ -35,7 +35,7 @@ export const ApiKeysView: FunctionComponent = () => {
   );
 
   //reset loadables after success delete action
-  let deleteLoadable = actions.useSelector((state) => state.loadables.delete);
+  const deleteLoadable = actions.useSelector((state) => state.loadables.delete);
   useEffect(() => {
     if (deleteLoadable.loaded) {
       actions.loadableReset.delete.dispatch();
@@ -51,12 +51,12 @@ export const ApiKeysView: FunctionComponent = () => {
       >
         <>
           {list.loaded &&
-            (!list.data!.length ? (
+            (!list.data?.length ? (
               <EmptyListMessage>
                 <T>No api keys yet!</T>
               </EmptyListMessage>
             ) : (
-              <ApiKeysList data={list.data!} />
+              <ApiKeysList data={list.data} />
             ))}
           <FabAddButtonLink to={LINKS.USER_API_KEYS_GENERATE.build()} />
         </>

@@ -5,9 +5,10 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 const LoadingButton: FunctionComponent<
   ComponentProps<typeof Button> & { loading?: boolean }
 > = (props) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { disabled, loading, children, ...otherProps } = props;
 
-  let isDisabled = props.loading || props.disabled;
+  const isDisabled = props.loading || props.disabled;
 
   return (
     <Button disabled={isDisabled} {...otherProps}>

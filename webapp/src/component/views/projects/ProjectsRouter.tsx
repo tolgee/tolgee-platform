@@ -6,7 +6,7 @@ import { PrivateRoute } from '../../common/PrivateRoute';
 import { ProjectRouter } from './ProjectRouter';
 
 export const ProjectsRouter = () => {
-  let match = useRouteMatch();
+  const match = useRouteMatch();
 
   return (
     <Switch>

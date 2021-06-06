@@ -8,12 +8,12 @@ import { container } from 'tsyringe';
 import { TranslationActions } from '../../store/project/TranslationActions';
 import { Validation } from '../../constants/GlobalValidationSchema';
 
-let actions = container.resolve(TranslationActions);
+const actions = container.resolve(TranslationActions);
 
 export const KeyCell: FunctionComponent = (props) => {
-  let project = useProject();
+  const project = useProject();
 
-  let context = useContext(RowContext);
+  const context = useContext(RowContext);
 
   const handleSubmit = (v) => {
     actions.loadableActions.editKey.dispatch(project.id, {

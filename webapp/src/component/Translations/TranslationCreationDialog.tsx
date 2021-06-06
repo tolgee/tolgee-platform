@@ -31,15 +31,15 @@ export function TranslationCreationDialog() {
 
   const t = useTranslate();
 
-  let selectedLanguages = translationActions.useSelector(
+  const selectedLanguages = translationActions.useSelector(
     (s) => s.selectedLanguages
   );
 
-  let saveLoadable = translationActions.useSelector(
+  const saveLoadable = translationActions.useSelector(
     (s) => s.loadables.createKey
   );
 
-  let listContext = useContext(TranslationListContext);
+  const listContext = useContext(TranslationListContext);
 
   function onClose() {
     translationActions.loadableReset.createKey.dispatch();

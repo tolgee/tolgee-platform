@@ -24,11 +24,13 @@ import { Navigation } from '../../../navigation/Navigation';
 
 const actions = container.resolve(ProjectInvitationActions);
 
-export const ProjectInviteView: FunctionComponent<{}> = (props) => {
-  let match = useRouteMatch();
+export const ProjectInviteView: FunctionComponent<Record<string, unknown>> = (
+  props
+) => {
+  const match = useRouteMatch();
   const projectId = match.params[PARAMS.PROJECT_ID];
 
-  let state = useSelector((state: AppState) => state.projectInvitation);
+  const state = useSelector((state: AppState) => state.projectInvitation);
 
   useEffect(() => {
     actions.loadableActions.list.dispatch(projectId);

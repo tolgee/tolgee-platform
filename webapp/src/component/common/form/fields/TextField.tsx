@@ -1,9 +1,4 @@
-import {
-  default as React,
-  FunctionComponent,
-  useEffect,
-  useState,
-} from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import {
   TextField as MUITextField,
@@ -14,7 +9,7 @@ import { useField } from 'formik';
 
 interface PGTextFieldProps {
   name: string;
-  onValueChange?: (newValue: String) => void;
+  onValueChange?: (newValue: string) => void;
 }
 
 type Props = PGTextFieldProps & TextFieldProps;
@@ -30,9 +25,10 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export const TextField: FunctionComponent<Props> = (props) => {
   const classes = useStyles({});
-  const [field, meta, helpers] = useField(props.name);
+  const [field, meta] = useField(props.name);
   const [oldValue, setOldValue] = useState(field.value);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { onValueChange, ...otherProps } = props;
 
   useEffect(() => {

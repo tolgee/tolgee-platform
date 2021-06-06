@@ -47,7 +47,7 @@ const UserOrganizationSettingsSubtitleLink = (
 
     const data: ListDataType = [
       {
-        name: user?.name!,
+        name: user?.name as string,
         linkTo: LINKS.USER_SETTINGS.build(),
       },
     ];

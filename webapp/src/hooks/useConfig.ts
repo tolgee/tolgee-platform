@@ -7,7 +7,7 @@ import { GlobalError } from '../error/GlobalError';
 import { useEffect } from 'react';
 
 export const useConfig = (): RemoteConfigurationDTO => {
-  let loadable = useSelector(
+  const loadable = useSelector(
     (state: AppState) => state.global.loadables.remoteConfig
   );
 

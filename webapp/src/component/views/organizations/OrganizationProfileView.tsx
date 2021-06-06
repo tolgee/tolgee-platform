@@ -7,7 +7,7 @@ import { OrganizationActions } from '../../../store/organization/OrganizationAct
 import { AppState } from '../../../store';
 import { LINKS } from '../../../constants/links';
 import { Redirect } from 'react-router-dom';
-import { components } from '../../../service/apiSchema';
+import { components } from '../../../service/apiSchema.generated';
 import { Validation } from '../../../constants/GlobalValidationSchema';
 import { OrganizationFields } from './components/OrganizationFields';
 import { MessageService } from '../../../service/MessageService';
@@ -36,7 +36,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
       slug: values.slug,
     } as components['schemas']['OrganizationDto'];
 
-    actions.loadableActions.edit.dispatch(organization?.id!, toSave);
+    actions.loadableActions.edit.dispatch(organization?.id, toSave);
   };
 
   const initialValues: components['schemas']['OrganizationDto'] | null =

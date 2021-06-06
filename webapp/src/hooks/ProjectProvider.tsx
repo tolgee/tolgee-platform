@@ -10,7 +10,7 @@ import { FullPageLoading } from '../component/common/FullPageLoading';
 const projectActions = container.resolve(ProjectActions);
 
 export const ProjectProvider: FunctionComponent<{ id: number }> = (props) => {
-  let projectDTOLoadable = useSelector(
+  const projectDTOLoadable = useSelector(
     (state: AppState) => state.projects.loadables.project
   );
 

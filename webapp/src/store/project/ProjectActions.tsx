@@ -57,7 +57,7 @@ export class ProjectActions extends AbstractLoadableActions<ProjectsState> {
       (state: ProjectsState): ProjectsState => ({
         ...state,
         loadables: {
-          ...state.loadables!,
+          ...state.loadables,
           project: { ...createLoadable() } as Loadable<ProjectDTO>,
         },
       }),

@@ -11,7 +11,7 @@ import { SettingsIconButton } from '../../../common/buttons/SettingsIconButton';
 import { Link, useRouteMatch } from 'react-router-dom';
 import { LanguageActions } from '../../../../store/languages/LanguageActions';
 import { BaseView } from '../../../layout/BaseView';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { useProject } from '../../../../hooks/useProject';
 import { Navigation } from '../../../navigation/Navigation';
 
@@ -21,7 +21,7 @@ export const LanguageListView = () => {
   const match = useRouteMatch();
   const projectId = match.params[PARAMS.PROJECT_ID];
 
-  let loadable = actions.useSelector((s) => s.loadables.list);
+  const loadable = actions.useSelector((s) => s.loadables.list);
 
   const project = useProject();
 

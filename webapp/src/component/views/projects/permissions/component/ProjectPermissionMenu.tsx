@@ -1,7 +1,7 @@
 import React from 'react';
 import { PermissionsMenu } from '../../../../security/PermissionsMenu';
 import { useProject } from '../../../../../hooks/useProject';
-import { components } from '../../../../../service/apiSchema';
+import { components } from '../../../../../service/apiSchema.generated';
 import { useUser } from '../../../../../hooks/useUser';
 import { container } from 'tsyringe';
 import { ProjectActions } from '../../../../../store/project/ProjectActions';
@@ -27,7 +27,7 @@ const ProjectPermissionMenu = (props: {
           onConfirm: () =>
             projectActions.loadableActions.setUsersPermissions.dispatch({
               path: {
-                userId: props.user?.id!!,
+                userId: props.user?.id,
                 permissionType,
                 projectId: project.id,
               },

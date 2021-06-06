@@ -1,7 +1,7 @@
 import { T } from '@tolgee/react';
 import * as React from 'react';
 import { FunctionComponent } from 'react';
-import { components } from '../../../../service/apiSchema';
+import { components } from '../../../../service/apiSchema.generated';
 import { container } from 'tsyringe';
 import { OrganizationActions } from '../../../../store/organization/OrganizationActions';
 import { useOrganization } from '../../../../hooks/organizations/useOrganization';

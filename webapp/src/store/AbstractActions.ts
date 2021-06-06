@@ -1,6 +1,5 @@
 import { AbstractAction, Action, ActionType, PromiseAction } from './Action';
 import { ErrorResponseDTO } from '../service/response.types';
-import { Link } from '../constants/links';
 import { ReactNode } from 'react';
 
 export abstract class AbstractActions<StateType> {
@@ -22,7 +21,7 @@ export abstract class AbstractActions<StateType> {
     type: string,
     payloadProvider?: (...params: DispatchParams) => PayloadType
   ): Action<PayloadType, StateType, DispatchParams> {
-    let action = new Action<PayloadType, StateType, DispatchParams>(
+    const action = new Action<PayloadType, StateType, DispatchParams>(
       `${this.prefix}_${type}`,
       payloadProvider
     );
@@ -40,7 +39,7 @@ export abstract class AbstractActions<StateType> {
     successMessage?: ReactNode,
     redirectAfter?: string | ((action: ActionType<PayloadType>) => string)
   ): PromiseAction<PayloadType, ErrorType, StateType, DispatchParams> {
-    let promiseAction = new PromiseAction<
+    const promiseAction = new PromiseAction<
       PayloadType,
       ErrorType,
       StateType,
@@ -54,7 +53,7 @@ export abstract class AbstractActions<StateType> {
   }
 
   public getAction(type: string): AbstractAction {
-    return this.actions.get(type)!;
+    return this.actions.get(type) as AbstractAction;
   }
 
   protected register(action: AbstractAction) {

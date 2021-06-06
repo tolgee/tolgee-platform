@@ -31,7 +31,7 @@ export class SignUpService {
       invitationCode: this.invitationCodeService.getCode(),
     } as SignUpType;
     delete request.passwordRepeat;
-    let response = (await this.http.post(
+    const response = (await this.http.post(
       'public/sign_up',
       request
     )) as TokenDTO;
@@ -44,7 +44,7 @@ export class SignUpService {
   };
 
   async verifyEmail(userId: string, code: string) {
-    let response = (await this.http.get(
+    const response = (await this.http.get(
       `public/verify_email/${userId}/${code}`
     )) as TokenDTO;
     this.messageService.success(<T>email_verified_message</T>);

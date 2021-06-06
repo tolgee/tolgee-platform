@@ -9,8 +9,8 @@ export interface TranslationsTableCellProps {}
 export const TableCell: FunctionComponent<TranslationsTableCellProps> = (
   props
 ) => {
-  let rowContext = useContext(RowContext);
-  let listContext = useContext(TranslationListContext);
+  const rowContext = useContext(RowContext);
+  const listContext = useContext(TranslationListContext);
 
   const width = listContext.cellWidths[rowContext.lastRendered];
 

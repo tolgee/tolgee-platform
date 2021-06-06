@@ -1,7 +1,6 @@
 import { singleton } from 'tsyringe';
 import { TokenService } from '../TokenService';
 import { MessageService } from '../MessageService';
-import React from 'react';
 import { ApiV1HttpService } from './ApiV1HttpService';
 import { RedirectionActions } from '../../store/global/RedirectionActions';
 

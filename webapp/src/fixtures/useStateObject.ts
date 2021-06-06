@@ -10,11 +10,11 @@ export const useStateObject = <T extends { [key: string]: any }>(
 
   return new Proxy(reactStates, {
     get(target, name, receiver) {
-      let rv = Reflect.get(target, name, receiver);
+      const rv = Reflect.get(target, name, receiver);
       return rv[0];
     },
     set(target, name, value, receiver) {
-      let rv = Reflect.get(target, name, receiver);
+      const rv = Reflect.get(target, name, receiver);
       rv[1](value);
       return true;
     },

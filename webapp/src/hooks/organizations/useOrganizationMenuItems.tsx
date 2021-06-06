@@ -1,5 +1,4 @@
 import { LINKS, PARAMS } from '../../constants/links';
-import { default as React } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useOrganization } from './useOrganization';
 
@@ -12,7 +11,7 @@ export class OrganizationMenuItem {
 }
 
 export const useOrganizationMenuItems = (): OrganizationMenuItem[] => {
-  let match = useRouteMatch();
+  const match = useRouteMatch();
   const organization = useOrganization();
 
   return [

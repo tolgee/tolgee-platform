@@ -12,20 +12,19 @@ import { T } from '@tolgee/react';
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
 
-let timer;
 let requests: { [address: string]: number } = {};
 const detectLoop = (url) => {
   requests[url] = 1 + (requests[url] || 0);
   if (requests[url] > 30) {
     return true;
   }
-  timer = setTimeout(() => {
+  setTimeout(() => {
     requests = {};
   }, 20000);
 };
 
 export class RequestOptions {
-  disableNotFoundHandling: boolean = false;
+  disableNotFoundHandling = false;
 }
 
 @singleton()
@@ -131,7 +130,7 @@ export class ApiHttpService {
     return ApiHttpService.getResObject(await this.putNoJson(url, body));
   }
 
-  async delete<T>(url, body?: object): Promise<T> {
+  async delete<T>(url, body?: any): Promise<T> {
     return ApiHttpService.getResObject(
       await this.fetch(url, {
         method: 'DELETE',
@@ -152,7 +151,7 @@ export class ApiHttpService {
     );
   }
 
-  postNoJson(input: RequestInfo, body: {}): Promise<Response> {
+  postNoJson(input: RequestInfo, body: any): Promise<Response> {
     return this.fetch(input, {
       body: JSON.stringify(body),
       method: 'POST',
@@ -162,7 +161,7 @@ export class ApiHttpService {
     });
   }
 
-  putNoJson(input: RequestInfo, body: {}): Promise<Response> {
+  putNoJson(input: RequestInfo, body: any): Promise<Response> {
     return this.fetch(input, {
       body: JSON.stringify(body),
       method: 'PUT',

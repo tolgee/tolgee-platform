@@ -2,7 +2,7 @@ import React, { FunctionComponent, ReactElement } from 'react';
 import { Button, Tooltip } from '@material-ui/core';
 import { confirmation } from '../../../../../hooks/confirmation';
 import { T } from '@tolgee/react';
-import { components } from '../../../../../service/apiSchema';
+import { components } from '../../../../../service/apiSchema.generated';
 import { useUser } from '../../../../../hooks/useUser';
 import { container } from 'tsyringe';
 import { ProjectActions } from '../../../../../store/project/ProjectActions';
@@ -48,7 +48,7 @@ const RevokePermissionsButton = (props: {
             message: (
               <T
                 parameters={{
-                  userName: props.user.name || props.user.username!!,
+                  userName: props.user.name || props.user.username!,
                 }}
               >
                 project_permissions_revoke_user_access_message

@@ -13,7 +13,7 @@ export const LanguageCreateForm: FunctionComponent<{
   onCancel: () => void;
   onCreated?: (language: LanguageDTO) => void;
 }> = (props) => {
-  let createLoadable = actions.useSelector((s) => s.loadables.create);
+  const createLoadable = actions.useSelector((s) => s.loadables.create);
   const project = useProject();
   const [submitted, setSubmitted] = useState(false);
 

@@ -16,6 +16,7 @@ export const NavigationPath: React.FC<Props> = ({ path }) => {
       {path.map(([name, url], index) => {
         return (
           <Link
+            key={index}
             color={index === path.length - 1 ? 'primary' : 'inherit'}
             to={url}
             component={RouterLink}

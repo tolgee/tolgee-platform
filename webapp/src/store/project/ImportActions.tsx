@@ -8,14 +8,14 @@ import { AppState } from '../index';
 import { useSelector } from 'react-redux';
 import { ApiSchemaHttpService } from '../../service/http/ApiSchemaHttpService';
 import { T } from '@tolgee/react';
-import { components } from '../../service/apiSchema';
+import { components } from '../../service/apiSchema.generated';
 
 export class ImportState extends StateWithLoadables<ImportActions> {
   result?: components['schemas']['PagedModelImportLanguageModel'] = undefined;
   /**
    * Whether user already tried to apply import (Import button clicked)
    **/
-  applyTouched?: Boolean;
+  applyTouched?: boolean;
 }
 
 @singleton()

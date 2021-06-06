@@ -51,8 +51,8 @@ export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
       <FormLabel error={!!meta.error} component="legend">
         {props.label}
       </FormLabel>
-      {Array.from(props.options).map((option) => (
-        <FormControl className={classes.root} error={!!meta.error}>
+      {Array.from(props.options).map((option, index) => (
+        <FormControl key={index} className={classes.root} error={!!meta.error}>
           <FormControlLabel
             label={option}
             control={

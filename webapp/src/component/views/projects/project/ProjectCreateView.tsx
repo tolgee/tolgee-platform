@@ -16,7 +16,7 @@ import { T } from '@tolgee/react';
 import { Grid } from '@material-ui/core';
 import OwnerSelect from './components/OwnerSelect';
 import { useConfig } from '../../../../hooks/useConfig';
-import { components } from '../../../../service/apiSchema';
+import { components } from '../../../../service/apiSchema.generated';
 
 const actions = container.resolve(ProjectActions);
 

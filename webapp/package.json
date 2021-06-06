@@ -41,7 +41,7 @@
     "test": "craco test",
     "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.ts",
     "prettier": "prettier --write ./src",
-    "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 .",
+    "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives .",
     "tsc": "tsc"
   },
   "eslintConfig": {
@@ -71,10 +71,13 @@
     "@types/react-redux": "^7.1.16",
     "@types/react-router-dom": "^5.1.7",
     "@types/yup": "^0.29.11",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
     "concurrently": "^6.2.0",
     "craco": "^0.0.3",
     "eslint": "^7.27.0",
     "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-react": "^7.24.0",
     "prettier": "^2.3.0",
     "redux-devtools-extension": "^2.13.9",
     "typescript": "^4.3.2",

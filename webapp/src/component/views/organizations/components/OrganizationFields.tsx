@@ -14,13 +14,12 @@ const organizationService = container.resolve(OrganizationService);
 export const OrganizationFields = () => {
   const [slugDisabled, setSlugDisabled] = useState(true);
 
-  let formik = useFormikContext();
+  const formik = useFormikContext();
   const [value] = useDebounce(formik.getFieldProps('name').value, 500);
   const slugValue = formik.getFieldProps('slug').value;
 
   useEffect(() => {
     const nameMeta = formik.getFieldMeta('name');
-    const slugMeta = formik.getFieldMeta('slug');
     const nameChanged = nameMeta.initialValue !== nameMeta.value;
     //const slugChanged = slugMeta.initialValue !== slugMeta.value
 

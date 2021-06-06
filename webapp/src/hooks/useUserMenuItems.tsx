@@ -1,5 +1,4 @@
 import { LINKS } from '../constants/links';
-import { default as React } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 
 export class UserMenuItem {
@@ -11,7 +10,7 @@ export class UserMenuItem {
 }
 
 export const useUserMenuItems = (): UserMenuItem[] => {
-  let match = useRouteMatch();
+  const match = useRouteMatch();
 
   return [
     {

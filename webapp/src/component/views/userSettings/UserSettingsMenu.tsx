@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import * as React from 'react';
 import { T } from '@tolgee/react';
 import { useUserMenuItems } from '../../../hooks/useUserMenuItems';
-import { useUser } from '../../../hooks/useUser';
 
 export const UserSettingsMenu = () => {
   const menuItems = useUserMenuItems();

@@ -1,10 +1,10 @@
 import { useSelector } from 'react-redux';
 import { AppState } from '../store';
 import { GlobalError } from '../error/GlobalError';
-import { components } from '../service/apiSchema';
+import { components } from '../service/apiSchema.generated';
 
 export const useProject = (): components['schemas']['ProjectModel'] => {
-  let projectDTOLoadable = useSelector(
+  const projectDTOLoadable = useSelector(
     (state: AppState) => state.projects.loadables.project
   );
 
