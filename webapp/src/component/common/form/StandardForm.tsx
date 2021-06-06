@@ -27,7 +27,7 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
   validationSchema,
   ...props
 }) => {
-  let history = useHistory();
+  const history = useHistory();
 
   const onCancel = () =>
     typeof props.onCancel === 'function' ? props.onCancel() : history.goBack();

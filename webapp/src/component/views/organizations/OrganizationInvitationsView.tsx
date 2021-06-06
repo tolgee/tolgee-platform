@@ -1,10 +1,8 @@
-import * as React from 'react';
 import { FunctionComponent } from 'react';
 import { container } from 'tsyringe';
 import { T } from '@tolgee/react';
 import { OrganizationActions } from '../../../store/organization/OrganizationActions';
 import { LINKS, PARAMS } from '../../../constants/links';
-import { MessageService } from '../../../service/MessageService';
 import { StandardForm } from '../../common/form/StandardForm';
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { useOrganization } from '../../../hooks/organizations/useOrganization';

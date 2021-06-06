@@ -35,9 +35,9 @@ const messaging = container.resolve(MessageService);
 export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
   const classes = useStyles({});
 
-  let languageDTOS = useProjectLanguages();
+  const languageDTOS = useProjectLanguages();
 
-  let selected = actions.useSelector((s) => s.selectedLanguages);
+  const selected = actions.useSelector((s) => s.selectedLanguages);
 
   const [localSelected, setLocalSelected] = useState(selected);
 

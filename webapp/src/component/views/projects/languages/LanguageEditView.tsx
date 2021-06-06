@@ -17,17 +17,17 @@ import { ConfirmationDialogProps } from '../../../common/ConfirmationDialog';
 const actions = container.resolve(LanguageActions);
 
 export const LanguageEditView = () => {
-  let confirmationMessage = (options: ConfirmationDialogProps) =>
+  const confirmationMessage = (options: ConfirmationDialogProps) =>
     confirmation({ title: 'Delete language', ...options });
 
-  let match = useRouteMatch();
+  const match = useRouteMatch();
 
   const projectId = match.params[PARAMS.PROJECT_ID];
   const languageId = match.params[PARAMS.LANGUAGE_ID];
 
-  let languageLoadable = actions.useSelector((s) => s.loadables.language);
-  let editLoadable = actions.useSelector((s) => s.loadables.edit);
-  let deleteLoadable = actions.useSelector((s) => s.loadables.delete);
+  const languageLoadable = actions.useSelector((s) => s.loadables.language);
+  const editLoadable = actions.useSelector((s) => s.loadables.edit);
+  const deleteLoadable = actions.useSelector((s) => s.loadables.delete);
 
   useEffect(() => {
     if (!languageLoadable.loaded && !languageLoadable.loading) {

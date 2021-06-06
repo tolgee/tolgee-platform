@@ -9,7 +9,7 @@ interface EasyInputProps {
 type Props = EasyInputProps & InputProps;
 
 export const EasyInput: FunctionComponent<Props> = (props) => {
-  const [field, meta, helpers] = useField(props.name);
+  const [field, meta] = useField(props.name);
 
   const onChange = (e) => {
     field.onChange(e);

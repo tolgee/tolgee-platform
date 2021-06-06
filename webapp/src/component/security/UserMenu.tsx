@@ -9,7 +9,6 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { useUser } from '../../hooks/useUser';
 import { Link } from 'react-router-dom';
-import { LINKS } from '../../constants/links';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import PersonIcon from '@material-ui/icons/Person';
 import withStyles from '@material-ui/core/styles/withStyles';

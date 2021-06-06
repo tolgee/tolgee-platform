@@ -1,9 +1,8 @@
 import { singleton } from 'tsyringe';
 import { TokenService } from '../TokenService';
 import { MessageService } from '../MessageService';
-import React from 'react';
 import { RedirectionActions } from '../../store/global/RedirectionActions';
-import { paths } from '../apiSchema';
+import { paths } from '../apiSchema.generated';
 import { ApiHttpService, RequestOptions } from './ApiHttpService';
 
 @singleton()
@@ -46,7 +45,10 @@ export class ApiSchemaHttpService extends ApiHttpService {
         });
       }
 
-      const formData = request?.content?.['multipart/form-data'] as {};
+      const formData = request?.content?.['multipart/form-data'] as Record<
+        string,
+        unknown
+      >;
       let body: FormData | undefined = undefined;
       if (formData) {
         body = new FormData();
@@ -57,10 +59,10 @@ export class ApiSchemaHttpService extends ApiHttpService {
               fileName = (value as any as File).name;
             }
 
-            value.forEach((item) => body!.append(key, item as any, fileName));
+            value.forEach((item) => body?.append(key, item as any, fileName));
             return;
           }
-          body!.append(key, value as any);
+          body?.append(key, value as any);
         });
       }
 

@@ -6,7 +6,7 @@ import {
 import { InvitationService } from '../../../service/InvitationService';
 
 export class ProjectInvitationState extends StateWithLoadables<ProjectInvitationActions> {
-  invitationLoading: boolean = false;
+  invitationLoading = false;
   invitationCode: string | null = null;
 }
 

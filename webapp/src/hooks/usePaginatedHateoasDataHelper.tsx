@@ -1,10 +1,10 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
 } from '../store/AbstractLoadableActions';
 import { HateoasPaginatedData } from '../service/response.types';
-import { components } from '../service/apiSchema';
+import { components } from '../service/apiSchema.generated';
 
 export type EmbeddedDataItem<
   ActionsType extends AbstractLoadableActions<StateWithLoadables<ActionsType>>,
@@ -110,7 +110,7 @@ export const usePaginatedHateoasDataHelper = <
   const embedded = data?._embedded;
   const key = embedded ? Object.keys(embedded)?.[0] : null;
   const pageCount = data
-    ? Math.ceil(data.page?.totalElements!! / data.page?.size!!)
+    ? Math.ceil(data.page?.totalElements / data.page?.size)
     : undefined;
   const items = key ? embedded?.[key] : null;
 

@@ -9,7 +9,7 @@ import { GlobalActions } from '../../store/global/GlobalActions';
 import { container } from 'tsyringe';
 
 export default function GlobalError(props: { error: GlobalErrorError }) {
-  let dev = process.env.NODE_ENV === 'development';
+  const dev = process.env.NODE_ENV === 'development';
 
   return (
     <Container maxWidth={dev ? 'lg' : 'sm'}>

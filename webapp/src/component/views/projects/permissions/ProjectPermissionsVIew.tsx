@@ -28,7 +28,7 @@ export const ProjectPermissionsView: FunctionComponent = () => {
 
   const t = useTranslate();
 
-  let listLoadable = useSelector(
+  const listLoadable = useSelector(
     (state: AppState) => state.projects.loadables.listUsersForPermissions
   );
 

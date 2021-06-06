@@ -13,13 +13,12 @@ import { MenuBar } from './MenuBar';
 import { BaseView } from '../layout/BaseView';
 import { useProjectPermissions } from '../../hooks/useProjectPermissions';
 import { ProjectPermissionType } from '../../service/response.types';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 
 import { Navigation } from '../navigation/Navigation';
-import Typography from '@material-ui/core/Typography';
 
 export const TranslationsGrid: FunctionComponent = (props) => {
-  let projectDTO = useProject();
+  const projectDTO = useProject();
 
   const listContext = useContext(TranslationListContext);
   const isEmpty = listContext.listLoadable.data!.paginationMeta.allCount === 0;

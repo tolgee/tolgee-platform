@@ -4,7 +4,7 @@ import { T } from '@tolgee/react';
 import { useProject } from '../../../../../hooks/useProject';
 import { container } from 'tsyringe';
 import { ImportActions } from '../../../../../store/project/ImportActions';
-import { components } from '../../../../../service/apiSchema';
+import { components } from '../../../../../service/apiSchema.generated';
 import { SimplePaginatedHateoasList } from '../../../../common/list/SimplePaginatedHateoasList';
 import { Alert } from '@material-ui/lab';
 import { Warning } from '@material-ui/icons';
@@ -54,18 +54,18 @@ export const ImportFileIssuesDialog: FunctionComponent<{
                   <>
                     <Alert color="warning" icon={<Warning />}>
                       {i.type && (
-                        <T>{`file_issue_type_${i.type!!.toLowerCase()}`}</T>
+                        <T>{`file_issue_type_${i.type!.toLowerCase()}`}</T>
                       )}
                       &nbsp;(
                       {i.params &&
-                        i.params!!.map(
+                        i.params!.map(
                           (param, idx) =>
                             param.value && (
                               <>
                                 <T
-                                  parameters={{ value: param.value!! }}
+                                  parameters={{ value: param.value! }}
                                 >{`import_file_issue_param_type_${param.type.toLowerCase()}`}</T>
-                                {idx < i.params!!.length - 1 && ', '}
+                                {idx < i.params!.length - 1 && ', '}
                               </>
                             )
                         )}

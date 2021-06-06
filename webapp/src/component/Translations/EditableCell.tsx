@@ -8,7 +8,6 @@ import IconButton from '@material-ui/core/IconButton';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import * as Yup from 'yup';
-import { EditIconButton } from '../common/buttons/EditIconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 
@@ -52,7 +51,7 @@ export const EditableCell: FunctionComponent<EditableCellProps> = (props) => {
     props.onChange(e.target.value);
   };
 
-  let ref = React.createRef<HTMLDivElement>();
+  const ref = React.createRef<HTMLDivElement>();
 
   useEffect(() => {
     const onresize = () => {

@@ -7,7 +7,7 @@ export class ImplicitReducer {
   create =
     <StateType>(actions: AbstractActions<StateType>, appState?) =>
     (state = actions.initialState, action: ActionType<any>): StateType => {
-      let abstractActionDef = actions.getAction(action.type);
+      const abstractActionDef = actions.getAction(action.type);
 
       if (abstractActionDef instanceof PromiseAction) {
         if (

@@ -1,10 +1,8 @@
+import { useEffect } from 'react';
 import { T } from '@tolgee/react';
-import React, { ReactNode, useEffect } from 'react';
 import { container } from 'tsyringe';
 import { OrganizationActions } from '../../store/organization/OrganizationActions';
 import { confirmation } from '../confirmation';
-import { ResourceErrorComponent } from '../../component/common/form/ResourceErrorComponent';
-import { Box } from '@material-ui/core';
 import { parseErrorResponse } from '../../fixtures/errorFIxtures';
 import { MessageService } from '../../service/MessageService';
 

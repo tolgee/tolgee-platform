@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect, useState } from 'react';
-import { components } from '../../../../../service/apiSchema';
+import { components } from '../../../../../service/apiSchema.generated';
 import { container } from 'tsyringe';
 import { ImportActions } from '../../../../../store/project/ImportActions';
 import { useProject } from '../../../../../hooks/useProject';
@@ -148,10 +148,10 @@ export const ImportConflictsData: FunctionComponent<{
           </EmptyListMessage>
         ))}
       <Box display="flex" justifyContent="flex-end" p={4}>
-        {totalPages!! > 1 && (
+        {totalPages! > 1 && (
           <Pagination
             data-cy="global-list-pagination"
-            page={page!! + 1}
+            page={page! + 1}
             count={totalPages}
             onChange={(_, page) => loadData(page - 1)}
           />

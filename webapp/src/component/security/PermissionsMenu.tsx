@@ -4,7 +4,7 @@ import { T } from '@tolgee/react';
 import * as React from 'react';
 import { ComponentProps, FunctionComponent } from 'react';
 
-import { components } from '../../service/apiSchema';
+import { components } from '../../service/apiSchema.generated';
 import { ProjectPermissionType } from '../../service/response.types';
 import { ProjectPermissions } from '../../hooks/useProjectPermissions';
 

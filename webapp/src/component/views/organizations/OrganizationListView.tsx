@@ -49,7 +49,7 @@ export const OrganizationsListView = () => {
                 <Button
                   variant="outlined"
                   size="small"
-                  onClick={() => leaveOrganization(item.id!!)}
+                  onClick={() => leaveOrganization(item.id!)}
                   data-cy={'leave-organization-button'}
                 >
                   <T>organization_users_leave</T>

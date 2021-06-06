@@ -8,7 +8,6 @@ import { MessageService } from './MessageService';
 import { RedirectionActions } from '../store/global/RedirectionActions';
 import { InvitationCodeService } from './InvitationCodeService';
 import { InvitationService } from './InvitationService';
-import React from 'react';
 import { T } from '@tolgee/react';
 
 const API_URL = process.env.REACT_APP_API_URL + '/api/';
@@ -38,7 +37,7 @@ export class SecurityService {
     const invitationCodeQueryPart = invitationCode
       ? '?invitationCode=' + invitationCode
       : '';
-    let response = await fetch(
+    const response = await fetch(
       `${API_URL}public/authorize_oauth/${type}/${code}${invitationCodeQueryPart}`
     );
     this.invitationCodeService.disposeCode();
@@ -104,15 +103,15 @@ export class SecurityService {
     localStorage.removeItem('logoutMark');
   };
 
-  public saveAfterLoginLink = (afterLoginLink: object) => {
+  public saveAfterLoginLink = (afterLoginLink: Record<string, unknown>) => {
     if (!this.isLogoutMark()) {
       localStorage.setItem('afterLoginLink', JSON.stringify(afterLoginLink));
     }
     this.disposeLogoutMark();
   };
 
-  public getAfterLoginLink = (): object | null => {
-    let link = localStorage.getItem('afterLoginLink');
+  public getAfterLoginLink = (): Record<string, unknown> | null => {
+    const link = localStorage.getItem('afterLoginLink');
     if (link) {
       return JSON.parse(link);
     }

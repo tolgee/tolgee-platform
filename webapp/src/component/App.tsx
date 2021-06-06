@@ -51,7 +51,7 @@ const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
 
 const Redirection = () => {
-  let redirectionState = useSelector((state: AppState) => state.redirection);
+  const redirectionState = useSelector((state: AppState) => state.redirection);
 
   useEffect(() => {
     if (redirectionState.to) {
@@ -67,8 +67,8 @@ const Redirection = () => {
 };
 
 const MandatoryDataProvider = (props: any) => {
-  let config = useConfig();
-  let userData = useUser();
+  const config = useConfig();
+  const userData = useUser();
 
   useEffect(() => {
     if (config?.clientSentryDsn) {
@@ -77,7 +77,7 @@ const MandatoryDataProvider = (props: any) => {
     }
   }, [config?.clientSentryDsn]);
 
-  let allowPrivate = useSelector(
+  const allowPrivate = useSelector(
     (state: AppState) => state.global.security.allowPrivate
   );
 
@@ -89,11 +89,11 @@ const MandatoryDataProvider = (props: any) => {
 };
 
 const GlobalConfirmation = () => {
-  let state = useSelector((state: AppState) => state.global.confirmationDialog);
+  const state = useSelector((state: AppState) => state.global.confirmationDialog);
 
   const [wasDisplayed, setWasDisplayed] = useState(false);
 
-  let actions = container.resolve(GlobalActions);
+  const actions = container.resolve(GlobalActions);
 
   const onCancel = () => {
     state?.onCancel?.();

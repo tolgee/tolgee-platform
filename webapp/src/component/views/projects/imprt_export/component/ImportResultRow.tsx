@@ -1,4 +1,4 @@
-import { components } from '../../../../../service/apiSchema';
+import { components } from '../../../../../service/apiSchema.generated';
 import React from 'react';
 import {
   Box,

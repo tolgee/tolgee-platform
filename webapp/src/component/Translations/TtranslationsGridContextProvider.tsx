@@ -16,7 +16,7 @@ import { FullPageLoading } from '../common/FullPageLoading';
 import { useProjectLanguages } from '../../hooks/useProjectLanguages';
 import { useLeaveEditConfirmationOtherEdit } from './useLeaveEditConfirmation';
 import { parseErrorResponse } from '../../fixtures/errorFIxtures';
-import { BoxLoading } from '../common/BoxLoading';
+import {} from '../common/BoxLoading';
 
 export const TranslationListContext =
   // @ts-ignore
@@ -47,15 +47,15 @@ export type TranslationListContextType = {
 const messaging = container.resolve(MessageService);
 
 export const TranslationGridContextProvider: FunctionComponent = (props) => {
-  let projectDTO = useProject();
+  const projectDTO = useProject();
 
-  let listLoadable = actions.useSelector((s) => s.loadables.translations);
-  let selectedLanguages = actions.useSelector((s) => s.selectedLanguages);
-  let translationSaveLoadable = actions.useSelector(
+  const listLoadable = actions.useSelector((s) => s.loadables.translations);
+  const selectedLanguages = actions.useSelector((s) => s.selectedLanguages);
+  const translationSaveLoadable = actions.useSelector(
     (s) => s.loadables.setTranslations
   );
-  let keySaveLoadable = actions.useSelector((s) => s.loadables.editKey);
-  let deleteLoadable = actions.useSelector((s) => s.loadables.delete);
+  const keySaveLoadable = actions.useSelector((s) => s.loadables.editKey);
+  const deleteLoadable = actions.useSelector((s) => s.loadables.delete);
 
   const projectLanguages = useProjectLanguages().reduce(
     (acc, curr) => ({ ...acc, [curr.abbreviation]: curr.name }),
@@ -64,7 +64,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
 
   const t = useTranslate();
   const [perPage, setPerPage] = useState(20);
-  const [offset, setOffset] = useState(0);
+  const [_, setOffset] = useState(0);
   const [showKeys, setShowKeys] = useState(true);
   const [checkedKeys, setCheckedKeys] = useState(new Set<number>());
   const [_resetEdit, setResetEdit] = useState(() => () => {});
@@ -176,6 +176,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
     return listLoadable.data.data.filter((i) => isKeyChecked(i.id)).length > 0;
   };
 
+  // eslint-disable-next-line react/jsx-key
   const headerCells = showKeys ? [<b>{t('translation_grid_key_text')}</b>] : [];
   headerCells.push(
     ...listLoadable.data.params.languages.map((abbr, index) => (
@@ -211,7 +212,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
     offset: 0,
     isKeyChecked: isKeyChecked,
     toggleKeyChecked: (id) => {
-      let copy = new Set<number>(checkedKeys);
+      const copy = new Set<number>(checkedKeys);
       if (isKeyChecked(id)) {
         copy.delete(id);
       } else {

@@ -36,8 +36,8 @@ export abstract class AbstractLoadableActions<
   private _loadableActions;
 
   get initialState() {
-    let loadables = {};
-    for (let name in this.loadableDefinitions) {
+    const loadables = {};
+    for (const name in this.loadableDefinitions) {
       loadables[name] = createLoadable();
     }
 
@@ -84,7 +84,7 @@ export abstract class AbstractLoadableActions<
           loadables: {
             ...state.loadables,
             [loadableName]: <Loadable<PayloadType, DispatchParams>>{
-              ...state.loadables![loadableName],
+              ...state.loadables[loadableName],
               loading: true,
               errorParams: null,
               dispatchParams: action.meta.params,
@@ -99,7 +99,7 @@ export abstract class AbstractLoadableActions<
           loadables: {
             ...state.loadables,
             [loadableName]: <Loadable<PayloadType, DispatchParams>>{
-              ...state.loadables![loadableName],
+              ...state.loadables[loadableName],
               loading: false,
               data: action.payload,
               error: undefined,
@@ -117,7 +117,7 @@ export abstract class AbstractLoadableActions<
           loadables: {
             ...state.loadables,
             [loadableName]: <Loadable<PayloadType, DispatchParams>>{
-              ...state.loadables![loadableName],
+              ...state.loadables[loadableName],
               loading: false,
               data: null,
               error: action.payload.__handled ? null : action.payload,
@@ -150,7 +150,7 @@ export abstract class AbstractLoadableActions<
     [K in keyof this['loadableDefinitions']]: Action<never, StateType, []>;
   } {
     const loadableResets = {};
-    for (let loadableName in this.loadableDefinitions) {
+    for (const loadableName in this.loadableDefinitions) {
       loadableResets[loadableName] = this.createAction(
         loadableName.toUpperCase() + '_RESET'
       ).build.on((state: StateType) => {
@@ -172,7 +172,7 @@ export abstract class AbstractLoadableActions<
 
   private generateLoadableActions() {
     const loadableActions = {};
-    for (let loadableName in this.loadableDefinitions) {
+    for (const loadableName in this.loadableDefinitions) {
       const definition = this.loadableDefinitions[loadableName];
       loadableActions[loadableName] = this.createLoadableAction(
         loadableName,
@@ -192,9 +192,9 @@ export abstract class AbstractLoadableActions<
   ) =>
     this.createLoadableDefinition(payloadProvider, (state, action) => {
       const data = [
-        ...(state.loadables![listLoadableName].data as { id: number }[]),
+        ...(state.loadables[listLoadableName].data as { id: number }[]),
       ];
-      let index = data.findIndex((i) => i.id === action.payload);
+      const index = data.findIndex((i) => i.id === action.payload);
       if (index > -1) {
         data.splice(index, 1);
       }
@@ -203,7 +203,7 @@ export abstract class AbstractLoadableActions<
         ...state,
         loadables: {
           ...state.loadables,
-          [listLoadableName]: { ...state.loadables![listLoadableName], data },
+          [listLoadableName]: { ...state.loadables[listLoadableName], data },
         },
       };
       return typeof then === 'function' ? then(state, action) : state;

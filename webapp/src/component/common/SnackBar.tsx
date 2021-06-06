@@ -1,19 +1,10 @@
-import React, { useEffect } from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import { useEffect } from 'react';
 import { MessageActions } from '../../store/global/MessageActions';
 import { Message } from '../../store/global/types';
 import { connect } from 'react-redux';
 import { AppState } from '../../store';
 import { container } from 'tsyringe';
 import { useSnackbar } from 'notistack';
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    close: {
-      padding: theme.spacing(0.5),
-    },
-  })
-);
 
 interface Props {
   messages: Message[];
@@ -22,7 +13,6 @@ interface Props {
 const messageActions = container.resolve(MessageActions);
 
 function SnackBar(props: Props) {
-  const classes = useStyles({});
   const { enqueueSnackbar } = useSnackbar();
 
   // const handleClose = (event: SyntheticEvent | MouseEvent, reason?: string) => {

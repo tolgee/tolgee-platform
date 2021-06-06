@@ -8,7 +8,7 @@ import { OrganizationActions } from '../../../store/organization/OrganizationAct
 import { AppState } from '../../../store';
 import { LINKS } from '../../../constants/links';
 import { Redirect } from 'react-router-dom';
-import { components } from '../../../service/apiSchema';
+import { components } from '../../../service/apiSchema.generated';
 import { ProjectPermissionType } from '../../../service/response.types';
 import { BaseFormView } from '../../layout/BaseFormView';
 import { Validation } from '../../../constants/GlobalValidationSchema';

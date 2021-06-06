@@ -4,7 +4,7 @@ import { Box } from '@material-ui/core';
 
 export const LazyLoadOnScroll: FunctionComponent<{
   onLoad: () => void;
-  isMore: Boolean;
+  isMore: boolean;
   maxHeight: number;
 }> = (props) => {
   const wrapperRef = createRef<HTMLDivElement>();

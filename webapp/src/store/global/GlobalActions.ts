@@ -12,7 +12,7 @@ import {
 import { InvitationCodeService } from '../../service/InvitationCodeService';
 
 export class GlobalState extends StateWithLoadables<GlobalActions> {
-  authLoading: boolean = false;
+  authLoading = false;
   security: SecurityDTO = {
     allowPrivate: !!localStorage.getItem('jwtToken'),
     jwtToken: localStorage.getItem('jwtToken') || null,
@@ -24,8 +24,8 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
   passwordResetSetError = null;
   passwordResetSetSucceed = false;
   confirmationDialog: ConfirmationDialogProps | null = null;
-  sideMenuOpen: boolean = true;
-  loading: boolean = false;
+  sideMenuOpen = true;
+  loading = false;
 }
 
 @singleton()
@@ -157,7 +157,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
     remoteConfig: this.createLoadableDefinition(
       () => this.configService.getConfiguration(),
       (state, action) => {
-        let invitationCode = this.invitationCodeService.getCode();
+        const invitationCode = this.invitationCodeService.getCode();
         return {
           ...state,
           security: {

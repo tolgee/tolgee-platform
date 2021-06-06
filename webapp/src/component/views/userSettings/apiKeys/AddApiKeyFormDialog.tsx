@@ -36,10 +36,12 @@ const actions = container.resolve(UserApiKeysActions);
 export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
   const onDialogClose = () => useRedirect(LINKS.USER_API_KEYS);
 
-  let projects = actions.useSelector((s) => s.loadables.projects);
-  let scopes = actions.useSelector((s) => s.loadables.scopes);
-  let editLoadable = actions.useSelector((s) => s.loadables.edit);
-  let generateLoadable = actions.useSelector((s) => s.loadables.generateApiKey);
+  const projects = actions.useSelector((s) => s.loadables.projects);
+  const scopes = actions.useSelector((s) => s.loadables.scopes);
+  const editLoadable = actions.useSelector((s) => s.loadables.edit);
+  const generateLoadable = actions.useSelector(
+    (s) => s.loadables.generateApiKey
+  );
 
   useEffect(() => {
     actions.loadableActions.projects.dispatch();
