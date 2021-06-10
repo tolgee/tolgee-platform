@@ -43,7 +43,7 @@ export const FlagSelector: FunctionComponent<{
   name: string;
 }> = (props) => {
   const classes = useStyles();
-  const [field, meta, helpers] = useField(props.name);
+  const [field, _, helpers] = useField(props.name);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const svg = field.value || '🏁';
