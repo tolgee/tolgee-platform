@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.LanguageDTO
+import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.validators.LanguageValidator
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
@@ -39,39 +39,39 @@ open class LanguageController(
     @PostMapping(value = [""])
     @Operation(summary = "Creates language")
     fun createLanguage(@PathVariable("projectId") projectId: Long,
-                       @RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
+                       @RequestBody @Valid dto: LanguageDto?): LanguageDto {
         val project = projectService.get(projectId).orElseThrow { NotFoundException() }
         securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.MANAGE)
         languageValidator.validateCreate(dto, project)
         val language = languageService.createLanguage(dto, project!!)
-        return LanguageDTO.fromEntity(language)
+        return LanguageDto.fromEntity(language)
     }
 
     @Operation(summary = "Edits language")
     @PostMapping(value = ["/edit"])
-    fun editLanguage(@RequestBody @Valid dto: LanguageDTO?): LanguageDTO {
+    fun editLanguage(@RequestBody @Valid dto: LanguageDto?): LanguageDto {
         languageValidator.validateEdit(dto)
         val language = languageService.findById(dto!!.id!!).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
-        return LanguageDTO.fromEntity(languageService.editLanguage(dto))
+        return LanguageDto.fromEntity(languageService.editLanguage(dto))
     }
 
     @GetMapping(value = [""])
     @AccessWithApiKey
     @Operation(summary = "Returns all project languages", tags = ["API KEY", "Languages"])
-    fun getAll(@PathVariable("projectId") pathProjectId: Long?): Set<LanguageDTO> {
+    fun getAll(@PathVariable("projectId") pathProjectId: Long?): Set<LanguageDto> {
         val projectId = if (pathProjectId === null) authenticationFacade.apiKey.project!!.id else pathProjectId
         securityService.checkAnyProjectPermission(projectId)
-        return languageService.findAll(projectId).stream().map { LanguageDTO.fromEntity(it) }
+        return languageService.findAll(projectId).stream().map { LanguageDto.fromEntity(it) }
                 .collect(Collectors.toCollection { LinkedHashSet() })
     }
 
     @GetMapping(value = ["{id}"])
     @Operation(summary = "Returns specific language")
-    operator fun get(@PathVariable("id") id: Long?): LanguageDTO {
+    operator fun get(@PathVariable("id") id: Long?): LanguageDto {
         val language = languageService.findById(id!!).orElseThrow { NotFoundException() }
         securityService.checkAnyProjectPermission(language.project!!.id)
-        return LanguageDTO.fromEntity(language)
+        return LanguageDto.fromEntity(language)
     }
 
     @Operation(summary = "Deletes specific language")

@@ -72,7 +72,7 @@ class CoreImportFileProcessorUnitTest {
         whenever(typeProcessorMock.context).then { fileProcessorContext }
         whenever(importMock.project).thenReturn(Project(1, "test repo"))
         whenever(importServiceMock.saveFile(any())).thenReturn(importFile)
-        whenever(languageServiceMock.findByAbbreviation(eq("lng"), any<Long>()))
+        whenever(languageServiceMock.findByTag(eq("lng"), any<Long>()))
                 .thenReturn(Optional.of(existingLanguage))
         whenever(authenticationFacadeMock.userAccount).thenReturn(UserAccount())
     }

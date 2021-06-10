@@ -13,7 +13,7 @@ data class SetTranslationsDTO(
         var key: String? = null,
 
         /**
-         * Map of language abbreviation -> text
+         * Map of language tag -> text
          */
         @field:NotNull
         var translations: Map<String, String?>? = null

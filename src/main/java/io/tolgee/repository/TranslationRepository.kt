@@ -12,7 +12,7 @@ import java.util.*
 
 @Repository
 interface TranslationRepository : JpaRepository<Translation, Long> {
-    @Query("from Translation t join fetch t.key where t.key.project.id = :projectId and t.language.abbreviation in :languages")
+    @Query("from Translation t join fetch t.key where t.key.project.id = :projectId and t.language.tag in :languages")
     fun getTranslations(languages: Set<String>, projectId: Long): Set<Translation>
 
     @Query("from Translation t join fetch Key k on t.key = k where k = :key and k.project = :project and t.language in :languages")

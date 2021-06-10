@@ -412,13 +412,20 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1617016717129-2">
-        <addForeignKeyConstraint baseColumnNames="user_owner_id" baseTableName="repository" constraintName="FKe8q5ar4olfji1mw1p0163ctyk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="user_owner_id" baseTableName="repository"
+                                 constraintName="FKe8q5ar4olfji1mw1p0163ctyk" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1617016717129-3">
-        <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="repository" constraintName="FKp2q5w860n1uai6oyel74udi83" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="organization_owner_id" baseTableName="repository"
+                                 constraintName="FKp2q5w860n1uai6oyel74udi83" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1617093013144-2">
-        <addUniqueConstraint columnNames="user_id, organization_id" constraintName="organization_role_user_organization_unique" tableName="organization_role"/>
+        <addUniqueConstraint columnNames="user_id, organization_id"
+                             constraintName="organization_role_user_organization_unique" tableName="organization_role"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1618582318718-1">
         <addColumn tableName="email_verification">
@@ -628,64 +635,122 @@
         </createTable>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-14">
-        <addUniqueConstraint columnNames="author_id, repository_id" constraintName="UKiiys1nq2g2sdg7alh8oelygkh" tableName="import"/>
+        <addUniqueConstraint columnNames="author_id, repository_id" constraintName="UKiiys1nq2g2sdg7alh8oelygkh"
+                             tableName="import"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-15">
-        <addForeignKeyConstraint baseColumnNames="file_id" baseTableName="import_file_issue" constraintName="FK2q8pryy6fohmtjm1hmu7tw63s" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="file_id" baseTableName="import_file_issue"
+                                 constraintName="FK2q8pryy6fohmtjm1hmu7tw63s" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-16">
-        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="import" constraintName="FK2twe5erdt7yfludaoiq7gv3mf" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="import"
+                                 constraintName="FK2twe5erdt7yfludaoiq7gv3mf" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-17">
-        <addForeignKeyConstraint baseColumnNames="archive_id" baseTableName="import_file" constraintName="FK5yemkngk70scn7l0r4cwlmtn" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="archive_id" baseTableName="import_file"
+                                 constraintName="FK5yemkngk70scn7l0r4cwlmtn" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-18">
-        <addForeignKeyConstraint baseColumnNames="import_id" baseTableName="import_file" constraintName="FK8hvxh3e4cxn5561l76xejytnx" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="import_id" baseTableName="import_file"
+                                 constraintName="FK8hvxh3e4cxn5561l76xejytnx" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-19">
-        <addForeignKeyConstraint baseColumnNames="key_meta_id" baseTableName="key_comment" constraintName="FKapx5aa95fl74isypara87i0oe" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key_meta" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="key_meta_id" baseTableName="key_comment"
+                                 constraintName="FKapx5aa95fl74isypara87i0oe" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key_meta"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-20">
-        <addForeignKeyConstraint baseColumnNames="key_meta_id" baseTableName="key_code_reference" constraintName="FKcrettb2iyas70c96411bncjb7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key_meta" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="key_meta_id" baseTableName="key_code_reference"
+                                 constraintName="FKcrettb2iyas70c96411bncjb7" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key_meta"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-21">
-        <addForeignKeyConstraint baseColumnNames="language_id" baseTableName="import_translation" constraintName="FKfm8n337a6jyvume29k80edgvj" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_language" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="language_id" baseTableName="import_translation"
+                                 constraintName="FKfm8n337a6jyvume29k80edgvj" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id"
+                                 referencedTableName="import_language" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-22">
-        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="key_meta" constraintName="FKgdb4y0up36tyubhysfpbru11b" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="key_meta"
+                                 constraintName="FKgdb4y0up36tyubhysfpbru11b" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-23">
-        <addForeignKeyConstraint baseColumnNames="keys_id" baseTableName="import_file_keys" constraintName="FKikmqn4hh8e4fp8k4dj16fkh3y" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_key" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="keys_id" baseTableName="import_file_keys"
+                                 constraintName="FKikmqn4hh8e4fp8k4dj16fkh3y" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_key"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-24">
-        <addForeignKeyConstraint baseColumnNames="files_id" baseTableName="import_file_keys" constraintName="FKjawljy0kpt4o2j8ix7qv1x196" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="files_id" baseTableName="import_file_keys"
+                                 constraintName="FKjawljy0kpt4o2j8ix7qv1x196" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-25">
-        <addForeignKeyConstraint baseColumnNames="issue_id" baseTableName="import_file_issue_param" constraintName="FKlry3bmimp7a094jj0kioe6ga5" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file_issue" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="issue_id" baseTableName="import_file_issue_param"
+                                 constraintName="FKlry3bmimp7a094jj0kioe6ga5" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id"
+                                 referencedTableName="import_file_issue" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-26">
-        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="key_comment" constraintName="FKnhtysiwn7w2tn04nr4smmc6af" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="key_comment"
+                                 constraintName="FKnhtysiwn7w2tn04nr4smmc6af" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-27">
-        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="key_code_reference" constraintName="FKnus5ewftf9lxhm520whg3msnh" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="key_code_reference"
+                                 constraintName="FKnus5ewftf9lxhm520whg3msnh" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-28">
-        <addForeignKeyConstraint baseColumnNames="file_id" baseTableName="import_language" constraintName="FKp7xnyjio5do5p6yb8ch2hrudw" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="file_id" baseTableName="import_language"
+                                 constraintName="FKp7xnyjio5do5p6yb8ch2hrudw" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_file"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-29">
-        <addForeignKeyConstraint baseColumnNames="existing_language_id" baseTableName="import_language" constraintName="FKpn398j761o54kek3me10h4ppo" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="existing_language_id" baseTableName="import_language"
+                                 constraintName="FKpn398j761o54kek3me10h4ppo" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-30">
-        <addForeignKeyConstraint baseColumnNames="import_key_id" baseTableName="key_meta" constraintName="FKqpyb4896knd8m41ffn1f7wgeo" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_key" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="import_key_id" baseTableName="key_meta"
+                                 constraintName="FKqpyb4896knd8m41ffn1f7wgeo" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_key"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-31">
-        <addForeignKeyConstraint baseColumnNames="repository_id" baseTableName="import" constraintName="FKr3w7b3sw9aiegenlgjjnjt2yi" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="repository" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="repository_id" baseTableName="import"
+                                 constraintName="FKr3w7b3sw9aiegenlgjjnjt2yi" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="repository"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-32">
-        <addForeignKeyConstraint baseColumnNames="conflict_id" baseTableName="import_translation" constraintName="FKrlpc5t6f2d5v6w7r1jsk7y01l" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="translation" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="conflict_id" baseTableName="import_translation"
+                                 constraintName="FKrlpc5t6f2d5v6w7r1jsk7y01l" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="translation"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-33">
-        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="import_translation" constraintName="FKrtx4aq0bqg6m83cdbi8vcuyve" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_key" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="key_id" baseTableName="import_translation"
+                                 constraintName="FKrtx4aq0bqg6m83cdbi8vcuyve" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="import_key"
+                                 validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1621606909199-1">
         <addNotNullConstraint columnDataType="bigint" columnName="repository_id" tableName="key" validate="true"/>
@@ -827,5 +892,22 @@
     <changeSet author="jenik (generated)" id="1622541022896-3">
         <addUniqueConstraint columnNames="project_id, abbreviation" constraintName="language_abbreviation_name"
                              tableName="language"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1623335178713-1">
+        <dropUniqueConstraint constraintName="language_abbreviation_name" tableName="language"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1623335178713-2">
+        <addColumn tableName="language">
+            <column name="original_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <renameColumn tableName="language" oldColumnName="abbreviation" newColumnName="tag"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1623335178713-3">
+        <addUniqueConstraint columnNames="project_id, tag" constraintName="language_tag_name" tableName="language"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1623335669172-2">
+        <addNotNullConstraint columnDataType="varchar(255)" columnName="tag" tableName="language" validate="true"/>
     </changeSet>
 </databaseChangeLog>

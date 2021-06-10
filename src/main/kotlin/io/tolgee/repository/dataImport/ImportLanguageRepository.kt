@@ -19,7 +19,7 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
     companion object {
         private const val VIEW_BASE_QUERY = """
             select il.id as id, il.name as name, el.id as existingLanguageId, 
-            el.abbreviation as existingLanguageAbbreviation, el.name as existingLanguageName,
+            el.tag as existingLanguageTag, el.name as existingLanguageName,
             if.name as importFileName, if.id as importFileId,
             (select count(*) from if.issues) as importFileIssueCount,
             count(it) as totalCount, 

@@ -1,7 +1,7 @@
 package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
-import io.tolgee.dtos.request.LanguageDTO
+import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.SetTranslationsDTO
 import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.model.Organization
@@ -100,7 +100,7 @@ class ProjectsE2eDataController(
             projectData.keyData.forEach {
                 it.value.keys.forEach {
                     if (!createdLanguages.contains(it)) {
-                        languageService.createLanguage(LanguageDTO(name = it, abbreviation = it), project)
+                        languageService.createLanguage(LanguageDto(name = it, tag = it), project)
                         createdLanguages.add(it)
                     }
                 }

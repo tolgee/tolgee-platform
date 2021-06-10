@@ -11,7 +11,7 @@ data class CreateProjectDTO(
         var name: String? = null,
 
         @field:NotEmpty
-        var languages: Set<LanguageDTO>? = null,
+        var languages: Set<LanguageDto>? = null,
 
         @field:Size(min = 3, max = 60)
         @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")

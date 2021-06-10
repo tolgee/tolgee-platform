@@ -2,7 +2,7 @@ package io.tolgee.service
 
 import io.tolgee.collections.LanguageSet
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.LanguageDTO
+import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
@@ -23,7 +23,7 @@ class LanguageService(
     private var translationService: TranslationService? = null
 
     @Transactional
-    fun createLanguage(dto: LanguageDTO?, project: Project): Language {
+    fun createLanguage(dto: LanguageDto?, project: Project): Language {
         val language = fromRequestDTO(dto!!)
         language.project = project
         project.languages.add(language)
@@ -39,7 +39,7 @@ class LanguageService(
     }
 
     @Transactional
-    fun editLanguage(dto: LanguageDTO): Language {
+    fun editLanguage(dto: LanguageDto): Language {
         val language = languageRepository.findById(dto.id!!).orElseThrow { NotFoundException() }
         language.updateByDTO(dto)
         entityManager.persist(language)
@@ -59,34 +59,26 @@ class LanguageService(
         return languageRepository.findById(id)
     }
 
-    fun findByAbbreviation(abbreviation: String, project: Project): Optional<Language> {
-        return languageRepository.findByAbbreviationAndProject(abbreviation, project)
+    fun findByTag(tag: String, project: Project): Optional<Language> {
+        return languageRepository.findByTagAndProject(tag, project)
     }
 
-    fun findByAbbreviation(abbreviation: String?, projectId: Long): Optional<Language> {
-        return languageRepository.findByAbbreviationAndProjectId(abbreviation, projectId)
+    fun findByTag(tag: String?, projectId: Long): Optional<Language> {
+        return languageRepository.findByTagAndProjectId(tag, projectId)
     }
 
-    fun findByAbbreviations(abbreviations: Collection<String>?, projectId: Long?): LanguageSet {
-        val langs = languageRepository.findAllByAbbreviationInAndProjectId(abbreviations, projectId)
-        if (!langs.stream().map(Language::abbreviation).collect(Collectors.toSet()).containsAll(abbreviations!!)) {
+    fun findByTags(tag: Collection<String>?, projectId: Long?): LanguageSet {
+        val langs = languageRepository.findAllByTagInAndProjectId(tag, projectId)
+        if (!langs.stream().map(Language::tag).collect(Collectors.toSet()).containsAll(tag!!)) {
             throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
         }
         return LanguageSet(langs)
     }
 
-    @Transactional
-    fun getOrCreate(project: Project, languageAbbreviation: String): Language {
-        return this.findByAbbreviation(languageAbbreviation, project)
-                .orElseGet {
-                    createLanguage(LanguageDTO(null, languageAbbreviation, languageAbbreviation), project)
-                }
-    }
-
     fun getLanguagesForTranslationsView(languages: Set<String>?, project: Project): LanguageSet {
         return if (languages == null) {
             getImplicitLanguages(project)
-        } else findByAbbreviations(languages, project.id)
+        } else findByTags(languages, project.id)
     }
 
     fun findByName(name: String?, project: Project): Optional<Language> {

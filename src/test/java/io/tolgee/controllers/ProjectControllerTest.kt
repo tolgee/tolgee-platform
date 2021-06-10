@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.CreateProjectDTO
 import io.tolgee.dtos.request.EditProjectDTO
-import io.tolgee.dtos.request.LanguageDTO
+import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.fixtures.LoggedRequestFactory.loggedDelete
 import io.tolgee.fixtures.LoggedRequestFactory.loggedGet
@@ -25,7 +25,7 @@ import org.testng.annotations.Test
 @SpringBootTest
 @AutoConfigureMockMvc
 class ProjectControllerTest : SignedInControllerTest() {
-    private val languageDTO = LanguageDTO(null, "English", "en")
+    private val languageDTO = LanguageDto(null, "English", "en")
 
     @Test
     fun createProject() {
@@ -61,7 +61,7 @@ class ProjectControllerTest : SignedInControllerTest() {
         Assertions.assertThat(project.languages).isNotEmpty
         val language = project.languages.stream().findFirst().orElse(null)
         Assertions.assertThat(language).isNotNull
-        Assertions.assertThat(language.abbreviation).isEqualTo("en")
+        Assertions.assertThat(language.tag).isEqualTo("en")
         Assertions.assertThat(language.name).isEqualTo("English")
     }
 

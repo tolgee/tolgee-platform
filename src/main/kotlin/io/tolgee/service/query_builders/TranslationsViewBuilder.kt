@@ -23,10 +23,10 @@ class TranslationsViewBuilder(
         val project = key.join(Key_.project)
         for (language in languages) {
             val languagesJoin = project.join<Project, Language>("languages")
-            languagesJoin.on(cb.equal(languagesJoin.get(Language_.abbreviation), language.abbreviation))
+            languagesJoin.on(cb.equal(languagesJoin.get(Language_.tag), language.tag))
             val translations = key.join<Key, Translation>("translations", JoinType.LEFT)
             translations.on(cb.equal(translations.get(Translation_.language), languagesJoin))
-            selection.add(languagesJoin.get(Language_.abbreviation))
+            selection.add(languagesJoin.get(Language_.tag))
             selection.add(translations.get(Translation_.text))
             fullTextFields.add(translations.get(Translation_.text))
         }

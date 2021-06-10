@@ -1,7 +1,7 @@
 package io.tolgee.dtos.request.validators;
 
 import io.tolgee.constants.Message;
-import io.tolgee.dtos.request.LanguageDTO;
+import io.tolgee.dtos.request.LanguageDto;
 import io.tolgee.dtos.request.validators.exceptions.ValidationException;
 import io.tolgee.exceptions.NotFoundException;
 import io.tolgee.model.Language;
@@ -22,7 +22,7 @@ public class LanguageValidator {
         this.languageService = languageService;
     }
 
-    public void validateEdit(LanguageDTO dto) {
+    public void validateEdit(LanguageDto dto) {
         LinkedHashSet<ValidationError> validationErrors = new LinkedHashSet<>();
 
         //handle edit validation
@@ -33,8 +33,8 @@ public class LanguageValidator {
         if (!language.getName().equals(dto.getName())) {
             validateNameUniqueness(dto, project).ifPresent(validationErrors::add);
         }
-        if (!language.getAbbreviation().equals(dto.getAbbreviation())) {
-            validateAbbreviationUniqueness(dto, project).ifPresent(validationErrors::add);
+        if (!language.getTag().equals(dto.getTag())) {
+            validateTagUniqueness(dto, project).ifPresent(validationErrors::add);
         }
 
         if (!validationErrors.isEmpty()) {
@@ -42,11 +42,11 @@ public class LanguageValidator {
         }
     }
 
-    public void validateCreate(LanguageDTO dto, Project project) {
+    public void validateCreate(LanguageDto dto, Project project) {
         LinkedHashSet<ValidationError> validationErrors = new LinkedHashSet<>();
 
         //handle create validation
-        validateAbbreviationUniqueness(dto, project).ifPresent(validationErrors::add);
+        validateTagUniqueness(dto, project).ifPresent(validationErrors::add);
         validateNameUniqueness(dto, project).ifPresent(validationErrors::add);
 
         if (!validationErrors.isEmpty()) {
@@ -54,16 +54,16 @@ public class LanguageValidator {
         }
     }
 
-    private Optional<ValidationError> validateNameUniqueness(LanguageDTO dto, Project project) {
+    private Optional<ValidationError> validateNameUniqueness(LanguageDto dto, Project project) {
         if (languageService.findByName(dto.getName(), project).isPresent()) {
             return Optional.of(new ValidationError(ValidationErrorType.CUSTOM_VALIDATION, Message.LANGUAGE_NAME_EXISTS));
         }
         return Optional.empty();
     }
 
-    private Optional<ValidationError> validateAbbreviationUniqueness(LanguageDTO dto, Project project) {
-        if (languageService.findByAbbreviation(dto.getAbbreviation(), project).isPresent()) {
-            return Optional.of(new ValidationError(ValidationErrorType.CUSTOM_VALIDATION, Message.LANGUAGE_ABBREVIATION_EXISTS));
+    private Optional<ValidationError> validateTagUniqueness(LanguageDto dto, Project project) {
+        if (languageService.findByTag(dto.getTag(), project).isPresent()) {
+            return Optional.of(new ValidationError(ValidationErrorType.CUSTOM_VALIDATION, Message.LANGUAGE_TAG_EXISTS));
         }
         return Optional.empty();
     }
