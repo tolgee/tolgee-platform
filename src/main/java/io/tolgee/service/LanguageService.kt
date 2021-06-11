@@ -9,6 +9,8 @@ import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.repository.LanguageRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -39,8 +41,8 @@ class LanguageService(
     }
 
     @Transactional
-    fun editLanguage(dto: LanguageDto): Language {
-        val language = languageRepository.findById(dto.id!!).orElseThrow { NotFoundException() }
+    fun editLanguage(id: Long, dto: LanguageDto): Language {
+        val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
         language.updateByDTO(dto)
         entityManager.persist(language)
         return language
@@ -96,5 +98,9 @@ class LanguageService(
 
     fun saveAll(languages: Iterable<Language>): MutableList<Language>? {
         return this.languageRepository.saveAll(languages)
+    }
+
+    fun getPaged(projectId: Long, pageable: Pageable): Page<Language> {
+        return this.languageRepository.findAllByProjectId(projectId, pageable)
     }
 }

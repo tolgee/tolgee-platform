@@ -2,13 +2,9 @@ package io.tolgee.controllers
 
 import io.tolgee.ITest
 import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
-import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.fixtures.LoggedRequestFactory
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.generateUniqueString
-import io.tolgee.fixtures.mapResponseTo
+import io.tolgee.fixtures.*
 import io.tolgee.helpers.JsonHelper
 import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -20,10 +16,10 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class LanguageControllerTest : ProjectAuthControllerTest(), ITest {
-    private val languageDTO = LanguageDto(null, "en", "en")
+class LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/"), ITest {
+    private val languageDTO = LanguageDto("en", "en", "en")
     private val languageDTOBlank = LanguageDto(null, "")
-    private val languageDTOCorrect = LanguageDto(null, "Espanol", "es")
+    private val languageDTOCorrect = LanguageDto("Spanish", "Espanol", "es")
 
     @Test
     fun createLanguage() {
@@ -36,32 +32,37 @@ class LanguageControllerTest : ProjectAuthControllerTest(), ITest {
     fun editLanguage() {
         val test = dbPopulator.createBase(generateUniqueString())
         val en = test.getLanguage("en").orElseThrow { NotFoundException() }
-        val languageDTO = LanguageDto.fromEntity(en)
-        languageDTO.name = "newEnglish"
-        languageDTO.tag = "newEn"
-        val mvcResult = performEdit(test.id, languageDTO)
-                .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-        val languageDTORes = decodeJson(mvcResult.response.contentAsString, LanguageDto::class.java)
-        Assertions.assertThat(languageDTORes.name).isEqualTo(languageDTO.name)
-        Assertions.assertThat(languageDTORes.tag).isEqualTo(languageDTO.tag)
+        val languageDTO = LanguageDto(name = "newEnglish", tag = "newEn", originalName = "newOriginalEnglish",
+                flagEmoji = "\uD83C\uDDEC\uD83C\uDDE7")
+        performEdit(test.id, en.id, languageDTO).andIsOk.andAssertThatJson {
+            node("name").isEqualTo(languageDTO.name)
+            node("originalName").isEqualTo(languageDTO.originalName)
+            node("tag").isEqualTo(languageDTO.tag)
+            node("flagEmoji").isEqualTo(languageDTO.flagEmoji)
+        }
         val dbLanguage = languageService.findByTag(languageDTO.tag, test.id)
         Assertions.assertThat(dbLanguage).isPresent
         Assertions.assertThat(dbLanguage.get().name).isEqualTo(languageDTO.name)
+        Assertions.assertThat(dbLanguage.get().originalName).isEqualTo(languageDTO.originalName)
+        Assertions.assertThat(dbLanguage.get().flagEmoji).isEqualTo(languageDTO.flagEmoji)
     }
 
     @Test
     fun findAllLanguages() {
         val project = dbPopulator.createBase(generateUniqueString(), "ben", "pwd")
         logAsUser("ben", "pwd")
-        val mvcResult = performFindAll(project.id).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-        assertThat(decodeJson(mvcResult.response.contentAsString, Set::class.java)).hasSize(2)
+        performFindAll(project.id).andIsOk.andPrettyPrint.andAssertThatJson {
+            node("_embedded.languages") {
+                isArray.hasSize(2)
+            }
+        }
     }
 
     @Test
     fun deleteLanguage() {
         val test = dbPopulator.createBase(generateUniqueString())
         val en = test.getLanguage("en").orElseThrow { NotFoundException() }
-        performDelete(test.id, en.id!!).andExpect(MockMvcResultMatchers.status().isOk)
+        performDelete(test.id, en.id).andExpect(MockMvcResultMatchers.status().isOk)
         Assertions.assertThat(languageService.findById(en.id!!)).isEmpty
         projectService.deleteProject(test.id)
     }
@@ -69,66 +70,70 @@ class LanguageControllerTest : ProjectAuthControllerTest(), ITest {
     @Test
     fun createLanguageTestValidationComa() {
         val project = dbPopulator.createBase(generateUniqueString())
-        val mvcResult = performCreate(project.id, LanguageDto(name = "Name", tag = "aa,aa"))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
-        Assertions.assertThat(mvcResult.response.contentAsString)
-                .isEqualTo("{\"STANDARD_VALIDATION\":" +
-                        "{\"tag\":\"can not contain coma\"}}")
+        performCreate(
+                project.id,
+                LanguageDto(originalName = "Original name", name = "Name", tag = "aa,aa")
+        ).andIsBadRequest.andAssertThatJson {
+            node("STANDARD_VALIDATION.tag").isEqualTo("can not contain coma")
+        }
     }
 
     private fun createLanguageCorrectRequest(repoId: Long) {
-        val mvcResult = performCreate(repoId, languageDTOCorrect).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-        val languageDTO = decodeJson(mvcResult.response.contentAsString, LanguageDto::class.java)
-        Assertions.assertThat(languageDTO.name).isEqualTo(languageDTOCorrect.name)
-        Assertions.assertThat(languageDTO.tag).isEqualTo(languageDTOCorrect.tag)
+        performCreate(repoId, languageDTOCorrect).andIsOk.andAssertThatJson {
+            node("name").isEqualTo(languageDTOCorrect.name)
+            node("tag").isEqualTo(languageDTOCorrect.tag)
+        }
         val es = languageService.findByTag("es", repoId)
         Assertions.assertThat(es).isPresent
         Assertions.assertThat(es.get().name).isEqualTo(languageDTOCorrect.name)
     }
 
     fun createLanguageTestValidation(repoId: Long) {
-        var mvcResult = performCreate(repoId, languageDTO)
+        val mvcResult = performCreate(repoId, languageDTO)
                 .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
         Assertions.assertThat(mvcResult.response.contentAsString).contains("language_tag_exists")
         Assertions.assertThat(mvcResult.response.contentAsString).contains("language_name_exists")
-        mvcResult = performCreate(repoId, languageDTOBlank)
-                .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
-        Assertions.assertThat(mvcResult.response.contentAsString)
-                .isEqualTo("{\"STANDARD_VALIDATION\":" +
-                        "{\"name\":\"must not be blank\"," +
-                        "\"tag\":\"must not be blank\"}}")
+        performCreate(repoId, languageDTOBlank).andIsBadRequest.andAssertThatJson {
+            node("STANDARD_VALIDATION").apply {
+                node("name").isEqualTo("must not be blank")
+                node("tag").isEqualTo("must not be blank")
+                node("originalName").isEqualTo("must not be blank")
+            }
+        }
     }
 
     @Test
     @ProjectApiKeyAuthTestMethod
     fun findAllLanguagesApiKey() {
-        val contentAsString = performProjectAuthGet("languages").andIsOk.andReturn().mapResponseTo<Set<Any>>()
-        assertThat(contentAsString).hasSize(2)
+        performProjectAuthGet("languages").andIsOk.andAssertThatJson {
+            node("_embedded.languages").isArray.hasSize(2)
+        }
     }
 
     private fun performCreate(projectId: Long, content: LanguageDto): ResultActions {
+
         return mvc.perform(
-                LoggedRequestFactory.loggedPost("/api/project/$projectId/languages")
+                LoggedRequestFactory.loggedPost("/v2/projects/$projectId/languages")
                         .contentType(MediaType.APPLICATION_JSON).content(
                                 JsonHelper.asJsonString(content)))
     }
 
-    private fun performEdit(projectId: Long, content: LanguageDto): ResultActions {
+    private fun performEdit(projectId: Long, languageId: Long, content: LanguageDto): ResultActions {
         return mvc.perform(
-                LoggedRequestFactory.loggedPost("/api/project/$projectId/languages/edit")
+                LoggedRequestFactory.loggedPut("/v2/projects/$projectId/languages/${languageId}")
                         .contentType(MediaType.APPLICATION_JSON).content(
                                 JsonHelper.asJsonString(content)))
     }
 
     private fun performDelete(projectId: Long, languageId: Long): ResultActions {
         return mvc.perform(
-                LoggedRequestFactory.loggedDelete("/api/project/$projectId/languages/$languageId")
+                LoggedRequestFactory.loggedDelete("/v2/projects/$projectId/languages/$languageId")
                         .contentType(MediaType.APPLICATION_JSON))
     }
 
     private fun performFindAll(projectId: Long): ResultActions {
         return mvc.perform(
-                LoggedRequestFactory.loggedGet("/api/project/$projectId/languages")
+                LoggedRequestFactory.loggedGet("/v2/projects/$projectId/languages")
                         .contentType(MediaType.APPLICATION_JSON))
     }
 }

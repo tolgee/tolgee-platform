@@ -9,14 +9,14 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.ResultActions
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 @Scope("prototype")
 class ProjectApiKeyAuthRequestPerformer(
-        //bean is created manually
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val userAccount: UserAccount,
-        //bean is created manually
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection") private val scopes: Array<ApiScope>,
-) : ProjectAuthRequestPerformer(userAccount) {
+        private val userAccount: UserAccount,
+        private val scopes: Array<ApiScope>,
+        projectUrlPrefix: String = "/api/project"
+) : ProjectAuthRequestPerformer(userAccount, projectUrlPrefix) {
 
     @field:Autowired
     lateinit var apiKeyService: ApiKeyService
@@ -26,19 +26,19 @@ class ProjectApiKeyAuthRequestPerformer(
     }
 
     override fun performProjectAuthPut(url: String, content: Any?): ResultActions {
-        return performPut(API_PROJECT_URL_PREFIX + url.withApiKey, content)
+        return performPut(projectUrlPrefix + url.withApiKey, content)
     }
 
     override fun performProjectAuthPost(url: String, content: Any?): ResultActions {
-        return performPost(API_PROJECT_URL_PREFIX + url.withApiKey, content)
+        return performPost(projectUrlPrefix + url.withApiKey, content)
     }
 
     override fun performProjectAuthGet(url: String): ResultActions {
-        return performGet(API_PROJECT_URL_PREFIX + url.withApiKey)
+        return performGet(projectUrlPrefix + url.withApiKey)
     }
 
     override fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
-        return performDelete(API_PROJECT_URL_PREFIX + url.withApiKey, content)
+        return performDelete(projectUrlPrefix + url.withApiKey, content)
     }
 
     private val String.withApiKey: String

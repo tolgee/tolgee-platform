@@ -18,14 +18,14 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/address-part", "/api/address-part"])
 @Tag(name = "Address Part generation")
-open class SlugController(
+class SlugController(
         private val organizationService: OrganizationService,
         private val projectService: ProjectService,
 ) {
 
     @GetMapping("/validate-organization/{slug}")
     @Operation(summary = "Validate organization address part")
-    open fun validateOrganizationSlug(
+    fun validateOrganizationSlug(
             @PathVariable("slug") slug: String
     ): Boolean {
         return organizationService.validateSlugUniqueness(slug)
@@ -34,7 +34,7 @@ open class SlugController(
 
     @GetMapping("/validate-project/{slug}")
     @Operation(summary = "Validate project address part")
-    open fun validateProjectSlug(
+    fun validateProjectSlug(
             @PathVariable("slug") slug: String
     ): Boolean {
         return projectService.validateSlugUniqueness(slug)
@@ -42,7 +42,7 @@ open class SlugController(
 
     @PostMapping("/generate-organization", produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(summary = "Generate organization address part")
-    open fun generateOrganizationSlug(
+    fun generateOrganizationSlug(
             @RequestBody @Valid dto: GenerateSlugDto
     ): String {
         return """"${organizationService.generateSlug(dto.name!!, dto.oldSlug)}""""
@@ -51,7 +51,7 @@ open class SlugController(
 
     @PostMapping("/generate-project", produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(summary = "Generate project address part")
-    open fun generateProjectSlug(
+    fun generateProjectSlug(
             @RequestBody @Valid dto: GenerateSlugDto
     ): String {
         return """"${projectService.generateSlug(dto.name!!, dto.oldSlug)}""""

@@ -1,6 +1,5 @@
 package io.tolgee.security.api_key_auth
 
-import io.tolgee.ExceptionHandlers
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.project_auth.ProjectHolder
@@ -22,7 +21,6 @@ class ApiKeyAuthFilter(
         private val apiKeyService: ApiKeyService,
         private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
         private val securityService: SecurityService,
-        private val exceptionHandlers: ExceptionHandlers,
         private val projectHolder: ProjectHolder,
         @param:Qualifier("handlerExceptionResolver")
         private val resolver: HandlerExceptionResolver,

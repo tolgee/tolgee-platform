@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.*
+import javax.validation.constraints.Size
 
 @Entity
 @EntityListeners(Language.Companion.LanguageListeners::class)
@@ -42,12 +43,17 @@ class Language : StandardAuditModel() {
 
     var name: String? = null
 
-    @Column(nullable = false)
     var originalName: String? = null
+
+    @field:Size(max = 20)
+    @Column(length = 20)
+    var flagEmoji: String? = null
 
     fun updateByDTO(dto: LanguageDto) {
         name = dto.name
         tag = dto.tag
+        originalName = dto.originalName
+        flagEmoji = dto.flagEmoji
     }
 
     override fun toString(): String {
@@ -61,6 +67,7 @@ class Language : StandardAuditModel() {
             language.name = dto.name
             language.tag = dto.tag
             language.originalName = dto.originalName
+            language.flagEmoji = dto.flagEmoji
             return language
         }
 

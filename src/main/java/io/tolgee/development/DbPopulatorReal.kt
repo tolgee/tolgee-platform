@@ -174,7 +174,7 @@ class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     private fun createLanguage(name: String, project: Project): Language {
-        return languageService.createLanguage(LanguageDto(null, name, name, name), project)
+        return languageService.createLanguage(LanguageDto(name, name, name), project)
     }
 
     private fun createTranslation(project: Project, english: String,

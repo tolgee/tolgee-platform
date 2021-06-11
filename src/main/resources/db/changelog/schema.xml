@@ -898,9 +898,7 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1623335178713-2">
         <addColumn tableName="language">
-            <column name="original_name" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
+            <column name="original_name" type="varchar(255)"/>
         </addColumn>
         <renameColumn tableName="language" oldColumnName="abbreviation" newColumnName="tag"/>
     </changeSet>
@@ -909,5 +907,18 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1623335669172-2">
         <addNotNullConstraint columnDataType="varchar(255)" columnName="tag" tableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1623399568034-3">
+        <addColumn tableName="project">
+            <column name="base_language_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1623399568034-4">
+        <addForeignKeyConstraint baseColumnNames="base_language_id" baseTableName="project" constraintName="FKe87b2cgwpk3qttqh95tgrehlt" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1623406128517-2">
+        <addColumn tableName="language">
+            <column name="flag_emoji" type="varchar(20)"/>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

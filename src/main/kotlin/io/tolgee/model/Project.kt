@@ -28,7 +28,7 @@ data class Project(
         var slug: String? = null,
 ) : AuditModel() {
 
-    @OrderBy("tag")
+    @OrderBy("id")
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
     var languages: MutableSet<Language> = LinkedHashSet()
 
@@ -46,6 +46,9 @@ data class Project(
 
     @ManyToOne(optional = true)
     var organizationOwner: Organization? = null
+
+    @OneToOne(fetch = FetchType.LAZY)
+    var baseLanguage: Language? = null
 
     constructor(name: String?, description: String? = null, slug: String?, userOwner: UserAccount?)
             : this(id = 0L, name, description, slug) {

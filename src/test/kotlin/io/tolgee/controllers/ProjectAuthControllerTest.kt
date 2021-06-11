@@ -17,7 +17,9 @@ import java.lang.reflect.Method
 
 @SpringBootTest
 @AutoConfigureMockMvc
-abstract class ProjectAuthControllerTest : SignedInControllerTest(), AuthRequestPerformer {
+abstract class ProjectAuthControllerTest(
+        val projectUrlPrefix: String = "/api/project/"
+) : SignedInControllerTest(), AuthRequestPerformer {
 
     //for api key auth methods
     val apiKey: ApiKeyDTO
@@ -53,14 +55,19 @@ abstract class ProjectAuthControllerTest : SignedInControllerTest(), AuthRequest
         with(method.getAnnotation(ProjectApiKeyAuthTestMethod::class.java)) {
             if (this != null) {
                 this@ProjectAuthControllerTest.projectAuthRequestPerformer =
-                        applicationContext!!.getBean(ProjectApiKeyAuthRequestPerformer::class.java, userAccount, this.scopes)
+                        applicationContext!!.getBean(
+                                ProjectApiKeyAuthRequestPerformer::class.java,
+                                userAccount,
+                                this.scopes,
+                                projectUrlPrefix
+                        )
             }
         }
 
         with(method.getAnnotation(ProjectJWTAuthTestMethod::class.java)) {
             if (this != null) {
                 this@ProjectAuthControllerTest.projectAuthRequestPerformer =
-                        applicationContext!!.getBean(ProjectJwtAuthRequestPerformer::class.java, userAccount)
+                        applicationContext!!.getBean(ProjectJwtAuthRequestPerformer::class.java, userAccount, projectUrlPrefix)
             }
         }
     }

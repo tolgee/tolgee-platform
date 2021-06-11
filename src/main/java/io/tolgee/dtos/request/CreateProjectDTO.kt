@@ -11,12 +11,18 @@ data class CreateProjectDTO(
         var name: String? = null,
 
         @field:NotEmpty
-        var languages: Set<LanguageDto>? = null,
+        var languages: List<LanguageDto>? = null,
 
         @field:Size(min = 3, max = 60)
         @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
+        @Schema(description = "Slug of your project used in url e.g. \"/v2/projects/what-a-project\"." +
+                " If not provided, it will be generated")
         var slug: String? = null,
 
-        @Schema(description = "If not provided, project will be created as users")
-        var organizationId: Long? = null
+        @Schema(description = "If not provided, project will be created in user scope")
+        var organizationId: Long? = null,
+
+        @Schema(description = "Tag of one of created languages, to select it as base language. If not provided, " +
+                "first language will be selected as base.")
+        var baseLanguageTag: String? = null
 )
