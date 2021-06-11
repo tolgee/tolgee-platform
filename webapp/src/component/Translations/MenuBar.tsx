@@ -1,4 +1,5 @@
-import { default as React, FunctionComponent, useContext } from 'react';
+import { useQueryClient } from 'react-query';
+import { FunctionComponent, useContext } from 'react';
 import {
   Box,
   Button,
@@ -23,14 +24,38 @@ import { TranslationActions } from '../../store/project/TranslationActions';
 import { T, useTranslate } from '@tolgee/react';
 import { useProjectPermissions } from '../../hooks/useProjectPermissions';
 import { ProjectPermissionType } from '../../service/response.types';
+import { MessageService } from '../../service/MessageService';
+import { useDeleteKey } from '../../service/hooks/Translation';
+import { parseErrorResponse } from '../../fixtures/errorFIxtures';
+
+const messaging = container.resolve(MessageService);
 
 export const MenuBar: FunctionComponent = () => {
-  const projectDTO = useProject();
+  const project = useProject();
+  const queryClient = useQueryClient();
+
   const actions = container.resolve(TranslationActions);
   const listContext = useContext(TranslationListContext);
   const projectPermissions = useProjectPermissions();
 
   const t = useTranslate();
+
+  const deleteKey = useDeleteKey(project.id);
+
+  const handleConfirm = () => {
+    deleteKey.mutate(Array.from(listContext.checkedKeys), {
+      onError: (err) => {
+        for (const error of parseErrorResponse(err)) {
+          messaging.error(<T>{error}</T>);
+        }
+      },
+      onSuccess: () => {
+        messaging.success(<T>Translation grid - translation saved</T>);
+        queryClient.invalidateQueries(['project', project.id, 'translations']);
+        actions.closeKeyEditing.dispatch(true);
+      },
+    });
+  };
 
   return (
     <Box mb={2}>
@@ -49,11 +74,7 @@ export const MenuBar: FunctionComponent = () => {
                   data-cy="translations-delete-button"
                   onClick={() =>
                     confirmation({
-                      onConfirm: () =>
-                        actions.loadableActions.delete.dispatch(
-                          projectDTO.id,
-                          Array.from(listContext.checkedKeys)
-                        ),
+                      onConfirm: handleConfirm,
                       confirmButtonText: 'Delete',
                       confirmButtonColor: 'secondary',
                       message: (
@@ -107,7 +128,7 @@ export const MenuBar: FunctionComponent = () => {
               color="primary"
               size={'small'}
               to={LINKS.PROJECT_TRANSLATIONS_ADD.build({
-                [PARAMS.PROJECT_ID]: projectDTO.id,
+                [PARAMS.PROJECT_ID]: project.id,
               })}
               startIcon={<AddIcon />}
             >

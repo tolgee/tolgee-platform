@@ -21,8 +21,9 @@ export const TranslationsGrid: FunctionComponent = (props) => {
   const projectDTO = useProject();
 
   const listContext = useContext(TranslationListContext);
-  const isEmpty = listContext.listLoadable.data!.paginationMeta.allCount === 0;
-  const isSearch = listContext.listLoadable.data!.params.search;
+  const isEmpty =
+    listContext.listLoadable!.data!.paginationMeta!.allCount === 0;
+  const isSearch = Boolean(listContext.listLoadable.data!.params!.search);
   const projectPermissions = useProjectPermissions();
 
   const t = useTranslate();
@@ -45,10 +46,10 @@ export const TranslationsGrid: FunctionComponent = (props) => {
 
   const onNotEmptyInner = (
     <>
-      {listContext.listLoadable.data ? (
+      {listContext.listLoadable ? (
         <Box display="flex" flexDirection="column" flexGrow={1} fontSize={14}>
           <Header />
-          {listContext.listLoadable.data.data.map((t) => (
+          {listContext.listLoadable!.data!.data!.map((t) => (
             <TranslationsRow key={t.name} data={t} />
           ))}
         </Box>
@@ -82,16 +83,16 @@ export const TranslationsGrid: FunctionComponent = (props) => {
         />
       }
       customHeader={
-        isSearch ||
-        (!isEmpty && (
+        (isSearch || !isEmpty) && (
           <>
             <Box mt={2}>
               <MenuBar />
             </Box>
           </>
-        ))
+        )
       }
-      loading={listContext.listLoadable.loading}
+      loading={listContext.listLoadable.isFetching}
+      hideChildrenOnLoading={false}
     >
       {isEmpty ? onEmptyInner : onNotEmptyInner}
     </BaseView>

@@ -6,8 +6,8 @@ import SearchField from '../common/form/fields/SearchField';
 
 export const TranslationsSearchField: FunctionComponent = (props) => {
   const listContext = useContext(TranslationListContext);
-  const initial = listContext.listLoadable.data
-    ? listContext.listLoadable.data.params.search || ''
+  const initial = listContext.listLoadable
+    ? listContext.listLoadable!.data!.params!.search || ''
     : '';
 
   return (

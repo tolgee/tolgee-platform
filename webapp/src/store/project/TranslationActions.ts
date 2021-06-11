@@ -1,14 +1,10 @@
-import { container, singleton } from 'tsyringe';
+import { singleton } from 'tsyringe';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
 } from '../AbstractLoadableActions';
-import { TranslationService } from '../../service/TranslationService';
 import { AppState } from '../index';
 import { useSelector } from 'react-redux';
-import { LanguageDTO } from '../../service/response.types';
-import { ActionType } from '../Action';
-import { LanguageActions } from '../languages/LanguageActions';
 import { ProjectPreferencesService } from '../../service/ProjectPreferencesService';
 
 export type TranslationEditingType = {
@@ -30,9 +26,6 @@ export class TranslationsState extends StateWithLoadables<TranslationActions> {
     data: TranslationEditingType | SourceEditingType | null;
   } | null = null;
 }
-
-const service = container.resolve(TranslationService);
-const languageActions = container.resolve(LanguageActions);
 
 @singleton()
 export class TranslationActions extends AbstractLoadableActions<TranslationsState> {
@@ -97,66 +90,38 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
     'SET_KEY_EDITING',
     (data: SourceEditingType) => data
   ).build.on((state, action) => {
-    const needsConfirmation =
-      state.editing &&
-      state.editing.data?.initialValue !== state.editing.data?.newValue;
     return {
       ...state,
-      [needsConfirmation ? 'editingAfterConfirmation' : 'editing']: {
+      editing: {
         type: 'key',
         data: { ...action.payload },
       },
     };
   });
 
-  readonly loadableDefinitions = {
-    translations: this.createLoadableDefinition(
-      service.getTranslations,
-      (state, action) => {
-        return { ...state, selectedLanguages: action.payload.params.languages };
-      }
-    ),
-    createKey: this.createLoadableDefinition(service.createKey),
-    editKey: this.createLoadableDefinition(service.editKey, (state, action) => {
-      return { ...state, editingAfterConfirmation: null, editing: null };
-    }),
-    setTranslations: this.createLoadableDefinition(
-      service.setTranslations,
-      (state, action) => {
-        return { ...state, editingAfterConfirmation: null, editing: null };
-      }
-    ),
-    delete: this.createLoadableDefinition(service.deleteKey),
-  };
+  closeKeyEditing = this.createAction(
+    'CLOSE_KEY_EDITING',
+    (force: boolean) => ({
+      force,
+    })
+  ).build.on((state, action) => {
+    const needsConfirmation =
+      !action.payload.force &&
+      state.editing &&
+      state.editing.data?.initialValue !== state.editing.data?.newValue;
+    return {
+      ...state,
+      [needsConfirmation ? 'editingAfterConfirmation' : 'editing']: {
+        type: 'key',
+        data: null,
+      },
+    };
+  });
+
+  readonly loadableDefinitions = {};
 
   useSelector<T>(selector: (state: TranslationsState) => T): T {
     return useSelector((state: AppState) => selector(state.translations));
-  }
-
-  customReducer(
-    state: TranslationsState,
-    action: ActionType<any>,
-    appState
-  ): TranslationsState {
-    appState = appState as AppState; // otherwise circular reference
-    switch (action.type) {
-      case languageActions.loadableActions.list.fulfilledType:
-        //reseting translations state on language change
-        return {
-          ...state,
-          selectedLanguages: Array.from(
-            this.selectedLanguagesService.getUpdated(
-              appState.projects.loadables.project.data.id,
-              new Set(action.payload.map((l: LanguageDTO) => l.abbreviation))
-            )
-          ),
-          loadables: {
-            ...state.loadables,
-            translations: this.initialState.loadables.translations,
-          },
-        };
-    }
-    return state;
   }
 
   get prefix(): string {

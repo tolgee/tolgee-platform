@@ -20,7 +20,7 @@ export const ProjectRouter = () => {
 
   return (
     <Switch>
-      <ProjectProvider id={projectId}>
+      <ProjectProvider id={Number(projectId)}>
         <ProjectPage fullWidth={true}>
           <Route path={LINKS.PROJECT_TRANSLATIONS.template}>
             <TranslationView />
