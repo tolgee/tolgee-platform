@@ -57,12 +57,6 @@ export const TranslationGridContextProvider: React.FC = ({ children }) => {
   const [checkedKeys, setCheckedKeys] = useState(new Set<number>());
   const [_resetEdit, setResetEdit] = useState(() => () => {});
 
-  const loadData = (search?: string, limit?: number, offset?: number) => {
-    setSearch(search);
-    setOffset(offset);
-    setPerPage(limit);
-  };
-
   const listLoadable = useGetTranslations(
     projectDTO.id,
     selectedLanguages?.length ? selectedLanguages : undefined,
@@ -72,12 +66,12 @@ export const TranslationGridContextProvider: React.FC = ({ children }) => {
     { keepPreviousData: true }
   );
 
-  useEffect(() => {
-    if (selectedLanguages?.length === 0) {
-      // preselect first two languages
-      actions.select.dispatch(Object.keys(projectLanguages).slice(0, 2));
-    }
-  }, [listLoadable]);
+  const loadData = (search?: string, limit?: number, offset?: number) => {
+    setSearch(search);
+    setOffset(offset);
+    setPerPage(limit);
+    listLoadable.refetch();
+  };
 
   const editLeaveConfirmation = useLeaveEditConfirmationOtherEdit();
 
@@ -136,7 +130,6 @@ export const TranslationGridContextProvider: React.FC = ({ children }) => {
             )
           );
     },
-
     listLanguages: listLoadable.data?.params?.languages as string[],
     headerCells,
     cellWidths: headerCells.map((_) => 100 / headerCells.length),

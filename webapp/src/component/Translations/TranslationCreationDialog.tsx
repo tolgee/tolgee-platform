@@ -77,7 +77,10 @@ export function TranslationCreationDialog() {
       <DialogContent>
         {createKey.error && <ResourceErrorComponent error={createKey.error} />}
 
-        <LanguagesMenu context="creation-dialog" />
+        <LanguagesMenu
+          context="creation-dialog"
+          defaultSelected={listContext.listLoadable?.data?.params?.languages}
+        />
         <StandardForm
           onSubmit={onSubmit}
           initialValues={{ key: '', translations: initialTranslations }}
@@ -94,7 +97,7 @@ export function TranslationCreationDialog() {
             fullWidth
           />
 
-          {selectedLanguages.map((s) => (
+          {listContext.listLanguages.map((s) => (
             <TextField
               multiline
               lang={s}

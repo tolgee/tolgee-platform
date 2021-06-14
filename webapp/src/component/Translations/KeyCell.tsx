@@ -35,13 +35,16 @@ export const KeyCell: FunctionComponent = (props) => {
           }
         },
         onSuccess: () => {
-          messaging.success(<T>Translation grid - translation saved</T>);
+          messaging.success(<T>Translation grid - Successfully edited!</T>);
           queryClient.invalidateQueries([
             'project',
             project.id,
             'translations',
           ]);
-          actions.closeKeyEditing.dispatch(true);
+          actions.setTranslationEditing.dispatch({
+            data: null,
+            skipConfirm: true,
+          });
         },
       }
     );
@@ -70,7 +73,11 @@ export const KeyCell: FunctionComponent = (props) => {
         });
       }}
       isEditing={isEditing}
-      onCancel={() => actions.closeKeyEditing.dispatch(false)}
+      onCancel={() =>
+        actions.setTranslationEditing.dispatch({
+          data: null,
+        })
+      }
     />
   );
 };

@@ -51,7 +51,10 @@ export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
             projectDTO.id,
             'translations',
           ]);
-          actions.closeKeyEditing.dispatch(true);
+          actions.setTranslationEditing.dispatch({
+            data: null,
+            skipConfirm: true,
+          });
         },
       }
     );
@@ -81,14 +84,16 @@ export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
       onChange={(value) => actions.setEditingValue.dispatch(value)}
       onEditClick={() => {
         actions.setTranslationEditing.dispatch({
-          initialValue,
-          key: context.data.name as string,
-          newValue: initialValue,
-          languageAbbreviation: props.abbreviation,
+          data: {
+            initialValue,
+            key: context.data.name as string,
+            newValue: initialValue,
+            languageAbbreviation: props.abbreviation,
+          },
         });
       }}
       isEditing={isEditing}
-      onCancel={() => actions.closeKeyEditing.dispatch(false)}
+      onCancel={() => actions.setTranslationEditing.dispatch({ data: null })}
       lang={props.abbreviation}
     />
   );

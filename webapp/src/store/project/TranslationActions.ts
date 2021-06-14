@@ -72,16 +72,17 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
 
   setTranslationEditing = this.createAction(
     'SET_TRANSLATION_EDITING',
-    (data: TranslationEditingType) => data
+    (data: { data: TranslationEditingType; skipConfirm?: boolean }) => data
   ).build.on((state, action) => {
     const needsConfirmation =
+      !action.payload.skipConfirm &&
       state.editing &&
       state.editing.data?.initialValue !== state.editing.data?.newValue;
     return {
       ...state,
       [needsConfirmation ? 'editingAfterConfirmation' : 'editing']: {
         type: 'translation',
-        data: { ...action.payload },
+        data: { ...action.payload.data },
       },
     };
   });
@@ -90,30 +91,14 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
     'SET_KEY_EDITING',
     (data: SourceEditingType) => data
   ).build.on((state, action) => {
-    return {
-      ...state,
-      editing: {
-        type: 'key',
-        data: { ...action.payload },
-      },
-    };
-  });
-
-  closeKeyEditing = this.createAction(
-    'CLOSE_KEY_EDITING',
-    (force: boolean) => ({
-      force,
-    })
-  ).build.on((state, action) => {
     const needsConfirmation =
-      !action.payload.force &&
       state.editing &&
       state.editing.data?.initialValue !== state.editing.data?.newValue;
     return {
       ...state,
       [needsConfirmation ? 'editingAfterConfirmation' : 'editing']: {
         type: 'key',
-        data: null,
+        data: { ...action.payload },
       },
     };
   });

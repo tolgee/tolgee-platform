@@ -50,9 +50,12 @@ export const MenuBar: FunctionComponent = () => {
         }
       },
       onSuccess: () => {
-        messaging.success(<T>Translation grid - translation saved</T>);
+        messaging.success(<T>Translation grid - Successfully deleted!</T>);
         queryClient.invalidateQueries(['project', project.id, 'translations']);
-        actions.closeKeyEditing.dispatch(true);
+        actions.setTranslationEditing.dispatch({
+          data: null,
+          skipConfirm: true,
+        });
       },
     });
   };
@@ -97,7 +100,10 @@ export const MenuBar: FunctionComponent = () => {
           </Slide>
           <Box flexGrow={1} display="flex" alignItems="flex-end">
             <Box pr={2}>
-              <LanguagesMenu context="translations" />
+              <LanguagesMenu
+                context="translations"
+                defaultSelected={listContext.listLoadable?.data?.params?.languages}
+              />
             </Box>
             <Box pr={2}>
               <TranslationsSearchField />
