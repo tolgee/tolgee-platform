@@ -82,19 +82,16 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
               .map(
                 (val) =>
                   // @ts-ignore
-                  languageDTOS.find(
-                    (languageDTO) => languageDTO.abbreviation === val
-                  ).name
+                  languageDTOS.find((languageDTO) => languageDTO.tag === val)
+                    .name
               )
               .join(', ')
           }
           MenuProps={menuProps}
         >
           {languageDTOS.map((lang) => (
-            <MenuItem key={lang.abbreviation} value={lang.abbreviation}>
-              <Checkbox
-                checked={localSelected.indexOf(lang.abbreviation) > -1}
-              />
+            <MenuItem key={lang.tag} value={lang.tag}>
+              <Checkbox checked={localSelected.indexOf(lang.tag) > -1} />
               <ListItemText primary={lang.name} />
             </MenuItem>
           ))}

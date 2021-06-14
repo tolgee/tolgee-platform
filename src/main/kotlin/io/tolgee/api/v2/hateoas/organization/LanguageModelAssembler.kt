@@ -13,7 +13,7 @@ class LanguageModelAssembler : RepresentationModelAssemblerSupport<Language, Lan
                 id = entity.id,
                 name = entity.name ?: "",
                 originalName = entity.originalName,
-                tag = entity.tag,
+                tag = entity.tag ?: "",
                 flagEmoji = entity.flagEmoji
         )
     }

@@ -1,35 +1,37 @@
-import { useEffect } from 'react';
-import { ListItem } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
+import { Box, ListItem, Typography } from '@material-ui/core';
 import { container } from 'tsyringe';
 import { LINKS, PARAMS } from '../../../../constants/links';
-import { FabAddButtonLink } from '../../../common/buttons/FabAddButtonLink';
-import List from '@material-ui/core/List';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import { SettingsIconButton } from '../../../common/buttons/SettingsIconButton';
 import { Link, useRouteMatch } from 'react-router-dom';
 import { LanguageActions } from '../../../../store/languages/LanguageActions';
 import { BaseView } from '../../../layout/BaseView';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useProject } from '../../../../hooks/useProject';
 import { Navigation } from '../../../navigation/Navigation';
+import { SimplePaginatedHateoasList } from '../../../common/list/SimplePaginatedHateoasList';
+import { LanguageCreate } from '../../../languages/LanguageCreate';
+import { useEffect } from 'react';
+import { FlagImage } from '../../../languages/FlagImage';
 
 const actions = container.resolve(LanguageActions);
-
 export const LanguageListView = () => {
   const match = useRouteMatch();
   const projectId = match.params[PARAMS.PROJECT_ID];
-
   const loadable = actions.useSelector((s) => s.loadables.list);
-
   const project = useProject();
-
   const t = useTranslate();
 
+  const createLoadable = actions.useSelector((s) => s.loadables.create);
+
   useEffect(() => {
-    actions.loadableActions.list.dispatch(projectId);
-  }, []);
+    if (createLoadable.loaded) {
+      actions.loadableReset.list.dispatch();
+      actions.loadableReset.globalList.dispatch();
+      actions.loadableReset.create.dispatch();
+    }
+  }, [createLoadable.loaded]);
 
   return (
     <BaseView
@@ -52,45 +54,52 @@ export const LanguageListView = () => {
         />
       }
       loading={loadable.loading || !loadable.touched}
+      hideChildrenOnLoading={false}
       lg={5}
       md={7}
     >
-      {() => (
-        <Box ml={-2}>
-          <List>
-            {loadable.data!.map((l) => (
-              <ListItem key={l.id}>
-                <ListItemText>
-                  {l.name} [{l.abbreviation}]
-                </ListItemText>
-                <ListItemSecondaryAction>
-                  <Link
-                    to={LINKS.PROJECT_LANGUAGE_EDIT.build({
-                      [PARAMS.PROJECT_ID]: projectId,
-                      [PARAMS.LANGUAGE_ID]: l.id,
-                    })}
-                  >
-                    <SettingsIconButton />
-                  </Link>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="flex-end"
-            pr={2}
-            mt={5}
-          >
-            <FabAddButtonLink
-              to={LINKS.PROJECT_LANGUAGES_CREATE.build({
-                [PARAMS.PROJECT_ID]: projectId,
-              })}
-            />
-          </Box>
+      <SimplePaginatedHateoasList
+        loadableName="list"
+        dispatchParams={[
+          {
+            path: {
+              projectId: projectId,
+            },
+          },
+        ]}
+        actions={actions}
+        renderItem={(l) => (
+          <ListItem key={l.id}>
+            <ListItemText>
+              <Box display="inline-flex" justifyContent="center">
+                <Box mr={1} display="inline-flex" justifyContent="center">
+                  <FlagImage width={20} flagEmoji={l.flagEmoji || '🏁'} />
+                </Box>
+                {l.name} | {l.originalName} ({l.tag})
+              </Box>
+            </ListItemText>
+            <ListItemSecondaryAction>
+              <Link
+                to={LINKS.PROJECT_LANGUAGE_EDIT.build({
+                  [PARAMS.PROJECT_ID]: projectId,
+                  [PARAMS.LANGUAGE_ID]: l.id,
+                })}
+              >
+                <SettingsIconButton />
+              </Link>
+            </ListItemSecondaryAction>
+          </ListItem>
+        )}
+      />
+
+      <Box mt={4}>
+        <Typography variant="h5">
+          <T>create_language_title</T>
+        </Typography>
+        <Box mt={1} minHeight={400}>
+          <LanguageCreate onCancel={() => {}} onCreated={() => {}} />
         </Box>
-      )}
+      </Box>
     </BaseView>
   );
 };

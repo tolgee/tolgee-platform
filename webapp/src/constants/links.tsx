@@ -188,11 +188,6 @@ export class LINKS {
     'permissions'
   );
 
-  static PROJECT_LANGUAGES_CREATE = Link.ofParent(
-    LINKS.PROJECT_LANGUAGES,
-    'add'
-  );
-
   static PROJECT_IMPORT = Link.ofParent(LINKS.PROJECT, 'import');
 
   static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');

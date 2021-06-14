@@ -88,7 +88,7 @@ export const ImportRowLanguageMenu: FunctionComponent<{
 
   const items = availableLanguages.map((l) => (
     <MenuItem value={l.id} key={l.id} className={clsx(classes.item)}>
-      {l.name}
+      {l.flagEmoji} {l.name}
     </MenuItem>
   ));
 
@@ -148,7 +148,7 @@ export const ImportRowLanguageMenu: FunctionComponent<{
       <ImportLanguageCreateDialog
         open={state.addNewLanguageDialogOpen}
         onCreated={(id) => {
-          languageActions.loadableReset.list.dispatch();
+          languageActions.loadableReset.globalList.dispatch();
           dispatchChange(id);
           languageActions.loadableReset.create.dispatch();
         }}

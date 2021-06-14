@@ -1,5 +1,5 @@
 import { AbstractAction, Action, ActionType, PromiseAction } from './Action';
-import { ErrorResponseDTO } from '../service/response.types';
+import { ErrorResponseDto } from '../service/response.types';
 import { ReactNode } from 'react';
 
 export abstract class AbstractActions<StateType> {
@@ -31,7 +31,7 @@ export abstract class AbstractActions<StateType> {
 
   createPromiseAction<
     PayloadType,
-    ErrorType = ErrorResponseDTO,
+    ErrorType = ErrorResponseDto,
     DispatchParams extends any[] = []
   >(
     type: string,

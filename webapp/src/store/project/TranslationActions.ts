@@ -6,10 +6,10 @@ import {
 import { TranslationService } from '../../service/TranslationService';
 import { AppState } from '../index';
 import { useSelector } from 'react-redux';
-import { LanguageDTO } from '../../service/response.types';
 import { ActionType } from '../Action';
 import { LanguageActions } from '../languages/LanguageActions';
 import { ProjectPreferencesService } from '../../service/ProjectPreferencesService';
+import { components } from '../../service/apiSchema.generated';
 
 export type TranslationEditingType = {
   key: string;
@@ -36,15 +36,10 @@ const languageActions = container.resolve(LanguageActions);
 
 @singleton()
 export class TranslationActions extends AbstractLoadableActions<TranslationsState> {
-  constructor(private selectedLanguagesService: ProjectPreferencesService) {
-    super(new TranslationsState());
-  }
-
   select = this.createAction('SELECT_LANGUAGES', (langs) => langs).build.on(
     (state, action) =>
       <TranslationsState>{ ...state, selectedLanguages: action.payload }
   );
-
   otherEditionConfirm = this.createAction(
     'OTHER_EDITION_CONFIRM',
     () => {}
@@ -54,7 +49,6 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
     editing: { ...state.editingAfterConfirmation },
     editingAfterConfirmation: null,
   }));
-
   otherEditionCancel = this.createAction(
     'OTHER_EDITION_CANCEL',
     () => {}
@@ -62,7 +56,6 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
     ...state,
     editingAfterConfirmation: null,
   }));
-
   setEditingValue = this.createAction(
     'SET_EDITING_VALUE',
     (val: string) => val
@@ -76,7 +69,6 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
       },
     };
   });
-
   setTranslationEditing = this.createAction(
     'SET_TRANSLATION_EDITING',
     (data: TranslationEditingType) => data
@@ -92,7 +84,6 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
       },
     };
   });
-
   setKeyEditing = this.createAction(
     'SET_KEY_EDITING',
     (data: SourceEditingType) => data
@@ -108,7 +99,6 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
       },
     };
   });
-
   readonly loadableDefinitions = {
     translations: this.createLoadableDefinition(
       service.getTranslations,
@@ -129,6 +119,10 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
     delete: this.createLoadableDefinition(service.deleteKey),
   };
 
+  constructor(private selectedLanguagesService: ProjectPreferencesService) {
+    super(new TranslationsState());
+  }
+
   useSelector<T>(selector: (state: TranslationsState) => T): T {
     return useSelector((state: AppState) => selector(state.translations));
   }
@@ -140,14 +134,20 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
   ): TranslationsState {
     appState = appState as AppState; // otherwise circular reference
     switch (action.type) {
-      case languageActions.loadableActions.list.fulfilledType:
+      case languageActions.loadableActions.globalList.fulfilledType:
         //reseting translations state on language change
         return {
           ...state,
           selectedLanguages: Array.from(
             this.selectedLanguagesService.getUpdated(
               appState.projects.loadables.project.data.id,
-              new Set(action.payload.map((l: LanguageDTO) => l.abbreviation))
+              new Set(
+                (
+                  action.payload as components['schemas']['PagedModelLanguageModel']
+                )._embedded?.languages!.map(
+                  (l: components['schemas']['LanguageModel']) => l.tag
+                )
+              )
             )
           ),
           loadables: {

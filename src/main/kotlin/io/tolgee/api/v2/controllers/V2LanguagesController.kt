@@ -81,20 +81,21 @@ class V2LanguagesController(
         return pagedAssembler.toModel(data, languageModelAssembler)
     }
 
-    @GetMapping(value = ["{id}"])
+    @GetMapping(value = ["{languageId}"])
     @Operation(summary = "Returns specific language")
     @AccessWithAnyProjectPermission
-    operator fun get(@PathVariable("id") id: Long?): LanguageModel {
+    operator fun get(@PathVariable("languageId") id: Long?): LanguageModel {
         val language = languageService.findById(id!!).orElseThrow { NotFoundException() }
         securityService.checkAnyProjectPermission(language.project!!.id)
         return languageModelAssembler.toModel(language)
     }
 
     @Operation(summary = "Deletes specific language")
-    @DeleteMapping(value = ["/{id}"])
-    fun deleteLanguage(@PathVariable id: Long) {
-        val language = languageService.findById(id).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+    @DeleteMapping(value = ["/{languageId}"])
+    fun deleteLanguage(@PathVariable languageId: Long) {
+        val language = languageService.findById(languageId)
+                .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
-        languageService.deleteLanguage(id)
+        languageService.deleteLanguage(languageId)
     }
 }

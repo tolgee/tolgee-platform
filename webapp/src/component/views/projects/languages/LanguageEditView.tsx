@@ -3,16 +3,16 @@ import { useEffect } from 'react';
 import { container } from 'tsyringe';
 import { LINKS, PARAMS } from '../../../../constants/links';
 import { useRouteMatch } from 'react-router-dom';
-import { TextField } from '../../../common/form/fields/TextField';
 import { BaseFormView } from '../../../layout/BaseFormView';
 import { LanguageActions } from '../../../../store/languages/LanguageActions';
 import { Button } from '@material-ui/core';
 import { confirmation } from '../../../../hooks/confirmation';
-import { LanguageDTO } from '../../../../service/response.types';
 import { Validation } from '../../../../constants/GlobalValidationSchema';
 import { useRedirect } from '../../../../hooks/useRedirect';
 import { T } from '@tolgee/react';
 import { ConfirmationDialogProps } from '../../../common/ConfirmationDialog';
+import { LanguageModifyFields } from '../../../languages/LanguageModifyFields';
+import { components } from '../../../../service/apiSchema.generated';
 
 const actions = container.resolve(LanguageActions);
 
@@ -23,7 +23,7 @@ export const LanguageEditView = () => {
   const match = useRouteMatch();
 
   const projectId = match.params[PARAMS.PROJECT_ID];
-  const languageId = match.params[PARAMS.LANGUAGE_ID];
+  const languageId = match.params[PARAMS.LANGUAGE_ID] as number;
 
   const languageLoadable = actions.useSelector((s) => s.loadables.language);
   const editLoadable = actions.useSelector((s) => s.loadables.edit);
@@ -31,7 +31,12 @@ export const LanguageEditView = () => {
 
   useEffect(() => {
     if (!languageLoadable.loaded && !languageLoadable.loading) {
-      actions.loadableActions.language.dispatch(projectId, languageId);
+      actions.loadableActions.language.dispatch({
+        path: {
+          projectId: projectId,
+          languageId: languageId,
+        },
+      });
     }
     return () => {
       actions.loadableReset.edit.dispatch();
@@ -40,20 +45,33 @@ export const LanguageEditView = () => {
   }, []);
 
   useEffect(() => {
-    if (deleteLoadable.loaded) {
+    if (deleteLoadable.loaded || editLoadable.loaded) {
       useRedirect(LINKS.PROJECT_LANGUAGES, {
         [PARAMS.PROJECT_ID]: projectId,
       });
     }
-    return () => actions.loadableReset.delete.dispatch();
-  }, [deleteLoadable.loaded]);
-
-  const onSubmit = (values) => {
-    const dto: LanguageDTO = {
-      ...values,
-      id: languageId,
+    return () => {
+      actions.loadableReset.delete.dispatch();
+      actions.loadableReset.edit.dispatch();
     };
-    actions.loadableActions.edit.dispatch(projectId, dto);
+  }, [deleteLoadable.loaded || editLoadable.loaded]);
+
+  const onSubmit = (values: components['schemas']['LanguageModel']) => {
+    const { name, originalName, flagEmoji, tag } = values;
+    actions.loadableActions.edit.dispatch({
+      path: {
+        projectId: projectId,
+        languageId: languageId,
+      },
+      content: {
+        'application/json': {
+          name,
+          originalName,
+          tag,
+          flagEmoji,
+        } as components['schemas']['LanguageDto'],
+      },
+    });
   };
 
   return (
@@ -82,7 +100,12 @@ export const LanguageEditView = () => {
               confirmButtonText: <T>global_delete_button</T>,
               confirmButtonColor: 'secondary',
               onConfirm: () => {
-                actions.loadableActions.delete.dispatch(projectId, languageId);
+                actions.loadableActions.delete.dispatch({
+                  path: {
+                    projectId: projectId,
+                    languageId: languageId,
+                  },
+                });
               },
             })
           }
@@ -91,20 +114,7 @@ export const LanguageEditView = () => {
         </Button>
       }
     >
-      {() => (
-        <>
-          <TextField
-            label={<T>language_create_edit_language_name_label</T>}
-            name="name"
-            required={true}
-          />
-          <TextField
-            label={<T>language_create_edit_abbreviation</T>}
-            name="abbreviation"
-            required={true}
-          />
-        </>
-      )}
+      {() => <LanguageModifyFields />}
     </BaseFormView>
   );
 };

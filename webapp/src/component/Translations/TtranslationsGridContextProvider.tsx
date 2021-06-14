@@ -16,7 +16,6 @@ import { FullPageLoading } from '../common/FullPageLoading';
 import { useProjectLanguages } from '../../hooks/useProjectLanguages';
 import { useLeaveEditConfirmationOtherEdit } from './useLeaveEditConfirmation';
 import { parseErrorResponse } from '../../fixtures/errorFIxtures';
-import {} from '../common/BoxLoading';
 
 export const TranslationListContext =
   // @ts-ignore
@@ -58,7 +57,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
   const deleteLoadable = actions.useSelector((s) => s.loadables.delete);
 
   const projectLanguages = useProjectLanguages().reduce(
-    (acc, curr) => ({ ...acc, [curr.abbreviation]: curr.name }),
+    (acc, curr) => ({ ...acc, [curr.tag]: curr.name }),
     {}
   );
 

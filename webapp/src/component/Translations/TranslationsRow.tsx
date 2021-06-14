@@ -85,7 +85,7 @@ export const TranslationsRow: FunctionComponent<TranslationProps> = (props) => {
 
           {listContext.listLanguages.map((k) => (
             <TableCell key={k}>
-              <TranslationCell abbreviation={k} />
+              <TranslationCell tag={k} />
             </TableCell>
           ))}
         </Box>

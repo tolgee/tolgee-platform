@@ -13,7 +13,7 @@ open class LanguageModel(
         val name: String,
 
         @Schema(example = "cs-CZ", description = "Language tag according to BCP 47 definition")
-        var tag: String? = null,
+        var tag: String,
 
         @Schema(example = "čeština", description = "Language name in this language")
         var originalName: String? = null,

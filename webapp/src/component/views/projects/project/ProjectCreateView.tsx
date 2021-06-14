@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 import { AppState } from '../../../../store';
 import { container } from 'tsyringe';
 import { ProjectActions } from '../../../../store/project/ProjectActions';
-import { LanguageDTO } from '../../../../service/response.types';
 import { LINKS } from '../../../../constants/links';
 import { Redirect } from 'react-router-dom';
 import { TextField } from '../../../common/form/fields/TextField';
@@ -22,7 +21,7 @@ const actions = container.resolve(ProjectActions);
 
 type ValueType = {
   name: string;
-  languages: Partial<LanguageDTO>[];
+  languages: components['schemas']['LanguageDto'][];
   owner: number;
 };
 
@@ -46,7 +45,7 @@ export const ProjectCreateView: FunctionComponent = () => {
 
   const initialValues: ValueType = {
     name: '',
-    languages: [{ abbreviation: '', name: '' }],
+    languages: [{ tag: '', name: '', originalName: '', flagEmoji: '' }],
     owner: 0,
   };
 
@@ -66,7 +65,7 @@ export const ProjectCreateView: FunctionComponent = () => {
         onSubmit={onSubmit}
         onCancel={() => setCancelled(true)}
         saveActionLoadable={loadable}
-        validationSchema={Validation.REPOSITORY_CREATION}
+        validationSchema={Validation.PROJECT_CREATION}
       >
         <>
           <Grid container spacing={2}>

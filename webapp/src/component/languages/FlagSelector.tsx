@@ -1,12 +1,10 @@
 import { FunctionComponent, useState } from 'react';
 import { Box, Button, Popover } from '@material-ui/core';
-import { getSvgNameByEmoji, supportedFlags } from '@tginternal/language-util';
+import { supportedFlags } from '@tginternal/language-util';
 import { useField } from 'formik';
 import { makeStyles } from '@material-ui/core/styles';
 import { ArrowDropDown } from '@material-ui/icons';
-
-const getFlagPath = (hex: string) =>
-  `/static/flags/${getSvgNameByEmoji(hex)}.svg`;
+import { FlagImage } from './FlagImage';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -30,7 +28,6 @@ const useStyles = makeStyles((theme) => ({
   },
   selectorImgButton: {
     padding: theme.spacing(0.5),
-    margin: `0 ${theme.spacing(0.5)}`,
     minWidth: 0,
     '& > span': {
       height: '29px',
@@ -46,7 +43,7 @@ export const FlagSelector: FunctionComponent<{
   const [field, _, helpers] = useField(props.name);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const svg = field.value || '🏁';
+  const selectedEmoji = field.value || '🏁';
   const flags = [...new Set([...props.preferredEmojis, ...supportedFlags])];
   return (
     <>
@@ -54,13 +51,7 @@ export const FlagSelector: FunctionComponent<{
         className={classes.root}
         onClick={(event) => setAnchorEl(event.currentTarget)}
       >
-        <img
-          className={classes.selectedImg}
-          loading="lazy"
-          src={getFlagPath(svg)}
-          alt={field.value}
-        />
-
+        <FlagImage flagEmoji={selectedEmoji} className={classes.selectedImg} />
         <ArrowDropDown />
       </Button>
       <Popover
@@ -86,12 +77,7 @@ export const FlagSelector: FunctionComponent<{
                 setAnchorEl(null);
               }}
             >
-              <img
-                loading="lazy"
-                className={classes.selectorImg}
-                src={getFlagPath(f)}
-                alt={f}
-              />
+              <FlagImage flagEmoji={f} className={classes.selectorImg} />
             </Button>
           ))}
         </Box>

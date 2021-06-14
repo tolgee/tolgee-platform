@@ -4,7 +4,6 @@ import { LINKS, PARAMS } from '../../../constants/links';
 import { LanguageEditView } from './languages/LanguageEditView';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { ProjectProvider } from '../../../hooks/ProjectProvider';
-import { LanguageCreateView } from './languages/LanguageCreateView';
 import { PrivateRoute } from '../../common/PrivateRoute';
 import { ImportView } from './imprt_export/ImportView';
 import { ExportView } from './imprt_export/ExportView';
@@ -32,10 +31,6 @@ export const ProjectRouter = () => {
 
           <Route exact path={LINKS.PROJECT_LANGUAGES.template}>
             <LanguageListView />
-          </Route>
-
-          <Route exact path={LINKS.PROJECT_LANGUAGES_CREATE.template}>
-            <LanguageCreateView />
           </Route>
 
           <Route exact path={LINKS.PROJECT_LANGUAGE_EDIT.template}>

@@ -1,6 +1,5 @@
 import { container, singleton } from 'tsyringe';
 
-import { LanguageService } from '../../service/LanguageService';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
@@ -11,32 +10,56 @@ import { ActionType } from '../Action';
 import { ProjectActions } from '../project/ProjectActions';
 import React from 'react';
 import { T } from '@tolgee/react';
+import { ApiSchemaHttpService } from '../../service/http/ApiSchemaHttpService';
 
 export class LanguagesState extends StateWithLoadables<LanguageActions> {}
 
 @singleton()
 export class LanguageActions extends AbstractLoadableActions<LanguagesState> {
-  private service = container.resolve(LanguageService);
-
-  constructor() {
+  constructor(private schemaService: ApiSchemaHttpService) {
     super(new LanguagesState());
   }
 
   loadableDefinitions = {
-    list: this.createLoadableDefinition(this.service.getLanguages),
-    language: this.createLoadableDefinition(this.service.get),
+    list: this.createLoadableDefinition(
+      this.schemaService.schemaRequest(
+        '/v2/projects/{projectId}/languages',
+        'get'
+      )
+    ),
+    globalList: this.createLoadableDefinition(
+      this.schemaService.schemaRequest(
+        '/v2/projects/{projectId}/languages',
+        'get'
+      )
+    ),
+    language: this.createLoadableDefinition(
+      this.schemaService.schemaRequest(
+        '/v2/projects/{projectId}/languages/{languageId}',
+        'get'
+      )
+    ),
     create: this.createLoadableDefinition(
-      this.service.create,
+      this.schemaService.schemaRequest(
+        '/v2/projects/{projectId}/languages',
+        'post'
+      ),
       undefined,
       <T>language_created_message</T>
     ),
     edit: this.createLoadableDefinition(
-      this.service.editLanguage,
+      this.schemaService.schemaRequest(
+        '/v2/projects/{projectId}/languages/{languageId}',
+        'put'
+      ),
       undefined,
       <T>language_edited_message</T>
     ),
     delete: this.createLoadableDefinition(
-      this.service.delete,
+      this.schemaService.schemaRequest(
+        '/v2/projects/{projectId}/languages/{languageId}',
+        'delete'
+      ),
       undefined,
       <T>language_deleted_message</T>
     ),
