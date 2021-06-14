@@ -50,14 +50,17 @@ export const LanguageAutocomplete: FC<{
       onChange={(_, value) => {
         props.onSelect(value as AutocompleteOption);
       }}
-      renderOption={(option) =>
-        option.customRenderOption ||
-        `${option.englishName} - ${option.originalName} - ${
-          option.languageId
-        } ${option.flags?.[0] || ''}`
-      }
+      renderOption={(option) => (
+        <span data-cy="languages-create-autocomplete-suggested-option">
+          {option.customRenderOption ||
+            `${option.englishName} - ${option.originalName} - ${
+              option.languageId
+            } ${option.flags?.[0] || ''}`}
+        </span>
+      )}
       renderInput={(params) => (
         <TextField
+          data-cy="languages-create-autocomplete-field"
           {...params}
           onChange={(e) => {
             setTimeout(() => setOptions(getOptions(e.target.value)));

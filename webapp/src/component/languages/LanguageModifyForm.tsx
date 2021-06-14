@@ -24,11 +24,19 @@ export const LanguageModifyForm: FC<{
         <LanguageModifyFields preferredEmojis={preferredEmojis} />
         <Box display="flex" justifyContent="flex-end">
           <Box mr={1}>
-            <Button onClick={() => onCancel()}>
+            <Button
+              onClick={() => onCancel()}
+              data-cy="languages-modify-cancel-button"
+            >
               <T>global_form_cancel</T>
             </Button>
           </Box>
-          <Button variant="contained" color="primary" type="submit">
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            data-cy="languages-modify-apply-button"
+          >
             <T>languages_modify_ok_button</T>
           </Button>
         </Box>

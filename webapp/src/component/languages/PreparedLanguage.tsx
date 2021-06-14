@@ -32,7 +32,7 @@ export const PreparedLanguage: FC<
 
   return (
     <>
-      <Box className={classes.root}>
+      <Box className={classes.root} data-cy="languages-prepared-language-box">
         {props.flagEmoji && (
           <FlagImage
             flagEmoji={props.flagEmoji}
@@ -44,13 +44,18 @@ export const PreparedLanguage: FC<
         </Box>
         <Box>
           <IconButton
+            data-cy="languages-create-customize-button"
             size="small"
             className={classes.editButton}
             onClick={props.onEdit}
           >
             <Edit />
           </IconButton>
-          <IconButton size="small" onClick={props.onReset}>
+          <IconButton
+            size="small"
+            onClick={props.onReset}
+            data-cy="languages-create-cancel-prepared-button"
+          >
             <Close />
           </IconButton>
         </Box>

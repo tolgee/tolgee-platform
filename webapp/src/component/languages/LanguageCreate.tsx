@@ -94,6 +94,7 @@ export const LanguageCreate: FunctionComponent<{
           />
           <Box ml={1}>
             <Button
+              data-cy="languages-create-submit-button"
               variant="contained"
               color="primary"
               onClick={() => {

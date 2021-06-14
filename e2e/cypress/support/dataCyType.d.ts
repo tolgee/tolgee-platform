@@ -64,6 +64,15 @@ declare namespace DataCy {
         "import-show-data-dialog" |
         "import_apply_import_button" |
         "import_cancel_import_button" |
+        "languages-create-autocomplete-field" |
+        "languages-create-autocomplete-suggested-option" |
+        "languages-create-cancel-prepared-button" |
+        "languages-create-customize-button" |
+        "languages-create-submit-button" |
+        "languages-flag-selector-open-button" |
+        "languages-modify-apply-button" |
+        "languages-modify-cancel-button" |
+        "languages-prepared-language-box" |
         "leave-organization-button" |
         "organization-address-part-field" |
         "organization-delete-button" |

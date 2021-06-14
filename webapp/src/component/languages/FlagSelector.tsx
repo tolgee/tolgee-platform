@@ -48,6 +48,7 @@ export const FlagSelector: FunctionComponent<{
   return (
     <>
       <Button
+        data-cy="languages-flag-selector-open-button"
         className={classes.root}
         onClick={(event) => setAnchorEl(event.currentTarget)}
       >
