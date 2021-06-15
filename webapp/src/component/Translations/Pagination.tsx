@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { FunctionComponent, useContext, useState } from 'react';
 import { Box, TablePagination } from '@material-ui/core';
 import { TranslationListContext } from './TtranslationsGridContextProvider';
@@ -15,7 +14,7 @@ export const Pagination: FunctionComponent = (props) => {
     confirmation(() => {
       setPerPage(perPage);
       listContext.loadData(
-        listContext.listLoadable.data!.params.search,
+        listContext.listLoadable!.data!.params!.search,
         perPage,
         0
       );
@@ -25,7 +24,7 @@ export const Pagination: FunctionComponent = (props) => {
   const onPageChange = (p) => {
     confirmation(() => {
       listContext.loadData(
-        listContext.listLoadable.data!.params.search,
+        listContext.listLoadable!.data!.params!.search,
         perPage,
         p * perPage
       );
@@ -33,7 +32,8 @@ export const Pagination: FunctionComponent = (props) => {
   };
 
   const page = Math.ceil(
-    listContext.listLoadable.data!.paginationMeta.offset / listContext.perPage
+    Number(listContext.listLoadable!.data!.paginationMeta!.offset) /
+      listContext.perPage
   );
 
   return (
@@ -42,7 +42,9 @@ export const Pagination: FunctionComponent = (props) => {
         <TablePagination
           component={Box}
           rowsPerPageOptions={[10, 20, 30, 40, 50]}
-          count={listContext.listLoadable.data!.paginationMeta.allCount}
+          count={
+            listContext.listLoadable!.data!.paginationMeta!.allCount as number
+          }
           onChangePage={(_, p) => onPageChange(p)}
           page={page}
           onChangeRowsPerPage={(e) => onPerPageChange(e.target.value)}

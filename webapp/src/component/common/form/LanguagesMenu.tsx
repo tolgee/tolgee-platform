@@ -19,6 +19,7 @@ import { MessageService } from '../../../service/MessageService';
 import { T } from '@tolgee/react';
 
 export interface LanguagesMenuProps {
+  defaultSelected: string[] | undefined;
   context: string;
 }
 
@@ -39,7 +40,9 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
 
   const selected = actions.useSelector((s) => s.selectedLanguages);
 
-  const [localSelected, setLocalSelected] = useState(selected);
+  const [localSelected, setLocalSelected] = useState(
+    (selected.length ? selected : props.defaultSelected) || []
+  );
 
   const langsChange = (e) => {
     if (e.target.value < 1) {

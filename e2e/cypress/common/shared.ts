@@ -79,6 +79,9 @@ export const toggleInMultiselect = (chainable: Chainable, renderedValues: string
                 }
             })
         })
+        
     })
     cy.get('body').click(0, 0)
+    // wait for loading to finish
+    cy.gcy('global-base-view-loading').should('not.exist');
 }

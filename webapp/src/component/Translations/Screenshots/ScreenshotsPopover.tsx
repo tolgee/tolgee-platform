@@ -1,13 +1,16 @@
 import * as React from 'react';
 import { FunctionComponent, useEffect } from 'react';
 import { Box, Popover, Typography } from '@material-ui/core';
-import { KeyTranslationsDTO } from '../../../service/response.types';
 import { ScreenshotActions } from '../../../store/project/ScreenshotActions';
 import { container } from 'tsyringe';
 import { useProject } from '../../../hooks/useProject';
 import { T } from '@tolgee/react';
 import { Alert } from '../../common/Alert';
 import { ScreenshotGallery } from './ScreenshotGallery';
+import { components } from '../../../service/apiSchema.generated';
+
+type KeyTranslationsDTO =
+  components['schemas']['KeyWithTranslationsResponseDto'];
 
 export interface ScreenshotsPopoverProps {
   data: KeyTranslationsDTO;
