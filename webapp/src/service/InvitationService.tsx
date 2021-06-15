@@ -21,15 +21,6 @@ export class InvitationService {
     private invitationCodeService: InvitationCodeService
   ) {}
 
-  public generateInvitationCode = async (
-    projectId: number,
-    type: string
-  ): Promise<string> =>
-    await http.post('projects/invite', {
-      projectId,
-      type,
-    });
-
   public acceptInvitation = async (code: string): Promise<void> => {
     if (!this.tokenService.getToken()) {
       this.invitationCodeService.setCode(code);
