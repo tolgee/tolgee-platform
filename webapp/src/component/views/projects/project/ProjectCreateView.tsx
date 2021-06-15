@@ -1,21 +1,23 @@
 import * as React from 'react';
-import { FunctionComponent, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { AppState } from '../../../../store';
-import { container } from 'tsyringe';
-import { ProjectActions } from '../../../../store/project/ProjectActions';
-import { LINKS } from '../../../../constants/links';
-import { Redirect } from 'react-router-dom';
-import { TextField } from '../../../common/form/fields/TextField';
-import { BaseFormView } from '../../../layout/BaseFormView';
-import { FieldArray } from '../../../common/form/fields/FieldArray';
-import { Validation } from '../../../../constants/GlobalValidationSchema';
-import { DashboardPage } from '../../../layout/DashboardPage';
-import { T } from '@tolgee/react';
-import { Grid } from '@material-ui/core';
+import {FC, FunctionComponent, useState} from 'react';
+import {useSelector} from 'react-redux';
+import {AppState} from '../../../../store';
+import {container} from 'tsyringe';
+import {ProjectActions} from '../../../../store/project/ProjectActions';
+import {LINKS} from '../../../../constants/links';
+import {Redirect} from 'react-router-dom';
+import {TextField} from '../../../common/form/fields/TextField';
+import {BaseFormView} from '../../../layout/BaseFormView';
+import {FieldArray} from '../../../common/form/fields/FieldArray';
+import {Validation} from '../../../../constants/GlobalValidationSchema';
+import {DashboardPage} from '../../../layout/DashboardPage';
+import {T} from '@tolgee/react';
+import {Grid} from '@material-ui/core';
 import OwnerSelect from './components/OwnerSelect';
-import { useConfig } from '../../../../hooks/useConfig';
-import { components } from '../../../../service/apiSchema.generated';
+import {useConfig} from '../../../../hooks/useConfig';
+import {components} from '../../../../service/apiSchema.generated';
+import {CreateLanguageField} from '../../../languages/CreateLanguageField';
+import {useField} from "formik";
 
 const actions = container.resolve(ProjectActions);
 
@@ -87,20 +89,7 @@ export const ProjectCreateView: FunctionComponent = () => {
           <FieldArray name="languages">
             {(n) => (
               <>
-                <TextField
-                  data-cy="project-language-name-field"
-                  fullWidth={false}
-                  label={<T>create_project_language_name_label</T>}
-                  name={n('name')}
-                  required={true}
-                />
-                <TextField
-                  data-cy="project-language-abbreviation-field"
-                  fullWidth={false}
-                  label={<T>create_project_language_abbreviation_label</T>}
-                  name={n('abbreviation')}
-                  required={true}
-                />
+                <CreateLanguageFormikField />
               </>
             )}
           </FieldArray>
@@ -109,3 +98,8 @@ export const ProjectCreateView: FunctionComponent = () => {
     </DashboardPage>
   );
 };
+
+const CreateLanguageFormikField: FC<{}> = (props) => {
+  const [inputProps, meta, helpers] = useField("language")
+  return <CreateLanguageField onChange={()} />
+}
