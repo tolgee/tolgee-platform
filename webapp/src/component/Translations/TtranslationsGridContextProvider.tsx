@@ -2,6 +2,7 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import { UseQueryResult, useQueryClient } from 'react-query';
 import { container } from 'tsyringe';
 import { TranslationActions } from '../../store/project/TranslationActions';
+import { ProjectPreferencesService } from '../../service/ProjectPreferencesService';
 import { useProject } from '../../hooks/useProject';
 import { useTranslate } from '@tolgee/react';
 import { FullPageLoading } from '../common/FullPageLoading';
@@ -17,6 +18,7 @@ export const TranslationListContext =
   React.createContext<TranslationListContextType>(null);
 
 const actions = container.resolve(TranslationActions);
+const selectedLanguagesService = container.resolve(ProjectPreferencesService);
 
 export type TranslationListContextType = {
   listLanguages: string[];
@@ -63,7 +65,16 @@ export const TranslationGridContextProvider: React.FC = ({ children }) => {
     search,
     perPage || 20,
     offset || 0,
-    { keepPreviousData: true }
+    {
+      keepPreviousData: true,
+      onSuccess: (data) => {
+        // update selected languages in localstorage
+        selectedLanguagesService.setForProject(
+          projectDTO.id,
+          new Set(data.params?.languages)
+        );
+      },
+    }
   );
 
   const loadData = (search?: string, limit?: number, offset?: number) => {

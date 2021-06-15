@@ -148,8 +148,6 @@ describe('Translations', () => {
                     cy.gcy('global-base-view-loading').should('not.exist');
                 }
                 toggleLang("Česky");
-                cy.contains("Studený přeložený text 1").should("not.exist");
-                toggleLang("Česky")
                 cy.contains("Studený přeložený text 1").should("be.visible");
                 toggleLang("Česky")
                 cy.contains("Studený přeložený text 1").should("not.exist");
