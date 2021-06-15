@@ -10,8 +10,11 @@ import {
   Theme,
   Tooltip,
 } from '@material-ui/core';
-import { KeyTranslationsDTO } from '../../../service/response.types';
 import { ScreenshotsPopover } from './ScreenshotsPopover';
+import { components } from '../../../service/apiSchema.generated';
+
+type KeyTranslationsDTO =
+  components['schemas']['KeyWithTranslationsResponseDto'];
 
 export interface ScreenshotsProps {
   data: KeyTranslationsDTO;

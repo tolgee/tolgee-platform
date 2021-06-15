@@ -5,7 +5,6 @@ import { ScreenshotThumbnail } from './ScreenshotThumbnail';
 import Box from '@material-ui/core/Box';
 
 import {
-  KeyTranslationsDTO,
   ProjectPermissionType,
   ScreenshotDTO,
 } from '../../../service/response.types';
@@ -23,6 +22,11 @@ import { ScreenshotDropzone } from './ScreenshotDropzone';
 import { useProjectPermissions } from '../../../hooks/useProjectPermissions';
 import { Skeleton } from '@material-ui/lab';
 import { startLoading, stopLoading } from '../../../hooks/loading';
+
+import { components } from '../../../service/apiSchema.generated';
+
+type KeyTranslationsDTO =
+  components['schemas']['KeyWithTranslationsResponseDto'];
 
 export interface ScreenshotGalleryProps {
   data: KeyTranslationsDTO;
@@ -130,7 +134,7 @@ export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (
       actions.loadableActions.uploadScreenshot.dispatch(
         files,
         project.id,
-        props.data.name
+        props!.data!.name as string
       );
       return;
     }

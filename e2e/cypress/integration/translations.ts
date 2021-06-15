@@ -144,6 +144,8 @@ describe('Translations', () => {
                     cy.get("#languages-select-translations").click();
                     cy.get("#language-select-translations-menu").contains(lang).should("be.visible").click();
                     cy.get("body").click();
+                    // wait for loading to disappear
+                    cy.gcy('global-base-view-loading').should('not.exist');
                 }
                 toggleLang("Česky");
                 cy.contains("Studený přeložený text 1").should("be.visible");
@@ -196,6 +198,8 @@ function createTranslation(testKey: string, testTranslated: string, options: { i
 function setPerPage(current: number, newValue: number) {
     cy.xpath(getAnyContainingText("Per page:")).xpath(getClosestContainingText(current.toString())).click();
     getPopover().contains(newValue.toString()).click()
+    // wait for loading to disappear
+    cy.gcy('global-base-view-loading').should('not.exist');
 }
 
 function goToNextPage() {

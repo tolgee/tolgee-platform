@@ -8,6 +8,7 @@ declare namespace DataCy {
         "dropzone" |
         "dropzone-inner" |
         "global-base-view-content" |
+        "global-base-view-loading" |
         "global-base-view-title" |
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |

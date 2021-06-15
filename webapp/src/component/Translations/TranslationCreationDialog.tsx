@@ -1,5 +1,4 @@
-import * as React from 'react';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -16,6 +15,7 @@ import { MessageService } from '../../service/MessageService';
 import { Validation } from '../../constants/GlobalValidationSchema';
 import { TranslationListContext } from './TtranslationsGridContextProvider';
 import { useTranslate } from '@tolgee/react';
+import { useCreateKey } from '../../service/hooks/Translation';
 
 export type TranslationCreationValue = {
   key: string;
@@ -31,35 +31,30 @@ export function TranslationCreationDialog() {
 
   const t = useTranslate();
 
+  const createKey = useCreateKey(projectDTO.id);
+
+  function onSubmit(v) {
+    createKey.mutate(v, {
+      onSuccess: () => {
+        messaging.success(t('translation_grid_translation_created'));
+        listContext.loadData();
+        onClose();
+      },
+    });
+  }
+
   const selectedLanguages = translationActions.useSelector(
     (s) => s.selectedLanguages
-  );
-
-  const saveLoadable = translationActions.useSelector(
-    (s) => s.loadables.createKey
   );
 
   const listContext = useContext(TranslationListContext);
 
   function onClose() {
-    translationActions.loadableReset.createKey.dispatch();
     redirectionActions.redirect.dispatch(
       LINKS.PROJECT_TRANSLATIONS.build({
         [PARAMS.PROJECT_ID]: projectDTO.id,
       })
     );
-  }
-
-  useEffect(() => {
-    if (saveLoadable.loaded && !saveLoadable.error) {
-      messaging.success(t('translation_grid_translation_created'));
-      listContext.loadData();
-      onClose();
-    }
-  }, [saveLoadable.error, saveLoadable.loaded]);
-
-  function onSubmit(v) {
-    translationActions.loadableActions.createKey.dispatch(projectDTO.id, v);
   }
 
   const initialTranslations = selectedLanguages.reduce(
@@ -80,11 +75,12 @@ export function TranslationCreationDialog() {
         {t('add_translation_dialog_title')}
       </DialogTitle>
       <DialogContent>
-        {saveLoadable && saveLoadable.error && (
-          <ResourceErrorComponent error={saveLoadable.error} />
-        )}
+        {createKey.error && <ResourceErrorComponent error={createKey.error} />}
 
-        <LanguagesMenu context="creation-dialog" />
+        <LanguagesMenu
+          context="creation-dialog"
+          defaultSelected={listContext.listLoadable?.data?.params?.languages}
+        />
         <StandardForm
           onSubmit={onSubmit}
           initialValues={{ key: '', translations: initialTranslations }}
@@ -101,7 +97,7 @@ export function TranslationCreationDialog() {
             fullWidth
           />
 
-          {selectedLanguages.map((s) => (
+          {listContext.listLanguages.map((s) => (
             <TextField
               multiline
               lang={s}

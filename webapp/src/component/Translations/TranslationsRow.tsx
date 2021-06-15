@@ -1,9 +1,6 @@
 import * as React from 'react';
 import { FunctionComponent, useContext } from 'react';
-import {
-  KeyTranslationsDTO,
-  ProjectPermissionType,
-} from '../../service/response.types';
+import { ProjectPermissionType } from '../../service/response.types';
 import { Box, Checkbox } from '@material-ui/core';
 import { TableCell } from './TableCell';
 import { KeyCell } from './KeyCell';
@@ -13,6 +10,10 @@ import { TranslationListContext } from './TtranslationsGridContextProvider';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import { KeyScreenshots } from './Screenshots/KeySreenshots';
 import { useProjectPermissions } from '../../hooks/useProjectPermissions';
+import { components } from '../../service/apiSchema.generated';
+
+type KeyTranslationsDTO =
+  components['schemas']['KeyWithTranslationsResponseDto'];
 
 export interface TranslationProps {
   data: KeyTranslationsDTO;
@@ -68,9 +69,9 @@ export const TranslationsRow: FunctionComponent<TranslationProps> = (props) => {
             <Checkbox
               data-cy="translations-row-checkbox"
               onChange={() =>
-                listContext.toggleKeyChecked(contextValue.data.id)
+                listContext.toggleKeyChecked(contextValue.data.id as number)
               }
-              checked={listContext.isKeyChecked(contextValue.data.id)}
+              checked={listContext.isKeyChecked(contextValue.data.id as number)}
               size="small"
               style={{ padding: 0 }}
             />

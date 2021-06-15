@@ -1,28 +1,24 @@
-import {
-  default as React,
-  FunctionComponent,
-  ReactNode,
-  useEffect,
-  useState,
-} from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { UseQueryResult, useQueryClient } from 'react-query';
 import { container } from 'tsyringe';
-import { MessageService } from '../../service/MessageService';
 import { TranslationActions } from '../../store/project/TranslationActions';
+import { ProjectPreferencesService } from '../../service/ProjectPreferencesService';
 import { useProject } from '../../hooks/useProject';
-import { Loadable } from '../../store/AbstractLoadableActions';
-import { TranslationsDataResponse } from '../../service/response.types';
-import { T, useTranslate } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { FullPageLoading } from '../common/FullPageLoading';
 import { useProjectLanguages } from '../../hooks/useProjectLanguages';
 import { useLeaveEditConfirmationOtherEdit } from './useLeaveEditConfirmation';
-import { parseErrorResponse } from '../../fixtures/errorFIxtures';
-import {} from '../common/BoxLoading';
+import {
+  useGetTranslations,
+  TranslationsType,
+} from '../../service/hooks/Translation';
 
 export const TranslationListContext =
   // @ts-ignore
   React.createContext<TranslationListContextType>(null);
 
 const actions = container.resolve(TranslationActions);
+const selectedLanguagesService = container.resolve(ProjectPreferencesService);
 
 export type TranslationListContextType = {
   listLanguages: string[];
@@ -31,7 +27,7 @@ export type TranslationListContextType = {
   headerCells: ReactNode[];
   refreshList: () => void;
   loadData: (search?: string, limit?: number, offset?: number) => void;
-  listLoadable: Loadable<TranslationsDataResponse>;
+  listLoadable: UseQueryResult<TranslationsType>;
   perPage: number;
   checkAllToggle: () => void;
   isKeyChecked: (id: number) => boolean;
@@ -44,18 +40,11 @@ export type TranslationListContextType = {
   offset: number;
 };
 
-const messaging = container.resolve(MessageService);
+export const TranslationGridContextProvider: React.FC = ({ children }) => {
+  const queryClient = useQueryClient();
 
-export const TranslationGridContextProvider: FunctionComponent = (props) => {
   const projectDTO = useProject();
-
-  const listLoadable = actions.useSelector((s) => s.loadables.translations);
   const selectedLanguages = actions.useSelector((s) => s.selectedLanguages);
-  const translationSaveLoadable = actions.useSelector(
-    (s) => s.loadables.setTranslations
-  );
-  const keySaveLoadable = actions.useSelector((s) => s.loadables.editKey);
-  const deleteLoadable = actions.useSelector((s) => s.loadables.delete);
 
   const projectLanguages = useProjectLanguages().reduce(
     (acc, curr) => ({ ...acc, [curr.abbreviation]: curr.name }),
@@ -63,89 +52,37 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
   );
 
   const t = useTranslate();
-  const [perPage, setPerPage] = useState(20);
-  const [_, setOffset] = useState(0);
+  const [search, setSearch] = useState<string | undefined>();
+  const [offset, setOffset] = useState<number | undefined>();
+  const [perPage, setPerPage] = useState<number | undefined>();
   const [showKeys, setShowKeys] = useState(true);
   const [checkedKeys, setCheckedKeys] = useState(new Set<number>());
   const [_resetEdit, setResetEdit] = useState(() => () => {});
 
+  const listLoadable = useGetTranslations(
+    projectDTO.id,
+    selectedLanguages?.length ? selectedLanguages : undefined,
+    search,
+    perPage || 20,
+    offset || 0,
+    {
+      keepPreviousData: true,
+      onSuccess: (data) => {
+        // update selected languages in localstorage
+        selectedLanguagesService.setForProject(
+          projectDTO.id,
+          new Set(data.params?.languages)
+        );
+      },
+    }
+  );
+
   const loadData = (search?: string, limit?: number, offset?: number) => {
-    setOffset(0);
-    setPerPage(limit || perPage);
-    const lastLoadOffset = listLoadable?.dispatchParams?.[4];
-    offset = offset !== undefined ? offset : lastLoadOffset;
-    actions.loadableActions.translations.dispatch(
-      projectDTO.id,
-      selectedLanguages.length ? selectedLanguages : null,
-      search,
-      limit || perPage,
-      offset
-    );
+    setSearch(search);
+    setOffset(offset);
+    setPerPage(limit);
+    listLoadable.refetch();
   };
-
-  useEffect(() => {
-    return () => {
-      actions.loadableReset.translations.dispatch();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (
-      !listLoadable.data ||
-      (selectedLanguages !== listLoadable.data.params.languages &&
-        selectedLanguages.length)
-    ) {
-      loadData();
-    }
-  }, [selectedLanguages]);
-
-  useEffect(() => {
-    if (listLoadable.loaded && !listLoadable.loading) {
-      //reset edit just when its loaded and its not reloading after edit
-      _resetEdit();
-    }
-  }, [listLoadable.loading]);
-
-  useEffect(() => {
-    if (translationSaveLoadable.error) {
-      actions.loadableReset.setTranslations.dispatch();
-      for (const error of parseErrorResponse(translationSaveLoadable.error)) {
-        messaging.error(<T>{error}</T>);
-      }
-    }
-
-    if (translationSaveLoadable.loaded) {
-      messaging.success(<T>Translation grid - translation saved</T>);
-      contextValue.refreshList();
-      actions.loadableReset.setTranslations.dispatch();
-    }
-
-    if (keySaveLoadable.error) {
-      for (const error of parseErrorResponse(keySaveLoadable.error)) {
-        messaging.error(<T>{error}</T>);
-      }
-      actions.loadableReset.editKey.dispatch();
-    }
-
-    if (keySaveLoadable.loaded) {
-      actions.loadableReset.editKey.dispatch();
-      messaging.success(<T>Translation grid - Successfully edited!</T>);
-      contextValue.refreshList();
-    }
-
-    if (deleteLoadable.error) {
-      actions.loadableReset.delete.dispatch();
-      for (const error of parseErrorResponse(deleteLoadable.error)) {
-        messaging.error(<T>{error}</T>);
-      }
-    }
-
-    if (deleteLoadable.loaded) {
-      actions.loadableReset.delete.dispatch();
-      messaging.success(<T>Translation grid - Successfully deleted!</T>);
-      contextValue.refreshList();
-    }
-  }, [translationSaveLoadable, keySaveLoadable, deleteLoadable]);
 
   const editLeaveConfirmation = useLeaveEditConfirmationOtherEdit();
 
@@ -160,7 +97,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
     );
   });
 
-  if (!listLoadable.touched || (listLoadable.loading && !listLoadable.data)) {
+  if (listLoadable.isLoading) {
     return <FullPageLoading />;
   }
 
@@ -168,31 +105,43 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
 
   const isAllChecked = () => {
     return (
-      listLoadable.data.data.filter((i) => !isKeyChecked(i.id)).length === 0
+      listLoadable.data?.data?.filter((i) => !isKeyChecked(i.id)).length === 0
     );
   };
 
   const isSomeChecked = () => {
-    return listLoadable.data.data.filter((i) => isKeyChecked(i.id)).length > 0;
+    return (
+      Number(
+        listLoadable.data?.data?.filter((i) => isKeyChecked(i.id)).length
+      ) > 0
+    );
+  };
+
+  const refreshList = () => {
+    queryClient.invalidateQueries(['project', projectDTO.id, 'translations']);
   };
 
   // eslint-disable-next-line react/jsx-key
   const headerCells = showKeys ? [<b>{t('translation_grid_key_text')}</b>] : [];
-  headerCells.push(
-    ...listLoadable.data.params.languages.map((abbr, index) => (
-      <b key={index}>{projectLanguages[abbr]}</b>
-    ))
-  );
+  if (listLoadable.data?.params?.languages) {
+    headerCells.push(
+      ...listLoadable.data.params.languages.map((abbr, index) => (
+        <b key={index}>{projectLanguages[abbr]}</b>
+      ))
+    );
+  }
 
   const contextValue: TranslationListContextType = {
     checkAllToggle: () => {
       isAllChecked()
         ? setCheckedKeys(new Set())
         : setCheckedKeys(
-            new Set<number>(listLoadable.data.data.map((d) => d.id))
+            new Set<number>(
+              listLoadable!.data!.data!.map((d) => d.id) as number[]
+            )
           );
     },
-    listLanguages: listLoadable.data.params.languages,
+    listLanguages: listLoadable.data?.params?.languages as string[],
     headerCells,
     cellWidths: headerCells.map((_) => 100 / headerCells.length),
     set resetEdit(resetEdit: () => void) {
@@ -202,14 +151,11 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
     get resetEdit() {
       return _resetEdit;
     },
-    refreshList: () =>
-      actions.loadableActions.translations.dispatch(
-        ...listLoadable.dispatchParams
-      ),
+    refreshList,
     loadData,
     listLoadable,
-    perPage: perPage,
-    offset: 0,
+    perPage: perPage || 20,
+    offset: offset || 0,
     isKeyChecked: isKeyChecked,
     toggleKeyChecked: (id) => {
       const copy = new Set<number>(checkedKeys);
@@ -229,7 +175,7 @@ export const TranslationGridContextProvider: FunctionComponent = (props) => {
 
   return (
     <TranslationListContext.Provider value={contextValue}>
-      {props.children}
+      {children}
     </TranslationListContext.Provider>
   );
 };
