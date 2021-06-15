@@ -133,12 +133,25 @@ export class Validation {
     });
   };
 
-  static readonly PROJECT_CREATION = Yup.object().shape({
-    name: Yup.string().required().min(3).max(50),
-    languages: Yup.array().required().of(Validation.LANGUAGE),
-  });
+  static readonly PROJECT_CREATION = (t: (string) => string) =>
+    Yup.object().shape({
+      name: Yup.string().required().min(3).max(50),
+      languages: Yup.array()
+        .required()
+        .min(1, t('project_creation_add_at_least_one_language'))
+        .of(Validation.LANGUAGE.nullable())
+        .test(
+          'language-repeated',
+          t('create_project_validation_language_repeated'),
+          (values) =>
+            new Set(values?.map((i) => i?.name)).size ==
+              (values?.length || 0) &&
+            new Set(values?.map((i) => i?.tag)).size == (values?.length || 0)
+        ),
+      baseLanguageTag: Yup.string().required(),
+    });
 
-  static readonly REPOSITORY_SETTINGS = Yup.object().shape({
+  static readonly PROJECT_SETTINGS = Yup.object().shape({
     name: Yup.string().required().min(3).max(100),
   });
 

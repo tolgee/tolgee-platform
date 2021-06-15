@@ -13,8 +13,10 @@ import { T } from '@tolgee/react';
 import { ConfirmationDialogProps } from '../../../common/ConfirmationDialog';
 import { LanguageModifyFields } from '../../../languages/LanguageModifyFields';
 import { components } from '../../../../service/apiSchema.generated';
+import { MessageService } from '../../../../service/MessageService';
 
 const actions = container.resolve(LanguageActions);
+const messageService = container.resolve(MessageService);
 
 export const LanguageEditView = () => {
   const confirmationMessage = (options: ConfirmationDialogProps) =>
@@ -46,7 +48,7 @@ export const LanguageEditView = () => {
 
   useEffect(() => {
     if (deleteLoadable.loaded || editLoadable.loaded) {
-      useRedirect(LINKS.PROJECT_LANGUAGES, {
+      useRedirect(LINKS.PROJECT_EDIT, {
         [PARAMS.PROJECT_ID]: projectId,
       });
     }
@@ -89,7 +91,13 @@ export const LanguageEditView = () => {
         <Button
           variant="outlined"
           color="secondary"
-          onClick={() =>
+          onClick={() => {
+            if (languageLoadable.data?.base) {
+              return messageService.error(
+                <T>cannot_delete_base_language_message</T>
+              );
+            }
+
             confirmationMessage({
               message: (
                 <T parameters={{ name: languageLoadable.data!.name }}>
@@ -107,8 +115,8 @@ export const LanguageEditView = () => {
                   },
                 });
               },
-            })
-          }
+            });
+          }}
         >
           <T>delete_language_button</T>
         </Button>

@@ -25,7 +25,7 @@ export const ProjectProvider: FunctionComponent<{ id: number }> = (props) => {
     if (init || idChanged) {
       projectActions.loadableActions.project.dispatch(props.id);
     }
-  }, []);
+  }, [init]);
 
   if (projectDTOLoadable.loading || init || idChanged) {
     return <FullPageLoading />;

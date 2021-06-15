@@ -12,9 +12,6 @@ declare namespace DataCy {
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |
         "global-confirmation-hard-mode-text-field" |
-        "global-field-array-add-button" |
-        "global-field-array-minus-button" |
-        "global-field-array-plus-button" |
         "global-form-cancel-button" |
         "global-form-save-button" |
         "global-form-select" |
@@ -95,8 +92,6 @@ declare namespace DataCy {
         "permissions-menu" |
         "permissions-menu-button" |
         "permissions-revoke-button" |
-        "project-language-abbreviation-field" |
-        "project-language-name-field" |
         "project-list-owner" |
         "project-menu-items" |
         "project-name-field" |

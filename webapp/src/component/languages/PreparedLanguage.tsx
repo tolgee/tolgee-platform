@@ -4,11 +4,12 @@ import { Close, Edit } from '@material-ui/icons';
 import React, { FC } from 'react';
 import { components } from '../../service/apiSchema.generated';
 import { makeStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     border: `1px solid ${theme.palette.grey['100']}`,
-    padding: theme.spacing(1),
+    padding: `${theme.spacing(0.5)}px ${theme.spacing(1)}px`,
     borderRadius: theme.shape.borderRadius,
     display: `inline-flex`,
     alignItems: `center`,
@@ -20,6 +21,12 @@ const useStyles = makeStyles((theme) => ({
   },
   editButton: {
     marginLeft: theme.spacing(1),
+  },
+  icon: {
+    '& svg': {
+      width: 20,
+      height: 20,
+    },
   },
 }));
 export const PreparedLanguage: FC<
@@ -46,13 +53,14 @@ export const PreparedLanguage: FC<
           <IconButton
             data-cy="languages-create-customize-button"
             size="small"
-            className={classes.editButton}
+            className={clsx(classes.icon, classes.editButton)}
             onClick={props.onEdit}
           >
             <Edit />
           </IconButton>
           <IconButton
             size="small"
+            className={clsx(classes.icon)}
             onClick={props.onReset}
             data-cy="languages-create-cancel-prepared-button"
           >

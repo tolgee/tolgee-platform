@@ -132,11 +132,11 @@ class V2ProjectsController(
         return projectModelAssembler.toModel(projectService.getView(project.id)!!)
     }
 
-    @DeleteMapping(value = ["/{id}"])
+    @DeleteMapping(value = ["/{projectId}"])
     @Operation(summary = "Deletes project by id")
-    fun deleteProject(@PathVariable id: Long?) {
-        securityService.checkProjectPermission(id!!, Permission.ProjectPermissionType.MANAGE)
-        projectService.deleteProject(id)
+    fun deleteProject(@PathVariable projectId: Long?) {
+        securityService.checkProjectPermission(projectId!!, Permission.ProjectPermissionType.MANAGE)
+        projectService.deleteProject(projectId)
     }
 
     @PutMapping("/{projectId}/invite")

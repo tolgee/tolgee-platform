@@ -7,6 +7,7 @@ export interface paths {
   "/v2/projects/{projectId}": {
     get: operations["get"];
     put: operations["editProject"];
+    delete: operations["deleteProject"];
   };
   "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
     put: operations["setUsersPermissions"];
@@ -277,9 +278,6 @@ export interface paths {
   "/api/apiKeys/availableScopes": {
     get: operations["getScopes"];
   };
-  "/v2/projects/{id}": {
-    delete: operations["deleteProject"];
-  };
   "/v2/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser"];
   };
@@ -317,6 +315,8 @@ export interface components {
       originalName?: string;
       /** Language flag emoji as UTF-8 emoji */
       flagEmoji?: string;
+      /** Whether is base language of project */
+      base: boolean;
       _links?: components["schemas"]["Links"];
     };
     Links: { [key: string]: components["schemas"]["Link"] };
@@ -556,7 +556,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -567,6 +566,7 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
+      params: components["schemas"]["ImportFileIssueParamView"][];
       _links?: components["schemas"]["Links"];
     };
     ImportFileIssueParamView: {
@@ -727,6 +727,17 @@ export interface operations {
       content: {
         "application/json": components["schemas"]["EditProjectDTO"];
       };
+    };
+  };
+  deleteProject: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
     };
   };
   setUsersPermissions: {
@@ -2323,17 +2334,6 @@ export interface operations {
           "*/*": { [key: string]: string[] };
         };
       };
-    };
-  };
-  deleteProject: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
     };
   };
   removeUser: {

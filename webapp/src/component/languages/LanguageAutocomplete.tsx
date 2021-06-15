@@ -1,9 +1,9 @@
 import { Autocomplete } from '@material-ui/lab';
-import { TextField } from '@material-ui/core';
+import { Box, IconButton, InputAdornment, TextField } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import React, { FC, ReactNode, useState } from 'react';
 import { suggest } from '@tginternal/language-util';
-import { Add } from '@material-ui/icons';
+import { Add, Clear } from '@material-ui/icons';
 import { SuggestResult } from '@tginternal/language-util/lib/suggesting';
 
 export type AutocompleteOption = Omit<SuggestResult, 'languageId'> & {
@@ -24,11 +24,13 @@ const getOptions = (input: string): AutocompleteOption[] => {
     originalName: '',
     englishName: input,
     customRenderOption: (
-      <>
-        <Add />
+      <Box display="inline-flex" justifyContent="center">
+        <Box mr={1}>
+          <Add />
+        </Box>
         <T>language_field_autocomplete_label_new_language</T>
         &nbsp;🏁
-      </>
+      </Box>
     ),
   };
   return [newLang, ...suggest(input)];
@@ -36,6 +38,8 @@ const getOptions = (input: string): AutocompleteOption[] => {
 
 export const LanguageAutocomplete: FC<{
   onSelect: (value: AutocompleteOption) => void;
+  onClear?: () => void;
+  autoFocus?: boolean;
 }> = (props) => {
   const [options, setOptions] = useState([] as AutocompleteOption[]);
 
@@ -68,6 +72,18 @@ export const LanguageAutocomplete: FC<{
           label={<T>language_create_autocomplete_label</T>}
           margin="normal"
           required={true}
+          InputProps={{
+            autoFocus: props.autoFocus,
+            ...params.InputProps,
+            style: { paddingRight: 0 },
+            endAdornment: props.onClear ? (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={props.onClear}>
+                  <Clear />
+                </IconButton>
+              </InputAdornment>
+            ) : undefined,
+          }}
         />
       )}
     />

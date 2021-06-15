@@ -19,5 +19,8 @@ open class LanguageModel(
         var originalName: String? = null,
 
         @Schema(example = "\uD83C\uDDE8\uD83C\uDDFF", description = "Language flag emoji as UTF-8 emoji")
-        var flagEmoji: String? = null
+        var flagEmoji: String? = null,
+
+        @Schema(example = "false", description = "Whether is base language of project")
+        var base: Boolean
 ) : RepresentationModel<LanguageModel>()

@@ -1,8 +1,8 @@
-import { FC } from 'react';
+import { FC, FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, Dialog, DialogContent } from '@material-ui/core';
 import { components } from '../../service/apiSchema.generated';
-import { Form, Formik } from 'formik';
+import { Formik } from 'formik';
 import { Validation } from '../../constants/GlobalValidationSchema';
 import { LanguageModifyFields } from './LanguageModifyFields';
 
@@ -11,36 +11,53 @@ export const LanguageModifyForm: FC<{
   values: components['schemas']['LanguageDto'];
   onModified: (values: components['schemas']['LanguageDto']) => void;
   onCancel: () => void;
-}> = ({ preferredEmojis, values, onModified, onCancel }) => {
+  inDialog?: boolean;
+}> = (props) => {
+  const Wrapper: FunctionComponent = (wrapperProps) =>
+    props.inDialog ? (
+      <Dialog open={true}>
+        <DialogContent>
+          <Box mb={2}>{wrapperProps.children}</Box>
+        </DialogContent>
+      </Dialog>
+    ) : (
+      <>{wrapperProps.children}</>
+    );
+
   return (
-    <Formik
-      initialValues={values}
-      validationSchema={Validation.LANGUAGE}
-      onSubmit={(values) => {
-        onModified(values);
-      }}
-    >
-      <Form>
-        <LanguageModifyFields preferredEmojis={preferredEmojis} />
-        <Box display="flex" justifyContent="flex-end">
-          <Box mr={1}>
-            <Button
-              onClick={() => onCancel()}
-              data-cy="languages-modify-cancel-button"
-            >
-              <T>global_form_cancel</T>
-            </Button>
+    <Wrapper>
+      <Formik
+        initialValues={props.values}
+        validationSchema={Validation.LANGUAGE}
+        onSubmit={(values) => {
+          props.onModified(values);
+        }}
+      >
+        {(formikProps) => (
+          <Box>
+            <LanguageModifyFields preferredEmojis={props.preferredEmojis} />
+            <Box display="flex" justifyContent="flex-end">
+              <Box mr={1}>
+                <Button
+                  onClick={() => props.onCancel()}
+                  data-cy="languages-modify-cancel-button"
+                >
+                  <T>global_form_cancel</T>
+                </Button>
+              </Box>
+              <Button
+                variant="contained"
+                color="primary"
+                type="submit"
+                data-cy="languages-modify-apply-button"
+                onClick={formikProps.submitForm}
+              >
+                <T>languages_modify_ok_button</T>
+              </Button>
+            </Box>
           </Box>
-          <Button
-            variant="contained"
-            color="primary"
-            type="submit"
-            data-cy="languages-modify-apply-button"
-          >
-            <T>languages_modify_ok_button</T>
-          </Button>
-        </Box>
-      </Form>
-    </Formik>
+        )}
+      </Formik>
+    </Wrapper>
   );
 };

@@ -1,5 +1,4 @@
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
-import { LanguageListView } from './languages/LanguageListView';
 import { LINKS, PARAMS } from '../../../constants/links';
 import { LanguageEditView } from './languages/LanguageEditView';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
@@ -27,10 +26,6 @@ export const ProjectRouter = () => {
 
           <Route exact path={LINKS.PROJECT_EDIT.template}>
             <ProjectSettingsView />
-          </Route>
-
-          <Route exact path={LINKS.PROJECT_LANGUAGES.template}>
-            <LanguageListView />
           </Route>
 
           <Route exact path={LINKS.PROJECT_LANGUAGE_EDIT.template}>

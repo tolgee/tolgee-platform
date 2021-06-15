@@ -9,9 +9,10 @@ import { ResourceErrorComponent } from '../common/form/ResourceErrorComponent';
 import { CreateLanguageField } from './CreateLanguageField';
 
 const actions = container.resolve(LanguageActions);
-export const LanguageCreate: FunctionComponent<{
+export const CreateSingleLanguage: FunctionComponent<{
   onCancel: () => void;
   onCreated?: (language: components['schemas']['LanguageModel']) => void;
+  autoFocus?: boolean;
 }> = (props) => {
   const createLoadable = actions.useSelector((s) => s.loadables.create);
   const project = useProject();
@@ -56,6 +57,7 @@ export const LanguageCreate: FunctionComponent<{
         </Box>
       )}
       <CreateLanguageField
+        autoFocus={props.autoFocus}
         value={value}
         onSubmit={(values) => onSubmit(values)}
         showSubmitButton={true}

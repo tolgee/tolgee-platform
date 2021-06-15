@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from 'react';
 import { Box, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { LanguageCreate } from '../../../../languages/LanguageCreate';
+import { CreateSingleLanguage } from '../../../../languages/CreateSingleLanguage';
 
 export const ImportLanguageCreateDialog: FunctionComponent<{
   open: boolean;
@@ -20,7 +20,7 @@ export const ImportLanguageCreateDialog: FunctionComponent<{
       </DialogTitle>
       <DialogContent>
         <Box mt={-1} minWidth={600}>
-          <LanguageCreate
+          <CreateSingleLanguage
             onCreated={(language) => {
               props.onCreated(language.id);
             }}
