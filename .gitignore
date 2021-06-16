@@ -43,4 +43,4 @@ e2e/cypress/integration/examples/
 /webapp/yarn-debug.log*
 /webapp/yarn-error.log*
 
-/webapp/.vscode/settings.json
+/webapp/.vscode

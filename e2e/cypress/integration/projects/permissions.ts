@@ -17,8 +17,9 @@ import {
   visitList,
 } from "../../common/projects";
 
-describe("Organization Settings", () => {
-  beforeEach(() => {});
+describe("Project Permissions", () => {
+  beforeEach(() => {
+  });
 
   describe("Cukrberg's permissions", () => {
     before(() => {
@@ -167,6 +168,10 @@ describe("Organization Settings", () => {
         cy.contains("Facebook itself").should("not.exist");
       });
     });
+  });
+
+  after(() => {
+    cleanProjectsData();
   });
 });
 

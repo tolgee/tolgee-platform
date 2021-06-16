@@ -1,15 +1,10 @@
-import { container, singleton } from 'tsyringe';
+import { singleton } from 'tsyringe';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
 } from '../AbstractLoadableActions';
-import { TranslationService } from '../../service/TranslationService';
 import { AppState } from '../index';
 import { useSelector } from 'react-redux';
-import { ActionType } from '../Action';
-import { LanguageActions } from '../languages/LanguageActions';
-import { ProjectPreferencesService } from '../../service/ProjectPreferencesService';
-import { components } from '../../service/apiSchema.generated';
 
 export type TranslationEditingType = {
   key: string;
@@ -31,11 +26,12 @@ export class TranslationsState extends StateWithLoadables<TranslationActions> {
   } | null = null;
 }
 
-const service = container.resolve(TranslationService);
-const languageActions = container.resolve(LanguageActions);
-
 @singleton()
 export class TranslationActions extends AbstractLoadableActions<TranslationsState> {
+  constructor() {
+    super(new TranslationsState());
+  }
+
   select = this.createAction('SELECT_LANGUAGES', (langs) => langs).build.on(
     (state, action) =>
       <TranslationsState>{ ...state, selectedLanguages: action.payload }
@@ -43,7 +39,7 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
   otherEditionConfirm = this.createAction(
     'OTHER_EDITION_CONFIRM',
     () => {}
-  ).build.on((state, action) => ({
+  ).build.on((state) => ({
     ...state,
     //@ts-ignore
     editing: { ...state.editingAfterConfirmation },
@@ -52,7 +48,7 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
   otherEditionCancel = this.createAction(
     'OTHER_EDITION_CANCEL',
     () => {}
-  ).build.on((state, action) => ({
+  ).build.on((state) => ({
     ...state,
     editingAfterConfirmation: null,
   }));
@@ -71,16 +67,17 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
   });
   setTranslationEditing = this.createAction(
     'SET_TRANSLATION_EDITING',
-    (data: TranslationEditingType) => data
+    (data: { data: TranslationEditingType; skipConfirm?: boolean }) => data
   ).build.on((state, action) => {
     const needsConfirmation =
+      !action.payload.skipConfirm &&
       state.editing &&
       state.editing.data?.initialValue !== state.editing.data?.newValue;
     return {
       ...state,
       [needsConfirmation ? 'editingAfterConfirmation' : 'editing']: {
         type: 'translation',
-        data: { ...action.payload },
+        data: { ...action.payload.data },
       },
     };
   });
@@ -99,64 +96,11 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
       },
     };
   });
-  readonly loadableDefinitions = {
-    translations: this.createLoadableDefinition(
-      service.getTranslations,
-      (state, action) => {
-        return { ...state, selectedLanguages: action.payload.params.languages };
-      }
-    ),
-    createKey: this.createLoadableDefinition(service.createKey),
-    editKey: this.createLoadableDefinition(service.editKey, (state, action) => {
-      return { ...state, editingAfterConfirmation: null, editing: null };
-    }),
-    setTranslations: this.createLoadableDefinition(
-      service.setTranslations,
-      (state, action) => {
-        return { ...state, editingAfterConfirmation: null, editing: null };
-      }
-    ),
-    delete: this.createLoadableDefinition(service.deleteKey),
-  };
 
-  constructor(private selectedLanguagesService: ProjectPreferencesService) {
-    super(new TranslationsState());
-  }
+  readonly loadableDefinitions = {};
 
   useSelector<T>(selector: (state: TranslationsState) => T): T {
     return useSelector((state: AppState) => selector(state.translations));
-  }
-
-  customReducer(
-    state: TranslationsState,
-    action: ActionType<any>,
-    appState
-  ): TranslationsState {
-    appState = appState as AppState; // otherwise circular reference
-    switch (action.type) {
-      case languageActions.loadableActions.globalList.fulfilledType:
-        //reseting translations state on language change
-        return {
-          ...state,
-          selectedLanguages: Array.from(
-            this.selectedLanguagesService.getUpdated(
-              appState.projects.loadables.project.data.id,
-              new Set(
-                (
-                  action.payload as components['schemas']['PagedModelLanguageModel']
-                )._embedded?.languages!.map(
-                  (l: components['schemas']['LanguageModel']) => l.tag
-                )
-              )
-            )
-          ),
-          loadables: {
-            ...state.loadables,
-            translations: this.initialState.loadables.translations,
-          },
-        };
-    }
-    return state;
   }
 
   get prefix(): string {

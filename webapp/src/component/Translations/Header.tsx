@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { FunctionComponent, useContext } from 'react';
 import { Box, Checkbox } from '@material-ui/core';
 import { TableCell } from './TableCell';
@@ -13,8 +12,7 @@ export const Header: FunctionComponent = () => {
 
   return (
     <Box display="flex" height={40}>
-      {/*
-            @ts-ignore*/}
+      {/* @ts-ignore*/}
       <RowContext.Provider value={{ data: null, lastRendered: 0 }}>
         {permissions.satisfiesPermission(ProjectPermissionType.EDIT) && (
           <Box width={40} display="flex" alignItems="center">

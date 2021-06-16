@@ -11,6 +11,9 @@ import { container } from 'tsyringe';
 
 import { DispatchService } from './service/DispatchService';
 
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
+
 import ErrorBoundary from './component/ErrorBoundary';
 import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
 import RighteousLatinWoff2 from './fonts/Righteous/righteous-latin.woff2';
@@ -111,6 +114,15 @@ const theme = createMuiTheme({
   },
 });
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  },
+});
+
 ReactDOM.render(
   <React.Suspense fallback={<FullPageLoading />}>
     <TolgeeProvider
@@ -129,12 +141,15 @@ ReactDOM.render(
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Provider store={store}>
-          {/* @ts-ignore */}
-          <ErrorBoundary>
-            <SnackbarProvider data-cy="global-snackbars">
-              <App />
-            </SnackbarProvider>
-          </ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            {/* @ts-ignore */}
+            <ErrorBoundary>
+              <SnackbarProvider data-cy="global-snackbars">
+                <App />
+              </SnackbarProvider>
+            </ErrorBoundary>
+            <ReactQueryDevtools />
+          </QueryClientProvider>
         </Provider>
       </ThemeProvider>
     </TolgeeProvider>

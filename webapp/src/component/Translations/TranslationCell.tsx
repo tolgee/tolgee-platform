@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useQueryClient } from 'react-query';
 import { FunctionComponent, useContext } from 'react';
 import { RowContext } from './TranslationsRow';
 import { useProject } from '../../hooks/useProject';
@@ -9,25 +9,55 @@ import {
   TranslationActions,
   TranslationEditingType,
 } from '../../store/project/TranslationActions';
+import { T } from '@tolgee/react';
+import { MessageService } from '../../service/MessageService';
 import { Validation } from '../../constants/GlobalValidationSchema';
+import { useSetTranslations } from '../../service/hooks/Translation';
+import { parseErrorResponse } from '../../fixtures/errorFIxtures';
 
 export interface TranslationsTableCellProps {
   tag: string;
 }
 
 const actions = container.resolve(TranslationActions);
+const messaging = container.resolve(MessageService);
 
 export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
   props
 ) => {
+  const queryClient = useQueryClient();
+
   const projectDTO = useProject();
   const context = useContext(RowContext);
 
+  const setTranslations = useSetTranslations(projectDTO.id);
+
   const handleSubmit = (v) => {
-    actions.loadableActions.setTranslations.dispatch(projectDTO.id, {
-      key: context.data.name,
-      translations: { [props.tag]: v },
-    });
+    setTranslations.mutate(
+      {
+        key: context.data.name as string,
+        translations: { [props.tag]: v },
+      },
+      {
+        onError: (err) => {
+          for (const error of parseErrorResponse(err)) {
+            messaging.error(<T>{error}</T>);
+          }
+        },
+        onSuccess: () => {
+          messaging.success(<T>Translation grid - translation saved</T>);
+          queryClient.invalidateQueries([
+            'project',
+            projectDTO.id,
+            'translations',
+          ]);
+          actions.setTranslationEditing.dispatch({
+            data: null,
+            skipConfirm: true,
+          });
+        },
+      }
+    );
   };
 
   const isEditing = actions.useSelector((s) => {
@@ -54,14 +84,16 @@ export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
       onChange={(value) => actions.setEditingValue.dispatch(value)}
       onEditClick={() => {
         actions.setTranslationEditing.dispatch({
-          initialValue,
-          key: context.data.name,
-          newValue: initialValue,
-          languageAbbreviation: props.tag,
+          data: {
+            initialValue,
+            key: context.data.name as string,
+            newValue: initialValue,
+            languageAbbreviation: props.tag,
+          },
         });
       }}
       isEditing={isEditing}
-      onCancel={() => actions.setTranslationEditing.dispatch(null)}
+      onCancel={() => actions.setTranslationEditing.dispatch({ data: null })}
       lang={props.tag}
     />
   );

@@ -1,42 +1,25 @@
-import * as React from 'react';
-import { FunctionComponent, useEffect } from 'react';
-import { container } from 'tsyringe';
-import { ProjectActions } from '../store/project/ProjectActions';
-import { useSelector } from 'react-redux';
-import { AppState } from '../store';
+import React, { createContext } from 'react';
 import { GlobalError } from '../error/GlobalError';
 import { FullPageLoading } from '../component/common/FullPageLoading';
+import { useGetProject, ProjectType } from '../service/hooks/Project';
 
-const projectActions = container.resolve(ProjectActions);
+export const ProjectContext = createContext<ProjectType | null>(null);
 
-export const ProjectProvider: FunctionComponent<{ id: number }> = (props) => {
-  const projectDTOLoadable = useSelector(
-    (state: AppState) => state.projects.loadables.project
-  );
+export const ProjectProvider: React.FC<{ id: number }> = ({ id, children }) => {
+  const { isLoading, data, error } = useGetProject(id);
 
-  const isLoading = projectDTOLoadable.loading;
-  const init =
-    !projectDTOLoadable.data && !projectDTOLoadable.error && !isLoading;
-  const idChanged =
-    projectDTOLoadable.dispatchParams &&
-    projectDTOLoadable.dispatchParams[0] !== props.id;
-
-  useEffect(() => {
-    if (init || idChanged) {
-      projectActions.loadableActions.project.dispatch(props.id);
-    }
-  }, [init]);
-
-  if (projectDTOLoadable.loading || init || idChanged) {
+  if (isLoading) {
     return <FullPageLoading />;
   }
 
-  if (projectDTOLoadable.data) {
-    return <>{props.children}</>;
+  if (data) {
+    return (
+      <ProjectContext.Provider value={data}>{children}</ProjectContext.Provider>
+    );
   }
 
   throw new GlobalError(
     'Unexpected error occurred',
-    projectDTOLoadable.error?.code || 'Loadable error'
+    error?.code || 'Loadable error'
   );
 };

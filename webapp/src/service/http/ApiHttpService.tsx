@@ -108,7 +108,7 @@ export class ApiHttpService {
     });
   }
 
-  async get<T>(url, queryObject?: { [key: string]: any }): Promise<T> {
+  async get<T = any>(url, queryObject?: { [key: string]: any }): Promise<T> {
     return ApiHttpService.getResObject(
       await this.fetch(
         url + (!queryObject ? '' : '?' + this.buildQuery(queryObject))
