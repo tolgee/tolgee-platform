@@ -44,18 +44,21 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
   );
 
   useEffect(() => {
-    actions.loadableActions.projects.dispatch();
+    actions.loadableActions.projects.dispatch({
+      query: { pageable: { size: 1000 } },
+    });
     actions.loadableActions.scopes.dispatch();
   }, []);
 
-  const getAvailableScopes = (projectId: number): Set<string> => {
-    return new Set(
-      // @ts-ignore
-      scopes.data[
-        // @ts-ignore
-        projects.data.find((r) => r.id === projectId).permissionType
-      ]
-    );
+  const getAvailableScopes = (projectId?: number): Set<string> => {
+    const userPermissions = projects?.data?._embedded?.projects?.find(
+      (r) => r.id === projectId
+    )?.computedPermissions;
+    // eslint-disable-next-line no-console
+    if (!userPermissions || !scopes?.data) {
+      return new Set();
+    }
+    return new Set(scopes.data[userPermissions]);
   };
 
   const onSubmit = (value) => {
@@ -97,10 +100,11 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
       };
     }
 
+    const projectId = projects.data?._embedded?.projects?.[0]?.id;
     return {
-      projectId: projects.data![0].id,
+      projectId: projectId,
       //check all scopes checked by default
-      scopes: getAvailableScopes(projects.data![0].id),
+      scopes: getAvailableScopes(projectId),
     };
   };
 
@@ -124,9 +128,10 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
         )}
       </DialogTitle>
       <DialogContent>
-        {(projects.loaded && projects.data!.length === 0 && (
-          <T>cannot_add_api_key_without_project_message</T>
-        )) || (
+        {(projects.loaded &&
+          projects.data?._embedded?.projects?.length === 0 && (
+            <T>cannot_add_api_key_without_project_message</T>
+          )) || (
           <>
             {(projects.loading || scopes.loading || props.loading) && (
               <BoxLoading />
@@ -158,11 +163,12 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
                           name="projectId"
                           label="Project"
                           renderValue={(v) =>
-                            // @ts-ignore
-                            projects.data.find((r) => r.id === v).name
+                            projects.data?._embedded?.projects?.find(
+                              (r) => r.id === v
+                            )?.name
                           }
                         >
-                          {projects.data!.map((r) => (
+                          {projects.data?._embedded?.projects?.map((r) => (
                             <MenuItem
                               data-cy="api-keys-project-select-item"
                               key={r.id}

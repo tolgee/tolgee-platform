@@ -73,7 +73,7 @@ export const login = (username = USERNAME, password = PASSWORD) => {
 
 export const createProject = (createProjectDto: {
   name: string;
-  languages: Partial<components["schemas"]["LanguageModel"]>[];
+  languages: Partial<components["schemas"]["LanguageDto"]>[];
 }) => {
   const create = () =>
     v2apiFetch("projects", {
@@ -81,7 +81,10 @@ export const createProject = (createProjectDto: {
       method: "POST",
     });
   return v2apiFetch("projects").then((res) => {
-    const test = res.body.find((i) => i.name === createProjectDto.name);
+    console.log(res);
+    const test = res.body?._embeddded?.projects.find(
+      (i) => i.name === createProjectDto.name
+    );
     if (test) {
       return deleteProject(test.id).then(() => create());
     }

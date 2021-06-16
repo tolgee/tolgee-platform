@@ -10,7 +10,7 @@ import "cypress-file-upload";
 import { getPopover } from "../common/shared";
 import { ProjectDTO } from "../../../webapp/src/service/response.types";
 
-describe("Key screenshots", () => {
+describe("Screenshots", () => {
   let project: ProjectDTO = null;
 
   beforeEach(() => {
@@ -19,12 +19,14 @@ describe("Key screenshots", () => {
         name: "Test",
         languages: [
           {
-            abbreviation: "en",
+            tag: "en",
             name: "English",
+            originalName: "Engish",
           },
           {
-            abbreviation: "cs",
-            name: "Česky",
+            tag: "cs",
+            name: "Czech",
+            originalName: "čeština",
           },
         ],
       }).then((r) => {
