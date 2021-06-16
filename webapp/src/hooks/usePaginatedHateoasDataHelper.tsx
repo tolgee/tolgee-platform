@@ -102,6 +102,7 @@ export const usePaginatedHateoasDataHelper = <
   useEffect(() => {
     if (loadable.error) {
       setError(true);
+      // eslint-disable-next-line no-console
       console.error(error);
     }
   }, [loadable.error]);

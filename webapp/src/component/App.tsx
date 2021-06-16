@@ -73,6 +73,7 @@ const MandatoryDataProvider = (props: any) => {
   useEffect(() => {
     if (config?.clientSentryDsn) {
       Sentry.init({ dsn: config.clientSentryDsn });
+      // eslint-disable-next-line no-console
       console.info('Using Sentry!');
     }
   }, [config?.clientSentryDsn]);
@@ -89,7 +90,9 @@ const MandatoryDataProvider = (props: any) => {
 };
 
 const GlobalConfirmation = () => {
-  const state = useSelector((state: AppState) => state.global.confirmationDialog);
+  const state = useSelector(
+    (state: AppState) => state.global.confirmationDialog
+  );
 
   const [wasDisplayed, setWasDisplayed] = useState(false);
 

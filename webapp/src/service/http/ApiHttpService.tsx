@@ -61,6 +61,7 @@ export class ApiHttpService {
       fetch(this.apiUrl + input, init)
         .then((r) => {
           if (r.status == 401) {
+            // eslint-disable-next-line no-console
             console.warn('Redirecting to login - unauthorized user');
             ApiHttpService.getResObject(r).then(() => {
               this.messageService.error(<T>expired_jwt_token</T>);
@@ -98,6 +99,7 @@ export class ApiHttpService {
           }
         })
         .catch((e) => {
+          // eslint-disable-next-line no-console
           console.error(e);
           errorActions.globalError.dispatch(
             new GlobalError('Error while loading resource', input.toString(), e)

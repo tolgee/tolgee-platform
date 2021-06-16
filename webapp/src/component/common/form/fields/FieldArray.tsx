@@ -1,12 +1,7 @@
-import {
-  default as React,
-  FunctionComponent,
-  ReactElement,
-  ReactNode,
-} from 'react';
+import { default as React, FC, ReactElement, ReactNode } from 'react';
 import { FieldArray as FormikFieldArray, useField } from 'formik';
 
-export interface FAProps<T extends FunctionComponent> {
+export const FieldArray: FC<{
   name: string;
   children: (
     nameCallback: (fieldName: string) => string,
@@ -16,13 +11,9 @@ export interface FAProps<T extends FunctionComponent> {
   defaultItemValue?: any;
   addButton: (addItem: () => void) => ReactNode;
   showArrayErrors?: boolean;
-}
-
-export const FieldArray = <T extends FunctionComponent>(props: FAProps<T>) => {
+}> = (props) => {
   const [field, _] = useField(props.name);
   const values = field.value;
-
-  console.log(values);
 
   return (
     <>
@@ -35,13 +26,11 @@ export const FieldArray = <T extends FunctionComponent>(props: FAProps<T>) => {
                 (name) => `${props.name}.${index}.${name}`,
                 index,
                 () => {
-                  console.log('remove');
                   arrayHelpers.remove(index);
                 }
               )
             )}
             {props.addButton(() => {
-              console.log('insert');
               arrayHelpers.insert(values.length, props.defaultItemValue);
             })}
           </>
