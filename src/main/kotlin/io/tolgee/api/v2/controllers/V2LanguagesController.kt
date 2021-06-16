@@ -13,6 +13,7 @@ import io.tolgee.constants.Message
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.validators.LanguageValidator
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
@@ -96,6 +97,12 @@ class V2LanguagesController(
         val language = languageService.findById(languageId)
                 .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
+
+        //if base language is missing, select first language
+        val baseLanguage = projectService.autoSetBaseLanguage(projectHolder.project.id)
+        if (baseLanguage!!.id == languageId) {
+            throw BadRequestException(Message.CANNOT_DELETE_BASE_LANGUAGE)
+        }
         languageService.deleteLanguage(languageId)
     }
 }

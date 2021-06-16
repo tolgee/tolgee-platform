@@ -16,7 +16,7 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/"), ITest {
+class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/"), ITest {
     private val languageDTO = LanguageDto("en", "en", "en")
     private val languageDTOBlank = LanguageDto(null, "")
     private val languageDTOCorrect = LanguageDto("Spanish", "Espanol", "es")
@@ -61,10 +61,31 @@ class LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/"), ITest
     @Test
     fun deleteLanguage() {
         val test = dbPopulator.createBase(generateUniqueString())
+        val deutsch = test.getLanguage("de").orElseThrow { NotFoundException() }
+        performDelete(test.id, deutsch.id).andExpect(MockMvcResultMatchers.status().isOk)
+        Assertions.assertThat(languageService.findById(deutsch.id)).isEmpty
+    }
+
+    @Test
+    fun `cannot delete base language`() {
+        val test = dbPopulator.createBase(generateUniqueString())
         val en = test.getLanguage("en").orElseThrow { NotFoundException() }
-        performDelete(test.id, en.id).andExpect(MockMvcResultMatchers.status().isOk)
-        Assertions.assertThat(languageService.findById(en.id!!)).isEmpty
-        projectService.deleteProject(test.id)
+        test.baseLanguage = en
+        projectService.save(test)
+        performDelete(test.id, en.id).andIsBadRequest.andAssertThatJson {
+            node("code").isEqualTo("cannot_delete_base_language")
+        }
+    }
+
+    @Test
+    fun `automatically sets base language`() {
+        val test = dbPopulator.createBase(generateUniqueString())
+        val en = test.getLanguage("en").orElseThrow { NotFoundException() }
+        test.baseLanguage = null
+        projectService.save(test)
+        performDelete(test.id, en.id).andIsBadRequest.andAssertThatJson {
+            node("code").isEqualTo("cannot_delete_base_language")
+        }
     }
 
     @Test

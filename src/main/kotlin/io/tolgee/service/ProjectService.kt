@@ -156,13 +156,16 @@ class ProjectService constructor(
         projectRepository.delete(project)
     }
 
-
-    fun autoSetBaseLanguage(id: Long): Language? {
-        this.get(id).orElse(null)?.let { project ->
-            project.languages.toList().firstOrNull()?.let {
+    /**
+     * If base language is missing on project it selects language with lowest id
+     * It saves updated project and returns project's new baseLanguage
+     */
+    fun autoSetBaseLanguage(projectId: Long): Language? {
+        return this.get(projectId).orElse(null)?.let { project ->
+            project.baseLanguage ?: project.languages.toList().firstOrNull()?.let {
                 project.baseLanguage = it
                 projectRepository.save(project)
-                return it
+                it
             }
         }
         return null
@@ -193,6 +196,8 @@ class ProjectService constructor(
 
     fun saveAll(projects: Collection<Project>): MutableList<Project> =
             projectRepository.saveAll(projects)
+
+    fun save(project: Project): Project = projectRepository.save(project)
 
     private fun getBaseLanguage(dto: CreateProjectDTO, createdLanguages: List<Language>): Language {
         if (dto.baseLanguageTag != null) {
