@@ -1,234 +1,243 @@
-import {cleanProjectsData, createProjectsData, login} from "../../common/apiCalls";
-import {HOST} from "../../common/constants";
-import 'cypress-file-upload';
-import {assertMessage, confirmStandard, gcy, goToPage, selectInProjectMenu} from "../../common/shared";
+import {
+  cleanProjectsData,
+  createProjectsData,
+  login,
+} from "../../common/apiCalls";
+import "cypress-file-upload";
+import {
+  assertMessage,
+  confirmStandard,
+  gcy,
+  goToPage,
+  selectInProjectMenu,
+} from "../../common/shared";
+import {
+  enterProject,
+  enterProjectSettings,
+  visitList,
+} from "../../common/projects";
 
-describe('Organization Settings', () => {
+describe("Organization Settings", () => {
+  beforeEach(() => {});
+
+  describe("Cukrberg's permissions", () => {
+    before(() => {
+      cleanProjectsData();
+      createProjectsData();
+    });
+
     beforeEach(() => {
+      login("cukrberg@facebook.com", "admin");
+    });
 
-    })
+    it("Has manage permissions on facebook (organization owner)", () => {
+      validateManagePermissions("Facebook");
+    });
 
-    describe("Cukrberg's permissions", () => {
-        before(() => {
-            cleanProjectsData()
-            createProjectsData()
-        })
+    it("Has edit permissions on microsoft word (organization base)", () => {
+      validateEditPermissions("Microsoft Word");
+    });
 
-        beforeEach(() => {
-            login("cukrberg@facebook.com", "admin")
-        })
+    it("Has manage permissions (direct manage permissions)", () => {
+      validateManagePermissions("Vaclav's funny project");
+    });
 
-        it("Has manage permissions on facebook (organization owner)", () => {
-            validateManagePermissions("Facebook")
-        })
+    it("Has view permissions on facebook (direct view permissions)", () => {
+      validateViewPermissions("Vaclav's cool project");
+    });
+  });
 
-        it("Has edit permissions on microsoft word (organization base)", () => {
-            validateEditPermissions("Microsoft Word")
-        })
+  describe("Vaclav's permissions", () => {
+    before(() => {
+      cleanProjectsData();
+      createProjectsData();
+    });
 
-        it("Has manage permissions (direct manage permissions)", () => {
-            validateManagePermissions("Vaclav's funny project")
-        })
+    beforeEach(() => {
+      login("vaclav.novak@fake.com", "admin");
+    });
 
-        it("Has view permissions on facebook (direct view permissions)", () => {
-            validateViewPermissions("Vaclav's cool project")
-        })
-    })
+    it("Has edit permission on excel (direct) ", () => {
+      validateEditPermissions("Microsoft Excel");
+    });
 
-    describe("Vaclav's permissions", () => {
-        before(() => {
-            cleanProjectsData()
-            createProjectsData()
-        })
+    it("Has translate permission on Powerpoint (direct) ", () => {
+      validateTranslatePermissions("Microsoft Powerpoint");
+    });
+  });
 
-        beforeEach(() => {
-            login("vaclav.novak@fake.com", "admin")
-        })
+  describe("Permission settings", () => {
+    describe("Not modifying", () => {
+      before(() => {
+        cleanProjectsData();
+        createProjectsData();
+      });
 
-        it("Has edit permission on excel (direct) ", () => {
-            validateEditPermissions("Microsoft Excel")
-        })
+      beforeEach(() => {
+        login("cukrberg@facebook.com", "admin");
+      });
 
-        it("Has translate permission on Powerpoint (direct) ", () => {
-            validateTranslatePermissions("Microsoft Powerpoint")
-        })
-    })
+      it("Can search in permissions", () => {
+        visitList();
+        enterProjectSettings("Facebook itself");
+        selectInProjectMenu("Permissions");
+        gcy("global-list-search").find("input").type("Doe");
+        gcy("global-paginated-list").within(() => {
+          gcy("global-list-item")
+            .should("have.length", 1)
+            .should("contain", "John Doe");
+        });
+      });
 
-    describe("Permission settings", () => {
-        describe("Not modifying", () => {
-            before(() => {
-                cleanProjectsData()
-                createProjectsData()
-            })
+      it("Can paginate", () => {
+        visitList();
+        login("gates@microsoft.com", "admin");
+        enterProjectSettings("Microsoft Word");
+        selectInProjectMenu("Permissions");
+        goToPage(2);
+        cy.contains("owner@zzzcool9.com (owner@zzzcool9.com)").should(
+          "be.visible"
+        );
+      });
 
-            beforeEach(() => {
-                login("cukrberg@facebook.com", "admin")
-            })
+      it("Has enabled proper options for each user", () => {
+        visitList();
+        enterProjectSettings("Facebook itself");
+        selectInProjectMenu("Permissions");
+        gcy("global-paginated-list").within(() => {
+          gcy("global-list-item")
+            .contains("John Doe")
+            .closest("li")
+            .within(() => {
+              gcy("permissions-revoke-button").should("be.disabled");
+              gcy("permissions-menu-button").should("be.enabled");
+            });
+          gcy("global-list-item")
+            .contains("Cukrberg")
+            .closest("li")
+            .within(() => {
+              gcy("permissions-revoke-button").should("be.disabled");
+              gcy("permissions-menu-button").should("be.disabled");
+            });
+        });
+      });
+    });
 
-            it("Can search in permissions", () => {
-                visitList()
-                enterProjectSettings("Facebook itself")
-                selectInProjectMenu("Permissions")
-                gcy("global-list-search").find("input").type("Doe")
-                gcy("global-paginated-list").within(() => {
-                    gcy("global-list-item").should("have.length", 1).should("contain", "John Doe")
-                })
+    describe("Modifying", () => {
+      beforeEach(() => {
+        cleanProjectsData();
+        createProjectsData();
+        login("cukrberg@facebook.com", "admin");
+      });
 
-            })
+      it("Can modify permissions", () => {
+        visitList();
+        enterProjectSettings("Facebook itself");
+        selectInProjectMenu("Permissions");
+        gcy("global-paginated-list").within(() => {
+          gcy("global-list-item")
+            .contains("Vaclav Novak")
+            .closest("li")
+            .within(() => {
+              gcy("permissions-menu-button").click();
+            });
+        });
+        gcy("permissions-menu").filter(":visible").contains("Manage").click();
+        confirmStandard();
+        login("vaclav.novak@fake.com", "admin");
+        visitList();
+        validateManagePermissions("Facebook itself");
+      });
 
-            it("Can paginate", () => {
-                visitList()
-                login("gates@microsoft.com", "admin")
-                enterProjectSettings("Microsoft Word")
-                selectInProjectMenu("Permissions")
-                goToPage(2)
-                cy.contains("owner@zzzcool9.com (owner@zzzcool9.com)").should("be.visible")
-            })
+      it("Can revoke permissions", () => {
+        visitList();
+        enterProjectSettings("Facebook itself");
+        selectInProjectMenu("Permissions");
+        gcy("global-paginated-list").within(() => {
+          gcy("global-list-item")
+            .contains("Vaclav Novak")
+            .closest("li")
+            .within(() => {
+              gcy("permissions-revoke-button").click();
+            });
+        });
+        confirmStandard();
+        login("vaclav.novak@fake.com", "admin");
+        visitList();
+        cy.contains("Facebook itself").should("not.exist");
+      });
+    });
+  });
+});
 
-            it("Has enabled proper options for each user", () => {
-                visitList()
-                enterProjectSettings("Facebook itself")
-                selectInProjectMenu("Permissions")
-                gcy("global-paginated-list").within(() => {
-                    gcy("global-list-item").contains("John Doe").closest("li").within(() => {
-                        gcy("permissions-revoke-button").should("be.disabled")
-                        gcy("permissions-menu-button").should("be.enabled")
-                    })
-                    gcy("global-list-item").contains("Cukrberg").closest("li").within(() => {
-                        gcy("permissions-revoke-button").should("be.disabled")
-                        gcy("permissions-menu-button").should("be.disabled")
-                    })
-                })
-            })
-        })
-
-        describe("Modifying", () => {
-            beforeEach(() => {
-                cleanProjectsData()
-                createProjectsData()
-                login("cukrberg@facebook.com", "admin")
-            })
-
-            it("Can modify permissions", () => {
-                visitList()
-                enterProjectSettings("Facebook itself")
-                selectInProjectMenu("Permissions")
-                gcy("global-paginated-list").within(() => {
-                    gcy("global-list-item").contains("Vaclav Novak").closest("li").within(() => {
-                        gcy("permissions-menu-button").click()
-                    })
-                })
-                gcy("permissions-menu").filter(":visible").contains("Manage").click()
-                confirmStandard()
-                login("vaclav.novak@fake.com", "admin")
-                visitList()
-                validateManagePermissions("Facebook itself")
-            })
-
-
-            it("Can revoke permissions", () => {
-                visitList()
-                enterProjectSettings("Facebook itself")
-                selectInProjectMenu("Permissions")
-                gcy("global-paginated-list").within(() => {
-                    gcy("global-list-item").contains("Vaclav Novak").closest("li").within(() => {
-                        gcy("permissions-revoke-button").click()
-                    })
-                })
-                confirmStandard()
-                login("vaclav.novak@fake.com", "admin")
-                visitList()
-                cy.contains("Facebook itself").should("not.exist")
-            })
-        })
-    })
-
-    after(() => {
-    })
-})
-
-const enterProjectSettings = (projectName: string) => {
-    visitList()
-
-    gcy("global-paginated-list").contains(projectName).closest("li").within(() => {
-        cy.gcy("project-settings-button").should("be.visible").click()
-    })
-}
-
-const enterProject = (projectName: string) => {
-    visitList()
-
-    gcy("global-paginated-list").contains(projectName).closest("a").click()
-    gcy("global-base-view-content").should('be.visible')
-}
-
-const visitList = () => {
-    cy.visit(`${HOST}`)
-}
-
-const MANAGE_PROJECT_ITEMS = ["Permissions", "Languages"]
-const OTHER_PROJECT_ITEMS = ["Projects", "Export"]
+const MANAGE_PROJECT_ITEMS = ["Permissions"];
+const OTHER_PROJECT_ITEMS = ["Projects", "Export"];
 
 const assertManageMenuItemsNotVisible = () => {
-    MANAGE_PROJECT_ITEMS.forEach(item => {
-        gcy("project-menu-items").should("not.contain", item)
-    })
-}
+  MANAGE_PROJECT_ITEMS.forEach((item) => {
+    gcy("project-menu-items").should("not.contain", item);
+  });
+};
 
 const assertOtherMenuItemsVisible = () => {
-    OTHER_PROJECT_ITEMS.forEach(item => {
-        gcy("project-menu-items").should("contain", item)
-    })
-}
+  OTHER_PROJECT_ITEMS.forEach((item) => {
+    gcy("project-menu-items").should("contain", item);
+  });
+};
 
 const validateManagePermissions = (projectName: string) => {
-    visitList()
-    enterProjectSettings(projectName)
-    cy.gcy("global-form-save-button").click()
-    assertMessage("Project settings are successfully saved.")
-    enterProject(projectName)
-    MANAGE_PROJECT_ITEMS.forEach(item => {
-        gcy("project-menu-items").should("contain", item)
-    })
-    assertOtherMenuItemsVisible()
-}
+  visitList();
+  enterProjectSettings(projectName);
+  cy.gcy("global-form-save-button").click();
+  assertMessage("Project settings are successfully saved.");
+  enterProject(projectName);
+  MANAGE_PROJECT_ITEMS.forEach((item) => {
+    gcy("project-menu-items").should("contain", item);
+  });
+  assertOtherMenuItemsVisible();
+};
 
 const validateEditPermissions = (projectName: string) => {
-    visitList()
-    enterProject(projectName)
-    selectInProjectMenu("Translations")
-    assertManageMenuItemsNotVisible()
-    assertOtherMenuItemsVisible()
-    gcy("global-plus-button").should("be.visible").click()
-    gcy("translations-add-key-field").find("textarea").filter(":visible").type("test");
-    gcy("global-form-save-button").should("be.visible").click()
-    assertMessage("Translation created")
-    gcy("translations-row-checkbox").click()
-    gcy("translations-delete-button").click()
-    confirmStandard()
-    assertMessage("Translations deleted!")
-}
+  visitList();
+  enterProject(projectName);
+  selectInProjectMenu("Translations");
+  assertManageMenuItemsNotVisible();
+  assertOtherMenuItemsVisible();
+  gcy("global-plus-button").should("be.visible").click();
+  gcy("translations-add-key-field")
+    .find("textarea")
+    .filter(":visible")
+    .type("test");
+  gcy("global-form-save-button").should("be.visible").click();
+  assertMessage("Translation created");
+  gcy("translations-row-checkbox").click();
+  gcy("translations-delete-button").click();
+  confirmStandard();
+  assertMessage("Translations deleted!");
+};
 
 const validateTranslatePermissions = (projectName: string) => {
-    visitList()
-    enterProject(projectName)
-    selectInProjectMenu("Translations")
-    assertManageMenuItemsNotVisible()
-    assertOtherMenuItemsVisible()
-    gcy("global-plus-button").should("not.exist")
-    gcy("translations-row-checkbox").should("not.exist")
-    gcy("translations-editable-cell").contains("This is test text!").should("be.visible").click()
-    gcy("translations-editable-cell-editing").should("be.visible")
-}
-
+  visitList();
+  enterProject(projectName);
+  selectInProjectMenu("Translations");
+  assertManageMenuItemsNotVisible();
+  assertOtherMenuItemsVisible();
+  gcy("global-plus-button").should("not.exist");
+  gcy("translations-row-checkbox").should("not.exist");
+  gcy("translations-editable-cell")
+    .contains("This is test text!")
+    .should("be.visible")
+    .click();
+  gcy("translations-editable-cell-editing").should("be.visible");
+};
 
 const validateViewPermissions = (projectName: string) => {
-    visitList()
-    enterProject(projectName)
-    gcy("project-menu-items").should("contain", "Projects")
-    gcy("project-menu-items").should("contain", "Export")
-    assertManageMenuItemsNotVisible()
-    assertOtherMenuItemsVisible()
-    selectInProjectMenu("Translations")
-    gcy("global-plus-button").should("not.exist")
-}
+  visitList();
+  enterProject(projectName);
+  gcy("project-menu-items").should("contain", "Projects");
+  gcy("project-menu-items").should("contain", "Export");
+  assertManageMenuItemsNotVisible();
+  assertOtherMenuItemsVisible();
+  selectInProjectMenu("Translations");
+  gcy("global-plus-button").should("not.exist");
+};

@@ -36,7 +36,7 @@ class LanguageE2eDataController(
                 addProject {
                     self {
                         userOwner = this@addUserAccount.self
-                        name = "Repo"
+                        name = "Project"
                     }
                     addPermission {
                         self {

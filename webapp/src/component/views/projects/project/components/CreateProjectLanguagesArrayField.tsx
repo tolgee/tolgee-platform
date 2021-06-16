@@ -25,11 +25,13 @@ export const CreateProjectLanguagesArrayField: FC = () => {
           addButton={(addItem) =>
             !hasUnfinishedLanguage && (
               <Box display="inline-flex" alignItems="center">
-                <Box>
-                  <Button onClick={addItem} color="primary">
-                    <T>language_create_add</T>
-                  </Button>
-                </Box>
+                <Button
+                  data-cy="create-project-language-add-button"
+                  onClick={addItem}
+                  color="primary"
+                >
+                  <T>language_create_add</T>
+                </Button>
               </Box>
             )
           }

@@ -76,11 +76,11 @@ export const createProject = (createProjectDto: {
   languages: Partial<components["schemas"]["LanguageModel"]>[];
 }) => {
   const create = () =>
-    apiFetch("projects", {
+    v2apiFetch("projects", {
       body: JSON.stringify(createProjectDto),
       method: "POST",
     });
-  return apiFetch("projects").then((res) => {
+  return v2apiFetch("projects").then((res) => {
     const test = res.body.find((i) => i.name === createProjectDto.name);
     if (test) {
       return deleteProject(test.id).then(() => create());
@@ -109,7 +109,7 @@ export const setTranslations = (
   });
 
 export const deleteProject = (id: number) => {
-  return apiFetch(`projects/${id}`, { method: "DELETE" });
+  return v2apiFetch(`projects/${id}`, { method: "DELETE" });
 };
 
 export const createUser = (

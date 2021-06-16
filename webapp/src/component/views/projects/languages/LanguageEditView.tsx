@@ -5,7 +5,7 @@ import { LINKS, PARAMS } from '../../../../constants/links';
 import { useRouteMatch } from 'react-router-dom';
 import { BaseFormView } from '../../../layout/BaseFormView';
 import { LanguageActions } from '../../../../store/languages/LanguageActions';
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { confirmation } from '../../../../hooks/confirmation';
 import { Validation } from '../../../../constants/GlobalValidationSchema';
 import { useRedirect } from '../../../../hooks/useRedirect';
@@ -91,6 +91,7 @@ export const LanguageEditView = () => {
         <Button
           variant="outlined"
           color="secondary"
+          data-cy="language-delete-button"
           onClick={() => {
             if (languageLoadable.data?.base) {
               return messageService.error(
@@ -122,7 +123,9 @@ export const LanguageEditView = () => {
         </Button>
       }
     >
-      {() => <LanguageModifyFields />}
+      <Box data-cy="language-modify-form">
+        <LanguageModifyFields />
+      </Box>
     </BaseFormView>
   );
 };

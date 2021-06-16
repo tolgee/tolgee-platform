@@ -9,11 +9,15 @@ export const useProjectLanguages =
       (state: AppState) => state.languages.loadables.globalList
     );
 
-    if (!languagesLoadable.data?._embedded?.languages) {
+    if (!languagesLoadable.data) {
       throw new GlobalError(
         'Unexpected error',
         'No data in loadable? Did you use provider before using hook?'
       );
+    }
+
+    if (!languagesLoadable.data._embedded?.languages) {
+      return [];
     }
 
     return languagesLoadable.data._embedded.languages;

@@ -3,7 +3,13 @@ import {
   generateLanguagesData,
   login,
 } from "../../common/apiCalls";
-import { visitLanguages } from "../../common/import";
+import {
+  getCustomNameInput,
+  selectInAutocomplete,
+  setLanguageData,
+  typeToAutocomplete,
+  visitProjectSettings,
+} from "../../common/languages";
 import { assertMessage, gcy, getInputByName } from "../../common/shared";
 
 describe("Language creation", () => {
@@ -12,7 +18,7 @@ describe("Language creation", () => {
 
     generateLanguagesData().then((languageData) => {
       login("franta");
-      visitLanguages(languageData.body.id);
+      visitProjectSettings(languageData.body.id);
     });
   });
 
@@ -27,11 +33,12 @@ describe("Language creation", () => {
   it("customizes language", () => {
     prepareCzechLanguage();
     gcy("languages-create-customize-button").click();
-    getInputByName("name").clear().type("Czech modified");
-    getInputByName("originalName").clear().type("Česky upraveno");
-    getInputByName("tag").clear().type("cs-mod");
-    gcy("languages-flag-selector-open-button").click();
-    cy.xpath("//img[@alt='🇨🇭']").click();
+    setLanguageData({
+      name: "Czech modified",
+      originalName: "Česky upraveno",
+      tag: "cs-mod",
+      flagEmoji: "🇨🇭",
+    });
     cy.gcy("languages-modify-apply-button").click();
     cy.gcy("languages-prepared-language-box").should(
       "contain",
@@ -48,7 +55,7 @@ describe("Language creation", () => {
 
   it("custom language can be created", () => {
     addCustomLanguage();
-    getInputByName("name").should("be.visible");
+    getCustomNameInput().should("be.visible");
     getInputByName("originalName").type("New custom lang");
     cy.gcy("languages-modify-apply-button").click();
     cy.gcy("languages-prepared-language-box").should(
@@ -72,7 +79,7 @@ describe("Language creation", () => {
     gcy("languages-create-autocomplete-field").should("be.visible");
   });
 
-  it.only("cancels prepared language", () => {
+  it("cancels prepared language", () => {
     prepareCzechLanguage();
     gcy("languages-create-cancel-prepared-button").click();
     gcy("languages-create-autocomplete-field").should("be.visible");
@@ -84,15 +91,11 @@ describe("Language creation", () => {
 });
 
 const addCustomLanguage = () => {
-  gcy("languages-create-autocomplete-field").find("input").type("cs");
-  gcy("languages-create-autocomplete-suggested-option")
-    .contains("New custom language")
-    .click();
+  typeToAutocomplete("cs");
+  selectInAutocomplete("New custom language");
 };
 
 const prepareCzechLanguage = () => {
-  gcy("languages-create-autocomplete-field").find("input").type("cs");
-  gcy("languages-create-autocomplete-suggested-option")
-    .contains("čeština")
-    .click();
+  typeToAutocomplete("cs");
+  selectInAutocomplete("čeština");
 };

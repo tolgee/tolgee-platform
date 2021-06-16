@@ -32,6 +32,7 @@ export const BaseLanguageSelect: FC<{
 
   return (
     <Select
+      data-cy="base-language-select"
       name={props.name}
       label={props.label}
       renderValue={(v) => {

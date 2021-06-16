@@ -4,7 +4,9 @@ declare namespace DataCy {
         "api-keys-create-edit-dialog" |
         "api-keys-edit-button" |
         "api-keys-project-select-item" |
+        "base-language-select" |
         "camera-button" |
+        "create-project-language-add-button" |
         "dropzone" |
         "dropzone-inner" |
         "global-base-view-content" |
@@ -61,6 +63,8 @@ declare namespace DataCy {
         "import-show-data-dialog" |
         "import_apply_import_button" |
         "import_cancel_import_button" |
+        "language-delete-button" |
+        "language-modify-form" |
         "languages-create-autocomplete-field" |
         "languages-create-autocomplete-suggested-option" |
         "languages-create-cancel-prepared-button" |
@@ -98,6 +102,8 @@ declare namespace DataCy {
         "project-owner-select" |
         "project-owner-select-item" |
         "project-settings-button" |
+        "project-settings-languages-list-edit-button" |
+        "project-settings-languages-list-item" |
         "screenshot-box" |
         "translations-add-key-dialog" |
         "translations-add-key-field" |

@@ -40,7 +40,7 @@ export const ProjectSettingsLanguages = () => {
         ]}
         actions={languageActions}
         renderItem={(l) => (
-          <ListItem key={l.id}>
+          <ListItem key={l.id} data-cy="project-settings-languages-list-item">
             <ListItemText>
               <Box display="inline-flex" justifyContent="center">
                 <Box mr={1} display="inline-flex" justifyContent="center">
@@ -51,6 +51,7 @@ export const ProjectSettingsLanguages = () => {
             </ListItemText>
             <ListItemSecondaryAction>
               <Link
+                data-cy="project-settings-languages-list-edit-button"
                 to={LINKS.PROJECT_LANGUAGE_EDIT.build({
                   [PARAMS.PROJECT_ID]: project.id,
                   [PARAMS.LANGUAGE_ID]: l.id,

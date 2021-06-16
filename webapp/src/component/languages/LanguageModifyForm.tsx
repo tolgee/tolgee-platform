@@ -34,7 +34,7 @@ export const LanguageModifyForm: FC<{
         }}
       >
         {(formikProps) => (
-          <Box>
+          <Box data-cy="language-modify-form">
             <LanguageModifyFields preferredEmojis={props.preferredEmojis} />
             <Box display="flex" justifyContent="flex-end">
               <Box mr={1}>

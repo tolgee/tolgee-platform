@@ -32,10 +32,6 @@ export const visitImport = (projectId: number) => {
   cy.visit(`${HOST}/projects/${projectId}/import`);
 };
 
-export const visitLanguages = (projectId: number) => {
-  cy.visit(`${HOST}/projects/${projectId}/manage/languages`);
-};
-
 export const getLanguageRow = (filename: string) => {
   return cy
     .xpath(`//*[@data-cy='import-result-row']//*[. = '${filename}']`)
