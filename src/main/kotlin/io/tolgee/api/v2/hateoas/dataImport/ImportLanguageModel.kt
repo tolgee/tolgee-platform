@@ -9,7 +9,9 @@ open class ImportLanguageModel(
         override val id: Long,
         override val name: String,
         override val existingLanguageId: Long?,
-        override val existingLanguageAbbreviation: String?,
+        override val existingLanguageTag: String?,
+        @Deprecated("Use existingLanguageTag")
+        val existingLanguageAbbreviation: String?,
         override val existingLanguageName: String?,
         override val importFileName: String,
         override val importFileId: Long,

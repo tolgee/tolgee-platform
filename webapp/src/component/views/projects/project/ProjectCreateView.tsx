@@ -4,50 +4,58 @@ import { useSelector } from 'react-redux';
 import { AppState } from '../../../../store';
 import { container } from 'tsyringe';
 import { ProjectActions } from '../../../../store/project/ProjectActions';
-import { LanguageDTO } from '../../../../service/response.types';
 import { LINKS } from '../../../../constants/links';
 import { Redirect } from 'react-router-dom';
 import { TextField } from '../../../common/form/fields/TextField';
 import { BaseFormView } from '../../../layout/BaseFormView';
-import { FieldArray } from '../../../common/form/fields/FieldArray';
 import { Validation } from '../../../../constants/GlobalValidationSchema';
 import { DashboardPage } from '../../../layout/DashboardPage';
-import { T } from '@tolgee/react';
-import { Grid } from '@material-ui/core';
+import { T, useTranslate } from '@tolgee/react';
+import { Box, Grid, Typography } from '@material-ui/core';
 import OwnerSelect from './components/OwnerSelect';
 import { useConfig } from '../../../../hooks/useConfig';
 import { components } from '../../../../service/apiSchema.generated';
+import { FormikProps } from 'formik';
+import { BaseLanguageSelect } from './components/BaseLanguageSelect';
+import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
 
 const actions = container.resolve(ProjectActions);
 
-type ValueType = {
-  name: string;
-  languages: Partial<LanguageDTO>[];
-  owner: number;
-};
+export type CreateProjectValueType =
+  components['schemas']['CreateProjectDTO'] & {
+    owner: number;
+  };
 
 export const ProjectCreateView: FunctionComponent = () => {
   const loadable = useSelector(
     (state: AppState) => state.projects.loadables.createProject
   );
+  const t = useTranslate();
 
   const config = useConfig();
 
-  const onSubmit = (values: ValueType) => {
-    const data = { ...values } as
-      | components['schemas']['CreateProjectDTO']
-      | any;
+  const onSubmit = (values: CreateProjectValueType) => {
+    const { owner, ...data } = {
+      ...values,
+    } as components['schemas']['CreateProjectDTO'] & { owner: number };
     if (values.owner !== 0) {
-      data.organizationId = values.owner;
+      data.organizationId = owner;
+      data.languages = data.languages.filter((l) => !!l);
     }
-    delete data.owner;
-    actions.loadableActions.createProject.dispatch(data);
+    actions.loadableActions.createProject.dispatch({
+      content: {
+        'application/json': data,
+      },
+    });
   };
 
-  const initialValues: ValueType = {
+  const initialValues: CreateProjectValueType = {
     name: '',
-    languages: [{ abbreviation: '', name: '' }],
+    languages: [
+      { tag: 'en', name: 'English', originalName: 'English', flagEmoji: '🇬🇧' },
+    ],
     owner: 0,
+    baseLanguageTag: 'en',
   };
 
   const [cancelled, setCancelled] = useState(false);
@@ -66,46 +74,46 @@ export const ProjectCreateView: FunctionComponent = () => {
         onSubmit={onSubmit}
         onCancel={() => setCancelled(true)}
         saveActionLoadable={loadable}
-        validationSchema={Validation.REPOSITORY_CREATION}
+        validationSchema={Validation.PROJECT_CREATION(t)}
       >
-        <>
-          <Grid container spacing={2}>
-            {config.authentication && (
-              <Grid item lg={3} md={4} sm={12} xs={12}>
-                <OwnerSelect />
+        {(props: FormikProps<CreateProjectValueType>) => {
+          return (
+            <Box mb={8}>
+              <Grid container spacing={2}>
+                {config.authentication && (
+                  <Grid item lg={3} md={4} sm={12} xs={12}>
+                    <OwnerSelect />
+                  </Grid>
+                )}
+                <Grid item lg md sm xs>
+                  <TextField
+                    autoFocus
+                    data-cy="project-name-field"
+                    label={<T>create_project_name_label</T>}
+                    name="name"
+                    required={true}
+                  />
+                </Grid>
               </Grid>
-            )}
-
-            <Grid item lg md sm xs>
-              <TextField
-                data-cy="project-name-field"
-                label={<T>create_project_name_label</T>}
-                name="name"
-                required={true}
-              />
-            </Grid>
-          </Grid>
-          <FieldArray name="languages">
-            {(n) => (
-              <>
-                <TextField
-                  data-cy="project-language-name-field"
-                  fullWidth={false}
-                  label={<T>create_project_language_name_label</T>}
-                  name={n('name')}
-                  required={true}
+              <Box mb={2}>
+                <Typography variant="h6">
+                  <T>project_create_languages_title</T>
+                </Typography>
+              </Box>
+              <CreateProjectLanguagesArrayField />
+              <Box mt={4}>
+                <Typography variant="h6">
+                  <T>project_create_base_language_label</T>
+                </Typography>
+                <BaseLanguageSelect
+                  valueKey="tag"
+                  name="baseLanguageTag"
+                  languages={props.values.languages}
                 />
-                <TextField
-                  data-cy="project-language-abbreviation-field"
-                  fullWidth={false}
-                  label={<T>create_project_language_abbreviation_label</T>}
-                  name={n('abbreviation')}
-                  required={true}
-                />
-              </>
-            )}
-          </FieldArray>
-        </>
+              </Box>
+            </Box>
+          );
+        }}
       </BaseFormView>
     </DashboardPage>
   );

@@ -4,7 +4,7 @@ interface ImportLanguageView {
     val id: Long
     val name: String
     val existingLanguageId: Long?
-    val existingLanguageAbbreviation: String?
+    val existingLanguageTag: String?
     val existingLanguageName: String?
     val importFileName: String
     val importFileId: Long

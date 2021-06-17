@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from 'react';
 import { Box, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { LanguageCreateForm } from '../../../../languages/LanguageCreateForm';
+import { CreateSingleLanguage } from '../../../../languages/CreateSingleLanguage';
 
 export const ImportLanguageCreateDialog: FunctionComponent<{
   open: boolean;
@@ -9,13 +9,18 @@ export const ImportLanguageCreateDialog: FunctionComponent<{
   onClose: () => void;
 }> = (props) => {
   return (
-    <Dialog open={props.open} aria-labelledby="form-dialog-title">
+    <Dialog
+      open={props.open}
+      aria-labelledby="form-dialog-title"
+      onClose={() => props.onClose()}
+      maxWidth={'md'}
+    >
       <DialogTitle id="form-dialog-title">
         <T>import_add_new_language_dialog_title</T>
       </DialogTitle>
       <DialogContent>
-        <Box mt={-2}>
-          <LanguageCreateForm
+        <Box mt={-1} minWidth={600}>
+          <CreateSingleLanguage
             onCreated={(language) => {
               props.onCreated(language.id);
             }}

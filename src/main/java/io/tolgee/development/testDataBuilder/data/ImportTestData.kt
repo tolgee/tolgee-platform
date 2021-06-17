@@ -59,25 +59,25 @@ class ImportTestData {
             english = addLanguage {
                 self {
                     name = "English"
-                    abbreviation = "en"
+                    tag = "en"
                 }
             }.self
             german = addLanguage {
                 self {
                     name = "German"
-                    abbreviation = "de"
+                    tag = "de"
                 }
             }.self
             czech = addLanguage {
                 self {
                     name = "Czech"
-                    abbreviation = "cs"
+                    tag = "cs"
                 }
             }.self
             french = addLanguage {
                 self {
                     name = "French"
-                    abbreviation = "fr"
+                    tag = "fr"
                 }
             }.self
             conflict = addTranslation {

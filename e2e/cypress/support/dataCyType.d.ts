@@ -4,7 +4,9 @@ declare namespace DataCy {
         "api-keys-create-edit-dialog" |
         "api-keys-edit-button" |
         "api-keys-project-select-item" |
+        "base-language-select" |
         "camera-button" |
+        "create-project-language-add-button" |
         "dropzone" |
         "dropzone-inner" |
         "global-base-view-content" |
@@ -13,9 +15,6 @@ declare namespace DataCy {
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |
         "global-confirmation-hard-mode-text-field" |
-        "global-field-array-add-button" |
-        "global-field-array-minus-button" |
-        "global-field-array-plus-button" |
         "global-form-cancel-button" |
         "global-form-save-button" |
         "global-form-select" |
@@ -65,6 +64,17 @@ declare namespace DataCy {
         "import-show-data-dialog" |
         "import_apply_import_button" |
         "import_cancel_import_button" |
+        "language-delete-button" |
+        "language-modify-form" |
+        "languages-create-autocomplete-field" |
+        "languages-create-autocomplete-suggested-option" |
+        "languages-create-cancel-prepared-button" |
+        "languages-create-customize-button" |
+        "languages-create-submit-button" |
+        "languages-flag-selector-open-button" |
+        "languages-modify-apply-button" |
+        "languages-modify-cancel-button" |
+        "languages-prepared-language-box" |
         "leave-organization-button" |
         "organization-address-part-field" |
         "organization-delete-button" |
@@ -87,14 +97,14 @@ declare namespace DataCy {
         "permissions-menu" |
         "permissions-menu-button" |
         "permissions-revoke-button" |
-        "project-language-abbreviation-field" |
-        "project-language-name-field" |
         "project-list-owner" |
         "project-menu-items" |
         "project-name-field" |
         "project-owner-select" |
         "project-owner-select-item" |
         "project-settings-button" |
+        "project-settings-languages-list-edit-button" |
+        "project-settings-languages-list-item" |
         "screenshot-box" |
         "translations-add-key-dialog" |
         "translations-add-key-field" |

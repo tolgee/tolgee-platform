@@ -40,20 +40,25 @@ export class ProjectActions extends AbstractLoadableActions<ProjectsState> {
       )
     ),
     editProject: this.createLoadableDefinition(
-      (id, values) => this.service.editProject(id, values),
+      this.apiSchemaHttpService.schemaRequest(
+        '/v2/projects/{projectId}',
+        'put'
+      ),
       undefined,
-      <T>project_successfully_edited_message</T>,
-      LINKS.PROJECTS.build()
+      <T>project_successfully_edited_message</T>
     ),
     createProject: this.createLoadableDefinition(
-      this.service.createProject,
+      this.apiSchemaHttpService.schemaRequest('/v2/projects', 'post'),
       undefined,
       <T>project_created_message</T>,
       LINKS.PROJECTS.build()
     ),
     project: this.createLoadableDefinition(this.service.loadProject),
     deleteProject: this.createLoadableDefinition(
-      this.service.deleteProject,
+      this.apiSchemaHttpService.schemaRequest(
+        '/v2/projects/{projectId}',
+        'delete'
+      ),
       (state: ProjectsState): ProjectsState => ({
         ...state,
         loadables: {
@@ -61,7 +66,8 @@ export class ProjectActions extends AbstractLoadableActions<ProjectsState> {
           project: { ...createLoadable() } as Loadable<ProjectDTO>,
         },
       }),
-      <T>project_deleted_message</T>
+      <T>project_deleted_message</T>,
+      LINKS.PROJECTS.build()
     ),
     setUsersPermissions: this.createLoadableDefinition(
       this.apiSchemaHttpService.schemaRequest(

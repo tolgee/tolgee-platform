@@ -16,7 +16,7 @@ import { useSetTranslations } from '../../service/hooks/Translation';
 import { parseErrorResponse } from '../../fixtures/errorFIxtures';
 
 export interface TranslationsTableCellProps {
-  abbreviation: string;
+  tag: string;
 }
 
 const actions = container.resolve(TranslationActions);
@@ -36,7 +36,7 @@ export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
     setTranslations.mutate(
       {
         key: context.data.name as string,
-        translations: { [props.abbreviation]: v },
+        translations: { [props.tag]: v },
       },
       {
         onError: (err) => {
@@ -64,16 +64,16 @@ export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
     const data = s.editing?.data as TranslationEditingType;
     return (
       s.editing?.type === 'translation' &&
-      data?.languageAbbreviation === props.abbreviation &&
+      data?.languageAbbreviation === props.tag &&
       data?.key === context.data.name
     );
   });
 
-  const initialValue = context.data.translations[props.abbreviation];
+  const initialValue = context.data.translations[props.tag];
 
   return (
     <EditableCell
-      initialValue={context.data.translations[props.abbreviation]}
+      initialValue={context.data.translations[props.tag]}
       validationSchema={Validation.TRANSLATION_TRANSLATION}
       onSubmit={handleSubmit}
       editEnabled={
@@ -88,13 +88,13 @@ export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
             initialValue,
             key: context.data.name as string,
             newValue: initialValue,
-            languageAbbreviation: props.abbreviation,
+            languageAbbreviation: props.tag,
           },
         });
       }}
       isEditing={isEditing}
       onCancel={() => actions.setTranslationEditing.dispatch({ data: null })}
-      lang={props.abbreviation}
+      lang={props.tag}
     />
   );
 };

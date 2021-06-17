@@ -1,8 +1,8 @@
 import { singleton } from 'tsyringe';
 import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { ErrorResponseDTO, ScreenshotDTO } from './response.types';
+import { ErrorResponseDto, ScreenshotDTO } from './response.types';
 
-type UploadResult = { stored: ScreenshotDTO[]; errors: ErrorResponseDTO[] };
+type UploadResult = { stored: ScreenshotDTO[]; errors: ErrorResponseDto[] };
 
 @singleton()
 export class ScreenshotService {
@@ -28,7 +28,7 @@ export class ScreenshotService {
           .postMultipart(`project/${projectId}/screenshots`, formData)
           .then((r) => ({ stored: r }))
           .catch((e) => ({ error: e }))) as {
-          error?: ErrorResponseDTO;
+          error?: ErrorResponseDto;
           stored?: ScreenshotDTO;
         };
       })

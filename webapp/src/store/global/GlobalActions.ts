@@ -2,7 +2,7 @@ import { SecurityDTO } from './types';
 import { singleton } from 'tsyringe';
 import { RemoteConfigService } from '../../service/RemoteConfigService';
 import { SecurityService } from '../../service/SecurityService';
-import { ErrorResponseDTO, TokenDTO } from '../../service/response.types';
+import { ErrorResponseDto, TokenDTO } from '../../service/response.types';
 import { UserService } from '../../service/UserService';
 import { ConfirmationDialogProps } from '../../component/common/ConfirmationDialog';
 import {
@@ -59,7 +59,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
 
   resetPasswordValidate = this.createPromiseAction<
     never,
-    ErrorResponseDTO,
+    ErrorResponseDto,
     Parameters<SecurityService['resetPasswordValidate']>
   >('RESET_PASSWORD_VALIDATE', this.securityService.resetPasswordValidate)
     .build.onPending((state) => {
@@ -82,7 +82,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
     });
   resetPasswordSet = this.createPromiseAction<
     void,
-    ErrorResponseDTO,
+    ErrorResponseDto,
     Parameters<SecurityService['resetPasswordSet']>
   >('RESET_PASSWORD_SET', this.securityService.resetPasswordSet)
     .build.onPending((state) => {
@@ -205,7 +205,7 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
     name: string,
     payloadProvider: (...params: DispatchParams) => Promise<TokenDTO>
   ) {
-    return this.createPromiseAction<TokenDTO, ErrorResponseDTO, DispatchParams>(
+    return this.createPromiseAction<TokenDTO, ErrorResponseDto, DispatchParams>(
       name,
       payloadProvider
     )

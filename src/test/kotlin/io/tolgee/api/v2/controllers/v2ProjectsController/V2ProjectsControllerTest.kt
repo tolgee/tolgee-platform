@@ -1,17 +1,19 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.v2ProjectsController
 
+import io.tolgee.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.controllers.SignedInControllerTest
+import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.dtos.request.ProjectInviteUserDto
 import io.tolgee.fixtures.*
 import io.tolgee.model.Permission
+import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerTest : SignedInControllerTest() {
-
+class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     @Test
     fun getAll() {
         dbPopulator.createBase("one", "kim")
@@ -32,7 +34,6 @@ class V2ProjectsControllerTest : SignedInControllerTest() {
             it.node("[2].organizationOwnerSlug").isEqualTo("cool")
         }
     }
-
 
     @Test
     fun get() {
@@ -207,5 +208,22 @@ class V2ProjectsControllerTest : SignedInControllerTest() {
 
         performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null)
                 .andIsBadRequest.andReturn().let { assertThat(it).error().hasCode("user_is_organization_member") }
+    }
+
+    @Test
+    fun deleteProject() {
+        val base = dbPopulator.createBase(generateUniqueString())
+        performAuthDelete("/v2/projects/${base.id}", null).andIsOk
+        val project = projectService.get(base.id)
+        Assertions.assertThat(project).isEmpty
+    }
+
+    @Test
+    @ProjectJWTAuthTestMethod
+    fun inviteUserToProject() {
+        val key = performProjectAuthPut("/invite", ProjectInviteUserDto(Permission.ProjectPermissionType.MANAGE))
+                .andIsOk.andGetContentAsString
+
+        assertThat(key).hasSize(50)
     }
 }

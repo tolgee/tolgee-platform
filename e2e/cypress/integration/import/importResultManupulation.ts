@@ -1,117 +1,143 @@
-import {cleanImportData, generateImportData, login} from "../../common/apiCalls";
-import 'cypress-file-upload';
-import {confirmStandard, gcy, selectInProjectMenu, selectInSelect} from "../../common/shared";
-import {getLanguageRow, getLanguageSelect, visitImport} from "../../common/import";
+import {
+  cleanImportData,
+  generateImportData,
+  login,
+} from "../../common/apiCalls";
+import "cypress-file-upload";
+import {
+  confirmStandard,
+  gcy,
+  selectInProjectMenu,
+  selectInSelect,
+} from "../../common/shared";
+import {
+  getLanguageRow,
+  getLanguageSelect,
+  visitImport,
+} from "../../common/import";
 
-describe('Import result & manipulation', () => {
-    beforeEach(() => {
-        cleanImportData()
+describe("Import result & manipulation", () => {
+  beforeEach(() => {
+    cleanImportData();
 
-        generateImportData().then(importData => {
-            login("franta")
-            visitImport(importData.body.project.id);
-        })
-    })
+    generateImportData().then((importData) => {
+      login("franta");
+      visitImport(importData.body.project.id);
+    });
+  });
 
-    it("Shows correct import result", () => {
-        cy.gcy("import-result-row").should("have.length", 3)
+  it("Shows correct import result", () => {
+    cy.gcy("import-result-row").should("have.length", 3);
 
+    getLanguageRow("multilang.json (en)").within(() => {
+      cy.gcy("import-result-resolve-button")
+        .should("contain", "0 / 4")
+        .should("not.be.disabled");
+      cy.gcy("import-result-language-menu-cell").should(
+        "not.contain",
+        "German"
+      );
+      cy.gcy("import-result-language-menu-cell").should("contain", "English");
+      cy.gcy("import-result-total-count-cell").should("contain", "6");
+    });
 
-        getLanguageRow("multilang.json (en)").within(() => {
-                cy.gcy("import-result-resolve-button")
-                    .should("contain", "0 / 4").should("not.be.disabled");
-                cy.gcy("import-result-language-menu-cell").should("not.contain", "German")
-                cy.gcy("import-result-language-menu-cell").should("contain", "English")
-                cy.gcy("import-result-total-count-cell").should("contain", "6")
+    getLanguageRow("multilang.json (de)").within(() => {
+      cy.gcy("import-result-resolve-button")
+        .should("contain", "0 / 0")
+        .should("be.disabled");
+      cy.gcy("import-result-language-menu-cell").should("contain", "German");
+      cy.gcy("import-result-language-menu-cell").should(
+        "not.contain",
+        "English"
+      );
+    });
+  });
 
-            }
-        )
+  it("Shows correct file issues number", () => {
+    getLanguageRow("multilang.json (en)")
+      .findDcy("import-result-file-warnings")
+      .should("contain", "4");
+  });
 
-        getLanguageRow("multilang.json (de)").within(() => {
-                cy.gcy("import-result-resolve-button")
-                    .should("contain", "0 / 0").should("be.disabled");
-                cy.gcy("import-result-language-menu-cell").should("contain", "German")
-                cy.gcy("import-result-language-menu-cell").should("not.contain", "English")
-            }
-        )
-    })
+  it("Selects language", () => {
+    const select = getLanguageSelect("multilang.json (fr)");
+    selectInSelect(select, "French");
+    select.should("contain", "French");
+    select.should("not.contain", "Czech");
+  });
 
-    it("Shows correct file issues number", () => {
-            getLanguageRow("multilang.json (en)").findDcy("import-result-file-warnings").should("contain", "4")
-        }
-    )
+  it("Changes language", () => {
+    const filename = "multilang.json (en)";
+    let select = getLanguageSelect(filename);
+    selectInSelect(select, "French");
+    select.should("contain", "French");
+    select.should("not.contain", "Czech");
+    cy.reload();
+    getLanguageSelect(filename);
+    select.should("contain", "French");
+  });
 
-    it("Selects language", () => {
-            const select = getLanguageSelect("multilang.json (fr)")
-            selectInSelect(select, "French")
-            select.should("contain", "French")
-            select.should("not.contain", "Czech")
-        }
-    )
+  it("Clears existing language", () => {
+    const filename = "multilang.json (en)";
+    getLanguageRow(filename).should("contain.text", "English");
+    getLanguageRow(filename)
+      .findDcy("import-row-language-select-clear-button")
+      .click()
+      .should("not.exist");
+    getLanguageSelect(filename).should("not.contain", "English");
+    cy.reload();
+    getLanguageSelect(filename);
+    getLanguageSelect(filename).should("not.contain.text", "English");
+    getLanguageRow(filename)
+      .gcy("import-result-resolved-conflicts-cell")
+      .should("contain.text", "0 / 0");
+  });
 
-    it("Changes language", () => {
-            const filename = "multilang.json (en)"
-            let select = getLanguageSelect(filename)
-            selectInSelect(select, "French")
-            select.should("contain", "French")
-            select.should("not.contain", "Czech")
-            cy.reload()
-            getLanguageSelect(filename)
-            select.should("contain", "French")
-        }
-    )
+  it("Adds new language", () => {
+    const filename = "multilang.json (en)";
+    let select = getLanguageSelect(filename);
+    selectInSelect(select, "Add new");
+    cy.gcy("languages-create-autocomplete-field").find("input").type("aze");
+    cy.gcy("languages-create-autocomplete-suggested-option")
+      .contains("Azerbaijani")
+      .click();
+    gcy("languages-create-submit-button").click();
+    getLanguageSelect(filename).should("contain.text", "Azerbaijani");
+    selectInProjectMenu("Project settings");
+    cy.contains("Azerbaijani").should("be.visible");
+  });
 
-    it("Clears existing language", () => {
-            const filename = "multilang.json (en)"
-            getLanguageRow(filename).should("contain.text", "English")
-            getLanguageRow(filename).findDcy("import-row-language-select-clear-button").click().should("not.exist")
-            getLanguageSelect(filename).should("not.contain", "English")
-            cy.reload()
-            getLanguageSelect(filename)
-            getLanguageSelect(filename).should("not.contain.text", "English")
-            getLanguageRow(filename).gcy("import-result-resolved-conflicts-cell").should("contain.text", "0 / 0")
-        }
-    )
+  it("Deletes language", () => {
+    getLanguageRow("multilang.json (en)")
+      .findDcy("import-result-delete-language-button")
+      .click();
+    confirmStandard();
+    cy.reload();
+    cy.gcy("import-result-row").should("have.length", 2);
+    cy.reload();
+    cy.gcy("import-result-row").should("have.length", 2);
+  });
 
-    it("Adds new language", () => {
-        const filename = "multilang.json (en)"
-        let select = getLanguageSelect(filename)
-        selectInSelect(select, "Add new")
-        cy.xpath("//input[@name='name']").type("New language")
-        cy.xpath("//input[@name='abbreviation']").type("nl")
-        gcy("global-form-save-button").click()
-        getLanguageSelect(filename).should("contain.text", "New language")
-        selectInProjectMenu("Languages")
-        cy.contains("New language").should("be.visible")
-    })
+  it("Cancels import", () => {
+    gcy("import_cancel_import_button").click();
+    confirmStandard();
+    cy.gcy("import-result-row").should("not.exist");
+  });
 
-    it("Deletes language", () => {
-            getLanguageRow("multilang.json (en)").findDcy("import-result-delete-language-button").click()
-            confirmStandard()
-            cy.reload()
-            cy.gcy("import-result-row").should("have.length", 2)
-            cy.reload()
-            cy.gcy("import-result-row").should("have.length", 2)
-        }
-    )
+  it("Doesn't apply when language not selected", () => {
+    const filename = "multilang.json (fr)";
+    getLanguageSelect(filename).should(
+      "not.contain.text",
+      "Select existing language"
+    );
+    gcy("import_apply_import_button").click();
+    getLanguageSelect(filename).should(
+      "contain.text",
+      "Select existing language"
+    );
+  });
 
-    it("Cancels import", () => {
-            gcy("import_cancel_import_button").click()
-            confirmStandard()
-            cy.gcy("import-result-row").should("not.exist")
-        }
-    )
-
-    it("Doesn't apply when language not selected", () => {
-            const filename = "multilang.json (fr)"
-            getLanguageSelect(filename).should("not.contain.text", "Select existing language")
-            gcy("import_apply_import_button").click()
-            getLanguageSelect(filename).should("contain.text", "Select existing language")
-        }
-    )
-
-    after(() => {
-        cleanImportData()
-    })
-})
-
+  after(() => {
+    cleanImportData();
+  });
+});

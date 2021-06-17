@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 @Service
 @Transactional
@@ -28,7 +27,6 @@ class OrganizationService(
         private val projectService: ProjectService,
         private val organizationRoleService: OrganizationRoleService,
         private val invitationService: InvitationService,
-        private val entityManager: EntityManager
 ) {
 
     @Transactional

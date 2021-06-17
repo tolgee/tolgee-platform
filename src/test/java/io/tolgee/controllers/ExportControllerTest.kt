@@ -26,7 +26,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
         mvcResult.response
         val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
         project.languages.forEach(Consumer { l: Language ->
-            val name = l.abbreviation + ".json"
+            val name = l.tag + ".json"
             Assertions.assertThat(fileSizes).containsKey(name)
         })
         //cleanup
@@ -43,7 +43,7 @@ class ExportControllerTest : ProjectAuthControllerTest() {
         mvcResult.response
         val fileSizes = parseZip(mvcResult.response.contentAsByteArray)
         project.languages.forEach(Consumer { l: Language ->
-            val name = l.abbreviation + ".json"
+            val name = l.tag + ".json"
             Assertions.assertThat(fileSizes).containsKey(name)
         })
         //cleanup

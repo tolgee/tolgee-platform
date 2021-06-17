@@ -108,12 +108,15 @@ export class Validation {
   static readonly TRANSLATION_TRANSLATION = Yup.string();
 
   static readonly LANGUAGE_NAME = Yup.string().required().max(100);
-
-  static readonly LANGUAGE_ABBREVIATION = Yup.string().required().max(20);
+  static readonly LANGUAGE_TAG = Yup.string().required().max(20);
+  static readonly LANGUAGE_ORIGINAL_NAME = Yup.string().required().max(100);
+  static readonly LANGUAGE_FLAG_EMOJI = Yup.string().required().max(20);
 
   static readonly LANGUAGE = Yup.object().shape({
     name: Validation.LANGUAGE_NAME,
-    abbreviation: Validation.LANGUAGE_ABBREVIATION,
+    originalName: Validation.LANGUAGE_ORIGINAL_NAME,
+    tag: Validation.LANGUAGE_TAG,
+    flagEmoji: Validation.LANGUAGE_FLAG_EMOJI,
   });
 
   static readonly KEY_TRANSLATION_CREATION = (langs: string[]) => {
@@ -130,20 +133,25 @@ export class Validation {
     });
   };
 
-  static readonly REPOSITORY_CREATION = Yup.object().shape({
-    name: Yup.string().required().min(3).max(50),
-    languages: Yup.array()
-      .required()
-      .of(
-        Yup.object().shape({
-          name: Validation.LANGUAGE_NAME.label('name').required(),
-          abbreviation:
-            Validation.LANGUAGE_ABBREVIATION.label('name').required(),
-        })
-      ),
-  });
+  static readonly PROJECT_CREATION = (t: (string) => string) =>
+    Yup.object().shape({
+      name: Yup.string().required().min(3).max(50),
+      languages: Yup.array()
+        .required()
+        .min(1, t('project_creation_add_at_least_one_language'))
+        .of(Validation.LANGUAGE.nullable())
+        .test(
+          'language-repeated',
+          t('create_project_validation_language_repeated'),
+          (values) =>
+            new Set(values?.map((i) => i?.name)).size ==
+              (values?.length || 0) &&
+            new Set(values?.map((i) => i?.tag)).size == (values?.length || 0)
+        ),
+      baseLanguageTag: Yup.string().required(),
+    });
 
-  static readonly REPOSITORY_SETTINGS = Yup.object().shape({
+  static readonly PROJECT_SETTINGS = Yup.object().shape({
     name: Yup.string().required().min(3).max(100),
   });
 

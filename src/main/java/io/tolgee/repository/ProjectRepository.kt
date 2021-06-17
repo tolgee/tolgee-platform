@@ -11,11 +11,13 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
     companion object {
-        const val BASE_ALL_PERMITTED_QUERY = """select r.id as id, r.name as name, r.description as description,
+        const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
         r.slug as slug, 
         ua as userOwner, o.name as organizationOwnerName, o.slug as organizationOwnerSlug, 
+        bl as baseLanguage,
         o.basePermissions as organizationBasePermissions, role.type as organizationRole, p.type as directPermissions
         from Project r 
+        left join r.baseLanguage bl
         left join UserAccount ua on ua.id = r.userOwner.id
         left join Permission p on p.project = r and p.user.id = :userAccountId
         left join Organization o on r.organizationOwner = o
@@ -32,7 +34,7 @@ interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
         """)
     fun findAllPermitted(userAccountId: Long): List<Array<Any>>
 
-    @Query("""$BASE_ALL_PERMITTED_QUERY 
+    @Query("""$BASE_VIEW_QUERY 
                 and (:search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
                 or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
                 or lower(ua.name) like lower(concat('%', cast(:search as text),'%')))
@@ -41,7 +43,7 @@ interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
 
     fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<io.tolgee.model.Project>
 
-    @Query("""$BASE_ALL_PERMITTED_QUERY and o.id = :organizationOwnerId and o is not null
+    @Query("""$BASE_VIEW_QUERY and o.id = :organizationOwnerId and o is not null
          and ((lower(r.name) like lower(concat('%', cast(:search as text),'%'))
                 or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
                 or lower(ua.name) like lower(concat('%', cast(:search as text),'%')) or cast(:search as text) is null)
@@ -50,7 +52,7 @@ interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
 
     fun countAllBySlug(slug: String): Long
 
-    @Query("""$BASE_ALL_PERMITTED_QUERY and r.id = :projectId""")
+    @Query("""$BASE_VIEW_QUERY and r.id = :projectId""")
     fun findViewById(userAccountId: Long, projectId: Long): ProjectView?
 
     fun findAllByName(name: String): List<io.tolgee.model.Project>

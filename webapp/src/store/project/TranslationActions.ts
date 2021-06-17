@@ -5,7 +5,6 @@ import {
 } from '../AbstractLoadableActions';
 import { AppState } from '../index';
 import { useSelector } from 'react-redux';
-import { ProjectPreferencesService } from '../../service/ProjectPreferencesService';
 
 export type TranslationEditingType = {
   key: string;
@@ -29,7 +28,7 @@ export class TranslationsState extends StateWithLoadables<TranslationActions> {
 
 @singleton()
 export class TranslationActions extends AbstractLoadableActions<TranslationsState> {
-  constructor(private selectedLanguagesService: ProjectPreferencesService) {
+  constructor() {
     super(new TranslationsState());
   }
 
@@ -37,25 +36,22 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
     (state, action) =>
       <TranslationsState>{ ...state, selectedLanguages: action.payload }
   );
-
   otherEditionConfirm = this.createAction(
     'OTHER_EDITION_CONFIRM',
     () => {}
-  ).build.on((state, action) => ({
+  ).build.on((state) => ({
     ...state,
     //@ts-ignore
     editing: { ...state.editingAfterConfirmation },
     editingAfterConfirmation: null,
   }));
-
   otherEditionCancel = this.createAction(
     'OTHER_EDITION_CANCEL',
     () => {}
-  ).build.on((state, action) => ({
+  ).build.on((state) => ({
     ...state,
     editingAfterConfirmation: null,
   }));
-
   setEditingValue = this.createAction(
     'SET_EDITING_VALUE',
     (val: string) => val
@@ -69,7 +65,6 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
       },
     };
   });
-
   setTranslationEditing = this.createAction(
     'SET_TRANSLATION_EDITING',
     (data: { data: TranslationEditingType; skipConfirm?: boolean }) => data
@@ -86,7 +81,6 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
       },
     };
   });
-
   setKeyEditing = this.createAction(
     'SET_KEY_EDITING',
     (data: SourceEditingType) => data

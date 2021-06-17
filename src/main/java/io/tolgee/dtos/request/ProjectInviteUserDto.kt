@@ -5,7 +5,5 @@ import javax.validation.constraints.NotNull
 
 data class ProjectInviteUserDto(
         @field:NotNull
-        var projectId: Long? = null,
-        @field:NotNull
         var type: ProjectPermissionType? = null
 )

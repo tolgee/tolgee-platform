@@ -23,18 +23,21 @@ import { useProject } from '../../../../hooks/useProject';
 import { Navigation } from '../../../navigation/Navigation';
 
 const actions = container.resolve(ProjectInvitationActions);
-
 export const ProjectInviteView: FunctionComponent<Record<string, unknown>> = (
   props
 ) => {
   const match = useRouteMatch();
   const projectId = match.params[PARAMS.PROJECT_ID];
 
+  const generateLoadable = useSelector(
+    (state: AppState) => state.projectInvitation.loadables.generateInvitation
+  );
+
   const state = useSelector((state: AppState) => state.projectInvitation);
 
   useEffect(() => {
     actions.loadableActions.list.dispatch(projectId);
-  }, [state.invitationCode]);
+  }, [generateLoadable.data]);
 
   const project = useProject();
 
@@ -71,7 +74,7 @@ export const ProjectInviteView: FunctionComponent<Record<string, unknown>> = (
       {() => (
         <>
           <StandardForm
-            loading={state.invitationLoading}
+            saveActionLoadable={generateLoadable}
             submitButtons={
               <Button
                 variant="contained"
@@ -82,7 +85,16 @@ export const ProjectInviteView: FunctionComponent<Record<string, unknown>> = (
                 <T>invite_user_generate_invitation_link</T>
               </Button>
             }
-            onSubmit={(v) => actions.generateCode.dispatch(projectId, v.type)}
+            onSubmit={(v) =>
+              actions.loadableActions.generateInvitation.dispatch({
+                path: {
+                  projectId: projectId,
+                },
+                content: {
+                  'application/json': v,
+                },
+              })
+            }
             initialValues={{ type: 'MANAGE' }}
           >
             <PermissionSelect
@@ -92,7 +104,7 @@ export const ProjectInviteView: FunctionComponent<Record<string, unknown>> = (
             />
           </StandardForm>
 
-          {state.invitationCode && (
+          {generateLoadable.data && (
             <Box mt={2}>
               <TextField
                 fullWidth
@@ -101,7 +113,7 @@ export const ProjectInviteView: FunctionComponent<Record<string, unknown>> = (
                   readOnly: true,
                 }}
                 value={LINKS.ACCEPT_INVITATION.buildWithOrigin({
-                  [PARAMS.INVITATION_CODE]: state.invitationCode,
+                  [PARAMS.INVITATION_CODE]: generateLoadable.data,
                 })}
                 label={<T>invite_user_invitation_code</T>}
               />

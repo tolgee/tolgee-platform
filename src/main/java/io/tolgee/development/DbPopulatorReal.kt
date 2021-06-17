@@ -2,7 +2,7 @@ package io.tolgee.development
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.ApiScope
-import io.tolgee.dtos.request.LanguageDTO
+import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.*
@@ -174,7 +174,7 @@ class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     private fun createLanguage(name: String, project: Project): Language {
-        return languageService.createLanguage(LanguageDTO(null, name, name), project)
+        return languageService.createLanguage(LanguageDto(name, name, name), project)
     }
 
     private fun createTranslation(project: Project, english: String,

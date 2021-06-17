@@ -3,7 +3,6 @@ import {
   createProjectsData,
   login,
 } from "../../common/apiCalls";
-import { HOST } from "../../common/constants";
 import "cypress-file-upload";
 import {
   assertMessage,
@@ -12,9 +11,15 @@ import {
   goToPage,
   selectInProjectMenu,
 } from "../../common/shared";
+import {
+  enterProject,
+  enterProjectSettings,
+  visitList,
+} from "../../common/projects";
 
 describe("Project Permissions", () => {
-  beforeEach(() => {});
+  beforeEach(() => {
+  });
 
   describe("Cukrberg's permissions", () => {
     before(() => {
@@ -170,29 +175,7 @@ describe("Project Permissions", () => {
   });
 });
 
-const enterProjectSettings = (projectName: string) => {
-  visitList();
-
-  gcy("global-paginated-list")
-    .contains(projectName)
-    .closest("li")
-    .within(() => {
-      cy.gcy("project-settings-button").should("be.visible").click();
-    });
-};
-
-const enterProject = (projectName: string) => {
-  visitList();
-
-  gcy("global-paginated-list").contains(projectName).closest("a").click();
-  gcy("global-base-view-content").should("be.visible");
-};
-
-const visitList = () => {
-  cy.visit(`${HOST}`);
-};
-
-const MANAGE_PROJECT_ITEMS = ["Permissions", "Languages"];
+const MANAGE_PROJECT_ITEMS = ["Permissions"];
 const OTHER_PROJECT_ITEMS = ["Projects", "Export"];
 
 const assertManageMenuItemsNotVisible = () => {

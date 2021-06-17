@@ -7,24 +7,25 @@ import org.springframework.test.web.servlet.ResultActions
 
 @Component
 @Scope("prototype")
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class ProjectJwtAuthRequestPerformer(
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        private val userAccount: UserAccount,
-) : ProjectAuthRequestPerformer(userAccount) {
+        userAccount: UserAccount,
+        projectUrlPrefix: String
+) : ProjectAuthRequestPerformer(userAccount, projectUrlPrefix) {
 
     override fun performProjectAuthPut(url: String, content: Any?): ResultActions {
-        return super.performAuthPut(API_PROJECT_URL_PREFIX + project.id + "/" + url, content)
+        return super.performAuthPut(projectUrlPrefix + project.id + "/" + url, content)
     }
 
     override fun performProjectAuthPost(url: String, content: Any?): ResultActions {
-        return performAuthPost(API_PROJECT_URL_PREFIX + project.id + "/" + url, content)
+        return performAuthPost(projectUrlPrefix + project.id + "/" + url, content)
     }
 
     override fun performProjectAuthGet(url: String): ResultActions {
-        return performAuthGet(API_PROJECT_URL_PREFIX + project.id + "/" + url)
+        return performAuthGet(projectUrlPrefix + project.id + "/" + url)
     }
 
     override fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
-        return performAuthDelete(API_PROJECT_URL_PREFIX + project.id + "/" + url, content)
+        return performAuthDelete(projectUrlPrefix + project.id + "/" + url, content)
     }
 }
