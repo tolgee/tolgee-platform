@@ -1,3 +1,4 @@
+import { useQueryClient } from 'react-query';
 import { Button, Menu, MenuItem } from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
 import { T } from '@tolgee/react';
@@ -7,32 +8,43 @@ import { components } from '../../../../service/apiSchema.generated';
 import { FunctionComponent } from 'react';
 import { OrganizationRoleType } from '../../../../service/response.types';
 import { container } from 'tsyringe';
-import { OrganizationActions } from '../../../../store/organization/OrganizationActions';
-import { useOrganization } from '../../../../hooks/organizations/useOrganization';
-import { confirmation } from '../../../../hooks/confirmation';
 
-const actions = container.resolve(OrganizationActions);
+import { MessageService } from '../../../../service/MessageService';
+import { useOrganization } from '../useOrganization';
+import { confirmation } from '../../../../hooks/confirmation';
+import { usePutOrganizationRole } from '../../../../service/hooks/Organization';
+
+const messagingService = container.resolve(MessageService);
 
 export const OrganizationRoleMenu: FunctionComponent<{
   user: components['schemas']['UserAccountWithOrganizationRoleModel'];
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
+  const queryClient = useQueryClient();
+
   const currentUser = useUser();
   const organization = useOrganization();
+  const setRole = usePutOrganizationRole(organization!.id, props.user.id);
 
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  const handleSet = (type: string) => {
+  const handleSet = (type) => {
     confirmation({
       message: <T>really_want_to_change_role_confirmation</T>,
       onConfirm: () =>
-        actions.loadableActions.setRole.dispatch(
-          organization.id,
-          props.user!.id,
-          type
+        setRole.mutate(
+          { roleType: type },
+          {
+            onSuccess: () => {
+              messagingService.success(
+                <T>organization_role_changed_message</T>
+              );
+              queryClient.invalidateQueries([]);
+            },
+          }
         ),
     });
 

@@ -46,7 +46,7 @@ export const SimpleList = <
   return (
     <>
       <Wrapper {...wrapperProps}>
-        <ListWrapper {...props.listComponentProps}>
+        <ListWrapper data-cy="global-list-items" {...props.listComponentProps}>
           {data.map((i) => props.renderItem(i))}
         </ListWrapper>
         {pagination && pagination.pageCount > 1 && (

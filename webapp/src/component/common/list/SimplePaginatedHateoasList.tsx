@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { JSXElementConstructor, ReactNode, useEffect, useState } from 'react';
 import { EmptyListMessage } from '../EmptyListMessage';
 import { OverridableListWrappers, SimpleList } from './SimpleList';
@@ -15,7 +14,7 @@ import { T } from '@tolgee/react';
 import {
   EmbeddedDataItem,
   usePaginatedHateoasDataHelper,
-} from '../../../hooks/usePaginatedHateoasDataHelper';
+} from './usePaginatedHateoasDataHelper';
 
 export type SimplePaginatedHateoasListProps<
   ActionsType extends AbstractLoadableActions<StateWithLoadables<ActionsType>>,

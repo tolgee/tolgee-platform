@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import {
   Box,
   FormControl,
@@ -7,24 +6,18 @@ import {
   Select,
 } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
-import { OrganizationActions } from '../../../../../store/organization/OrganizationActions';
 import { useUser } from '../../../../../hooks/useUser';
 import { useField } from 'formik';
 import { BoxLoading } from '../../../../common/BoxLoading';
-
-const organizationActions = container.resolve(OrganizationActions);
+import { useGetOrganizations } from '../../../../../service/hooks/Organization';
 
 const OwnerSelect = () => {
   const user = useUser();
 
-  const organizationsLoadable = organizationActions.useSelector(
-    (state) => state.loadables.listPermittedForMenu
-  );
-
-  useEffect(() => {
-    organizationActions.loadableActions.listPermittedForMenu.dispatch();
-  }, []);
+  const organizationsLoadable = useGetOrganizations({
+    filterCurrentUserOwner: true,
+    size: 100,
+  });
 
   const data = [{ value: 0, render: user?.name, key: 0 }];
   organizationsLoadable.data?._embedded?.organizations?.forEach((i) =>
@@ -58,7 +51,7 @@ const OwnerSelect = () => {
             return data.find((i) => i.value === v)?.render;
           }}
         >
-          {organizationsLoadable.loaded ? items : <BoxLoading />}
+          {organizationsLoadable.isLoading ? <BoxLoading /> : items}
         </Select>
       </FormControl>
     </Box>

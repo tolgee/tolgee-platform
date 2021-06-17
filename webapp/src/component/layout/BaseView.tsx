@@ -61,7 +61,10 @@ export const BaseView = (props: BaseViewProps) => {
         <Box position="relative" overflow="visible">
           <Box position="absolute" width="100%">
             {(globalLoading || props.loading) && (
-              <LinearProgress data-cy="global-base-view-loading" style={{ height: '2px' }} />
+              <LinearProgress
+                data-cy="global-base-view-loading"
+                style={{ height: '2px' }}
+              />
             )}
           </Box>
         </Box>

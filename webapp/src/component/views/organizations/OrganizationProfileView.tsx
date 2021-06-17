@@ -1,62 +1,75 @@
-import * as React from 'react';
-import { FunctionComponent, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useRouteMatch } from 'react-router-dom';
+import { FunctionComponent, useState } from 'react';
 import { container } from 'tsyringe';
 import { T, useTranslate } from '@tolgee/react';
-import { OrganizationActions } from '../../../store/organization/OrganizationActions';
-import { AppState } from '../../../store';
-import { LINKS } from '../../../constants/links';
 import { Redirect } from 'react-router-dom';
-import { components } from '../../../service/apiSchema.generated';
 import { Validation } from '../../../constants/GlobalValidationSchema';
 import { OrganizationFields } from './components/OrganizationFields';
 import { MessageService } from '../../../service/MessageService';
 import { StandardForm } from '../../common/form/StandardForm';
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
-import { useOrganization } from '../../../hooks/organizations/useOrganization';
 import { Button } from '@material-ui/core';
 import { confirmation } from '../../../hooks/confirmation';
+import {
+  OrganizationBody,
+  useDeleteOrganization,
+  useGetOrganization,
+  usePutOrganization,
+} from '../../../service/hooks/Organization';
+import { RedirectionActions } from '../../../store/global/RedirectionActions';
+import { LINKS, PARAMS } from '../../../constants/links';
 
-const actions = container.resolve(OrganizationActions);
+const redirectionActions = container.resolve(RedirectionActions);
 const messageService = container.resolve(MessageService);
 
 export const OrganizationProfileView: FunctionComponent = () => {
-  const saveLoadable = useSelector(
-    (state: AppState) => state.organizations.loadables.edit
-  );
   const t = useTranslate();
 
-  const organization = useOrganization();
+  const match = useRouteMatch();
+  const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
 
-  const onSubmit = (values: components['schemas']['OrganizationModel']) => {
+  const organization = useGetOrganization(organizationSlug);
+  const editOrganization = usePutOrganization(organization.data?.id as number);
+  const deleteOrganization = useDeleteOrganization();
+
+  const onSubmit = (values: OrganizationBody) => {
     const toSave = {
       name: values.name,
       description: values.description,
       basePermissions: values.basePermissions,
       slug: values.slug,
-    } as components['schemas']['OrganizationDto'];
+    } as OrganizationBody;
 
-    actions.loadableActions.edit.dispatch(organization?.id, toSave);
+    editOrganization.mutate(toSave, {
+      onSuccess: (data) => {
+        if (data.slug !== organizationSlug) {
+          redirectionActions.redirect.dispatch(
+            LINKS.ORGANIZATION_PROFILE.build({
+              [PARAMS.ORGANIZATION_SLUG]: data.slug,
+            })
+          );
+        } else {
+          organization.refetch();
+        }
+        messageService.success(<T>organization_updated_message</T>);
+      },
+    });
   };
 
-  const initialValues: components['schemas']['OrganizationDto'] | null =
-    actions.useSelector((state) => state.loadables.get).data;
+  const initialValues = organization.data;
   const [cancelled, setCancelled] = useState(false);
-
-  useEffect(() => {
-    if (saveLoadable.loaded) {
-      actions.loadableReset.edit.dispatch();
-      actions.loadableReset.get.dispatch();
-      messageService.success(<T>organization_updated_message</T>);
-    }
-  }, [saveLoadable.loaded]);
 
   const handleDelete = () => {
     confirmation({
-      hardModeText: organization.name.toUpperCase(),
+      hardModeText: organization.data?.name.toUpperCase(),
       message: <T>delete_organization_confirmation_message</T>,
       onConfirm: () =>
-        actions.loadableActions.deleteOrganization.dispatch(organization.id),
+        deleteOrganization.mutate(organization.data!.id, {
+          onSuccess: () => {
+            messageService.success(<T>organization_deleted_message</T>);
+            redirectionActions.redirect.dispatch(LINKS.ORGANIZATIONS.build());
+          },
+        }),
     });
   };
 
@@ -70,7 +83,6 @@ export const OrganizationProfileView: FunctionComponent = () => {
         initialValues={initialValues!}
         onSubmit={onSubmit}
         onCancel={() => setCancelled(true)}
-        saveActionLoadable={saveLoadable}
         validationSchema={Validation.ORGANIZATION_CREATE_OR_EDIT(
           t,
           initialValues?.slug

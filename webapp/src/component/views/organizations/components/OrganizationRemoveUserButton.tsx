@@ -1,18 +1,21 @@
-import React from 'react';
 import { Button } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { OrganizationActions } from '../../../../store/organization/OrganizationActions';
 import { container } from 'tsyringe';
-import { useOrganization } from '../../../../hooks/organizations/useOrganization';
+import { useOrganization } from '../useOrganization';
 import { confirmation } from '../../../../hooks/confirmation';
+import { useDeleteOrganizationUser } from '../../../../service/hooks/Organization';
+import { useQueryClient } from 'react-query';
+import { MessageService } from '../../../../service/MessageService';
 
-const actions = container.resolve(OrganizationActions);
+const messageService = container.resolve(MessageService);
 
 const OrganizationRemoveUserButton = (props: {
   userId: number;
   userName: string;
 }) => {
+  const queryClient = useQueryClient();
   const organization = useOrganization();
+  const removeUserLoadable = useDeleteOrganizationUser(organization!.id);
 
   const removeUser = () => {
     confirmation({
@@ -22,10 +25,14 @@ const OrganizationRemoveUserButton = (props: {
         </T>
       ),
       onConfirm: () =>
-        actions.loadableActions.removeUser.dispatch(
-          organization.id,
-          props.userId
-        ),
+        removeUserLoadable.mutate(props.userId, {
+          onSuccess: () => {
+            messageService.success(<T>organization_user_deleted</T>);
+            queryClient.invalidateQueries(['organizations'], {
+              refetchActive: true,
+            });
+          },
+        }),
     });
   };
 

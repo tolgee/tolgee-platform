@@ -22,20 +22,20 @@ describe('Organization Invitations', () => {
         generateInvitation("OWNER")
         generateInvitation("OWNER")
         generateInvitation("MEMBER")
-        cy.xpath("//*[@data-cy='simple-hateoas-list']//li").should("have.length", 4)
-        gcy("simple-hateoas-list").xpath("." + getAnyContainingText("MEMBER")).should("have.length", 2)
-        gcy("simple-hateoas-list").xpath("." + getAnyContainingText("OWNER")).should("have.length", 2)
+        cy.xpath("//*[@data-cy='global-list-items']//li").should("have.length", 4)
+        gcy("global-list-items").xpath("." + getAnyContainingText("MEMBER")).should("have.length", 2)
+        gcy("global-list-items").xpath("." + getAnyContainingText("OWNER")).should("have.length", 2)
     })
 
     it("cancels invitation", () => {
         generateInvitation("MEMBER")
         generateInvitation("OWNER")
 
-        cy.xpath("//*[@data-cy='simple-hateoas-list']//li").should("have.length", 2)
+        cy.xpath("//*[@data-cy='global-list-items']//li").should("have.length", 2)
         gcy("organization-invitation-cancel-button").eq(0).click()
-        cy.xpath("//*[@data-cy='simple-hateoas-list']//li").should("have.length", 1)
+        cy.xpath("//*[@data-cy='global-list-items']//li").should("have.length", 1)
         gcy("organization-invitation-cancel-button").click()
-        gcy("simple-hateoas-list").should("not.exist")
+        gcy("global-list-items").should("not.exist")
     })
 
     it("owner invitation can be accepted", () => {

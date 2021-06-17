@@ -140,6 +140,10 @@ describe("Translations", () => {
           visit();
         })
       );
+
+      // wait for loading to appear and disappear again
+      cy.gcy("global-base-view-loading").should("be.visible");
+      cy.gcy("global-base-view-loading").should("not.exist");
     });
 
     it("will edit key", () => {

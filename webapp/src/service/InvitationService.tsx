@@ -32,7 +32,7 @@ export class InvitationService {
 
     try {
       await http.get('invitation/accept/' + code);
-      this.messaging.success(<T>Invitation successfully accepted</T>);
+      this.messaging.success(<T>invitation_code_accepted</T>);
     } catch (e) {
       if ((e as ErrorResponseDto).code) {
         this.messaging.error(<T>{e.code}</T>);

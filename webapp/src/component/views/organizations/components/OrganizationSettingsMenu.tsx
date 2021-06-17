@@ -1,8 +1,7 @@
 import { MenuItem, MenuList, Paper } from '@material-ui/core';
 import { Link } from 'react-router-dom';
-import * as React from 'react';
 import { T } from '@tolgee/react';
-import { useOrganizationMenuItems } from '../../../../hooks/organizations/useOrganizationMenuItems';
+import { useOrganizationMenuItems } from '../useOrganizationMenuItems';
 
 export const OrganizationSettingsMenu = () => {
   const menuItems = useOrganizationMenuItems();

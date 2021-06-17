@@ -1,4 +1,4 @@
-import { LINKS, PARAMS } from '../../constants/links';
+import { LINKS, PARAMS } from '../../../constants/links';
 import { useRouteMatch } from 'react-router-dom';
 import { useOrganization } from './useOrganization';
 
@@ -17,25 +17,25 @@ export const useOrganizationMenuItems = (): OrganizationMenuItem[] => {
   return [
     {
       link: LINKS.ORGANIZATION_PROFILE.build({
-        [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+        [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
       }),
       nameTranslationKey: 'organization_menu_profile',
     },
     {
       link: LINKS.ORGANIZATION_MEMBERS.build({
-        [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+        [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
       }),
       nameTranslationKey: 'organization_menu_members',
     },
     {
       link: LINKS.ORGANIZATION_MEMBER_PRIVILEGES.build({
-        [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+        [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
       }),
       nameTranslationKey: 'organization_menu_member_privileges',
     },
     {
       link: LINKS.ORGANIZATION_INVITATIONS.build({
-        [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+        [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
       }),
       nameTranslationKey: 'organization_menu_invitations',
     },
