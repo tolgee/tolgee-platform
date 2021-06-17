@@ -54,7 +54,6 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
     const userPermissions = projects?.data?._embedded?.projects?.find(
       (r) => r.id === projectId
     )?.computedPermissions;
-    // eslint-disable-next-line no-console
     if (!userPermissions || !scopes?.data) {
       return new Set();
     }
