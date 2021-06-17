@@ -4,7 +4,7 @@ import { FieldArray } from '../../../../common/form/fields/FieldArray';
 import { Box, Button, Grid } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import { useField, useFormikContext } from 'formik';
+import { useFormikContext } from 'formik';
 import { CreateLanguageField } from '../../../../languages/CreateLanguageField';
 import { CreateProjectValueType } from '../ProjectCreateView';
 
@@ -36,14 +36,26 @@ export const CreateProjectLanguagesArrayField: FC = () => {
             )
           }
         >
-          {(_, index, removeItem) => (
-            <CreateLanguageFormikField
-              key={index}
-              name="languages"
-              index={index}
-              onRemove={removeItem}
-            />
-          )}
+          {(_, index, removeItem) => {
+            const fieldName = `languages.${index}`;
+            const helpers = formikContext.getFieldHelpers(fieldName);
+            const inputProps = formikContext.getFieldProps(fieldName);
+            const isPrepared = !!inputProps.value;
+            return (
+              <Grid item {...{ xs: !isPrepared && 12 }}>
+                <CreateLanguageField
+                  autoFocus={true}
+                  modifyInDialog={true}
+                  onChange={helpers.setValue}
+                  value={inputProps.value}
+                  showSubmitButton={false}
+                  onPreparedClear={removeItem}
+                  onAutocompleteClear={removeItem}
+                  preparedLanguageWrapperProps={{ display: 'inline-flex' }}
+                />
+              </Grid>
+            );
+          }}
         </FieldArray>
         {languagesMeta.touched && typeof languagesMeta.error === 'string' && (
           <Grid item xs={12}>
@@ -54,29 +66,5 @@ export const CreateProjectLanguagesArrayField: FC = () => {
         )}
       </Grid>
     </>
-  );
-};
-
-const CreateLanguageFormikField: FC<{
-  name: string;
-  index: number;
-  onRemove: () => void;
-}> = (props) => {
-  const [inputProps, _, helpers] = useField(`${props.name}.${props.index}`);
-  const isPrepared = !!inputProps.value;
-
-  return (
-    <Grid item {...{ xs: !isPrepared && 12 }}>
-      <CreateLanguageField
-        autoFocus={true}
-        modifyInDialog={true}
-        onChange={helpers.setValue}
-        value={inputProps.value}
-        showSubmitButton={false}
-        onPreparedClear={props.onRemove}
-        onAutocompleteClear={props.onRemove}
-        preparedLanguageWrapperProps={{ display: 'inline-flex' }}
-      />
-    </Grid>
   );
 };
