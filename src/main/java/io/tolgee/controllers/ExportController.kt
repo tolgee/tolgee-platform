@@ -44,7 +44,7 @@ class ExportController @Autowired constructor(private val translationService: Tr
                         String.format("attachment; filename=\"%s.zip\"", projectHolder.project.name))
                 .body(StreamingResponseBody { out: OutputStream ->
                     val zipOutputStream = ZipOutputStream(out)
-                    val translations = translationService.getTranslations(languages.abbreviations,
+                    val translations = translationService.getTranslations(languages.tags,
                             projectHolder.project.id)
                     for ((key, value) in translations) {
                         zipOutputStream.putNextEntry(ZipEntry(String.format("%s.json", key)))

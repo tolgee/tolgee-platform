@@ -1,6 +1,6 @@
 import { container, singleton } from 'tsyringe';
 import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { ErrorResponseDTO, InvitationDTO } from './response.types';
+import { ErrorResponseDto, InvitationDTO } from './response.types';
 import { RedirectionActions } from '../store/global/RedirectionActions';
 import { LINKS } from '../constants/links';
 import { MessageService } from './MessageService';
@@ -21,15 +21,6 @@ export class InvitationService {
     private invitationCodeService: InvitationCodeService
   ) {}
 
-  public generateInvitationCode = async (
-    projectId: number,
-    type: string
-  ): Promise<string> =>
-    await http.post('projects/invite', {
-      projectId,
-      type,
-    });
-
   public acceptInvitation = async (code: string): Promise<void> => {
     if (!this.tokenService.getToken()) {
       this.invitationCodeService.setCode(code);
@@ -43,7 +34,7 @@ export class InvitationService {
       await http.get('invitation/accept/' + code);
       this.messaging.success(<T>Invitation successfully accepted</T>);
     } catch (e) {
-      if ((e as ErrorResponseDTO).code) {
+      if ((e as ErrorResponseDto).code) {
         this.messaging.error(<T>{e.code}</T>);
       }
     }

@@ -4,36 +4,20 @@ import {
   StateWithLoadables,
 } from '../../AbstractLoadableActions';
 import { InvitationService } from '../../../service/InvitationService';
+import { ApiSchemaHttpService } from '../../../service/http/ApiSchemaHttpService';
 
-export class ProjectInvitationState extends StateWithLoadables<ProjectInvitationActions> {
-  invitationLoading = false;
-  invitationCode: string | null = null;
-}
+export class ProjectInvitationState extends StateWithLoadables<ProjectInvitationActions> {}
 
 @singleton()
 export class ProjectInvitationActions extends AbstractLoadableActions<ProjectInvitationState> {
-  generateCode = this.createPromiseAction('GENERATE_CODE', (projectId, type) =>
-    this.invitationService.generateInvitationCode(projectId, type)
-  )
-    .build.onPending((state) => {
-      return { ...state, invitationCode: null, invitationLoading: true };
-    })
-    .build.onFullFilled((state, action) => {
-      return {
-        ...state,
-        invitationCode: action.payload,
-        invitationLoading: false,
-      };
-    })
-    .build.onRejected((state) => {
-      return { ...state, invitationCode: null, invitationLoading: false };
-    });
-
   acceptInvitation = this.createPromiseAction('ACCEPT_INVITATION', (code) =>
     this.invitationService.acceptInvitation(code)
   );
 
   loadableDefinitions = {
+    generateInvitation: this.createLoadableDefinition(
+      this.schemaService.schemaRequest('/v2/projects/{projectId}/invite', 'put')
+    ),
     list: this.createLoadableDefinition(this.invitationService.getInvitations),
     delete: this.createDeleteDefinition(
       'list',
@@ -45,11 +29,14 @@ export class ProjectInvitationActions extends AbstractLoadableActions<ProjectInv
     ),
   };
 
-  constructor(private invitationService: InvitationService) {
+  constructor(
+    private invitationService: InvitationService,
+    private schemaService: ApiSchemaHttpService
+  ) {
     super(new ProjectInvitationState());
   }
 
   get prefix(): string {
-    return 'REPOSITORY_INVITATION';
+    return 'PROJECT_INVITATION';
   }
 }

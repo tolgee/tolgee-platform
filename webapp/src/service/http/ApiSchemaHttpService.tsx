@@ -66,6 +66,8 @@ export class ApiSchemaHttpService extends ApiHttpService {
         });
       }
 
+      const jsonBody = JSON.stringify(request?.content?.['application/json']);
+
       const queryParams = request?.query;
       let queryString = '';
 
@@ -82,7 +84,15 @@ export class ApiSchemaHttpService extends ApiHttpService {
 
       return await this.fetch(
         urlResult + queryString,
-        { method: method as string, body: body },
+        {
+          method: method as string,
+          body: body || jsonBody,
+          headers: jsonBody
+            ? {
+                'Content-Type': 'application/json',
+              }
+            : undefined,
+        },
         options
       );
     };
@@ -147,6 +157,7 @@ type OperationSchemaType = {
   requestBody?: {
     content?: {
       'multipart/form-data'?: { [key: string]: any };
+      'application/json'?: any;
     };
   };
   parameters?: {

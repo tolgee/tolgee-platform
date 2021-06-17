@@ -8,11 +8,6 @@ export type KeyTranslationsDTO = {
   translations: TranslationsObject;
 };
 
-export type LanguageDTO = {
-  abbreviation: string;
-  id: number;
-  name: string;
-};
 export type TranslationsDataResponse = {
   paginationMeta: {
     offset: number;
@@ -53,7 +48,7 @@ export interface TokenDTO {
   accessToken: string;
 }
 
-export type ErrorResponseDTO = {
+export type ErrorResponseDto = {
   CUSTOM_VALIDATION?: { [key: string]: any[] };
   STANDARD_VALIDATION?: { [key: string]: any[] };
   code: string;

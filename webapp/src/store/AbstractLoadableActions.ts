@@ -1,5 +1,5 @@
 import { Action, ActionType, PromiseAction, StateModifier } from './Action';
-import { ErrorResponseDTO } from '../service/response.types';
+import { ErrorResponseDto } from '../service/response.types';
 import { AbstractActions } from './AbstractActions';
 import { ReactNode } from 'react';
 
@@ -71,7 +71,7 @@ export abstract class AbstractLoadableActions<
     then?: StateModifier<StateType, PayloadType>,
     successMessage?: ReactNode,
     redirectAfter?: string | ((action: ActionType<PayloadType>) => string)
-  ): PromiseAction<PayloadType, ErrorResponseDTO, StateType, DispatchParams> {
+  ): PromiseAction<PayloadType, ErrorResponseDto, StateType, DispatchParams> {
     return this.createPromiseAction(
       loadableName.toUpperCase(),
       payloadProvider,
@@ -221,7 +221,7 @@ export interface Loadable<DataType = any, DispatchParams = any> {
   data: DataType | null;
   dispatchParams: DispatchParams | null;
   loading: boolean;
-  error?: ErrorResponseDTO;
+  error?: ErrorResponseDto;
   loaded: boolean;
   touched: boolean;
 }

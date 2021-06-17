@@ -6,7 +6,6 @@ import { LINKS, PARAMS } from '../../../../constants/links';
 import DynamicFeedIcon from '@material-ui/icons/DynamicFeed';
 import LanguageIcon from '@material-ui/icons/Language';
 import SettingsIcon from '@material-ui/icons/Settings';
-import FlagIcon from '@material-ui/icons/Flag';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import SupervisedUserCircleIcon from '@material-ui/icons/SupervisedUserCircle';
 import { useProject } from '../../../../hooks/useProject';
@@ -64,13 +63,6 @@ export const ProjectMenu = ({ id }) => {
                 })}
                 icon={<SettingsIcon />}
                 text={t('project_menu_project_settings')}
-              />
-              <SideMenuItem
-                linkTo={LINKS.PROJECT_LANGUAGES.build({
-                  [PARAMS.PROJECT_ID]: id,
-                })}
-                icon={<FlagIcon />}
-                text={t('project_menu_languages')}
               />
 
               {config.authentication && (

@@ -4,339 +4,389 @@
  */
 
 export interface paths {
-  '/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}': {
-    put: operations['setUsersPermissions'];
+  "/v2/projects/{projectId}": {
+    get: operations["get"];
+    put: operations["editProject"];
+    delete: operations["deleteProject"];
   };
-  '/v2/projects/{projectId}/users/{userId}/revoke-access': {
-    put: operations['revokePermission'];
+  "/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}": {
+    put: operations["setUsersPermissions"];
   };
-  '/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override': {
-    put: operations['resolveTranslationSetOverride'];
+  "/v2/projects/{projectId}/users/{userId}/revoke-access": {
+    put: operations["revokePermission"];
   };
-  '/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing': {
-    put: operations['resolveTranslationSetKeepExisting'];
+  "/v2/projects/{projectId}/invite": {
+    put: operations["inviteUser"];
   };
-  '/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override': {
-    put: operations['resolveTranslationSetOverride_1'];
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
+    put: operations["resolveTranslationSetOverride"];
   };
-  '/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-keep-existing': {
-    put: operations['resolveTranslationSetKeepExisting_1'];
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing": {
+    put: operations["resolveTranslationSetKeepExisting"];
   };
-  '/v2/projects/{projectId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}': {
-    put: operations['selectExistingLanguage'];
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override": {
+    put: operations["resolveTranslationSetOverride_1"];
   };
-  '/v2/projects/{projectId}/import/result/languages/{importLanguageId}/reset-existing': {
-    put: operations['resetExistingLanguage'];
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
+    put: operations["resolveTranslationSetKeepExisting_1"];
   };
-  '/v2/projects/{projectId}/import/apply': {
-    put: operations['applyImport'];
+  "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}": {
+    put: operations["selectExistingLanguage"];
   };
-  '/v2/organizations/{organizationId}/users/{userId}/set-role': {
-    put: operations['setUserRole'];
+  "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/reset-existing": {
+    put: operations["resetExistingLanguage"];
   };
-  '/api/organizations/{organizationId}/users/{userId}/set-role': {
-    put: operations['setUserRole_1'];
+  "/v2/projects/{projectId}/import/apply": {
+    put: operations["applyImport"];
   };
-  '/v2/organizations/{id}/leave': {
-    put: operations['leaveOrganization'];
+  "/v2/projects/{projectId}/languages/{languageId}": {
+    get: operations["get_1"];
+    put: operations["editLanguage"];
+    delete: operations["deleteLanguage_1"];
   };
-  '/api/organizations/{id}/leave': {
-    put: operations['leaveOrganization_1'];
+  "/v2/projects/languages/{languageId}": {
+    get: operations["get_2"];
+    put: operations["editLanguage_1"];
+    delete: operations["deleteLanguage_2"];
   };
-  '/v2/organizations/{id}/invite': {
-    put: operations['inviteUser'];
+  "/v2/organizations/{organizationId}/users/{userId}/set-role": {
+    put: operations["setUserRole"];
   };
-  '/api/organizations/{id}/invite': {
-    put: operations['inviteUser_1'];
+  "/api/organizations/{organizationId}/users/{userId}/set-role": {
+    put: operations["setUserRole_1"];
   };
-  '/v2/organizations/{id}': {
-    get: operations['get_1'];
-    put: operations['update'];
-    delete: operations['delete'];
+  "/v2/organizations/{id}/leave": {
+    put: operations["leaveOrganization"];
   };
-  '/api/organizations/{id}': {
-    get: operations['get_2'];
-    put: operations['update_1'];
-    delete: operations['delete_1'];
+  "/api/organizations/{id}/leave": {
+    put: operations["leaveOrganization_1"];
   };
-  '/api/project/{projectId}/keys': {
-    put: operations['edit'];
-    post: operations['create_3'];
-    delete: operations['delete_4'];
+  "/v2/organizations/{id}/invite": {
+    put: operations["inviteUser_1"];
   };
-  '/api/project/keys': {
-    delete: operations['delete_5'];
+  "/api/organizations/{id}/invite": {
+    put: operations["inviteUser_2"];
   };
-  '/api/project/{projectId}/translations': {
-    put: operations['setTranslations'];
-    post: operations['createOrUpdateTranslations'];
+  "/v2/organizations/{id}": {
+    get: operations["get_5"];
+    put: operations["update"];
+    delete: operations["delete"];
   };
-  '/api/project/translations': {
-    put: operations['setTranslations_1'];
-    post: operations['createOrUpdateTranslations_1'];
+  "/api/organizations/{id}": {
+    get: operations["get_6"];
+    put: operations["update_1"];
+    delete: operations["delete_1"];
   };
-  '/v2/projects/{projectId}/import': {
-    post: operations['addFiles'];
-    delete: operations['cancelImport'];
+  "/api/project/{projectId}/keys": {
+    put: operations["edit"];
+    post: operations["create_3"];
+    delete: operations["delete_4"];
   };
-  '/v2/projects/{projectId}/import/with-streaming-response': {
-    post: operations['addFilesStreaming'];
+  "/api/project/keys": {
+    delete: operations["delete_5"];
   };
-  '/v2/organizations': {
-    get: operations['getAll_1'];
-    post: operations['create'];
+  "/api/project/{projectId}/translations": {
+    put: operations["setTranslations"];
+    post: operations["createOrUpdateTranslations"];
   };
-  '/api/organizations': {
-    get: operations['getAll_2'];
-    post: operations['create_1'];
+  "/api/project/translations": {
+    put: operations["setTranslations_1"];
+    post: operations["createOrUpdateTranslations_1"];
   };
-  '/v2/address-part/generate-project': {
-    post: operations['generateProjectSlug'];
+  "/v2/projects": {
+    get: operations["getAll"];
+    post: operations["createProject"];
   };
-  '/api/address-part/generate-project': {
-    post: operations['generateProjectSlug_1'];
+  "/v2/projects/{projectId}/import": {
+    post: operations["addFiles"];
+    delete: operations["cancelImport"];
   };
-  '/v2/address-part/generate-organization': {
-    post: operations['generateOrganizationSlug'];
+  "/v2/projects/{projectId}/import/with-streaming-response": {
+    post: operations["addFilesStreaming"];
   };
-  '/api/address-part/generate-organization': {
-    post: operations['generateOrganizationSlug_1'];
+  "/v2/projects/{projectId}/languages": {
+    get: operations["getAll_1"];
+    post: operations["createLanguage"];
   };
-  '/api/user': {
-    get: operations['getInfo'];
-    post: operations['updateUser'];
+  "/v2/organizations": {
+    get: operations["getAll_3"];
+    post: operations["create"];
   };
-  '/api/project/{projectId}/keys/translations/{languages}': {
+  "/api/organizations": {
+    get: operations["getAll_4"];
+    post: operations["create_1"];
+  };
+  "/v2/address-part/generate-project": {
+    post: operations["generateProjectSlug"];
+  };
+  "/api/address-part/generate-project": {
+    post: operations["generateProjectSlug_1"];
+  };
+  "/v2/address-part/generate-organization": {
+    post: operations["generateOrganizationSlug"];
+  };
+  "/api/address-part/generate-organization": {
+    post: operations["generateOrganizationSlug_1"];
+  };
+  "/api/user": {
+    get: operations["getInfo"];
+    post: operations["updateUser"];
+  };
+  "/api/public/validate_email": {
+    post: operations["validateEmail"];
+  };
+  "/api/public/sign_up": {
+    post: operations["signUp"];
+  };
+  "/api/public/reset_password_set": {
+    post: operations["resetPasswordSet"];
+  };
+  "/api/public/reset_password_request": {
+    post: operations["resetPasswordRequest"];
+  };
+  "/api/public/generatetoken": {
+    post: operations["authenticateUser"];
+  };
+  "/api/project/{projectId}/keys/translations/{languages}": {
     /** Key name must be provided in method body, since it can be long and can contain characters hard to encode */
-    post: operations['getKeyTranslationsPost'];
+    post: operations["getKeyTranslationsPost"];
   };
-  '/api/project/{projectId}/keys/edit': {
-    post: operations['editDeprecated'];
+  "/api/project/{projectId}/keys/edit": {
+    post: operations["editDeprecated"];
   };
-  '/api/project/{projectId}/keys/create': {
-    post: operations['create_2'];
+  "/api/project/{projectId}/keys/create": {
+    post: operations["create_2"];
   };
-  '/api/project/{projectId}/languages/edit': {
-    post: operations['editLanguage'];
+  "/api/project/{projectId}/screenshots/get": {
+    post: operations["getKeyScreenshots_1"];
   };
-  '/api/project/languages/edit': {
-    post: operations['editLanguage_1'];
+  "/api/project/{projectId}/screenshots": {
+    post: operations["uploadScreenshot_1"];
   };
-  '/api/project/{projectId}/languages': {
-    get: operations['getAll_3'];
-    post: operations['createLanguage'];
+  "/api/apiKeys": {
+    get: operations["allByUser"];
+    post: operations["create_6"];
   };
-  '/api/project/{projectId}/screenshots/get': {
-    post: operations['getKeyScreenshots_1'];
+  "/api/apiKeys/edit": {
+    post: operations["edit_2"];
   };
-  '/api/project/{projectId}/screenshots': {
-    post: operations['uploadScreenshot_1'];
+  "/v2/projects/{projectId}/users": {
+    get: operations["getAllUsers"];
   };
-  '/api/projects': {
-    get: operations['getAll_5'];
-    post: operations['createProject'];
+  "/v2/projects/{projectId}/import/result": {
+    get: operations["getImportResult"];
   };
-  '/api/projects/invite': {
-    post: operations['inviteUser_2'];
+  "/v2/projects/{projectId}/import/result/languages/{languageId}": {
+    get: operations["getImportLanguage"];
+    delete: operations["deleteLanguage"];
   };
-  '/api/projects/edit': {
-    post: operations['editProject'];
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations": {
+    get: operations["getImportTranslations"];
   };
-  '/api/public/validate_email': {
-    post: operations['validateEmail'];
+  "/v2/projects/{projectId}/import/result/files/{importFileId}/issues": {
+    get: operations["getImportFileIssues"];
   };
-  '/api/public/sign_up': {
-    post: operations['signUp'];
+  "/v2/organizations/{slug}/projects": {
+    get: operations["getAllProjects"];
   };
-  '/api/public/reset_password_set': {
-    post: operations['resetPasswordSet'];
+  "/api/organizations/{slug}/projects": {
+    get: operations["getAllProjects_1"];
   };
-  '/api/public/reset_password_request': {
-    post: operations['resetPasswordRequest'];
+  "/v2/organizations/{slug}": {
+    get: operations["get_3"];
   };
-  '/api/public/generatetoken': {
-    post: operations['authenticateUser'];
+  "/api/organizations/{slug}": {
+    get: operations["get_4"];
   };
-  '/api/apiKeys': {
-    get: operations['allByUser'];
-    post: operations['create_6'];
+  "/v2/organizations/{organizationId}/invitations": {
+    get: operations["getInvitations"];
   };
-  '/api/apiKeys/edit': {
-    post: operations['edit_2'];
+  "/api/organizations/{organizationId}/invitations": {
+    get: operations["getInvitations_1"];
   };
-  '/v2/projects': {
-    get: operations['getAll'];
+  "/v2/organizations/{id}/users": {
+    get: operations["getAllUsers_1"];
   };
-  '/v2/projects/{projectId}': {
-    get: operations['get'];
+  "/api/organizations/{id}/users": {
+    get: operations["getAllUsers_2"];
   };
-  '/v2/projects/{projectId}/users': {
-    get: operations['getAllUsers'];
+  "/v2/organizations/{id}/projects": {
+    get: operations["getAllProjects_2"];
   };
-  '/v2/projects/{projectId}/import/result': {
-    get: operations['getImportResult'];
+  "/api/organizations/{id}/projects": {
+    get: operations["getAllProjects_3"];
   };
-  '/v2/projects/{projectId}/import/result/languages/{languageId}': {
-    get: operations['getImportLanguage'];
-    delete: operations['deleteLanguage'];
+  "/v2/address-part/validate-project/{slug}": {
+    get: operations["validateProjectSlug"];
   };
-  '/v2/projects/{projectId}/import/result/languages/{languageId}/translations': {
-    get: operations['getImportTranslations'];
+  "/api/address-part/validate-project/{slug}": {
+    get: operations["validateProjectSlug_1"];
   };
-  '/v2/projects/{projectId}/import/result/files/{importFileId}/issues': {
-    get: operations['getImportFileIssues'];
+  "/v2/address-part/validate-organization/{slug}": {
+    get: operations["validateOrganizationSlug"];
   };
-  '/v2/organizations/{organizationId}/invitations': {
-    get: operations['getInvitations'];
+  "/api/address-part/validate-organization/{slug}": {
+    get: operations["validateOrganizationSlug_1"];
   };
-  '/api/organizations/{organizationId}/invitations': {
-    get: operations['getInvitations_1'];
+  "/api/public/verify_email/{userId}/{code}": {
+    get: operations["verifyEmail"];
   };
-  '/v2/organizations/{id}/users': {
-    get: operations['getAllUsers_1'];
+  "/api/public/reset_password_validate/{email}/{code}": {
+    get: operations["resetPasswordValidate"];
   };
-  '/api/organizations/{id}/users': {
-    get: operations['getAllUsers_2'];
+  "/api/public/configuration": {
+    get: operations["getPublicConfiguration"];
   };
-  '/v2/organizations/{id}/projects': {
-    get: operations['getAllProjects'];
+  "/api/public/authorize_oauth/{serviceType}/{code}": {
+    get: operations["authenticateUser_1"];
   };
-  '/api/organizations/{id}/projects': {
-    get: operations['getAllProjects_1'];
+  "/api/project/{projectId}/keys/{id}": {
+    get: operations["getDeprecated"];
+    delete: operations["delete_2"];
   };
-  '/v2/organizations/{slug}/projects': {
-    get: operations['getAllProjects_2'];
+  "/api/project/keys/{id}": {
+    get: operations["getDeprecated_1"];
+    delete: operations["delete_3"];
   };
-  '/api/organizations/{slug}/projects': {
-    get: operations['getAllProjects_3'];
+  "/api/project/{projectId}/export/jsonZip": {
+    get: operations["doExportJsonZip"];
   };
-  '/v2/organizations/{slug}': {
-    get: operations['get_3'];
+  "/api/repository/{projectId}/export/jsonZip": {
+    get: operations["doExportJsonZip_2"];
   };
-  '/api/organizations/{slug}': {
-    get: operations['get_4'];
+  "/api/project/{projectId}/translations/{languages}": {
+    get: operations["getTranslations"];
   };
-  '/v2/address-part/validate-project/{slug}': {
-    get: operations['validateProjectSlug'];
+  "/api/project/translations/{languages}": {
+    get: operations["getTranslations_1"];
   };
-  '/api/address-part/validate-project/{slug}': {
-    get: operations['validateProjectSlug_1'];
+  "/api/project/{projectId}/translations/view": {
+    get: operations["getViewData"];
   };
-  '/v2/address-part/validate-organization/{slug}': {
-    get: operations['validateOrganizationSlug'];
+  "/api/invitation/list/{projectId}": {
+    get: operations["getProjectInvitations"];
   };
-  '/api/address-part/validate-organization/{slug}': {
-    get: operations['validateOrganizationSlug_1'];
+  "/api/invitation/accept/{code}": {
+    get: operations["acceptInvitation"];
   };
-  '/api/project/{projectId}/keys/{id}': {
-    get: operations['getDeprecated'];
-    delete: operations['delete_2'];
+  "/api/apiKeys/scopes": {
+    get: operations["getApiKeyScopes"];
   };
-  '/api/project/keys/{id}': {
-    get: operations['getDeprecated_1'];
-    delete: operations['delete_3'];
+  "/api/apiKeys/project/{projectId}": {
+    get: operations["allByProject"];
   };
-  '/api/project/{projectId}/export/jsonZip': {
-    get: operations['doExportJsonZip'];
+  "/api/apiKeys/availableScopes": {
+    get: operations["getScopes"];
   };
-  '/api/project/{projectId}/translations/{languages}': {
-    get: operations['getTranslations'];
+  "/v2/organizations/{organizationId}/users/{userId}": {
+    delete: operations["removeUser"];
   };
-  '/api/project/translations/{languages}': {
-    get: operations['getTranslations_1'];
+  "/api/organizations/{organizationId}/users/{userId}": {
+    delete: operations["removeUser_1"];
   };
-  '/api/project/{projectId}/translations/view': {
-    get: operations['getViewData'];
+  "/api/project/screenshots/{ids}": {
+    delete: operations["deleteScreenshots"];
   };
-  '/api/project/{projectId}/languages/{id}': {
-    get: operations['get_5'];
-    delete: operations['deleteLanguage_1'];
+  "/api/project/{projectId}/screenshots/{ids}": {
+    delete: operations["deleteScreenshots_1"];
   };
-  '/api/project/languages/{id}': {
-    get: operations['get_6'];
-    delete: operations['deleteLanguage_2'];
+  "/api/invitation/{invitationId}": {
+    delete: operations["deleteInvitation"];
   };
-  '/api/projects/{id}': {
-    get: operations['getProject'];
-    delete: operations['deleteProject'];
-  };
-  '/api/public/verify_email/{userId}/{code}': {
-    get: operations['verifyEmail'];
-  };
-  '/api/public/reset_password_validate/{email}/{code}': {
-    get: operations['resetPasswordValidate'];
-  };
-  '/api/public/configuration': {
-    get: operations['getPublicConfiguration'];
-  };
-  '/api/public/authorize_oauth/{serviceType}/{code}': {
-    get: operations['authenticateUser_1'];
-  };
-  '/api/invitation/list/{projectId}': {
-    get: operations['getProjectInvitations'];
-  };
-  '/api/invitation/accept/{code}': {
-    get: operations['acceptInvitation'];
-  };
-  '/api/apiKeys/scopes': {
-    get: operations['getApiKeyScopes'];
-  };
-  '/api/apiKeys/project/{projectId}': {
-    get: operations['allByProject'];
-  };
-  '/api/apiKeys/availableScopes': {
-    get: operations['getScopes'];
-  };
-  '/v2/organizations/{organizationId}/users/{userId}': {
-    delete: operations['removeUser'];
-  };
-  '/api/organizations/{organizationId}/users/{userId}': {
-    delete: operations['removeUser_1'];
-  };
-  '/api/project/screenshots/{ids}': {
-    delete: operations['deleteScreenshots'];
-  };
-  '/api/project/{projectId}/screenshots/{ids}': {
-    delete: operations['deleteScreenshots_1'];
-  };
-  '/api/invitation/{invitationId}': {
-    delete: operations['deleteInvitation'];
-  };
-  '/api/apiKeys/{key}': {
-    delete: operations['delete_6'];
+  "/api/apiKeys/{key}": {
+    delete: operations["delete_6"];
   };
 }
 
 export interface components {
   schemas: {
+    EditProjectDTO: {
+      name: string;
+      slug?: string;
+      baseLanguageId?: number;
+    };
+    LanguageModel: {
+      id: number;
+      /** Language name in english */
+      name: string;
+      /** Language tag according to BCP 47 definition */
+      tag: string;
+      /** Language name in this language */
+      originalName?: string;
+      /** Language flag emoji as UTF-8 emoji */
+      flagEmoji?: string;
+      /** Whether is base language of project */
+      base: boolean;
+      _links?: components["schemas"]["Links"];
+    };
+    Links: { [key: string]: components["schemas"]["Link"] };
+    ProjectModel: {
+      id: number;
+      name: string;
+      description?: string;
+      slug?: string;
+      userOwner?: components["schemas"]["UserAccountModel"];
+      baseLanguage?: components["schemas"]["LanguageModel"];
+      organizationOwnerName?: string;
+      organizationOwnerSlug?: string;
+      organizationOwnerBasePermissions?:
+        | "VIEW"
+        | "TRANSLATE"
+        | "EDIT"
+        | "MANAGE";
+      organizationRole?: "MEMBER" | "OWNER";
+      /** Current user's direct permission */
+      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      /** Actual current user's permissions on this project. You can not sort data by this column! */
+      computedPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      _links?: components["schemas"]["Links"];
+    };
+    UserAccountModel: {
+      id: number;
+      username: string;
+      name?: string;
+      _links?: components["schemas"]["Links"];
+    };
+    ProjectInviteUserDto: {
+      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+    };
+    LanguageDto: {
+      /** Language name in english */
+      name: string;
+      /** Language tag according to BCP 47 definition */
+      originalName: string;
+      /** Language name in this language */
+      tag: string;
+      /** Language flag emoji as UTF-8 emoji */
+      flagEmoji?: string;
+    };
     SetOrganizationRoleDto: {
-      roleType: 'MEMBER' | 'OWNER';
+      roleType: "MEMBER" | "OWNER";
     };
     OrganizationInviteUserDto: {
-      roleType: 'MEMBER' | 'OWNER';
+      roleType: "MEMBER" | "OWNER";
     };
-    Links: { [key: string]: components['schemas']['Link'] };
     OrganizationInvitationModel: {
       id: number;
       code: string;
-      type: 'MEMBER' | 'OWNER';
+      type: "MEMBER" | "OWNER";
       createdAt: string;
-      _links?: components['schemas']['Links'];
+      _links?: components["schemas"]["Links"];
     };
     OrganizationDto: {
       name: string;
       description?: string;
       slug?: string;
-      basePermissions: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
+      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     OrganizationModel: {
       id: number;
       name: string;
       slug: string;
       description?: string;
-      basePermissions: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
-      currentUserRole: 'MEMBER' | 'OWNER';
-      _links?: components['schemas']['Links'];
+      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      currentUserRole: "MEMBER" | "OWNER";
+      _links?: components["schemas"]["Links"];
     };
     EditKeyDTO: {
       currentName: string;
@@ -346,19 +396,30 @@ export interface components {
       key: string;
       translations: { [key: string]: string };
     };
+    CreateProjectDTO: {
+      name: string;
+      languages: components["schemas"]["LanguageDto"][];
+      /** Slug of your project used in url e.g. "/v2/projects/what-a-project". If not provided, it will be generated */
+      slug?: string;
+      /** If not provided, project will be created in user scope */
+      organizationId?: number;
+      /** Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
+      baseLanguageTag?: string;
+    };
     ErrorResponseBody: {
       code?: string;
       params?: { [key: string]: any }[];
     };
     ImportAddFilesResultModel: {
-      errors: components['schemas']['ErrorResponseBody'][];
-      result?: components['schemas']['PagedModelImportLanguageModel'];
-      _links?: components['schemas']['Links'];
+      errors: components["schemas"]["ErrorResponseBody"][];
+      result?: components["schemas"]["PagedModelImportLanguageModel"];
+      _links?: components["schemas"]["Links"];
     };
     ImportLanguageModel: {
       id: number;
       name: string;
       existingLanguageId?: number;
+      existingLanguageTag?: string;
       existingLanguageAbbreviation?: string;
       existingLanguageName?: string;
       importFileName: string;
@@ -367,7 +428,7 @@ export interface components {
       totalCount: number;
       conflictCount: number;
       resolvedCount: number;
-      _links?: components['schemas']['Links'];
+      _links?: components["schemas"]["Links"];
     };
     PageMetadata: {
       size?: number;
@@ -377,13 +438,13 @@ export interface components {
     };
     PagedModelImportLanguageModel: {
       _embedded?: {
-        languages?: components['schemas']['ImportLanguageModel'][];
+        languages?: components["schemas"]["ImportLanguageModel"][];
       };
-      _links?: components['schemas']['Links'];
-      page?: components['schemas']['PageMetadata'];
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
     };
     StreamingResponseBody: { [key: string]: any };
-    GenerateAddressPathDto: {
+    GenerateSlugDto: {
       name: string;
       oldSlug?: string;
     };
@@ -393,47 +454,6 @@ export interface components {
       password?: string;
       /** Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
       callbackUrl?: string;
-    };
-    GetKeyTranslationsReqDto: {
-      key?: string;
-    };
-    DeprecatedEditKeyDTO: {
-      oldFullPathString: string;
-      newFullPathString: string;
-    };
-    LanguageDTO: {
-      id?: number;
-      name: string;
-      abbreviation: string;
-    };
-    GetScreenshotsByKeyDTO: {
-      key: string;
-    };
-    ScreenshotDTO: {
-      id: number;
-      filename: string;
-      createdAt: string;
-    };
-    CreateProjectDTO: {
-      name: string;
-      languages: components['schemas']['LanguageDTO'][];
-      slug?: string;
-      /** If not provided, project will be created as users */
-      organizationId?: number;
-    };
-    ProjectDTO: {
-      id?: number;
-      name?: string;
-      permissionType?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
-    };
-    ProjectInviteUserDto: {
-      projectId: number;
-      type: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
-    };
-    EditProjectDTO: {
-      projectId: number;
-      name: string;
-      slug?: string;
     };
     TextNode: { [key: string]: any };
     SignUpDto: {
@@ -456,9 +476,24 @@ export interface components {
       username?: string;
       password?: string;
     };
+    GetKeyTranslationsReqDto: {
+      key?: string;
+    };
+    DeprecatedEditKeyDTO: {
+      oldFullPathString: string;
+      newFullPathString: string;
+    };
+    GetScreenshotsByKeyDTO: {
+      key: string;
+    };
+    ScreenshotDTO: {
+      id: number;
+      filename: string;
+      createdAt: string;
+    };
     CreateApiKeyDTO: {
       projectId: number;
-      scopes?: string[];
+      scopes: string[];
     };
     ApiKeyDTO: {
       id?: number;
@@ -479,54 +514,28 @@ export interface components {
     };
     PagedModelProjectModel: {
       _embedded?: {
-        projects?: components['schemas']['ProjectModel'][];
+        projects?: components["schemas"]["ProjectModel"][];
       };
-      _links?: components['schemas']['Links'];
-      page?: components['schemas']['PageMetadata'];
-    };
-    ProjectModel: {
-      id: number;
-      name: string;
-      description?: string;
-      slug?: string;
-      userOwner?: components['schemas']['UserAccountModel'];
-      organizationOwnerName?: string;
-      organizationOwnerSlug?: string;
-      organizationOwnerBasePermissions?:
-        | 'VIEW'
-        | 'TRANSLATE'
-        | 'EDIT'
-        | 'MANAGE';
-      organizationRole?: 'MEMBER' | 'OWNER';
-      /** Current user's direct permission */
-      directPermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
-      /** Actual current user's permissions on this project. You can not sort data by this column! */
-      computedPermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
-      _links?: components['schemas']['Links'];
-    };
-    UserAccountModel: {
-      id: number;
-      username: string;
-      name?: string;
-      _links?: components['schemas']['Links'];
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
     };
     PagedModelUserAccountInProjectModel: {
       _embedded?: {
-        users?: components['schemas']['UserAccountInProjectModel'][];
+        users?: components["schemas"]["UserAccountInProjectModel"][];
       };
-      _links?: components['schemas']['Links'];
-      page?: components['schemas']['PageMetadata'];
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
     };
     UserAccountInProjectModel: {
       id: number;
       username: string;
       name?: string;
-      organizationRole?: 'MEMBER' | 'OWNER';
-      organizationBasePermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
-      directPermissions?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
+      organizationRole?: "MEMBER" | "OWNER";
+      organizationBasePermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       /** Actual user's permissions on selected project. You can not sort data by this column! */
-      computedPermissions: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
-      _links?: components['schemas']['Links'];
+      computedPermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      _links?: components["schemas"]["Links"];
     };
     ImportTranslationModel: {
       id: number;
@@ -537,82 +546,112 @@ export interface components {
       conflictText?: string;
       override: boolean;
       resolved: boolean;
-      _links?: components['schemas']['Links'];
+      _links?: components["schemas"]["Links"];
     };
     PagedModelImportTranslationModel: {
       _embedded?: {
-        translations?: components['schemas']['ImportTranslationModel'][];
+        translations?: components["schemas"]["ImportTranslationModel"][];
       };
-      _links?: components['schemas']['Links'];
-      page?: components['schemas']['PageMetadata'];
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      id?: number;
-      type?:
-        | 'KEY_IS_NOT_STRING'
-        | 'MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE'
-        | 'VALUE_IS_NOT_STRING'
-        | 'KEY_IS_EMPTY'
-        | 'VALUE_IS_EMPTY'
-        | 'PO_MSGCTXT_NOT_SUPPORTED'
-        | 'ID_ATTRIBUTE_NOT_PROVIDED'
-        | 'TARGET_NOT_PROVIDED';
-      params?: components['schemas']['ImportFileIssueParamView'][];
-      _links?: components['schemas']['Links'];
+      id: number;
+      type:
+        | "KEY_IS_NOT_STRING"
+        | "MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE"
+        | "VALUE_IS_NOT_STRING"
+        | "KEY_IS_EMPTY"
+        | "VALUE_IS_EMPTY"
+        | "PO_MSGCTXT_NOT_SUPPORTED"
+        | "ID_ATTRIBUTE_NOT_PROVIDED"
+        | "TARGET_NOT_PROVIDED";
+      params: components["schemas"]["ImportFileIssueParamView"][];
+      _links?: components["schemas"]["Links"];
     };
     ImportFileIssueParamView: {
       value?: string;
       type:
-        | 'KEY_NAME'
-        | 'KEY_ID'
-        | 'LANGUAGE_ID'
-        | 'KEY_INDEX'
-        | 'VALUE'
-        | 'LINE'
-        | 'FILE_NODE_ORIGINAL';
+        | "KEY_NAME"
+        | "KEY_ID"
+        | "LANGUAGE_ID"
+        | "KEY_INDEX"
+        | "VALUE"
+        | "LINE"
+        | "FILE_NODE_ORIGINAL";
     };
     PagedModelEntityModelImportFileIssueView: {
       _embedded?: {
-        importFileIssueViews?: components['schemas']['EntityModelImportFileIssueView'][];
+        importFileIssueViews?: components["schemas"]["EntityModelImportFileIssueView"][];
       };
-      _links?: components['schemas']['Links'];
-      page?: components['schemas']['PageMetadata'];
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelLanguageModel: {
+      _embedded?: {
+        languages?: components["schemas"]["LanguageModel"][];
+      };
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
     };
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
-        organizationInvitations?: components['schemas']['OrganizationInvitationModel'][];
+        organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
       };
-      _links?: components['schemas']['Links'];
+      _links?: components["schemas"]["Links"];
     };
     PagedModelUserAccountWithOrganizationRoleModel: {
       _embedded?: {
-        usersInOrganization?: components['schemas']['UserAccountWithOrganizationRoleModel'][];
+        usersInOrganization?: components["schemas"]["UserAccountWithOrganizationRoleModel"][];
       };
-      _links?: components['schemas']['Links'];
-      page?: components['schemas']['PageMetadata'];
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
     };
     UserAccountWithOrganizationRoleModel: {
       id: number;
       name: string;
       username: string;
-      organizationRole: 'MEMBER' | 'OWNER';
-      _links?: components['schemas']['Links'];
+      organizationRole: "MEMBER" | "OWNER";
+      _links?: components["schemas"]["Links"];
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
     };
     PagedModelOrganizationModel: {
       _embedded?: {
-        organizations?: components['schemas']['OrganizationModel'][];
+        organizations?: components["schemas"]["OrganizationModel"][];
       };
-      _links?: components['schemas']['Links'];
-      page?: components['schemas']['PageMetadata'];
+      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
     };
     UserResponseDTO: {
       id?: number;
       name?: string;
       username?: string;
       emailAwaitingVerification?: string;
+    };
+    JwtAuthenticationResponse: {
+      accessToken?: string;
+      tokenType?: string;
+    };
+    AuthMethodsDTO: {
+      github: components["schemas"]["GithubPublicConfigDTO"];
+    };
+    GithubPublicConfigDTO: {
+      clientId?: string;
+      isEnabled: boolean;
+    };
+    PublicConfigurationDTO: {
+      isAuthentication: boolean;
+      authMethods?: components["schemas"]["AuthMethodsDTO"];
+      isPasswordResettable: boolean;
+      isAllowRegistrations: boolean;
+      screenshotsUrl: string;
+      maxUploadFileSize: number;
+      clientSentryDsn?: string;
+      needsEmailVerification: boolean;
+      userCanCreateProjects: boolean;
+      userCanCreateOrganizations: boolean;
     };
     DeprecatedKeyDto: {
       /** This means name of key. Will be renamed in v2 */
@@ -632,37 +671,14 @@ export interface components {
       languages?: string[];
     };
     ViewDataResponseLinkedHashSetKeyWithTranslationsResponseDtoResponseParams: {
-      paginationMeta?: components['schemas']['PaginationMeta'];
-      params?: components['schemas']['ResponseParams'];
-      data?: components['schemas']['KeyWithTranslationsResponseDto'][];
-    };
-    JwtAuthenticationResponse: {
-      accessToken?: string;
-      tokenType?: string;
-    };
-    AuthMethodsDTO: {
-      github: components['schemas']['GithubPublicConfigDTO'];
-    };
-    GithubPublicConfigDTO: {
-      clientId?: string;
-      isEnabled: boolean;
-    };
-    PublicConfigurationDTO: {
-      isAuthentication: boolean;
-      authMethods?: components['schemas']['AuthMethodsDTO'];
-      isPasswordResettable: boolean;
-      isAllowRegistrations: boolean;
-      screenshotsUrl: string;
-      maxUploadFileSize: number;
-      clientSentryDsn?: string;
-      needsEmailVerification: boolean;
-      userCanCreateProjects: boolean;
-      userCanCreateOrganizations: boolean;
+      paginationMeta?: components["schemas"]["PaginationMeta"];
+      params?: components["schemas"]["ResponseParams"];
+      data?: components["schemas"]["KeyWithTranslationsResponseDto"][];
     };
     InvitationDTO: {
       id?: number;
       code?: string;
-      type?: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
+      type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     Link: {
       href?: string;
@@ -678,12 +694,58 @@ export interface components {
 }
 
 export interface operations {
+  get: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ProjectModel"];
+        };
+      };
+    };
+  };
+  editProject: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ProjectModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EditProjectDTO"];
+      };
+    };
+  };
+  deleteProject: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
   setUsersPermissions: {
     parameters: {
       path: {
         projectId: number;
         userId: number;
-        permissionType: 'VIEW' | 'TRANSLATE' | 'EDIT' | 'MANAGE';
+        permissionType: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       };
     };
     responses: {
@@ -701,6 +763,26 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+    };
+  };
+  inviteUser: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProjectInviteUserDto"];
+      };
     };
   };
   resolveTranslationSetOverride: {
@@ -784,7 +866,102 @@ export interface operations {
         projectId: number;
       };
       query: {
-        forceMode?: 'OVERRIDE' | 'KEEP' | 'NO_FORCE';
+        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  get_1: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["LanguageModel"];
+        };
+      };
+    };
+  };
+  editLanguage: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["LanguageModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LanguageDto"];
+      };
+    };
+  };
+  deleteLanguage_1: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  get_2: {
+    parameters: {
+      path: {
+        languageId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["LanguageModel"];
+        };
+      };
+    };
+  };
+  editLanguage_1: {
+    parameters: {
+      path: {
+        languageId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["LanguageModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LanguageDto"];
+      };
+    };
+  };
+  deleteLanguage_2: {
+    parameters: {
+      path: {
+        languageId: number;
       };
     };
     responses: {
@@ -805,7 +982,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['SetOrganizationRoleDto'];
+        "application/json": components["schemas"]["SetOrganizationRoleDto"];
       };
     };
   };
@@ -822,7 +999,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['SetOrganizationRoleDto'];
+        "application/json": components["schemas"]["SetOrganizationRoleDto"];
       };
     };
   };
@@ -848,26 +1025,6 @@ export interface operations {
       200: unknown;
     };
   };
-  inviteUser: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['OrganizationInvitationModel'];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['OrganizationInviteUserDto'];
-      };
-    };
-  };
   inviteUser_1: {
     parameters: {
       path: {
@@ -878,17 +1035,17 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['OrganizationInvitationModel'];
+          "*/*": components["schemas"]["OrganizationInvitationModel"];
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['OrganizationInviteUserDto'];
+        "application/json": components["schemas"]["OrganizationInviteUserDto"];
       };
     };
   };
-  get_1: {
+  inviteUser_2: {
     parameters: {
       path: {
         id: number;
@@ -898,7 +1055,27 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['OrganizationModel'];
+          "*/*": components["schemas"]["OrganizationInvitationModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationInviteUserDto"];
+      };
+    };
+  };
+  get_5: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
         };
       };
     };
@@ -913,13 +1090,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['OrganizationModel'];
+          "*/*": components["schemas"]["OrganizationModel"];
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['OrganizationDto'];
+        "application/json": components["schemas"]["OrganizationDto"];
       };
     };
   };
@@ -934,7 +1111,7 @@ export interface operations {
       200: unknown;
     };
   };
-  get_2: {
+  get_6: {
     parameters: {
       path: {
         id: number;
@@ -944,7 +1121,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['OrganizationModel'];
+          "*/*": components["schemas"]["OrganizationModel"];
         };
       };
     };
@@ -959,13 +1136,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['OrganizationModel'];
+          "*/*": components["schemas"]["OrganizationModel"];
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['OrganizationDto'];
+        "application/json": components["schemas"]["OrganizationDto"];
       };
     };
   };
@@ -992,7 +1169,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['EditKeyDTO'];
+        "application/json": components["schemas"]["EditKeyDTO"];
       };
     };
   };
@@ -1008,7 +1185,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['SetTranslationsDTO'];
+        "application/json": components["schemas"]["SetTranslationsDTO"];
       };
     };
   };
@@ -1024,7 +1201,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': number[];
+        "application/json": number[];
       };
     };
   };
@@ -1035,7 +1212,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': number[];
+        "application/json": number[];
       };
     };
   };
@@ -1051,7 +1228,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['SetTranslationsDTO'];
+        "application/json": components["schemas"]["SetTranslationsDTO"];
       };
     };
   };
@@ -1067,7 +1244,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['SetTranslationsDTO'];
+        "application/json": components["schemas"]["SetTranslationsDTO"];
       };
     };
   };
@@ -1079,7 +1256,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['SetTranslationsDTO'];
+        "application/json": components["schemas"]["SetTranslationsDTO"];
       };
     };
   };
@@ -1091,7 +1268,38 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['SetTranslationsDTO'];
+        "application/json": components["schemas"]["SetTranslationsDTO"];
+      };
+    };
+  };
+  getAll: {
+    parameters: {
+      query: {
+        pageable: components["schemas"]["Pageable"];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectModel"];
+        };
+      };
+    };
+  };
+  createProject: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ProjectModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateProjectDTO"];
       };
     };
   };
@@ -1105,13 +1313,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['ImportAddFilesResultModel'];
+          "*/*": components["schemas"]["ImportAddFilesResultModel"];
         };
       };
     };
     requestBody: {
       content: {
-        'multipart/form-data': {
+        "multipart/form-data": {
           files: string[];
         };
       };
@@ -1138,13 +1346,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['StreamingResponseBody'];
+          "*/*": components["schemas"]["StreamingResponseBody"];
         };
       };
     };
     requestBody: {
       content: {
-        'multipart/form-data': {
+        "multipart/form-data": {
           files: string[];
         };
       };
@@ -1152,16 +1360,54 @@ export interface operations {
   };
   getAll_1: {
     parameters: {
+      path: {
+        projectId: number;
+      };
       query: {
-        pageable: components['schemas']['Pageable'];
-        params: components['schemas']['OrganizationRequestParamsDto'];
+        pageable: components["schemas"]["Pageable"];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          'application/hal+json': components['schemas']['PagedModelOrganizationModel'];
+          "*/*": components["schemas"]["PagedModelLanguageModel"];
+        };
+      };
+    };
+  };
+  createLanguage: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["LanguageModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LanguageDto"];
+      };
+    };
+  };
+  getAll_3: {
+    parameters: {
+      query: {
+        pageable: components["schemas"]["Pageable"];
+        params: components["schemas"]["OrganizationRequestParamsDto"];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
         };
       };
     };
@@ -1171,28 +1417,28 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['OrganizationModel'];
+          "*/*": components["schemas"]["OrganizationModel"];
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['OrganizationDto'];
+        "application/json": components["schemas"]["OrganizationDto"];
       };
     };
   };
-  getAll_2: {
+  getAll_4: {
     parameters: {
       query: {
-        pageable: components['schemas']['Pageable'];
-        params: components['schemas']['OrganizationRequestParamsDto'];
+        pageable: components["schemas"]["Pageable"];
+        params: components["schemas"]["OrganizationRequestParamsDto"];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          'application/hal+json': components['schemas']['PagedModelOrganizationModel'];
+          "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
         };
       };
     };
@@ -1202,13 +1448,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['OrganizationModel'];
+          "*/*": components["schemas"]["OrganizationModel"];
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['OrganizationDto'];
+        "application/json": components["schemas"]["OrganizationDto"];
       };
     };
   };
@@ -1217,13 +1463,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          'application/json': string;
+          "application/json": string;
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['GenerateAddressPathDto'];
+        "application/json": components["schemas"]["GenerateSlugDto"];
       };
     };
   };
@@ -1232,13 +1478,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          'application/json': string;
+          "application/json": string;
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['GenerateAddressPathDto'];
+        "application/json": components["schemas"]["GenerateSlugDto"];
       };
     };
   };
@@ -1247,13 +1493,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          'application/json': string;
+          "application/json": string;
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['GenerateAddressPathDto'];
+        "application/json": components["schemas"]["GenerateSlugDto"];
       };
     };
   };
@@ -1262,13 +1508,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          'application/json': string;
+          "application/json": string;
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['GenerateAddressPathDto'];
+        "application/json": components["schemas"]["GenerateSlugDto"];
       };
     };
   };
@@ -1277,7 +1523,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['UserResponseDTO'];
+          "*/*": components["schemas"]["UserResponseDTO"];
         };
       };
     };
@@ -1289,7 +1535,74 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['UserUpdateRequestDTO'];
+        "application/json": components["schemas"]["UserUpdateRequestDTO"];
+      };
+    };
+  };
+  validateEmail: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": boolean;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TextNode"];
+      };
+    };
+  };
+  signUp: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": { [key: string]: any };
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SignUpDto"];
+      };
+    };
+  };
+  resetPasswordSet: {
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResetPassword"];
+      };
+    };
+  };
+  resetPasswordRequest: {
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResetPasswordRequest"];
+      };
+    };
+  };
+  authenticateUser: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": { [key: string]: any };
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LoginRequest"];
       };
     };
   };
@@ -1305,13 +1618,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': { [key: string]: string };
+          "*/*": { [key: string]: string };
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['GetKeyTranslationsReqDto'];
+        "application/json": components["schemas"]["GetKeyTranslationsReqDto"];
       };
     };
   };
@@ -1327,7 +1640,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['DeprecatedEditKeyDTO'];
+        "application/json": components["schemas"]["DeprecatedEditKeyDTO"];
       };
     };
   };
@@ -1343,77 +1656,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['SetTranslationsDTO'];
-      };
-    };
-  };
-  editLanguage: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['LanguageDTO'];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['LanguageDTO'];
-      };
-    };
-  };
-  editLanguage_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['LanguageDTO'];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['LanguageDTO'];
-      };
-    };
-  };
-  getAll_3: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['LanguageDTO'][];
-        };
-      };
-    };
-  };
-  createLanguage: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['LanguageDTO'];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['LanguageDTO'];
+        "application/json": components["schemas"]["SetTranslationsDTO"];
       };
     };
   };
@@ -1427,13 +1670,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['ScreenshotDTO'][];
+          "*/*": components["schemas"]["ScreenshotDTO"][];
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['GetScreenshotsByKeyDTO'];
+        "application/json": components["schemas"]["GetScreenshotsByKeyDTO"];
       };
     };
   };
@@ -1450,137 +1693,15 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['ScreenshotDTO'];
+          "*/*": components["schemas"]["ScreenshotDTO"];
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': {
+        "application/json": {
           screenshot: string;
         };
-      };
-    };
-  };
-  getAll_5: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['ProjectDTO'][];
-        };
-      };
-    };
-  };
-  createProject: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['ProjectDTO'];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateProjectDTO'];
-      };
-    };
-  };
-  inviteUser_2: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ProjectInviteUserDto'];
-      };
-    };
-  };
-  editProject: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['ProjectDTO'];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['EditProjectDTO'];
-      };
-    };
-  };
-  validateEmail: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': boolean;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['TextNode'];
-      };
-    };
-  };
-  signUp: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': { [key: string]: any };
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['SignUpDto'];
-      };
-    };
-  };
-  resetPasswordSet: {
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ResetPassword'];
-      };
-    };
-  };
-  resetPasswordRequest: {
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['ResetPasswordRequest'];
-      };
-    };
-  };
-  authenticateUser: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': { [key: string]: any };
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['LoginRequest'];
       };
     };
   };
@@ -1589,7 +1710,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['ApiKeyDTO'][];
+          "*/*": components["schemas"]["ApiKeyDTO"][];
         };
       };
     };
@@ -1599,13 +1720,13 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['ApiKeyDTO'];
+          "*/*": components["schemas"]["ApiKeyDTO"];
         };
       };
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateApiKeyDTO'];
+        "application/json": components["schemas"]["CreateApiKeyDTO"];
       };
     };
   };
@@ -1616,38 +1737,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['EditApiKeyDTO'];
-      };
-    };
-  };
-  getAll: {
-    parameters: {
-      query: {
-        pageable: components['schemas']['Pageable'];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          'application/hal+json': components['schemas']['PagedModelProjectModel'];
-        };
-      };
-    };
-  };
-  get: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['ProjectModel'];
-        };
+        "application/json": components["schemas"]["EditApiKeyDTO"];
       };
     };
   };
@@ -1657,7 +1747,7 @@ export interface operations {
         projectId: number;
       };
       query: {
-        pageable: components['schemas']['Pageable'];
+        pageable: components["schemas"]["Pageable"];
         search?: string;
       };
     };
@@ -1665,7 +1755,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['PagedModelUserAccountInProjectModel'];
+          "*/*": components["schemas"]["PagedModelUserAccountInProjectModel"];
         };
       };
     };
@@ -1676,14 +1766,14 @@ export interface operations {
         projectId: number;
       };
       query: {
-        pageable: components['schemas']['Pageable'];
+        pageable: components["schemas"]["Pageable"];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['PagedModelImportLanguageModel'];
+          "*/*": components["schemas"]["PagedModelImportLanguageModel"];
         };
       };
     };
@@ -1699,7 +1789,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['ImportLanguageModel'];
+          "*/*": components["schemas"]["ImportLanguageModel"];
         };
       };
     };
@@ -1726,14 +1816,14 @@ export interface operations {
         onlyConflicts?: boolean;
         onlyUnresolved?: boolean;
         search?: string;
-        pageable: components['schemas']['Pageable'];
+        pageable: components["schemas"]["Pageable"];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['PagedModelImportTranslationModel'];
+          "*/*": components["schemas"]["PagedModelImportTranslationModel"];
         };
       };
     };
@@ -1745,82 +1835,14 @@ export interface operations {
         projectId: number;
       };
       query: {
-        pageable: components['schemas']['Pageable'];
+        pageable: components["schemas"]["Pageable"];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['PagedModelEntityModelImportFileIssueView'];
-        };
-      };
-    };
-  };
-  getInvitations: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['CollectionModelOrganizationInvitationModel'];
-        };
-      };
-    };
-  };
-  getInvitations_1: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['CollectionModelOrganizationInvitationModel'];
-        };
-      };
-    };
-  };
-  getAllUsers_1: {
-    parameters: {
-      path: {
-        id: number;
-      };
-      query: {
-        pageable: components['schemas']['Pageable'];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['PagedModelUserAccountWithOrganizationRoleModel'];
-        };
-      };
-    };
-  };
-  getAllUsers_2: {
-    parameters: {
-      path: {
-        id: number;
-      };
-      query: {
-        pageable: components['schemas']['Pageable'];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['PagedModelUserAccountWithOrganizationRoleModel'];
+          "*/*": components["schemas"]["PagedModelEntityModelImportFileIssueView"];
         };
       };
     };
@@ -1828,10 +1850,10 @@ export interface operations {
   getAllProjects: {
     parameters: {
       path: {
-        id: number;
+        slug: string;
       };
       query: {
-        pageable: components['schemas']['Pageable'];
+        pageable: components["schemas"]["Pageable"];
         search?: string;
       };
     };
@@ -1839,7 +1861,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['PagedModelProjectModel'];
+          "*/*": components["schemas"]["PagedModelProjectModel"];
         };
       };
     };
@@ -1847,29 +1869,10 @@ export interface operations {
   getAllProjects_1: {
     parameters: {
       path: {
-        id: number;
-      };
-      query: {
-        pageable: components['schemas']['Pageable'];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['PagedModelProjectModel'];
-        };
-      };
-    };
-  };
-  getAllProjects_2: {
-    parameters: {
-      path: {
         slug: string;
       };
       query: {
-        pageable: components['schemas']['Pageable'];
+        pageable: components["schemas"]["Pageable"];
         search?: string;
       };
     };
@@ -1877,26 +1880,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['PagedModelProjectModel'];
-        };
-      };
-    };
-  };
-  getAllProjects_3: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-      query: {
-        pageable: components['schemas']['Pageable'];
-        search?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['PagedModelProjectModel'];
+          "*/*": components["schemas"]["PagedModelProjectModel"];
         };
       };
     };
@@ -1911,7 +1895,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['OrganizationModel'];
+          "*/*": components["schemas"]["OrganizationModel"];
         };
       };
     };
@@ -1926,7 +1910,113 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['OrganizationModel'];
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+    };
+  };
+  getInvitations: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
+        };
+      };
+    };
+  };
+  getInvitations_1: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
+        };
+      };
+    };
+  };
+  getAllUsers_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+      query: {
+        pageable: components["schemas"]["Pageable"];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+        };
+      };
+    };
+  };
+  getAllUsers_2: {
+    parameters: {
+      path: {
+        id: number;
+      };
+      query: {
+        pageable: components["schemas"]["Pageable"];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+        };
+      };
+    };
+  };
+  getAllProjects_2: {
+    parameters: {
+      path: {
+        id: number;
+      };
+      query: {
+        pageable: components["schemas"]["Pageable"];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelProjectModel"];
+        };
+      };
+    };
+  };
+  getAllProjects_3: {
+    parameters: {
+      path: {
+        id: number;
+      };
+      query: {
+        pageable: components["schemas"]["Pageable"];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelProjectModel"];
         };
       };
     };
@@ -1941,7 +2031,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': boolean;
+          "*/*": boolean;
         };
       };
     };
@@ -1956,7 +2046,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': boolean;
+          "*/*": boolean;
         };
       };
     };
@@ -1971,7 +2061,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': boolean;
+          "*/*": boolean;
         };
       };
     };
@@ -1986,7 +2076,64 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': boolean;
+          "*/*": boolean;
+        };
+      };
+    };
+  };
+  verifyEmail: {
+    parameters: {
+      path: {
+        userId: number;
+        code: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["JwtAuthenticationResponse"];
+        };
+      };
+    };
+  };
+  resetPasswordValidate: {
+    parameters: {
+      path: {
+        code: string;
+        email: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  getPublicConfiguration: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PublicConfigurationDTO"];
+        };
+      };
+    };
+  };
+  authenticateUser_1: {
+    parameters: {
+      path: {
+        serviceType: string;
+        code: string;
+      };
+      query: {
+        invitationCode?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
     };
@@ -2002,7 +2149,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['DeprecatedKeyDto'];
+          "*/*": components["schemas"]["DeprecatedKeyDto"];
         };
       };
     };
@@ -2029,7 +2176,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['DeprecatedKeyDto'];
+          "*/*": components["schemas"]["DeprecatedKeyDto"];
         };
       };
     };
@@ -2055,7 +2202,22 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          'application/zip': components['schemas']['StreamingResponseBody'];
+          "application/zip": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+    };
+  };
+  doExportJsonZip_2: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/zip": components["schemas"]["StreamingResponseBody"];
         };
       };
     };
@@ -2071,7 +2233,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': { [key: string]: { [key: string]: any } };
+          "*/*": { [key: string]: { [key: string]: any } };
         };
       };
     };
@@ -2086,7 +2248,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': { [key: string]: { [key: string]: any } };
+          "*/*": { [key: string]: { [key: string]: any } };
         };
       };
     };
@@ -2107,144 +2269,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['ViewDataResponseLinkedHashSetKeyWithTranslationsResponseDtoResponseParams'];
-        };
-      };
-    };
-  };
-  get_5: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['LanguageDTO'];
-        };
-      };
-    };
-  };
-  deleteLanguage_1: {
-    parameters: {
-      path: {
-        id: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-  };
-  get_6: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['LanguageDTO'];
-        };
-      };
-    };
-  };
-  deleteLanguage_2: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-  };
-  getProject: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['ProjectDTO'];
-        };
-      };
-    };
-  };
-  deleteProject: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-  };
-  verifyEmail: {
-    parameters: {
-      path: {
-        userId: number;
-        code: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['JwtAuthenticationResponse'];
-        };
-      };
-    };
-  };
-  resetPasswordValidate: {
-    parameters: {
-      path: {
-        code: string;
-        email: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-  };
-  getPublicConfiguration: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['PublicConfigurationDTO'];
-        };
-      };
-    };
-  };
-  authenticateUser_1: {
-    parameters: {
-      path: {
-        serviceType: string;
-        code: string;
-      };
-      query: {
-        invitationCode?: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          '*/*': components['schemas']['JwtAuthenticationResponse'];
+          "*/*": components["schemas"]["ViewDataResponseLinkedHashSetKeyWithTranslationsResponseDtoResponseParams"];
         };
       };
     };
@@ -2259,7 +2284,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['InvitationDTO'][];
+          "*/*": components["schemas"]["InvitationDTO"][];
         };
       };
     };
@@ -2281,7 +2306,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': string[];
+          "*/*": string[];
         };
       };
     };
@@ -2296,7 +2321,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': components['schemas']['ApiKeyDTO'][];
+          "*/*": components["schemas"]["ApiKeyDTO"][];
         };
       };
     };
@@ -2306,7 +2331,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          '*/*': { [key: string]: string[] };
+          "*/*": { [key: string]: string[] };
         };
       };
     };

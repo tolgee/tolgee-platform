@@ -40,7 +40,7 @@
     "startConcurrently": "concurrently \"craco start\"",
     "build": "craco build",
     "test": "craco test",
-    "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.ts",
+    "schema": "openapi-typescript http://localhost:8080/v3/api-docs/All%20Internal%20-%20for%20Tolgee%20Web%20application --output ./src/service/apiSchema.generated.ts",
     "prettier": "prettier --write ./src",
     "eslint": "eslint --ext .ts --ext .tsx --max-warnings 0 --report-unused-disable-directives .",
     "tsc": "tsc"
@@ -65,6 +65,7 @@
   },
   "devDependencies": {
     "@sentry/types": "^6.5.1",
+    "@tginternal/language-util": "^1.0.3",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.12.2",
     "@types/react": "^17.0.9",
@@ -75,6 +76,7 @@
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.1",
     "concurrently": "^6.2.0",
+    "copy-webpack-plugin": "6.4.1",
     "craco": "^0.0.3",
     "eslint": "^7.28.0",
     "eslint-plugin-prettier": "^3.4.0",

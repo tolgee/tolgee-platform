@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.ResultActions
 
 
-abstract class ProjectAuthRequestPerformer(userAccount: UserAccount) : SignedInRequestPerformer() {
+abstract class ProjectAuthRequestPerformer(
+        userAccount: UserAccount,
+        val projectUrlPrefix: String = "/api/project/"
+) : SignedInRequestPerformer() {
 
     @field:Autowired
     lateinit var dbPopulator: DbPopulatorReal
@@ -18,10 +21,6 @@ abstract class ProjectAuthRequestPerformer(userAccount: UserAccount) : SignedInR
     }
 
     var projectSupplier: (() -> Project)? = null
-
-    companion object {
-        const val API_PROJECT_URL_PREFIX = "/api/project/"
-    }
 
     abstract fun performProjectAuthPut(url: String, content: Any?): ResultActions
     abstract fun performProjectAuthPost(url: String, content: Any?): ResultActions

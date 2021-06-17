@@ -47,7 +47,7 @@ export const TranslationGridContextProvider: React.FC = ({ children }) => {
   const selectedLanguages = actions.useSelector((s) => s.selectedLanguages);
 
   const projectLanguages = useProjectLanguages().reduce(
-    (acc, curr) => ({ ...acc, [curr.abbreviation]: curr.name }),
+    (acc, curr) => ({ ...acc, [curr.tag]: curr.name }),
     {}
   );
 

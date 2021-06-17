@@ -68,7 +68,6 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
           open={!!anchorEl}
           anchorEl={anchorEl}
           onClose={handleClose}
-          onChange={(e) => console.log(e)}
           {...props}
         >
           {Object.entries(languages).map(([abbr, name]) => (

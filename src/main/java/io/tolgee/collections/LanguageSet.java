@@ -22,8 +22,8 @@ public class LanguageSet extends LinkedHashSet<Language> {
         super(s);
     }
 
-    public Set<String> getAbbreviations() {
-        return this.stream().map(Language::getAbbreviation).collect(Collectors.toSet());
+    public Set<String> getTags() {
+        return this.stream().map(Language::getTag).collect(Collectors.toSet());
     }
 
     private static final long serialVersionUID = -6613807560609280131L;

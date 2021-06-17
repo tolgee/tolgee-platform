@@ -1,24 +1,35 @@
 package io.tolgee.model
 
-import io.tolgee.dtos.request.LanguageDTO
+import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.*
+import javax.validation.constraints.Size
 
 @Entity
 @EntityListeners(Language.Companion.LanguageListeners::class)
 @Table(
-        uniqueConstraints = [UniqueConstraint(
-                columnNames = ["project_id", "name"],
-                name = "language_project_name"
-        ), UniqueConstraint(columnNames = ["project_id", "abbreviation"], name = "language_abbreviation_name")],
-        indexes = [Index(
-                columnList = "abbreviation",
-                name = "index_abbreviation"
-        ), Index(columnList = "abbreviation, project_id", name = "index_abbreviation_project")]
+        uniqueConstraints = [
+            UniqueConstraint(
+                    columnNames = ["project_id", "name"],
+                    name = "language_project_name"
+            ),
+            UniqueConstraint(
+                    columnNames = ["project_id", "tag"],
+                    name = "language_tag_name")
+        ],
+        indexes = [
+            Index(
+                    columnList = "tag",
+                    name = "index_tag"
+            ),
+            Index(
+                    columnList = "tag, project_id",
+                    name = "index_tag_project")
+        ]
 )
 class Language : StandardAuditModel() {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
@@ -26,23 +37,37 @@ class Language : StandardAuditModel() {
 
     @ManyToOne
     var project: Project? = null
-    var abbreviation: String? = null
+
+    @Column(nullable = false)
+    var tag: String? = null
+
     var name: String? = null
-    fun updateByDTO(dto: LanguageDTO) {
+
+    var originalName: String? = null
+
+    @field:Size(max = 20)
+    @Column(length = 20)
+    var flagEmoji: String? = null
+
+    fun updateByDTO(dto: LanguageDto) {
         name = dto.name
-        abbreviation = dto.abbreviation
+        tag = dto.tag
+        originalName = dto.originalName
+        flagEmoji = dto.flagEmoji
     }
 
     override fun toString(): String {
-        return "Language(id=" + id + ", abbreviation=" + abbreviation + ", name=" + name + ")"
+        return "Language(tag=$tag, name=$name, originalName=$originalName)"
     }
 
     companion object {
         @JvmStatic
-        fun fromRequestDTO(dto: LanguageDTO): Language {
+        fun fromRequestDTO(dto: LanguageDto): Language {
             val language = Language()
             language.name = dto.name
-            language.abbreviation = dto.abbreviation
+            language.tag = dto.tag
+            language.originalName = dto.originalName
+            language.flagEmoji = dto.flagEmoji
             return language
         }
 

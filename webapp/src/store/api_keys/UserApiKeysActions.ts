@@ -7,6 +7,7 @@ import { ApiKeysService } from '../../service/ApiKeysService';
 import { AppState } from '../index';
 import { useSelector } from 'react-redux';
 import { ProjectService } from '../../service/ProjectService';
+import { ApiSchemaHttpService } from '../../service/http/ApiSchemaHttpService';
 
 export class UserApiKeysState extends StateWithLoadables<UserApiKeysActions> {}
 
@@ -16,7 +17,9 @@ export class UserApiKeysActions extends AbstractLoadableActions<UserApiKeysState
     list: this.createLoadableDefinition(
       this.apiKeysService.getListForLoggedUser
     ),
-    projects: this.createLoadableDefinition(this.projectService.getProjects),
+    projects: this.createLoadableDefinition(
+      this.schemaService.schemaRequest('/v2/projects', 'get')
+    ),
     scopes: this.createLoadableDefinition(
       this.apiKeysService.getAvailableScopes
     ),
@@ -29,7 +32,8 @@ export class UserApiKeysActions extends AbstractLoadableActions<UserApiKeysState
 
   constructor(
     private apiKeysService: ApiKeysService,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private schemaService: ApiSchemaHttpService
   ) {
     super(new UserApiKeysState());
   }

@@ -4,7 +4,7 @@ class PluralData {
     companion object {
         val DATA = mapOf<String, PluralLanguage>(
                 "ach" to PluralLanguage(
-                        abbreviation = "ach",
+                        tag = "ach",
                         name = "Acholi",
                         examples = listOf(
                                 PluralExample(
@@ -21,7 +21,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "af" to PluralLanguage(
-                        abbreviation = "af",
+                        tag = "af",
                         name = "Afrikaans",
                         examples = listOf(
                                 PluralExample(
@@ -38,7 +38,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ak" to PluralLanguage(
-                        abbreviation = "ak",
+                        tag = "ak",
                         name = "Akan",
                         examples = listOf(
                                 PluralExample(
@@ -55,7 +55,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "am" to PluralLanguage(
-                        abbreviation = "am",
+                        tag = "am",
                         name = "Amharic",
                         examples = listOf(
                                 PluralExample(
@@ -72,7 +72,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "an" to PluralLanguage(
-                        abbreviation = "an",
+                        tag = "an",
                         name = "Aragonese",
                         examples = listOf(
                                 PluralExample(
@@ -89,7 +89,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ar" to PluralLanguage(
-                        abbreviation = "ar",
+                        tag = "ar",
                         name = "Arabic",
                         examples = listOf(
                                 PluralExample(
@@ -122,7 +122,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 0) 0 else if (n == 1) 1 else if (n == 2) 2 else if (n % 100 >= 3 && n % 100 <= 10) 3 else if (n % 100 >= 11) 4 else 5 }
                 ),
                 "arn" to PluralLanguage(
-                        abbreviation = "arn",
+                        tag = "arn",
                         name = "Mapudungun",
                         examples = listOf(
                                 PluralExample(
@@ -139,7 +139,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "ast" to PluralLanguage(
-                        abbreviation = "ast",
+                        tag = "ast",
                         name = "Asturian",
                         examples = listOf(
                                 PluralExample(
@@ -156,7 +156,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ay" to PluralLanguage(
-                        abbreviation = "ay",
+                        tag = "ay",
                         name = "Aymará",
                         examples = listOf(
                                 PluralExample(
@@ -169,7 +169,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "az" to PluralLanguage(
-                        abbreviation = "az",
+                        tag = "az",
                         name = "Azerbaijani",
                         examples = listOf(
                                 PluralExample(
@@ -186,7 +186,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "be" to PluralLanguage(
-                        abbreviation = "be",
+                        tag = "be",
                         name = "Belarusian",
                         examples = listOf(
                                 PluralExample(
@@ -207,7 +207,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n % 10 == 1 && n % 100 != 11) 0 else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) 1 else 2 }
                 ),
                 "bg" to PluralLanguage(
-                        abbreviation = "bg",
+                        tag = "bg",
                         name = "Bulgarian",
                         examples = listOf(
                                 PluralExample(
@@ -224,7 +224,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "bn" to PluralLanguage(
-                        abbreviation = "bn",
+                        tag = "bn",
                         name = "Bengali",
                         examples = listOf(
                                 PluralExample(
@@ -241,7 +241,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "bo" to PluralLanguage(
-                        abbreviation = "bo",
+                        tag = "bo",
                         name = "Tibetan",
                         examples = listOf(
                                 PluralExample(
@@ -254,7 +254,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "br" to PluralLanguage(
-                        abbreviation = "br",
+                        tag = "br",
                         name = "Breton",
                         examples = listOf(
                                 PluralExample(
@@ -271,7 +271,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "brx" to PluralLanguage(
-                        abbreviation = "brx",
+                        tag = "brx",
                         name = "Bodo",
                         examples = listOf(
                                 PluralExample(
@@ -288,7 +288,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "bs" to PluralLanguage(
-                        abbreviation = "bs",
+                        tag = "bs",
                         name = "Bosnian",
                         examples = listOf(
                                 PluralExample(
@@ -309,7 +309,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n % 10 == 1 && n % 100 != 11) 0 else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) 1 else 2 }
                 ),
                 "ca" to PluralLanguage(
-                        abbreviation = "ca",
+                        tag = "ca",
                         name = "Catalan",
                         examples = listOf(
                                 PluralExample(
@@ -326,7 +326,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "cgg" to PluralLanguage(
-                        abbreviation = "cgg",
+                        tag = "cgg",
                         name = "Chiga",
                         examples = listOf(
                                 PluralExample(
@@ -339,7 +339,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "cs" to PluralLanguage(
-                        abbreviation = "cs",
+                        tag = "cs",
                         name = "Czech",
                         examples = listOf(
                                 PluralExample(
@@ -360,7 +360,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 1) 0 else if ((n >= 2 && n <= 4)) 1 else 2 }
                 ),
                 "csb" to PluralLanguage(
-                        abbreviation = "csb",
+                        tag = "csb",
                         name = "Kashubian",
                         examples = listOf(
                                 PluralExample(
@@ -381,7 +381,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 1) 0 else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) 1 else 2 }
                 ),
                 "cy" to PluralLanguage(
-                        abbreviation = "cy",
+                        tag = "cy",
                         name = "Welsh",
                         examples = listOf(
                                 PluralExample(
@@ -406,7 +406,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 1) 0 else if (n == 2) 1 else if ((n != 8 && n != 11)) 2 else 3 }
                 ),
                 "da" to PluralLanguage(
-                        abbreviation = "da",
+                        tag = "da",
                         name = "Danish",
                         examples = listOf(
                                 PluralExample(
@@ -423,7 +423,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "de" to PluralLanguage(
-                        abbreviation = "de",
+                        tag = "de",
                         name = "German",
                         examples = listOf(
                                 PluralExample(
@@ -440,7 +440,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "doi" to PluralLanguage(
-                        abbreviation = "doi",
+                        tag = "doi",
                         name = "Dogri",
                         examples = listOf(
                                 PluralExample(
@@ -457,7 +457,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "dz" to PluralLanguage(
-                        abbreviation = "dz",
+                        tag = "dz",
                         name = "Dzongkha",
                         examples = listOf(
                                 PluralExample(
@@ -470,7 +470,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "el" to PluralLanguage(
-                        abbreviation = "el",
+                        tag = "el",
                         name = "Greek",
                         examples = listOf(
                                 PluralExample(
@@ -487,7 +487,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "en" to PluralLanguage(
-                        abbreviation = "en",
+                        tag = "en",
                         name = "English",
                         examples = listOf(
                                 PluralExample(
@@ -504,7 +504,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "eo" to PluralLanguage(
-                        abbreviation = "eo",
+                        tag = "eo",
                         name = "Esperanto",
                         examples = listOf(
                                 PluralExample(
@@ -521,7 +521,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "es" to PluralLanguage(
-                        abbreviation = "es",
+                        tag = "es",
                         name = "Spanish",
                         examples = listOf(
                                 PluralExample(
@@ -538,7 +538,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "et" to PluralLanguage(
-                        abbreviation = "et",
+                        tag = "et",
                         name = "Estonian",
                         examples = listOf(
                                 PluralExample(
@@ -555,7 +555,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "eu" to PluralLanguage(
-                        abbreviation = "eu",
+                        tag = "eu",
                         name = "Basque",
                         examples = listOf(
                                 PluralExample(
@@ -572,7 +572,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "fa" to PluralLanguage(
-                        abbreviation = "fa",
+                        tag = "fa",
                         name = "Persian",
                         examples = listOf(
                                 PluralExample(
@@ -585,7 +585,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "ff" to PluralLanguage(
-                        abbreviation = "ff",
+                        tag = "ff",
                         name = "Fulah",
                         examples = listOf(
                                 PluralExample(
@@ -602,7 +602,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "fi" to PluralLanguage(
-                        abbreviation = "fi",
+                        tag = "fi",
                         name = "Finnish",
                         examples = listOf(
                                 PluralExample(
@@ -619,7 +619,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "fil" to PluralLanguage(
-                        abbreviation = "fil",
+                        tag = "fil",
                         name = "Filipino",
                         examples = listOf(
                                 PluralExample(
@@ -636,7 +636,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "fo" to PluralLanguage(
-                        abbreviation = "fo",
+                        tag = "fo",
                         name = "Faroese",
                         examples = listOf(
                                 PluralExample(
@@ -653,7 +653,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "fr" to PluralLanguage(
-                        abbreviation = "fr",
+                        tag = "fr",
                         name = "French",
                         examples = listOf(
                                 PluralExample(
@@ -670,7 +670,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "fur" to PluralLanguage(
-                        abbreviation = "fur",
+                        tag = "fur",
                         name = "Friulian",
                         examples = listOf(
                                 PluralExample(
@@ -687,7 +687,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "fy" to PluralLanguage(
-                        abbreviation = "fy",
+                        tag = "fy",
                         name = "Frisian",
                         examples = listOf(
                                 PluralExample(
@@ -704,7 +704,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ga" to PluralLanguage(
-                        abbreviation = "ga",
+                        tag = "ga",
                         name = "Irish",
                         examples = listOf(
                                 PluralExample(
@@ -733,7 +733,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 1) 0 else if (n == 2) 1 else if (n < 7) 2 else if (n < 11) 3 else 4 }
                 ),
                 "gd" to PluralLanguage(
-                        abbreviation = "gd",
+                        tag = "gd",
                         name = "Scottish Gaelic",
                         examples = listOf(
                                 PluralExample(
@@ -758,7 +758,7 @@ class PluralData {
                         pluralsFunc = { n -> if ((n == 1 || n == 11)) 0 else if ((n == 2 || n == 12)) 1 else if ((n > 2 && n < 20)) 2 else 3 }
                 ),
                 "gl" to PluralLanguage(
-                        abbreviation = "gl",
+                        tag = "gl",
                         name = "Galician",
                         examples = listOf(
                                 PluralExample(
@@ -775,7 +775,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "gu" to PluralLanguage(
-                        abbreviation = "gu",
+                        tag = "gu",
                         name = "Gujarati",
                         examples = listOf(
                                 PluralExample(
@@ -792,7 +792,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "gun" to PluralLanguage(
-                        abbreviation = "gun",
+                        tag = "gun",
                         name = "Gun",
                         examples = listOf(
                                 PluralExample(
@@ -809,7 +809,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "ha" to PluralLanguage(
-                        abbreviation = "ha",
+                        tag = "ha",
                         name = "Hausa",
                         examples = listOf(
                                 PluralExample(
@@ -826,7 +826,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "he" to PluralLanguage(
-                        abbreviation = "he",
+                        tag = "he",
                         name = "Hebrew",
                         examples = listOf(
                                 PluralExample(
@@ -843,7 +843,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "hi" to PluralLanguage(
-                        abbreviation = "hi",
+                        tag = "hi",
                         name = "Hindi",
                         examples = listOf(
                                 PluralExample(
@@ -860,7 +860,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "hne" to PluralLanguage(
-                        abbreviation = "hne",
+                        tag = "hne",
                         name = "Chhattisgarhi",
                         examples = listOf(
                                 PluralExample(
@@ -877,7 +877,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "hr" to PluralLanguage(
-                        abbreviation = "hr",
+                        tag = "hr",
                         name = "Croatian",
                         examples = listOf(
                                 PluralExample(
@@ -898,7 +898,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n % 10 == 1 && n % 100 != 11) 0 else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) 1 else 2 }
                 ),
                 "hu" to PluralLanguage(
-                        abbreviation = "hu",
+                        tag = "hu",
                         name = "Hungarian",
                         examples = listOf(
                                 PluralExample(
@@ -915,7 +915,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "hy" to PluralLanguage(
-                        abbreviation = "hy",
+                        tag = "hy",
                         name = "Armenian",
                         examples = listOf(
                                 PluralExample(
@@ -932,7 +932,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "id" to PluralLanguage(
-                        abbreviation = "id",
+                        tag = "id",
                         name = "Indonesian",
                         examples = listOf(
                                 PluralExample(
@@ -945,7 +945,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "is" to PluralLanguage(
-                        abbreviation = "is",
+                        tag = "is",
                         name = "Icelandic",
                         examples = listOf(
                                 PluralExample(
@@ -962,7 +962,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n % 10 != 1 || n % 100 == 11) 0 else 1 }
                 ),
                 "it" to PluralLanguage(
-                        abbreviation = "it",
+                        tag = "it",
                         name = "Italian",
                         examples = listOf(
                                 PluralExample(
@@ -979,7 +979,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ja" to PluralLanguage(
-                        abbreviation = "ja",
+                        tag = "ja",
                         name = "Japanese",
                         examples = listOf(
                                 PluralExample(
@@ -992,7 +992,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "jbo" to PluralLanguage(
-                        abbreviation = "jbo",
+                        tag = "jbo",
                         name = "Lojban",
                         examples = listOf(
                                 PluralExample(
@@ -1005,7 +1005,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "jv" to PluralLanguage(
-                        abbreviation = "jv",
+                        tag = "jv",
                         name = "Javanese",
                         examples = listOf(
                                 PluralExample(
@@ -1022,7 +1022,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 0) 0 else 1 }
                 ),
                 "ka" to PluralLanguage(
-                        abbreviation = "ka",
+                        tag = "ka",
                         name = "Georgian",
                         examples = listOf(
                                 PluralExample(
@@ -1035,7 +1035,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "kk" to PluralLanguage(
-                        abbreviation = "kk",
+                        tag = "kk",
                         name = "Kazakh",
                         examples = listOf(
                                 PluralExample(
@@ -1048,7 +1048,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "km" to PluralLanguage(
-                        abbreviation = "km",
+                        tag = "km",
                         name = "Khmer",
                         examples = listOf(
                                 PluralExample(
@@ -1061,7 +1061,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "kn" to PluralLanguage(
-                        abbreviation = "kn",
+                        tag = "kn",
                         name = "Kannada",
                         examples = listOf(
                                 PluralExample(
@@ -1078,7 +1078,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ko" to PluralLanguage(
-                        abbreviation = "ko",
+                        tag = "ko",
                         name = "Korean",
                         examples = listOf(
                                 PluralExample(
@@ -1091,7 +1091,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "ku" to PluralLanguage(
-                        abbreviation = "ku",
+                        tag = "ku",
                         name = "Kurdish",
                         examples = listOf(
                                 PluralExample(
@@ -1108,7 +1108,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "kw" to PluralLanguage(
-                        abbreviation = "kw",
+                        tag = "kw",
                         name = "Cornish",
                         examples = listOf(
                                 PluralExample(
@@ -1133,7 +1133,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 1) 0 else if (n == 2) 1 else if (n == 3) 2 else 3 }
                 ),
                 "ky" to PluralLanguage(
-                        abbreviation = "ky",
+                        tag = "ky",
                         name = "Kyrgyz",
                         examples = listOf(
                                 PluralExample(
@@ -1146,7 +1146,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "lb" to PluralLanguage(
-                        abbreviation = "lb",
+                        tag = "lb",
                         name = "Letzeburgesch",
                         examples = listOf(
                                 PluralExample(
@@ -1163,7 +1163,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ln" to PluralLanguage(
-                        abbreviation = "ln",
+                        tag = "ln",
                         name = "Lingala",
                         examples = listOf(
                                 PluralExample(
@@ -1180,7 +1180,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "lo" to PluralLanguage(
-                        abbreviation = "lo",
+                        tag = "lo",
                         name = "Lao",
                         examples = listOf(
                                 PluralExample(
@@ -1193,7 +1193,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "lt" to PluralLanguage(
-                        abbreviation = "lt",
+                        tag = "lt",
                         name = "Lithuanian",
                         examples = listOf(
                                 PluralExample(
@@ -1214,7 +1214,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n % 10 == 1 && n % 100 != 11) 0 else if (n % 10 >= 2 && (n % 100 < 10 || n % 100 >= 20)) 1 else 2 }
                 ),
                 "lv" to PluralLanguage(
-                        abbreviation = "lv",
+                        tag = "lv",
                         name = "Latvian",
                         examples = listOf(
                                 PluralExample(
@@ -1235,7 +1235,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n % 10 == 1 && n % 100 != 11) 0 else if (n != 0) 1 else 2 }
                 ),
                 "mai" to PluralLanguage(
-                        abbreviation = "mai",
+                        tag = "mai",
                         name = "Maithili",
                         examples = listOf(
                                 PluralExample(
@@ -1252,7 +1252,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "mfe" to PluralLanguage(
-                        abbreviation = "mfe",
+                        tag = "mfe",
                         name = "Mauritian Creole",
                         examples = listOf(
                                 PluralExample(
@@ -1269,7 +1269,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "mg" to PluralLanguage(
-                        abbreviation = "mg",
+                        tag = "mg",
                         name = "Malagasy",
                         examples = listOf(
                                 PluralExample(
@@ -1286,7 +1286,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "mi" to PluralLanguage(
-                        abbreviation = "mi",
+                        tag = "mi",
                         name = "Maori",
                         examples = listOf(
                                 PluralExample(
@@ -1303,7 +1303,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "mk" to PluralLanguage(
-                        abbreviation = "mk",
+                        tag = "mk",
                         name = "Macedonian",
                         examples = listOf(
                                 PluralExample(
@@ -1320,7 +1320,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 1 || n % 10 == 1) 0 else 1 }
                 ),
                 "ml" to PluralLanguage(
-                        abbreviation = "ml",
+                        tag = "ml",
                         name = "Malayalam",
                         examples = listOf(
                                 PluralExample(
@@ -1337,7 +1337,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "mn" to PluralLanguage(
-                        abbreviation = "mn",
+                        tag = "mn",
                         name = "Mongolian",
                         examples = listOf(
                                 PluralExample(
@@ -1354,7 +1354,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "mni" to PluralLanguage(
-                        abbreviation = "mni",
+                        tag = "mni",
                         name = "Manipuri",
                         examples = listOf(
                                 PluralExample(
@@ -1371,7 +1371,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "mnk" to PluralLanguage(
-                        abbreviation = "mnk",
+                        tag = "mnk",
                         name = "Mandinka",
                         examples = listOf(
                                 PluralExample(
@@ -1392,7 +1392,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 0) 0 else if (n == 1) 1 else 2 }
                 ),
                 "mr" to PluralLanguage(
-                        abbreviation = "mr",
+                        tag = "mr",
                         name = "Marathi",
                         examples = listOf(
                                 PluralExample(
@@ -1409,7 +1409,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ms" to PluralLanguage(
-                        abbreviation = "ms",
+                        tag = "ms",
                         name = "Malay",
                         examples = listOf(
                                 PluralExample(
@@ -1422,7 +1422,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "mt" to PluralLanguage(
-                        abbreviation = "mt",
+                        tag = "mt",
                         name = "Maltese",
                         examples = listOf(
                                 PluralExample(
@@ -1447,7 +1447,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 1) 0 else if (n == 0 || (n % 100 > 1 && n % 100 < 11)) 1 else if ((n % 100 > 10 && n % 100 < 20)) 2 else 3 }
                 ),
                 "my" to PluralLanguage(
-                        abbreviation = "my",
+                        tag = "my",
                         name = "Burmese",
                         examples = listOf(
                                 PluralExample(
@@ -1460,7 +1460,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "nah" to PluralLanguage(
-                        abbreviation = "nah",
+                        tag = "nah",
                         name = "Nahuatl",
                         examples = listOf(
                                 PluralExample(
@@ -1477,7 +1477,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "nap" to PluralLanguage(
-                        abbreviation = "nap",
+                        tag = "nap",
                         name = "Neapolitan",
                         examples = listOf(
                                 PluralExample(
@@ -1494,7 +1494,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "nb" to PluralLanguage(
-                        abbreviation = "nb",
+                        tag = "nb",
                         name = "Norwegian Bokmal",
                         examples = listOf(
                                 PluralExample(
@@ -1511,7 +1511,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ne" to PluralLanguage(
-                        abbreviation = "ne",
+                        tag = "ne",
                         name = "Nepali",
                         examples = listOf(
                                 PluralExample(
@@ -1528,7 +1528,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "nl" to PluralLanguage(
-                        abbreviation = "nl",
+                        tag = "nl",
                         name = "Dutch",
                         examples = listOf(
                                 PluralExample(
@@ -1545,7 +1545,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "nn" to PluralLanguage(
-                        abbreviation = "nn",
+                        tag = "nn",
                         name = "Norwegian Nynorsk",
                         examples = listOf(
                                 PluralExample(
@@ -1562,7 +1562,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "no" to PluralLanguage(
-                        abbreviation = "no",
+                        tag = "no",
                         name = "Norwegian",
                         examples = listOf(
                                 PluralExample(
@@ -1579,7 +1579,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "nso" to PluralLanguage(
-                        abbreviation = "nso",
+                        tag = "nso",
                         name = "Northern Sotho",
                         examples = listOf(
                                 PluralExample(
@@ -1596,7 +1596,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "oc" to PluralLanguage(
-                        abbreviation = "oc",
+                        tag = "oc",
                         name = "Occitan",
                         examples = listOf(
                                 PluralExample(
@@ -1613,7 +1613,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "or" to PluralLanguage(
-                        abbreviation = "or",
+                        tag = "or",
                         name = "Oriya",
                         examples = listOf(
                                 PluralExample(
@@ -1630,7 +1630,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "pa" to PluralLanguage(
-                        abbreviation = "pa",
+                        tag = "pa",
                         name = "Punjabi",
                         examples = listOf(
                                 PluralExample(
@@ -1647,7 +1647,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "pap" to PluralLanguage(
-                        abbreviation = "pap",
+                        tag = "pap",
                         name = "Papiamento",
                         examples = listOf(
                                 PluralExample(
@@ -1664,7 +1664,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "pl" to PluralLanguage(
-                        abbreviation = "pl",
+                        tag = "pl",
                         name = "Polish",
                         examples = listOf(
                                 PluralExample(
@@ -1685,7 +1685,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 1) 0 else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) 1 else 2 }
                 ),
                 "pms" to PluralLanguage(
-                        abbreviation = "pms",
+                        tag = "pms",
                         name = "Piemontese",
                         examples = listOf(
                                 PluralExample(
@@ -1702,7 +1702,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ps" to PluralLanguage(
-                        abbreviation = "ps",
+                        tag = "ps",
                         name = "Pashto",
                         examples = listOf(
                                 PluralExample(
@@ -1719,7 +1719,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "pt" to PluralLanguage(
-                        abbreviation = "pt",
+                        tag = "pt",
                         name = "Portuguese",
                         examples = listOf(
                                 PluralExample(
@@ -1736,7 +1736,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "rm" to PluralLanguage(
-                        abbreviation = "rm",
+                        tag = "rm",
                         name = "Romansh",
                         examples = listOf(
                                 PluralExample(
@@ -1753,7 +1753,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ro" to PluralLanguage(
-                        abbreviation = "ro",
+                        tag = "ro",
                         name = "Romanian",
                         examples = listOf(
                                 PluralExample(
@@ -1774,7 +1774,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 1) 0 else if ((n == 0 || (n % 100 > 0 && n % 100 < 20))) 1 else 2 }
                 ),
                 "ru" to PluralLanguage(
-                        abbreviation = "ru",
+                        tag = "ru",
                         name = "Russian",
                         examples = listOf(
                                 PluralExample(
@@ -1795,7 +1795,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n % 10 == 1 && n % 100 != 11) 0 else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) 1 else 2 }
                 ),
                 "rw" to PluralLanguage(
-                        abbreviation = "rw",
+                        tag = "rw",
                         name = "Kinyarwanda",
                         examples = listOf(
                                 PluralExample(
@@ -1812,7 +1812,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "sah" to PluralLanguage(
-                        abbreviation = "sah",
+                        tag = "sah",
                         name = "Yakut",
                         examples = listOf(
                                 PluralExample(
@@ -1825,7 +1825,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "sat" to PluralLanguage(
-                        abbreviation = "sat",
+                        tag = "sat",
                         name = "Santali",
                         examples = listOf(
                                 PluralExample(
@@ -1842,7 +1842,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "sco" to PluralLanguage(
-                        abbreviation = "sco",
+                        tag = "sco",
                         name = "Scots",
                         examples = listOf(
                                 PluralExample(
@@ -1859,7 +1859,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "sd" to PluralLanguage(
-                        abbreviation = "sd",
+                        tag = "sd",
                         name = "Sindhi",
                         examples = listOf(
                                 PluralExample(
@@ -1876,7 +1876,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "se" to PluralLanguage(
-                        abbreviation = "se",
+                        tag = "se",
                         name = "Northern Sami",
                         examples = listOf(
                                 PluralExample(
@@ -1893,7 +1893,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "si" to PluralLanguage(
-                        abbreviation = "si",
+                        tag = "si",
                         name = "Sinhala",
                         examples = listOf(
                                 PluralExample(
@@ -1910,7 +1910,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "sk" to PluralLanguage(
-                        abbreviation = "sk",
+                        tag = "sk",
                         name = "Slovak",
                         examples = listOf(
                                 PluralExample(
@@ -1931,7 +1931,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n == 1) 0 else if ((n >= 2 && n <= 4)) 1 else 2 }
                 ),
                 "sl" to PluralLanguage(
-                        abbreviation = "sl",
+                        tag = "sl",
                         name = "Slovenian",
                         examples = listOf(
                                 PluralExample(
@@ -1956,7 +1956,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n % 100 == 1) 1 else if (n % 100 == 2) 2 else if (n % 100 == 3 || n % 100 == 4) 3 else 0 }
                 ),
                 "so" to PluralLanguage(
-                        abbreviation = "so",
+                        tag = "so",
                         name = "Somali",
                         examples = listOf(
                                 PluralExample(
@@ -1973,7 +1973,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "son" to PluralLanguage(
-                        abbreviation = "son",
+                        tag = "son",
                         name = "Songhay",
                         examples = listOf(
                                 PluralExample(
@@ -1990,7 +1990,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "sq" to PluralLanguage(
-                        abbreviation = "sq",
+                        tag = "sq",
                         name = "Albanian",
                         examples = listOf(
                                 PluralExample(
@@ -2007,7 +2007,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "sr" to PluralLanguage(
-                        abbreviation = "sr",
+                        tag = "sr",
                         name = "Serbian",
                         examples = listOf(
                                 PluralExample(
@@ -2028,7 +2028,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n % 10 == 1 && n % 100 != 11) 0 else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) 1 else 2 }
                 ),
                 "su" to PluralLanguage(
-                        abbreviation = "su",
+                        tag = "su",
                         name = "Sundanese",
                         examples = listOf(
                                 PluralExample(
@@ -2041,7 +2041,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "sv" to PluralLanguage(
-                        abbreviation = "sv",
+                        tag = "sv",
                         name = "Swedish",
                         examples = listOf(
                                 PluralExample(
@@ -2058,7 +2058,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "sw" to PluralLanguage(
-                        abbreviation = "sw",
+                        tag = "sw",
                         name = "Swahili",
                         examples = listOf(
                                 PluralExample(
@@ -2075,7 +2075,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "ta" to PluralLanguage(
-                        abbreviation = "ta",
+                        tag = "ta",
                         name = "Tamil",
                         examples = listOf(
                                 PluralExample(
@@ -2092,7 +2092,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "te" to PluralLanguage(
-                        abbreviation = "te",
+                        tag = "te",
                         name = "Telugu",
                         examples = listOf(
                                 PluralExample(
@@ -2109,7 +2109,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "tg" to PluralLanguage(
-                        abbreviation = "tg",
+                        tag = "tg",
                         name = "Tajik",
                         examples = listOf(
                                 PluralExample(
@@ -2126,7 +2126,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "th" to PluralLanguage(
-                        abbreviation = "th",
+                        tag = "th",
                         name = "Thai",
                         examples = listOf(
                                 PluralExample(
@@ -2139,7 +2139,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "ti" to PluralLanguage(
-                        abbreviation = "ti",
+                        tag = "ti",
                         name = "Tigrinya",
                         examples = listOf(
                                 PluralExample(
@@ -2156,7 +2156,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "tk" to PluralLanguage(
-                        abbreviation = "tk",
+                        tag = "tk",
                         name = "Turkmen",
                         examples = listOf(
                                 PluralExample(
@@ -2173,7 +2173,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "tr" to PluralLanguage(
-                        abbreviation = "tr",
+                        tag = "tr",
                         name = "Turkish",
                         examples = listOf(
                                 PluralExample(
@@ -2190,7 +2190,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "tt" to PluralLanguage(
-                        abbreviation = "tt",
+                        tag = "tt",
                         name = "Tatar",
                         examples = listOf(
                                 PluralExample(
@@ -2203,7 +2203,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "ug" to PluralLanguage(
-                        abbreviation = "ug",
+                        tag = "ug",
                         name = "Uyghur",
                         examples = listOf(
                                 PluralExample(
@@ -2216,7 +2216,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "uk" to PluralLanguage(
-                        abbreviation = "uk",
+                        tag = "uk",
                         name = "Ukrainian",
                         examples = listOf(
                                 PluralExample(
@@ -2237,7 +2237,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n % 10 == 1 && n % 100 != 11) 0 else if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) 1 else 2 }
                 ),
                 "ur" to PluralLanguage(
-                        abbreviation = "ur",
+                        tag = "ur",
                         name = "Urdu",
                         examples = listOf(
                                 PluralExample(
@@ -2254,7 +2254,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "uz" to PluralLanguage(
-                        abbreviation = "uz",
+                        tag = "uz",
                         name = "Uzbek",
                         examples = listOf(
                                 PluralExample(
@@ -2271,7 +2271,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "vi" to PluralLanguage(
-                        abbreviation = "vi",
+                        tag = "vi",
                         name = "Vietnamese",
                         examples = listOf(
                                 PluralExample(
@@ -2284,7 +2284,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "wa" to PluralLanguage(
-                        abbreviation = "wa",
+                        tag = "wa",
                         name = "Walloon",
                         examples = listOf(
                                 PluralExample(
@@ -2301,7 +2301,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n > 1) 0 else 1 }
                 ),
                 "wo" to PluralLanguage(
-                        abbreviation = "wo",
+                        tag = "wo",
                         name = "Wolof",
                         examples = listOf(
                                 PluralExample(
@@ -2314,7 +2314,7 @@ class PluralData {
                         pluralsFunc = { n -> 0 }
                 ),
                 "yo" to PluralLanguage(
-                        abbreviation = "yo",
+                        tag = "yo",
                         name = "Yoruba",
                         examples = listOf(
                                 PluralExample(
@@ -2331,7 +2331,7 @@ class PluralData {
                         pluralsFunc = { n -> if (n != 1) 0 else 1 }
                 ),
                 "zh" to PluralLanguage(
-                        abbreviation = "zh",
+                        tag = "zh",
                         name = "Chinese",
                         examples = listOf(
                                 PluralExample(

@@ -1,79 +1,41 @@
-import { default as React, FunctionComponent, ReactElement } from 'react';
+import { default as React, FC, ReactElement, ReactNode } from 'react';
 import { FieldArray as FormikFieldArray, useField } from 'formik';
-import { Box } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import RemoveIcon from '@material-ui/icons/Remove';
-import AddIcon from '@material-ui/icons/Add';
-import Button from '@material-ui/core/Button';
-import FormHelperText from '@material-ui/core/FormHelperText';
 
-export interface FAProps {
+export const FieldArray: FC<{
   name: string;
-  children: (nameCallback: (fieldName: string) => string) => ReactElement;
-  initialValue?: any[];
-  addText?: string;
-}
-
-export const FieldArray: FunctionComponent<FAProps> = (props) => {
-  const [field, meta] = useField(props.name);
+  children: (
+    nameCallback: (fieldName: string) => string,
+    index: number,
+    removeItem: () => void
+  ) => ReactElement;
+  defaultItemValue?: any;
+  addButton: (addItem: () => void) => ReactNode;
+  showArrayErrors?: boolean;
+}> = (props) => {
+  const [field, _] = useField(props.name);
   const values = field.value;
+
   return (
-    <FormikFieldArray
-      name={props.name}
-      render={(arrayHelpers) => (
-        <div>
-          {values && values.length > 0 ? (
-            <>
-              {values.map((value, index) => (
-                <Box key={index} display="flex">
-                  <Box
-                    flexGrow={1}
-                    justifyContent="space-between"
-                    display="flex"
-                  >
-                    {props.children((name) => `${props.name}.${index}.${name}`)}
-                    <Box display="flex" alignItems="center">
-                      <IconButton
-                        data-cy="global-field-array-minus-button"
-                        type="button"
-                        onClick={() => arrayHelpers.remove(index)} // remove a friend from the list
-                      >
-                        <RemoveIcon />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                </Box>
-              ))}
-              <Box display="flex" alignItems="center" justifyContent="flex-end">
-                <IconButton
-                  data-cy="global-field-array-plus-button"
-                  type="button"
-                  onClick={() =>
-                    arrayHelpers.insert(values.length, props.initialValue)
-                  } // insert an empty string at a position
-                >
-                  <AddIcon />
-                </IconButton>
-              </Box>
-            </>
-          ) : (
-            <>
-              <Box>
-                <Button
-                  data-cy="global-field-array-add-button"
-                  variant="outlined"
-                  onClick={() => arrayHelpers.push('')}
-                >
-                  Add {field.name}
-                </Button>
-              </Box>
-              <FormHelperText error={!!meta.error} color="textSecondary">
-                {meta.error}
-              </FormHelperText>
-            </>
-          )}
-        </div>
-      )}
-    />
+    <>
+      <FormikFieldArray
+        name={props.name}
+        render={(arrayHelpers) => (
+          <>
+            {values.map((value, index) =>
+              props.children(
+                (name) => `${props.name}.${index}.${name}`,
+                index,
+                () => {
+                  arrayHelpers.remove(index);
+                }
+              )
+            )}
+            {props.addButton(() => {
+              arrayHelpers.insert(values.length, props.defaultItemValue);
+            })}
+          </>
+        )}
+      />
+    </>
   );
 };

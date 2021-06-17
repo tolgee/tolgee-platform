@@ -47,3 +47,7 @@ val ResultActions.andPrettyPrint: ResultActions
         println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(parsed))
         return this
     }
+
+fun JsonAssert.node(node: String, rfn: JsonAssert.() -> Unit) {
+    rfn(node(node))
+}

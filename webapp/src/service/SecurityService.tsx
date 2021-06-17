@@ -1,6 +1,6 @@
 import { singleton } from 'tsyringe';
 import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { ErrorResponseDTO, TokenDTO } from './response.types';
+import { ErrorResponseDto, TokenDTO } from './response.types';
 import { TokenService } from './TokenService';
 import { API_LINKS } from '../constants/apiLinks';
 import { LINKS } from '../constants/links';
@@ -124,7 +124,7 @@ export class SecurityService {
 
   private async handleLoginResponse(response): Promise<TokenDTO> {
     if (response.status >= 400) {
-      throw (await response.json()) as ErrorResponseDTO;
+      throw (await response.json()) as ErrorResponseDto;
     }
 
     const tokenDTO: TokenDTO = await response.json();

@@ -1,13 +1,14 @@
 package io.tolgee.service
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.CreateProjectDTO
 import io.tolgee.dtos.request.EditProjectDTO
 import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.*
 import io.tolgee.model.views.ProjectView
-import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.dataImport.ImportService
@@ -26,7 +27,6 @@ class ProjectService constructor(
         private val projectRepository: ProjectRepository,
         private val entityManager: EntityManager,
         private val securityService: SecurityService,
-        private val permissionRepository: PermissionRepository,
         private val permissionService: PermissionService,
         private val apiKeyService: ApiKeyService,
         private val screenshotService: ScreenshotService,
@@ -75,19 +75,38 @@ class ProjectService constructor(
             project.userOwner = authenticationFacade.userAccount
             securityService.grantFullAccessToRepo(project)
         }
-        for (language in dto.languages!!) {
-            languageService.createLanguage(language, project)
-        }
+
+        val createdLanguages = dto.languages!!.map { languageService.createLanguage(it, project) }
+        project.baseLanguage = getBaseLanguage(dto, createdLanguages)
 
         entityManager.persist(project)
         return project
     }
 
+
     @Transactional
-    fun editProject(dto: EditProjectDTO): Project {
-        val project = projectRepository.findById(dto.projectId!!)
+    fun editProject(id: Long, dto: EditProjectDTO): Project {
+        val project = projectRepository.findById(id)
                 .orElseThrow { NotFoundException() }!!
         project.name = dto.name
+
+        dto.baseLanguageId?.let {
+            val language = project.languages.find { it.id == dto.baseLanguageId }
+                    ?: throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
+            project.baseLanguage = language
+        }
+
+        val newSlug = dto.slug
+        if (newSlug != null && newSlug != project.slug) {
+            validateSlugUniqueness(newSlug)
+            project.slug = newSlug
+        }
+
+        //if project has null slag, generate it
+        if (project.slug == null) {
+            project.slug = generateSlug(project.name!!, null)
+        }
+
         entityManager.persist(project)
         return project
     }
@@ -137,6 +156,21 @@ class ProjectService constructor(
         projectRepository.delete(project)
     }
 
+    /**
+     * If base language is missing on project it selects language with lowest id
+     * It saves updated project and returns project's new baseLanguage
+     */
+    fun autoSetBaseLanguage(projectId: Long): Language? {
+        return this.get(projectId).orElse(null)?.let { project ->
+            project.baseLanguage ?: project.languages.toList().firstOrNull()?.let {
+                project.baseLanguage = it
+                projectRepository.save(project)
+                it
+            }
+        }
+        return null
+    }
+
     fun deleteAllByName(name: String) {
         projectRepository.findAllByName(name).forEach {
             this.deleteProject(it.id)
@@ -162,4 +196,14 @@ class ProjectService constructor(
 
     fun saveAll(projects: Collection<Project>): MutableList<Project> =
             projectRepository.saveAll(projects)
+
+    fun save(project: Project): Project = projectRepository.save(project)
+
+    private fun getBaseLanguage(dto: CreateProjectDTO, createdLanguages: List<Language>): Language {
+        if (dto.baseLanguageTag != null) {
+            return createdLanguages.find { it.tag == dto.baseLanguageTag }
+                    ?: throw BadRequestException(Message.LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND)
+        }
+        return createdLanguages[0]
+    }
 }
