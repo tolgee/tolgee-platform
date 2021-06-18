@@ -12,6 +12,7 @@ import {
 } from "../common/apiCalls";
 import { HOST } from "../common/constants";
 import { ProjectDTO } from "../../../webapp/src/service/response.types";
+import { deleteLanguage, visitLanguageSettings, visitProjectSettings } from "../common/languages";
 
 describe("Translations", () => {
   let project: ProjectDTO = null;
@@ -48,6 +49,20 @@ describe("Translations", () => {
   afterEach(() => {
     cy.wrap(null).then(() => deleteProject(project.id));
   });
+
+  it("won't fail when language deleted", () => {
+    createTranslation("Test key", "Translated test key", { isFirst: true });
+    cy.contains("Translation created").should("be.visible");
+    toggleLang("Česky");
+    visitProjectSettings(project.id)
+    visitLanguageSettings("Česky")
+    deleteLanguage()
+    visit()
+    // wait for loading to appear and disappear again
+    cy.gcy("global-base-view-loading").should("be.visible");
+    cy.gcy("global-base-view-loading").should("not.exist");
+    cy.contains("Translated test key").should("be.visible");
+  })
 
   it("will paginate", () => {
     const promises = [];
@@ -228,16 +243,6 @@ describe("Translations", () => {
 
     describe("Options", () => {
       it("will select language", () => {
-        const toggleLang = (lang) => {
-          cy.get("#languages-select-translations").click();
-          cy.get("#language-select-translations-menu")
-            .contains(lang)
-            .should("be.visible")
-            .click();
-          cy.get("body").click();
-          // wait for loading to disappear
-          cy.gcy("global-base-view-loading").should("not.exist");
-        };
         toggleLang("Česky");
         cy.contains("Studený přeložený text 1").should("be.visible");
         toggleLang("Česky");
@@ -314,3 +319,15 @@ function goToPreviousPage() {
 function clickDiscardChanges() {
   cy.xpath(getAnyContainingText("Discard changes", "button")).click();
 }
+
+const toggleLang = (lang) => {
+  cy.get("#languages-select-translations").click();
+  cy.get("#language-select-translations-menu")
+    .contains(lang)
+    .should("be.visible")
+    .click();
+  cy.get("body").click();
+  // wait for loading to disappear
+  cy.gcy("global-base-view-loading").should("not.exist");
+};
+

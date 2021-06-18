@@ -71,7 +71,7 @@ export const TranslationGridContextProvider: React.FC = ({ children }) => {
         // update selected languages in localstorage
         selectedLanguagesService.setForProject(
           projectDTO.id,
-          new Set(data.params?.languages)
+          data.params!.languages!
         );
       },
     }
