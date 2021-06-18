@@ -105,23 +105,22 @@ type RequestParamsType<
 > = OperationSchema<Url, Method>['parameters'] &
   OperationSchema<Url, Method>['requestBody'];
 
-type ResponseContent<Url extends keyof paths, Method extends keyof paths[Url]> =
-  OperationSchema<Url, Method>['responses'][200] extends NotNullAnyContent
-    ? OperationSchema<Url, Method>['responses'][200]['content']['*/*']
-    : OperationSchema<
-        Url,
-        Method
-      >['responses'][200] extends NotNullJsonHalContent
-    ? OperationSchema<
-        Url,
-        Method
-      >['responses'][200]['content']['application/hal+json']
-    : OperationSchema<Url, Method>['responses'][200] extends NotNullJsonContent
-    ? OperationSchema<
-        Url,
-        Method
-      >['responses'][200]['content']['application/json']
-    : void;
+type ResponseContent<
+  Url extends keyof paths,
+  Method extends keyof paths[Url]
+> = OperationSchema<Url, Method>['responses'][200] extends NotNullAnyContent
+  ? OperationSchema<Url, Method>['responses'][200]['content']['*/*']
+  : OperationSchema<Url, Method>['responses'][200] extends NotNullJsonHalContent
+  ? OperationSchema<
+      Url,
+      Method
+    >['responses'][200]['content']['application/hal+json']
+  : OperationSchema<Url, Method>['responses'][200] extends NotNullJsonContent
+  ? OperationSchema<
+      Url,
+      Method
+    >['responses'][200]['content']['application/json']
+  : void;
 
 type NotNullAnyContent = {
   content: {
@@ -167,5 +166,7 @@ type OperationSchemaType = {
   responses: ResponseType;
 };
 
-type OperationSchema<Url extends keyof paths, Method extends keyof paths[Url]> =
-  paths[Url][Method] extends OperationSchemaType ? paths[Url][Method] : never;
+type OperationSchema<
+  Url extends keyof paths,
+  Method extends keyof paths[Url]
+> = paths[Url][Method] extends OperationSchemaType ? paths[Url][Method] : never;

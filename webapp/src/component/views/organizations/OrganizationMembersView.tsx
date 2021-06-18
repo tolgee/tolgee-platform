@@ -1,21 +1,17 @@
-import * as React from 'react';
-import { FunctionComponent } from 'react';
-import { container } from 'tsyringe';
+import { FunctionComponent, useState } from 'react';
 import { T } from '@tolgee/react';
-import { OrganizationActions } from '../../../store/organization/OrganizationActions';
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
-import { SimplePaginatedHateoasList } from '../../common/list/SimplePaginatedHateoasList';
 import { Box, Button, Grid, Theme, Typography } from '@material-ui/core';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import createStyles from '@material-ui/core/styles/createStyles';
 import { useUser } from '../../../hooks/useUser';
-import { useOrganization } from '../../../hooks/organizations/useOrganization';
-import { useLeaveOrganization } from '../../../hooks/organizations/useLeaveOrganization';
+import { useOrganization } from './useOrganization';
+import { useLeaveOrganization } from './useLeaveOrganization';
 import { OrganizationRoleMenu } from './components/OrganizationRoleMenu';
 import OrganizationRemoveUserButton from './components/OrganizationRemoveUserButton';
 import { SimpleListItem } from '../../common/list/SimpleListItem';
-
-const actions = container.resolve(OrganizationActions);
+import { PaginatedHateoasList } from '../../common/list/PaginatedHateoasList';
+import { useGetOrganizationUsers } from '../../../service/hooks/Organization';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -37,12 +33,29 @@ export const OrganizationMembersView: FunctionComponent = () => {
 
   const leaveOrganization = useLeaveOrganization();
 
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+
+  const membersLoadable = useGetOrganizationUsers(
+    organization!.id,
+    {
+      page,
+      search,
+      sort: ['name'],
+      size: 10,
+    },
+    {
+      keepPreviousData: true,
+    }
+  );
+
   return (
-    <BaseOrganizationSettingsView>
-      <SimplePaginatedHateoasList
-        searchField
+    <BaseOrganizationSettingsView loading={membersLoadable.isFetching}>
+      <PaginatedHateoasList
+        loadable={membersLoadable}
         title={<T>organization_members_view_title</T>}
-        pageSize={10}
+        onSearchChange={setSearch}
+        onPageChange={setPage}
         renderItem={(i) => (
           <SimpleListItem className={classes.container} key={i.id}>
             <Grid container justify="space-between" alignItems="center">
@@ -85,7 +98,7 @@ export const OrganizationMembersView: FunctionComponent = () => {
                       size="small"
                       aria-controls="simple-menu"
                       aria-haspopup="true"
-                      onClick={() => leaveOrganization(organization.id)}
+                      onClick={() => leaveOrganization(organization!.id)}
                     >
                       <T>organization_users_leave</T>
                     </Button>
@@ -100,13 +113,6 @@ export const OrganizationMembersView: FunctionComponent = () => {
             </Grid>
           </SimpleListItem>
         )}
-        actions={actions}
-        loadableName="listUsers"
-        dispatchParams={[
-          {
-            path: { id: organization.id },
-          },
-        ]}
       />
     </BaseOrganizationSettingsView>
   );

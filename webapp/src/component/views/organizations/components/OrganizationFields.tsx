@@ -1,6 +1,5 @@
 import { useFormikContext } from 'formik';
 import { useDebounce } from 'use-debounce';
-import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { TextField } from '../../../common/form/fields/TextField';
 import { Box, FormHelperText } from '@material-ui/core';

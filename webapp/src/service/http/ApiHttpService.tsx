@@ -124,15 +124,15 @@ export class ApiHttpService {
     ).blob();
   }
 
-  async post<T>(url, body): Promise<T> {
+  async post<T = any>(url, body): Promise<T> {
     return ApiHttpService.getResObject(await this.postNoJson(url, body));
   }
 
-  async put<T>(url, body): Promise<T> {
+  async put<T = any>(url, body): Promise<T> {
     return ApiHttpService.getResObject(await this.putNoJson(url, body));
   }
 
-  async delete<T>(url, body?: any): Promise<T> {
+  async delete<T = any>(url, body?: any): Promise<T> {
     return ApiHttpService.getResObject(
       await this.fetch(url, {
         method: 'DELETE',

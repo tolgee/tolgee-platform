@@ -2,3 +2,5 @@ build
 public
 
 ./*.json
+
+**/*.generated.*

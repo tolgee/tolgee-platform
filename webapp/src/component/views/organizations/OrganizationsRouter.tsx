@@ -1,5 +1,4 @@
 import { Switch } from 'react-router-dom';
-import * as React from 'react';
 import { PrivateRoute } from '../../common/PrivateRoute';
 import { OrganizationsListView } from './OrganizationListView';
 import { OrganizationCreateView } from './OrganizationCreateView';
@@ -8,10 +7,11 @@ import { OrganizationProfileView } from './OrganizationProfileView';
 import { BoxLoading } from '../../common/BoxLoading';
 import { DashboardPage } from '../../layout/DashboardPage';
 import { OrganizationMembersView } from './OrganizationMembersView';
-import { useOrganization } from '../../../hooks/organizations/useOrganization';
 import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivilegesView';
 import { OrganizationInvitationsView } from './OrganizationInvitationsView';
 import { OrganizationsProjectListView } from './OrganizationProjectListView';
+
+import { useOrganization } from './useOrganization';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
