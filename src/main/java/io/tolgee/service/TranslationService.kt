@@ -14,6 +14,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Translation
 import io.tolgee.model.Translation.Companion.builder
 import io.tolgee.model.key.Key
+import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.query_builders.TranslationsViewBuilder.Companion.getData
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,7 +38,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
         val langTranslations: HashMap<String, Any> = LinkedHashMap()
         for (translation in allByLanguages) {
             val map = langTranslations
-                    .computeIfAbsent(translation.language!!.tag!!
+                    .computeIfAbsent(translation.languageTag
                     ) { LinkedHashMap<String, Any>() } as MutableMap<String, Any?>
             addToMap(translation, map)
         }
@@ -132,9 +133,10 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun addToMap(translation: Translation, map: MutableMap<String, Any?>) {
+    private fun addToMap(translation: SimpleTranslationView, map: MutableMap<String, Any?>) {
         var currentMap = map
-        for (folderName in translation.key!!.path.path) {
+        val path = PathDTO.fromFullPath(translation.key)
+        for (folderName in path.path) {
             val childMap = currentMap.computeIfAbsent(folderName) { LinkedHashMap<Any, Any>() }
             if (childMap is Map<*, *>) {
                 currentMap = childMap as MutableMap<String, Any?>
@@ -142,7 +144,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
             }
             throw InternalException(Message.DATA_CORRUPTED)
         }
-        currentMap[translation.key!!.path.name] = translation.text
+        currentMap[path.name] = translation.text
     }
 
     fun deleteAllByProject(projectId: Long) {
