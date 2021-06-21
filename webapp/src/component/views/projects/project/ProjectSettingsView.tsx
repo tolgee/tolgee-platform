@@ -89,7 +89,11 @@ export const ProjectSettingsView: FunctionComponent = () => {
   const LanguageSelect = () => {
     const projectLanguages = useProjectLanguages();
     return (
-      <BaseLanguageSelect name="baseLanguageId" languages={projectLanguages} />
+      <BaseLanguageSelect
+        label={<T>project_settings_base_language</T>}
+        name="baseLanguageId"
+        languages={projectLanguages}
+      />
     );
   };
 
