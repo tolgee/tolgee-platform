@@ -2,6 +2,7 @@ import React, { ComponentProps, useEffect, useState } from 'react';
 import { InputAdornment, TextField } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import { T } from '@tolgee/react';
+import { useDebounce } from 'use-debounce/lib';
 
 const SearchField = (
   props: {
@@ -10,19 +11,13 @@ const SearchField = (
   } & ComponentProps<typeof TextField>
 ) => {
   const [search, setSearch] = useState(props.initial || '');
-  const [oldSearch, setOldSearch] = useState('');
+  const [debouncedSearch] = useDebounce(search, 500);
 
   const { onSearch, ...otherProps } = props;
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      if (oldSearch !== search) {
-        onSearch(search);
-        setOldSearch(search);
-      }
-    }, 500);
-    return () => clearTimeout(handler);
-  }, [search]);
+    onSearch(debouncedSearch);
+  }, [debouncedSearch]);
 
   return (
     <TextField

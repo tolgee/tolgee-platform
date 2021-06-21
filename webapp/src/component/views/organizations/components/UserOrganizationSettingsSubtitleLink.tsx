@@ -1,12 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Box, Link, MenuItem, Popover } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import { ArrowDropDown } from '@material-ui/icons';
 import { useUser } from '../../../../hooks/useUser';
 import { LINKS, PARAMS } from '../../../../constants/links';
 import { Link as RouterLink } from 'react-router-dom';
-import { container } from 'tsyringe';
-import { OrganizationActions } from '../../../../store/organization/OrganizationActions';
+import { useGetOrganizations } from '../../../../service/hooks/Organization';
 
 type UserOrganizationSettingsSubtitleLinkProps = {
   isUser: boolean;
@@ -16,8 +15,6 @@ type ListDataType = {
   name: string;
   linkTo: string;
 }[];
-
-const actions = container.resolve(OrganizationActions);
 
 const UserOrganizationSettingsSubtitleLink = (
   props: UserOrganizationSettingsSubtitleLinkProps
@@ -37,13 +34,9 @@ const UserOrganizationSettingsSubtitleLink = (
   const MenuItems = () => {
     const user = useUser();
 
-    const organizationsLoadable = actions.useSelector(
-      (state) => state.loadables.listPermittedForMenu
-    );
-
-    useEffect(() => {
-      actions.loadableActions.listPermittedForMenu.dispatch();
-    }, []);
+    const organizationsLoadable = useGetOrganizations({
+      filterCurrentUserOwner: true,
+    });
 
     const data: ListDataType = [
       {

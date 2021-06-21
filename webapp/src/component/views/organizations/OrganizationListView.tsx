@@ -1,8 +1,6 @@
-import * as React from 'react';
-import { container } from 'tsyringe';
+import { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { OrganizationActions } from '../../../store/organization/OrganizationActions';
-import { SimplePaginatedHateoasList } from '../../common/list/SimplePaginatedHateoasList';
+import { PaginatedHateoasList } from '../../common/list/PaginatedHateoasList';
 import { LINKS, PARAMS } from '../../../constants/links';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
@@ -13,24 +11,33 @@ import Box from '@material-ui/core/Box';
 import { BaseUserSettingsView } from '../userSettings/BaseUserSettingsView';
 import { SimpleListItem } from '../../common/list/SimpleListItem';
 import { Button } from '@material-ui/core';
-import { useLeaveOrganization } from '../../../hooks/organizations/useLeaveOrganization';
-
-const actions = container.resolve(OrganizationActions);
+import { useLeaveOrganization } from './useLeaveOrganization';
+import { useGetOrganizations } from '../../../service/hooks/Organization';
 
 export const OrganizationsListView = () => {
   const t = useTranslate();
 
   const leaveOrganization = useLeaveOrganization();
 
+  const [page, setPage] = useState(0);
+
+  const organizatationsLoadable = useGetOrganizations({
+    page,
+    filterCurrentUserOwner: false,
+    sort: ['name'],
+    size: 10,
+  });
+
   return (
     <BaseUserSettingsView
       title={t('organizations_title')}
       containerMaxWidth="lg"
+      loading={organizatationsLoadable.isFetching}
+      hideChildrenOnLoading={false}
     >
-      <SimplePaginatedHateoasList
-        actions={actions}
-        pageSize={10}
-        loadableName={'listPermitted'}
+      <PaginatedHateoasList
+        loadable={organizatationsLoadable}
+        onPageChange={setPage}
         renderItem={(item) => (
           <SimpleListItem
             button

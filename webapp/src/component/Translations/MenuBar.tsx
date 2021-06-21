@@ -51,7 +51,7 @@ export const MenuBar: FunctionComponent = () => {
       },
       onSuccess: () => {
         messaging.success(<T>Translation grid - Successfully deleted!</T>);
-        queryClient.invalidateQueries(['project', project.id, 'translations']);
+        queryClient.invalidateQueries(['project']);
         actions.setTranslationEditing.dispatch({
           data: null,
           skipConfirm: true,
@@ -100,10 +100,7 @@ export const MenuBar: FunctionComponent = () => {
           </Slide>
           <Box flexGrow={1} display="flex" alignItems="flex-end">
             <Box pr={2}>
-              <LanguagesMenu
-                context="translations"
-                defaultSelected={listContext.listLoadable?.data?.params?.languages}
-              />
+              <LanguagesMenu context="translations" />
             </Box>
             <Box pr={2}>
               <TranslationsSearchField />

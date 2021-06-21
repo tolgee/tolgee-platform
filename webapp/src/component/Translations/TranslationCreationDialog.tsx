@@ -57,10 +57,8 @@ export function TranslationCreationDialog() {
     );
   }
 
-  const initialTranslations = selectedLanguages.reduce(
-    (res, l) => ({ ...res, [l]: '' }),
-    {}
-  );
+  const initialTranslations =
+    selectedLanguages!.reduce((res, l) => ({ ...res, [l]: '' }), {}) || {};
 
   return (
     <Dialog
@@ -77,15 +75,12 @@ export function TranslationCreationDialog() {
       <DialogContent>
         {createKey.error && <ResourceErrorComponent error={createKey.error} />}
 
-        <LanguagesMenu
-          context="creation-dialog"
-          defaultSelected={listContext.listLoadable?.data?.params?.languages}
-        />
+        <LanguagesMenu context="creation-dialog" />
         <StandardForm
           onSubmit={onSubmit}
           initialValues={{ key: '', translations: initialTranslations }}
           validationSchema={Validation.KEY_TRANSLATION_CREATION(
-            selectedLanguages
+            selectedLanguages!
           )}
           onCancel={() => onClose()}
         >

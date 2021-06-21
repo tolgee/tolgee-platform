@@ -50,9 +50,6 @@ export class OrganizationService {
     components['schemas']['PagedModelUserAccountWithOrganizationRoleModel']
   > => this.v2http.get(`organizations/${id}/users`, query);
 
-  public leave = async (id: number) =>
-    this.v2http.put(`organizations/${id}/leave`, {});
-
   public setRole = async (
     organizationId: number,
     userId: number,

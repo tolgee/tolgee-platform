@@ -20,6 +20,7 @@ declare namespace DataCy {
         "global-form-select" |
         "global-list-item" |
         "global-list-item-text" |
+        "global-list-items" |
         "global-list-pagination" |
         "global-list-search" |
         "global-paginated-list" |

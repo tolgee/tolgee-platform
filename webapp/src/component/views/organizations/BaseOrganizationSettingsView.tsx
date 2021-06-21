@@ -1,33 +1,31 @@
+import { useRouteMatch } from 'react-router-dom';
 import { BaseView, BaseViewProps } from '../../layout/BaseView';
 import { FunctionComponent, PropsWithChildren } from 'react';
 import { Box, Grid, Typography } from '@material-ui/core';
 import { OrganizationSettingsMenu } from './components/OrganizationSettingsMenu';
-import { useOrganization } from '../../../hooks/organizations/useOrganization';
+import { useGetOrganization } from '../../../service/hooks/Organization';
 import UserOrganizationSettingsSubtitleLink from './components/UserOrganizationSettingsSubtitleLink';
-import { container } from 'tsyringe';
-import { OrganizationActions } from '../../../store/organization/OrganizationActions';
-
-const actions = container.resolve(OrganizationActions);
+import { PARAMS } from '../../../constants/links';
 
 export const BaseOrganizationSettingsView: FunctionComponent<BaseViewProps> = ({
   children,
   title,
+  loading,
   ...otherProps
 }: PropsWithChildren<BaseViewProps>) => {
-  const organization = useOrganization();
+  const match = useRouteMatch();
+  const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
 
-  const organizationLoadable = actions.useSelector(
-    (state) => state.loadables.get
-  );
+  const organization = useGetOrganization(organizationSlug);
 
   return (
     <BaseView
       {...otherProps}
       containerMaxWidth="md"
-      loading={organizationLoadable.loading}
+      loading={organization.isLoading || loading}
       customHeader={
         <>
-          <Typography variant="h5">{organization?.name}</Typography>
+          <Typography variant="h5">{organization.data?.name}</Typography>
           <UserOrganizationSettingsSubtitleLink isUser={false} />
         </>
       }

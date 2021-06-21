@@ -1,37 +1,42 @@
-import * as React from 'react';
-import { container } from 'tsyringe';
+import { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { OrganizationActions } from '../../../store/organization/OrganizationActions';
 import { BaseView } from '../../layout/BaseView';
 import ProjectListItem from '../projects/ProjectListItem';
-import { useOrganization } from '../../../hooks/organizations/useOrganization';
-import { SimplePaginatedHateoasList } from '../../common/list/SimplePaginatedHateoasList';
+import { useOrganization } from './useOrganization';
+import { PaginatedHateoasList } from '../../common/list/PaginatedHateoasList';
 import Box from '@material-ui/core/Box';
 import { FabAddButtonLink } from '../../common/buttons/FabAddButtonLink';
 import { LINKS } from '../../../constants/links';
-
-const actions = container.resolve(OrganizationActions);
+import { useGetOrganizationProjects } from '../../../service/hooks/Organization';
 
 export const OrganizationsProjectListView = () => {
   const t = useTranslate();
 
   const organization = useOrganization();
 
-  const loadable = actions.useSelector((state) => state.loadables.listProjects);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+
+  const loadable = useGetOrganizationProjects(
+    organization!.slug,
+    {
+      page,
+      search,
+    },
+    { keepPreviousData: true }
+  );
 
   return (
     <BaseView
-      title={t('organization_projects_title', { name: organization.name })}
+      title={t('organization_projects_title', { name: organization!.name })}
       containerMaxWidth="md"
       hideChildrenOnLoading={false}
-      loading={loadable.loading}
+      loading={loadable.isFetching}
     >
-      <SimplePaginatedHateoasList
-        pageSize={20}
-        dispatchParams={[{ path: { slug: organization.slug } }]}
-        actions={actions}
-        searchField
-        loadableName="listProjects"
+      <PaginatedHateoasList
+        loadable={loadable}
+        onSearchChange={setSearch}
+        onPageChange={setPage}
         renderItem={(r) => <ProjectListItem {...r} />}
       />
       <Box

@@ -1,0 +1,56 @@
+name: Deploy preview
+
+on:
+  push:
+    tags:
+      - preview/stepan/1
+      - preview/stepan/2
+      - preview/honza/1
+      - preview/honza/2
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Set git globals
+        run: |
+          git config --local user.email "machine@tolgee.io"
+          git config --local user.name "Tolgee Machine"
+
+      - name: Create docker image
+        run: ./gradlew docker
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
+      - name: Login to docker
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
+
+      - name: Set version
+        id: version
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | sed -e 's/refs\/tags\///g' -e 's/\//-/g')
+
+      - name: Tag the image
+        run: |
+          docker tag tolgee/tolgee tgint/tgpreview:${{ steps.version.outputs.VERSION }}
+
+      - name: Publish docker image
+        run: |
+          docker push tgint/tgpreview:${{ steps.version.outputs.VERSION }}
+
+      - name: Deploy
+        uses: nickgronow/kubectl@master
+        with:
+          args: '"rollout restart deployment/tolgee-deployment-${{ steps.version.outputs.VERSION }}"'
+          config_data: ${{ secrets.KUBERNETES_SERVICE_CONFIG }}

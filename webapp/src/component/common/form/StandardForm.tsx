@@ -51,7 +51,6 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
                 !props.loading &&
                 props.children(formikProps)) ||
                 props.children}
-              {props.loading && <CircularProgress size="small" />}
               {props.submitButtons || (
                 <Box display="flex" justifyContent="flex-end">
                   <React.Fragment>
@@ -80,6 +79,11 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
                       </Box>
                     </Box>
                   </React.Fragment>
+                </Box>
+              )}
+              {props.loading && (
+                <Box justifyContent="cetner">
+                  <CircularProgress />
                 </Box>
               )}
             </Form>

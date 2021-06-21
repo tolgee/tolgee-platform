@@ -556,6 +556,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -566,7 +567,6 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
-      params: components["schemas"]["ImportFileIssueParamView"][];
       _links?: components["schemas"]["Links"];
     };
     ImportFileIssueParamView: {
@@ -2406,3 +2406,5 @@ export interface operations {
     };
   };
 }
+
+export interface external {}

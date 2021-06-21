@@ -19,6 +19,9 @@ export const ProjectLanguagesProvider: FunctionComponent = (props) => {
   const languagesLoadable = useSelector(
     (state: AppState) => state.languages.loadables.globalList
   );
+  const selectedLanguages = useSelector(
+    (state: AppState) => state.translations.selectedLanguages
+  );
 
   const isLoading = languagesLoadable.loading;
   const init =
@@ -39,14 +42,34 @@ export const ProjectLanguagesProvider: FunctionComponent = (props) => {
           },
         },
       });
-      const selectedLanguages = selectedLanguagesService.getForProject(
-        projectDTO.id
-      );
-      translationActions.select.dispatch(Array.from(selectedLanguages));
     }
   }, [init]);
 
-  if (init || idChanged || languagesLoadable.loading) {
+  useEffect(() => {
+    // reset languages when unmount
+    return () => {
+      languageActions.loadableReset.globalList.dispatch();
+    };
+  }, []);
+
+  useEffect(() => {
+    translationActions.select.dispatch(null);
+    if (languagesLoadable.data) {
+      if (languagesLoadable.data._embedded?.languages?.length) {
+        const selection = selectedLanguagesService.getUpdated(
+          projectDTO.id,
+          languagesLoadable.data._embedded.languages.map((l) => l.tag) || []
+        );
+        translationActions.select.dispatch(selection);
+      } else {
+        translationActions.select.dispatch(
+          selectedLanguagesService.getForProject(projectDTO.id)
+        );
+      }
+    }
+  }, [languagesLoadable.data]);
+
+  if (init || idChanged || languagesLoadable.loading || !selectedLanguages) {
     return <FullPageLoading />;
   }
 

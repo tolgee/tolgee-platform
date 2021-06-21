@@ -10,36 +10,34 @@ export class ProjectPreferencesService {
     return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) as string);
   }
 
-  getForProject(projectId: number): Set<string> {
+  getForProject(projectId: number): string[] {
     if (!this.getAll()) {
-      return new Set();
+      return [];
     }
-    return new Set(this.getAll()[projectId]);
+    return Array.from(new Set(this.getAll()[projectId]));
   }
 
-  setForProject(projectId, languages: Set<string>) {
-    this.setAll({ ...this.getAll(), [projectId]: Array.from(languages) });
+  setForProject(projectId, languages: string[]) {
+    this.setAll({ ...this.getAll(), [projectId]: languages });
   }
 
   setAll(data: AllType) {
     return localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
   }
 
-  getUpdated(projectId, allLanguages: Set<string>): Set<string> {
+  getUpdated(projectId, allLanguages: string[]): string[] {
     let filtered = [...this.getForProject(projectId)].filter((f) =>
-      allLanguages.has(f)
+      allLanguages.includes(f)
     );
 
     //filter the value, to get rid of potentially removed items
-    if (filtered.length == 0 && allLanguages.size) {
-      filtered = Array.from(allLanguages).slice(0, 1);
+    if (filtered.length == 0 && allLanguages.length) {
+      filtered = allLanguages.slice(0, 1);
     }
 
-    const filteredSet = new Set(filtered);
-
     //update id on db change
-    this.setForProject(projectId, filteredSet);
+    this.setForProject(projectId, filtered);
 
-    return filteredSet;
+    return filtered;
   }
 }
