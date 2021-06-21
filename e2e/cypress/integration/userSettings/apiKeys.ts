@@ -74,7 +74,7 @@ describe("Api keys", () => {
     });
   });
 
-  it.only("will create API Key for user with lower permissions", () => {
+  it("will create API Key for user with lower permissions", () => {
     cleanProjectsData();
     createProjectsData();
     login("cukrberg@facebook.com", "admin");
