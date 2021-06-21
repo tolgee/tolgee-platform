@@ -1,9 +1,5 @@
-import * as React from 'react';
 import { FunctionComponent, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { AppState } from '../../../../store';
 import { container } from 'tsyringe';
-import { ProjectActions } from '../../../../store/project/ProjectActions';
 import { LINKS } from '../../../../constants/links';
 import { Redirect } from 'react-router-dom';
 import { TextField } from '../../../common/form/fields/TextField';
@@ -18,8 +14,10 @@ import { components } from '../../../../service/apiSchema.generated';
 import { FormikProps } from 'formik';
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
+import { useApiMutation } from '../../../../service/http/useQueryApi';
+import { MessageService } from '../../../../service/MessageService';
 
-const actions = container.resolve(ProjectActions);
+const messageService = container.resolve(MessageService);
 
 export type CreateProjectValueType =
   components['schemas']['CreateProjectDTO'] & {
@@ -27,9 +25,10 @@ export type CreateProjectValueType =
   };
 
 export const ProjectCreateView: FunctionComponent = () => {
-  const loadable = useSelector(
-    (state: AppState) => state.projects.loadables.createProject
-  );
+  const createProjectLoadable = useApiMutation({
+    url: '/v2/projects',
+    method: 'post',
+  });
   const t = useTranslate();
 
   const config = useConfig();
@@ -42,11 +41,18 @@ export const ProjectCreateView: FunctionComponent = () => {
       data.organizationId = owner;
       data.languages = data.languages.filter((l) => !!l);
     }
-    actions.loadableActions.createProject.dispatch({
-      content: {
-        'application/json': data,
+    createProjectLoadable.mutate(
+      {
+        content: {
+          'application/json': data,
+        },
       },
-    });
+      {
+        onSuccess() {
+          messageService.success(<T>project_created_message</T>);
+        },
+      }
+    );
   };
 
   const initialValues: CreateProjectValueType = {
@@ -60,7 +66,7 @@ export const ProjectCreateView: FunctionComponent = () => {
 
   const [cancelled, setCancelled] = useState(false);
 
-  if (cancelled) {
+  if (cancelled || createProjectLoadable.isSuccess) {
     return <Redirect to={LINKS.PROJECTS.build()} />;
   }
 
@@ -73,7 +79,7 @@ export const ProjectCreateView: FunctionComponent = () => {
         initialValues={initialValues}
         onSubmit={onSubmit}
         onCancel={() => setCancelled(true)}
-        saveActionLoadable={loadable}
+        loading={createProjectLoadable.isLoading}
         validationSchema={Validation.PROJECT_CREATION(t)}
       >
         {(props: FormikProps<CreateProjectValueType>) => {
