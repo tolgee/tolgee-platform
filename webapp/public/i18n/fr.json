@@ -133,5 +133,7 @@
   "translations_key_delete_confirmation_text" : "Etes-vous sûr de vouloir supprimer {count} clés et ses traductions ? ",
   "translations_leave_save_confirmation_message" : "Voulez-vous annuler le changement de \"{initialValue}\" à \"{newValue}\"?",
   "validation_email_is_not_valid" : "Le format de l'e-mail n'est pas valide",
-  "repository_menu_dashboard" : ""
+  "repository_menu_dashboard" : "",
+  "language_create_autocomplete_label" : "",
+  "invitation_code_accepted" : ""
 }

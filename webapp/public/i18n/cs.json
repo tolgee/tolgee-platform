@@ -301,5 +301,19 @@
   "organization_projects_title" : "{name} - Projekty",
   "projects_title" : "Projekty",
   "project_menu_projects" : "Projekty",
-  "repository_menu_dashboard" : "Nástěnka"
+  "repository_menu_dashboard" : "Nástěnka",
+  "language_create_edit_english_name_label" : "Název anglicky",
+  "language_create_edit_original_name_label" : "Originální název",
+  "invalid_language_tag" : "Tato zkratka nevyhovuje normě BCP 47. Zvažte zkratku ve správném formátu.",
+  "language_field_autocomplete_label_new_language" : "Nový vlastní jazyk",
+  "language_tag_exists" : "Zkratka existuje",
+  "languages_modify_ok_button" : "OK",
+  "language_create_add" : "Přidat",
+  "language_create_autocomplete_label" : "Hledat jazyk",
+  "project_create_languages_title" : "Jazyky",
+  "create_project_validation_language_repeated" : "Jazkyky se nesmí opakovat",
+  "project_creation_add_at_least_one_language" : "Přidejte alespoň jeden jazyk",
+  "project_create_base_language_label" : "Základní jazyk",
+  "cannot_delete_base_language_message" : "Nelze smazat základní jazyk",
+  "invitation_code_accepted" : "Pozvánka úspěšně přijata"
 }
