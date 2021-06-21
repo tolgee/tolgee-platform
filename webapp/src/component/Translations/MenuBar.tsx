@@ -100,12 +100,7 @@ export const MenuBar: FunctionComponent = () => {
           </Slide>
           <Box flexGrow={1} display="flex" alignItems="flex-end">
             <Box pr={2}>
-              <LanguagesMenu
-                context="translations"
-                defaultSelected={
-                  listContext.listLoadable?.data?.params?.languages
-                }
-              />
+              <LanguagesMenu context="translations" />
             </Box>
             <Box pr={2}>
               <TranslationsSearchField />

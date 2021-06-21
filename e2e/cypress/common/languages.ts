@@ -1,4 +1,4 @@
-import { gcy, getInputByName } from "./shared";
+import { confirmHardMode, gcy, getInputByName } from "./shared";
 import { HOST } from "./constants";
 
 export const selectFlag = (emoji: string) => {
@@ -33,4 +33,18 @@ export const selectInAutocomplete = (containedText: string) => {
   return gcy("languages-create-autocomplete-suggested-option")
     .contains(containedText)
     .click();
+};
+
+export const visitLanguageSettings = (langName: string) => {
+  gcy("global-list-items")
+    .contains(langName)
+    .closest("li")
+    .within(() => {
+      gcy("project-settings-languages-list-edit-button").click();
+    });
+};
+
+export const deleteLanguage = () => {
+  gcy("language-delete-button").click();
+  confirmHardMode();
 };

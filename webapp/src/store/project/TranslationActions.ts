@@ -15,7 +15,7 @@ export type TranslationEditingType = {
 export type SourceEditingType = { initialValue: string; newValue: string };
 
 export class TranslationsState extends StateWithLoadables<TranslationActions> {
-  selectedLanguages: string[] = [];
+  selectedLanguages: string[] | null = null;
   editing: {
     type: 'key' | 'translation';
     data: TranslationEditingType | SourceEditingType | null;
@@ -32,7 +32,10 @@ export class TranslationActions extends AbstractLoadableActions<TranslationsStat
     super(new TranslationsState());
   }
 
-  select = this.createAction('SELECT_LANGUAGES', (langs) => langs).build.on(
+  select = this.createAction(
+    'SELECT_LANGUAGES',
+    (langs: string[] | null) => langs
+  ).build.on(
     (state, action) =>
       <TranslationsState>{ ...state, selectedLanguages: action.payload }
   );
