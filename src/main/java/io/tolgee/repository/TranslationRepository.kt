@@ -3,6 +3,7 @@ package io.tolgee.repository
 import io.tolgee.model.Language
 import io.tolgee.model.Translation
 import io.tolgee.model.key.Key
+import io.tolgee.model.views.SimpleTranslationView
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -12,8 +13,9 @@ import java.util.*
 
 @Repository
 interface TranslationRepository : JpaRepository<Translation, Long> {
-    @Query("from Translation t join fetch t.key where t.key.project.id = :projectId and t.language.tag in :languages")
-    fun getTranslations(languages: Set<String>, projectId: Long): Set<Translation>
+    @Query("""select t.text as text, l.tag as languageTag, k.name as key from Translation t 
+        join t.key k join t.language l where t.key.project.id = :projectId and l.tag in :languages""")
+    fun getTranslations(languages: Set<String>, projectId: Long): List<SimpleTranslationView>
 
     @Query("from Translation t join fetch Key k on t.key = k where k = :key and k.project = :project and t.language in :languages")
     fun getTranslations(key: Key, project: io.tolgee.model.Project, languages: Collection<Language>): Set<Translation>

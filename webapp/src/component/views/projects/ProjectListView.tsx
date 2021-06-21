@@ -1,20 +1,29 @@
+import { useState } from 'react';
 import Box from '@material-ui/core/Box';
-import { container } from 'tsyringe';
-import { ProjectActions } from '../../../store/project/ProjectActions';
 import { LINKS } from '../../../constants/links';
 import { FabAddButtonLink } from '../../common/buttons/FabAddButtonLink';
 import { BaseView } from '../../layout/BaseView';
 import { DashboardPage } from '../../layout/DashboardPage';
 import { useTranslate } from '@tolgee/react';
-import { SimplePaginatedHateoasList } from '../../common/list/SimplePaginatedHateoasList';
+import { PaginatedHateoasList } from '../../common/list/PaginatedHateoasList';
 import ProjectListItem from './ProjectListItem';
-
-const actions = container.resolve(ProjectActions);
+import { useApiQuery } from '../../../service/http/useQueryApi';
 
 export const ProjectListView = () => {
-  const listPermitted = actions.useSelector(
-    (state) => state.loadables.listPermitted
-  );
+  const [page, setPage] = useState(0);
+  const [search, setSearch] = useState('');
+
+  const listPermitted = useApiQuery({
+    url: '/v2/projects',
+    method: 'get',
+    query: {
+      pageable: {
+        page,
+        size: 20,
+      },
+      search,
+    },
+  });
 
   const t = useTranslate();
 
@@ -24,13 +33,12 @@ export const ProjectListView = () => {
         title={t('projects_title')}
         containerMaxWidth="md"
         hideChildrenOnLoading={false}
-        loading={listPermitted.loading}
+        loading={listPermitted.isLoading}
       >
-        <SimplePaginatedHateoasList
-          searchField
-          pageSize={20}
-          actions={actions}
-          loadableName="listPermitted"
+        <PaginatedHateoasList
+          onPageChange={setPage}
+          onSearchChange={setSearch}
+          loadable={listPermitted}
           renderItem={(r) => <ProjectListItem key={r.id} {...r} />}
         />
         <Box
