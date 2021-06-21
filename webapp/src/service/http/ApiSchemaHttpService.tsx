@@ -99,13 +99,13 @@ export class ApiSchemaHttpService extends ApiHttpService {
   }
 }
 
-type RequestParamsType<
+export type RequestParamsType<
   Url extends keyof paths,
   Method extends keyof paths[Url]
 > = OperationSchema<Url, Method>['parameters'] &
   OperationSchema<Url, Method>['requestBody'];
 
-type ResponseContent<
+export type ResponseContent<
   Url extends keyof paths,
   Method extends keyof paths[Url]
 > = OperationSchema<Url, Method>['responses'][200] extends NotNullAnyContent

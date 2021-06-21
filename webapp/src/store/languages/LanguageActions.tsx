@@ -1,14 +1,10 @@
-import { container, singleton } from 'tsyringe';
-
+import { singleton } from 'tsyringe';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
 } from '../AbstractLoadableActions';
 import { useSelector } from 'react-redux';
 import { AppState } from '../index';
-import { ActionType } from '../Action';
-import { ProjectActions } from '../project/ProjectActions';
-import React from 'react';
 import { T } from '@tolgee/react';
 import { ApiSchemaHttpService } from '../../service/http/ApiSchemaHttpService';
 
@@ -67,20 +63,6 @@ export class LanguageActions extends AbstractLoadableActions<LanguagesState> {
 
   useSelector<T>(selector: (state: LanguagesState) => T): T {
     return useSelector((state: AppState) => selector(state.languages));
-  }
-
-  customReducer(
-    state: LanguagesState,
-    action: ActionType<any>,
-    appState
-  ): LanguagesState {
-    if (
-      action.type ===
-      container.resolve(ProjectActions).loadableActions.project.fulfilledType
-    ) {
-      this.resetLoadable(state, 'list');
-    }
-    return state;
   }
 
   get prefix(): string {

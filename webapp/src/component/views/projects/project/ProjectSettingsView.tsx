@@ -1,9 +1,5 @@
-import * as React from 'react';
-import { FunctionComponent, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { AppState } from '../../../../store';
+import { FunctionComponent, useState } from 'react';
 import { container } from 'tsyringe';
-import { ProjectActions } from '../../../../store/project/ProjectActions';
 import { LINKS, PARAMS } from '../../../../constants/links';
 import { Redirect } from 'react-router-dom';
 import { TextField } from '../../../common/form/fields/TextField';
@@ -21,53 +17,63 @@ import { ProjectLanguagesProvider } from '../../../../hooks/ProjectLanguagesProv
 import { useProjectLanguages } from '../../../../hooks/useProjectLanguages';
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { components } from '../../../../service/apiSchema.generated';
+import { useApiMutation } from '../../../../service/http/useQueryApi';
+import { MessageService } from '../../../../service/MessageService';
 
-const actions = container.resolve(ProjectActions);
+const messageService = container.resolve(MessageService);
 
 type ValueType = components['schemas']['EditProjectDTO'];
 
 export const ProjectSettingsView: FunctionComponent = () => {
-  const loadable = useSelector(
-    (state: AppState) => state.projects.loadables.editProject
-  );
-  const saveLoadable = useSelector(
-    (state: AppState) => state.projects.loadables.editProject
-  );
-
-  const deleteLoadable = useSelector(
-    (state: AppState) => state.projects.loadables.deleteProject
-  );
-
   const project = useProject();
+  const updateLoadable = useApiMutation({
+    url: '/v2/projects/{projectId}',
+    method: 'put',
+    invalidatePrefix: '/v2/projects',
+  });
+  const deleteLoadable = useApiMutation({
+    url: '/v2/projects/{projectId}',
+    method: 'delete',
+  });
 
   const confirm = (options: ConfirmationDialogProps) =>
     confirmation({ title: <T>delete_project_dialog_title</T>, ...options });
 
-  const onSubmit = (values) => {
-    actions.loadableActions.editProject.dispatch({
-      path: {
-        projectId: project.id,
+  const handleEdit = (values) => {
+    updateLoadable.mutate(
+      {
+        path: { projectId: project.id },
+        content: { 'application/json': values },
       },
-      content: {
-        'application/json': values,
-      },
+      {
+        onSuccess() {
+          messageService.success(<T>project_successfully_edited_message</T>);
+        },
+      }
+    );
+  };
+
+  const handleDelete = () => {
+    confirm({
+      message: (
+        <T parameters={{ name: project.name }}>
+          delete_project_confirmation_message
+        </T>
+      ),
+      onConfirm: () =>
+        deleteLoadable.mutate(
+          { path: { projectId: project.id } },
+          {
+            onSuccess() {
+              messageService.success(<T>project_deleted_message</T>);
+            },
+          }
+        ),
+      hardModeText: project.name.toUpperCase(),
     });
   };
 
   const t = useTranslate();
-
-  useEffect(() => {
-    if (saveLoadable.touched) {
-      actions.loadableReset.project.dispatch();
-    }
-    return () => actions.loadableReset.editProject.dispatch();
-  }, [saveLoadable.touched]);
-
-  useEffect(() => {
-    return () => {
-      actions.loadableReset.deleteProject.dispatch();
-    };
-  }, []);
 
   const initialValues: ValueType = {
     name: project.name,
@@ -76,7 +82,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
 
   const [cancelled, setCancelled] = useState(false);
 
-  if (cancelled || deleteLoadable.loaded) {
+  if (cancelled || deleteLoadable.isSuccess) {
     return <Redirect to={LINKS.PROJECTS.build()} />;
   }
 
@@ -111,30 +117,13 @@ export const ProjectSettingsView: FunctionComponent = () => {
       }
     >
       <StandardForm
-        saveActionLoadable={loadable}
+        loading={updateLoadable.isLoading || deleteLoadable.isLoading}
         validationSchema={Validation.PROJECT_SETTINGS}
-        onSubmit={onSubmit}
+        onSubmit={handleEdit}
         onCancel={() => setCancelled(true)}
         initialValues={initialValues}
         customActions={
-          <Button
-            color="secondary"
-            variant="outlined"
-            onClick={() => {
-              confirm({
-                message: (
-                  <T parameters={{ name: project.name }}>
-                    delete_project_confirmation_message
-                  </T>
-                ),
-                onConfirm: () =>
-                  actions.loadableActions.deleteProject.dispatch({
-                    path: { projectId: project.id },
-                  }),
-                hardModeText: project.name.toUpperCase(),
-              });
-            }}
-          >
+          <Button color="secondary" variant="outlined" onClick={handleDelete}>
             <T>delete_project_button</T>
           </Button>
         }

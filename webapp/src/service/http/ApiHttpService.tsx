@@ -6,7 +6,6 @@ import { TokenService } from '../TokenService';
 import { GlobalError } from '../../error/GlobalError';
 import { MessageService } from '../MessageService';
 import * as Sentry from '@sentry/browser';
-import React from 'react';
 import { T } from '@tolgee/react';
 
 const errorActions = container.resolve(ErrorActions);

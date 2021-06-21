@@ -1,12 +1,19 @@
 import React, { createContext } from 'react';
 import { GlobalError } from '../error/GlobalError';
 import { FullPageLoading } from '../component/common/FullPageLoading';
-import { useGetProject, ProjectType } from '../service/hooks/Project';
+import { useApiQuery } from '../service/http/useQueryApi';
+import { components } from '../service/apiSchema.generated';
 
-export const ProjectContext = createContext<ProjectType | null>(null);
+export const ProjectContext = createContext<
+  components['schemas']['ProjectModel'] | null
+>(null);
 
 export const ProjectProvider: React.FC<{ id: number }> = ({ id, children }) => {
-  const { isLoading, data, error } = useGetProject(id);
+  const { isLoading, data, error } = useApiQuery({
+    url: '/v2/projects/{projectId}',
+    method: 'get',
+    path: { projectId: id },
+  });
 
   if (isLoading) {
     return <FullPageLoading />;
