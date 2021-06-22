@@ -1,4 +1,3 @@
-import { useQueryClient } from 'react-query';
 import { FunctionComponent, useContext } from 'react';
 import { RowContext } from './TranslationsRow';
 import { useProject } from '../../hooks/useProject';
@@ -12,8 +11,8 @@ import {
 import { T } from '@tolgee/react';
 import { MessageService } from '../../service/MessageService';
 import { Validation } from '../../constants/GlobalValidationSchema';
-import { useSetTranslations } from '../../service/hooks/Translation';
 import { parseErrorResponse } from '../../fixtures/errorFIxtures';
+import { useApiMutation } from '../../service/http/useQueryApi';
 
 export interface TranslationsTableCellProps {
   tag: string;
@@ -25,18 +24,25 @@ const messaging = container.resolve(MessageService);
 export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
   props
 ) => {
-  const queryClient = useQueryClient();
-
   const projectDTO = useProject();
   const context = useContext(RowContext);
 
-  const setTranslations = useSetTranslations(projectDTO.id);
+  const setTranslations = useApiMutation({
+    url: '/api/project/{projectId}/translations',
+    method: 'put',
+    invalidatePrefix: '/api/project',
+  });
 
   const handleSubmit = (v) => {
     setTranslations.mutate(
       {
-        key: context.data.name as string,
-        translations: { [props.tag]: v },
+        path: { projectId: projectDTO.id },
+        content: {
+          'application/json': {
+            key: context.data.name as string,
+            translations: { [props.tag]: v },
+          },
+        },
       },
       {
         onError: (err) => {
@@ -46,11 +52,6 @@ export const TranslationCell: FunctionComponent<TranslationsTableCellProps> = (
         },
         onSuccess: () => {
           messaging.success(<T>Translation grid - translation saved</T>);
-          queryClient.invalidateQueries([
-            'project',
-            projectDTO.id,
-            'translations',
-          ]);
           actions.setTranslationEditing.dispatch({
             data: null,
             skipConfirm: true,

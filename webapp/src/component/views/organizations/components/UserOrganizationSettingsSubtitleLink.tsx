@@ -5,7 +5,7 @@ import { ArrowDropDown } from '@material-ui/icons';
 import { useUser } from '../../../../hooks/useUser';
 import { LINKS, PARAMS } from '../../../../constants/links';
 import { Link as RouterLink } from 'react-router-dom';
-import { useGetOrganizations } from '../../../../service/hooks/Organization';
+import { useApiQuery } from '../../../../service/http/useQueryApi';
 
 type UserOrganizationSettingsSubtitleLinkProps = {
   isUser: boolean;
@@ -34,8 +34,13 @@ const UserOrganizationSettingsSubtitleLink = (
   const MenuItems = () => {
     const user = useUser();
 
-    const organizationsLoadable = useGetOrganizations({
-      filterCurrentUserOwner: true,
+    const organizationsLoadable = useApiQuery({
+      url: '/v2/organizations',
+      method: 'get',
+      query: {
+        params: { filterCurrentUserOwner: false },
+        pageable: { size: 1000 },
+      },
     });
 
     const data: ListDataType = [

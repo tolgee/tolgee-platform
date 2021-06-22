@@ -3,9 +3,8 @@ import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 import { useOrganization } from '../useOrganization';
 import { confirmation } from '../../../../hooks/confirmation';
-import { useDeleteOrganizationUser } from '../../../../service/hooks/Organization';
-import { useQueryClient } from 'react-query';
 import { MessageService } from '../../../../service/MessageService';
+import { useApiMutation } from '../../../../service/http/useQueryApi';
 
 const messageService = container.resolve(MessageService);
 
@@ -13,9 +12,12 @@ const OrganizationRemoveUserButton = (props: {
   userId: number;
   userName: string;
 }) => {
-  const queryClient = useQueryClient();
   const organization = useOrganization();
-  const removeUserLoadable = useDeleteOrganizationUser(organization!.id);
+  const removeUserLoadable = useApiMutation({
+    url: '/v2/organizations/{organizationId}/users/{userId}',
+    method: 'delete',
+    invalidatePrefix: '/v2/organizations',
+  });
 
   const removeUser = () => {
     confirmation({
@@ -25,14 +27,19 @@ const OrganizationRemoveUserButton = (props: {
         </T>
       ),
       onConfirm: () =>
-        removeUserLoadable.mutate(props.userId, {
-          onSuccess: () => {
-            messageService.success(<T>organization_user_deleted</T>);
-            queryClient.invalidateQueries(['organizations'], {
-              refetchActive: true,
-            });
+        removeUserLoadable.mutate(
+          {
+            path: {
+              organizationId: organization!.id,
+              userId: props.userId,
+            },
           },
-        }),
+          {
+            onSuccess: () => {
+              messageService.success(<T>organization_user_deleted</T>);
+            },
+          }
+        ),
     });
   };
 

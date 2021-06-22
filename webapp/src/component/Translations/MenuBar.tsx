@@ -1,4 +1,3 @@
-import { useQueryClient } from 'react-query';
 import { FunctionComponent, useContext } from 'react';
 import {
   Box,
@@ -25,14 +24,13 @@ import { T, useTranslate } from '@tolgee/react';
 import { useProjectPermissions } from '../../hooks/useProjectPermissions';
 import { ProjectPermissionType } from '../../service/response.types';
 import { MessageService } from '../../service/MessageService';
-import { useDeleteKey } from '../../service/hooks/Translation';
 import { parseErrorResponse } from '../../fixtures/errorFIxtures';
+import { useApiMutation } from '../../service/http/useQueryApi';
 
 const messaging = container.resolve(MessageService);
 
 export const MenuBar: FunctionComponent = () => {
   const project = useProject();
-  const queryClient = useQueryClient();
 
   const actions = container.resolve(TranslationActions);
   const listContext = useContext(TranslationListContext);
@@ -40,24 +38,33 @@ export const MenuBar: FunctionComponent = () => {
 
   const t = useTranslate();
 
-  const deleteKey = useDeleteKey(project.id);
+  const deleteKey = useApiMutation({
+    url: '/api/project/{projectId}/keys',
+    method: 'delete',
+    invalidatePrefix: '/api/project',
+  });
 
   const handleConfirm = () => {
-    deleteKey.mutate(Array.from(listContext.checkedKeys), {
-      onError: (err) => {
-        for (const error of parseErrorResponse(err)) {
-          messaging.error(<T>{error}</T>);
-        }
+    deleteKey.mutate(
+      {
+        path: { projectId: project.id },
+        content: { 'application/json': Array.from(listContext.checkedKeys) },
       },
-      onSuccess: () => {
-        messaging.success(<T>Translation grid - Successfully deleted!</T>);
-        queryClient.invalidateQueries(['project']);
-        actions.setTranslationEditing.dispatch({
-          data: null,
-          skipConfirm: true,
-        });
-      },
-    });
+      {
+        onError: (err) => {
+          for (const error of parseErrorResponse(err)) {
+            messaging.error(<T>{error}</T>);
+          }
+        },
+        onSuccess: () => {
+          messaging.success(<T>Translation grid - Successfully deleted!</T>);
+          actions.setTranslationEditing.dispatch({
+            data: null,
+            skipConfirm: true,
+          });
+        },
+      }
+    );
   };
 
   return (

@@ -9,14 +9,22 @@ import { T } from '@tolgee/react';
 import { useUser } from '../../../../../hooks/useUser';
 import { useField } from 'formik';
 import { BoxLoading } from '../../../../common/BoxLoading';
-import { useGetOrganizations } from '../../../../../service/hooks/Organization';
+import { useApiQuery } from '../../../../../service/http/useQueryApi';
 
 const OwnerSelect = () => {
   const user = useUser();
 
-  const organizationsLoadable = useGetOrganizations({
-    filterCurrentUserOwner: true,
-    size: 100,
+  const organizationsLoadable = useApiQuery({
+    url: '/v2/organizations',
+    method: 'get',
+    query: {
+      pageable: {
+        size: 100,
+      },
+      params: {
+        filterCurrentUserOwner: true,
+      },
+    },
   });
 
   const data = [{ value: 0, render: user?.name, key: 0 }];

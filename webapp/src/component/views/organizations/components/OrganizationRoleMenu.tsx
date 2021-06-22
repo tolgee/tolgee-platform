@@ -12,7 +12,7 @@ import { container } from 'tsyringe';
 import { MessageService } from '../../../../service/MessageService';
 import { useOrganization } from '../useOrganization';
 import { confirmation } from '../../../../hooks/confirmation';
-import { usePutOrganizationRole } from '../../../../service/hooks/Organization';
+import { useApiMutation } from '../../../../service/http/useQueryApi';
 
 const messagingService = container.resolve(MessageService);
 
@@ -25,7 +25,10 @@ export const OrganizationRoleMenu: FunctionComponent<{
 
   const currentUser = useUser();
   const organization = useOrganization();
-  const setRole = usePutOrganizationRole(organization!.id, props.user.id);
+  const setRole = useApiMutation({
+    url: '/v2/organizations/{organizationId}/users/{userId}/set-role',
+    method: 'put',
+  });
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -36,7 +39,10 @@ export const OrganizationRoleMenu: FunctionComponent<{
       message: <T>really_want_to_change_role_confirmation</T>,
       onConfirm: () =>
         setRole.mutate(
-          { roleType: type },
+          {
+            path: { organizationId: organization!.id, userId: props.user.id },
+            content: { 'application/json': { roleType: type } },
+          },
           {
             onSuccess: () => {
               messagingService.success(
