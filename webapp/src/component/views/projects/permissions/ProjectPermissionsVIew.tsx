@@ -32,6 +32,7 @@ export const ProjectPermissionsView: FunctionComponent = () => {
     query: {
       pageable: {
         page,
+        sort: ['name'],
       },
       search,
     },

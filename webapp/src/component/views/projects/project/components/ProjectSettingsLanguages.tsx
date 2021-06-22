@@ -10,9 +10,14 @@ import { SettingsIconButton } from '../../../../common/buttons/SettingsIconButto
 import { T } from '@tolgee/react';
 import { CreateSingleLanguage } from '../../../../languages/CreateSingleLanguage';
 import { useProject } from '../../../../../hooks/useProject';
-import { useApiQuery } from '../../../../../service/http/useQueryApi';
+import {
+  invalidateUrlPrefix,
+  useApiQuery,
+} from '../../../../../service/http/useQueryApi';
+import { useQueryClient } from 'react-query';
 
 export const ProjectSettingsLanguages = () => {
+  const queryClient = useQueryClient();
   const project = useProject();
 
   const [page, setPage] = useState(0);
@@ -67,7 +72,7 @@ export const ProjectSettingsLanguages = () => {
           autoFocus={false}
           onCancel={() => {}}
           onCreated={() => {
-            languagesLoadable.refetch();
+            invalidateUrlPrefix(queryClient, '/v2/project');
           }}
         />
       </Box>

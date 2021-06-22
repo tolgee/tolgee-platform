@@ -149,6 +149,7 @@ export const ImportRowLanguageMenu: FunctionComponent<{
       <ImportLanguageCreateDialog
         open={state.addNewLanguageDialogOpen}
         onCreated={(id) => {
+          // we need to invalidate languages provider
           invalidateUrlPrefix(
             queryClient,
             '/v2/projects/{projectId}/languages'

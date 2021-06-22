@@ -23,7 +23,6 @@ export const CreateSingleLanguage: FunctionComponent<{
   const createLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/languages',
     method: 'post',
-    invalidatePrefix: '/v2/projects',
   });
   const [value, setValue] = useState(null as LanguageDto | null);
 

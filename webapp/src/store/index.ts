@@ -16,7 +16,6 @@ import { TranslationActions } from './project/TranslationActions';
 import { UserApiKeysActions } from './api_keys/UserApiKeysActions';
 import { ExportActions } from './project/ExportActions';
 import { UserActions } from './global/UserActions';
-import { ScreenshotActions } from './project/ScreenshotActions';
 import { ImportActions } from './project/ImportActions';
 
 const implicitReducer = container.resolve(ImplicitReducer);
@@ -41,7 +40,6 @@ const appReducer = (appState, action) =>
     export: implicitReducer.create(container.resolve(ExportActions)),
     userApiKey: implicitReducer.create(container.resolve(UserApiKeysActions)),
     user: implicitReducer.create(container.resolve(UserActions)),
-    screenshots: implicitReducer.create(container.resolve(ScreenshotActions)),
     import: implicitReducer.create(container.resolve(ImportActions)),
   })(appState, action);
 

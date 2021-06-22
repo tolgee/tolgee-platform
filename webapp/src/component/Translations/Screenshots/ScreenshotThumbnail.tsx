@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { FunctionComponent, useState } from 'react';
 import { useConfig } from '../../../hooks/useConfig';
 import {
@@ -9,24 +8,19 @@ import {
   Theme,
   Tooltip,
 } from '@material-ui/core';
-import {
-  ProjectPermissionType,
-  ScreenshotDTO,
-} from '../../../service/response.types';
+import { ProjectPermissionType } from '../../../service/response.types';
 import clsx from 'clsx';
 import ClearIcon from '@material-ui/icons/Clear';
-import { ScreenshotActions } from '../../../store/project/ScreenshotActions';
-import { container } from 'tsyringe';
 import { confirmation } from '../../../hooks/confirmation';
 import { T } from '@tolgee/react';
 import { useProjectPermissions } from '../../../hooks/useProjectPermissions';
+import { components } from '../../../service/apiSchema.generated';
 
 export interface ScreenshotThumbnailProps {
   onClick: () => void;
-  screenshotData: ScreenshotDTO;
+  screenshotData: components['schemas']['ScreenshotDTO'];
+  onDelete: (id: number) => void;
 }
-
-const actions = container.resolve(ScreenshotActions);
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -103,9 +97,7 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
       confirmation({
         title: <T>screenshot_delete_title</T>,
         message: <T>screenshot_delete_message</T>,
-        onConfirm: () => {
-          actions.loadableActions.delete.dispatch(props.screenshotData.id);
-        },
+        onConfirm: () => props.onDelete(props.screenshotData.id),
       });
     };
 
