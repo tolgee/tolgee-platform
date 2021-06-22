@@ -12,13 +12,12 @@ type IconProps = ComponentProps<typeof SvgIcon>;
 
 const CustomIcon: React.FC<IconProps & { icon: typeof ExportSvg }> = ({
   icon,
-  fill,
   ...props
 }) => {
   const Icon = icon;
   return (
-    <SvgIcon fill={fill} {...props}>
-      <Icon />
+    <SvgIcon {...props}>
+      <Icon fill="currentColor" />
     </SvgIcon>
   );
 };
