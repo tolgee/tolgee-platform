@@ -1,11 +1,14 @@
 declare namespace Cypress {
-    import Value = DataCy.Value;
+  import Value = DataCy.Value;
 
-    interface Chainable<Subject = any> {
-        closestDcy(dataCy: Value): Chainable
-        gcy(dataCy: Value): Chainable
-        findDcy(dataCy: Value): Chainable
-        findInputByName(name: String): Chainable
-    }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface Chainable<Subject = any> {
+    closestDcy(dataCy: Value): Chainable;
+
+    gcy(dataCy: Value): Chainable;
+
+    findDcy(dataCy: Value): Chainable;
+
+    findInputByName(name: string): Chainable;
+  }
 }
-

@@ -1,18 +1,18 @@
 /// <reference types="cypress" />
-import { getAnyContainingAriaLabelAttribute, getInput } from "./xPath";
-import { Scope } from "./types";
+import { getAnyContainingAriaLabelAttribute, getInput } from './xPath';
+import { Scope } from './types';
 import Value = DataCy.Value;
 import Chainable = Cypress.Chainable;
 
 export const allScopes: Scope[] = [
-  "keys.edit",
-  "translations.edit",
-  "translations.view",
+  'keys.edit',
+  'translations.edit',
+  'translations.view',
 ];
 
 export const clickAdd = () => {
   cy.wait(100);
-  cy.xpath(getAnyContainingAriaLabelAttribute("add")).click();
+  cy.xpath(getAnyContainingAriaLabelAttribute('add')).click();
 };
 
 export const getPopover = () => {
@@ -24,43 +24,43 @@ export const getPopover = () => {
 export const gcy = (dataCy: Value, options?: Parameters<typeof cy.get>[1]) =>
   cy.get('[data-cy="' + dataCy + '"]', options);
 export const goToPage = (page: number) =>
-  gcy("global-list-pagination").within(() =>
+  gcy('global-list-pagination').within(() =>
     cy.xpath(".//button[text() = '" + page + "']").click()
   );
 export const contextGoToPage = (chainable: Chainable, page: number) =>
   chainable
-    .findDcy("global-list-pagination")
+    .findDcy('global-list-pagination')
     .within(() => cy.xpath(".//button[text() = '" + page + "']").click());
 
 export const clickGlobalSave = () => {
-  gcy("global-form-save-button").click();
+  gcy('global-form-save-button').click();
 };
 
 export const confirmHardMode = () => {
-  gcy("global-confirmation-hard-mode-text-field").within(() => {
-    cy.get("label")
+  gcy('global-confirmation-hard-mode-text-field').within(() => {
+    cy.get('label')
       .then(($label) => {
-        cy.get("input").type($label.text().replace("Rewrite text: ", ""));
+        cy.get('input').type($label.text().replace('Rewrite text: ', ''));
       })
-      .its("text");
+      .its('text');
   });
-  gcy("global-confirmation-confirm").click();
+  gcy('global-confirmation-confirm').click();
 };
 
 export const confirmStandard = () => {
-  gcy("global-confirmation-confirm").click();
+  gcy('global-confirmation-confirm').click();
 };
 
 export const assertMessage = (message: string) => {
-  gcy("global-snackbars").should("contain", message);
+  gcy('global-snackbars').should('contain', message);
 };
 
 export const selectInProjectMenu = (itemName: string) => {
-  gcy("project-menu-items").contains(itemName).click();
+  gcy('project-menu-items').contains(itemName).click();
 };
 
 export const selectInSelect = (chainable: Chainable, renderedValue: string) => {
-  chainable.find("div").first().click();
+  chainable.find('div').first().click();
   getPopover().contains(renderedValue).click();
 };
 
@@ -68,7 +68,7 @@ export const toggleInMultiselect = (
   chainable: Chainable,
   renderedValues: string[]
 ) => {
-  chainable.find("div").first().click();
+  chainable.find('div').first().click();
 
   getPopover().within(() => {
     renderedValues.forEach((val) => {
@@ -77,14 +77,14 @@ export const toggleInMultiselect = (
       });
     });
 
-    cy.get("li").each(($li) => {
-      const input = cy.wrap($li).find("input");
+    cy.get('li').each(($li) => {
+      const input = cy.wrap($li).find('input');
       input.each(($input) => {
         let isInValues = false;
         for (let i = 0; i < renderedValues.length; i++) {
           const val = renderedValues[i];
           if (
-            !!document
+            document
               .evaluate(`.//*[text() = '${val}']`, $li.get(0))
               .iterateNext()
           ) {
@@ -92,16 +92,16 @@ export const toggleInMultiselect = (
             break;
           }
         }
-        const isChecked = $input.is(":checked");
+        const isChecked = $input.is(':checked');
         if ((isChecked && !isInValues) || (!isChecked && isInValues)) {
           input.click();
         }
       });
     });
   });
-  cy.get("body").click(0, 0);
+  cy.get('body').click(0, 0);
   // wait for loading to finish
-  cy.gcy("global-base-view-loading").should("not.exist");
+  cy.gcy('global-base-view-loading').should('not.exist');
 };
 
 export const getInputByName = (name: string): Chainable => {

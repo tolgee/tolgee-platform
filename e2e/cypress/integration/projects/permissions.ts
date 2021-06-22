@@ -2,24 +2,23 @@ import {
   cleanProjectsData,
   createProjectsData,
   login,
-} from "../../common/apiCalls";
-import "cypress-file-upload";
+} from '../../common/apiCalls';
+import 'cypress-file-upload';
 import {
   assertMessage,
   confirmStandard,
   gcy,
   goToPage,
   selectInProjectMenu,
-} from "../../common/shared";
+} from '../../common/shared';
 import {
   enterProject,
   enterProjectSettings,
   visitList,
-} from "../../common/projects";
+} from '../../common/projects';
 
-describe("Project Permissions", () => {
-  beforeEach(() => {
-  });
+describe('Project Permissions', () => {
+  beforeEach(() => {});
 
   describe("Cukrberg's permissions", () => {
     before(() => {
@@ -28,22 +27,22 @@ describe("Project Permissions", () => {
     });
 
     beforeEach(() => {
-      login("cukrberg@facebook.com", "admin");
+      login('cukrberg@facebook.com', 'admin');
     });
 
-    it("Has manage permissions on facebook (organization owner)", () => {
-      validateManagePermissions("Facebook");
+    it('Has manage permissions on facebook (organization owner)', () => {
+      validateManagePermissions('Facebook');
     });
 
-    it("Has edit permissions on microsoft word (organization base)", () => {
-      validateEditPermissions("Microsoft Word");
+    it('Has edit permissions on microsoft word (organization base)', () => {
+      validateEditPermissions('Microsoft Word');
     });
 
-    it("Has manage permissions (direct manage permissions)", () => {
+    it('Has manage permissions (direct manage permissions)', () => {
       validateManagePermissions("Vaclav's funny project");
     });
 
-    it("Has view permissions on facebook (direct view permissions)", () => {
+    it('Has view permissions on facebook (direct view permissions)', () => {
       validateViewPermissions("Vaclav's cool project");
     });
   });
@@ -55,117 +54,117 @@ describe("Project Permissions", () => {
     });
 
     beforeEach(() => {
-      login("vaclav.novak@fake.com", "admin");
+      login('vaclav.novak@fake.com', 'admin');
     });
 
-    it("Has edit permission on excel (direct) ", () => {
-      validateEditPermissions("Microsoft Excel");
+    it('Has edit permission on excel (direct) ', () => {
+      validateEditPermissions('Microsoft Excel');
     });
 
-    it("Has translate permission on Powerpoint (direct) ", () => {
-      validateTranslatePermissions("Microsoft Powerpoint");
+    it('Has translate permission on Powerpoint (direct) ', () => {
+      validateTranslatePermissions('Microsoft Powerpoint');
     });
   });
 
-  describe("Permission settings", () => {
-    describe("Not modifying", () => {
+  describe('Permission settings', () => {
+    describe('Not modifying', () => {
       before(() => {
         cleanProjectsData();
         createProjectsData();
       });
 
       beforeEach(() => {
-        login("cukrberg@facebook.com", "admin");
+        login('cukrberg@facebook.com', 'admin');
       });
 
-      it("Can search in permissions", () => {
+      it('Can search in permissions', () => {
         visitList();
-        enterProjectSettings("Facebook itself");
-        selectInProjectMenu("Permissions");
-        gcy("global-list-search").find("input").type("Doe");
-        gcy("global-paginated-list").within(() => {
-          gcy("global-list-item")
-            .should("have.length", 1)
-            .should("contain", "John Doe");
+        enterProjectSettings('Facebook itself');
+        selectInProjectMenu('Permissions');
+        gcy('global-list-search').find('input').type('Doe');
+        gcy('global-paginated-list').within(() => {
+          gcy('global-list-item')
+            .should('have.length', 1)
+            .should('contain', 'John Doe');
         });
       });
 
-      it("Can paginate", () => {
+      it('Can paginate', () => {
         visitList();
-        login("gates@microsoft.com", "admin");
-        enterProjectSettings("Microsoft Word");
-        selectInProjectMenu("Permissions");
+        login('gates@microsoft.com', 'admin');
+        enterProjectSettings('Microsoft Word');
+        selectInProjectMenu('Permissions');
         goToPage(2);
-        cy.contains("owner@zzzcool9.com (owner@zzzcool9.com)").should(
-          "be.visible"
+        cy.contains('owner@zzzcool9.com (owner@zzzcool9.com)').should(
+          'be.visible'
         );
       });
 
-      it("Has enabled proper options for each user", () => {
+      it('Has enabled proper options for each user', () => {
         visitList();
-        enterProjectSettings("Facebook itself");
-        selectInProjectMenu("Permissions");
-        gcy("global-paginated-list").within(() => {
-          gcy("global-list-item")
-            .contains("John Doe")
-            .closest("li")
+        enterProjectSettings('Facebook itself');
+        selectInProjectMenu('Permissions');
+        gcy('global-paginated-list').within(() => {
+          gcy('global-list-item')
+            .contains('John Doe')
+            .closest('li')
             .within(() => {
-              gcy("permissions-revoke-button").should("be.disabled");
-              gcy("permissions-menu-button").should("be.enabled");
+              gcy('permissions-revoke-button').should('be.disabled');
+              gcy('permissions-menu-button').should('be.enabled');
             });
-          gcy("global-list-item")
-            .contains("Cukrberg")
-            .closest("li")
+          gcy('global-list-item')
+            .contains('Cukrberg')
+            .closest('li')
             .within(() => {
-              gcy("permissions-revoke-button").should("be.disabled");
-              gcy("permissions-menu-button").should("be.disabled");
+              gcy('permissions-revoke-button').should('be.disabled');
+              gcy('permissions-menu-button').should('be.disabled');
             });
         });
       });
     });
 
-    describe("Modifying", () => {
+    describe('Modifying', () => {
       beforeEach(() => {
         cleanProjectsData();
         createProjectsData();
-        login("cukrberg@facebook.com", "admin");
+        login('cukrberg@facebook.com', 'admin');
       });
 
-      it("Can modify permissions", () => {
+      it('Can modify permissions', () => {
         visitList();
-        enterProjectSettings("Facebook itself");
-        selectInProjectMenu("Permissions");
-        gcy("global-paginated-list").within(() => {
-          gcy("global-list-item")
-            .contains("Vaclav Novak")
-            .closest("li")
+        enterProjectSettings('Facebook itself');
+        selectInProjectMenu('Permissions');
+        gcy('global-paginated-list').within(() => {
+          gcy('global-list-item')
+            .contains('Vaclav Novak')
+            .closest('li')
             .within(() => {
-              gcy("permissions-menu-button").click();
+              gcy('permissions-menu-button').click();
             });
         });
-        gcy("permissions-menu").filter(":visible").contains("Manage").click();
+        gcy('permissions-menu').filter(':visible').contains('Manage').click();
         confirmStandard();
-        login("vaclav.novak@fake.com", "admin");
+        login('vaclav.novak@fake.com', 'admin');
         visitList();
-        validateManagePermissions("Facebook itself");
+        validateManagePermissions('Facebook itself');
       });
 
-      it("Can revoke permissions", () => {
+      it('Can revoke permissions', () => {
         visitList();
-        enterProjectSettings("Facebook itself");
-        selectInProjectMenu("Permissions");
-        gcy("global-paginated-list").within(() => {
-          gcy("global-list-item")
-            .contains("Vaclav Novak")
-            .closest("li")
+        enterProjectSettings('Facebook itself');
+        selectInProjectMenu('Permissions');
+        gcy('global-paginated-list').within(() => {
+          gcy('global-list-item')
+            .contains('Vaclav Novak')
+            .closest('li')
             .within(() => {
-              gcy("permissions-revoke-button").click();
+              gcy('permissions-revoke-button').click();
             });
         });
         confirmStandard();
-        login("vaclav.novak@fake.com", "admin");
+        login('vaclav.novak@fake.com', 'admin');
         visitList();
-        cy.contains("Facebook itself").should("not.exist");
+        cy.contains('Facebook itself').should('not.exist');
       });
     });
   });
@@ -175,29 +174,29 @@ describe("Project Permissions", () => {
   });
 });
 
-const MANAGE_PROJECT_ITEMS = ["Permissions"];
-const OTHER_PROJECT_ITEMS = ["Projects", "Export"];
+const MANAGE_PROJECT_ITEMS = ['Permissions'];
+const OTHER_PROJECT_ITEMS = ['Projects', 'Export'];
 
 const assertManageMenuItemsNotVisible = () => {
   MANAGE_PROJECT_ITEMS.forEach((item) => {
-    gcy("project-menu-items").should("not.contain", item);
+    gcy('project-menu-items').should('not.contain', item);
   });
 };
 
 const assertOtherMenuItemsVisible = () => {
   OTHER_PROJECT_ITEMS.forEach((item) => {
-    gcy("project-menu-items").should("contain", item);
+    gcy('project-menu-items').should('contain', item);
   });
 };
 
 const validateManagePermissions = (projectName: string) => {
   visitList();
   enterProjectSettings(projectName);
-  cy.gcy("global-form-save-button").click();
-  assertMessage("Project settings are successfully saved.");
+  cy.gcy('global-form-save-button').click();
+  assertMessage('Project settings are successfully saved.');
   enterProject(projectName);
   MANAGE_PROJECT_ITEMS.forEach((item) => {
-    gcy("project-menu-items").should("contain", item);
+    gcy('project-menu-items').should('contain', item);
   });
   assertOtherMenuItemsVisible();
 };
@@ -205,44 +204,44 @@ const validateManagePermissions = (projectName: string) => {
 const validateEditPermissions = (projectName: string) => {
   visitList();
   enterProject(projectName);
-  selectInProjectMenu("Translations");
+  selectInProjectMenu('Translations');
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
-  gcy("global-plus-button").should("be.visible").click();
-  gcy("translations-add-key-field")
-    .find("textarea")
-    .filter(":visible")
-    .type("test");
-  gcy("global-form-save-button").should("be.visible").click();
-  assertMessage("Translation created");
-  gcy("translations-row-checkbox").click();
-  gcy("translations-delete-button").click();
+  gcy('global-plus-button').should('be.visible').click();
+  gcy('translations-add-key-field')
+    .find('textarea')
+    .filter(':visible')
+    .type('test');
+  gcy('global-form-save-button').should('be.visible').click();
+  assertMessage('Translation created');
+  gcy('translations-row-checkbox').click();
+  gcy('translations-delete-button').click();
   confirmStandard();
-  assertMessage("Translations deleted!");
+  assertMessage('Translations deleted!');
 };
 
 const validateTranslatePermissions = (projectName: string) => {
   visitList();
   enterProject(projectName);
-  selectInProjectMenu("Translations");
+  selectInProjectMenu('Translations');
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
-  gcy("global-plus-button").should("not.exist");
-  gcy("translations-row-checkbox").should("not.exist");
-  gcy("translations-editable-cell")
-    .contains("This is test text!")
-    .should("be.visible")
+  gcy('global-plus-button').should('not.exist');
+  gcy('translations-row-checkbox').should('not.exist');
+  gcy('translations-editable-cell')
+    .contains('This is test text!')
+    .should('be.visible')
     .click();
-  gcy("translations-editable-cell-editing").should("be.visible");
+  gcy('translations-editable-cell-editing').should('be.visible');
 };
 
 const validateViewPermissions = (projectName: string) => {
   visitList();
   enterProject(projectName);
-  gcy("project-menu-items").should("contain", "Projects");
-  gcy("project-menu-items").should("contain", "Export");
+  gcy('project-menu-items').should('contain', 'Projects');
+  gcy('project-menu-items').should('contain', 'Export');
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
-  selectInProjectMenu("Translations");
-  gcy("global-plus-button").should("not.exist");
+  selectInProjectMenu('Translations');
+  gcy('global-plus-button').should('not.exist');
 };
