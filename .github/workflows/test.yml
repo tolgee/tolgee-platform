@@ -6,7 +6,8 @@ on:
       "main"
 
 jobs:
-  backend:
+  backend-build:
+    name: Build backend 🏗️
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -28,29 +29,73 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
-      - name: Cache node modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - name: Build backend
+        run: ./gradlew bootJar
 
-      - name: Build with Gradle
-        run: ./gradlew test
-        env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+      - name: Tar build
+        run: tar -czf ~/backend.tgz ./build
 
       - uses: actions/upload-artifact@v2
         if: always()
         with:
-          name: test
+          name: backend
           path: |
-            ./e2e/cypress/videos/**/*
-            ./e2e/cypress/screenshots/**/*
+            ~/backend.tgz
+
+  backend-test:
+    name: Backend testing ‍🔎
+    needs: [ backend-build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Download backend build result
+        uses: actions/download-artifact@v2
+        with:
+          name: backend
+          path: ~/
+
+      - name: Untar it
+        run: tar -xzf ~/backend.tgz ./build
+
+      - name: Run backend tests
+        run: ./gradlew test
+        env:
+          SKIP_SERVER_BUILD: true
+
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: backend_test_reports
+          path: |
             ./build/reports/**/*
 
   e2e:
+    needs: [ frontend-build, backend-build, e2e-install-deps ]
     runs-on: ubuntu-latest
+    name: E2E testing ‍🔎
+    strategy:
+      fail-fast: false
+      matrix:
+        total_jobs: [ 10 ]
+        job_inex: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
     steps:
       - uses: actions/checkout@v2
 
@@ -77,22 +122,122 @@ jobs:
           path: ~/.npm
           key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Build with Gradle
-        run: ./gradlew runE2e
+      - name: Download backend build result
+        uses: actions/download-artifact@v2
+        with:
+          name: backend
+          path: ~/
+
+      - name: Untar it
+        run: tar -xzf ~/backend.tgz ./build
+
+      - name: Download frontend build result
+        uses: actions/download-artifact@v2
+        with:
+          name: webapp
+          path: ./webapp/build
+
+      - name: Download dependencies
+        uses: actions/download-artifact@v2
+        with:
+          name: e2e_deps
+          path: ~/
+
+      - name: Untar node modules
+        run: |
+          tar -xzf ~/node_modules.tgz ./e2e/node_modules
+
+      - name: Create cache directory
+        run: |
+          mkdir -p ~/.cache
+
+      - name: Untar Cypress cache
+        run: |
+          tar -xzf ~/cypress_cache.tgz
+        working-directory: /home/runner/.cache/
+
+      - name: Run e2e test
+        run: ./gradlew runE2e || ./gradlew runE2e
         env:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+          SKIP_WEBAPP_BUILD: true
+          SKIP_SERVER_BUILD: true
+          SKIP_INSTALL_E2E_DEPS: true
+          E2E_TOTAL_JOBS: ${{matrix.total_jobs}}
+          E2E_JOB_INDEX: ${{matrix.job_inex}}
 
       - uses: actions/upload-artifact@v2
         if: always()
         with:
-          name: test
+          name: e2e_${{matrix.job_index}}
           path: |
             ./e2e/cypress/videos/**/*
             ./e2e/cypress/screenshots/**/*
-            ./build/reports/**/*
+
+  frontend-build:
+    name: Build frontend 🏗️
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Build webapp
+        run: ./gradlew buildWebapp
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
+      - name: Upload built webapp
+        uses: actions/upload-artifact@v2
+        with:
+          name: webapp
+          path: webapp/build
+
+  frontend-code-check:
+    name: Frontend Eslint 🪲
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./webapp
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Eslint
+        run: npm run eslint
+        working-directory: ./webapp
 
   e2e-code-checks:
+    name: E2E Eslint 🪲
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -120,7 +265,8 @@ jobs:
         run: npm run tsc
         working-directory: ./e2e
 
-  frontend:
+  e2e-install-deps:
+    name: Install E2E dependencies ⬇️
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -138,16 +284,34 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        working-directory: ./webapp
+        working-directory: ./e2e
 
-      - name: Eslint
-        run: npm run eslint
-        working-directory: ./webapp
+      - name: Tar node modules
+        run: |
+          tar -czf ~/node_modules.tgz ./e2e/node_modules
 
-      - name: Typecheck
-        run: npm run tsc
-        working-directory: ./webapp
+      - name: Tar Cypress cache
+        run: |
+          tar -czf ~/cypress_cache.tgz ./Cypress
+        working-directory: /home/runner/.cache/
 
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: e2e_deps
+          path: |
+            ~/node_modules.tgz
+            ~/cypress_cache.tgz
 
-
+  cleanup:
+    needs: [ e2e, backend-test ]
+    name: Delete artifacts 🧹
+    runs-on: ubuntu-latest
+    steps:
+      - uses: geekyeggo/delete-artifact@v1
+        with:
+          name: |
+            e2e_deps
+            webapp
+            backend
 
