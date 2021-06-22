@@ -3,15 +3,9 @@ import List from '@material-ui/core/List';
 import { useSelector } from 'react-redux';
 import { SideMenuItem } from './SideMenuItem';
 import { LINKS, PARAMS } from '../../../../constants/links';
-import DynamicFeedIcon from '@material-ui/icons/DynamicFeed';
 import LanguageIcon from '@material-ui/icons/Language';
-import SettingsIcon from '@material-ui/icons/Settings';
-import PersonAddIcon from '@material-ui/icons/PersonAdd';
-import SupervisedUserCircleIcon from '@material-ui/icons/SupervisedUserCircle';
 import { useProject } from '../../../../hooks/useProject';
 import { ProjectPermissionType } from '../../../../service/response.types';
-import ImportExportIcon from '@material-ui/icons/ImportExport';
-import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import { useConfig } from '../../../../hooks/useConfig';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { useTranslate } from '@tolgee/react';
@@ -19,6 +13,14 @@ import { container } from 'tsyringe';
 import { GlobalActions } from '../../../../store/global/GlobalActions';
 import { AppState } from '../../../../store';
 import { SideMenu } from './SideMenu';
+import {
+  ProjectsIcon,
+  SettingsIcon,
+  ImportIcon,
+  ExportIcon,
+  UserSettingIcon,
+  UserAddIcon,
+} from '../../../CustomIcons';
 
 const actions = container.resolve(GlobalActions);
 
@@ -39,7 +41,7 @@ export const ProjectMenu = ({ id }) => {
         <List>
           <SideMenuItem
             linkTo={LINKS.PROJECTS.build({ [PARAMS.PROJECT_ID]: id })}
-            icon={<DynamicFeedIcon />}
+            icon={<ProjectsIcon />}
             text={t('project_menu_projects')}
           />
         </List>
@@ -71,14 +73,14 @@ export const ProjectMenu = ({ id }) => {
                     linkTo={LINKS.PROJECT_INVITATION.build({
                       [PARAMS.PROJECT_ID]: id,
                     })}
-                    icon={<PersonAddIcon />}
+                    icon={<UserAddIcon />}
                     text={t('project_menu_invite_user')}
                   />
                   <SideMenuItem
                     linkTo={LINKS.PROJECT_PERMISSIONS.build({
                       [PARAMS.PROJECT_ID]: id,
                     })}
-                    icon={<SupervisedUserCircleIcon />}
+                    icon={<UserSettingIcon />}
                     text={t('project_menu_permissions')}
                   />
                 </>
@@ -88,7 +90,7 @@ export const ProjectMenu = ({ id }) => {
                 linkTo={LINKS.PROJECT_IMPORT.build({
                   [PARAMS.PROJECT_ID]: id,
                 })}
-                icon={<ImportExportIcon />}
+                icon={<ImportIcon />}
                 text={t('project_menu_import')}
               />
             </>
@@ -97,7 +99,7 @@ export const ProjectMenu = ({ id }) => {
             linkTo={LINKS.PROJECT_EXPORT.build({
               [PARAMS.PROJECT_ID]: id,
             })}
-            icon={<SaveAltIcon />}
+            icon={<ExportIcon />}
             text={t('project_menu_export')}
           />
         </List>
