@@ -70,7 +70,9 @@ describe('Import errors', () => {
         .should('be.visible');
     });
 
-    it('error shows more and less', () => {
+    it.only('error shows more and less', () => {
+      cy.gcy('global-base-view-loading').should('be.visible');
+      cy.gcy('global-base-view-loading').should('not.exist');
       gcy('import-file-error')
         .findDcy('import-file-error-more-less-button')
         .click();
