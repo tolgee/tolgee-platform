@@ -1,19 +1,18 @@
-import * as React from 'react';
-import { FunctionComponent, ReactNode, useEffect } from 'react';
+import React, {
+  ReactNode,
+  useEffect,
+  createRef,
+  useState,
+  SyntheticEvent,
+} from 'react';
 import { BoxLoading } from '../../common/BoxLoading';
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
 import Box from '@material-ui/core/Box';
 
-import {
-  ProjectPermissionType,
-  ScreenshotDTO,
-} from '../../../service/response.types';
-import { ScreenshotActions } from '../../../store/project/ScreenshotActions';
+import { ProjectPermissionType } from '../../../service/response.types';
 import { container } from 'tsyringe';
 import AddIcon from '@material-ui/icons/Add';
-import { Message } from '../../../store/global/types';
 import { T } from '@tolgee/react';
-import { MessageActions } from '../../../store/global/MessageActions';
 import { useConfig } from '../../../hooks/useConfig';
 import { useProject } from '../../../hooks/useProject';
 import { createStyles, makeStyles, Theme } from '@material-ui/core';
@@ -24,6 +23,8 @@ import { Skeleton } from '@material-ui/lab';
 import { startLoading, stopLoading } from '../../../hooks/loading';
 
 import { components } from '../../../service/apiSchema.generated';
+import { useApiMutation, useApiQuery } from '../../../service/http/useQueryApi';
+import { MessageService } from '../../../service/MessageService';
 
 type KeyTranslationsDTO =
   components['schemas']['KeyWithTranslationsResponseDto'];
@@ -58,28 +59,50 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const actions = container.resolve(ScreenshotActions);
-const messageActions = container.resolve(MessageActions);
+const messageService = container.resolve(MessageService);
 export const MAX_FILE_COUNT = 20;
 const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
-export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (
-  props
-) => {
-  const fileRef = React.createRef<HTMLInputElement>();
-  const screenshotsLoadable = actions.useSelector((s) => s.loadables.getForKey);
-  const screenshots = screenshotsLoadable.data as ScreenshotDTO[];
+export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
+  const fileRef = createRef<HTMLInputElement>();
   const projectPermissions = useProjectPermissions();
-  const uploadLoadable = actions.useSelector(
-    (s) => s.loadables.uploadScreenshot
-  );
-
-  const [detailFileName, setDetailFileName] = React.useState(
-    null as string | null
-  );
   const classes = useStyles({});
   const config = useConfig();
   const project = useProject();
+
+  const screenshotsLoadable = useApiQuery({
+    url: '/api/project/{projectId}/screenshots/get',
+    method: 'post',
+    path: { projectId: project.id },
+    content: { 'application/json': { key: props.data!.name! } },
+  });
+
+  const uploadLoadable = useApiMutation({
+    url: '/api/project/{projectId}/screenshots',
+    method: 'post',
+  });
+  //   (s) => s.loadables.uploadScreenshot
+  // );
+
+  const [detailFileName, setDetailFileName] = useState(null as string | null);
+
+  const deleteLoadable = useApiMutation({
+    url: '/api/project/screenshots/{ids}',
+    method: 'delete',
+  });
+
+  const onDelete = (id: number) => {
+    deleteLoadable.mutate(
+      {
+        path: { ids: [id] },
+      },
+      {
+        onSuccess() {
+          screenshotsLoadable.refetch();
+        },
+      }
+    );
+  };
 
   const addBox = projectPermissions.satisfiesPermission(
     ProjectPermissionType.TRANSLATE
@@ -128,22 +151,40 @@ export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (
     return { ...result, valid };
   };
 
-  const validateAndUpload = (files: File[]) => {
+  const validateAndUpload = async (files: File[]) => {
     const validation = validate(files);
+    let errorHappened = false;
     if (validation.valid) {
-      actions.loadableActions.uploadScreenshot.dispatch(
-        files,
-        project.id,
-        props!.data!.name as string
+      await Promise.all(
+        files.map((file) =>
+          uploadLoadable
+            .mutateAsync({
+              path: { projectId: project.id },
+              query: { key: props!.data!.name! },
+              content: {
+                'multipart/form-data': {
+                  screenshot: file as any,
+                },
+              },
+            })
+            .catch((e) => {
+              errorHappened = true;
+            })
+        )
       );
-      return;
+
+      if (errorHappened) {
+        messageService.error(
+          <T>translations.screenshots.some_screenshots_not_uploaded</T>
+        );
+      }
+      screenshotsLoadable.refetch();
+    } else {
+      validation.errors.forEach((e) => messageService.error(e));
     }
-    validation.errors.forEach((e) =>
-      messageActions.showMessage.dispatch(new Message(e, 'error'))
-    );
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const listener = (e) => {
       e.preventDefault();
     };
@@ -173,7 +214,7 @@ export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (
     };
   }, []);
 
-  function onFileSelected(e: React.SyntheticEvent) {
+  function onFileSelected(e: SyntheticEvent) {
     const files = (e.target as HTMLInputElement).files;
     if (!files) {
       return;
@@ -189,14 +230,14 @@ export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (
   }
 
   useEffect(() => {
-    if (uploadLoadable.loading) {
+    if (uploadLoadable.isLoading || deleteLoadable.isLoading) {
       startLoading();
     } else {
       stopLoading();
     }
-  }, [uploadLoadable.loading]);
+  }, [uploadLoadable.isLoading, deleteLoadable.isLoading]);
 
-  const loadingSkeleton = uploadLoadable.loading ? (
+  const loadingSkeleton = uploadLoadable.isLoading ? (
     <Skeleton variant="rect" width={100} height={100} />
   ) : null;
 
@@ -211,16 +252,16 @@ export const ScreenshotGallery: FunctionComponent<ScreenshotGalleryProps> = (
         accept={ALLOWED_UPLOAD_TYPES.join(',')}
       />
       <ScreenshotDropzone validateAndUpload={validateAndUpload}>
-        {screenshotsLoadable.loading || !screenshotsLoadable.touched ? (
+        {screenshotsLoadable.isLoading || !screenshotsLoadable.data ? (
           <BoxLoading />
-        ) : screenshots.length > 0 || uploadLoadable.loading ? (
+        ) : screenshotsLoadable.data.length > 0 || uploadLoadable.isLoading ? (
           <Box display="flex" flexWrap="wrap" overflow="visible">
-            {' '}
-            {screenshots.map((s) => (
+            {screenshotsLoadable.data.map((s) => (
               <ScreenshotThumbnail
                 key={s.id}
                 onClick={() => setDetailFileName(s.filename)}
                 screenshotData={s}
+                onDelete={onDelete}
               />
             ))}
             {loadingSkeleton}

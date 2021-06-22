@@ -1,11 +1,7 @@
-import { default as React, FunctionComponent } from 'react';
+import { FunctionComponent, useState } from 'react';
 import { BaseView } from '../../../layout/BaseView';
-import { useSelector } from 'react-redux';
-import { AppState } from '../../../../store';
-import { container } from 'tsyringe';
 import { T, useTranslate } from '@tolgee/react';
-import { SimplePaginatedHateoasList } from '../../../common/list/SimplePaginatedHateoasList';
-import { ProjectActions } from '../../../../store/project/ProjectActions';
+import { PaginatedHateoasList } from '../../../common/list/PaginatedHateoasList';
 import { SimpleListItem } from '../../../common/list/SimpleListItem';
 import { LINKS, PARAMS } from '../../../../constants/links';
 import {
@@ -20,17 +16,30 @@ import { useProject } from '../../../../hooks/useProject';
 import { translatedPermissionType } from '../../../../fixtures/translatePermissionFile';
 import ProjectPermissionMenu from './component/ProjectPermissionMenu';
 import { Navigation } from '../../../navigation/Navigation';
-
-const projectActions = container.resolve(ProjectActions);
+import { useApiQuery } from '../../../../service/http/useQueryApi';
 
 export const ProjectPermissionsView: FunctionComponent = () => {
   const project = useProject();
 
   const t = useTranslate();
 
-  const listLoadable = useSelector(
-    (state: AppState) => state.projects.loadables.listUsersForPermissions
-  );
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const listLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/users',
+    method: 'get',
+    path: { projectId: project.id },
+    query: {
+      pageable: {
+        page,
+        sort: ['name'],
+      },
+      search,
+    },
+    options: {
+      keepPreviousData: true,
+    },
+  });
 
   const basePermissionText = translatedPermissionType(
     project.organizationOwnerBasePermissions!,
@@ -58,7 +67,7 @@ export const ProjectPermissionsView: FunctionComponent = () => {
         />
       }
       containerMaxWidth="lg"
-      loading={listLoadable.loading}
+      loading={listLoadable.isFetching}
       hideChildrenOnLoading={false}
     >
       {project.organizationOwnerSlug && (
@@ -72,11 +81,10 @@ export const ProjectPermissionsView: FunctionComponent = () => {
         </Box>
       )}
 
-      <SimplePaginatedHateoasList
-        searchField
-        actions={projectActions}
-        dispatchParams={[{ path: { projectId: project.id } }]}
-        loadableName="listUsersForPermissions"
+      <PaginatedHateoasList
+        loadable={listLoadable}
+        onPageChange={setPage}
+        onSearchChange={setSearch}
         renderItem={(u) => (
           <SimpleListItem>
             <ListItemText>

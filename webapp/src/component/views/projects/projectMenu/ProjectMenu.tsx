@@ -3,7 +3,6 @@ import List from '@material-ui/core/List';
 import { useSelector } from 'react-redux';
 import { SideMenuItem } from './SideMenuItem';
 import { LINKS, PARAMS } from '../../../../constants/links';
-import LanguageIcon from '@material-ui/icons/Language';
 import { useProject } from '../../../../hooks/useProject';
 import { ProjectPermissionType } from '../../../../service/response.types';
 import { useConfig } from '../../../../hooks/useConfig';
@@ -15,6 +14,7 @@ import { AppState } from '../../../../store';
 import { SideMenu } from './SideMenu';
 import {
   ProjectsIcon,
+  TranslationIcon,
   SettingsIcon,
   ImportIcon,
   ExportIcon,
@@ -51,7 +51,7 @@ export const ProjectMenu = ({ id }) => {
             linkTo={LINKS.PROJECT_TRANSLATIONS.build({
               [PARAMS.PROJECT_ID]: id,
             })}
-            icon={<LanguageIcon />}
+            icon={<TranslationIcon />}
             text={t('project_menu_translations')}
           />
         </List>
