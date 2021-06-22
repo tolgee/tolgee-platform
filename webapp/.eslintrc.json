@@ -20,6 +20,7 @@
   "plugins": ["react", "@typescript-eslint", "prettier"],
   "settings": { "react": { "version": "detect" } },
   "rules": {
+    "prettier/prettier": "error",
     "no-console": "warn",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/ban-ts-comment": "off",
