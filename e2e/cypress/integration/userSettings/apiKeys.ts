@@ -80,7 +80,7 @@ describe("Api keys", () => {
     login("cukrberg@facebook.com", "admin");
     visit();
     clickAdd();
-    cy.gcy("global-form-select").contains("Facebook itself").click();
+    cy.gcy("global-form-select").click();
     cy.gcy("api-keys-project-select-item")
       .contains("Vaclav's cool project")
       .click();
