@@ -1,11 +1,6 @@
-import * as React from 'react';
-import { FunctionComponent, useEffect } from 'react';
+import { FunctionComponent } from 'react';
 import { Box, Popover, Typography } from '@material-ui/core';
-import { ScreenshotActions } from '../../../store/project/ScreenshotActions';
-import { container } from 'tsyringe';
-import { useProject } from '../../../hooks/useProject';
 import { T } from '@tolgee/react';
-import { Alert } from '../../common/Alert';
 import { ScreenshotGallery } from './ScreenshotGallery';
 import { components } from '../../../service/apiSchema.generated';
 
@@ -18,23 +13,10 @@ export interface ScreenshotsPopoverProps {
   onClose: () => void;
 }
 
-const actions = container.resolve(ScreenshotActions);
 export const ScreenshotsPopover: FunctionComponent<ScreenshotsPopoverProps> = (
   props
 ) => {
-  const uploadLoadable = actions.useSelector(
-    (s) => s.loadables.uploadScreenshot
-  );
-
-  const project = useProject();
   const id = `screenshot-popover-${props.data.id}`;
-
-  useEffect(() => {
-    actions.loadableActions.getForKey.dispatch(project.id, props.data.name);
-    return () => {
-      actions.loadableReset.uploadScreenshot.dispatch();
-    };
-  }, []);
 
   return (
     <>
@@ -58,14 +40,6 @@ export const ScreenshotsPopover: FunctionComponent<ScreenshotsPopoverProps> = (
               <T>translations_screenshots_popover_title</T>
             </Typography>
           </Box>
-
-          {!!uploadLoadable?.data?.errors?.length && (
-            <Box>
-              <Alert severity="error" style={{ marginTop: 0, width: '100%' }}>
-                <T>translations.screenshots.some_screenshots_not_uploaded</T>
-              </Alert>
-            </Box>
-          )}
           <ScreenshotGallery data={props.data} />
         </Box>
       </Popover>

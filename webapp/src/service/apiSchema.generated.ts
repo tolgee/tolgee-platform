@@ -1699,7 +1699,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": {
+        "multipart/form-data": {
           screenshot: string;
         };
       };
