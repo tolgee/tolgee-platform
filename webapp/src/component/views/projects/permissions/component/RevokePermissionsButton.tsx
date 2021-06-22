@@ -1,14 +1,15 @@
-import React, { FunctionComponent, ReactElement } from 'react';
+import { FunctionComponent, ReactElement } from 'react';
 import { Button, Tooltip } from '@material-ui/core';
 import { confirmation } from '../../../../../hooks/confirmation';
 import { T } from '@tolgee/react';
 import { components } from '../../../../../service/apiSchema.generated';
 import { useUser } from '../../../../../hooks/useUser';
 import { container } from 'tsyringe';
-import { ProjectActions } from '../../../../../store/project/ProjectActions';
 import { useProject } from '../../../../../hooks/useProject';
+import { useApiMutation } from '../../../../../service/http/useQueryApi';
+import { MessageService } from '../../../../../service/MessageService';
 
-const projectActions = container.resolve(ProjectActions);
+const messageService = container.resolve(MessageService);
 
 const RevokePermissionsButton = (props: {
   user: components['schemas']['UserAccountInProjectModel'];
@@ -16,6 +17,29 @@ const RevokePermissionsButton = (props: {
   const hasOrganizationRole = !!props.user.organizationRole;
   const project = useProject();
   const currentUser = useUser();
+
+  const revokeAccess = useApiMutation({
+    url: '/v2/projects/{projectId}/users/{userId}/revoke-access',
+    method: 'put',
+    invalidatePrefix: '/v2/projects/{projectId}/users',
+  });
+
+  const handleRevoke = () => {
+    revokeAccess.mutate(
+      {
+        path: {
+          projectId: project.id,
+          userId: props.user.id,
+        },
+      },
+      {
+        onSuccess() {
+          messageService.success(<T>access_revoked_message</T>);
+        },
+      }
+    );
+  };
+
   let disabledTooltipTitle = undefined as ReactElement | undefined;
 
   if (currentUser!.id === props.user.id) {
@@ -54,14 +78,7 @@ const RevokePermissionsButton = (props: {
                 project_permissions_revoke_user_access_message
               </T>
             ),
-            onConfirm: () => {
-              projectActions.loadableActions.revokeAccess.dispatch({
-                path: {
-                  projectId: project.id,
-                  userId: props.user.id,
-                },
-              });
-            },
+            onConfirm: handleRevoke,
           })
         }
       >

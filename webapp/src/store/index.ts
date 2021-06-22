@@ -4,7 +4,6 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import promise from 'redux-promise-middleware';
 import { container } from 'tsyringe';
 import { ImplicitReducer } from './ImplicitReducer';
-import { ProjectActions } from './project/ProjectActions';
 import { GlobalActions } from './global/GlobalActions';
 import { ErrorActions } from './global/ErrorActions';
 import { RedirectionActions } from './global/RedirectionActions';
@@ -21,7 +20,6 @@ import { ScreenshotActions } from './project/ScreenshotActions';
 import { ImportActions } from './project/ImportActions';
 
 const implicitReducer = container.resolve(ImplicitReducer);
-const projectActions = container.resolve(ProjectActions);
 const globalActions = container.resolve(GlobalActions);
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -33,7 +31,6 @@ const appReducer = (appState, action) =>
       appState
     ),
     global: implicitReducer.create(globalActions),
-    projects: implicitReducer.create(projectActions),
     error: implicitReducer.create(errorActions),
     redirection: implicitReducer.create(redirectionActions),
     message: implicitReducer.create(container.resolve(MessageActions)),
