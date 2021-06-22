@@ -12,7 +12,7 @@ import { BaseUserSettingsView } from '../userSettings/BaseUserSettingsView';
 import { SimpleListItem } from '../../common/list/SimpleListItem';
 import { Button } from '@material-ui/core';
 import { useLeaveOrganization } from './useLeaveOrganization';
-import { useGetOrganizations } from '../../../service/hooks/Organization';
+import { useApiQuery } from '../../../service/http/useQueryApi';
 
 export const OrganizationsListView = () => {
   const t = useTranslate();
@@ -21,11 +21,19 @@ export const OrganizationsListView = () => {
 
   const [page, setPage] = useState(0);
 
-  const organizatationsLoadable = useGetOrganizations({
-    page,
-    filterCurrentUserOwner: false,
-    sort: ['name'],
-    size: 10,
+  const organizatationsLoadable = useApiQuery({
+    url: '/v2/organizations',
+    method: 'get',
+    query: {
+      pageable: {
+        sort: ['name'],
+        size: 10,
+        page,
+      },
+      params: {
+        filterCurrentUserOwner: false,
+      },
+    },
   });
 
   return (

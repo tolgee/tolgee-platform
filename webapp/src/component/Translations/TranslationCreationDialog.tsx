@@ -15,7 +15,7 @@ import { MessageService } from '../../service/MessageService';
 import { Validation } from '../../constants/GlobalValidationSchema';
 import { TranslationListContext } from './TtranslationsGridContextProvider';
 import { useTranslate } from '@tolgee/react';
-import { useCreateKey } from '../../service/hooks/Translation';
+import { useApiMutation } from '../../service/http/useQueryApi';
 
 export type TranslationCreationValue = {
   key: string;
@@ -31,16 +31,27 @@ export function TranslationCreationDialog() {
 
   const t = useTranslate();
 
-  const createKey = useCreateKey(projectDTO.id);
+  const createKey = useApiMutation({
+    url: '/api/project/{projectId}/keys/create',
+    method: 'post',
+  });
 
-  function onSubmit(v) {
-    createKey.mutate(v, {
-      onSuccess: () => {
-        messaging.success(t('translation_grid_translation_created'));
-        listContext.loadData();
-        onClose();
+  function onSubmit(values) {
+    createKey.mutate(
+      {
+        path: { projectId: projectDTO.id },
+        content: {
+          'application/json': values,
+        },
       },
-    });
+      {
+        onSuccess: () => {
+          messaging.success(t('translation_grid_translation_created'));
+          listContext.loadData();
+          onClose();
+        },
+      }
+    );
   }
 
   const selectedLanguages = translationActions.useSelector(

@@ -7,7 +7,7 @@ import { PaginatedHateoasList } from '../../common/list/PaginatedHateoasList';
 import Box from '@material-ui/core/Box';
 import { FabAddButtonLink } from '../../common/buttons/FabAddButtonLink';
 import { LINKS } from '../../../constants/links';
-import { useGetOrganizationProjects } from '../../../service/hooks/Organization';
+import { useApiQuery } from '../../../service/http/useQueryApi';
 
 export const OrganizationsProjectListView = () => {
   const t = useTranslate();
@@ -17,14 +17,20 @@ export const OrganizationsProjectListView = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
 
-  const loadable = useGetOrganizationProjects(
-    organization!.slug,
-    {
-      page,
+  const loadable = useApiQuery({
+    url: '/v2/organizations/{id}/projects',
+    method: 'get',
+    path: { id: organization!.id },
+    query: {
+      pageable: {
+        page,
+      },
       search,
     },
-    { keepPreviousData: true }
-  );
+    options: {
+      keepPreviousData: true,
+    },
+  });
 
   return (
     <BaseView

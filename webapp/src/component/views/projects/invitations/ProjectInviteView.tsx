@@ -19,10 +19,9 @@ import { useProject } from '../../../../hooks/useProject';
 import { Navigation } from '../../../navigation/Navigation';
 import { ProjectInvitationActions } from '../../../../store/project/invitations/ProjectInvitationActions';
 import {
-  useDeleteInvitation,
-  useGetInvitations,
-  usePostInvite,
-} from '../../../../service/hooks/Invitation';
+  useApiMutation,
+  useApiQuery,
+} from '../../../../service/http/useQueryApi';
 
 type FormType = {
   type: string;
@@ -40,14 +39,30 @@ export const ProjectInviteView: FunctionComponent = () => {
 
   const t = useTranslate();
 
-  const invitations = useGetInvitations(projectId);
-  const invite = usePostInvite();
-  const deleteInvitation = useDeleteInvitation();
+  const invitations = useApiQuery({
+    url: '/api/invitation/list/{projectId}',
+    method: 'get',
+    path: { projectId: Number(projectId) },
+  });
+
+  const invite = useApiMutation({
+    url: '/v2/projects/{projectId}/invite',
+    method: 'put',
+  });
+  const deleteInvitation = useApiMutation({
+    url: '/api/invitation/{invitationId}',
+    method: 'delete',
+  });
 
   const handleSubmit = (values: FormType) => {
     invite.mutate(
       {
-        type: values.type as any,
+        path: { projectId: project.id },
+        content: {
+          'application/json': {
+            type: values.type as any,
+          },
+        },
       },
       {
         onSuccess: (code) => {
@@ -59,13 +74,16 @@ export const ProjectInviteView: FunctionComponent = () => {
     );
   };
 
-  const handleCancel = (id: number) => {
-    deleteInvitation.mutate(id, {
-      onSuccess: () => {
-        actions.setCode.dispatch('');
-        invitations.refetch();
-      },
-    });
+  const handleCancel = (invitationId: number) => {
+    deleteInvitation.mutate(
+      { path: { invitationId } },
+      {
+        onSuccess: () => {
+          actions.setCode.dispatch('');
+          invitations.refetch();
+        },
+      }
+    );
   };
 
   const loading =
