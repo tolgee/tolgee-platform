@@ -36,7 +36,7 @@
     "yup": "^0.32.9"
   },
   "scripts": {
-    "start": "craco start",
+    "start": "DISABLE_ESLINT_PLUGIN=true craco start",
     "startConcurrently": "concurrently \"craco start\"",
     "build": "craco build",
     "test": "craco test",

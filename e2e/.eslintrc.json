@@ -25,7 +25,8 @@
     "no-only-tests"
   ],
   "rules": {
-    "no-console": "error",
+    "prettier/prettier": "error",
+    "no-console": "warn",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
