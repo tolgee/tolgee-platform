@@ -9,25 +9,31 @@ import { BaseFormView } from '../../layout/BaseFormView';
 import { Validation } from '../../../constants/GlobalValidationSchema';
 import { OrganizationFields } from './components/OrganizationFields';
 import { MessageService } from '../../../service/MessageService';
-import {
-  usePostCreateOrganization,
-  OrganizationBody,
-} from '../../../service/hooks/Organization';
+import { components } from '../../../service/apiSchema.generated';
+import { useApiMutation } from '../../../service/http/useQueryApi';
+
+type OrganizationBody = components['schemas']['OrganizationDto'];
 
 const redirectionActions = container.resolve(RedirectionActions);
 const messageService = container.resolve(MessageService);
 
 export const OrganizationCreateView: FunctionComponent = () => {
-  const loadable = usePostCreateOrganization();
+  const loadable = useApiMutation({
+    url: '/v2/organizations',
+    method: 'post',
+  });
   const t = useTranslate();
 
   const onSubmit = (values) => {
-    loadable.mutate(values, {
-      onSuccess: () => {
-        redirectionActions.redirect.dispatch(LINKS.ORGANIZATIONS.build());
-        messageService.success(<T>organization_created_message</T>);
-      },
-    });
+    loadable.mutate(
+      { content: { 'application/json': values } },
+      {
+        onSuccess: () => {
+          redirectionActions.redirect.dispatch(LINKS.ORGANIZATIONS.build());
+          messageService.success(<T>organization_created_message</T>);
+        },
+      }
+    );
   };
 
   const onCancel = () => {

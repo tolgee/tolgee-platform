@@ -1,4 +1,3 @@
-import { useQueryClient } from 'react-query';
 import { FunctionComponent, useContext } from 'react';
 import { RowContext } from './TranslationsRow';
 import { useProject } from '../../hooks/useProject';
@@ -6,27 +5,35 @@ import { ProjectPermissionType } from '../../service/response.types';
 import { EditableCell } from './EditableCell';
 import { container } from 'tsyringe';
 import { TranslationActions } from '../../store/project/TranslationActions';
-import { useEditKey } from '../../service/hooks/Translation';
 import { T } from '@tolgee/react';
 import { MessageService } from '../../service/MessageService';
 import { Validation } from '../../constants/GlobalValidationSchema';
 import { parseErrorResponse } from '../../fixtures/errorFIxtures';
+import { useApiMutation } from '../../service/http/useQueryApi';
 
 const actions = container.resolve(TranslationActions);
 const messaging = container.resolve(MessageService);
 
 export const KeyCell: FunctionComponent = (props) => {
   const project = useProject();
-  const queryClient = useQueryClient();
 
   const context = useContext(RowContext);
-  const editKey = useEditKey(project.id);
+  const editKey = useApiMutation({
+    url: '/api/project/{projectId}/keys/edit',
+    method: 'post',
+    invalidatePrefix: '/api/project',
+  });
 
   const handleSubmit = (v) => {
     editKey.mutate(
       {
-        oldFullPathString: context.data.name as string,
-        newFullPathString: v,
+        path: { projectId: project.id },
+        content: {
+          'application/json': {
+            oldFullPathString: context.data.name as string,
+            newFullPathString: v,
+          },
+        },
       },
       {
         onError: (err) => {
@@ -36,11 +43,6 @@ export const KeyCell: FunctionComponent = (props) => {
         },
         onSuccess: () => {
           messaging.success(<T>Translation grid - Successfully edited!</T>);
-          queryClient.invalidateQueries([
-            'project',
-            project.id,
-            'translations',
-          ]);
           actions.setTranslationEditing.dispatch({
             data: null,
             skipConfirm: true,

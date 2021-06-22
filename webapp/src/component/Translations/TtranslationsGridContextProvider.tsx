@@ -8,10 +8,11 @@ import { useTranslate } from '@tolgee/react';
 import { FullPageLoading } from '../common/FullPageLoading';
 import { useProjectLanguages } from '../../hooks/useProjectLanguages';
 import { useLeaveEditConfirmationOtherEdit } from './useLeaveEditConfirmation';
-import {
-  useGetTranslations,
-  TranslationsType,
-} from '../../service/hooks/Translation';
+import { components } from '../../service/apiSchema.generated';
+import { useApiQuery } from '../../service/http/useQueryApi';
+
+type TranslationsType =
+  components['schemas']['ViewDataResponseLinkedHashSetKeyWithTranslationsResponseDtoResponseParams'];
 
 export const TranslationListContext =
   // @ts-ignore
@@ -59,13 +60,17 @@ export const TranslationGridContextProvider: React.FC = ({ children }) => {
   const [checkedKeys, setCheckedKeys] = useState(new Set<number>());
   const [_resetEdit, setResetEdit] = useState(() => () => {});
 
-  const listLoadable = useGetTranslations(
-    projectDTO.id,
-    selectedLanguages?.length ? selectedLanguages : undefined,
-    search,
-    perPage || 20,
-    offset || 0,
-    {
+  const listLoadable = useApiQuery({
+    url: '/api/project/{projectId}/translations/view',
+    method: 'get',
+    path: { projectId: projectDTO.id },
+    query: {
+      languages: selectedLanguages?.length ? selectedLanguages : undefined,
+      search,
+      limit: perPage || 20,
+      offset: offset || 0,
+    },
+    options: {
       keepPreviousData: true,
       onSuccess: (data) => {
         // update selected languages in localstorage
@@ -74,8 +79,8 @@ export const TranslationGridContextProvider: React.FC = ({ children }) => {
           data.params!.languages!
         );
       },
-    }
-  );
+    },
+  });
 
   const loadData = (search?: string, limit?: number, offset?: number) => {
     setSearch(search);

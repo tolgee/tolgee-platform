@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useEffect } from 'react';
 import { container } from 'tsyringe';
 import { LINKS, PARAMS } from '../../../../constants/links';
