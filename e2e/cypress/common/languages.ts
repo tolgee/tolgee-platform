@@ -1,8 +1,8 @@
-import { confirmHardMode, gcy, getInputByName } from "./shared";
-import { HOST } from "./constants";
+import { confirmHardMode, gcy, getInputByName } from './shared';
+import { HOST } from './constants';
 
 export const selectFlag = (emoji: string) => {
-  gcy("languages-flag-selector-open-button").click();
+  gcy('languages-flag-selector-open-button').click();
   cy.xpath(`//img[@alt='${emoji}']`).click();
 };
 
@@ -13,38 +13,38 @@ export const setLanguageData = (data: {
   flagEmoji: string;
 }) => {
   getCustomNameInput().clear().type(data.name);
-  getInputByName("originalName").clear().type(data.originalName);
-  getInputByName("tag").clear().type(data.tag);
+  getInputByName('originalName').clear().type(data.originalName);
+  getInputByName('tag').clear().type(data.tag);
   selectFlag(data.flagEmoji);
 };
 
 export const getCustomNameInput = () =>
-  gcy("language-modify-form").xpath(".//input[@name='name']");
+  gcy('language-modify-form').xpath(".//input[@name='name']");
 
 export const visitProjectSettings = (projectId: number) => {
   cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
 };
 
 export const typeToAutocomplete = (text: string) => {
-  gcy("languages-create-autocomplete-field").find("input").type(text);
+  gcy('languages-create-autocomplete-field').find('input').type(text);
 };
 
 export const selectInAutocomplete = (containedText: string) => {
-  return gcy("languages-create-autocomplete-suggested-option")
+  return gcy('languages-create-autocomplete-suggested-option')
     .contains(containedText)
     .click();
 };
 
 export const visitLanguageSettings = (langName: string) => {
-  gcy("global-list-items")
+  gcy('global-list-items')
     .contains(langName)
-    .closest("li")
+    .closest('li')
     .within(() => {
-      gcy("project-settings-languages-list-edit-button").click();
+      gcy('project-settings-languages-list-edit-button').click();
     });
 };
 
 export const deleteLanguage = () => {
-  gcy("language-delete-button").click();
+  gcy('language-delete-button').click();
   confirmHardMode();
 };

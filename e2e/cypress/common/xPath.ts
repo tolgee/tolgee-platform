@@ -8,31 +8,31 @@
  */
 export const getAnyContainingText = (
   text,
-  tag = "*",
+  tag = '*',
   nth = 1,
   allowWrapped = true
 ) =>
   `//${tag}${
-    allowWrapped ? "/descendant-or-self::*" : ""
+    allowWrapped ? '/descendant-or-self::*' : ''
   }/text()[contains(translate(.,` +
   `'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), '${text.toLowerCase()}')][${nth}]/parent::*`;
 
 export const getAnyContainingAriaLabelAttribute = (
   text,
-  tag = "*",
+  tag = '*',
   nth = 1,
   allowWrapped = true
 ) =>
-  `//${tag}${allowWrapped ? "//*" : ""}[contains(translate(@aria-label,` +
+  `//${tag}${allowWrapped ? '//*' : ''}[contains(translate(@aria-label,` +
   `'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'), '${text.toLowerCase()}')][${nth}]`;
 
 export const getInput = (name, nth = 1) =>
   `//input[translate(@name,` +
   `'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') = '${name.toLowerCase()}'][${nth}]`;
 
-export const getClosestContainingText = (text, tag = "*", nth = 1) =>
+export const getClosestContainingText = (text, tag = '*', nth = 1) =>
   `./ancestor::*[.//*[${containsIgnoreCase(
-    "text()",
+    'text()',
     text
   )}]][1]//*[contains(text(), "${text}")]`;
 
