@@ -8,11 +8,11 @@ import { FullPageLoading } from '../common/FullPageLoading';
 
 import { GlobalActions } from '../../store/global/GlobalActions';
 import { RedirectionActions } from '../../store/global/RedirectionActions';
-import { useGetInvitationAccept } from '../../service/hooks/Invitation';
 import { MessageService } from '../../service/MessageService';
 import { InvitationCodeService } from '../../service/InvitationCodeService';
 import { TokenService } from '../../service/TokenService';
 import { LINKS } from '../../constants/links';
+import { useApiQuery } from '../../service/http/useQueryApi';
 
 interface AcceptInvitationHandlerProps {}
 
@@ -23,12 +23,16 @@ const invitationCodeService = container.resolve(InvitationCodeService);
 const tokenService = container.resolve(TokenService);
 
 const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
-  (props) => {
+  () => {
     const match = useRouteMatch();
 
     const code = match.params[PARAMS.INVITATION_CODE];
 
-    const { isSuccess, error } = useGetInvitationAccept(code);
+    const { isSuccess, error } = useApiQuery({
+      url: '/api/invitation/accept/{code}',
+      method: 'get',
+      path: { code },
+    });
 
     useEffect(() => {
       if (!tokenService.getToken()) {

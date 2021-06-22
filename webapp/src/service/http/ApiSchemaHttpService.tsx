@@ -71,16 +71,8 @@ export class ApiSchemaHttpService extends ApiHttpService {
       const queryParams = request?.query;
       let queryString = '';
 
-      if (queryParams) {
-        const params = Object.entries(queryParams).reduce(
-          (acc, [key, value]) =>
-            typeof value === 'object'
-              ? { ...acc, ...value }
-              : { ...acc, [key]: value },
-          {}
-        );
-        queryString = '?' + this.buildQuery(params);
-      }
+      const params = flattenParams(queryParams);
+      queryString = '?' + this.buildQuery(params);
 
       return await this.fetch(
         urlResult + queryString,
@@ -98,6 +90,24 @@ export class ApiSchemaHttpService extends ApiHttpService {
     };
   }
 }
+
+type Params = {
+  [k: string]: string | string[] | null | undefined | Params;
+};
+
+const flattenParams = (params: Params | null | undefined) => {
+  if (params) {
+    return Object.entries(params).reduce(
+      (acc, [key, value]) =>
+        Array.isArray(value) || typeof value !== 'object'
+          ? { ...acc, [key]: value }
+          : { ...acc, ...flattenParams(value) },
+      {}
+    );
+  } else {
+    return {};
+  }
+};
 
 export type RequestParamsType<
   Url extends keyof paths,

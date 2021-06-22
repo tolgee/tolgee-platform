@@ -11,25 +11,36 @@ import { OrganizationRoleType } from '../../../service/response.types';
 import { SimpleListItem } from '../../common/list/SimpleListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { SimpleList } from '../../common/list/SimpleList';
-import {
-  useGetOrganizationInvitations,
-  usePutOrganizationInvite,
-} from '../../../service/hooks/Organization';
-import { useDeleteInvitation } from '../../../service/hooks/Invitation';
 import { useState } from 'react';
+import { useApiMutation, useApiQuery } from '../../../service/http/useQueryApi';
 
 export const OrganizationInvitationsView: FunctionComponent = () => {
   const organization = useOrganization();
 
   const [code, setCode] = useState('');
 
-  const invitationsLoadable = useGetOrganizationInvitations(organization!.id);
-  const inviteLoadable = usePutOrganizationInvite(organization!.id);
-  const cancelInviteLoadable = useDeleteInvitation();
+  const invitationsLoadable = useApiQuery({
+    url: '/v2/organizations/{organizationId}/invitations',
+    method: 'get',
+    path: {
+      organizationId: organization!.id,
+    },
+  });
+  const inviteLoadable = useApiMutation({
+    url: '/v2/organizations/{id}/invite',
+    method: 'put',
+  });
+  const cancelInviteLoadable = useApiMutation({
+    url: '/api/invitation/{invitationId}',
+    method: 'delete',
+  });
 
   const onSubmit = (values) => {
     inviteLoadable.mutate(
-      { roleType: values.type },
+      {
+        path: { id: organization!.id },
+        content: { 'application/json': { roleType: values.type } },
+      },
       {
         onSuccess(data) {
           setCode(data.code);
@@ -39,13 +50,16 @@ export const OrganizationInvitationsView: FunctionComponent = () => {
     );
   };
 
-  const onCancel = (id: number) => {
-    cancelInviteLoadable.mutate(id, {
-      onSuccess() {
-        setCode('');
-        invitationsLoadable.refetch();
-      },
-    });
+  const onCancel = (invitationId: number) => {
+    cancelInviteLoadable.mutate(
+      { path: { invitationId } },
+      {
+        onSuccess() {
+          setCode('');
+          invitationsLoadable.refetch();
+        },
+      }
+    );
   };
 
   return (

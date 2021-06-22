@@ -11,7 +11,7 @@ import { OrganizationRoleMenu } from './components/OrganizationRoleMenu';
 import OrganizationRemoveUserButton from './components/OrganizationRemoveUserButton';
 import { SimpleListItem } from '../../common/list/SimpleListItem';
 import { PaginatedHateoasList } from '../../common/list/PaginatedHateoasList';
-import { useGetOrganizationUsers } from '../../../service/hooks/Organization';
+import { useApiQuery } from '../../../service/http/useQueryApi';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -36,18 +36,22 @@ export const OrganizationMembersView: FunctionComponent = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
 
-  const membersLoadable = useGetOrganizationUsers(
-    organization!.id,
-    {
-      page,
+  const membersLoadable = useApiQuery({
+    url: '/v2/organizations/{id}/users',
+    method: 'get',
+    path: { id: organization!.id },
+    query: {
+      pageable: {
+        page,
+        sort: ['name'],
+        size: 10,
+      },
       search,
-      sort: ['name'],
-      size: 10,
     },
-    {
+    options: {
       keepPreviousData: true,
-    }
-  );
+    },
+  });
 
   return (
     <BaseOrganizationSettingsView loading={membersLoadable.isFetching}>

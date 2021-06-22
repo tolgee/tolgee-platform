@@ -21,8 +21,7 @@ export const TranslationsGrid: FunctionComponent = (props) => {
   const projectDTO = useProject();
 
   const listContext = useContext(TranslationListContext);
-  const isEmpty =
-    listContext.listLoadable!.data!.paginationMeta!.allCount === 0;
+  const isEmpty = listContext.listLoadable.data!.paginationMeta!.allCount === 0;
   const isSearch = Boolean(listContext.listLoadable.data!.params!.search);
   const projectPermissions = useProjectPermissions();
 

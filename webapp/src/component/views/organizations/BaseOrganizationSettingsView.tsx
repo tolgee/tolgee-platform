@@ -3,9 +3,9 @@ import { BaseView, BaseViewProps } from '../../layout/BaseView';
 import { FunctionComponent, PropsWithChildren } from 'react';
 import { Box, Grid, Typography } from '@material-ui/core';
 import { OrganizationSettingsMenu } from './components/OrganizationSettingsMenu';
-import { useGetOrganization } from '../../../service/hooks/Organization';
 import UserOrganizationSettingsSubtitleLink from './components/UserOrganizationSettingsSubtitleLink';
 import { PARAMS } from '../../../constants/links';
+import { useApiQuery } from '../../../service/http/useQueryApi';
 
 export const BaseOrganizationSettingsView: FunctionComponent<BaseViewProps> = ({
   children,
@@ -16,7 +16,11 @@ export const BaseOrganizationSettingsView: FunctionComponent<BaseViewProps> = ({
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
 
-  const organization = useGetOrganization(organizationSlug);
+  const organization = useApiQuery({
+    url: '/v2/organizations/{slug}',
+    method: 'get',
+    path: { slug: organizationSlug },
+  });
 
   return (
     <BaseView

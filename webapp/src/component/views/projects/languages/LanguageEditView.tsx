@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useEffect } from 'react';
 import { container } from 'tsyringe';
 import { LINKS, PARAMS } from '../../../../constants/links';
@@ -82,7 +81,11 @@ export const LanguageEditView = () => {
       md={8}
       xs={10}
       title={<T>language_settings_title</T>}
-      initialValues={languageLoadable.data!}
+      initialValues={{
+        ...languageLoadable.data!,
+        flagEmoji: languageLoadable.data?.flagEmoji || '🏁',
+        originalName: languageLoadable.data?.originalName || '',
+      }}
       onSubmit={onSubmit}
       saveActionLoadable={editLoadable}
       resourceLoadable={languageLoadable}
