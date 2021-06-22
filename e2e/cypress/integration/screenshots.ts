@@ -4,35 +4,35 @@ import {
   deleteProject,
   login,
   setTranslations,
-} from "../common/apiCalls";
-import { HOST } from "../common/constants";
-import "cypress-file-upload";
-import { getPopover } from "../common/shared";
-import { ProjectDTO } from "../../../webapp/src/service/response.types";
+} from '../common/apiCalls';
+import { HOST } from '../common/constants';
+import 'cypress-file-upload';
+import { getPopover } from '../common/shared';
+import { ProjectDTO } from '../../../webapp/src/service/response.types';
 
-describe("Screenshots", () => {
+describe('Screenshots', () => {
   let project: ProjectDTO = null;
 
   beforeEach(() => {
     login().then(() => {
       createProject({
-        name: "Test",
+        name: 'Test',
         languages: [
           {
-            tag: "en",
-            name: "English",
-            originalName: "Engish",
+            tag: 'en',
+            name: 'English',
+            originalName: 'Engish',
           },
           {
-            tag: "cs",
-            name: "Czech",
-            originalName: "čeština",
+            tag: 'cs',
+            name: 'Czech',
+            originalName: 'čeština',
           },
         ],
       }).then((r) => {
         project = r.body as ProjectDTO;
         window.localStorage.setItem(
-          "selectedLanguages",
+          'selectedLanguages',
           `{"${project.id}":["en"]}`
         );
         const promises = [];
@@ -40,8 +40,8 @@ describe("Screenshots", () => {
           promises.push(
             setTranslations(
               project.id,
-              `Cool key ${i.toString().padStart(2, "0")}`,
-              { en: "Cool" }
+              `Cool key ${i.toString().padStart(2, '0')}`,
+              { en: 'Cool' }
             )
           );
         }
@@ -52,44 +52,44 @@ describe("Screenshots", () => {
     });
   });
 
-  it("opens popup", () => {
+  it('opens popup', () => {
     getCameraButton(1).click();
-    cy.contains("No screenshots have been added yet.");
+    cy.contains('No screenshots have been added yet.');
   });
 
-  it("uploads file", () => {
+  it('uploads file', () => {
     getCameraButton(1).click();
-    cy.contains("No screenshots have been added yet.");
-    cy.get("[data-cy=dropzone]").attachFile("screenshots/test_1.png", {
-      subjectType: "drag-n-drop",
+    cy.contains('No screenshots have been added yet.');
+    cy.get('[data-cy=dropzone]').attachFile('screenshots/test_1.png', {
+      subjectType: 'drag-n-drop',
     });
     cy.xpath("//img[@alt='Screenshot']")
-      .should("be.visible")
+      .should('be.visible')
       .and(($img) => {
         expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(0);
       });
   });
 
-  it("uploads with hidden input", () => {
+  it('uploads with hidden input', () => {
     getCameraButton(1).click();
-    cy.contains("No screenshots have been added yet.");
-    cy.xpath("//input[@type='file']").attachFile("screenshots/test_1.png");
+    cy.contains('No screenshots have been added yet.');
+    cy.xpath("//input[@type='file']").attachFile('screenshots/test_1.png');
     cy.xpath("//img[@alt='Screenshot']")
-      .should("be.visible")
+      .should('be.visible')
       .and(($img) => {
         expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(0);
       });
   });
 
-  it("uploads multiple", () => {
+  it('uploads multiple', () => {
     getCameraButton(1).click();
-    cy.contains("No screenshots have been added yet.");
-    cy.get("[data-cy=dropzone]")
-      .attachFile("screenshots/test_1.png", { subjectType: "drag-n-drop" })
-      .attachFile("screenshots/test_1.png", { subjectType: "drag-n-drop" })
-      .attachFile("screenshots/test_1.png", { subjectType: "drag-n-drop" });
+    cy.contains('No screenshots have been added yet.');
+    cy.get('[data-cy=dropzone]')
+      .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
+      .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
+      .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' });
     cy.xpath("//img[@alt='Screenshot']")
-      .should("be.visible")
+      .should('be.visible')
       .and(($img) => {
         expect($img.length).to.be.equal(3);
         for (let i = 0; i < $img.length; i++) {
@@ -100,12 +100,12 @@ describe("Screenshots", () => {
       });
   });
 
-  it("images and plus button is visible", () => {
-    addScreenshot(project.id, "Cool key 04", "screenshots/test_1.png").then(
+  it('images and plus button is visible', () => {
+    addScreenshot(project.id, 'Cool key 04', 'screenshots/test_1.png').then(
       () => {
         getCameraButton(4).click();
         cy.xpath("//img[@alt='Screenshot']")
-          .should("be.visible")
+          .should('be.visible')
           .and(($img) => {
             expect($img.length).to.be.equal(1);
             expect(
@@ -114,39 +114,39 @@ describe("Screenshots", () => {
           });
         cy.xpath(
           "//*[text() = 'Screenshots']/parent::*/parent::*//div[contains(@data-cy, 'add-box')]"
-        ).should("be.visible");
+        ).should('be.visible');
       }
     );
   });
 
-  it("screenshots are visible only for key, where uploaded", () => {
+  it('screenshots are visible only for key, where uploaded', () => {
     const promises = [];
 
     for (let i = 0; i < 10; i++) {
       promises.push(
-        addScreenshot(project.id, "Cool key 02", "screenshots/test_1.png")
+        addScreenshot(project.id, 'Cool key 02', 'screenshots/test_1.png')
       );
     }
 
     Cypress.Promise.all(promises).then(() => {
       getCameraButton(2).click();
       cy.xpath("//img[@alt='Screenshot']")
-        .should("be.visible")
+        .should('be.visible')
         .and(($img) => {
           expect($img.length).to.be.equal(10);
         });
-      getPopover().xpath("./div[1]").click();
+      getPopover().xpath('./div[1]').click();
       getCameraButton(1).click();
-      cy.contains("No screenshots have been added yet.");
+      cy.contains('No screenshots have been added yet.');
     });
   });
 
-  it("deletes screenshot", () => {
+  it('deletes screenshot', () => {
     const promises = [];
 
     for (let i = 0; i < 10; i++) {
       promises.push(
-        addScreenshot(project.id, "Cool key 02", "screenshots/test_1.png")
+        addScreenshot(project.id, 'Cool key 02', 'screenshots/test_1.png')
       );
     }
 
@@ -155,19 +155,19 @@ describe("Screenshots", () => {
 
       for (let i = 10; i >= 1; i--) {
         cy.xpath("//img[@alt='Screenshot']")
-          .should("be.visible")
+          .should('be.visible')
           .and(($img) => {
             expect($img.length).to.be.equal(i);
           });
         cy.xpath("//img[@alt='Screenshot']")
           .first()
-          .trigger("mouseover")
+          .trigger('mouseover')
           .xpath("./ancestor::div[contains(@data-cy, 'screenshot-box')]/button")
           .click();
-        cy.contains("Confirm").click();
+        cy.contains('Confirm').click();
         if (i > 1) {
           cy.xpath("//img[@alt='Screenshot']")
-            .should("be.visible")
+            .should('be.visible')
             .and(($img) => {
               expect($img.length).to.be.equal(i - 1);
             });
@@ -176,7 +176,7 @@ describe("Screenshots", () => {
 
       cy.reload();
       getCameraButton(2).click();
-      cy.contains("No screenshots have been added yet.");
+      cy.contains('No screenshots have been added yet.');
     });
   });
 

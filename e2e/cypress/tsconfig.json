@@ -1,12 +1,23 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["es5", "dom", "es2020"],
-    "types": ["cypress", "cypress-xpath/src"],
-    "jsx": "react"
+    "lib": [
+      "es5",
+      "dom",
+      "es2020"
+    ],
+    "types": [
+      "cypress",
+      "cypress-xpath/src"
+    ],
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true
   },
   "include": [
-    "**/*.ts",
-    "../../webapp/src/"
+    "**/*.ts"
   ]
 }

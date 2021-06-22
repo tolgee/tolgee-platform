@@ -13,11 +13,13 @@
 // the project's config changing)
 
 const dotenvPlugin = require('cypress-dotenv');
-const path = require("path");
+const path = require('path');
 
 /**
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
-    return dotenvPlugin(config, {path: path.resolve(__dirname, '../../.test.docker.env')})
-}
+  return dotenvPlugin(config, {
+    path: path.resolve(__dirname, '../../.test.docker.env'),
+  });
+};

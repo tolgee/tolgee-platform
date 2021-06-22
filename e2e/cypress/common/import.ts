@@ -1,31 +1,31 @@
-import { gcy } from "./shared";
-import { HOST } from "./constants";
+import { gcy } from './shared';
+import { HOST } from './constants';
 
 export const getFileIssuesDialog = () => {
-  return gcy("import-file-issues-dialog");
+  return gcy('import-file-issues-dialog');
 };
 
 export const getShowDataDialog = () => {
-  return gcy("import-show-data-dialog");
+  return gcy('import-show-data-dialog');
 };
 
 export const getResolutionDialog = () => {
-  return gcy("import-conflict-resolution-dialog");
+  return gcy('import-conflict-resolution-dialog');
 };
 
 export const assertInResultDialog = (text: string) => {
-  getShowDataDialog().contains(text).scrollIntoView().should("be.visible");
+  getShowDataDialog().contains(text).scrollIntoView().should('be.visible');
 };
 
 export const assertInResolutionDialog = (text: string) => {
-  getResolutionDialog().contains(text).scrollIntoView().should("be.visible");
+  getResolutionDialog().contains(text).scrollIntoView().should('be.visible');
 };
 
 export const findResolutionRow = (key: string) => {
-  return gcy("import-resolution-dialog-data-row")
-    .findDcy("import-resolution-dialog-key-name")
+  return gcy('import-resolution-dialog-data-row')
+    .findDcy('import-resolution-dialog-key-name')
     .contains(key)
-    .closestDcy("import-resolution-dialog-data-row");
+    .closestDcy('import-resolution-dialog-data-row');
 };
 
 export const visitImport = (projectId: number) => {
@@ -35,7 +35,7 @@ export const visitImport = (projectId: number) => {
 export const getLanguageRow = (filename: string) => {
   return cy
     .xpath(`//*[@data-cy='import-result-row']//*[. = '${filename}']`)
-    .closestDcy("import-result-row");
+    .closestDcy('import-result-row');
 };
 
 export const getLanguageSelect = (filename: string) => {
