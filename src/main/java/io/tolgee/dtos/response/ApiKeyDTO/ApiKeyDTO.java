@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class ApiKeyDTO {
     private Long id;
 
-    @Schema(name = "Resulting user's api key")
+    @Schema(description = "Resulting user's api key")
     private String key;
 
     private String userName;

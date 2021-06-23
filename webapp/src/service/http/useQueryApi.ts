@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import {
   QueryClient,
   useMutation,
@@ -52,24 +53,42 @@ export const useApiMutation = <
 }) => {
   const queryClient = useQueryClient();
   const { url, method, fetchOptions, options, invalidatePrefix } = props;
-  return useMutation<
+  const mutation = useMutation<
     ResponseContent<Url, Method>,
     any,
     RequestParamsType<Url, Method>
   >(
     (request) =>
       apiHttpService.schemaRequest(url, method, fetchOptions)(request),
-    {
-      ...options,
-      onSuccess(...args) {
-        if (invalidatePrefix !== undefined) {
-          invalidateUrlPrefix(queryClient, invalidatePrefix);
-        }
-        // call original onSuccess if present
-        options?.onSuccess?.(...args);
-      },
-    }
+    options
   );
+
+  // inject custom onSuccess
+  const customOptions = (options) => ({
+    ...options,
+    onSuccess: (...args) => {
+      if (invalidatePrefix !== undefined) {
+        invalidateUrlPrefix(queryClient, invalidatePrefix);
+      }
+      options?.onSuccess?.(...args);
+    },
+  });
+
+  const mutate = useCallback<typeof mutation.mutate>(
+    (variables, options) => {
+      return mutation.mutate(variables, customOptions(options));
+    },
+    [mutation.mutate]
+  );
+
+  const mutateAsync = useCallback<typeof mutation.mutateAsync>(
+    (variables, options) => {
+      return mutation.mutateAsync(variables, customOptions(options));
+    },
+    [mutation.mutateAsync]
+  );
+
+  return { ...mutation, mutate, mutateAsync };
 };
 
 export const invalidateUrlPrefix = (

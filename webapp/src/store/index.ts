@@ -13,7 +13,6 @@ import { ProjectInvitationActions } from './project/invitations/ProjectInvitatio
 import { SecurityService } from '../service/SecurityService';
 import { MessageService } from '../service/MessageService';
 import { TranslationActions } from './project/TranslationActions';
-import { UserApiKeysActions } from './api_keys/UserApiKeysActions';
 import { ExportActions } from './project/ExportActions';
 import { ImportActions } from './project/ImportActions';
 
@@ -37,7 +36,6 @@ const appReducer = (appState, action) =>
       container.resolve(ProjectInvitationActions)
     ),
     export: implicitReducer.create(container.resolve(ExportActions)),
-    userApiKey: implicitReducer.create(container.resolve(UserApiKeysActions)),
     import: implicitReducer.create(container.resolve(ImportActions)),
   })(appState, action);
 

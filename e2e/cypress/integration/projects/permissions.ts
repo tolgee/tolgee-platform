@@ -153,6 +153,8 @@ describe('Project Permissions', () => {
         visitList();
         enterProjectSettings('Facebook itself');
         selectInProjectMenu('Permissions');
+        cy.contains('Vaclav Novak');
+
         gcy('global-paginated-list').within(() => {
           gcy('global-list-item')
             .contains('Vaclav Novak')

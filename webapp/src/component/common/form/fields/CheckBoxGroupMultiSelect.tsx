@@ -51,19 +51,25 @@ export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
       <FormLabel error={!!meta.error} component="legend">
         {props.label}
       </FormLabel>
-      {Array.from(props.options).map((option, index) => (
-        <FormControl key={index} className={classes.root} error={!!meta.error}>
-          <FormControlLabel
-            label={option}
-            control={
-              <Checkbox
-                onChange={(e) => onChange(option, e.target.checked)}
-                checked={field.value.has(option)}
-              />
-            }
-          />
-        </FormControl>
-      ))}
+      {Array.from(props.options).map((option, index) => {
+        return (
+          <FormControl
+            key={index}
+            className={classes.root}
+            error={!!meta.error}
+          >
+            <FormControlLabel
+              label={option}
+              control={
+                <Checkbox
+                  onChange={(e) => onChange(option, e.target.checked)}
+                  checked={field.value.has(option)}
+                />
+              }
+            />
+          </FormControl>
+        );
+      })}
       {!!meta.error && (
         <FormHelperText error={!!meta.error}>{meta.error}</FormHelperText>
       )}
