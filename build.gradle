@@ -15,6 +15,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
         classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
         classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
+        classpath group: 'commons-io', name: 'commons-io', version: '2.10.0'
     }
 }
 
@@ -210,6 +211,7 @@ bootJar {
     manifest {
         attributes('Implementation-Version': project.version)
     }
+    onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 }
 
 def unpackTarget = "build/dependency"
@@ -217,16 +219,23 @@ def unpackTarget = "build/dependency"
 task unpack(type: Copy) {
     from(zipTree(project.tasks.findByName("bootJar").outputs.files.singleFile))
     into(unpackTarget)
-    dependsOn "bootJar"
+    if (System.getenv("SKIP_SERVER_BUILD") != "true") {
+        dependsOn "bootJar"
+    }
 }
 
 apply from: "./gradle/webapp.gradle"
 apply from: "./gradle/docker.gradle"
 apply from: "./gradle/e2e.gradle"
 
-project.tasks.findByName("dockerPrepare").mustRunAfter(copyDist)
-task buildProd(dependsOn: ['bootJar'])
+project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("bootBuildInfo").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
 
+project.tasks.findByName("dockerPrepare").mustRunAfter(copyDist)
+
+task buildProd(dependsOn: ['bootJar'])
 task packWebapp(type: Zip) {
     dependsOn "unpack"
     dependsOn "copyDist"
