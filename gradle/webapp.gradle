@@ -12,6 +12,7 @@ task copyDist(type: Copy) {
 }
 
 task installWebappDeps(type: Exec) {
+    onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
     commandLine "npm", "ci"
     workingDir = webappPath
     inputs.file("${project.projectDir}/webapp/package.json")
@@ -20,6 +21,7 @@ task installWebappDeps(type: Exec) {
 }
 
 task buildWebapp(type: Exec) {
+    onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
     commandLine "npm", "run", "build"
     workingDir = webappPath
     inputs.dir("${project.projectDir}/webapp/")
@@ -27,7 +29,15 @@ task buildWebapp(type: Exec) {
     dependsOn "installWebappDeps", "updateStaticTranslations"
 }
 
+task createBuildDir() {
+    File directory = new File(buildDir as String)
+    if (!directory.exists()) {
+        directory.mkdir()
+    }
+}
+
 task updateStaticTranslations() {
+    onlyIf { System.getenv("SKIP_WEBAPP_BUILD") != "true" }
     def tolgeeApiKey = System.env.TOLGEE_API_KEY
     def tolgeeApiUrl = System.env.TOLGEE_API_URL
     onlyIf { tolgeeApiUrl != null && tolgeeApiUrl != "" }
@@ -48,4 +58,5 @@ task updateStaticTranslations() {
             into outputDir
         }
     }
+    dependsOn(createBuildDir)
 }

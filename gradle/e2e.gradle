@@ -1,7 +1,40 @@
+import groovy.io.FileType
+
 import java.time.Duration
 
-def E2E_DIR = "${project.projectDir}/e2e"
-def WEBAPP_DIR = "${project.projectDir}/webapp"
+ext {
+    E2E_DIR = "${project.projectDir}/e2e"
+    WEBAPP_DIR = "${project.projectDir}/webapp"
+}
+
+
+def getE2eTestsToRun() {
+    def totalJobs = System.getenv("E2E_TOTAL_JOBS")
+    def jobIndex = System.getenv("E2E_JOB_INDEX")
+    def list = []
+
+    def dir = new File("$E2E_DIR/cypress/integration")
+    dir.eachFileRecurse(FileType.FILES) { file ->
+        if (file.path.matches("^.*\\.tsx?${'$'}")) {
+            list.add(file.path.replace("$E2E_DIR/", ""))
+        }
+    }
+
+    if (totalJobs == null || jobIndex == null) {
+        return list
+    }
+
+    def remainingChunks = Integer.parseInt(totalJobs)
+    def chunks = []
+    while (remainingChunks > 0) {
+        def toIndex = Math.ceil(list.size().toFloat() / remainingChunks.toFloat()).toInteger();
+        chunks.add(list.subList(0, toIndex))
+        list = list.subList(toIndex, list.size())
+        remainingChunks--
+    }
+
+    return chunks[Integer.parseInt(jobIndex)]
+}
 
 task waitForRunningContainer(type: Task, group: "e2e") {
     doLast {
@@ -25,6 +58,7 @@ task waitForRunningContainer(type: Task, group: "e2e") {
 }
 
 task installE2eDeps(type: Exec, group: "e2e") {
+    onlyIf { System.getenv("SKIP_INSTALL_E2E_DEPS") != "true" }
     inputs.file("$E2E_DIR/package.json")
     inputs.file("$E2E_DIR/package-lock.json")
     outputs.dir("$E2E_DIR/node_modules")
@@ -35,8 +69,9 @@ task installE2eDeps(type: Exec, group: "e2e") {
 
 task runE2e(type: Exec, group: "e2e") {
     dependsOn "runDockerE2e", "installE2eDeps"
+    def specs = getE2eTestsToRun().join(",")
 
-    commandLine "npm", "run", "cy:run"
+    commandLine "npm", "run", "cy:run", "--", "--spec", specs
 
     workingDir E2E_DIR
 
