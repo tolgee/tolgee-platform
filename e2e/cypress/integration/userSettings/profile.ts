@@ -18,7 +18,10 @@ describe('User profile', () => {
   const NEW_EMAIL = 'pavel@honza.com';
 
   function visit() {
-    return cy.visit(HOST + '/user');
+    cy.visit(HOST + '/user');
+    // wait for loading to appear and disappear again
+    cy.gcy('global-base-view-loading').should('be.visible');
+    cy.gcy('global-base-view-loading').should('not.exist');
   }
 
   beforeEach(() => {

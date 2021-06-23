@@ -6,9 +6,15 @@ import { ObjectSchema } from 'yup';
 import { useHistory } from 'react-router-dom';
 import { T } from '@tolgee/react';
 import { ResourceErrorComponent } from './ResourceErrorComponent';
-import { Loadable } from '../../../store/AbstractLoadableActions';
 import LoadingButton from './LoadingButton';
 import { FormikHelpers } from 'formik/dist/types';
+import { ErrorResponseDto } from '../../../service/response.types';
+
+interface LoadableType {
+  loading?: boolean;
+  isLoading?: boolean;
+  error?: ErrorResponseDto;
+}
 
 interface FormProps<T> {
   initialValues: T;
@@ -19,7 +25,7 @@ interface FormProps<T> {
   submitButtons?: ReactNode;
   customActions?: ReactNode;
   submitButtonInner?: ReactNode;
-  saveActionLoadable?: Loadable;
+  saveActionLoadable?: LoadableType;
 }
 
 export const StandardForm: FunctionComponent<FormProps<any>> = ({
@@ -31,6 +37,9 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
 
   const onCancel = () =>
     typeof props.onCancel === 'function' ? props.onCancel() : history.goBack();
+
+  const actionLoading =
+    props.saveActionLoadable?.isLoading || props.saveActionLoadable?.loading;
 
   return (
     <>
@@ -68,7 +77,7 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
                       <Box ml={1}>
                         <LoadingButton
                           data-cy="global-form-save-button"
-                          loading={props.saveActionLoadable?.loading}
+                          loading={actionLoading}
                           color="primary"
                           variant="contained"
                           disabled={props.loading}
