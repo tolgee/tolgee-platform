@@ -23,6 +23,7 @@ import io.tolgee.service.ScreenshotService
 import io.tolgee.service.SecurityService
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.http.MediaType
 import java.util.*
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
@@ -40,7 +41,7 @@ class ScreenshotController(
         private val tolgeeProperties: TolgeeProperties,
         private val timestampValidation: TimestampValidation
 ) {
-    @PostMapping("")
+    @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @Operation(summary = "Upload screenshot for specific key")
     fun uploadScreenshot(@PathVariable("projectId") projectId: Long,
                          @RequestParam("screenshot") screenshot: MultipartFile,

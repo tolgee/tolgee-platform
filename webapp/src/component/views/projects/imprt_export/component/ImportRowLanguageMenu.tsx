@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FunctionComponent } from 'react';
+import { ChangeEvent, FunctionComponent } from 'react';
 import {
   FormControl,
   FormHelperText,
@@ -19,10 +19,10 @@ import { Add, Clear } from '@material-ui/icons';
 import clsx from 'clsx';
 import { useStateObject } from '../../../../../fixtures/useStateObject';
 import { ImportLanguageCreateDialog } from './ImportLanguageCreateDialog';
-import { LanguageActions } from '../../../../../store/languages/LanguageActions';
+import { useQueryClient } from 'react-query';
+import { invalidateUrlPrefix } from '../../../../../service/http/useQueryApi';
 
 const actions = container.resolve(ImportActions);
-const languageActions = container.resolve(LanguageActions);
 
 const useStyles = makeStyles((theme) => ({
   item: {
@@ -44,6 +44,7 @@ export const ImportRowLanguageMenu: FunctionComponent<{
   value?: number;
   importLanguageId: number;
 }> = (props) => {
+  const queryClient = useQueryClient();
   const languages = useProjectLanguages();
   const importData = useImportDataHelper();
   const usedLanguages = importData
@@ -148,9 +149,12 @@ export const ImportRowLanguageMenu: FunctionComponent<{
       <ImportLanguageCreateDialog
         open={state.addNewLanguageDialogOpen}
         onCreated={(id) => {
-          languageActions.loadableReset.globalList.dispatch();
+          // we need to invalidate languages provider
+          invalidateUrlPrefix(
+            queryClient,
+            '/v2/projects/{projectId}/languages'
+          );
           dispatchChange(id);
-          languageActions.loadableReset.create.dispatch();
         }}
         onClose={() => (state.addNewLanguageDialogOpen = false)}
       />

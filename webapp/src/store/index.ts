@@ -4,8 +4,6 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import promise from 'redux-promise-middleware';
 import { container } from 'tsyringe';
 import { ImplicitReducer } from './ImplicitReducer';
-import { ProjectActions } from './project/ProjectActions';
-import { LanguageActions } from './languages/LanguageActions';
 import { GlobalActions } from './global/GlobalActions';
 import { ErrorActions } from './global/ErrorActions';
 import { RedirectionActions } from './global/RedirectionActions';
@@ -18,12 +16,9 @@ import { TranslationActions } from './project/TranslationActions';
 import { UserApiKeysActions } from './api_keys/UserApiKeysActions';
 import { ExportActions } from './project/ExportActions';
 import { UserActions } from './global/UserActions';
-import { ScreenshotActions } from './project/ScreenshotActions';
 import { ImportActions } from './project/ImportActions';
 
 const implicitReducer = container.resolve(ImplicitReducer);
-const projectActions = container.resolve(ProjectActions);
-const languageActions = container.resolve(LanguageActions);
 const globalActions = container.resolve(GlobalActions);
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -35,8 +30,6 @@ const appReducer = (appState, action) =>
       appState
     ),
     global: implicitReducer.create(globalActions),
-    projects: implicitReducer.create(projectActions),
-    languages: implicitReducer.create(languageActions),
     error: implicitReducer.create(errorActions),
     redirection: implicitReducer.create(redirectionActions),
     message: implicitReducer.create(container.resolve(MessageActions)),
@@ -47,7 +40,6 @@ const appReducer = (appState, action) =>
     export: implicitReducer.create(container.resolve(ExportActions)),
     userApiKey: implicitReducer.create(container.resolve(UserApiKeysActions)),
     user: implicitReducer.create(container.resolve(UserActions)),
-    screenshots: implicitReducer.create(container.resolve(ScreenshotActions)),
     import: implicitReducer.create(container.resolve(ImportActions)),
   })(appState, action);
 

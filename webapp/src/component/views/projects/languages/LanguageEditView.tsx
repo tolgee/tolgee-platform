@@ -1,10 +1,7 @@
-import * as React from 'react';
-import { useEffect } from 'react';
 import { container } from 'tsyringe';
 import { LINKS, PARAMS } from '../../../../constants/links';
 import { useRouteMatch } from 'react-router-dom';
 import { BaseFormView } from '../../../layout/BaseFormView';
-import { LanguageActions } from '../../../../store/languages/LanguageActions';
 import { Box, Button } from '@material-ui/core';
 import { confirmation } from '../../../../hooks/confirmation';
 import { Validation } from '../../../../constants/GlobalValidationSchema';
@@ -14,8 +11,13 @@ import { ConfirmationDialogProps } from '../../../common/ConfirmationDialog';
 import { LanguageModifyFields } from '../../../languages/LanguageModifyFields';
 import { components } from '../../../../service/apiSchema.generated';
 import { MessageService } from '../../../../service/MessageService';
+import {
+  useApiMutation,
+  useApiQuery,
+} from '../../../../service/http/useQueryApi';
 
-const actions = container.resolve(LanguageActions);
+type LanguageModel = components['schemas']['LanguageModel'];
+
 const messageService = container.resolve(MessageService);
 
 export const LanguageEditView = () => {
@@ -27,53 +29,68 @@ export const LanguageEditView = () => {
   const projectId = match.params[PARAMS.PROJECT_ID];
   const languageId = match.params[PARAMS.LANGUAGE_ID] as number;
 
-  const languageLoadable = actions.useSelector((s) => s.loadables.language);
-  const editLoadable = actions.useSelector((s) => s.loadables.edit);
-  const deleteLoadable = actions.useSelector((s) => s.loadables.delete);
+  const languageLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/languages/{languageId}',
+    method: 'get',
+    path: { projectId, languageId },
+    options: {
+      cacheTime: 0,
+    },
+  });
+  const editLoadable = useApiMutation({
+    url: '/v2/projects/{projectId}/languages/{languageId}',
+    method: 'put',
+  });
+  const deleteLoadable = useApiMutation({
+    url: '/v2/projects/{projectId}/languages/{languageId}',
+    method: 'delete',
+  });
 
-  useEffect(() => {
-    if (!languageLoadable.loaded && !languageLoadable.loading) {
-      actions.loadableActions.language.dispatch({
+  const onSubmit = (values: LanguageModel) => {
+    const { name, originalName, flagEmoji, tag } = values;
+    editLoadable.mutate(
+      {
         path: {
           projectId: projectId,
           languageId: languageId,
         },
-      });
-    }
-    return () => {
-      actions.loadableReset.edit.dispatch();
-      actions.loadableReset.language.dispatch();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (deleteLoadable.loaded || editLoadable.loaded) {
-      useRedirect(LINKS.PROJECT_EDIT, {
-        [PARAMS.PROJECT_ID]: projectId,
-      });
-    }
-    return () => {
-      actions.loadableReset.delete.dispatch();
-      actions.loadableReset.edit.dispatch();
-    };
-  }, [deleteLoadable.loaded || editLoadable.loaded]);
-
-  const onSubmit = (values: components['schemas']['LanguageModel']) => {
-    const { name, originalName, flagEmoji, tag } = values;
-    actions.loadableActions.edit.dispatch({
-      path: {
-        projectId: projectId,
-        languageId: languageId,
+        content: {
+          'application/json': {
+            name,
+            originalName: originalName as string,
+            tag,
+            flagEmoji,
+          },
+        },
       },
-      content: {
-        'application/json': {
-          name,
-          originalName,
-          tag,
-          flagEmoji,
-        } as components['schemas']['LanguageDto'],
+      {
+        onSuccess() {
+          messageService.success(<T>language_edited_message</T>);
+          useRedirect(LINKS.PROJECT_EDIT, {
+            [PARAMS.PROJECT_ID]: projectId,
+          });
+        },
+      }
+    );
+  };
+
+  const onDelete = () => {
+    deleteLoadable.mutate(
+      {
+        path: {
+          projectId: projectId,
+          languageId: languageId,
+        },
       },
-    });
+      {
+        onSuccess() {
+          messageService.success(<T>language_deleted_message</T>);
+          useRedirect(LINKS.PROJECT_EDIT, {
+            [PARAMS.PROJECT_ID]: projectId,
+          });
+        },
+      }
+    );
   };
 
   return (
@@ -82,10 +99,18 @@ export const LanguageEditView = () => {
       md={8}
       xs={10}
       title={<T>language_settings_title</T>}
-      initialValues={languageLoadable.data!}
+      initialValues={{
+        ...languageLoadable.data!,
+        flagEmoji: languageLoadable.data?.flagEmoji || '🏁',
+        originalName: languageLoadable.data?.originalName || '',
+      }}
       onSubmit={onSubmit}
-      saveActionLoadable={editLoadable}
-      resourceLoadable={languageLoadable}
+      loading={
+        languageLoadable.isFetching ||
+        editLoadable.isLoading ||
+        deleteLoadable.isLoading
+      }
+      hideChildrenOnLoading={languageLoadable.isLoading}
       validationSchema={Validation.LANGUAGE}
       customActions={
         <Button
@@ -98,7 +123,6 @@ export const LanguageEditView = () => {
                 <T>cannot_delete_base_language_message</T>
               );
             }
-
             confirmationMessage({
               message: (
                 <T parameters={{ name: languageLoadable.data!.name }}>
@@ -108,14 +132,7 @@ export const LanguageEditView = () => {
               hardModeText: languageLoadable.data!.name.toUpperCase(),
               confirmButtonText: <T>global_delete_button</T>,
               confirmButtonColor: 'secondary',
-              onConfirm: () => {
-                actions.loadableActions.delete.dispatch({
-                  path: {
-                    projectId: projectId,
-                    languageId: languageId,
-                  },
-                });
-              },
+              onConfirm: onDelete,
             });
           }}
         >

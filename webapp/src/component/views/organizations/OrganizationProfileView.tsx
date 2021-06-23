@@ -10,14 +10,12 @@ import { StandardForm } from '../../common/form/StandardForm';
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { Button } from '@material-ui/core';
 import { confirmation } from '../../../hooks/confirmation';
-import {
-  OrganizationBody,
-  useDeleteOrganization,
-  useGetOrganization,
-  usePutOrganization,
-} from '../../../service/hooks/Organization';
+import { components } from '../../../service/apiSchema.generated';
 import { RedirectionActions } from '../../../store/global/RedirectionActions';
 import { LINKS, PARAMS } from '../../../constants/links';
+import { useApiMutation, useApiQuery } from '../../../service/http/useQueryApi';
+
+type OrganizationBody = components['schemas']['OrganizationDto'];
 
 const redirectionActions = container.resolve(RedirectionActions);
 const messageService = container.resolve(MessageService);
@@ -28,9 +26,20 @@ export const OrganizationProfileView: FunctionComponent = () => {
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
 
-  const organization = useGetOrganization(organizationSlug);
-  const editOrganization = usePutOrganization(organization.data?.id as number);
-  const deleteOrganization = useDeleteOrganization();
+  const organization = useApiQuery({
+    url: '/v2/organizations/{slug}',
+    method: 'get',
+    path: { slug: organizationSlug },
+  });
+
+  const editOrganization = useApiMutation({
+    url: '/v2/organizations/{id}',
+    method: 'put',
+  });
+  const deleteOrganization = useApiMutation({
+    url: '/v2/organizations/{id}',
+    method: 'delete',
+  });
 
   const onSubmit = (values: OrganizationBody) => {
     const toSave = {
@@ -40,20 +49,26 @@ export const OrganizationProfileView: FunctionComponent = () => {
       slug: values.slug,
     } as OrganizationBody;
 
-    editOrganization.mutate(toSave, {
-      onSuccess: (data) => {
-        if (data.slug !== organizationSlug) {
-          redirectionActions.redirect.dispatch(
-            LINKS.ORGANIZATION_PROFILE.build({
-              [PARAMS.ORGANIZATION_SLUG]: data.slug,
-            })
-          );
-        } else {
-          organization.refetch();
-        }
-        messageService.success(<T>organization_updated_message</T>);
+    editOrganization.mutate(
+      {
+        path: { id: organization.data!.id },
+        content: { 'application/json': toSave },
       },
-    });
+      {
+        onSuccess: (data) => {
+          if (data.slug !== organizationSlug) {
+            redirectionActions.redirect.dispatch(
+              LINKS.ORGANIZATION_PROFILE.build({
+                [PARAMS.ORGANIZATION_SLUG]: data.slug,
+              })
+            );
+          } else {
+            organization.refetch();
+          }
+          messageService.success(<T>organization_updated_message</T>);
+        },
+      }
+    );
   };
 
   const initialValues = organization.data;
@@ -64,12 +79,15 @@ export const OrganizationProfileView: FunctionComponent = () => {
       hardModeText: organization.data?.name.toUpperCase(),
       message: <T>delete_organization_confirmation_message</T>,
       onConfirm: () =>
-        deleteOrganization.mutate(organization.data!.id, {
-          onSuccess: () => {
-            messageService.success(<T>organization_deleted_message</T>);
-            redirectionActions.redirect.dispatch(LINKS.ORGANIZATIONS.build());
-          },
-        }),
+        deleteOrganization.mutate(
+          { path: { id: organization.data!.id } },
+          {
+            onSuccess: () => {
+              messageService.success(<T>organization_deleted_message</T>);
+              redirectionActions.redirect.dispatch(LINKS.ORGANIZATIONS.build());
+            },
+          }
+        ),
     });
   };
 

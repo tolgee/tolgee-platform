@@ -1,46 +1,51 @@
-import React, { FunctionComponent, useEffect, useState } from 'react';
-import { container } from 'tsyringe';
-import { LanguageActions } from '../../store/languages/LanguageActions';
+import { T } from '@tolgee/react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { useProject } from '../../hooks/useProject';
 import { components } from '../../service/apiSchema.generated';
 import { Box } from '@material-ui/core';
 import { ErrorResponseDto } from '../../service/response.types';
 import { ResourceErrorComponent } from '../common/form/ResourceErrorComponent';
 import { CreateLanguageField } from './CreateLanguageField';
+import { useApiMutation } from '../../service/http/useQueryApi';
+import { container } from 'tsyringe';
+import { MessageService } from '../../service/MessageService';
 
-const actions = container.resolve(LanguageActions);
+const messageService = container.resolve(MessageService);
+
+type LanguageDto = components['schemas']['LanguageDto'];
+
 export const CreateSingleLanguage: FunctionComponent<{
   onCancel: () => void;
   onCreated?: (language: components['schemas']['LanguageModel']) => void;
   autoFocus?: boolean;
 }> = (props) => {
-  const createLoadable = actions.useSelector((s) => s.loadables.create);
   const project = useProject();
-  const [submitted, setSubmitted] = useState(false);
+  const createLoadable = useApiMutation({
+    url: '/v2/projects/{projectId}/languages',
+    method: 'post',
+  });
+  const [value, setValue] = useState(null as LanguageDto | null);
 
   const onSubmit = (values) => {
-    setSubmitted(true);
-    actions.loadableActions.create.dispatch({
-      path: {
-        projectId: project.id,
+    createLoadable.mutate(
+      {
+        path: {
+          projectId: project.id,
+        },
+        content: {
+          'application/json': values,
+        },
       },
-      content: {
-        'application/json': values,
-      },
-    });
+      {
+        onSuccess(data) {
+          props.onCreated && props.onCreated(data);
+          setValue(null);
+          messageService.success(<T>language_created_message</T>);
+        },
+      }
+    );
   };
 
-  useEffect(() => {
-    if (createLoadable.loaded && submitted) {
-      props.onCreated && props.onCreated(createLoadable.data!);
-      setSubmitted(false);
-      setValue(null);
-    }
-  }, [createLoadable.loading]);
-
-  const [value, setValue] = useState(
-    null as components['schemas']['LanguageDto'] | null
-  );
   const [serverError, setServerError] = useState(
     undefined as ErrorResponseDto | undefined
   );

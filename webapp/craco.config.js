@@ -4,6 +4,9 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = function ({ env: _env }) {
   return {
+    typescript: {
+      enableTypeChecking: false,
+    },
     babel: {
       plugins: ['babel-plugin-transform-typescript-metadata'],
     },

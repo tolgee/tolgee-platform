@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 import { Box, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import { CreateSingleLanguage } from '../../../../languages/CreateSingleLanguage';

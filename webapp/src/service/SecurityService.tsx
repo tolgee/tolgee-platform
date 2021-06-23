@@ -1,3 +1,4 @@
+import { T } from '@tolgee/react';
 import { singleton } from 'tsyringe';
 import { ApiV1HttpService } from './http/ApiV1HttpService';
 import { ErrorResponseDto, TokenDTO } from './response.types';
@@ -5,10 +6,8 @@ import { TokenService } from './TokenService';
 import { API_LINKS } from '../constants/apiLinks';
 import { LINKS } from '../constants/links';
 import { MessageService } from './MessageService';
-import { RedirectionActions } from '../store/global/RedirectionActions';
 import { InvitationCodeService } from './InvitationCodeService';
-import { InvitationService } from './InvitationService';
-import { T } from '@tolgee/react';
+import { ApiSchemaHttpService } from './http/ApiSchemaHttpService';
 
 const API_URL = process.env.REACT_APP_API_URL + '/api/';
 
@@ -24,9 +23,8 @@ export class SecurityService {
     private http: ApiV1HttpService,
     private tokenService: TokenService,
     private messageService: MessageService,
-    private redirectionActions: RedirectionActions,
     private invitationCodeService: InvitationCodeService,
-    private invitationService: InvitationService
+    private apiSchemaService: ApiSchemaHttpService
   ) {}
 
   public authorizeOAuthLogin = async (
@@ -133,7 +131,10 @@ export class SecurityService {
 
     const code = this.invitationCodeService.getCode();
     if (code) {
-      await this.invitationService.acceptInvitation(code);
+      await this.apiSchemaService.schemaRequest(
+        '/api/invitation/accept/{code}',
+        'get'
+      )({ path: { code } });
       this.invitationCodeService.disposeCode();
     }
     return tokenDTO;
