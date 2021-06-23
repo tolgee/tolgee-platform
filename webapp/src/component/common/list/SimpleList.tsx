@@ -47,7 +47,11 @@ export const SimpleList = <
     <>
       <Wrapper {...wrapperProps}>
         <ListWrapper data-cy="global-list-items" {...props.listComponentProps}>
-          {data.map((i) => props.renderItem(i))}
+          {data.map((item, index) => (
+            <React.Fragment key={(item as any).id || index}>
+              {props.renderItem(item)}
+            </React.Fragment>
+          ))}
         </ListWrapper>
         {pagination && pagination.pageCount > 1 && (
           <Box display="flex" justifyContent="flex-end" mt={1} mb={1}>

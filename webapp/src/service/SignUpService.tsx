@@ -4,7 +4,6 @@ import { TokenDTO } from './response.types';
 import { TokenService } from './TokenService';
 import { MessageService } from './MessageService';
 import { SignUpType } from '../component/security/SignUpView';
-import { RedirectionActions } from '../store/global/RedirectionActions';
 import { GlobalActions } from '../store/global/GlobalActions';
 import { InvitationCodeService } from './InvitationCodeService';
 import { T } from '@tolgee/react';
@@ -16,7 +15,6 @@ export class SignUpService {
     private http: ApiV1HttpService,
     private tokenService: TokenService,
     private messageService: MessageService,
-    private redirectionActions: RedirectionActions,
     private globalActions: GlobalActions,
     private invitationCodeService: InvitationCodeService
   ) {}
@@ -43,15 +41,11 @@ export class SignUpService {
     }
   };
 
-  async verifyEmail(userId: string, code: string) {
-    const response = (await this.http.get(
-      `public/verify_email/${userId}/${code}`
-    )) as TokenDTO;
-    this.messageService.success(<T>email_verified_message</T>);
+  async verifyEmail(accessToken: string | undefined) {
     this.invitationCodeService.disposeCode();
-    if (response.accessToken) {
-      this.tokenService.setToken(response.accessToken);
-      this.globalActions.setJWTToken.dispatch(response.accessToken);
+    if (accessToken) {
+      this.tokenService.setToken(accessToken);
+      this.globalActions.setJWTToken.dispatch(accessToken);
     }
   }
 }

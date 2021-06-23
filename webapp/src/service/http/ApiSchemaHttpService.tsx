@@ -72,7 +72,10 @@ export class ApiSchemaHttpService extends ApiHttpService {
       let queryString = '';
 
       const params = flattenParams(queryParams);
-      queryString = '?' + this.buildQuery(params);
+      const query = this.buildQuery(params);
+      if (query) {
+        queryString = '?' + query;
+      }
 
       return await this.fetch(
         urlResult + queryString,
