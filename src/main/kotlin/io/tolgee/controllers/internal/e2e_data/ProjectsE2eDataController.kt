@@ -2,7 +2,7 @@ package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.dtos.request.LanguageDto
-import io.tolgee.dtos.request.SetTranslationsDTO
+import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
@@ -104,7 +104,7 @@ class ProjectsE2eDataController(
                         createdLanguages.add(it)
                     }
                 }
-                keyService.create(project, SetTranslationsDTO(it.key, it.value))
+                keyService.create(project, SetTranslationsWithKeyDto(it.key, it.value))
             }
         }
     }

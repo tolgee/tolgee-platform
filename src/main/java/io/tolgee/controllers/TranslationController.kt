@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.PathDTO
-import io.tolgee.dtos.request.SetTranslationsDTO
+import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
 import io.tolgee.dtos.response.ViewDataResponse
 import io.tolgee.dtos.response.translations_view.ResponseParams
@@ -50,7 +50,7 @@ class TranslationController @Autowired constructor(
     @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
     @Deprecated(message = "Use put method to /api/project/{projectId}/translations or /api/project/translations")
     @Hidden
-    fun setTranslationsPost(@RequestBody @Valid dto: SetTranslationsDTO?) {
+    fun setTranslationsPost(@RequestBody @Valid dto: SetTranslationsWithKeyDto?) {
         setTranslations(dto)
     }
 
@@ -58,7 +58,7 @@ class TranslationController @Autowired constructor(
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
     @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
     @Operation(summary = "Sets translations for existing key")
-    fun setTranslations(@RequestBody @Valid dto: SetTranslationsDTO?) {
+    fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto?) {
         val key = keyService.get(
                 projectHolder.project.id,
                 PathDTO.fromFullPath(dto!!.key)
@@ -71,8 +71,8 @@ class TranslationController @Autowired constructor(
     @AccessWithApiKey([ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
     @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
     @Operation(summary = "Sets translations for existing or not existing key")
-    fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsDTO) {
-        val project = projectService.get(projectHolder.project.id).get()
+    fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto) {
+        val project = projectHolder.project
         val key = keyService.getOrCreateKey(project, PathDTO.fromFullPath(dto.key))
         translationService.setForKey(key, dto.translations!!)
     }

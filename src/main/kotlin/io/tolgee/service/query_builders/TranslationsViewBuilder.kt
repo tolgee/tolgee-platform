@@ -15,7 +15,7 @@ class TranslationsViewBuilder(
     var selection: MutableSet<Selection<*>> = LinkedHashSet()
     var fullTextFields: MutableSet<Expression<String>> = HashSet()
     var restrictions: MutableSet<Predicate> = HashSet()
-    fun <T> getBaseQuery(query1: CriteriaQuery<T>): CriteriaQuery<T> {
+    private fun <T> getBaseQuery(query1: CriteriaQuery<T>): CriteriaQuery<T> {
         val key = query1.from(Key::class.java)
         val fullPath: Expression<String> = key.get("name")
         selection.add(key.get<Any>("id"))

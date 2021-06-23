@@ -7,7 +7,7 @@ import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.DeprecatedEditKeyDTO
 import io.tolgee.dtos.request.EditKeyDTO
 import io.tolgee.dtos.request.GetKeyTranslationsReqDto
-import io.tolgee.dtos.request.SetTranslationsDTO
+import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
@@ -43,7 +43,7 @@ class KeyController(
     @PostMapping(value = ["/create", ""])
     @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
     @Operation(summary = "Creates new key with specified translation data")
-    fun create(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: SetTranslationsDTO?) {
+    fun create(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: SetTranslationsWithKeyDto?) {
         keyService.create(projectHolder.project, dto!!)
     }
 

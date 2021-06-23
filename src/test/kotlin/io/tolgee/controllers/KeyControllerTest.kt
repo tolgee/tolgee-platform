@@ -6,7 +6,7 @@ import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.DeprecatedEditKeyDTO
 import io.tolgee.dtos.request.EditKeyDTO
 import io.tolgee.dtos.request.GetKeyTranslationsReqDto
-import io.tolgee.dtos.request.SetTranslationsDTO
+import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
@@ -23,8 +23,8 @@ import org.testng.annotations.Test
 @AutoConfigureMockMvc
 @Transactional
 class KeyControllerTest : SignedInControllerTest(), ITest {
-    private val keyDto = SetTranslationsDTO("test string", mapOf(Pair("en", "Hello")))
-    private val keyDto2 = SetTranslationsDTO("test string 2", mapOf(Pair("en", "Hello 2")))
+    private val keyDto = SetTranslationsWithKeyDto("test string", mapOf(Pair("en", "Hello")))
+    private val keyDto2 = SetTranslationsWithKeyDto("test string 2", mapOf(Pair("en", "Hello 2")))
 
     private lateinit var project: Project
 
@@ -45,7 +45,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     fun createValidation() {
         val result = performCreate(
                 projectId = project.id,
-                content = SetTranslationsDTO("", mapOf(Pair("en", "aaa"))))
+                content = SetTranslationsWithKeyDto("", mapOf(Pair("en", "aaa"))))
                 .andExpect(status().isBadRequest)
                 .andReturn()
         assertThat(result).error().isStandardValidation
@@ -129,7 +129,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
         assertThat(got["de"]).isEqualTo("Hallo Welt!")
     }
 
-    private fun performCreate(projectId: Long, content: SetTranslationsDTO): ResultActions {
+    private fun performCreate(projectId: Long, content: SetTranslationsWithKeyDto): ResultActions {
         return performAuthPost("/api/project/$projectId/keys", content)
     }
 

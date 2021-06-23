@@ -5,7 +5,7 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
 @Validated
-data class SetTranslationsDTO(
+data class SetTranslationsWithKeyDto(
         /**
          * Key full path is stored as name in entity
          */

@@ -4,7 +4,7 @@ import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.PathDTO
-import io.tolgee.dtos.request.SetTranslationsDTO
+import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
 import io.tolgee.dtos.response.ViewDataResponse
 import io.tolgee.dtos.response.translations_view.ResponseParams
@@ -98,7 +98,7 @@ class TranslationControllerTest()
         val project = dbPopulator.createBase(generateUniqueString())
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 
-        performAuthPost("/api/project/${project.id}/translations", SetTranslationsDTO("hello",
+        performAuthPost("/api/project/${project.id}/translations", SetTranslationsWithKeyDto("hello",
                 translationsMap
         )).andExpect(status().isOk)
 
@@ -116,7 +116,7 @@ class TranslationControllerTest()
     fun setTranslationsWithApiKey() {
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 
-        performProjectAuthPost("translations", SetTranslationsDTO("hello",
+        performProjectAuthPost("translations", SetTranslationsWithKeyDto("hello",
                 translationsMap
         )).andExpect(status().isOk)
 
@@ -134,7 +134,7 @@ class TranslationControllerTest()
     fun setTranslationsWithApiKeyForbidden() {
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
 
-        performProjectAuthPost("translations", SetTranslationsDTO("hello",
+        performProjectAuthPost("translations", SetTranslationsWithKeyDto("hello",
                 translationsMap
         )).andIsForbidden
     }
@@ -143,11 +143,11 @@ class TranslationControllerTest()
     fun updateTranslations() {
         val project = dbPopulator.createBase(generateUniqueString())
         val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"));
-        keyService.create(project, SetTranslationsDTO(key = "hello", translations = translationsMap));
+        keyService.create(project, SetTranslationsWithKeyDto(key = "hello", translations = translationsMap));
 
 
         val updatedTranslationsMap = mapOf(Pair("en", "Hello you!"), Pair("de", "Hallo dich!"))
-        performAuthPut("/api/project/${project.id}/translations", SetTranslationsDTO("hello",
+        performAuthPut("/api/project/${project.id}/translations", SetTranslationsWithKeyDto("hello",
                 updatedTranslationsMap
         )).andExpect(status().isOk)
 

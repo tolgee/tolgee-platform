@@ -5,7 +5,7 @@ import io.tolgee.constants.ApiScope
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.GetKeyTranslationsReqDto
-import io.tolgee.dtos.request.SetTranslationsDTO
+import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.security.AuthenticationFacade
@@ -75,7 +75,7 @@ class UserAppApiController(
 
     @PostMapping("")
     @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
-    fun setTranslations(@RequestBody @Valid dto: SetTranslationsDTO) {
+    fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto) {
         val apiKey = authenticationFacade.apiKey
         val project = projectService.get(apiKey.project!!.id).orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }!!
         val key = keyService.getOrCreateKey(project, PathDTO.fromFullPath(dto.key))
