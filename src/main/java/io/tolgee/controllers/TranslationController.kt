@@ -86,6 +86,6 @@ class TranslationController @Autowired constructor(
                     @RequestParam(name = "search", required = false) search: String?
     ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
         securityService.checkProjectPermission(projectId!!, Permission.ProjectPermissionType.VIEW)
-        return translationService.getViewData(languages, projectId, limit, offset, search)
+        return translationService.getViewDataOld(languages, projectId, limit, offset, search)
     }
 }

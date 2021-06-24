@@ -7,12 +7,16 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import io.tolgee.api.v2.hateoas.translations.KeyTranslationModelAssembler
+import io.tolgee.api.v2.hateoas.translations.KeyWithTranslationsModel
 import io.tolgee.constants.ApiScope
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.PathDTO
+import io.tolgee.dtos.request.GetTranslationsParamsDto
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
+import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
@@ -20,6 +24,8 @@ import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyService
 import io.tolgee.service.TranslationService
 import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
@@ -37,7 +43,9 @@ import javax.validation.Valid
 class V2TranslationsController(
         private val projectHolder: ProjectHolder,
         private val translationService: TranslationService,
-        private val keyService: KeyService
+        private val keyService: KeyService,
+        private val pagedAssembler: PagedResourcesAssembler<KeyWithTranslationsView>,
+        private val keyTranslationModelAssembler: KeyTranslationModelAssembler
 ) : IController {
     @GetMapping(value = ["/{languages}"])
     @AccessWithAnyProjectPermission
@@ -54,7 +62,7 @@ class V2TranslationsController(
     fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto) {
         val key = keyService.get(
                 projectHolder.project.id,
-                PathDTO.fromFullPath(dto!!.key)
+                PathDTO.fromFullPath(dto.key)
         ).orElseThrow { NotFoundException() }
 
         translationService.setForKey(key, dto.translations!!)
@@ -73,10 +81,9 @@ class V2TranslationsController(
     @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
     @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
     @Operation(summary = "Returns translations in repository")
-    fun getTranslations(@RequestParam(name = "languages", required = false) languages: Set<String>?,
-                        @RequestParam(name = "search", required = false) search: String?,
-                        pageable: Pageable) {
-        projectHolder
-        //return translationService.getViewData(languages, projectId, limit, offset, search)
+    fun getTranslations(params: GetTranslationsParamsDto,
+                        pageable: Pageable): PagedModel<KeyWithTranslationsModel> {
+        val data = translationService.getViewData(projectHolder.project, pageable, params)
+        return pagedAssembler.toModel(data, keyTranslationModelAssembler)
     }
 }

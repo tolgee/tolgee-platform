@@ -159,6 +159,7 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
             ))
         }
 
+        loginAsUser("admin")
         return mvc.perform(LoggedRequestFactory.addToken(builder))
     }
 
@@ -173,6 +174,7 @@ class V2ImportControllerAddFilesTest : SignedInControllerTest() {
             ))
         }
 
+        loginAsUser("admin")
         mvc.perform(LoggedRequestFactory.addToken(
                 builder
         )).andReturn().let {

@@ -13,16 +13,16 @@ import org.springframework.test.web.servlet.ResultActions
 @Component
 @Scope("prototype")
 class ProjectApiKeyAuthRequestPerformer(
-        private val userAccount: UserAccount,
+        private val userAccountProvider: () -> UserAccount,
         private val scopes: Array<ApiScope>,
         projectUrlPrefix: String = "/api/project"
-) : ProjectAuthRequestPerformer(userAccount, projectUrlPrefix) {
+) : ProjectAuthRequestPerformer(userAccountProvider, projectUrlPrefix) {
 
     @field:Autowired
     lateinit var apiKeyService: ApiKeyService
 
     val apiKey: ApiKeyDTO by lazy {
-        apiKeyService.createApiKey(userAccount, scopes = this.scopes.toSet(), project)
+        apiKeyService.createApiKey(userAccountProvider.invoke(), scopes = this.scopes.toSet(), project)
     }
 
     override fun performProjectAuthPut(url: String, content: Any?): ResultActions {

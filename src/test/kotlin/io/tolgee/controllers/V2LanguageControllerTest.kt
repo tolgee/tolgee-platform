@@ -5,11 +5,9 @@ import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.*
-import io.tolgee.helpers.JsonHelper
 import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.testng.annotations.Test
@@ -50,7 +48,7 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/"), ITe
     @Test
     fun findAllLanguages() {
         val project = dbPopulator.createBase(generateUniqueString(), "ben", "pwd")
-        logAsUser("ben", "pwd")
+        loginAsUser("ben")
         performFindAll(project.id).andIsOk.andPrettyPrint.andAssertThatJson {
             node("_embedded.languages") {
                 isArray.hasSize(2)
@@ -132,29 +130,18 @@ class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/"), ITe
     }
 
     private fun performCreate(projectId: Long, content: LanguageDto): ResultActions {
-
-        return mvc.perform(
-                LoggedRequestFactory.loggedPost("/v2/projects/$projectId/languages")
-                        .contentType(MediaType.APPLICATION_JSON).content(
-                                JsonHelper.asJsonString(content)))
+        return performAuthPost("/v2/projects/$projectId/languages", content)
     }
 
     private fun performEdit(projectId: Long, languageId: Long, content: LanguageDto): ResultActions {
-        return mvc.perform(
-                LoggedRequestFactory.loggedPut("/v2/projects/$projectId/languages/${languageId}")
-                        .contentType(MediaType.APPLICATION_JSON).content(
-                                JsonHelper.asJsonString(content)))
+        return performAuthPut("/v2/projects/$projectId/languages/${languageId}", content)
     }
 
     private fun performDelete(projectId: Long, languageId: Long): ResultActions {
-        return mvc.perform(
-                LoggedRequestFactory.loggedDelete("/v2/projects/$projectId/languages/$languageId")
-                        .contentType(MediaType.APPLICATION_JSON))
+        return performAuthDelete("/v2/projects/$projectId/languages/$languageId", null)
     }
 
     private fun performFindAll(projectId: Long): ResultActions {
-        return mvc.perform(
-                LoggedRequestFactory.loggedGet("/v2/projects/$projectId/languages")
-                        .contentType(MediaType.APPLICATION_JSON))
+        return performAuthGet("/v2/projects/$projectId/languages")
     }
 }

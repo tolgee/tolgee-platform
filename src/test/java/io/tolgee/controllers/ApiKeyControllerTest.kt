@@ -85,7 +85,7 @@ class ApiKeyControllerTest : ProjectAuthControllerTest(), ITest {
     @Test
     fun getAllByUser() {
         val project = dbPopulator.createBase(generateUniqueString(), "ben")
-        logAsUser("ben", initialPassword)
+        loginAsUser("ben")
         val apiKey1 = apiKeyService.createApiKey(project.permissions.first().user, setOf(ApiScope.KEYS_EDIT), project)
         val project2 = dbPopulator.createBase(generateUniqueString(), "ben")
         val apiKey2 = apiKeyService.createApiKey(project2.permissions.first().user, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project)
@@ -95,7 +95,7 @@ class ApiKeyControllerTest : ProjectAuthControllerTest(), ITest {
         var mvcResult = performAuthGet("/api/apiKeys").andExpect(MockMvcResultMatchers.status().isOk).andReturn()
         var set = mapResponse<Set<ApiKeyDTO?>>(mvcResult, TypeFactory.defaultInstance().constructCollectionType(MutableSet::class.java, ApiKeyDTO::class.java))
         Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(apiKeyDTO.key, apiKey1.key, apiKey2.key)
-        logAsUser("testUser", initialPassword)
+        loginAsUser("testUser")
         mvcResult = performAuthGet("/api/apiKeys").andExpect(MockMvcResultMatchers.status().isOk).andReturn()
         set = mapResponse(mvcResult, TypeFactory.defaultInstance().constructCollectionType(MutableSet::class.java, ApiKeyDTO::class.java))
         Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(user2Key.key)
@@ -113,7 +113,7 @@ class ApiKeyControllerTest : ProjectAuthControllerTest(), ITest {
         var mvcResult = performAuthGet("/api/apiKeys/project/" + project.id).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
         var set: Set<ApiKeyDTO> = mvcResult.mapResponseTo()
         Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(apiKeyDTO.key, apiKey1.key, apiKey2.key)
-        logAsUser("testUser", initialPassword)
+        loginAsUser("testUser")
         performAuthGet("/api/apiKeys/project/" + project2.id).andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
         permissionService.grantFullAccessToRepo(testUser, project2)
         mvcResult = performAuthGet("/api/apiKeys/project/" + project2.id).andExpect(MockMvcResultMatchers.status().isOk).andReturn()

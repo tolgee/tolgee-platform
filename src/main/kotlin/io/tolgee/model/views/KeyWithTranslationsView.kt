@@ -1,6 +1,6 @@
 package io.tolgee.model.views
 
-class KeyTranslationsView(queryData: Array<Any>) {
+class KeyWithTranslationsView(queryData: Array<Any>) {
     val keyId: Long
     val keyName: String
     val translations = mutableMapOf<String, TranslationView>()

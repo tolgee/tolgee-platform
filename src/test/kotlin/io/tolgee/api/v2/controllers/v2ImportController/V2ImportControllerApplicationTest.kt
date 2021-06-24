@@ -15,7 +15,7 @@ class V2ImportControllerApplicationTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
         val projectId = testData.project.id
-        logAsUser(user.username!!, "admin")
+        loginAsUser(user.username!!)
         val path = "/v2/projects/${projectId}/import/apply"
         performAuthPut(path, null).andIsOk
         this.importService.find(projectId, user.id!!).let {
@@ -29,7 +29,7 @@ class V2ImportControllerApplicationTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
         val projectId = testData.project.id
-        logAsUser(user.username!!, "admin")
+        loginAsUser(user.username!!)
         val path = "/v2/projects/${projectId}/import/apply?forceMode=OVERRIDE"
         performAuthPut(path, null).andIsOk
         this.importService.find(projectId, user.id!!).let {
@@ -43,7 +43,7 @@ class V2ImportControllerApplicationTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
         val projectId = testData.project.id
-        logAsUser(user.username!!, "admin")
+        loginAsUser(user.username!!)
         val path = "/v2/projects/${projectId}/import/apply?forceMode=KEEP"
         performAuthPut(path, null).andIsOk
     }

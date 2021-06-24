@@ -57,7 +57,7 @@ abstract class ProjectAuthControllerTest(
                 this@ProjectAuthControllerTest.projectAuthRequestPerformer =
                         applicationContext!!.getBean(
                                 ProjectApiKeyAuthRequestPerformer::class.java,
-                                userAccount,
+                                { userAccount },
                                 this.scopes,
                                 projectUrlPrefix
                         )
@@ -67,7 +67,7 @@ abstract class ProjectAuthControllerTest(
         with(method.getAnnotation(ProjectJWTAuthTestMethod::class.java)) {
             if (this != null) {
                 this@ProjectAuthControllerTest.projectAuthRequestPerformer =
-                        applicationContext!!.getBean(ProjectJwtAuthRequestPerformer::class.java, userAccount, projectUrlPrefix)
+                        applicationContext!!.getBean(ProjectJwtAuthRequestPerformer::class.java, { userAccount }, projectUrlPrefix)
             }
         }
     }

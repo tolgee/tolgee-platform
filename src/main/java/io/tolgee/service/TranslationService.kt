@@ -3,6 +3,7 @@ package io.tolgee.service
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.query_results.KeyWithTranslationsDto
+import io.tolgee.dtos.request.GetTranslationsParamsDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto.Companion.fromQueryResult
 import io.tolgee.dtos.response.ViewDataResponse
@@ -14,10 +15,14 @@ import io.tolgee.model.Project
 import io.tolgee.model.Translation
 import io.tolgee.model.Translation.Companion.builder
 import io.tolgee.model.key.Key
+import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.repository.TranslationRepository
-import io.tolgee.service.query_builders.TranslationsViewBuilder.Companion.getData
+import io.tolgee.service.query_builders.TranslationsViewBuilder
+import io.tolgee.service.query_builders.TranslationsViewBuilderOld
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -27,9 +32,14 @@ import javax.persistence.EntityManager
 @Service
 @Transactional
 class TranslationService(private val translationRepository: TranslationRepository, private val entityManager: EntityManager) {
-    private var languageService: LanguageService? = null
-    private var keyService: KeyService? = null
-    private var projectService: ProjectService? = null
+    @Autowired
+    private lateinit var languageService: LanguageService
+
+    @Autowired
+    private lateinit var keyService: KeyService
+
+    @Autowired
+    private lateinit var projectService: ProjectService
 
     @Transactional
     @Suppress("UNCHECKED_CAST")
@@ -50,12 +60,12 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     fun getKeyTranslationsResult(projectId: Long, path: PathDTO?, languageTags: Set<String>?): Map<String, String?> {
-        val project = projectService!!.get(projectId).orElseThrow { NotFoundException() }!!
-        val key = keyService!!.get(project, path!!).orElse(null)
+        val project = projectService.get(projectId).orElseThrow { NotFoundException() }!!
+        val key = keyService.get(project, path!!).orElse(null)
         val languages: Set<Language> = if (languageTags == null) {
-            languageService!!.getImplicitLanguages(project)
+            languageService.getImplicitLanguages(project)
         } else {
-            languageService!!.findByTags(languageTags, projectId)
+            languageService.findByTags(languageTags, projectId)
         }
         val translations = getKeyTranslations(languages, project, key)
         val translationsMap = translations.stream()
@@ -87,12 +97,14 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun getViewData(
+    @Deprecated(replaceWith = ReplaceWith("getViewData"),
+            message = "Use new getViewData. This is for old API compatibility.")
+    fun getViewDataOld(
             languageTags: Set<String>?, projectId: Long?, limit: Int, offset: Int, search: String?
     ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-        val project = projectService!!.get(projectId!!).orElseThrow { NotFoundException() }!!
-        val languages: Set<Language> = languageService!!.getLanguagesForTranslationsView(languageTags, project)
-        val (count, data1) = getData(entityManager, project, languages, search, limit, offset)
+        val project = projectService.get(projectId!!).orElseThrow { NotFoundException() }!!
+        val languages: Set<Language> = languageService.getLanguagesForTranslationsView(languageTags, project)
+        val (count, data1) = TranslationsViewBuilderOld.getData(entityManager, project, languages, search, limit, offset)
         return ViewDataResponse(data1
                 .stream()
                 .map { queryResult: Any? -> fromQueryResult(KeyWithTranslationsDto((queryResult as Array<Any?>))) }
@@ -100,8 +112,16 @@ class TranslationService(private val translationRepository: TranslationRepositor
                 ResponseParams(search, languages.stream().map(Language::tag).collect(Collectors.toSet())))
     }
 
+    @Suppress("UNCHECKED_CAST")
+    fun getViewData(project: Project, pageable: Pageable, params: GetTranslationsParamsDto
+    ): Page<KeyWithTranslationsView> {
+        val languages: Set<Language> = languageService.getLanguagesForTranslationsView(params.languages, project)
+        return TranslationsViewBuilder.getData(entityManager, project, languages, pageable, params)
+    }
+
+
     fun setTranslation(key: Key, languageTag: String?, text: String?) {
-        val language = languageService!!.findByTag(languageTag!!, key.project!!)
+        val language = languageService.findByTag(languageTag!!, key.project!!)
                 .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         setTranslation(key, language, text)
     }
@@ -126,7 +146,7 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     fun deleteIfExists(key: Key, languageTag: String?) {
-        val language = languageService!!.findByTag(languageTag!!, key.project!!)
+        val language = languageService.findByTag(languageTag!!, key.project!!)
                 .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
         translationRepository.findOneByKeyAndLanguage(key, language)
                 .ifPresent { entity: Translation -> translationRepository.delete(entity) }
@@ -161,21 +181,6 @@ class TranslationService(private val translationRepository: TranslationRepositor
 
     fun deleteAllByKey(id: Long) {
         this.deleteAllByKeys(listOf(id))
-    }
-
-    @Autowired
-    fun setLanguageService(languageService: LanguageService?) {
-        this.languageService = languageService
-    }
-
-    @Autowired
-    fun setKeyService(keyService: KeyService?) {
-        this.keyService = keyService
-    }
-
-    @Autowired
-    fun setRepositoryService(projectService: ProjectService?) {
-        this.projectService = projectService
     }
 
     fun saveAll(entities: Iterable<Translation?>) {
