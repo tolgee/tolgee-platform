@@ -98,8 +98,10 @@ class TranslationsTestData {
     }
 
     fun addKeyWithDot() {
-        projectBuilder.addKey { self {
-            name = ""
-        } }
+        projectBuilder.addKey {
+            self {
+                name = "key.with.dots"
+            }
+        }
     }
 }

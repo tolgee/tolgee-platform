@@ -110,12 +110,13 @@ class V2TranslationsControllerTest : ProjectAuthControllerTest("/v2/projects/") 
     @ProjectJWTAuthTestMethod
     @Test
     fun `filters by keyName containing dot`() {
+        testData.addKeyWithDot()
         testDataService.saveTestData(testData.root)
         userAccount = testData.user
         performProjectAuthGet("/translations?keyName=key.with.dots").andPrettyPrint.andIsOk.andAssertThatJson {
             node("_embedded.keys") {
                 isArray.hasSize(1)
-                node("[0].keyName").isEqualTo("key 18")
+                node("[0].keyName").isEqualTo("key.with.dots")
             }
             node("page.totalElements").isEqualTo(1)
         }
