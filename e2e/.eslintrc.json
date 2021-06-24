@@ -27,6 +27,7 @@
   "rules": {
     "prettier/prettier": "error",
     "no-console": "warn",
+    "no-only-tests/no-only-tests": "warn",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",

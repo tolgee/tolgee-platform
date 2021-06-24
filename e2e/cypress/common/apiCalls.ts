@@ -137,6 +137,9 @@ export const deleteUser = (username: string) => {
 export const deleteUserWithEmailVerification = (username: string) => {
   const sql = `
       delete
+      from permission
+      where user_id in (select id from user_account where username = '${username}');
+      delete
       from email_verification
       where user_account_id in (select id from user_account where username = '${username}');
       delete

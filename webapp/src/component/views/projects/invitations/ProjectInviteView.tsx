@@ -125,6 +125,7 @@ export const ProjectInviteView: FunctionComponent = () => {
                 type="submit"
                 size="large"
                 disabled={invite.isLoading}
+                data-cy="invite-generate-button"
               >
                 <T>invite_user_generate_invitation_link</T>
               </Button>
@@ -150,6 +151,7 @@ export const ProjectInviteView: FunctionComponent = () => {
                   [PARAMS.INVITATION_CODE]: code,
                 })}
                 label={<T>invite_user_invitation_code</T>}
+                data-cy="invite-generate-input-code"
               />
             </Box>
           )}

@@ -9,6 +9,20 @@ import {
 } from '../common/apiCalls';
 import { assertMessage, getPopover } from '../common/shared';
 
+export const loginWithFakeGithub = () => {
+  cy.intercept('https://github.com/login/oauth/**', {
+    statusCode: 200,
+    body: 'Fake GitHub',
+  });
+  cy.contains('Github login').click();
+  cy.contains('Fake GitHub').should('be.visible');
+  cy.visit(
+    HOST +
+      '/login/auth_callback/github?scope=user%3Aemail&code=this_is_dummy_code'
+  );
+  cy.contains('Projects').should('be.visible');
+};
+
 context('Login', () => {
   beforeEach(() => {
     cy.visit(HOST);
@@ -38,17 +52,7 @@ context('Login', () => {
   });
 
   it('Will login with github', () => {
-    cy.intercept('https://github.com/login/oauth/**', {
-      statusCode: 200,
-      body: 'Fake GitHub',
-    });
-    cy.contains('Github login').click();
-    cy.contains('Fake GitHub').should('be.visible');
-    cy.visit(
-      HOST +
-        '/login/auth_callback/github?scope=user%3Aemail&code=this_is_dummy_code'
-    );
-    cy.contains('Projects').should('be.visible');
+    loginWithFakeGithub();
   });
 
   it('Will logout', () => {
