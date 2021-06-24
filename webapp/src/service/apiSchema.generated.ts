@@ -497,7 +497,8 @@ export interface components {
     };
     ApiKeyDTO: {
       id?: number;
-      "Resulting user's api key"?: string;
+      /** Resulting user's api key */
+      key?: string;
       userName?: string;
       projectId?: number;
       projectName?: string;

@@ -1,6 +1,4 @@
-import { default as React, FunctionComponent, useEffect } from 'react';
-import { container } from 'tsyringe';
-import { UserApiKeysActions } from '../../../../store/api_keys/UserApiKeysActions';
+import { FunctionComponent } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import { LINKS, PARAMS } from '../../../../constants/links';
 import { FabAddButtonLink } from '../../../common/buttons/FabAddButtonLink';
@@ -9,21 +7,17 @@ import { ApiKeysList } from './ApiKeysList';
 import { EmptyListMessage } from '../../../common/EmptyListMessage';
 import { T } from '@tolgee/react';
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
+import { useApiQuery } from '../../../../service/http/useQueryApi';
 
 export const ApiKeysView: FunctionComponent = () => {
-  const actions = container.resolve(UserApiKeysActions);
-
-  const list = actions.useSelector((state) => state.loadables.list);
-
-  useEffect(() => {
-    if (!list.loading && !list.loaded) {
-      actions.loadableActions.list.dispatch();
-    }
-  }, [list.loaded]);
+  const list = useApiQuery({
+    url: '/api/apiKeys',
+    method: 'get',
+  });
 
   const EditForm = () => (
     <>
-      {list.loaded && (
+      {list.isSuccess && (
         <AddApiKeyFormDialog
           editKey={list.data?.find(
             (key) =>
@@ -34,23 +28,14 @@ export const ApiKeysView: FunctionComponent = () => {
     </>
   );
 
-  //reset loadables after success delete action
-  const deleteLoadable = actions.useSelector((state) => state.loadables.delete);
-  useEffect(() => {
-    if (deleteLoadable.loaded) {
-      actions.loadableReset.delete.dispatch();
-      actions.loadableReset.list.dispatch();
-    }
-  }, [deleteLoadable.loaded]);
-
   return (
     <>
       <BaseUserSettingsView
         title={<T>Api keys title</T>}
-        loading={list.loading}
+        loading={list.isFetching}
       >
         <>
-          {list.loaded &&
+          {list.isSuccess &&
             (!list.data?.length ? (
               <EmptyListMessage>
                 <T>No api keys yet!</T>

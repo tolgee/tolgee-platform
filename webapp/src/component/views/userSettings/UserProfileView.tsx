@@ -1,14 +1,11 @@
-import { default as React, FunctionComponent, useEffect } from 'react';
+import { FunctionComponent } from 'react';
 import { container } from 'tsyringe';
 
-import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import { T } from '@tolgee/react';
-import { AppState } from '../../../store';
 import { Validation } from '../../../constants/GlobalValidationSchema';
 import { SetPasswordFields } from '../../security/SetPasswordFields';
-import { UserActions } from '../../../store/global/UserActions';
 import { UserUpdateDTO } from '../../../service/request.types';
 import { TextField } from '../../common/form/fields/TextField';
 import { BaseUserSettingsView } from './BaseUserSettingsView';
@@ -16,23 +13,41 @@ import { StandardForm } from '../../common/form/StandardForm';
 import { useFormikContext } from 'formik';
 import { Box, Typography } from '@material-ui/core';
 import { useConfig } from '../../../hooks/useConfig';
+import { useApiMutation, useApiQuery } from '../../../service/http/useQueryApi';
+import { MessageService } from '../../../service/MessageService';
 
-const actions = container.resolve(UserActions);
-const userActions = container.resolve(UserActions);
+const messagesService = container.resolve(MessageService);
 
 export const UserProfileView: FunctionComponent = () => {
-  const saveLoadable = useSelector(
-    (state: AppState) => state.user.loadables.updateUser
-  );
-  const resourceLoadable = useSelector(
-    (state: AppState) => state.user.loadables.userData
-  );
+  const userLoadable = useApiQuery({
+    url: '/api/user',
+    method: 'get',
+    options: {
+      cacheTime: 0,
+    },
+  });
 
-  useEffect(() => {
-    if (saveLoadable.loaded) {
-      userActions.loadableActions.userData.dispatch();
+  const updateUser = useApiMutation({
+    url: '/api/user',
+    method: 'post',
+  });
+
+  const handleSubmit = (v: UserUpdateDTO) => {
+    if (!v.password) {
+      delete v.password;
     }
-  }, [saveLoadable.loading]);
+    // @ts-ignore
+    v.callbackUrl = window.location.protocol + '//' + window.location.host;
+    updateUser.mutate(
+      { content: { 'application/json': v } },
+      {
+        onSuccess() {
+          messagesService.success(<T>User data - Successfully updated!</T>);
+          userLoadable.refetch();
+        },
+      }
+    );
+  };
 
   const history = useHistory();
   const config = useConfig();
@@ -47,12 +62,12 @@ export const UserProfileView: FunctionComponent = () => {
       <>
         <TextField name="name" label={<T>User settings - Full name</T>} />
         <TextField name="email" label={<T>User settings - E-mail</T>} />
-        {resourceLoadable?.data?.emailAwaitingVerification && (
+        {userLoadable?.data?.emailAwaitingVerification && (
           <Box>
             <Typography variant="body1">
               <T
                 parameters={{
-                  email: resourceLoadable.data.emailAwaitingVerification!,
+                  email: userLoadable.data.emailAwaitingVerification!,
                 }}
               >
                 email_waiting_for_verification
@@ -74,29 +89,26 @@ export const UserProfileView: FunctionComponent = () => {
   return (
     <BaseUserSettingsView
       title={<T>user_profile_title</T>}
-      loading={resourceLoadable.loading}
+      loading={userLoadable.isFetching}
     >
-      <StandardForm
-        saveActionLoadable={saveLoadable}
-        initialValues={
-          {
-            password: '',
-            passwordRepeat: '',
-            name: resourceLoadable.data!.name,
-            email: resourceLoadable.data!.username,
-          } as UserUpdateDTO
-        }
-        validationSchema={Validation.USER_SETTINGS}
-        onCancel={() => history.goBack()}
-        onSubmit={(v: UserUpdateDTO) => {
-          if (!v.password) {
-            delete v.password;
+      {userLoadable.data && (
+        <StandardForm
+          saveActionLoadable={updateUser}
+          initialValues={
+            {
+              password: '',
+              passwordRepeat: '',
+              name: userLoadable.data.name,
+              email: userLoadable.data.username,
+            } as UserUpdateDTO
           }
-          actions.loadableActions.updateUser.dispatch(v);
-        }}
-      >
-        <Fields />
-      </StandardForm>
+          validationSchema={Validation.USER_SETTINGS}
+          onCancel={() => history.goBack()}
+          onSubmit={handleSubmit}
+        >
+          <Fields />
+        </StandardForm>
+      )}
     </BaseUserSettingsView>
   );
 };

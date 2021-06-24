@@ -18,7 +18,7 @@ describe('User profile', () => {
   const NEW_EMAIL = 'pavel@honza.com';
 
   function visit() {
-    return cy.visit(HOST + '/user');
+    cy.visit(HOST + '/user');
   }
 
   beforeEach(() => {

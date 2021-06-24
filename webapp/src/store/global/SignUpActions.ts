@@ -14,9 +14,6 @@ export class SignUpActions extends AbstractLoadableActions<SignUpState> {
       v.callbackUrl = window.location.protocol + '//' + window.location.host;
       return this.service.signUp(v);
     }),
-    verifyEmail: this.createLoadableDefinition((userId, code) =>
-      this.service.verifyEmail(userId, code)
-    ),
   };
 
   constructor(private service: SignUpService) {

@@ -11,15 +11,21 @@ import { StandardForm } from '../../../common/form/StandardForm';
 import { Select } from '../../../common/form/fields/Select';
 import { default as React, FunctionComponent, useEffect } from 'react';
 import { container } from 'tsyringe';
-import { UserApiKeysActions } from '../../../../store/api_keys/UserApiKeysActions';
 import { BoxLoading } from '../../../common/BoxLoading';
 import { FormikProps } from 'formik';
 import { CheckBoxGroupMultiSelect } from '../../../common/form/fields/CheckBoxGroupMultiSelect';
-import { ApiKeyDTO } from '../../../../service/response.types';
-import { EditApiKeyDTO } from '../../../../service/request.types';
 import { Validation } from '../../../../constants/GlobalValidationSchema';
 import { FullPageLoading } from '../../../common/FullPageLoading';
 import { T } from '@tolgee/react';
+import {
+  useApiMutation,
+  useApiQuery,
+} from '../../../../service/http/useQueryApi';
+import { MessageService } from '../../../../service/MessageService';
+import { components } from '../../../../service/apiSchema.generated';
+
+type ApiKeyDTO = components['schemas']['ApiKeyDTO'];
+type EditApiKeyDTO = components['schemas']['EditApiKeyDTO'];
 
 interface Value {
   scopes: string[];
@@ -31,24 +37,33 @@ interface Props {
   loading?: boolean;
 }
 
-const actions = container.resolve(UserApiKeysActions);
+const messageService = container.resolve(MessageService);
+
+const setsIntersection = (set1: Set<unknown>, set2: Set<unknown>) =>
+  new Set([...set1].filter((v) => set2.has(v)));
 
 export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
   const onDialogClose = () => useRedirect(LINKS.USER_API_KEYS);
 
-  const projects = actions.useSelector((s) => s.loadables.projects);
-  const scopes = actions.useSelector((s) => s.loadables.scopes);
-  const editLoadable = actions.useSelector((s) => s.loadables.edit);
-  const generateLoadable = actions.useSelector(
-    (s) => s.loadables.generateApiKey
-  );
-
-  useEffect(() => {
-    actions.loadableActions.projects.dispatch({
-      query: { pageable: { size: 1000 } },
-    });
-    actions.loadableActions.scopes.dispatch();
-  }, []);
+  const projects = useApiQuery({
+    url: '/v2/projects',
+    method: 'get',
+    query: { pageable: { size: 1000 } },
+  });
+  const scopes = useApiQuery({
+    url: '/api/apiKeys/availableScopes',
+    method: 'get',
+  });
+  const editLoadable = useApiMutation({
+    url: '/api/apiKeys/edit',
+    method: 'post',
+    invalidatePrefix: '/api/apiKeys',
+  });
+  const generateLoadable = useApiMutation({
+    url: '/api/apiKeys',
+    method: 'post',
+    invalidatePrefix: '/api/apiKeys',
+  });
 
   const getAvailableScopes = (projectId?: number): Set<string> => {
     const userPermissions = projects?.data?._embedded?.projects?.find(
@@ -60,35 +75,43 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
     return new Set(scopes.data[userPermissions]);
   };
 
-  const onSubmit = (value) => {
-    if (props.editKey) {
-      actions.loadableActions.edit.dispatch({
-        id: props.editKey.id,
-        scopes: Array.from(value.scopes),
-      } as EditApiKeyDTO);
-    } else {
-      actions.loadableActions.generateApiKey.dispatch({
-        ...value,
-        scopes: Array.from(value.scopes),
-      } as Value);
-    }
+  const handleEdit = (value) => {
+    editLoadable.mutateAsync(
+      {
+        content: {
+          'application/json': {
+            id: props.editKey!.id,
+            scopes: Array.from(value.scopes),
+          } as EditApiKeyDTO,
+        },
+      },
+      {
+        onSuccess: () => {
+          messageService.success(<T>api_key_successfully_edited</T>);
+          useRedirect(LINKS.USER_API_KEYS);
+        },
+      }
+    );
   };
 
-  useEffect(() => {
-    if (editLoadable.loaded) {
-      actions.loadableReset.edit.dispatch();
-      actions.loadableReset.list.dispatch();
-      useRedirect(LINKS.USER_API_KEYS);
-    }
-  }, [editLoadable.loaded]);
-
-  useEffect(() => {
-    if (generateLoadable.loaded) {
-      actions.loadableReset.generateApiKey.dispatch();
-      actions.loadableReset.list.dispatch();
-      useRedirect(LINKS.USER_API_KEYS);
-    }
-  }, [generateLoadable.loaded]);
+  const handleAdd = (value) => {
+    generateLoadable.mutate(
+      {
+        content: {
+          'application/json': {
+            ...value,
+            scopes: Array.from(value.scopes),
+          } as Value,
+        },
+      },
+      {
+        onSuccess() {
+          messageService.success(<T>api_key_successfully_generated</T>);
+          useRedirect(LINKS.USER_API_KEYS);
+        },
+      }
+    );
+  };
 
   const getInitialValues = () => {
     if (props.editKey) {
@@ -100,6 +123,7 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
     }
 
     const projectId = projects.data?._embedded?.projects?.[0]?.id;
+
     return {
       projectId: projectId,
       //check all scopes checked by default
@@ -107,7 +131,7 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
     };
   };
 
-  if (projects.loading || scopes.loading) {
+  if (projects.isLoading || scopes.isLoading) {
     return <FullPageLoading />;
   }
 
@@ -127,17 +151,14 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
         )}
       </DialogTitle>
       <DialogContent>
-        {(projects.loaded &&
-          projects.data?._embedded?.projects?.length === 0 && (
-            <T>cannot_add_api_key_without_project_message</T>
-          )) || (
+        {(projects.data && projects.data?._embedded?.projects?.length === 0 && (
+          <T>cannot_add_api_key_without_project_message</T>
+        )) || (
           <>
-            {(projects.loading || scopes.loading || props.loading) && (
-              <BoxLoading />
-            )}
-            {projects.loaded && scopes.loaded && (
+            {props.loading && <BoxLoading />}
+            {projects.data && scopes.data && (
               <StandardForm
-                onSubmit={onSubmit}
+                onSubmit={props.editKey ? handleEdit : handleAdd}
                 onCancel={() => onDialogClose()}
                 initialValues={getInitialValues()}
                 validationSchema={
@@ -150,7 +171,10 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
                   useEffect(() => {
                     formikProps.setFieldValue(
                       'scopes',
-                      getAvailableScopes(formikProps.values.projectId)
+                      setsIntersection(
+                        getAvailableScopes(formikProps.values.projectId),
+                        formikProps.values.scopes as any
+                      )
                     );
                   }, [formikProps.values.projectId]);
 
