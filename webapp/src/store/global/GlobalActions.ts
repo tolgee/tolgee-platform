@@ -3,7 +3,6 @@ import { singleton } from 'tsyringe';
 import { RemoteConfigService } from '../../service/RemoteConfigService';
 import { SecurityService } from '../../service/SecurityService';
 import { ErrorResponseDto, TokenDTO } from '../../service/response.types';
-import { UserService } from '../../service/UserService';
 import { ConfirmationDialogProps } from '../../component/common/ConfirmationDialog';
 import {
   AbstractLoadableActions,
@@ -33,7 +32,6 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
   constructor(
     private configService: RemoteConfigService,
     private securityService: SecurityService,
-    private userService: UserService,
     private invitationCodeService: InvitationCodeService
   ) {
     super(new GlobalState());

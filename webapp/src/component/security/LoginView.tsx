@@ -32,17 +32,13 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
   );
   const remoteConfig = useConfig();
 
-  if (!remoteConfig.authentication || security.allowPrivate) {
-    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
-  }
-
   const githubRedirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({
     [PARAMS.SERVICE_TYPE]: 'github',
   });
   const clientId = remoteConfig.authMethods.github.clientId;
   const gitHubUrl =
     GITHUB_BASE +
-    `?client_id=${clientId}&redirect_uri=${githubRedirectUri}?scope=user%3Aemail`;
+    `?client_id=${clientId}&redirect_uri=${githubRedirectUri}&scope=user%3Aemail`;
 
   const history = useHistory();
   if (history.location.state && (history.location.state as any).from) {
@@ -54,6 +50,10 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
       messageService.error(<T>{security.loginErrorCode}</T>);
     }
   }, [security.loginErrorCode, authLoading]);
+
+  if (!remoteConfig.authentication || security.allowPrivate) {
+    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
+  }
 
   return (
     <DashboardPage>

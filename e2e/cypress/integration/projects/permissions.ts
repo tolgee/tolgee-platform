@@ -139,7 +139,10 @@ describe('Project Permissions', () => {
             .contains('Vaclav Novak')
             .closest('li')
             .within(() => {
-              gcy('permissions-menu-button').click();
+              gcy('permissions-menu-button')
+                .should('be.visible')
+                // clicks the button even if detached from dom
+                .click({ force: true });
             });
         });
         gcy('permissions-menu').filter(':visible').contains('Manage').click();
@@ -153,12 +156,16 @@ describe('Project Permissions', () => {
         visitList();
         enterProjectSettings('Facebook itself');
         selectInProjectMenu('Permissions');
+
         gcy('global-paginated-list').within(() => {
           gcy('global-list-item')
             .contains('Vaclav Novak')
             .closest('li')
             .within(() => {
-              gcy('permissions-revoke-button').click();
+              gcy('permissions-revoke-button')
+                .should('be.visible')
+                // clicks the button even if detached from dom
+                .click({ force: true });
             });
         });
         confirmStandard();
