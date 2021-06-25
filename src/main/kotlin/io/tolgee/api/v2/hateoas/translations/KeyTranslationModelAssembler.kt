@@ -15,5 +15,7 @@ class KeyTranslationModelAssembler(
             keyName = view.keyName,
             translations = view.translations.map {
                 it.key to translationModelAssembler.toModel(it.value)
-            }.toMap())
+            }.toMap(),
+            screenshotCount = view.screenshotCount
+    )
 }

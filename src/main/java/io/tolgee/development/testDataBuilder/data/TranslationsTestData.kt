@@ -2,10 +2,7 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.DataBuilders
 import io.tolgee.development.testDataBuilder.TestDataBuilder
-import io.tolgee.model.Language
-import io.tolgee.model.Permission
-import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
+import io.tolgee.model.*
 import io.tolgee.model.key.Key
 
 class TranslationsTestData {
@@ -15,6 +12,7 @@ class TranslationsTestData {
     var user: UserAccount
     lateinit var aKey: Key
     lateinit var projectBuilder: DataBuilders.ProjectBuilder
+    lateinit var aKeyGermanTranslation: Translation
 
     val root: TestDataBuilder = TestDataBuilder().apply {
         user = addUserAccount {
@@ -53,13 +51,13 @@ class TranslationsTestData {
 
             aKey = addKey {
                 self.name = "A key"
-                addTranslation {
+                aKeyGermanTranslation = addTranslation {
                     self {
                         key = this@addKey.self
                         language = germanLanguage
                         text = "Z translation"
                     }
-                }
+                }.self
             }.self
 
             addKey {
@@ -72,7 +70,37 @@ class TranslationsTestData {
                     }
                 }
             }
+            projectBuilder = this
+        }.self
+    }
 
+    fun addKeyWithDot() {
+        projectBuilder.addKey {
+            self {
+                name = "key.with.dots"
+            }
+        }
+    }
+
+    fun addKeysWithScreenshots() {
+        projectBuilder.addKey {
+            self {
+                name = "key with screenshot"
+            }
+            addScreenshot {}
+            addScreenshot {}
+        }
+        projectBuilder.addKey {
+            self {
+                name = "key with screenshot 2"
+            }
+            addScreenshot {}
+            addScreenshot {}
+        }
+    }
+
+    fun generateLotOfData() {
+        root.data.projects[0].apply {
             (1..99).forEach {
                 val padNum = it.toString().padStart(2, '0')
                 addKey {
@@ -92,15 +120,6 @@ class TranslationsTestData {
                         }
                     }
                 }
-            }
-            projectBuilder = this
-        }.self
-    }
-
-    fun addKeyWithDot() {
-        projectBuilder.addKey {
-            self {
-                name = "key.with.dots"
             }
         }
     }

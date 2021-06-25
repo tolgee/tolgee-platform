@@ -117,4 +117,8 @@ class ScreenshotService(
         }
         return Dimension(image.width, image.height)
     }
+
+    fun saveAll(screenshots: List<Screenshot>) {
+        screenshotRepository.saveAll(screenshots)
+    }
 }

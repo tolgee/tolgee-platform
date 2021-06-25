@@ -3,7 +3,7 @@ package io.tolgee.service
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.query_results.KeyWithTranslationsDto
-import io.tolgee.dtos.request.GetTranslationsParamsDto
+import io.tolgee.dtos.request.GetTranslationsParams
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto.Companion.fromQueryResult
 import io.tolgee.dtos.response.ViewDataResponse
@@ -113,36 +113,38 @@ class TranslationService(private val translationRepository: TranslationRepositor
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun getViewData(project: Project, pageable: Pageable, params: GetTranslationsParamsDto
+    fun getViewData(project: Project, pageable: Pageable, params: GetTranslationsParams
     ): Page<KeyWithTranslationsView> {
         val languages: Set<Language> = languageService.getLanguagesForTranslationsView(params.languages, project)
         return TranslationsViewBuilder.getData(entityManager, project, languages, pageable, params)
     }
 
 
-    fun setTranslation(key: Key, languageTag: String?, text: String?) {
+    fun setTranslation(key: Key, languageTag: String?, text: String?): Translation {
         val language = languageService.findByTag(languageTag!!, key.project!!)
                 .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-        setTranslation(key, language, text)
+        return setTranslation(key, language, text)
     }
 
-    fun setTranslation(key: Key, language: Language, text: String?) {
+    fun setTranslation(key: Key, language: Language, text: String?): Translation {
         val translation = getOrCreate(key, language)
         translation.text = text
         saveTranslation(translation)
+        return translation
     }
 
     fun saveTranslation(translation: Translation) {
         translationRepository.save(translation)
     }
 
-    fun setForKey(key: Key, translations: Map<String, String?>) {
-        for ((key1, value) in translations) {
+    fun setForKey(key: Key, translations: Map<String, String?>): Map<String, Translation> {
+        return translations.entries.associate { (languageTag, value) ->
             if (value == null || value.isEmpty()) {
-                deleteIfExists(key, key1)
+                deleteIfExists(key, languageTag)
+                return@associate languageTag to null
             }
-            setTranslation(key, key1, value)
-        }
+            languageTag to setTranslation(key, languageTag, value)
+        }.filterValues { it != null }.mapValues { it.value as Translation }
     }
 
     fun deleteIfExists(key: Key, languageTag: String?) {
