@@ -1,8 +1,9 @@
-import * as Yup from 'yup';
-import { container } from 'tsyringe';
-import { SignUpService } from '../service/SignUpService';
 import { T } from '@tolgee/react';
+import { container } from 'tsyringe';
+import * as Yup from 'yup';
+
 import { OrganizationService } from '../service/OrganizationService';
+import { SignUpService } from '../service/SignUpService';
 
 Yup.setLocale({
   // use constant translation keys for messages without values

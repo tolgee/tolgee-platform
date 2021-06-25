@@ -1,9 +1,9 @@
-import { default as React, FunctionComponent } from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Backdrop from '@material-ui/core/Backdrop';
-import createStyles from '@material-ui/core/styles/createStyles';
+import { FunctionComponent } from 'react';
 import { Theme } from '@material-ui/core';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import createStyles from '@material-ui/core/styles/createStyles';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 
 interface FullPageLoadingProps {}
 

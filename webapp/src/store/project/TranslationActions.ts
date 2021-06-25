@@ -1,10 +1,10 @@
+import { useSelector } from 'react-redux';
 import { singleton } from 'tsyringe';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
 } from '../AbstractLoadableActions';
 import { AppState } from '../index';
-import { useSelector } from 'react-redux';
 
 export type TranslationEditingType = {
   key: string;

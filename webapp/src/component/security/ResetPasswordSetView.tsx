@@ -1,19 +1,21 @@
 import { default as React, FunctionComponent, useEffect } from 'react';
-import { DashboardPage } from '../layout/DashboardPage';
-import { BaseView } from '../layout/BaseView';
 import { Button } from '@material-ui/core';
-import { useSelector } from 'react-redux';
-import { AppState } from '../../store';
-import { LINKS, PARAMS } from '../../constants/links';
-import { Redirect, useRouteMatch } from 'react-router-dom';
-import { StandardForm } from '../common/form/StandardForm';
 import Box from '@material-ui/core/Box';
+import { useSelector } from 'react-redux';
+import { Redirect, useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
-import { GlobalActions } from '../../store/global/GlobalActions';
+
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useConfig } from 'tg.hooks/useConfig';
+import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { AppState } from 'tg.store/index';
+
 import { Alert } from '../common/Alert';
+import { StandardForm } from '../common/form/StandardForm';
+import { BaseView } from '../layout/BaseView';
+import { DashboardPage } from '../layout/DashboardPage';
 import { SetPasswordFields } from './SetPasswordFields';
-import { useConfig } from '../../hooks/useConfig';
-import { Validation } from '../../constants/GlobalValidationSchema';
 
 const globalActions = container.resolve(GlobalActions);
 

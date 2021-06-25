@@ -1,13 +1,13 @@
+import { T } from '@tolgee/react';
 import { singleton } from 'tsyringe';
-import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { TokenDTO } from './response.types';
-import { TokenService } from './TokenService';
-import { MessageService } from './MessageService';
+
 import { SignUpType } from '../component/security/SignUpView';
 import { GlobalActions } from '../store/global/GlobalActions';
 import { InvitationCodeService } from './InvitationCodeService';
-import { T } from '@tolgee/react';
-import React from 'react';
+import { MessageService } from './MessageService';
+import { TokenService } from './TokenService';
+import { ApiV1HttpService } from './http/ApiV1HttpService';
+import { TokenDTO } from './response.types';
 
 @singleton()
 export class SignUpService {

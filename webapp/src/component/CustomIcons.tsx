@@ -1,5 +1,6 @@
-import { SvgIcon } from '@material-ui/core';
 import React, { ComponentProps } from 'react';
+import { SvgIcon } from '@material-ui/core';
+
 import { ReactComponent as ExportSvg } from '../svgs/icons/export.svg';
 import { ReactComponent as ImportSvg } from '../svgs/icons/import.svg';
 import { ReactComponent as ProjectsSvg } from '../svgs/icons/projects.svg';

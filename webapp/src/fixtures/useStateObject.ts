@@ -1,5 +1,4 @@
 import { useState } from 'react';
-
 export const useStateObject = <T extends { [key: string]: any }>(
   states: T
 ): T => {

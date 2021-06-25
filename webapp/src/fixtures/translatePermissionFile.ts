@@ -1,4 +1,5 @@
 import { useTranslate } from '@tolgee/react';
+
 import { projectPermissionTypes } from '../constants/projectPermissionTypes';
 
 export const translatedPermissionType = (type: string, noWrap = false) => {

@@ -1,4 +1,5 @@
 import { singleton } from 'tsyringe';
+
 import { ApiV1HttpService } from './http/ApiV1HttpService';
 import { ErrorResponseDto, ScreenshotDTO } from './response.types';
 

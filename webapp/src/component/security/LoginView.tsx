@@ -1,22 +1,24 @@
 import { FunctionComponent, useEffect } from 'react';
-import { DashboardPage } from '../layout/DashboardPage';
-import { BaseView } from '../layout/BaseView';
-import GitHubIcon from '@material-ui/icons/GitHub';
 import { Button } from '@material-ui/core';
+import Box from '@material-ui/core/Box';
+import GitHubIcon from '@material-ui/icons/GitHub';
+import { T } from '@tolgee/react';
 import { useSelector } from 'react-redux';
-import { AppState } from '../../store';
-import { LINKS, PARAMS } from '../../constants/links';
 import { Link, Redirect, useHistory } from 'react-router-dom';
+import { container } from 'tsyringe';
+
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useConfig } from 'tg.hooks/useConfig';
+import { MessageService } from 'tg.service/MessageService';
+import { SecurityService } from 'tg.service/SecurityService';
+import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { AppState } from 'tg.store/index';
+
+import LoadingButton from '../common/form/LoadingButton';
 import { StandardForm } from '../common/form/StandardForm';
 import { TextField } from '../common/form/fields/TextField';
-import Box from '@material-ui/core/Box';
-import { container } from 'tsyringe';
-import { GlobalActions } from '../../store/global/GlobalActions';
-import { SecurityService } from '../../service/SecurityService';
-import { useConfig } from '../../hooks/useConfig';
-import { T } from '@tolgee/react';
-import { MessageService } from '../../service/MessageService';
-import LoadingButton from '../common/form/LoadingButton';
+import { BaseView } from '../layout/BaseView';
+import { DashboardPage } from '../layout/DashboardPage';
 
 interface LoginProps {}
 

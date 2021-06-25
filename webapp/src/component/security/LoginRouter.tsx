@@ -1,9 +1,11 @@
 import { default as React, FunctionComponent } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { LINKS } from '../../constants/links';
+
+import { LINKS } from 'tg.constants/links';
+
+import { EmailVerificationHandler } from './EmailVerificationHandler';
 import { LoginView } from './LoginView';
 import { OAuthRedirectionHandler } from './OAuthRedirectionHandler';
-import { EmailVerificationHandler } from './EmailVerificationHandler';
 
 interface LoginRouterProps {}
 

@@ -1,12 +1,11 @@
+import React, { ComponentProps, FunctionComponent } from 'react';
 import { Button, Menu, MenuItem } from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
 import { T } from '@tolgee/react';
-import * as React from 'react';
-import { ComponentProps, FunctionComponent } from 'react';
 
-import { components } from '../../service/apiSchema.generated';
-import { ProjectPermissionType } from '../../service/response.types';
-import { ProjectPermissions } from '../../hooks/useProjectPermissions';
+import { ProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { components } from 'tg.service/apiSchema.generated';
+import { ProjectPermissionType } from 'tg.service/response.types';
 
 export const PermissionsMenu: FunctionComponent<{
   selected: NonNullable<

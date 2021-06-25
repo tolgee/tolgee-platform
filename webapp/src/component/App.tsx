@@ -1,25 +1,25 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { GlobalActions } from '../store/global/GlobalActions';
-import SnackBar from './common/SnackBar';
+import React, { useEffect, useState } from 'react';
+import * as Sentry from '@sentry/browser';
+import { useSelector } from 'react-redux';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { container } from 'tsyringe';
-import { useSelector } from 'react-redux';
-import { AppState } from '../store';
+
 import { LINKS } from '../constants/links';
-import { PrivateRoute } from './common/PrivateRoute';
-import { ErrorActions } from '../store/global/ErrorActions';
-import { RedirectionActions } from '../store/global/RedirectionActions';
+import { GlobalError } from '../error/GlobalError';
 import { useConfig } from '../hooks/useConfig';
 import { useUser } from '../hooks/useUser';
-import { ProjectsRouter } from './views/projects/ProjectsRouter';
-import { FullPageLoading } from './common/FullPageLoading';
-import * as Sentry from '@sentry/browser';
-import { GlobalError } from '../error/GlobalError';
-import { OrganizationsRouter } from './views/organizations/OrganizationsRouter';
-import { ApiKeysView } from './views/userSettings/apiKeys/ApiKeysView';
+import { AppState } from '../store';
+import { ErrorActions } from '../store/global/ErrorActions';
+import { GlobalActions } from '../store/global/GlobalActions';
+import { RedirectionActions } from '../store/global/RedirectionActions';
+import { OrganizationsRouter } from '../views/organizations/OrganizationsRouter';
+import { ProjectsRouter } from '../views/projects/ProjectsRouter';
+import { UserProfileView } from '../views/userSettings/UserProfileView';
+import { ApiKeysView } from '../views/userSettings/apiKeys/ApiKeysView';
 import ConfirmationDialog from './common/ConfirmationDialog';
-import { UserProfileView } from './views/userSettings/UserProfileView';
+import { FullPageLoading } from './common/FullPageLoading';
+import { PrivateRoute } from './common/PrivateRoute';
+import SnackBar from './common/SnackBar';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/LoginRouter')

@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { FunctionComponent, useState } from 'react';
 import {
   Box,
@@ -9,14 +8,15 @@ import {
   Theme,
 } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import { useProjectLanguages } from '../../../hooks/useProjectLanguages';
-import { container } from 'tsyringe';
-import { TranslationActions } from '../../../store/project/TranslationActions';
 import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import { MessageService } from '../../../service/MessageService';
 import { T } from '@tolgee/react';
+import { container } from 'tsyringe';
+
+import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { MessageService } from 'tg.service/MessageService';
+import { TranslationActions } from 'tg.store/project/TranslationActions';
 
 export interface LanguagesMenuProps {
   context: string;

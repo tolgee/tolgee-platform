@@ -1,7 +1,8 @@
-import * as React from 'react';
 import { FC } from 'react';
-import { components } from '../../service/apiSchema.generated';
 import { Box } from '@material-ui/core';
+
+import { components } from 'tg.service/apiSchema.generated';
+
 import { FlagImage } from './FlagImage';
 
 export const LanguageValue: FC<{

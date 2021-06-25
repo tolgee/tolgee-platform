@@ -8,12 +8,13 @@ import {
   UseQueryOptions,
 } from 'react-query';
 import { container } from 'tsyringe';
+
 import { paths } from '../apiSchema.generated';
 import { RequestOptions } from './ApiHttpService';
 import {
   ApiSchemaHttpService,
-  ResponseContent,
   RequestParamsType,
+  ResponseContent,
 } from './ApiSchemaHttpService';
 
 const apiHttpService = container.resolve(ApiSchemaHttpService);

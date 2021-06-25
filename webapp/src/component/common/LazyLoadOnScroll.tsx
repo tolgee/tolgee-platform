@@ -1,6 +1,7 @@
 import { createRef, FunctionComponent } from 'react';
-import { BoxLoading } from './BoxLoading';
 import { Box } from '@material-ui/core';
+
+import { BoxLoading } from './BoxLoading';
 
 export const LazyLoadOnScroll: FunctionComponent<{
   onLoad: () => void;

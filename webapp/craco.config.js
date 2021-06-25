@@ -2,8 +2,20 @@ const path = require('path');
 const { DataCyPlugin } = require('./dataCy.plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 
+const CracoAlias = require('craco-alias');
+
 module.exports = function ({ env: _env }) {
   return {
+    plugins: [
+      {
+        plugin: CracoAlias,
+        options: {
+          source: 'tsconfig',
+          baseUrl: './src',
+          tsConfigPath: './tsconfig.extend.json',
+        },
+      },
+    ],
     typescript: {
       enableTypeChecking: false,
     },

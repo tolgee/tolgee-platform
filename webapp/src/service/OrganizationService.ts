@@ -1,4 +1,5 @@
 import { singleton } from 'tsyringe';
+
 import { ApiV2HttpService } from './http/ApiV2HttpService';
 
 @singleton()

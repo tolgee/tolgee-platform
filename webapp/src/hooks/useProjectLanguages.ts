@@ -1,7 +1,7 @@
+import { useContext } from 'react';
 import { GlobalError } from '../error/GlobalError';
 import { components } from '../service/apiSchema.generated';
 import { ProjectLanguagesContext } from './ProjectLanguagesProvider';
-import { useContext } from 'react';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
