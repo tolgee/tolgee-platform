@@ -1,13 +1,13 @@
 import { FunctionComponent, ReactElement } from 'react';
 import { Button, Tooltip } from '@material-ui/core';
-import { confirmation } from '../../../../hooks/confirmation';
+import { confirmation } from 'tg.hooks/confirmation';
 import { T } from '@tolgee/react';
-import { components } from '../../../../service/apiSchema.generated';
-import { useUser } from '../../../../hooks/useUser';
+import { components } from 'tg.service/apiSchema.generated';
+import { useUser } from 'tg.hooks/useUser';
 import { container } from 'tsyringe';
-import { useProject } from '../../../../hooks/useProject';
-import { useApiMutation } from '../../../../service/http/useQueryApi';
-import { MessageService } from '../../../../service/MessageService';
+import { useProject } from 'tg.hooks/useProject';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
 
 const messageService = container.resolve(MessageService);
 

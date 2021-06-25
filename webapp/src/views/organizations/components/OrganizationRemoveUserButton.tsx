@@ -2,9 +2,9 @@ import { Button } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 import { useOrganization } from '../useOrganization';
-import { confirmation } from '../../../hooks/confirmation';
-import { MessageService } from '../../../service/MessageService';
-import { useApiMutation } from '../../../service/http/useQueryApi';
+import { confirmation } from 'tg.hooks/confirmation';
+import { MessageService } from 'tg.service/MessageService';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 const messageService = container.resolve(MessageService);
 

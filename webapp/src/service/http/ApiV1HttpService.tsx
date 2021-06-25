@@ -1,5 +1,5 @@
 import { singleton } from 'tsyringe';
-import { RedirectionActions } from '../../store/global/RedirectionActions';
+import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 import { TokenService } from '../TokenService';
 import { MessageService } from '../MessageService';
 import { ApiHttpService } from './ApiHttpService';

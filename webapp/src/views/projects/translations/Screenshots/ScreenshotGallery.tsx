@@ -5,29 +5,26 @@ import React, {
   useState,
   SyntheticEvent,
 } from 'react';
-import { BoxLoading } from '../../../../component/common/BoxLoading';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
 import Box from '@material-ui/core/Box';
 
-import { ProjectPermissionType } from '../../../../service/response.types';
+import { ProjectPermissionType } from 'tg.service/response.types';
 import { container } from 'tsyringe';
 import AddIcon from '@material-ui/icons/Add';
 import { T } from '@tolgee/react';
-import { useConfig } from '../../../../hooks/useConfig';
-import { useProject } from '../../../../hooks/useProject';
+import { useConfig } from 'tg.hooks/useConfig';
+import { useProject } from 'tg.hooks/useProject';
 import { createStyles, makeStyles, Theme } from '@material-ui/core';
 import { ScreenshotDetail } from './ScreenshotDetail';
 import { ScreenshotDropzone } from './ScreenshotDropzone';
-import { useProjectPermissions } from '../../../../hooks/useProjectPermissions';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { Skeleton } from '@material-ui/lab';
-import { startLoading, stopLoading } from '../../../../hooks/loading';
+import { startLoading, stopLoading } from 'tg.hooks/loading';
 
-import { components } from '../../../../service/apiSchema.generated';
-import {
-  useApiMutation,
-  useApiQuery,
-} from '../../../../service/http/useQueryApi';
-import { MessageService } from '../../../../service/MessageService';
+import { components } from 'tg.service/apiSchema.generated';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
 
 type KeyTranslationsDTO =
   components['schemas']['KeyWithTranslationsResponseDto'];

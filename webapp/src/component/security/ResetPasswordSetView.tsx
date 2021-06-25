@@ -3,17 +3,17 @@ import { DashboardPage } from '../layout/DashboardPage';
 import { BaseView } from '../layout/BaseView';
 import { Button } from '@material-ui/core';
 import { useSelector } from 'react-redux';
-import { AppState } from '../../store';
-import { LINKS, PARAMS } from '../../constants/links';
+import { AppState } from 'tg.store/index';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { Redirect, useRouteMatch } from 'react-router-dom';
 import { StandardForm } from '../common/form/StandardForm';
 import Box from '@material-ui/core/Box';
 import { container } from 'tsyringe';
-import { GlobalActions } from '../../store/global/GlobalActions';
+import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { Alert } from '../common/Alert';
 import { SetPasswordFields } from './SetPasswordFields';
-import { useConfig } from '../../hooks/useConfig';
-import { Validation } from '../../constants/GlobalValidationSchema';
+import { useConfig } from 'tg.hooks/useConfig';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 const globalActions = container.resolve(GlobalActions);
 

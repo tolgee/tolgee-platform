@@ -1,8 +1,8 @@
 import MenuItem from '@material-ui/core/MenuItem';
 import { ComponentProps, default as React, FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
-import { Select } from '../../../component/common/form/fields/Select';
-import { OrganizationRoleType } from '../../../service/response.types';
+import { Select } from 'tg.component/common/form/fields/Select';
+import { OrganizationRoleType } from 'tg.service/response.types';
 
 export const OrganizationRoleSelect: FunctionComponent<
   ComponentProps<typeof Select>

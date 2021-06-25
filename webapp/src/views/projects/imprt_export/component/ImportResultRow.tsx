@@ -1,4 +1,4 @@
-import { components } from '../../../../service/apiSchema.generated';
+import { components } from 'tg.service/apiSchema.generated';
 import React from 'react';
 import {
   Box,
@@ -9,16 +9,16 @@ import {
   TableRow,
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { ImportActions } from '../../../../store/project/ImportActions';
+import { ImportActions } from 'tg.store/project/ImportActions';
 import { container } from 'tsyringe';
-import { useProject } from '../../../../hooks/useProject';
-import { confirmation } from '../../../../hooks/confirmation';
+import { useProject } from 'tg.hooks/useProject';
+import { confirmation } from 'tg.hooks/confirmation';
 import { ImportRowLanguageMenu } from './ImportRowLanguageMenu';
 import { CheckCircle, Error, Warning } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
-import { ChipButton } from '../../../../component/common/buttons/ChipButton';
+import { ChipButton } from 'tg.component/common/buttons/ChipButton';
 
 const useStyles = makeStyles((theme) => ({
   root: {

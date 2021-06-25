@@ -4,11 +4,11 @@ import BackupTwoToneIcon from '@material-ui/icons/BackupTwoTone';
 import HighlightOffTwoToneIcon from '@material-ui/icons/HighlightOffTwoTone';
 import clsx from 'clsx';
 import { Box, createStyles, makeStyles, Theme } from '@material-ui/core';
-import { FileUploadFixtures } from '../../../../fixtures/FileUploadFixtures';
+import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';
 import { MAX_FILE_COUNT } from './ScreenshotGallery';
 import { green, red } from '@material-ui/core/colors';
-import { useProjectPermissions } from '../../../../hooks/useProjectPermissions';
-import { ProjectPermissionType } from '../../../../service/response.types';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { ProjectPermissionType } from 'tg.service/response.types';
 
 export interface ScreenshotDropzoneProps {
   validateAndUpload: (files: File[]) => void;

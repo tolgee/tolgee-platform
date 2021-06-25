@@ -1,11 +1,11 @@
 import { Switch } from 'react-router-dom';
-import { PrivateRoute } from '../../component/common/PrivateRoute';
+import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { OrganizationsListView } from './OrganizationListView';
 import { OrganizationCreateView } from './OrganizationCreateView';
-import { LINKS } from '../../constants/links';
+import { LINKS } from 'tg.constants/links';
 import { OrganizationProfileView } from './OrganizationProfileView';
-import { BoxLoading } from '../../component/common/BoxLoading';
-import { DashboardPage } from '../../component/layout/DashboardPage';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { OrganizationMembersView } from './OrganizationMembersView';
 import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivilegesView';
 import { OrganizationInvitationsView } from './OrganizationInvitationsView';

@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { MessageActions } from '../../store/global/MessageActions';
-import { Message } from '../../store/global/types';
+import { MessageActions } from 'tg.store/global/MessageActions';
+import { Message } from 'tg.store/global/types';
 import { connect } from 'react-redux';
-import { AppState } from '../../store';
+import { AppState } from 'tg.store/index';
 import { container } from 'tsyringe';
 import { useSnackbar } from 'notistack';
 

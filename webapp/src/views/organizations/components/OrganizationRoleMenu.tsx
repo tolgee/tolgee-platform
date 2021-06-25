@@ -3,16 +3,16 @@ import { Button, Menu, MenuItem } from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
 import { T } from '@tolgee/react';
 import * as React from 'react';
-import { useUser } from '../../../hooks/useUser';
-import { components } from '../../../service/apiSchema.generated';
+import { useUser } from 'tg.hooks/useUser';
+import { components } from 'tg.service/apiSchema.generated';
 import { FunctionComponent } from 'react';
-import { OrganizationRoleType } from '../../../service/response.types';
+import { OrganizationRoleType } from 'tg.service/response.types';
 import { container } from 'tsyringe';
 
-import { MessageService } from '../../../service/MessageService';
+import { MessageService } from 'tg.service/MessageService';
 import { useOrganization } from '../useOrganization';
-import { confirmation } from '../../../hooks/confirmation';
-import { useApiMutation } from '../../../service/http/useQueryApi';
+import { confirmation } from 'tg.hooks/confirmation';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 const messagingService = container.resolve(MessageService);
 

@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { PaginatedHateoasList } from '../../component/common/list/PaginatedHateoasList';
-import { LINKS, PARAMS } from '../../constants/links';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { Link } from 'react-router-dom';
-import { OrganizationRoleType } from '../../service/response.types';
-import { FabAddButtonLink } from '../../component/common/buttons/FabAddButtonLink';
+import { OrganizationRoleType } from 'tg.service/response.types';
+import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
 import Box from '@material-ui/core/Box';
 import { BaseUserSettingsView } from '../userSettings/BaseUserSettingsView';
-import { SimpleListItem } from '../../component/common/list/SimpleListItem';
+import { SimpleListItem } from 'tg.component/common/list/SimpleListItem';
 import { Button } from '@material-ui/core';
 import { useLeaveOrganization } from './useLeaveOrganization';
-import { useApiQuery } from '../../service/http/useQueryApi';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const OrganizationsListView = () => {
   const t = useTranslate();

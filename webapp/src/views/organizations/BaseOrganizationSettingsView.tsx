@@ -1,11 +1,11 @@
 import { useRouteMatch } from 'react-router-dom';
-import { BaseView, BaseViewProps } from '../../component/layout/BaseView';
+import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
 import { FunctionComponent, PropsWithChildren } from 'react';
 import { Box, Grid, Typography } from '@material-ui/core';
 import { OrganizationSettingsMenu } from './components/OrganizationSettingsMenu';
 import UserOrganizationSettingsSubtitleLink from './components/UserOrganizationSettingsSubtitleLink';
-import { PARAMS } from '../../constants/links';
-import { useApiQuery } from '../../service/http/useQueryApi';
+import { PARAMS } from 'tg.constants/links';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const BaseOrganizationSettingsView: FunctionComponent<BaseViewProps> = ({
   children,

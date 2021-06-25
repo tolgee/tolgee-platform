@@ -9,18 +9,18 @@ import {
   MenuItem,
   Select,
 } from '@material-ui/core';
-import { useProjectLanguages } from '../../../../hooks/useProjectLanguages';
+import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
-import { ImportActions } from '../../../../store/project/ImportActions';
+import { ImportActions } from 'tg.store/project/ImportActions';
 import { useImportDataHelper } from '../hooks/useImportDataHelper';
-import { useProject } from '../../../../hooks/useProject';
+import { useProject } from 'tg.hooks/useProject';
 import { Add, Clear } from '@material-ui/icons';
 import clsx from 'clsx';
-import { useStateObject } from '../../../../fixtures/useStateObject';
+import { useStateObject } from 'tg.fixtures/useStateObject';
 import { ImportLanguageCreateDialog } from './ImportLanguageCreateDialog';
 import { useQueryClient } from 'react-query';
-import { invalidateUrlPrefix } from '../../../../service/http/useQueryApi';
+import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
 
 const actions = container.resolve(ImportActions);
 

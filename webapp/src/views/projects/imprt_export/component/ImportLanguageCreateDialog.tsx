@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import { Box, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { CreateSingleLanguage } from '../../../../component/languages/CreateSingleLanguage';
+import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
 
 export const ImportLanguageCreateDialog: FunctionComponent<{
   open: boolean;

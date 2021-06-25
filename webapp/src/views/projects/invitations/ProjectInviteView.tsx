@@ -1,24 +1,24 @@
 import { FunctionComponent, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { LINKS, PARAMS } from '../../../constants/links';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { Button, TextField } from '@material-ui/core';
-import { BaseView } from '../../../component/layout/BaseView';
+import { BaseView } from 'tg.component/layout/BaseView';
 import { container } from 'tsyringe';
-import { projectPermissionTypes } from '../../../constants/projectPermissionTypes';
-import { StandardForm } from '../../../component/common/form/StandardForm';
+import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import { EmptyListMessage } from '../../../component/common/EmptyListMessage';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { T, useTranslate } from '@tolgee/react';
-import { PermissionSelect } from '../../../component/security/PermissionSelect';
-import { useProject } from '../../../hooks/useProject';
-import { Navigation } from '../../../component/navigation/Navigation';
-import { ProjectInvitationActions } from '../../../store/project/invitations/ProjectInvitationActions';
-import { useApiMutation, useApiQuery } from '../../../service/http/useQueryApi';
+import { PermissionSelect } from 'tg.component/security/PermissionSelect';
+import { useProject } from 'tg.hooks/useProject';
+import { Navigation } from 'tg.component/navigation/Navigation';
+import { ProjectInvitationActions } from 'tg.store/project/invitations/ProjectInvitationActions';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 type FormType = {
   type: string;

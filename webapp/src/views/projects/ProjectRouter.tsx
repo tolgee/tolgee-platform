@@ -1,9 +1,9 @@
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
-import { LINKS, PARAMS } from '../../constants/links';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { LanguageEditView } from './languages/LanguageEditView';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
-import { ProjectProvider } from '../../hooks/ProjectProvider';
-import { PrivateRoute } from '../../component/common/PrivateRoute';
+import { ProjectProvider } from 'tg.hooks/ProjectProvider';
+import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { ImportView } from './imprt_export/ImportView';
 import { ExportView } from './imprt_export/ExportView';
 import { ProjectPage } from './ProjectPage';

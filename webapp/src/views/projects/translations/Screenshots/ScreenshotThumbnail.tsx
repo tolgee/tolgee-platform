@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { useConfig } from '../../../../hooks/useConfig';
+import { useConfig } from 'tg.hooks/useConfig';
 import {
   Box,
   createStyles,
@@ -8,13 +8,13 @@ import {
   Theme,
   Tooltip,
 } from '@material-ui/core';
-import { ProjectPermissionType } from '../../../../service/response.types';
+import { ProjectPermissionType } from 'tg.service/response.types';
 import clsx from 'clsx';
 import ClearIcon from '@material-ui/icons/Clear';
-import { confirmation } from '../../../../hooks/confirmation';
+import { confirmation } from 'tg.hooks/confirmation';
 import { T } from '@tolgee/react';
-import { useProjectPermissions } from '../../../../hooks/useProjectPermissions';
-import { components } from '../../../../service/apiSchema.generated';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { components } from 'tg.service/apiSchema.generated';
 
 export interface ScreenshotThumbnailProps {
   onClick: () => void;

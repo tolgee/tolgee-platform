@@ -8,7 +8,9 @@
       "tg.constants/*": ["constants/*"],
       "tg.fixtures/*": ["fixtures/*"],
       "tg.service/*": ["service/*"],
-      "tg.views/*": ["views/*"]
+      "tg.views/*": ["views/*"],
+      "tg.error/*": ["error/*"],
+      "tg.svgs/*": ["svgs/*"]
     }
   }
 }

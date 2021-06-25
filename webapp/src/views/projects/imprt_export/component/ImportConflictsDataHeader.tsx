@@ -10,9 +10,9 @@ import {
 import { T } from '@tolgee/react';
 import { DoneAll } from '@material-ui/icons';
 import { container } from 'tsyringe';
-import { ImportActions } from '../../../../store/project/ImportActions';
-import { useProject } from '../../../../hooks/useProject';
-import { components } from '../../../../service/apiSchema.generated';
+import { ImportActions } from 'tg.store/project/ImportActions';
+import { useProject } from 'tg.hooks/useProject';
+import { components } from 'tg.service/apiSchema.generated';
 
 const actions = container.resolve(ImportActions);
 export const ImportConflictsDataHeader: FunctionComponent<{

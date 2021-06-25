@@ -1,11 +1,10 @@
-import * as React from 'react';
 import { Button, Paper } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import { GlobalError as GlobalErrorError } from '../../error/GlobalError';
+import { GlobalError as GlobalErrorError } from 'tg.error/GlobalError';
 import { SadEmotionMessage } from './SadEmotionMessage';
-import { GlobalActions } from '../../store/global/GlobalActions';
+import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { container } from 'tsyringe';
 
 export default function GlobalError(props: { error: GlobalErrorError }) {

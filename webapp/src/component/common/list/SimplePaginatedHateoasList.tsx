@@ -4,11 +4,11 @@ import { OverridableListWrappers, SimpleList } from './SimpleList';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
-} from '../../../store/AbstractLoadableActions';
+} from 'tg.store/AbstractLoadableActions';
 import { BoxLoading } from '../BoxLoading';
 import { Box, Grid, Typography } from '@material-ui/core';
 import SearchField from '../form/fields/SearchField';
-import { startLoading, stopLoading } from '../../../hooks/loading';
+import { startLoading, stopLoading } from 'tg.hooks/loading';
 import { Alert } from '@material-ui/lab';
 import { T } from '@tolgee/react';
 import {

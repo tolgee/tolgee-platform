@@ -3,17 +3,17 @@ import { DashboardPage } from '../layout/DashboardPage';
 import { BaseView } from '../layout/BaseView';
 import { Button } from '@material-ui/core';
 import { useSelector } from 'react-redux';
-import { AppState } from '../../store';
-import { LINKS } from '../../constants/links';
+import { AppState } from 'tg.store/index';
+import { LINKS } from 'tg.constants/links';
 import { Redirect } from 'react-router-dom';
 import { StandardForm } from '../common/form/StandardForm';
 import { TextField } from '../common/form/fields/TextField';
 import Box from '@material-ui/core/Box';
 import { container } from 'tsyringe';
-import { GlobalActions } from '../../store/global/GlobalActions';
+import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { Alert } from '../common/Alert';
-import { useConfig } from '../../hooks/useConfig';
-import { Validation } from '../../constants/GlobalValidationSchema';
+import { useConfig } from 'tg.hooks/useConfig';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { T } from '@tolgee/react';
 
 interface LoginProps {}

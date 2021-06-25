@@ -1,17 +1,17 @@
 import { container } from 'tsyringe';
-import { LINKS, PARAMS } from '../../../constants/links';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { useRouteMatch } from 'react-router-dom';
-import { BaseFormView } from '../../../component/layout/BaseFormView';
+import { BaseFormView } from 'tg.component/layout/BaseFormView';
 import { Box, Button } from '@material-ui/core';
-import { confirmation } from '../../../hooks/confirmation';
-import { Validation } from '../../../constants/GlobalValidationSchema';
-import { useRedirect } from '../../../hooks/useRedirect';
+import { confirmation } from 'tg.hooks/confirmation';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { useRedirect } from 'tg.hooks/useRedirect';
 import { T } from '@tolgee/react';
-import { ConfirmationDialogProps } from '../../../component/common/ConfirmationDialog';
-import { LanguageModifyFields } from '../../../component/languages/LanguageModifyFields';
-import { components } from '../../../service/apiSchema.generated';
-import { MessageService } from '../../../service/MessageService';
-import { useApiMutation, useApiQuery } from '../../../service/http/useQueryApi';
+import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
+import { LanguageModifyFields } from 'tg.component/languages/LanguageModifyFields';
+import { components } from 'tg.service/apiSchema.generated';
+import { MessageService } from 'tg.service/MessageService';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 

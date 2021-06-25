@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from 'react';
-import { SecondaryBar } from '../../../../component/layout/SecondaryBar';
+import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
 import {
   Box,
   FormControlLabel,
@@ -11,7 +11,7 @@ import {
 import { T } from '@tolgee/react';
 import { CheckCircle, Warning } from '@material-ui/icons';
 import { container } from 'tsyringe';
-import { ImportActions } from '../../../../store/project/ImportActions';
+import { ImportActions } from 'tg.store/project/ImportActions';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({

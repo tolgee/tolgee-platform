@@ -2,9 +2,9 @@ import { ReactNode, useEffect, useState } from 'react';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
-} from '../../../store/AbstractLoadableActions';
-import { HateoasPaginatedData } from '../../../service/response.types';
-import { components } from '../../../service/apiSchema.generated';
+} from 'tg.store/AbstractLoadableActions';
+import { HateoasPaginatedData } from 'tg.service/response.types';
+import { components } from 'tg.service/apiSchema.generated';
 
 export type EmbeddedDataItem<
   ActionsType extends AbstractLoadableActions<StateWithLoadables<ActionsType>>,

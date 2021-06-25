@@ -1,9 +1,9 @@
 import React, { FunctionComponent, ReactNode } from 'react';
 import { Box, Button, makeStyles, Typography } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { Message } from '../../../../store/global/types';
-import { useConfig } from '../../../../hooks/useConfig';
-import { MessageActions } from '../../../../store/global/MessageActions';
+import { Message } from 'tg.store/global/types';
+import { useConfig } from 'tg.hooks/useConfig';
+import { MessageActions } from 'tg.store/global/MessageActions';
 import { container } from 'tsyringe';
 import { ImportFileDropzone } from './ImportFileDropzone';
 

@@ -1,13 +1,12 @@
-import React from 'react';
-import { ListItemLink } from '../../component/common/list/ListItemLink';
-import { LINKS, PARAMS } from '../../constants/links';
+import { ListItemLink } from 'tg.component/common/list/ListItemLink';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import ListItemText from '@material-ui/core/ListItemText';
 import { Button, Chip } from '@material-ui/core';
-import { ProjectPermissionType } from '../../service/response.types';
+import { ProjectPermissionType } from 'tg.service/response.types';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { Link } from 'react-router-dom';
 import { T } from '@tolgee/react';
-import { components } from '../../service/apiSchema.generated';
+import { components } from 'tg.service/apiSchema.generated';
 
 const ProjectListItem = (r: components['schemas']['ProjectModel']) => {
   return (

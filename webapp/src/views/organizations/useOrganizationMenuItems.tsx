@@ -1,4 +1,4 @@
-import { LINKS, PARAMS } from '../../constants/links';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { useRouteMatch } from 'react-router-dom';
 import { useOrganization } from './useOrganization';
 

@@ -5,24 +5,24 @@ import {
   useState,
 } from 'react';
 import { Box, Button } from '@material-ui/core';
-import { LINKS, PARAMS } from '../../../constants/links';
-import { Navigation } from '../../../component/navigation/Navigation';
-import { BaseView } from '../../../component/layout/BaseView';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { Navigation } from 'tg.component/navigation/Navigation';
+import { BaseView } from 'tg.component/layout/BaseView';
 import { T, useTranslate } from '@tolgee/react';
 import ImportFileInput from './component/ImportFileInput';
 import { useImportDataHelper } from './hooks/useImportDataHelper';
 import { ImportResult } from './component/ImportResult';
 import { container } from 'tsyringe';
-import { ImportActions } from '../../../store/project/ImportActions';
-import { useProject } from '../../../hooks/useProject';
+import { ImportActions } from 'tg.store/project/ImportActions';
+import { useProject } from 'tg.hooks/useProject';
 import { ImportConflictNotResolvedErrorDialog } from './component/ImportConflictNotResolvedErrorDialog';
 import { useApplyImportHelper } from './hooks/useApplyImportHelper';
-import { startLoading, stopLoading } from '../../../hooks/loading';
-import { parseErrorResponse } from '../../../fixtures/errorFIxtures';
-import { MessageService } from '../../../service/MessageService';
+import { startLoading, stopLoading } from 'tg.hooks/loading';
+import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { MessageService } from 'tg.service/MessageService';
 import { ImportAlertError } from './ImportAlertError';
-import { confirmation } from '../../../hooks/confirmation';
-import { components } from '../../../service/apiSchema.generated';
+import { confirmation } from 'tg.hooks/confirmation';
+import { components } from 'tg.service/apiSchema.generated';
 import { ImportConflictResolutionDialog } from './component/ImportConflictResolutionDialog';
 
 const actions = container.resolve(ImportActions);

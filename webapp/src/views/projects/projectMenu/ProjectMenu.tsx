@@ -2,15 +2,15 @@ import { Divider } from '@material-ui/core';
 import List from '@material-ui/core/List';
 import { useSelector } from 'react-redux';
 import { SideMenuItem } from './SideMenuItem';
-import { LINKS, PARAMS } from '../../../constants/links';
-import { useProject } from '../../../hooks/useProject';
-import { ProjectPermissionType } from '../../../service/response.types';
-import { useConfig } from '../../../hooks/useConfig';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useProject } from 'tg.hooks/useProject';
+import { ProjectPermissionType } from 'tg.service/response.types';
+import { useConfig } from 'tg.hooks/useConfig';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
-import { GlobalActions } from '../../../store/global/GlobalActions';
-import { AppState } from '../../../store';
+import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { AppState } from 'tg.store/index';
 import { SideMenu } from './SideMenu';
 import {
   ProjectsIcon,
@@ -20,7 +20,7 @@ import {
   ExportIcon,
   UserSettingIcon,
   UserAddIcon,
-} from '../../../component/CustomIcons';
+} from 'tg.component/CustomIcons';
 
 const actions = container.resolve(GlobalActions);
 

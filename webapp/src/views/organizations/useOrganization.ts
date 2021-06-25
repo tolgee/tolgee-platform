@@ -1,6 +1,6 @@
 import { useRouteMatch } from 'react-router-dom';
-import { PARAMS } from '../../constants/links';
-import { useApiQuery } from '../../service/http/useQueryApi';
+import { PARAMS } from 'tg.constants/links';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const useOrganization = () => {
   const match = useRouteMatch();

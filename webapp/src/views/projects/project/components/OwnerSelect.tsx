@@ -6,10 +6,10 @@ import {
   Select,
 } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { useUser } from '../../../../hooks/useUser';
+import { useUser } from 'tg.hooks/useUser';
 import { useField } from 'formik';
-import { BoxLoading } from '../../../../component/common/BoxLoading';
-import { useApiQuery } from '../../../../service/http/useQueryApi';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 const OwnerSelect = () => {
   const user = useUser();

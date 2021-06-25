@@ -1,11 +1,11 @@
 import React, { FunctionComponent } from 'react';
 import { Box, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { useProject } from '../../../../hooks/useProject';
+import { useProject } from 'tg.hooks/useProject';
 import { container } from 'tsyringe';
-import { ImportActions } from '../../../../store/project/ImportActions';
-import { components } from '../../../../service/apiSchema.generated';
-import { SimplePaginatedHateoasList } from '../../../../component/common/list/SimplePaginatedHateoasList';
+import { ImportActions } from 'tg.store/project/ImportActions';
+import { components } from 'tg.service/apiSchema.generated';
+import { SimplePaginatedHateoasList } from 'tg.component/common/list/SimplePaginatedHateoasList';
 import { Alert } from '@material-ui/lab';
 import { Warning } from '@material-ui/icons';
 

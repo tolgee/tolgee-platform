@@ -4,17 +4,17 @@ import { container } from 'tsyringe';
 import { useHistory } from 'react-router-dom';
 
 import { T } from '@tolgee/react';
-import { Validation } from '../../constants/GlobalValidationSchema';
-import { SetPasswordFields } from '../../component/security/SetPasswordFields';
-import { UserUpdateDTO } from '../../service/request.types';
-import { TextField } from '../../component/common/form/fields/TextField';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { SetPasswordFields } from 'tg.component/security/SetPasswordFields';
+import { UserUpdateDTO } from 'tg.service/request.types';
+import { TextField } from 'tg.component/common/form/fields/TextField';
 import { BaseUserSettingsView } from './BaseUserSettingsView';
-import { StandardForm } from '../../component/common/form/StandardForm';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { useFormikContext } from 'formik';
 import { Box, Typography } from '@material-ui/core';
-import { useConfig } from '../../hooks/useConfig';
-import { useApiMutation, useApiQuery } from '../../service/http/useQueryApi';
-import { MessageService } from '../../service/MessageService';
+import { useConfig } from 'tg.hooks/useConfig';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
 
 const messagesService = container.resolve(MessageService);
 

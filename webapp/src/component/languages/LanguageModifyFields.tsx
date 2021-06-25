@@ -6,7 +6,7 @@ import { FlagSelector } from './FlagSelector';
 import { Alert } from '@material-ui/lab';
 import { isValidLanguageTag } from '@tginternal/language-util';
 import { useFormikContext } from 'formik';
-import { components } from '../../service/apiSchema.generated';
+import { components } from 'tg.service/apiSchema.generated';
 
 export const LanguageModifyFields: FC<{
   preferredEmojis?: string[];

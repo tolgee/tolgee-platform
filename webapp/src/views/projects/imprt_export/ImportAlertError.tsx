@@ -6,11 +6,11 @@ import React, {
 } from 'react';
 import { Box, Button, Collapse, IconButton } from '@material-ui/core';
 import { container } from 'tsyringe';
-import { ImportActions } from '../../../store/project/ImportActions';
+import { ImportActions } from 'tg.store/project/ImportActions';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import { T } from '@tolgee/react';
 import CloseIcon from '@material-ui/icons/Close';
-import { components } from '../../../service/apiSchema.generated';
+import { components } from 'tg.service/apiSchema.generated';
 
 const actions = container.resolve(ImportActions);
 export const ImportAlertError: FunctionComponent<{

@@ -9,7 +9,7 @@ import { T } from '@tolgee/react';
 import {
   HateoasPaginatedData,
   HateoasListData,
-} from '../../../service/response.types';
+} from 'tg.service/response.types';
 import { useEffect } from 'react';
 
 // get item type from TData

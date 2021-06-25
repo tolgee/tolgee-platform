@@ -7,8 +7,8 @@ import {
   LanguageAutocomplete,
 } from './LanguageAutocomplete';
 import { LanguageModifyForm } from './LanguageModifyForm';
-import { Validation } from '../../constants/GlobalValidationSchema';
-import { components } from '../../service/apiSchema.generated';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { components } from 'tg.service/apiSchema.generated';
 
 export const CreateLanguageField: FC<{
   onSubmit?: (value) => void;

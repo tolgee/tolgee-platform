@@ -2,7 +2,7 @@ import { FunctionComponent } from 'react';
 import { Box, Popover, Typography } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import { ScreenshotGallery } from './ScreenshotGallery';
-import { components } from '../../../../service/apiSchema.generated';
+import { components } from 'tg.service/apiSchema.generated';
 
 type KeyTranslationsDTO =
   components['schemas']['KeyWithTranslationsResponseDto'];

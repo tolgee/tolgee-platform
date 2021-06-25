@@ -3,16 +3,16 @@ import { useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
 import { T } from '@tolgee/react';
 
-import { PARAMS } from '../../constants/links';
+import { PARAMS } from 'tg.constants/links';
 import { FullPageLoading } from '../common/FullPageLoading';
 
-import { GlobalActions } from '../../store/global/GlobalActions';
-import { RedirectionActions } from '../../store/global/RedirectionActions';
-import { MessageService } from '../../service/MessageService';
-import { InvitationCodeService } from '../../service/InvitationCodeService';
-import { TokenService } from '../../service/TokenService';
-import { LINKS } from '../../constants/links';
-import { useApiMutation } from '../../service/http/useQueryApi';
+import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { MessageService } from 'tg.service/MessageService';
+import { InvitationCodeService } from 'tg.service/InvitationCodeService';
+import { TokenService } from 'tg.service/TokenService';
+import { LINKS } from 'tg.constants/links';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 interface AcceptInvitationHandlerProps {}
 

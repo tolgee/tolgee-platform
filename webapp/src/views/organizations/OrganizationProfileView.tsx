@@ -3,17 +3,17 @@ import { FunctionComponent, useState } from 'react';
 import { container } from 'tsyringe';
 import { T, useTranslate } from '@tolgee/react';
 import { Redirect } from 'react-router-dom';
-import { Validation } from '../../constants/GlobalValidationSchema';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { OrganizationFields } from './components/OrganizationFields';
-import { MessageService } from '../../service/MessageService';
-import { StandardForm } from '../../component/common/form/StandardForm';
+import { MessageService } from 'tg.service/MessageService';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { Button } from '@material-ui/core';
-import { confirmation } from '../../hooks/confirmation';
-import { components } from '../../service/apiSchema.generated';
-import { RedirectionActions } from '../../store/global/RedirectionActions';
-import { LINKS, PARAMS } from '../../constants/links';
-import { useApiMutation, useApiQuery } from '../../service/http/useQueryApi';
+import { confirmation } from 'tg.hooks/confirmation';
+import { components } from 'tg.service/apiSchema.generated';
+import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 

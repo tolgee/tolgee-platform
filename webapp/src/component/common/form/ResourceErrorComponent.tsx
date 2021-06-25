@@ -1,9 +1,9 @@
 import { default as React, FunctionComponent } from 'react';
 import { Alert } from '../Alert';
-import { ErrorResponseDto } from '../../../service/response.types';
+import { ErrorResponseDto } from 'tg.service/response.types';
 import { T } from '@tolgee/react';
 import { Box } from '@material-ui/core';
-import { parseErrorResponse } from '../../../fixtures/errorFIxtures';
+import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 
 export const ResourceErrorComponent: FunctionComponent<{
   error: ErrorResponseDto | any;

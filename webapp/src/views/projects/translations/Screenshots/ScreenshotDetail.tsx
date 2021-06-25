@@ -1,6 +1,6 @@
 import { Dialog } from '@material-ui/core';
 import React from 'react';
-import { useConfig } from '../../../../hooks/useConfig';
+import { useConfig } from 'tg.hooks/useConfig';
 
 interface ScreenshotDetailProps {
   onClose: () => void;

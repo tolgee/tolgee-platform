@@ -1,14 +1,14 @@
 import { T } from '@tolgee/react';
 import { FunctionComponent, useEffect, useState } from 'react';
-import { useProject } from '../../hooks/useProject';
-import { components } from '../../service/apiSchema.generated';
+import { useProject } from 'tg.hooks/useProject';
+import { components } from 'tg.service/apiSchema.generated';
 import { Box } from '@material-ui/core';
-import { ErrorResponseDto } from '../../service/response.types';
+import { ErrorResponseDto } from 'tg.service/response.types';
 import { ResourceErrorComponent } from '../common/form/ResourceErrorComponent';
 import { CreateLanguageField } from './CreateLanguageField';
-import { useApiMutation } from '../../service/http/useQueryApi';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { container } from 'tsyringe';
-import { MessageService } from '../../service/MessageService';
+import { MessageService } from 'tg.service/MessageService';
 
 const messageService = container.resolve(MessageService);
 

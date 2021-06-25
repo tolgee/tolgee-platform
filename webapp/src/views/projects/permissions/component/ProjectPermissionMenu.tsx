@@ -1,12 +1,12 @@
-import { PermissionsMenu } from '../../../../component/security/PermissionsMenu';
-import { useProject } from '../../../../hooks/useProject';
-import { components } from '../../../../service/apiSchema.generated';
-import { useUser } from '../../../../hooks/useUser';
+import { PermissionsMenu } from 'tg.component/security/PermissionsMenu';
+import { useProject } from 'tg.hooks/useProject';
+import { components } from 'tg.service/apiSchema.generated';
+import { useUser } from 'tg.hooks/useUser';
 import { container } from 'tsyringe';
-import { confirmation } from '../../../../hooks/confirmation';
+import { confirmation } from 'tg.hooks/confirmation';
 import { T } from '@tolgee/react';
-import { useApiMutation } from '../../../../service/http/useQueryApi';
-import { MessageService } from '../../../../service/MessageService';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
 
 const messageService = container.resolve(MessageService);
 

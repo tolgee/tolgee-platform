@@ -8,7 +8,7 @@ import { T } from '@tolgee/react';
 import { ResourceErrorComponent } from './ResourceErrorComponent';
 import LoadingButton from './LoadingButton';
 import { FormikHelpers } from 'formik/dist/types';
-import { ErrorResponseDto } from '../../../service/response.types';
+import { ErrorResponseDto } from 'tg.service/response.types';
 
 interface LoadableType {
   loading?: boolean;

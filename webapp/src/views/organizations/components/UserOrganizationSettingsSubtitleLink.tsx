@@ -2,10 +2,10 @@ import React from 'react';
 import { Box, Link, MenuItem, Popover } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import { ArrowDropDown } from '@material-ui/icons';
-import { useUser } from '../../../hooks/useUser';
-import { LINKS, PARAMS } from '../../../constants/links';
+import { useUser } from 'tg.hooks/useUser';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { Link as RouterLink } from 'react-router-dom';
-import { useApiQuery } from '../../../service/http/useQueryApi';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 type UserOrganizationSettingsSubtitleLinkProps = {
   isUser: boolean;

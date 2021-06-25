@@ -3,12 +3,12 @@ import {
   AbstractLoadableActions,
   StateWithLoadables,
 } from '../AbstractLoadableActions';
-import { ImportExportService } from '../../service/ImportExportService';
+import { ImportExportService } from 'tg.service/ImportExportService';
 import { AppState } from '../index';
 import { useSelector } from 'react-redux';
-import { ApiSchemaHttpService } from '../../service/http/ApiSchemaHttpService';
+import { ApiSchemaHttpService } from 'tg.service/http/ApiSchemaHttpService';
 import { T } from '@tolgee/react';
-import { components } from '../../service/apiSchema.generated';
+import { components } from 'tg.service/apiSchema.generated';
 
 export class ImportState extends StateWithLoadables<ImportActions> {
   result?: components['schemas']['PagedModelImportLanguageModel'] = undefined;

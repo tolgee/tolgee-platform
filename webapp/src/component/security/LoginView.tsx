@@ -4,18 +4,18 @@ import { BaseView } from '../layout/BaseView';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import { Button } from '@material-ui/core';
 import { useSelector } from 'react-redux';
-import { AppState } from '../../store';
-import { LINKS, PARAMS } from '../../constants/links';
+import { AppState } from 'tg.store/index';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { Link, Redirect, useHistory } from 'react-router-dom';
 import { StandardForm } from '../common/form/StandardForm';
 import { TextField } from '../common/form/fields/TextField';
 import Box from '@material-ui/core/Box';
 import { container } from 'tsyringe';
-import { GlobalActions } from '../../store/global/GlobalActions';
-import { SecurityService } from '../../service/SecurityService';
-import { useConfig } from '../../hooks/useConfig';
+import { GlobalActions } from 'tg.store/global/GlobalActions';
+import { SecurityService } from 'tg.service/SecurityService';
+import { useConfig } from 'tg.hooks/useConfig';
 import { T } from '@tolgee/react';
-import { MessageService } from '../../service/MessageService';
+import { MessageService } from 'tg.service/MessageService';
 import LoadingButton from '../common/form/LoadingButton';
 
 interface LoginProps {}

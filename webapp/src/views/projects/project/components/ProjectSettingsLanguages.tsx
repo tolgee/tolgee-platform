@@ -1,19 +1,16 @@
 import { useState } from 'react';
-import { PaginatedHateoasList } from '../../../../component/common/list/PaginatedHateoasList';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { Box, ListItem, Typography } from '@material-ui/core';
 import ListItemText from '@material-ui/core/ListItemText';
-import { FlagImage } from '../../../../component/languages/FlagImage';
+import { FlagImage } from 'tg.component/languages/FlagImage';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { Link } from 'react-router-dom';
-import { LINKS, PARAMS } from '../../../../constants/links';
-import { SettingsIconButton } from '../../../../component/common/buttons/SettingsIconButton';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { SettingsIconButton } from 'tg.component/common/buttons/SettingsIconButton';
 import { T } from '@tolgee/react';
-import { CreateSingleLanguage } from '../../../../component/languages/CreateSingleLanguage';
-import { useProject } from '../../../../hooks/useProject';
-import {
-  invalidateUrlPrefix,
-  useApiQuery,
-} from '../../../../service/http/useQueryApi';
+import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
+import { useProject } from 'tg.hooks/useProject';
+import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useQueryClient } from 'react-query';
 
 export const ProjectSettingsLanguages = () => {

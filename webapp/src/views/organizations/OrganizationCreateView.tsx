@@ -1,16 +1,16 @@
 import { FunctionComponent } from 'react';
 import { container } from 'tsyringe';
 import { T, useTranslate } from '@tolgee/react';
-import { DashboardPage } from '../../component/layout/DashboardPage';
-import { RedirectionActions } from '../../store/global/RedirectionActions';
-import { LINKS } from '../../constants/links';
-import { ProjectPermissionType } from '../../service/response.types';
-import { BaseFormView } from '../../component/layout/BaseFormView';
-import { Validation } from '../../constants/GlobalValidationSchema';
+import { DashboardPage } from 'tg.component/layout/DashboardPage';
+import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { LINKS } from 'tg.constants/links';
+import { ProjectPermissionType } from 'tg.service/response.types';
+import { BaseFormView } from 'tg.component/layout/BaseFormView';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { OrganizationFields } from './components/OrganizationFields';
-import { MessageService } from '../../service/MessageService';
-import { components } from '../../service/apiSchema.generated';
-import { useApiMutation } from '../../service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
+import { components } from 'tg.service/apiSchema.generated';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 

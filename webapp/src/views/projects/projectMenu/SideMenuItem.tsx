@@ -1,7 +1,7 @@
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import * as React from 'react';
-import { ListItemLink } from '../../../component/common/list/ListItemLink';
+import { ListItemLink } from 'tg.component/common/list/ListItemLink';
 import { useRouteMatch } from 'react-router-dom';
 
 interface SideMenuItemProps {

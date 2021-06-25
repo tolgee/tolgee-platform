@@ -1,14 +1,14 @@
 import { default as React, FunctionComponent, useEffect } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { LINKS, PARAMS } from '../../../constants/links';
-import { BaseView } from '../../../component/layout/BaseView';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { BaseView } from 'tg.component/layout/BaseView';
 import { Box, Button } from '@material-ui/core';
 import { container } from 'tsyringe';
-import { ExportActions } from '../../../store/project/ExportActions';
+import { ExportActions } from 'tg.store/project/ExportActions';
 import { useSelector } from 'react-redux';
-import { AppState } from '../../../store';
-import { useProject } from '../../../hooks/useProject';
-import { Navigation } from '../../../component/navigation/Navigation';
+import { AppState } from 'tg.store/index';
+import { useProject } from 'tg.hooks/useProject';
+import { Navigation } from 'tg.component/navigation/Navigation';
 import { T, useTranslate } from '@tolgee/react';
 
 const actions = container.resolve(ExportActions);

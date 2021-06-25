@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { startLoading, stopLoading } from '../../../../hooks/loading';
+import { startLoading, stopLoading } from 'tg.hooks/loading';
 import { container } from 'tsyringe';
-import { ImportActions } from '../../../../store/project/ImportActions';
+import { ImportActions } from 'tg.store/project/ImportActions';
 import { useImportDataHelper } from './useImportDataHelper';
-import { useProject } from '../../../../hooks/useProject';
+import { useProject } from 'tg.hooks/useProject';
 
 const actions = container.resolve(ImportActions);
 export const useApplyImportHelper = (

@@ -1,18 +1,18 @@
 import { FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
-import { LINKS, PARAMS } from '../../constants/links';
-import { StandardForm } from '../../component/common/form/StandardForm';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { useOrganization } from './useOrganization';
 import { Button, ListItemText, TextField, Typography } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import { OrganizationRoleSelect } from './components/OrganizationRoleSelect';
-import { OrganizationRoleType } from '../../service/response.types';
-import { SimpleListItem } from '../../component/common/list/SimpleListItem';
+import { OrganizationRoleType } from 'tg.service/response.types';
+import { SimpleListItem } from 'tg.component/common/list/SimpleListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import { SimpleList } from '../../component/common/list/SimpleList';
+import { SimpleList } from 'tg.component/common/list/SimpleList';
 import { useState } from 'react';
-import { useApiMutation, useApiQuery } from '../../service/http/useQueryApi';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const OrganizationInvitationsView: FunctionComponent = () => {
   const organization = useOrganization();

@@ -1,19 +1,19 @@
 import { default as React, FunctionComponent, useState } from 'react';
 import { Button, MenuProps } from '@material-ui/core';
 import { container } from 'tsyringe';
-import { GlobalActions } from '../../store/global/GlobalActions';
+import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { useSelector } from 'react-redux';
-import { AppState } from '../../store';
-import { useConfig } from '../../hooks/useConfig';
+import { AppState } from 'tg.store/index';
+import { useConfig } from 'tg.hooks/useConfig';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import { useUser } from '../../hooks/useUser';
+import { useUser } from 'tg.hooks/useUser';
 import { Link } from 'react-router-dom';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import PersonIcon from '@material-ui/icons/Person';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { T } from '@tolgee/react';
-import { useUserMenuItems } from '../../hooks/useUserMenuItems';
+import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 
 interface UserMenuProps {
   variant: 'small' | 'expanded';

@@ -1,7 +1,7 @@
 import { singleton } from 'tsyringe';
 import { TokenService } from '../TokenService';
 import { MessageService } from '../MessageService';
-import { RedirectionActions } from '../../store/global/RedirectionActions';
+import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 import { paths } from '../apiSchema.generated';
 import { ApiHttpService, RequestOptions } from './ApiHttpService';
 

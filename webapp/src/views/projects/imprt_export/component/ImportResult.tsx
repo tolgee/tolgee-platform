@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from 'react';
-import { components } from '../../../../service/apiSchema.generated';
+import { components } from 'tg.service/apiSchema.generated';
 import {
   Box,
   makeStyles,
@@ -12,7 +12,7 @@ import {
 } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import { ImportResultRow } from './ImportResultRow';
-import { ProjectLanguagesProvider } from '../../../../hooks/ProjectLanguagesProvider';
+import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
 import { ImportFileIssuesDialog } from './ImportFileIssuesDialog';
 import { ImportShowDataDialog } from './ImportShowDataDialog';
 

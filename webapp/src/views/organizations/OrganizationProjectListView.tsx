@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { BaseView } from '../../component/layout/BaseView';
+import { BaseView } from 'tg.component/layout/BaseView';
 import ProjectListItem from '../projects/ProjectListItem';
 import { useOrganization } from './useOrganization';
-import { PaginatedHateoasList } from '../../component/common/list/PaginatedHateoasList';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import Box from '@material-ui/core/Box';
-import { FabAddButtonLink } from '../../component/common/buttons/FabAddButtonLink';
-import { LINKS } from '../../constants/links';
-import { useApiQuery } from '../../service/http/useQueryApi';
+import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
+import { LINKS } from 'tg.constants/links';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const OrganizationsProjectListView = () => {
   const t = useTranslate();

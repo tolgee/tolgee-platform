@@ -1,13 +1,13 @@
 import { FunctionComponent } from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
-import { LINKS, PARAMS } from '../../../constants/links';
-import { FabAddButtonLink } from '../../../component/common/buttons/FabAddButtonLink';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
 import { AddApiKeyFormDialog } from './AddApiKeyFormDialog';
 import { ApiKeysList } from './ApiKeysList';
-import { EmptyListMessage } from '../../../component/common/EmptyListMessage';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { T } from '@tolgee/react';
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
-import { useApiQuery } from '../../../service/http/useQueryApi';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const ApiKeysView: FunctionComponent = () => {
   const list = useApiQuery({

@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { FC } from 'react';
-import { FieldArray } from '../../../../component/common/form/fields/FieldArray';
+import { FieldArray } from 'tg.component/common/form/fields/FieldArray';
 import { Box, Button, Grid } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { useFormikContext } from 'formik';
-import { CreateLanguageField } from '../../../../component/languages/CreateLanguageField';
+import { CreateLanguageField } from 'tg.component/languages/CreateLanguageField';
 import { CreateProjectValueType } from '../ProjectCreateView';
 
 export const CreateProjectLanguagesArrayField: FC = () => {

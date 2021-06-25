@@ -1,11 +1,11 @@
 import { useFormikContext } from 'formik';
 import { useDebounce } from 'use-debounce';
 import { useEffect, useState } from 'react';
-import { TextField } from '../../../component/common/form/fields/TextField';
+import { TextField } from 'tg.component/common/form/fields/TextField';
 import { Box, FormHelperText } from '@material-ui/core';
-import { LINKS, PARAMS } from '../../../constants/links';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { container } from 'tsyringe';
-import { OrganizationService } from '../../../service/OrganizationService';
+import { OrganizationService } from 'tg.service/OrganizationService';
 import { T } from '@tolgee/react';
 
 const organizationService = container.resolve(OrganizationService);
