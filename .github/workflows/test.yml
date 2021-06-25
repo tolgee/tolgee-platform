@@ -217,7 +217,7 @@ jobs:
           path: webapp/build
 
   frontend-code-check:
-    name: Frontend Eslint 🪲
+    name: Frontend static check 🪲
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -231,6 +231,10 @@ jobs:
         with:
           path: ~/.npm
           key: cache-node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Typescript
+        run: npm run tsc
+        working-directory: ./webapp
 
       - name: Eslint
         run: npm run eslint

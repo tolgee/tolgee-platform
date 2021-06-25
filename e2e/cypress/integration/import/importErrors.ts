@@ -70,7 +70,7 @@ describe('Import errors', () => {
         .should('be.visible');
     });
 
-    it.only('error shows more and less', () => {
+    it('error shows more and less', () => {
       cy.gcy('global-base-view-loading').should('be.visible');
       cy.gcy('global-base-view-loading').should('not.exist');
       gcy('import-file-error')
