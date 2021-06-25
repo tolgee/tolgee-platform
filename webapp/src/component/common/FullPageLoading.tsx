@@ -1,4 +1,4 @@
-import { default as React, FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import Backdrop from '@material-ui/core/Backdrop';

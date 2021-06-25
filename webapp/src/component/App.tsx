@@ -12,14 +12,14 @@ import { ErrorActions } from '../store/global/ErrorActions';
 import { RedirectionActions } from '../store/global/RedirectionActions';
 import { useConfig } from '../hooks/useConfig';
 import { useUser } from '../hooks/useUser';
-import { ProjectsRouter } from './views/projects/ProjectsRouter';
+import { ProjectsRouter } from '../views/projects/ProjectsRouter';
 import { FullPageLoading } from './common/FullPageLoading';
 import * as Sentry from '@sentry/browser';
 import { GlobalError } from '../error/GlobalError';
-import { OrganizationsRouter } from './views/organizations/OrganizationsRouter';
-import { ApiKeysView } from './views/userSettings/apiKeys/ApiKeysView';
+import { OrganizationsRouter } from '../views/organizations/OrganizationsRouter';
+import { ApiKeysView } from '../views/userSettings/apiKeys/ApiKeysView';
 import ConfirmationDialog from './common/ConfirmationDialog';
-import { UserProfileView } from './views/userSettings/UserProfileView';
+import { UserProfileView } from '../views/userSettings/UserProfileView';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/LoginRouter')
