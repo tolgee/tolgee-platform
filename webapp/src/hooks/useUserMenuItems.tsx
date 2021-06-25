@@ -1,5 +1,5 @@
-import { LINKS } from '../constants/links';
 import { useRouteMatch } from 'react-router-dom';
+import { LINKS } from '../constants/links';
 
 export class UserMenuItem {
   constructor(

@@ -1,5 +1,3 @@
-import { default as React, FunctionComponent } from 'react';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
 import {
   Checkbox,
   FormControl,
@@ -8,7 +6,9 @@ import {
   FormHelperText,
   Theme,
 } from '@material-ui/core';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
 import { useField } from 'formik';
+import { default as React, FunctionComponent } from 'react';
 
 interface PGCheckBoxProps {
   name: string;

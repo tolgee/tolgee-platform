@@ -1,10 +1,10 @@
-import { container } from 'tsyringe';
-import { GlobalActions } from '../store/global/GlobalActions';
-import { useSelector } from 'react-redux';
-import { AppState } from '../store';
-import { RemoteConfigurationDTO } from '../service/response.types';
-import { GlobalError } from '../error/GlobalError';
 import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { container } from 'tsyringe';
+import { GlobalError } from '../error/GlobalError';
+import { RemoteConfigurationDTO } from '../service/response.types';
+import { AppState } from '../store';
+import { GlobalActions } from '../store/global/GlobalActions';
 
 export const useConfig = (): RemoteConfigurationDTO => {
   const loadable = useSelector(

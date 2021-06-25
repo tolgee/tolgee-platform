@@ -1,4 +1,3 @@
-import React, { FunctionComponent } from 'react';
 import {
   Box,
   Button,
@@ -7,12 +6,13 @@ import {
   useMediaQuery,
   useTheme,
 } from '@material-ui/core';
-import { T } from '@tolgee/react';
 import { DoneAll } from '@material-ui/icons';
-import { container } from 'tsyringe';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { T } from '@tolgee/react';
+import React, { FunctionComponent } from 'react';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
+import { ImportActions } from 'tg.store/project/ImportActions';
+import { container } from 'tsyringe';
 
 const actions = container.resolve(ImportActions);
 export const ImportConflictsDataHeader: FunctionComponent<{

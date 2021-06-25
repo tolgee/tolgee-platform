@@ -1,9 +1,9 @@
-import { FunctionComponent, useState } from 'react';
 import { Box, Button, Popover } from '@material-ui/core';
-import { supportedFlags } from '@tginternal/language-util';
-import { useField } from 'formik';
 import { makeStyles } from '@material-ui/core/styles';
 import { ArrowDropDown } from '@material-ui/icons';
+import { supportedFlags } from '@tginternal/language-util';
+import { useField } from 'formik';
+import { FunctionComponent, useState } from 'react';
 import { FlagImage } from './FlagImage';
 
 const useStyles = makeStyles((theme) => ({

@@ -1,5 +1,5 @@
-import { FC, ImgHTMLAttributes } from 'react';
 import { getSvgNameByEmoji } from '@tginternal/language-util';
+import { FC, ImgHTMLAttributes } from 'react';
 
 export const getFlagPath = (hex: string) =>
   `/static/flags/${getSvgNameByEmoji(hex)}.svg`;

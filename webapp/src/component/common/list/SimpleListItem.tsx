@@ -1,8 +1,8 @@
-import { ComponentProps, default as React, FunctionComponent } from 'react';
-import ListItem from '@material-ui/core/ListItem';
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import { Theme } from '@material-ui/core';
+import ListItem from '@material-ui/core/ListItem';
 import createStyles from '@material-ui/core/styles/createStyles';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import { ComponentProps, default as React, FunctionComponent } from 'react';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

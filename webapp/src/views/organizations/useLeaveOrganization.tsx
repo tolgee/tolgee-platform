@@ -1,9 +1,9 @@
 import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
-import { confirmation } from 'tg.hooks/confirmation';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { MessageService } from 'tg.service/MessageService';
+import { confirmation } from 'tg.hooks/confirmation';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
+import { container } from 'tsyringe';
 
 const messageService = container.resolve(MessageService);
 

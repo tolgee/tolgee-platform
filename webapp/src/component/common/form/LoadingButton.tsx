@@ -1,6 +1,6 @@
-import React, { ComponentProps, FunctionComponent } from 'react';
 import { Box, Button } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import React, { ComponentProps, FunctionComponent } from 'react';
 
 const LoadingButton: FunctionComponent<
   ComponentProps<typeof Button> & { loading?: boolean }

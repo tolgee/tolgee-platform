@@ -1,10 +1,9 @@
+import { makeStyles } from '@material-ui/core';
 import * as React from 'react';
 import { FunctionComponent } from 'react';
-
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useProject } from 'tg.hooks/useProject';
 import { ProjectMenu } from './projectMenu/ProjectMenu';
-import { makeStyles } from '@material-ui/core';
 
 const useStyle = makeStyles({
   content: {

@@ -1,5 +1,3 @@
-import { components } from 'tg.service/apiSchema.generated';
-import React from 'react';
 import {
   Box,
   Button,
@@ -8,17 +6,19 @@ import {
   TableCell,
   TableRow,
 } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { ImportActions } from 'tg.store/project/ImportActions';
-import { container } from 'tsyringe';
-import { useProject } from 'tg.hooks/useProject';
-import { confirmation } from 'tg.hooks/confirmation';
-import { ImportRowLanguageMenu } from './ImportRowLanguageMenu';
 import { CheckCircle, Error, Warning } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
+import React from 'react';
 import { ChipButton } from 'tg.component/common/buttons/ChipButton';
+import { confirmation } from 'tg.hooks/confirmation';
+import { useProject } from 'tg.hooks/useProject';
+import { components } from 'tg.service/apiSchema.generated';
+import { ImportActions } from 'tg.store/project/ImportActions';
+import { container } from 'tsyringe';
+import { ImportRowLanguageMenu } from './ImportRowLanguageMenu';
 
 const useStyles = makeStyles((theme) => ({
   root: {

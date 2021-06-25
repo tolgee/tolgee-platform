@@ -1,14 +1,14 @@
-import * as React from 'react';
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box } from '@material-ui/core';
 import AppBar from '@material-ui/core/AppBar';
+import { makeStyles } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import clsx from 'clsx';
+import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { TolgeeLogo } from '../common/icons/TolgeeLogo';
-import { Box } from '@material-ui/core';
-import { UserMenu } from '../security/UserMenu';
 import { LocaleMenu } from '../LocaleMenu';
+import { UserMenu } from '../security/UserMenu';
 
 const drawerWidth = 240;
 

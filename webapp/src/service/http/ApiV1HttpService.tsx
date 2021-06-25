@@ -1,7 +1,7 @@
-import { singleton } from 'tsyringe';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-import { TokenService } from '../TokenService';
+import { singleton } from 'tsyringe';
 import { MessageService } from '../MessageService';
+import { TokenService } from '../TokenService';
 import { ApiHttpService } from './ApiHttpService';
 
 @singleton()

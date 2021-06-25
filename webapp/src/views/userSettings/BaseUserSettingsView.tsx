@@ -1,12 +1,12 @@
-import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
+import { Box, Grid, Typography } from '@material-ui/core';
 import * as React from 'react';
 import { FunctionComponent, PropsWithChildren } from 'react';
-import { Box, Grid, Typography } from '@material-ui/core';
-import { useUser } from 'tg.hooks/useUser';
-import { UserSettingsMenu } from './UserSettingsMenu';
-import UserOrganizationSettingsSubtitleLink from '../organizations/components/UserOrganizationSettingsSubtitleLink';
+import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
+import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useConfig } from 'tg.hooks/useConfig';
+import { useUser } from 'tg.hooks/useUser';
+import UserOrganizationSettingsSubtitleLink from '../organizations/components/UserOrganizationSettingsSubtitleLink';
+import { UserSettingsMenu } from './UserSettingsMenu';
 
 export const BaseUserSettingsView: FunctionComponent<BaseViewProps> = ({
   children,

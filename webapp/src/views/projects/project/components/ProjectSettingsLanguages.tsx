@@ -1,17 +1,17 @@
-import { useState } from 'react';
-import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { Box, ListItem, Typography } from '@material-ui/core';
-import ListItemText from '@material-ui/core/ListItemText';
-import { FlagImage } from 'tg.component/languages/FlagImage';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import { Link } from 'react-router-dom';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { SettingsIconButton } from 'tg.component/common/buttons/SettingsIconButton';
+import ListItemText from '@material-ui/core/ListItemText';
 import { T } from '@tolgee/react';
+import { useState } from 'react';
+import { useQueryClient } from 'react-query';
+import { Link } from 'react-router-dom';
+import { SettingsIconButton } from 'tg.component/common/buttons/SettingsIconButton';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
+import { FlagImage } from 'tg.component/languages/FlagImage';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
-import { useQueryClient } from 'react-query';
 
 export const ProjectSettingsLanguages = () => {
   const queryClient = useQueryClient();

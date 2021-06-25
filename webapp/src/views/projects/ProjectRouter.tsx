@@ -1,15 +1,15 @@
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { LanguageEditView } from './languages/LanguageEditView';
-import { ProjectSettingsView } from './project/ProjectSettingsView';
-import { ProjectProvider } from 'tg.hooks/ProjectProvider';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
-import { ImportView } from './imprt_export/ImportView';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { ProjectProvider } from 'tg.hooks/ProjectProvider';
 import { ExportView } from './imprt_export/ExportView';
+import { ImportView } from './imprt_export/ImportView';
+import { ProjectInviteView } from './invitations/ProjectInviteView';
+import { LanguageEditView } from './languages/LanguageEditView';
+import { ProjectPermissionsView } from './permissions/ProjectPermissionsVIew';
+import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { ProjectPage } from './ProjectPage';
 import { TranslationView } from './translations/TranslationView';
-import { ProjectPermissionsView } from './permissions/ProjectPermissionsVIew';
-import { ProjectInviteView } from './invitations/ProjectInviteView';
 
 export const ProjectRouter = () => {
   const match = useRouteMatch();

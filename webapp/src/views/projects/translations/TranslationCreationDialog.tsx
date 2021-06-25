@@ -1,21 +1,21 @@
-import { useContext } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { useProject } from 'tg.hooks/useProject';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { container } from 'tsyringe';
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
-import { TranslationActions } from 'tg.store/project/TranslationActions';
-import { TextField } from 'tg.component/common/form/fields/TextField';
-import { ResourceErrorComponent } from 'tg.component/common/form/ResourceErrorComponent';
-import { MessageService } from 'tg.service/MessageService';
-import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { TranslationListContext } from './TtranslationsGridContextProvider';
 import { useTranslate } from '@tolgee/react';
+import { useContext } from 'react';
+import { TextField } from 'tg.component/common/form/fields/TextField';
+import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
+import { ResourceErrorComponent } from 'tg.component/common/form/ResourceErrorComponent';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
+import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { TranslationActions } from 'tg.store/project/TranslationActions';
+import { container } from 'tsyringe';
+import { TranslationListContext } from './TtranslationsGridContextProvider';
 
 export type TranslationCreationValue = {
   key: string;

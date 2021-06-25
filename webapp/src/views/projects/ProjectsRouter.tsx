@@ -1,8 +1,8 @@
 import { Switch, useRouteMatch } from 'react-router-dom';
-import { ProjectListView } from './ProjectListView';
-import { ProjectCreateView } from './project/ProjectCreateView';
-import { LINKS } from 'tg.constants/links';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
+import { LINKS } from 'tg.constants/links';
+import { ProjectCreateView } from './project/ProjectCreateView';
+import { ProjectListView } from './ProjectListView';
 import { ProjectRouter } from './ProjectRouter';
 
 export const ProjectsRouter = () => {

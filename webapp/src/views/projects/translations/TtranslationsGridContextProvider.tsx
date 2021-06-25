@@ -1,15 +1,15 @@
-import React, { ReactNode, useEffect, useState } from 'react';
-import { UseQueryResult, useQueryClient } from 'react-query';
-import { container } from 'tsyringe';
-import { TranslationActions } from 'tg.store/project/TranslationActions';
-import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
-import { useProject } from 'tg.hooks/useProject';
 import { useTranslate } from '@tolgee/react';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { useQueryClient, UseQueryResult } from 'react-query';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { useProject } from 'tg.hooks/useProject';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
-import { useLeaveEditConfirmationOtherEdit } from './useLeaveEditConfirmation';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
+import { TranslationActions } from 'tg.store/project/TranslationActions';
+import { container } from 'tsyringe';
+import { useLeaveEditConfirmationOtherEdit } from './useLeaveEditConfirmation';
 
 type TranslationsType =
   components['schemas']['ViewDataResponseLinkedHashSetKeyWithTranslationsResponseDtoResponseParams'];

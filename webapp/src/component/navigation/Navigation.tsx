@@ -1,6 +1,6 @@
 import React from 'react';
-import { NavigationWrapper } from './NavigationWrapper';
 import { NavigationPath } from './NavigationPath';
+import { NavigationWrapper } from './NavigationWrapper';
 
 type Props = {
   path: React.ComponentProps<typeof NavigationPath>['path'];

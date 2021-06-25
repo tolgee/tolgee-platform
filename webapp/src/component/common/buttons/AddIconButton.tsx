@@ -1,6 +1,6 @@
 import IconButton from '@material-ui/core/IconButton';
-import * as React from 'react';
 import AddIcon from '@material-ui/icons/Add';
+import * as React from 'react';
 
 export function AddIconButton(props: any) {
   return (

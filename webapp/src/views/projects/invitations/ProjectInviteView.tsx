@@ -1,24 +1,24 @@
-import { FunctionComponent, useState } from 'react';
-import { useRouteMatch } from 'react-router-dom';
-import { LINKS, PARAMS } from 'tg.constants/links';
 import { Button, TextField } from '@material-ui/core';
-import { BaseView } from 'tg.component/layout/BaseView';
-import { container } from 'tsyringe';
-import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
-import { StandardForm } from 'tg.component/common/form/StandardForm';
 import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import ListItemText from '@material-ui/core/ListItemText';
+import Typography from '@material-ui/core/Typography';
 import { T, useTranslate } from '@tolgee/react';
-import { PermissionSelect } from 'tg.component/security/PermissionSelect';
-import { useProject } from 'tg.hooks/useProject';
+import { FunctionComponent, useState } from 'react';
+import { useRouteMatch } from 'react-router-dom';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { BaseView } from 'tg.component/layout/BaseView';
 import { Navigation } from 'tg.component/navigation/Navigation';
-import { ProjectInvitationActions } from 'tg.store/project/invitations/ProjectInvitationActions';
+import { PermissionSelect } from 'tg.component/security/PermissionSelect';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
+import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { ProjectInvitationActions } from 'tg.store/project/invitations/ProjectInvitationActions';
+import { container } from 'tsyringe';
 
 type FormType = {
   type: string;

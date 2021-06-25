@@ -1,6 +1,6 @@
 import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
-import * as React from 'react';
 import SettingsIcon from '@material-ui/icons/Settings';
+import * as React from 'react';
 
 export function SettingsIconButton(props: IconButtonProps) {
   return (

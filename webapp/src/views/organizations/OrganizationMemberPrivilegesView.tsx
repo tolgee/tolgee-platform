@@ -1,10 +1,10 @@
+import { Box, Typography } from '@material-ui/core';
+import { T } from '@tolgee/react';
 import * as React from 'react';
 import { FunctionComponent } from 'react';
-import { T } from '@tolgee/react';
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
-import { useOrganization } from './useOrganization';
 import { OrganizationBasePermissionMenu } from './components/OrganizationBasePermissionMenu';
-import { Box, Typography } from '@material-ui/core';
+import { useOrganization } from './useOrganization';
 
 export const OrganizationMemberPrivilegesView: FunctionComponent = () => {
   const organization = useOrganization();

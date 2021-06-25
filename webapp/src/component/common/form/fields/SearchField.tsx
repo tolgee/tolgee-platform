@@ -1,7 +1,7 @@
-import React, { ComponentProps, useEffect, useState } from 'react';
 import { InputAdornment, TextField } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import { T } from '@tolgee/react';
+import React, { ComponentProps, useEffect, useState } from 'react';
 import { useDebounce } from 'use-debounce/lib';
 
 const SearchField = (

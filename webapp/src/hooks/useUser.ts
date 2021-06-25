@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
-import { AppState } from '../store';
-import { UserDTO } from '../service/response.types';
 import { useApiQuery } from '../service/http/useQueryApi';
+import { UserDTO } from '../service/response.types';
+import { AppState } from '../store';
 
 export const useUser = (): UserDTO | null => {
   const jwt = useSelector((state: AppState) => state.global.security.jwtToken);

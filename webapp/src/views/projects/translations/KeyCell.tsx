@@ -1,15 +1,15 @@
-import { FunctionComponent, useContext } from 'react';
-import { RowContext } from './TranslationsRow';
-import { useProject } from 'tg.hooks/useProject';
-import { ProjectPermissionType } from 'tg.service/response.types';
-import { EditableCell } from './EditableCell';
-import { container } from 'tsyringe';
-import { TranslationActions } from 'tg.store/project/TranslationActions';
 import { T } from '@tolgee/react';
-import { MessageService } from 'tg.service/MessageService';
+import { FunctionComponent, useContext } from 'react';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
+import { ProjectPermissionType } from 'tg.service/response.types';
+import { TranslationActions } from 'tg.store/project/TranslationActions';
+import { container } from 'tsyringe';
+import { EditableCell } from './EditableCell';
+import { RowContext } from './TranslationsRow';
 
 const actions = container.resolve(TranslationActions);
 const messaging = container.resolve(MessageService);

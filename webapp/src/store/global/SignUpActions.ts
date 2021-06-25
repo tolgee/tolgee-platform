@@ -1,5 +1,5 @@
-import { singleton } from 'tsyringe';
 import { SignUpService } from 'tg.service/SignUpService';
+import { singleton } from 'tsyringe';
 import {
   AbstractLoadableActions,
   StateWithLoadables,

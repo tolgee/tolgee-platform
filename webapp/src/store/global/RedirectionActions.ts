@@ -1,5 +1,5 @@
-import { AbstractActions } from '../AbstractActions';
 import { singleton } from 'tsyringe';
+import { AbstractActions } from '../AbstractActions';
 
 export class RedirectionState {
   to: string | null = null;

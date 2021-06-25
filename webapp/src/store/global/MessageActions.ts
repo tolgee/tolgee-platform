@@ -1,7 +1,7 @@
-import { Message } from './types';
-import { AbstractActions } from '../AbstractActions';
-import { singleton } from 'tsyringe';
 import { ReactNode } from 'react';
+import { singleton } from 'tsyringe';
+import { AbstractActions } from '../AbstractActions';
+import { Message } from './types';
 
 export class MessageState {
   messages: Message[] = [];

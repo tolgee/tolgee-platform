@@ -1,5 +1,3 @@
-import { useRedirect } from 'tg.hooks/useRedirect';
-import { LINKS } from 'tg.constants/links';
 import {
   Box,
   Dialog,
@@ -7,19 +5,21 @@ import {
   DialogTitle,
   MenuItem,
 } from '@material-ui/core';
-import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { Select } from 'tg.component/common/form/fields/Select';
-import { default as React, FunctionComponent, useEffect } from 'react';
-import { container } from 'tsyringe';
-import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { FormikProps } from 'formik';
-import { CheckBoxGroupMultiSelect } from 'tg.component/common/form/fields/CheckBoxGroupMultiSelect';
-import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { T } from '@tolgee/react';
+import { FormikProps } from 'formik';
+import { default as React, FunctionComponent, useEffect } from 'react';
+import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { CheckBoxGroupMultiSelect } from 'tg.component/common/form/fields/CheckBoxGroupMultiSelect';
+import { Select } from 'tg.component/common/form/fields/Select';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { LINKS } from 'tg.constants/links';
+import { useRedirect } from 'tg.hooks/useRedirect';
+import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
-import { components } from 'tg.service/apiSchema.generated';
+import { container } from 'tsyringe';
 
 type ApiKeyDTO = components['schemas']['ApiKeyDTO'];
 type EditApiKeyDTO = components['schemas']['EditApiKeyDTO'];

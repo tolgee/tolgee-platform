@@ -1,5 +1,5 @@
-import { LINKS, PARAMS } from 'tg.constants/links';
 import { useRouteMatch } from 'react-router-dom';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { useOrganization } from './useOrganization';
 
 export class OrganizationMenuItem {

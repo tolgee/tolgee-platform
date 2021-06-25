@@ -1,11 +1,10 @@
-import React from 'react';
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
+import { Divider, ListItem, ListItemIcon } from '@material-ui/core';
 import Drawer from '@material-ui/core/Drawer';
+import { makeStyles } from '@material-ui/core/styles';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import { ListItem, ListItemIcon } from '@material-ui/core';
-import { Divider } from '@material-ui/core';
+import clsx from 'clsx';
+import React from 'react';
 
 const drawerWidth = 240;
 

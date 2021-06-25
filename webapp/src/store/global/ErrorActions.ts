@@ -1,6 +1,6 @@
-import { AbstractActions } from '../AbstractActions';
-import { singleton } from 'tsyringe';
 import { GlobalError } from 'tg.error/GlobalError';
+import { singleton } from 'tsyringe';
+import { AbstractActions } from '../AbstractActions';
 
 export class ErrorState {
   error: GlobalError | null = null;

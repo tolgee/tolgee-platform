@@ -1,16 +1,16 @@
+import { Box, Button, Collapse, IconButton } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import { Alert, AlertTitle } from '@material-ui/lab';
+import { T } from '@tolgee/react';
 import React, {
   FunctionComponent,
   ReactNode,
   useEffect,
   useState,
 } from 'react';
-import { Box, Button, Collapse, IconButton } from '@material-ui/core';
-import { container } from 'tsyringe';
-import { ImportActions } from 'tg.store/project/ImportActions';
-import { Alert, AlertTitle } from '@material-ui/lab';
-import { T } from '@tolgee/react';
-import CloseIcon from '@material-ui/icons/Close';
 import { components } from 'tg.service/apiSchema.generated';
+import { ImportActions } from 'tg.store/project/ImportActions';
+import { container } from 'tsyringe';
 
 const actions = container.resolve(ImportActions);
 export const ImportAlertError: FunctionComponent<{

@@ -1,21 +1,20 @@
-import { FunctionComponent, useContext } from 'react';
-import { useProject } from 'tg.hooks/useProject';
 import { Box } from '@material-ui/core';
-import { TranslationsRow } from './TranslationsRow';
-import { Header } from './Header';
+import { useTranslate } from '@tolgee/react';
+import { FunctionComponent, useContext } from 'react';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { Pagination } from './Pagination';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { TranslationListContext } from './TtranslationsGridContextProvider';
-import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
-import { MenuBar } from './MenuBar';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { BaseView } from 'tg.component/layout/BaseView';
+import { Navigation } from 'tg.component/navigation/Navigation';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
-import { useTranslate } from '@tolgee/react';
-
-import { Navigation } from 'tg.component/navigation/Navigation';
+import { Header } from './Header';
+import { MenuBar } from './MenuBar';
+import { Pagination } from './Pagination';
+import { TranslationsRow } from './TranslationsRow';
+import { TranslationListContext } from './TtranslationsGridContextProvider';
 
 export const TranslationsGrid: FunctionComponent = (props) => {
   const projectDTO = useProject();

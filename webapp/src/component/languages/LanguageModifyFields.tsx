@@ -1,12 +1,12 @@
-import { FC, useState } from 'react';
-import { TextField } from '../common/form/fields/TextField';
-import { T } from '@tolgee/react';
 import { Box } from '@material-ui/core';
-import { FlagSelector } from './FlagSelector';
 import { Alert } from '@material-ui/lab';
 import { isValidLanguageTag } from '@tginternal/language-util';
+import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
+import { FC, useState } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
+import { TextField } from '../common/form/fields/TextField';
+import { FlagSelector } from './FlagSelector';
 
 export const LanguageModifyFields: FC<{
   preferredEmojis?: string[];

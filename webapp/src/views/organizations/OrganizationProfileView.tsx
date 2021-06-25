@@ -1,19 +1,18 @@
-import { useRouteMatch } from 'react-router-dom';
-import { FunctionComponent, useState } from 'react';
-import { container } from 'tsyringe';
-import { T, useTranslate } from '@tolgee/react';
-import { Redirect } from 'react-router-dom';
-import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { OrganizationFields } from './components/OrganizationFields';
-import { MessageService } from 'tg.service/MessageService';
-import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { Button } from '@material-ui/core';
+import { T, useTranslate } from '@tolgee/react';
+import { FunctionComponent, useState } from 'react';
+import { Redirect, useRouteMatch } from 'react-router-dom';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/apiSchema.generated';
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
+import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { container } from 'tsyringe';
+import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
+import { OrganizationFields } from './components/OrganizationFields';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 

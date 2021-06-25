@@ -1,13 +1,13 @@
-import { useRouteMatch } from 'react-router-dom';
 import { T } from '@tolgee/react';
 import { FunctionComponent } from 'react';
-import { container } from 'tsyringe';
-import { MessageService } from 'tg.service/MessageService';
-import { confirmation } from 'tg.hooks/confirmation';
+import { useRouteMatch } from 'react-router-dom';
 import { PermissionsMenu } from 'tg.component/security/PermissionsMenu';
-import { components } from 'tg.service/apiSchema.generated';
 import { PARAMS } from 'tg.constants/links';
+import { confirmation } from 'tg.hooks/confirmation';
+import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
+import { container } from 'tsyringe';
 
 type Permission = components['schemas']['OrganizationDto']['basePermissions'];
 type OrganizationModel = components['schemas']['OrganizationModel'];

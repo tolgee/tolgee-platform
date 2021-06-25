@@ -1,14 +1,14 @@
-import * as React from 'react';
-import { FunctionComponent, useState } from 'react';
+import { Box, createStyles, makeStyles, Theme } from '@material-ui/core';
+import { green, red } from '@material-ui/core/colors';
 import BackupTwoToneIcon from '@material-ui/icons/BackupTwoTone';
 import HighlightOffTwoToneIcon from '@material-ui/icons/HighlightOffTwoTone';
 import clsx from 'clsx';
-import { Box, createStyles, makeStyles, Theme } from '@material-ui/core';
+import * as React from 'react';
+import { FunctionComponent, useState } from 'react';
 import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';
-import { MAX_FILE_COUNT } from './ScreenshotGallery';
-import { green, red } from '@material-ui/core/colors';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { MAX_FILE_COUNT } from './ScreenshotGallery';
 
 export interface ScreenshotDropzoneProps {
   validateAndUpload: (files: File[]) => void;

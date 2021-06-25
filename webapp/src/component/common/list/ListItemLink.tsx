@@ -1,5 +1,5 @@
-import { default as React, FunctionComponent } from 'react';
 import ListItem from '@material-ui/core/ListItem';
+import { default as React, FunctionComponent } from 'react';
 import { Link } from 'react-router-dom';
 
 interface ListItemLinkProps {

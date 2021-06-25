@@ -1,4 +1,3 @@
-import { FunctionComponent, useContext } from 'react';
 import {
   Box,
   Button,
@@ -9,23 +8,24 @@ import {
   Switch,
   Tooltip,
 } from '@material-ui/core';
-import { confirmation } from 'tg.hooks/confirmation';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
-import { TranslationsSearchField } from './TranslationsSearchField';
-import { Link } from 'react-router-dom';
-import { LINKS, PARAMS } from 'tg.constants/links';
 import AddIcon from '@material-ui/icons/Add';
-import { TranslationListContext } from './TtranslationsGridContextProvider';
-import { useProject } from 'tg.hooks/useProject';
-import { container } from 'tsyringe';
-import { TranslationActions } from 'tg.store/project/TranslationActions';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { T, useTranslate } from '@tolgee/react';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
-import { MessageService } from 'tg.service/MessageService';
+import { FunctionComponent, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { confirmation } from 'tg.hooks/confirmation';
+import { useProject } from 'tg.hooks/useProject';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
+import { ProjectPermissionType } from 'tg.service/response.types';
+import { TranslationActions } from 'tg.store/project/TranslationActions';
+import { container } from 'tsyringe';
+import { TranslationsSearchField } from './TranslationsSearchField';
+import { TranslationListContext } from './TtranslationsGridContextProvider';
 
 const messaging = container.resolve(MessageService);
 

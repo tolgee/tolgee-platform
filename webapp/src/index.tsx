@@ -1,31 +1,24 @@
-import 'reflect-metadata';
-import 'regenerator-runtime/runtime';
-import { Provider } from 'react-redux';
-
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-
-import configureStore from './store';
-
-import { container } from 'tsyringe';
-
-import { DispatchService } from './service/DispatchService';
-
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { ReactQueryDevtools } from 'react-query/devtools';
-
-import ErrorBoundary from './component/ErrorBoundary';
-import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
-import RighteousLatinWoff2 from './fonts/Righteous/righteous-latin.woff2';
-import RighteousLatinExtWoff2 from './fonts/Righteous/righteous-latin-ext.woff2';
-
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { TolgeeProvider } from '@tolgee/react';
 import { UI } from '@tolgee/ui';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
+import { Provider } from 'react-redux';
+import 'reflect-metadata';
+import 'regenerator-runtime/runtime';
+import { container } from 'tsyringe';
 import { App } from './component/App';
 import { FullPageLoading } from './component/common/FullPageLoading';
+import ErrorBoundary from './component/ErrorBoundary';
+import RighteousLatinExtWoff2 from './fonts/Righteous/righteous-latin-ext.woff2';
+import RighteousLatinWoff2 from './fonts/Righteous/righteous-latin.woff2';
+import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
 import reportWebVitals from './reportWebVitals';
+import { DispatchService } from './service/DispatchService';
+import configureStore from './store';
 
 const store = configureStore();
 

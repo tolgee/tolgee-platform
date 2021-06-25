@@ -1,9 +1,9 @@
 import { FunctionComponent, ReactNode } from 'react';
-import { BaseView, BaseViewProps } from './BaseView';
-import { StandardForm } from '../common/form/StandardForm';
-import { ObjectSchema } from 'yup';
 import { Link } from 'tg.constants/links';
 import { Loadable } from 'tg.store/AbstractLoadableActions';
+import { ObjectSchema } from 'yup';
+import { StandardForm } from '../common/form/StandardForm';
+import { BaseView, BaseViewProps } from './BaseView';
 
 interface BaseFormViewProps {
   onInit?: () => Record<string, unknown>;

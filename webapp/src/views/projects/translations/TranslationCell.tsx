@@ -1,18 +1,18 @@
+import { T } from '@tolgee/react';
 import { FunctionComponent, useContext } from 'react';
-import { RowContext } from './TranslationsRow';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { useProject } from 'tg.hooks/useProject';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { MessageService } from 'tg.service/MessageService';
 import { ProjectPermissionType } from 'tg.service/response.types';
-import { EditableCell } from './EditableCell';
-import { container } from 'tsyringe';
 import {
   TranslationActions,
   TranslationEditingType,
 } from 'tg.store/project/TranslationActions';
-import { T } from '@tolgee/react';
-import { MessageService } from 'tg.service/MessageService';
-import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { container } from 'tsyringe';
+import { EditableCell } from './EditableCell';
+import { RowContext } from './TranslationsRow';
 
 export interface TranslationsTableCellProps {
   tag: string;

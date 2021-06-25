@@ -1,18 +1,18 @@
-import React, { FunctionComponent } from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import Dialog from '@material-ui/core/Dialog';
 import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
+import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
+import Slide from '@material-ui/core/Slide';
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
+import Toolbar from '@material-ui/core/Toolbar';
+import { TransitionProps } from '@material-ui/core/transitions';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
-import Slide from '@material-ui/core/Slide';
-import { TransitionProps } from '@material-ui/core/transitions';
-import { components } from 'tg.service/apiSchema.generated';
 import { T } from '@tolgee/react';
-import { ImportConflictsData } from './ImportConflictsData';
-import { container } from 'tsyringe';
+import React, { FunctionComponent } from 'react';
+import { components } from 'tg.service/apiSchema.generated';
 import { ImportActions } from 'tg.store/project/ImportActions';
+import { container } from 'tsyringe';
+import { ImportConflictsData } from './ImportConflictsData';
 
 container.resolve(ImportActions);
 const useStyles = makeStyles((theme: Theme) =>

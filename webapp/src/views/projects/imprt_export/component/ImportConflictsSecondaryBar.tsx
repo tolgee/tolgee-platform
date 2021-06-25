@@ -1,5 +1,3 @@
-import React, { FunctionComponent } from 'react';
-import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
 import {
   Box,
   FormControlLabel,
@@ -8,11 +6,13 @@ import {
   Switch,
   Typography,
 } from '@material-ui/core';
-import { T } from '@tolgee/react';
 import { CheckCircle, Warning } from '@material-ui/icons';
-import { container } from 'tsyringe';
-import { ImportActions } from 'tg.store/project/ImportActions';
+import { T } from '@tolgee/react';
 import clsx from 'clsx';
+import React, { FunctionComponent } from 'react';
+import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
+import { ImportActions } from 'tg.store/project/ImportActions';
+import { container } from 'tsyringe';
 
 const useStyles = makeStyles((theme) => ({
   counter: {

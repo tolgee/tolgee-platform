@@ -1,16 +1,16 @@
+import { Box, Checkbox } from '@material-ui/core';
+import { grey } from '@material-ui/core/colors';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
 import * as React from 'react';
 import { FunctionComponent, useContext } from 'react';
-import { ProjectPermissionType } from 'tg.service/response.types';
-import { Box, Checkbox } from '@material-ui/core';
-import { TableCell } from './TableCell';
-import { KeyCell } from './KeyCell';
-import { TranslationCell } from './TranslationCell';
-import { grey } from '@material-ui/core/colors';
-import { TranslationListContext } from './TtranslationsGridContextProvider';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
-import { KeyScreenshots } from './Screenshots/KeySreenshots';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { components } from 'tg.service/apiSchema.generated';
+import { ProjectPermissionType } from 'tg.service/response.types';
+import { KeyCell } from './KeyCell';
+import { KeyScreenshots } from './Screenshots/KeySreenshots';
+import { TableCell } from './TableCell';
+import { TranslationCell } from './TranslationCell';
+import { TranslationListContext } from './TtranslationsGridContextProvider';
 
 type KeyTranslationsDTO =
   components['schemas']['KeyWithTranslationsResponseDto'];

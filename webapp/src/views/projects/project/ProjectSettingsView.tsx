@@ -1,24 +1,24 @@
-import { FunctionComponent, useState } from 'react';
-import { container } from 'tsyringe';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { Redirect } from 'react-router-dom';
-import { TextField } from 'tg.component/common/form/fields/TextField';
-import { useProject } from 'tg.hooks/useProject';
 import { Box, Button, Typography } from '@material-ui/core';
-import { confirmation } from 'tg.hooks/confirmation';
 import { T, useTranslate } from '@tolgee/react';
+import { FunctionComponent, useState } from 'react';
+import { Redirect } from 'react-router-dom';
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
-import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { Navigation } from 'tg.component/navigation/Navigation';
-import { BaseView } from 'tg.component/layout/BaseView';
+import { TextField } from 'tg.component/common/form/fields/TextField';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
-import { ProjectSettingsLanguages } from './components/ProjectSettingsLanguages';
+import { BaseView } from 'tg.component/layout/BaseView';
+import { Navigation } from 'tg.component/navigation/Navigation';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { confirmation } from 'tg.hooks/confirmation';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
+import { useProject } from 'tg.hooks/useProject';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
-import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
+import { container } from 'tsyringe';
+import { BaseLanguageSelect } from './components/BaseLanguageSelect';
+import { ProjectSettingsLanguages } from './components/ProjectSettingsLanguages';
 
 const messageService = container.resolve(MessageService);
 

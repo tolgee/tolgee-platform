@@ -1,9 +1,9 @@
+import { Box } from '@material-ui/core';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
+import { useTranslate } from '@tolgee/react';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslate } from '@tolgee/react';
-import { Box } from '@material-ui/core';
 
 export function FabAddButtonLink(props: { to: string }) {
   const t = useTranslate();

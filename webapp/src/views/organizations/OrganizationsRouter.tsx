@@ -1,16 +1,15 @@
 import { Switch } from 'react-router-dom';
-import { PrivateRoute } from 'tg.component/common/PrivateRoute';
-import { OrganizationsListView } from './OrganizationListView';
-import { OrganizationCreateView } from './OrganizationCreateView';
-import { LINKS } from 'tg.constants/links';
-import { OrganizationProfileView } from './OrganizationProfileView';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { OrganizationMembersView } from './OrganizationMembersView';
-import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivilegesView';
+import { LINKS } from 'tg.constants/links';
+import { OrganizationCreateView } from './OrganizationCreateView';
 import { OrganizationInvitationsView } from './OrganizationInvitationsView';
+import { OrganizationsListView } from './OrganizationListView';
+import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivilegesView';
+import { OrganizationMembersView } from './OrganizationMembersView';
+import { OrganizationProfileView } from './OrganizationProfileView';
 import { OrganizationsProjectListView } from './OrganizationProjectListView';
-
 import { useOrganization } from './useOrganization';
 
 const SpecificOrganizationRouter = () => {

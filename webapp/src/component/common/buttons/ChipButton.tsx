@@ -1,8 +1,8 @@
+import { Button, ButtonProps, makeStyles } from '@material-ui/core';
+import Box from '@material-ui/core/Box';
+import clsx from 'clsx';
 import * as React from 'react';
 import { FunctionComponent, ReactNode } from 'react';
-import Box from '@material-ui/core/Box';
-import { Button, ButtonProps, makeStyles } from '@material-ui/core';
-import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
   root: {

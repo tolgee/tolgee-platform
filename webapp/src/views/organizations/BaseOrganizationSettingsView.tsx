@@ -1,11 +1,11 @@
+import { Box, Grid, Typography } from '@material-ui/core';
+import { FunctionComponent, PropsWithChildren } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
-import { FunctionComponent, PropsWithChildren } from 'react';
-import { Box, Grid, Typography } from '@material-ui/core';
-import { OrganizationSettingsMenu } from './components/OrganizationSettingsMenu';
-import UserOrganizationSettingsSubtitleLink from './components/UserOrganizationSettingsSubtitleLink';
 import { PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { OrganizationSettingsMenu } from './components/OrganizationSettingsMenu';
+import UserOrganizationSettingsSubtitleLink from './components/UserOrganizationSettingsSubtitleLink';
 
 export const BaseOrganizationSettingsView: FunctionComponent<BaseViewProps> = ({
   children,

@@ -1,6 +1,6 @@
 import MenuItem from '@material-ui/core/MenuItem';
-import { ComponentProps, default as React, FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
+import { ComponentProps, default as React, FunctionComponent } from 'react';
 import { Select } from 'tg.component/common/form/fields/Select';
 import { OrganizationRoleType } from 'tg.service/response.types';
 

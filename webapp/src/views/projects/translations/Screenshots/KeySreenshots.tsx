@@ -1,7 +1,3 @@
-import * as React from 'react';
-import { FunctionComponent } from 'react';
-import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
-import { T } from '@tolgee/react';
 import {
   Box,
   createStyles,
@@ -10,8 +6,12 @@ import {
   Theme,
   Tooltip,
 } from '@material-ui/core';
-import { ScreenshotsPopover } from './ScreenshotsPopover';
+import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
+import { T } from '@tolgee/react';
+import * as React from 'react';
+import { FunctionComponent } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
+import { ScreenshotsPopover } from './ScreenshotsPopover';
 
 type KeyTranslationsDTO =
   components['schemas']['KeyWithTranslationsResponseDto'];

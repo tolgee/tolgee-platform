@@ -1,26 +1,26 @@
 import { Divider } from '@material-ui/core';
 import List from '@material-ui/core/List';
-import { useSelector } from 'react-redux';
-import { SideMenuItem } from './SideMenuItem';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { useProject } from 'tg.hooks/useProject';
-import { ProjectPermissionType } from 'tg.service/response.types';
-import { useConfig } from 'tg.hooks/useConfig';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { useTranslate } from '@tolgee/react';
-import { container } from 'tsyringe';
+import { useSelector } from 'react-redux';
+import {
+  ExportIcon,
+  ImportIcon,
+  ProjectsIcon,
+  SettingsIcon,
+  TranslationIcon,
+  UserAddIcon,
+  UserSettingIcon,
+} from 'tg.component/CustomIcons';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { useConfig } from 'tg.hooks/useConfig';
+import { useProject } from 'tg.hooks/useProject';
+import { ProjectPermissionType } from 'tg.service/response.types';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
+import { container } from 'tsyringe';
 import { SideMenu } from './SideMenu';
-import {
-  ProjectsIcon,
-  TranslationIcon,
-  SettingsIcon,
-  ImportIcon,
-  ExportIcon,
-  UserSettingIcon,
-  UserAddIcon,
-} from 'tg.component/CustomIcons';
+import { SideMenuItem } from './SideMenuItem';
 
 const actions = container.resolve(GlobalActions);
 

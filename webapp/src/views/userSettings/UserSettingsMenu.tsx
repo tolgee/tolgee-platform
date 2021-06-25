@@ -1,7 +1,7 @@
 import { MenuItem, MenuList, Paper } from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import * as React from 'react';
 import { T } from '@tolgee/react';
+import * as React from 'react';
+import { Link } from 'react-router-dom';
 import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 
 export const UserSettingsMenu = () => {

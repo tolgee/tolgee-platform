@@ -1,10 +1,10 @@
-import React, { FunctionComponent, useState } from 'react';
 import { Grid } from '@material-ui/core';
-import { ImportConflictTranslation } from './ImportConflictTranslation';
-import { container } from 'tsyringe';
-import { ImportActions } from 'tg.store/project/ImportActions';
-import { components } from 'tg.service/apiSchema.generated';
+import React, { FunctionComponent, useState } from 'react';
 import { useProject } from 'tg.hooks/useProject';
+import { components } from 'tg.service/apiSchema.generated';
+import { ImportActions } from 'tg.store/project/ImportActions';
+import { container } from 'tsyringe';
+import { ImportConflictTranslation } from './ImportConflictTranslation';
 
 const actions = container.resolve(ImportActions);
 export const ImportConflictTranslationsPair: FunctionComponent<{

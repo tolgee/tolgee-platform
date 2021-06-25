@@ -6,9 +6,9 @@ import {
   Select,
 } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { useUser } from 'tg.hooks/useUser';
 import { useField } from 'formik';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
+import { useUser } from 'tg.hooks/useUser';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 const OwnerSelect = () => {

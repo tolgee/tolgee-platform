@@ -1,29 +1,29 @@
+import { Box, Button } from '@material-ui/core';
+import { T, useTranslate } from '@tolgee/react';
 import {
   default as React,
   FunctionComponent,
   useEffect,
   useState,
 } from 'react';
-import { Box, Button } from '@material-ui/core';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { Navigation } from 'tg.component/navigation/Navigation';
 import { BaseView } from 'tg.component/layout/BaseView';
-import { T, useTranslate } from '@tolgee/react';
-import ImportFileInput from './component/ImportFileInput';
-import { useImportDataHelper } from './hooks/useImportDataHelper';
-import { ImportResult } from './component/ImportResult';
-import { container } from 'tsyringe';
-import { ImportActions } from 'tg.store/project/ImportActions';
-import { useProject } from 'tg.hooks/useProject';
-import { ImportConflictNotResolvedErrorDialog } from './component/ImportConflictNotResolvedErrorDialog';
-import { useApplyImportHelper } from './hooks/useApplyImportHelper';
-import { startLoading, stopLoading } from 'tg.hooks/loading';
+import { Navigation } from 'tg.component/navigation/Navigation';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { MessageService } from 'tg.service/MessageService';
-import { ImportAlertError } from './ImportAlertError';
 import { confirmation } from 'tg.hooks/confirmation';
+import { startLoading, stopLoading } from 'tg.hooks/loading';
+import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
+import { MessageService } from 'tg.service/MessageService';
+import { ImportActions } from 'tg.store/project/ImportActions';
+import { container } from 'tsyringe';
+import { ImportConflictNotResolvedErrorDialog } from './component/ImportConflictNotResolvedErrorDialog';
 import { ImportConflictResolutionDialog } from './component/ImportConflictResolutionDialog';
+import ImportFileInput from './component/ImportFileInput';
+import { ImportResult } from './component/ImportResult';
+import { useApplyImportHelper } from './hooks/useApplyImportHelper';
+import { useImportDataHelper } from './hooks/useImportDataHelper';
+import { ImportAlertError } from './ImportAlertError';
 
 const actions = container.resolve(ImportActions);
 const messageService = container.resolve(MessageService);

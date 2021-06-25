@@ -1,12 +1,12 @@
-import { container, singleton } from 'tsyringe';
-import { ErrorActions } from 'tg.store/global/ErrorActions';
-import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-import { LINKS } from 'tg.constants/links';
-import { TokenService } from '../TokenService';
-import { GlobalError } from 'tg.error/GlobalError';
-import { MessageService } from '../MessageService';
 import * as Sentry from '@sentry/browser';
 import { T } from '@tolgee/react';
+import { LINKS } from 'tg.constants/links';
+import { GlobalError } from 'tg.error/GlobalError';
+import { ErrorActions } from 'tg.store/global/ErrorActions';
+import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { container, singleton } from 'tsyringe';
+import { MessageService } from '../MessageService';
+import { TokenService } from '../TokenService';
 
 const errorActions = container.resolve(ErrorActions);
 const redirectionActions = container.resolve(RedirectionActions);

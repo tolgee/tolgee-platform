@@ -1,9 +1,3 @@
-import { FunctionComponent, useState } from 'react';
-import { BaseView } from 'tg.component/layout/BaseView';
-import { T, useTranslate } from '@tolgee/react';
-import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
-import { SimpleListItem } from 'tg.component/common/list/SimpleListItem';
-import { LINKS, PARAMS } from 'tg.constants/links';
 import {
   Box,
   Chip,
@@ -11,12 +5,18 @@ import {
   ListItemText,
   Typography,
 } from '@material-ui/core';
-import RevokePermissionsButton from './component/RevokePermissionsButton';
-import { useProject } from 'tg.hooks/useProject';
-import { translatedPermissionType } from 'tg.fixtures/translatePermissionFile';
-import ProjectPermissionMenu from './component/ProjectPermissionMenu';
+import { T, useTranslate } from '@tolgee/react';
+import { FunctionComponent, useState } from 'react';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { SimpleListItem } from 'tg.component/common/list/SimpleListItem';
+import { BaseView } from 'tg.component/layout/BaseView';
 import { Navigation } from 'tg.component/navigation/Navigation';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { translatedPermissionType } from 'tg.fixtures/translatePermissionFile';
+import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import ProjectPermissionMenu from './component/ProjectPermissionMenu';
+import RevokePermissionsButton from './component/RevokePermissionsButton';
 
 export const ProjectPermissionsView: FunctionComponent = () => {
   const project = useProject();

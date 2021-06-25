@@ -1,17 +1,17 @@
-import { FunctionComponent, useState } from 'react';
-import { T } from '@tolgee/react';
-import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { Box, Button, Grid, Theme, Typography } from '@material-ui/core';
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import createStyles from '@material-ui/core/styles/createStyles';
-import { useUser } from 'tg.hooks/useUser';
-import { useOrganization } from './useOrganization';
-import { useLeaveOrganization } from './useLeaveOrganization';
-import { OrganizationRoleMenu } from './components/OrganizationRoleMenu';
-import OrganizationRemoveUserButton from './components/OrganizationRemoveUserButton';
-import { SimpleListItem } from 'tg.component/common/list/SimpleListItem';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import { T } from '@tolgee/react';
+import { FunctionComponent, useState } from 'react';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { SimpleListItem } from 'tg.component/common/list/SimpleListItem';
+import { useUser } from 'tg.hooks/useUser';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
+import OrganizationRemoveUserButton from './components/OrganizationRemoveUserButton';
+import { OrganizationRoleMenu } from './components/OrganizationRoleMenu';
+import { useLeaveOrganization } from './useLeaveOrganization';
+import { useOrganization } from './useOrganization';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

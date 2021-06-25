@@ -1,5 +1,5 @@
-import { default as React, FC, ReactElement, ReactNode } from 'react';
 import { FieldArray as FormikFieldArray, useField } from 'formik';
+import { default as React, FC, ReactElement, ReactNode } from 'react';
 
 export const FieldArray: FC<{
   name: string;

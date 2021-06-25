@@ -1,13 +1,13 @@
-import { useState } from 'react';
 import Box from '@material-ui/core/Box';
-import { LINKS } from 'tg.constants/links';
+import { useTranslate } from '@tolgee/react';
+import { useState } from 'react';
 import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { useTranslate } from '@tolgee/react';
-import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
-import ProjectListItem from './ProjectListItem';
+import { LINKS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import ProjectListItem from './ProjectListItem';
 
 export const ProjectListView = () => {
   const [page, setPage] = useState(0);

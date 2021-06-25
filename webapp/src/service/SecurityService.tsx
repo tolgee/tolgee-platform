@@ -1,13 +1,13 @@
 import { T } from '@tolgee/react';
 import { singleton } from 'tsyringe';
-import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { ErrorResponseDto, TokenDTO } from './response.types';
-import { TokenService } from './TokenService';
 import { API_LINKS } from '../constants/apiLinks';
 import { LINKS } from '../constants/links';
-import { MessageService } from './MessageService';
-import { InvitationCodeService } from './InvitationCodeService';
 import { ApiSchemaHttpService } from './http/ApiSchemaHttpService';
+import { ApiV1HttpService } from './http/ApiV1HttpService';
+import { InvitationCodeService } from './InvitationCodeService';
+import { MessageService } from './MessageService';
+import { ErrorResponseDto, TokenDTO } from './response.types';
+import { TokenService } from './TokenService';
 
 const API_URL = process.env.REACT_APP_API_URL + '/api/';
 

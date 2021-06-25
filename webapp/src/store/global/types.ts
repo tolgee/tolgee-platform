@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
 import { VariantType } from 'notistack';
+import { ReactNode } from 'react';
 
 export type SecurityDTO = {
   allowPrivate: boolean;

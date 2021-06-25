@@ -1,8 +1,8 @@
-import { singleton } from 'tsyringe';
-import { TokenService } from '../TokenService';
-import { MessageService } from '../MessageService';
-import { ApiV1HttpService } from './ApiV1HttpService';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { singleton } from 'tsyringe';
+import { MessageService } from '../MessageService';
+import { TokenService } from '../TokenService';
+import { ApiV1HttpService } from './ApiV1HttpService';
 
 @singleton()
 export class ApiV2HttpService extends ApiV1HttpService {

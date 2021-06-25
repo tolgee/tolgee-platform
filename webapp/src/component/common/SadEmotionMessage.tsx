@@ -1,8 +1,8 @@
-import { default as React, FunctionComponent, ReactNode } from 'react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import createStyles from '@material-ui/core/styles/createStyles';
 import { Theme, Typography } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
+import createStyles from '@material-ui/core/styles/createStyles';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import { default as React, FunctionComponent, ReactNode } from 'react';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({

@@ -1,21 +1,21 @@
+import { Box, Grid, Typography } from '@material-ui/core';
+import { T, useTranslate } from '@tolgee/react';
+import { FormikProps } from 'formik';
 import { FunctionComponent, useState } from 'react';
-import { container } from 'tsyringe';
-import { LINKS } from 'tg.constants/links';
 import { Redirect } from 'react-router-dom';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { BaseFormView } from 'tg.component/layout/BaseFormView';
-import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
-import { T, useTranslate } from '@tolgee/react';
-import { Box, Grid, Typography } from '@material-ui/core';
-import OwnerSelect from './components/OwnerSelect';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.hooks/useConfig';
 import { components } from 'tg.service/apiSchema.generated';
-import { FormikProps } from 'formik';
-import { BaseLanguageSelect } from './components/BaseLanguageSelect';
-import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
+import { container } from 'tsyringe';
+import { BaseLanguageSelect } from './components/BaseLanguageSelect';
+import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
+import OwnerSelect from './components/OwnerSelect';
 
 const messageService = container.resolve(MessageService);
 

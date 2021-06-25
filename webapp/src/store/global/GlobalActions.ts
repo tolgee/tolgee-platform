@@ -1,14 +1,14 @@
-import { SecurityDTO } from './types';
-import { singleton } from 'tsyringe';
-import { RemoteConfigService } from 'tg.service/RemoteConfigService';
-import { SecurityService } from 'tg.service/SecurityService';
-import { ErrorResponseDto, TokenDTO } from 'tg.service/response.types';
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
+import { InvitationCodeService } from 'tg.service/InvitationCodeService';
+import { RemoteConfigService } from 'tg.service/RemoteConfigService';
+import { ErrorResponseDto, TokenDTO } from 'tg.service/response.types';
+import { SecurityService } from 'tg.service/SecurityService';
+import { singleton } from 'tsyringe';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
 } from '../AbstractLoadableActions';
-import { InvitationCodeService } from 'tg.service/InvitationCodeService';
+import { SecurityDTO } from './types';
 
 export class GlobalState extends StateWithLoadables<GlobalActions> {
   authLoading = false;

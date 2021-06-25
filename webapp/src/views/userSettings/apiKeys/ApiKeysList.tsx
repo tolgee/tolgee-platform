@@ -1,17 +1,17 @@
-import { FunctionComponent } from 'react';
 import { Box, Grid, Paper, Theme } from '@material-ui/core';
-import { EditIconButton } from 'tg.component/common/buttons/EditIconButton';
-import { DeleteIconButton } from 'tg.component/common/buttons/DeleteIconButton';
-import { Link } from 'react-router-dom';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { container } from 'tsyringe';
-import { confirmation } from 'tg.hooks/confirmation';
-import { T } from '@tolgee/react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import createStyles from '@material-ui/core/styles/createStyles';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import { T } from '@tolgee/react';
+import { FunctionComponent } from 'react';
+import { Link } from 'react-router-dom';
+import { DeleteIconButton } from 'tg.component/common/buttons/DeleteIconButton';
+import { EditIconButton } from 'tg.component/common/buttons/EditIconButton';
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { confirmation } from 'tg.hooks/confirmation';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
+import { container } from 'tsyringe';
 
 type ApiKeyDTO = components['schemas']['ApiKeyDTO'];
 

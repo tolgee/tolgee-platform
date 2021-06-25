@@ -1,9 +1,9 @@
-import { FC, FunctionComponent } from 'react';
-import { T } from '@tolgee/react';
 import { Box, Button, Dialog, DialogContent } from '@material-ui/core';
-import { components } from 'tg.service/apiSchema.generated';
+import { T } from '@tolgee/react';
 import { Formik } from 'formik';
+import { FC, FunctionComponent } from 'react';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { components } from 'tg.service/apiSchema.generated';
 import { LanguageModifyFields } from './LanguageModifyFields';
 
 export const LanguageModifyForm: FC<{
