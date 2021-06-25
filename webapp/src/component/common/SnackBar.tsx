@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import { MessageActions } from '../../store/global/MessageActions';
-import { Message } from '../../store/global/types';
-import { connect } from 'react-redux';
-import { AppState } from '../../store';
-import { container } from 'tsyringe';
 import { useSnackbar } from 'notistack';
+import { connect } from 'react-redux';
+import { container } from 'tsyringe';
+
+import { MessageActions } from 'tg.store/global/MessageActions';
+import { Message } from 'tg.store/global/types';
+import { AppState } from 'tg.store/index';
 
 interface Props {
   messages: Message[];

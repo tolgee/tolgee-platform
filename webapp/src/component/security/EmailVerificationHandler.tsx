@@ -1,13 +1,15 @@
 import { FunctionComponent, useEffect } from 'react';
 import { T } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
-import { LINKS, PARAMS } from '../../constants/links';
-import { FullPageLoading } from '../common/FullPageLoading';
 import { container } from 'tsyringe';
-import { RedirectionActions } from '../../store/global/RedirectionActions';
-import { useApiQuery } from '../../service/http/useQueryApi';
-import { MessageService } from '../../service/MessageService';
-import { SignUpService } from '../../service/SignUpService';
+
+import { LINKS, PARAMS } from 'tg.constants/links';
+import { MessageService } from 'tg.service/MessageService';
+import { SignUpService } from 'tg.service/SignUpService';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+
+import { FullPageLoading } from '../common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}
 

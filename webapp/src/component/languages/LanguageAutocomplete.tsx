@@ -1,10 +1,10 @@
-import { Autocomplete } from '@material-ui/lab';
-import { Box, IconButton, InputAdornment, TextField } from '@material-ui/core';
-import { T } from '@tolgee/react';
 import React, { FC, ReactNode, useState } from 'react';
-import { suggest } from '@tginternal/language-util';
+import { Box, IconButton, InputAdornment, TextField } from '@material-ui/core';
 import { Add, Clear } from '@material-ui/icons';
+import { Autocomplete } from '@material-ui/lab';
+import { suggest } from '@tginternal/language-util';
 import { SuggestResult } from '@tginternal/language-util/lib/suggesting';
+import { T } from '@tolgee/react';
 
 export type AutocompleteOption = Omit<SuggestResult, 'languageId'> & {
   isNew?: true;

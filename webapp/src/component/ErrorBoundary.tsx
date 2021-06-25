@@ -1,6 +1,7 @@
-import * as React from 'react';
-import { AppState } from '../store';
+import React from 'react';
 import { connect } from 'react-redux';
+
+import { AppState } from '../store';
 
 const GlobalError = React.lazy(
   () => import(/* webpackChunkName: "global-error" */ './common/GlobalError')

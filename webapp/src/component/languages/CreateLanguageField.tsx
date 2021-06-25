@@ -1,14 +1,16 @@
 import React, { FC, useEffect, useState } from 'react';
 import { Box, BoxProps, Button } from '@material-ui/core';
-import { PreparedLanguage } from './PreparedLanguage';
 import { T } from '@tolgee/react';
+
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { components } from 'tg.service/apiSchema.generated';
+
 import {
   AutocompleteOption,
   LanguageAutocomplete,
 } from './LanguageAutocomplete';
 import { LanguageModifyForm } from './LanguageModifyForm';
-import { Validation } from '../../constants/GlobalValidationSchema';
-import { components } from '../../service/apiSchema.generated';
+import { PreparedLanguage } from './PreparedLanguage';
 
 export const CreateLanguageField: FC<{
   onSubmit?: (value) => void;

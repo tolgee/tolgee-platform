@@ -1,5 +1,5 @@
-import { useProject } from './useProject';
 import { ProjectPermissionType } from '../service/response.types';
+import { useProject } from './useProject';
 
 export class ProjectPermissions {
   constructor(private activePermission: ProjectPermissionType) {}

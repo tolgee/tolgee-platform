@@ -1,10 +1,10 @@
 import { ReactNode, useEffect, useState } from 'react';
+import { components } from 'tg.service/apiSchema.generated';
+import { HateoasPaginatedData } from 'tg.service/response.types';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
-} from '../../../store/AbstractLoadableActions';
-import { HateoasPaginatedData } from '../../../service/response.types';
-import { components } from '../../../service/apiSchema.generated';
+} from 'tg.store/AbstractLoadableActions';
 
 export type EmbeddedDataItem<
   ActionsType extends AbstractLoadableActions<StateWithLoadables<ActionsType>>,

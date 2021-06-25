@@ -1,21 +1,23 @@
 import { default as React, FunctionComponent } from 'react';
-import { DashboardPage } from '../layout/DashboardPage';
 import { Button } from '@material-ui/core';
-import { useSelector } from 'react-redux';
-import { AppState } from '../../store';
-import { LINKS } from '../../constants/links';
-import { Redirect } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
-import { container } from 'tsyringe';
-import { SetPasswordFields } from './SetPasswordFields';
-import { SignUpActions } from '../../store/global/SignUpActions';
-import { TextField } from '../common/form/fields/TextField';
-import { useConfig } from '../../hooks/useConfig';
-import { Validation } from '../../constants/GlobalValidationSchema';
-import { BaseFormView } from '../layout/BaseFormView';
-import { Alert } from '../common/Alert';
 import { T, useTranslate } from '@tolgee/react';
+import { useSelector } from 'react-redux';
+import { Redirect } from 'react-router-dom';
+import { container } from 'tsyringe';
+
+import { Validation } from 'tg.constants/GlobalValidationSchema';
+import { LINKS } from 'tg.constants/links';
+import { useConfig } from 'tg.hooks/useConfig';
+import { SignUpActions } from 'tg.store/global/SignUpActions';
+import { AppState } from 'tg.store/index';
+
+import { Alert } from '../common/Alert';
+import { TextField } from '../common/form/fields/TextField';
+import { BaseFormView } from '../layout/BaseFormView';
 import { BaseView } from '../layout/BaseView';
+import { DashboardPage } from '../layout/DashboardPage';
+import { SetPasswordFields } from './SetPasswordFields';
 
 const actions = container.resolve(SignUpActions);
 

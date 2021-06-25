@@ -1,6 +1,7 @@
 import { singleton } from 'tsyringe';
-import { Action, ActionType, PromiseAction } from './Action';
+
 import { AbstractActions } from './AbstractActions';
+import { Action, ActionType, PromiseAction } from './Action';
 
 @singleton()
 export class ImplicitReducer {

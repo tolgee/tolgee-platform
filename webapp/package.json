@@ -78,6 +78,7 @@
     "concurrently": "^6.2.0",
     "copy-webpack-plugin": "6.4.1",
     "craco": "^0.0.3",
+    "craco-alias": "^3.0.1",
     "eslint": "^7.28.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.24.0",

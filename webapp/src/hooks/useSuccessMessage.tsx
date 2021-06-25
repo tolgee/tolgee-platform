@@ -1,5 +1,6 @@
-import { MessageService } from '../service/MessageService';
 import { container } from 'tsyringe';
+
+import { MessageService } from '../service/MessageService';
 
 const messageService = container.resolve(MessageService);
 

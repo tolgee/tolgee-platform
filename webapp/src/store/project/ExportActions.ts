@@ -1,9 +1,11 @@
 import { singleton } from 'tsyringe';
+
+import { ImportExportService } from 'tg.service/ImportExportService';
+
 import {
   AbstractLoadableActions,
   StateWithLoadables,
 } from '../AbstractLoadableActions';
-import { ImportExportService } from '../../service/ImportExportService';
 
 export class ExportState extends StateWithLoadables<ExportActions> {}
 

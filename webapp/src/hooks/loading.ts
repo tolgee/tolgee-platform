@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux';
-import { AppState } from '../store';
 import { container } from 'tsyringe';
+
+import { AppState } from '../store';
 import { GlobalActions } from '../store/global/GlobalActions';
 
 const globalActions = container.resolve(GlobalActions);

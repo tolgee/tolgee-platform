@@ -1,14 +1,16 @@
 import { default as React, FunctionComponent, ReactNode } from 'react';
-import { Form, Formik, FormikProps } from 'formik';
 import { Box, Button } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { ObjectSchema } from 'yup';
-import { useHistory } from 'react-router-dom';
 import { T } from '@tolgee/react';
-import { ResourceErrorComponent } from './ResourceErrorComponent';
-import LoadingButton from './LoadingButton';
+import { Form, Formik, FormikProps } from 'formik';
 import { FormikHelpers } from 'formik/dist/types';
-import { ErrorResponseDto } from '../../../service/response.types';
+import { useHistory } from 'react-router-dom';
+import { ObjectSchema } from 'yup';
+
+import { ErrorResponseDto } from 'tg.service/response.types';
+
+import LoadingButton from './LoadingButton';
+import { ResourceErrorComponent } from './ResourceErrorComponent';
 
 interface LoadableType {
   loading?: boolean;

@@ -1,7 +1,7 @@
-import { Action, ActionType, PromiseAction, StateModifier } from './Action';
+import { ReactNode } from 'react';
 import { ErrorResponseDto } from '../service/response.types';
 import { AbstractActions } from './AbstractActions';
-import { ReactNode } from 'react';
+import { Action, ActionType, PromiseAction, StateModifier } from './Action';
 
 export class LoadableDefinition<
   StateType extends StateWithLoadables<any>,

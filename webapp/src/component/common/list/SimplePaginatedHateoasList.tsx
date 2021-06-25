@@ -1,16 +1,18 @@
 import { JSXElementConstructor, ReactNode, useEffect, useState } from 'react';
-import { EmptyListMessage } from '../EmptyListMessage';
-import { OverridableListWrappers, SimpleList } from './SimpleList';
+import { Box, Grid, Typography } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
+import { T } from '@tolgee/react';
+
+import { startLoading, stopLoading } from 'tg.hooks/loading';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
-} from '../../../store/AbstractLoadableActions';
+} from 'tg.store/AbstractLoadableActions';
+
 import { BoxLoading } from '../BoxLoading';
-import { Box, Grid, Typography } from '@material-ui/core';
+import { EmptyListMessage } from '../EmptyListMessage';
 import SearchField from '../form/fields/SearchField';
-import { startLoading, stopLoading } from '../../../hooks/loading';
-import { Alert } from '@material-ui/lab';
-import { T } from '@tolgee/react';
+import { OverridableListWrappers, SimpleList } from './SimpleList';
 import {
   EmbeddedDataItem,
   usePaginatedHateoasDataHelper,

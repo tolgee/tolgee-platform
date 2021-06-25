@@ -1,4 +1,5 @@
 import { container } from 'tsyringe';
+
 import { DispatchService } from '../service/DispatchService';
 
 export type ActionType<PayloadType> = {

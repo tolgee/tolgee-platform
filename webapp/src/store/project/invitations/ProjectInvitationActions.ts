@@ -1,4 +1,5 @@
 import { singleton } from 'tsyringe';
+
 import {
   AbstractLoadableActions,
   StateWithLoadables,

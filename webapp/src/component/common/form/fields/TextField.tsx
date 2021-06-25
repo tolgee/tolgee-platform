@@ -1,10 +1,10 @@
 import { FunctionComponent, useEffect, useState } from 'react';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
 import {
   TextField as MUITextField,
   TextFieldProps,
   Theme,
 } from '@material-ui/core';
+import { createStyles, makeStyles } from '@material-ui/core/styles';
 import { useField } from 'formik';
 
 interface PGTextFieldProps {

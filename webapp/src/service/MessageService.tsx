@@ -1,8 +1,9 @@
-import { singleton } from 'tsyringe';
-import { Message } from '../store/global/types';
 import { ReactNode } from 'react';
-import { MessageActions } from '../store/global/MessageActions';
 import { VariantType } from 'notistack';
+import { singleton } from 'tsyringe';
+
+import { MessageActions } from '../store/global/MessageActions';
+import { Message } from '../store/global/types';
 
 @singleton()
 export class MessageService {

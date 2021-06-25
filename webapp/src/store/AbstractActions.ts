@@ -1,6 +1,6 @@
-import { AbstractAction, Action, ActionType, PromiseAction } from './Action';
-import { ErrorResponseDto } from '../service/response.types';
 import { ReactNode } from 'react';
+import { ErrorResponseDto } from '../service/response.types';
+import { AbstractAction, Action, ActionType, PromiseAction } from './Action';
 
 export abstract class AbstractActions<StateType> {
   private actions = new Map<string, AbstractAction>();

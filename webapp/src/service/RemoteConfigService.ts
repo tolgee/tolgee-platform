@@ -1,8 +1,9 @@
 import { singleton } from 'tsyringe';
-import { RemoteConfigurationDTO } from './response.types';
-import { ApiV1HttpService } from './http/ApiV1HttpService';
+
 import { GlobalError } from '../error/GlobalError';
 import { ErrorActions } from '../store/global/ErrorActions';
+import { ApiV1HttpService } from './http/ApiV1HttpService';
+import { RemoteConfigurationDTO } from './response.types';
 
 @singleton()
 export class RemoteConfigService {

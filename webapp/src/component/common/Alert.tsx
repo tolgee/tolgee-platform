@@ -1,7 +1,7 @@
 import { default as React, FunctionComponent } from 'react';
-import MuiAlert from '@material-ui/lab/Alert';
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import { Theme } from '@material-ui/core';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+import MuiAlert from '@material-ui/lab/Alert';
 
 const useStyles = makeStyles((theme: Theme) => ({
   alert: {

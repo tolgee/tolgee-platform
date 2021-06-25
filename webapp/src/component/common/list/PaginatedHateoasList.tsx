@@ -1,16 +1,17 @@
-import { UseQueryResult } from 'react-query';
-import { JSXElementConstructor, ReactNode } from 'react';
-import { EmptyListMessage } from '../EmptyListMessage';
-import { OverridableListWrappers, SimpleList } from './SimpleList';
+import { JSXElementConstructor, ReactNode, useEffect } from 'react';
 import { Box, Grid, Typography } from '@material-ui/core';
-import SearchField from '../form/fields/SearchField';
 import { Alert } from '@material-ui/lab';
 import { T } from '@tolgee/react';
+import { UseQueryResult } from 'react-query';
+
 import {
-  HateoasPaginatedData,
   HateoasListData,
-} from '../../../service/response.types';
-import { useEffect } from 'react';
+  HateoasPaginatedData,
+} from 'tg.service/response.types';
+
+import { EmptyListMessage } from '../EmptyListMessage';
+import SearchField from '../form/fields/SearchField';
+import { OverridableListWrappers, SimpleList } from './SimpleList';
 
 // get item type from TData
 export type InferItemType<TData> = TData extends HateoasListData<

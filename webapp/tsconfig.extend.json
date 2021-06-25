@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "tg.component/*": ["component/*"],
+      "tg.store/*": ["store/*"],
+      "tg.hooks/*": ["hooks/*"],
+      "tg.constants/*": ["constants/*"],
+      "tg.fixtures/*": ["fixtures/*"],
+      "tg.service/*": ["service/*"],
+      "tg.views/*": ["views/*"],
+      "tg.error/*": ["error/*"],
+      "tg.svgs/*": ["svgs/*"]
+    }
+  }
+}

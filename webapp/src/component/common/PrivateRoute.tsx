@@ -1,10 +1,11 @@
 import { default as React, FunctionComponent } from 'react';
-import { Redirect, Route } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { AppState } from '../../store';
-import { LINKS } from '../../constants/links';
-import { SecurityService } from '../../service/SecurityService';
+import { Redirect, Route } from 'react-router-dom';
 import { container } from 'tsyringe';
+
+import { LINKS } from 'tg.constants/links';
+import { SecurityService } from 'tg.service/SecurityService';
+import { AppState } from 'tg.store/index';
 
 interface PrivateRouteProps {}
 
