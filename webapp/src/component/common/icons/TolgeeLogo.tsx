@@ -1,5 +1,4 @@
 import { SvgIcon, SvgIconProps } from '@material-ui/core';
-import * as React from 'react';
 import { FunctionComponent } from 'react';
 import { ReactComponent as Logo } from 'tg.svgs/tolgeeLogo.svg';
 

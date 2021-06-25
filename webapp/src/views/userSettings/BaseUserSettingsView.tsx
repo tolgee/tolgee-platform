@@ -1,5 +1,4 @@
 import { Box, Grid, Typography } from '@material-ui/core';
-import * as React from 'react';
 import { FunctionComponent, PropsWithChildren } from 'react';
 import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';

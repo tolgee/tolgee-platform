@@ -1,5 +1,4 @@
 import { T } from '@tolgee/react';
-import React from 'react';
 import { singleton } from 'tsyringe';
 import { SignUpType } from '../component/security/SignUpView';
 import { GlobalActions } from '../store/global/GlobalActions';

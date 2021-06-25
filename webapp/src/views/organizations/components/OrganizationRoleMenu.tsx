@@ -1,8 +1,7 @@
 import { Button, Menu, MenuItem } from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
 import { T } from '@tolgee/react';
-import * as React from 'react';
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useUser } from 'tg.hooks/useUser';
@@ -18,7 +17,7 @@ const messagingService = container.resolve(MessageService);
 export const OrganizationRoleMenu: FunctionComponent<{
   user: components['schemas']['UserAccountWithOrganizationRoleModel'];
 }> = (props) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const queryClient = useQueryClient();
 

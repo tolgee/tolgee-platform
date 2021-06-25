@@ -1,5 +1,4 @@
 import { Box } from '@material-ui/core';
-import * as React from 'react';
 import { FC } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { FlagImage } from './FlagImage';

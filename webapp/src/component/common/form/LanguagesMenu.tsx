@@ -11,7 +11,6 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { T } from '@tolgee/react';
-import * as React from 'react';
 import { FunctionComponent, useState } from 'react';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { MessageService } from 'tg.service/MessageService';

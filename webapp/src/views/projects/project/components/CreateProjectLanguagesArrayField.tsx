@@ -2,7 +2,6 @@ import { Box, Button, Grid } from '@material-ui/core';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
-import * as React from 'react';
 import { FC } from 'react';
 import { FieldArray } from 'tg.component/common/form/fields/FieldArray';
 import { CreateLanguageField } from 'tg.component/languages/CreateLanguageField';

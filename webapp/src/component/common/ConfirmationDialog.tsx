@@ -7,7 +7,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { T } from '@tolgee/react';
-import * as React from 'react';
 import { ReactNode, useEffect, useState } from 'react';
 
 export class ConfirmationDialogProps {

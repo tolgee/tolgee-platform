@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/browser';
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { container } from 'tsyringe';
