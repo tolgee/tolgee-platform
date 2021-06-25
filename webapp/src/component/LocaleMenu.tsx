@@ -1,3 +1,4 @@
+import { default as React, FunctionComponent, useState } from 'react';
 import { Button, MenuProps } from '@material-ui/core';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -5,7 +6,6 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import LanguageIcon from '@material-ui/icons/Language';
 import { useCurrentLanguage, useSetLanguage } from '@tolgee/react';
-import { default as React, FunctionComponent, useState } from 'react';
 
 export const LocaleMenu: FunctionComponent<{ className?: string }> = (
   props

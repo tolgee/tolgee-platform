@@ -1,12 +1,14 @@
+import { FunctionComponent, useState } from 'react';
 import { Box, Button, Grid, Theme, Typography } from '@material-ui/core';
 import createStyles from '@material-ui/core/styles/createStyles';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { T } from '@tolgee/react';
-import { FunctionComponent, useState } from 'react';
+
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { SimpleListItem } from 'tg.component/common/list/SimpleListItem';
 import { useUser } from 'tg.hooks/useUser';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import OrganizationRemoveUserButton from './components/OrganizationRemoveUserButton';
 import { OrganizationRoleMenu } from './components/OrganizationRoleMenu';

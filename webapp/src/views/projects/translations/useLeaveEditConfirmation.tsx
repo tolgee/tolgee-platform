@@ -1,7 +1,8 @@
 import { T } from '@tolgee/react';
+import { container } from 'tsyringe';
+
 import { confirmation } from 'tg.hooks/confirmation';
 import { TranslationActions } from 'tg.store/project/TranslationActions';
-import { container } from 'tsyringe';
 
 const actions = container.resolve(TranslationActions);
 

@@ -1,3 +1,4 @@
+import { FunctionComponent, useState } from 'react';
 import {
   Box,
   Checkbox,
@@ -11,11 +12,11 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { T } from '@tolgee/react';
-import { FunctionComponent, useState } from 'react';
+import { container } from 'tsyringe';
+
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { MessageService } from 'tg.service/MessageService';
 import { TranslationActions } from 'tg.store/project/TranslationActions';
-import { container } from 'tsyringe';
 
 export interface LanguagesMenuProps {
   context: string;

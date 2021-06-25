@@ -1,7 +1,8 @@
+import { container } from 'tsyringe';
+
 import { startLoading } from 'tg.hooks/loading';
 import { useProject } from 'tg.hooks/useProject';
 import { ImportActions } from 'tg.store/project/ImportActions';
-import { container } from 'tsyringe';
 
 const actions = container.resolve(ImportActions);
 

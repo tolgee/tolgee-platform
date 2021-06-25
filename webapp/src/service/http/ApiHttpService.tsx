@@ -1,10 +1,12 @@
 import * as Sentry from '@sentry/browser';
 import { T } from '@tolgee/react';
+import { container, singleton } from 'tsyringe';
+
 import { LINKS } from 'tg.constants/links';
 import { GlobalError } from 'tg.error/GlobalError';
 import { ErrorActions } from 'tg.store/global/ErrorActions';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-import { container, singleton } from 'tsyringe';
+
 import { MessageService } from '../MessageService';
 import { TokenService } from '../TokenService';
 

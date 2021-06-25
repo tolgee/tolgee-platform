@@ -1,3 +1,4 @@
+import React, { FunctionComponent, useState } from 'react';
 import {
   Box,
   makeStyles,
@@ -9,9 +10,10 @@ import {
   TableRow,
 } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import React, { FunctionComponent, useState } from 'react';
+
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
 import { components } from 'tg.service/apiSchema.generated';
+
 import { ImportFileIssuesDialog } from './ImportFileIssuesDialog';
 import { ImportResultRow } from './ImportResultRow';
 import { ImportShowDataDialog } from './ImportShowDataDialog';

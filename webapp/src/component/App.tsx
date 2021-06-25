@@ -1,8 +1,9 @@
-import * as Sentry from '@sentry/browser';
 import React, { useEffect, useState } from 'react';
+import * as Sentry from '@sentry/browser';
 import { useSelector } from 'react-redux';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { container } from 'tsyringe';
+
 import { LINKS } from '../constants/links';
 import { GlobalError } from '../error/GlobalError';
 import { useConfig } from '../hooks/useConfig';
@@ -13,8 +14,8 @@ import { GlobalActions } from '../store/global/GlobalActions';
 import { RedirectionActions } from '../store/global/RedirectionActions';
 import { OrganizationsRouter } from '../views/organizations/OrganizationsRouter';
 import { ProjectsRouter } from '../views/projects/ProjectsRouter';
-import { ApiKeysView } from '../views/userSettings/apiKeys/ApiKeysView';
 import { UserProfileView } from '../views/userSettings/UserProfileView';
+import { ApiKeysView } from '../views/userSettings/apiKeys/ApiKeysView';
 import ConfirmationDialog from './common/ConfirmationDialog';
 import { FullPageLoading } from './common/FullPageLoading';
 import { PrivateRoute } from './common/PrivateRoute';

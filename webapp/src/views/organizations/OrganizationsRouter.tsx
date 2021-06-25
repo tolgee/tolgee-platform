@@ -1,8 +1,10 @@
 import { Switch } from 'react-router-dom';
+
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
+
 import { OrganizationCreateView } from './OrganizationCreateView';
 import { OrganizationInvitationsView } from './OrganizationInvitationsView';
 import { OrganizationsListView } from './OrganizationListView';

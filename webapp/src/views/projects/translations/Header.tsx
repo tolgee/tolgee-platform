@@ -1,7 +1,9 @@
-import { Box, Checkbox } from '@material-ui/core';
 import { FunctionComponent, useContext } from 'react';
+import { Box, Checkbox } from '@material-ui/core';
+
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
+
 import { TableCell } from './TableCell';
 import { RowContext } from './TranslationsRow';
 import { TranslationListContext } from './TtranslationsGridContextProvider';

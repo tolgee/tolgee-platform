@@ -1,10 +1,12 @@
+import React, { FunctionComponent, ReactNode } from 'react';
 import { Box, Button, makeStyles, Typography } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import React, { FunctionComponent, ReactNode } from 'react';
+import { container } from 'tsyringe';
+
 import { useConfig } from 'tg.hooks/useConfig';
 import { MessageActions } from 'tg.store/global/MessageActions';
 import { Message } from 'tg.store/global/types';
-import { container } from 'tsyringe';
+
 import { ImportFileDropzone } from './ImportFileDropzone';
 
 export const MAX_FILE_COUNT = 20;

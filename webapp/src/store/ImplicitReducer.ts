@@ -1,4 +1,5 @@
 import { singleton } from 'tsyringe';
+
 import { AbstractActions } from './AbstractActions';
 import { Action, ActionType, PromiseAction } from './Action';
 

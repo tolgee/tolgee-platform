@@ -1,6 +1,7 @@
+import { FunctionComponent, useContext, useState } from 'react';
 import { Box, TablePagination } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { FunctionComponent, useContext, useState } from 'react';
+
 import { TranslationListContext } from './TtranslationsGridContextProvider';
 import { useLeaveEditConfirmationPagination } from './useLeaveEditConfirmation';
 

@@ -1,3 +1,4 @@
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import { Box, Theme, Tooltip, Typography } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -5,10 +6,10 @@ import { createStyles, makeStyles } from '@material-ui/core/styles';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
-import React, { FunctionComponent, useEffect, useState } from 'react';
-import { EasyInput } from 'tg.component/common/form/fields/EasyInput';
-import { MicroForm } from 'tg.component/common/form/MicroForm';
 import * as Yup from 'yup';
+
+import { MicroForm } from 'tg.component/common/form/MicroForm';
+import { EasyInput } from 'tg.component/common/form/fields/EasyInput';
 
 export interface EditableCellProps {
   initialValue: any;

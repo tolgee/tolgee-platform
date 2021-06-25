@@ -1,6 +1,7 @@
+import { FunctionComponent } from 'react';
 import { Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { FunctionComponent } from 'react';
+
 import { TopBar } from './TopBar';
 
 const useStyles = makeStyles((theme) => ({

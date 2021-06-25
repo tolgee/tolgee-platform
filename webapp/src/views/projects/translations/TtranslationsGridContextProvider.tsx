@@ -1,14 +1,16 @@
-import { useTranslate } from '@tolgee/react';
 import React, { ReactNode, useEffect, useState } from 'react';
+import { useTranslate } from '@tolgee/react';
 import { useQueryClient, UseQueryResult } from 'react-query';
+import { container } from 'tsyringe';
+
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { TranslationActions } from 'tg.store/project/TranslationActions';
-import { container } from 'tsyringe';
+
 import { useLeaveEditConfirmationOtherEdit } from './useLeaveEditConfirmation';
 
 type TranslationsType =

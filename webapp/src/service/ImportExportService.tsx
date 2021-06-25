@@ -1,7 +1,8 @@
 import { container, singleton } from 'tsyringe';
+
+import { MessageService } from './MessageService';
 import { ApiSchemaHttpService } from './http/ApiSchemaHttpService';
 import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { MessageService } from './MessageService';
 
 const http = container.resolve(ApiV1HttpService);
 container.resolve(ApiSchemaHttpService);

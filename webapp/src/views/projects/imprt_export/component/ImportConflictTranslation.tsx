@@ -1,3 +1,4 @@
+import React, { FunctionComponent, LegacyRef, useEffect } from 'react';
 import {
   Box,
   BoxProps,
@@ -10,7 +11,6 @@ import { KeyboardArrowUp } from '@material-ui/icons';
 import CheckIcon from '@material-ui/icons/Check';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import clsx from 'clsx';
-import React, { FunctionComponent, LegacyRef, useEffect } from 'react';
 
 type ImportConflictTranslationProps = {
   text?: string;

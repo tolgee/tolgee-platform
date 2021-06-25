@@ -1,9 +1,11 @@
-import { Box, Grid, Typography } from '@material-ui/core';
 import { FunctionComponent, PropsWithChildren } from 'react';
+import { Box, Grid, Typography } from '@material-ui/core';
+
 import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useConfig } from 'tg.hooks/useConfig';
 import { useUser } from 'tg.hooks/useUser';
+
 import UserOrganizationSettingsSubtitleLink from '../organizations/components/UserOrganizationSettingsSubtitleLink';
 import { UserSettingsMenu } from './UserSettingsMenu';
 

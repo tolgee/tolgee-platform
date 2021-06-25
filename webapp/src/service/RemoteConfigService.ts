@@ -1,4 +1,5 @@
 import { singleton } from 'tsyringe';
+
 import { GlobalError } from '../error/GlobalError';
 import { ErrorActions } from '../store/global/ErrorActions';
 import { ApiV1HttpService } from './http/ApiV1HttpService';

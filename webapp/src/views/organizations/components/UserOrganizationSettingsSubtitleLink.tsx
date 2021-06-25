@@ -1,8 +1,9 @@
+import React from 'react';
 import { Box, Link, MenuItem, Popover } from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
 import { T } from '@tolgee/react';
-import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useUser } from 'tg.hooks/useUser';
 import { useApiQuery } from 'tg.service/http/useQueryApi';

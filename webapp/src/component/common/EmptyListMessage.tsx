@@ -1,6 +1,7 @@
+import { default as React, FunctionComponent } from 'react';
 import { Box } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { default as React, FunctionComponent } from 'react';
+
 import { SadEmotionMessage } from './SadEmotionMessage';
 
 export const EmptyListMessage: FunctionComponent = (props) => {

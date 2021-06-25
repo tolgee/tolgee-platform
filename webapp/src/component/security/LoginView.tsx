@@ -1,20 +1,22 @@
+import { FunctionComponent, useEffect } from 'react';
 import { Button } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import { T } from '@tolgee/react';
-import { FunctionComponent, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, Redirect, useHistory } from 'react-router-dom';
+import { container } from 'tsyringe';
+
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useConfig } from 'tg.hooks/useConfig';
 import { MessageService } from 'tg.service/MessageService';
 import { SecurityService } from 'tg.service/SecurityService';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
-import { container } from 'tsyringe';
-import { TextField } from '../common/form/fields/TextField';
+
 import LoadingButton from '../common/form/LoadingButton';
 import { StandardForm } from '../common/form/StandardForm';
+import { TextField } from '../common/form/fields/TextField';
 import { BaseView } from '../layout/BaseView';
 import { DashboardPage } from '../layout/DashboardPage';
 

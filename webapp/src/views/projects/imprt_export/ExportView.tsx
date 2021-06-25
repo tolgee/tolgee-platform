@@ -1,15 +1,16 @@
+import { default as React, FunctionComponent, useEffect } from 'react';
 import { Box, Button } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
-import { default as React, FunctionComponent, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useRouteMatch } from 'react-router-dom';
+import { container } from 'tsyringe';
+
 import { BaseView } from 'tg.component/layout/BaseView';
 import { Navigation } from 'tg.component/navigation/Navigation';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { AppState } from 'tg.store/index';
 import { ExportActions } from 'tg.store/project/ExportActions';
-import { container } from 'tsyringe';
 
 const actions = container.resolve(ExportActions);
 

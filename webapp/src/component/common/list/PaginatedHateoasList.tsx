@@ -1,12 +1,14 @@
+import { JSXElementConstructor, ReactNode, useEffect } from 'react';
 import { Box, Grid, Typography } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { T } from '@tolgee/react';
-import { JSXElementConstructor, ReactNode, useEffect } from 'react';
 import { UseQueryResult } from 'react-query';
+
 import {
   HateoasListData,
   HateoasPaginatedData,
 } from 'tg.service/response.types';
+
 import { EmptyListMessage } from '../EmptyListMessage';
 import SearchField from '../form/fields/SearchField';
 import { OverridableListWrappers, SimpleList } from './SimpleList';

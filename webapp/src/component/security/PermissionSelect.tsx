@@ -1,7 +1,9 @@
-import { MenuItem } from '@material-ui/core';
 import { ComponentProps, default as React, FunctionComponent } from 'react';
+import { MenuItem } from '@material-ui/core';
+
 import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
 import { translatedPermissionType } from 'tg.fixtures/translatePermissionFile';
+
 import { Select } from '../common/form/fields/Select';
 
 export const PermissionSelect: FunctionComponent<

@@ -1,14 +1,16 @@
+import { default as React, FunctionComponent, useEffect } from 'react';
 import { Button } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
-import { default as React, FunctionComponent, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router-dom';
+import { container } from 'tsyringe';
+
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useConfig } from 'tg.hooks/useConfig';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
-import { container } from 'tsyringe';
+
 import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
 import { BaseView } from '../layout/BaseView';

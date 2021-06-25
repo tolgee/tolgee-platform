@@ -1,8 +1,10 @@
+import { default as React, FunctionComponent } from 'react';
 import { Box } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { default as React, FunctionComponent } from 'react';
+
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { ErrorResponseDto } from 'tg.service/response.types';
+
 import { Alert } from '../Alert';
 
 export const ResourceErrorComponent: FunctionComponent<{

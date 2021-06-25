@@ -1,17 +1,19 @@
+import { FunctionComponent } from 'react';
 import { Box, Typography } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
-import { FunctionComponent } from 'react';
 import { useHistory } from 'react-router-dom';
-import { TextField } from 'tg.component/common/form/fields/TextField';
+import { container } from 'tsyringe';
+
 import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { TextField } from 'tg.component/common/form/fields/TextField';
 import { SetPasswordFields } from 'tg.component/security/SetPasswordFields';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useConfig } from 'tg.hooks/useConfig';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
+import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { UserUpdateDTO } from 'tg.service/request.types';
-import { container } from 'tsyringe';
+
 import { BaseUserSettingsView } from './BaseUserSettingsView';
 
 const messagesService = container.resolve(MessageService);

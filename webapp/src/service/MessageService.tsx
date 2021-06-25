@@ -1,6 +1,7 @@
-import { VariantType } from 'notistack';
 import { ReactNode } from 'react';
+import { VariantType } from 'notistack';
 import { singleton } from 'tsyringe';
+
 import { MessageActions } from '../store/global/MessageActions';
 import { Message } from '../store/global/types';
 

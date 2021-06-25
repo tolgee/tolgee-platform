@@ -1,3 +1,4 @@
+import { FunctionComponent, useEffect, useState } from 'react';
 import {
   TextField as MUITextField,
   TextFieldProps,
@@ -5,7 +6,6 @@ import {
 } from '@material-ui/core';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import { useField } from 'formik';
-import { FunctionComponent, useEffect, useState } from 'react';
 
 interface PGTextFieldProps {
   name: string;

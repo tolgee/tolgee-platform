@@ -1,7 +1,8 @@
+import React, { ComponentProps, FunctionComponent } from 'react';
 import { Button, Menu, MenuItem } from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
 import { T } from '@tolgee/react';
-import React, { ComponentProps, FunctionComponent } from 'react';
+
 import { ProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { components } from 'tg.service/apiSchema.generated';
 import { ProjectPermissionType } from 'tg.service/response.types';

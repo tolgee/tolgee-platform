@@ -1,10 +1,12 @@
+import React, { FunctionComponent, useContext } from 'react';
 import { Box, Checkbox } from '@material-ui/core';
 import { grey } from '@material-ui/core/colors';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
-import React, { FunctionComponent, useContext } from 'react';
+
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { components } from 'tg.service/apiSchema.generated';
 import { ProjectPermissionType } from 'tg.service/response.types';
+
 import { KeyCell } from './KeyCell';
 import { KeyScreenshots } from './Screenshots/KeySreenshots';
 import { TableCell } from './TableCell';

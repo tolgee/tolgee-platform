@@ -1,5 +1,6 @@
-import { Dialog } from '@material-ui/core';
 import React from 'react';
+import { Dialog } from '@material-ui/core';
+
 import { useConfig } from 'tg.hooks/useConfig';
 
 interface ScreenshotDetailProps {

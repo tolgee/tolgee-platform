@@ -3,6 +3,8 @@ import List from '@material-ui/core/List';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
+import { container } from 'tsyringe';
+
 import {
   ExportIcon,
   ImportIcon,
@@ -18,7 +20,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
-import { container } from 'tsyringe';
+
 import { SideMenu } from './SideMenu';
 import { SideMenuItem } from './SideMenuItem';
 

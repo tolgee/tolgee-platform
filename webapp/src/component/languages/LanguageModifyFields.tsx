@@ -1,10 +1,12 @@
+import { FC, useState } from 'react';
 import { Box } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { isValidLanguageTag } from '@tginternal/language-util';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
-import { FC, useState } from 'react';
+
 import { components } from 'tg.service/apiSchema.generated';
+
 import { TextField } from '../common/form/fields/TextField';
 import { FlagSelector } from './FlagSelector';
 

@@ -1,8 +1,3 @@
-import { createStyles, makeStyles, Theme } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import AddIcon from '@material-ui/icons/Add';
-import { Skeleton } from '@material-ui/lab';
-import { T } from '@tolgee/react';
 import React, {
   createRef,
   ReactNode,
@@ -10,16 +5,23 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { createStyles, makeStyles, Theme } from '@material-ui/core';
+import Box from '@material-ui/core/Box';
+import AddIcon from '@material-ui/icons/Add';
+import { Skeleton } from '@material-ui/lab';
+import { T } from '@tolgee/react';
+import { container } from 'tsyringe';
+
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { startLoading, stopLoading } from 'tg.hooks/loading';
 import { useConfig } from 'tg.hooks/useConfig';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
 import { ProjectPermissionType } from 'tg.service/response.types';
-import { container } from 'tsyringe';
+
 import { ScreenshotDetail } from './ScreenshotDetail';
 import { ScreenshotDropzone } from './ScreenshotDropzone';
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';

@@ -3,18 +3,19 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import promise from 'redux-promise-middleware';
 import thunkMiddleware from 'redux-thunk';
 import { container } from 'tsyringe';
+
 import { MessageService } from '../service/MessageService';
 import { SecurityService } from '../service/SecurityService';
+import { ImplicitReducer } from './ImplicitReducer';
 import { ErrorActions } from './global/ErrorActions';
 import { GlobalActions } from './global/GlobalActions';
 import { MessageActions } from './global/MessageActions';
 import { RedirectionActions } from './global/RedirectionActions';
 import { SignUpActions } from './global/SignUpActions';
-import { ImplicitReducer } from './ImplicitReducer';
 import { ExportActions } from './project/ExportActions';
 import { ImportActions } from './project/ImportActions';
-import { ProjectInvitationActions } from './project/invitations/ProjectInvitationActions';
 import { TranslationActions } from './project/TranslationActions';
+import { ProjectInvitationActions } from './project/invitations/ProjectInvitationActions';
 
 const implicitReducer = container.resolve(ImplicitReducer);
 const globalActions = container.resolve(GlobalActions);

@@ -1,10 +1,12 @@
 import { FunctionComponent, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router-dom';
+import { container } from 'tsyringe';
+
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { GlobalActions, GlobalState } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
-import { container } from 'tsyringe';
+
 import { FullPageLoading } from '../common/FullPageLoading';
 
 interface OAuthRedirectionHandlerProps {}

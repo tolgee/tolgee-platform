@@ -1,6 +1,8 @@
 import { Box, Button } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
+import { container } from 'tsyringe';
+
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
 import { LanguageModifyFields } from 'tg.component/languages/LanguageModifyFields';
 import { BaseFormView } from 'tg.component/layout/BaseFormView';
@@ -8,10 +10,9 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useRedirect } from 'tg.hooks/useRedirect';
+import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
-import { container } from 'tsyringe';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 

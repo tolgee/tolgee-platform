@@ -1,5 +1,6 @@
-import { T } from '@tolgee/react';
 import { default as React, FunctionComponent } from 'react';
+import { T } from '@tolgee/react';
+
 import { TextField } from '../common/form/fields/TextField';
 
 interface SetPasswordFieldsProps {}

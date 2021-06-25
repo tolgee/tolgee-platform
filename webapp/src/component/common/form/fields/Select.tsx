@@ -1,3 +1,4 @@
+import { default as React, FunctionComponent, ReactNode } from 'react';
 import {
   FormControl,
   FormControlProps,
@@ -8,7 +9,6 @@ import {
 } from '@material-ui/core';
 import { createStyles, makeStyles } from '@material-ui/core/styles';
 import { useField } from 'formik';
-import { default as React, FunctionComponent, ReactNode } from 'react';
 
 interface PGSelectProps {
   name: string;

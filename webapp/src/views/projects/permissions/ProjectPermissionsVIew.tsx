@@ -1,3 +1,4 @@
+import { FunctionComponent, useState } from 'react';
 import {
   Box,
   Chip,
@@ -6,7 +7,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
-import { FunctionComponent, useState } from 'react';
+
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { SimpleListItem } from 'tg.component/common/list/SimpleListItem';
 import { BaseView } from 'tg.component/layout/BaseView';
@@ -15,6 +16,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { translatedPermissionType } from 'tg.fixtures/translatePermissionFile';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+
 import ProjectPermissionMenu from './component/ProjectPermissionMenu';
 import RevokePermissionsButton from './component/RevokePermissionsButton';
 

@@ -1,4 +1,5 @@
 import { singleton } from 'tsyringe';
+
 import { AbstractActions } from '../AbstractActions';
 
 export class RedirectionState {

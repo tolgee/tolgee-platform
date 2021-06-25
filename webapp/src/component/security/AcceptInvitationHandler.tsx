@@ -1,14 +1,16 @@
-import { T } from '@tolgee/react';
 import { FunctionComponent, useEffect } from 'react';
+import { T } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
+import { container } from 'tsyringe';
+
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
 import { MessageService } from 'tg.service/MessageService';
 import { TokenService } from 'tg.service/TokenService';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-import { container } from 'tsyringe';
+
 import { FullPageLoading } from '../common/FullPageLoading';
 
 interface AcceptInvitationHandlerProps {}

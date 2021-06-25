@@ -1,15 +1,17 @@
+import { FunctionComponent, useState } from 'react';
 import { Button, Menu, MenuItem } from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
 import { T } from '@tolgee/react';
-import { FunctionComponent, useState } from 'react';
 import { useQueryClient } from 'react-query';
+import { container } from 'tsyringe';
+
 import { confirmation } from 'tg.hooks/confirmation';
 import { useUser } from 'tg.hooks/useUser';
+import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
 import { OrganizationRoleType } from 'tg.service/response.types';
-import { container } from 'tsyringe';
+
 import { useOrganization } from '../useOrganization';
 
 const messagingService = container.resolve(MessageService);

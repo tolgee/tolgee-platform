@@ -1,22 +1,24 @@
+import { FunctionComponent, useState } from 'react';
 import { Box, Button, Typography } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
-import { FunctionComponent, useState } from 'react';
 import { Redirect } from 'react-router-dom';
+import { container } from 'tsyringe';
+
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
-import { TextField } from 'tg.component/common/form/fields/TextField';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { TextField } from 'tg.component/common/form/fields/TextField';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { Navigation } from 'tg.component/navigation/Navigation';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { confirmation } from 'tg.hooks/confirmation';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
+import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
-import { container } from 'tsyringe';
+
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { ProjectSettingsLanguages } from './components/ProjectSettingsLanguages';
 

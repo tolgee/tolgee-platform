@@ -1,4 +1,5 @@
 import { container, singleton } from 'tsyringe';
+
 import { LINKS } from '../constants/links';
 import { useRedirect } from '../hooks/useRedirect';
 import { components } from './apiSchema.generated';

@@ -1,16 +1,18 @@
+import { FunctionComponent, useState } from 'react';
 import { Button } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
-import { FunctionComponent, useState } from 'react';
 import { Redirect, useRouteMatch } from 'react-router-dom';
+import { container } from 'tsyringe';
+
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
+import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { MessageService } from 'tg.service/MessageService';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-import { container } from 'tsyringe';
+
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { OrganizationFields } from './components/OrganizationFields';
 

@@ -1,9 +1,11 @@
+import { default as React, ReactNode } from 'react';
 import { Box, Container, LinearProgress } from '@material-ui/core';
-import grey from '@material-ui/core/colors/grey';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import { default as React, ReactNode } from 'react';
+import grey from '@material-ui/core/colors/grey';
+
 import { useLoading } from 'tg.hooks/loading';
+
 import { SecondaryBar } from './SecondaryBar';
 
 export interface BaseViewProps {

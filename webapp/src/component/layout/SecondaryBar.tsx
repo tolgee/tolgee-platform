@@ -1,6 +1,6 @@
+import { FunctionComponent } from 'react';
 import { Box } from '@material-ui/core';
 import grey from '@material-ui/core/colors/grey';
-import { FunctionComponent } from 'react';
 
 export const SecondaryBar: FunctionComponent = (props) => (
   <Box

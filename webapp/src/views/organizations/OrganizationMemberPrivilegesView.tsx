@@ -1,6 +1,7 @@
+import { FunctionComponent } from 'react';
 import { Box, Typography } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import { FunctionComponent } from 'react';
+
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { OrganizationBasePermissionMenu } from './components/OrganizationBasePermissionMenu';
 import { useOrganization } from './useOrganization';

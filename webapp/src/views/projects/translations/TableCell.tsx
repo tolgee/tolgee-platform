@@ -1,5 +1,6 @@
-import { Box } from '@material-ui/core';
 import { FunctionComponent, useContext } from 'react';
+import { Box } from '@material-ui/core';
+
 import { RowContext } from './TranslationsRow';
 import { TranslationListContext } from './TtranslationsGridContextProvider';
 

@@ -1,9 +1,11 @@
+import React, { FC } from 'react';
 import { Box, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Close, Edit } from '@material-ui/icons';
 import clsx from 'clsx';
-import React, { FC } from 'react';
+
 import { components } from 'tg.service/apiSchema.generated';
+
 import { FlagImage } from './FlagImage';
 
 const useStyles = makeStyles((theme) => ({

@@ -1,6 +1,6 @@
+import { default as React, FunctionComponent } from 'react';
 import { FormHelperText, Input, InputProps } from '@material-ui/core';
 import { useField } from 'formik';
-import { default as React, FunctionComponent } from 'react';
 
 interface EasyInputProps {
   name: string;

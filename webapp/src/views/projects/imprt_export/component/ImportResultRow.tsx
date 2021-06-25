@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Box,
   Button,
@@ -11,13 +12,14 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
-import React from 'react';
+import { container } from 'tsyringe';
+
 import { ChipButton } from 'tg.component/common/buttons/ChipButton';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { ImportActions } from 'tg.store/project/ImportActions';
-import { container } from 'tsyringe';
+
 import { ImportRowLanguageMenu } from './ImportRowLanguageMenu';
 
 const useStyles = makeStyles((theme) => ({

@@ -1,3 +1,4 @@
+import { FunctionComponent, useState } from 'react';
 import { Button, TextField } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import List from '@material-ui/core/List';
@@ -6,8 +7,9 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import { T, useTranslate } from '@tolgee/react';
-import { FunctionComponent, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
+import { container } from 'tsyringe';
+
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { BaseView } from 'tg.component/layout/BaseView';
@@ -18,7 +20,6 @@ import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { ProjectInvitationActions } from 'tg.store/project/invitations/ProjectInvitationActions';
-import { container } from 'tsyringe';
 
 type FormType = {
   type: string;

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { container } from 'tsyringe';
+
 import { GlobalError } from '../error/GlobalError';
 import { RemoteConfigurationDTO } from '../service/response.types';
 import { AppState } from '../store';

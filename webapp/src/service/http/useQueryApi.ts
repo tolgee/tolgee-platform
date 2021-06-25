@@ -8,6 +8,7 @@ import {
   UseQueryOptions,
 } from 'react-query';
 import { container } from 'tsyringe';
+
 import { paths } from '../apiSchema.generated';
 import { RequestOptions } from './ApiHttpService';
 import {

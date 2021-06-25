@@ -1,14 +1,16 @@
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
+
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { ProjectProvider } from 'tg.hooks/ProjectProvider';
+
+import { ProjectPage } from './ProjectPage';
 import { ExportView } from './imprt_export/ExportView';
 import { ImportView } from './imprt_export/ImportView';
 import { ProjectInviteView } from './invitations/ProjectInviteView';
 import { LanguageEditView } from './languages/LanguageEditView';
 import { ProjectPermissionsView } from './permissions/ProjectPermissionsVIew';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
-import { ProjectPage } from './ProjectPage';
 import { TranslationView } from './translations/TranslationView';
 
 export const ProjectRouter = () => {

@@ -1,3 +1,4 @@
+import React, { FunctionComponent } from 'react';
 import {
   Box,
   FormControlLabel,
@@ -9,10 +10,10 @@ import {
 import { CheckCircle, Warning } from '@material-ui/icons';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
-import React, { FunctionComponent } from 'react';
+import { container } from 'tsyringe';
+
 import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
 import { ImportActions } from 'tg.store/project/ImportActions';
-import { container } from 'tsyringe';
 
 const useStyles = makeStyles((theme) => ({
   counter: {

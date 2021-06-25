@@ -1,9 +1,11 @@
+import React, { FunctionComponent, useState } from 'react';
 import { Box, createStyles, makeStyles, Theme } from '@material-ui/core';
 import { green, red } from '@material-ui/core/colors';
 import { Backup, HighlightOff } from '@material-ui/icons';
 import clsx from 'clsx';
-import React, { FunctionComponent, useState } from 'react';
+
 import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';
+
 import { MAX_FILE_COUNT } from './ImportFileInput';
 
 export interface ScreenshotDropzoneProps {

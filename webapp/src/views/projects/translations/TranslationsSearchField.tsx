@@ -1,6 +1,8 @@
-import { T } from '@tolgee/react';
 import { FunctionComponent, useContext } from 'react';
+import { T } from '@tolgee/react';
+
 import SearchField from 'tg.component/common/form/fields/SearchField';
+
 import { TranslationListContext } from './TtranslationsGridContextProvider';
 
 export const TranslationsSearchField: FunctionComponent = (props) => {

@@ -1,9 +1,11 @@
 import { Switch, useRouteMatch } from 'react-router-dom';
+
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { LINKS } from 'tg.constants/links';
-import { ProjectCreateView } from './project/ProjectCreateView';
+
 import { ProjectListView } from './ProjectListView';
 import { ProjectRouter } from './ProjectRouter';
+import { ProjectCreateView } from './project/ProjectCreateView';
 
 export const ProjectsRouter = () => {
   const match = useRouteMatch();

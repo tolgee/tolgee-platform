@@ -1,3 +1,4 @@
+import React, { FunctionComponent } from 'react';
 import {
   Button,
   Dialog,
@@ -7,7 +8,6 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 import { T } from '@tolgee/react';
-import React, { FunctionComponent } from 'react';
 
 export const ImportConflictNotResolvedErrorDialog: FunctionComponent<{
   open: boolean;

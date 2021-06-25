@@ -1,6 +1,8 @@
-import { Box } from '@material-ui/core';
 import { FC } from 'react';
+import { Box } from '@material-ui/core';
+
 import { components } from 'tg.service/apiSchema.generated';
+
 import { FlagImage } from './FlagImage';
 
 export const LanguageValue: FC<{

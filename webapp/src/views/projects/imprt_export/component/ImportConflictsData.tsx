@@ -1,17 +1,19 @@
+import React, { FunctionComponent, useEffect, useState } from 'react';
 import { Box, Grid, Typography } from '@material-ui/core';
 import { Pagination } from '@material-ui/lab';
 import { T } from '@tolgee/react';
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import { container } from 'tsyringe';
+
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { startLoading, stopLoading } from 'tg.hooks/loading';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { ImportActions } from 'tg.store/project/ImportActions';
-import { container } from 'tsyringe';
+
+import { ImportConflictTranslationsPair } from './ImportConflictTranslationsPair';
 import { ImportConflictsDataHeader } from './ImportConflictsDataHeader';
 import { ImportConflictsSecondaryBar } from './ImportConflictsSecondaryBar';
-import { ImportConflictTranslationsPair } from './ImportConflictTranslationsPair';
 
 const actions = container.resolve(ImportActions);
 export const ImportConflictsData: FunctionComponent<{

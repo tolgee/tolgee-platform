@@ -1,27 +1,28 @@
+import React, { FunctionComponent, useState } from 'react';
 import { Box, Grid } from '@material-ui/core';
 import AppBar from '@material-ui/core/AppBar';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import Slide from '@material-ui/core/Slide';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
 import {
   createStyles,
   makeStyles,
   Theme,
   useTheme,
 } from '@material-ui/core/styles';
-import Toolbar from '@material-ui/core/Toolbar';
 import { TransitionProps } from '@material-ui/core/transitions';
-import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import { T } from '@tolgee/react';
-import React, { FunctionComponent, useState } from 'react';
+import { container } from 'tsyringe';
+
 import SearchField from 'tg.component/common/form/fields/SearchField';
 import { SimplePaginatedHateoasList } from 'tg.component/common/list/SimplePaginatedHateoasList';
 import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { ImportActions } from 'tg.store/project/ImportActions';
-import { container } from 'tsyringe';
 
 const actions = container.resolve(ImportActions);
 const useStyles = makeStyles((theme: Theme) =>

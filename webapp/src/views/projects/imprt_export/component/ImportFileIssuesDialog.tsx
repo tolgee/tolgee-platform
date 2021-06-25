@@ -1,13 +1,14 @@
+import React, { FunctionComponent } from 'react';
 import { Box, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
 import { Warning } from '@material-ui/icons';
 import { Alert } from '@material-ui/lab';
 import { T } from '@tolgee/react';
-import React, { FunctionComponent } from 'react';
+import { container } from 'tsyringe';
+
 import { SimplePaginatedHateoasList } from 'tg.component/common/list/SimplePaginatedHateoasList';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { ImportActions } from 'tg.store/project/ImportActions';
-import { container } from 'tsyringe';
 
 const actions = container.resolve(ImportActions);
 export const ImportFileIssuesDialog: FunctionComponent<{

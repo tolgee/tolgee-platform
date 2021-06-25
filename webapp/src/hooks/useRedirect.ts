@@ -1,4 +1,5 @@
 import { container } from 'tsyringe';
+
 import { Link, PARAMS } from '../constants/links';
 import { RedirectionActions } from '../store/global/RedirectionActions';
 
