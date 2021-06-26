@@ -18,6 +18,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
     @BeforeMethod
     fun setup() {
         testData = TranslationsTestData()
+        testData.generateLotOfData()
         testDataService.saveTestData(testData.root)
     }
 
@@ -31,7 +32,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
                 PageRequest.of(0, 10),
         )
         assertThat(result.content).hasSize(10)
-        assertThat(result.totalElements).isGreaterThan(100)
+        assertThat(result.totalElements).isGreaterThan(90)
     }
 
     @Test
