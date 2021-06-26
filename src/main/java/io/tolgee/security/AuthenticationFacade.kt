@@ -11,15 +11,15 @@ import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationFacade(
-    private val configuration: TolgeeProperties,
-    private val userAccountService: UserAccountService
+        private val configuration: TolgeeProperties,
+        private val userAccountService: UserAccountService
 ) {
-    val authentication: Authentication
+    val authentication: Authentication?
         get() = SecurityContextHolder.getContext().authentication
     val userAccount: UserAccount
         get() = if (!configuration.authentication.enabled) {
             userAccountService.implicitUser
-        } else authentication.principal as UserAccount
+        } else authentication?.principal as UserAccount
     val apiKey: ApiKey
         get() {
             val authentication = authentication as ApiKeyAuthenticationToken

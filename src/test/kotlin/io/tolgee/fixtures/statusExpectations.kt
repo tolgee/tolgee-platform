@@ -8,6 +8,7 @@ import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.math.BigDecimal
 
 val ResultActions.andIsOk: ResultActions
     get() = this.andExpect(status().isOk)
@@ -51,3 +52,9 @@ val ResultActions.andPrettyPrint: ResultActions
 fun JsonAssert.node(node: String, rfn: JsonAssert.() -> Unit) {
     rfn(node(node))
 }
+
+val JsonAssert.isValidId: Unit
+    get() {
+        this.asNumber().isGreaterThan(BigDecimal(10000000))
+    }
+

@@ -2,6 +2,7 @@ package io.tolgee.model.key
 
 import io.tolgee.dtos.PathDTO
 import io.tolgee.model.Project
+import io.tolgee.model.Screenshot
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.Translation
 import javax.persistence.*
@@ -26,6 +27,9 @@ data class Key(
 
     @OneToOne(mappedBy = "key")
     var keyMeta: KeyMeta? = null
+
+    @OneToMany(mappedBy = "key")
+    var screenshots: MutableList<Screenshot> = mutableListOf()
 
     constructor(name: String? = null,
                 project: Project? = null,

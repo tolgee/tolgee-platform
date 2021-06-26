@@ -9,9 +9,9 @@ import org.springframework.test.web.servlet.ResultActions
 @Scope("prototype")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class ProjectJwtAuthRequestPerformer(
-        userAccount: UserAccount,
+        userAccountProvider: () -> UserAccount,
         projectUrlPrefix: String
-) : ProjectAuthRequestPerformer(userAccount, projectUrlPrefix) {
+) : ProjectAuthRequestPerformer(userAccountProvider, projectUrlPrefix) {
 
     override fun performProjectAuthPut(url: String, content: Any?): ResultActions {
         return super.performAuthPut(projectUrlPrefix + project.id + "/" + url, content)

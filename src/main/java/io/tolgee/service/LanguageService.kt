@@ -10,6 +10,7 @@ import io.tolgee.model.Project
 import io.tolgee.repository.LanguageRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -49,7 +50,8 @@ class LanguageService(
     }
 
     fun getImplicitLanguages(project: Project): LanguageSet {
-        return project.languages.stream().limit(2).collect(Collectors.toCollection { LanguageSet() })
+        val data = getPaged(projectId = project.id, PageRequest.of(0, 2))
+        return data.content.toCollection(LanguageSet())
     }
 
     @Transactional

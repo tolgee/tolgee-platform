@@ -50,7 +50,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
     fun testGetAll() {
         val users = dbPopulator.createUsersAndOrganizations()
 
-        logAsUser(users[1].name!!, initialPassword)
+        loginAsUser(users[1].name!!)
 
         performAuthGet("/api/organizations?size=100")
                 .andPrettyPrint.andAssertThatJson.let {
@@ -67,7 +67,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
     fun testGetAllFilterOwned() {
         val users = dbPopulator.createUsersAndOrganizations()
 
-        logAsUser(users[1].name!!, initialPassword)
+        loginAsUser(users[1].name!!)
 
         performAuthGet("/api/organizations?size=100&filterCurrentUserOwner=true")
                 .andPrettyPrint.andAssertThatJson.let {
@@ -84,7 +84,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
     fun testGetAllSort() {
         val users = dbPopulator.createUsersAndOrganizations()
 
-        logAsUser(users[1].name!!, initialPassword)
+        loginAsUser(users[1].name!!)
 
         performAuthGet("/api/organizations?size=100&sort=basePermissions,desc&sort=name,desc")
                 .andPrettyPrint
@@ -95,7 +95,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
     @Test
     fun testGetAllUsers() {
         val users = dbPopulator.createUsersAndOrganizations()
-        logAsUser(users[0].username!!, initialPassword)
+        loginAsUser(users[0].username!!)
         val organizationId = users[1].organizationRoles[0].organization!!.id
         performAuthGet("/v2/organizations/$organizationId/users").andIsOk
                 .also { println(it.andReturn().response.contentAsString) }
@@ -334,7 +334,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
     @Test
     fun testGetAllProjects() {
         val users = dbPopulator.createUsersAndOrganizations()
-        logAsUser(users[1].username!!, initialPassword)
+        loginAsUser(users[1].username!!)
         users[1].organizationRoles[0].organization.let { organization ->
             performAuthGet("/v2/organizations/${organization!!.slug}/projects")
                     .andIsOk.andAssertThatJson.let {
@@ -354,7 +354,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
 
         this.organizationService.create(dummyDto, helloUser).let { organization ->
             val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
-            logAsUser("hellouser", initialPassword)
+            loginAsUser("hellouser")
             performAuthGet("/v2/organizations/${organization.id}/invitations")
                     .andIsOk.andAssertThatJson.let {
                         it.node("_embedded.organizationInvitations").let { projectsNode ->
@@ -369,7 +369,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
     @Test
     fun testInviteUser() {
         val helloUser = dbPopulator.createUserIfNotExists("hellouser")
-        logAsUser(helloUser.username!!, initialPassword)
+        loginAsUser(helloUser.username!!)
 
         this.organizationService.create(dummyDto, helloUser).let { organization ->
             val body = OrganizationInviteUserDto(roleType = OrganizationRoleType.MEMBER)
@@ -389,7 +389,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
         this.organizationService.create(dummyDto, helloUser).let { organization ->
             val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
             val invitedUser = dbPopulator.createUserIfNotExists("invitedUser")
-            logAsUser(invitedUser.username!!, initialPassword)
+            loginAsUser(invitedUser.username!!)
             performAuthGet("/api/invitation/accept/${invitation.code}").andIsOk
             assertThatThrownBy { invitationService.getInvitation(invitation.code) }
                     .isInstanceOf(BadRequestException::class.java)
@@ -405,7 +405,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
 
         this.organizationService.create(dummyDto, helloUser).let { organization ->
             val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
-            logAsUser(helloUser.username!!, initialPassword)
+            loginAsUser(helloUser.username!!)
             performAuthDelete("/api/invitation/${invitation.id!!}", null).andIsOk
             assertThatThrownBy { invitationService.getInvitation(invitation.code) }
                     .isInstanceOf(BadRequestException::class.java)

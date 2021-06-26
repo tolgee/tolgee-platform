@@ -2,6 +2,7 @@ package io.tolgee.security.project_auth
 
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import org.springframework.beans.factory.annotation.Qualifier
@@ -21,17 +22,18 @@ class ProjectPermissionFilter(
         @param:Qualifier("handlerExceptionResolver")
         private val resolver: HandlerExceptionResolver,
         private val projectHolder: ProjectHolder,
-        private val projectService: ProjectService
+        private val projectService: ProjectService,
+        private val authenticationFacade: AuthenticationFacade
 
 ) : OncePerRequestFilter() {
 
-    companion object{
+    companion object {
         const val REGEX = "/(?:v2|api)/(?:repositor(?:y|ies)|projects?)/([0-9]+)/?.*"
     }
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val matchRegex = REGEX.toRegex()
-        if (request.requestURI.matches(matchRegex)) {
+        if (request.requestURI.matches(matchRegex) && authenticationFacade.authentication?.isAuthenticated == true) {
             val specificPermissionAnnotation = getSpecificPermissionAnnotation(request)
             val anyPermissionAnnotation = getAnyPermissionAnnotation(request)
 

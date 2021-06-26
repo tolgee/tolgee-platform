@@ -4,7 +4,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.DeprecatedEditKeyDTO
 import io.tolgee.dtos.request.EditKeyDTO
-import io.tolgee.dtos.request.SetTranslationsDTO
+import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.exceptions.NotFoundException
@@ -125,7 +125,7 @@ class KeyService(
     }
 
     @Transactional
-    fun create(project: Project, dto: SetTranslationsDTO): Key {
+    fun create(project: Project, dto: SetTranslationsWithKeyDto): Key {
         if (this.get(project, PathDTO.fromFullPath(dto.key)).isPresent) {
             throw ValidationException(Message.KEY_EXISTS)
         }

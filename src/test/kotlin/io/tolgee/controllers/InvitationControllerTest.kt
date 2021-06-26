@@ -13,7 +13,7 @@ class InvitationControllerTest : SignedInControllerTest() {
 
     @BeforeMethod
     fun login() {
-        logAsUser(initialUsername, initialPassword)
+        loginAsUser(initialUsername)
     }
 
     @Test
@@ -32,7 +32,7 @@ class InvitationControllerTest : SignedInControllerTest() {
         val invitation = invitationService.create(project, Permission.ProjectPermissionType.EDIT)
 
         val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
-        logAsUser(newUser.username!!, "pwd")
+        loginAsUser(newUser.username!!)
         performAuthGet("/api/invitation/accept/${invitation}").andExpect(status().isOk).andReturn()
 
         assertThat(invitationService.getForProject(project)).hasSize(0)
