@@ -111,6 +111,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
     fun uploadValidationNoImage() {
         val project = dbPopulator.createBase(generateUniqueString())
         val key = keyService.create(project, DeprecatedKeyDto("test"))
+        loginAsUser("admin")
         val response = mvc.perform(addToken(multipart("/api/project/${project.id}/screenshots")
                 .file(MockMultipartFile("screenshot", "originalShot.png", "not_valid",
                         "test".toByteArray()))
@@ -123,6 +124,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
     @Test
     fun uploadValidationBlankKey() {
         val project = dbPopulator.createBase(generateUniqueString())
+        loginAsUser("admin")
         val response = mvc.perform(addToken(multipart("/api/project/${project.id}/screenshots")
                 .file(MockMultipartFile("screenshot", "originalShot.png", "image/png",
                         screenshotFile.file.readBytes()))))

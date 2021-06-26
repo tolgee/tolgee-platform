@@ -8,7 +8,7 @@ import org.springframework.test.web.servlet.ResultActions
 
 
 abstract class ProjectAuthRequestPerformer(
-        userAccount: UserAccount,
+        userAccountProvider: () -> UserAccount,
         val projectUrlPrefix: String = "/api/project/"
 ) : SignedInRequestPerformer() {
 
@@ -17,7 +17,7 @@ abstract class ProjectAuthRequestPerformer(
 
     val project: Project by lazy {
         projectSupplier?.invoke()
-                ?: dbPopulator.createBase(generateUniqueString(), username = userAccount.username!!)
+                ?: dbPopulator.createBase(generateUniqueString(), username = userAccountProvider.invoke().username!!)
     }
 
     var projectSupplier: (() -> Project)? = null

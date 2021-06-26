@@ -9,8 +9,8 @@ typealias FT<T> = T.() -> Unit
 
 class DataBuilders {
     class ProjectBuilder(userOwner: UserAccount? = null,
-                            organizationOwner: Organization? = null,
-                            val testDataBuilder: TestDataBuilder
+                         organizationOwner: Organization? = null,
+                         val testDataBuilder: TestDataBuilder
     ) : BaseEntityDataBuilder<Project>() {
         override var self: Project = Project().apply {
             if (userOwner == null && organizationOwner == null) {
@@ -96,11 +96,13 @@ class DataBuilders {
 
         class DATA {
             var meta: KeyMetaBuilder? = null
+            val screenshots = mutableListOf<ScreenshotBuilder>()
         }
 
         val data = DATA()
 
         override var self: ImportKey = ImportKey("testKey")
+                .also { it.files.add(importFileBuilder.self) }
 
         fun addMeta(ft: FT<KeyMetaBuilder>) {
             data.meta = KeyMetaBuilder(this).apply(ft)
@@ -120,6 +122,17 @@ class DataBuilders {
             }
             importKeyBuilder?.self {
                 keyMeta = it
+            }
+        }
+    }
+
+    class ScreenshotBuilder(
+            keyBuilder: KeyBuilder
+    ) : EntityDataBuilder<Screenshot> {
+        override var self: Screenshot = Screenshot().also {
+            it.key = keyBuilder.self
+            keyBuilder.self {
+                screenshots.add(it)
             }
         }
     }
@@ -148,10 +161,11 @@ class DataBuilders {
 
     class KeyBuilder(
             val projectBuilder: ProjectBuilder
-    ) : EntityDataBuilder<Key> {
+    ) : BaseEntityDataBuilder<Key>() {
 
         class DATA {
             var meta: KeyMetaBuilder? = null
+            var screenshots = mutableListOf<ScreenshotBuilder>()
         }
 
         val data = DATA()
@@ -163,6 +177,8 @@ class DataBuilders {
         fun addMeta(ft: FT<KeyMetaBuilder>) {
             data.meta = KeyMetaBuilder(keyBuilder = this).apply(ft)
         }
+
+        fun addScreenshot(ft: FT<ScreenshotBuilder>) = addOperation(data.screenshots, ft)
     }
 
     class LanguageBuilder(

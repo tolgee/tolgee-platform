@@ -55,7 +55,7 @@ class V2ProjectsControllerCreateTest : SignedInControllerTest() {
     fun createProjectOrganization() {
         val userAccount = dbPopulator.createUserIfNotExists("testuser")
         val organization = dbPopulator.createOrganization("Test Organization", userAccount)
-        logAsUser("testuser", initialPasswordManager.initialPassword)
+        loginAsUser("testuser")
         val request = CreateProjectDTO("aaa", listOf(languageDTO), organizationId = organization.id)
         performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
             node("id").asNumber().satisfies {

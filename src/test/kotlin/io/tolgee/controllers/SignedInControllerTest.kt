@@ -4,45 +4,68 @@ import io.tolgee.fixtures.AuthRequestPerformer
 import io.tolgee.fixtures.LoggedRequestFactory.init
 import io.tolgee.fixtures.SignedInRequestPerformer
 import io.tolgee.model.UserAccount
+import io.tolgee.security.JwtTokenProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.testng.annotations.AfterMethod
-import org.testng.annotations.BeforeMethod
 
 @SpringBootTest
 @AutoConfigureMockMvc
 abstract class SignedInControllerTest : AbstractControllerTest(), AuthRequestPerformer {
-    var userAccount: UserAccount? = null
+    private var _userAccount: UserAccount? = null
+
+    var userAccount: UserAccount?
+        get() {
+            if (_userAccount == null) {
+                //populate to create the user if not created
+                dbPopulator.createUserIfNotExists(tolgeeProperties.authentication.initialUsername)
+                loginAsUser(tolgeeProperties.authentication.initialUsername)
+                commitTransaction()
+            }
+            return _userAccount
+        }
+        set(userAccount) {
+            if (userAccount != null) {
+                loginAsUser(userAccount)
+            }
+            _userAccount = userAccount
+        }
 
     @Autowired
     lateinit var signedInRequestPerformer: SignedInRequestPerformer
 
-    @BeforeMethod
-    fun beforeEach() {
-        //populate to create the user if not created
-        dbPopulator.createUserIfNotExists(tolgeeProperties.authentication.initialUsername)
-        if (userAccount == null) {
-            logAsUser(tolgeeProperties.authentication.initialUsername, initialPassword)
-        }
-        commitTransaction()
-    }
+    @Autowired
+    lateinit var jwtTokenProvider: JwtTokenProvider
 
     @AfterMethod
     fun afterEach() {
         logout()
     }
 
-    fun logAsUser(userName: String, password: String = initialPassword) {
-        val defaultAuthenticationResult = login(userName, password)
-        init(defaultAuthenticationResult.token)
-        userAccount = defaultAuthenticationResult.entity
+    fun loginAsAdminIfNotLogged() {
+        if (_userAccount == null) {
+            loginAsUser("admin")
+        }
+    }
+
+    fun loginAsUser(userName: String) {
+        _userAccount = userAccountService.getByUserName(userName).orElseGet {
+            dbPopulator.createUserIfNotExists("admin")
+        }
+        init(jwtTokenProvider.generateToken(_userAccount!!.id!!).toString())
+    }
+
+
+    fun loginAsUser(userAccount: UserAccount) {
+        _userAccount = userAccount
+        init(jwtTokenProvider.generateToken(_userAccount!!.id!!).toString())
     }
 
     fun logout() {
-        userAccount = null
+        _userAccount = null
     }
 
     override fun perform(builder: MockHttpServletRequestBuilder): ResultActions {
@@ -66,18 +89,22 @@ abstract class SignedInControllerTest : AbstractControllerTest(), AuthRequestPer
     }
 
     override fun performAuthPut(url: String, content: Any?): ResultActions {
+        loginAsAdminIfNotLogged()
         return signedInRequestPerformer.performAuthPut(url, content)
     }
 
     override fun performAuthPost(url: String, content: Any?): ResultActions {
+        loginAsAdminIfNotLogged()
         return signedInRequestPerformer.performAuthPost(url, content)
     }
 
     override fun performAuthGet(url: String): ResultActions {
+        loginAsAdminIfNotLogged()
         return signedInRequestPerformer.performAuthGet(url)
     }
 
     override fun performAuthDelete(url: String, content: Any?): ResultActions {
+        loginAsAdminIfNotLogged()
         return signedInRequestPerformer.performAuthDelete(url, content)
     }
 }

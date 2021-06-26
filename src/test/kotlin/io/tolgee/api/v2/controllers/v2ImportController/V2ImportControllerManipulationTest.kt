@@ -14,7 +14,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
         val user = testData.root.data.userAccounts[0].self
         val projectId = testData.project.id
 
-        logAsUser(user.username!!, "admin")
+        loginAsUser(user.username!!)
 
         performAuthDelete("/v2/projects/${projectId}/import", null).andIsOk
         assertThat(importService.find(projectId, user.id!!)).isNull()
@@ -26,7 +26,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
         val projectId = testData.project.id
-        logAsUser(user.username!!, "admin")
+        loginAsUser(user.username!!)
         val path = "/v2/projects/${projectId}/import/result/languages/${testData.importEnglish.id}"
         performAuthDelete(path, null).andIsOk
         assertThat(importService.findLanguage(testData.importEnglish.id)).isNull()
@@ -38,7 +38,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
         val projectId = testData.project.id
-        logAsUser(user.username!!, "admin")
+        loginAsUser(user.username!!)
         val path = "/v2/projects/${projectId}/import/result/languages/${testData.importEnglish.id}" +
                 "/translations/${testData.translationWithConflict.id}/resolve/set-override"
         performAuthPut(path, null).andIsOk
@@ -54,7 +54,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
         val projectId = testData.project.id
-        logAsUser(user.username!!, "admin")
+        loginAsUser(user.username!!)
         val path = "/v2/projects/${projectId}/import/result/languages/${testData.importEnglish.id}" +
                 "/translations/${testData.translationWithConflict.id}/resolve/set-keep-existing"
         performAuthPut(path, null).andIsOk
@@ -69,7 +69,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
         val projectId = testData.project.id
-        logAsUser(user.username!!, "admin")
+        loginAsUser(user.username!!)
         val path = "/v2/projects/${projectId}/import/result/languages/${testData.importEnglish.id}/resolve-all/set-override"
         performAuthPut(path, null).andIsOk
         val translation = importService.findTranslation(testData.translationWithConflict.id)
@@ -83,7 +83,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
         val projectId = testData.project.id
-        logAsUser(user.username!!, "admin")
+        loginAsUser(user.username!!)
         val path = "/v2/projects/${projectId}/import/result/languages/${testData.importEnglish.id}/resolve-all/set-keep-existing"
         performAuthPut(path, null).andIsOk
         val translation = importService.findTranslation(testData.translationWithConflict.id)
@@ -99,7 +99,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
         val projectId = testData.project.id
-        logAsUser(user.username!!, "admin")
+        loginAsUser(user.username!!)
         val path = "/v2/projects/${projectId}/import/result/languages/${testData.importFrench.id}/" +
                 "select-existing/${testData.french.id}"
         performAuthPut(path, null).andIsOk
@@ -115,7 +115,7 @@ class V2ImportControllerManipulationTest : SignedInControllerTest() {
         testDataService.saveTestData(testData.root)
         val user = testData.root.data.userAccounts[0].self
         val projectId = testData.project.id
-        logAsUser(user.username!!, "admin")
+        loginAsUser(user.username!!)
         val path = "/v2/projects/${projectId}/import/result/languages/${testData.importEnglish.id}/reset-existing"
         performAuthPut(path, null).andIsOk
         assertThat(importService.findLanguage(testData.importEnglish.id)?.existingLanguage)

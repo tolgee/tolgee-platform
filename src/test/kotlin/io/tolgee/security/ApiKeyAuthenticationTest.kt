@@ -4,7 +4,7 @@ import io.tolgee.assertions.Assertions
 import io.tolgee.assertions.UserApiAppAction
 import io.tolgee.constants.ApiScope
 import io.tolgee.controllers.AbstractUserAppApiTest
-import io.tolgee.dtos.request.SetTranslationsDTO
+import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.generateUniqueString
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.HttpMethod
@@ -60,7 +60,7 @@ class ApiKeyAuthenticationTest : AbstractUserAppApiTest() {
     @Test
     fun accessWithApiKey_editPermissions() {
         var apiKey = createBaseWithApiKey(ApiScope.KEYS_EDIT)
-        val translations = SetTranslationsDTO(key = "aaaa", translations = mapOf(Pair("aaa", "aaa")))
+        val translations = SetTranslationsWithKeyDto(key = "aaaa", translations = mapOf(Pair("aaa", "aaa")))
 
         performAction(UserApiAppAction(
                 method = HttpMethod.POST,
