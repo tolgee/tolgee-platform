@@ -23,6 +23,7 @@ import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
+import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
@@ -77,7 +78,7 @@ class V2LanguagesController(
     @AccessWithApiKey
     @AccessWithAnyProjectPermission
     @Operation(summary = "Returns all project languages", tags = ["API KEY", "Languages"])
-    fun getAll(@PathVariable("projectId") pathProjectId: Long?, pageable: Pageable): PagedModel<LanguageModel> {
+    fun getAll(@PathVariable("projectId") pathProjectId: Long?, @ParameterObject pageable: Pageable): PagedModel<LanguageModel> {
         val data = languageService.getPaged(projectHolder.project.id, pageable)
         return pagedAssembler.toModel(data, languageModelAssembler)
     }

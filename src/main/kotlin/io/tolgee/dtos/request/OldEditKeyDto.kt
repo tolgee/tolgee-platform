@@ -1,15 +1,17 @@
 package io.tolgee.dtos.request
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import io.tolgee.dtos.PathDTO
 import io.swagger.v3.oas.annotations.Hidden
+import io.tolgee.dtos.PathDTO
+import org.hibernate.validator.constraints.Length
 import javax.validation.constraints.NotBlank
 
-data class EditKeyDTO(
+data class OldEditKeyDto(
         @field:NotBlank
-        var currentName: String? = null,
+        var currentName: String = "",
         @field:NotBlank
-        var newName: String? = null
+        @field:Length(max = 200)
+        var newName: String = ""
 ) {
     @get:Hidden
     @get:JsonIgnore

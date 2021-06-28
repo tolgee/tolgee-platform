@@ -2,17 +2,14 @@ package io.tolgee.configuration
 
 import io.swagger.v3.oas.models.*
 import io.swagger.v3.oas.models.info.Info
-import io.swagger.v3.oas.models.media.ArraySchema
-import io.swagger.v3.oas.models.media.Content
 import io.swagger.v3.oas.models.media.IntegerSchema
 import io.swagger.v3.oas.models.parameters.Parameter
-import io.tolgee.openapi_fixtures.InternalIgnorePaths
 import io.tolgee.security.api_key_auth.AccessWithApiKey
-import org.reflections.Reflections
 import org.springdoc.core.GroupedOpenApi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.HandlerMethod
+import java.lang.reflect.Method
 
 
 @Configuration
@@ -23,7 +20,7 @@ class OpenApiConfiguration {
     }
 
     @Bean
-    fun springShopOpenAPI(): OpenAPI? {
+    fun openAPI(): OpenAPI? {
         return OpenAPI()
                 .info(Info().title("Tolgee API ")
                         .description("Tolgee Server API reference")
@@ -50,13 +47,26 @@ class OpenApiConfiguration {
         return internalGroupForPaths(arrayOf("/v2/**", "/api/**"), "All Internal - for Tolgee Web application")
     }
 
+    @Bean
+    fun apiKeyAllOpenApi(): GroupedOpenApi? {
+        return apiKeyGroupForPaths(arrayOf("/api/**", "/v2/**"), "Accessible with API key")
+    }
 
     @Bean
-    fun apiKeyOpenApi(): GroupedOpenApi? {
+    fun apiKeyV1OpenApi(): GroupedOpenApi? {
+        return apiKeyGroupForPaths(arrayOf("/api/**"), "V1 Accessible with API key")
+    }
+
+    @Bean
+    fun apiKeyV2OpenApi(): GroupedOpenApi? {
+        return apiKeyGroupForPaths(arrayOf("/v2/**"), "V2 Accessible with API key V2")
+    }
+
+    fun apiKeyGroupForPaths(paths: Array<String>, name: String): GroupedOpenApi? {
         val operationHandlers = HashMap<Operation, HandlerMethod>()
 
-        return GroupedOpenApi.builder().group("Accessible with API key")
-                .pathsToMatch("/api/**")
+        return GroupedOpenApi.builder().group(name)
+                .pathsToMatch(*paths)
                 .addOpenApiCustomiser { openApi ->
                     val newPaths = Paths()
                     openApi.paths.forEach { pathEntry ->
@@ -70,7 +80,7 @@ class OpenApiConfiguration {
                             if (annotation != null) {
                                 val containsProjectIdParam = pathEntry.key
                                         .contains("{${PROJECT_ID_PARAMETER}}")
-                                if (!pathEntry.key.startsWith("/api/project/{${PROJECT_ID_PARAMETER}}")) {
+                                if (!pathEntry.key.matches("^/(?:api|v2)/projects?/\\{${PROJECT_ID_PARAMETER}}.*".toRegex())) {
                                     if (!containsProjectIdParam) {
                                         operation.parameters.removeIf { it.name == PROJECT_ID_PARAMETER }
                                     }
@@ -91,41 +101,26 @@ class OpenApiConfiguration {
 
                     val usedTags = newPaths.flatMap { it.value.readOperations() }.flatMap { it.tags }
                     openApi.tags.removeIf { !usedTags.contains(it.name) }
-
-                    openApi.components.schemas.entries.removeIf { !newPaths.usedSchemas.contains(it.key) }
-
                 }
                 .addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
-                    operationHandlers.put(operation, handlerMethod)
+                    operationHandlers[operation] = handlerMethod
                     operation
-                }.build()
+                }.handleLinks().build()
     }
 
-    private val Paths.usedSchemas: List<String>
-        get() {
-            val result = mutableListOf<String>()
-            this.forEach { path ->
-                path.value.readOperations().forEach { method ->
-                    method.requestBody?.content?.forEachSchemaName { result.add(it) }
-                    method.responses?.values?.forEach {
-                        it.content?.forEachSchemaName { result.add(it) }
-                    }
-                }
-            }
-            return result
-        }
-
-    private fun Content?.forEachSchemaName(callback: (name: String) -> Unit) {
-
-        this?.values?.forEach {
-            val refReplacePath = "#/components/schemas/"
-            it.schema?.`$ref`?.let { schemaRef ->
-                callback(schemaRef.replace(refReplacePath, ""))
-            }
-            (it.schema as? ArraySchema)?.items?.`$ref`?.let { schemaRef ->
-                callback(schemaRef.replace(refReplacePath, ""))
+    private fun GroupedOpenApi.Builder.handleLinks(): GroupedOpenApi.Builder {
+        this.addOpenApiCustomiser {
+            it.components.schemas.values.forEach {
+                it?.properties?.remove("_links")
             }
         }
+        return this
+    }
+
+
+    private fun String.removeRefPath(): String {
+        val refReplacePath = "#/components/schemas/"
+        return this.replace(refReplacePath, "")
     }
 
 
@@ -143,28 +138,29 @@ class OpenApiConfiguration {
         }
     }
 
-    private val apiKeyPaths: List<String> by lazy {
-        val reflections = Reflections("io.tolgee.controllers")
-
-        reflections.getTypesAnnotatedWith(InternalIgnorePaths::class.java)
-                .flatMap { clazz ->
-                    val methodPaths = clazz.declaredMethods.asSequence()
-                            .filter { it.isAnnotationPresent(InternalIgnorePaths::class.java) }
-                            .flatMap { it.getAnnotation(InternalIgnorePaths::class.java).value.asSequence() }
-                            .toList()
-                    val classPaths = clazz.getAnnotation(InternalIgnorePaths::class.java).value
-                    val withMethods = classPaths
-                            .flatMap { classPath -> methodPaths.map { classPath + it } }
-
-                    if (withMethods.isNotEmpty()) withMethods else classPaths.toList()
-                }
-    }
-
     private fun internalGroupForPaths(paths: Array<String>, name: String): GroupedOpenApi? {
-        val apiPaths = this.apiKeyPaths
+        val operationHandlers = HashMap<Operation, HandlerMethod>()
+        val handlerPaths = HashMap<Method, MutableList<String>>()
 
         return GroupedOpenApi.builder().group(name)
-                .pathsToMatch(*paths)
+                .addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
+                    operationHandlers[operation] = handlerMethod
+                    operation
+                }.pathsToMatch(*paths)
+                .addOpenApiCustomiser { openApi ->
+                    openApi.paths.forEach { (path, value) ->
+                        value.readOperations().forEach { operation ->
+                            operationHandlers[operation]?.method?.let { method ->
+                                handlerPaths[method] = handlerPaths[method].let {
+                                    it?.run {
+                                        add(path)
+                                        this
+                                    } ?: mutableListOf(path)
+                                }
+                            }
+                        }
+                    }
+                }
                 .addOpenApiCustomiser { openApi ->
                     val newPaths = Paths()
                     openApi.paths.forEach { pathEntry ->
@@ -172,15 +168,24 @@ class OpenApiConfiguration {
                         val newPathItem = PathItem()
                         val oldPathItem = pathEntry.value
                         oldPathItem.readOperations().forEach { operation ->
-                            val isParameterConsumed = operation?.parameters?.any { it.name == PROJECT_ID_PARAMETER } == true
-                            val pathContainsParam = pathEntry.key.contains("{${PROJECT_ID_PARAMETER}}")
-                            val parameterIsMissingAtAll = !pathContainsParam && !isParameterConsumed
+                            val isParameterConsumed = operation?.parameters?.any {
+                                it.name == PROJECT_ID_PARAMETER
+                            } == true
+                            val pathContainsProjectId = pathEntry.key.contains("{${PROJECT_ID_PARAMETER}}")
+                            val parameterIsMissingAtAll = !pathContainsProjectId && !isParameterConsumed
+                            val otherMethodPathContainsProjectId = handlerPaths[operationHandlers[operation]
+                                    ?.method]?.any { it.contains("{projectId}") }
+                                    ?: false
+                            //If controller method has another method which request mapping path contains {projectId},
+                            //this operation is then considered as one for access for API key and removed from
+                            //internal operations
+                            val isApiKeyOperation = !pathContainsProjectId && otherMethodPathContainsProjectId
 
-                            if (pathContainsParam || parameterIsMissingAtAll) {
+                            if ((pathContainsProjectId || parameterIsMissingAtAll) && !isApiKeyOperation) {
                                 operations.add(operation)
                             }
 
-                            if (!isParameterConsumed && pathContainsParam) {
+                            if (!isParameterConsumed && pathContainsProjectId) {
                                 val param = Parameter().apply {
                                     name(PROJECT_ID_PARAMETER)
                                     `in` = "path"
@@ -207,8 +212,8 @@ class OpenApiConfiguration {
                         }
                     }
                     openApi.paths = newPaths
-                }
-                .pathsToExclude(*apiPaths.toTypedArray(), "/api/project/{${PROJECT_ID_PARAMETER}}/sources/**")
+                }.handleLinks()
+                .pathsToExclude("/api/project/{${PROJECT_ID_PARAMETER}}/sources/**")
                 .build()
     }
 }

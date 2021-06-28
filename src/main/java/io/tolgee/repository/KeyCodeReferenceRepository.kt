@@ -14,4 +14,16 @@ interface KeyCodeReferenceRepository : JpaRepository<KeyCodeReference, Long> {
     @Query("""delete from KeyCodeReference kcr where kcr.keyMeta in 
         (select km from kcr.keyMeta km where km.importKey.id in :keyIds)""")
     fun deleteAllByImportKeyIds(keyIds: List<Long>)
+
+    @Modifying
+    @Transactional
+    @Query("""delete from KeyCodeReference kcr where kcr.keyMeta in 
+        (select km from kcr.keyMeta km where km.key.id in :keyIds)""")
+    fun deleteAllByKeyIds(keyIds: Any)
+
+    @Modifying
+    @Transactional
+    @Query("""delete from KeyCodeReference kcr where kcr.keyMeta in 
+        (select km from kcr.keyMeta km where km.key.id = :keyId)""")
+    fun deleteAllByKeyId(keyId: Long)
 }

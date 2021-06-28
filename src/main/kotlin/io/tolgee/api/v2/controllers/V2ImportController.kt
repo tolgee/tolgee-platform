@@ -31,6 +31,7 @@ import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
 import io.tolgee.service.dataImport.ForceMode
 import io.tolgee.service.dataImport.ImportService
+import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
@@ -134,7 +135,7 @@ class V2ImportController(
     @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun getImportResult(
             @PathVariable("projectId") projectId: Long,
-            pageable: Pageable
+            @ParameterObject pageable: Pageable
     ): PagedModel<ImportLanguageModel> {
         val userId = authenticationFacade.userAccount.id!!
         val languages = importService.getResult(projectId, userId, pageable)
@@ -165,7 +166,7 @@ class V2ImportController(
             @RequestParam("onlyUnresolved", defaultValue = "false") onlyUnresolved: Boolean = false,
             @Schema(description = "String to search in translation text or key")
             @RequestParam("search") search: String? = null,
-            pageable: Pageable
+            @ParameterObject pageable: Pageable
     ): PagedModel<ImportTranslationModel> {
         checkImportLanguageInProject(languageId)
         val translations = importService.getTranslationsView(languageId, pageable, onlyConflicts, onlyUnresolved, search)
@@ -242,7 +243,7 @@ class V2ImportController(
     @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     fun getImportFileIssues(
             @PathVariable("importFileId") importFileId: Long,
-            pageable: Pageable
+            @ParameterObject pageable: Pageable
     ): PagedModel<EntityModel<ImportFileIssueView>> {
         checkFileFromProject(importFileId)
         val page = importService.getFileIssues(importFileId, pageable)

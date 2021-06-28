@@ -22,8 +22,8 @@ data class GetTranslationsParams(
         val filterUntranslatedInLang: String? = null,
         @field:Parameter(description = "Selects only keys, where translation is provided in specified language", example = "en-US")
         val filterTranslatedInLang: String? = null,
-        @field:Parameter(description = "Selects only keys with screenshots", example = "en-US")
+        @field:Parameter(description = "Selects only keys with screenshots")
         val filterHasScreenshot: Boolean = false,
-        @field:Parameter(description = "Selects only keys without screenshots", example = "en-US")
+        @field:Parameter(description = "Selects only keys without screenshots")
         val filterHasNoScreenshot: Boolean = false
 )
