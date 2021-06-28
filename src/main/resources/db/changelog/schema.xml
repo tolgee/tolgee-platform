@@ -921,4 +921,9 @@
             <column name="flag_emoji" type="varchar(20)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1624895205019-2">
+        <addColumn tableName="translation">
+            <column name="state" type="integer" defaultValue="2"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

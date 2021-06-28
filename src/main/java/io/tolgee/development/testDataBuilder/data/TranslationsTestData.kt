@@ -3,6 +3,7 @@ package io.tolgee.development.testDataBuilder.data
 import io.tolgee.development.testDataBuilder.DataBuilders
 import io.tolgee.development.testDataBuilder.TestDataBuilder
 import io.tolgee.model.*
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 
 class TranslationsTestData {
@@ -56,6 +57,7 @@ class TranslationsTestData {
                         key = this@addKey.self
                         language = germanLanguage
                         text = "Z translation"
+                        state = TranslationState.REVIEWED
                     }
                 }.self
             }.self

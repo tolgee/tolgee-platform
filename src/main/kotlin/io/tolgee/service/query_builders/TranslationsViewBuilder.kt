@@ -62,6 +62,8 @@ class TranslationsViewBuilder(
             val translationTextField = translations.get(Translation_.text)
             selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::text.name] =
                     translationTextField
+            selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::state.name] =
+                    translations.get(Translation_.state)
             fullTextFields.add(translationTextField)
             translationsTextFields.add(translationTextField)
             applyTranslationFilters(language, translationTextField)
@@ -116,9 +118,9 @@ class TranslationsViewBuilder(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private val dataQuery: CriteriaQuery<Array<Any>>
+    private val dataQuery: CriteriaQuery<Array<Any?>>
         get() {
-            val query = getBaseQuery(cb.createQuery(Array<Any>::class.java))
+            val query = getBaseQuery(cb.createQuery(Array<Any?>::class.java))
             val paths = selection.values.toTypedArray()
             query.multiselect(*paths)
             val orderList = sort.asSequence().filter { selection[it.property] != null }.map {

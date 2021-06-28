@@ -6,6 +6,7 @@ import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.assertions.MvcResultAssert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.assertj.core.api.BigDecimalAssert
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
@@ -53,8 +54,8 @@ fun JsonAssert.node(node: String, rfn: JsonAssert.() -> Unit) {
     rfn(node(node))
 }
 
-val JsonAssert.isValidId: Unit
+val JsonAssert.isValidId: BigDecimalAssert
     get() {
-        this.asNumber().isGreaterThan(BigDecimal(10000000))
+       return this.asNumber().isGreaterThan(BigDecimal(10000000))
     }
 
