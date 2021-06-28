@@ -1,6 +1,7 @@
 package io.tolgee.dtos.request
 
 import io.swagger.v3.oas.annotations.media.Schema
+import org.hibernate.validator.constraints.Length
 import org.springframework.validation.annotation.Validated
 import javax.validation.constraints.NotBlank
 
@@ -11,5 +12,6 @@ data class CreateKeyDto(
          */
         @Schema(description = "Name of the key")
         @field:NotBlank
+        @field:Length(max = 200, min = 1)
         val name: String = "",
 )

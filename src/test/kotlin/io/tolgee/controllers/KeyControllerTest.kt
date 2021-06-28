@@ -4,8 +4,8 @@ import io.tolgee.ITest
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.DeprecatedEditKeyDTO
-import io.tolgee.dtos.request.EditKeyDto
 import io.tolgee.dtos.request.GetKeyTranslationsReqDto
+import io.tolgee.dtos.request.OldEditKeyDto
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.fixtures.generateUniqueString
@@ -71,7 +71,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
 
         performEdit(
                 projectId = project.id,
-                content = EditKeyDto(
+                content = OldEditKeyDto(
                         currentName = "test string",
                         newName = "hello"
                 ))
@@ -133,7 +133,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
         return performAuthPost("/api/project/$projectId/keys", content)
     }
 
-    private fun performEdit(projectId: Long, content: EditKeyDto): ResultActions {
+    private fun performEdit(projectId: Long, content: OldEditKeyDto): ResultActions {
         return performAuthPut("/api/project/$projectId/keys", content)
     }
 

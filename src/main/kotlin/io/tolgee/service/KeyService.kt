@@ -4,9 +4,11 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.DeprecatedEditKeyDTO
 import io.tolgee.dtos.request.EditKeyDto
+import io.tolgee.dtos.request.OldEditKeyDto
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.DeprecatedKeyDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
@@ -71,6 +73,7 @@ class KeyService(
         return keyRepository.findAllById(ids)
     }
 
+    @Deprecated("Use other create method")
     fun create(project: Project, dto: DeprecatedKeyDto): Key {
         if (this.get(project, dto.pathDto).isPresent) {
             throw ValidationException(Message.KEY_EXISTS)
@@ -93,7 +96,7 @@ class KeyService(
         keyRepository.save(key)
     }
 
-    fun edit(project: Project, dto: EditKeyDto): Key {
+    fun edit(project: Project, dto: OldEditKeyDto): Key {
         val key = get(project, dto.oldPathDto).orElseThrow { NotFoundException() }
         //do nothing on no change
         if (dto.newName == dto.currentName) {
@@ -106,15 +109,30 @@ class KeyService(
         return keyRepository.save(key)
     }
 
+    fun edit(project: Project, keyId: Long, dto: EditKeyDto): Key {
+        val key = get(keyId).orElseThrow { NotFoundException() }
+        //do nothing on no change
+        if (key.name == dto.name) {
+            return key
+        }
+        if (get(project.id, dto.name).isPresent) {
+            throw ValidationException(Message.KEY_EXISTS)
+        }
+        key.name = dto.name
+        return keyRepository.save(key)
+    }
+
     fun delete(id: Long) {
         val key = get(id).orElseThrow { NotFoundException() }
         translationService!!.deleteAllByKey(id)
+        keyMetaService.deleteAllByKeyId(id)
         screenshotService.deleteAllByKeyId(id)
         keyRepository.delete(key)
     }
 
     fun deleteMultiple(ids: Collection<Long>) {
         translationService!!.deleteAllByKeys(ids)
+        keyMetaService.deleteAllByKeyIdIn(ids)
         screenshotService.deleteAllByKeyId(ids)
         keyRepository.deleteAllByIdIn(ids)
     }
@@ -133,6 +151,9 @@ class KeyService(
 
     @Transactional
     fun create(project: Project, name: String): Key {
+        if (this.get(project.id, name).isPresent) {
+            throw BadRequestException(Message.KEY_EXISTS)
+        }
         val key = Key(name = name, project = project)
         return keyRepository.save(key)
     }
@@ -142,5 +163,5 @@ class KeyService(
         this.translationService = translationService
     }
 
-    fun saveAll(entities: Collection<Key>) = this.keyRepository.saveAll(entities)
+    fun saveAll(entities: Collection<Key>): MutableList<Key> = this.keyRepository.saveAll(entities)
 }

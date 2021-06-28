@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.DeprecatedEditKeyDTO
-import io.tolgee.dtos.request.EditKeyDto
 import io.tolgee.dtos.request.GetKeyTranslationsReqDto
+import io.tolgee.dtos.request.OldEditKeyDto
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.exceptions.NotFoundException
@@ -57,7 +57,7 @@ class KeyController(
     @PutMapping(value = [""])
     @Operation(summary = "Edits key name")
     @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-    fun edit(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: EditKeyDto) {
+    fun edit(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: OldEditKeyDto) {
         keyService.edit(projectHolder.project, dto)
     }
 
