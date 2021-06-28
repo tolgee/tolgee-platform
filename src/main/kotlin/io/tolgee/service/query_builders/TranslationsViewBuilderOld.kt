@@ -3,10 +3,10 @@ package io.tolgee.service.query_builders
 import io.tolgee.model.Language
 import io.tolgee.model.Language_
 import io.tolgee.model.Project
-import io.tolgee.model.Translation_
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.translation.Translation_
 import javax.persistence.EntityManager
 import javax.persistence.criteria.*
 

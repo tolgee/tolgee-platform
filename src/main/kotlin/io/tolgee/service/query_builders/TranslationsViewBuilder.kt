@@ -4,6 +4,7 @@ import io.tolgee.dtos.request.GetTranslationsParams
 import io.tolgee.model.*
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
+import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
 import org.springframework.data.domain.Page
