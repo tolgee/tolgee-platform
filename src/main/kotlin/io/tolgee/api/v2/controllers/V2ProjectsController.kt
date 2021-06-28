@@ -28,6 +28,7 @@ import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.*
+import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.MediaTypes
@@ -58,7 +59,9 @@ class V2ProjectsController(
 ) {
     @Operation(summary = "Returns all projects, which are current user permitted to view")
     @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
-    fun getAll(pageable: Pageable, @RequestParam("search") search: String?): PagedModel<ProjectModel>? {
+    fun getAll(@ParameterObject pageable: Pageable,
+               @RequestParam("search") search: String?
+    ): PagedModel<ProjectModel>? {
         val projects = projectService.findPermittedPaged(pageable, search)
         return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
     }
@@ -77,7 +80,7 @@ class V2ProjectsController(
     @Operation(summary = "Returns project all users, who have permission to access project")
     @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
     fun getAllUsers(@PathVariable("projectId") projectId: Long,
-                    pageable: Pageable,
+                    @ParameterObject pageable: Pageable,
                     @RequestParam("search", required = false) search: String?
     ): PagedModel<UserAccountInProjectModel> {
         return userAccountService.getAllInProject(projectId, pageable, search).let { users ->

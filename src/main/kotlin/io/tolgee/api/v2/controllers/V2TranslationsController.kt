@@ -5,6 +5,9 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.api.v2.hateoas.translations.KeyTranslationModelAssembler
@@ -55,7 +58,13 @@ class V2TranslationsController(
     @GetMapping(value = ["/{languages}"])
     @AccessWithAnyProjectPermission
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-    @Operation(summary = "Returns all translations for specified languages")
+    @Operation(summary = "Returns all translations for specified languages", responses = [
+        ApiResponse(responseCode = "200", content = [
+            Content(schema = Schema(
+                    example = """{"en": {"what a key": "Translated value", "another key": "Another key translated"},""" +
+                            """"cs": {"what a key": "Překlad", "another key": "Další překlad"}}"""))
+        ])
+    ])
     fun getAllTranslations(@PathVariable("languages") languages: Set<String>): Map<String, Any> {
         return translationService.getTranslations(languages, projectHolder.project.id)
     }
@@ -97,7 +106,7 @@ class V2TranslationsController(
             SetTranslationsResponseModel {
         return SetTranslationsResponseModel(
                 keyId = key.id,
-                keyName = key.name!!,
+                keyName = key.name,
                 translations = translations.entries.associate { (languageTag, translation) ->
                     languageTag to TranslationModel(translation.id, translation.text)
                 }

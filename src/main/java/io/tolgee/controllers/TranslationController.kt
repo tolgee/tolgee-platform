@@ -18,7 +18,6 @@ import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import io.tolgee.service.TranslationService
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,12 +28,12 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/api/project/{projectId:[0-9]+}/translations", "/api/project/translations")
 @Tag(name = "Translations", description = "Manipulates localization messages and metadata")
+@Deprecated("Use V2TranslationController")
 class TranslationController @Autowired constructor(
         private val translationService: TranslationService,
         private val keyService: KeyService,
         private val securityService: SecurityService,
         private val projectHolder: ProjectHolder,
-        private val projectService: ProjectService
 ) : IController {
     @GetMapping(value = ["/{languages}"])
     @AccessWithAnyProjectPermission
