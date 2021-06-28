@@ -6,8 +6,10 @@ import io.tolgee.model.UserAccount
 import io.tolgee.service.ApiKeyService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
@@ -39,6 +41,17 @@ class ProjectApiKeyAuthRequestPerformer(
 
     override fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
         return performDelete(projectUrlPrefix + url.withApiKey, content)
+    }
+
+    override fun performProjectAuthMultipart(
+            url: String, files: List<MockMultipartFile>, params: Map<String, Array<String>>
+    ): ResultActions {
+        val builder = MockMvcRequestBuilders.multipart(url)
+        files.forEach { builder.file(it) }
+        params.forEach { (name, values) -> builder.param(name, *values) }
+        return mvc.perform(
+                LoggedRequestFactory.addToken(
+                        MockMvcRequestBuilders.multipart(projectUrlPrefix + url.withApiKey)))
     }
 
     private val String.withApiKey: String

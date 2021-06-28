@@ -4,6 +4,9 @@
 
 package io.tolgee.service
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Screenshot
 import io.tolgee.model.key.Key
 import io.tolgee.repository.ScreenshotRepository
@@ -26,12 +29,19 @@ import kotlin.math.sqrt
 @Service
 class ScreenshotService(
         private val screenshotRepository: ScreenshotRepository,
-        private val fileStorageService: FileStorageService
+        private val fileStorageService: FileStorageService,
+        private val tolgeeProperties: TolgeeProperties
 ) {
     private val screenshotFolderName = "screenshots"
 
     @Transactional
     fun store(screenshotImage: InputStreamSource, key: Key): Screenshot {
+        if (getScreenshotsCountForKey(key) >= tolgeeProperties.maxScreenshotsPerKey) {
+            throw BadRequestException(
+                    Message.MAX_SCREENSHOTS_EXCEEDED,
+                    listOf(tolgeeProperties.maxScreenshotsPerKey)
+            )
+        }
         val screenshotEntity = Screenshot(key = key)
         screenshotRepository.save(screenshotEntity)
         val image = prepareImage(screenshotImage.inputStream)
@@ -120,5 +130,9 @@ class ScreenshotService(
 
     fun saveAll(screenshots: List<Screenshot>) {
         screenshotRepository.saveAll(screenshots)
+    }
+
+    fun getScreenshotsCountForKey(key: Key): Long {
+        return screenshotRepository.countByKey(key)
     }
 }

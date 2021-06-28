@@ -26,7 +26,6 @@ class KeyService(
         private val screenshotService: ScreenshotService,
         private val keyMetaService: KeyMetaService
 ) {
-
     private var translationService: TranslationService? = null
 
     @Transactional
@@ -162,6 +161,13 @@ class KeyService(
     fun setTranslationService(translationService: TranslationService?) {
         this.translationService = translationService
     }
+
+    fun checkInProject(key: Key, project: Project) {
+        if (key.project!!.id != project.id) {
+            throw BadRequestException(Message.KEY_NOT_FROM_PROJECT)
+        }
+    }
+
 
     fun saveAll(entities: Collection<Key>): MutableList<Key> = this.keyRepository.saveAll(entities)
 }

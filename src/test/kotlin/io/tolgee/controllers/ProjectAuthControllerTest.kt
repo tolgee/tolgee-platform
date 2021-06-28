@@ -10,6 +10,7 @@ import io.tolgee.fixtures.ProjectJwtAuthRequestPerformer
 import io.tolgee.model.Project
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 import org.testng.annotations.BeforeMethod
 import java.lang.reflect.Method
@@ -88,4 +89,9 @@ abstract class ProjectAuthControllerTest(
         return projectAuthRequestPerformer.performProjectAuthDelete(url, content)
     }
 
+    fun performProjectAuthMultipart(
+            url: String, files: List<MockMultipartFile>, params: Map<String, Array<String>> = mapOf()
+    ): ResultActions {
+        return projectAuthRequestPerformer.performProjectAuthMultipart(url, files, params)
+    }
 }

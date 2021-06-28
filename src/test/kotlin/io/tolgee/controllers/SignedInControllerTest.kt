@@ -8,6 +8,7 @@ import io.tolgee.security.JwtTokenProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.testng.annotations.AfterMethod
@@ -106,5 +107,12 @@ abstract class SignedInControllerTest : AbstractControllerTest(), AuthRequestPer
     override fun performAuthDelete(url: String, content: Any?): ResultActions {
         loginAsAdminIfNotLogged()
         return signedInRequestPerformer.performAuthDelete(url, content)
+    }
+
+    override fun performAuthMultipart(
+            url: String, files: List<MockMultipartFile>, params: Map<String, Array<String>>
+    ): ResultActions {
+        loginAsAdminIfNotLogged()
+        return signedInRequestPerformer.performAuthMultipart(url, files, params)
     }
 }
