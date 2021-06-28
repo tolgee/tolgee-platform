@@ -17,6 +17,8 @@ import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyService
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -39,33 +41,27 @@ class V2KeyController(
     @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
     @Operation(summary = "Creates new key")
-    fun create(@RequestBody @Valid dto: CreateKeyDto): KeyModel {
-        return keyService.create(projectHolder.project, dto.name).model
+    @ResponseStatus(HttpStatus.CREATED)
+    fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyModel> {
+        return ResponseEntity(keyService.create(projectHolder.project, dto.name).model, HttpStatus.CREATED)
     }
 
-    @PutMapping(value = [""])
+    @PutMapping(value = ["/{id}"])
     @Operation(summary = "Edits key name")
     @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
-    fun edit(@RequestBody @Valid dto: EditKeyDto): KeyModel {
-        return keyService.edit(projectHolder.project, dto).model
+    fun edit(@PathVariable id: Long, @RequestBody @Valid dto: EditKeyDto): KeyModel {
+        val key = keyService.get(id).orElseThrow { NotFoundException() }
+        key.checkInProject()
+        return keyService.edit(projectHolder.project, id, dto).model
     }
 
-    @DeleteMapping(value = ["/{id}"])
-    @Operation(summary = "Deletes key with specified id")
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-    @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
-    fun delete(@PathVariable id: Long) {
-        keyService.get(id).orElseThrow { NotFoundException() }.checkInProject()
-        keyService.delete(id)
-    }
-
-    @DeleteMapping(value = [""])
+    @DeleteMapping(value = ["/{ids:[0-9,]+}"])
     @Transactional
-    @Operation(summary = "Deletes multiple keys by IDs")
+    @Operation(summary = "Deletes one or multiple keys by their IDs")
     @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
-    fun delete(@RequestBody ids: Set<Long>) {
+    fun delete(@PathVariable ids: Set<Long>) {
         keyService.get(ids).forEach { it.checkInProject() }
         keyService.deleteMultiple(ids)
     }

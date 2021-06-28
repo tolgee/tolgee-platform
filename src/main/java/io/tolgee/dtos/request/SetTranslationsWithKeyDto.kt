@@ -1,6 +1,7 @@
 package io.tolgee.dtos.request
 
 import io.swagger.v3.oas.annotations.media.Schema
+import org.hibernate.validator.constraints.Length
 import org.springframework.validation.annotation.Validated
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
@@ -11,7 +12,8 @@ data class SetTranslationsWithKeyDto(
          * Key full path is stored as name in entity
          */
         @Schema(description = "Key name to set translations for", example = "what_a_key_to_translate")
-        @field:NotNull @field:NotBlank
+        @field:NotBlank
+        @field:Length(max = 200)
         val key: String = "",
 
         /**
