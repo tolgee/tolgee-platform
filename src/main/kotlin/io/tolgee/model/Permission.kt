@@ -25,10 +25,24 @@ data class Permission(
     }
 
     enum class ProjectPermissionType(val power: Int, val availableScopes: Array<ApiScope>) {
-        VIEW(1, arrayOf(ApiScope.TRANSLATIONS_VIEW)),
-        TRANSLATE(2, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT)),
-        EDIT(3, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT)),
-        MANAGE(4, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT));
+        VIEW(1, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.SCREENSHOTS_VIEW)),
+        TRANSLATE(2, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.SCREENSHOTS_VIEW)),
+        EDIT(3, arrayOf(
+                ApiScope.TRANSLATIONS_VIEW,
+                ApiScope.TRANSLATIONS_EDIT,
+                ApiScope.KEYS_EDIT,
+                ApiScope.SCREENSHOTS_VIEW,
+                ApiScope.SCREENSHOTS_UPLOAD,
+                ApiScope.SCREENSHOTS_DELETE
+        )),
+        MANAGE(4, arrayOf(
+                ApiScope.TRANSLATIONS_VIEW,
+                ApiScope.TRANSLATIONS_EDIT,
+                ApiScope.KEYS_EDIT,
+                ApiScope.SCREENSHOTS_VIEW,
+                ApiScope.SCREENSHOTS_UPLOAD,
+                ApiScope.SCREENSHOTS_DELETE
+        ));
     }
 
     @ManyToOne

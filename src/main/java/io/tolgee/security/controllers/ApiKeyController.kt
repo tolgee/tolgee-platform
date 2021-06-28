@@ -82,12 +82,12 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
 
     @GetMapping(path = ["/availableScopes"])
     @Operation(summary = "Returns API key scopes for every permission type")
-    fun getScopes(): Map<String, Set<String>> = Arrays.stream(ProjectPermissionType.values())
+    fun getScopes(): Map<String, List<String>> = Arrays.stream(ProjectPermissionType.values())
             .collect(Collectors.toMap({ obj: ProjectPermissionType -> obj.name },
                     { type: ProjectPermissionType ->
                         Arrays.stream(type.availableScopes)
                                 .map { obj: ApiScope -> obj.value }
-                                .collect(Collectors.toSet())
+                                .collect(Collectors.toList())
                     }
             ))
 
