@@ -11,6 +11,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.isValidId
+import io.tolgee.model.enums.TranslationState
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.BeforeMethod
@@ -45,6 +46,22 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
                     node("keyName").isEqualTo("A key")
                 }
     }
+
+    @ProjectJWTAuthTestMethod
+    @Test
+    fun `sets translation state`() {
+        val id = testData.aKeyGermanTranslation.id
+        performProjectAuthPut("/translations/${id}/set-state/UNTRANSLATED", null).andIsOk
+                .andAssertThatJson {
+                    node("state").isEqualTo("UNTRANSLATED")
+                    node("id").isValidId.satisfies { id ->
+                        id.toLong().let {
+                            assertThat(translationService.find(it)?.state).isEqualTo(TranslationState.UNTRANSLATED)
+                        }
+                    }
+                }
+    }
+
 
     @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
     @Test

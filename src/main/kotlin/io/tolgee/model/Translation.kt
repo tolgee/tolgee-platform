@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.ObjectFactory
@@ -25,6 +26,10 @@ data class Translation(
 
     @ManyToOne
     var language: Language? = null
+
+    @Enumerated
+    @Column()
+    var state: TranslationState = TranslationState.TRANSLATED
 
     constructor(text: String?, key: Key?, language: Language?) : this(text) {
         this.key = key

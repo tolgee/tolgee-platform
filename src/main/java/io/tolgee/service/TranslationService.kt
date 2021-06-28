@@ -14,6 +14,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.Translation
 import io.tolgee.model.Translation.Companion.builder
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
@@ -133,8 +134,8 @@ class TranslationService(private val translationRepository: TranslationRepositor
         return translation
     }
 
-    fun saveTranslation(translation: Translation) {
-        translationRepository.save(translation)
+    fun saveTranslation(translation: Translation): Translation {
+        return translationRepository.save(translation)
     }
 
     fun setForKey(key: Key, translations: Map<String, String?>): Map<String, Translation> {
@@ -187,5 +188,10 @@ class TranslationService(private val translationRepository: TranslationRepositor
 
     fun saveAll(entities: Iterable<Translation?>) {
         translationRepository.saveAll(entities)
+    }
+
+    fun setState(translation: Translation, state: TranslationState): Translation {
+        translation.state = state
+        return this.saveTranslation(translation)
     }
 }
