@@ -1,5 +1,7 @@
-package io.tolgee.model
+package io.tolgee.model.translation
 
+import io.tolgee.model.Language
+import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.service.dataImport.ImportService
@@ -28,7 +30,6 @@ data class Translation(
     var language: Language? = null
 
     @Enumerated
-    @Column()
     var state: TranslationState = TranslationState.TRANSLATED
 
     constructor(text: String?, key: Key?, language: Language?) : this(text) {

@@ -12,10 +12,10 @@ import io.tolgee.exceptions.InternalException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
-import io.tolgee.model.Translation
-import io.tolgee.model.Translation.Companion.builder
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
+import io.tolgee.model.translation.Translation.Companion.builder
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.repository.TranslationRepository

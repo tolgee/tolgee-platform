@@ -4,6 +4,7 @@ import io.tolgee.model.*
 import io.tolgee.model.dataImport.*
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
+import io.tolgee.model.translation.Translation
 
 typealias FT<T> = T.() -> Unit
 
