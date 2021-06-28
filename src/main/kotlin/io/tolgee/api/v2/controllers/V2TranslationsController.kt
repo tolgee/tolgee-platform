@@ -10,18 +10,18 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
-import io.tolgee.api.v2.hateoas.translations.KeyTranslationModelAssembler
-import io.tolgee.api.v2.hateoas.translations.KeyWithTranslationsModel
-import io.tolgee.api.v2.hateoas.translations.SetTranslationsResponseModel
-import io.tolgee.api.v2.hateoas.translations.TranslationModel
+import io.tolgee.api.v2.hateoas.translations.*
 import io.tolgee.constants.ApiScope
+import io.tolgee.constants.Message
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.GetTranslationsParams
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.model.Translation
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.security.api_key_auth.AccessWithApiKey
@@ -53,7 +53,9 @@ class V2TranslationsController(
         private val translationService: TranslationService,
         private val keyService: KeyService,
         private val pagedAssembler: PagedResourcesAssembler<KeyWithTranslationsView>,
-        private val keyTranslationModelAssembler: KeyTranslationModelAssembler
+        private val keyTranslationModelAssembler: KeyTranslationModelAssembler,
+        private val translationViewModelAssembler: TranslationViewModelAssembler,
+        private val translationModelAssembler: TranslationModelAssembler
 ) : IController {
     @GetMapping(value = ["/{languages}"])
     @AccessWithAnyProjectPermission
@@ -92,6 +94,16 @@ class V2TranslationsController(
         return getSetTranslationsResponse(key, translations)
     }
 
+    @PutMapping("/{translationId}/set-state/{state}")
+    @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
+    @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
+    @Operation(summary = "Sets translations for existing or not existing key")
+    fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {
+        val translation = translationService.find(translationId) ?: throw NotFoundException()
+        translation.checkFromProject()
+        return translationModelAssembler.toModel(translationService.setState(translation, state))
+    }
+
     @GetMapping(value = [""])
     @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
     @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
@@ -108,8 +120,14 @@ class V2TranslationsController(
                 keyId = key.id,
                 keyName = key.name,
                 translations = translations.entries.associate { (languageTag, translation) ->
-                    languageTag to TranslationModel(translation.id, translation.text)
+                    languageTag to TranslationModel(translation.id, translation.text, translation.state)
                 }
         )
+    }
+
+    private fun Translation.checkFromProject() {
+        if (this.key?.project?.id != projectHolder.project.id) {
+            throw BadRequestException(Message.TRANSLATION_NOT_FROM_PROJECT)
+        }
     }
 }
