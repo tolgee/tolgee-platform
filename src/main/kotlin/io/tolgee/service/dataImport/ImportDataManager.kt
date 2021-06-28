@@ -1,12 +1,12 @@
 package io.tolgee.service.dataImport
 
-import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
+import io.tolgee.model.translation.Translation
 import io.tolgee.service.KeyMetaService
 import io.tolgee.service.KeyService
 import io.tolgee.service.TranslationService

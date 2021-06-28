@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.model.translation.Translation
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired

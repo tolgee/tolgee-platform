@@ -3,11 +3,11 @@ package io.tolgee.service.dataImport
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.ImportConflictNotResolvedException
-import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
 import io.tolgee.service.KeyMetaService
 import io.tolgee.service.KeyService
 import io.tolgee.service.TranslationService

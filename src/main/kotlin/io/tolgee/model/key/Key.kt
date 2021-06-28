@@ -4,7 +4,7 @@ import io.tolgee.dtos.PathDTO
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.StandardAuditModel
-import io.tolgee.model.Translation
+import io.tolgee.model.translation.Translation
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
