@@ -65,8 +65,6 @@ declare namespace DataCy {
         "import-show-data-dialog" |
         "import_apply_import_button" |
         "import_cancel_import_button" |
-        "invite-generate-button" |
-        "invite-generate-input-code" |
         "language-delete-button" |
         "language-modify-form" |
         "languages-create-autocomplete-field" |

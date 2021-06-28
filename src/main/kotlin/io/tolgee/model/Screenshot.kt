@@ -12,9 +12,9 @@ import javax.persistence.*
 data class Screenshot(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        var id: Long? = null
+        var id: Long = 0
 ) : AuditModel() {
-    constructor(id: Long? = null, key: Key) : this(id) {
+    constructor(id: Long = 0, key: Key) : this(id) {
         this.key = key
     }
 

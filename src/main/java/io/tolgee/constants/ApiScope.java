@@ -5,7 +5,10 @@ import io.tolgee.exceptions.NotFoundException;
 public enum ApiScope {
     TRANSLATIONS_VIEW("translations.view"),
     TRANSLATIONS_EDIT("translations.edit"),
-    KEYS_EDIT("keys.edit");
+    KEYS_EDIT("keys.edit"),
+    SCREENSHOTS_UPLOAD("screenshots.upload"),
+    SCREENSHOTS_DELETE("screenshots.delete"),
+    SCREENSHOTS_VIEW("screenshots.view");
 
     private String value;
 

@@ -21,9 +21,9 @@ import io.tolgee.service.KeyService
 import io.tolgee.service.ProjectService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.SecurityService
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.http.MediaType
 import java.util.*
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
@@ -33,6 +33,7 @@ import javax.validation.constraints.NotBlank
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/api/project/screenshots", "/api/project/{projectId:[0-9]+}/screenshots"])
 @Tag(name = "Screenshots")
+@Deprecated("Use V2ScreenshotController")
 class ScreenshotController(
         private val screenshotService: ScreenshotService,
         private val keyService: KeyService,

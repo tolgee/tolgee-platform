@@ -5,11 +5,9 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.key.KeyModel
 import io.tolgee.api.v2.hateoas.key.KeyModelAssembler
 import io.tolgee.constants.ApiScope
-import io.tolgee.constants.Message
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.CreateKeyDto
 import io.tolgee.dtos.request.EditKeyDto
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.model.key.Key
@@ -67,9 +65,7 @@ class V2KeyController(
     }
 
     private fun Key.checkInProject() {
-        if (this.project!!.id != projectHolder.project.id) {
-            throw BadRequestException(Message.KEY_NOT_FROM_PROJECT)
-        }
+        keyService.checkInProject(this, projectHolder.project)
     }
 
     private val Key.model: KeyModel

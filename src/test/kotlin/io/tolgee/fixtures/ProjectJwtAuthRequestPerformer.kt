@@ -2,6 +2,7 @@ package io.tolgee.fixtures
 
 import io.tolgee.model.UserAccount
 import org.springframework.context.annotation.Scope
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.ResultActions
 
@@ -27,5 +28,11 @@ class ProjectJwtAuthRequestPerformer(
 
     override fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
         return performAuthDelete(projectUrlPrefix + project.id + "/" + url, content)
+    }
+
+    override fun performProjectAuthMultipart(
+            url: String, files: List<MockMultipartFile>, params: Map<String, Array<String>>
+    ): ResultActions {
+        return performAuthMultipart(projectUrlPrefix + project.id + "/" + url, files, params)
     }
 }

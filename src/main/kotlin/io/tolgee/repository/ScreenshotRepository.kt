@@ -11,4 +11,5 @@ interface ScreenshotRepository : JpaRepository<Screenshot, Long> {
     fun getAllByKeyProjectId(projectId: Long): List<Screenshot>
     fun getAllByKeyId(id: Long): List<Screenshot>
     fun getAllByKeyIdIn(keyIds: Collection<Long>): List<Screenshot>
+    fun countByKey(key: Key): Long
 }
