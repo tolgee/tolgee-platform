@@ -56,7 +56,8 @@ enum class Message {
     LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND,
     LANGUAGE_NOT_FROM_PROJECT,
     CANNOT_DELETE_BASE_LANGUAGE,
-    KEY_NOT_FROM_PROJECT;
+    KEY_NOT_FROM_PROJECT,
+    MAX_SCREENSHOTS_EXCEEDED;
 
     val code: String
         get() = name.toLowerCase()
