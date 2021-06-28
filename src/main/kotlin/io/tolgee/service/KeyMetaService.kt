@@ -114,4 +114,16 @@ class KeyMetaService(
         keyCodeReferenceRepository.deleteAllByImportKeyIds(keyIds)
         this.keyMetaRepository.deleteAllByImportKeyIdIn(keyIds)
     }
+
+    fun deleteAllByKeyIdIn(ids: Collection<Long>) {
+        keyCommentRepository.deleteAllByKeyIds(ids)
+        keyCodeReferenceRepository.deleteAllByKeyIds(ids)
+        this.keyMetaRepository.deleteAllByKeyIds(ids)
+    }
+
+    fun deleteAllByKeyId(id: Long) {
+        keyCommentRepository.deleteAllByKeyId(id)
+        keyCodeReferenceRepository.deleteAllByKeyId(id)
+        this.keyMetaRepository.deleteAllByKeyId(id)
+    }
 }

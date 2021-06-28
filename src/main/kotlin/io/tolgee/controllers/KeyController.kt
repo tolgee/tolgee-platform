@@ -5,13 +5,12 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.DeprecatedEditKeyDTO
-import io.tolgee.dtos.request.EditKeyDTO
 import io.tolgee.dtos.request.GetKeyTranslationsReqDto
+import io.tolgee.dtos.request.OldEditKeyDto
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
-import io.tolgee.openapi_fixtures.InternalIgnorePaths
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
@@ -31,7 +30,7 @@ import javax.validation.Valid
     "/api/project/{projectId}/keys",
     "/api/project/keys"
 ])
-@InternalIgnorePaths(["/api/project/keys"])
+@Deprecated("Use V2KeyController")
 @Tag(name = "Localization keys", description = "Manipulates localization keys and their translations and metadata")
 class KeyController(
         private val keyService: KeyService,
@@ -41,7 +40,7 @@ class KeyController(
 ) : IController {
 
     @PostMapping(value = ["/create", ""])
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
     @Operation(summary = "Creates new key with specified translation data")
     fun create(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: SetTranslationsWithKeyDto?) {
         keyService.create(projectHolder.project, dto!!)
@@ -58,7 +57,7 @@ class KeyController(
     @PutMapping(value = [""])
     @Operation(summary = "Edits key name")
     @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-    fun edit(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: EditKeyDTO) {
+    fun edit(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: OldEditKeyDto) {
         keyService.edit(projectHolder.project, dto)
     }
 
@@ -81,7 +80,7 @@ class KeyController(
 
     @DeleteMapping(value = [""])
     @Transactional
-    @Operation(summary = "Deletes multiple kdys by their IDs")
+    @Operation(summary = "Deletes multiple keys by their IDs")
     fun delete(@RequestBody ids: Set<Long>?) {
         for (key in keyService.get(ids!!)) {
             securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
@@ -96,7 +95,6 @@ class KeyController(
             summary = "Returns translations for specific key by its name",
             description = "Key name must be provided in method body, since it can be long and can contain characters hard to " +
                     "encode")
-    @InternalIgnorePaths(["/translations/{languages}"])
     fun getKeyTranslationsPost(
             @RequestBody body: GetKeyTranslationsReqDto,
             @PathVariable("languages") languages: Set<String>?
