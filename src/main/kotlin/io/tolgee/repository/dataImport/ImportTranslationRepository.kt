@@ -1,9 +1,9 @@
 package io.tolgee.repository.dataImport
 
-import io.tolgee.model.Translation
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.ImportTranslationView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

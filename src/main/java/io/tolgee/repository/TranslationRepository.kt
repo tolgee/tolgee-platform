@@ -1,8 +1,8 @@
 package io.tolgee.repository
 
 import io.tolgee.model.Language
-import io.tolgee.model.Translation
 import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.SimpleTranslationView
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying

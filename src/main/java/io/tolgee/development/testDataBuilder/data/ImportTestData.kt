@@ -2,10 +2,14 @@ package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.DataBuilders
 import io.tolgee.development.testDataBuilder.TestDataBuilder
-import io.tolgee.model.*
+import io.tolgee.model.Language
+import io.tolgee.model.Permission
+import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.translation.Translation
 
 class ImportTestData {
     lateinit var conflict: Translation
