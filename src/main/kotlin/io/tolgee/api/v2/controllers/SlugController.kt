@@ -17,7 +17,7 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/address-part", "/api/address-part"])
-@Tag(name = "Address Part generation")
+@Tag(name = "Slug generation")
 class SlugController(
         private val organizationService: OrganizationService,
         private val projectService: ProjectService,

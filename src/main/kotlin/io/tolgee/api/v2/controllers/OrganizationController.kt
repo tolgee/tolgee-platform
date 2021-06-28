@@ -30,6 +30,7 @@ import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.*
+import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.CollectionModel
@@ -99,7 +100,7 @@ class OrganizationController(
 
     @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
     @Operation(summary = "Returns all organizations, which is current user allowed to view")
-    fun getAll(pageable: Pageable, params: OrganizationRequestParamsDto): PagedModel<OrganizationModel>? {
+    fun getAll(@ParameterObject pageable: Pageable, params: OrganizationRequestParamsDto): PagedModel<OrganizationModel>? {
         val organizations = organizationService.findPermittedPaged(pageable, params)
         return arrayResourcesAssembler.toModel(organizations, organizationModelAssembler)
     }
@@ -122,7 +123,7 @@ class OrganizationController(
     @Operation(summary = "Returns all users in organization")
     fun getAllUsers(
             @PathVariable("id") id: Long,
-            pageable: Pageable,
+            @ParameterObject pageable: Pageable,
             @RequestParam("search") search: String?): PagedModel<UserAccountWithOrganizationRoleModel> {
         organizationRoleService.checkUserIsMemberOrOwner(id)
         val allInOrganization = userAccountService.getAllInOrganization(id, pageable, search)
@@ -166,7 +167,7 @@ class OrganizationController(
     @Operation(summary = "Returns all organization projects")
     fun getAllProjects(
             @PathVariable("id") id: Long,
-            pageable: Pageable,
+            @ParameterObject pageable: Pageable,
             @RequestParam("search") search: String?
     ): PagedModel<ProjectModel> {
         return organizationService.get(id)?.let {
@@ -181,7 +182,7 @@ class OrganizationController(
     @Operation(summary = "Returns all organization projects")
     fun getAllProjects(
             @PathVariable("slug") slug: String,
-            pageable: Pageable,
+            @ParameterObject pageable: Pageable,
             @RequestParam("search") search: String?
     ): PagedModel<ProjectModel> {
         return organizationService.get(slug)?.let {

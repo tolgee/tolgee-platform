@@ -16,7 +16,7 @@ data class Key(
         @field:NotBlank
         @field:Size(max = 2000)
         @Column(length = 2000)
-        var name: String? = null,
+        var name: String = "",
 ) : StandardAuditModel() {
     @field:NotNull
     @ManyToOne(optional = false)
@@ -31,8 +31,8 @@ data class Key(
     @OneToMany(mappedBy = "key")
     var screenshots: MutableList<Screenshot> = mutableListOf()
 
-    constructor(name: String? = null,
-                project: Project? = null,
+    constructor(name: String,
+                project: Project,
                 translations: MutableSet<Translation> = HashSet()
     ) : this(name) {
         this.project = project

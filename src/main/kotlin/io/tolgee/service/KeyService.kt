@@ -3,7 +3,7 @@ package io.tolgee.service
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.DeprecatedEditKeyDTO
-import io.tolgee.dtos.request.EditKeyDTO
+import io.tolgee.dtos.request.EditKeyDto
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.DeprecatedKeyDto
@@ -93,17 +93,17 @@ class KeyService(
         keyRepository.save(key)
     }
 
-    fun edit(project: Project, dto: EditKeyDTO) {
+    fun edit(project: Project, dto: EditKeyDto): Key {
+        val key = get(project, dto.oldPathDto).orElseThrow { NotFoundException() }
         //do nothing on no change
         if (dto.newName == dto.currentName) {
-            return
+            return key
         }
         if (get(project, dto.newPathDto).isPresent) {
             throw ValidationException(Message.KEY_EXISTS)
         }
-        val key = get(project, dto.oldPathDto).orElseThrow { NotFoundException() }
         key.name = dto.newName
-        keyRepository.save(key)
+        return keyRepository.save(key)
     }
 
     fun delete(id: Long) {
@@ -126,13 +126,15 @@ class KeyService(
 
     @Transactional
     fun create(project: Project, dto: SetTranslationsWithKeyDto): Key {
-        if (this.get(project, PathDTO.fromFullPath(dto.key)).isPresent) {
-            throw ValidationException(Message.KEY_EXISTS)
-        }
-        val key = Key(name = dto.key, project = project)
-        keyRepository.save(key)
-        translationService!!.setForKey(key, dto.translations!!)
+        val key = create(project, dto.key)
+        translationService!!.setForKey(key, dto.translations)
         return key
+    }
+
+    @Transactional
+    fun create(project: Project, name: String): Key {
+        val key = Key(name = name, project = project)
+        return keyRepository.save(key)
     }
 
     @Autowired
