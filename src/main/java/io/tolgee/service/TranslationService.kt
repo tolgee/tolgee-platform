@@ -22,6 +22,8 @@ import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.query_builders.TranslationsViewBuilder
 import io.tolgee.service.query_builders.TranslationsViewBuilderOld
+import org.hibernate.envers.AuditReaderFactory
+import org.hibernate.envers.query.AuditEntity
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -175,8 +177,14 @@ class TranslationService(
         currentMap[path.name] = translation.text
     }
 
-    private fun getHistory(key: Key, language: Language) {
-        //auditReader.createQuery().forRevisionsOfEntityWithChanges()
+    private fun getHistory(key: Key, language: Language): MutableList<Any?>? {
+       return AuditReaderFactory.get(entityManager)
+                .createQuery()
+                .forRevisionsOfEntity(Translation::class.java, true)
+                .add(AuditEntity.and(
+                        AuditEntity.property("language_id").eq(language.id),
+                        AuditEntity.property("key_id").eq(key.id)
+                )).resultList
     }
 
     fun deleteByIdIn(ids: Collection<Long>) {
