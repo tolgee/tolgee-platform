@@ -3,6 +3,7 @@ package io.tolgee.model
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.dataImport.ImportService
+import org.hibernate.envers.Audited
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
@@ -32,6 +33,7 @@ import javax.validation.constraints.Size
                     name = "index_tag_project")
         ]
 )
+@Audited
 class Language : StandardAuditModel() {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
     var translations: MutableSet<Translation>? = null

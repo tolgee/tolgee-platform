@@ -5,6 +5,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.translation.Translation
+import org.hibernate.envers.Audited
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
@@ -12,6 +13,7 @@ import javax.validation.constraints.Size
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name"], name = "key_project_id_name")])
+@Audited
 data class Key(
         @field:NotBlank
         @field:Size(max = 200)

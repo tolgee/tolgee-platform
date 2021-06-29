@@ -926,4 +926,261 @@
             <column name="state" type="integer" defaultValue="2"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-2">
+        <createTable tableName="api_key_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="api_key_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="api_key_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="key" type="VARCHAR(255)"/>
+            <column name="scopes" type="VARCHAR(255)"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="user_account_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-3">
+        <createTable tableName="api_key_scopes_enum_aud">
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="api_key_scopes_enum_audPK"/>
+            </column>
+            <column name="api_key_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="api_key_scopes_enum_audPK"/>
+            </column>
+            <column name="scopes_enum" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="api_key_scopes_enum_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-4">
+        <createTable tableName="email_verification_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="email_verification_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="email_verification_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="code" type="VARCHAR(255)"/>
+            <column name="new_email" type="VARCHAR(255)"/>
+            <column name="user_account_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-5">
+        <createTable tableName="invitation_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="invitation_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="invitation_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="code" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-6">
+        <createTable tableName="key_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="key_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="key_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="name" type="VARCHAR(2000)"/>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-7">
+        <createTable tableName="language_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="language_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="language_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="flag_emoji" type="VARCHAR(20)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="original_name" type="VARCHAR(255)"/>
+            <column name="tag" type="VARCHAR(255)"/>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-8">
+        <createTable tableName="organization_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="organization_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="organization_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="base_permissions" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="address_part" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-9">
+        <createTable tableName="organization_role_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="organization_role_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="organization_role_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="type" type="INT"/>
+            <column name="invitation_id" type="BIGINT"/>
+            <column name="organization_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-10">
+        <createTable tableName="permission_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="permission_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="permission_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="type" type="VARCHAR(255)"/>
+            <column name="invitation_id" type="BIGINT"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-11">
+        <createTable tableName="project_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="project_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="project_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="address_part" type="VARCHAR(255)"/>
+            <column name="base_language_id" type="BIGINT"/>
+            <column name="organization_owner_id" type="BIGINT"/>
+            <column name="user_owner_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-12">
+        <createTable tableName="revinfo">
+            <column autoIncrement="true" name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="revinfoPK"/>
+            </column>
+            <column name="revtstmp" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-13">
+        <createTable tableName="screenshot_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="screenshot_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="screenshot_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="key_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-14">
+        <createTable tableName="translation_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="translation_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="translation_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="state" type="INT"/>
+            <column name="text" type="CLOB"/>
+            <column name="key_id" type="BIGINT"/>
+            <column name="language_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-15">
+        <createTable tableName="translation_comment">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="translation_commentPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="INT"/>
+            <column name="text" type="CLOB"/>
+            <column name="author_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-16">
+        <createTable tableName="user_account_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_account_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_account_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="reset_password_code" type="VARCHAR(255)"/>
+            <column name="role" type="VARCHAR(255)"/>
+            <column name="third_party_auth_id" type="VARCHAR(255)"/>
+            <column name="third_party_auth_type" type="VARCHAR(255)"/>
+            <column name="username" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-18">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="email_verification_aud" constraintName="FK3be9pxox0ohk73obdc44eal66" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-19">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="screenshot_aud" constraintName="FK484ybryofdkkx68d3kef40y9n" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-20">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="api_key_aud" constraintName="FK4l7ji243l5ogf2d0ldpnw7wfp" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-21">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="permission_aud" constraintName="FK8p00qhf8aau42hacp13k6x5hh" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-22">
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="translation_comment" constraintName="FK9ac0dmcy0armtdh781gs8bq01" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-23">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="language_aud" constraintName="FKadkpre8edt1b93q10c2us67in" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-24">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="translation_aud" constraintName="FKcoa1490muqk7e5x5ufyn672yk" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-25">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="invitation_aud" constraintName="FKdea3yn7qgyx6oihqo1xub34jw" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-26">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="user_account_aud" constraintName="FKhvfceciynu26iccnapnt5xb4y" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-27">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="api_key_scopes_enum_aud" constraintName="FKighcd7ca491l6v4v484ud5ycv" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-28">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="organization_aud" constraintName="FKjc7pc3ombplinmhjykfmu9ckg" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-29">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="project_aud" constraintName="FKpnojd25gxjyn8jg0mj5k96mcl" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-30">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="key_aud" constraintName="FKr4diqbicgpylicuo89301b0tt" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624950721954-31">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="organization_role_aud" constraintName="FKsg7cc2qdqax0lio5ltieqyhc" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

@@ -138,7 +138,8 @@ class KeyService(
 
     fun deleteAllByProject(projectId: Long) {
         keyMetaService.deleteAllByProjectId(projectId)
-        keyRepository.deleteAllByProjectId(projectId)
+        val ids = keyRepository.getIdsByProjectId(projectId)
+        keyRepository.deleteAllByIdIn(ids)
     }
 
     @Transactional

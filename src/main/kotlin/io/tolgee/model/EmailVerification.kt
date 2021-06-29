@@ -1,11 +1,13 @@
 package io.tolgee.model
 
+import org.hibernate.envers.Audited
 import javax.persistence.*
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotBlank
 
 @Entity
 @Table(uniqueConstraints = [])
+@Audited
 data class EmailVerification(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)

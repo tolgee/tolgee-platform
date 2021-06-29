@@ -11,7 +11,6 @@ import io.tolgee.model.Language
 import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
-import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
@@ -143,8 +142,8 @@ class ImportService(
         return this.importFileRepository.saveAll(files)
     }
 
-    fun onTranslationConflictRemoved(translation: Translation) {
-        this.importTranslationRepository.removeExistingTranslationConflictReference(translation)
+    fun onExistingTranslationsRemoved(translationIds: Collection<Long>) {
+        this.importTranslationRepository.removeExistingTranslationConflictReferences(translationIds)
     }
 
     fun getResult(projectId: Long, userId: Long, pageable: Pageable): Page<ImportLanguageView> {

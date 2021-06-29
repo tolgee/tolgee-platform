@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import io.tolgee.model.enums.OrganizationRoleType
+import org.hibernate.envers.Audited
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotNull
             columnNames = ["user_id", "organization_id"],
             name = "organization_member_role_user_organization_unique")
 ])
+@Audited
 data class OrganizationRole(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
