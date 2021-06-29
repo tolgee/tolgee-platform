@@ -6,9 +6,11 @@ package io.tolgee.model
 
 import io.tolgee.model.key.Key
 import org.apache.commons.codec.digest.DigestUtils
+import org.hibernate.envers.Audited
 import javax.persistence.*
 
 @Entity
+@Audited
 data class Screenshot(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,6 +2,7 @@ package io.tolgee.model
 
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Parameter
+import org.hibernate.envers.Audited
 import org.springframework.data.util.ProxyUtils
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -9,6 +10,7 @@ import javax.persistence.Id
 import javax.persistence.MappedSuperclass
 
 @MappedSuperclass
+@Audited
 abstract class StandardAuditModel : AuditModel() {
     @Id
     @GenericGenerator(

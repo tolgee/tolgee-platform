@@ -143,6 +143,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation "org.springframework.boot:spring-boot-starter-hateoas"
+    implementation("org.springframework.data:spring-data-envers")
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     compile "org.springframework.boot:spring-boot-configuration-processor"
     testCompile "org.springframework.boot:spring-boot-configuration-processor"

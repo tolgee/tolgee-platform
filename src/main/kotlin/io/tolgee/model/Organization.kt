@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import org.hibernate.envers.Audited
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Pattern
@@ -8,6 +9,7 @@ import javax.validation.constraints.Size
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "organization_address_part_unique")])
+@Audited
 open class Organization(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
         open var id: Long? = null,

@@ -1,10 +1,12 @@
 package io.tolgee.model
 
+import org.hibernate.envers.Audited
 import javax.persistence.*
 import javax.validation.constraints.NotBlank
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["code"], name = "invitation_code_unique")])
+@Audited
 data class Invitation(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)

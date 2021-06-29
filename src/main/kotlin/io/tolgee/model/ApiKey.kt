@@ -1,12 +1,14 @@
 package io.tolgee.model
 
 import io.tolgee.constants.ApiScope
+import org.hibernate.envers.Audited
 import javax.persistence.*
 import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["key"], name = "api_key_unique")])
+@Audited
 data class ApiKey(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)

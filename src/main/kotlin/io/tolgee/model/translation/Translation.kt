@@ -4,21 +4,17 @@ import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
-import io.tolgee.service.dataImport.ImportService
-import org.springframework.beans.factory.ObjectFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
-import org.springframework.transaction.annotation.Transactional
+import org.hibernate.envers.Audited
 import javax.persistence.*
 
 @Entity
-@EntityListeners(Translation.Companion.TranslationListeners::class)
 @Table(
         uniqueConstraints = [UniqueConstraint(
                 columnNames = ["key_id", "language_id"],
                 name = "translation_key_language"
         )]
 )
+@Audited
 data class Translation(
         @Column(columnDefinition = "text")
         var text: String? = null
@@ -71,19 +67,6 @@ data class Translation(
         @JvmStatic
         fun builder(): TranslationBuilder {
             return TranslationBuilder()
-        }
-
-        @Configurable
-        class TranslationListeners {
-
-            @Autowired
-            lateinit var provider: ObjectFactory<ImportService>
-
-            @PreRemove
-            @Transactional
-            fun preRemove(translation: Translation) {
-                provider.`object`.onTranslationConflictRemoved(translation)
-            }
         }
     }
 }
