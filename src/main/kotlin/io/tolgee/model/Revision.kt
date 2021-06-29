@@ -5,7 +5,10 @@ import org.hibernate.envers.RevisionEntity
 import org.hibernate.envers.RevisionNumber
 import org.hibernate.envers.RevisionTimestamp
 import java.io.Serializable
-import javax.persistence.*
+import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
 
 @Entity
 @RevisionEntity(RevisionListener::class)
@@ -26,6 +29,8 @@ class Revision : Serializable {
     @RevisionTimestamp
     private val timestamp: Long = 0
 
-    @OneToOne
-    var author: UserAccount? = null
+    /**
+     * We don't want an foreign key, since user could be deleted
+     */
+    var authorId: Long? = null
 }

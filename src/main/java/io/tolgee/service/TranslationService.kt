@@ -36,7 +36,7 @@ import javax.persistence.EntityManager
 class TranslationService(
         private val translationRepository: TranslationRepository,
         private val entityManager: EntityManager,
-        private val importService: ImportService
+        private val importService: ImportService,
 ) {
     @Autowired
     private lateinit var languageService: LanguageService
@@ -173,6 +173,10 @@ class TranslationService(
             throw InternalException(Message.DATA_CORRUPTED)
         }
         currentMap[path.name] = translation.text
+    }
+
+    private fun getHistory(key: Key, language: Language) {
+        //auditReader.createQuery().forRevisionsOfEntityWithChanges()
     }
 
     fun deleteByIdIn(ids: Collection<Long>) {
