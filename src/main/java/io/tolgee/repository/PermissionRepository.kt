@@ -3,7 +3,6 @@ package io.tolgee.repository
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
@@ -16,7 +15,8 @@ interface PermissionRepository : JpaRepository<Permission?, Long?> {
     @Query("from Permission p join Project r on r = p.project where p.user = ?1 order by r.name")
     fun findAllByUser(userAccount: UserAccount?): LinkedHashSet<Permission>
 
-    @Modifying
-    @Query("delete from Permission p where p.project.id = :projectId")
-    fun deleteAllByProjectId(projectId: Long?)
+    fun deleteByIdIn(ids: Collection<Long>)
+
+    @Query("select p.id from Permission p where p.project.id = :projectId")
+    fun getIdsByProject(projectId: Long): List<Long>
 }

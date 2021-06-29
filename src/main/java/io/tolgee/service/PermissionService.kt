@@ -67,8 +67,9 @@ class PermissionService @Autowired constructor(private val permissionRepository:
         permissionRepository.delete(permission)
     }
 
-    fun deleteAllByProject(projectId: Long?) {
-        permissionRepository.deleteAllByProjectId(projectId)
+    fun deleteAllByProject(projectId: Long) {
+        val ids = permissionRepository.getIdsByProject(projectId)
+        permissionRepository.deleteByIdIn(ids)
     }
 
     @Transactional
