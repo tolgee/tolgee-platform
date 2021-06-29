@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers.v2TranslationsController
+package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.annotations.ProjectJWTAuthTestMethod

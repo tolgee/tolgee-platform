@@ -22,9 +22,6 @@ open class TranslationCommentModel(
         @Schema(description = "User who created the comment")
         val author: UserAccountModel,
 
-        @Schema(description = "User who updated the comment")
-        val updatedBy: UserAccountModel?,
-
         @Schema(description = "Date when it was created")
         val createdAt: Date,
 

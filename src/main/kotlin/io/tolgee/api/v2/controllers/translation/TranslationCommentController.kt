@@ -29,7 +29,10 @@ import io.tolgee.service.TranslationService
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
@@ -55,7 +58,7 @@ class TranslationCommentController(
     @GetMapping(value = [""])
     @AccessWithAnyProjectPermission
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-    fun getAll(translationId: Long, pageable: Pageable): PagedModel<TranslationCommentModel> {
+    fun getAll(@PathVariable translationId: Long, pageable: Pageable): PagedModel<TranslationCommentModel> {
         val translation = translationService.find(translationId) ?: throw NotFoundException()
         translation.checkFromProject()
         return pagedResourcesAssembler.toModel(
@@ -67,7 +70,7 @@ class TranslationCommentController(
     @GetMapping(value = ["/{commentId}"])
     @AccessWithAnyProjectPermission
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-    fun get(translationId: Long, id: Long): TranslationCommentModel {
+    fun get(@PathVariable translationId: Long, id: Long): TranslationCommentModel {
         val comment = translationCommentService.get(id)
         comment.checkFromProject()
         return translationCommentModelAssembler.toModel(comment)
@@ -77,7 +80,7 @@ class TranslationCommentController(
     @PutMapping(value = ["/{commentId}"])
     @AccessWithAnyProjectPermission
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    fun update(id: Long, dto: TranslationCommentDto): TranslationCommentModel {
+    fun update(@PathVariable id: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
         val comment = translationCommentService.get(id)
         if (comment.author.id == authenticationFacade.userAccount.id) {
             throw BadRequestException(Message.CAN_EDIT_ONLY_OWN_COMMENT)
@@ -89,7 +92,11 @@ class TranslationCommentController(
     @PutMapping(value = ["/{commentId}/set-state/{state}"])
     @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    fun setState(id: Long, commentId: Long, state: TranslationCommentState): TranslationCommentModel {
+    fun setState(
+            @PathVariable id: Long,
+            @PathVariable commentId: Long,
+            @PathVariable state: TranslationCommentState
+    ): TranslationCommentModel {
         val comment = translationCommentService.get(id)
         comment.checkFromProject()
         translationCommentService.setState(comment, state)
@@ -99,7 +106,7 @@ class TranslationCommentController(
     @DeleteMapping(value = ["/{commentId}"])
     @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    fun delete(id: Long) {
+    fun delete(@PathVariable id: Long) {
         val comment = translationCommentService.get(id)
         comment.checkFromProject()
         if (comment.author.id != authenticationFacade.userAccount.id) {
@@ -118,10 +125,15 @@ class TranslationCommentController(
     @PostMapping(value = [""])
     @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    fun create(translationId: Long, dto: TranslationCommentDto) {
+    @ResponseStatus(HttpStatus.CREATED)
+    fun create(
+            @PathVariable translationId: Long,
+            @RequestBody @Valid dto: TranslationCommentDto
+    ): ResponseEntity<TranslationCommentModel> {
         val translation = translationService.find(translationId) ?: throw NotFoundException()
         translation.checkFromProject()
-        translationCommentService.create(dto, translation)
+        val comment = translationCommentService.create(dto, translation)
+        return ResponseEntity(translationCommentModelAssembler.toModel(comment), HttpStatus.CREATED)
     }
 
     private fun TranslationComment.checkFromProject() {
