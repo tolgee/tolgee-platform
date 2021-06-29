@@ -2,7 +2,7 @@
  * Copyright (c) 2020. Tolgee
  */
 
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.translation
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -54,7 +54,6 @@ class V2TranslationsController(
         private val keyService: KeyService,
         private val pagedAssembler: PagedResourcesAssembler<KeyWithTranslationsView>,
         private val keyTranslationModelAssembler: KeyTranslationModelAssembler,
-        private val translationViewModelAssembler: TranslationViewModelAssembler,
         private val translationModelAssembler: TranslationModelAssembler
 ) : IController {
     @GetMapping(value = ["/{languages}"])

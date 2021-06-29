@@ -16,10 +16,15 @@ class AuthenticationFacade(
 ) {
     val authentication: Authentication?
         get() = SecurityContextHolder.getContext().authentication
+
     val userAccount: UserAccount
+        get() = userAccountOrNull ?: throw IllegalStateException("No current user set!")
+
+    val userAccountOrNull: UserAccount?
         get() = if (!configuration.authentication.enabled) {
             userAccountService.implicitUser
-        } else authentication?.principal as UserAccount
+        } else authentication?.principal as UserAccount?
+
     val apiKey: ApiKey
         get() {
             val authentication = authentication as ApiKeyAuthenticationToken

@@ -14,7 +14,7 @@ import javax.validation.constraints.NotBlank
 @Audited
 data class TranslationComment(
         @field:Length(max = 10000)
-        @field:NotBlank()
+        @field:NotBlank
         @Column(columnDefinition = "text")
         var text: String = "",
 
@@ -26,5 +26,6 @@ data class TranslationComment(
         @ManyToOne
         var translation: Translation
 ) : StandardAuditModel() {
-
+    @ManyToOne
+    var updatedBy: UserAccount? = null
 }

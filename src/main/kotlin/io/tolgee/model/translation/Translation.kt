@@ -27,8 +27,11 @@ data class Translation(
     var language: Language? = null
 
     @Enumerated
-    @ColumnDefault(value="2")
+    @ColumnDefault(value = "2")
     var state: TranslationState = TranslationState.TRANSLATED
+
+    @OneToMany(mappedBy = "translation", cascade = [CascadeType.REMOVE])
+    var comments: MutableList<TranslationComment> = mutableListOf()
 
     constructor(text: String?, key: Key?, language: Language?) : this(text) {
         this.key = key
