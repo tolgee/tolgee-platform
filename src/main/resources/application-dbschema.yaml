@@ -1,5 +1,5 @@
 spring:
   datasource:
-    url: jdbc:h2:./build/tmp_db_schema_updates/db.h2;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    url: jdbc:h2:./build/tmp_db_schema_updates/db.h2;DATABASE_TO_LOWER=TRUE
   liquibase:
     change-log: classpath:db/changelog/schema.xml
