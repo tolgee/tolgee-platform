@@ -1219,4 +1219,7 @@
     <changeSet author="jenik (generated)" id="1624975131291-36">
         <addForeignKeyConstraint baseColumnNames="rev" baseTableName="project_aud" constraintName="FKqsyp928iixx9oharj1ofavbk5" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1624978579675-3">
+        <dropForeignKeyConstraint baseTableName="revision" constraintName="fkb7qk3ljn3o8bqwum6a5io3tpe"/>
+    </changeSet>
 </databaseChangeLog>

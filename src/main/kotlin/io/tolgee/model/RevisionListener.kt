@@ -15,6 +15,6 @@ class RevisionListener : DefaultRevisionListener {
     override fun newRevision(revisionEntity: Any) {
         val authenticationFacade = factory.`object` as AuthenticationFacade
         val revision = revisionEntity as Revision
-        revision.author = authenticationFacade.userAccountOrNull
+        revision.authorId = authenticationFacade.userAccountOrNull?.id
     }
 }
