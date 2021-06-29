@@ -1183,4 +1183,30 @@
     <changeSet author="jenik (generated)" id="1624950721954-31">
         <addForeignKeyConstraint baseColumnNames="rev" baseTableName="organization_role_aud" constraintName="FKsg7cc2qdqax0lio5ltieqyhc" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1624958741350-2">
+        <createTable tableName="translation_comment_aud">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="translation_comment_audPK"/>
+            </column>
+            <column name="rev" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="translation_comment_audPK"/>
+            </column>
+            <column name="revtype" type="TINYINT"/>
+            <column name="state" type="INT"/>
+            <column name="text" type="CLOB"/>
+            <column name="author_id" type="BIGINT"/>
+            <column name="translation_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624958741350-3">
+        <addColumn tableName="translation_comment">
+            <column name="translation_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624958741350-4">
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="translation_comment_aud" constraintName="FKcj0bumgrvu8483k3bb5uifli" deferrable="false" initiallyDeferred="false" referencedColumnNames="rev" referencedTableName="revinfo" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1624958741350-5">
+        <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_comment" constraintName="FKfre351ty5rjdolc8qeq3tbdlg" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="translation" validate="true"/>
+    </changeSet>
 </databaseChangeLog>
