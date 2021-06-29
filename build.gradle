@@ -97,7 +97,7 @@ def liveDbH2 = [
         driver      : 'org.h2.Driver'
 ]
 
-def liveDb = liveDbH2
+def liveDb = liveDbPostgres
 
 liquibase {
     activities {
