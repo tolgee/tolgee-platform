@@ -18,7 +18,6 @@ class TranslationCommentModelAssembler(
                 text = entity.text,
                 state = entity.state,
                 author = entity.author.let { userAccountModelAssembler.toModel(it) },
-                updatedBy = entity.updatedBy?.let { userAccountModelAssembler.toModel(it) },
                 createdAt = entity.createdAt ?: Date(),
                 updatedAt = entity.updatedAt ?: Date()
         )

@@ -5,6 +5,7 @@ import io.tolgee.model.dataImport.*
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta
 import io.tolgee.model.translation.Translation
+import io.tolgee.model.translation.TranslationComment
 
 typealias FT<T> = T.() -> Unit
 
@@ -192,8 +193,29 @@ class DataBuilders {
 
     class TranslationBuilder(
             val projectBuilder: ProjectBuilder
-    ) : EntityDataBuilder<Translation> {
+    ) : BaseEntityDataBuilder<Translation>() {
+
+        class DATA {
+            var comments = mutableListOf<TranslationCommentBuilder>()
+        }
+
+        val data = DATA()
+
         override var self: Translation = Translation().apply { text = "What a text" }
+
+        fun addComment(ft: FT<TranslationCommentBuilder>) = addOperation(data.comments, ft)
+    }
+
+    class TranslationCommentBuilder(
+            val translationBuilder: TranslationBuilder
+    ) : BaseEntityDataBuilder<TranslationComment>() {
+        override var self: TranslationComment = TranslationComment(
+                translation = translationBuilder.self,
+        ).also { comment ->
+            translationBuilder.self.key?.project?.userOwner?.let {
+                comment.author = it
+            }
+        }
     }
 
     class UserAccountBuilder(

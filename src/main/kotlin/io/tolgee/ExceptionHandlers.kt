@@ -1,5 +1,8 @@
 package io.tolgee
 
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.validators.ValidationErrorType
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -50,6 +53,10 @@ class ExceptionHandlers {
         return ResponseEntity(Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors), HttpStatus.BAD_REQUEST)
     }
 
+    @ApiResponse(responseCode = "400", content = [
+        Content(schema = Schema(
+                example = """{"code": "you_did_something_wrong", "params": ["something", "wrong"]}"""))
+    ])
     @ExceptionHandler(ErrorException::class)
     fun handleServerError(ex: ErrorException): ResponseEntity<ErrorResponseBody> {
         return ResponseEntity(ex.errorResponseBody, ex.httpStatus)
@@ -60,6 +67,10 @@ class ExceptionHandlers {
         return ResponseEntity(ErrorResponseBody(Message.RESOURCE_NOT_FOUND.code, null), HttpStatus.NOT_FOUND)
     }
 
+    @ApiResponse(responseCode = "404", content = [
+        Content(schema = Schema(
+                example = """{"code": "resource_not_found", "params": null}"""))
+    ])
     @ExceptionHandler(NotFoundException::class)
     fun handleNotFound(ex: NotFoundException): ResponseEntity<ErrorResponseBody> {
         return ResponseEntity(ErrorResponseBody(ex.msg!!.code, null), HttpStatus.NOT_FOUND)
