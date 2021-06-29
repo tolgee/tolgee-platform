@@ -15,7 +15,7 @@ abstract class AuditModel : Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
-    open var createdAt: Date? = null
+    var createdAt: Date? = null
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_at", nullable = false)

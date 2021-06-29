@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.translations
 
-import io.tolgee.api.v2.controllers.V2TranslationsController
+import io.tolgee.api.v2.controllers.translation.V2TranslationsController
 import io.tolgee.model.views.TranslationView
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
