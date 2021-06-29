@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import org.hibernate.envers.Audited
 import javax.persistence.*
 
 @Entity
@@ -14,6 +15,7 @@ import javax.persistence.*
                     name = "useraccount_authtype_auth_id")
         ]
 )
+@Audited
 data class UserAccount(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -48,7 +48,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         performProjectAuthPost("keys", CreateKeyDto(name = ""))
                 .andIsBadRequest.andPrettyPrint.andAssertThatJson {
                     node("STANDARD_VALIDATION") {
-                        node("name").isEqualTo("must not be blank")
+                        node("name").isString
                     }
                 }
 

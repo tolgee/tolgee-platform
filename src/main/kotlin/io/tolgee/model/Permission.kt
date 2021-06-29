@@ -1,9 +1,11 @@
 package io.tolgee.model
 
 import io.tolgee.constants.ApiScope
+import org.hibernate.envers.Audited
 import javax.persistence.*
 
 @Entity
+@Audited
 data class Permission(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)

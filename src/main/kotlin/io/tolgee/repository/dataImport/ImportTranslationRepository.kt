@@ -3,7 +3,6 @@ package io.tolgee.repository.dataImport
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
-import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.ImportTranslationView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -29,9 +28,8 @@ interface ImportTranslationRepository : JpaRepository<ImportTranslation, Long> {
 
     @Modifying
     @Transactional
-    @Query("update ImportTranslation it set it.conflict = null where it.conflict = :translation")
-    fun removeExistingTranslationConflictReference(translation: Translation)
-
+    @Query("update ImportTranslation it set it.conflict = null where it.conflict.id in :translationIds")
+    fun removeExistingTranslationConflictReferences(translationIds: Collection<Long>)
 
     @Query(""" select it.id as id, it.text as text, ik.name as keyName, ik.id as keyId,
         itc.id as conflictId, itc.text as conflictText, it.override as override, it.resolvedHash as resolvedHash

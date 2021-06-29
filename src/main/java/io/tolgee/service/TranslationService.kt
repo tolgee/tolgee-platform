@@ -19,6 +19,7 @@ import io.tolgee.model.translation.Translation.Companion.builder
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.repository.TranslationRepository
+import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.query_builders.TranslationsViewBuilder
 import io.tolgee.service.query_builders.TranslationsViewBuilderOld
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,7 +33,11 @@ import javax.persistence.EntityManager
 
 @Service
 @Transactional
-class TranslationService(private val translationRepository: TranslationRepository, private val entityManager: EntityManager) {
+class TranslationService(
+        private val translationRepository: TranslationRepository,
+        private val entityManager: EntityManager,
+        private val importService: ImportService
+) {
     @Autowired
     private lateinit var languageService: LanguageService
 
@@ -170,16 +175,26 @@ class TranslationService(private val translationRepository: TranslationRepositor
         currentMap[path.name] = translation.text
     }
 
+    fun deleteByIdIn(ids: Collection<Long>) {
+        importService.onExistingTranslationsRemoved(ids)
+        translationRepository.deleteByIdIn(ids)
+    }
+
     fun deleteAllByProject(projectId: Long) {
-        translationRepository.deleteAllByProjectId(projectId)
+        val ids = translationRepository.selectIdsByProject(projectId)
+        deleteByIdIn(ids)
+        entityManager.flush()
     }
 
     fun deleteAllByLanguage(languageId: Long) {
-        translationRepository.deleteAll(translationRepository.getAllByLanguageId(languageId))
+        val translations = translationRepository.getAllByLanguageId(languageId)
+        val ids = translations.map { it.id }
+        deleteByIdIn(ids)
     }
 
     fun deleteAllByKeys(ids: Collection<Long>) {
-        translationRepository.deleteAll(translationRepository.getAllByKeyIdIn(ids))
+        val translations = translationRepository.getAllByKeyIdIn(ids)
+        deleteByIdIn(translations.map { it.id })
     }
 
     fun deleteAllByKey(id: Long) {
