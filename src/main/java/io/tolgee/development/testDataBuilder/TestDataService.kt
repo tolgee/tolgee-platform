@@ -17,7 +17,8 @@ class TestDataService(
         private val translationService: TranslationService,
         private val permissionService: PermissionService,
         private val entityManager: EntityManager,
-        private val screenshotService: ScreenshotService
+        private val screenshotService: ScreenshotService,
+        private val translationCommentService: TranslationCommentService
 ) {
     @Transactional
     fun saveTestData(builder: TestDataBuilder) {
@@ -35,9 +36,10 @@ class TestDataService(
         keyMetaService.saveAll(keyBuilders.map { it.data.meta?.self }.filterNotNull())
         screenshotService.saveAll(keyBuilders.flatMap { it.data.screenshots.map { it.self } }.toList())
 
-        builder.data.projects.flatMap { it.data.translations.map { it.self } }.let {
-            translationService.saveAll(it)
-        }
+        val translationBuilders = builder.data.projects.flatMap { it.data.translations }
+        translationService.saveAll(translationBuilders.map { it.self })
+        val translationComments = translationBuilders.flatMap { it.data.comments.map { it.self } }
+        translationCommentService.createAll(translationComments)
 
         val importBuilders = builder.data.projects.flatMap { repoBuilder -> repoBuilder.data.imports }
         importService.saveAllImports(importBuilders.map { it.self })

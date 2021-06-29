@@ -12,20 +12,17 @@ import javax.validation.constraints.NotBlank
 
 @Entity
 @Audited
-data class TranslationComment(
+class TranslationComment(
         @field:Length(max = 10000)
         @field:NotBlank
         @Column(columnDefinition = "text")
         var text: String = "",
 
-        @ManyToOne
-        var author: UserAccount,
-
         var state: TranslationCommentState = TranslationCommentState.RESOLUTION_NOT_NEEDED,
 
         @ManyToOne
         var translation: Translation
-) : StandardAuditModel() {
-    @ManyToOne
-    var updatedBy: UserAccount? = null
+) : StandardAuditModel(){
+        @ManyToOne(optional = false)
+        lateinit var author: UserAccount
 }

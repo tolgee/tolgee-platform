@@ -27,9 +27,9 @@ class TranslationCommentService(
         return TranslationComment(
                 text = dto.text,
                 state = dto.state,
-                author = author,
                 translation = translation
         ).let {
+            it.author = author
             create(it)
         }
     }
@@ -68,11 +68,14 @@ class TranslationCommentService(
         return translationCommentRepository.save(entity)
     }
 
+    fun createAll(entities: Collection<TranslationComment>) {
+        translationCommentRepository.saveAll(entities)
+    }
+
     fun update(
             entity: TranslationComment,
             updatedBy: UserAccount = authenticationFacade.userAccount
     ): TranslationComment {
-        entity.updatedBy = updatedBy
         return translationCommentRepository.save(entity)
     }
 }
