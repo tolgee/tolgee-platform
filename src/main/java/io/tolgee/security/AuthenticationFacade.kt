@@ -23,7 +23,7 @@ class AuthenticationFacade(
     val userAccountOrNull: UserAccount?
         get() = if (!configuration.authentication.enabled) {
             userAccountService.implicitUser
-        } else authentication?.principal as UserAccount?
+        } else authentication?.principal as? UserAccount
 
     val apiKey: ApiKey
         get() {
