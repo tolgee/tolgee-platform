@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.screenshot
 
-import io.tolgee.api.v2.controllers.V2TranslationsController
+import io.tolgee.api.v2.controllers.translation.V2TranslationsController
 import io.tolgee.component.TimestampValidation
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.Screenshot

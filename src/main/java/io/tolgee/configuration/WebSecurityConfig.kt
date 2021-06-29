@@ -28,7 +28,7 @@ open class WebSecurityConfig @Autowired constructor(private val jwtTokenFilter: 
     override fun configure(http: HttpSecurity) {
         if (configuration.authentication.enabled) {
             http
-                    .csrf().disable().cors().and()
+                    .csrf().disable().cors().and().headers().frameOptions().sameOrigin().and()
                     .addFilterBefore(internalDenyFilter, UsernamePasswordAuthenticationFilter::class.java)
                     .addFilterBefore(disabledAuthenticationFilter, InternalDenyFilter::class.java)
                     //if jwt token is provided in header, this filter will authorize user, so the request is not gonna reach the ldap auth

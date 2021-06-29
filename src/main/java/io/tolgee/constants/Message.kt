@@ -58,7 +58,8 @@ enum class Message {
     CANNOT_DELETE_BASE_LANGUAGE,
     KEY_NOT_FROM_PROJECT,
     MAX_SCREENSHOTS_EXCEEDED,
-    TRANSLATION_NOT_FROM_PROJECT;
+    TRANSLATION_NOT_FROM_PROJECT,
+    CAN_EDIT_ONLY_OWN_COMMENT;
 
     val code: String
         get() = name.toLowerCase()
