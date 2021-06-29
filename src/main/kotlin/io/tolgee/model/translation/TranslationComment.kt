@@ -3,6 +3,7 @@ package io.tolgee.model.translation
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationCommentState
+import org.hibernate.envers.Audited
 import org.hibernate.validator.constraints.Length
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -10,6 +11,7 @@ import javax.persistence.ManyToOne
 import javax.validation.constraints.NotBlank
 
 @Entity
+@Audited
 data class TranslationComment(
         @field:Length(max = 10000)
         @field:NotBlank()
@@ -19,7 +21,10 @@ data class TranslationComment(
         @ManyToOne
         var author: UserAccount,
 
-        var state: TranslationCommentState = TranslationCommentState.RESOLUTION_NOT_NEEDED
+        var state: TranslationCommentState = TranslationCommentState.RESOLUTION_NOT_NEEDED,
+
+        @ManyToOne
+        var translation: Translation
 ) : StandardAuditModel() {
 
 }

@@ -4,6 +4,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import org.hibernate.annotations.ColumnDefault
 import org.hibernate.envers.Audited
 import javax.persistence.*
 
@@ -26,6 +27,7 @@ data class Translation(
     var language: Language? = null
 
     @Enumerated
+    @ColumnDefault(value="2")
     var state: TranslationState = TranslationState.TRANSLATED
 
     constructor(text: String?, key: Key?, language: Language?) : this(text) {
