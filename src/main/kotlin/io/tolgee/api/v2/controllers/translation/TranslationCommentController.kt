@@ -4,6 +4,7 @@
 
 package io.tolgee.api.v2.controllers.translation
 
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.api.v2.hateoas.translations.comments.TranslationCommentModel
@@ -26,6 +27,7 @@ import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.SecurityService
 import io.tolgee.service.TranslationCommentService
 import io.tolgee.service.TranslationService
+import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
@@ -37,13 +39,12 @@ import javax.validation.Valid
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@Tag(name = "Import")
 @RequestMapping(value = [
     "/v2/projects/{projectId:[0-9]+}/translations/{translationId}/comments",
     "/v2/projects/translations/{translationId}/comments"
 ])
 @Tags(value = [
-    Tag(name = "Translations", description = "Operations related to translations in project"),
+    Tag(name = "Translation Comments", description = "Operations related to translation comments"),
 ])
 class TranslationCommentController(
         private val projectHolder: ProjectHolder,
@@ -58,7 +59,8 @@ class TranslationCommentController(
     @GetMapping(value = [""])
     @AccessWithAnyProjectPermission
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-    fun getAll(@PathVariable translationId: Long, pageable: Pageable): PagedModel<TranslationCommentModel> {
+    @Operation(summary = "Returns translation comments of translation")
+    fun getAll(@PathVariable translationId: Long, @ParameterObject pageable: Pageable): PagedModel<TranslationCommentModel> {
         val translation = translationService.find(translationId) ?: throw NotFoundException()
         translation.checkFromProject()
         return pagedResourcesAssembler.toModel(
@@ -70,6 +72,7 @@ class TranslationCommentController(
     @GetMapping(value = ["/{commentId}"])
     @AccessWithAnyProjectPermission
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
+    @Operation(summary = "Returns single translation comment")
     fun get(@PathVariable translationId: Long, @PathVariable commentId: Long): TranslationCommentModel {
         val comment = translationCommentService.get(commentId)
         comment.checkFromProject()
@@ -80,6 +83,7 @@ class TranslationCommentController(
     @PutMapping(value = ["/{commentId}"])
     @AccessWithAnyProjectPermission
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+    @Operation(summary = "Updates single translation comment")
     fun update(@PathVariable commentId: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
         val comment = translationCommentService.get(commentId)
         if (comment.author.id != authenticationFacade.userAccount.id) {
@@ -90,6 +94,7 @@ class TranslationCommentController(
     }
 
     @PutMapping(value = ["/{commentId}/set-state/{state}"])
+    @Operation(summary = "Sets state of translation comment")
     @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
     fun setState(
@@ -105,6 +110,7 @@ class TranslationCommentController(
     @DeleteMapping(value = ["/{commentId}"])
     @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+    @Operation(summary = "Deletes the translation comment")
     fun delete(@PathVariable commentId: Long) {
         val comment = translationCommentService.get(commentId)
         comment.checkFromProject()
@@ -125,6 +131,7 @@ class TranslationCommentController(
     @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Creates a translation comment")
     fun create(
             @PathVariable translationId: Long,
             @RequestBody @Valid dto: TranslationCommentDto
