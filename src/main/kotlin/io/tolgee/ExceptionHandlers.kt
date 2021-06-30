@@ -13,6 +13,7 @@ import io.tolgee.exceptions.NotFoundException
 import org.hibernate.QueryException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.validation.FieldError
 import org.springframework.validation.ObjectError
 import org.springframework.web.HttpRequestMethodNotSupportedException
@@ -79,6 +80,12 @@ class ExceptionHandlers {
     @ExceptionHandler(MaxUploadSizeExceededException::class)
     fun handleFileSizeLimitExceeded(ex: MaxUploadSizeExceededException): ResponseEntity<ErrorResponseBody> {
         return ResponseEntity(ErrorResponseBody(Message.FILE_TOO_BIG.code, listOf()),
+                HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleFileSizeLimitExceeded(ex: HttpMessageNotReadableException): ResponseEntity<ErrorResponseBody> {
+        return ResponseEntity(ErrorResponseBody(Message.REQUEST_PARSE_ERROR.code, listOf(ex.rootCause.message)),
                 HttpStatus.BAD_REQUEST)
     }
 

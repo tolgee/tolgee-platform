@@ -59,7 +59,8 @@ enum class Message {
     KEY_NOT_FROM_PROJECT,
     MAX_SCREENSHOTS_EXCEEDED,
     TRANSLATION_NOT_FROM_PROJECT,
-    CAN_EDIT_ONLY_OWN_COMMENT;
+    CAN_EDIT_ONLY_OWN_COMMENT,
+    REQUEST_PARSE_ERROR;
 
     val code: String
         get() = name.toLowerCase()
