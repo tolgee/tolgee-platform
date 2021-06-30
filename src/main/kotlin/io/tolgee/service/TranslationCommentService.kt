@@ -22,7 +22,7 @@ class TranslationCommentService(
     fun create(
             dto: TranslationCommentDto,
             translation: Translation,
-            author: UserAccount = authenticationFacade.userAccount
+            author: UserAccount
     ): TranslationComment {
         return TranslationComment(
                 text = dto.text,
@@ -34,8 +34,12 @@ class TranslationCommentService(
         }
     }
 
+    fun find(id: Long): TranslationComment? {
+        return translationCommentRepository.findById(id).orElse(null)
+    }
+
     fun get(id: Long): TranslationComment {
-        return translationCommentRepository.findById(id).orElseThrow { NotFoundException() }
+        return find(id) ?: throw NotFoundException()
     }
 
     @Transactional

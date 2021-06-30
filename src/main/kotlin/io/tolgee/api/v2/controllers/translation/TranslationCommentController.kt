@@ -70,8 +70,8 @@ class TranslationCommentController(
     @GetMapping(value = ["/{commentId}"])
     @AccessWithAnyProjectPermission
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-    fun get(@PathVariable translationId: Long, id: Long): TranslationCommentModel {
-        val comment = translationCommentService.get(id)
+    fun get(@PathVariable translationId: Long, @PathVariable commentId: Long): TranslationCommentModel {
+        val comment = translationCommentService.get(commentId)
         comment.checkFromProject()
         return translationCommentModelAssembler.toModel(comment)
     }
@@ -80,9 +80,9 @@ class TranslationCommentController(
     @PutMapping(value = ["/{commentId}"])
     @AccessWithAnyProjectPermission
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    fun update(@PathVariable id: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
-        val comment = translationCommentService.get(id)
-        if (comment.author.id == authenticationFacade.userAccount.id) {
+    fun update(@PathVariable commentId: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
+        val comment = translationCommentService.get(commentId)
+        if (comment.author.id != authenticationFacade.userAccount.id) {
             throw BadRequestException(Message.CAN_EDIT_ONLY_OWN_COMMENT)
         }
         translationCommentService.update(dto, comment)
@@ -93,11 +93,10 @@ class TranslationCommentController(
     @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
     fun setState(
-            @PathVariable id: Long,
             @PathVariable commentId: Long,
             @PathVariable state: TranslationCommentState
     ): TranslationCommentModel {
-        val comment = translationCommentService.get(id)
+        val comment = translationCommentService.get(commentId)
         comment.checkFromProject()
         translationCommentService.setState(comment, state)
         return translationCommentModelAssembler.toModel(comment)
@@ -106,8 +105,8 @@ class TranslationCommentController(
     @DeleteMapping(value = ["/{commentId}"])
     @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
     @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    fun delete(@PathVariable id: Long) {
-        val comment = translationCommentService.get(id)
+    fun delete(@PathVariable commentId: Long) {
+        val comment = translationCommentService.get(commentId)
         comment.checkFromProject()
         if (comment.author.id != authenticationFacade.userAccount.id) {
             try {
@@ -132,7 +131,7 @@ class TranslationCommentController(
     ): ResponseEntity<TranslationCommentModel> {
         val translation = translationService.find(translationId) ?: throw NotFoundException()
         translation.checkFromProject()
-        val comment = translationCommentService.create(dto, translation)
+        val comment = translationCommentService.create(dto, translation, authenticationFacade.userAccount)
         return ResponseEntity(translationCommentModelAssembler.toModel(comment), HttpStatus.CREATED)
     }
 
