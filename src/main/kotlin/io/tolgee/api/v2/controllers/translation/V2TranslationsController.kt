@@ -40,7 +40,6 @@ import javax.validation.Valid
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@Tag(name = "Import")
 @RequestMapping(value = [
     "/v2/projects/{projectId:[0-9]+}/translations",
     "/v2/projects/translations"
