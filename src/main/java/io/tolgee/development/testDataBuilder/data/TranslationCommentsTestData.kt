@@ -12,11 +12,12 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 
 class TranslationCommentsTestData {
-    private lateinit var firstComment: TranslationComment
-    private lateinit var secondComment: TranslationComment
+    lateinit var firstComment: TranslationComment
+    lateinit var secondComment: TranslationComment
     var project: Project
     lateinit var englishLanguage: Language
     var user: UserAccount
+    var pepa: UserAccount
     lateinit var aKey: Key
     lateinit var projectBuilder: DataBuilders.ProjectBuilder
     lateinit var translation: Translation
@@ -25,6 +26,11 @@ class TranslationCommentsTestData {
         user = addUserAccount {
             self {
                 username = "franta"
+            }
+        }.self
+        pepa = addUserAccount {
+            self {
+                username = "pepa"
             }
         }.self
         project = addProject {
@@ -38,6 +44,14 @@ class TranslationCommentsTestData {
                     project = this@addProject.self
                     user = this@TranslationCommentsTestData.user
                     type = Permission.ProjectPermissionType.MANAGE
+                }
+            }
+
+            addPermission {
+                self {
+                    project = this@addProject.self
+                    user = this@TranslationCommentsTestData.pepa
+                    type = Permission.ProjectPermissionType.EDIT
                 }
             }
 
