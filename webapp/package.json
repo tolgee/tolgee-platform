@@ -64,7 +64,7 @@
     ]
   },
   "devDependencies": {
-    "@sentry/types": "^6.5.1",
+    "@sentry/types": "^6.8.0",
     "@tginternal/language-util": "^1.0.3",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.12.2",
