@@ -121,9 +121,12 @@ class TranslationService(
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun getViewData(project: Project, pageable: Pageable, params: GetTranslationsParams
+    fun getViewData(
+            project: Project,
+            pageable: Pageable,
+            params: GetTranslationsParams,
+            languages: Set<Language>
     ): Page<KeyWithTranslationsView> {
-        val languages: Set<Language> = languageService.getLanguagesForTranslationsView(params.languages, project)
         return TranslationsViewBuilder.getData(entityManager, project, languages, pageable, params)
     }
 
@@ -178,7 +181,7 @@ class TranslationService(
     }
 
     private fun getHistory(key: Key, language: Language): MutableList<Any?>? {
-       return AuditReaderFactory.get(entityManager)
+        return AuditReaderFactory.get(entityManager)
                 .createQuery()
                 .forRevisionsOfEntity(Translation::class.java, true)
                 .add(AuditEntity.and(

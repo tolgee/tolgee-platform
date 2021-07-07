@@ -19,21 +19,20 @@ import io.tolgee.dtos.request.GetTranslationsParams
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyService
+import io.tolgee.service.LanguageService
 import io.tolgee.service.TranslationService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
-import org.springframework.data.web.PagedResourcesAssembler
-import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
@@ -51,9 +50,10 @@ class V2TranslationsController(
         private val projectHolder: ProjectHolder,
         private val translationService: TranslationService,
         private val keyService: KeyService,
-        private val pagedAssembler: PagedResourcesAssembler<KeyWithTranslationsView>,
-        private val keyTranslationModelAssembler: KeyTranslationModelAssembler,
-        private val translationModelAssembler: TranslationModelAssembler
+        private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
+        private val keyTranslationsModelAssembler: KeyWithTranslationsModelAssembler,
+        private val translationModelAssembler: TranslationModelAssembler,
+        private val languageService: LanguageService
 ) : IController {
     @GetMapping(value = ["/{languages}"])
     @AccessWithAnyProjectPermission
@@ -107,9 +107,11 @@ class V2TranslationsController(
     @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
     @Operation(summary = "Returns translations in project")
     fun getTranslations(@ParameterObject params: GetTranslationsParams,
-                        @ParameterObject pageable: Pageable): PagedModel<KeyWithTranslationsModel> {
-        val data = translationService.getViewData(projectHolder.project, pageable, params)
-        return pagedAssembler.toModel(data, keyTranslationModelAssembler)
+                        @ParameterObject pageable: Pageable): KeysWithTranslationsPageModel {
+        val languages: Set<Language> = languageService
+                .getLanguagesForTranslationsView(params.languages, projectHolder.project)
+        val data = translationService.getViewData(projectHolder.project, pageable, params, languages)
+        return pagedAssembler.toTranslationModel(data, languages)
     }
 
     private fun getSetTranslationsResponse(key: Key, translations: Map<String, Translation>):
