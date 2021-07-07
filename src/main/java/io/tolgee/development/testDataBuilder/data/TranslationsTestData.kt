@@ -129,4 +129,70 @@ class TranslationsTestData {
             }
         }
     }
+
+
+    fun generateCursorTestData() {
+        root.data.projects[0].apply {
+                addKey {
+                    self { name = "a" }
+                    addTranslation {
+                        self {
+                            key = this@addKey.self
+                            language = germanLanguage
+                            text = "d"
+                        }
+                    }
+                }
+                addKey {
+                    self { name = "b" }
+                    addTranslation {
+                        self {
+                            key = this@addKey.self
+                            language = germanLanguage
+                            text = "d"
+                        }
+                    }
+                }
+                addKey {
+                    self { name = "c" }
+                    addTranslation {
+                        self {
+                            key = this@addKey.self
+                            language = germanLanguage
+                            text = "d"
+                        }
+                    }
+                }
+                addKey {
+                    self { name = "d" }
+                    addTranslation {
+                        self {
+                            key = this@addKey.self
+                            language = germanLanguage
+                            text = "a"
+                        }
+                    }
+                }
+            addKey {
+                self { name = "e" }
+                addTranslation {
+                    self {
+                        key = this@addKey.self
+                        language = germanLanguage
+                        text = "a"
+                    }
+                }
+            }
+            addKey {
+                self { name = "f" }
+                addTranslation {
+                    self {
+                        key = this@addKey.self
+                        language = germanLanguage
+                        text = "a"
+                    }
+                }
+            }
+        }
+    }
 }

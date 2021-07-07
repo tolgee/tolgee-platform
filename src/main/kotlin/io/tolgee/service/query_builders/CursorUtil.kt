@@ -1,6 +1,7 @@
 package io.tolgee.service.query_builders
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.response.CursorValue
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
@@ -15,12 +16,21 @@ class CursorUtil {
                         direction = it.direction,
                         value = getCursorValue(property = it.property, item)
                 )
-            }.toMap()
+            }.toMap().toMutableMap()
+
+            //add key id, to make cursor always contain unique value
+            if (cursor[KeyWithTranslationsView::keyId.name] == null) {
+                cursor[KeyWithTranslationsView::keyId.name] = CursorValue(
+                        direction = Sort.Direction.ASC,
+                        value = item?.keyId.toString()
+                )
+            }
+
             val json = jacksonObjectMapper().writer().writeValueAsString(cursor)
             return Base64.getEncoder().encodeToString(json.toByteArray())
         }
 
-        fun getCursorValue(property: String, item: KeyWithTranslationsView?): String? {
+        private fun getCursorValue(property: String, item: KeyWithTranslationsView?): String? {
             val path = property.split(".")
             return when (path[0]) {
                 KeyWithTranslationsView::keyId.name -> item?.keyId.toString()
@@ -37,6 +47,11 @@ class CursorUtil {
                 }
                 else -> null
             }
+        }
+
+        fun parseCursor(cursor: String): Map<String, CursorValue> {
+            val json = Base64.getDecoder().decode(cursor)
+            return jacksonObjectMapper().readValue(json)
         }
     }
 }

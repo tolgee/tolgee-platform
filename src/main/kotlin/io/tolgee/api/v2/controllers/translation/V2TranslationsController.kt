@@ -31,6 +31,7 @@ import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.TranslationService
+import io.tolgee.service.query_builders.CursorUtil
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
@@ -111,7 +112,8 @@ class V2TranslationsController(
         val languages: Set<Language> = languageService
                 .getLanguagesForTranslationsView(params.languages, projectHolder.project)
         val data = translationService.getViewData(projectHolder.project, pageable, params, languages)
-        return pagedAssembler.toTranslationModel(data, languages)
+        val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
+        return pagedAssembler.toTranslationModel(data, languages, cursor)
     }
 
     private fun getSetTranslationsResponse(key: Key, translations: Map<String, Translation>):
