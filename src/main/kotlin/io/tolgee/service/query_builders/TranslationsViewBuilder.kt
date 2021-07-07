@@ -1,6 +1,7 @@
 package io.tolgee.service.query_builders
 
 import io.tolgee.dtos.request.GetTranslationsParams
+import io.tolgee.dtos.response.CursorValue
 import io.tolgee.model.*
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
@@ -18,6 +19,7 @@ class TranslationsViewBuilder(
         private val languages: Set<Language>,
         private val params: GetTranslationsParams,
         private val sort: Sort,
+        private val cursor: Map<String, CursorValue>?,
 ) {
     private var selection: LinkedHashMap<String, Selection<*>> = LinkedHashMap()
     private var fullTextFields: MutableSet<Expression<String>> = HashSet()
@@ -42,6 +44,39 @@ class TranslationsViewBuilder(
         query.where(*whereConditions.toTypedArray())
         query.having(*havingConditions.toTypedArray())
         return query
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    /**
+     * This function body is inspired by this thread
+     * https://stackoverflow.com/questions/38017054/mysql-cursor-based-pagination-with-multiple-columns
+     */
+    private fun getCursorPredicate(): Predicate? {
+        var result: Predicate? = null
+        cursor?.entries?.reversed()?.forEach { (property, value) ->
+            val isUnique = property === KeyWithTranslationsView::keyId.name
+            val expression = selection[property] as Expression<String>
+
+            val strongCondition: Predicate
+            val condition: Predicate
+            if (value.direction == Sort.Direction.ASC) {
+                condition = if (isUnique)
+                    cb.greaterThan(expression, value.value as String)
+                else
+                    cb.greaterThanOrEqualTo(expression, value.value as String)
+                strongCondition = cb.greaterThan(expression, value.value)
+            } else {
+                condition = if (isUnique)
+                    cb.lessThan(expression, value.value as String)
+                else
+                    cb.lessThanOrEqualTo(expression, value.value as String)
+                strongCondition = cb.lessThan(expression, value.value)
+            }
+            result = result?.let {
+                cb.and(condition, cb.or(strongCondition, result))
+            } ?: condition
+        }
+        return result
     }
 
     private fun addLeftJoinedColumns() {
@@ -132,6 +167,9 @@ class TranslationsViewBuilder(
             if (orderList.isEmpty()) {
                 orderList.add(cb.asc(selection[KEY_NAME_FIELD] as Expression<*>))
             }
+            getCursorPredicate()?.let {
+                query.where(it)
+            }
             query.groupBy(keyIdExpression)
             query.orderBy(orderList)
             return query
@@ -161,23 +199,28 @@ class TranslationsViewBuilder(
                 params: GetTranslationsParams = GetTranslationsParams()
         ): Page<KeyWithTranslationsView> {
 
-            val sort = if (pageable.sort.isSorted)
+            var sort = if (pageable.sort.isSorted)
                 pageable.sort
             else
                 Sort.by(Sort.Order.asc(KEY_NAME_FIELD))
+
+            sort = sort.and(Sort.by(Sort.Direction.ASC, KeyWithTranslationsView::keyId.name))
 
             var translationsViewBuilder = TranslationsViewBuilder(
                     cb = em.criteriaBuilder,
                     project = project,
                     languages = languages,
                     params = params,
-                    sort = sort
+                    sort = sort,
+                    cursor = params.cursor?.let { CursorUtil.parseCursor(it) }
             )
             val count = em.createQuery(translationsViewBuilder.countQuery).singleResult
-            translationsViewBuilder = TranslationsViewBuilder(em.criteriaBuilder, project, languages, params, pageable.sort)
-            val query = em.createQuery(translationsViewBuilder.dataQuery).setFirstResult(pageable.offset.toInt()).setMaxResults(pageable.pageSize)
+            translationsViewBuilder = TranslationsViewBuilder(em.criteriaBuilder, project, languages, params, sort, params.cursor?.let { CursorUtil.parseCursor(it) })
+            val query = em.createQuery(translationsViewBuilder.dataQuery).setMaxResults(pageable.pageSize)
+            if (params.cursor == null) {
+                query.firstResult = pageable.offset.toInt()
+            }
             val views = query.resultList.map { KeyWithTranslationsView.of(it) }
-            CursorUtil.getCursor(views.last(), sort)
             return PageImpl(views, pageable, count)
         }
     }
