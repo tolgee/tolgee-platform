@@ -315,5 +315,7 @@
   "project_creation_add_at_least_one_language" : "Přidejte alespoň jeden jazyk",
   "project_create_base_language_label" : "Základní jazyk",
   "cannot_delete_base_language_message" : "Nelze smazat základní jazyk",
-  "invitation_code_accepted" : "Pozvánka úspěšně přijata"
+  "invitation_code_accepted" : "Pozvánka úspěšně přijata",
+  "project_settings_base_language" : "Základní jazyk",
+  "invitation_log_in_first" : "Nejprve se přihlaste nebo zaregistrujte prosím"
 }
