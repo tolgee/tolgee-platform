@@ -7,10 +7,7 @@ import io.tolgee.model.key.Key_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Sort
+import org.springframework.data.domain.*
 import java.util.*
 import javax.persistence.EntityManager
 import javax.persistence.criteria.*
@@ -163,17 +160,24 @@ class TranslationsViewBuilder(
                 pageable: Pageable,
                 params: GetTranslationsParams = GetTranslationsParams()
         ): Page<KeyWithTranslationsView> {
+
+            val sort = if (pageable.sort.isSorted)
+                pageable.sort
+            else
+                Sort.by(Sort.Order.asc(KEY_NAME_FIELD))
+
             var translationsViewBuilder = TranslationsViewBuilder(
                     cb = em.criteriaBuilder,
                     project = project,
                     languages = languages,
                     params = params,
-                    sort = pageable.sort
+                    sort = sort
             )
             val count = em.createQuery(translationsViewBuilder.countQuery).singleResult
             translationsViewBuilder = TranslationsViewBuilder(em.criteriaBuilder, project, languages, params, pageable.sort)
             val query = em.createQuery(translationsViewBuilder.dataQuery).setFirstResult(pageable.offset.toInt()).setMaxResults(pageable.pageSize)
-            val views = query.resultList.map { KeyWithTranslationsView(it) }
+            val views = query.resultList.map { KeyWithTranslationsView.of(it) }
+            CursorUtil.getCursor(views.last(), sort)
             return PageImpl(views, pageable, count)
         }
     }

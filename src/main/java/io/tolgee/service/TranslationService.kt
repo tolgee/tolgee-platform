@@ -127,9 +127,9 @@ class TranslationService(
             params: GetTranslationsParams,
             languages: Set<Language>
     ): Page<KeyWithTranslationsView> {
-        return TranslationsViewBuilder.getData(entityManager, project, languages, pageable, params)
+        val data = TranslationsViewBuilder.getData(entityManager, project, languages, pageable, params)
+        return data
     }
-
 
     fun setTranslation(key: Key, languageTag: String?, text: String?): Translation {
         val language = languageService.findByTag(languageTag!!, key.project!!)
