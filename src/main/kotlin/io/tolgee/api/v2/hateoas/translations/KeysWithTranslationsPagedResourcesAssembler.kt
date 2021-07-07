@@ -18,13 +18,14 @@ class KeysWithTranslationsPagedResourcesAssembler(
         baseUri: UriComponents? = null
 ) : PagedResourcesAssembler<KeyWithTranslationsView>(resolver, baseUri) {
     fun toTranslationModel(entities: Page<KeyWithTranslationsView>,
-                           selectedLanguages: Collection<Language>): KeysWithTranslationsPageModel {
+                           selectedLanguages: Collection<Language>, nextCursor: String?): KeysWithTranslationsPageModel {
         val pageModel = toModel(entities, keyWithTranslationsModelAssembler)
         return KeysWithTranslationsPageModel(
                 content = pageModel.content,
                 metadata = pageModel.metadata,
                 links = pageModel.links.toList().toTypedArray(),
-                selectedLanguages = selectedLanguages.map { languageModelAssembler.toModel(it) }
+                selectedLanguages = selectedLanguages.map { languageModelAssembler.toModel(it) },
+                nextCursor = nextCursor
         )
     }
 }

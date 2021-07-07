@@ -3,7 +3,9 @@ package io.tolgee.dtos.request
 import io.swagger.v3.oas.annotations.Parameter
 
 data class GetTranslationsParams(
-        @field:Parameter(description = "Languages to be contained in response", example = "en,de")
+        @field:Parameter(description = """Languages to be contained in response.
+                
+To add multiple languages, repeat this param (eg. ?languages=en&languages=de)""", example = "en")
         val languages: Set<String>? = null,
         @field:Parameter(description = "String to search in key name or translation text")
         val search: String? = null,
@@ -25,5 +27,7 @@ data class GetTranslationsParams(
         @field:Parameter(description = "Selects only keys with screenshots")
         val filterHasScreenshot: Boolean = false,
         @field:Parameter(description = "Selects only keys without screenshots")
-        val filterHasNoScreenshot: Boolean = false
+        val filterHasNoScreenshot: Boolean = false,
+        @field:Parameter(description = "Cursor to get next data")
+        val cursor: String? = null
 )
