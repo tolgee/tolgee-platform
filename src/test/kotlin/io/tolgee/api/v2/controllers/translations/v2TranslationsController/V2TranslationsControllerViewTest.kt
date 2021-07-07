@@ -34,6 +34,12 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
         performProjectAuthGet("/translations").andPrettyPrint.andIsOk.andAssertThatJson {
             node("page.totalElements").isNumber.isGreaterThan(BigDecimal(100))
             node("page.size").isEqualTo(20)
+            node("selectedLanguages") {
+                isArray.hasSize(2)
+                node("[0].originalName").isEqualTo("English")
+                node("[1].tag").isEqualTo("de")
+
+            }
             node("_embedded.keys") {
                 isArray.hasSize(20)
                 node("[0]") {
@@ -85,6 +91,10 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
         performProjectAuthGet("/translations?languages=en").andPrettyPrint.andIsOk.andAssertThatJson {
             node("_embedded.keys[10].translations").isObject
                     .doesNotContainKey("de").containsKey("en")
+            node("selectedLanguages") {
+                isArray.hasSize(1)
+                node("[0].tag").isEqualTo("en")
+            }
         }
     }
 

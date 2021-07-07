@@ -6,7 +6,7 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class KeyTranslationModelAssembler(
+class KeyWithTranslationsModelAssembler(
         private val translationViewModelAssembler: TranslationViewModelAssembler
 ) : RepresentationModelAssemblerSupport<KeyWithTranslationsView, KeyWithTranslationsModel>(
         V2TranslationsController::class.java, KeyWithTranslationsModel::class.java) {
