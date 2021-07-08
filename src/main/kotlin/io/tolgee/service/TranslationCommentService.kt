@@ -15,71 +15,71 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TranslationCommentService(
-        private val translationCommentRepository: TranslationCommentRepository,
-        private val authenticationFacade: AuthenticationFacade
+  private val translationCommentRepository: TranslationCommentRepository,
+  private val authenticationFacade: AuthenticationFacade
 ) {
-    @Transactional
-    fun create(
-            dto: TranslationCommentDto,
-            translation: Translation,
-            author: UserAccount
-    ): TranslationComment {
-        return TranslationComment(
-                text = dto.text,
-                state = dto.state,
-                translation = translation
-        ).let {
-            it.author = author
-            create(it)
-        }
+  @Transactional
+  fun create(
+    dto: TranslationCommentDto,
+    translation: Translation,
+    author: UserAccount
+  ): TranslationComment {
+    return TranslationComment(
+      text = dto.text,
+      state = dto.state,
+      translation = translation
+    ).let {
+      it.author = author
+      create(it)
     }
+  }
 
-    fun find(id: Long): TranslationComment? {
-        return translationCommentRepository.findById(id).orElse(null)
-    }
+  fun find(id: Long): TranslationComment? {
+    return translationCommentRepository.findById(id).orElse(null)
+  }
 
-    fun get(id: Long): TranslationComment {
-        return find(id) ?: throw NotFoundException()
-    }
+  fun get(id: Long): TranslationComment {
+    return find(id) ?: throw NotFoundException()
+  }
 
-    @Transactional
-    fun update(dto: TranslationCommentDto, entity: TranslationComment): TranslationComment {
-        entity.text = dto.text
-        entity.state = dto.state
-        return this.update(entity)
-    }
+  @Transactional
+  fun update(dto: TranslationCommentDto, entity: TranslationComment): TranslationComment {
+    entity.text = dto.text
+    entity.state = dto.state
+    return this.update(entity)
+  }
 
-    @Transactional
-    fun setState(entity: TranslationComment, state: TranslationCommentState): TranslationComment {
-        entity.state = state
-        return this.update(entity)
-    }
+  @Transactional
+  fun setState(entity: TranslationComment, state: TranslationCommentState): TranslationComment {
+    entity.state = state
+    return this.update(entity)
+  }
 
-    fun getPaged(translation: Translation, pageable: Pageable): Page<TranslationComment> {
-        return translationCommentRepository.getPagedByTranslation(translation, pageable)
-    }
+  fun getPaged(translation: Translation, pageable: Pageable): Page<TranslationComment> {
+    return translationCommentRepository.getPagedByTranslation(translation, pageable)
+  }
 
-    fun delete(entity: TranslationComment) {
-        deleteByIds(listOf(entity.id))
-    }
+  fun delete(entity: TranslationComment) {
+    deleteByIds(listOf(entity.id))
+  }
 
-    @Transactional
-    fun deleteByIds(ids: List<Long>) {
-        return translationCommentRepository.deleteAllByIdIn(ids)
-    }
+  @Transactional
+  fun deleteByIds(ids: List<Long>) {
+    return translationCommentRepository.deleteAllByIdIn(ids)
+  }
 
-    fun create(entity: TranslationComment): TranslationComment {
-        return translationCommentRepository.save(entity)
-    }
+  fun create(entity: TranslationComment): TranslationComment {
+    return translationCommentRepository.save(entity)
+  }
 
-    fun createAll(entities: Collection<TranslationComment>) {
-        translationCommentRepository.saveAll(entities)
-    }
+  fun createAll(entities: Collection<TranslationComment>) {
+    translationCommentRepository.saveAll(entities)
+  }
 
-    fun update(
-            entity: TranslationComment,
-            updatedBy: UserAccount = authenticationFacade.userAccount
-    ): TranslationComment {
-        return translationCommentRepository.save(entity)
-    }
+  fun update(
+    entity: TranslationComment,
+    updatedBy: UserAccount = authenticationFacade.userAccount
+  ): TranslationComment {
+    return translationCommentRepository.save(entity)
+  }
 }

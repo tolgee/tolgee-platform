@@ -14,31 +14,32 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 @EnableJpaAuditing
 @ConfigurationPropertiesScan
 class Application(
-        populator: DbPopulatorReal,
-        userAccountService: UserAccountService,
-        properties: TolgeeProperties,
-        initialPasswordManager: InitialPasswordManager
+  populator: DbPopulatorReal,
+  userAccountService: UserAccountService,
+  properties: TolgeeProperties,
+  initialPasswordManager: InitialPasswordManager
 ) {
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-            SpringApplication.run(Application::class.java, *args)
-        }
+  companion object {
+    @JvmStatic
+    fun main(args: Array<String>) {
+      SpringApplication.run(Application::class.java, *args)
+    }
+  }
+
+  init {
+    if (properties.internal.populate) {
+      populator.autoPopulate()
     }
 
-    init {
-        if (properties.internal.populate) {
-            populator.autoPopulate()
-        }
+    val initialUsername = properties.authentication.initialUsername
+    if (properties.authentication.createInitialUser && !userAccountService.isAnyUserAccount &&
+      userAccountService.getByUserName(initialUsername).isEmpty
+    ) {
+      val initialPassword = initialPasswordManager.initialPassword
 
-        val initialUsername = properties.authentication.initialUsername
-        if (properties.authentication.createInitialUser && !userAccountService.isAnyUserAccount &&
-                userAccountService.getByUserName(initialUsername).isEmpty) {
-            val initialPassword = initialPasswordManager.initialPassword
-
-            userAccountService.createUser(
-                    SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername)
-            )
-        }
+      userAccountService.createUser(
+        SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername)
+      )
     }
+  }
 }

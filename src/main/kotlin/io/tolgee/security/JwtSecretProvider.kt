@@ -12,33 +12,31 @@ import org.springframework.stereotype.Component
 
 @Component
 class JwtSecretProvider(
-        private val tolgeeProperties: TolgeeProperties,
-        private val fileStorageService: FileStorageService
+  private val tolgeeProperties: TolgeeProperties,
+  private val fileStorageService: FileStorageService
 ) {
-    private lateinit var cachedSecret: ByteArray
+  private lateinit var cachedSecret: ByteArray
 
-    val jwtSecret: ByteArray
-        get() {
-            if (this::cachedSecret.isInitialized) {
-                return cachedSecret
-            }
+  val jwtSecret: ByteArray
+    get() {
+      if (this::cachedSecret.isInitialized) {
+        return cachedSecret
+      }
 
-            if (tolgeeProperties.authentication.jwtSecret != null) {
-                return tolgeeProperties.authentication.jwtSecret!!.toByteArray()
-            }
+      if (tolgeeProperties.authentication.jwtSecret != null) {
+        return tolgeeProperties.authentication.jwtSecret!!.toByteArray()
+      }
 
+      val fileName = "jwt.secret"
 
-            val fileName = "jwt.secret"
+      if (!fileStorageService.fileExists(fileName)) {
+        val generated = Keys.secretKeyFor(SignatureAlgorithm.HS512).encoded
+        fileStorageService.storeFile(fileName, generated)
+        cachedSecret = generated
+        return generated
+      }
 
-
-            if (!fileStorageService.fileExists(fileName)) {
-                val generated = Keys.secretKeyFor(SignatureAlgorithm.HS512).encoded
-                fileStorageService.storeFile(fileName, generated)
-                cachedSecret = generated
-                return generated
-            }
-
-            cachedSecret = fileStorageService.readFile(fileName)
-            return cachedSecret
-        }
+      cachedSecret = fileStorageService.readFile(fileName)
+      return cachedSecret
+    }
 }

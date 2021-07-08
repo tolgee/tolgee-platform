@@ -12,20 +12,23 @@ import org.springframework.web.util.UriComponents
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 class KeysWithTranslationsPagedResourcesAssembler(
-        val keyWithTranslationsModelAssembler: KeyWithTranslationsModelAssembler,
-        val languageModelAssembler: LanguageModelAssembler,
-        resolver: HateoasPageableHandlerMethodArgumentResolver? = null,
-        baseUri: UriComponents? = null
+  val keyWithTranslationsModelAssembler: KeyWithTranslationsModelAssembler,
+  val languageModelAssembler: LanguageModelAssembler,
+  resolver: HateoasPageableHandlerMethodArgumentResolver? = null,
+  baseUri: UriComponents? = null
 ) : PagedResourcesAssembler<KeyWithTranslationsView>(resolver, baseUri) {
-    fun toTranslationModel(entities: Page<KeyWithTranslationsView>,
-                           selectedLanguages: Collection<Language>, nextCursor: String?): KeysWithTranslationsPageModel {
-        val pageModel = toModel(entities, keyWithTranslationsModelAssembler)
-        return KeysWithTranslationsPageModel(
-                content = pageModel.content,
-                metadata = pageModel.metadata,
-                links = pageModel.links.toList().toTypedArray(),
-                selectedLanguages = selectedLanguages.map { languageModelAssembler.toModel(it) },
-                nextCursor = nextCursor
-        )
-    }
+  fun toTranslationModel(
+    entities: Page<KeyWithTranslationsView>,
+    selectedLanguages: Collection<Language>,
+    nextCursor: String?
+  ): KeysWithTranslationsPageModel {
+    val pageModel = toModel(entities, keyWithTranslationsModelAssembler)
+    return KeysWithTranslationsPageModel(
+      content = pageModel.content,
+      metadata = pageModel.metadata,
+      links = pageModel.links.toList().toTypedArray(),
+      selectedLanguages = selectedLanguages.map { languageModelAssembler.toModel(it) },
+      nextCursor = nextCursor
+    )
+  }
 }

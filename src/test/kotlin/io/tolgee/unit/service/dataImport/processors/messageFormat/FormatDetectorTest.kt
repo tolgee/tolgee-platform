@@ -13,29 +13,32 @@ import org.testng.annotations.Test
 import java.io.File
 
 class FormatDetectorTest {
-    private lateinit var importMock: Import
-    private lateinit var importFile: ImportFile
-    private lateinit var importFileDto: ImportFileDto
-    private lateinit var fileProcessorContext: FileProcessorContext
+  private lateinit var importMock: Import
+  private lateinit var importFile: ImportFile
+  private lateinit var importFileDto: ImportFileDto
+  private lateinit var fileProcessorContext: FileProcessorContext
 
-    @BeforeMethod
-    fun setup() {
-        importMock = mock()
-        importFile = ImportFile("exmample.po", importMock)
-        importFileDto = ImportFileDto("exmample.po", File("src/test/resources/import/po/example.po")
-                .inputStream())
-        fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
-    }
+  @BeforeMethod
+  fun setup() {
+    importMock = mock()
+    importFile = ImportFile("exmample.po", importMock)
+    importFileDto = ImportFileDto(
+      "exmample.po",
+      File("src/test/resources/import/po/example.po")
+        .inputStream()
+    )
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
+  }
 
-    @Test
-    fun `returns C format`() {
-        val detector = FormatDetector(listOf("%jd %hhd", "%d %s", "d %s"))
-        assertThat(detector()).isEqualTo(SupportedFormat.C)
-    }
+  @Test
+  fun `returns C format`() {
+    val detector = FormatDetector(listOf("%jd %hhd", "%d %s", "d %s"))
+    assertThat(detector()).isEqualTo(SupportedFormat.C)
+  }
 
-    @Test
-    fun `returns PHP format`() {
-        val detector = FormatDetector(listOf("%b %d", "%d %s", "d %s"))
-        assertThat(detector()).isEqualTo(SupportedFormat.PHP)
-    }
+  @Test
+  fun `returns PHP format`() {
+    val detector = FormatDetector(listOf("%b %d", "%d %s", "d %s"))
+    assertThat(detector()).isEqualTo(SupportedFormat.PHP)
+  }
 }

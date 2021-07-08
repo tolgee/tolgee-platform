@@ -9,8 +9,8 @@ import java.util.*
 
 @Repository
 interface InvitationRepository : JpaRepository<Invitation?, Long?> {
-    fun deleteAllByCreatedAtLessThan(date: Date)
-    fun findOneByCode(code: String?): Optional<Invitation>
-    fun findAllByPermissionProjectOrderByCreatedAt(project: Project): LinkedHashSet<Invitation>
-    fun getAllByOrganizationRoleOrganizationOrderByCreatedAt(organization: Organization): List<Invitation>
+  fun deleteAllByCreatedAtLessThan(date: Date)
+  fun findOneByCode(code: String?): Optional<Invitation>
+  fun findAllByPermissionProjectOrderByCreatedAt(project: Project): LinkedHashSet<Invitation>
+  fun getAllByOrganizationRoleOrganizationOrderByCreatedAt(organization: Organization): List<Invitation>
 }

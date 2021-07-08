@@ -9,27 +9,29 @@ import javax.xml.namespace.QName
 import javax.xml.stream.events.StartElement
 
 class XliffFileProcessor(override val context: FileProcessorContext) : ImportFileProcessor() {
-    override fun process() {
-        try {
-            when (version) {
-                "1.2" -> Xliff12FileProcessor(context, xmlEventReader).process()
-                else -> throw UnsupportedXliffVersionException(version)
-            }
-        } catch (e: Exception) {
-            throw ImportCannotParseFileException(context.file.name, e.message)
-        }
+  override fun process() {
+    try {
+      when (version) {
+        "1.2" -> Xliff12FileProcessor(context, xmlEventReader).process()
+        else -> throw UnsupportedXliffVersionException(version)
+      }
+    } catch (e: Exception) {
+      throw ImportCannotParseFileException(context.file.name, e.message)
     }
+  }
 
-    private val version: String by lazy {
-        while (xmlEventReader.hasNext()) {
-            val event = xmlEventReader.nextEvent()
-            if (event.isStartElement && (event as? StartElement)?.name?.localPart?.lowercase(Locale.getDefault()) == "xliff") {
-                val versionAttr = event.getAttributeByName(QName(null, "version"))
-                if (versionAttr != null) {
-                    return@lazy versionAttr.value
-                }
-            }
+  private val version: String by lazy {
+    while (xmlEventReader.hasNext()) {
+      val event = xmlEventReader.nextEvent()
+      if (event.isStartElement &&
+        (event as? StartElement)?.name?.localPart?.lowercase(Locale.getDefault()) == "xliff"
+      ) {
+        val versionAttr = event.getAttributeByName(QName(null, "version"))
+        if (versionAttr != null) {
+          return@lazy versionAttr.value
         }
-        throw ImportCannotParseFileException(context.file.name, "No version information")
+      }
     }
+    throw ImportCannotParseFileException(context.file.name, "No version information")
+  }
 }

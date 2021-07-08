@@ -1,4 +1,3 @@
 package io.tolgee
 
-interface ITest {
-}
+interface ITest

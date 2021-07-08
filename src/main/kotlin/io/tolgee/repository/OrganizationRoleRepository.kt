@@ -8,9 +8,13 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface OrganizationRoleRepository : JpaRepository<OrganizationRole, Long> {
-    fun findOneByUserIdAndOrganizationId(userId: Long, organizationId: Long): OrganizationRole?
+  fun findOneByUserIdAndOrganizationId(userId: Long, organizationId: Long): OrganizationRole?
 
-    fun countAllByOrganizationIdAndTypeAndUserIdNot(id: Long, owner: OrganizationRoleType, userId: Long): Long
+  fun countAllByOrganizationIdAndTypeAndUserIdNot(
+    id: Long,
+    owner: OrganizationRoleType,
+    userId: Long
+  ): Long
 
-    fun deleteByOrganization(organization: Organization)
+  fun deleteByOrganization(organization: Organization)
 }

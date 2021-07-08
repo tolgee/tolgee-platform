@@ -10,13 +10,13 @@ import java.util.*
 
 @Component
 class AuthenticationProvider(
-        private val userAccountService: UserAccountService
+  private val userAccountService: UserAccountService
 ) {
-    fun getAuthentication(userAccount: UserAccount): Authentication {
-        val userDetails = userAccount
-        val authorities: MutableList<GrantedAuthority> = LinkedList()
-        val grantedAuthority = GrantedAuthority { "user" }
-        authorities.add(grantedAuthority)
-        return UsernamePasswordAuthenticationToken(userDetails, null, authorities)
-    }
+  fun getAuthentication(userAccount: UserAccount): Authentication {
+    val userDetails = userAccount
+    val authorities: MutableList<GrantedAuthority> = LinkedList()
+    val grantedAuthority = GrantedAuthority { "user" }
+    authorities.add(grantedAuthority)
+    return UsernamePasswordAuthenticationToken(userDetails, null, authorities)
+  }
 }

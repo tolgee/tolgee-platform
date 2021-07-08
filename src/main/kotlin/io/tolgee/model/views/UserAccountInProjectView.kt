@@ -4,10 +4,10 @@ import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 
 interface UserAccountInProjectView {
-    val id: Long
-    val name: String?
-    val username: String
-    val organizationRole: OrganizationRoleType?
-    val organizationBasePermissions: Permission.ProjectPermissionType?
-    val directPermissions: Permission.ProjectPermissionType?
+  val id: Long
+  val name: String?
+  val username: String
+  val organizationRole: OrganizationRoleType?
+  val organizationBasePermissions: Permission.ProjectPermissionType?
+  val directPermissions: Permission.ProjectPermissionType?
 }

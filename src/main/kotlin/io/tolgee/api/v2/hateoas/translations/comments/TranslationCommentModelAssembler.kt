@@ -9,17 +9,18 @@ import java.util.*
 
 @Component
 class TranslationCommentModelAssembler(
-        private val userAccountModelAssembler: UserAccountModelAssembler
+  private val userAccountModelAssembler: UserAccountModelAssembler
 ) : RepresentationModelAssemblerSupport<TranslationComment, TranslationCommentModel>(
-        TranslationCommentController::class.java, TranslationCommentModel::class.java) {
-    override fun toModel(entity: TranslationComment): TranslationCommentModel {
-        return TranslationCommentModel(
-                id = entity.id,
-                text = entity.text,
-                state = entity.state,
-                author = entity.author.let { userAccountModelAssembler.toModel(it) },
-                createdAt = entity.createdAt ?: Date(),
-                updatedAt = entity.updatedAt ?: Date()
-        )
-    }
+  TranslationCommentController::class.java, TranslationCommentModel::class.java
+) {
+  override fun toModel(entity: TranslationComment): TranslationCommentModel {
+    return TranslationCommentModel(
+      id = entity.id,
+      text = entity.text,
+      state = entity.state,
+      author = entity.author.let { userAccountModelAssembler.toModel(it) },
+      createdAt = entity.createdAt ?: Date(),
+      updatedAt = entity.updatedAt ?: Date()
+    )
+  }
 }

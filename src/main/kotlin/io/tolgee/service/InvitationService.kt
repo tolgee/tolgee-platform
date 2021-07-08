@@ -20,96 +20,96 @@ import java.util.*
 
 @Service
 open class InvitationService @Autowired constructor(
-        private val invitationRepository: InvitationRepository,
-        private val authenticationFacade: AuthenticationFacade,
-        private val organizationRoleService: OrganizationRoleService,
-        private val permissionService: PermissionService
+  private val invitationRepository: InvitationRepository,
+  private val authenticationFacade: AuthenticationFacade,
+  private val organizationRoleService: OrganizationRoleService,
+  private val permissionService: PermissionService
 ) {
-    @Transactional
-    open fun create(project: Project, type: ProjectPermissionType): String {
-        val code = RandomStringUtils.randomAlphabetic(50)
-        val invitation = Invitation(null, code)
-        invitation.permission = permissionService.createForInvitation(invitation, project, type)
-        invitationRepository.save(invitation)
-        return code
+  @Transactional
+  open fun create(project: Project, type: ProjectPermissionType): String {
+    val code = RandomStringUtils.randomAlphabetic(50)
+    val invitation = Invitation(null, code)
+    invitation.permission = permissionService.createForInvitation(invitation, project, type)
+    invitationRepository.save(invitation)
+    return code
+  }
+
+  @Transactional
+  open fun create(organization: Organization, type: OrganizationRoleType): Invitation {
+    val code = RandomStringUtils.randomAlphabetic(50)
+    val invitation = Invitation(null, code)
+    invitation.organizationRole = organizationRoleService.createForInvitation(invitation, type, organization)
+    invitationRepository.save(invitation)
+    return invitation
+  }
+
+  @Transactional
+  open fun removeExpired() {
+    invitationRepository.deleteAllByCreatedAtLessThan(Date.from(Instant.now().minus(Duration.ofDays(30))))
+  }
+
+  @Transactional
+  open fun accept(code: String?) {
+    this.accept(code, authenticationFacade.userAccount)
+  }
+
+  @Transactional
+  open fun accept(code: String?, userAccount: UserAccount) {
+    val invitation = getInvitation(code)
+    val permission = invitation.permission
+    val organizationRole = invitation.organizationRole
+
+    if (!(permission == null).xor(organizationRole == null)) {
+      throw IllegalStateException("Exactly of permission and organizationRole may be set")
     }
 
-    @Transactional
-    open fun create(organization: Organization, type: OrganizationRoleType): Invitation {
-        val code = RandomStringUtils.randomAlphabetic(50)
-        val invitation = Invitation(null, code)
-        invitation.organizationRole = organizationRoleService.createForInvitation(invitation, type, organization)
-        invitationRepository.save(invitation)
-        return invitation
+    permission?.let {
+      if (permissionService.findOneByProjectIdAndUserId(permission.project!!.id, userAccount.id!!) != null) {
+        throw BadRequestException(Message.USER_ALREADY_HAS_PERMISSIONS)
+      }
+      permissionService.acceptInvitation(permission, userAccount)
     }
 
-    @Transactional
-    open fun removeExpired() {
-        invitationRepository.deleteAllByCreatedAtLessThan(Date.from(Instant.now().minus(Duration.ofDays(30))))
+    organizationRole?.let {
+      if (organizationRoleService.isUserMemberOrOwner(userAccount.id!!, it.id!!)) {
+        throw BadRequestException(Message.USER_ALREADY_HAS_ROLE)
+      }
+      organizationRoleService.acceptInvitation(organizationRole, userAccount)
     }
 
-    @Transactional
-    open fun accept(code: String?) {
-        this.accept(code, authenticationFacade.userAccount)
+    // avoid cascade delete
+    invitation.permission = null
+    invitation.organizationRole = null
+    invitationRepository.delete(invitation)
+  }
+
+  open fun getInvitation(code: String?): Invitation {
+    return invitationRepository.findOneByCode(code).orElseThrow { // this exception is important for sign up service! Do not remove!!
+      BadRequestException(Message.INVITATION_CODE_DOES_NOT_EXIST_OR_EXPIRED)
+    }!!
+  }
+
+  open fun findById(id: Long): Optional<Invitation> {
+    @Suppress("UNCHECKED_CAST")
+    return invitationRepository.findById(id) as Optional<Invitation>
+  }
+
+  open fun getForProject(project: Project): Set<Invitation> {
+    return invitationRepository.findAllByPermissionProjectOrderByCreatedAt(project)
+  }
+
+  @Transactional
+  open fun delete(invitation: Invitation) {
+    invitation.permission?.let {
+      permissionService.delete(it)
     }
-
-    @Transactional
-    open fun accept(code: String?, userAccount: UserAccount) {
-        val invitation = getInvitation(code)
-        val permission = invitation.permission
-        val organizationRole = invitation.organizationRole
-
-        if (!(permission == null).xor(organizationRole == null)) {
-            throw IllegalStateException("Exactly of permission and organizationRole may be set")
-        }
-
-        permission?.let {
-            if (permissionService.findOneByProjectIdAndUserId(permission.project!!.id, userAccount.id!!) != null) {
-                throw BadRequestException(Message.USER_ALREADY_HAS_PERMISSIONS)
-            }
-            permissionService.acceptInvitation(permission, userAccount)
-        }
-
-        organizationRole?.let {
-            if (organizationRoleService.isUserMemberOrOwner(userAccount.id!!, it.id!!)) {
-                throw BadRequestException(Message.USER_ALREADY_HAS_ROLE)
-            }
-            organizationRoleService.acceptInvitation(organizationRole, userAccount)
-        }
-
-        //avoid cascade delete
-        invitation.permission = null
-        invitation.organizationRole = null
-        invitationRepository.delete(invitation)
+    if (invitation.organizationRole != null) {
+      organizationRoleService
     }
+    invitationRepository.delete(invitation)
+  }
 
-    open fun getInvitation(code: String?): Invitation {
-        return invitationRepository.findOneByCode(code).orElseThrow { //this exception is important for sign up service! Do not remove!!
-            BadRequestException(Message.INVITATION_CODE_DOES_NOT_EXIST_OR_EXPIRED)
-        }!!
-    }
-
-    open fun findById(id: Long): Optional<Invitation> {
-        @Suppress("UNCHECKED_CAST")
-        return invitationRepository.findById(id) as Optional<Invitation>
-    }
-
-    open fun getForProject(project: Project): Set<Invitation> {
-        return invitationRepository.findAllByPermissionProjectOrderByCreatedAt(project)
-    }
-
-    @Transactional
-    open fun delete(invitation: Invitation) {
-        invitation.permission?.let {
-            permissionService.delete(it)
-        }
-        if (invitation.organizationRole != null) {
-            organizationRoleService
-        }
-        invitationRepository.delete(invitation)
-    }
-
-    open fun getForOrganization(organization: Organization): List<Invitation> {
-        return invitationRepository.getAllByOrganizationRoleOrganizationOrderByCreatedAt(organization)
-    }
+  open fun getForOrganization(organization: Organization): List<Invitation> {
+    return invitationRepository.getAllByOrganizationRoleOrganizationOrderByCreatedAt(organization)
+  }
 }

@@ -42,111 +42,114 @@ import javax.validation.Valid
 @RequestMapping(value = ["/v2/projects"])
 @Tag(name = "Projects")
 class V2ProjectsController(
-        private val projectService: ProjectService,
-        private val projectHolder: ProjectHolder,
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        private val arrayResourcesAssembler: PagedResourcesAssembler<ProjectView>,
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-        private val userArrayResourcesAssembler: PagedResourcesAssembler<UserAccountInProjectView>,
-        private val userAccountInProjectModelAssembler: UserAccountInProjectModelAssembler,
-        private val projectModelAssembler: ProjectModelAssembler,
-        private val userAccountService: UserAccountService,
-        private val permissionService: PermissionService,
-        private val authenticationFacade: AuthenticationFacade,
-        private val tolgeeProperties: TolgeeProperties,
-        private val securityService: SecurityService,
-        private val invitationService: InvitationService,
+  private val projectService: ProjectService,
+  private val projectHolder: ProjectHolder,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  private val arrayResourcesAssembler: PagedResourcesAssembler<ProjectView>,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  private val userArrayResourcesAssembler: PagedResourcesAssembler<UserAccountInProjectView>,
+  private val userAccountInProjectModelAssembler: UserAccountInProjectModelAssembler,
+  private val projectModelAssembler: ProjectModelAssembler,
+  private val userAccountService: UserAccountService,
+  private val permissionService: PermissionService,
+  private val authenticationFacade: AuthenticationFacade,
+  private val tolgeeProperties: TolgeeProperties,
+  private val securityService: SecurityService,
+  private val invitationService: InvitationService,
 ) {
-    @Operation(summary = "Returns all projects, which are current user permitted to view")
-    @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
-    fun getAll(@ParameterObject pageable: Pageable,
-               @RequestParam("search") search: String?
-    ): PagedModel<ProjectModel>? {
-        val projects = projectService.findPermittedPaged(pageable, search)
-        return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
-    }
+  @Operation(summary = "Returns all projects, which are current user permitted to view")
+  @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
+  fun getAll(
+    @ParameterObject pageable: Pageable,
+    @RequestParam("search") search: String?
+  ): PagedModel<ProjectModel>? {
+    val projects = projectService.findPermittedPaged(pageable, search)
+    return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
+  }
 
-    @GetMapping("/{projectId}")
-    @AccessWithAnyProjectPermission
-    @AccessWithApiKey
-    @Operation(summary = "Returns project by id")
-    fun get(@PathVariable("projectId") projectId: Long): ProjectModel {
-        return projectService.getView(projectId)?.let {
-            projectModelAssembler.toModel(it)
-        } ?: throw NotFoundException()
-    }
+  @GetMapping("/{projectId}")
+  @AccessWithAnyProjectPermission
+  @AccessWithApiKey
+  @Operation(summary = "Returns project by id")
+  fun get(@PathVariable("projectId") projectId: Long): ProjectModel {
+    return projectService.getView(projectId)?.let {
+      projectModelAssembler.toModel(it)
+    } ?: throw NotFoundException()
+  }
 
-    @GetMapping("/{projectId}/users")
-    @Operation(summary = "Returns project all users, who have permission to access project")
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
-    fun getAllUsers(@PathVariable("projectId") projectId: Long,
-                    @ParameterObject pageable: Pageable,
-                    @RequestParam("search", required = false) search: String?
-    ): PagedModel<UserAccountInProjectModel> {
-        return userAccountService.getAllInProject(projectId, pageable, search).let { users ->
-            userArrayResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
-        }
+  @GetMapping("/{projectId}/users")
+  @Operation(summary = "Returns project all users, who have permission to access project")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  fun getAllUsers(
+    @PathVariable("projectId") projectId: Long,
+    @ParameterObject pageable: Pageable,
+    @RequestParam("search", required = false) search: String?
+  ): PagedModel<UserAccountInProjectModel> {
+    return userAccountService.getAllInProject(projectId, pageable, search).let { users ->
+      userArrayResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
     }
+  }
 
-    @PutMapping("/{projectId}/users/{userId}/set-permissions/{permissionType}")
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
-    @Operation(summary = "Sets user's direct permission")
-    fun setUsersPermissions(
-            @PathVariable("projectId") projectId: Long,
-            @PathVariable("userId") userId: Long,
-            @PathVariable("permissionType") permissionType: Permission.ProjectPermissionType,
+  @PutMapping("/{projectId}/users/{userId}/set-permissions/{permissionType}")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  @Operation(summary = "Sets user's direct permission")
+  fun setUsersPermissions(
+    @PathVariable("projectId") projectId: Long,
+    @PathVariable("userId") userId: Long,
+    @PathVariable("permissionType") permissionType: Permission.ProjectPermissionType,
+  ) {
+    if (userId == authenticationFacade.userAccount.id) {
+      throw BadRequestException(Message.CANNOT_SET_YOUR_OWN_PERMISSIONS)
+    }
+    permissionService.setUserDirectPermission(projectId, userId, permissionType)
+  }
+
+  @PutMapping("/{projectId}/users/{userId}/revoke-access")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  @Operation(summary = "Revokes user's access")
+  fun revokePermission(
+    @PathVariable("projectId") projectId: Long,
+    @PathVariable("userId") userId: Long
+  ) {
+    if (userId == authenticationFacade.userAccount.id) {
+      throw BadRequestException(Message.CAN_NOT_REVOKE_OWN_PERMISSIONS)
+    }
+    permissionService.revoke(projectId, userId)
+  }
+
+  @PostMapping(value = [""])
+  @Operation(summary = "Creates project with specified languages")
+  fun createProject(@RequestBody @Valid dto: CreateProjectDTO): ProjectModel {
+    val userAccount = authenticationFacade.userAccount
+    if (!this.tolgeeProperties.authentication.userCanCreateProjects &&
+      userAccount.role != UserAccount.Role.ADMIN
     ) {
-        if (userId == authenticationFacade.userAccount.id) {
-            throw BadRequestException(Message.CANNOT_SET_YOUR_OWN_PERMISSIONS)
-        }
-        permissionService.setUserDirectPermission(projectId, userId, permissionType)
+      throw PermissionException()
     }
+    val project = projectService.createProject(dto)
+    return projectModelAssembler.toModel(projectService.getView(project.id)!!)
+  }
 
-    @PutMapping("/{projectId}/users/{userId}/revoke-access")
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
-    @Operation(summary = "Revokes user's access")
-    fun revokePermission(
-            @PathVariable("projectId") projectId: Long,
-            @PathVariable("userId") userId: Long
-    ) {
-        if (userId == authenticationFacade.userAccount.id) {
-            throw BadRequestException(Message.CAN_NOT_REVOKE_OWN_PERMISSIONS)
-        }
-        permissionService.revoke(projectId, userId)
-    }
+  @Operation(summary = "Modifies project")
+  @PutMapping(value = ["/{projectId}"])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  fun editProject(@RequestBody @Valid dto: EditProjectDTO): ProjectModel {
+    val project = projectService.editProject(projectHolder.project.id, dto)
+    return projectModelAssembler.toModel(projectService.getView(project.id)!!)
+  }
 
-    @PostMapping(value = [""])
-    @Operation(summary = "Creates project with specified languages")
-    fun createProject(@RequestBody @Valid dto: CreateProjectDTO): ProjectModel {
-        val userAccount = authenticationFacade.userAccount
-        if (!this.tolgeeProperties.authentication.userCanCreateProjects
-                && userAccount.role != UserAccount.Role.ADMIN) {
-            throw PermissionException()
-        }
-        val project = projectService.createProject(dto)
-        return projectModelAssembler.toModel(projectService.getView(project.id)!!)
-    }
+  @DeleteMapping(value = ["/{projectId}"])
+  @Operation(summary = "Deletes project by id")
+  fun deleteProject(@PathVariable projectId: Long?) {
+    securityService.checkProjectPermission(projectId!!, Permission.ProjectPermissionType.MANAGE)
+    projectService.deleteProject(projectId)
+  }
 
-    @Operation(summary = "Modifies project")
-    @PutMapping(value = ["/{projectId}"])
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
-    fun editProject(@RequestBody @Valid dto: EditProjectDTO): ProjectModel {
-        val project = projectService.editProject(projectHolder.project.id, dto)
-        return projectModelAssembler.toModel(projectService.getView(project.id)!!)
-    }
-
-    @DeleteMapping(value = ["/{projectId}"])
-    @Operation(summary = "Deletes project by id")
-    fun deleteProject(@PathVariable projectId: Long?) {
-        securityService.checkProjectPermission(projectId!!, Permission.ProjectPermissionType.MANAGE)
-        projectService.deleteProject(projectId)
-    }
-
-    @PutMapping("/{projectId}/invite")
-    @Operation(summary = "Generates user invitation link for project")
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
-    fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): String {
-        val project = projectService.get(projectHolder.project.id).orElseThrow { NotFoundException() }!!
-        return invitationService.create(project, invitation.type!!)
-    }
+  @PutMapping("/{projectId}/invite")
+  @Operation(summary = "Generates user invitation link for project")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): String {
+    val project = projectService.get(projectHolder.project.id).orElseThrow { NotFoundException() }!!
+    return invitationService.create(project, invitation.type!!)
+  }
 }

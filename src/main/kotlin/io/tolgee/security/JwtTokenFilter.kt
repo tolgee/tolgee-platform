@@ -16,27 +16,31 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class JwtTokenFilter @Autowired constructor(
-        private val jwtTokenProvider: JwtTokenProvider,
-        private val configuration: TolgeeProperties,
-        @param:Qualifier("handlerExceptionResolver")
-        private val resolver: HandlerExceptionResolver
+  private val jwtTokenProvider: JwtTokenProvider,
+  private val configuration: TolgeeProperties,
+  @param:Qualifier("handlerExceptionResolver")
+  private val resolver: HandlerExceptionResolver
 
 ) : OncePerRequestFilter() {
-    @Throws(ServletException::class, IOException::class)
-    override fun doFilterInternal(req: HttpServletRequest, res: HttpServletResponse, filterChain: FilterChain) {
-        val token = jwtTokenProvider.resolveToken(req)
-        try {
-            if (token != null && jwtTokenProvider.validateToken(token)) {
-                val auth = jwtTokenProvider.getAuthentication(token)
-                SecurityContextHolder.getContext().authentication = auth
-            }
-            filterChain.doFilter(req, res)
-        } catch (e: AuthenticationException) {
-            resolver.resolveException(req, res, null, e)
-        }
+  @Throws(ServletException::class, IOException::class)
+  override fun doFilterInternal(
+    req: HttpServletRequest,
+    res: HttpServletResponse,
+    filterChain: FilterChain
+  ) {
+    val token = jwtTokenProvider.resolveToken(req)
+    try {
+      if (token != null && jwtTokenProvider.validateToken(token)) {
+        val auth = jwtTokenProvider.getAuthentication(token)
+        SecurityContextHolder.getContext().authentication = auth
+      }
+      filterChain.doFilter(req, res)
+    } catch (e: AuthenticationException) {
+      resolver.resolveException(req, res, null, e)
     }
+  }
 
-    override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-        return !configuration.authentication.enabled
-    }
+  override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+    return !configuration.authentication.enabled
+  }
 }

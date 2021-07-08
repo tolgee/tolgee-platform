@@ -9,36 +9,36 @@ import javax.validation.constraints.Size
 
 @Entity
 class ImportKey(
-        @field:NotBlank
-        @field:Size(max = 2000)
-        @Column(length = 2000)
-        var name: String,
+  @field:NotBlank
+  @field:Size(max = 2000)
+  @Column(length = 2000)
+  var name: String,
 ) : StandardAuditModel() {
-    @ManyToMany(mappedBy = "keys")
-    @field:NotEmpty
-    var files: MutableList<ImportFile> = mutableListOf()
+  @ManyToMany(mappedBy = "keys")
+  @field:NotEmpty
+  var files: MutableList<ImportFile> = mutableListOf()
 
-    @OneToMany(mappedBy = "key")
-    var translations: MutableList<ImportTranslation> = mutableListOf()
+  @OneToMany(mappedBy = "key")
+  var translations: MutableList<ImportTranslation> = mutableListOf()
 
-    @OneToOne(mappedBy = "importKey")
-    var keyMeta: KeyMeta? = null
+  @OneToOne(mappedBy = "importKey")
+  var keyMeta: KeyMeta? = null
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        if (!super.equals(other)) return false
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+    if (!super.equals(other)) return false
 
-        other as ImportKey
+    other as ImportKey
 
-        if (name != other.name) return false
+    if (name != other.name) return false
 
-        return true
-    }
+    return true
+  }
 
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + name.hashCode()
-        return result
-    }
+  override fun hashCode(): Int {
+    var result = super.hashCode()
+    result = 31 * result + name.hashCode()
+    return result
+  }
 }

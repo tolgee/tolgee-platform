@@ -6,34 +6,42 @@ import javax.persistence.*
 import javax.validation.constraints.NotNull
 
 @Entity
-@Table(uniqueConstraints = [
+@Table(
+  uniqueConstraints = [
     UniqueConstraint(
-            columnNames = ["user_id", "organization_id"],
-            name = "organization_member_role_user_organization_unique")
-])
+      columnNames = ["user_id", "organization_id"],
+      name = "organization_member_role_user_organization_unique"
+    )
+  ]
+)
 @Audited
 data class OrganizationRole(
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        var id: Long? = null,
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  var id: Long? = null,
 
-        @OneToOne
-        var invitation: Invitation? = null,
+  @OneToOne
+  var invitation: Invitation? = null,
 
-        @Enumerated(EnumType.ORDINAL)
-        var type: OrganizationRoleType? = null
+  @Enumerated(EnumType.ORDINAL)
+  var type: OrganizationRoleType? = null
 ) : AuditModel() {
 
-    constructor(id: Long? = null, user: UserAccount? = null, invitation: Invitation? = null, organization: Organization?,
-                type: OrganizationRoleType?) : this(id, invitation, type) {
-        this.organization = organization
-        this.user = user
-    }
+  constructor(
+    id: Long? = null,
+    user: UserAccount? = null,
+    invitation: Invitation? = null,
+    organization: Organization?,
+    type: OrganizationRoleType?
+  ) : this(id, invitation, type) {
+    this.organization = organization
+    this.user = user
+  }
 
-    @ManyToOne
-    var user: UserAccount? = null
+  @ManyToOne
+  var user: UserAccount? = null
 
-    @ManyToOne
-    @NotNull
-    var organization: Organization? = null
+  @ManyToOne
+  @NotNull
+  var organization: Organization? = null
 }

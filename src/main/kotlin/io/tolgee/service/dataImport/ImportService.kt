@@ -34,206 +34,208 @@ import org.springframework.transaction.interceptor.TransactionInterceptor
 @Service
 @Transactional
 class ImportService(
-        private val importRepository: ImportRepository,
-        private val importFileRepository: ImportFileRepository,
-        private val authenticationFacade: AuthenticationFacade,
-        private val projectHolder: ProjectHolder,
-        private val importFileIssueRepository: ImportFileIssueRepository,
-        private val importLanguageRepository: ImportLanguageRepository,
-        private val importKeyRepository: ImportKeyRepository,
-        private val applicationContext: ApplicationContext,
-        private val importTranslationRepository: ImportTranslationRepository,
-        private val importFileIssueParamRepository: ImportFileIssueParamRepository,
-        private val keyMetaService: KeyMetaService,
+  private val importRepository: ImportRepository,
+  private val importFileRepository: ImportFileRepository,
+  private val authenticationFacade: AuthenticationFacade,
+  private val projectHolder: ProjectHolder,
+  private val importFileIssueRepository: ImportFileIssueRepository,
+  private val importLanguageRepository: ImportLanguageRepository,
+  private val importKeyRepository: ImportKeyRepository,
+  private val applicationContext: ApplicationContext,
+  private val importTranslationRepository: ImportTranslationRepository,
+  private val importFileIssueParamRepository: ImportFileIssueParamRepository,
+  private val keyMetaService: KeyMetaService,
 ) {
-    @Transactional
-    fun addFiles(files: List<ImportFileDto>,
-                 messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null
-    ): List<ErrorResponseBody> {
-        val import = find(projectHolder.project.id, authenticationFacade.userAccount.id!!)
-                ?: Import(authenticationFacade.userAccount, projectHolder.project)
+  @Transactional
+  fun addFiles(
+    files: List<ImportFileDto>,
+    messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null
+  ): List<ErrorResponseBody> {
+    val import = find(projectHolder.project.id, authenticationFacade.userAccount.id!!)
+      ?: Import(authenticationFacade.userAccount, projectHolder.project)
 
-        val nonNullMessageClient = messageClient ?: { _, _ -> }
-        val languages = findLanguages(import)
+    val nonNullMessageClient = messageClient ?: { _, _ -> }
+    val languages = findLanguages(import)
 
-        if (languages.count() + files.size > 100) {
-            throw BadRequestException(Message.CANNOT_ADD_MORE_THEN_100_LANGUAGES)
-        }
-
-        importRepository.save(import)
-        val fileProcessor = CoreImportFilesProcessor(
-                applicationContext = applicationContext,
-                import = import
-        )
-        val errors = fileProcessor.processFiles(files, nonNullMessageClient)
-
-        if (findLanguages(import).isEmpty()) {
-            TransactionInterceptor.currentTransactionStatus().setRollbackOnly()
-        }
-        return errors
+    if (languages.count() + files.size > 100) {
+      throw BadRequestException(Message.CANNOT_ADD_MORE_THEN_100_LANGUAGES)
     }
 
-    @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
-    fun import(projectId: Long, authorId: Long, forceMode: ForceMode = ForceMode.NO_FORCE) {
-        import(findOrThrow(projectId, authorId), forceMode)
+    importRepository.save(import)
+    val fileProcessor = CoreImportFilesProcessor(
+      applicationContext = applicationContext,
+      import = import
+    )
+    val errors = fileProcessor.processFiles(files, nonNullMessageClient)
+
+    if (findLanguages(import).isEmpty()) {
+      TransactionInterceptor.currentTransactionStatus().setRollbackOnly()
     }
+    return errors
+  }
 
+  @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
+  fun import(projectId: Long, authorId: Long, forceMode: ForceMode = ForceMode.NO_FORCE) {
+    import(findOrThrow(projectId, authorId), forceMode)
+  }
 
-    @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
-    fun import(import: Import, forceMode: ForceMode = ForceMode.NO_FORCE) {
-        StoredDataImporter(applicationContext, import, forceMode).doImport()
-        deleteImport(import)
+  @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
+  fun import(import: Import, forceMode: ForceMode = ForceMode.NO_FORCE) {
+    StoredDataImporter(applicationContext, import, forceMode).doImport()
+    deleteImport(import)
+  }
+
+  @Transactional
+  fun selectExistingLanguage(importLanguage: ImportLanguage, existingLanguage: Language?) {
+    val import = importLanguage.file.import
+    val dataManager = ImportDataManager(applicationContext, import)
+    existingLanguage?.let {
+      if (dataManager.storedLanguages.any { it.existingLanguage?.id == existingLanguage.id }) {
+        throw BadRequestException(Message.LANGUAGE_ALREADY_SELECTED)
+      }
     }
+    importLanguage.existingLanguage = existingLanguage
+    importLanguageRepository.save(importLanguage)
+    dataManager.populateStoredTranslations(importLanguage)
+    dataManager.resetConflicts(importLanguage)
+    dataManager.handleConflicts(false)
+    dataManager.saveAllStoredTranslations()
+  }
 
-    @Transactional
-    fun selectExistingLanguage(importLanguage: ImportLanguage, existingLanguage: Language?) {
-        val import = importLanguage.file.import
-        val dataManager = ImportDataManager(applicationContext, import)
-        existingLanguage?.let {
-            if (dataManager.storedLanguages.any { it.existingLanguage?.id == existingLanguage.id }) {
-                throw BadRequestException(Message.LANGUAGE_ALREADY_SELECTED)
-            }
-        }
-        importLanguage.existingLanguage = existingLanguage
-        importLanguageRepository.save(importLanguage)
-        dataManager.populateStoredTranslations(importLanguage)
-        dataManager.resetConflicts(importLanguage)
-        dataManager.handleConflicts(false)
-        dataManager.saveAllStoredTranslations()
+  fun save(import: Import): Import {
+    return this.importRepository.save(import)
+  }
+
+  fun saveFile(importFile: ImportFile): ImportFile =
+    importFileRepository.save(importFile)
+
+  fun find(projectId: Long, authorId: Long) =
+    this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
+
+  fun findOrThrow(projectId: Long, authorId: Long) =
+    this.find(projectId, authorId) ?: throw NotFoundException()
+
+  fun findLanguages(import: Import) = importLanguageRepository.findAllByImport(import.id)
+
+  fun findKeys(import: Import) = importKeyRepository.findAllByImport(import.id)
+
+  fun saveLanguages(entries: Collection<ImportLanguage>) {
+    importLanguageRepository.saveAll(entries)
+  }
+
+  fun findTranslations(languageId: Long) =
+    this.importTranslationRepository.findAllByImportAndLanguageId(languageId)
+
+  fun saveTranslations(translations: List<ImportTranslation>) {
+    this.importTranslationRepository.saveAll(translations)
+  }
+
+  fun onExistingLanguageRemoved(language: Language) {
+    this.importLanguageRepository.removeExistingLanguageReference(language)
+  }
+
+  fun saveAllImports(imports: Iterable<Import>) {
+    this.importRepository.saveAll(imports)
+  }
+
+  fun saveAllFiles(files: Iterable<ImportFile>): MutableList<ImportFile>? {
+    return this.importFileRepository.saveAll(files)
+  }
+
+  fun onExistingTranslationsRemoved(translationIds: Collection<Long>) {
+    this.importTranslationRepository.removeExistingTranslationConflictReferences(translationIds)
+  }
+
+  fun getResult(projectId: Long, userId: Long, pageable: Pageable): Page<ImportLanguageView> {
+    return this.find(projectId, userId)?.let {
+      this.importLanguageRepository.findImportLanguagesView(it.id, pageable)
+    } ?: throw NotFoundException()
+  }
+
+  fun findLanguage(languageId: Long): ImportLanguage? {
+    return importLanguageRepository.findById(languageId).orElse(null)
+  }
+
+  fun findLanguageView(languageId: Long): ImportLanguageView? {
+    return importLanguageRepository.findViewById(languageId).orElse(null)
+  }
+
+  fun getTranslationsView(
+    languageId: Long,
+    pageable: Pageable,
+    onlyConflicts: Boolean,
+    onlyUnresolved: Boolean,
+    search: String? = null
+  ): Page<ImportTranslationView> {
+    return importTranslationRepository.findImportTranslationsView(
+      languageId, pageable, onlyConflicts, onlyUnresolved, search
+    )
+  }
+
+  fun deleteImport(import: Import) {
+    this.importTranslationRepository.deleteAllByImport(import)
+    this.importLanguageRepository.deleteAllByImport(import)
+    val keyIds = this.importKeyRepository.getAllIdsByImport(import)
+    this.keyMetaService.deleteAllByImportKeyIdIn(keyIds)
+    this.importKeyRepository.deleteByIdIn(keyIds)
+    this.importFileIssueParamRepository.deleteAllByImport(import)
+    this.importFileIssueRepository.deleteAllByImport(import)
+    this.importFileRepository.deleteAllByImport(import)
+    this.importRepository.delete(import)
+  }
+
+  @Transactional
+  fun deleteImport(projectId: Long, authorId: Long) =
+    this.deleteImport(findOrThrow(projectId, authorId))
+
+  @Transactional
+  fun deleteLanguage(language: ImportLanguage) {
+    val import = language.file.import
+    this.importTranslationRepository.deleteAllByLanguage(language)
+    this.importLanguageRepository.delete(language)
+    if (this.findLanguages(import = language.file.import).isEmpty()) {
+      deleteImport(import)
     }
+  }
 
-    fun save(import: Import): Import {
-        return this.importRepository.save(import)
+  fun findTranslation(translationId: Long): ImportTranslation? {
+    return importTranslationRepository.findById(translationId).orElse(null)
+  }
+
+  fun resolveTranslationConflict(translation: ImportTranslation, override: Boolean) {
+    translation.override = override
+    translation.resolve()
+    importTranslationRepository.save(translation)
+  }
+
+  fun resolveAllOfLanguage(language: ImportLanguage, override: Boolean) {
+    val translations = findTranslations(language.id)
+    translations.forEach {
+      it.resolve()
+      it.override = override
     }
+    this.importTranslationRepository.saveAll(translations)
+  }
 
-    fun saveFile(importFile: ImportFile): ImportFile =
-            importFileRepository.save(importFile)
+  fun findFile(fileId: Long): ImportFile? {
+    return importFileRepository.findById(fileId).orElse(null)
+  }
 
-    fun find(projectId: Long, authorId: Long) =
-            this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
+  fun getFileIssues(fileId: Long, pageable: Pageable): Page<ImportFileIssueView> {
+    return importFileIssueRepository.findAllByFileIdView(fileId, pageable)
+  }
 
-    fun findOrThrow(projectId: Long, authorId: Long) =
-            this.find(projectId, authorId) ?: throw NotFoundException()
+  fun saveAllKeys(keys: Iterable<ImportKey>): MutableList<ImportKey> = this.importKeyRepository.saveAll(keys)
 
-    fun findLanguages(import: Import) = importLanguageRepository.findAllByImport(import.id)
+  fun saveKey(entity: ImportKey): ImportKey = this.importKeyRepository.save(entity)
 
-    fun findKeys(import: Import) = importKeyRepository.findAllByImport(import.id)
+  fun saveAllFileIssues(issues: Iterable<ImportFileIssue>) {
+    this.importFileIssueRepository.saveAll(issues)
+  }
 
-    fun saveLanguages(entries: Collection<ImportLanguage>) {
-        importLanguageRepository.saveAll(entries)
-    }
+  fun getAllByProject(projectId: Long) =
+    this.importRepository.findAllByProjectId(projectId)
 
-    fun findTranslations(languageId: Long) =
-            this.importTranslationRepository.findAllByImportAndLanguageId(languageId)
-
-    fun saveTranslations(translations: List<ImportTranslation>) {
-        this.importTranslationRepository.saveAll(translations)
-    }
-
-    fun onExistingLanguageRemoved(language: Language) {
-        this.importLanguageRepository.removeExistingLanguageReference(language)
-    }
-
-    fun saveAllImports(imports: Iterable<Import>) {
-        this.importRepository.saveAll(imports)
-    }
-
-    fun saveAllFiles(files: Iterable<ImportFile>): MutableList<ImportFile>? {
-        return this.importFileRepository.saveAll(files)
-    }
-
-    fun onExistingTranslationsRemoved(translationIds: Collection<Long>) {
-        this.importTranslationRepository.removeExistingTranslationConflictReferences(translationIds)
-    }
-
-    fun getResult(projectId: Long, userId: Long, pageable: Pageable): Page<ImportLanguageView> {
-        return this.find(projectId, userId)?.let {
-            this.importLanguageRepository.findImportLanguagesView(it.id, pageable)
-        } ?: throw NotFoundException()
-    }
-
-    fun findLanguage(languageId: Long): ImportLanguage? {
-        return importLanguageRepository.findById(languageId).orElse(null)
-    }
-
-    fun findLanguageView(languageId: Long): ImportLanguageView? {
-        return importLanguageRepository.findViewById(languageId).orElse(null)
-    }
-
-    fun getTranslationsView(languageId: Long,
-                            pageable: Pageable,
-                            onlyConflicts: Boolean,
-                            onlyUnresolved: Boolean,
-                            search: String? = null
-    ): Page<ImportTranslationView> {
-        return importTranslationRepository.findImportTranslationsView(
-                languageId, pageable, onlyConflicts, onlyUnresolved, search)
-    }
-
-    fun deleteImport(import: Import) {
-        this.importTranslationRepository.deleteAllByImport(import)
-        this.importLanguageRepository.deleteAllByImport(import)
-        val keyIds = this.importKeyRepository.getAllIdsByImport(import)
-        this.keyMetaService.deleteAllByImportKeyIdIn(keyIds)
-        this.importKeyRepository.deleteByIdIn(keyIds)
-        this.importFileIssueParamRepository.deleteAllByImport(import)
-        this.importFileIssueRepository.deleteAllByImport(import)
-        this.importFileRepository.deleteAllByImport(import)
-        this.importRepository.delete(import)
-    }
-
-    @Transactional
-    fun deleteImport(projectId: Long, authorId: Long) =
-            this.deleteImport(findOrThrow(projectId, authorId))
-
-    @Transactional
-    fun deleteLanguage(language: ImportLanguage) {
-        val import = language.file.import
-        this.importTranslationRepository.deleteAllByLanguage(language)
-        this.importLanguageRepository.delete(language)
-        if (this.findLanguages(import = language.file.import).isEmpty()) {
-            deleteImport(import)
-        }
-    }
-
-    fun findTranslation(translationId: Long): ImportTranslation? {
-        return importTranslationRepository.findById(translationId).orElse(null)
-    }
-
-    fun resolveTranslationConflict(translation: ImportTranslation, override: Boolean) {
-        translation.override = override
-        translation.resolve()
-        importTranslationRepository.save(translation)
-    }
-
-    fun resolveAllOfLanguage(language: ImportLanguage, override: Boolean) {
-        val translations = findTranslations(language.id)
-        translations.forEach {
-            it.resolve()
-            it.override = override
-        }
-        this.importTranslationRepository.saveAll(translations)
-    }
-
-    fun findFile(fileId: Long): ImportFile? {
-        return importFileRepository.findById(fileId).orElse(null)
-    }
-
-    fun getFileIssues(fileId: Long, pageable: Pageable): Page<ImportFileIssueView> {
-        return importFileIssueRepository.findAllByFileIdView(fileId, pageable)
-    }
-
-    fun saveAllKeys(keys: Iterable<ImportKey>): MutableList<ImportKey> = this.importKeyRepository.saveAll(keys)
-
-    fun saveKey(entity: ImportKey): ImportKey = this.importKeyRepository.save(entity)
-
-    fun saveAllFileIssues(issues: Iterable<ImportFileIssue>) {
-        this.importFileIssueRepository.saveAll(issues)
-    }
-
-    fun getAllByProject(projectId: Long) =
-            this.importRepository.findAllByProjectId(projectId)
-
-    fun saveAllFileIssueParams(params: List<ImportFileIssueParam>): MutableList<ImportFileIssueParam> =
-            importFileIssueParamRepository.saveAll(params)
+  fun saveAllFileIssueParams(params: List<ImportFileIssueParam>): MutableList<ImportFileIssueParam> =
+    importFileIssueParamRepository.saveAll(params)
 }

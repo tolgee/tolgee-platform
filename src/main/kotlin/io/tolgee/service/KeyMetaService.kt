@@ -15,115 +15,123 @@ import javax.persistence.EntityManager
 
 @Service
 class KeyMetaService(
-        private val keyMetaRepository: KeyMetaRepository,
-        private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
-        private val keyCommentRepository: KeyCommentRepository,
-        private val entityManager: EntityManager
+  private val keyMetaRepository: KeyMetaRepository,
+  private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
+  private val keyCommentRepository: KeyCommentRepository,
+  private val entityManager: EntityManager
 ) {
-    fun saveAll(entities: Iterable<KeyMeta>): MutableList<KeyMeta> = keyMetaRepository.saveAll(entities)
+  fun saveAll(entities: Iterable<KeyMeta>): MutableList<KeyMeta> = keyMetaRepository.saveAll(entities)
 
-    fun saveAllComments(entities: Iterable<KeyComment>): MutableList<KeyComment> =
-            keyCommentRepository.saveAll(entities)
+  fun saveAllComments(entities: Iterable<KeyComment>): MutableList<KeyComment> =
+    keyCommentRepository.saveAll(entities)
 
-    fun saveAllCodeReferences(entities: Iterable<KeyCodeReference>): MutableList<KeyCodeReference> =
-            keyCodeReferenceRepository.saveAll(entities)
+  fun saveAllCodeReferences(entities: Iterable<KeyCodeReference>): MutableList<KeyCodeReference> =
+    keyCodeReferenceRepository.saveAll(entities)
 
-    fun import(target: KeyMeta, source: KeyMeta) {
-        target.comments.import(target, source.comments) { a, b ->
-            a.text == b.text && a.fromImport == b.fromImport
-        }
-        target.codeReferences.import(target, source.codeReferences) { a, b ->
-            a.line == b.line && a.path == b.path
-        }
+  fun import(target: KeyMeta, source: KeyMeta) {
+    target.comments.import(target, source.comments) { a, b ->
+      a.text == b.text && a.fromImport == b.fromImport
     }
-
-    private inline fun <T : WithKeyMetaReference> MutableList<T>.import(
-            target: KeyMeta,
-            other: MutableCollection<T>,
-            equalsFn: (a: T, b: T) -> Boolean
-    ) {
-        val toRemove = mutableListOf<WithKeyMetaReference>()
-        other.forEach { otherItem ->
-            if (!this.any { equalsFn(it, otherItem) }) {
-                this.add(otherItem)
-                toRemove.add(otherItem)
-                otherItem.keyMeta = target
-            }
-        }
-        other.removeAll(toRemove)
+    target.codeReferences.import(target, source.codeReferences) { a, b ->
+      a.line == b.line && a.path == b.path
     }
+  }
 
-    fun getWithFetchedData(import: Import): List<KeyMeta> {
-        var result: List<KeyMeta> = entityManager.createQuery("""
+  private inline fun <T : WithKeyMetaReference> MutableList<T>.import(
+    target: KeyMeta,
+    other: MutableCollection<T>,
+    equalsFn: (a: T, b: T) -> Boolean
+  ) {
+    val toRemove = mutableListOf<WithKeyMetaReference>()
+    other.forEach { otherItem ->
+      if (!this.any { equalsFn(it, otherItem) }) {
+        this.add(otherItem)
+        toRemove.add(otherItem)
+        otherItem.keyMeta = target
+      }
+    }
+    other.removeAll(toRemove)
+  }
+
+  fun getWithFetchedData(import: Import): List<KeyMeta> {
+    var result: List<KeyMeta> = entityManager.createQuery(
+      """
             select distinct ikm from KeyMeta ikm
             join fetch ikm.importKey ik
             left join fetch ikm.comments ikc
             join ik.files if
             where if.import = :import 
-            """)
-                .setParameter("import", import)
-                .setHint(PASS_DISTINCT_THROUGH, false)
-                .resultList as List<KeyMeta>
+            """
+    )
+      .setParameter("import", import)
+      .setHint(PASS_DISTINCT_THROUGH, false)
+      .resultList as List<KeyMeta>
 
-        result = entityManager.createQuery("""
+    result = entityManager.createQuery(
+      """
             select distinct ikm from KeyMeta ikm
             join ikm.importKey ik
             left join fetch ikm.codeReferences ikc
             join ik.files if
             where ikm in :metas 
-        """).setParameter("metas", result)
-                .setHint(PASS_DISTINCT_THROUGH, false)
-                .resultList as List<KeyMeta>
+        """
+    ).setParameter("metas", result)
+      .setHint(PASS_DISTINCT_THROUGH, false)
+      .resultList as List<KeyMeta>
 
-        return result
-    }
+    return result
+  }
 
-    fun getWithFetchedData(project: Project): List<KeyMeta> {
-        var result: List<KeyMeta> = entityManager.createQuery("""
+  fun getWithFetchedData(project: Project): List<KeyMeta> {
+    var result: List<KeyMeta> = entityManager.createQuery(
+      """
             select distinct ikm from KeyMeta ikm
             join fetch ikm.key k
             left join fetch ikm.comments ikc
             where k.project = :project 
-            """)
-                .setParameter("project", project)
-                .setHint(PASS_DISTINCT_THROUGH, false)
-                .resultList as List<KeyMeta>
+            """
+    )
+      .setParameter("project", project)
+      .setHint(PASS_DISTINCT_THROUGH, false)
+      .resultList as List<KeyMeta>
 
-        result = entityManager.createQuery("""
+    result = entityManager.createQuery(
+      """
             select distinct ikm from KeyMeta ikm
             join ikm.key k
             left join fetch ikm.codeReferences ikc
             where ikm in :metas 
-        """).setParameter("metas", result)
-                .setHint(PASS_DISTINCT_THROUGH, false)
-                .resultList as List<KeyMeta>
+        """
+    ).setParameter("metas", result)
+      .setHint(PASS_DISTINCT_THROUGH, false)
+      .resultList as List<KeyMeta>
 
-        return result
-    }
+    return result
+  }
 
-    fun deleteAllByProjectId(projectId: Long) {
-        keyMetaRepository.deleteAllKeyCodeReferencesByProjectId(projectId)
-        keyMetaRepository.deleteAllKeyCommentsByProjectId(projectId)
-        keyMetaRepository.deleteAllByProjectId(projectId)
-    }
+  fun deleteAllByProjectId(projectId: Long) {
+    keyMetaRepository.deleteAllKeyCodeReferencesByProjectId(projectId)
+    keyMetaRepository.deleteAllKeyCommentsByProjectId(projectId)
+    keyMetaRepository.deleteAllByProjectId(projectId)
+  }
 
-    fun save(meta: KeyMeta): KeyMeta = this.keyMetaRepository.save(meta)
+  fun save(meta: KeyMeta): KeyMeta = this.keyMetaRepository.save(meta)
 
-    fun deleteAllByImportKeyIdIn(keyIds: List<Long>) {
-        keyCommentRepository.deleteAllByImportKeyIds(keyIds)
-        keyCodeReferenceRepository.deleteAllByImportKeyIds(keyIds)
-        this.keyMetaRepository.deleteAllByImportKeyIdIn(keyIds)
-    }
+  fun deleteAllByImportKeyIdIn(keyIds: List<Long>) {
+    keyCommentRepository.deleteAllByImportKeyIds(keyIds)
+    keyCodeReferenceRepository.deleteAllByImportKeyIds(keyIds)
+    this.keyMetaRepository.deleteAllByImportKeyIdIn(keyIds)
+  }
 
-    fun deleteAllByKeyIdIn(ids: Collection<Long>) {
-        keyCommentRepository.deleteAllByKeyIds(ids)
-        keyCodeReferenceRepository.deleteAllByKeyIds(ids)
-        this.keyMetaRepository.deleteAllByKeyIds(ids)
-    }
+  fun deleteAllByKeyIdIn(ids: Collection<Long>) {
+    keyCommentRepository.deleteAllByKeyIds(ids)
+    keyCodeReferenceRepository.deleteAllByKeyIds(ids)
+    this.keyMetaRepository.deleteAllByKeyIds(ids)
+  }
 
-    fun deleteAllByKeyId(id: Long) {
-        keyCommentRepository.deleteAllByKeyId(id)
-        keyCodeReferenceRepository.deleteAllByKeyId(id)
-        this.keyMetaRepository.deleteAllByKeyId(id)
-    }
+  fun deleteAllByKeyId(id: Long) {
+    keyCommentRepository.deleteAllByKeyId(id)
+    keyCodeReferenceRepository.deleteAllByKeyId(id)
+    this.keyMetaRepository.deleteAllByKeyId(id)
+  }
 }

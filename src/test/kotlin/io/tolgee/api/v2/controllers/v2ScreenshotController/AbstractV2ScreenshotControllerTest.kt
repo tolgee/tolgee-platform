@@ -18,23 +18,28 @@ import org.testng.annotations.AfterClass
 import java.io.File
 
 abstract class AbstractV2ScreenshotControllerTest() : ProjectAuthControllerTest("/v2/projects/") {
-    @Value("classpath:screenshot.png")
-    lateinit var screenshotFile: Resource
+  @Value("classpath:screenshot.png")
+  lateinit var screenshotFile: Resource
 
-    @AfterClass
-    fun cleanUp() {
-        File("${tolgeeProperties.fileStorage.fsDataPath}/screenshots").deleteRecursively()
-    }
+  @AfterClass
+  fun cleanUp() {
+    File("${tolgeeProperties.fileStorage.fsDataPath}/screenshots").deleteRecursively()
+  }
 
-    protected fun performStoreScreenshot(project: Project, key: Key): ResultActions {
-        return performProjectAuthMultipart(
-                url = "keys/${key.id}/screenshots",
-                files = listOf(MockMultipartFile("screenshot", "originalShot.png", "image/png",
-                        screenshotFile.file.readBytes())))
-    }
+  protected fun performStoreScreenshot(project: Project, key: Key): ResultActions {
+    return performProjectAuthMultipart(
+      url = "keys/${key.id}/screenshots",
+      files = listOf(
+        MockMultipartFile(
+          "screenshot", "originalShot.png", "image/png",
+          screenshotFile.file.readBytes()
+        )
+      )
+    )
+  }
 
-    @Suppress("RedundantModalityModifier")
-    protected final inline fun <reified T> MvcResult.parseResponseTo(): T {
-        return jacksonObjectMapper().readValue(this.response.contentAsString)
-    }
+  @Suppress("RedundantModalityModifier")
+  protected final inline fun <reified T> MvcResult.parseResponseTo(): T {
+    return jacksonObjectMapper().readValue(this.response.contentAsString)
+  }
 }

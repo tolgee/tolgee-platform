@@ -25,82 +25,91 @@ import javax.validation.Valid
 @Suppress("MVCPathVariableInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = [
+@RequestMapping(
+  value = [
     "/api/project/{projectId}/sources",
     "/api/project/{projectId}/keys",
     "/api/project/keys"
-])
+  ]
+)
 @Deprecated("Use V2KeyController")
 @Tag(name = "Localization keys", description = "Manipulates localization keys and their translations and metadata")
 class KeyController(
-        private val keyService: KeyService,
-        private val securityService: SecurityService,
-        private val projectHolder: ProjectHolder,
-        private val translationService: TranslationService,
+  private val keyService: KeyService,
+  private val securityService: SecurityService,
+  private val projectHolder: ProjectHolder,
+  private val translationService: TranslationService,
 ) : IController {
 
-    @PostMapping(value = ["/create", ""])
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-    @Operation(summary = "Creates new key with specified translation data")
-    fun create(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: SetTranslationsWithKeyDto?) {
-        keyService.create(projectHolder.project, dto!!)
-    }
+  @PostMapping(value = ["/create", ""])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @Operation(summary = "Creates new key with specified translation data")
+  fun create(
+    @PathVariable("projectId") projectId: Long?,
+    @RequestBody @Valid dto: SetTranslationsWithKeyDto?
+  ) {
+    keyService.create(projectHolder.project, dto!!)
+  }
 
-    @PostMapping(value = ["/edit"])
-    @Operation(summary = "Edits key name")
-    @Deprecated("Uses wrong naming in body object, use \"PUT .\" - will be removed in 2.0")
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-    fun editDeprecated(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: DeprecatedEditKeyDTO?) {
-        keyService.edit(projectHolder.project, dto!!)
-    }
+  @PostMapping(value = ["/edit"])
+  @Operation(summary = "Edits key name")
+  @Deprecated("Uses wrong naming in body object, use \"PUT .\" - will be removed in 2.0")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  fun editDeprecated(
+    @PathVariable("projectId") projectId: Long?,
+    @RequestBody @Valid dto: DeprecatedEditKeyDTO?
+  ) {
+    keyService.edit(projectHolder.project, dto!!)
+  }
 
-    @PutMapping(value = [""])
-    @Operation(summary = "Edits key name")
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-    fun edit(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: OldEditKeyDto) {
-        keyService.edit(projectHolder.project, dto)
-    }
+  @PutMapping(value = [""])
+  @Operation(summary = "Edits key name")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  fun edit(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: OldEditKeyDto) {
+    keyService.edit(projectHolder.project, dto)
+  }
 
-    @GetMapping(value = ["{id}"])
-    @Operation(summary = "Returns key with specified id")
-    @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-    fun getDeprecated(@PathVariable("id") id: Long?): DeprecatedKeyDto {
-        val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-        securityService.checkAnyProjectPermission(key.project!!.id)
-        return DeprecatedKeyDto(key.name)
-    }
+  @GetMapping(value = ["{id}"])
+  @Operation(summary = "Returns key with specified id")
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
+  fun getDeprecated(@PathVariable("id") id: Long?): DeprecatedKeyDto {
+    val key = keyService.get(id!!).orElseThrow { NotFoundException() }
+    securityService.checkAnyProjectPermission(key.project!!.id)
+    return DeprecatedKeyDto(key.name)
+  }
 
-    @DeleteMapping(value = ["/{id}"])
-    @Operation(summary = "Deletes key with specified id")
-    fun delete(@PathVariable id: Long?) {
-        val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-        securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
-        keyService.delete(id)
-    }
+  @DeleteMapping(value = ["/{id}"])
+  @Operation(summary = "Deletes key with specified id")
+  fun delete(@PathVariable id: Long?) {
+    val key = keyService.get(id!!).orElseThrow { NotFoundException() }
+    securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
+    keyService.delete(id)
+  }
 
-    @DeleteMapping(value = [""])
-    @Transactional
-    @Operation(summary = "Deletes multiple keys by their IDs")
-    fun delete(@RequestBody ids: Set<Long>?) {
-        for (key in keyService.get(ids!!)) {
-            securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
-        }
-        keyService.deleteMultiple(ids)
+  @DeleteMapping(value = [""])
+  @Transactional
+  @Operation(summary = "Deletes multiple keys by their IDs")
+  fun delete(@RequestBody ids: Set<Long>?) {
+    for (key in keyService.get(ids!!)) {
+      securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
     }
+    keyService.deleteMultiple(ids)
+  }
 
-    @PostMapping(value = ["/translations/{languages}"])
-    @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
-    @AccessWithAnyProjectPermission
-    @Operation(
-            summary = "Returns translations for specific key by its name",
-            description = "Key name must be provided in method body, since it can be long and can contain characters hard to " +
-                    "encode")
-    fun getKeyTranslationsPost(
-            @RequestBody body: GetKeyTranslationsReqDto,
-            @PathVariable("languages") languages: Set<String>?
-    ): Map<String, String?> {
-        val projectId = projectHolder.project.id
-        val pathDTO = PathDTO.fromFullPath(body.key)
-        return translationService.getKeyTranslationsResult(projectId, pathDTO, languages)
-    }
+  @PostMapping(value = ["/translations/{languages}"])
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithAnyProjectPermission
+  @Operation(
+    summary = "Returns translations for specific key by its name",
+    description = "Key name must be provided in method body, since it can be long and can contain characters hard to " +
+      "encode"
+  )
+  fun getKeyTranslationsPost(
+    @RequestBody body: GetKeyTranslationsReqDto,
+    @PathVariable("languages") languages: Set<String>?
+  ): Map<String, String?> {
+    val projectId = projectHolder.project.id
+    val pathDTO = PathDTO.fromFullPath(body.key)
+    return translationService.getKeyTranslationsResult(projectId, pathDTO, languages)
+  }
 }

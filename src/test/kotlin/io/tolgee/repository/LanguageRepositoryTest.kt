@@ -13,16 +13,15 @@ import javax.persistence.EntityManager
 @Transactional
 class LanguageRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
 
-    @Autowired
-    lateinit var importService: ImportService
+  @Autowired
+  lateinit var importService: ImportService
 
-    @Autowired
-    lateinit var languageService: LanguageService
+  @Autowired
+  lateinit var languageService: LanguageService
 
-    @Autowired
-    lateinit var testDataService: TestDataService
+  @Autowired
+  lateinit var testDataService: TestDataService
 
-    @Autowired
-    lateinit var entityManager: EntityManager
+  @Autowired
+  lateinit var entityManager: EntityManager
 }
-

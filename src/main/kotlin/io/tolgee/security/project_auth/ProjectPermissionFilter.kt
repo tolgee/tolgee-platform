@@ -17,61 +17,67 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class ProjectPermissionFilter(
-        private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
-        private val securityService: SecurityService,
-        @param:Qualifier("handlerExceptionResolver")
-        private val resolver: HandlerExceptionResolver,
-        private val projectHolder: ProjectHolder,
-        private val projectService: ProjectService,
-        private val authenticationFacade: AuthenticationFacade
+  private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
+  private val securityService: SecurityService,
+  @param:Qualifier("handlerExceptionResolver")
+  private val resolver: HandlerExceptionResolver,
+  private val projectHolder: ProjectHolder,
+  private val projectService: ProjectService,
+  private val authenticationFacade: AuthenticationFacade
 
 ) : OncePerRequestFilter() {
 
-    companion object {
-        const val REGEX = "/(?:v2|api)/(?:repositor(?:y|ies)|projects?)/([0-9]+)/?.*"
-    }
+  companion object {
+    const val REGEX = "/(?:v2|api)/(?:repositor(?:y|ies)|projects?)/([0-9]+)/?.*"
+  }
 
-    override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
-        val matchRegex = REGEX.toRegex()
-        if (request.requestURI.matches(matchRegex) && authenticationFacade.authentication?.isAuthenticated == true) {
-            val specificPermissionAnnotation = getSpecificPermissionAnnotation(request)
-            val anyPermissionAnnotation = getAnyPermissionAnnotation(request)
+  override fun doFilterInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    filterChain: FilterChain
+  ) {
+    val matchRegex = REGEX.toRegex()
+    if (request.requestURI.matches(matchRegex) && authenticationFacade.authentication?.isAuthenticated == true) {
+      val specificPermissionAnnotation = getSpecificPermissionAnnotation(request)
+      val anyPermissionAnnotation = getAnyPermissionAnnotation(request)
 
-            if (specificPermissionAnnotation != null && anyPermissionAnnotation != null) {
-                throw Exception("Cannot use both AccessWithProjectPermission" +
-                        " and AccessWithAnyProjectPermission annotations.")
-            }
+      if (specificPermissionAnnotation != null && anyPermissionAnnotation != null) {
+        throw Exception(
+          "Cannot use both AccessWithProjectPermission" +
+            " and AccessWithAnyProjectPermission annotations."
+        )
+      }
 
-            try {
-                val projectId = request.projectId
-                projectHolder.project = projectService.get(projectId).orElseThrow { NotFoundException() }!!
+      try {
+        val projectId = request.projectId
+        projectHolder.project = projectService.get(projectId).orElseThrow { NotFoundException() }!!
 
-                if (specificPermissionAnnotation != null) {
-                    securityService.checkProjectPermission(projectId, specificPermissionAnnotation.permission)
-                }
-
-                if (anyPermissionAnnotation != null) {
-                    securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.VIEW)
-                }
-            } catch (e: Exception) {
-                resolver.resolveException(request, response, null, e)
-                return
-            }
+        if (specificPermissionAnnotation != null) {
+          securityService.checkProjectPermission(projectId, specificPermissionAnnotation.permission)
         }
-        filterChain.doFilter(request, response)
-    }
 
-    private val HttpServletRequest.projectId
-        get() = this.requestURI
-                .replace(REGEX.toRegex(), "$1").toLong()
-
-    private fun getSpecificPermissionAnnotation(request: HttpServletRequest): AccessWithProjectPermission? {
-        val handlerMethod = (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
-        return handlerMethod?.getMethodAnnotation(AccessWithProjectPermission::class.java)
+        if (anyPermissionAnnotation != null) {
+          securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.VIEW)
+        }
+      } catch (e: Exception) {
+        resolver.resolveException(request, response, null, e)
+        return
+      }
     }
+    filterChain.doFilter(request, response)
+  }
 
-    private fun getAnyPermissionAnnotation(request: HttpServletRequest): AccessWithAnyProjectPermission? {
-        val handlerMethod = (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
-        return handlerMethod?.getMethodAnnotation(AccessWithAnyProjectPermission::class.java)
-    }
+  private val HttpServletRequest.projectId
+    get() = this.requestURI
+      .replace(REGEX.toRegex(), "$1").toLong()
+
+  private fun getSpecificPermissionAnnotation(request: HttpServletRequest): AccessWithProjectPermission? {
+    val handlerMethod = (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
+    return handlerMethod?.getMethodAnnotation(AccessWithProjectPermission::class.java)
+  }
+
+  private fun getAnyPermissionAnnotation(request: HttpServletRequest): AccessWithAnyProjectPermission? {
+    val handlerMethod = (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
+    return handlerMethod?.getMethodAnnotation(AccessWithAnyProjectPermission::class.java)
+  }
 }

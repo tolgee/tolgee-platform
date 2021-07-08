@@ -8,18 +8,21 @@ import org.springframework.stereotype.Component
 
 @Component
 class UserAccountInProjectModelAssembler(
-        val permissionService: PermissionService
+  val permissionService: PermissionService
 ) : RepresentationModelAssemblerSupport<UserAccountInProjectView, UserAccountInProjectModel>(
-        UserController::class.java, UserAccountInProjectModel::class.java) {
-    override fun toModel(view: UserAccountInProjectView): UserAccountInProjectModel {
-        return UserAccountInProjectModel(
-                view.id,
-                view.username,
-                view.name,
-                view.organizationRole,
-                view.organizationBasePermissions,
-                view.directPermissions,
-                permissionService.computeProjectPermissionType(view.organizationRole, view.organizationBasePermissions, view.directPermissions)!!
-        )
-    }
+  UserController::class.java, UserAccountInProjectModel::class.java
+) {
+  override fun toModel(view: UserAccountInProjectView): UserAccountInProjectModel {
+    return UserAccountInProjectModel(
+      view.id,
+      view.username,
+      view.name,
+      view.organizationRole,
+      view.organizationBasePermissions,
+      view.directPermissions,
+      permissionService.computeProjectPermissionType(
+        view.organizationRole, view.organizationBasePermissions, view.directPermissions
+      )!!
+    )
+  }
 }

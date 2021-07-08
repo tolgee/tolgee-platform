@@ -15,28 +15,32 @@ import org.testng.annotations.Test
 @SpringBootTest(properties = ["tolgee.internal.controllerEnabled=true"])
 class SqlControllerTest : AbstractControllerTest() {
 
-    @Suppress("RedundantModalityModifier")
-    final inline fun <reified T> MvcResult.parseResponseTo(): T {
-        return jacksonObjectMapper().readValue(this.response.contentAsString)
-    }
+  @Suppress("RedundantModalityModifier")
+  final inline fun <reified T> MvcResult.parseResponseTo(): T {
+    return jacksonObjectMapper().readValue(this.response.contentAsString)
+  }
 
-    @Test
-    fun getList() {
-        dbPopulator.createBase("Test")
-        val parseResponseTo: List<Any> = mvc.perform(post("/internal/sql/list")
-                .content("select * from user_account"))
-                .andExpect(status().isOk).andReturn().parseResponseTo()
+  @Test
+  fun getList() {
+    dbPopulator.createBase("Test")
+    val parseResponseTo: List<Any> = mvc.perform(
+      post("/internal/sql/list")
+        .content("select * from user_account")
+    )
+      .andExpect(status().isOk).andReturn().parseResponseTo()
 
-        assertThat(parseResponseTo).isNotEmpty
-    }
+    assertThat(parseResponseTo).isNotEmpty
+  }
 
-    @Test
-    fun delete() {
-        val repo = dbPopulator.createBase("Test")
-        mvc.perform(post("/internal/sql/execute")
-                .content("delete from permission"))
-                .andExpect(status().isOk).andReturn()
+  @Test
+  fun delete() {
+    val repo = dbPopulator.createBase("Test")
+    mvc.perform(
+      post("/internal/sql/execute")
+        .content("delete from permission")
+    )
+      .andExpect(status().isOk).andReturn()
 
-        assertThat(permissionService.getAllOfProject(repo)).isEmpty()
-    }
+    assertThat(permissionService.getAllOfProject(repo)).isEmpty()
+  }
 }

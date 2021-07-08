@@ -24,126 +24,126 @@ import javax.persistence.EntityManager
 @Transactional
 @InternalController
 class ImportE2eDataController(
-        private val importService: ImportService,
-        private val entityManager: EntityManager,
-        private val testDataService: TestDataService,
-        private val projectService: ProjectService,
-        private val userAccountService: UserAccountService
+  private val importService: ImportService,
+  private val entityManager: EntityManager,
+  private val testDataService: TestDataService,
+  private val projectService: ProjectService,
+  private val userAccountService: UserAccountService
 ) {
-    @GetMapping(value = ["/generate"])
-    @Transactional
-    fun generateBasicTestData(): Import {
-        val data = ImportTestData()
-        data.addFileIssues()
-        testDataService.saveTestData(data.root)
-        return data.importBuilder.self
-    }
+  @GetMapping(value = ["/generate"])
+  @Transactional
+  fun generateBasicTestData(): Import {
+    val data = ImportTestData()
+    data.addFileIssues()
+    testDataService.saveTestData(data.root)
+    return data.importBuilder.self
+  }
 
-    @GetMapping(value = ["/generate-with-long-text"])
-    @Transactional
-    fun generateWithLongText(): Import {
-        val data = ImportTestData()
-        data.importBuilder.data.importFiles[0].data.importTranslations[0].self {
-            text = "Hello, I am translation, with pretty long long long long long long long long long " +
-                    "long long long long long long long long long long long long long long long long " +
-                    "long long long long long long long long long long text"
-            conflict!!.text = "Hello, I am old translation, with pretty long long long long long long long long long " +
-                    "long long long long long long long long long long long long long long long long " +
-                    "long long long long long long long long long long text"
+  @GetMapping(value = ["/generate-with-long-text"])
+  @Transactional
+  fun generateWithLongText(): Import {
+    val data = ImportTestData()
+    data.importBuilder.data.importFiles[0].data.importTranslations[0].self {
+      text = "Hello, I am translation, with pretty long long long long long long long long long " +
+        "long long long long long long long long long long long long long long long long " +
+        "long long long long long long long long long long text"
+      conflict!!.text = "Hello, I am old translation, with pretty long long long long long long long long long " +
+        "long long long long long long long long long long long long long long long long " +
+        "long long long long long long long long long long text"
+    }
+    data.addFileIssues()
+    testDataService.saveTestData(data.root)
+    return data.importBuilder.self
+  }
+
+  @GetMapping(value = ["/generate-applicable"])
+  @Transactional
+  fun generateApplicableTestData(): Import {
+    val data = ImportTestData()
+    data.setAllResolved()
+    data.addFileIssues()
+    data.importFrench.existingLanguage = data.french
+    testDataService.saveTestData(data.root)
+    return data.importBuilder.self
+  }
+
+  @GetMapping(value = ["/generate-all-selected"])
+  @Transactional
+  fun generateAllSelectedTestData(): Import {
+    val data = ImportTestData()
+    data.addFileIssues()
+    data.importFrench.existingLanguage = data.french
+    testDataService.saveTestData(data.root)
+    return data.importBuilder.self
+  }
+
+  @GetMapping(value = ["/generate-lot-of-data"])
+  @Transactional
+  fun generateLotTestData(): Import {
+    val data = ImportTestData()
+    data.addFileIssues()
+    data.addManyFileIssues()
+    data.addManyTranslations()
+    testDataService.saveTestData(data.root)
+    return data.importBuilder.self
+  }
+
+  @GetMapping(value = ["/generate-many-languages"])
+  @Transactional
+  fun addManyLanguages(): Import {
+    val data = ImportTestData()
+    val file = data.importBuilder.data.importFiles[0]
+    (0..90).forEach {
+      file.addImportLanguage {
+        self {
+          name = "lng $it"
         }
-        data.addFileIssues()
-        testDataService.saveTestData(data.root)
-        return data.importBuilder.self
+      }
     }
+    testDataService.saveTestData(data.root)
+    return data.importBuilder.self
+  }
 
-    @GetMapping(value = ["/generate-applicable"])
-    @Transactional
-    fun generateApplicableTestData(): Import {
-        val data = ImportTestData()
-        data.setAllResolved()
-        data.addFileIssues()
-        data.importFrench.existingLanguage = data.french
-        testDataService.saveTestData(data.root)
-        return data.importBuilder.self
-    }
-
-    @GetMapping(value = ["/generate-all-selected"])
-    @Transactional
-    fun generateAllSelectedTestData(): Import {
-        val data = ImportTestData()
-        data.addFileIssues()
-        data.importFrench.existingLanguage = data.french
-        testDataService.saveTestData(data.root)
-        return data.importBuilder.self
-    }
-
-    @GetMapping(value = ["/generate-lot-of-data"])
-    @Transactional
-    fun generateLotTestData(): Import {
-        val data = ImportTestData()
-        data.addFileIssues()
-        data.addManyFileIssues()
-        data.addManyTranslations()
-        testDataService.saveTestData(data.root)
-        return data.importBuilder.self
-    }
-
-    @GetMapping(value = ["/generate-many-languages"])
-    @Transactional
-    fun addManyLanguages(): Import {
-        val data = ImportTestData()
-        val file = data.importBuilder.data.importFiles[0]
-        (0..90).forEach {
-            file.addImportLanguage {
-                self {
-                    name = "lng $it"
-                }
+  @GetMapping(value = ["/generate-base"])
+  @Transactional
+  fun generateBaseData(): Project {
+    val data = testDataService.saveTestData {
+      addUserAccount {
+        self {
+          username = "franta"
+          name = "Frantisek Dobrota"
+        }
+        addProject {
+          self {
+            userOwner = this@addUserAccount.self
+            name = "Repo"
+          }
+          addPermission {
+            self {
+              type = Permission.ProjectPermissionType.MANAGE
+              user = this@addUserAccount.self
+              project = this@addProject.self
             }
+          }
         }
-        testDataService.saveTestData(data.root)
-        return data.importBuilder.self
+      }
     }
 
-    @GetMapping(value = ["/generate-base"])
-    @Transactional
-    fun generateBaseData(): Project {
-        val data = testDataService.saveTestData {
-            addUserAccount {
-                self {
-                    username = "franta"
-                    name = "Frantisek Dobrota"
-                }
-                addProject {
-                    self {
-                        userOwner = this@addUserAccount.self
-                        name = "Repo"
-                    }
-                    addPermission {
-                        self {
-                            type = Permission.ProjectPermissionType.MANAGE
-                            user = this@addUserAccount.self
-                            project = this@addProject.self
-                        }
-                    }
-                }
-            }
-        }
+    testDataService.saveTestData(data)
+    return data.data.projects[0].self
+  }
 
-        testDataService.saveTestData(data)
-        return data.data.projects[0].self
+  @GetMapping(value = ["/clean"])
+  @Transactional
+  fun cleanup() {
+    entityManager.createQuery("select i from Import i").resultList.forEach {
+      importService.deleteImport(it as Import)
     }
-
-    @GetMapping(value = ["/clean"])
-    @Transactional
-    fun cleanup() {
-        entityManager.createQuery("select i from Import i").resultList.forEach {
-            importService.deleteImport(it as Import)
-        }
-        userAccountService.getByUserName("franta").orElse(null)?.let {
-            projectService.findAllPermitted(it).forEach { repo ->
-                projectService.deleteProject(repo.id!!)
-            }
-            userAccountService.delete(it)
-        }
+    userAccountService.getByUserName("franta").orElse(null)?.let {
+      projectService.findAllPermitted(it).forEach { repo ->
+        projectService.deleteProject(repo.id!!)
+      }
+      userAccountService.delete(it)
     }
+  }
 }

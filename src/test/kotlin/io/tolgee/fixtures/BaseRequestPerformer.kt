@@ -14,35 +14,34 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 @Scope("prototype")
 open class BaseRequestPerformer : RequestPerformer {
 
-    @field:Autowired
-    lateinit var mvc: MockMvc
+  @field:Autowired
+  lateinit var mvc: MockMvc
 
-    override fun perform(builder: MockHttpServletRequestBuilder): ResultActions {
-        return try {
-            mvc.perform(builder)
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
+  override fun perform(builder: MockHttpServletRequestBuilder): ResultActions {
+    return try {
+      mvc.perform(builder)
+    } catch (e: Exception) {
+      throw RuntimeException(e)
     }
+  }
 
-    override fun performPut(url: String, content: Any?): ResultActions {
-        return perform(MockMvcRequestBuilders.put(url).withJsonContent(content))
-    }
+  override fun performPut(url: String, content: Any?): ResultActions {
+    return perform(MockMvcRequestBuilders.put(url).withJsonContent(content))
+  }
 
-    override fun performPost(url: String, content: Any?): ResultActions {
-        return mvc.perform(MockMvcRequestBuilders.post(url).withJsonContent(content))
-    }
+  override fun performPost(url: String, content: Any?): ResultActions {
+    return mvc.perform(MockMvcRequestBuilders.post(url).withJsonContent(content))
+  }
 
-    override fun performGet(url: String): ResultActions {
-        return perform(MockMvcRequestBuilders.get(url))
-    }
+  override fun performGet(url: String): ResultActions {
+    return perform(MockMvcRequestBuilders.get(url))
+  }
 
-    override fun performDelete(url: String, content: Any?): ResultActions {
-        return perform(MockMvcRequestBuilders.delete(url).withJsonContent(content))
-    }
+  override fun performDelete(url: String, content: Any?): ResultActions {
+    return perform(MockMvcRequestBuilders.delete(url).withJsonContent(content))
+  }
 
-    protected fun MockHttpServletRequestBuilder.withJsonContent(content: Any?): MockHttpServletRequestBuilder {
-        return this.contentType(MediaType.APPLICATION_JSON).content(JsonHelper.asJsonString(content))
-    }
-
+  protected fun MockHttpServletRequestBuilder.withJsonContent(content: Any?): MockHttpServletRequestBuilder {
+    return this.contentType(MediaType.APPLICATION_JSON).content(JsonHelper.asJsonString(content))
+  }
 }

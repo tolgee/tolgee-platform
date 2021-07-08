@@ -7,11 +7,11 @@ import javax.validation.constraints.NotBlank
 
 @Validated
 data class CreateKeyDto(
-        /**
-         * Key full path is stored as name in entity
-         */
-        @Schema(description = "Name of the key")
-        @field:NotBlank
-        @field:Length(max = 200, min = 1)
-        val name: String = "",
+  /**
+   * Key full path is stored as name in entity
+   */
+  @Schema(description = "Name of the key")
+  @field:NotBlank
+  @field:Length(max = 200, min = 1)
+  val name: String = "",
 )

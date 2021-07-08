@@ -24,50 +24,52 @@ import javax.validation.Valid
 @Suppress("MVCPathVariableInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = [
+@RequestMapping(
+  value = [
     "/v2/projects/{projectId}/keys",
     "/v2/projects/keys"
-])
+  ]
+)
 @Tag(name = "Localization keys", description = "Manipulates localization keys and their translations and metadata")
 class V2KeyController(
-        private val keyService: KeyService,
-        private val projectHolder: ProjectHolder,
-        private val keyModelAssembler: KeyModelAssembler
+  private val keyService: KeyService,
+  private val projectHolder: ProjectHolder,
+  private val keyModelAssembler: KeyModelAssembler
 ) : IController {
 
-    @PostMapping(value = ["/create", ""])
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-    @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
-    @Operation(summary = "Creates new key")
-    @ResponseStatus(HttpStatus.CREATED)
-    fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyModel> {
-        return ResponseEntity(keyService.create(projectHolder.project, dto.name).model, HttpStatus.CREATED)
-    }
+  @PostMapping(value = ["/create", ""])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  @Operation(summary = "Creates new key")
+  @ResponseStatus(HttpStatus.CREATED)
+  fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyModel> {
+    return ResponseEntity(keyService.create(projectHolder.project, dto.name).model, HttpStatus.CREATED)
+  }
 
-    @PutMapping(value = ["/{id}"])
-    @Operation(summary = "Edits key name")
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-    @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
-    fun edit(@PathVariable id: Long, @RequestBody @Valid dto: EditKeyDto): KeyModel {
-        val key = keyService.get(id).orElseThrow { NotFoundException() }
-        key.checkInProject()
-        return keyService.edit(projectHolder.project, id, dto).model
-    }
+  @PutMapping(value = ["/{id}"])
+  @Operation(summary = "Edits key name")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  fun edit(@PathVariable id: Long, @RequestBody @Valid dto: EditKeyDto): KeyModel {
+    val key = keyService.get(id).orElseThrow { NotFoundException() }
+    key.checkInProject()
+    return keyService.edit(projectHolder.project, id, dto).model
+  }
 
-    @DeleteMapping(value = ["/{ids:[0-9,]+}"])
-    @Transactional
-    @Operation(summary = "Deletes one or multiple keys by their IDs")
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-    @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
-    fun delete(@PathVariable ids: Set<Long>) {
-        keyService.get(ids).forEach { it.checkInProject() }
-        keyService.deleteMultiple(ids)
-    }
+  @DeleteMapping(value = ["/{ids:[0-9,]+}"])
+  @Transactional
+  @Operation(summary = "Deletes one or multiple keys by their IDs")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  fun delete(@PathVariable ids: Set<Long>) {
+    keyService.get(ids).forEach { it.checkInProject() }
+    keyService.deleteMultiple(ids)
+  }
 
-    private fun Key.checkInProject() {
-        keyService.checkInProject(this, projectHolder.project)
-    }
+  private fun Key.checkInProject() {
+    keyService.checkInProject(this, projectHolder.project)
+  }
 
-    private val Key.model: KeyModel
-        get() = keyModelAssembler.toModel(this)
+  private val Key.model: KeyModel
+    get() = keyModelAssembler.toModel(this)
 }

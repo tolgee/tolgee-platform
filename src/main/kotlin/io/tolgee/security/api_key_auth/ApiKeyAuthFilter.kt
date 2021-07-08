@@ -18,44 +18,48 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class ApiKeyAuthFilter(
-        private val apiKeyService: ApiKeyService,
-        private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
-        private val securityService: SecurityService,
-        private val projectHolder: ProjectHolder,
-        @param:Qualifier("handlerExceptionResolver")
-        private val resolver: HandlerExceptionResolver,
+  private val apiKeyService: ApiKeyService,
+  private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
+  private val securityService: SecurityService,
+  private val projectHolder: ProjectHolder,
+  @param:Qualifier("handlerExceptionResolver")
+  private val resolver: HandlerExceptionResolver,
 ) : OncePerRequestFilter() {
 
-    override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
-        if (this.isApiAccessAllowed(request)) {
-            val keyParameter = request.getParameter("ak")
-            if (keyParameter != null && !keyParameter.isEmpty()) {
-                val ak = apiKeyService.getApiKey(keyParameter)
-                if (ak.isPresent) {
-                    val apiKeyAuthenticationToken = ApiKeyAuthenticationToken(ak.get())
-                    SecurityContextHolder.getContext().authentication = apiKeyAuthenticationToken
+  override fun doFilterInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    filterChain: FilterChain
+  ) {
+    if (this.isApiAccessAllowed(request)) {
+      val keyParameter = request.getParameter("ak")
+      if (keyParameter != null && !keyParameter.isEmpty()) {
+        val ak = apiKeyService.getApiKey(keyParameter)
+        if (ak.isPresent) {
+          val apiKeyAuthenticationToken = ApiKeyAuthenticationToken(ak.get())
+          SecurityContextHolder.getContext().authentication = apiKeyAuthenticationToken
 
-                    val apiScopes = this.getAccessAllowedAnnotation(request)!!.scopes
-                    try {
-                        val key = ak.get()
-                        securityService.checkApiKeyScopes(setOf(*apiScopes), key)
-                        projectHolder.project = key.project ?: throw NotFoundException()
-                    } catch (e: PermissionException) {
-                        resolver.resolveException(request, response, null, e)
-                        return
-                    }
-                }
-            }
+          val apiScopes = this.getAccessAllowedAnnotation(request)!!.scopes
+          try {
+            val key = ak.get()
+            securityService.checkApiKeyScopes(setOf(*apiScopes), key)
+            projectHolder.project = key.project ?: throw NotFoundException()
+          } catch (e: PermissionException) {
+            resolver.resolveException(request, response, null, e)
+            return
+          }
         }
-        filterChain.doFilter(request, response)
+      }
     }
+    filterChain.doFilter(request, response)
+  }
 
-    private fun isApiAccessAllowed(request: HttpServletRequest): Boolean {
-        return this.getAccessAllowedAnnotation(request) != null
-    }
+  private fun isApiAccessAllowed(request: HttpServletRequest): Boolean {
+    return this.getAccessAllowedAnnotation(request) != null
+  }
 
-    private fun getAccessAllowedAnnotation(request: HttpServletRequest): AccessWithApiKey? {
-        return (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
-                ?.getMethodAnnotation(AccessWithApiKey::class.java) ?: return null
-    }
+  private fun getAccessAllowedAnnotation(request: HttpServletRequest): AccessWithApiKey? {
+    return (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
+      ?.getMethodAnnotation(AccessWithApiKey::class.java) ?: return null
+  }
 }

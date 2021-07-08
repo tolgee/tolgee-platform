@@ -1,3 +1,3 @@
 package io.tolgee.controllers
 
-interface IController 
+interface IController

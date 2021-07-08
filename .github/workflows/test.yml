@@ -307,6 +307,32 @@ jobs:
             ~/node_modules.tgz
             ~/cypress_cache.tgz
 
+  backend-code-checks:
+    name: Ktlint 🪲
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Run ktlint
+        run: ./gradlew ktlint
+
   cleanup:
     needs: [ e2e, backend-test ]
     name: Delete artifacts 🧹

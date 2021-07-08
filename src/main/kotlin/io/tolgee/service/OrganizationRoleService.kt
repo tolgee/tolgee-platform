@@ -19,125 +19,132 @@ import javax.persistence.EntityManager
 @Service
 @Transactional
 open class OrganizationRoleService(
-        private val organizationRoleRepository: OrganizationRoleRepository,
-        private val authenticationFacade: AuthenticationFacade,
-        private val userAccountService: UserAccountService,
-        private val entityManager: EntityManager
+  private val organizationRoleRepository: OrganizationRoleRepository,
+  private val authenticationFacade: AuthenticationFacade,
+  private val userAccountService: UserAccountService,
+  private val entityManager: EntityManager
 ) {
 
-    open fun checkUserIsOwner(userId: Long, organizationId: Long) {
-        if (this.isUserOwner(userId, organizationId)) return else throw PermissionException()
-    }
+  open fun checkUserIsOwner(userId: Long, organizationId: Long) {
+    if (this.isUserOwner(userId, organizationId)) return else throw PermissionException()
+  }
 
-    open fun checkUserIsOwner(organizationId: Long) {
-        this.checkUserIsOwner(authenticationFacade.userAccount.id!!, organizationId)
-    }
+  open fun checkUserIsOwner(organizationId: Long) {
+    this.checkUserIsOwner(authenticationFacade.userAccount.id!!, organizationId)
+  }
 
-    open fun checkUserIsMemberOrOwner(userId: Long, organizationId: Long) {
-        if (isUserMemberOrOwner(userId, organizationId)) {
-            return
-        }
-        throw PermissionException()
+  open fun checkUserIsMemberOrOwner(userId: Long, organizationId: Long) {
+    if (isUserMemberOrOwner(userId, organizationId)) {
+      return
     }
+    throw PermissionException()
+  }
 
-    open fun checkUserIsMemberOrOwner(organizationId: Long) {
-        this.checkUserIsMemberOrOwner(this.authenticationFacade.userAccount.id!!, organizationId)
-    }
+  open fun checkUserIsMemberOrOwner(organizationId: Long) {
+    this.checkUserIsMemberOrOwner(this.authenticationFacade.userAccount.id!!, organizationId)
+  }
 
-    open fun isUserMemberOrOwner(userId: Long, organizationId: Long): Boolean {
-        val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
-        if (role != null) {
-            return true
-        }
-        return false
+  open fun isUserMemberOrOwner(userId: Long, organizationId: Long): Boolean {
+    val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
+    if (role != null) {
+      return true
     }
+    return false
+  }
 
-    open fun isUserOwner(userId: Long, organizationId: Long): Boolean {
-        val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
-        if (role?.type == OrganizationRoleType.OWNER) {
-            return true
-        }
-        return false
+  open fun isUserOwner(userId: Long, organizationId: Long): Boolean {
+    val role = organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
+    if (role?.type == OrganizationRoleType.OWNER) {
+      return true
     }
+    return false
+  }
 
-    open fun getTypeOrThrow(userId: Long, organizationId: Long): OrganizationRoleType {
-        organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
-                ?.let { return it.type!! }
-        throw PermissionException()
-    }
+  open fun getTypeOrThrow(userId: Long, organizationId: Long): OrganizationRoleType {
+    organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
+      ?.let { return it.type!! }
+    throw PermissionException()
+  }
 
-    open fun getTypeOrThrow(organizationId: Long): OrganizationRoleType {
-        return getTypeOrThrow(authenticationFacade.userAccount.id!!, organizationId)
-    }
+  open fun getTypeOrThrow(organizationId: Long): OrganizationRoleType {
+    return getTypeOrThrow(authenticationFacade.userAccount.id!!, organizationId)
+  }
 
-    open fun getType(userId: Long, organizationId: Long): OrganizationRoleType? {
-        organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
-                ?.let { return it.type }
-        return null
-    }
+  open fun getType(userId: Long, organizationId: Long): OrganizationRoleType? {
+    organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
+      ?.let { return it.type }
+    return null
+  }
 
-    open fun grantRoleToUser(user: UserAccount, organization: Organization, organizationRoleType: OrganizationRoleType) {
-        OrganizationRole(user = user, organization = organization, type = organizationRoleType)
-                .let {
-                    organizationRoleRepository.save(it)
-                    organization.memberRoles.add(it)
-                    entityManager.merge(user).organizationRoles.add(it)
-                }
-    }
+  open fun grantRoleToUser(
+    user: UserAccount,
+    organization: Organization,
+    organizationRoleType: OrganizationRoleType
+  ) {
+    OrganizationRole(user = user, organization = organization, type = organizationRoleType)
+      .let {
+        organizationRoleRepository.save(it)
+        organization.memberRoles.add(it)
+        entityManager.merge(user).organizationRoles.add(it)
+      }
+  }
 
-    open fun leave(organizationId: Long) {
-        this.removeUser(organizationId, authenticationFacade.userAccount.id!!)
-    }
+  open fun leave(organizationId: Long) {
+    this.removeUser(organizationId, authenticationFacade.userAccount.id!!)
+  }
 
-    open fun removeUser(organizationId: Long, userId: Long) {
-        organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
-            organizationRoleRepository.delete(it)
-        }
+  open fun removeUser(organizationId: Long, userId: Long) {
+    organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
+      organizationRoleRepository.delete(it)
     }
+  }
 
-    open fun deleteAllInOrganization(organization: Organization) {
-        organizationRoleRepository.deleteByOrganization(organization)
-    }
+  open fun deleteAllInOrganization(organization: Organization) {
+    organizationRoleRepository.deleteByOrganization(organization)
+  }
 
-    open fun delete(id: Long) {
-        organizationRoleRepository.deleteById(id)
-    }
+  open fun delete(id: Long) {
+    organizationRoleRepository.deleteById(id)
+  }
 
-    open fun grantMemberRoleToUser(user: UserAccount, organization: Organization) {
-        this.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.MEMBER)
-    }
+  open fun grantMemberRoleToUser(user: UserAccount, organization: Organization) {
+    this.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.MEMBER)
+  }
 
-    open fun grantOwnerRoleToUser(user: UserAccount, organization: Organization) {
-        this.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.OWNER)
-    }
+  open fun grantOwnerRoleToUser(user: UserAccount, organization: Organization) {
+    this.grantRoleToUser(user, organization, organizationRoleType = OrganizationRoleType.OWNER)
+  }
 
-    open fun setMemberRole(organizationId: Long, userId: Long, dto: SetOrganizationRoleDto) {
-        val user = userAccountService.get(userId).orElseThrow { NotFoundException() }!!
-        organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id!!, organizationId)?.let {
-            it.type = dto.roleType
-            organizationRoleRepository.save(it)
-        } ?: throw ValidationException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
-    }
+  open fun setMemberRole(organizationId: Long, userId: Long, dto: SetOrganizationRoleDto) {
+    val user = userAccountService.get(userId).orElseThrow { NotFoundException() }!!
+    organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id!!, organizationId)?.let {
+      it.type = dto.roleType
+      organizationRoleRepository.save(it)
+    } ?: throw ValidationException(Message.USER_IS_NOT_MEMBER_OF_ORGANIZATION)
+  }
 
-    open fun createForInvitation(invitation: Invitation, type: OrganizationRoleType, organization: Organization)
-            : OrganizationRole {
-        return OrganizationRole(invitation = invitation, type = type, organization = organization).let {
-            organizationRoleRepository.save(it)
-        }
+  open fun createForInvitation(
+    invitation: Invitation,
+    type: OrganizationRoleType,
+    organization: Organization
+  ): OrganizationRole {
+    return OrganizationRole(invitation = invitation, type = type, organization = organization).let {
+      organizationRoleRepository.save(it)
     }
+  }
 
-    open fun acceptInvitation(organizationRole: OrganizationRole, userAccount: UserAccount) {
-        organizationRole.invitation = null
-        organizationRole.user = userAccount
-        organizationRoleRepository.save(organizationRole)
-    }
+  open fun acceptInvitation(organizationRole: OrganizationRole, userAccount: UserAccount) {
+    organizationRole.invitation = null
+    organizationRole.user = userAccount
+    organizationRoleRepository.save(organizationRole)
+  }
 
-    open fun isAnotherOwnerInOrganization(id: Long): Boolean {
-        return this.organizationRoleRepository
-                .countAllByOrganizationIdAndTypeAndUserIdNot(
-                        id,
-                        OrganizationRoleType.OWNER,
-                        authenticationFacade.userAccount.id!!
-                ) > 0
-    }
+  open fun isAnotherOwnerInOrganization(id: Long): Boolean {
+    return this.organizationRoleRepository
+      .countAllByOrganizationIdAndTypeAndUserIdNot(
+        id,
+        OrganizationRoleType.OWNER,
+        authenticationFacade.userAccount.id!!
+      ) > 0
+  }
 }

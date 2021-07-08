@@ -11,20 +11,20 @@ import org.testng.annotations.Test
 @SpringBootTest
 class ImportRepositoryTest : AbstractSpringTest() {
 
-    @Autowired
-    lateinit var importRepository: ImportRepository
+  @Autowired
+  lateinit var importRepository: ImportRepository
 
-    @Test
-    fun `creates, saves and gets Import entity`() {
-        val base = dbPopulator.createBase("hello", "importUser")
-        Import(author = base.userOwner!!, project = base).let {
-            importRepository.save(it).let {
-                importRepository.getOne(it.id).let { got ->
-                    assertThat(got.author).isEqualTo(base.userOwner)
-                    assertThat(got.project).isEqualTo(base)
-                    assertThat(got.id).isGreaterThan(0L)
-                }
-            }
+  @Test
+  fun `creates, saves and gets Import entity`() {
+    val base = dbPopulator.createBase("hello", "importUser")
+    Import(author = base.userOwner!!, project = base).let {
+      importRepository.save(it).let {
+        importRepository.getOne(it.id).let { got ->
+          assertThat(got.author).isEqualTo(base.userOwner)
+          assertThat(got.project).isEqualTo(base)
+          assertThat(got.id).isGreaterThan(0L)
         }
+      }
     }
+  }
 }

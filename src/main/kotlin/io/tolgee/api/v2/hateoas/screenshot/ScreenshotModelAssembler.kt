@@ -10,15 +10,16 @@ import java.util.*
 
 @Component
 class ScreenshotModelAssembler(
-        private val timestampValidation: TimestampValidation,
-        private val tolgeeProperties: TolgeeProperties
+  private val timestampValidation: TimestampValidation,
+  private val tolgeeProperties: TolgeeProperties
 ) : RepresentationModelAssemblerSupport<Screenshot, ScreenshotModel>(
-        V2TranslationsController::class.java, ScreenshotModel::class.java) {
-    override fun toModel(entity: Screenshot): ScreenshotModel {
-        var filename = entity.filename
-        if (tolgeeProperties.authentication.securedScreenshotRetrieval) {
-            filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
-        }
-        return ScreenshotModel(id = entity.id, filename = filename, createdAt = entity.createdAt)
+  V2TranslationsController::class.java, ScreenshotModel::class.java
+) {
+  override fun toModel(entity: Screenshot): ScreenshotModel {
+    var filename = entity.filename
+    if (tolgeeProperties.authentication.securedScreenshotRetrieval) {
+      filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
     }
+    return ScreenshotModel(id = entity.id, filename = filename, createdAt = entity.createdAt)
+  }
 }

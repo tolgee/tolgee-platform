@@ -15,77 +15,79 @@ import javax.validation.constraints.Size
 @Entity
 @EntityListeners(Language.Companion.LanguageListeners::class)
 @Table(
-        uniqueConstraints = [
-            UniqueConstraint(
-                    columnNames = ["project_id", "name"],
-                    name = "language_project_name"
-            ),
-            UniqueConstraint(
-                    columnNames = ["project_id", "tag"],
-                    name = "language_tag_name")
-        ],
-        indexes = [
-            Index(
-                    columnList = "tag",
-                    name = "index_tag"
-            ),
-            Index(
-                    columnList = "tag, project_id",
-                    name = "index_tag_project")
-        ]
+  uniqueConstraints = [
+    UniqueConstraint(
+      columnNames = ["project_id", "name"],
+      name = "language_project_name"
+    ),
+    UniqueConstraint(
+      columnNames = ["project_id", "tag"],
+      name = "language_tag_name"
+    )
+  ],
+  indexes = [
+    Index(
+      columnList = "tag",
+      name = "index_tag"
+    ),
+    Index(
+      columnList = "tag, project_id",
+      name = "index_tag_project"
+    )
+  ]
 )
 @Audited
 class Language : StandardAuditModel() {
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
-    var translations: MutableSet<Translation>? = null
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
+  var translations: MutableSet<Translation>? = null
 
-    @ManyToOne
-    var project: Project? = null
+  @ManyToOne
+  var project: Project? = null
 
-    @Column(nullable = false)
-    @field:NotEmpty
-    var tag: String = ""
+  @Column(nullable = false)
+  @field:NotEmpty
+  var tag: String = ""
 
-    var name: String? = null
+  var name: String? = null
 
-    var originalName: String? = null
+  var originalName: String? = null
 
-    @field:Size(max = 20)
-    @Column(length = 20)
-    var flagEmoji: String? = null
+  @field:Size(max = 20)
+  @Column(length = 20)
+  var flagEmoji: String? = null
 
-    fun updateByDTO(dto: LanguageDto) {
-        name = dto.name
-        tag = dto.tag
-        originalName = dto.originalName
-        flagEmoji = dto.flagEmoji
+  fun updateByDTO(dto: LanguageDto) {
+    name = dto.name
+    tag = dto.tag
+    originalName = dto.originalName
+    flagEmoji = dto.flagEmoji
+  }
+
+  override fun toString(): String {
+    return "Language(tag=$tag, name=$name, originalName=$originalName)"
+  }
+
+  companion object {
+    @JvmStatic
+    fun fromRequestDTO(dto: LanguageDto): Language {
+      val language = Language()
+      language.name = dto.name
+      language.tag = dto.tag
+      language.originalName = dto.originalName
+      language.flagEmoji = dto.flagEmoji
+      return language
     }
 
-    override fun toString(): String {
-        return "Language(tag=$tag, name=$name, originalName=$originalName)"
+    @Configurable
+    class LanguageListeners {
+      @Autowired
+      lateinit var provider: ObjectFactory<ImportService>
+
+      @PreRemove
+      @Transactional
+      fun preRemove(language: Language) {
+        provider.`object`.onExistingLanguageRemoved(language)
+      }
     }
-
-    companion object {
-        @JvmStatic
-        fun fromRequestDTO(dto: LanguageDto): Language {
-            val language = Language()
-            language.name = dto.name
-            language.tag = dto.tag
-            language.originalName = dto.originalName
-            language.flagEmoji = dto.flagEmoji
-            return language
-        }
-
-        @Configurable
-        class LanguageListeners {
-            @Autowired
-            lateinit var provider: ObjectFactory<ImportService>
-
-            @PreRemove
-            @Transactional
-            fun preRemove(language: Language) {
-                provider.`object`.onExistingLanguageRemoved(language)
-            }
-        }
-    }
+  }
 }

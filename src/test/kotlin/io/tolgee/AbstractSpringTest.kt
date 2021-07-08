@@ -15,74 +15,74 @@ import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.annotation.Autowired
 
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
-    @Autowired
-    protected lateinit var dbPopulator: DbPopulatorReal
+  @Autowired
+  protected lateinit var dbPopulator: DbPopulatorReal
 
-    @Autowired
-    protected lateinit var projectService: ProjectService
+  @Autowired
+  protected lateinit var projectService: ProjectService
 
-    @Autowired
-    protected lateinit var translationService: TranslationService
+  @Autowired
+  protected lateinit var translationService: TranslationService
 
-    @Autowired
-    protected lateinit var keyService: KeyService
+  @Autowired
+  protected lateinit var keyService: KeyService
 
-    @Autowired
-    protected lateinit var languageService: LanguageService
+  @Autowired
+  protected lateinit var languageService: LanguageService
 
-    @Autowired
-    protected lateinit var keyRepository: KeyRepository
+  @Autowired
+  protected lateinit var keyRepository: KeyRepository
 
-    @Autowired
-    protected lateinit var userAccountService: UserAccountService
+  @Autowired
+  protected lateinit var userAccountService: UserAccountService
 
-    @Autowired
-    protected lateinit var apiKeyService: ApiKeyService
+  @Autowired
+  protected lateinit var apiKeyService: ApiKeyService
 
-    @Autowired
-    protected lateinit var permissionService: PermissionService
+  @Autowired
+  protected lateinit var permissionService: PermissionService
 
-    @Autowired
-    protected lateinit var invitationService: InvitationService
+  @Autowired
+  protected lateinit var invitationService: InvitationService
 
-    @Autowired
-    protected lateinit var tolgeeProperties: TolgeeProperties
+  @Autowired
+  protected lateinit var tolgeeProperties: TolgeeProperties
 
-    @Autowired
-    lateinit var mapper: ObjectMapper
+  @Autowired
+  lateinit var mapper: ObjectMapper
 
-    @Autowired
-    protected lateinit var initialPasswordManager: InitialPasswordManager
+  @Autowired
+  protected lateinit var initialPasswordManager: InitialPasswordManager
 
-    @Autowired
-    protected lateinit var screenshotService: ScreenshotService
+  @Autowired
+  protected lateinit var screenshotService: ScreenshotService
 
-    protected lateinit var initialUsername: String
+  protected lateinit var initialUsername: String
 
-    protected lateinit var initialPassword: String
+  protected lateinit var initialPassword: String
 
-    @Autowired
-    protected lateinit var organizationRepository: OrganizationRepository
+  @Autowired
+  protected lateinit var organizationRepository: OrganizationRepository
 
-    @Autowired
-    protected lateinit var organizationService: OrganizationService
+  @Autowired
+  protected lateinit var organizationService: OrganizationService
 
-    @Autowired
-    protected lateinit var organizationRoleService: OrganizationRoleService
+  @Autowired
+  protected lateinit var organizationRoleService: OrganizationRoleService
 
-    @Autowired lateinit var organizationRoleRepository: OrganizationRoleRepository
+  @Autowired lateinit var organizationRoleRepository: OrganizationRoleRepository
 
-    @Autowired lateinit var projectRepository: ProjectRepository
+  @Autowired lateinit var projectRepository: ProjectRepository
 
-    @Autowired lateinit var importService: ImportService
+  @Autowired lateinit var importService: ImportService
 
-    @Autowired lateinit var testDataService: TestDataService
+  @Autowired lateinit var testDataService: TestDataService
 
-    @Autowired lateinit var translationCommentService: TranslationCommentService
+  @Autowired lateinit var translationCommentService: TranslationCommentService
 
-    @Autowired
-    private fun initInitialUser(authenticationProperties: AuthenticationProperties) {
-        initialUsername = authenticationProperties.initialUsername
-        initialPassword = initialPasswordManager.initialPassword
-    }
+  @Autowired
+  private fun initInitialUser(authenticationProperties: AuthenticationProperties) {
+    initialUsername = authenticationProperties.initialUsername
+    initialPassword = initialPasswordManager.initialPassword
+  }
 }

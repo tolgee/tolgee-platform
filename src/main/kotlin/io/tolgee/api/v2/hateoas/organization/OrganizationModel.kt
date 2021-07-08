@@ -8,17 +8,17 @@ import org.springframework.hateoas.server.core.Relation
 
 @Relation(collectionRelation = "organizations", itemRelation = "organization")
 open class OrganizationModel(
-        val id: Long,
+  val id: Long,
 
-        @Schema(example = "Beautiful organization")
-        val name: String,
+  @Schema(example = "Beautiful organization")
+  val name: String,
 
-        @Schema(example = "btforg")
-        val slug: String,
+  @Schema(example = "btforg")
+  val slug: String,
 
-        @Schema(example = "This is a beautiful organization full of beautiful and clever people")
-        val description: String?,
-        val basePermissions: Permission.ProjectPermissionType,
+  @Schema(example = "This is a beautiful organization full of beautiful and clever people")
+  val description: String?,
+  val basePermissions: Permission.ProjectPermissionType,
 
-        val currentUserRole: OrganizationRoleType
+  val currentUserRole: OrganizationRoleType
 ) : RepresentationModel<OrganizationModel>()

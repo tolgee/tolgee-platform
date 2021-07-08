@@ -20,45 +20,47 @@ import java.util.stream.Collectors
 @RequestMapping("/api/invitation")
 @Tag(name = "User invitations to project")
 open class InvitationController @Autowired constructor(
-        private val invitationService: InvitationService,
-        private val securityService: SecurityService,
-        private val projectService: ProjectService,
-        private val organizationRoleService: OrganizationRoleService
+  private val invitationService: InvitationService,
+  private val securityService: SecurityService,
+  private val projectService: ProjectService,
+  private val organizationRoleService: OrganizationRoleService
 ) {
-    @GetMapping("/accept/{code}")
-    @Operation(summary = "Accepts invitation to project")
-    open fun acceptInvitation(@PathVariable("code") code: String?): ResponseEntity<Void> {
-        invitationService.removeExpired()
-        invitationService.accept(code)
-        return ResponseEntity(HttpStatus.OK)
+  @GetMapping("/accept/{code}")
+  @Operation(summary = "Accepts invitation to project")
+  open fun acceptInvitation(@PathVariable("code") code: String?): ResponseEntity<Void> {
+    invitationService.removeExpired()
+    invitationService.accept(code)
+    return ResponseEntity(HttpStatus.OK)
+  }
+
+  @GetMapping("/list/{projectId}")
+  @Operation(summary = "Prints all invitations to project")
+  open fun getProjectInvitations(@PathVariable("projectId") id: Long): Set<InvitationDTO> {
+    val repository = projectService.get(id).orElseThrow { NotFoundException() }!!
+    securityService.checkProjectPermission(id, Permission.ProjectPermissionType.MANAGE)
+    return invitationService.getForProject(repository).stream().map { invitation: Invitation? ->
+      InvitationDTO.fromEntity(invitation)
+    }.collect(Collectors.toCollection { LinkedHashSet() })
+  }
+
+  @DeleteMapping("/{invitationId}")
+  @Operation(summary = "Deletes invitation by ID")
+  open fun deleteInvitation(@PathVariable("invitationId") id: Long): ResponseEntity<Void> {
+    val invitation = invitationService.findById(id).orElseThrow {
+      NotFoundException()
+    }
+    invitation.permission?.let {
+      securityService.checkProjectPermission(
+        invitation.permission!!.project!!.id,
+        Permission.ProjectPermissionType.MANAGE
+      )
     }
 
-    @GetMapping("/list/{projectId}")
-    @Operation(summary = "Prints all invitations to project")
-    open fun getProjectInvitations(@PathVariable("projectId") id: Long): Set<InvitationDTO> {
-        val repository = projectService.get(id).orElseThrow { NotFoundException() }!!
-        securityService.checkProjectPermission(id, Permission.ProjectPermissionType.MANAGE)
-        return invitationService.getForProject(repository).stream().map { invitation: Invitation? ->
-            InvitationDTO.fromEntity(invitation)
-        }.collect(Collectors.toCollection { LinkedHashSet() })
+    invitation.organizationRole?.let {
+      organizationRoleService.checkUserIsOwner(invitation.organizationRole!!.organization!!.id!!)
     }
 
-    @DeleteMapping("/{invitationId}")
-    @Operation(summary = "Deletes invitation by ID")
-    open fun deleteInvitation(@PathVariable("invitationId") id: Long): ResponseEntity<Void> {
-        val invitation = invitationService.findById(id).orElseThrow {
-            NotFoundException()
-        }
-        invitation.permission?.let {
-            securityService.checkProjectPermission(invitation.permission!!.project!!.id,
-                    Permission.ProjectPermissionType.MANAGE)
-        }
-
-        invitation.organizationRole?.let {
-            organizationRoleService.checkUserIsOwner(invitation.organizationRole!!.organization!!.id!!)
-        }
-
-        invitationService.delete(invitation)
-        return ResponseEntity(HttpStatus.OK)
-    }
+    invitationService.delete(invitation)
+    return ResponseEntity(HttpStatus.OK)
+  }
 }

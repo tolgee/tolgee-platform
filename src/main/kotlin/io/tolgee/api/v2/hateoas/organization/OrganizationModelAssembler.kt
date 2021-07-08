@@ -8,16 +8,17 @@ import org.springframework.stereotype.Component
 
 @Component
 class OrganizationModelAssembler : RepresentationModelAssemblerSupport<OrganizationView, OrganizationModel>(
-        OrganizationController::class.java, OrganizationModel::class.java) {
-    override fun toModel(view: OrganizationView): OrganizationModel {
-        val link = linkTo<OrganizationController> { get(view.slug) }.withSelfRel()
-        return OrganizationModel(
-                view.id,
-                view.name,
-                view.slug,
-                view.description,
-                view.basePermissions,
-                view.currentUserRole
-        ).add(link)
-    }
+  OrganizationController::class.java, OrganizationModel::class.java
+) {
+  override fun toModel(view: OrganizationView): OrganizationModel {
+    val link = linkTo<OrganizationController> { get(view.slug) }.withSelfRel()
+    return OrganizationModel(
+      view.id,
+      view.name,
+      view.slug,
+      view.description,
+      view.basePermissions,
+      view.currentUserRole
+    ).add(link)
+  }
 }

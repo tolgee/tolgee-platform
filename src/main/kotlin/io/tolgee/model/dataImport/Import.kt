@@ -9,15 +9,15 @@ import javax.validation.constraints.NotNull
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["author_id", "project_id"])])
 class Import(
-        @field:NotNull
-        @ManyToOne(optional = false)
-        val author: UserAccount,
+  @field:NotNull
+  @ManyToOne(optional = false)
+  val author: UserAccount,
 
-        @field:NotNull
-        @ManyToOne(optional = false)
-        val project: Project
+  @field:NotNull
+  @ManyToOne(optional = false)
+  val project: Project
 ) : StandardAuditModel() {
 
-    @OneToMany(mappedBy = "import")
-    var files = mutableListOf<ImportFile>()
+  @OneToMany(mappedBy = "import")
+  var files = mutableListOf<ImportFile>()
 }

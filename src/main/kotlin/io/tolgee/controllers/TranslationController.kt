@@ -30,61 +30,62 @@ import javax.validation.Valid
 @Tag(name = "Translations", description = "Manipulates localization messages and metadata")
 @Deprecated("Use V2TranslationController")
 class TranslationController @Autowired constructor(
-        private val translationService: TranslationService,
-        private val keyService: KeyService,
-        private val securityService: SecurityService,
-        private val projectHolder: ProjectHolder,
+  private val translationService: TranslationService,
+  private val keyService: KeyService,
+  private val securityService: SecurityService,
+  private val projectHolder: ProjectHolder,
 ) : IController {
-    @GetMapping(value = ["/{languages}"])
-    @AccessWithAnyProjectPermission
-    @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-    @Operation(summary = "Get all translations for specific languages")
-    fun getTranslations(@PathVariable("languages") languages: Set<String>): Map<String, Any> {
-        return translationService.getTranslations(languages, projectHolder.project.id)
-    }
+  @GetMapping(value = ["/{languages}"])
+  @AccessWithAnyProjectPermission
+  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @Operation(summary = "Get all translations for specific languages")
+  fun getTranslations(@PathVariable("languages") languages: Set<String>): Map<String, Any> {
+    return translationService.getTranslations(languages, projectHolder.project.id)
+  }
 
-    @Suppress("DeprecatedCallableAddReplaceWith")
-    @PostMapping("/set")
-    @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
-    @Deprecated(message = "Use put method to /api/project/{projectId}/translations or /api/project/translations")
-    @Hidden
-    fun setTranslationsPost(@RequestBody @Valid dto: SetTranslationsWithKeyDto?) {
-        setTranslations(dto)
-    }
+  @Suppress("DeprecatedCallableAddReplaceWith")
+  @PostMapping("/set")
+  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
+  @Deprecated(message = "Use put method to /api/project/{projectId}/translations or /api/project/translations")
+  @Hidden
+  fun setTranslationsPost(@RequestBody @Valid dto: SetTranslationsWithKeyDto?) {
+    setTranslations(dto)
+  }
 
-    @PutMapping("")
-    @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
-    @Operation(summary = "Sets translations for existing key")
-    fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto?) {
-        val key = keyService.get(
-                projectHolder.project.id,
-                PathDTO.fromFullPath(dto!!.key)
-        ).orElseThrow { NotFoundException() }
+  @PutMapping("")
+  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
+  @Operation(summary = "Sets translations for existing key")
+  fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto?) {
+    val key = keyService.get(
+      projectHolder.project.id,
+      PathDTO.fromFullPath(dto!!.key)
+    ).orElseThrow { NotFoundException() }
 
-        translationService.setForKey(key, dto.translations)
-    }
+    translationService.setForKey(key, dto.translations)
+  }
 
-    @PostMapping("")
-    @AccessWithApiKey([ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
-    @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
-    @Operation(summary = "Sets translations for existing or not existing key")
-    fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto) {
-        val project = projectHolder.project
-        val key = keyService.getOrCreateKey(project, PathDTO.fromFullPath(dto.key))
-        translationService.setForKey(key, dto.translations)
-    }
+  @PostMapping("")
+  @AccessWithApiKey([ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
+  @Operation(summary = "Sets translations for existing or not existing key")
+  fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto) {
+    val project = projectHolder.project
+    val key = keyService.getOrCreateKey(project, PathDTO.fromFullPath(dto.key))
+    translationService.setForKey(key, dto.translations)
+  }
 
-    @GetMapping(value = ["/view"])
-    @Operation(summary = "Returns data for translations view with metadata")
-    fun getViewData(@PathVariable("projectId") projectId: Long?,
-                    @RequestParam(name = "languages", required = false) languages: Set<String>?,
-                    @RequestParam(name = "limit", defaultValue = "10") limit: Int,
-                    @RequestParam(name = "offset", defaultValue = "0") offset: Int,
-                    @RequestParam(name = "search", required = false) search: String?
-    ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-        securityService.checkProjectPermission(projectId!!, Permission.ProjectPermissionType.VIEW)
-        return translationService.getViewDataOld(languages, projectId, limit, offset, search)
-    }
+  @GetMapping(value = ["/view"])
+  @Operation(summary = "Returns data for translations view with metadata")
+  fun getViewData(
+    @PathVariable("projectId") projectId: Long?,
+    @RequestParam(name = "languages", required = false) languages: Set<String>?,
+    @RequestParam(name = "limit", defaultValue = "10") limit: Int,
+    @RequestParam(name = "offset", defaultValue = "0") offset: Int,
+    @RequestParam(name = "search", required = false) search: String?
+  ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
+    securityService.checkProjectPermission(projectId!!, Permission.ProjectPermissionType.VIEW)
+    return translationService.getViewDataOld(languages, projectId, limit, offset, search)
+  }
 }

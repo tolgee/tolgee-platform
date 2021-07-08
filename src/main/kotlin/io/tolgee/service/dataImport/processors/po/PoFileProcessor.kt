@@ -13,89 +13,88 @@ import io.tolgee.service.dataImport.processors.po.data.PoParsedTranslation
 import io.tolgee.service.dataImport.processors.po.data.PoParserResult
 
 class PoFileProcessor(
-        override val context: FileProcessorContext
+  override val context: FileProcessorContext
 ) : ImportFileProcessor() {
 
-    lateinit var languageId: String
-    lateinit var parsed: PoParserResult
-    var poParser: PoParser = PoParser(context)
+  lateinit var languageId: String
+  lateinit var parsed: PoParserResult
+  var poParser: PoParser = PoParser(context)
 
-    override fun process() {
-        try {
-            parsed = poParser()
-            languageId = parsed.meta.language ?: languageNameGuesses[0]
-            context.languages[languageId] = ImportLanguage(languageId, context.fileEntity)
+  override fun process() {
+    try {
+      parsed = poParser()
+      languageId = parsed.meta.language ?: languageNameGuesses[0]
+      context.languages[languageId] = ImportLanguage(languageId, context.fileEntity)
 
-            parsed.translations.forEach { poTranslation ->
-                val keyName = poTranslation.msgid.toString()
+      parsed.translations.forEach { poTranslation ->
+        val keyName = poTranslation.msgid.toString()
 
-                if (poTranslation.msgidPlural.isNotEmpty()) {
-                    addPlural(poTranslation)
-                    return@forEach
-                }
-                if (poTranslation.msgid.isNotBlank() && poTranslation.msgstr.isNotBlank()) {
-                    val icuMessage = getToIcuConverter(poTranslation)
-                            .convert(poTranslation.msgstr.toString())
-                    context.addTranslation(keyName, languageId, icuMessage)
+        if (poTranslation.msgidPlural.isNotEmpty()) {
+          addPlural(poTranslation)
+          return@forEach
+        }
+        if (poTranslation.msgid.isNotBlank() && poTranslation.msgstr.isNotBlank()) {
+          val icuMessage = getToIcuConverter(poTranslation)
+            .convert(poTranslation.msgstr.toString())
+          context.addTranslation(keyName, languageId, icuMessage)
 
-                    poTranslation.meta.references.forEach { reference ->
-                        val split = reference.split(":")
-                        val file = split.getOrNull(0)
-                        val line = split.getOrNull(1)?.toIntOrNull()
-                        file?.let {
-                            context.addKeyCodeReference(keyName, it, line?.toLong())
-                        }
-                    }
-                    if (poTranslation.meta.extractedComments.isNotEmpty()) {
-                        val extractedComments = poTranslation.meta.extractedComments.joinToString(" ")
-                        context.addKeyComment(keyName, extractedComments)
-                    }
-
-                    if (poTranslation.meta.translatorComments.isNotEmpty()) {
-                        val translatorComments = poTranslation.meta.translatorComments.joinToString(" ")
-                        context.addKeyComment(keyName, translatorComments)
-                    }
-                }
+          poTranslation.meta.references.forEach { reference ->
+            val split = reference.split(":")
+            val file = split.getOrNull(0)
+            val line = split.getOrNull(1)?.toIntOrNull()
+            file?.let {
+              context.addKeyCodeReference(keyName, it, line?.toLong())
             }
-        } catch (e: PoParserException) {
-            throw ImportCannotParseFileException(context.file.name, e.message)
+          }
+          if (poTranslation.meta.extractedComments.isNotEmpty()) {
+            val extractedComments = poTranslation.meta.extractedComments.joinToString(" ")
+            context.addKeyComment(keyName, extractedComments)
+          }
+
+          if (poTranslation.meta.translatorComments.isNotEmpty()) {
+            val translatorComments = poTranslation.meta.translatorComments.joinToString(" ")
+            context.addKeyComment(keyName, translatorComments)
+          }
+        }
+      }
+    } catch (e: PoParserException) {
+      throw ImportCannotParseFileException(context.file.name, e.message)
+    }
+  }
+
+  private fun addPlural(poTranslation: PoParsedTranslation) {
+    val plurals = poTranslation.msgstrPlurals?.map { it.key to it.value.toString() }?.toMap()
+    plurals?.let {
+      val icuMessage = ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation), context)
+        .convertPoPlural(plurals)
+      context.addTranslation(poTranslation.msgidPlural.toString(), languageId, icuMessage)
+    }
+  }
+
+  private fun getToIcuConverter(poTranslation: PoParsedTranslation): ToICUConverter {
+    return ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation), context)
+  }
+
+  private fun getMessageFormat(
+    poParsedTranslation: PoParsedTranslation,
+  ): SupportedFormat {
+    poParsedTranslation.meta.flags.forEach {
+      SupportedFormat.findByFlag(it)
+        ?.let { found -> return found }
+    }
+    return detectedFormat
+  }
+
+  private val detectedFormat by lazy {
+    val messages = parsed.translations.flatMap { poParsed ->
+      if (poParsed.msgidPlural.isNotBlank() && !poParsed.msgstrPlurals.isNullOrEmpty())
+        poParsed.msgstrPlurals!!.values.asSequence().map { it.toString() }
+      else
+        sequence {
+          yield(poParsed.msgstr.toString())
         }
     }
 
-    private fun addPlural(poTranslation: PoParsedTranslation) {
-        val plurals = poTranslation.msgstrPlurals?.map { it.key to it.value.toString() }?.toMap()
-        plurals?.let {
-            val icuMessage = ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation), context)
-                    .convertPoPlural(plurals)
-            context.addTranslation(poTranslation.msgidPlural.toString(), languageId, icuMessage)
-        }
-    }
-
-    private fun getToIcuConverter(poTranslation: PoParsedTranslation): ToICUConverter {
-        return ToICUConverter(ULocale(languageId), getMessageFormat(poTranslation), context)
-    }
-
-    private fun getMessageFormat(
-            poParsedTranslation: PoParsedTranslation,
-    ): SupportedFormat {
-        poParsedTranslation.meta.flags.forEach {
-            SupportedFormat.findByFlag(it)
-                    ?.let { found -> return found }
-        }
-        return detectedFormat
-    }
-
-    private val detectedFormat by lazy {
-        val messages = parsed.translations.flatMap { poParsed ->
-            if (poParsed.msgidPlural.isNotBlank() && !poParsed.msgstrPlurals.isNullOrEmpty())
-                poParsed.msgstrPlurals!!.values.asSequence().map { it.toString() }
-            else
-                sequence {
-                    yield(poParsed.msgstr.toString())
-                }
-        }
-
-        FormatDetector(messages.toList())()
-    }
+    FormatDetector(messages.toList())()
+  }
 }
-

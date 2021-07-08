@@ -13,24 +13,24 @@ import javax.validation.Valid
 @RequestMapping("/api/user")
 @Tag(name = "User", description = "Manipulates user data")
 class UserController(
-        private val authenticationFacade: AuthenticationFacade,
-        private val userAccountService: UserAccountService,
+  private val authenticationFacade: AuthenticationFacade,
+  private val userAccountService: UserAccountService,
 ) {
-    @Operation(summary = "Returns current user's data")
-    @GetMapping("")
-    fun getInfo(): UserResponseDTO {
-        val userAccount = authenticationFacade.userAccount;
-        return UserResponseDTO(
-                name = userAccount.name,
-                username = userAccount.username,
-                id = userAccount.id,
-                emailAwaitingVerification = userAccount.emailVerification?.newEmail
-        )
-    }
+  @Operation(summary = "Returns current user's data")
+  @GetMapping("")
+  fun getInfo(): UserResponseDTO {
+    val userAccount = authenticationFacade.userAccount
+    return UserResponseDTO(
+      name = userAccount.name,
+      username = userAccount.username,
+      id = userAccount.id,
+      emailAwaitingVerification = userAccount.emailVerification?.newEmail
+    )
+  }
 
-    @PostMapping("")
-    @Operation(summary = "Updates current user's data")
-    fun updateUser(@RequestBody @Valid dto: UserUpdateRequestDTO?) {
-        userAccountService.update(authenticationFacade.userAccount, dto!!)
-    }
+  @PostMapping("")
+  @Operation(summary = "Updates current user's data")
+  fun updateUser(@RequestBody @Valid dto: UserUpdateRequestDTO?) {
+    userAccountService.update(authenticationFacade.userAccount, dto!!)
+  }
 }

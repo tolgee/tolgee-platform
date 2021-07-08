@@ -7,21 +7,22 @@ import org.springframework.stereotype.Component
 
 @Component
 class ImportLanguageModelAssembler : RepresentationModelAssemblerSupport<ImportLanguageView, ImportLanguageModel>(
-        V2ImportController::class.java, ImportLanguageModel::class.java) {
-    override fun toModel(view: ImportLanguageView): ImportLanguageModel {
-        return ImportLanguageModel(
-                id = view.id,
-                name = view.name,
-                existingLanguageId = view.existingLanguageId,
-                existingLanguageTag = view.existingLanguageTag,
-                existingLanguageAbbreviation = view.existingLanguageTag,
-                existingLanguageName = view.existingLanguageName,
-                importFileName = view.importFileName,
-                importFileId = view.importFileId,
-                importFileIssueCount = view.importFileIssueCount,
-                totalCount = view.totalCount,
-                conflictCount = view.conflictCount,
-                resolvedCount = view.resolvedCount
-        )
-    }
+  V2ImportController::class.java, ImportLanguageModel::class.java
+) {
+  override fun toModel(view: ImportLanguageView): ImportLanguageModel {
+    return ImportLanguageModel(
+      id = view.id,
+      name = view.name,
+      existingLanguageId = view.existingLanguageId,
+      existingLanguageTag = view.existingLanguageTag,
+      existingLanguageAbbreviation = view.existingLanguageTag,
+      existingLanguageName = view.existingLanguageName,
+      importFileName = view.importFileName,
+      importFileId = view.importFileId,
+      importFileIssueCount = view.importFileIssueCount,
+      totalCount = view.totalCount,
+      conflictCount = view.conflictCount,
+      resolvedCount = view.resolvedCount
+    )
+  }
 }

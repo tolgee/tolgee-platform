@@ -12,80 +12,80 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 
 class TranslationCommentsTestData {
-    lateinit var firstComment: TranslationComment
-    lateinit var secondComment: TranslationComment
-    var project: Project
-    lateinit var englishLanguage: Language
-    var user: UserAccount
-    var pepa: UserAccount
-    lateinit var aKey: Key
-    lateinit var projectBuilder: DataBuilders.ProjectBuilder
-    lateinit var translation: Translation
+  lateinit var firstComment: TranslationComment
+  lateinit var secondComment: TranslationComment
+  var project: Project
+  lateinit var englishLanguage: Language
+  var user: UserAccount
+  var pepa: UserAccount
+  lateinit var aKey: Key
+  lateinit var projectBuilder: DataBuilders.ProjectBuilder
+  lateinit var translation: Translation
 
-    val root: TestDataBuilder = TestDataBuilder().apply {
-        user = addUserAccount {
+  val root: TestDataBuilder = TestDataBuilder().apply {
+    user = addUserAccount {
+      self {
+        username = "franta"
+      }
+    }.self
+    pepa = addUserAccount {
+      self {
+        username = "pepa"
+      }
+    }.self
+    project = addProject {
+      self {
+        name = "Franta's project"
+        userOwner = user
+      }
+
+      addPermission {
+        self {
+          project = this@addProject.self
+          user = this@TranslationCommentsTestData.user
+          type = Permission.ProjectPermissionType.MANAGE
+        }
+      }
+
+      addPermission {
+        self {
+          project = this@addProject.self
+          user = this@TranslationCommentsTestData.pepa
+          type = Permission.ProjectPermissionType.EDIT
+        }
+      }
+
+      englishLanguage = addLanguage {
+        self {
+          name = "English"
+          tag = "en"
+          originalName = "English"
+        }
+      }.self
+
+      aKey = addKey {
+        self.name = "A key"
+        translation = addTranslation {
+          self {
+            key = this@addKey.self
+            language = englishLanguage
+            text = "Z translation"
+            state = TranslationState.REVIEWED
+          }
+          firstComment = addComment {
             self {
-                username = "franta"
+              text = "First comment"
             }
-        }.self
-        pepa = addUserAccount {
+          }.self
+
+          secondComment = addComment {
             self {
-                username = "pepa"
+              text = "Second comment"
             }
+          }.self
         }.self
-        project = addProject {
-            self {
-                name = "Franta's project"
-                userOwner = user
-            }
-
-            addPermission {
-                self {
-                    project = this@addProject.self
-                    user = this@TranslationCommentsTestData.user
-                    type = Permission.ProjectPermissionType.MANAGE
-                }
-            }
-
-            addPermission {
-                self {
-                    project = this@addProject.self
-                    user = this@TranslationCommentsTestData.pepa
-                    type = Permission.ProjectPermissionType.EDIT
-                }
-            }
-
-            englishLanguage = addLanguage {
-                self {
-                    name = "English"
-                    tag = "en"
-                    originalName = "English"
-                }
-            }.self
-
-            aKey = addKey {
-                self.name = "A key"
-                translation = addTranslation {
-                    self {
-                        key = this@addKey.self
-                        language = englishLanguage
-                        text = "Z translation"
-                        state = TranslationState.REVIEWED
-                    }
-                    firstComment = addComment {
-                        self {
-                            text = "First comment"
-                        }
-                    }.self
-
-                    secondComment = addComment {
-                        self {
-                            text = "Second comment"
-                        }
-                    }.self
-                }.self
-            }.self
-            projectBuilder = this
-        }.self
-    }
+      }.self
+      projectBuilder = this
+    }.self
+  }
 }

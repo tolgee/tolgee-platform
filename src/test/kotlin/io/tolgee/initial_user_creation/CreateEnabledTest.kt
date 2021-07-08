@@ -17,35 +17,37 @@ import org.testng.annotations.Test
 import java.io.File
 
 @AutoConfigureMockMvc
-@SpringBootTest(properties = [
+@SpringBootTest(
+  properties = [
     "tolgee.file-storage.fs-data-path=./build/create-enabled-test-data/",
     "tolgee.authentication.create-initial-user=true",
     "tolgee.authentication.initialUsername=johny"
-])
+  ]
+)
 class CreateEnabledTest : AbstractTestNGSpringContextTests() {
-    @set:Autowired
-    lateinit var tolgeeProperties: TolgeeProperties
+  @set:Autowired
+  lateinit var tolgeeProperties: TolgeeProperties
 
-    @set:Autowired
-    lateinit var userAccountService: UserAccountService
+  @set:Autowired
+  lateinit var userAccountService: UserAccountService
 
-    private val passwordFile = File("./build/create-enabled-test-data/initial.pwd")
+  private val passwordFile = File("./build/create-enabled-test-data/initial.pwd")
 
-    @Test
-    fun storesPassword() {
-        assertThat(passwordFile).exists()
-        assertThat(passwordFile.readText()).isNotBlank
-    }
+  @Test
+  fun storesPassword() {
+    assertThat(passwordFile).exists()
+    assertThat(passwordFile.readText()).isNotBlank
+  }
 
-    @Test
-    fun passwordStoredInDb() {
-        val johny = userAccountService.getByUserName("johny").orElseGet(null)
-        val bCryptPasswordEncoder = BCryptPasswordEncoder()
-        assertThat(bCryptPasswordEncoder.matches(passwordFile.readText(), johny.password)).isTrue
-    }
+  @Test
+  fun passwordStoredInDb() {
+    val johny = userAccountService.getByUserName("johny").orElseGet(null)
+    val bCryptPasswordEncoder = BCryptPasswordEncoder()
+    assertThat(bCryptPasswordEncoder.matches(passwordFile.readText(), johny.password)).isTrue
+  }
 
-    @AfterClass
-    fun cleanUp() {
-        passwordFile.delete()
-    }
+  @AfterClass
+  fun cleanUp() {
+    passwordFile.delete()
+  }
 }

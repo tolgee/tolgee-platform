@@ -11,36 +11,36 @@ import kotlin.random.Random
 
 @Component
 class InitialPasswordManager(
-        private val tolgeeProperties: TolgeeProperties,
-        private val fileStorageService: FileStorageService,
+  private val tolgeeProperties: TolgeeProperties,
+  private val fileStorageService: FileStorageService,
 ) {
-    private lateinit var cachedInitialPassword: String
+  private lateinit var cachedInitialPassword: String
 
-    val initialPassword: String
-        get() {
-            if (this::cachedInitialPassword.isInitialized) {
-                return cachedInitialPassword
-            }
+  val initialPassword: String
+    get() {
+      if (this::cachedInitialPassword.isInitialized) {
+        return cachedInitialPassword
+      }
 
-            if (tolgeeProperties.authentication.initialPassword != null) {
-                cachedInitialPassword = tolgeeProperties.authentication.initialPassword!!
-                return cachedInitialPassword
-            }
+      if (tolgeeProperties.authentication.initialPassword != null) {
+        cachedInitialPassword = tolgeeProperties.authentication.initialPassword!!
+        return cachedInitialPassword
+      }
 
-            val filename = "initial.pwd"
-            if (fileStorageService.fileExists(filename)) {
-                cachedInitialPassword = fileStorageService.readFile(filename).toString(charset("UTF-8"))
-                return cachedInitialPassword
-            }
+      val filename = "initial.pwd"
+      if (fileStorageService.fileExists(filename)) {
+        cachedInitialPassword = fileStorageService.readFile(filename).toString(charset("UTF-8"))
+        return cachedInitialPassword
+      }
 
-            val password = generatePassword()
-            fileStorageService.storeFile(filename, password.toByteArray(charset("UTF-8")))
-            cachedInitialPassword = password
-            return cachedInitialPassword
-        }
-
-    private fun generatePassword(): String {
-        val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-        return (1..40).map { charPool[Random.nextInt(0, charPool.size)] }.joinToString("")
+      val password = generatePassword()
+      fileStorageService.storeFile(filename, password.toByteArray(charset("UTF-8")))
+      cachedInitialPassword = password
+      return cachedInitialPassword
     }
+
+  private fun generatePassword(): String {
+    val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+    return (1..40).map { charPool[Random.nextInt(0, charPool.size)] }.joinToString("")
+  }
 }
