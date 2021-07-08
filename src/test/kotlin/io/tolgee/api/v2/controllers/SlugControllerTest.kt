@@ -16,31 +16,31 @@ class SlugControllerTest : SignedInControllerTest() {
 
   @Test
   fun testValidateOrganizationSlug() {
-    performAuthGet("/v2/address-part/validate-organization/hello-1").andIsOk.andAssertThatJson.isEqualTo(true)
+    performAuthGet("/v2/slug/validate-organization/hello-1").andIsOk.andAssertThatJson.isEqualTo(true)
     organizationRepository.save(
       Organization(
         name = "aaa",
         slug = "hello-1"
       )
     )
-    performAuthGet("/v2/address-part/validate-organization/hello-1").andIsOk.andAssertThatJson.isEqualTo(false)
+    performAuthGet("/v2/slug/validate-organization/hello-1").andIsOk.andAssertThatJson.isEqualTo(false)
   }
 
   @Test
   fun testValidateRepositorySlug() {
-    performAuthGet("/v2/address-part/validate-project/hello-1").andIsOk.andAssertThatJson.isEqualTo(true)
+    performAuthGet("/v2/slug/validate-project/hello-1").andIsOk.andAssertThatJson.isEqualTo(true)
     projectRepository.save(
       Project(
         name = "aaa",
         slug = "hello-1"
       ).also { it.userOwner = dbPopulator.createUserIfNotExists("hello") }
     )
-    performAuthGet("/v2/address-part/validate-project/hello-1").andIsOk.andAssertThatJson.isEqualTo(false)
+    performAuthGet("/v2/slug/validate-project/hello-1").andIsOk.andAssertThatJson.isEqualTo(false)
   }
 
   @Test
   fun testGenerateOrganizationSlug() {
-    performAuthPost("/v2/address-part/generate-organization", GenerateSlugDto("Hello world"))
+    performAuthPost("/v2/slug/generate-organization", GenerateSlugDto("Hello world"))
       .andIsOk.andAssertThatJson.isEqualTo("hello-world")
 
     organizationRepository.save(
@@ -50,7 +50,7 @@ class SlugControllerTest : SignedInControllerTest() {
       )
     )
 
-    performAuthPost("/v2/address-part/generate-organization", GenerateSlugDto("Hello world"))
+    performAuthPost("/v2/slug/generate-organization", GenerateSlugDto("Hello world"))
       .andIsOk.andAssertThatJson.isEqualTo("hello-world1")
   }
 
@@ -63,7 +63,7 @@ class SlugControllerTest : SignedInControllerTest() {
       )
     )
 
-    performAuthPost("/v2/address-part/generate-organization", GenerateSlugDto("Hello world", "hello-world"))
+    performAuthPost("/v2/slug/generate-organization", GenerateSlugDto("Hello world", "hello-world"))
       .andIsOk.andAssertThatJson.isEqualTo("hello-world")
   }
 
@@ -75,7 +75,7 @@ class SlugControllerTest : SignedInControllerTest() {
         slug = "hello-world"
       ).also { it.userOwner = dbPopulator.createUserIfNotExists("hello") }
     )
-    performAuthPost("/v2/address-part/generate-project", GenerateSlugDto("Hello world"))
+    performAuthPost("/v2/slug/generate-project", GenerateSlugDto("Hello world"))
       .andIsOk.andAssertThatJson.isEqualTo("hello-world1")
   }
 }
