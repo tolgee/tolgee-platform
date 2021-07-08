@@ -71,7 +71,7 @@ open class InvitationService @Autowired constructor(
     }
 
     organizationRole?.let {
-      if (organizationRoleService.isUserMemberOrOwner(userAccount.id!!, it.id!!)) {
+      if (organizationRoleService.isUserMemberOrOwner(userAccount.id!!, it.organization!!.id!!)) {
         throw BadRequestException(Message.USER_ALREADY_HAS_ROLE)
       }
       organizationRoleService.acceptInvitation(organizationRole, userAccount)
