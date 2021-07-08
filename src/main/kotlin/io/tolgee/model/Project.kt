@@ -19,7 +19,7 @@ data class Project(
 
         @field:NotBlank
         @field:Size(min = 3, max = 50)
-        var name: String? = null,
+        var name: String = "",
 
         @field:Size(min = 3, max = 2000)
         var description: String? = null,
@@ -52,12 +52,12 @@ data class Project(
     @OneToOne(fetch = FetchType.LAZY)
     var baseLanguage: Language? = null
 
-    constructor(name: String?, description: String? = null, slug: String?, userOwner: UserAccount?)
+    constructor(name: String, description: String? = null, slug: String?, userOwner: UserAccount?)
             : this(id = 0L, name, description, slug) {
         this.userOwner = userOwner
     }
 
-    constructor(name: String?,
+    constructor(name: String,
                 description: String? = null,
                 slug: String?,
                 organizationOwner: Organization?,

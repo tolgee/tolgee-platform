@@ -1,23 +1,15 @@
-package io.tolgee.repository;
+package io.tolgee.repository
 
-import io.tolgee.model.ApiKey;
-import io.tolgee.model.UserAccount;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import javax.validation.constraints.NotNull;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import io.tolgee.model.ApiKey
+import io.tolgee.model.UserAccount
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
-public interface ApiKeyRepository extends JpaRepository<ApiKey, Long> {
-    Optional<ApiKey> findByKey(@NotNull String key);
-
-    LinkedHashSet<ApiKey> getAllByUserAccountOrderById(UserAccount userAccount);
-
-    Set<ApiKey> getAllByProjectId(Long projectId);
-
-    void deleteAllByProjectId(Long projectId);
+interface ApiKeyRepository : JpaRepository<ApiKey, Long> {
+    fun findByKey(key: String): Optional<ApiKey>
+    fun getAllByUserAccountOrderById(userAccount: UserAccount): LinkedHashSet<ApiKey>
+    fun getAllByProjectId(projectId: Long): Set<ApiKey>
+    fun deleteAllByProjectId(projectId: Long)
 }
-

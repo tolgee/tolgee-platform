@@ -1,4 +1,4 @@
-package io.tolgee.dtos
+package io.tolgee.dtos.response
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.configuration.tolgee.TolgeeProperties

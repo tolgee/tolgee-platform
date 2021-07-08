@@ -1,7 +1,6 @@
 package io.tolgee.dtos.response
 
 import io.tolgee.dtos.query_results.KeyWithTranslationsDto
-import java.util.*
 
 data class KeyWithTranslationsResponseDto(
         var id: Long? = null,

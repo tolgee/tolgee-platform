@@ -1,21 +1,13 @@
-package io.tolgee.exceptions;
+package io.tolgee.exceptions
 
-import io.tolgee.constants.Message;
-import org.springframework.http.HttpStatus;
+import io.tolgee.constants.Message
+import org.springframework.http.HttpStatus
+import java.io.Serializable
 
-import java.io.Serializable;
-import java.util.List;
+class InternalException : ErrorException {
+    constructor(message: Message, params: List<Serializable>?) : super(message, params) {}
+    constructor(message: Message) : super(message) {}
 
-public class InternalException extends ErrorException {
-    public InternalException(Message message, List<Serializable> params) {
-        super(message, params);
-    }
-
-    public InternalException(Message message) {
-        super(message);
-    }
-
-    public HttpStatus getHttpStatus() {
-        return HttpStatus.INTERNAL_SERVER_ERROR;
-    }
+    override val httpStatus: HttpStatus?
+        get() = HttpStatus.INTERNAL_SERVER_ERROR
 }

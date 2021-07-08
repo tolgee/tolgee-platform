@@ -1,8 +1,9 @@
-package io.tolgee.constants;
+package io.tolgee.model.enums
 
-import io.tolgee.exceptions.NotFoundException;
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.NotFoundException
 
-public enum ApiScope {
+enum class ApiScope(var value: String) {
     TRANSLATIONS_VIEW("translations.view"),
     TRANSLATIONS_EDIT("translations.edit"),
     KEYS_EDIT("keys.edit"),
@@ -10,26 +11,14 @@ public enum ApiScope {
     SCREENSHOTS_DELETE("screenshots.delete"),
     SCREENSHOTS_VIEW("screenshots.view");
 
-    private String value;
-
-    private ApiScope(String value) {
-        this.value = value;
-    }
-
-    public static ApiScope fromValue(String value) {
-        for (ApiScope scope : ApiScope.values()) {
-            if (scope.value.equals(value)) {
-                return scope;
+    companion object {
+        fun fromValue(value: String): ApiScope {
+            for (scope in values()) {
+                if (scope.value == value) {
+                    return scope
+                }
             }
+            throw NotFoundException(Message.SCOPE_NOT_FOUND)
         }
-        throw new NotFoundException(Message.SCOPE_NOT_FOUND);
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
     }
 }

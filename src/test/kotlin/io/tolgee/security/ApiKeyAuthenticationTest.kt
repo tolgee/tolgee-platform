@@ -2,10 +2,10 @@ package io.tolgee.security
 
 import io.tolgee.assertions.Assertions
 import io.tolgee.assertions.UserApiAppAction
-import io.tolgee.constants.ApiScope
 import io.tolgee.controllers.AbstractUserAppApiTest
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.model.enums.ApiScope
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -25,7 +25,7 @@ class ApiKeyAuthenticationTest : AbstractUserAppApiTest() {
     @Test
     fun accessWithApiKey_success() {
         val base = dbPopulator.createBase(generateUniqueString())
-        val apiKey = apiKeyService.createApiKey(base.permissions.first().user, setOf(*ApiScope.values()), base)
+        val apiKey = apiKeyService.createApiKey(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
         mvc.perform(MockMvcRequestBuilders.get("/uaa/en?ak=" + apiKey.key))
                 .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
     }
@@ -39,7 +39,7 @@ class ApiKeyAuthenticationTest : AbstractUserAppApiTest() {
     @Test
     fun accessWithApiKey_failure_api_path() {
         val base = dbPopulator.createBase(generateUniqueString())
-        val apiKey = apiKeyService.createApiKey(base.permissions.first().user, setOf(*ApiScope.values()), base)
+        val apiKey = apiKeyService.createApiKey(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
         performAction(UserApiAppAction(
                 apiKey = apiKey.key,
                 url = "/api/projects",

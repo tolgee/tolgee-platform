@@ -3,8 +3,8 @@ package io.tolgee.controllers
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.constants.ApiScope
 import io.tolgee.model.Permission
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
@@ -44,7 +44,7 @@ class ExportController @Autowired constructor(private val translationService: Tr
                         String.format("attachment; filename=\"%s.zip\"", projectHolder.project.name))
                 .body(StreamingResponseBody { out: OutputStream ->
                     val zipOutputStream = ZipOutputStream(out)
-                    val translations = translationService.getTranslations(languages.tags,
+                    val translations = translationService.getTranslations(languages.map { it.tag }.toSet(),
                             projectHolder.project.id)
                     for ((key, value) in translations) {
                         zipOutputStream.putNextEntry(ZipEntry(String.format("%s.json", key)))

@@ -2,10 +2,10 @@ package io.tolgee.api.v2.controllers.translations.v2TranslationsController
 
 import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.annotations.ProjectJWTAuthTestMethod
-import io.tolgee.constants.ApiScope
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.fixtures.*
+import io.tolgee.model.enums.ApiScope
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.BeforeMethod

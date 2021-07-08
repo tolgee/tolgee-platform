@@ -17,9 +17,9 @@ class JsonFileProcessor(
                 context.addTranslation(it.key, languageNameGuesses[0], it.value)
             }
         } catch (e: JsonParseException) {
-            throw ImportCannotParseFileException(context.file.name, e.message)
+            throw ImportCannotParseFileException(context.file.name, e.message ?: "")
         } catch (e: MismatchedInputException) {
-            throw ImportCannotParseFileException(context.file.name, e.message)
+            throw ImportCannotParseFileException(context.file.name, e.message ?: "")
         }
     }
 

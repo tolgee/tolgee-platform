@@ -2,7 +2,6 @@ package io.tolgee.controllers
 
 import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
@@ -13,6 +12,7 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.helpers.JsonHelper
 import io.tolgee.model.Project
+import io.tolgee.model.enums.ApiScope
 import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest

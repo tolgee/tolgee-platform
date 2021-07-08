@@ -2,7 +2,6 @@ package io.tolgee.security.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.constants.ApiScope
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.CreateApiKeyDTO
 import io.tolgee.dtos.request.EditApiKeyDTO
@@ -11,6 +10,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Permission.ProjectPermissionType
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.service.ApiKeyService
@@ -33,47 +33,47 @@ class ApiKeyController(private val apiKeyService: ApiKeyService,
     @Operation(summary = "Returns all user's api keys")
     @GetMapping(path = [""])
     fun allByUser(): Set<ApiKeyDTO> {
-        return apiKeyService.getAllByUser(authenticationFacade.userAccount).stream()
-                .map { apiKey: ApiKey? -> ApiKeyDTO.fromEntity(apiKey) }
-                .collect(Collectors.toCollection { LinkedHashSet() })
+        return apiKeyService.getAllByUser(authenticationFacade.userAccount)
+                .map { apiKey: ApiKey -> ApiKeyDTO.fromEntity(apiKey) }
+                .toCollection(linkedSetOf())
     }
 
     @GetMapping(path = ["/project/{projectId}"])
     @Operation(summary = "Returns all API keys for project")
     fun allByProject(@PathVariable("projectId") repositoryId: Long?): Set<ApiKeyDTO> {
         securityService.checkProjectPermission(repositoryId!!, ProjectPermissionType.MANAGE)
-        return apiKeyService.getAllByProject(repositoryId).stream()
-                .map { apiKey: ApiKey? -> ApiKeyDTO.fromEntity(apiKey) }
-                .collect(Collectors.toCollection { LinkedHashSet() })
+        return apiKeyService.getAllByProject(repositoryId)
+                .map { apiKey: ApiKey -> ApiKeyDTO.fromEntity(apiKey) }
+                .toCollection(linkedSetOf())
     }
 
     @PostMapping(path = [""])
     @Operation(summary = "Creates new API key with provided scopes")
     fun create(@RequestBody @Valid createApiKeyDTO: CreateApiKeyDTO?): ApiKeyDTO {
-        val repository = projectService.get(createApiKeyDTO!!.projectId!!)
+        val project = projectService.get(createApiKeyDTO!!.projectId!!)
                 .orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }
-        securityService.checkApiKeyScopes(createApiKeyDTO.scopes!!, repository)
-        return apiKeyService.createApiKey(authenticationFacade.userAccount, createApiKeyDTO.scopes!!, repository)
+        securityService.checkApiKeyScopes(createApiKeyDTO.scopes!!, project)
+        return apiKeyService.createApiKey(authenticationFacade.userAccount, createApiKeyDTO.scopes!!, project!!)
     }
 
     @PostMapping(path = ["/edit"])
     @Operation(summary = "Edits existing API key")
-    fun edit(@RequestBody @Valid dto: EditApiKeyDTO?) {
-        val apiKey = apiKeyService.getApiKey(dto!!.id).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
+    fun edit(@RequestBody @Valid dto: EditApiKeyDTO) {
+        val apiKey = apiKeyService.getApiKey(dto.id).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
         securityService.checkApiKeyScopes(dto.scopes, apiKey.project)
-        apiKey.scopesEnum = dto.scopes
+        apiKey.scopesEnum = dto.scopes.toMutableSet()
         apiKeyService.editApiKey(apiKey)
     }
 
     @DeleteMapping(path = ["/{key}"])
     @Operation(summary = "Deletes API key")
-    fun delete(@PathVariable("key") key: String?) {
+    fun delete(@PathVariable("key") key: String) {
         val apiKey = apiKeyService.getApiKey(key).orElseThrow { NotFoundException(Message.API_KEY_NOT_FOUND) }
         try {
-            securityService.checkProjectPermission(apiKey.project!!.id, ProjectPermissionType.MANAGE)
+            securityService.checkProjectPermission(apiKey.project.id, ProjectPermissionType.MANAGE)
         } catch (e: PermissionException) {
-            //user can delete their own api keys
-            if (apiKey.userAccount!!.id != authenticationFacade.userAccount.id) {
+            //users can delete their own api keys
+            if (apiKey.userAccount.id != authenticationFacade.userAccount.id) {
                 throw e
             }
         }

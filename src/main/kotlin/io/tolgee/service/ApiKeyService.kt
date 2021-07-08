@@ -1,11 +1,11 @@
 package io.tolgee.service
 
-import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.repository.ApiKeyRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -20,7 +20,7 @@ class ApiKeyService @Autowired constructor(private val apiKeyRepository: ApiKeyR
     @set:Autowired
     lateinit var permissionService: PermissionService
 
-    fun createApiKey(userAccount: UserAccount?, scopes: Set<ApiScope>, project: Project?): ApiKeyDTO {
+    fun createApiKey(userAccount: UserAccount, scopes: Set<ApiScope>, project: Project): ApiKeyDTO {
         val apiKey = ApiKey(
                 key = BigInteger(130, random).toString(32),
                 project = project,
@@ -31,15 +31,15 @@ class ApiKeyService @Autowired constructor(private val apiKeyRepository: ApiKeyR
         return ApiKeyDTO.fromEntity(apiKey)
     }
 
-    fun getAllByUser(userAccount: UserAccount?): Set<ApiKey> {
+    fun getAllByUser(userAccount: UserAccount): Set<ApiKey> {
         return apiKeyRepository.getAllByUserAccountOrderById(userAccount)
     }
 
-    fun getAllByProject(projectId: Long?): Set<ApiKey> {
+    fun getAllByProject(projectId: Long): Set<ApiKey> {
         return apiKeyRepository.getAllByProjectId(projectId)
     }
 
-    fun getApiKey(apiKey: String?): Optional<ApiKey> {
+    fun getApiKey(apiKey: String): Optional<ApiKey> {
         return apiKeyRepository.findByKey(apiKey)
     }
 
@@ -60,7 +60,7 @@ class ApiKeyService @Autowired constructor(private val apiKeyRepository: ApiKeyR
         apiKeyRepository.save(apiKey)
     }
 
-    fun deleteAllByProject(projectId: Long?) {
+    fun deleteAllByProject(projectId: Long) {
         apiKeyRepository.deleteAllByProjectId(projectId)
     }
 }

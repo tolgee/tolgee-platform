@@ -39,7 +39,7 @@ class ProjectPermissionFilterTest : SignedInControllerTest() {
     }
 
     @Test
-    fun returnsNotFoundWhenProjectNotExist() {
+    fun returnsNotFoundWhenProjectNotExists() {
         val user = dbPopulator.createUserIfNotExists("newUser")
         performAuthGet("/api/project/${user.id}/translations/en")
                 .andExpect(MockMvcResultMatchers.status().isNotFound).andReturn()

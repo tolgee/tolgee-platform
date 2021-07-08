@@ -1,64 +1,39 @@
 package io.tolgee.model
 
-import io.tolgee.constants.ApiScope
+import io.tolgee.model.enums.ApiScope
 import org.hibernate.envers.Audited
 import javax.persistence.*
 import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
 
+@Suppress("JoinDeclarationAndAssignment")
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["key"], name = "api_key_unique")])
 @Audited
-data class ApiKey(
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        var id: Long? = null,
-
-        @NotEmpty
-        @NotNull
-        var key: String? = null,
+class ApiKey(
+        @field:NotEmpty
+        @field:NotNull
+        var key: String = "",
 
         @NotNull
         @NotEmpty
         @Enumerated(EnumType.ORDINAL)
         @field:ElementCollection(targetClass = ApiScope::class, fetch = FetchType.EAGER)
-        var scopesEnum: Set<ApiScope>
-) : AuditModel() {
+        var scopesEnum: MutableSet<ApiScope>
+) : StandardAuditModel() {
 
     @ManyToOne
     @NotNull
-    var userAccount: UserAccount? = null
+    lateinit var userAccount: UserAccount
 
     @ManyToOne
     @NotNull
-    var project: Project? = null
-
-    @Deprecated(level = DeprecationLevel.WARNING,
-            message = "Scopes field is deprecated, it should not persist string values",
-            replaceWith = ReplaceWith("scopesEnum")
-    )
-    private var scopes: String? = null
+    lateinit var project: Project
 
     constructor(
-            id: Long? = null,
-
-            @NotNull
-            userAccount: UserAccount?,
-
-            @NotNull
-            project: Project?,
-
-            @NotEmpty @NotNull
-            key: String?,
-
-            scopes: String? = null,
-
-            @NotEmpty @NotNull
-            scopesEnum: Set<ApiScope>
-    ) : this(id, key, scopesEnum) {
+            key: String, scopesEnum: Set<ApiScope>, userAccount: UserAccount, project: Project
+    ) : this(key, scopesEnum.toMutableSet()) {
         this.userAccount = userAccount
         this.project = project
-        @Suppress("DEPRECATION")
-        this.scopes = scopes
     }
 }

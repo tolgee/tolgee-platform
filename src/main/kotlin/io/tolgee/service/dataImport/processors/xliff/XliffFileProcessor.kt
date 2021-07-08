@@ -4,6 +4,7 @@ import io.tolgee.exceptions.ImportCannotParseFileException
 import io.tolgee.exceptions.UnsupportedXliffVersionException
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
+import java.util.*
 import javax.xml.namespace.QName
 import javax.xml.stream.events.StartElement
 
@@ -22,7 +23,7 @@ class XliffFileProcessor(override val context: FileProcessorContext) : ImportFil
     private val version: String by lazy {
         while (xmlEventReader.hasNext()) {
             val event = xmlEventReader.nextEvent()
-            if (event.isStartElement && (event as? StartElement)?.name?.localPart?.toLowerCase() == "xliff") {
+            if (event.isStartElement && (event as? StartElement)?.name?.localPart?.lowercase(Locale.getDefault()) == "xliff") {
                 val versionAttr = event.getAttributeByName(QName(null, "version"))
                 if (versionAttr != null) {
                     return@lazy versionAttr.value

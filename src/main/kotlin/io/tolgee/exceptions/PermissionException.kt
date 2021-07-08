@@ -1,14 +1,9 @@
-package io.tolgee.exceptions;
+package io.tolgee.exceptions
 
-import io.tolgee.constants.Message;
-import org.springframework.http.HttpStatus;
+import io.tolgee.constants.Message
+import org.springframework.http.HttpStatus
 
-public class PermissionException extends ErrorException {
-    public PermissionException() {
-        super(Message.OPERATION_NOT_PERMITTED);
-    }
-
-    public HttpStatus getHttpStatus() {
-        return HttpStatus.FORBIDDEN;
-    }
+class PermissionException : ErrorException(Message.OPERATION_NOT_PERMITTED) {
+    override val httpStatus: HttpStatus
+        get() = HttpStatus.FORBIDDEN
 }

@@ -1,6 +1,5 @@
 package io.tolgee.service
 
-import io.tolgee.collections.LanguageSet
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException
@@ -49,14 +48,14 @@ class LanguageService(
         return language
     }
 
-    fun getImplicitLanguages(project: Project): LanguageSet {
+    fun getImplicitLanguages(project: Project): Set<Language> {
         val data = getPaged(projectId = project.id, PageRequest.of(0, 2))
-        return data.content.toCollection(LanguageSet())
+        return data.content.toSet()
     }
 
     @Transactional
-    fun findAll(projectId: Long?): LanguageSet {
-        return LanguageSet(languageRepository.findAllByProjectId(projectId))
+    fun findAll(projectId: Long): Set<Language> {
+        return languageRepository.findAllByProjectId(projectId).toSet()
     }
 
     fun findById(id: Long): Optional<Language> {
@@ -71,15 +70,15 @@ class LanguageService(
         return languageRepository.findByTagAndProjectId(tag, projectId)
     }
 
-    fun findByTags(tag: Collection<String>?, projectId: Long?): LanguageSet {
-        val langs = languageRepository.findAllByTagInAndProjectId(tag, projectId)
-        if (!langs.stream().map(Language::tag).collect(Collectors.toSet()).containsAll(tag!!)) {
+    fun findByTags(tag: Collection<String>?, projectId: Long?): Set<Language> {
+        val languages = languageRepository.findAllByTagInAndProjectId(tag, projectId)
+        if (!languages.stream().map(Language::tag).collect(Collectors.toSet()).containsAll(tag!!)) {
             throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
         }
-        return LanguageSet(langs)
+        return languages.toSet()
     }
 
-    fun getLanguagesForTranslationsView(languages: Set<String>?, project: Project): LanguageSet {
+    fun getLanguagesForTranslationsView(languages: Set<String>?, project: Project): Set<Language> {
         return if (languages == null) {
             getImplicitLanguages(project)
         } else findByTags(languages, project.id)

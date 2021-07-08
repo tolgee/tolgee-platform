@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.enums.Explode
 import io.swagger.v3.oas.annotations.enums.ParameterIn
 import io.swagger.v3.oas.annotations.enums.ParameterStyle
 import io.swagger.v3.oas.annotations.media.Schema
-import io.tolgee.constants.ApiScope
+import io.tolgee.model.enums.ApiScope
 
 @Parameter(`in` = ParameterIn.QUERY,
         name = "ak", style = ParameterStyle.FORM,

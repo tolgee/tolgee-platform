@@ -9,13 +9,13 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.api.v2.hateoas.translations.comments.TranslationCommentModel
 import io.tolgee.api.v2.hateoas.translations.comments.TranslationCommentModelAssembler
-import io.tolgee.constants.ApiScope
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.TranslationCommentDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Permission
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment

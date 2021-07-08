@@ -5,7 +5,6 @@ package io.tolgee.controllers
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
@@ -13,6 +12,7 @@ import io.tolgee.dtos.response.ViewDataResponse
 import io.tolgee.dtos.response.translations_view.ResponseParams
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
@@ -63,7 +63,7 @@ class TranslationController @Autowired constructor(
                 PathDTO.fromFullPath(dto!!.key)
         ).orElseThrow { NotFoundException() }
 
-        translationService.setForKey(key, dto.translations!!)
+        translationService.setForKey(key, dto.translations)
     }
 
     @PostMapping("")
@@ -73,7 +73,7 @@ class TranslationController @Autowired constructor(
     fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto) {
         val project = projectHolder.project
         val key = keyService.getOrCreateKey(project, PathDTO.fromFullPath(dto.key))
-        translationService.setForKey(key, dto.translations!!)
+        translationService.setForKey(key, dto.translations)
     }
 
     @GetMapping(value = ["/view"])
