@@ -9,13 +9,15 @@ import org.springframework.hateoas.server.core.Relation
 
 @Relation(collectionRelation = "users", itemRelation = "user")
 data class UserAccountInProjectModel(
-        override val id: Long,
-        override val username: String,
-        override var name: String?,
-        override val organizationRole: OrganizationRoleType?,
-        override val organizationBasePermissions: Permission.ProjectPermissionType?,
-        override val directPermissions: Permission.ProjectPermissionType?,
-        @Schema(description = "Actual user's permissions on selected project. You can not sort data by this column!", example = "EDIT")
-        val computedPermissions: Permission.ProjectPermissionType
+  override val id: Long,
+  override val username: String,
+  override var name: String?,
+  override val organizationRole: OrganizationRoleType?,
+  override val organizationBasePermissions: Permission.ProjectPermissionType?,
+  override val directPermissions: Permission.ProjectPermissionType?,
+  @Schema(
+    description = "Actual user's permissions on selected project. You can not sort data by this column!",
+    example = "EDIT"
+  )
+  val computedPermissions: Permission.ProjectPermissionType
 ) : RepresentationModel<UserAccountInProjectModel>(), UserAccountInProjectView
-

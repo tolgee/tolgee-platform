@@ -10,46 +10,51 @@ import java.lang.Integer.min
 @Component
 class SlugGenerator {
 
-    companion object {
-        const val DELIMITER = "-"
-    }
+  companion object {
+    const val DELIMITER = "-"
+  }
 
-    fun generate(name: String, minLength: Int, maxLength: Int, checkUniquenessCallback: (name: String) -> Boolean): String {
-        var namePart = StringUtils.stripAccents(name).toLowerCase()
-                .replace("[^a-z0-9]+".toRegex(), DELIMITER)
-                .let { it.substring(0, min(it.length, maxLength)) }
+  fun generate(
+    name: String,
+    minLength: Int,
+    maxLength: Int,
+    checkUniquenessCallback: (name: String) -> Boolean
+  ): String {
+    var namePart = StringUtils.stripAccents(name).toLowerCase()
+      .replace("[^a-z0-9]+".toRegex(), DELIMITER)
+      .let { it.substring(0, min(it.length, maxLength)) }
 
-        namePart = namePart.removePrefix(DELIMITER)
+    namePart = namePart.removePrefix(DELIMITER)
 
-        var numPart = 0
-        var tries = 0
+    var numPart = 0
+    var tries = 0
 
-        while (true) {
-            if (tries > 5000) {
-                throw BadRequestException(Message.CANNOT_FIND_SUITABLE_ADDRESS_PART)
-            }
-            tries++
+    while (true) {
+      if (tries > 5000) {
+        throw BadRequestException(Message.CANNOT_FIND_SUITABLE_ADDRESS_PART)
+      }
+      tries++
 
-            if ((namePart + numPart.emptyOnZero()).length > maxLength) {
-                namePart = namePart.substring(0, namePart.length - 1)
-            }
+      if ((namePart + numPart.emptyOnZero()).length > maxLength) {
+        namePart = namePart.substring(0, namePart.length - 1)
+      }
 
-            namePart = namePart.removeSuffix("-");
+      namePart = namePart.removeSuffix("-")
 
-            val result = namePart + numPart.emptyOnZero()
-            if (result.length >= minLength && checkUniquenessCallback(result)) {
+      val result = namePart + numPart.emptyOnZero()
+      if (result.length >= minLength && checkUniquenessCallback(result)) {
 
-                //has to contain letter
-                if (result.matches(".*[a-z]+.*+".toRegex())) {
-                    return result
-                }
-                namePart += "a"
-                numPart = 0;
-            }
-
-            numPart++
+        // has to contain letter
+        if (result.matches(".*[a-z]+.*+".toRegex())) {
+          return result
         }
-    }
+        namePart += "a"
+        numPart = 0
+      }
 
-    private fun Int.emptyOnZero() = if (this == 0) "" else this.toString()
+      numPart++
+    }
+  }
+
+  private fun Int.emptyOnZero() = if (this == 0) "" else this.toString()
 }

@@ -11,24 +11,23 @@ import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
-
 @Component
 open class Aes(jwtSecretProvider: JwtSecretProvider) {
-    private val secretKey: SecretKeySpec? by lazy {
-        val sha = MessageDigest.getInstance("SHA-1")
-        val key = Arrays.copyOf(sha.digest(jwtSecretProvider.jwtSecret), 16)
-        SecretKeySpec(key, "AES")
-    }
+  private val secretKey: SecretKeySpec? by lazy {
+    val sha = MessageDigest.getInstance("SHA-1")
+    val key = Arrays.copyOf(sha.digest(jwtSecretProvider.jwtSecret), 16)
+    SecretKeySpec(key, "AES")
+  }
 
-    fun encrypt(toEncrypt: ByteArray): ByteArray? {
-        val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-        return cipher.doFinal(toEncrypt)
-    }
+  fun encrypt(toEncrypt: ByteArray): ByteArray? {
+    val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
+    cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+    return cipher.doFinal(toEncrypt)
+  }
 
-    fun decrypt(toDecrypt: ByteArray): ByteArray {
-        val cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING")
-        cipher.init(Cipher.DECRYPT_MODE, secretKey)
-        return cipher.doFinal(toDecrypt)
-    }
+  fun decrypt(toDecrypt: ByteArray): ByteArray {
+    val cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING")
+    cipher.init(Cipher.DECRYPT_MODE, secretKey)
+    return cipher.doFinal(toDecrypt)
+  }
 }

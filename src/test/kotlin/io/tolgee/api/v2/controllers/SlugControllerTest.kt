@@ -14,69 +14,68 @@ import org.testng.annotations.Test
 @AutoConfigureWebMvc
 class SlugControllerTest : SignedInControllerTest() {
 
-    @Test
-    fun testValidateOrganizationSlug() {
-        performAuthGet("/v2/address-part/validate-organization/hello-1").andIsOk.andAssertThatJson.isEqualTo(true)
-        organizationRepository.save(
-                Organization(
-                        name = "aaa",
-                        slug = "hello-1"
-                )
-        )
-        performAuthGet("/v2/address-part/validate-organization/hello-1").andIsOk.andAssertThatJson.isEqualTo(false)
-    }
+  @Test
+  fun testValidateOrganizationSlug() {
+    performAuthGet("/v2/address-part/validate-organization/hello-1").andIsOk.andAssertThatJson.isEqualTo(true)
+    organizationRepository.save(
+      Organization(
+        name = "aaa",
+        slug = "hello-1"
+      )
+    )
+    performAuthGet("/v2/address-part/validate-organization/hello-1").andIsOk.andAssertThatJson.isEqualTo(false)
+  }
 
-    @Test
-    fun testValidateRepositorySlug() {
-        performAuthGet("/v2/address-part/validate-project/hello-1").andIsOk.andAssertThatJson.isEqualTo(true)
-        projectRepository.save(
-                Project(
-                        name = "aaa",
-                        slug = "hello-1"
-                ).also { it.userOwner = dbPopulator.createUserIfNotExists("hello") }
-        )
-        performAuthGet("/v2/address-part/validate-project/hello-1").andIsOk.andAssertThatJson.isEqualTo(false)
-    }
+  @Test
+  fun testValidateRepositorySlug() {
+    performAuthGet("/v2/address-part/validate-project/hello-1").andIsOk.andAssertThatJson.isEqualTo(true)
+    projectRepository.save(
+      Project(
+        name = "aaa",
+        slug = "hello-1"
+      ).also { it.userOwner = dbPopulator.createUserIfNotExists("hello") }
+    )
+    performAuthGet("/v2/address-part/validate-project/hello-1").andIsOk.andAssertThatJson.isEqualTo(false)
+  }
 
+  @Test
+  fun testGenerateOrganizationSlug() {
+    performAuthPost("/v2/address-part/generate-organization", GenerateSlugDto("Hello world"))
+      .andIsOk.andAssertThatJson.isEqualTo("hello-world")
 
-    @Test
-    fun testGenerateOrganizationSlug() {
-        performAuthPost("/v2/address-part/generate-organization", GenerateSlugDto("Hello world"))
-                .andIsOk.andAssertThatJson.isEqualTo("hello-world")
+    organizationRepository.save(
+      Organization(
+        name = "aaa",
+        slug = "hello-world"
+      )
+    )
 
-        organizationRepository.save(
-                Organization(
-                        name = "aaa",
-                        slug = "hello-world"
-                )
-        )
+    performAuthPost("/v2/address-part/generate-organization", GenerateSlugDto("Hello world"))
+      .andIsOk.andAssertThatJson.isEqualTo("hello-world1")
+  }
 
-        performAuthPost("/v2/address-part/generate-organization", GenerateSlugDto("Hello world"))
-                .andIsOk.andAssertThatJson.isEqualTo("hello-world1")
-    }
+  @Test
+  fun testGenerateOrganizationSlugSameOld() {
+    organizationRepository.save(
+      Organization(
+        name = "aaa",
+        slug = "hello-world"
+      )
+    )
 
-    @Test
-    fun testGenerateOrganizationSlugSameOld() {
-        organizationRepository.save(
-                Organization(
-                        name = "aaa",
-                        slug = "hello-world"
-                )
-        )
+    performAuthPost("/v2/address-part/generate-organization", GenerateSlugDto("Hello world", "hello-world"))
+      .andIsOk.andAssertThatJson.isEqualTo("hello-world")
+  }
 
-        performAuthPost("/v2/address-part/generate-organization", GenerateSlugDto("Hello world", "hello-world"))
-                .andIsOk.andAssertThatJson.isEqualTo("hello-world")
-    }
-
-    @Test
-    fun testGenerateRepositorySlug() {
-        projectRepository.save(
-                Project(
-                        name = "aaa",
-                        slug = "hello-world"
-                ).also { it.userOwner = dbPopulator.createUserIfNotExists("hello") }
-        )
-        performAuthPost("/v2/address-part/generate-project", GenerateSlugDto("Hello world"))
-                .andIsOk.andAssertThatJson.isEqualTo("hello-world1")
-    }
+  @Test
+  fun testGenerateRepositorySlug() {
+    projectRepository.save(
+      Project(
+        name = "aaa",
+        slug = "hello-world"
+      ).also { it.userOwner = dbPopulator.createUserIfNotExists("hello") }
+    )
+    performAuthPost("/v2/address-part/generate-project", GenerateSlugDto("Hello world"))
+      .andIsOk.andAssertThatJson.isEqualTo("hello-world1")
+  }
 }

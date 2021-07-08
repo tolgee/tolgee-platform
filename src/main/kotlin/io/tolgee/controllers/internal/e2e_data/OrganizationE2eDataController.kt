@@ -21,143 +21,147 @@ import org.springframework.web.bind.annotation.RestController
 @Transactional
 @InternalController
 open class OrganizationE2eDataController(
-        private val organizationService: OrganizationService,
-        private val userAccountService: UserAccountService,
-        private val dbPopulatorReal: DbPopulatorReal,
-        private val organizationRoleService: OrganizationRoleService
+  private val organizationService: OrganizationService,
+  private val userAccountService: UserAccountService,
+  private val dbPopulatorReal: DbPopulatorReal,
+  private val organizationRoleService: OrganizationRoleService
 ) {
-    @GetMapping(value = ["/create"])
-    @Transactional
-    open fun createOrganizations() {
-        data.forEach {
-            val organization = organizationService.create(
-                    it.dto,
-                    this.dbPopulatorReal.createUserIfNotExists(it.owner.email, null, it.owner.name)
-            )
-        }
-
-        data.forEach {
-            val organization = organizationService.get(it.dto.slug!!)
-            it.members.forEach { memberUserName ->
-                userAccountService.getByUserName(memberUserName).orElseThrow { NotFoundException() }.let { user ->
-                    organizationRoleService.grantMemberRoleToUser(user, organization!!)
-                }
-            }
-
-            it.otherOwners.forEach { memberUserName ->
-                userAccountService.getByUserName(memberUserName).orElseThrow { NotFoundException() }.let { user ->
-                    organizationRoleService.grantOwnerRoleToUser(user, organization!!)
-                }
-            }
-        }
+  @GetMapping(value = ["/create"])
+  @Transactional
+  open fun createOrganizations() {
+    data.forEach {
+      val organization = organizationService.create(
+        it.dto,
+        this.dbPopulatorReal.createUserIfNotExists(it.owner.email, null, it.owner.name)
+      )
     }
 
-    @GetMapping(value = ["/clean"])
-    @Transactional
-    open fun cleanupOrganizations() {
-        organizationService.get("what-a-nice-organization")?.let {
-            organizationService.delete(it.id!!)
+    data.forEach {
+      val organization = organizationService.get(it.dto.slug!!)
+      it.members.forEach { memberUserName ->
+        userAccountService.getByUserName(memberUserName).orElseThrow { NotFoundException() }.let { user ->
+          organizationRoleService.grantMemberRoleToUser(user, organization!!)
         }
-        data.forEach {
-            organizationService.get(it.dto.slug!!)?.let { organization ->
-                organizationService.delete(organization.id!!)
-            }
+      }
+
+      it.otherOwners.forEach { memberUserName ->
+        userAccountService.getByUserName(memberUserName).orElseThrow { NotFoundException() }.let { user ->
+          organizationRoleService.grantOwnerRoleToUser(user, organization!!)
         }
+      }
     }
+  }
 
-    companion object {
-        data class UserData(
-                val email: String,
-                val name: String = email
-        )
+  @GetMapping(value = ["/clean"])
+  @Transactional
+  open fun cleanupOrganizations() {
+    organizationService.get("what-a-nice-organization")?.let {
+      organizationService.delete(it.id!!)
+    }
+    data.forEach {
+      organizationService.get(it.dto.slug!!)?.let { organization ->
+        organizationService.delete(organization.id!!)
+      }
+    }
+  }
 
-        data class OrganizationDataItem(
-                val dto: OrganizationDto,
-                val owner: UserData,
-                val otherOwners: MutableList<String> = mutableListOf(),
-                val members: MutableList<String> = mutableListOf(),
-        )
+  companion object {
+    data class UserData(
+      val email: String,
+      val name: String = email
+    )
 
-        val data = mutableListOf(
-                OrganizationDataItem(
-                        dto = OrganizationDto(
-                                name = "Google",
-                                description = "An organization made by google company",
-                                slug = "google"),
-                        owner = UserData("admin")
-                ),
-                OrganizationDataItem(
-                        dto = OrganizationDto(
-                                name = "Netsuite",
-                                description = "A system for everything",
-                                slug = "netsuite"),
-                        owner = UserData("evan@netsuite.com", "Evan Goldberg")
-                ),
-                OrganizationDataItem(
-                        dto = OrganizationDto(
-                                name = "Microsoft",
-                                description = "A first software company ever or something like that.",
-                                slug = "microsoft"
-                        ),
-                        owner = UserData("gates@microsoft.com", "Bill Gates"),
-                        members = mutableListOf("admin")
-                ),
-                OrganizationDataItem(
-                        dto = OrganizationDto(
-                                name = "Tolgee",
-                                description = "This is us",
-                                slug = "tolgee"
-                        ),
-                        owner = UserData("admin"),
-                        otherOwners = mutableListOf("evan@netsuite.com"),
-                        members = mutableListOf("gates@microsoft.com", "cukrberg@facebook.com")
-                ),
-                OrganizationDataItem(
-                        dto = OrganizationDto(
-                                name = "Facebook",
-                                description = """
+    data class OrganizationDataItem(
+      val dto: OrganizationDto,
+      val owner: UserData,
+      val otherOwners: MutableList<String> = mutableListOf(),
+      val members: MutableList<String> = mutableListOf(),
+    )
+
+    val data = mutableListOf(
+      OrganizationDataItem(
+        dto = OrganizationDto(
+          name = "Google",
+          description = "An organization made by google company",
+          slug = "google"
+        ),
+        owner = UserData("admin")
+      ),
+      OrganizationDataItem(
+        dto = OrganizationDto(
+          name = "Netsuite",
+          description = "A system for everything",
+          slug = "netsuite"
+        ),
+        owner = UserData("evan@netsuite.com", "Evan Goldberg")
+      ),
+      OrganizationDataItem(
+        dto = OrganizationDto(
+          name = "Microsoft",
+          description = "A first software company ever or something like that.",
+          slug = "microsoft"
+        ),
+        owner = UserData("gates@microsoft.com", "Bill Gates"),
+        members = mutableListOf("admin")
+      ),
+      OrganizationDataItem(
+        dto = OrganizationDto(
+          name = "Tolgee",
+          description = "This is us",
+          slug = "tolgee"
+        ),
+        owner = UserData("admin"),
+        otherOwners = mutableListOf("evan@netsuite.com"),
+        members = mutableListOf("gates@microsoft.com", "cukrberg@facebook.com")
+      ),
+      OrganizationDataItem(
+        dto = OrganizationDto(
+          name = "Facebook",
+          description = """
                             |This is an organization providing a great service to everyone for free. 
                             |They also develop amazing things like react and other open source stuff.
                             |However, they sell our data to companies.
                         """.trimMargin(),
-                                slug = "facebook"
-                        ),
-                        owner = UserData("cukrberg@facebook.com", "Mark Cukrberg"),
-                        otherOwners = mutableListOf("admin")
-                ),
-                OrganizationDataItem(
-                        dto = OrganizationDto(
-                                name = "Unknown company",
-                                description = "We are very unknown.",
-                                slug = "unknown-company"
-                        ),
-                        owner = UserData("admin")
-                ),
-                OrganizationDataItem(
-                        dto = OrganizationDto(
-                                name = "Techfides solutions s.r.o",
-                                description = "Lets develop the future",
-                                slug = "techfides-solutions"
+          slug = "facebook"
+        ),
+        owner = UserData("cukrberg@facebook.com", "Mark Cukrberg"),
+        otherOwners = mutableListOf("admin")
+      ),
+      OrganizationDataItem(
+        dto = OrganizationDto(
+          name = "Unknown company",
+          description = "We are very unknown.",
+          slug = "unknown-company"
+        ),
+        owner = UserData("admin")
+      ),
+      OrganizationDataItem(
+        dto = OrganizationDto(
+          name = "Techfides solutions s.r.o",
+          description = "Lets develop the future",
+          slug = "techfides-solutions"
 
-                        ),
-                        owner = UserData("admin")
-                )
+        ),
+        owner = UserData("admin")
+      )
+    )
+
+    init {
+      (1..20).forEach { number ->
+        val email = "owner@zzzcool$number.com"
+        data.add(
+          OrganizationDataItem(
+            dto = OrganizationDto(
+              name = "ZZZ Cool company $number",
+              description = "We are Z Cool company $number. What a nice day!",
+              slug = "zzz-cool-company-$number"
+            ),
+            otherOwners = mutableListOf("admin"),
+            owner = UserData(email),
+          )
         )
-
-        init {
-            (1..20).forEach { number ->
-                val email = "owner@zzzcool${number}.com";
-                data.add(OrganizationDataItem(
-                        dto = OrganizationDto(
-                                name = "ZZZ Cool company $number",
-                                description = "We are Z Cool company $number. What a nice day!",
-                                slug = "zzz-cool-company-$number"
-                        ),
-                        otherOwners = mutableListOf("admin"),
-                        owner = UserData(email),
-                ))
-                data.find{ item -> item.dto.slug == "facebook"}!!.otherOwners.add(email)
-            }
-        }
+        data.find { item -> item.dto.slug == "facebook" }!!.otherOwners.add(email)
+      }
     }
+  }
 }

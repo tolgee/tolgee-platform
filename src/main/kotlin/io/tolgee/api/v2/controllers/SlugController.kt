@@ -13,47 +13,44 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
-
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/v2/address-part", "/api/address-part"])
-@Tag(name = "Address Part generation")
+@Tag(name = "Slug generation")
 class SlugController(
-        private val organizationService: OrganizationService,
-        private val projectService: ProjectService,
+  private val organizationService: OrganizationService,
+  private val projectService: ProjectService,
 ) {
 
-    @GetMapping("/validate-organization/{slug}")
-    @Operation(summary = "Validate organization address part")
-    fun validateOrganizationSlug(
-            @PathVariable("slug") slug: String
-    ): Boolean {
-        return organizationService.validateSlugUniqueness(slug)
-    }
+  @GetMapping("/validate-organization/{slug}")
+  @Operation(summary = "Validate organization address part")
+  fun validateOrganizationSlug(
+    @PathVariable("slug") slug: String
+  ): Boolean {
+    return organizationService.validateSlugUniqueness(slug)
+  }
 
+  @GetMapping("/validate-project/{slug}")
+  @Operation(summary = "Validate project address part")
+  fun validateProjectSlug(
+    @PathVariable("slug") slug: String
+  ): Boolean {
+    return projectService.validateSlugUniqueness(slug)
+  }
 
-    @GetMapping("/validate-project/{slug}")
-    @Operation(summary = "Validate project address part")
-    fun validateProjectSlug(
-            @PathVariable("slug") slug: String
-    ): Boolean {
-        return projectService.validateSlugUniqueness(slug)
-    }
+  @PostMapping("/generate-organization", produces = [MediaType.APPLICATION_JSON_VALUE])
+  @Operation(summary = "Generate organization address part")
+  fun generateOrganizationSlug(
+    @RequestBody @Valid dto: GenerateSlugDto
+  ): String {
+    return """"${organizationService.generateSlug(dto.name!!, dto.oldSlug)}""""
+  }
 
-    @PostMapping("/generate-organization", produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Operation(summary = "Generate organization address part")
-    fun generateOrganizationSlug(
-            @RequestBody @Valid dto: GenerateSlugDto
-    ): String {
-        return """"${organizationService.generateSlug(dto.name!!, dto.oldSlug)}""""
-    }
-
-
-    @PostMapping("/generate-project", produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Operation(summary = "Generate project address part")
-    fun generateProjectSlug(
-            @RequestBody @Valid dto: GenerateSlugDto
-    ): String {
-        return """"${projectService.generateSlug(dto.name!!, dto.oldSlug)}""""
-    }
+  @PostMapping("/generate-project", produces = [MediaType.APPLICATION_JSON_VALUE])
+  @Operation(summary = "Generate project address part")
+  fun generateProjectSlug(
+    @RequestBody @Valid dto: GenerateSlugDto
+  ): String {
+    return """"${projectService.generateSlug(dto.name!!, dto.oldSlug)}""""
+  }
 }

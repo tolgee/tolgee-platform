@@ -11,22 +11,22 @@ import javax.validation.constraints.NotBlank
 
 @Entity
 class KeyCodeReference(
-        @ManyToOne(optional = false)
-        override var keyMeta: KeyMeta,
+  @ManyToOne(optional = false)
+  override var keyMeta: KeyMeta,
 
-        @field:NotNull
-        @ManyToOne(optional = false, fetch = FetchType.LAZY)
-        var author: UserAccount? = null,
+  @field:NotNull
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  var author: UserAccount? = null,
 ) : StandardAuditModel(), WithKeyMetaReference {
-    @field:NotBlank
-    @Column(length = 300)
-    var path: String = ""
+  @field:NotBlank
+  @Column(length = 300)
+  var path: String = ""
 
-    var line: Long? = null
+  var line: Long? = null
 
-    var fromImport: Boolean = false
+  var fromImport: Boolean = false
 
-    override fun toString(): String {
-        return "KeyCodeReference(path='$path', line=$line)"
-    }
+  override fun toString(): String {
+    return "KeyCodeReference(path='$path', line=$line)"
+  }
 }

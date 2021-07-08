@@ -21,9 +21,9 @@ import io.tolgee.service.KeyService
 import io.tolgee.service.ProjectService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.SecurityService
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.http.MediaType
 import java.util.*
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
@@ -33,61 +33,66 @@ import javax.validation.constraints.NotBlank
 @CrossOrigin(origins = ["*"])
 @RequestMapping(value = ["/api/project/screenshots", "/api/project/{projectId:[0-9]+}/screenshots"])
 @Tag(name = "Screenshots")
+@Deprecated("Use V2ScreenshotController")
 class ScreenshotController(
-        private val screenshotService: ScreenshotService,
-        private val keyService: KeyService,
-        private val projectService: ProjectService,
-        private val securityService: SecurityService,
-        private val tolgeeProperties: TolgeeProperties,
-        private val timestampValidation: TimestampValidation
+  private val screenshotService: ScreenshotService,
+  private val keyService: KeyService,
+  private val projectService: ProjectService,
+  private val securityService: SecurityService,
+  private val tolgeeProperties: TolgeeProperties,
+  private val timestampValidation: TimestampValidation
 ) {
-    @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    @Operation(summary = "Upload screenshot for specific key")
-    fun uploadScreenshot(@PathVariable("projectId") projectId: Long,
-                         @RequestParam("screenshot") screenshot: MultipartFile,
-                         @NotBlank @RequestParam key: String): ScreenshotDTO {
+  @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+  @Operation(summary = "Upload screenshot for specific key")
+  fun uploadScreenshot(
+    @PathVariable("projectId") projectId: Long,
+    @RequestParam("screenshot") screenshot: MultipartFile,
+    @NotBlank @RequestParam key: String
+  ): ScreenshotDTO {
 
-        val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
+    val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
 
-        if (!contentTypes.contains(screenshot.contentType!!)) {
-            throw ValidationException(Message.FILE_NOT_IMAGE)
-        }
-
-        projectService.get(projectId).orElseThrow { NotFoundException() }
-        securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.TRANSLATE)
-        val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
-        val screenShotEntity = screenshotService.store(screenshot, keyEntity)
-        return screenShotEntity.toDTO()
+    if (!contentTypes.contains(screenshot.contentType!!)) {
+      throw ValidationException(Message.FILE_NOT_IMAGE)
     }
 
-    @PostMapping("/get")
-    @Operation(summary = "Returns all screenshots for specific key")
-    @AccessWithAnyProjectPermission
-    fun getKeyScreenshots(@PathVariable("projectId") projectId: Long,
-                          @RequestBody @Valid dto: GetScreenshotsByKeyDTO): List<ScreenshotDTO> {
-        val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(dto.key)).orElseThrow { NotFoundException() }
-        return screenshotService.findAll(keyEntity).map { it.toDTO() }
-    }
+    projectService.get(projectId).orElseThrow { NotFoundException() }
+    securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.TRANSLATE)
+    val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
+    val screenShotEntity = screenshotService.store(screenshot, keyEntity)
+    return screenShotEntity.toDTO()
+  }
 
-    @DeleteMapping("/{ids}")
-    @Operation(summary = "Deletes multiple screenshots by id")
-    fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
-        val screenshots = screenshotService.findByIdIn(ids)
-        screenshots.forEach {
-            securityService.checkProjectPermission(
-                    it.key.project!!.id,
-                    Permission.ProjectPermissionType.TRANSLATE
-            )
-        }
-        screenshotService.delete(screenshots)
-    }
+  @PostMapping("/get")
+  @Operation(summary = "Returns all screenshots for specific key")
+  @AccessWithAnyProjectPermission
+  fun getKeyScreenshots(
+    @PathVariable("projectId") projectId: Long,
+    @RequestBody @Valid dto: GetScreenshotsByKeyDTO
+  ): List<ScreenshotDTO> {
+    val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(dto.key)).orElseThrow { NotFoundException() }
+    return screenshotService.findAll(keyEntity).map { it.toDTO() }
+  }
 
-    private fun Screenshot.toDTO(): ScreenshotDTO {
-        val entity = this
-        var filename = entity.filename
-        if (tolgeeProperties.authentication.securedScreenshotRetrieval) {
-            filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
-        }
-        return ScreenshotDTO(id = entity.id!!, filename = filename, createdAt = entity.createdAt!!)
+  @DeleteMapping("/{ids}")
+  @Operation(summary = "Deletes multiple screenshots by id")
+  fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
+    val screenshots = screenshotService.findByIdIn(ids)
+    screenshots.forEach {
+      securityService.checkProjectPermission(
+        it.key.project!!.id,
+        Permission.ProjectPermissionType.TRANSLATE
+      )
     }
+    screenshotService.delete(screenshots)
+  }
+
+  private fun Screenshot.toDTO(): ScreenshotDTO {
+    val entity = this
+    var filename = entity.filename
+    if (tolgeeProperties.authentication.securedScreenshotRetrieval) {
+      filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
+    }
+    return ScreenshotDTO(id = entity.id!!, filename = filename, createdAt = entity.createdAt!!)
+  }
 }

@@ -20,64 +20,63 @@ import org.springframework.web.bind.annotation.RestController
 @Transactional
 @InternalController
 class LanguageE2eDataController(
-        private val testDataService: TestDataService,
-        private val projectService: ProjectService,
-        private val userAccountService: UserAccountService
+  private val testDataService: TestDataService,
+  private val projectService: ProjectService,
+  private val userAccountService: UserAccountService
 ) {
-    @GetMapping(value = ["/generate"])
-    @Transactional
-    fun generateBaseData(): Project {
-        val data = testDataService.saveTestData {
-            addUserAccount {
-                self {
-                    username = "franta"
-                    name = "Frantisek Dobrota"
-                }
-                addProject {
-                    self {
-                        userOwner = this@addUserAccount.self
-                        name = "Project"
-                    }
-                    addPermission {
-                        self {
-                            type = Permission.ProjectPermissionType.MANAGE
-                            user = this@addUserAccount.self
-                            project = this@addProject.self
-                        }
-                    }
-                    addLanguage {
-                        self {
-                            name = "English"
-                            tag = "en"
-                            flagEmoji = "\uD83C\uDDEC\uD83C\uDDE7"
-                            originalName = "English"
-                        }
-                    }
-                    addLanguage {
-                        self {
-                            name = "German"
-                            tag = "de"
-                            flagEmoji = "\uD83C\uDDE9\uD83C\uDDEA"
-                            originalName = "Deutsch"
-                        }
-                    }
-                }
-            }
+  @GetMapping(value = ["/generate"])
+  @Transactional
+  fun generateBaseData(): Project {
+    val data = testDataService.saveTestData {
+      addUserAccount {
+        self {
+          username = "franta"
+          name = "Frantisek Dobrota"
         }
-
-        testDataService.saveTestData(data)
-        return data.data.projects[0].self
+        addProject {
+          self {
+            userOwner = this@addUserAccount.self
+            name = "Project"
+          }
+          addPermission {
+            self {
+              type = Permission.ProjectPermissionType.MANAGE
+              user = this@addUserAccount.self
+              project = this@addProject.self
+            }
+          }
+          addLanguage {
+            self {
+              name = "English"
+              tag = "en"
+              flagEmoji = "\uD83C\uDDEC\uD83C\uDDE7"
+              originalName = "English"
+            }
+          }
+          addLanguage {
+            self {
+              name = "German"
+              tag = "de"
+              flagEmoji = "\uD83C\uDDE9\uD83C\uDDEA"
+              originalName = "Deutsch"
+            }
+          }
+        }
+      }
     }
 
+    testDataService.saveTestData(data)
+    return data.data.projects[0].self
+  }
 
-    @GetMapping(value = ["/clean"])
-    @Transactional
-    fun cleanup() {
-        userAccountService.getByUserName("franta").orElse(null)?.let {
-            projectService.findAllPermitted(it).forEach { repo ->
-                projectService.deleteProject(repo.id!!)
-            }
-            userAccountService.delete(it)
-        }
+  @GetMapping(value = ["/clean"])
+  @Transactional
+  fun cleanup() {
+    userAccountService.getByUserName("franta").orElse(null)?.let {
+      projectService.findAllPermitted(it).forEach { repo ->
+        projectService.deleteProject(repo.id!!)
+      }
+      userAccountService.delete(it)
     }
+  }
 }

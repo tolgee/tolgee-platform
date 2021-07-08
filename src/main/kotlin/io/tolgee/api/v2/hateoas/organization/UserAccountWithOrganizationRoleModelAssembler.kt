@@ -6,15 +6,16 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class UserAccountWithOrganizationRoleModelAssembler:
-        RepresentationModelAssemblerSupport<UserAccountWithOrganizationRoleView, UserAccountWithOrganizationRoleModel>(
-                UserController::class.java, UserAccountWithOrganizationRoleModel::class.java) {
-    override fun toModel(view: UserAccountWithOrganizationRoleView): UserAccountWithOrganizationRoleModel {
-        return UserAccountWithOrganizationRoleModel(
-                id = view.id,
-                name = view.name,
-                username = view.username,
-                organizationRole = view.organizationRole
-        )
-    }
+class UserAccountWithOrganizationRoleModelAssembler :
+  RepresentationModelAssemblerSupport<UserAccountWithOrganizationRoleView, UserAccountWithOrganizationRoleModel>(
+    UserController::class.java, UserAccountWithOrganizationRoleModel::class.java
+  ) {
+  override fun toModel(view: UserAccountWithOrganizationRoleView): UserAccountWithOrganizationRoleModel {
+    return UserAccountWithOrganizationRoleModel(
+      id = view.id,
+      name = view.name,
+      username = view.username,
+      organizationRole = view.organizationRole
+    )
+  }
 }

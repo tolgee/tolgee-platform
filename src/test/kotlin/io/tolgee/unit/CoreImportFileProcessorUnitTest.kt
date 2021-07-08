@@ -4,12 +4,12 @@ import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.Language
 import io.tolgee.model.Project
-import io.tolgee.model.Translation
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.key.Key
+import io.tolgee.model.translation.Translation
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.KeyMetaService
 import io.tolgee.service.LanguageService
@@ -27,107 +27,119 @@ import java.util.*
 
 class CoreImportFileProcessorUnitTest {
 
-    private lateinit var applicationContextMock: ApplicationContext
-    private lateinit var importMock: Import
-    private lateinit var processorFactoryMock: ProcessorFactory
-    private lateinit var importServiceMock: ImportService
-    private lateinit var languageServiceMock: LanguageService
-    private lateinit var processor: CoreImportFilesProcessor
-    private lateinit var typeProcessorMock: ImportFileProcessor
-    private lateinit var fileProcessorContext: FileProcessorContext
-    private lateinit var importFile: ImportFile
-    private lateinit var importFileDto: ImportFileDto
-    private lateinit var translationServiceMock: TranslationService
-    private lateinit var existingLanguage: Language
-    private lateinit var existingTranslation: Translation
-    private lateinit var authenticationFacadeMock: AuthenticationFacade
-    private lateinit var keyMetaService: KeyMetaService
+  private lateinit var applicationContextMock: ApplicationContext
+  private lateinit var importMock: Import
+  private lateinit var processorFactoryMock: ProcessorFactory
+  private lateinit var importServiceMock: ImportService
+  private lateinit var languageServiceMock: LanguageService
+  private lateinit var processor: CoreImportFilesProcessor
+  private lateinit var typeProcessorMock: ImportFileProcessor
+  private lateinit var fileProcessorContext: FileProcessorContext
+  private lateinit var importFile: ImportFile
+  private lateinit var importFileDto: ImportFileDto
+  private lateinit var translationServiceMock: TranslationService
+  private lateinit var existingLanguage: Language
+  private lateinit var existingTranslation: Translation
+  private lateinit var authenticationFacadeMock: AuthenticationFacade
+  private lateinit var keyMetaService: KeyMetaService
 
-    @BeforeMethod
-    fun setup() {
-        applicationContextMock = mock()
-        importMock = mock()
-        processorFactoryMock = mock()
-        importServiceMock = mock()
-        languageServiceMock = mock()
-        translationServiceMock = mock()
-        typeProcessorMock = mock()
-        authenticationFacadeMock = mock()
-        keyMetaService = mock()
+  @BeforeMethod
+  fun setup() {
+    applicationContextMock = mock()
+    importMock = mock()
+    processorFactoryMock = mock()
+    importServiceMock = mock()
+    languageServiceMock = mock()
+    translationServiceMock = mock()
+    typeProcessorMock = mock()
+    authenticationFacadeMock = mock()
+    keyMetaService = mock()
 
-        importFile = ImportFile("lgn.json", importMock)
-        importFileDto = ImportFileDto("lng.json", "".toByteArray().inputStream())
-        existingLanguage = Language().also { it.name = "lng" }
-        existingTranslation = Translation("helllo").also { it.key = Key(name = "colliding key") }
-        processor = CoreImportFilesProcessor(applicationContextMock, importMock)
-        whenever(applicationContextMock.getBean(ProcessorFactory::class.java)).thenReturn(processorFactoryMock)
-        whenever(applicationContextMock.getBean(ImportService::class.java)).thenReturn(importServiceMock)
-        whenever(applicationContextMock.getBean(LanguageService::class.java)).thenReturn(languageServiceMock)
-        whenever(applicationContextMock.getBean(TranslationService::class.java)).thenReturn(translationServiceMock)
-        whenever(applicationContextMock.getBean(AuthenticationFacade::class.java)).thenReturn(authenticationFacadeMock)
-        whenever(applicationContextMock.getBean(KeyMetaService::class.java)).thenReturn(keyMetaService)
-        whenever(processorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
-        fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
-        fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
-        whenever(typeProcessorMock.context).then { fileProcessorContext }
-        whenever(importMock.project).thenReturn(Project(1, "test repo"))
-        whenever(importServiceMock.saveFile(any())).thenReturn(importFile)
-        whenever(languageServiceMock.findByTag(eq("lng"), any<Long>()))
-                .thenReturn(Optional.of(existingLanguage))
-        whenever(authenticationFacadeMock.userAccount).thenReturn(UserAccount())
-    }
+    importFile = ImportFile("lgn.json", importMock)
+    importFileDto = ImportFileDto("lng.json", "".toByteArray().inputStream())
+    existingLanguage = Language().also { it.name = "lng" }
+    existingTranslation = Translation("helllo").also { it.key = Key(name = "colliding key") }
+    processor = CoreImportFilesProcessor(applicationContextMock, importMock)
+    whenever(applicationContextMock.getBean(ProcessorFactory::class.java)).thenReturn(processorFactoryMock)
+    whenever(applicationContextMock.getBean(ImportService::class.java)).thenReturn(importServiceMock)
+    whenever(applicationContextMock.getBean(LanguageService::class.java)).thenReturn(languageServiceMock)
+    whenever(applicationContextMock.getBean(TranslationService::class.java)).thenReturn(translationServiceMock)
+    whenever(applicationContextMock.getBean(AuthenticationFacade::class.java)).thenReturn(authenticationFacadeMock)
+    whenever(applicationContextMock.getBean(KeyMetaService::class.java)).thenReturn(keyMetaService)
+    whenever(processorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
+    fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
+    whenever(typeProcessorMock.context).then { fileProcessorContext }
+    whenever(importMock.project).thenReturn(Project(1, "test repo"))
+    whenever(importServiceMock.saveFile(any())).thenReturn(importFile)
+    whenever(languageServiceMock.findByTag(eq("lng"), any<Long>()))
+      .thenReturn(Optional.of(existingLanguage))
+    whenever(authenticationFacadeMock.userAccount).thenReturn(UserAccount())
+  }
 
-    @Test
-    fun `finds proper existing language for imported language`() {
-        processor.processFiles(listOf(importFileDto), messageClient = mock())
-        verify(importServiceMock).saveLanguages(argThat {
-            this.first().run {
-                name == "lng" && existingLanguage!!.name == "lng"
-            }
-        })
-    }
+  @Test
+  fun `finds proper existing language for imported language`() {
+    processor.processFiles(listOf(importFileDto), messageClient = mock())
+    verify(importServiceMock).saveLanguages(
+      argThat {
+        this.first().run {
+          name == "lng" && existingLanguage!!.name == "lng"
+        }
+      }
+    )
+  }
 
-    @Test
-    fun `handles conflicts properly`() {
-        fileProcessorContext.addTranslation("colliding key", "lng", "colliding value")
-        fileProcessorContext.addTranslation("not colliding key", "lng", "not colliding value")
-        fileProcessorContext.addTranslation("equal key", "lng", "equal text")
+  @Test
+  fun `handles conflicts properly`() {
+    fileProcessorContext.addTranslation("colliding key", "lng", "colliding value")
+    fileProcessorContext.addTranslation("not colliding key", "lng", "not colliding value")
+    fileProcessorContext.addTranslation("equal key", "lng", "equal text")
 
-        whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(
-                listOf(existingTranslation,
-                        Translation("equal text").also {
-                            it.key = Key("equal key")
-                        }
-                ))
-        processor.processFiles(listOf(importFileDto), messageClient = mock())
-        verify(importServiceMock).saveTranslations(argThat {
-            assertThat(this[0].conflict).isEqualTo(existingTranslation)
-            assertThat(this[1].conflict).isNull()
-            assertThat(this[2].conflict).isNull()
-            true
-        })
-    }
+    whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(
+      listOf(
+        existingTranslation,
+        Translation("equal text").also {
+          it.key = Key("equal key")
+        }
+      )
+    )
+    processor.processFiles(listOf(importFileDto), messageClient = mock())
+    verify(importServiceMock).saveTranslations(
+      argThat {
+        assertThat(this[0].conflict).isEqualTo(existingTranslation)
+        assertThat(this[1].conflict).isNull()
+        assertThat(this[2].conflict).isNull()
+        true
+      }
+    )
+  }
 
-    @Test
-    fun `stores key meta`() {
-        fileProcessorContext.addTranslation("test_key", "lng", "value")
-        fileProcessorContext.addKeyCodeReference("test_key", "hello.php", 10)
-        fileProcessorContext.addKeyCodeReference("test_key", "hello2.php", 10)
-        fileProcessorContext.addKeyComment("test_key", "test comment")
-        whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(listOf())
+  @Test
+  fun `stores key meta`() {
+    fileProcessorContext.addTranslation("test_key", "lng", "value")
+    fileProcessorContext.addKeyCodeReference("test_key", "hello.php", 10)
+    fileProcessorContext.addKeyCodeReference("test_key", "hello2.php", 10)
+    fileProcessorContext.addKeyComment("test_key", "test comment")
+    whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(listOf())
 
-        processor.processFiles(listOf(importFileDto), messageClient = mock())
-        verify(keyMetaService).save(argThat {
-            this.comments.any { it.text == "test comment" }
-        })
-        verify(keyMetaService).save(argThat {
-            this.codeReferences.any { it.path == "hello.php" }
-        })
-        verify(importServiceMock).saveTranslations(argThat {
-            assertThat(this[0].key.keyMeta).isNotNull
-            assertThat(this[0].key.keyMeta?.codeReferences).hasSize(2)
-            assertThat(this[0].key.keyMeta?.comments).hasSize(1)
-            true
-        })
-    }
+    processor.processFiles(listOf(importFileDto), messageClient = mock())
+    verify(keyMetaService).save(
+      argThat {
+        this.comments.any { it.text == "test comment" }
+      }
+    )
+    verify(keyMetaService).save(
+      argThat {
+        this.codeReferences.any { it.path == "hello.php" }
+      }
+    )
+    verify(importServiceMock).saveTranslations(
+      argThat {
+        assertThat(this[0].key.keyMeta).isNotNull
+        assertThat(this[0].key.keyMeta?.codeReferences).hasSize(2)
+        assertThat(this[0].key.keyMeta?.comments).hasSize(1)
+        true
+      }
+    )
+  }
 }

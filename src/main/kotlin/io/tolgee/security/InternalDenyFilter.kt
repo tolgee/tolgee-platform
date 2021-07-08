@@ -14,32 +14,35 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class InternalDenyFilter(
-        private val internalProperties: InternalProperties,
-        private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
-        @param:Qualifier("handlerExceptionResolver")
-        private val resolver: HandlerExceptionResolver
+  private val internalProperties: InternalProperties,
+  private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
+  @param:Qualifier("handlerExceptionResolver")
+  private val resolver: HandlerExceptionResolver
 ) : OncePerRequestFilter() {
 
-    override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
-        try {
-            if (isInternal(request) && !isInternalAllowed()) {
-                response.status = 403
-                response.outputStream.print("Internal access is not allowed")
-                return
-            }
-            filterChain.doFilter(request, response);
-        } catch (e: HttpRequestMethodNotSupportedException) {
-            resolver.resolveException(request, response, null, e)
-        }
+  override fun doFilterInternal(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    filterChain: FilterChain
+  ) {
+    try {
+      if (isInternal(request) && !isInternalAllowed()) {
+        response.status = 403
+        response.outputStream.print("Internal access is not allowed")
+        return
+      }
+      filterChain.doFilter(request, response)
+    } catch (e: HttpRequestMethodNotSupportedException) {
+      resolver.resolveException(request, response, null, e)
     }
+  }
 
-    private fun isInternal(request: HttpServletRequest): Boolean {
-        return request.requestURI.startsWith("/internal") ||
-                (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
-                        ?.method?.declaringClass
-                        ?.getAnnotation(InternalController::class.java) != null;
+  private fun isInternal(request: HttpServletRequest): Boolean {
+    return request.requestURI.startsWith("/internal") ||
+      (requestMappingHandlerMapping.getHandler(request)?.handler as HandlerMethod?)
+      ?.method?.declaringClass
+      ?.getAnnotation(InternalController::class.java) != null
+  }
 
-    }
-
-    private fun isInternalAllowed() = internalProperties.controllerEnabled
+  private fun isInternalAllowed() = internalProperties.controllerEnabled
 }

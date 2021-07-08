@@ -6,8 +6,8 @@ import org.springframework.hateoas.server.core.Relation
 
 @Relation(collectionRelation = "usersInOrganization", itemRelation = "userAccount")
 data class UserAccountWithOrganizationRoleModel(
-        val id: Long,
-        val name: String,
-        var username: String,
-        var organizationRole: OrganizationRoleType
+  val id: Long,
+  val name: String,
+  var username: String,
+  var organizationRole: OrganizationRoleType
 ) : RepresentationModel<UserAccountWithOrganizationRoleModel>()

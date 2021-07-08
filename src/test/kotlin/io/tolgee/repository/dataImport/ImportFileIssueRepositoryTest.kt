@@ -13,26 +13,26 @@ import org.testng.annotations.Test
 @SpringBootTest
 class ImportFileIssueRepositoryTest : AbstractSpringTest() {
 
-    @Autowired
-    lateinit var importFileIssueRepository: ImportFileIssueRepository
+  @Autowired
+  lateinit var importFileIssueRepository: ImportFileIssueRepository
 
-    @Test
-    fun `view query returns correct result`() {
-        val testData = ImportTestData()
-        testData.addFileIssues()
-        testDataService.saveTestData(testData.root)
-        val result = importFileIssueRepository.findAllByFileIdView(
-                testData.importBuilder.data.importFiles[0].self.id, PageRequest.of(0, 10)
-        ).content
+  @Test
+  fun `view query returns correct result`() {
+    val testData = ImportTestData()
+    testData.addFileIssues()
+    testDataService.saveTestData(testData.root)
+    val result = importFileIssueRepository.findAllByFileIdView(
+      testData.importBuilder.data.importFiles[0].self.id, PageRequest.of(0, 10)
+    ).content
 
-        assertThat(result).hasSize(4)
-        assertThat(result[0].params).hasSize(1)
-        assertThat(result[1].params).hasSize(2)
-        assertThat(result[2].params).hasSize(1)
-        assertThat(result[3].params).hasSize(3)
-        assertThat(result[3].params[0].type).isEqualTo(FileIssueParamType.KEY_NAME)
-        assertThat(result[3].params[0].value).isEqualTo("value_is_not_string_key")
-        assertThat(result[3].params[1].value).isEqualTo("5")
-        assertThat(result[3].params[2].value).isEqualTo("1")
-    }
+    assertThat(result).hasSize(4)
+    assertThat(result[0].params).hasSize(1)
+    assertThat(result[1].params).hasSize(2)
+    assertThat(result[2].params).hasSize(1)
+    assertThat(result[3].params).hasSize(3)
+    assertThat(result[3].params[0].type).isEqualTo(FileIssueParamType.KEY_NAME)
+    assertThat(result[3].params[0].value).isEqualTo("value_is_not_string_key")
+    assertThat(result[3].params[1].value).isEqualTo("5")
+    assertThat(result[3].params[2].value).isEqualTo("1")
+  }
 }

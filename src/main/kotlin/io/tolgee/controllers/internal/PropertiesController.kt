@@ -23,29 +23,29 @@ import kotlin.reflect.full.hasAnnotation
 @Transactional
 @InternalController
 open class PropertiesController(
-        val tolgeeProperties: TolgeeProperties
+  val tolgeeProperties: TolgeeProperties
 ) {
-    @PutMapping(value = ["/set"])
-    @Transactional
-    open fun setProperty(@RequestBody @Valid setPropertyDto: SetPropertyDto) {
-        val name = setPropertyDto.name
-        var instance: Any = tolgeeProperties
-        name.split(".").let { namePath ->
-            namePath.forEachIndexed { idx, property ->
-                val isLast = idx == namePath.size - 1
-                val props = instance::class.declaredMemberProperties
-                val prop = props.find { it.name == property } ?: throw NotFoundException()
-                if (isLast) {
-                    (prop as? KMutableProperty1<Any, Any?>)?.let {
-                        if (!it.hasAnnotation<E2eRuntimeMutable>()) {
-                            Message.PROPERTY_NOT_MUTABLE
-                        }
-                        it.set(instance, setPropertyDto.value)
-                        return
-                    } ?: throw BadRequestException(Message.PROPERTY_NOT_MUTABLE)
-                }
-                instance = (prop as KProperty1<Any, Any?>).get(instance)!!
+  @PutMapping(value = ["/set"])
+  @Transactional
+  open fun setProperty(@RequestBody @Valid setPropertyDto: SetPropertyDto) {
+    val name = setPropertyDto.name
+    var instance: Any = tolgeeProperties
+    name.split(".").let { namePath ->
+      namePath.forEachIndexed { idx, property ->
+        val isLast = idx == namePath.size - 1
+        val props = instance::class.declaredMemberProperties
+        val prop = props.find { it.name == property } ?: throw NotFoundException()
+        if (isLast) {
+          (prop as? KMutableProperty1<Any, Any?>)?.let {
+            if (!it.hasAnnotation<E2eRuntimeMutable>()) {
+              Message.PROPERTY_NOT_MUTABLE
             }
+            it.set(instance, setPropertyDto.value)
+            return
+          } ?: throw BadRequestException(Message.PROPERTY_NOT_MUTABLE)
         }
+        instance = (prop as KProperty1<Any, Any?>).get(instance)!!
+      }
     }
+  }
 }

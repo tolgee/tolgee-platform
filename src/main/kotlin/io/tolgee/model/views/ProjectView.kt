@@ -6,15 +6,15 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 
 interface ProjectView {
-    val id: Long
-    val name: String
-    val description: String?
-    val slug: String?
-    val userOwner: UserAccount?
-    val baseLanguage: Language?
-    val organizationOwnerName: String?
-    val organizationOwnerSlug: String?
-    val organizationBasePermissions: Permission.ProjectPermissionType?
-    val organizationRole: OrganizationRoleType?
-    val directPermissions: Permission.ProjectPermissionType?
+  val id: Long
+  val name: String
+  val description: String?
+  val slug: String?
+  val userOwner: UserAccount?
+  val baseLanguage: Language?
+  val organizationOwnerName: String?
+  val organizationOwnerSlug: String?
+  val organizationBasePermissions: Permission.ProjectPermissionType?
+  val organizationRole: OrganizationRoleType?
+  val directPermissions: Permission.ProjectPermissionType?
 }

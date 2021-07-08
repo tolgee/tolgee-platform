@@ -12,27 +12,27 @@ import org.testng.annotations.Test
 import java.io.File
 
 class XliffFileProcessorTest {
-    private lateinit var importMock: Import
-    private lateinit var importFile: ImportFile
-    private lateinit var importFileDto: ImportFileDto
-    private lateinit var fileProcessorContext: FileProcessorContext
+  private lateinit var importMock: Import
+  private lateinit var importFile: ImportFile
+  private lateinit var importFileDto: ImportFileDto
+  private lateinit var fileProcessorContext: FileProcessorContext
 
-    @BeforeMethod
-    fun setup() {
-        importMock = mock()
-        importFile = ImportFile("exmample.xliff", importMock)
-        importFileDto = ImportFileDto(
-                "exmample.xliff",
-                File("src/test/resources/import/xliff/example.xliff")
-                        .inputStream()
-        )
-        fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
-    }
+  @BeforeMethod
+  fun setup() {
+    importMock = mock()
+    importFile = ImportFile("exmample.xliff", importMock)
+    importFileDto = ImportFileDto(
+      "exmample.xliff",
+      File("src/test/resources/import/xliff/example.xliff")
+        .inputStream()
+    )
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
+  }
 
-    @Test
-    fun `processes xliff 12 file`() {
-        XliffFileProcessor(fileProcessorContext).process()
-        assertThat(fileProcessorContext.languages).hasSize(2)
-        assertThat(fileProcessorContext.translations).hasSize(176)
-    }
+  @Test
+  fun `processes xliff 12 file`() {
+    XliffFileProcessor(fileProcessorContext).process()
+    assertThat(fileProcessorContext.languages).hasSize(2)
+    assertThat(fileProcessorContext.translations).hasSize(176)
+  }
 }

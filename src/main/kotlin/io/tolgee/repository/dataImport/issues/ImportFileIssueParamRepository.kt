@@ -11,10 +11,12 @@ import org.springframework.transaction.annotation.Transactional
 @Repository
 interface ImportFileIssueParamRepository : JpaRepository<ImportFileIssueParam, Long> {
 
-    @Transactional
-    @Modifying
-    @Query("""delete from ImportFileIssueParam ifip where ifip.issue in 
+  @Transactional
+  @Modifying
+  @Query(
+    """delete from ImportFileIssueParam ifip where ifip.issue in 
         (select ifi from ifip.issue ifi join ifi.file if where if.import = :import)
-        """)
-    fun deleteAllByImport(import: Import)
+        """
+  )
+  fun deleteAllByImport(import: Import)
 }

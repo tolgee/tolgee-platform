@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ImportFileRepository : JpaRepository<ImportFile, Long> {
-    fun deleteAllByImport(import: Import)
+  fun deleteAllByImport(import: Import)
 }

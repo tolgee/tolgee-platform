@@ -44,6 +44,7 @@ configurations {
     runtimeClasspath {
         extendsFrom developmentOnly
     }
+    ktlint
 }
 
 apply plugin: 'java'
@@ -89,7 +90,7 @@ def liveDbPostgres = [
 ]
 
 def liveDbH2 = [
-        url         : "jdbc:h2:${project.projectDir}/build/tmp_db_schema_updates/db.h2;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE",
+        url         : "jdbc:h2:${project.projectDir}/build/tmp_db_schema_updates/db.h2;DATABASE_TO_LOWER=TRUE",
         referenceUrl: 'hibernate:spring:io.tolgee' +
                 '?dialect=org.hibernate.dialect.H2Dialect' +
                 '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
@@ -97,7 +98,7 @@ def liveDbH2 = [
         driver      : 'org.h2.Driver'
 ]
 
-def liveDb = liveDbH2
+def liveDb = liveDbPostgres
 
 liquibase {
     activities {
@@ -143,6 +144,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation "org.springframework.boot:spring-boot-starter-hateoas"
+    implementation("org.springframework.data:spring-data-envers")
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     compile "org.springframework.boot:spring-boot-configuration-processor"
     testCompile "org.springframework.boot:spring-boot-configuration-processor"
@@ -192,6 +194,11 @@ dependencies {
     testImplementation('org.mockito.kotlin:mockito-kotlin:3.2.0')
     testCompile("io.findify:s3mock_2.13:0.2.6")
     implementation group: 'com.ibm.icu', name: 'icu4j', version: '69.1'
+    ktlint("com.pinterest:ktlint:0.41.0") {
+        attributes {
+            attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
+        }
+    }
 }
 
 test {
@@ -250,4 +257,24 @@ tasks.findByName("build").dependsOn("runE2e")
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+}
+
+task ktlint(type: JavaExec, group: "verification") {
+    description = "Check Kotlin code style."
+    classpath = configurations.ktlint
+    main = "com.pinterest.ktlint.Main"
+    args "src/**/*.kt", "!**/data/PluralData.kt"
+    // to generate report in checkstyle format prepend following args:
+    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
+    // to add a baseline to check against prepend following args:
+    // "--baseline=ktlint-baseline.xml"
+    // see https://github.com/pinterest/ktlint#usage for more
+}
+check.dependsOn ktlint
+
+task ktlintFormat(type: JavaExec, group: "formatting") {
+    description = "Fix Kotlin code style deviations."
+    classpath = configurations.ktlint
+    main = "com.pinterest.ktlint.Main"
+    args "-F", "src/**/*.kt", "!**/data/PluralData.kt"
 }
