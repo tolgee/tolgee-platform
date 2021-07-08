@@ -15,83 +15,84 @@ import org.springframework.test.web.servlet.ResultActions
 import org.testng.annotations.BeforeMethod
 import java.lang.reflect.Method
 
-
 @SpringBootTest
 @AutoConfigureMockMvc
 abstract class ProjectAuthControllerTest(
-        val projectUrlPrefix: String = "/api/project/"
+  val projectUrlPrefix: String = "/api/project/"
 ) : SignedInControllerTest(), AuthRequestPerformer {
 
-    //for api key auth methods
-    val apiKey: ApiKeyDTO
-        get() {
-            val performer = this.projectAuthRequestPerformer
-            return if (performer is ProjectApiKeyAuthRequestPerformer)
-                performer.apiKey else
-                throw Exception("Method not annotated with ApiKeyAccessTestMethod?")
-        }
-
-    val project: Project
-        get() = this.projectAuthRequestPerformer.project
-
-    var projectSupplier: (() -> Project)?
-        get() = this.projectAuthRequestPerformer.projectSupplier
-        set(value) {
-            this.projectAuthRequestPerformer.projectSupplier = value
-        }
-
-    private var _projectAuthRequestPerformer: ProjectAuthRequestPerformer? = null;
-
-    private var projectAuthRequestPerformer: ProjectAuthRequestPerformer
-        get() {
-            return _projectAuthRequestPerformer
-                    ?: throw Exception("Method not annotated with ApiKeyAccessTestMethod nor ProjectJWTAuthTestMethod?")
-        }
-        set(value) {
-            _projectAuthRequestPerformer = value
-        }
-
-    @BeforeMethod
-    fun beforeEach(method: Method) {
-        with(method.getAnnotation(ProjectApiKeyAuthTestMethod::class.java)) {
-            if (this != null) {
-                this@ProjectAuthControllerTest.projectAuthRequestPerformer =
-                        applicationContext!!.getBean(
-                                ProjectApiKeyAuthRequestPerformer::class.java,
-                                { userAccount },
-                                this.scopes,
-                                projectUrlPrefix
-                        )
-            }
-        }
-
-        with(method.getAnnotation(ProjectJWTAuthTestMethod::class.java)) {
-            if (this != null) {
-                this@ProjectAuthControllerTest.projectAuthRequestPerformer =
-                        applicationContext!!.getBean(ProjectJwtAuthRequestPerformer::class.java, { userAccount }, projectUrlPrefix)
-            }
-        }
+  // for api key auth methods
+  val apiKey: ApiKeyDTO
+    get() {
+      val performer = this.projectAuthRequestPerformer
+      return if (performer is ProjectApiKeyAuthRequestPerformer)
+        performer.apiKey else
+        throw Exception("Method not annotated with ApiKeyAccessTestMethod?")
     }
 
-    fun performProjectAuthPut(url: String, content: Any?): ResultActions {
-        return projectAuthRequestPerformer.performProjectAuthPut(url, content)
+  val project: Project
+    get() = this.projectAuthRequestPerformer.project
+
+  var projectSupplier: (() -> Project)?
+    get() = this.projectAuthRequestPerformer.projectSupplier
+    set(value) {
+      this.projectAuthRequestPerformer.projectSupplier = value
     }
 
-    fun performProjectAuthPost(url: String, content: Any?): ResultActions {
-        return projectAuthRequestPerformer.performProjectAuthPost(url, content)
+  private var _projectAuthRequestPerformer: ProjectAuthRequestPerformer? = null
+
+  private var projectAuthRequestPerformer: ProjectAuthRequestPerformer
+    get() {
+      return _projectAuthRequestPerformer
+        ?: throw Exception("Method not annotated with ApiKeyAccessTestMethod nor ProjectJWTAuthTestMethod?")
+    }
+    set(value) {
+      _projectAuthRequestPerformer = value
     }
 
-    fun performProjectAuthGet(url: String): ResultActions {
-        return projectAuthRequestPerformer.performProjectAuthGet(url)
+  @BeforeMethod
+  fun beforeEach(method: Method) {
+    with(method.getAnnotation(ProjectApiKeyAuthTestMethod::class.java)) {
+      if (this != null) {
+        this@ProjectAuthControllerTest.projectAuthRequestPerformer =
+          applicationContext!!.getBean(
+            ProjectApiKeyAuthRequestPerformer::class.java,
+            { userAccount },
+            this.scopes,
+            projectUrlPrefix
+          )
+      }
     }
 
-    fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
-        return projectAuthRequestPerformer.performProjectAuthDelete(url, content)
+    with(method.getAnnotation(ProjectJWTAuthTestMethod::class.java)) {
+      if (this != null) {
+        this@ProjectAuthControllerTest.projectAuthRequestPerformer =
+          applicationContext!!.getBean(ProjectJwtAuthRequestPerformer::class.java, { userAccount }, projectUrlPrefix)
+      }
     }
+  }
 
-    fun performProjectAuthMultipart(
-            url: String, files: List<MockMultipartFile>, params: Map<String, Array<String>> = mapOf()
-    ): ResultActions {
-        return projectAuthRequestPerformer.performProjectAuthMultipart(url, files, params)
-    }
+  fun performProjectAuthPut(url: String, content: Any?): ResultActions {
+    return projectAuthRequestPerformer.performProjectAuthPut(url, content)
+  }
+
+  fun performProjectAuthPost(url: String, content: Any?): ResultActions {
+    return projectAuthRequestPerformer.performProjectAuthPost(url, content)
+  }
+
+  fun performProjectAuthGet(url: String): ResultActions {
+    return projectAuthRequestPerformer.performProjectAuthGet(url)
+  }
+
+  fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
+    return projectAuthRequestPerformer.performProjectAuthDelete(url, content)
+  }
+
+  fun performProjectAuthMultipart(
+    url: String,
+    files: List<MockMultipartFile>,
+    params: Map<String, Array<String>> = mapOf()
+  ): ResultActions {
+    return projectAuthRequestPerformer.performProjectAuthMultipart(url, files, params)
+  }
 }

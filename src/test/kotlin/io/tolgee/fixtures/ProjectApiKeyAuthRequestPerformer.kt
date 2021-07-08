@@ -15,48 +15,52 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 @Component
 @Scope("prototype")
 class ProjectApiKeyAuthRequestPerformer(
-        private val userAccountProvider: () -> UserAccount,
-        private val scopes: Array<ApiScope>,
-        projectUrlPrefix: String = "/api/project"
+  private val userAccountProvider: () -> UserAccount,
+  private val scopes: Array<ApiScope>,
+  projectUrlPrefix: String = "/api/project"
 ) : ProjectAuthRequestPerformer(userAccountProvider, projectUrlPrefix) {
 
-    @field:Autowired
-    lateinit var apiKeyService: ApiKeyService
+  @field:Autowired
+  lateinit var apiKeyService: ApiKeyService
 
-    val apiKey: ApiKeyDTO by lazy {
-        apiKeyService.createApiKey(userAccountProvider.invoke(), scopes = this.scopes.toSet(), project)
+  val apiKey: ApiKeyDTO by lazy {
+    apiKeyService.createApiKey(userAccountProvider.invoke(), scopes = this.scopes.toSet(), project)
+  }
+
+  override fun performProjectAuthPut(url: String, content: Any?): ResultActions {
+    return performPut(projectUrlPrefix + url.withApiKey, content)
+  }
+
+  override fun performProjectAuthPost(url: String, content: Any?): ResultActions {
+    return performPost(projectUrlPrefix + url.withApiKey, content)
+  }
+
+  override fun performProjectAuthGet(url: String): ResultActions {
+    return performGet(projectUrlPrefix + url.withApiKey)
+  }
+
+  override fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
+    return performDelete(projectUrlPrefix + url.withApiKey, content)
+  }
+
+  override fun performProjectAuthMultipart(
+    url: String,
+    files: List<MockMultipartFile>,
+    params: Map<String, Array<String>>
+  ): ResultActions {
+    val builder = MockMvcRequestBuilders.multipart(url)
+    files.forEach { builder.file(it) }
+    params.forEach { (name, values) -> builder.param(name, *values) }
+    return mvc.perform(
+      LoggedRequestFactory.addToken(
+        MockMvcRequestBuilders.multipart(projectUrlPrefix + url.withApiKey)
+      )
+    )
+  }
+
+  private val String.withApiKey: String
+    get() {
+      val symbol = if (this.contains("?")) "&" else "?"
+      return this + symbol + "ak=" + apiKey.key
     }
-
-    override fun performProjectAuthPut(url: String, content: Any?): ResultActions {
-        return performPut(projectUrlPrefix + url.withApiKey, content)
-    }
-
-    override fun performProjectAuthPost(url: String, content: Any?): ResultActions {
-        return performPost(projectUrlPrefix + url.withApiKey, content)
-    }
-
-    override fun performProjectAuthGet(url: String): ResultActions {
-        return performGet(projectUrlPrefix + url.withApiKey)
-    }
-
-    override fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
-        return performDelete(projectUrlPrefix + url.withApiKey, content)
-    }
-
-    override fun performProjectAuthMultipart(
-            url: String, files: List<MockMultipartFile>, params: Map<String, Array<String>>
-    ): ResultActions {
-        val builder = MockMvcRequestBuilders.multipart(url)
-        files.forEach { builder.file(it) }
-        params.forEach { (name, values) -> builder.param(name, *values) }
-        return mvc.perform(
-                LoggedRequestFactory.addToken(
-                        MockMvcRequestBuilders.multipart(projectUrlPrefix + url.withApiKey)))
-    }
-
-    private val String.withApiKey: String
-        get() {
-            val symbol = if (this.contains("?")) "&" else "?"
-            return this + symbol + "ak=" + apiKey.key
-        }
 }

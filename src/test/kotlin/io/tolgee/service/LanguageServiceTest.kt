@@ -13,18 +13,18 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 class LanguageServiceTest : AbstractSpringTest() {
-    @Test
-    @Transactional
-    fun `remove of language removes existing language reference from import language`() {
-        val testData = ImportTestData()
-        testDataService.saveTestData(testData.root)
+  @Test
+  @Transactional
+  fun `remove of language removes existing language reference from import language`() {
+    val testData = ImportTestData()
+    testDataService.saveTestData(testData.root)
 
-        var foundImportLanguage = importService.findLanguages(testData.import).first()
-        assertThat(foundImportLanguage.existingLanguage!!.id).isEqualTo(testData.english.id)
-        languageService.deleteLanguage(testData.english.id)
-        entityManager.flush()
-        entityManager.clear()
-        foundImportLanguage = importService.findLanguages(testData.import).first()
-        assertThat(foundImportLanguage.existingLanguage).isEqualTo(null)
-    }
+    var foundImportLanguage = importService.findLanguages(testData.import).first()
+    assertThat(foundImportLanguage.existingLanguage!!.id).isEqualTo(testData.english.id)
+    languageService.deleteLanguage(testData.english.id)
+    entityManager.flush()
+    entityManager.clear()
+    foundImportLanguage = importService.findLanguages(testData.import).first()
+    assertThat(foundImportLanguage.existingLanguage).isEqualTo(null)
+  }
 }

@@ -9,11 +9,11 @@ import java.util.*
 
 @Repository
 interface KeyRepository : JpaRepository<Key, Long> {
-    fun getByNameAndProject(name: String, project: Project): Optional<Key>
-    fun getByNameAndProjectId(fullPathString: String, projectId: Long): Optional<Key>
-    fun getAllByProjectId(projectId: Long): Set<Key>
+  fun getByNameAndProject(name: String, project: Project): Optional<Key>
+  fun getByNameAndProjectId(fullPathString: String, projectId: Long): Optional<Key>
+  fun getAllByProjectId(projectId: Long): Set<Key>
 
-    @Query("select k.id from Key k where k.project.id = :projectId")
-    fun getIdsByProjectId(projectId: Long?): List<Long>
-    fun deleteAllByIdIn(ids: Collection<Long>)
+  @Query("select k.id from Key k where k.project.id = :projectId")
+  fun getIdsByProjectId(projectId: Long?): List<Long>
+  fun deleteAllByIdIn(ids: Collection<Long>)
 }

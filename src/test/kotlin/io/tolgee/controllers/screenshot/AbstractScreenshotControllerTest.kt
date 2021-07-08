@@ -19,26 +19,31 @@ import org.testng.annotations.AfterClass
 import java.io.File
 
 abstract class AbstractScreenshotControllerTest() : SignedInControllerTest() {
-    @Value("classpath:screenshot.png")
-    lateinit var screenshotFile: Resource
+  @Value("classpath:screenshot.png")
+  lateinit var screenshotFile: Resource
 
-    @AfterClass
-    fun cleanUp() {
-        File("${tolgeeProperties.fileStorage.fsDataPath}/screenshots").deleteRecursively()
-    }
+  @AfterClass
+  fun cleanUp() {
+    File("${tolgeeProperties.fileStorage.fsDataPath}/screenshots").deleteRecursively()
+  }
 
-    protected fun performStoreScreenshot(project: Project, key: Key): ScreenshotDTO {
-        loginAsUser("admin")
-        return performAuthMultipart(
-                url = "/api/project/${project.id}/screenshots",
-                files = listOf(MockMultipartFile("screenshot", "originalShot.png", "image/png",
-                        screenshotFile.file.readBytes())),
-                params = mapOf("key" to arrayOf(key.name)))
-                .andExpect(status().isOk).andReturn().parseResponseTo()
-    }
+  protected fun performStoreScreenshot(project: Project, key: Key): ScreenshotDTO {
+    loginAsUser("admin")
+    return performAuthMultipart(
+      url = "/api/project/${project.id}/screenshots",
+      files = listOf(
+        MockMultipartFile(
+          "screenshot", "originalShot.png", "image/png",
+          screenshotFile.file.readBytes()
+        )
+      ),
+      params = mapOf("key" to arrayOf(key.name))
+    )
+      .andExpect(status().isOk).andReturn().parseResponseTo()
+  }
 
-    @Suppress("RedundantModalityModifier")
-    protected final inline fun <reified T> MvcResult.parseResponseTo(): T {
-        return jacksonObjectMapper().readValue(this.response.contentAsString)
-    }
+  @Suppress("RedundantModalityModifier")
+  protected final inline fun <reified T> MvcResult.parseResponseTo(): T {
+    return jacksonObjectMapper().readValue(this.response.contentAsString)
+  }
 }

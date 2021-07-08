@@ -17,23 +17,23 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 open class StorageConfiguration(properties: TolgeeProperties) {
 
-    private val s3config = properties.fileStorage.s3
+  private val s3config = properties.fileStorage.s3
 
-    @Bean
-    open fun getS3(): AmazonS3? {
-        if (s3config.enabled) {
-            val credentials: AWSCredentials = BasicAWSCredentials(
-                    s3config.accessKey,
-                    s3config.secretKey
-            )
+  @Bean
+  open fun getS3(): AmazonS3? {
+    if (s3config.enabled) {
+      val credentials: AWSCredentials = BasicAWSCredentials(
+        s3config.accessKey,
+        s3config.secretKey
+      )
 
-            val endpointConfig = AwsClientBuilder.EndpointConfiguration(s3config.endpoint, s3config.signingRegion)
+      val endpointConfig = AwsClientBuilder.EndpointConfiguration(s3config.endpoint, s3config.signingRegion)
 
-            return AmazonS3ClientBuilder.standard().withCredentials(AWSStaticCredentialsProvider(credentials))
-                    .withEndpointConfiguration(endpointConfig)
-                    .enablePathStyleAccess()
-                    .build()
-        }
-        return null
+      return AmazonS3ClientBuilder.standard().withCredentials(AWSStaticCredentialsProvider(credentials))
+        .withEndpointConfiguration(endpointConfig)
+        .enablePathStyleAccess()
+        .build()
     }
+    return null
+  }
 }

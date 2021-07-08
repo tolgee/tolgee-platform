@@ -17,97 +17,100 @@ import java.util.stream.Collectors
 
 class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
 
-    @Test
-    @ProjectJWTAuthTestMethod
-    fun `uploads single screenshot`() {
-        val key = keyService.create(project, DeprecatedKeyDto("test"))
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `uploads single screenshot`() {
+    val key = keyService.create(project, DeprecatedKeyDto("test"))
 
-        performStoreScreenshot(project, key).andPrettyPrint.andIsCreated.andAssertThatJson {
-            val screenshots = screenshotService.findAll(key = key)
-            assertThat(screenshots).hasSize(1)
-            node("filename").isEqualTo(screenshots[0].filename)
-            val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
-            assertThat(file).exists()
-            assertThat(file.readBytes().size).isLessThan(1024 * 100)
-        }
+    performStoreScreenshot(project, key).andPrettyPrint.andIsCreated.andAssertThatJson {
+      val screenshots = screenshotService.findAll(key = key)
+      assertThat(screenshots).hasSize(1)
+      node("filename").isEqualTo(screenshots[0].filename)
+      val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshots[0].filename)
+      assertThat(file).exists()
+      assertThat(file.readBytes().size).isLessThan(1024 * 100)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `does not upload more then 20`() {
+    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    repeat((1..20).count()) {
+      performStoreScreenshot(project, key).andIsCreated
+    }
+    performStoreScreenshot(project, key).andIsBadRequest
+    assertThat(screenshotService.findAll(key = key)).hasSize(20)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun findAll() {
+    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val key2 = keyService.create(project, DeprecatedKeyDto("test_2"))
+
+    screenshotService.store(screenshotFile, key)
+    screenshotService.store(screenshotFile, key)
+    screenshotService.store(screenshotFile, key2)
+
+    performProjectAuthGet("keys/${key.id}/screenshots").andIsOk.andPrettyPrint.andAssertThatJson {
+      node("_embedded.screenshots").isArray.hasSize(2)
+      node("_embedded.screenshots[0].filename").isString.satisfies {
+        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + it)
+        assertThat(file.exists()).isTrue()
+      }
     }
 
-    @Test
-    @ProjectJWTAuthTestMethod
-    fun `does not upload more then 20`() {
-        val key = keyService.create(project, DeprecatedKeyDto("test"))
-        repeat((1..20).count()) {
-            performStoreScreenshot(project, key).andIsCreated
-        }
-        performStoreScreenshot(project, key).andIsBadRequest
-        assertThat(screenshotService.findAll(key = key)).hasSize(20)
+    performProjectAuthGet("keys/${key2.id}/screenshots").andIsOk.andAssertThatJson {
+      node("_embedded.screenshots").isArray.hasSize(1)
     }
+  }
 
-    @Test
-    @ProjectJWTAuthTestMethod
-    fun findAll() {
-        val key = keyService.create(project, DeprecatedKeyDto("test"))
-        val key2 = keyService.create(project, DeprecatedKeyDto("test_2"))
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun getScreenshotFile() {
+    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val screenshot = screenshotService.store(screenshotFile, key)
 
-        screenshotService.store(screenshotFile, key)
-        screenshotService.store(screenshotFile, key)
-        screenshotService.store(screenshotFile, key2)
+    val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshot.filename)
+    val result = performAuthGet("/screenshots/${screenshot.filename}").andIsOk
+      .andExpect(
+        header().string("Cache-Control", "max-age=365, must-revalidate, no-transform")
+      )
+      .andReturn()
+    assertThat(result.response.contentAsByteArray).isEqualTo(file.readBytes())
+  }
 
-        performProjectAuthGet("keys/${key.id}/screenshots").andIsOk.andPrettyPrint.andAssertThatJson {
-            node("_embedded.screenshots").isArray.hasSize(2)
-            node("_embedded.screenshots[0].filename").isString.satisfies {
-                val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + it)
-                assertThat(file.exists()).isTrue()
-            }
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun delete() {
+    val key = keyService.create(project, DeprecatedKeyDto("test"))
 
-        }
+    val list = (1..20).map {
+      screenshotService.store(screenshotFile, key)
+    }.toCollection(mutableListOf())
 
-        performProjectAuthGet("keys/${key2.id}/screenshots").andIsOk.andAssertThatJson {
-            node("_embedded.screenshots").isArray.hasSize(1)
-        }
-    }
+    val idsToDelete = list.stream().limit(10).map { it.id.toString() }.collect(Collectors.joining(","))
 
-    @Test
-    @ProjectJWTAuthTestMethod
-    fun getScreenshotFile() {
-        val key = keyService.create(project, DeprecatedKeyDto("test"))
-        val screenshot = screenshotService.store(screenshotFile, key)
+    performProjectAuthDelete("/keys/${key.id}/screenshots/$idsToDelete", null).andExpect(status().isOk)
 
-        val file = File(tolgeeProperties.fileStorage.fsDataPath + "/screenshots/" + screenshot.filename)
-        val result = performAuthGet("/screenshots/${screenshot.filename}").andIsOk
-                .andExpect(
-                        header().string("Cache-Control", "max-age=365, must-revalidate, no-transform"))
-                .andReturn()
-        assertThat(result.response.contentAsByteArray).isEqualTo(file.readBytes())
-    }
+    val rest = screenshotService.findAll(key)
+    assertThat(rest).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))
+  }
 
-    @Test
-    @ProjectJWTAuthTestMethod
-    fun delete() {
-        val key = keyService.create(project, DeprecatedKeyDto("test"))
-
-        val list = (1..20).map {
-            screenshotService.store(screenshotFile, key)
-        }.toCollection(mutableListOf())
-
-        val idsToDelete = list.stream().limit(10).map { it.id.toString() }.collect(Collectors.joining(","))
-
-        performProjectAuthDelete("/keys/${key.id}/screenshots/$idsToDelete", null).andExpect(status().isOk)
-
-        val rest = screenshotService.findAll(key)
-        assertThat(rest).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))
-    }
-
-    @Test
-    @ProjectJWTAuthTestMethod
-    fun uploadValidationNoImage() {
-        val key = keyService.create(project, DeprecatedKeyDto("test"))
-        val response = performProjectAuthMultipart(
-                "keys/${key.id}/screenshots",
-                listOf(
-                        MockMultipartFile("screenshot", "originalShot.png", "not_valid",
-                                "test".toByteArray())),
-        ).andIsBadRequest.andReturn()
-        assertThat(response).error().isCustomValidation.hasMessage("file_not_image")
-    }
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun uploadValidationNoImage() {
+    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    val response = performProjectAuthMultipart(
+      "keys/${key.id}/screenshots",
+      listOf(
+        MockMultipartFile(
+          "screenshot", "originalShot.png", "not_valid",
+          "test".toByteArray()
+        )
+      ),
+    ).andIsBadRequest.andReturn()
+    assertThat(response).error().isCustomValidation.hasMessage("file_not_image")
+  }
 }

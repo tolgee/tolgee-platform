@@ -44,6 +44,7 @@ configurations {
     runtimeClasspath {
         extendsFrom developmentOnly
     }
+    ktlint
 }
 
 apply plugin: 'java'
@@ -193,6 +194,11 @@ dependencies {
     testImplementation('org.mockito.kotlin:mockito-kotlin:3.2.0')
     testCompile("io.findify:s3mock_2.13:0.2.6")
     implementation group: 'com.ibm.icu', name: 'icu4j', version: '69.1'
+    ktlint("com.pinterest:ktlint:0.41.0") {
+        attributes {
+            attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
+        }
+    }
 }
 
 test {
@@ -251,4 +257,24 @@ tasks.findByName("build").dependsOn("runE2e")
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+}
+
+task ktlint(type: JavaExec, group: "verification") {
+    description = "Check Kotlin code style."
+    classpath = configurations.ktlint
+    main = "com.pinterest.ktlint.Main"
+    args "src/**/*.kt", "!**/data/PluralData.kt"
+    // to generate report in checkstyle format prepend following args:
+    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
+    // to add a baseline to check against prepend following args:
+    // "--baseline=ktlint-baseline.xml"
+    // see https://github.com/pinterest/ktlint#usage for more
+}
+check.dependsOn ktlint
+
+task ktlintFormat(type: JavaExec, group: "formatting") {
+    description = "Fix Kotlin code style deviations."
+    classpath = configurations.ktlint
+    main = "com.pinterest.ktlint.Main"
+    args "-F", "src/**/*.kt", "!**/data/PluralData.kt"
 }

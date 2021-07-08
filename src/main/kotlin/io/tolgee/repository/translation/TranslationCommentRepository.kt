@@ -10,8 +10,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface TranslationCommentRepository : JpaRepository<TranslationComment, Long> {
-    fun deleteAllByIdIn(ids: List<Long>)
+  fun deleteAllByIdIn(ids: List<Long>)
 
-    @Query("select tc from TranslationComment tc where tc.translation = :translation")
-    fun getPagedByTranslation(translation: Translation, pageable: Pageable): Page<TranslationComment>
+  @Query("select tc from TranslationComment tc where tc.translation = :translation")
+  fun getPagedByTranslation(translation: Translation, pageable: Pageable): Page<TranslationComment>
 }

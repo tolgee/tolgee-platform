@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @CrossOrigin(origins = ["*"])
 @RequestMapping("/api/public/")
-@Tag(name="Public configuration controller")
+@Tag(name = "Public configuration controller")
 class ConfigurationController @Autowired constructor(private val configuration: TolgeeProperties) : IController {
 
-    @GetMapping(value = ["configuration"])
-    @Operation(summary = "Returns server configuration information")
-    fun getPublicConfiguration(): PublicConfigurationDTO {
-        return PublicConfigurationDTO(configuration)
-    }
+  @GetMapping(value = ["configuration"])
+  @Operation(summary = "Returns server configuration information")
+  fun getPublicConfiguration(): PublicConfigurationDTO {
+    return PublicConfigurationDTO(configuration)
+  }
 }

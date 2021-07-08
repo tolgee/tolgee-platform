@@ -6,7 +6,8 @@ import java.util.*
 
 @Suppress("unused")
 @Relation(collectionRelation = "screenshots", itemRelation = "screenshot")
-open class ScreenshotModel(val id: Long,
-                           val filename: String,
-                           val createdAt: Date?
+open class ScreenshotModel(
+  val id: Long,
+  val filename: String,
+  val createdAt: Date?
 ) : RepresentationModel<ScreenshotModel>()

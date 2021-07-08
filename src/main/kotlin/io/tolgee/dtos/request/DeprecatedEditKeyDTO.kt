@@ -7,18 +7,18 @@ import javax.validation.constraints.NotBlank
 
 @Deprecated(message = "Ugly naming", ReplaceWith("io/tolgee/dtos/request/EditKeyDTO.kt"))
 data class DeprecatedEditKeyDTO(
-        @field:NotBlank
-        var oldFullPathString: String = "",
-        @field:NotBlank
-        var newFullPathString: String = ""
+  @field:NotBlank
+  var oldFullPathString: String = "",
+  @field:NotBlank
+  var newFullPathString: String = ""
 ) {
-    @get:Hidden
-    @get:JsonIgnore
-    val oldPathDto: PathDTO
-        get() = PathDTO.fromFullPath(oldFullPathString)
+  @get:Hidden
+  @get:JsonIgnore
+  val oldPathDto: PathDTO
+    get() = PathDTO.fromFullPath(oldFullPathString)
 
-    @get:Hidden
-    @get:JsonIgnore
-    val newPathDto: PathDTO
-        get() = PathDTO.fromFullPath(newFullPathString)
+  @get:Hidden
+  @get:JsonIgnore
+  val newPathDto: PathDTO
+    get() = PathDTO.fromFullPath(newFullPathString)
 }

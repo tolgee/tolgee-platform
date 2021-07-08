@@ -5,17 +5,17 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Size
 
 data class SignUpDto(
-        @field:NotBlank
-        var name: String? = null,
+  @field:NotBlank
+  var name: String? = null,
 
-        @field:Email @field:NotBlank
-        var email: String? = null,
+  @field:Email @field:NotBlank
+  var email: String? = null,
 
-        @field:Size(min = 8, max = 100)
-        @field:NotBlank
-        var password: String? = null,
+  @field:Size(min = 8, max = 100)
+  @field:NotBlank
+  var password: String? = null,
 
-        var invitationCode: String? = null,
+  var invitationCode: String? = null,
 
-        var callbackUrl: String? = null
+  var callbackUrl: String? = null
 )

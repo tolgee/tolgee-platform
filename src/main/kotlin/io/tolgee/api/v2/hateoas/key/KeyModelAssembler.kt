@@ -6,11 +6,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class KeyModelAssembler(
-) : RepresentationModelAssemblerSupport<Key, KeyModel>(
-        V2TranslationsController::class.java, KeyModel::class.java) {
-    override fun toModel(entity: Key) = KeyModel(
-            id = entity.id,
-            name = entity.name
-    )
+class KeyModelAssembler() : RepresentationModelAssemblerSupport<Key, KeyModel>(
+  V2TranslationsController::class.java, KeyModel::class.java
+) {
+  override fun toModel(entity: Key) = KeyModel(
+    id = entity.id,
+    name = entity.name
+  )
 }

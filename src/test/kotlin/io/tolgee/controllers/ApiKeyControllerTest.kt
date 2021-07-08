@@ -24,116 +24,139 @@ import java.util.stream.Collectors
 @AutoConfigureMockMvc
 class ApiKeyControllerTest : ProjectAuthControllerTest(), ITest {
 
-    @Test
-    fun create_success() {
-        val apiKeyDTO = doCreate()
-        val apiKey = apiKeyService.getApiKey(apiKeyDTO.key)
-        Assertions.assertThat(apiKey).isPresent
-        checkKey(apiKey.get().key)
-    }
+  @Test
+  fun create_success() {
+    val apiKeyDTO = doCreate()
+    val apiKey = apiKeyService.getApiKey(apiKeyDTO.key)
+    Assertions.assertThat(apiKey).isPresent
+    checkKey(apiKey.get().key)
+  }
 
-    private fun doCreate(username: String): ApiKeyDTO {
-        return doCreate(dbPopulator.createBase(generateUniqueString(), username))
-    }
+  private fun doCreate(username: String): ApiKeyDTO {
+    return doCreate(dbPopulator.createBase(generateUniqueString(), username))
+  }
 
-    private fun doCreate(project: Project = dbPopulator.createBase(generateUniqueString())): ApiKeyDTO {
-        val requestDto = CreateApiKeyDTO(
-                projectId = project.id,
-                scopes = setOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.KEYS_EDIT)
-        )
-        val mvcResult = performAuthPost("/api/apiKeys", requestDto).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-        return mapResponse(mvcResult, ApiKeyDTO::class.java)
-    }
+  private fun doCreate(project: Project = dbPopulator.createBase(generateUniqueString())): ApiKeyDTO {
+    val requestDto = CreateApiKeyDTO(
+      projectId = project.id,
+      scopes = setOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.KEYS_EDIT)
+    )
+    val mvcResult = performAuthPost("/api/apiKeys", requestDto)
+      .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+    return mapResponse(mvcResult, ApiKeyDTO::class.java)
+  }
 
-    @Test
-    fun create_failure_no_scopes() {
-        val base = dbPopulator.createBase(generateUniqueString())
-        val requestDto = CreateApiKeyDTO(base.id, setOf())
-        val mvcResult = performAuthPost("/api/apiKeys", requestDto).andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
-        assertThat(mvcResult).error().isStandardValidation.onField("scopes").isEqualTo("must not be empty")
-        assertThat(mvcResult).error().isStandardValidation.errorCount().isEqualTo(1)
-    }
+  @Test
+  fun create_failure_no_scopes() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    val requestDto = CreateApiKeyDTO(base.id, setOf())
+    val mvcResult = performAuthPost("/api/apiKeys", requestDto)
+      .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
+    assertThat(mvcResult).error().isStandardValidation.onField("scopes").isEqualTo("must not be empty")
+    assertThat(mvcResult).error().isStandardValidation.errorCount().isEqualTo(1)
+  }
 
-    @Test
-    fun create_failure_no_project() {
-        val requestDto = CreateApiKeyDTO(scopes = setOf(ApiScope.TRANSLATIONS_VIEW), projectId = null)
-        val mvcResult = performAuthPost("/api/apiKeys", requestDto).andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
-        assertThat(mvcResult).error().isStandardValidation.onField("projectId").isEqualTo("must not be null")
-        assertThat(mvcResult).error().isStandardValidation.errorCount().isEqualTo(1)
-    }
+  @Test
+  fun create_failure_no_project() {
+    val requestDto = CreateApiKeyDTO(scopes = setOf(ApiScope.TRANSLATIONS_VIEW), projectId = null)
+    val mvcResult = performAuthPost("/api/apiKeys", requestDto)
+      .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
+    assertThat(mvcResult).error().isStandardValidation.onField("projectId").isEqualTo("must not be null")
+    assertThat(mvcResult).error().isStandardValidation.errorCount().isEqualTo(1)
+  }
 
-    @Test
-    fun edit_success() {
-        val apiKeyDTO = doCreate()
-        val newScopes = setOf(ApiScope.TRANSLATIONS_EDIT)
-        val editDto = EditApiKeyDTO(id = apiKeyDTO.id, scopes = newScopes)
-        performAuthPost("/api/apiKeys/edit", editDto).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-        val apiKey = apiKeyService.getApiKey(apiKeyDTO.id)
-        Assertions.assertThat(apiKey).isPresent
-        Assertions.assertThat(apiKey.get().scopesEnum).isEqualTo(newScopes)
-    }
+  @Test
+  fun edit_success() {
+    val apiKeyDTO = doCreate()
+    val newScopes = setOf(ApiScope.TRANSLATIONS_EDIT)
+    val editDto = EditApiKeyDTO(id = apiKeyDTO.id, scopes = newScopes)
+    performAuthPost("/api/apiKeys/edit", editDto).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+    val apiKey = apiKeyService.getApiKey(apiKeyDTO.id)
+    Assertions.assertThat(apiKey).isPresent
+    Assertions.assertThat(apiKey.get().scopesEnum).isEqualTo(newScopes)
+  }
 
-    @Test
-    fun edit_failure_no_scopes() {
-        val newScopes: Set<ApiScope> = setOf()
-        val apiKeyDTO = doCreate()
-        val editDto = EditApiKeyDTO(id = apiKeyDTO.id, scopes = newScopes)
-        val mvcResult = performAuthPost("/api/apiKeys/edit", editDto).andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
-        assertThat(mvcResult).error().isStandardValidation.onField("scopes").isEqualTo("must not be empty")
-    }
+  @Test
+  fun edit_failure_no_scopes() {
+    val newScopes: Set<ApiScope> = setOf()
+    val apiKeyDTO = doCreate()
+    val editDto = EditApiKeyDTO(id = apiKeyDTO.id, scopes = newScopes)
+    val mvcResult = performAuthPost("/api/apiKeys/edit", editDto)
+      .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
+    assertThat(mvcResult).error().isStandardValidation.onField("scopes").isEqualTo("must not be empty")
+  }
 
-    @Test
-    fun getAllByUser() {
-        val project = dbPopulator.createBase(generateUniqueString(), "ben")
-        loginAsUser("ben")
-        val apiKey1 = apiKeyService.createApiKey(project.permissions.first().user!!, setOf(ApiScope.KEYS_EDIT), project)
-        val project2 = dbPopulator.createBase(generateUniqueString(), "ben")
-        val apiKey2 = apiKeyService.createApiKey(project2.permissions.first().user!!, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project)
-        val testUser = dbPopulator.createUserIfNotExists("testUser")
-        val user2Key = apiKeyService.createApiKey(testUser, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project)
-        val apiKeyDTO = doCreate("ben")
-        var mvcResult = performAuthGet("/api/apiKeys").andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-        var set = mapResponse<Set<ApiKeyDTO?>>(mvcResult, TypeFactory.defaultInstance().constructCollectionType(MutableSet::class.java, ApiKeyDTO::class.java))
-        Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(apiKeyDTO.key, apiKey1.key, apiKey2.key)
-        loginAsUser("testUser")
-        mvcResult = performAuthGet("/api/apiKeys").andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-        set = mapResponse(mvcResult, TypeFactory.defaultInstance().constructCollectionType(MutableSet::class.java, ApiKeyDTO::class.java))
-        Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(user2Key.key)
-    }
+  @Test
+  fun getAllByUser() {
+    val project = dbPopulator.createBase(generateUniqueString(), "ben")
+    loginAsUser("ben")
+    val apiKey1 = apiKeyService.createApiKey(project.permissions.first().user!!, setOf(ApiScope.KEYS_EDIT), project)
+    val project2 = dbPopulator.createBase(generateUniqueString(), "ben")
+    val apiKey2 = apiKeyService.createApiKey(
+      userAccount = project2.permissions.first().user!!,
+      scopes = setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW),
+      project = project
+    )
+    val testUser = dbPopulator.createUserIfNotExists("testUser")
+    val user2Key = apiKeyService.createApiKey(testUser, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project)
+    val apiKeyDTO = doCreate("ben")
+    var mvcResult = performAuthGet("/api/apiKeys").andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+    var set = mvcResult.mapResponseTo<Set<ApiKeyDTO?>>()
+    Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(apiKeyDTO.key, apiKey1.key, apiKey2.key)
+    loginAsUser("testUser")
+    mvcResult = performAuthGet("/api/apiKeys").andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+    set = mvcResult.mapResponseTo()
+    Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(user2Key.key)
+  }
 
-    @Test
-    fun allByProject() {
-        val project = dbPopulator.createBase(generateUniqueString())
-        val apiKeyDTO = doCreate(project)
-        val apiKey1 = apiKeyService.createApiKey(project.permissions.first().user!!, setOf(ApiScope.KEYS_EDIT), project)
-        val project2 = dbPopulator.createBase(generateUniqueString(), initialUsername)
-        val apiKey2 = apiKeyService.createApiKey(project2.permissions.first().user!!, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project)
-        val testUser = dbPopulator.createUserIfNotExists("testUser")
-        val user2Key = apiKeyService.createApiKey(testUser, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project2)
-        var mvcResult = performAuthGet("/api/apiKeys/project/" + project.id).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-        var set: Set<ApiKeyDTO> = mvcResult.mapResponseTo()
-        Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(apiKeyDTO.key, apiKey1.key, apiKey2.key)
-        loginAsUser("testUser")
-        performAuthGet("/api/apiKeys/project/" + project2.id).andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
-        permissionService.grantFullAccessToRepo(testUser, project2)
-        mvcResult = performAuthGet("/api/apiKeys/project/" + project2.id).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-        set = mapResponse(mvcResult, TypeFactory.defaultInstance().constructCollectionType(MutableSet::class.java, ApiKeyDTO::class.java))
-        Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(user2Key.key)
-        logout()
-    }
+  @Test
+  fun allByProject() {
+    val project = dbPopulator.createBase(generateUniqueString())
+    val apiKeyDTO = doCreate(project)
+    val apiKey1 = apiKeyService.createApiKey(project.permissions.first().user!!, setOf(ApiScope.KEYS_EDIT), project)
+    val project2 = dbPopulator.createBase(generateUniqueString(), initialUsername)
+    val apiKey2 = apiKeyService.createApiKey(
+      project2.permissions.first().user!!, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project
+    )
+    val testUser = dbPopulator.createUserIfNotExists("testUser")
+    val user2Key = apiKeyService.createApiKey(
+      testUser, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project2
+    )
+    var mvcResult = performAuthGet(
+      "/api/apiKeys/project/" + project.id
+    ).andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+    var set: Set<ApiKeyDTO> = mvcResult.mapResponseTo()
+    Assertions.assertThat(set).extracting("key")
+      .containsExactlyInAnyOrder(apiKeyDTO.key, apiKey1.key, apiKey2.key)
 
-    @Test
-    @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT])
-    fun getApiKeyScopes() {
-        val scopes = performGet("/api/apiKeys/scopes?ak=" + apiKey.key).andIsOk.andReturn().mapResponseTo<Set<String>>()
-        assertThat(scopes).containsAll(setOf(ApiScope.TRANSLATIONS_EDIT.value, ApiScope.KEYS_EDIT.value))
-    }
+    loginAsUser("testUser")
+    performAuthGet("/api/apiKeys/project/" + project2.id)
+      .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
+    permissionService.grantFullAccessToRepo(testUser, project2)
+    mvcResult = performAuthGet("/api/apiKeys/project/" + project2.id)
+      .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+    set = mapResponse(
+      mvcResult,
+      TypeFactory.defaultInstance()
+        .constructCollectionType(MutableSet::class.java, ApiKeyDTO::class.java)
+    )
+    Assertions.assertThat(set).extracting("key").containsExactlyInAnyOrder(user2Key.key)
+    logout()
+  }
 
-    private fun checkKey(key: String?) {
-        Assertions.assertThat(arrayDistinctCount(key!!.chars().boxed().toArray())).isGreaterThan(10)
-    }
+  @Test
+  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT, ApiScope.KEYS_EDIT])
+  fun getApiKeyScopes() {
+    val scopes = performGet("/api/apiKeys/scopes?ak=" + apiKey.key)
+      .andIsOk.andReturn().mapResponseTo<Set<String>>()
+    assertThat(scopes).containsAll(setOf(ApiScope.TRANSLATIONS_EDIT.value, ApiScope.KEYS_EDIT.value))
+  }
 
-    private fun <T> arrayDistinctCount(array: Array<T>): Int {
-        return Arrays.stream(array).collect(Collectors.toSet()).size
-    }
+  private fun checkKey(key: String?) {
+    Assertions.assertThat(arrayDistinctCount(key!!.chars().boxed().toArray())).isGreaterThan(10)
+  }
+
+  private fun <T> arrayDistinctCount(array: Array<T>): Int {
+    return Arrays.stream(array).collect(Collectors.toSet()).size
+  }
 }

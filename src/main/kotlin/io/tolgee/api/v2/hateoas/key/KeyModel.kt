@@ -7,8 +7,8 @@ import org.springframework.hateoas.server.core.Relation
 @Suppress("unused")
 @Relation(collectionRelation = "keys", itemRelation = "key")
 open class KeyModel(
-        @Schema(description = "Id of key record")
-        val id: Long,
-        @Schema(description = "Name of key", example = "this_is_super_key")
-        val name: String,
+  @Schema(description = "Id of key record")
+  val id: Long,
+  @Schema(description = "Name of key", example = "this_is_super_key")
+  val name: String,
 ) : RepresentationModel<KeyModel>()

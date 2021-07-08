@@ -11,23 +11,23 @@ import org.springframework.stereotype.Component
 
 @Component
 class AuthenticationFacade(
-        private val configuration: TolgeeProperties,
-        private val userAccountService: UserAccountService
+  private val configuration: TolgeeProperties,
+  private val userAccountService: UserAccountService
 ) {
-    val authentication: Authentication?
-        get() = SecurityContextHolder.getContext().authentication
+  val authentication: Authentication?
+    get() = SecurityContextHolder.getContext().authentication
 
-    val userAccount: UserAccount
-        get() = userAccountOrNull ?: throw IllegalStateException("No current user set!")
+  val userAccount: UserAccount
+    get() = userAccountOrNull ?: throw IllegalStateException("No current user set!")
 
-    val userAccountOrNull: UserAccount?
-        get() = if (!configuration.authentication.enabled) {
-            userAccountService.implicitUser
-        } else authentication?.principal as? UserAccount
+  val userAccountOrNull: UserAccount?
+    get() = if (!configuration.authentication.enabled) {
+      userAccountService.implicitUser
+    } else authentication?.principal as? UserAccount
 
-    val apiKey: ApiKey
-        get() {
-            val authentication = authentication as ApiKeyAuthenticationToken
-            return authentication.apiKey
-        }
+  val apiKey: ApiKey
+    get() {
+      val authentication = authentication as ApiKeyAuthenticationToken
+      return authentication.apiKey
+    }
 }

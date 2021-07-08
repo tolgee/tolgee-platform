@@ -10,8 +10,8 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
-    companion object {
-        const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
+  companion object {
+    const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
         r.slug as slug, 
         ua as userOwner, o.name as organizationOwnerName, o.slug as organizationOwnerSlug, 
         bl as baseLanguage,
@@ -24,36 +24,51 @@ interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
         left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId
         where (p is not null or role is not null)
         """
-    }
+  }
 
-    @Query("""from Project r 
+  @Query(
+    """from Project r 
         left join fetch Permission p on p.project = r and p.user.id = :userAccountId
         left join fetch Organization o on r.organizationOwner = o
         left join fetch OrganizationRole role on role.organization = o and role.user.id = :userAccountId
         where p is not null or (role is not null)
-        """)
-    fun findAllPermitted(userAccountId: Long): List<Array<Any>>
+        """
+  )
+  fun findAllPermitted(userAccountId: Long): List<Array<Any>>
 
-    @Query("""$BASE_VIEW_QUERY 
+  @Query(
+    """$BASE_VIEW_QUERY 
                 and (:search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
                 or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
                 or lower(ua.name) like lower(concat('%', cast(:search as text),'%')))
-    """)
-    fun findAllPermitted(userAccountId: Long, pageable: Pageable, @Param("search") search: String? = null): Page<ProjectView>
+    """
+  )
+  fun findAllPermitted(
+    userAccountId: Long,
+    pageable: Pageable,
+    @Param("search") search: String? = null
+  ): Page<ProjectView>
 
-    fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<io.tolgee.model.Project>
+  fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<io.tolgee.model.Project>
 
-    @Query("""$BASE_VIEW_QUERY and o.id = :organizationOwnerId and o is not null
+  @Query(
+    """$BASE_VIEW_QUERY and o.id = :organizationOwnerId and o is not null
          and ((lower(r.name) like lower(concat('%', cast(:search as text),'%'))
                 or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
                 or lower(ua.name) like lower(concat('%', cast(:search as text),'%')) or cast(:search as text) is null)
-        """)
-    fun findAllPermittedInOrganization(userAccountId: Long, organizationOwnerId: Long, pageable: Pageable, search: String?): Page<ProjectView>
+        """
+  )
+  fun findAllPermittedInOrganization(
+    userAccountId: Long,
+    organizationOwnerId: Long,
+    pageable: Pageable,
+    search: String?
+  ): Page<ProjectView>
 
-    fun countAllBySlug(slug: String): Long
+  fun countAllBySlug(slug: String): Long
 
-    @Query("""$BASE_VIEW_QUERY and r.id = :projectId""")
-    fun findViewById(userAccountId: Long, projectId: Long): ProjectView?
+  @Query("""$BASE_VIEW_QUERY and r.id = :projectId""")
+  fun findViewById(userAccountId: Long, projectId: Long): ProjectView?
 
-    fun findAllByName(name: String): List<io.tolgee.model.Project>
+  fun findAllByName(name: String): List<io.tolgee.model.Project>
 }

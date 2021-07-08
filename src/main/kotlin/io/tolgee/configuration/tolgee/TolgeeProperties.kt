@@ -10,13 +10,13 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties(prefix = "tolgee")
 @ConstructorBinding
 open class TolgeeProperties(
-        var authentication: AuthenticationProperties = AuthenticationProperties(),
-        var smtp: SmtpProperties = SmtpProperties(),
-        var sentry: SentryProperties = SentryProperties(),
-        var internal: InternalProperties = InternalProperties(),
-        var screenshotsUrl: String = "/screenshots",
-        var maxUploadFileSize: Int = 2048,
-        val maxScreenshotsPerKey: Int = 20,
-        var fileStorage: FileStorageProperties = FileStorageProperties(),
-        var frontEndUrl: String? = null
+  var authentication: AuthenticationProperties = AuthenticationProperties(),
+  var smtp: SmtpProperties = SmtpProperties(),
+  var sentry: SentryProperties = SentryProperties(),
+  var internal: InternalProperties = InternalProperties(),
+  var screenshotsUrl: String = "/screenshots",
+  var maxUploadFileSize: Int = 2048,
+  val maxScreenshotsPerKey: Int = 20,
+  var fileStorage: FileStorageProperties = FileStorageProperties(),
+  var frontEndUrl: String? = null
 )

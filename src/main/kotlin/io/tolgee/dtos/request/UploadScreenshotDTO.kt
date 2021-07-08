@@ -5,6 +5,6 @@ import javax.validation.constraints.NotBlank
 
 @Validated
 data class UploadScreenshotDTO(
-        @field:NotBlank
-        var key: String? = null
+  @field:NotBlank
+  var key: String? = null
 )

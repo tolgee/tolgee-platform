@@ -10,19 +10,19 @@ import org.testng.annotations.Test
 
 @AutoConfigureMockMvc
 class UserAppApiControllerTest : AbstractUserAppApiTest() {
-    @Test
-    fun getScopes() {
-        val base = dbPopulator.createBase(generateUniqueString())
-        val apiKey = apiKeyService.createApiKey(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
-        mvc.perform(MockMvcRequestBuilders.get("/uaa/scopes?ak=" + apiKey.key))
-                .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-    }
+  @Test
+  fun getScopes() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    val apiKey = apiKeyService.createApiKey(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
+    mvc.perform(MockMvcRequestBuilders.get("/uaa/scopes?ak=" + apiKey.key))
+      .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+  }
 
-    @Test
-    fun getLanguages() {
-        val base = dbPopulator.createBase(generateUniqueString())
-        val apiKey = apiKeyService.createApiKey(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
-        val languages = mvc.perform(MockMvcRequestBuilders.get("/uaa/languages?ak=" + apiKey.key))
-                .andExpect(MockMvcResultMatchers.status().isOk).andReturn().mapResponseTo<Set<String>>()
-    }
+  @Test
+  fun getLanguages() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    val apiKey = apiKeyService.createApiKey(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
+    val languages = mvc.perform(MockMvcRequestBuilders.get("/uaa/languages?ak=" + apiKey.key))
+      .andExpect(MockMvcResultMatchers.status().isOk).andReturn().mapResponseTo<Set<String>>()
+  }
 }

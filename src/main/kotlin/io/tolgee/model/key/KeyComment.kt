@@ -11,21 +11,21 @@ import javax.validation.constraints.NotNull
 
 @Entity
 class KeyComment(
-        @ManyToOne(optional = false)
-        override var keyMeta: KeyMeta,
+  @ManyToOne(optional = false)
+  override var keyMeta: KeyMeta,
 
-        @field:NotNull
-        @ManyToOne(optional = false, fetch = FetchType.LAZY)
-        var author: UserAccount? = null
+  @field:NotNull
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  var author: UserAccount? = null
 ) : StandardAuditModel(), WithKeyMetaReference {
 
-    var fromImport: Boolean = false
+  var fromImport: Boolean = false
 
-    @field:NotBlank
-    @Column(columnDefinition = "text", length = 2000)
-    var text: String = ""
+  @field:NotBlank
+  @Column(columnDefinition = "text", length = 2000)
+  var text: String = ""
 
-    override fun toString(): String {
-        return "KeyComment(text='$text', fromImport=$fromImport)"
-    }
+  override fun toString(): String {
+    return "KeyComment(text='$text', fromImport=$fromImport)"
+  }
 }

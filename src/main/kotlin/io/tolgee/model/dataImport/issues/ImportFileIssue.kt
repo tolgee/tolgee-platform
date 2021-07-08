@@ -11,13 +11,13 @@ import javax.validation.constraints.NotNull
 
 @Entity
 class ImportFileIssue(
-        @ManyToOne(optional = false)
-        @field:NotNull
-        var file: ImportFile,
+  @ManyToOne(optional = false)
+  @field:NotNull
+  var file: ImportFile,
 
-        @Enumerated
-        var type: FileIssueType = FileIssueType.ID_ATTRIBUTE_NOT_PROVIDED,
+  @Enumerated
+  var type: FileIssueType = FileIssueType.ID_ATTRIBUTE_NOT_PROVIDED,
 
-        @OneToMany(mappedBy = "issue")
-        var params: MutableList<ImportFileIssueParam>? = null,
+  @OneToMany(mappedBy = "issue")
+  var params: MutableList<ImportFileIssueParam>? = null,
 ) : StandardAuditModel()

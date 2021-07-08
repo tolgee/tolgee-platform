@@ -7,12 +7,13 @@ import org.springframework.stereotype.Component
 
 @Component
 class UserAccountModelAssembler : RepresentationModelAssemblerSupport<UserAccount, UserAccountModel>(
-        UserController::class.java, UserAccountModel::class.java) {
-    override fun toModel(entity: UserAccount): UserAccountModel {
-        return UserAccountModel(
-                entity.id!!,
-                entity.username!!,
-                entity.name
-        )
-    }
+  UserController::class.java, UserAccountModel::class.java
+) {
+  override fun toModel(entity: UserAccount): UserAccountModel {
+    return UserAccountModel(
+      entity.id!!,
+      entity.username!!,
+      entity.name
+    )
+  }
 }

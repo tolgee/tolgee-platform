@@ -9,12 +9,12 @@ import javax.validation.constraints.NotBlank
 
 @Entity
 class ImportFileIssueParam(
-        @ManyToOne(optional = false)
-        val issue: ImportFileIssue,
+  @ManyToOne(optional = false)
+  val issue: ImportFileIssue,
 
-        @Enumerated
-        val type: FileIssueParamType,
+  @Enumerated
+  val type: FileIssueParamType,
 
-        @field:NotBlank
-        val value: String
+  @field:NotBlank
+  val value: String
 ) : StandardAuditModel()

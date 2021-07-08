@@ -16,8 +16,8 @@ import java.util.*
 @Repository
 interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
 
-    companion object {
-        private const val VIEW_BASE_QUERY = """
+  companion object {
+    private const val VIEW_BASE_QUERY = """
             select il.id as id, il.name as name, el.id as existingLanguageId, 
             el.tag as existingLanguageTag, el.name as existingLanguageName,
             if.name as importFileName, if.id as importFileId,
@@ -28,36 +28,42 @@ interface ImportLanguageRepository : JpaRepository<ImportLanguage, Long> {
             from ImportLanguage il join il.file if left join il.existingLanguage el left join il.translations it
         """
 
-        private const val VIEW_GROUP_BY = """
+    private const val VIEW_GROUP_BY = """
             group by il.id, if.id, el.id
         """
-    }
+  }
 
-    @Query("from ImportLanguage il join il.file if join if.import im where im.id = :importId")
-    fun findAllByImport(importId: Long): List<ImportLanguage>
+  @Query("from ImportLanguage il join il.file if join if.import im where im.id = :importId")
+  fun findAllByImport(importId: Long): List<ImportLanguage>
 
-    @Modifying
-    @Transactional
-    @Query("update ImportLanguage il set il.existingLanguage = null where il.existingLanguage = :language")
-    fun removeExistingLanguageReference(language: Language)
+  @Modifying
+  @Transactional
+  @Query("update ImportLanguage il set il.existingLanguage = null where il.existingLanguage = :language")
+  fun removeExistingLanguageReference(language: Language)
 
-    @Query("""
+  @Query(
+    """
             $VIEW_BASE_QUERY
             where if.import.id = :importId
             $VIEW_GROUP_BY
-            """)
-    fun findImportLanguagesView(importId: Long, pageable: Pageable): Page<ImportLanguageView>
+            """
+  )
+  fun findImportLanguagesView(importId: Long, pageable: Pageable): Page<ImportLanguageView>
 
-    @Modifying
-    @Transactional
-    @Query("""delete from ImportLanguage l where l.file in 
-        (select f from ImportFile f where f.import = :import)""")
-    fun deleteAllByImport(import: Import)
+  @Modifying
+  @Transactional
+  @Query(
+    """delete from ImportLanguage l where l.file in 
+        (select f from ImportFile f where f.import = :import)"""
+  )
+  fun deleteAllByImport(import: Import)
 
-    @Query("""
+  @Query(
+    """
             $VIEW_BASE_QUERY
             where il.id = :languageId
             $VIEW_GROUP_BY
-            """)
-    fun findViewById(languageId: Long): Optional<ImportLanguageView>
+            """
+  )
+  fun findViewById(languageId: Long): Optional<ImportLanguageView>
 }

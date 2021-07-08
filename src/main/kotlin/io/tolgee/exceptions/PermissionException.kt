@@ -4,6 +4,6 @@ import io.tolgee.constants.Message
 import org.springframework.http.HttpStatus
 
 class PermissionException : ErrorException(Message.OPERATION_NOT_PERMITTED) {
-    override val httpStatus: HttpStatus
-        get() = HttpStatus.FORBIDDEN
+  override val httpStatus: HttpStatus
+    get() = HttpStatus.FORBIDDEN
 }

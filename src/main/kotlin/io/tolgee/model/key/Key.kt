@@ -15,32 +15,33 @@ import javax.validation.constraints.Size
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name"], name = "key_project_id_name")])
 @Audited
 data class Key(
-        @field:NotBlank
-        @field:Size(max = 200)
-        @Column(length = 2000)
-        var name: String = "",
+  @field:NotBlank
+  @field:Size(max = 200)
+  @Column(length = 2000)
+  var name: String = "",
 ) : StandardAuditModel() {
-    @field:NotNull
-    @ManyToOne(optional = false)
-    var project: Project? = null
+  @field:NotNull
+  @ManyToOne(optional = false)
+  var project: Project? = null
 
-    @OneToMany(mappedBy = "key")
-    var translations: MutableSet<Translation> = HashSet()
+  @OneToMany(mappedBy = "key")
+  var translations: MutableSet<Translation> = HashSet()
 
-    @OneToOne(mappedBy = "key")
-    var keyMeta: KeyMeta? = null
+  @OneToOne(mappedBy = "key")
+  var keyMeta: KeyMeta? = null
 
-    @OneToMany(mappedBy = "key")
-    var screenshots: MutableList<Screenshot> = mutableListOf()
+  @OneToMany(mappedBy = "key")
+  var screenshots: MutableList<Screenshot> = mutableListOf()
 
-    constructor(name: String,
-                project: Project,
-                translations: MutableSet<Translation> = HashSet()
-    ) : this(name) {
-        this.project = project
-        this.translations = translations
-    }
+  constructor(
+    name: String,
+    project: Project,
+    translations: MutableSet<Translation> = HashSet()
+  ) : this(name) {
+    this.project = project
+    this.translations = translations
+  }
 
-    val path: PathDTO
-        get() = PathDTO.fromFullPath(name)
+  val path: PathDTO
+    get() = PathDTO.fromFullPath(name)
 }

@@ -9,17 +9,18 @@ import org.springframework.stereotype.Component
 
 @Component
 class OrganizationInvitationModelAssembler(
-        private val organizationModelAssembler: OrganizationModelAssembler
+  private val organizationModelAssembler: OrganizationModelAssembler
 ) : RepresentationModelAssemblerSupport<Invitation, OrganizationInvitationModel>(
-        InvitationController::class.java, OrganizationInvitationModel::class.java) {
-    override fun toModel(entity: Invitation): OrganizationInvitationModel {
-        return OrganizationInvitationModel(
-                entity.id!!,
-                entity.code!!,
-                entity.organizationRole!!.type!!,
-                entity.createdAt!!
-        )
-                .add(linkTo<InvitationController> { acceptInvitation(entity.code) }.withRel("accept"))
-                .add(linkTo<InvitationController> { deleteInvitation(entity.id!!) }.withRel("delete"))
-    }
+  InvitationController::class.java, OrganizationInvitationModel::class.java
+) {
+  override fun toModel(entity: Invitation): OrganizationInvitationModel {
+    return OrganizationInvitationModel(
+      entity.id!!,
+      entity.code!!,
+      entity.organizationRole!!.type!!,
+      entity.createdAt!!
+    )
+      .add(linkTo<InvitationController> { acceptInvitation(entity.code) }.withRel("accept"))
+      .add(linkTo<InvitationController> { deleteInvitation(entity.id!!) }.withRel("delete"))
+  }
 }

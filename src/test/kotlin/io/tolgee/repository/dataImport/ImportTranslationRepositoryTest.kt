@@ -11,36 +11,36 @@ import org.testng.annotations.Test
 @SpringBootTest
 class ImportTranslationRepositoryTest : AbstractSpringTest() {
 
-    @Autowired
-    lateinit var importTranslationRepository: ImportTranslationRepository
+  @Autowired
+  lateinit var importTranslationRepository: ImportTranslationRepository
 
-    @Test
-    fun `view returns correct data`() {
-        val importTestData = ImportTestData()
-        testDataService.saveTestData(importTestData.root)
+  @Test
+  fun `view returns correct data`() {
+    val importTestData = ImportTestData()
+    testDataService.saveTestData(importTestData.root)
 
-        val result = importTranslationRepository
-                .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10))
-        assertThat(result.content).hasSize(6)
+    val result = importTranslationRepository
+      .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10))
+    assertThat(result.content).hasSize(6)
 
-        result.content[0].let {
-            assertThat(it.id).isNotNull
-            assertThat(it.keyName).isEqualTo("what a key")
-            assertThat(it.keyId).isNotNull
-            assertThat(it.text).isEqualTo("Overridden")
-            assertThat(it.conflictText).isEqualTo("What a text")
-            assertThat(it.conflictId).isNotNull
-            assertThat(it.override).isEqualTo(false)
-        }
+    result.content[0].let {
+      assertThat(it.id).isNotNull
+      assertThat(it.keyName).isEqualTo("what a key")
+      assertThat(it.keyId).isNotNull
+      assertThat(it.text).isEqualTo("Overridden")
+      assertThat(it.conflictText).isEqualTo("What a text")
+      assertThat(it.conflictId).isNotNull
+      assertThat(it.override).isEqualTo(false)
     }
+  }
 
-    @Test
-    fun `view filters`() {
-        val importTestData = ImportTestData()
-        testDataService.saveTestData(importTestData.root)
+  @Test
+  fun `view filters`() {
+    val importTestData = ImportTestData()
+    testDataService.saveTestData(importTestData.root)
 
-        val result = importTranslationRepository
-                .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10), true)
-        assertThat(result.content).hasSize(4)
-    }
+    val result = importTranslationRepository
+      .findImportTranslationsView(importTestData.importEnglish.id, PageRequest.of(0, 10), true)
+    assertThat(result.content).hasSize(4)
+  }
 }

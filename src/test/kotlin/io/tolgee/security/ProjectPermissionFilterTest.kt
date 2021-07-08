@@ -12,36 +12,35 @@ import org.testng.annotations.Test
 @AutoConfigureMockMvc
 class ProjectPermissionFilterTest : SignedInControllerTest() {
 
-    @field:Autowired
-    lateinit var projectHolder: ProjectHolder
+  @field:Autowired
+  lateinit var projectHolder: ProjectHolder
 
-    @Test
-    fun allowsAccessToPrivilegedUser() {
-        val base = dbPopulator.createBase(generateUniqueString())
-        performAuthGet("/api/project/${base.id}/translations/en")
-                .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-    }
+  @Test
+  fun allowsAccessToPrivilegedUser() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    performAuthGet("/api/project/${base.id}/translations/en")
+      .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+  }
 
-    @Test
-    fun projectIdIsRequestScoped() {
-        val base = dbPopulator.createBase(generateUniqueString())
-        performAuthGet("/api/project/${base.id}/translations/en")
-                .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
-        assertThat(projectHolder.isProjectInitialized).isFalse
-    }
+  @Test
+  fun projectIdIsRequestScoped() {
+    val base = dbPopulator.createBase(generateUniqueString())
+    performAuthGet("/api/project/${base.id}/translations/en")
+      .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
+    assertThat(projectHolder.isProjectInitialized).isFalse
+  }
 
+  @Test
+  fun deniesAccessToNonPrivilegedUser() {
+    val base2 = dbPopulator.createBase(generateUniqueString(), "newUser")
+    performAuthGet("/api/project/${base2.id}/translations/en")
+      .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
+  }
 
-    @Test
-    fun deniesAccessToNonPrivilegedUser() {
-        val base2 = dbPopulator.createBase(generateUniqueString(), "newUser")
-        performAuthGet("/api/project/${base2.id}/translations/en")
-                .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
-    }
-
-    @Test
-    fun returnsNotFoundWhenProjectNotExists() {
-        val user = dbPopulator.createUserIfNotExists("newUser")
-        performAuthGet("/api/project/${user.id}/translations/en")
-                .andExpect(MockMvcResultMatchers.status().isNotFound).andReturn()
-    }
+  @Test
+  fun returnsNotFoundWhenProjectNotExists() {
+    val user = dbPopulator.createUserIfNotExists("newUser")
+    performAuthGet("/api/project/${user.id}/translations/en")
+      .andExpect(MockMvcResultMatchers.status().isNotFound).andReturn()
+  }
 }

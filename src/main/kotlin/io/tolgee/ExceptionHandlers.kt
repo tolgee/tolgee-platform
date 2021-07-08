@@ -28,78 +28,110 @@ import javax.persistence.EntityNotFoundException
 
 @RestControllerAdvice
 class ExceptionHandlers {
-    @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleValidationExceptions(ex: MethodArgumentNotValidException): ResponseEntity<Map<String, Map<String, String>>> {
-        val errors: MutableMap<String, String> = HashMap()
-        ex.bindingResult.allErrors.forEach(Consumer { error: ObjectError ->
-            val fieldName = (error as FieldError).field
-            val errorMessage = error.getDefaultMessage()
-            errors[fieldName] = errorMessage ?: ""
-        })
-        return ResponseEntity(Collections.singletonMap<String, Map<String, String>>(ValidationErrorType.STANDARD_VALIDATION.name, errors), HttpStatus.BAD_REQUEST)
-    }
+  @ExceptionHandler(MethodArgumentNotValidException::class)
+  fun handleValidationExceptions(
+    ex: MethodArgumentNotValidException
+  ): ResponseEntity<Map<String, Map<String, String>>> {
+    val errors: MutableMap<String, String> = HashMap()
+    ex.bindingResult.allErrors.forEach(
+      Consumer { error: ObjectError ->
+        val fieldName = (error as FieldError).field
+        val errorMessage = error.getDefaultMessage()
+        errors[fieldName] = errorMessage ?: ""
+      }
+    )
+    return ResponseEntity(
+      Collections.singletonMap<String, Map<String, String>>(ValidationErrorType.STANDARD_VALIDATION.name, errors),
+      HttpStatus.BAD_REQUEST
+    )
+  }
 
-    @ExceptionHandler(ValidationException::class)
-    fun handleCustomValidationExceptions(ex: ValidationException): ResponseEntity<Map<String, Map<String, List<String>>>> {
-        val errors: MutableMap<String, List<String>> = HashMap()
-        for (validationError in ex.validationErrors) {
-            errors[validationError.message.code] = Arrays.asList(*validationError.parameters)
-        }
-        return ResponseEntity(Collections.singletonMap<String, Map<String, List<String>>>(ValidationErrorType.CUSTOM_VALIDATION.name, errors), HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(ValidationException::class)
+  fun handleCustomValidationExceptions(
+    ex: ValidationException
+  ): ResponseEntity<Map<String, Map<String, List<String>>>> {
+    val errors: MutableMap<String, List<String>> = HashMap()
+    for (validationError in ex.validationErrors) {
+      errors[validationError.message.code] = Arrays.asList(*validationError.parameters)
     }
+    return ResponseEntity(
+      Collections.singletonMap<String, Map<String, List<String>>>(ValidationErrorType.CUSTOM_VALIDATION.name, errors),
+      HttpStatus.BAD_REQUEST
+    )
+  }
 
-    @ExceptionHandler(MissingServletRequestParameterException::class)
-    fun handleCMissingServletRequestParameterException(ex: MissingServletRequestParameterException): ResponseEntity<Map<String, Map<String, String?>>> {
-        val errors = Collections.singletonMap(ex.parameterName, ex.message)
-        return ResponseEntity(Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors), HttpStatus.BAD_REQUEST)
-    }
+  @ExceptionHandler(MissingServletRequestParameterException::class)
+  fun handleCMissingServletRequestParameterException(
+    ex: MissingServletRequestParameterException
+  ): ResponseEntity<Map<String, Map<String, String?>>> {
+    val errors = Collections.singletonMap(ex.parameterName, ex.message)
+    return ResponseEntity(
+      Collections.singletonMap(ValidationErrorType.STANDARD_VALIDATION.name, errors), HttpStatus.BAD_REQUEST
+    )
+  }
 
-    @ApiResponse(responseCode = "400", content = [
-        Content(schema = Schema(
-                example = """{"code": "you_did_something_wrong", "params": ["something", "wrong"]}"""))
-    ])
-    @ExceptionHandler(ErrorException::class)
-    fun handleServerError(ex: ErrorException): ResponseEntity<ErrorResponseBody> {
-        return ResponseEntity(ex.errorResponseBody, ex.httpStatus)
-    }
+  @ApiResponse(
+    responseCode = "400",
+    content = [
+      Content(
+        schema = Schema(
+          example = """{"code": "you_did_something_wrong", "params": ["something", "wrong"]}"""
+        )
+      )
+    ]
+  )
+  @ExceptionHandler(ErrorException::class)
+  fun handleServerError(ex: ErrorException): ResponseEntity<ErrorResponseBody> {
+    return ResponseEntity(ex.errorResponseBody, ex.httpStatus)
+  }
 
-    @ExceptionHandler(EntityNotFoundException::class)
-    fun handleServerError(ex: EntityNotFoundException?): ResponseEntity<ErrorResponseBody> {
-        return ResponseEntity(ErrorResponseBody(Message.RESOURCE_NOT_FOUND.code, null), HttpStatus.NOT_FOUND)
-    }
+  @ExceptionHandler(EntityNotFoundException::class)
+  fun handleServerError(ex: EntityNotFoundException?): ResponseEntity<ErrorResponseBody> {
+    return ResponseEntity(ErrorResponseBody(Message.RESOURCE_NOT_FOUND.code, null), HttpStatus.NOT_FOUND)
+  }
 
-    @ApiResponse(responseCode = "404", content = [
-        Content(schema = Schema(
-                example = """{"code": "resource_not_found", "params": null}"""))
-    ])
-    @ExceptionHandler(NotFoundException::class)
-    fun handleNotFound(ex: NotFoundException): ResponseEntity<ErrorResponseBody> {
-        return ResponseEntity(ErrorResponseBody(ex.msg!!.code, null), HttpStatus.NOT_FOUND)
-    }
+  @ApiResponse(
+    responseCode = "404",
+    content = [
+      Content(
+        schema = Schema(
+          example = """{"code": "resource_not_found", "params": null}"""
+        )
+      )
+    ]
+  )
+  @ExceptionHandler(NotFoundException::class)
+  fun handleNotFound(ex: NotFoundException): ResponseEntity<ErrorResponseBody> {
+    return ResponseEntity(ErrorResponseBody(ex.msg!!.code, null), HttpStatus.NOT_FOUND)
+  }
 
-    @ExceptionHandler(MaxUploadSizeExceededException::class)
-    fun handleFileSizeLimitExceeded(ex: MaxUploadSizeExceededException): ResponseEntity<ErrorResponseBody> {
-        return ResponseEntity(ErrorResponseBody(Message.FILE_TOO_BIG.code, listOf()),
-                HttpStatus.BAD_REQUEST)
-    }
+  @ExceptionHandler(MaxUploadSizeExceededException::class)
+  fun handleFileSizeLimitExceeded(ex: MaxUploadSizeExceededException): ResponseEntity<ErrorResponseBody> {
+    return ResponseEntity(
+      ErrorResponseBody(Message.FILE_TOO_BIG.code, listOf()),
+      HttpStatus.BAD_REQUEST
+    )
+  }
 
-    @ExceptionHandler(HttpMessageNotReadableException::class)
-    fun handleFileSizeLimitExceeded(ex: HttpMessageNotReadableException): ResponseEntity<ErrorResponseBody> {
-        val params = ex.rootCause?.message?.let { listOf(it) }
-        return ResponseEntity(ErrorResponseBody(Message.REQUEST_PARSE_ERROR.code, params),
-                HttpStatus.BAD_REQUEST)
-    }
+  @ExceptionHandler(HttpMessageNotReadableException::class)
+  fun handleFileSizeLimitExceeded(ex: HttpMessageNotReadableException): ResponseEntity<ErrorResponseBody> {
+    val params = ex.rootCause?.message?.let { listOf(it) }
+    return ResponseEntity(
+      ErrorResponseBody(Message.REQUEST_PARSE_ERROR.code, params),
+      HttpStatus.BAD_REQUEST
+    )
+  }
 
-    @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
-    fun handleFileSizeLimitExceeded(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> {
-        return ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED)
-    }
+  @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
+  fun handleFileSizeLimitExceeded(ex: HttpRequestMethodNotSupportedException): ResponseEntity<Void> {
+    return ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED)
+  }
 
-    @ExceptionHandler(QueryException::class)
-    fun handleQueryException(ex: QueryException): ResponseEntity<ErrorResponseBody> {
-        if (ex.message!!.contains("could not resolve property")) {
-            return handleServerError(BadRequestException(Message.COULD_NOT_RESOLVE_PROPERTY))
-        }
-        throw ex
+  @ExceptionHandler(QueryException::class)
+  fun handleQueryException(ex: QueryException): ResponseEntity<ErrorResponseBody> {
+    if (ex.message!!.contains("could not resolve property")) {
+      return handleServerError(BadRequestException(Message.COULD_NOT_RESOLVE_PROPERTY))
     }
+    throw ex
+  }
 }

@@ -20,53 +20,52 @@ import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
 import javax.servlet.MultipartConfigElement
 
-
 @Configuration
 class WebConfiguration(
-        private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties
 ) : WebMvcConfigurer {
-    override fun addViewControllers(registry: ViewControllerRegistry) {
-        registry.run {
-            val forwardTo = "forward:/"
-            addViewController("/{spring:[\\w-_=]+}")
-                    .setViewName(forwardTo)
-            addViewController("/**/{spring:[\\w-_=]+}")
-                    .setViewName(forwardTo)
-            addViewController("/{spring:\\w+}/**{spring:?!(\\.js|\\.css||\\.woff2)$}")
-                    .setViewName(forwardTo)
-        }
+  override fun addViewControllers(registry: ViewControllerRegistry) {
+    registry.run {
+      val forwardTo = "forward:/"
+      addViewController("/{spring:[\\w-_=]+}")
+        .setViewName(forwardTo)
+      addViewController("/**/{spring:[\\w-_=]+}")
+        .setViewName(forwardTo)
+      addViewController("/{spring:\\w+}/**{spring:?!(\\.js|\\.css||\\.woff2)$}")
+        .setViewName(forwardTo)
     }
+  }
 
-    override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-        registry.addResourceHandler("/*.js", "/**/*.woff2", "/*.css", "/**/*.svg")
-                .addResourceLocations("classpath:/static/")
-                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
-    }
+  override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+    registry.addResourceHandler("/*.js", "/**/*.woff2", "/*.css", "/**/*.svg")
+      .addResourceLocations("classpath:/static/")
+      .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
+  }
 
-    override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE")
-    }
+  override fun addCorsMappings(registry: CorsRegistry) {
+    registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE")
+  }
 
-    @Bean
-    fun restTemplate(): RestTemplate {
-        return RestTemplate()
-    }
+  @Bean
+  fun restTemplate(): RestTemplate {
+    return RestTemplate()
+  }
 
-    @Bean
-    fun secureRandom(): SecureRandom {
-        return SecureRandom()
-    }
+  @Bean
+  fun secureRandom(): SecureRandom {
+    return SecureRandom()
+  }
 
-    @Bean
-    fun objectMapper(): ObjectMapper {
-        return ObjectMapper()
-    }
+  @Bean
+  fun objectMapper(): ObjectMapper {
+    return ObjectMapper()
+  }
 
-    @Bean
-    fun multipartConfigElement(): MultipartConfigElement {
-        val factory = MultipartConfigFactory()
-        factory.setMaxFileSize(DataSize.ofKilobytes(tolgeeProperties.maxUploadFileSize.toLong()))
-        factory.setMaxRequestSize(DataSize.ofKilobytes(tolgeeProperties.maxUploadFileSize.toLong()))
-        return factory.createMultipartConfig()
-    }
+  @Bean
+  fun multipartConfigElement(): MultipartConfigElement {
+    val factory = MultipartConfigFactory()
+    factory.setMaxFileSize(DataSize.ofKilobytes(tolgeeProperties.maxUploadFileSize.toLong()))
+    factory.setMaxRequestSize(DataSize.ofKilobytes(tolgeeProperties.maxUploadFileSize.toLong()))
+    return factory.createMultipartConfig()
+  }
 }

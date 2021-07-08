@@ -12,38 +12,38 @@ import javax.persistence.MappedSuperclass
 @MappedSuperclass
 @Audited
 abstract class StandardAuditModel : AuditModel() {
-    @Id
-    @GenericGenerator(
-            name = "sequenceGenerator",
-            strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-            parameters = [
-                Parameter(name = "sequence_name", value = "hibernate_sequence"),
-                Parameter(name = "optimizer", value = "pooled"),
-                Parameter(name = "initial_value", value = "1000000000"),
-                Parameter(name = "increment_size", value = "100")
-            ]
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "sequenceGenerator"
-    )
-    val id: Long = 0
+  @Id
+  @GenericGenerator(
+    name = "sequenceGenerator",
+    strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+    parameters = [
+      Parameter(name = "sequence_name", value = "hibernate_sequence"),
+      Parameter(name = "optimizer", value = "pooled"),
+      Parameter(name = "initial_value", value = "1000000000"),
+      Parameter(name = "increment_size", value = "100")
+    ]
+  )
+  @GeneratedValue(
+    strategy = GenerationType.SEQUENCE,
+    generator = "sequenceGenerator"
+  )
+  val id: Long = 0
 
-    override fun equals(other: Any?): Boolean {
-        other ?: return false
+  override fun equals(other: Any?): Boolean {
+    other ?: return false
 
-        if (this === other) return true
+    if (this === other) return true
 
-        if (javaClass != ProxyUtils.getUserClass(other)) return false
+    if (javaClass != ProxyUtils.getUserClass(other)) return false
 
-        other as StandardAuditModel
+    other as StandardAuditModel
 
-        return this.id == other.id
-    }
+    return this.id == other.id
+  }
 
-    override fun hashCode(): Int {
-        return 31
-    }
+  override fun hashCode(): Int {
+    return 31
+  }
 
-    override fun toString() = "${this.javaClass.name}(id: $id)"
+  override fun toString() = "${this.javaClass.name}(id: $id)"
 }

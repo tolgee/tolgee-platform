@@ -22,96 +22,102 @@ import java.io.UnsupportedEncodingException
 
 @SpringBootTest
 abstract class AbstractControllerTest :
-        AbstractSpringTest(), ITest, RequestPerformer {
+  AbstractSpringTest(), ITest, RequestPerformer {
 
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-    @Autowired
-    protected lateinit var mvc: MockMvc
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  @Autowired
+  protected lateinit var mvc: MockMvc
 
+  @Qualifier("baseRequestPerformer")
+  @Autowired
+  protected lateinit var requestPerformer: RequestPerformer
 
-
-    @Qualifier("baseRequestPerformer")
-    @Autowired
-    protected lateinit var requestPerformer: RequestPerformer
-
-    fun <T> decodeJson(json: String?, clazz: Class<T>?): T {
-        val mapper = ObjectMapper()
-        return try {
-            mapper.readValue(json, clazz)
-        } catch (e: JsonProcessingException) {
-            throw RuntimeException(e)
-        }
+  fun <T> decodeJson(json: String?, clazz: Class<T>?): T {
+    val mapper = ObjectMapper()
+    return try {
+      mapper.readValue(json, clazz)
+    } catch (e: JsonProcessingException) {
+      throw RuntimeException(e)
     }
+  }
 
-    protected fun login(userName: String?, password: String?): DefaultAuthenticationResult {
-        val response = doAuthentication(userName, password)
-                .response.contentAsString
-        val userAccount = userAccountService.getByUserName(userName).orElseThrow { NotFoundException() }
-        return DefaultAuthenticationResult(mapper.readValue(response, HashMap::class.java)["accessToken"] as String?, userAccount)
-    }
+  protected fun login(userName: String?, password: String?): DefaultAuthenticationResult {
+    val response = doAuthentication(userName, password)
+      .response.contentAsString
+    val userAccount = userAccountService.getByUserName(userName).orElseThrow { NotFoundException() }
+    return DefaultAuthenticationResult(
+      mapper.readValue(response, HashMap::class.java)["accessToken"] as String?, userAccount
+    )
+  }
 
-    protected fun doAuthentication(username: String?, password: String?): MvcResult {
-        val request = LoginRequest()
-        request.username = username
-        request.password = password
-        val jsonRequest = mapper.writeValueAsString(request)
-        return mvc.perform(MockMvcRequestBuilders.post("/api/public/generatetoken")
-                .content(jsonRequest)
-                .accept(MediaType.ALL)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andReturn()
-    }
+  protected fun doAuthentication(username: String?, password: String?): MvcResult {
+    val request = LoginRequest()
+    request.username = username
+    request.password = password
+    val jsonRequest = mapper.writeValueAsString(request)
+    return mvc.perform(
+      MockMvcRequestBuilders.post("/api/public/generatetoken")
+        .content(jsonRequest)
+        .accept(MediaType.ALL)
+        .contentType(MediaType.APPLICATION_JSON)
+    )
+      .andReturn()
+  }
 
-    protected fun <T> mapResponse(result: MvcResult, type: JavaType?): T {
-        return try {
-            mapper.readValue(result.response.contentAsString, type)
-        } catch (e: JsonProcessingException) {
-            throw RuntimeException(e)
-        } catch (e: UnsupportedEncodingException) {
-            throw RuntimeException(e)
-        }
+  protected fun <T> mapResponse(result: MvcResult, type: JavaType?): T {
+    return try {
+      mapper.readValue(result.response.contentAsString, type)
+    } catch (e: JsonProcessingException) {
+      throw RuntimeException(e)
+    } catch (e: UnsupportedEncodingException) {
+      throw RuntimeException(e)
     }
+  }
 
-    protected fun <T> mapResponse(result: MvcResult, clazz: Class<T>?): T {
-        return try {
-            mapper.readValue(result.response.contentAsString, clazz)
-        } catch (e: JsonProcessingException) {
-            throw RuntimeException(e)
-        } catch (e: UnsupportedEncodingException) {
-            throw RuntimeException(e)
-        }
+  protected fun <T> mapResponse(result: MvcResult, clazz: Class<T>?): T {
+    return try {
+      mapper.readValue(result.response.contentAsString, clazz)
+    } catch (e: JsonProcessingException) {
+      throw RuntimeException(e)
+    } catch (e: UnsupportedEncodingException) {
+      throw RuntimeException(e)
     }
+  }
 
-    protected fun <C : Collection<E>?, E> mapResponse(result: MvcResult, collectionType: Class<C>?, elementType: Class<E>?): C {
-        return try {
-            mapper!!.readValue(
-                    result.response.contentAsString,
-                    TypeFactory.defaultInstance().constructCollectionType(collectionType, elementType)
-            )
-        } catch (e: JsonProcessingException) {
-            throw RuntimeException(e)
-        } catch (e: UnsupportedEncodingException) {
-            throw RuntimeException(e)
-        }
+  protected fun <C : Collection<E>?, E> mapResponse(
+    result: MvcResult,
+    collectionType: Class<C>?,
+    elementType: Class<E>?
+  ): C {
+    return try {
+      mapper!!.readValue(
+        result.response.contentAsString,
+        TypeFactory.defaultInstance().constructCollectionType(collectionType, elementType)
+      )
+    } catch (e: JsonProcessingException) {
+      throw RuntimeException(e)
+    } catch (e: UnsupportedEncodingException) {
+      throw RuntimeException(e)
     }
+  }
 
-    override fun perform(builder: MockHttpServletRequestBuilder): ResultActions {
-        return requestPerformer.perform(builder)
-    }
+  override fun perform(builder: MockHttpServletRequestBuilder): ResultActions {
+    return requestPerformer.perform(builder)
+  }
 
-    override fun performPut(url: String, content: Any?): ResultActions {
-        return requestPerformer.performPut(url, content)
-    }
+  override fun performPut(url: String, content: Any?): ResultActions {
+    return requestPerformer.performPut(url, content)
+  }
 
-    override fun performPost(url: String, content: Any?): ResultActions {
-        return requestPerformer.performPost(url, content)
-    }
+  override fun performPost(url: String, content: Any?): ResultActions {
+    return requestPerformer.performPost(url, content)
+  }
 
-    override fun performGet(url: String): ResultActions {
-        return requestPerformer.performGet(url)
-    }
+  override fun performGet(url: String): ResultActions {
+    return requestPerformer.performGet(url)
+  }
 
-    override fun performDelete(url: String, content: Any?): ResultActions {
-        return requestPerformer.performDelete(url, content)
-    }
+  override fun performDelete(url: String, content: Any?): ResultActions {
+    return requestPerformer.performDelete(url, content)
+  }
 }

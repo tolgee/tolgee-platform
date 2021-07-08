@@ -9,54 +9,54 @@ import io.tolgee.model.dataImport.ImportTranslation
 import io.tolgee.model.key.KeyMeta
 
 data class FileProcessorContext(
-        val file: ImportFileDto,
-        val fileEntity: ImportFile,
-        val messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit,
+  val file: ImportFileDto,
+  val fileEntity: ImportFile,
+  val messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit,
 ) {
-    var languages: MutableMap<String, ImportLanguage> = mutableMapOf()
-    var translations: MutableMap<String, MutableList<ImportTranslation>> = mutableMapOf()
-    val keys: MutableMap<String, ImportKey> = mutableMapOf()
+  var languages: MutableMap<String, ImportLanguage> = mutableMapOf()
+  var translations: MutableMap<String, MutableList<ImportTranslation>> = mutableMapOf()
+  val keys: MutableMap<String, ImportKey> = mutableMapOf()
 
-    lateinit var languageNameGuesses: List<String>
+  lateinit var languageNameGuesses: List<String>
 
-    fun addTranslation(keyName: String, languageName: String, value: Any?) {
-        val language = languages[languageName] ?: ImportLanguage(languageName, fileEntity).also {
-            languages[languageName] = it
-        }
-
-        if (translations[keyName] == null) {
-            translations[keyName] = mutableListOf()
-        }
-
-        val entity = ImportTranslation(value as? String?, language)
-
-        translations[keyName]!!.add(entity)
+  fun addTranslation(keyName: String, languageName: String, value: Any?) {
+    val language = languages[languageName] ?: ImportLanguage(languageName, fileEntity).also {
+      languages[languageName] = it
     }
 
-    fun addKeyComment(key: String, text: String) {
-        val keyMeta = getOrCreateKeyMeta(key)
-        keyMeta.addComment {
-            this.text = text
-        }
+    if (translations[keyName] == null) {
+      translations[keyName] = mutableListOf()
     }
 
-    fun addKeyCodeReference(key: String, path: String, line: Long? = null) {
-        val keyMeta = getOrCreateKeyMeta(key)
-        keyMeta.addCodeReference {
-            this.path = path
-            this.line = line
-        }
-    }
+    val entity = ImportTranslation(value as? String?, language)
 
-    private fun getOrCreateKey(name: String): ImportKey {
-        return keys[name] ?: let { ImportKey(name).also { keys[name] = it } }
-    }
+    translations[keyName]!!.add(entity)
+  }
 
-    private fun getOrCreateKeyMeta(key: String): KeyMeta {
-        val keyEntity = getOrCreateKey(key)
-        return keyEntity.keyMeta ?: let {
-            keyEntity.keyMeta = KeyMeta(importKey = keyEntity)
-            keyEntity.keyMeta!!
-        }
+  fun addKeyComment(key: String, text: String) {
+    val keyMeta = getOrCreateKeyMeta(key)
+    keyMeta.addComment {
+      this.text = text
     }
+  }
+
+  fun addKeyCodeReference(key: String, path: String, line: Long? = null) {
+    val keyMeta = getOrCreateKeyMeta(key)
+    keyMeta.addCodeReference {
+      this.path = path
+      this.line = line
+    }
+  }
+
+  private fun getOrCreateKey(name: String): ImportKey {
+    return keys[name] ?: let { ImportKey(name).also { keys[name] = it } }
+  }
+
+  private fun getOrCreateKeyMeta(key: String): KeyMeta {
+    val keyEntity = getOrCreateKey(key)
+    return keyEntity.keyMeta ?: let {
+      keyEntity.keyMeta = KeyMeta(importKey = keyEntity)
+      keyEntity.keyMeta!!
+    }
+  }
 }

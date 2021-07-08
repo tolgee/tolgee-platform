@@ -39,118 +39,124 @@ import javax.validation.Valid
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = [
+@RequestMapping(
+  value = [
     "/v2/projects/{projectId:[0-9]+}/translations/{translationId}/comments",
     "/v2/projects/translations/{translationId}/comments"
-])
-@Tags(value = [
+  ]
+)
+@Tags(
+  value = [
     Tag(name = "Translation Comments", description = "Operations related to translation comments"),
-])
+  ]
+)
 class TranslationCommentController(
-        private val projectHolder: ProjectHolder,
-        private val translationService: TranslationService,
-        private val translationCommentService: TranslationCommentService,
-        private val pagedResourcesAssembler: PagedResourcesAssembler<TranslationComment>,
-        private val translationCommentModelAssembler: TranslationCommentModelAssembler,
-        private val authenticationFacade: AuthenticationFacade,
-        private val securityService: SecurityService
+  private val projectHolder: ProjectHolder,
+  private val translationService: TranslationService,
+  private val translationCommentService: TranslationCommentService,
+  private val pagedResourcesAssembler: PagedResourcesAssembler<TranslationComment>,
+  private val translationCommentModelAssembler: TranslationCommentModelAssembler,
+  private val authenticationFacade: AuthenticationFacade,
+  private val securityService: SecurityService
 ) {
 
-    @GetMapping(value = [""])
-    @AccessWithAnyProjectPermission
-    @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-    @Operation(summary = "Returns translation comments of translation")
-    fun getAll(@PathVariable translationId: Long, @ParameterObject pageable: Pageable): PagedModel<TranslationCommentModel> {
-        val translation = translationService.find(translationId) ?: throw NotFoundException()
-        translation.checkFromProject()
-        return pagedResourcesAssembler.toModel(
-                translationCommentService.getPaged(translation, pageable),
-                translationCommentModelAssembler
+  @GetMapping(value = [""])
+  @AccessWithAnyProjectPermission
+  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @Operation(summary = "Returns translation comments of translation")
+  fun getAll(
+    @PathVariable translationId: Long,
+    @ParameterObject pageable: Pageable
+  ): PagedModel<TranslationCommentModel> {
+    val translation = translationService.find(translationId) ?: throw NotFoundException()
+    translation.checkFromProject()
+    return pagedResourcesAssembler.toModel(
+      translationCommentService.getPaged(translation, pageable),
+      translationCommentModelAssembler
+    )
+  }
+
+  @GetMapping(value = ["/{commentId}"])
+  @AccessWithAnyProjectPermission
+  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @Operation(summary = "Returns single translation comment")
+  fun get(@PathVariable translationId: Long, @PathVariable commentId: Long): TranslationCommentModel {
+    val comment = translationCommentService.get(commentId)
+    comment.checkFromProject()
+    return translationCommentModelAssembler.toModel(comment)
+  }
+
+  @PutMapping(value = ["/{commentId}"])
+  @AccessWithAnyProjectPermission
+  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @Operation(summary = "Updates single translation comment")
+  fun update(@PathVariable commentId: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
+    val comment = translationCommentService.get(commentId)
+    if (comment.author.id != authenticationFacade.userAccount.id) {
+      throw BadRequestException(Message.CAN_EDIT_ONLY_OWN_COMMENT)
+    }
+    translationCommentService.update(dto, comment)
+    return translationCommentModelAssembler.toModel(comment)
+  }
+
+  @PutMapping(value = ["/{commentId}/set-state/{state}"])
+  @Operation(summary = "Sets state of translation comment")
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  fun setState(
+    @PathVariable commentId: Long,
+    @PathVariable state: TranslationCommentState
+  ): TranslationCommentModel {
+    val comment = translationCommentService.get(commentId)
+    comment.checkFromProject()
+    translationCommentService.setState(comment, state)
+    return translationCommentModelAssembler.toModel(comment)
+  }
+
+  @DeleteMapping(value = ["/{commentId}"])
+  @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @Operation(summary = "Deletes the translation comment")
+  fun delete(@PathVariable commentId: Long) {
+    val comment = translationCommentService.get(commentId)
+    comment.checkFromProject()
+    if (comment.author.id != authenticationFacade.userAccount.id) {
+      try {
+        securityService.checkProjectPermission(
+          projectHolder.project.id,
+          Permission.ProjectPermissionType.MANAGE
         )
+      } catch (e: PermissionException) {
+        throw BadRequestException(Message.CAN_EDIT_ONLY_OWN_COMMENT)
+      }
     }
+    translationCommentService.delete(comment)
+  }
 
-    @GetMapping(value = ["/{commentId}"])
-    @AccessWithAnyProjectPermission
-    @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
-    @Operation(summary = "Returns single translation comment")
-    fun get(@PathVariable translationId: Long, @PathVariable commentId: Long): TranslationCommentModel {
-        val comment = translationCommentService.get(commentId)
-        comment.checkFromProject()
-        return translationCommentModelAssembler.toModel(comment)
+  @PostMapping(value = [""])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(summary = "Creates a translation comment")
+  fun create(
+    @PathVariable translationId: Long,
+    @RequestBody @Valid dto: TranslationCommentDto
+  ): ResponseEntity<TranslationCommentModel> {
+    val translation = translationService.find(translationId) ?: throw NotFoundException()
+    translation.checkFromProject()
+    val comment = translationCommentService.create(dto, translation, authenticationFacade.userAccount)
+    return ResponseEntity(translationCommentModelAssembler.toModel(comment), HttpStatus.CREATED)
+  }
+
+  private fun TranslationComment.checkFromProject() {
+    if (this.translation.key?.project?.id != projectHolder.project.id) {
+      throw BadRequestException(Message.TRANSLATION_NOT_FROM_PROJECT)
     }
+  }
 
-
-    @PutMapping(value = ["/{commentId}"])
-    @AccessWithAnyProjectPermission
-    @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    @Operation(summary = "Updates single translation comment")
-    fun update(@PathVariable commentId: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
-        val comment = translationCommentService.get(commentId)
-        if (comment.author.id != authenticationFacade.userAccount.id) {
-            throw BadRequestException(Message.CAN_EDIT_ONLY_OWN_COMMENT)
-        }
-        translationCommentService.update(dto, comment)
-        return translationCommentModelAssembler.toModel(comment)
+  private fun Translation.checkFromProject() {
+    if (this.key?.project?.id != projectHolder.project.id) {
+      throw BadRequestException(Message.TRANSLATION_NOT_FROM_PROJECT)
     }
-
-    @PutMapping(value = ["/{commentId}/set-state/{state}"])
-    @Operation(summary = "Sets state of translation comment")
-    @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
-    @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    fun setState(
-            @PathVariable commentId: Long,
-            @PathVariable state: TranslationCommentState
-    ): TranslationCommentModel {
-        val comment = translationCommentService.get(commentId)
-        comment.checkFromProject()
-        translationCommentService.setState(comment, state)
-        return translationCommentModelAssembler.toModel(comment)
-    }
-
-    @DeleteMapping(value = ["/{commentId}"])
-    @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
-    @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    @Operation(summary = "Deletes the translation comment")
-    fun delete(@PathVariable commentId: Long) {
-        val comment = translationCommentService.get(commentId)
-        comment.checkFromProject()
-        if (comment.author.id != authenticationFacade.userAccount.id) {
-            try {
-                securityService.checkProjectPermission(
-                        projectHolder.project.id,
-                        Permission.ProjectPermissionType.MANAGE
-                )
-            } catch (e: PermissionException) {
-                throw BadRequestException(Message.CAN_EDIT_ONLY_OWN_COMMENT)
-            }
-        }
-        translationCommentService.delete(comment)
-    }
-
-    @PostMapping(value = [""])
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
-    @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Creates a translation comment")
-    fun create(
-            @PathVariable translationId: Long,
-            @RequestBody @Valid dto: TranslationCommentDto
-    ): ResponseEntity<TranslationCommentModel> {
-        val translation = translationService.find(translationId) ?: throw NotFoundException()
-        translation.checkFromProject()
-        val comment = translationCommentService.create(dto, translation, authenticationFacade.userAccount)
-        return ResponseEntity(translationCommentModelAssembler.toModel(comment), HttpStatus.CREATED)
-    }
-
-    private fun TranslationComment.checkFromProject() {
-        if (this.translation.key?.project?.id != projectHolder.project.id) {
-            throw BadRequestException(Message.TRANSLATION_NOT_FROM_PROJECT)
-        }
-    }
-
-    private fun Translation.checkFromProject() {
-        if (this.key?.project?.id != projectHolder.project.id) {
-            throw BadRequestException(Message.TRANSLATION_NOT_FROM_PROJECT)
-        }
-    }
+  }
 }

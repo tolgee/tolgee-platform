@@ -11,14 +11,21 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface OrganizationRepository : JpaRepository<Organization, Long> {
-    fun getOneBySlug(slug: String): Organization?
+  fun getOneBySlug(slug: String): Organization?
 
-    @Query("""select o.id as id, o.name as name, o.description as description, o.slug as slug,
+  @Query(
+    """select o.id as id, o.name as name, o.description as description, o.slug as slug,
         o.basePermissions as basePermissions, r.type as currentUserRole 
         from Organization o 
-        join OrganizationRole r on r.user.id = :userId and r.organization = o and (r.type = :roleType or :roleType is null)""")
-    fun findAllPermitted(userId: Long?, pageable: Pageable, roleType: OrganizationRoleType? = null): Page<OrganizationView>
+        join OrganizationRole r on r.user.id = :userId 
+        and r.organization = o and (r.type = :roleType or :roleType is null)"""
+  )
+  fun findAllPermitted(
+    userId: Long?,
+    pageable: Pageable,
+    roleType: OrganizationRoleType? = null
+  ): Page<OrganizationView>
 
-    fun countAllBySlug(slug: String): Long
-    fun findAllByName(name: String): List<Organization>
+  fun countAllBySlug(slug: String): Long
+  fun findAllByName(name: String): List<Organization>
 }

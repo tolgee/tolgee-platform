@@ -12,18 +12,28 @@ import java.util.*
 
 @Repository
 interface UserAccountRepository : JpaRepository<UserAccount?, Long?> {
-    fun findByUsername(username: String?): Optional<UserAccount>
-    fun findByThirdPartyAuthTypeAndThirdPartyAuthId(thirdPartyAuthId: String, thirdPartyAuthType: String): Optional<UserAccount>
+  fun findByUsername(username: String?): Optional<UserAccount>
+  fun findByThirdPartyAuthTypeAndThirdPartyAuthId(
+    thirdPartyAuthId: String,
+    thirdPartyAuthType: String
+  ): Optional<UserAccount>
 
-    @Query("""select userAccount.id as id, userAccount.name as name, userAccount.username as username, memberRole.type as organizationRole from UserAccount userAccount 
+  @Query(
+    """select userAccount.id as id, userAccount.name as name, userAccount.username as username, memberRole.type as organizationRole from UserAccount userAccount 
         join OrganizationRole memberRole on memberRole.user = userAccount and memberRole.organization.id = :organizationId
         where ((lower(userAccount.name)
         like lower(concat('%', cast(:search as text),'%')) 
         or lower(userAccount.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
-        """)
-    fun getAllInOrganization(organizationId: Long, pageable: Pageable, search: String): Page<UserAccountWithOrganizationRoleView>
+        """
+  )
+  fun getAllInOrganization(
+    organizationId: Long,
+    pageable: Pageable,
+    search: String
+  ): Page<UserAccountWithOrganizationRoleView>
 
-    @Query("""
+  @Query(
+    """
         select ua.id as id, ua.name as name, ua.username as username, p.type as directPermissions, orl.type as organizationRole,
         orl.organization.id as oid, o.basePermissions as organizationBasePermissions from UserAccount ua, Project r 
         left join Permission p on ua = p.user and p.project.id = :projectId
@@ -33,6 +43,7 @@ interface UserAccountRepository : JpaRepository<UserAccount?, Long?> {
         and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
-    """)
-    fun getAllInProject(projectId: Long, pageable: Pageable, search: String? = ""): Page<UserAccountInProjectView>
+    """
+  )
+  fun getAllInProject(projectId: Long, pageable: Pageable, search: String? = ""): Page<UserAccountInProjectView>
 }

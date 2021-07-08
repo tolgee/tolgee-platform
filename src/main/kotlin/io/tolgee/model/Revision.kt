@@ -14,23 +14,23 @@ import javax.persistence.Id
 @RevisionEntity(RevisionListener::class)
 class Revision : Serializable {
 
-    @Id
-    @GenericGenerator(
-            name = "revisionSequenceGenerator",
-            strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "revisionSequenceGenerator"
-    )
-    @RevisionNumber
-    private val id = 0
+  @Id
+  @GenericGenerator(
+    name = "revisionSequenceGenerator",
+    strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
+  )
+  @GeneratedValue(
+    strategy = GenerationType.SEQUENCE,
+    generator = "revisionSequenceGenerator"
+  )
+  @RevisionNumber
+  private val id = 0
 
-    @RevisionTimestamp
-    private val timestamp: Long = 0
+  @RevisionTimestamp
+  private val timestamp: Long = 0
 
-    /**
-     * We don't want an foreign key, since user could be deleted
-     */
-    var authorId: Long? = null
+  /**
+   * We don't want an foreign key, since user could be deleted
+   */
+  var authorId: Long? = null
 }

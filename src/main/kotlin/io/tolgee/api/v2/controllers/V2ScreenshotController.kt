@@ -31,62 +31,64 @@ import org.springframework.web.multipart.MultipartFile
 @Suppress("MVCPathVariableInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = [
+@RequestMapping(
+  value = [
     "/v2/projects/keys/{keyId}/screenshots",
     "/v2/projects/{projectId:[0-9]+}/keys/{keyId}/screenshots"
-])
+  ]
+)
 @Tag(name = "Screenshots")
 class V2ScreenshotController(
-        private val screenshotService: ScreenshotService,
-        private val keyService: KeyService,
-        private val projectHolder: ProjectHolder,
-        private val screenshotModelAssembler: ScreenshotModelAssembler
+  private val screenshotService: ScreenshotService,
+  private val keyService: KeyService,
+  private val projectHolder: ProjectHolder,
+  private val screenshotModelAssembler: ScreenshotModelAssembler
 ) {
-    @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    @Operation(summary = "Upload screenshot for specific key")
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-    @AccessWithApiKey([ApiScope.SCREENSHOTS_UPLOAD])
-    @ResponseStatus(HttpStatus.CREATED)
-    fun uploadScreenshot(
-            @PathVariable keyId: Long,
-            @RequestParam("screenshot") screenshot: MultipartFile,
-    ): ResponseEntity<ScreenshotModel> {
-        val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
-        if (!contentTypes.contains(screenshot.contentType!!)) {
-            throw ValidationException(Message.FILE_NOT_IMAGE)
-        }
-        val keyEntity = keyService.get(keyId).orElseThrow { NotFoundException() }
-        keyEntity.checkInProject()
-        val screenShotEntity = screenshotService.store(screenshot, keyEntity)
-        return ResponseEntity(screenShotEntity.model, HttpStatus.CREATED)
+  @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+  @Operation(summary = "Upload screenshot for specific key")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey([ApiScope.SCREENSHOTS_UPLOAD])
+  @ResponseStatus(HttpStatus.CREATED)
+  fun uploadScreenshot(
+    @PathVariable keyId: Long,
+    @RequestParam("screenshot") screenshot: MultipartFile,
+  ): ResponseEntity<ScreenshotModel> {
+    val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
+    if (!contentTypes.contains(screenshot.contentType!!)) {
+      throw ValidationException(Message.FILE_NOT_IMAGE)
     }
+    val keyEntity = keyService.get(keyId).orElseThrow { NotFoundException() }
+    keyEntity.checkInProject()
+    val screenShotEntity = screenshotService.store(screenshot, keyEntity)
+    return ResponseEntity(screenShotEntity.model, HttpStatus.CREATED)
+  }
 
-    @GetMapping("")
-    @Operation(summary = "Returns all screenshots for specified key")
-    @AccessWithAnyProjectPermission
-    @AccessWithApiKey([ApiScope.SCREENSHOTS_VIEW])
-    fun getKeyScreenshots(@PathVariable keyId: Long): CollectionModel<ScreenshotModel> {
-        val keyEntity = keyService.get(keyId).orElseThrow { NotFoundException() }
-        keyEntity.checkInProject()
-        return screenshotModelAssembler.toCollectionModel(screenshotService.findAll(keyEntity))
+  @GetMapping("")
+  @Operation(summary = "Returns all screenshots for specified key")
+  @AccessWithAnyProjectPermission
+  @AccessWithApiKey([ApiScope.SCREENSHOTS_VIEW])
+  fun getKeyScreenshots(@PathVariable keyId: Long): CollectionModel<ScreenshotModel> {
+    val keyEntity = keyService.get(keyId).orElseThrow { NotFoundException() }
+    keyEntity.checkInProject()
+    return screenshotModelAssembler.toCollectionModel(screenshotService.findAll(keyEntity))
+  }
+
+  @DeleteMapping("/{ids}")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @Operation(summary = "Deletes multiple screenshots by ids")
+  @AccessWithApiKey([ApiScope.SCREENSHOTS_VIEW])
+  fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
+    val screenshots = screenshotService.findByIdIn(ids)
+    screenshots.forEach {
+      it.key.checkInProject()
     }
+    screenshotService.delete(screenshots)
+  }
 
-    @DeleteMapping("/{ids}")
-    @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
-    @Operation(summary = "Deletes multiple screenshots by ids")
-    @AccessWithApiKey([ApiScope.SCREENSHOTS_VIEW])
-    fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
-        val screenshots = screenshotService.findByIdIn(ids)
-        screenshots.forEach {
-            it.key.checkInProject()
-        }
-        screenshotService.delete(screenshots)
-    }
+  private fun Key.checkInProject() {
+    keyService.checkInProject(this, projectHolder.project)
+  }
 
-    private fun Key.checkInProject() {
-        keyService.checkInProject(this, projectHolder.project)
-    }
-
-    private val Screenshot.model: ScreenshotModel
-        get() = screenshotModelAssembler.toModel(this)
+  private val Screenshot.model: ScreenshotModel
+    get() = screenshotModelAssembler.toModel(this)
 }

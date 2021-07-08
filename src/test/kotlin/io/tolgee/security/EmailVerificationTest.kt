@@ -27,185 +27,190 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 
-@SpringBootTest(properties = [
+@SpringBootTest(
+  properties = [
     "tolgee.authentication.needs-email-verification=true",
     "tolgee.front-end-url=dummy_frontend_url"
-])
+  ]
+)
 @AutoConfigureMockMvc
 open class EmailVerificationTest : AbstractControllerTest() {
+
+  @set:Autowired
+  lateinit var mailSender: MailSender
+
+  @set:Autowired
+  lateinit var emailVerificationService: EmailVerificationService
+
+  @set:Autowired
+  lateinit var emailVerificationRepository: EmailVerificationRepository
+
+  @BeforeMethod
+  fun setup() {
+    every { mailSender.send(any()) } returns Unit
+  }
+
+  @BeforeMethod
+  fun setupConstructor() {
+    mockkConstructor(SimpleMailMessage::class)
+  }
+
+  @Test
+  fun doesNotLoginWhenNotVerified() {
+    val createUser = dbPopulator.createUserIfNotExists(initialUsername)
+    emailVerificationService.createForUser(createUser)
+
+    val response = doAuthentication(initialUsername, initialPassword)
+    assertThat(response).error().hasCode("email_not_verified")
+  }
+
+  @Test
+  fun doesLoginWhenVerified() {
+    dbPopulator.createUserIfNotExists(initialUsername)
+    val result = doAuthentication(initialUsername, initialPassword)
+    assertThat(result.response.status).isEqualTo(200)
+  }
+
+  @Test
+  fun verifiesEmail() {
+    val createUser = dbPopulator.createUserIfNotExists(initialUsername)
+    val emailVerification = emailVerificationService.createForUser(createUser)
+    mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
+      .andExpect(status().isOk).andReturn()
+
+    assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
+  }
+
+  @Test
+  fun verifiesNewEmail() {
+    val createUser = dbPopulator.createUserIfNotExists(initialUsername)
+    val emailVerification = emailVerificationService.createForUser(createUser, newEmail = "this.is@new.email")
+    mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
+      .andExpect(status().isOk).andReturn()
+    assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
+    assertThat(userAccountService.getByUserName(createUser.username).get().username).isEqualTo("this.is@new.email")
+  }
+
+  @Test
+  fun doesNotVerifyWithWrongCode() {
+    val createUser = dbPopulator.createUserIfNotExists(initialUsername)
+    val emailVerification = emailVerificationService.createForUser(createUser)
+    mvc.perform(get("/api/public/verify_email/${createUser.id}/wrong_code"))
+      .andExpect(status().isNotFound).andReturn()
+
+    assertThat(emailVerificationRepository.findById(emailVerification!!.id!!)).isPresent
+  }
+
+  @Test
+  fun doesNotVerifyWithWrongUser() {
+    val createUser = dbPopulator.createUserIfNotExists(initialUsername)
+    val emailVerification = emailVerificationService.createForUser(createUser)
+    mvc.perform(get("/api/public/verify_email/${createUser.id!! + 1L}/${emailVerification!!.code}"))
+      .andExpect(status().isNotFound).andReturn()
+
+    assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isPresent
+  }
+
+  val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", "testtest", null)
+
+  protected fun perform(): MvcResult {
+    return mvc.perform(
+      post("/api/public/sign_up")
+        .content(mapper.writeValueAsString(signUpDto))
+        .accept(MediaType.ALL)
+        .contentType(MediaType.APPLICATION_JSON)
+    )
+      .andReturn()
+  }
+
+  @Test
+  fun signUpSavesVerification() {
+    perform()
+
+    val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
+
+    verify { mailSender.send(any()) }
+
+    verify { anyConstructed<SimpleMailMessage>().subject = "Tolgee e-mail verification" }
+
+    verify {
+      anyConstructed<SimpleMailMessage>().text = match {
+        it.contains("dummy_frontend_url/login/verify_email/${user.id}/")
+      }
+    }
+
+    assertThat(userAccountService[user.id!!]).isNotNull
+  }
+
+  @Test
+  fun signUpFrontendUrlIsPrimary() {
+    signUpDto.callbackUrl = "dummyCallbackUrl"
+
+    perform()
+
+    val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
+
+    verify {
+      anyConstructed<SimpleMailMessage>().text = match {
+        it.contains("dummy_frontend_url/login/verify_email/${user.id}/")
+      }
+    }
+
+    assertThat(userAccountService[user.id!!]).isNotNull
+  }
+
+  @Test
+  fun signUpDoesNotReturnToken() {
+    assertThat(perform().response.contentAsString).isEqualTo("{}")
+  }
+
+  @SpringBootTest(
+    properties = [
+      "tolgee.authentication.needs-email-verification=true",
+    ]
+  )
+  @AutoConfigureMockMvc
+  class EmailVerificationNoFrontendUrlTest : AbstractControllerTest() {
+
+    val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", "testtest", null)
 
     @set:Autowired
     lateinit var mailSender: MailSender
 
-    @set:Autowired
-    lateinit var emailVerificationService: EmailVerificationService
-
-    @set:Autowired
-    lateinit var emailVerificationRepository: EmailVerificationRepository
-
-    @BeforeMethod
-    fun setup() {
-        every { mailSender.send(any()) } returns Unit
-    }
-
-    @BeforeMethod
-    fun setupConstructor() {
-        mockkConstructor(SimpleMailMessage::class)
-    }
-
     @Test
-    fun doesNotLoginWhenNotVerified() {
-        val createUser = dbPopulator.createUserIfNotExists(initialUsername)
-        emailVerificationService.createForUser(createUser)
+    fun usesCallbackUrlIs() {
+      mockkConstructor(SimpleMailMessage::class)
 
-        val response = doAuthentication(initialUsername, initialPassword)
-        assertThat(response).error().hasCode("email_not_verified")
-    }
+      every { mailSender.send(any()) } returns Unit
 
-    @Test
-    fun doesLoginWhenVerified() {
-        dbPopulator.createUserIfNotExists(initialUsername)
-        val result = doAuthentication(initialUsername, initialPassword)
-        assertThat(result.response.status).isEqualTo(200)
-    }
+      signUpDto.callbackUrl = "dummyCallbackUrl"
 
-    @Test
-    fun verifiesEmail() {
-        val createUser = dbPopulator.createUserIfNotExists(initialUsername)
-        val emailVerification = emailVerificationService.createForUser(createUser)
-        mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
-                .andExpect(status().isOk).andReturn()
+      mvc.perform(
+        post("/api/public/sign_up")
+          .content(mapper.writeValueAsString(signUpDto))
+          .accept(MediaType.ALL)
+          .contentType(MediaType.APPLICATION_JSON)
+      )
+        .andReturn()
 
-        assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
-    }
+      val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
 
-    @Test
-    fun verifiesNewEmail() {
-        val createUser = dbPopulator.createUserIfNotExists(initialUsername)
-        val emailVerification = emailVerificationService.createForUser(createUser, newEmail = "this.is@new.email")
-        mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
-                .andExpect(status().isOk).andReturn()
-        assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
-        assertThat(userAccountService.getByUserName(createUser.username).get().username).isEqualTo("this.is@new.email")
-    }
-
-    @Test
-    fun doesNotVerifyWithWrongCode() {
-        val createUser = dbPopulator.createUserIfNotExists(initialUsername)
-        val emailVerification = emailVerificationService.createForUser(createUser)
-        mvc.perform(get("/api/public/verify_email/${createUser.id}/wrong_code"))
-                .andExpect(status().isNotFound).andReturn()
-
-        assertThat(emailVerificationRepository.findById(emailVerification!!.id!!)).isPresent
-    }
-
-    @Test
-    fun doesNotVerifyWithWrongUser() {
-        val createUser = dbPopulator.createUserIfNotExists(initialUsername)
-        val emailVerification = emailVerificationService.createForUser(createUser)
-        mvc.perform(get("/api/public/verify_email/${createUser.id!! + 1L}/${emailVerification!!.code}"))
-                .andExpect(status().isNotFound).andReturn()
-
-        assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isPresent
-    }
-
-
-    val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", "testtest", null)
-
-    protected fun perform(): MvcResult {
-        return mvc.perform(post("/api/public/sign_up")
-                .content(mapper.writeValueAsString(signUpDto))
-                .accept(MediaType.ALL)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andReturn()
-    }
-
-    @Test
-    fun signUpSavesVerification() {
-        perform()
-
-        val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
-
-        verify { mailSender.send(any()) }
-
-        verify { anyConstructed<SimpleMailMessage>().subject = "Tolgee e-mail verification" }
-
-        verify {
-            anyConstructed<SimpleMailMessage>().text = match {
-                it.contains("dummy_frontend_url/login/verify_email/${user.id}/")
-            }
+      verify {
+        anyConstructed<SimpleMailMessage>().text = match {
+          it.contains("dummyCallbackUrl/login/verify_email/${user.id}/")
         }
+      }
 
-        assertThat(userAccountService[user.id!!]).isNotNull
+      assertThat(userAccountService[user.id!!]).isNotNull
     }
-
-    @Test
-    fun signUpFrontendUrlIsPrimary() {
-        signUpDto.callbackUrl = "dummyCallbackUrl"
-
-        perform()
-
-        val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
-
-        verify {
-            anyConstructed<SimpleMailMessage>().text = match {
-                it.contains("dummy_frontend_url/login/verify_email/${user.id}/")
-            }
-        }
-
-        assertThat(userAccountService[user.id!!]).isNotNull
-    }
-
-    @Test
-    fun signUpDoesNotReturnToken() {
-        assertThat(perform().response.contentAsString).isEqualTo("{}")
-    }
-
-    @SpringBootTest(properties = [
-        "tolgee.authentication.needs-email-verification=true",
-    ])
-    @AutoConfigureMockMvc
-    class EmailVerificationNoFrontendUrlTest : AbstractControllerTest() {
-
-        val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", "testtest", null)
-
-        @set:Autowired
-        lateinit var mailSender: MailSender
-
-        @Test
-        fun usesCallbackUrlIs() {
-            mockkConstructor(SimpleMailMessage::class)
-
-            every { mailSender.send(any()) } returns Unit
-
-            signUpDto.callbackUrl = "dummyCallbackUrl"
-
-
-            mvc.perform(post("/api/public/sign_up")
-                    .content(mapper.writeValueAsString(signUpDto))
-                    .accept(MediaType.ALL)
-                    .contentType(MediaType.APPLICATION_JSON))
-                    .andReturn()
-
-
-            val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
-
-            verify {
-                anyConstructed<SimpleMailMessage>().text = match {
-                    it.contains("dummyCallbackUrl/login/verify_email/${user.id}/")
-                }
-            }
-
-            assertThat(userAccountService[user.id!!]).isNotNull
-        }
-    }
+  }
 }
 
 @Configuration
 open class MockBeanMailSender {
-    @Bean
-    @Primary
-    open fun mailSender(): JavaMailSender {
-        return mockk()
-    }
+  @Bean
+  @Primary
+  open fun mailSender(): JavaMailSender {
+    return mockk()
+  }
 }

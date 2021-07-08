@@ -34,76 +34,85 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(origins = ["*"])
 @Tag(name = "Import")
-@RequestMapping(value = [
+@RequestMapping(
+  value = [
     "/v2/projects/{projectId:[0-9]+}/languages",
     "/v2/projects/languages"
-])
-@Tags(value = [
+  ]
+)
+@Tags(
+  value = [
     Tag(name = "Languages", description = "Languages"),
-])
+  ]
+)
 class V2LanguagesController(
-        private val languageService: LanguageService,
-        private val projectService: ProjectService,
-        private val languageValidator: LanguageValidator,
-        private val securityService: SecurityService,
-        private val languageModelAssembler: LanguageModelAssembler,
-        private val pagedAssembler: PagedResourcesAssembler<Language>,
-        private val projectHolder: ProjectHolder
+  private val languageService: LanguageService,
+  private val projectService: ProjectService,
+  private val languageValidator: LanguageValidator,
+  private val securityService: SecurityService,
+  private val languageModelAssembler: LanguageModelAssembler,
+  private val pagedAssembler: PagedResourcesAssembler<Language>,
+  private val projectHolder: ProjectHolder
 ) : IController {
 
-    @PostMapping(value = [""])
-    @Operation(summary = "Creates language")
-    fun createLanguage(@PathVariable("projectId") projectId: Long,
-                       @RequestBody @Valid dto: LanguageDto): LanguageModel {
-        val project = projectService.get(projectId).orElseThrow { NotFoundException() }
-        securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.MANAGE)
-        languageValidator.validateCreate(dto, project)
-        val language = languageService.createLanguage(dto, project!!)
-        return languageModelAssembler.toModel(language)
-    }
+  @PostMapping(value = [""])
+  @Operation(summary = "Creates language")
+  fun createLanguage(
+    @PathVariable("projectId") projectId: Long,
+    @RequestBody @Valid dto: LanguageDto
+  ): LanguageModel {
+    val project = projectService.get(projectId).orElseThrow { NotFoundException() }
+    securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.MANAGE)
+    languageValidator.validateCreate(dto, project)
+    val language = languageService.createLanguage(dto, project!!)
+    return languageModelAssembler.toModel(language)
+  }
 
-    @Operation(summary = "Edits language")
-    @PutMapping(value = ["/{languageId}"])
-    fun editLanguage(
-            @RequestBody @Valid dto: LanguageDto,
-            @PathVariable("languageId") languageId: Long
-    ): LanguageModel {
-        languageValidator.validateEdit(languageId, dto)
-        val language = languageService.findById(languageId).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-        securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
-        return languageModelAssembler.toModel(languageService.editLanguage(languageId, dto))
-    }
+  @Operation(summary = "Edits language")
+  @PutMapping(value = ["/{languageId}"])
+  fun editLanguage(
+    @RequestBody @Valid dto: LanguageDto,
+    @PathVariable("languageId") languageId: Long
+  ): LanguageModel {
+    languageValidator.validateEdit(languageId, dto)
+    val language = languageService.findById(languageId).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+    securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
+    return languageModelAssembler.toModel(languageService.editLanguage(languageId, dto))
+  }
 
-    @GetMapping(value = [""])
-    @AccessWithApiKey
-    @AccessWithAnyProjectPermission
-    @Operation(summary = "Returns all project languages", tags = ["API KEY", "Languages"])
-    fun getAll(@PathVariable("projectId") pathProjectId: Long?, @ParameterObject pageable: Pageable): PagedModel<LanguageModel> {
-        val data = languageService.getPaged(projectHolder.project.id, pageable)
-        return pagedAssembler.toModel(data, languageModelAssembler)
-    }
+  @GetMapping(value = [""])
+  @AccessWithApiKey
+  @AccessWithAnyProjectPermission
+  @Operation(summary = "Returns all project languages", tags = ["API KEY", "Languages"])
+  fun getAll(
+    @PathVariable("projectId") pathProjectId: Long?,
+    @ParameterObject pageable: Pageable
+  ): PagedModel<LanguageModel> {
+    val data = languageService.getPaged(projectHolder.project.id, pageable)
+    return pagedAssembler.toModel(data, languageModelAssembler)
+  }
 
-    @GetMapping(value = ["{languageId}"])
-    @Operation(summary = "Returns specific language")
-    @AccessWithAnyProjectPermission
-    operator fun get(@PathVariable("languageId") id: Long?): LanguageModel {
-        val language = languageService.findById(id!!).orElseThrow { NotFoundException() }
-        securityService.checkAnyProjectPermission(language.project!!.id)
-        return languageModelAssembler.toModel(language)
-    }
+  @GetMapping(value = ["{languageId}"])
+  @Operation(summary = "Returns specific language")
+  @AccessWithAnyProjectPermission
+  operator fun get(@PathVariable("languageId") id: Long?): LanguageModel {
+    val language = languageService.findById(id!!).orElseThrow { NotFoundException() }
+    securityService.checkAnyProjectPermission(language.project!!.id)
+    return languageModelAssembler.toModel(language)
+  }
 
-    @Operation(summary = "Deletes specific language")
-    @DeleteMapping(value = ["/{languageId}"])
-    fun deleteLanguage(@PathVariable languageId: Long) {
-        val language = languageService.findById(languageId)
-                .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-        securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
+  @Operation(summary = "Deletes specific language")
+  @DeleteMapping(value = ["/{languageId}"])
+  fun deleteLanguage(@PathVariable languageId: Long) {
+    val language = languageService.findById(languageId)
+      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+    securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
 
-        //if base language is missing, select first language
-        val baseLanguage = projectService.autoSetBaseLanguage(projectHolder.project.id)
-        if (baseLanguage!!.id == languageId) {
-            throw BadRequestException(Message.CANNOT_DELETE_BASE_LANGUAGE)
-        }
-        languageService.deleteLanguage(languageId)
+    // if base language is missing, select first language
+    val baseLanguage = projectService.autoSetBaseLanguage(projectHolder.project.id)
+    if (baseLanguage!!.id == languageId) {
+      throw BadRequestException(Message.CANNOT_DELETE_BASE_LANGUAGE)
     }
+    languageService.deleteLanguage(languageId)
+  }
 }

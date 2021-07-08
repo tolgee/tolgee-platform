@@ -10,21 +10,21 @@ import java.util.*
 @Suppress("unused")
 @Relation(collectionRelation = "translationComments", itemRelation = "translationComment")
 open class TranslationCommentModel(
-        @Schema(description = "Id of translation comment record")
-        val id: Long,
+  @Schema(description = "Id of translation comment record")
+  val id: Long,
 
-        @Schema(description = "Text of comment")
-        val text: String,
+  @Schema(description = "Text of comment")
+  val text: String,
 
-        @Schema(description = "State of translation")
-        val state: TranslationCommentState,
+  @Schema(description = "State of translation")
+  val state: TranslationCommentState,
 
-        @Schema(description = "User who created the comment")
-        val author: UserAccountModel,
+  @Schema(description = "User who created the comment")
+  val author: UserAccountModel,
 
-        @Schema(description = "Date when it was created")
-        val createdAt: Date,
+  @Schema(description = "Date when it was created")
+  val createdAt: Date,
 
-        @Schema(description = "Date when it was updated")
-        val updatedAt: Date,
+  @Schema(description = "Date when it was updated")
+  val updatedAt: Date,
 ) : RepresentationModel<TranslationCommentModel>()
