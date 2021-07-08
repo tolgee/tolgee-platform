@@ -1,5 +1,3 @@
-package io.tolgee.exceptions;
+package io.tolgee.exceptions
 
-public class InvalidStateException extends RuntimeException {
-
-}
+class InvalidStateException : RuntimeException()

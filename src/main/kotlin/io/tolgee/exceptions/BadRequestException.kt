@@ -1,21 +1,13 @@
-package io.tolgee.exceptions;
+package io.tolgee.exceptions
 
-import io.tolgee.constants.Message;
-import org.springframework.http.HttpStatus;
+import io.tolgee.constants.Message
+import org.springframework.http.HttpStatus
+import java.io.Serializable
 
-import java.io.Serializable;
-import java.util.List;
+open class BadRequestException : ErrorException {
+    constructor(message: Message, params: List<Serializable>?) : super(message, params)
+    constructor(message: Message) : super(message) {}
 
-public class BadRequestException extends ErrorException {
-    public BadRequestException(Message message, List<Serializable> params) {
-        super(message, params);
-    }
-
-    public BadRequestException(Message message) {
-        super(message);
-    }
-
-    public HttpStatus getHttpStatus() {
-        return HttpStatus.BAD_REQUEST;
-    }
+    override val httpStatus: HttpStatus?
+        get() = HttpStatus.BAD_REQUEST
 }

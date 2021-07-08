@@ -1,8 +1,8 @@
 package io.tolgee.controllers
 
-import io.tolgee.constants.ApiScope
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
+import io.tolgee.model.enums.ApiScope
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
@@ -13,7 +13,7 @@ class UserAppApiControllerTest : AbstractUserAppApiTest() {
     @Test
     fun getScopes() {
         val base = dbPopulator.createBase(generateUniqueString())
-        val apiKey = apiKeyService.createApiKey(base.permissions.first().user, setOf(*ApiScope.values()), base)
+        val apiKey = apiKeyService.createApiKey(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
         mvc.perform(MockMvcRequestBuilders.get("/uaa/scopes?ak=" + apiKey.key))
                 .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
     }
@@ -21,7 +21,7 @@ class UserAppApiControllerTest : AbstractUserAppApiTest() {
     @Test
     fun getLanguages() {
         val base = dbPopulator.createBase(generateUniqueString())
-        val apiKey = apiKeyService.createApiKey(base.permissions.first().user, setOf(*ApiScope.values()), base)
+        val apiKey = apiKeyService.createApiKey(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
         val languages = mvc.perform(MockMvcRequestBuilders.get("/uaa/languages?ak=" + apiKey.key))
                 .andExpect(MockMvcResultMatchers.status().isOk).andReturn().mapResponseTo<Set<String>>()
     }

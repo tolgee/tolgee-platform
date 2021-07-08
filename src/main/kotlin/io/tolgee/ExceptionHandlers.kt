@@ -85,7 +85,8 @@ class ExceptionHandlers {
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleFileSizeLimitExceeded(ex: HttpMessageNotReadableException): ResponseEntity<ErrorResponseBody> {
-        return ResponseEntity(ErrorResponseBody(Message.REQUEST_PARSE_ERROR.code, listOf(ex.rootCause.message)),
+        val params = ex.rootCause?.message?.let { listOf(it) }
+        return ResponseEntity(ErrorResponseBody(Message.REQUEST_PARSE_ERROR.code, params),
                 HttpStatus.BAD_REQUEST)
     }
 

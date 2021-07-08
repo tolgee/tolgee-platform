@@ -1,8 +1,8 @@
 package io.tolgee.fixtures
 
-import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.service.ApiKeyService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope

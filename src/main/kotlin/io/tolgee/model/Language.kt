@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.*
+import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.Size
 
 @Entity
@@ -42,7 +43,8 @@ class Language : StandardAuditModel() {
     var project: Project? = null
 
     @Column(nullable = false)
-    var tag: String? = null
+    @field:NotEmpty
+    var tag: String = ""
 
     var name: String? = null
 

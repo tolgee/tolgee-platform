@@ -1,11 +1,11 @@
 package io.tolgee.service
 
-import io.tolgee.constants.ApiScope
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.AuthenticationFacade
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

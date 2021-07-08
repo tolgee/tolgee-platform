@@ -19,7 +19,7 @@ import javax.persistence.EntityManager
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-open class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
+class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
     @Autowired
     lateinit var populator: DbPopulatorReal
 
@@ -41,20 +41,20 @@ open class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
     lateinit var userAccount: UserAccount
 
     @BeforeMethod
-    open fun setup() {
+    fun setup() {
         populator.autoPopulate()
         userAccount = userAccountRepository.findByUsername(tolgeeProperties.authentication.initialUsername).orElseThrow({ NotFoundException() })
     }
 
     @Test
     @Transactional
-    open fun createsUser() {
+    fun createsUser() {
         Assertions.assertThat(userAccount.name).isEqualTo(tolgeeProperties.authentication.initialUsername)
     }
 
     @Test
     @Transactional
-    open fun createsProject() {
+    fun createsProject() {
         entityManager.refresh(userAccount)
         val found = projectRepository.findAll().asSequence()
                 .flatMap { it!!.permissions.map { it.user } }
@@ -64,10 +64,9 @@ open class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
 
     @Test
     @Transactional
-    open fun createsApiKey() {
+    fun createsApiKey() {
         val key = apiKeyService.getAllByUser(userAccount).stream().findFirst()
         Assertions.assertThat(key).isPresent
-        val (_, key1) = key.get()
-        Assertions.assertThat(key1).isEqualTo("this_is_dummy_api_key")
+        Assertions.assertThat(key.get().key).isEqualTo("this_is_dummy_api_key")
     }
 }

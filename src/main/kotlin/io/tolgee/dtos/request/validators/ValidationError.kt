@@ -1,29 +1,9 @@
-package io.tolgee.dtos.request.validators;
+package io.tolgee.dtos.request.validators
 
-import io.tolgee.constants.Message;
+import io.tolgee.constants.Message
 
-public class ValidationError {
-    private String[] parameters;
-
-    private ValidationErrorType type;
-
-    private Message message;
-
-    public ValidationError(ValidationErrorType type, Message message, String... parameters) {
-        this.parameters = parameters;
-        this.message = message;
-        this.type = type;
-    }
-
-    public String[] getParameters() {
-        return this.parameters;
-    }
-
-    public ValidationErrorType getType() {
-        return this.type;
-    }
-
-    public Message getMessage() {
-        return this.message;
-    }
+class ValidationError(type: ValidationErrorType, message: Message, vararg parameters: String) {
+    val parameters: Array<String> = parameters as Array<String>
+    val type: ValidationErrorType = type
+    val message: Message = message
 }

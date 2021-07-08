@@ -1,11 +1,11 @@
 package io.tolgee.development
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.constants.ApiScope
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.*
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -102,7 +102,7 @@ class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     @Transactional
-    fun createBase(projectName: String?, username: String, password: String? = null): Project {
+    fun createBase(projectName: String, username: String, password: String? = null): Project {
         val userAccount = createUserIfNotExists(username, password)
         val project = Project()
         project.name = projectName
@@ -117,22 +117,22 @@ class DbPopulatorReal(private val entityManager: EntityManager,
     }
 
     @Transactional
-    fun createBase(projectName: String?, username: String): Project {
+    fun createBase(projectName: String, username: String): Project {
         return createBase(projectName, username, null)
     }
 
     @Transactional
-    fun createBase(projectName: String?): Project {
+    fun createBase(projectName: String): Project {
         return createBase(projectName, tolgeeProperties.authentication.initialUsername)
     }
 
     @Transactional
-    fun populate(projectName: String?): Project {
+    fun populate(projectName: String): Project {
         return populate(projectName, tolgeeProperties.authentication.initialUsername)
     }
 
     @Transactional
-    fun populate(projectName: String?, userName: String): Project {
+    fun populate(projectName: String, userName: String): Project {
         val project = createBase(projectName, userName)
         createApiKey(project)
         createTranslation(project, "Hello world!", "Hallo Welt!", en, de)
@@ -166,7 +166,7 @@ class DbPopulatorReal(private val entityManager: EntityManager,
             val apiKey = ApiKey(
                     project = project,
                     key = API_KEY,
-                    userAccount = user,
+                    userAccount = user!!,
                     scopesEnum = ApiScope.values().toSet()
             )
             project.apiKeys.add(apiKey)

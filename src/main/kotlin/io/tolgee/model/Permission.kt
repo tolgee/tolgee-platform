@@ -1,6 +1,6 @@
 package io.tolgee.model
 
-import io.tolgee.constants.ApiScope
+import io.tolgee.model.enums.ApiScope
 import org.hibernate.envers.Audited
 import javax.persistence.*
 

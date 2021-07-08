@@ -1,6 +1,6 @@
 package io.tolgee.annotations
 
-import io.tolgee.constants.ApiScope
+import io.tolgee.model.enums.ApiScope
 import org.testng.annotations.Test
 
 @Test

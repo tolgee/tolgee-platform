@@ -17,7 +17,7 @@ import org.testng.annotations.Test
 @AutoConfigureMockMvc
 class V2LanguageControllerTest : ProjectAuthControllerTest("/v2/projects/"), ITest {
     private val languageDTO = LanguageDto("en", "en", "en")
-    private val languageDTOBlank = LanguageDto(null, "")
+    private val languageDTOBlank = LanguageDto("", "")
     private val languageDTOCorrect = LanguageDto("Spanish", "Espanol", "es")
 
     @Test

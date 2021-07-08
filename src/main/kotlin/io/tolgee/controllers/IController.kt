@@ -1,5 +1,3 @@
-package io.tolgee.controllers;
+package io.tolgee.controllers
 
-public interface IController {
-
-}
+interface IController 

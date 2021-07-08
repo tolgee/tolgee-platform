@@ -8,7 +8,7 @@ import javax.validation.constraints.Size
 data class LanguageDto(
         @Schema(example = "Czech", description = "Language name in english")
         @field:NotBlank @field:Size(max = 100)
-        var name: String? = null,
+        var name: String = "",
 
         @Schema(example = "cs-CZ", description = "Language tag according to BCP 47 definition")
         @field:NotBlank @field:Size(max = 100)
@@ -16,7 +16,7 @@ data class LanguageDto(
 
         @Schema(example = "čeština", description = "Language name in this language")
         @field:NotBlank @field:Size(max = 20) @field:Pattern(regexp = "^[^,]*$", message = "can not contain coma")
-        var tag: String? = null,
+        var tag: String = "",
 
         @Schema(example = "\uD83C\uDDE8\uD83C\uDDFF", description = "Language flag emoji as UTF-8 emoji")
         @field:Size(max = 20)
