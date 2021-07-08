@@ -315,5 +315,8 @@
   "create_project_validation_language_repeated" : "Cannot add single language more then once",
   "project_create_base_language_label" : "Base language",
   "cannot_delete_base_language_message" : "Cannot delete base language",
-  "invitation_code_accepted" : "Invitation successfully accepted"
+  "invitation_code_accepted" : "Invitation successfully accepted",
+  "project_settings_base_language" : "Base language",
+  "invitation_log_in_first" : "Log in or sign up first please",
+  "user_already_has_role" : "You are a member of this organization already"
 }

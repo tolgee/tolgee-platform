@@ -407,6 +407,21 @@ class OrganizationControllerTest : SignedInControllerTest() {
   }
 
   @Test
+  fun `it will not fail when accepting invitation again`() {
+    val helloUser = dbPopulator.createUserIfNotExists("hellouser")
+
+    this.organizationService.create(dummyDto, helloUser).let { organization ->
+      val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
+      val invitedUser = dbPopulator.createUserIfNotExists("invitedUser")
+      this.organizationRoleService.grantMemberRoleToUser(invitedUser, organization)
+      entityManager.flush()
+      entityManager.clear()
+      loginAsUser(invitedUser.username!!)
+      performAuthGet("/api/invitation/accept/${invitation.code}").andIsBadRequest
+    }
+  }
+
+  @Test
   fun testDeleteInvitation() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 

@@ -135,5 +135,7 @@
   "validation_email_is_not_valid" : "Le format de l'e-mail n'est pas valide",
   "repository_menu_dashboard" : "",
   "language_create_autocomplete_label" : "",
-  "invitation_code_accepted" : ""
+  "invitation_code_accepted" : "",
+  "project_settings_base_language" : "",
+  "invitation_log_in_first" : ""
 }
