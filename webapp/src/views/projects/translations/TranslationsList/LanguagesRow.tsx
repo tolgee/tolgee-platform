@@ -6,7 +6,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { CellPlain } from '../CellPlain';
 import { CircledLanguageIcon } from '../CircledLanguageIcon';
 import { CellControls } from '../CellControls';
-import { useEditableRow } from './useEditableRow';
+import { useEditableRow } from '../useEditableRow';
 import { Editor } from 'tg.component/editor/Editor';
 
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -75,14 +75,13 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
 }) {
   const classes = useStyles();
 
-  const {
-    languageEdited,
-    value,
-    setValue,
-    handleEdit,
-    handleEditCancel,
-    handleSave,
-  } = useEditableRow(data);
+  const { editVal, value, setValue, handleEdit, handleEditCancel, handleSave } =
+    useEditableRow({
+      keyId: data.keyId,
+      keyName: data.keyName,
+      translations: data.translations,
+      language: null,
+    });
 
   return (
     <div className={classes.content}>
@@ -90,7 +89,7 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
         {languages.map((l) => (
           <div key={l.id} className={classes.rowWrapper}>
             <CellPlain
-              background={l.tag === languageEdited ? '#efefef' : undefined}
+              background={l.tag === editVal?.language ? '#efefef' : undefined}
             >
               <div className={classes.rowContent}>
                 <div className={classes.languageContent}>
@@ -110,22 +109,22 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
           </div>
         ))}
       </div>
-      {languageEdited && (
+      {editVal?.language && (
         <div className={classes.editor}>
           <CellPlain background="#efefef">
             <Editor
-              key={languageEdited}
+              key={editVal.language}
               minHeight={100}
               initialValue={value}
               variables={[]}
               onChange={(v) => setValue(v as string)}
-              onSave={(direction) => handleSave(languageEdited, direction)}
+              onSave={(direction) => handleSave(direction)}
               onCancel={handleEditCancel}
               autoFocus
             />
             <CellControls>
               <IconButton
-                onClick={() => handleSave(languageEdited)}
+                onClick={() => handleSave()}
                 color="primary"
                 size="small"
               >

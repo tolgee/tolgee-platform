@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import { createContext, useContext } from 'use-context-selector';
 import { T } from '@tolgee/react';
 
@@ -11,12 +11,12 @@ import {
 import { container } from 'tsyringe';
 import { MessageService } from 'tg.service/MessageService';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import { confirmation } from 'tg.hooks/confirmation';
 import {
   flattenKeys,
   updateTranslation,
   updateTranslationKey,
 } from './contextTools';
-import { useCallback } from 'react';
 
 const PAGE_SIZE = 60;
 
@@ -25,7 +25,8 @@ type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
 
 type ActionType =
-  | { type: 'SET_EDIT'; payload: CellLocation | undefined }
+  | { type: 'SET_EDIT'; payload: EditType | undefined }
+  | { type: 'UPDATE_EDIT'; payload: Partial<EditType> }
   | { type: 'EDIT_NEXT' }
   | { type: 'EDIT_MOVE'; payload: Direction }
   | { type: 'SET_SEARCH'; payload: string }
@@ -51,6 +52,11 @@ type ChangeScreenshotNum = {
   screenshotCount: number | undefined;
 };
 
+type EditType = CellLocation & {
+  savedValue?: string;
+  changed?: boolean;
+};
+
 type CellLocation = {
   keyId: number;
   keyName: string;
@@ -66,7 +72,7 @@ export type TranslationsContextType = {
   hasMoreToFetch?: boolean;
   search?: string;
   selection: number[];
-  edit?: CellLocation;
+  edit?: EditType;
   selectedLanguages?: string[];
   view: ViewType;
 };
@@ -85,7 +91,7 @@ export const TranslationsContextProvider: React.FC<{
   projectId: number;
 }> = (props) => {
   const dispatchRef = useRef(null as any as (action: ActionType) => void);
-  const [edit, setEdit] = useState<CellLocation | undefined>(undefined);
+  const [edit, setEdit] = useState<EditType | undefined>(undefined);
   const [selection, setSelection] = useState<number[]>([]);
   const [fixedTranslations, setFixedTranslations] = useState(
     [] as KeyWithTranslationsModelType[]
@@ -250,7 +256,22 @@ export const TranslationsContextProvider: React.FC<{
         updateQuery({ search: action.payload });
         return;
       case 'SET_EDIT':
-        setEdit(action.payload);
+        if (edit?.changed) {
+          confirmation({
+            title: <T>translations_leave_save_confirmation</T>,
+            cancelButtonText: <T>back_to_editing</T>,
+            confirmButtonText: <T>discard_changes</T>,
+            onConfirm: () => setEdit(action.payload),
+          });
+        } else {
+          setEdit(action.payload);
+        }
+
+        return;
+      case 'UPDATE_EDIT':
+        if (edit) {
+          setEdit({ ...edit, ...action.payload });
+        }
         return;
       case 'TOGGLE_SELECT': {
         const newSelection = selection.includes(action.payload)

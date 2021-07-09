@@ -2,8 +2,8 @@ import React from 'react';
 import { IconButton, makeStyles } from '@material-ui/core';
 import { Done, Close, Edit } from '@material-ui/icons';
 
-import { useEditableCell } from './useEditableCell';
 import { Editor } from 'tg.component/editor/Editor';
+import { useEditableRow } from '../useEditableRow';
 import { CellPlain } from '../CellPlain';
 import { CellControls } from '../CellControls';
 
@@ -40,7 +40,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
     handleEdit,
     handleEditCancel,
     handleSave,
-  } = useEditableCell({ text, keyId, keyName, language });
+  } = useEditableRow({ keyId, keyName, defaultVal: text, language: language });
 
   return (
     <CellPlain
@@ -79,7 +79,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
         <>
           {text}
           <CellControls key="cell-controls" className={classes.controls}>
-            <IconButton onClick={handleEdit} size="small">
+            <IconButton onClick={() => handleEdit(language)} size="small">
               <Edit fontSize="small" />
             </IconButton>
           </CellControls>
