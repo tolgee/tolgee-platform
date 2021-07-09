@@ -1,27 +1,27 @@
 import { useState, useEffect } from 'react';
 
-export const useResize = (myRef) => {
+export const useResize = (myRef, dataReady) => {
   const [width, setWidth] = useState(undefined);
+  const [height, setHeight] = useState(undefined);
 
   const handleResize = () => {
     setWidth(myRef.current.offsetWidth);
+    setHeight(myRef.current.offsetHeight);
   };
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
 
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [myRef]);
-
-  useEffect(() => {
     if (myRef.current) {
       handleResize();
     }
-  });
 
-  return { width: width || 0 };
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [myRef, dataReady]);
+
+  return { width: width || 0, height: height || 0 };
 };
 
 export const resizeColumn = (
