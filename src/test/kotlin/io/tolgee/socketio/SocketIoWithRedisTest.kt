@@ -23,7 +23,6 @@ class SocketIoWithRedisTest : AbstractSocketIoTest() {
   companion object {
     const val SECONDARY_SOCKET_SERVER_PORT = 19091
 
-
     val redisRunner = DockerContainerRunner(
       image = "redis:6",
       expose = mapOf("56379" to "6379"),
@@ -42,7 +41,7 @@ class SocketIoWithRedisTest : AbstractSocketIoTest() {
   @Autowired
   lateinit var redissonClient: RedissonClient
 
-  @AfterClass
+  @AfterClass(alwaysRun = true)
   fun cleanup() {
     redisRunner.stop()
   }
@@ -56,11 +55,32 @@ class SocketIoWithRedisTest : AbstractSocketIoTest() {
 
   @Test
   fun `event is dispatched on key edit`() {
-    assertNotified("key_modified", {
-      keyService.edit(key, "name edited")
-    }, {
-      it
-    })
+    assertKeyModify()
+  }
+
+  @Test
+  fun `event is dispatched on key delete`() {
+    assertKeyDelete()
+  }
+
+  @Test
+  fun `event is dispatched on key create`() {
+    assertKeyCreate()
+  }
+
+  @Test
+  fun `event is dispatched on translation edit`() {
+    assertTranslationModify()
+  }
+
+  @Test
+  fun `event is dispatched on translation delete`() {
+    assertTranslationDelete()
+  }
+
+  @Test
+  fun `event is dispatched on translation create`() {
+    assertTranslationCreate()
   }
 
   private fun runSecondarySocketIoServer() {

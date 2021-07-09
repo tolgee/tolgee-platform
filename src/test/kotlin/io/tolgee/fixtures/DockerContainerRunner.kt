@@ -42,7 +42,7 @@ class DockerContainerRunner(
 
   private fun String.runCommand(
     workingDir: File = File("."),
-    timeoutAmount: Long = 60,
+    timeoutAmount: Long = 120,
     timeoutUnit: TimeUnit = TimeUnit.SECONDS
   ): String? = runCatching {
     ProcessBuilder("\\s".toRegex().split(this))
