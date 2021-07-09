@@ -106,8 +106,7 @@ export const TranslationsContextProvider: React.FC<{
   const [query, setQuery] = useState({
     search: '',
     size: PAGE_SIZE,
-    page: 0,
-    sort: ['key'],
+    sort: ['keyName'],
     languages: undefined as string[] | undefined,
   });
 
@@ -119,13 +118,12 @@ export const TranslationsContextProvider: React.FC<{
     options: {
       keepPreviousData: true,
       getNextPageParam: (lastPage) => {
-        const newPage = Number(lastPage.page?.number) + 1;
-        if (Number(lastPage.page?.totalPages) > newPage) {
+        if (lastPage.nextCursor) {
           return {
             path,
             query: {
               ...query,
-              page: newPage,
+              cursor: lastPage.nextCursor,
             },
           };
         }

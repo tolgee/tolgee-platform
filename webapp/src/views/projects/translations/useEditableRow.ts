@@ -26,9 +26,11 @@ export const useEditableRow = ({
   language,
 }: Props) => {
   const edit = useContextSelector(TranslationsContext, (v) => {
-    // in case of null, listen for whole row
+    // in case of null, listen for all languages
     if (language === null) {
-      return v.edit?.keyId === keyId ? v.edit : undefined;
+      return v.edit?.keyId === keyId && v.edit.language !== undefined
+        ? v.edit
+        : undefined;
     } else {
       // otherwise identify language or keyName (in case of undefined)
       return v.edit?.keyId === keyId && v.edit.language === language
@@ -52,7 +54,7 @@ export const useEditableRow = ({
     if (isEditing) {
       setValue(edit?.savedValue || originalValue);
     }
-  }, [isEditing]);
+  }, [isEditing, originalValue]);
 
   const handleEdit = (language?: string) => {
     dispatch({
@@ -84,11 +86,11 @@ export const useEditableRow = ({
 
   useEffect(() => {
     const isChanged = originalValue !== value;
-    // let context know if value is different from original
-    if (isEditing && edit?.changed !== isChanged) {
+    // let context know, that something has changed
+    if (edit && Boolean(edit?.changed) !== isChanged) {
       dispatch({ type: 'UPDATE_EDIT', payload: { changed: isChanged } });
     }
-  }, [edit, value, originalValue]);
+  }, [originalValue, edit?.changed, value]);
 
   const valueRef = useRef(isEditing ? value : undefined);
 
