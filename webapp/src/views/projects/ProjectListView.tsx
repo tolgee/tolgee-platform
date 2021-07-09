@@ -19,10 +19,8 @@ export const ProjectListView = () => {
     url: '/v2/projects',
     method: 'get',
     query: {
-      pageable: {
-        page,
-        size: 20,
-      },
+      page,
+      size: 20,
       search,
     },
   });

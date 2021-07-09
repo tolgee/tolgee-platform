@@ -127,5 +127,4 @@ export type HateoasPaginatedData<ItemDataType> = {
 
 export type HateoasListData<ItemDataType> = {
   _embedded?: { [key: string]: ItemDataType[] };
-  _links?: components['schemas']['Links'];
 };

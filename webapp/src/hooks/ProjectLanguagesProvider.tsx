@@ -30,11 +30,9 @@ export const ProjectLanguagesProvider: FunctionComponent = (props) => {
     method: 'get',
     path: { projectId: projectDTO.id },
     query: {
-      pageable: {
-        page: 0,
-        size: 1000,
-        sort: ['tag'],
-      },
+      page: 0,
+      size: 1000,
+      sort: ['tag'],
     },
   });
 

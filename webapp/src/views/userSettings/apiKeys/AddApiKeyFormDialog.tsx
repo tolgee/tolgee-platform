@@ -46,7 +46,7 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
   const projects = useApiQuery({
     url: '/v2/projects',
     method: 'get',
-    query: { pageable: { size: 1000 } },
+    query: { size: 1000 },
   });
   const scopes = useApiQuery({
     url: '/api/apiKeys/availableScopes',

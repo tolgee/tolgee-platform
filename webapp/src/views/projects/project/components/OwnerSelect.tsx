@@ -19,9 +19,7 @@ const OwnerSelect = () => {
     url: '/v2/organizations',
     method: 'get',
     query: {
-      pageable: {
-        size: 100,
-      },
+      size: 100,
       params: {
         filterCurrentUserOwner: true,
       },

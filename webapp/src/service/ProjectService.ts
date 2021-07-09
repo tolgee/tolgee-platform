@@ -11,19 +11,24 @@ const http = container.resolve(ApiV1HttpService);
 
 const httpV2 = container.resolve(ApiV2HttpService);
 
+interface Pageable {
+  page: number;
+  size: number;
+}
+
 @singleton()
 export class ProjectService {
   constructor() {}
 
   public getV2Projects = async (
-    pageable: components['schemas']['Pageable']
+    pageable: Pageable
   ): Promise<components['schemas']['PagedModelProjectModel']> =>
     httpV2.get(`projects`, pageable);
 
   public getV2Users = async (
     projectId,
     search,
-    pageable: components['schemas']['Pageable']
+    pageable: Pageable
   ): Promise<components['schemas']['PagedModelUserAccountInProjectModel']> =>
     httpV2.get(`projects/${projectId}/users`, { ...pageable, search });
 

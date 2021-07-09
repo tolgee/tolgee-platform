@@ -15,6 +15,7 @@ declare namespace DataCy {
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |
         "global-confirmation-hard-mode-text-field" |
+        "global-editor" |
         "global-form-cancel-button" |
         "global-form-save-button" |
         "global-form-select" |
@@ -109,13 +110,18 @@ declare namespace DataCy {
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-item" |
         "screenshot-box" |
+        "translations-add-button" |
         "translations-add-key-dialog" |
         "translations-add-key-field" |
+        "translations-cell-cancel-button" |
+        "translations-cell-data" |
+        "translations-cell-edit-button" |
+        "translations-cell-save-button" |
+        "translations-cell-screenshots-button" |
         "translations-delete-button" |
-        "translations-editable-cell" |
-        "translations-editable-cell-editing" |
         "translations-language-select-form-control" |
         "translations-row-checkbox" |
+        "translations-table-cell" |
         "user-account-side-menu" |
         "user-organizations-settings-subtitle-link"
 }

@@ -1,11 +1,13 @@
 import { useCallback } from 'react';
 import {
   QueryClient,
+  useInfiniteQuery,
   useMutation,
   UseMutationOptions,
   useQuery,
   useQueryClient,
   UseQueryOptions,
+  UseInfiniteQueryOptions,
 } from 'react-query';
 import { container } from 'tsyringe';
 
@@ -18,6 +20,31 @@ import {
 } from './ApiSchemaHttpService';
 
 const apiHttpService = container.resolve(ApiSchemaHttpService);
+
+export const useApiInfiniteQuery = <
+  Url extends keyof paths,
+  Method extends keyof paths[Url]
+>(
+  props: {
+    url: Url;
+    method: Method;
+    fetchOptions?: RequestOptions;
+    options?: UseInfiniteQueryOptions<ResponseContent<Url, Method>>;
+  } & RequestParamsType<Url, Method>
+) => {
+  const { url, method, fetchOptions, options, ...request } = props;
+  return useInfiniteQuery<ResponseContent<Url, Method>, any>(
+    [url, (request as any)?.path, (request as any)?.query],
+    ({ pageParam }) => {
+      return apiHttpService.schemaRequest(
+        url,
+        method,
+        fetchOptions
+      )(pageParam || request);
+    },
+    options
+  );
+};
 
 export const useApiQuery = <
   Url extends keyof paths,
