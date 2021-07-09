@@ -30,6 +30,7 @@ class TranslationsViewBuilder(
   private lateinit var root: Root<Key>
   private lateinit var screenshotCountExpression: Expression<Long>
   private val havingConditions: MutableSet<Predicate> = HashSet()
+  private val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
 
   private fun <T> getBaseQuery(query: CriteriaQuery<T>): CriteriaQuery<T> {
     root = query.from(Key::class.java)
@@ -89,9 +90,13 @@ class TranslationsViewBuilder(
       languagesJoin.on(cb.equal(languagesJoin.get(Language_.tag), language.tag))
       val translations = root.join(Key_.translations, JoinType.LEFT)
       translations.on(cb.equal(translations.get(Translation_.language), languagesJoin))
-      selection[KeyWithTranslationsView::translations.name + "." + language.tag] = languagesJoin.get(Language_.tag)
-      selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::id.name] =
-        translations.get(Translation_.id)
+      val languageTag = languagesJoin.get(Language_.tag)
+      selection[KeyWithTranslationsView::translations.name + "." + language.tag] = languageTag
+      groupByExpressions.add(languageTag)
+      val translationId = translations.get(Translation_.id)
+      selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::id.name] = translationId
+      groupByExpressions.add(translationId)
+
       val translationTextField = translations.get(Translation_.text)
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::text.name] =
         translationTextField
@@ -171,7 +176,8 @@ class TranslationsViewBuilder(
       getCursorPredicate()?.let {
         query.where(it)
       }
-      query.groupBy(keyIdExpression)
+      val groupBy = listOf(keyIdExpression, *groupByExpressions.toTypedArray())
+      query.groupBy(groupBy)
       query.orderBy(orderList)
       return query
     }
