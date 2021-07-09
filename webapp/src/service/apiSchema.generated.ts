@@ -100,6 +100,18 @@ export interface paths {
     put: operations["setTranslations_2"];
     post: operations["createOrUpdateTranslations_2"];
   };
+  "/v2/slug/generate-project": {
+    post: operations["generateProjectSlug"];
+  };
+  "/api/address-part/generate-project": {
+    post: operations["generateProjectSlug_1"];
+  };
+  "/v2/slug/generate-organization": {
+    post: operations["generateOrganizationSlug"];
+  };
+  "/api/address-part/generate-organization": {
+    post: operations["generateOrganizationSlug_1"];
+  };
   "/v2/projects": {
     get: operations["getAll"];
     post: operations["createProject"];
@@ -136,18 +148,6 @@ export interface paths {
   "/api/organizations": {
     get: operations["getAll_6"];
     post: operations["create_7"];
-  };
-  "/v2/address-part/generate-project": {
-    post: operations["generateProjectSlug"];
-  };
-  "/api/address-part/generate-project": {
-    post: operations["generateProjectSlug_1"];
-  };
-  "/v2/address-part/generate-organization": {
-    post: operations["generateOrganizationSlug"];
-  };
-  "/api/address-part/generate-organization": {
-    post: operations["generateOrganizationSlug_1"];
   };
   "/api/user": {
     get: operations["getInfo"];
@@ -190,6 +190,18 @@ export interface paths {
   };
   "/api/apiKeys/edit": {
     post: operations["edit_4"];
+  };
+  "/v2/slug/validate-project/{slug}": {
+    get: operations["validateProjectSlug"];
+  };
+  "/api/address-part/validate-project/{slug}": {
+    get: operations["validateProjectSlug_1"];
+  };
+  "/v2/slug/validate-organization/{slug}": {
+    get: operations["validateOrganizationSlug"];
+  };
+  "/api/address-part/validate-organization/{slug}": {
+    get: operations["validateOrganizationSlug_1"];
   };
   "/v2/projects/{projectId}/users": {
     get: operations["getAllUsers"];
@@ -239,18 +251,6 @@ export interface paths {
   };
   "/api/organizations/{id}/projects": {
     get: operations["getAllProjects_3"];
-  };
-  "/v2/address-part/validate-project/{slug}": {
-    get: operations["validateProjectSlug"];
-  };
-  "/api/address-part/validate-project/{slug}": {
-    get: operations["validateProjectSlug_1"];
-  };
-  "/v2/address-part/validate-organization/{slug}": {
-    get: operations["validateOrganizationSlug"];
-  };
-  "/api/address-part/validate-organization/{slug}": {
-    get: operations["validateOrganizationSlug_1"];
   };
   "/api/public/verify_email/{userId}/{code}": {
     get: operations["verifyEmail"];
@@ -461,6 +461,10 @@ export interface components {
       currentName: string;
       newName: string;
     };
+    GenerateSlugDto: {
+      name: string;
+      oldSlug?: string;
+    };
     CreateProjectDTO: {
       name: string;
       languages: components["schemas"]["LanguageDto"][];
@@ -476,7 +480,7 @@ export interface components {
       name: string;
     };
     ErrorResponseBody: {
-      code?: string;
+      code: string;
       params?: { [key: string]: any }[];
     };
     ImportAddFilesResultModel: {
@@ -514,10 +518,6 @@ export interface components {
       id: number;
       filename: string;
       createdAt?: string;
-    };
-    GenerateSlugDto: {
-      name: string;
-      oldSlug?: string;
     };
     UserUpdateRequestDTO: {
       name: string;
@@ -567,13 +567,13 @@ export interface components {
       scopes: string[];
     };
     ApiKeyDTO: {
-      id?: number;
+      id: number;
       /** Resulting user's api key */
-      key?: string;
+      key: string;
       userName?: string;
-      projectId?: number;
-      projectName?: string;
-      scopes?: string[];
+      projectId: number;
+      projectName: string;
+      scopes: string[];
     };
     EditApiKeyDTO: {
       id: number;
@@ -670,7 +670,10 @@ export interface components {
         keys?: components["schemas"]["KeyWithTranslationsModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
+      /** Provided languages data */
       selectedLanguages: components["schemas"]["LanguageModel"][];
+      /** Cursor to get next data */
+      nextCursor?: string;
     };
     PagedModelLanguageModel: {
       _embedded?: {
@@ -1290,7 +1293,11 @@ export interface operations {
   getTranslations: {
     parameters: {
       query: {
-        /** Languages to be contained in response */
+        /**
+         * Languages to be contained in response.
+         *
+         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
+         */
         languages?: string[];
         /** String to search in key name or translation text */
         search?: string;
@@ -1310,6 +1317,8 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
+        /** Cursor to get next data */
+        cursor?: string;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -1963,6 +1972,114 @@ export interface operations {
       };
     };
   };
+  generateProjectSlug: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateSlugDto"];
+      };
+    };
+  };
+  generateProjectSlug_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateSlugDto"];
+      };
+    };
+  };
+  generateOrganizationSlug: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateSlugDto"];
+      };
+    };
+  };
+  generateOrganizationSlug_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateSlugDto"];
+      };
+    };
+  };
   getAll: {
     parameters: {
       query: {
@@ -2497,114 +2614,6 @@ export interface operations {
       };
     };
   };
-  generateProjectSlug: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
-  generateProjectSlug_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
-  generateOrganizationSlug: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
-  generateOrganizationSlug_1: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "application/json": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GenerateSlugDto"];
-      };
-    };
-  };
   getInfo: {
     responses: {
       /** OK */
@@ -3005,6 +3014,114 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["EditApiKeyDTO"];
+      };
+    };
+  };
+  validateProjectSlug: {
+    parameters: {
+      path: {
+        slug: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  validateProjectSlug_1: {
+    parameters: {
+      path: {
+        slug: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  validateOrganizationSlug: {
+    parameters: {
+      path: {
+        slug: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  validateOrganizationSlug_1: {
+    parameters: {
+      path: {
+        slug: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
       };
     };
   };
@@ -3542,114 +3659,6 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelProjectModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  validateProjectSlug: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": boolean;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  validateProjectSlug_1: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": boolean;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  validateOrganizationSlug: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": boolean;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  validateOrganizationSlug_1: {
-    parameters: {
-      path: {
-        slug: string;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": boolean;
         };
       };
       /** Bad Request */
