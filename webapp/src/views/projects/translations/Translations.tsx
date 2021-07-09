@@ -18,6 +18,7 @@ export const Translations = () => {
     TranslationsContext,
     (v) => v.isFetching
   );
+  const view = useContextSelector(TranslationsContext, (v) => v.view);
 
   return (
     <BaseView
@@ -43,7 +44,7 @@ export const Translations = () => {
       }
     >
       <TranslationsHeader />
-      <TranslationsTable />
+      {view === 'TABLE' ? <TranslationsTable /> : null}
     </BaseView>
   );
 };

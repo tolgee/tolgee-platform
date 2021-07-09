@@ -33,7 +33,11 @@ type ActionType =
   | { type: 'CHANGE_FIELD'; payload: ChangeValueType }
   | { type: 'FETCH_MORE' }
   | { type: 'SELECT_LANGUAGES'; payload: string[] | undefined }
-  | { type: 'UPDATE_SCREENSHOT_COUNT'; payload: ChangeScreenshotNum };
+  | { type: 'UPDATE_SCREENSHOT_COUNT'; payload: ChangeScreenshotNum }
+  | { type: 'CHANGE_VIEW'; payload: ViewType }
+  | { type: 'UPDATE_LANGUAGES' };
+
+export type ViewType = 'TABLE' | 'LIST';
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
@@ -64,6 +68,7 @@ export type TranslationsContextType = {
   selection: number[];
   edit?: CellLocation;
   selectedLanguages?: string[];
+  view: ViewType;
 };
 
 // @ts-ignore
@@ -85,6 +90,8 @@ export const TranslationsContextProvider: React.FC<{
   const [fixedTranslations, setFixedTranslations] = useState(
     [] as KeyWithTranslationsModelType[]
   );
+  const [view, setView] = useState('TABLE' as ViewType);
+
   const path = useMemo(
     () => ({ projectId: props.projectId }),
     [props.projectId]
@@ -143,6 +150,7 @@ export const TranslationsContextProvider: React.FC<{
     setSelection([]);
     // force refetch from first page
     translations.remove();
+    translations.refetch();
   };
 
   const languages = useApiQuery({
@@ -267,12 +275,18 @@ export const TranslationsContextProvider: React.FC<{
       case 'SELECT_LANGUAGES':
         updateQuery({ languages: action.payload });
         return;
+      case 'UPDATE_LANGUAGES':
+        updateQuery({});
+        return;
       case 'UPDATE_SCREENSHOT_COUNT':
         setFixedTranslations(
           updateTranslationKey(fixedTranslations, action.payload.keyId, {
             screenshotCount: action.payload.screenshotCount,
           })
         );
+        return;
+      case 'CHANGE_VIEW':
+        setView(action.payload);
         return;
     }
   };
@@ -307,6 +321,7 @@ export const TranslationsContextProvider: React.FC<{
           selectedLanguages:
             query.languages ||
             translations.data?.pages[0]?.selectedLanguages.map((l) => l.tag),
+          view,
         }}
       >
         {props.children}
