@@ -1,12 +1,12 @@
 import { useMemo, useRef, useCallback, useEffect, useState } from 'react';
-import { useContextSelector } from 'use-context-selector';
-import { makeStyles, Box, CircularProgress } from '@material-ui/core';
 import ReactList from 'react-list';
+import { makeStyles, Box, CircularProgress } from '@material-ui/core';
+import { useContextSelector } from 'use-context-selector';
 
 import {
   TranslationsContext,
   useTranslationsDispatch,
-} from './TranslationsContext';
+} from '../TranslationsContext';
 import { CellData } from './CellData';
 import { resizeColumn, useResize } from './tableTools';
 import { ColumnResizer } from './ColumnResizer';
