@@ -18,19 +18,16 @@ import { useConfig } from 'tg.hooks/useConfig';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { MessageService } from 'tg.service/MessageService';
-import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { ProjectPermissionType } from 'tg.service/response.types';
 
 import { ScreenshotDetail } from './ScreenshotDetail';
 import { ScreenshotDropzone } from './ScreenshotDropzone';
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
-
-type KeyTranslationsDTO =
-  components['schemas']['KeyWithTranslationsResponseDto'];
+import { useTranslationsDispatch } from '../TranslationsContext';
 
 export interface ScreenshotGalleryProps {
-  data: KeyTranslationsDTO;
+  keyId: number;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -69,20 +66,18 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const classes = useStyles({});
   const config = useConfig();
   const project = useProject();
+  const dispatch = useTranslationsDispatch();
 
   const screenshotsLoadable = useApiQuery({
-    url: '/api/project/{projectId}/screenshots/get',
-    method: 'post',
-    path: { projectId: project.id },
-    content: { 'application/json': { key: props.data!.name! } },
+    url: '/v2/projects/{projectId}/keys/{keyId}/screenshots',
+    method: 'get',
+    path: { projectId: project.id, keyId: props.keyId },
   });
 
   const uploadLoadable = useApiMutation({
-    url: '/api/project/{projectId}/screenshots',
+    url: '/v2/projects/{projectId}/keys/{keyId}/screenshots',
     method: 'post',
   });
-  //   (s) => s.loadables.uploadScreenshot
-  // );
 
   const [detailFileName, setDetailFileName] = useState(null as string | null);
 
@@ -159,8 +154,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
         files.map((file) =>
           uploadLoadable
             .mutateAsync({
-              path: { projectId: project.id },
-              query: { key: props!.data!.name! },
+              path: { projectId: project.id, keyId: props.keyId },
               content: {
                 'multipart/form-data': {
                   screenshot: file as any,
@@ -214,6 +208,19 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (screenshotsLoadable.data) {
+      dispatch({
+        type: 'UPDATE_SCREENSHOT_COUNT',
+        payload: {
+          keyId: props.keyId,
+          screenshotCount:
+            screenshotsLoadable.data._embedded?.screenshots?.length,
+        },
+      });
+    }
+  }, [screenshotsLoadable.data?._embedded?.screenshots?.length]);
+
   function onFileSelected(e: SyntheticEvent) {
     const files = (e.target as HTMLInputElement).files;
     if (!files) {
@@ -254,9 +261,10 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
       <ScreenshotDropzone validateAndUpload={validateAndUpload}>
         {screenshotsLoadable.isLoading || !screenshotsLoadable.data ? (
           <BoxLoading />
-        ) : screenshotsLoadable.data.length > 0 || uploadLoadable.isLoading ? (
+        ) : Number(screenshotsLoadable.data?._embedded?.screenshots?.length) >
+            0 || uploadLoadable.isLoading ? (
           <Box display="flex" flexWrap="wrap" overflow="visible">
-            {screenshotsLoadable.data.map((s) => (
+            {screenshotsLoadable.data?._embedded?.screenshots?.map((s) => (
               <ScreenshotThumbnail
                 key={s.id}
                 onClick={() => setDetailFileName(s.filename)}

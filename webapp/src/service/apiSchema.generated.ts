@@ -42,13 +42,24 @@ export interface paths {
   "/v2/projects/{projectId}/import/apply": {
     put: operations["applyImport"];
   };
+  "/v2/projects/{projectId}/translations/{translationId}/set-state/{state}": {
+    put: operations["setTranslationState"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}/set-state/{state}": {
+    put: operations["setState"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
+    get: operations["get_1"];
+    put: operations["update"];
+    delete: operations["delete_2"];
+  };
   "/v2/projects/{projectId}/translations": {
     get: operations["getTranslations"];
     put: operations["setTranslations"];
     post: operations["createOrUpdateTranslations"];
   };
   "/v2/projects/{projectId}/languages/{languageId}": {
-    get: operations["get_1"];
+    get: operations["get_3"];
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_1"];
   };
@@ -71,19 +82,19 @@ export interface paths {
     put: operations["inviteUser_2"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_5"];
-    put: operations["update"];
-    delete: operations["delete_2"];
+    get: operations["get_7"];
+    put: operations["update_2"];
+    delete: operations["delete_4"];
   };
   "/api/organizations/{id}": {
-    get: operations["get_6"];
-    put: operations["update_1"];
-    delete: operations["delete_3"];
+    get: operations["get_8"];
+    put: operations["update_3"];
+    delete: operations["delete_5"];
   };
   "/api/project/{projectId}/keys": {
     put: operations["edit_2"];
-    post: operations["create_7"];
-    delete: operations["delete_6"];
+    post: operations["create_9"];
+    delete: operations["delete_8"];
   };
   "/api/project/{projectId}/translations": {
     put: operations["setTranslations_2"];
@@ -106,8 +117,12 @@ export interface paths {
   "/v2/projects/{projectId}/import/with-streaming-response": {
     post: operations["addFilesStreaming"];
   };
-  "/v2/projects/{projectId}/languages": {
+  "/v2/projects/{projectId}/translations/{translationId}/comments": {
     get: operations["getAll_1"];
+    post: operations["create_4"];
+  };
+  "/v2/projects/{projectId}/languages": {
+    get: operations["getAll_3"];
     post: operations["createLanguage"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
@@ -115,12 +130,12 @@ export interface paths {
     post: operations["uploadScreenshot_1"];
   };
   "/v2/organizations": {
-    get: operations["getAll_3"];
-    post: operations["create_4"];
+    get: operations["getAll_5"];
+    post: operations["create_6"];
   };
   "/api/organizations": {
-    get: operations["getAll_4"];
-    post: operations["create_5"];
+    get: operations["getAll_6"];
+    post: operations["create_7"];
   };
   "/v2/address-part/generate-project": {
     post: operations["generateProjectSlug"];
@@ -161,7 +176,7 @@ export interface paths {
     post: operations["editDeprecated"];
   };
   "/api/project/{projectId}/keys/create": {
-    post: operations["create_6"];
+    post: operations["create_8"];
   };
   "/api/project/{projectId}/screenshots/get": {
     post: operations["getKeyScreenshots_1"];
@@ -171,7 +186,7 @@ export interface paths {
   };
   "/api/apiKeys": {
     get: operations["allByUser"];
-    post: operations["create_10"];
+    post: operations["create_12"];
   };
   "/api/apiKeys/edit": {
     post: operations["edit_4"];
@@ -202,10 +217,10 @@ export interface paths {
     get: operations["getAllProjects_1"];
   };
   "/v2/organizations/{slug}": {
-    get: operations["get_3"];
+    get: operations["get_5"];
   };
   "/api/organizations/{slug}": {
-    get: operations["get_4"];
+    get: operations["get_6"];
   };
   "/v2/organizations/{organizationId}/invitations": {
     get: operations["getInvitations"];
@@ -251,7 +266,7 @@ export interface paths {
   };
   "/api/project/{projectId}/keys/{id}": {
     get: operations["getDeprecated"];
-    delete: operations["delete_4"];
+    delete: operations["delete_6"];
   };
   "/api/project/{projectId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
@@ -299,7 +314,7 @@ export interface paths {
     delete: operations["deleteInvitation"];
   };
   "/api/apiKeys/{key}": {
-    delete: operations["delete_8"];
+    delete: operations["delete_10"];
   };
 }
 
@@ -360,6 +375,36 @@ export interface components {
     ProjectInviteUserDto: {
       type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
+    TranslationModel: {
+      /** Id of translation record */
+      id: number;
+      /** Translation text */
+      text?: string;
+      /** State of translation */
+      state:
+        | "UNTRANSLATED"
+        | "MACHINE_TRANSLATED"
+        | "TRANSLATED"
+        | "REVIEWED"
+        | "NEEDS_REVIEW";
+    };
+    TranslationCommentModel: {
+      /** Id of translation comment record */
+      id: number;
+      /** Text of comment */
+      text: string;
+      /** State of translation */
+      state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
+      author: components["schemas"]["UserAccountModel"];
+      /** Date when it was created */
+      createdAt: string;
+      /** Date when it was updated */
+      updatedAt: string;
+    };
+    TranslationCommentDto: {
+      text: string;
+      state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
+    };
     SetTranslationsWithKeyDto: {
       /** Key name to set translations for */
       key: string;
@@ -375,11 +420,6 @@ export interface components {
       translations: {
         [key: string]: components["schemas"]["TranslationModel"];
       };
-    };
-    /** Translations object containing values updated in this request */
-    TranslationModel: {
-      id: number;
-      text?: string;
     };
     LanguageDto: {
       /** Language name in english */
@@ -607,6 +647,12 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    PagedModelTranslationCommentModel: {
+      _embedded?: {
+        translationComments?: components["schemas"]["TranslationCommentModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     KeyWithTranslationsModel: {
       /** Id of key record */
       keyId: number;
@@ -619,11 +665,12 @@ export interface components {
         [key: string]: components["schemas"]["TranslationModel"];
       };
     };
-    PagedModelKeyWithTranslationsModel: {
+    KeysWithTranslationsPageModel: {
       _embedded?: {
         keys?: components["schemas"]["KeyWithTranslationsModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
+      selectedLanguages: components["schemas"]["LanguageModel"][];
     };
     PagedModelLanguageModel: {
       _embedded?: {
@@ -735,6 +782,18 @@ export interface operations {
           "*/*": components["schemas"]["ProjectModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   editProject: {
@@ -748,6 +807,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["ProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -766,6 +837,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   setUsersPermissions: {
@@ -779,6 +862,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   revokePermission: {
@@ -791,6 +886,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   edit: {
@@ -805,6 +912,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["KeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -827,6 +946,18 @@ export interface operations {
           "*/*": string;
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -845,6 +976,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   resolveTranslationSetKeepExisting: {
@@ -858,6 +1001,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   resolveTranslationSetOverride_1: {
@@ -870,6 +1025,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   resolveTranslationSetKeepExisting_1: {
@@ -882,6 +1049,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   selectExistingLanguage: {
@@ -895,6 +1074,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   resetExistingLanguage: {
@@ -907,6 +1098,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   applyImport: {
@@ -921,6 +1124,167 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setTranslationState: {
+    parameters: {
+      path: {
+        translationId: number;
+        state:
+          | "UNTRANSLATED"
+          | "MACHINE_TRANSLATED"
+          | "TRANSLATED"
+          | "REVIEWED"
+          | "NEEDS_REVIEW";
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setState: {
+    parameters: {
+      path: {
+        commentId: number;
+        state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  get_1: {
+    parameters: {
+      path: {
+        translationId: number;
+        commentId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  update: {
+    parameters: {
+      path: {
+        commentId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TranslationCommentDto"];
+      };
+    };
+  };
+  delete_2: {
+    parameters: {
+      path: {
+        commentId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getTranslations: {
@@ -961,7 +1325,19 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelKeyWithTranslationsModel"];
+          "*/*": components["schemas"]["KeysWithTranslationsPageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -977,6 +1353,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["SetTranslationsResponseModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -999,6 +1387,18 @@ export interface operations {
           "*/*": components["schemas"]["SetTranslationsResponseModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1006,7 +1406,7 @@ export interface operations {
       };
     };
   };
-  get_1: {
+  get_3: {
     parameters: {
       path: {
         languageId: number;
@@ -1018,6 +1418,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["LanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1034,6 +1446,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["LanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1053,6 +1477,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   setUserRole: {
@@ -1065,6 +1501,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1082,6 +1530,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1098,6 +1558,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   leaveOrganization_1: {
@@ -1109,6 +1581,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   inviteUser_1: {
@@ -1122,6 +1606,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["OrganizationInvitationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1144,6 +1640,18 @@ export interface operations {
           "*/*": components["schemas"]["OrganizationInvitationModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1151,7 +1659,7 @@ export interface operations {
       };
     };
   };
-  get_5: {
+  get_7: {
     parameters: {
       path: {
         id: number;
@@ -1164,9 +1672,21 @@ export interface operations {
           "*/*": components["schemas"]["OrganizationModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
-  update: {
+  update_2: {
     parameters: {
       path: {
         id: number;
@@ -1179,50 +1699,16 @@ export interface operations {
           "*/*": components["schemas"]["OrganizationModel"];
         };
       };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["OrganizationDto"];
-      };
-    };
-  };
-  delete_2: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-  };
-  get_6: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
+      /** Bad Request */
+      400: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "*/*": string;
         };
       };
-    };
-  };
-  update_1: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
+      /** Not Found */
+      404: {
         content: {
-          "*/*": components["schemas"]["OrganizationModel"];
+          "*/*": string;
         };
       };
     };
@@ -1232,7 +1718,7 @@ export interface operations {
       };
     };
   };
-  delete_3: {
+  delete_4: {
     parameters: {
       path: {
         id: number;
@@ -1241,6 +1727,100 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  get_8: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  update_3: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["OrganizationDto"];
+      };
+    };
+  };
+  delete_5: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   edit_2: {
@@ -1252,6 +1832,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1259,7 +1851,7 @@ export interface operations {
       };
     };
   };
-  create_7: {
+  create_9: {
     parameters: {
       path: {
         projectId: number;
@@ -1268,6 +1860,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1275,7 +1879,7 @@ export interface operations {
       };
     };
   };
-  delete_6: {
+  delete_8: {
     parameters: {
       path: {
         projectId: number;
@@ -1284,6 +1888,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1300,6 +1916,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1316,6 +1944,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1342,6 +1982,18 @@ export interface operations {
           "application/hal+json": components["schemas"]["PagedModelProjectModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   createProject: {
@@ -1350,6 +2002,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["ProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1372,6 +2036,18 @@ export interface operations {
           "*/*": components["schemas"]["KeyModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1390,6 +2066,18 @@ export interface operations {
       201: {
         content: {
           "*/*": components["schemas"]["KeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1412,6 +2100,18 @@ export interface operations {
           "*/*": components["schemas"]["ImportAddFilesResultModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1430,6 +2130,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   addFilesStreaming: {
@@ -1445,6 +2157,18 @@ export interface operations {
           "*/*": components["schemas"]["StreamingResponseBody"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1455,6 +2179,75 @@ export interface operations {
     };
   };
   getAll_1: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelTranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  create_4: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["TranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TranslationCommentDto"];
+      };
+    };
+  };
+  getAll_3: {
     parameters: {
       path: {
         projectId: number;
@@ -1475,6 +2268,18 @@ export interface operations {
           "*/*": components["schemas"]["PagedModelLanguageModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   createLanguage: {
@@ -1488,6 +2293,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["LanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1511,6 +2328,18 @@ export interface operations {
           "*/*": components["schemas"]["CollectionModelScreenshotModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   uploadScreenshot_1: {
@@ -1527,6 +2356,18 @@ export interface operations {
           "*/*": components["schemas"]["ScreenshotModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1536,7 +2377,7 @@ export interface operations {
       };
     };
   };
-  getAll_3: {
+  getAll_5: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -1555,14 +2396,38 @@ export interface operations {
           "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
-  create_4: {
+  create_6: {
     responses: {
       /** OK */
       200: {
         content: {
           "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1572,7 +2437,7 @@ export interface operations {
       };
     };
   };
-  getAll_4: {
+  getAll_6: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -1591,14 +2456,38 @@ export interface operations {
           "application/hal+json": components["schemas"]["PagedModelOrganizationModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
-  create_5: {
+  create_7: {
     responses: {
       /** OK */
       200: {
         content: {
           "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1616,6 +2505,18 @@ export interface operations {
           "application/json": string;
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1629,6 +2530,18 @@ export interface operations {
       200: {
         content: {
           "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1646,6 +2559,18 @@ export interface operations {
           "application/json": string;
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1659,6 +2584,18 @@ export interface operations {
       200: {
         content: {
           "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1676,12 +2613,36 @@ export interface operations {
           "*/*": components["schemas"]["UserResponseDTO"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   updateUser: {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1695,6 +2656,18 @@ export interface operations {
       200: {
         content: {
           "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1712,6 +2685,18 @@ export interface operations {
           "*/*": { [key: string]: any };
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1723,6 +2708,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1734,6 +2731,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1747,6 +2756,18 @@ export interface operations {
       200: {
         content: {
           "*/*": { [key: string]: any };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1771,6 +2792,18 @@ export interface operations {
           "*/*": { [key: string]: string };
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1787,6 +2820,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1794,7 +2839,7 @@ export interface operations {
       };
     };
   };
-  create_6: {
+  create_8: {
     parameters: {
       path: {
         projectId: number;
@@ -1803,6 +2848,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1821,6 +2878,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["ScreenshotDTO"][];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1846,6 +2915,18 @@ export interface operations {
           "*/*": components["schemas"]["ScreenshotDTO"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1863,14 +2944,38 @@ export interface operations {
           "*/*": components["schemas"]["ApiKeyDTO"][];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
-  create_10: {
+  create_12: {
     responses: {
       /** OK */
       200: {
         content: {
           "*/*": components["schemas"]["ApiKeyDTO"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -1884,6 +2989,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
     requestBody: {
       content: {
@@ -1913,6 +3030,18 @@ export interface operations {
           "*/*": components["schemas"]["PagedModelUserAccountInProjectModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getImportResult: {
@@ -1936,6 +3065,18 @@ export interface operations {
           "*/*": components["schemas"]["PagedModelImportLanguageModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getImportLanguage: {
@@ -1952,6 +3093,18 @@ export interface operations {
           "*/*": components["schemas"]["ImportLanguageModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   deleteLanguage: {
@@ -1964,6 +3117,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getImportTranslations: {
@@ -1991,6 +3156,18 @@ export interface operations {
           "*/*": components["schemas"]["PagedModelImportTranslationModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getImportFileIssues: {
@@ -2015,6 +3192,18 @@ export interface operations {
           "*/*": components["schemas"]["PagedModelEntityModelImportFileIssueView"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getAllTranslations: {
@@ -2027,6 +3216,18 @@ export interface operations {
     responses: {
       /** OK */
       200: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
         content: {
           "*/*": string;
         };
@@ -2055,6 +3256,18 @@ export interface operations {
           "*/*": components["schemas"]["PagedModelProjectModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getAllProjects_1: {
@@ -2079,9 +3292,21 @@ export interface operations {
           "*/*": components["schemas"]["PagedModelProjectModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
-  get_3: {
+  get_5: {
     parameters: {
       path: {
         slug: string;
@@ -2094,9 +3319,21 @@ export interface operations {
           "*/*": components["schemas"]["OrganizationModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
-  get_4: {
+  get_6: {
     parameters: {
       path: {
         slug: string;
@@ -2107,6 +3344,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -2124,6 +3373,18 @@ export interface operations {
           "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getInvitations_1: {
@@ -2137,6 +3398,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -2163,6 +3436,18 @@ export interface operations {
           "*/*": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getAllUsers_2: {
@@ -2185,6 +3470,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelUserAccountWithOrganizationRoleModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -2211,6 +3508,18 @@ export interface operations {
           "*/*": components["schemas"]["PagedModelProjectModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getAllProjects_3: {
@@ -2235,6 +3544,18 @@ export interface operations {
           "*/*": components["schemas"]["PagedModelProjectModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   validateProjectSlug: {
@@ -2248,6 +3569,18 @@ export interface operations {
       200: {
         content: {
           "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -2265,6 +3598,18 @@ export interface operations {
           "*/*": boolean;
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   validateOrganizationSlug: {
@@ -2280,6 +3625,18 @@ export interface operations {
           "*/*": boolean;
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   validateOrganizationSlug_1: {
@@ -2293,6 +3650,18 @@ export interface operations {
       200: {
         content: {
           "*/*": boolean;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -2311,6 +3680,18 @@ export interface operations {
           "*/*": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   resetPasswordValidate: {
@@ -2323,6 +3704,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getPublicConfiguration: {
@@ -2331,6 +3724,18 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PublicConfigurationDTO"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -2352,6 +3757,18 @@ export interface operations {
           "*/*": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getDeprecated: {
@@ -2368,9 +3785,21 @@ export interface operations {
           "*/*": components["schemas"]["DeprecatedKeyDto"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
-  delete_4: {
+  delete_6: {
     parameters: {
       path: {
         id: number;
@@ -2380,6 +3809,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   doExportJsonZip: {
@@ -2393,6 +3834,18 @@ export interface operations {
       200: {
         content: {
           "application/zip": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -2410,6 +3863,18 @@ export interface operations {
           "application/zip": components["schemas"]["StreamingResponseBody"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getTranslations_2: {
@@ -2424,6 +3889,18 @@ export interface operations {
       200: {
         content: {
           "*/*": { [key: string]: { [key: string]: any } };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -2447,6 +3924,18 @@ export interface operations {
           "*/*": components["schemas"]["ViewDataResponseLinkedHashSetKeyWithTranslationsResponseDtoResponseParams"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getProjectInvitations: {
@@ -2462,6 +3951,18 @@ export interface operations {
           "*/*": components["schemas"]["InvitationDTO"][];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   acceptInvitation: {
@@ -2473,6 +3974,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getApiKeyScopes: {
@@ -2482,6 +3995,18 @@ export interface operations {
       200: {
         content: {
           "*/*": string[];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -2499,6 +4024,18 @@ export interface operations {
           "*/*": components["schemas"]["ApiKeyDTO"][];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   getScopes: {
@@ -2507,6 +4044,18 @@ export interface operations {
       200: {
         content: {
           "*/*": { [key: string]: string[] };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
         };
       };
     };
@@ -2521,6 +4070,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   deleteScreenshots_1: {
@@ -2533,6 +4094,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   removeUser: {
@@ -2545,6 +4118,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   removeUser_1: {
@@ -2557,6 +4142,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   deleteScreenshots_3: {
@@ -2569,6 +4166,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
   deleteInvitation: {
@@ -2580,9 +4189,21 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
-  delete_8: {
+  delete_10: {
     parameters: {
       path: {
         key: string;
@@ -2591,6 +4212,18 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
     };
   };
 }

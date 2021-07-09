@@ -3,21 +3,23 @@ import { useState, useEffect } from 'react';
 export const useResize = (myRef) => {
   const [width, setWidth] = useState(undefined);
 
+  const handleResize = () => {
+    setWidth(myRef.current.offsetWidth);
+  };
+
   useEffect(() => {
-    const handleResize = () => {
-      setWidth(myRef.current.offsetWidth);
-    };
-
-    if (width === undefined) {
-      handleResize();
-    }
-
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
     };
   }, [myRef]);
+
+  useEffect(() => {
+    if (myRef.current) {
+      handleResize();
+    }
+  });
 
   return { width: width || 0 };
 };
