@@ -1,4 +1,4 @@
-import { useMemo, useRef, useCallback, useEffect } from 'react';
+import { useMemo, useRef, useCallback, useEffect, useState } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { CircularProgress, Box, makeStyles } from '@material-ui/core';
 
@@ -7,42 +7,48 @@ import {
   useTranslationsDispatch,
 } from './TranslationsContext';
 import { Cell } from './Cell';
+import { resizeColumn, useResize } from './tableTools';
+import { ColumnResizer } from './ColumnResizer';
 
-const useStyles = makeStyles({
-  table: {
-    marginTop: 10,
-    width: '100%',
-    flexGrow: 0,
-  },
-  headerRow: {
-    display: 'flex',
-  },
-  headerCell: {
-    display: 'flex',
-    flexGrow: 1,
-    flexBasis: 0,
-    alignItems: 'stretch',
-    minWidth: '200px',
-  },
-  resizer: {
-    width: 3,
-    background: 'black',
-  },
-  dataRow: {
-    display: 'flex',
-  },
-  cell: {
-    boxSizing: 'border-box',
-    display: 'flex',
-    flexGrow: 1,
-    flexBasis: 0,
-    alignItems: 'stretch',
-    minWidth: '200px',
-    paddingRight: 5,
-  },
+const useStyles = makeStyles(() => {
+  return {
+    table: {
+      marginTop: 10,
+      width: '100%',
+      position: 'relative',
+    },
+    headerRow: {
+      display: 'flex',
+      position: 'relative',
+    },
+    resizer: {
+      width: 3,
+      background: 'black',
+    },
+    dataRow: {
+      display: 'flex',
+    },
+    headerCell: {
+      display: 'flex',
+      flexBasis: 1,
+      alignItems: 'stretch',
+      position: 'relative',
+    },
+    cell: {
+      boxSizing: 'border-box',
+      display: 'flex',
+      flexBasis: 1,
+      alignItems: 'stretch',
+      paddingRight: 5,
+      flexGrow: 0,
+      overflow: 'hidden',
+    },
+  };
 });
 
 export const TranslationsTable = () => {
+  const tableRef = useRef<HTMLDivElement>(null);
+
   const classes = useStyles();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -73,7 +79,7 @@ export const TranslationsTable = () => {
   const columns = useMemo(
     () => [
       { Header: 'Klíč', lang: undefined, accessor: (item) => item.keyName },
-      ...(languages?._embedded?.languages
+      ...(languages
         ?.filter((l) => data?.[0]?.translations[l.tag])
         .map((l) => ({
           Header: l.name,
@@ -83,6 +89,24 @@ export const TranslationsTable = () => {
     ],
     [translations, languages]
   );
+
+  const [columnSizes, setColumnSizes] = useState(columns.map(() => 1));
+
+  const { width } = useResize(tableRef);
+
+  const handleColumnResize = (i: number) => (size: number) => {
+    setColumnSizes(resizeColumn(columnSizes, i, size));
+  };
+
+  useEffect(() => {
+    const prevSizes =
+      columnSizes.length === columns.length
+        ? columnSizes
+        : columns.map(() => 1);
+    const previousWidth = prevSizes.reduce((a, b) => a + b, 0) || 1;
+    const newSizes = prevSizes.map((w) => (w / previousWidth) * (width || 1));
+    setColumnSizes(newSizes);
+  }, [width, columns]);
 
   const handleFetchMore = useCallback(
     (e) => {
@@ -108,22 +132,41 @@ export const TranslationsTable = () => {
   }, [handleFetchMore, containerRef]);
 
   return (
-    <div className={classes.table}>
+    <div className={classes.table} ref={tableRef}>
       <div className={classes.headerRow}>
         {columns.map((column, i) => (
-          <div key={i} className={classes.headerCell}>
+          <div
+            key={i}
+            className={classes.headerCell}
+            style={{ flexBasis: columnSizes[i] || 0 }}
+          >
             {column.Header}
           </div>
         ))}
       </div>
+      {columnSizes.slice(0, -1).map((w, i) => {
+        const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
+        return (
+          <ColumnResizer
+            key={i}
+            size={w}
+            left={left}
+            onResize={handleColumnResize(i)}
+          />
+        );
+      })}
 
       <div>
         {data.map((row) => {
           return (
             <div key={row.keyId} className={classes.dataRow}>
-              {columns.map((col) => {
+              {columns.map((col, i) => {
                 return (
-                  <div key={col.lang || 'key'} className={classes.cell}>
+                  <div
+                    key={col.lang || 'key'}
+                    className={classes.cell}
+                    style={{ flexBasis: columnSizes[i] || 0 }}
+                  >
                     <Cell
                       keyId={row.keyId}
                       keyName={row.keyName}

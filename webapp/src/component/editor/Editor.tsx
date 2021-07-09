@@ -3,6 +3,7 @@ import MonacoEditor, {
   BeforeMount,
   OnChange,
   OnMount,
+  loader,
 } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
 import completion from './icuCompletion';
@@ -11,6 +12,13 @@ import icuValidator from './icuValidator';
 import icuTheme from './icuTheme';
 import { makeStyles } from '@material-ui/core';
 import { useState } from 'react';
+import { useEffect } from 'react';
+
+loader.init().then((monaco) => {
+  monaco.languages.register({ id: 'icu' });
+  monaco.languages.setMonarchTokensProvider('icu', tokenizer);
+  monaco.editor.onDidCreateModel(icuValidator(monaco.editor));
+});
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -50,19 +58,22 @@ export const Editor = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const onSaveRef = useRef<typeof onSave>();
   onSaveRef.current = onSave;
+  const disposeRef = useRef<() => void>();
 
   const beforeMount: BeforeMount = (monaco) => {
-    monaco.languages.register({ id: 'icu' });
-    monaco.languages.setMonarchTokensProvider('icu', tokenizer);
-    monaco.languages.registerCompletionItemProvider(
+    const { dispose } = monaco.languages.registerCompletionItemProvider(
       'icu',
       completion({
         variables,
         enableSnippets: true,
       })
     );
-    monaco.editor.onDidCreateModel(icuValidator(monaco.editor));
+    disposeRef.current = dispose;
   };
+
+  useEffect(() => {
+    return () => disposeRef.current?.();
+  }, []);
 
   const onMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;

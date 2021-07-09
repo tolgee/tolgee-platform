@@ -20,7 +20,7 @@ import { useCallback } from 'react';
 
 const PAGE_SIZE = 60;
 
-type LanguagesType = components['schemas']['PagedModelLanguageModel'];
+type LanguagesType = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
 
@@ -31,7 +31,8 @@ type ActionType =
   | { type: 'SET_SEARCH'; payload: string }
   | { type: 'TOGGLE_SELECT'; payload: string }
   | { type: 'CHANGE_FIELD'; payload: ChangeValueType }
-  | { type: 'FETCH_MORE' };
+  | { type: 'FETCH_MORE' }
+  | { type: 'SELECT_LANGUAGES'; payload: string[] | undefined };
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
@@ -48,7 +49,7 @@ type CellLocation = {
 
 export type TranslationsContextType = {
   translations?: KeyWithTranslationsModelType[];
-  languages?: LanguagesType;
+  languages?: LanguagesType[];
   isLoading?: boolean;
   isFetching?: boolean;
   isFetchingMore?: boolean;
@@ -56,6 +57,7 @@ export type TranslationsContextType = {
   search?: string;
   selection: string[];
   edit?: CellLocation;
+  selectedLanguages?: string[];
 };
 
 // @ts-ignore
@@ -86,6 +88,7 @@ export const TranslationsContextProvider: React.FC<{
     size: PAGE_SIZE,
     page: 0,
     sort: ['key'],
+    languages: undefined as string[] | undefined,
   });
 
   const translations = useApiInfiniteQuery({
@@ -124,7 +127,11 @@ export const TranslationsContextProvider: React.FC<{
   });
 
   const updateQuery = (q: Partial<typeof query>) => {
-    setQuery({ ...query, ...q });
+    const newQuery = { ...query, ...q };
+    setQuery({
+      ...newQuery,
+      languages: newQuery.languages?.length ? newQuery.languages : undefined,
+    });
     setEdit(undefined);
     // force refetch from first page
     translations.remove();
@@ -240,7 +247,7 @@ export const TranslationsContextProvider: React.FC<{
         translations.fetchNextPage();
         return;
       case 'CHANGE_FIELD':
-        return mutateTranslation(action.payload)
+        mutateTranslation(action.payload)
           .then(() => {
             moveEditToDirection(action.payload.after);
           })
@@ -248,6 +255,10 @@ export const TranslationsContextProvider: React.FC<{
             const parsed = parseErrorResponse(e);
             parsed.forEach((error) => messaging.error(<T>{error}</T>));
           });
+        return;
+      case 'SELECT_LANGUAGES':
+        updateQuery({ languages: action.payload });
+        return;
     }
   };
 
@@ -262,7 +273,7 @@ export const TranslationsContextProvider: React.FC<{
       <TranslationsContext.Provider
         value={{
           translations: fixedTranslations,
-          languages: languages.data,
+          languages: languages.data?._embedded?.languages,
           isLoading: translations.isLoading || languages.isLoading,
           isFetching:
             translations.isFetching ||
@@ -274,6 +285,7 @@ export const TranslationsContextProvider: React.FC<{
           search: query.search,
           edit,
           selection,
+          selectedLanguages: query.languages,
         }}
       >
         {props.children}
