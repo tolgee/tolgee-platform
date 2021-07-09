@@ -4,7 +4,7 @@ import { IconButton, Checkbox, Box, makeStyles } from '@material-ui/core';
 import { Done, Close, Edit, CameraAlt } from '@material-ui/icons';
 
 import { Editor } from 'tg.component/editor/Editor';
-import { useEditableCell } from './TranslationsTable/useEditableCell';
+import { useEditableRow } from './useEditableRow';
 import {
   TranslationsContext,
   useTranslationsDispatch,
@@ -49,7 +49,12 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
     handleEdit,
     handleEditCancel,
     handleSave,
-  } = useEditableCell({ text, keyId, keyName });
+  } = useEditableRow({
+    keyId,
+    keyName,
+    defaultVal: keyName,
+    language: undefined,
+  });
 
   const isSelected = useContextSelector(TranslationsContext, (c) =>
     c.selection.includes(keyId)
@@ -116,7 +121,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
             </Box>
             <CellControls key="cell-controls">
               <IconButton
-                onClick={handleEdit}
+                onClick={() => handleEdit(undefined)}
                 size="small"
                 className={classes.controls}
               >
