@@ -8,6 +8,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { Navigation } from 'tg.component/navigation/Navigation';
 import { TranslationsTable } from './TranslationsTable/TranslationsTable';
 import { TranslationsHeader } from './TranslationsHeader';
+import { TranslationsList } from './TranslationsList/TranslationsList';
 
 export const Translations = () => {
   const t = useTranslate();
@@ -44,7 +45,7 @@ export const Translations = () => {
       }
     >
       <TranslationsHeader />
-      {view === 'TABLE' ? <TranslationsTable /> : null}
+      {view === 'TABLE' ? <TranslationsTable /> : <TranslationsList />}
     </BaseView>
   );
 };

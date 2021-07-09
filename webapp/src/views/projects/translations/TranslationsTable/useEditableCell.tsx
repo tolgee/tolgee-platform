@@ -5,7 +5,7 @@ import { DirectionType } from 'tg.component/editor/Editor';
 import {
   TranslationsContext,
   useTranslationsDispatch,
-} from './TranslationsContext';
+} from '../TranslationsContext';
 
 type Props = {
   text: string;

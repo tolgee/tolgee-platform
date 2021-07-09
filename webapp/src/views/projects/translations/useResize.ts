@@ -6,7 +6,7 @@ export const useResize = (myRef, dependency) => {
   const handleResize = () => {
     const newWidth = myRef.current?.offsetWidth;
     if (newWidth && width !== newWidth) {
-      setWidth(myRef.current.offsetWidth);
+      setWidth(newWidth);
     }
   };
 
@@ -21,7 +21,7 @@ export const useResize = (myRef, dependency) => {
       clearInterval(interval);
       window.removeEventListener('resize', handleResize);
     };
-  }, [dependency]);
+  }, []);
 
   return { width: width || 0 };
 };
@@ -29,12 +29,13 @@ export const useResize = (myRef, dependency) => {
 export const resizeColumn = (
   allSizes: number[],
   index: number,
-  newSize: number
+  newSize: number,
+  minSizeMult = 0.5
 ) => {
   const oldColumnSize = allSizes[index];
   let newColumnSize = newSize;
   const totalSize = allSizes.reduce((a, b) => a + b, 0);
-  const minSize = totalSize / allSizes.length / 2;
+  const minSize = (totalSize / allSizes.length) * minSizeMult;
   const columnsAfter = allSizes.slice(index + 1);
   const marginsAfter = columnsAfter.map((w) => w - minSize);
   const maxIncrease = marginsAfter.reduce((a, b) => a + b, 0);

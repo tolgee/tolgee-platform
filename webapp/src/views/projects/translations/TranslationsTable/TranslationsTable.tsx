@@ -8,12 +8,12 @@ import {
   useTranslationsDispatch,
 } from '../TranslationsContext';
 import { CellData } from './CellData';
-import { resizeColumn, useResize } from './tableTools';
-import { ColumnResizer } from './ColumnResizer';
-import { CellPlain } from './CellPlain';
+import { resizeColumn, useResize } from '../useResize';
+import { ColumnResizer } from '../ColumnResizer';
+import { CellPlain } from '../CellPlain';
 import { CellLanguage } from './CellLanguage';
 import { SortableHeading } from './SortableHeading';
-import { CellKey } from './CellKey';
+import { CellKey } from '../CellKey';
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.divider;

@@ -2,10 +2,10 @@ import React from 'react';
 import { IconButton, makeStyles } from '@material-ui/core';
 import { Done, Close, Edit } from '@material-ui/icons';
 
-import { useEditableCell } from '../useEditableCell';
+import { useEditableCell } from './useEditableCell';
 import { Editor } from 'tg.component/editor/Editor';
-import { CellPlain } from './CellPlain';
-import { CellControls } from './CellControls';
+import { CellPlain } from '../CellPlain';
+import { CellControls } from '../CellControls';
 
 const useStyles = makeStyles({
   cell: {
