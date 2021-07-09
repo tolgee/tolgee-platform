@@ -18,5 +18,6 @@ open class TolgeeProperties(
   var maxUploadFileSize: Int = 2048,
   val maxScreenshotsPerKey: Int = 20,
   var fileStorage: FileStorageProperties = FileStorageProperties(),
-  var frontEndUrl: String? = null
+  var frontEndUrl: String? = null,
+  var socketIo: SocketIoProperties = SocketIoProperties()
 )

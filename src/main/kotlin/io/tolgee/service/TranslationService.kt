@@ -22,6 +22,7 @@ import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.query_builders.TranslationsViewBuilder
 import io.tolgee.service.query_builders.TranslationsViewBuilderOld
+import io.tolgee.socketio.TranslationsSocketIoModule
 import org.hibernate.envers.AuditReaderFactory
 import org.hibernate.envers.query.AuditEntity
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,6 +40,7 @@ class TranslationService(
   private val translationRepository: TranslationRepository,
   private val entityManager: EntityManager,
   private val importService: ImportService,
+  private val translationsSocketIoModule: TranslationsSocketIoModule
 ) {
   @Autowired
   private lateinit var languageService: LanguageService
@@ -154,7 +156,14 @@ class TranslationService(
   }
 
   fun saveTranslation(translation: Translation): Translation {
-    return translationRepository.save(translation)
+    val wasCreated = translation.id == 0L
+    return translationRepository.save(translation).also {
+      if (wasCreated) {
+        translationsSocketIoModule.onTranslationsCreated(listOf(translation))
+      } else {
+        translationsSocketIoModule.onTranslationsModified(listOf(translation))
+      }
+    }
   }
 
   fun setForKey(key: Key, translations: Map<String, String?>): Map<String, Translation> {
@@ -167,11 +176,14 @@ class TranslationService(
     }.filterValues { it != null }.mapValues { it.value as Translation }
   }
 
-  fun deleteIfExists(key: Key, languageTag: String?) {
-    val language = languageService.findByTag(languageTag!!, key.project!!)
+  fun deleteIfExists(key: Key, languageTag: String) {
+    val language = languageService.findByTag(languageTag, key.project!!)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
     translationRepository.findOneByKeyAndLanguage(key, language)
-      .ifPresent { entity: Translation -> translationRepository.delete(entity) }
+      .ifPresent { entity: Translation ->
+        translationsSocketIoModule.onTranslationsDeleted(listOf(entity))
+        translationRepository.delete(entity)
+      }
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -220,6 +232,7 @@ class TranslationService(
 
   fun deleteAllByKeys(ids: Collection<Long>) {
     val translations = translationRepository.getAllByKeyIdIn(ids)
+    translationsSocketIoModule.onTranslationsDeleted(translations)
     deleteByIdIn(translations.map { it.id })
   }
 
@@ -227,8 +240,8 @@ class TranslationService(
     this.deleteAllByKeys(listOf(id))
   }
 
-  fun saveAll(entities: Iterable<Translation?>) {
-    translationRepository.saveAll(entities)
+  fun saveAll(entities: Iterable<Translation>) {
+    entities.map { saveTranslation(it) }
   }
 
   fun setState(translation: Translation, state: TranslationState): Translation {

@@ -50,7 +50,7 @@ class ProjectService constructor(
   lateinit var importService: ImportService
 
   @Transactional
-  fun get(id: Long): Optional<Project?> {
+  fun get(id: Long): Optional<Project> {
     return projectRepository.findById(id)
   }
 

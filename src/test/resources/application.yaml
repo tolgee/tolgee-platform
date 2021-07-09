@@ -1,4 +1,8 @@
 spring:
+  data:
+    redis:
+      repositories:
+        enabled: false
   main:
     allow-bean-definition-overriding: true
   datasource:
@@ -16,6 +20,8 @@ tolgee:
     create-initial-user: false
   internal:
     populate: false
+  socket-io:
+    port: 19090
 #logging:
 #  level:
 #    org.springframework.orm.jpa: DEBUG
