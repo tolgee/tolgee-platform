@@ -38,10 +38,8 @@ export const useEditableRow = ({
   });
 
   const originalValue =
-    (edit &&
-      (edit.savedValue ||
-        (edit.language && translations?.[edit.language]?.text) ||
-        defaultVal)) ||
+    (edit && edit.language && translations?.[edit.language]?.text) ||
+    defaultVal ||
     '';
 
   const [value, setValue] = useState(originalValue);
@@ -52,7 +50,7 @@ export const useEditableRow = ({
 
   useEffect(() => {
     if (isEditing) {
-      setValue(originalValue);
+      setValue(edit?.savedValue || originalValue);
     }
   }, [isEditing]);
 
