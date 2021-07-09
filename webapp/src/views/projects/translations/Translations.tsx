@@ -6,7 +6,7 @@ import { BaseView } from 'tg.component/layout/BaseView';
 import { TranslationsContext } from './TranslationsContext';
 import { useProject } from 'tg.hooks/useProject';
 import { Navigation } from 'tg.component/navigation/Navigation';
-import { TranslationsTable } from './TranslationsTable';
+import { TranslationsTable } from './TranslationsTable/TranslationsTable';
 import { TranslationsHeader } from './TranslationsHeader';
 
 export const Translations = () => {

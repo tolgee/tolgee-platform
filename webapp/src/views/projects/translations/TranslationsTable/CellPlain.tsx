@@ -1,5 +1,5 @@
-import { Box, BoxProps } from '@material-ui/core';
 import React from 'react';
+import { Box, BoxProps } from '@material-ui/core';
 
 type Props = {
   onClick?: React.MouseEventHandler<HTMLElement>;
