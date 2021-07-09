@@ -1,27 +1,29 @@
 import { useState, useEffect } from 'react';
 
-export const useResize = (myRef, dataReady) => {
+export const useResize = (myRef, dependency) => {
   const [width, setWidth] = useState(undefined);
-  const [height, setHeight] = useState(undefined);
 
   const handleResize = () => {
-    setWidth(myRef.current.offsetWidth);
-    setHeight(myRef.current.offsetHeight);
+    const newWidth = myRef.current?.offsetWidth;
+    if (newWidth && width !== newWidth) {
+      setWidth(myRef.current.offsetWidth);
+    }
   };
 
   useEffect(() => {
+    handleResize();
+  }, [dependency]);
+
+  useEffect(() => {
     window.addEventListener('resize', handleResize);
-
-    if (myRef.current) {
-      handleResize();
-    }
-
+    const interval = setInterval(handleResize, 1000);
     return () => {
+      clearInterval(interval);
       window.removeEventListener('resize', handleResize);
     };
-  }, [myRef, dataReady]);
+  }, [dependency]);
 
-  return { width: width || 0, height: height || 0 };
+  return { width: width || 0 };
 };
 
 export const resizeColumn = (
