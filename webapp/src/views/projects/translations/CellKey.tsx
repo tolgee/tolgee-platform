@@ -76,6 +76,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
               onChange={(v) => setValue(v as string)}
               onSave={handleSave}
               onCancel={handleEditCancel}
+              language="plaintext"
               autoFocus
             />
             <CellControls>
