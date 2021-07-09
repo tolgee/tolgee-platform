@@ -43,11 +43,9 @@ export const OrganizationMembersView: FunctionComponent = () => {
     method: 'get',
     path: { id: organization!.id },
     query: {
-      pageable: {
-        page,
-        sort: ['name'],
-        size: 10,
-      },
+      page,
+      sort: ['name'],
+      size: 10,
       search,
     },
     options: {

@@ -31,7 +31,8 @@ export const useImportDataHelper = () => {
         projectId: project.id,
       },
       query: {
-        pageable: { page: 0, size: 100 },
+        page: 0,
+        size: 100,
       },
     });
   };

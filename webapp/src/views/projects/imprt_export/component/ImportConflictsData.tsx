@@ -39,10 +39,8 @@ export const ImportConflictsData: FunctionComponent<{
       query: {
         onlyConflicts: true,
         onlyUnresolved: !showResolved,
-        pageable: {
-          page: page,
-          size: 50,
-        },
+        page: page,
+        size: 50,
       },
     });
     actions.loadableActions.resolveConflictsLanguage.dispatch({

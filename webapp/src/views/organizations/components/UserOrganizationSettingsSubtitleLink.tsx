@@ -40,7 +40,7 @@ const UserOrganizationSettingsSubtitleLink = (
       method: 'get',
       query: {
         params: { filterCurrentUserOwner: false },
-        pageable: { size: 1000 },
+        size: 1000,
       },
     });
 

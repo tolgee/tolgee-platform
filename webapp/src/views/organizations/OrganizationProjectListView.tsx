@@ -24,9 +24,7 @@ export const OrganizationsProjectListView = () => {
     method: 'get',
     path: { id: organization!.id },
     query: {
-      pageable: {
-        page,
-      },
+      page,
       search,
     },
     options: {

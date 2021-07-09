@@ -87,14 +87,14 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const [detailFileName, setDetailFileName] = useState(null as string | null);
 
   const deleteLoadable = useApiMutation({
-    url: '/api/project/screenshots/{ids}',
+    url: '/v2/projects/{projectId}/keys/{keyId}/screenshots/{ids}',
     method: 'delete',
   });
 
   const onDelete = (id: number) => {
     deleteLoadable.mutate(
       {
-        path: { ids: [id] },
+        path: { projectId: project.id, ids: [id] },
       },
       {
         onSuccess() {

@@ -24,9 +24,7 @@ export const ProjectSettingsLanguages = () => {
     method: 'get',
     path: { projectId: project.id },
     query: {
-      pageable: {
-        page,
-      },
+      page,
     },
   });
 

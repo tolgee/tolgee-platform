@@ -32,10 +32,8 @@ export const ProjectPermissionsView: FunctionComponent = () => {
     method: 'get',
     path: { projectId: project.id },
     query: {
-      pageable: {
-        page,
-        sort: ['name'],
-      },
+      page,
+      sort: ['name'],
       search,
     },
     options: {

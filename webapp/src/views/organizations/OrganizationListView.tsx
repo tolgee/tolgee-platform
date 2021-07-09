@@ -27,11 +27,9 @@ export const OrganizationsListView = () => {
     url: '/v2/organizations',
     method: 'get',
     query: {
-      pageable: {
-        sort: ['name'],
-        size: 10,
-        page,
-      },
+      sort: ['name'],
+      size: 10,
+      page,
       params: {
         filterCurrentUserOwner: false,
       },

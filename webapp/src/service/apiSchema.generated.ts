@@ -15,6 +15,9 @@ export interface paths {
   "/v2/projects/{projectId}/users/{userId}/revoke-access": {
     put: operations["revokePermission"];
   };
+  "/v2/projects/{projectId}/keys/{id}": {
+    put: operations["edit"];
+  };
   "/v2/projects/{projectId}/invite": {
     put: operations["inviteUser"];
   };
@@ -39,15 +42,15 @@ export interface paths {
   "/v2/projects/{projectId}/import/apply": {
     put: operations["applyImport"];
   };
+  "/v2/projects/{projectId}/translations": {
+    get: operations["getTranslations"];
+    put: operations["setTranslations"];
+    post: operations["createOrUpdateTranslations"];
+  };
   "/v2/projects/{projectId}/languages/{languageId}": {
     get: operations["get_1"];
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_1"];
-  };
-  "/v2/projects/languages/{languageId}": {
-    get: operations["get_2"];
-    put: operations["editLanguage_1"];
-    delete: operations["deleteLanguage_2"];
   };
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole"];
@@ -70,32 +73,31 @@ export interface paths {
   "/v2/organizations/{id}": {
     get: operations["get_5"];
     put: operations["update"];
-    delete: operations["delete"];
+    delete: operations["delete_2"];
   };
   "/api/organizations/{id}": {
     get: operations["get_6"];
     put: operations["update_1"];
-    delete: operations["delete_1"];
+    delete: operations["delete_3"];
   };
   "/api/project/{projectId}/keys": {
-    put: operations["edit"];
-    post: operations["create_3"];
-    delete: operations["delete_4"];
-  };
-  "/api/project/keys": {
-    delete: operations["delete_5"];
+    put: operations["edit_2"];
+    post: operations["create_7"];
+    delete: operations["delete_6"];
   };
   "/api/project/{projectId}/translations": {
-    put: operations["setTranslations"];
-    post: operations["createOrUpdateTranslations"];
-  };
-  "/api/project/translations": {
-    put: operations["setTranslations_1"];
-    post: operations["createOrUpdateTranslations_1"];
+    put: operations["setTranslations_2"];
+    post: operations["createOrUpdateTranslations_2"];
   };
   "/v2/projects": {
     get: operations["getAll"];
     post: operations["createProject"];
+  };
+  "/v2/projects/{projectId}/keys/create": {
+    post: operations["create"];
+  };
+  "/v2/projects/{projectId}/keys": {
+    post: operations["create_1"];
   };
   "/v2/projects/{projectId}/import": {
     post: operations["addFiles"];
@@ -108,13 +110,17 @@ export interface paths {
     get: operations["getAll_1"];
     post: operations["createLanguage"];
   };
+  "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
+    get: operations["getKeyScreenshots_3"];
+    post: operations["uploadScreenshot_1"];
+  };
   "/v2/organizations": {
     get: operations["getAll_3"];
-    post: operations["create"];
+    post: operations["create_4"];
   };
   "/api/organizations": {
     get: operations["getAll_4"];
-    post: operations["create_1"];
+    post: operations["create_5"];
   };
   "/v2/address-part/generate-project": {
     post: operations["generateProjectSlug"];
@@ -155,20 +161,20 @@ export interface paths {
     post: operations["editDeprecated"];
   };
   "/api/project/{projectId}/keys/create": {
-    post: operations["create_2"];
+    post: operations["create_6"];
   };
   "/api/project/{projectId}/screenshots/get": {
     post: operations["getKeyScreenshots_1"];
   };
   "/api/project/{projectId}/screenshots": {
-    post: operations["uploadScreenshot_1"];
+    post: operations["uploadScreenshot_3"];
   };
   "/api/apiKeys": {
     get: operations["allByUser"];
-    post: operations["create_6"];
+    post: operations["create_10"];
   };
   "/api/apiKeys/edit": {
-    post: operations["edit_2"];
+    post: operations["edit_4"];
   };
   "/v2/projects/{projectId}/users": {
     get: operations["getAllUsers"];
@@ -185,6 +191,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/import/result/files/{importFileId}/issues": {
     get: operations["getImportFileIssues"];
+  };
+  "/v2/projects/{projectId}/translations/{languages}": {
+    get: operations["getAllTranslations"];
   };
   "/v2/organizations/{slug}/projects": {
     get: operations["getAllProjects"];
@@ -242,11 +251,7 @@ export interface paths {
   };
   "/api/project/{projectId}/keys/{id}": {
     get: operations["getDeprecated"];
-    delete: operations["delete_2"];
-  };
-  "/api/project/keys/{id}": {
-    get: operations["getDeprecated_1"];
-    delete: operations["delete_3"];
+    delete: operations["delete_4"];
   };
   "/api/project/{projectId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
@@ -255,10 +260,7 @@ export interface paths {
     get: operations["doExportJsonZip_2"];
   };
   "/api/project/{projectId}/translations/{languages}": {
-    get: operations["getTranslations"];
-  };
-  "/api/project/translations/{languages}": {
-    get: operations["getTranslations_1"];
+    get: operations["getTranslations_2"];
   };
   "/api/project/{projectId}/translations/view": {
     get: operations["getViewData"];
@@ -278,23 +280,26 @@ export interface paths {
   "/api/apiKeys/availableScopes": {
     get: operations["getScopes"];
   };
+  "/v2/projects/{projectId}/keys/{ids}": {
+    delete: operations["delete"];
+  };
+  "/v2/projects/{projectId}/keys/{keyId}/screenshots/{ids}": {
+    delete: operations["deleteScreenshots_1"];
+  };
   "/v2/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser"];
   };
   "/api/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser_1"];
   };
-  "/api/project/screenshots/{ids}": {
-    delete: operations["deleteScreenshots"];
-  };
   "/api/project/{projectId}/screenshots/{ids}": {
-    delete: operations["deleteScreenshots_1"];
+    delete: operations["deleteScreenshots_3"];
   };
   "/api/invitation/{invitationId}": {
     delete: operations["deleteInvitation"];
   };
   "/api/apiKeys/{key}": {
-    delete: operations["delete_6"];
+    delete: operations["delete_8"];
   };
 }
 
@@ -317,9 +322,7 @@ export interface components {
       flagEmoji?: string;
       /** Whether is base language of project */
       base: boolean;
-      _links?: components["schemas"]["Links"];
     };
-    Links: { [key: string]: components["schemas"]["Link"] };
     ProjectModel: {
       id: number;
       name: string;
@@ -339,16 +342,44 @@ export interface components {
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       /** Actual current user's permissions on this project. You can not sort data by this column! */
       computedPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      _links?: components["schemas"]["Links"];
     };
     UserAccountModel: {
       id: number;
       username: string;
       name?: string;
-      _links?: components["schemas"]["Links"];
+    };
+    EditKeyDto: {
+      name: string;
+    };
+    KeyModel: {
+      /** Id of key record */
+      id: number;
+      /** Name of key */
+      name: string;
     };
     ProjectInviteUserDto: {
       type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+    };
+    SetTranslationsWithKeyDto: {
+      /** Key name to set translations for */
+      key: string;
+      /** Object mapping language tag to translation */
+      translations: { [key: string]: string };
+    };
+    SetTranslationsResponseModel: {
+      /** Id of key record */
+      keyId: number;
+      /** Name of key */
+      keyName: string;
+      /** Translations object containing values updated in this request */
+      translations: {
+        [key: string]: components["schemas"]["TranslationModel"];
+      };
+    };
+    /** Translations object containing values updated in this request */
+    TranslationModel: {
+      id: number;
+      text?: string;
     };
     LanguageDto: {
       /** Language name in english */
@@ -371,7 +402,6 @@ export interface components {
       code: string;
       type: "MEMBER" | "OWNER";
       createdAt: string;
-      _links?: components["schemas"]["Links"];
     };
     OrganizationDto: {
       name: string;
@@ -386,15 +416,10 @@ export interface components {
       description?: string;
       basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       currentUserRole: "MEMBER" | "OWNER";
-      _links?: components["schemas"]["Links"];
     };
-    EditKeyDTO: {
+    OldEditKeyDto: {
       currentName: string;
       newName: string;
-    };
-    SetTranslationsDTO: {
-      key: string;
-      translations: { [key: string]: string };
     };
     CreateProjectDTO: {
       name: string;
@@ -406,6 +431,10 @@ export interface components {
       /** Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
       baseLanguageTag?: string;
     };
+    CreateKeyDto: {
+      /** Name of the key */
+      name: string;
+    };
     ErrorResponseBody: {
       code?: string;
       params?: { [key: string]: any }[];
@@ -413,7 +442,6 @@ export interface components {
     ImportAddFilesResultModel: {
       errors: components["schemas"]["ErrorResponseBody"][];
       result?: components["schemas"]["PagedModelImportLanguageModel"];
-      _links?: components["schemas"]["Links"];
     };
     ImportLanguageModel: {
       id: number;
@@ -428,7 +456,6 @@ export interface components {
       totalCount: number;
       conflictCount: number;
       resolvedCount: number;
-      _links?: components["schemas"]["Links"];
     };
     PageMetadata: {
       size?: number;
@@ -440,10 +467,14 @@ export interface components {
       _embedded?: {
         languages?: components["schemas"]["ImportLanguageModel"][];
       };
-      _links?: components["schemas"]["Links"];
       page?: components["schemas"]["PageMetadata"];
     };
     StreamingResponseBody: { [key: string]: any };
+    ScreenshotModel: {
+      id: number;
+      filename: string;
+      createdAt?: string;
+    };
     GenerateSlugDto: {
       name: string;
       oldSlug?: string;
@@ -508,23 +539,16 @@ export interface components {
       id: number;
       scopes: string[];
     };
-    Pageable: {
-      page?: number;
-      size?: number;
-      sort?: string[];
-    };
     PagedModelProjectModel: {
       _embedded?: {
         projects?: components["schemas"]["ProjectModel"][];
       };
-      _links?: components["schemas"]["Links"];
       page?: components["schemas"]["PageMetadata"];
     };
     PagedModelUserAccountInProjectModel: {
       _embedded?: {
         users?: components["schemas"]["UserAccountInProjectModel"][];
       };
-      _links?: components["schemas"]["Links"];
       page?: components["schemas"]["PageMetadata"];
     };
     UserAccountInProjectModel: {
@@ -536,7 +560,6 @@ export interface components {
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       /** Actual user's permissions on selected project. You can not sort data by this column! */
       computedPermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      _links?: components["schemas"]["Links"];
     };
     ImportTranslationModel: {
       id: number;
@@ -547,13 +570,11 @@ export interface components {
       conflictText?: string;
       override: boolean;
       resolved: boolean;
-      _links?: components["schemas"]["Links"];
     };
     PagedModelImportTranslationModel: {
       _embedded?: {
         translations?: components["schemas"]["ImportTranslationModel"][];
       };
-      _links?: components["schemas"]["Links"];
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
@@ -568,7 +589,6 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
-      _links?: components["schemas"]["Links"];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -585,27 +605,46 @@ export interface components {
       _embedded?: {
         importFileIssueViews?: components["schemas"]["EntityModelImportFileIssueView"][];
       };
-      _links?: components["schemas"]["Links"];
+      page?: components["schemas"]["PageMetadata"];
+    };
+    KeyWithTranslationsModel: {
+      /** Id of key record */
+      keyId: number;
+      /** Name of key */
+      keyName: string;
+      /** Count of screenshots provided for the key */
+      screenshotCount: number;
+      /** Translations object */
+      translations: {
+        [key: string]: components["schemas"]["TranslationModel"];
+      };
+    };
+    PagedModelKeyWithTranslationsModel: {
+      _embedded?: {
+        keys?: components["schemas"]["KeyWithTranslationsModel"][];
+      };
       page?: components["schemas"]["PageMetadata"];
     };
     PagedModelLanguageModel: {
       _embedded?: {
         languages?: components["schemas"]["LanguageModel"][];
       };
-      _links?: components["schemas"]["Links"];
       page?: components["schemas"]["PageMetadata"];
+    };
+    CollectionModelScreenshotModel: {
+      _embedded?: {
+        screenshots?: components["schemas"]["ScreenshotModel"][];
+      };
     };
     CollectionModelOrganizationInvitationModel: {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
       };
-      _links?: components["schemas"]["Links"];
     };
     PagedModelUserAccountWithOrganizationRoleModel: {
       _embedded?: {
         usersInOrganization?: components["schemas"]["UserAccountWithOrganizationRoleModel"][];
       };
-      _links?: components["schemas"]["Links"];
       page?: components["schemas"]["PageMetadata"];
     };
     UserAccountWithOrganizationRoleModel: {
@@ -613,7 +652,6 @@ export interface components {
       name: string;
       username: string;
       organizationRole: "MEMBER" | "OWNER";
-      _links?: components["schemas"]["Links"];
     };
     OrganizationRequestParamsDto: {
       filterCurrentUserOwner: boolean;
@@ -622,7 +660,6 @@ export interface components {
       _embedded?: {
         organizations?: components["schemas"]["OrganizationModel"][];
       };
-      _links?: components["schemas"]["Links"];
       page?: components["schemas"]["PageMetadata"];
     };
     UserResponseDTO: {
@@ -680,16 +717,6 @@ export interface components {
       id?: number;
       code?: string;
       type?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-    };
-    Link: {
-      href?: string;
-      hreflang?: string;
-      title?: string;
-      type?: string;
-      deprecation?: string;
-      profile?: string;
-      name?: string;
-      templated?: boolean;
     };
   };
 }
@@ -764,6 +791,27 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+    };
+  };
+  edit: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["KeyModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EditKeyDto"];
+      };
     };
   };
   inviteUser: {
@@ -875,6 +923,89 @@ export interface operations {
       200: unknown;
     };
   };
+  getTranslations: {
+    parameters: {
+      query: {
+        /** Languages to be contained in response */
+        languages?: string[];
+        /** String to search in key name or translation text */
+        search?: string;
+        /** Selects only one key with provided name */
+        filterKeyName?: string;
+        /** Selects only one key with provided id */
+        filterKeyId?: number;
+        /** Selects only keys, where translation is missing in any language */
+        filterUntranslatedAny?: boolean;
+        /** Selects only keys, where translation is provided in any language */
+        filterTranslatedAny?: boolean;
+        /** Selects only keys, where translation is missing in specified language */
+        filterUntranslatedInLang?: string;
+        /** Selects only keys, where translation is provided in specified language */
+        filterTranslatedInLang?: string;
+        /** Selects only keys with screenshots */
+        filterHasScreenshot?: boolean;
+        /** Selects only keys without screenshots */
+        filterHasNoScreenshot?: boolean;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelKeyWithTranslationsModel"];
+        };
+      };
+    };
+  };
+  setTranslations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SetTranslationsResponseModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
+      };
+    };
+  };
+  createOrUpdateTranslations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SetTranslationsResponseModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
+      };
+    };
+  };
   get_1: {
     parameters: {
       path: {
@@ -917,52 +1048,6 @@ export interface operations {
       path: {
         languageId: number;
         projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-  };
-  get_2: {
-    parameters: {
-      path: {
-        languageId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["LanguageModel"];
-        };
-      };
-    };
-  };
-  editLanguage_1: {
-    parameters: {
-      path: {
-        languageId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["LanguageModel"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["LanguageDto"];
-      };
-    };
-  };
-  deleteLanguage_2: {
-    parameters: {
-      path: {
-        languageId: number;
       };
     };
     responses: {
@@ -1101,7 +1186,7 @@ export interface operations {
       };
     };
   };
-  delete: {
+  delete_2: {
     parameters: {
       path: {
         id: number;
@@ -1147,7 +1232,7 @@ export interface operations {
       };
     };
   };
-  delete_1: {
+  delete_3: {
     parameters: {
       path: {
         id: number;
@@ -1158,7 +1243,7 @@ export interface operations {
       200: unknown;
     };
   };
-  edit: {
+  edit_2: {
     parameters: {
       path: {
         projectId: number;
@@ -1170,11 +1255,11 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["EditKeyDTO"];
+        "application/json": components["schemas"]["OldEditKeyDto"];
       };
     };
   };
-  create_3: {
+  create_7: {
     parameters: {
       path: {
         projectId: number;
@@ -1186,11 +1271,11 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
+        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
       };
     };
   };
-  delete_4: {
+  delete_6: {
     parameters: {
       path: {
         projectId: number;
@@ -1206,18 +1291,7 @@ export interface operations {
       };
     };
   };
-  delete_5: {
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-    requestBody: {
-      content: {
-        "application/json": number[];
-      };
-    };
-  };
-  setTranslations: {
+  setTranslations_2: {
     parameters: {
       path: {
         projectId: number;
@@ -1229,11 +1303,11 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
+        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
       };
     };
   };
-  createOrUpdateTranslations: {
+  createOrUpdateTranslations_2: {
     parameters: {
       path: {
         projectId: number;
@@ -1245,38 +1319,19 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
-      };
-    };
-  };
-  setTranslations_1: {
-    parameters: {};
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
-      };
-    };
-  };
-  createOrUpdateTranslations_1: {
-    parameters: {};
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
+        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
       };
     };
   };
   getAll: {
     parameters: {
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
         search?: string;
       };
     };
@@ -1301,6 +1356,46 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["CreateProjectDTO"];
+      };
+    };
+  };
+  create: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["KeyModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateKeyDto"];
+      };
+    };
+  };
+  create_1: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["KeyModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateKeyDto"];
       };
     };
   };
@@ -1365,7 +1460,12 @@ export interface operations {
         projectId: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
@@ -1397,10 +1497,54 @@ export interface operations {
       };
     };
   };
+  getKeyScreenshots_3: {
+    parameters: {
+      path: {
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelScreenshotModel"];
+        };
+      };
+    };
+  };
+  uploadScreenshot_1: {
+    parameters: {
+      path: {
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["ScreenshotModel"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          screenshot: string;
+        };
+      };
+    };
+  };
   getAll_3: {
     parameters: {
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
         params: components["schemas"]["OrganizationRequestParamsDto"];
       };
     };
@@ -1413,7 +1557,7 @@ export interface operations {
       };
     };
   };
-  create: {
+  create_4: {
     responses: {
       /** OK */
       200: {
@@ -1431,7 +1575,12 @@ export interface operations {
   getAll_4: {
     parameters: {
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
         params: components["schemas"]["OrganizationRequestParamsDto"];
       };
     };
@@ -1444,7 +1593,7 @@ export interface operations {
       };
     };
   };
-  create_1: {
+  create_5: {
     responses: {
       /** OK */
       200: {
@@ -1645,7 +1794,7 @@ export interface operations {
       };
     };
   };
-  create_2: {
+  create_6: {
     parameters: {
       path: {
         projectId: number;
@@ -1657,7 +1806,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["SetTranslationsDTO"];
+        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
       };
     };
   };
@@ -1681,7 +1830,7 @@ export interface operations {
       };
     };
   };
-  uploadScreenshot_1: {
+  uploadScreenshot_3: {
     parameters: {
       path: {
         projectId: number;
@@ -1716,7 +1865,7 @@ export interface operations {
       };
     };
   };
-  create_6: {
+  create_10: {
     responses: {
       /** OK */
       200: {
@@ -1731,7 +1880,7 @@ export interface operations {
       };
     };
   };
-  edit_2: {
+  edit_4: {
     responses: {
       /** OK */
       200: unknown;
@@ -1748,7 +1897,12 @@ export interface operations {
         projectId: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
         search?: string;
       };
     };
@@ -1767,7 +1921,12 @@ export interface operations {
         projectId: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
@@ -1817,7 +1976,12 @@ export interface operations {
         onlyConflicts?: boolean;
         onlyUnresolved?: boolean;
         search?: string;
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
@@ -1836,7 +2000,12 @@ export interface operations {
         projectId: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
@@ -1848,13 +2017,34 @@ export interface operations {
       };
     };
   };
+  getAllTranslations: {
+    parameters: {
+      path: {
+        languages: string[];
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllProjects: {
     parameters: {
       path: {
         slug: string;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
         search?: string;
       };
     };
@@ -1873,7 +2063,12 @@ export interface operations {
         slug: string;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
         search?: string;
       };
     };
@@ -1952,7 +2147,12 @@ export interface operations {
         id: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
         search?: string;
       };
     };
@@ -1971,7 +2171,12 @@ export interface operations {
         id: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
         search?: string;
       };
     };
@@ -1990,7 +2195,12 @@ export interface operations {
         id: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
         search?: string;
       };
     };
@@ -2009,7 +2219,12 @@ export interface operations {
         id: number;
       };
       query: {
-        pageable: components["schemas"]["Pageable"];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
         search?: string;
       };
     };
@@ -2155,37 +2370,11 @@ export interface operations {
       };
     };
   };
-  delete_2: {
+  delete_4: {
     parameters: {
       path: {
         id: number;
         projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-  };
-  getDeprecated_1: {
-    parameters: {
-      path: {
-        id: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["DeprecatedKeyDto"];
-        };
-      };
-    };
-  };
-  delete_3: {
-    parameters: {
-      path: {
-        id: number;
       };
     };
     responses: {
@@ -2223,26 +2412,11 @@ export interface operations {
       };
     };
   };
-  getTranslations: {
+  getTranslations_2: {
     parameters: {
       path: {
         languages: string[];
         projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": { [key: string]: { [key: string]: any } };
-        };
-      };
-    };
-  };
-  getTranslations_1: {
-    parameters: {
-      path: {
-        languages: string[];
       };
     };
     responses: {
@@ -2337,6 +2511,30 @@ export interface operations {
       };
     };
   };
+  delete: {
+    parameters: {
+      path: {
+        ids: number[];
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
+  deleteScreenshots_1: {
+    parameters: {
+      path: {
+        ids: number[];
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+    };
+  };
   removeUser: {
     parameters: {
       path: {
@@ -2361,18 +2559,7 @@ export interface operations {
       200: unknown;
     };
   };
-  deleteScreenshots: {
-    parameters: {
-      path: {
-        ids: number[];
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-    };
-  };
-  deleteScreenshots_1: {
+  deleteScreenshots_3: {
     parameters: {
       path: {
         ids: number[];
@@ -2395,7 +2582,7 @@ export interface operations {
       200: unknown;
     };
   };
-  delete_6: {
+  delete_8: {
     parameters: {
       path: {
         key: string;
