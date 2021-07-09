@@ -1,9 +1,21 @@
-import { Box, Checkbox, FormControlLabel } from '@material-ui/core';
+import { useState } from 'react';
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  Button,
+} from '@material-ui/core';
+import { ViewListRounded, TableChart, Add } from '@material-ui/icons';
 import SearchField from 'tg.component/common/form/fields/SearchField';
 import { useContextSelector } from 'use-context-selector';
+import { T } from '@tolgee/react';
+
+import { TranslationNewDialog } from './TranslationNewDialog';
 import {
   TranslationsContext,
   useTranslationsDispatch,
+  ViewType,
 } from './TranslationsContext';
 
 export const TranslationsHeader = () => {
@@ -13,6 +25,9 @@ export const TranslationsHeader = () => {
     TranslationsContext,
     (v) => v.selectedLanguages
   );
+  const view = useContextSelector(TranslationsContext, (v) => v.view);
+
+  const [newDialogOpen, setNewDialogOpen] = useState(false);
 
   const dispatch = useTranslationsDispatch();
 
@@ -31,8 +46,16 @@ export const TranslationsHeader = () => {
     });
   };
 
+  const handleViewChange = (val: ViewType) => {
+    dispatch({ type: 'CHANGE_VIEW', payload: val });
+  };
+
+  const handleAfterAdd = () => {
+    dispatch({ type: 'UPDATE_LANGUAGES' });
+  };
+
   return (
-    <Box display="flex">
+    <Box display="flex" alignItems="center">
       <SearchField label={''} initial={search} onSearch={handleSearchChange} />
       <Box marginLeft="10px">
         {languages?.map((l) => (
@@ -49,6 +72,35 @@ export const TranslationsHeader = () => {
           />
         ))}
       </Box>
+      <IconButton
+        color={view === 'TABLE' ? 'primary' : undefined}
+        onClick={() => handleViewChange('TABLE')}
+      >
+        <TableChart />
+      </IconButton>
+      <IconButton
+        color={view === 'LIST' ? 'primary' : undefined}
+        onClick={() => handleViewChange('LIST')}
+      >
+        <ViewListRounded />
+      </IconButton>
+
+      <Button
+        startIcon={<Add />}
+        color="primary"
+        size="small"
+        variant="contained"
+        onClick={() => setNewDialogOpen(true)}
+      >
+        <T>language_create_add</T>
+      </Button>
+
+      {newDialogOpen && (
+        <TranslationNewDialog
+          onClose={() => setNewDialogOpen(false)}
+          onAdd={handleAfterAdd}
+        />
+      )}
     </Box>
   );
 };
