@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button, ButtonGroup, makeStyles } from '@material-ui/core';
-import { ViewListRounded, AppsRounded, Add } from '@material-ui/icons';
+import { ViewListRounded, AppsRounded, Add, Delete } from '@material-ui/icons';
 import SearchField from 'tg.component/common/form/fields/SearchField';
 import { useContextSelector } from 'use-context-selector';
 import { T } from '@tolgee/react';
@@ -37,6 +37,7 @@ export const TranslationsHeader = () => {
     (v) => v.selectedLanguages
   );
   const view = useContextSelector(TranslationsContext, (v) => v.view);
+  const selection = useContextSelector(TranslationsContext, (v) => v.selection);
 
   const [newDialogOpen, setNewDialogOpen] = useState(false);
 
@@ -61,9 +62,18 @@ export const TranslationsHeader = () => {
     dispatch({ type: 'UPDATE_LANGUAGES' });
   };
 
+  const handleDelete = () => {
+    dispatch({ type: 'DELETE_TRANSLATIONS', payload: selection });
+  };
+
   return (
     <div className={classes.container}>
       <div className={classes.spaced}>
+        {selection.length > 0 && (
+          <Button size="small" onClick={handleDelete}>
+            <Delete />
+          </Button>
+        )}
         <SearchField
           label={''}
           initial={search}
