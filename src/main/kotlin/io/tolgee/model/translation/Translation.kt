@@ -7,6 +7,7 @@ import io.tolgee.model.key.Key
 import org.hibernate.annotations.ColumnDefault
 import org.hibernate.envers.Audited
 import javax.persistence.*
+import javax.validation.constraints.NotNull
 
 @Entity
 @Table(
@@ -22,7 +23,8 @@ data class Translation(
   @Column(columnDefinition = "text")
   var text: String? = null
 ) : StandardAuditModel() {
-  @ManyToOne
+  @ManyToOne(optional = false)
+  @field:NotNull
   var key: Key? = null
 
   @ManyToOne

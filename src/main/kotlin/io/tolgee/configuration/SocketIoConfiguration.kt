@@ -20,8 +20,10 @@ class SocketIoConfiguration(
     config.socketConfig.isReuseAddress = true
     tolgeeProperties.socketIo.host?.let { config.hostname = it }
     config.port = tolgeeProperties.socketIo.port
-    val redissonStoreFactory: StoreFactory = RedissonStoreFactory(redissonClient)
-    config.storeFactory = redissonStoreFactory
+    if (tolgeeProperties.socketIo.useRedis) {
+      val redissonStoreFactory: StoreFactory = RedissonStoreFactory(redissonClient)
+      config.storeFactory = redissonStoreFactory
+    }
     return SocketIOServer(config)
   }
 }

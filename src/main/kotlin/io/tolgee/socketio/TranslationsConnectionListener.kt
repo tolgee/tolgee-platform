@@ -36,6 +36,5 @@ class TranslationsConnectionListener(
       log.debug("Client[{}] - Connected to chat module through '{}'", client.sessionId.toString(), handshakeData.url)
     }
 
-
   private fun Project.getRoomName() = "translations-${this.id}"
 }
