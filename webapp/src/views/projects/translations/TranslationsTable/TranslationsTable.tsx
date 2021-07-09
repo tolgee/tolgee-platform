@@ -79,6 +79,7 @@ const useStyles = makeStyles((theme) => {
 
 export const TranslationsTable = () => {
   const tableRef = useRef<HTMLDivElement>(null);
+  const reactListRef = useRef<ReactList>(null);
 
   const classes = useStyles();
 
@@ -99,6 +100,19 @@ export const TranslationsTable = () => {
     TranslationsContext,
     (v) => v.hasMoreToFetch
   );
+  const editKeyId = useContextSelector(
+    TranslationsContext,
+    (v) => v.edit?.keyId
+  );
+
+  useEffect(() => {
+    // scroll to currently edited item
+    if (editKeyId) {
+      reactListRef.current?.scrollAround(
+        translations!.findIndex((t) => t.keyId === editKeyId)
+      );
+    }
+  }, [editKeyId]);
 
   const [columnsOrder, setColumnsOrder] = useState<string[]>([]);
 
@@ -201,6 +215,7 @@ export const TranslationsTable = () => {
       })}
 
       <ReactList
+        ref={reactListRef}
         threshold={200}
         type="variable"
         itemSizeEstimator={(index, cache) => {

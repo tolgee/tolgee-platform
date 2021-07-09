@@ -200,9 +200,11 @@ export const TranslationsContextProvider: React.FC<{
   const getEditOldValue = (): string | undefined => {
     const key = fixedTranslations.find((k) => k.keyId === edit?.keyId);
     if (key) {
-      return edit?.language
-        ? key.translations[edit.language]?.text
-        : key.keyName;
+      return (
+        (edit?.language
+          ? key.translations[edit.language]?.text
+          : key.keyName) || ''
+      );
     }
   };
 
@@ -211,7 +213,7 @@ export const TranslationsContextProvider: React.FC<{
 
     if (payload.value === getEditOldValue()) {
       // value not modified
-      return;
+      return null;
     }
 
     if (language) {
@@ -269,9 +271,7 @@ export const TranslationsContextProvider: React.FC<{
 
         return;
       case 'UPDATE_EDIT':
-        if (edit) {
-          setEdit({ ...edit, ...action.payload });
-        }
+        setEdit((edit) => (edit ? { ...edit, ...action.payload } : edit));
         return;
       case 'TOGGLE_SELECT': {
         const newSelection = selection.includes(action.payload)
