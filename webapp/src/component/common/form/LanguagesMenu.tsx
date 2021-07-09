@@ -1,56 +1,46 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent } from 'react';
 import {
   Box,
   Checkbox,
   ListItemText,
   MenuItem,
   Select,
-  Theme,
 } from '@material-ui/core';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
+import FormControl from '@material-ui/core/FormControl';
+import makeStyles from '@material-ui/core/styles/makeStyles';
 
-import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { MessageService } from 'tg.service/MessageService';
-import { TranslationActions } from 'tg.store/project/TranslationActions';
 
-export interface LanguagesMenuProps {
-  context: string;
-}
-
-const actions = container.resolve(TranslationActions);
-
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles({
   input: {
     minWidth: 200,
   },
-}));
+});
+
+type Language = {
+  value: string;
+  label: string;
+};
+export interface LanguagesMenuProps {
+  onChange: (value: string[]) => void;
+  languages: Language[];
+  value: string[];
+  context: string;
+}
 
 const messaging = container.resolve(MessageService);
 
 export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
-  const classes = useStyles({});
-
-  const languageDTOS = useProjectLanguages();
-
-  const selected = actions.useSelector((s) => s.selectedLanguages);
-
-  const [localSelected, setLocalSelected] = useState(selected || []);
+  const classes = useStyles();
 
   const langsChange = (e) => {
     if (e.target.value < 1) {
       messaging.error(<T>set_at_least_one_language_error</T>);
       return;
     }
-    setLocalSelected(e.target.value);
-  };
-
-  const onLanguageMenuExit = () => {
-    actions.select.dispatch(localSelected);
+    props.onChange(e.target.value);
   };
 
   const menuProps = {
@@ -61,38 +51,32 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
       },
     },
     id: `language-select-${props.context}-menu`,
-    onExit: onLanguageMenuExit,
   };
 
   return (
     <Box display="flex" alignItems="right">
-      <FormControl data-cy="translations-language-select-form-control">
-        <InputLabel id="languages">
-          <T>translations_language_select_label</T>
-        </InputLabel>
+      <FormControl
+        data-cy="translations-language-select-form-control"
+        variant="outlined"
+        size="small"
+      >
         <Select
           labelId={`languages-${props.context}`}
           id={`languages-select-${props.context}`}
           multiple
-          value={localSelected}
+          value={props.value}
           onChange={(e) => langsChange(e)}
-          input={<Input className={classes.input} />}
-          renderValue={(selected) =>
-            (selected as string[])
-              .map(
-                (val) =>
-                  // @ts-ignore
-                  languageDTOS.find((languageDTO) => languageDTO.tag === val)
-                    .name
-              )
-              .join(', ')
-          }
+          renderValue={(selected) => (selected as string[]).join(', ')}
+          className={classes.input}
           MenuProps={menuProps}
         >
-          {languageDTOS.map((lang) => (
-            <MenuItem key={lang.tag} value={lang.tag}>
-              <Checkbox checked={localSelected.indexOf(lang.tag) > -1} />
-              <ListItemText primary={lang.name} />
+          {props.languages.map((lang) => (
+            <MenuItem key={lang.value} value={lang.value}>
+              <Checkbox
+                checked={props.value.indexOf(lang.value) > -1}
+                size="small"
+              />
+              <ListItemText primary={lang.label} />
             </MenuItem>
           ))}
         </Select>

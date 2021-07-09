@@ -96,7 +96,7 @@ export const TranslationsContextProvider: React.FC<{
   const [fixedTranslations, setFixedTranslations] = useState(
     [] as KeyWithTranslationsModelType[]
   );
-  const [view, setView] = useState('TABLE' as ViewType);
+  const [view, setView] = useState('LIST' as ViewType);
 
   const path = useMemo(
     () => ({ projectId: props.projectId }),
