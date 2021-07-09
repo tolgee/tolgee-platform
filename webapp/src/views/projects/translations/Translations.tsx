@@ -7,7 +7,7 @@ import { TranslationsContext } from './TranslationsContext';
 import { useProject } from 'tg.hooks/useProject';
 import { Navigation } from 'tg.component/navigation/Navigation';
 import { TranslationsTable } from './TranslationsTable';
-import { TranslationsSearch } from './TranslationsSearch';
+import { TranslationsHeader } from './TranslationsHeader';
 
 export const Translations = () => {
   const t = useTranslate();
@@ -42,7 +42,7 @@ export const Translations = () => {
         />
       }
     >
-      <TranslationsSearch />
+      <TranslationsHeader />
       <TranslationsTable />
     </BaseView>
   );
