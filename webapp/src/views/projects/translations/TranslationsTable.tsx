@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-key */
 import { useMemo, useRef, useCallback, useEffect } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { CircularProgress, Box, makeStyles } from '@material-ui/core';
