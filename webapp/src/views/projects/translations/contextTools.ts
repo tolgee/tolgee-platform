@@ -4,16 +4,16 @@ import { components } from 'tg.service/apiSchema.generated';
 type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
 type TranslationsResponse =
-  components['schemas']['PagedModelKeyWithTranslationsModel'];
+  components['schemas']['KeysWithTranslationsPageModel'];
 
 export const updateTranslationKey = (
   keys: KeyWithTranslationsModelType[],
   keyId: number,
-  keyName: string
+  value: Partial<KeyWithTranslationsModelType>
 ) => {
   return keys.map((k) => {
     if (k.keyId === keyId) {
-      return { ...k, keyName };
+      return { ...k, ...value };
     } else {
       return k;
     }

@@ -29,16 +29,22 @@ type ActionType =
   | { type: 'EDIT_NEXT' }
   | { type: 'EDIT_MOVE'; payload: Direction }
   | { type: 'SET_SEARCH'; payload: string }
-  | { type: 'TOGGLE_SELECT'; payload: string }
+  | { type: 'TOGGLE_SELECT'; payload: number }
   | { type: 'CHANGE_FIELD'; payload: ChangeValueType }
   | { type: 'FETCH_MORE' }
-  | { type: 'SELECT_LANGUAGES'; payload: string[] | undefined };
+  | { type: 'SELECT_LANGUAGES'; payload: string[] | undefined }
+  | { type: 'UPDATE_SCREENSHOT_COUNT'; payload: ChangeScreenshotNum };
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
 type ChangeValueType = CellLocation & {
   value: string;
   after?: Direction;
+};
+
+type ChangeScreenshotNum = {
+  keyId: number;
+  screenshotCount: number | undefined;
 };
 
 type CellLocation = {
@@ -55,7 +61,7 @@ export type TranslationsContextType = {
   isFetchingMore?: boolean;
   hasMoreToFetch?: boolean;
   search?: string;
-  selection: string[];
+  selection: number[];
   edit?: CellLocation;
   selectedLanguages?: string[];
 };
@@ -75,7 +81,7 @@ export const TranslationsContextProvider: React.FC<{
 }> = (props) => {
   const dispatchRef = useRef(null as any as (action: ActionType) => void);
   const [edit, setEdit] = useState<CellLocation | undefined>(undefined);
-  const [selection, setSelection] = useState<string[]>([]);
+  const [selection, setSelection] = useState<number[]>([]);
   const [fixedTranslations, setFixedTranslations] = useState(
     [] as KeyWithTranslationsModelType[]
   );
@@ -100,7 +106,7 @@ export const TranslationsContextProvider: React.FC<{
       keepPreviousData: true,
       getNextPageParam: (lastPage) => {
         const newPage = Number(lastPage.page?.number) + 1;
-        if (Number(lastPage.page?.totalPages) > Number(lastPage.page?.number))
+        if (Number(lastPage.page?.totalPages) > newPage) {
           return {
             path,
             query: {
@@ -108,6 +114,7 @@ export const TranslationsContextProvider: React.FC<{
               page: newPage,
             },
           };
+        }
       },
       onSuccess(data) {
         const flatKeys = flattenKeys(data);
@@ -133,6 +140,7 @@ export const TranslationsContextProvider: React.FC<{
       languages: newQuery.languages?.length ? newQuery.languages : undefined,
     });
     setEdit(undefined);
+    setSelection([]);
     // force refetch from first page
     translations.remove();
   };
@@ -222,7 +230,7 @@ export const TranslationsContextProvider: React.FC<{
         })
         .then(() =>
           setFixedTranslations(
-            updateTranslationKey(fixedTranslations, keyId, value)
+            updateTranslationKey(fixedTranslations, keyId, { keyName: value })
           )
         );
     }
@@ -259,6 +267,13 @@ export const TranslationsContextProvider: React.FC<{
       case 'SELECT_LANGUAGES':
         updateQuery({ languages: action.payload });
         return;
+      case 'UPDATE_SCREENSHOT_COUNT':
+        setFixedTranslations(
+          updateTranslationKey(fixedTranslations, action.payload.keyId, {
+            screenshotCount: action.payload.screenshotCount,
+          })
+        );
+        return;
     }
   };
 
@@ -268,12 +283,16 @@ export const TranslationsContextProvider: React.FC<{
     [dispatchRef]
   );
 
+  const dataReady = translations.isSuccess && languages.isSuccess;
+
   return (
     <DispatchContext.Provider value={dispatch}>
       <TranslationsContext.Provider
         value={{
-          translations: fixedTranslations,
-          languages: languages.data?._embedded?.languages,
+          translations: dataReady ? fixedTranslations : undefined,
+          languages: dataReady
+            ? languages.data?._embedded?.languages
+            : undefined,
           isLoading: translations.isLoading || languages.isLoading,
           isFetching:
             translations.isFetching ||
@@ -285,7 +304,9 @@ export const TranslationsContextProvider: React.FC<{
           search: query.search,
           edit,
           selection,
-          selectedLanguages: query.languages,
+          selectedLanguages:
+            query.languages ||
+            translations.data?.pages[0]?.selectedLanguages.map((l) => l.tag),
         }}
       >
         {props.children}

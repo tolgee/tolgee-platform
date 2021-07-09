@@ -1,34 +1,27 @@
-import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useContextSelector } from 'use-context-selector';
-
-import { Editor, DirectionType } from 'tg.component/editor/Editor';
+import { DirectionType } from 'tg.component/editor/Editor';
 
 import {
   TranslationsContext,
   useTranslationsDispatch,
 } from './TranslationsContext';
-import { useEffect } from 'react';
-import { CellPlain } from './CellPlain';
 
 type Props = {
   text: string;
+  language?: string;
   keyId: number;
   keyName: string;
-  language: string | undefined;
 };
 
-export const Cell: React.FC<Props> = React.memo(function Cell({
-  text,
-  keyName,
-  language,
-  keyId,
-}) {
+export const useEditableCell = ({ text, language, keyId, keyName }: Props) => {
   const [value, setValue] = useState(text || '');
+
   const isEditing = useContextSelector(
     TranslationsContext,
     (v) => v.edit?.keyId === keyId && v.edit?.language === language
   );
+
   const dispatch = useTranslationsDispatch();
 
   useEffect(() => {
@@ -37,7 +30,7 @@ export const Cell: React.FC<Props> = React.memo(function Cell({
     }
   }, [isEditing]);
 
-  const switchToEdit = () => {
+  const handleEdit = () => {
     dispatch({
       type: 'SET_EDIT',
       payload: {
@@ -48,7 +41,7 @@ export const Cell: React.FC<Props> = React.memo(function Cell({
     });
   };
 
-  const handleSave = (direction: DirectionType) => {
+  const handleSave = (direction?: DirectionType) => {
     dispatch({
       type: 'CHANGE_FIELD',
       payload: {
@@ -65,24 +58,12 @@ export const Cell: React.FC<Props> = React.memo(function Cell({
     dispatch({ type: 'SET_EDIT', payload: undefined });
   };
 
-  return (
-    <CellPlain
-      onClick={switchToEdit}
-      background={isEditing ? '#efefef' : undefined}
-    >
-      {isEditing ? (
-        <Editor
-          minHeight={100}
-          initialValue={value}
-          variables={[]}
-          onChange={(v) => setValue(v as string)}
-          onSave={handleSave}
-          onCancel={handleEditCancel}
-          autoFocus
-        />
-      ) : (
-        text
-      )}
-    </CellPlain>
-  );
-});
+  return {
+    handleEdit,
+    handleSave,
+    handleEditCancel,
+    value,
+    setValue,
+    isEditing,
+  };
+};

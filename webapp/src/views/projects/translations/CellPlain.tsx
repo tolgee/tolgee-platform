@@ -1,15 +1,16 @@
-import { Box } from '@material-ui/core';
+import { Box, BoxProps } from '@material-ui/core';
 import React from 'react';
 
 type Props = {
   onClick?: React.MouseEventHandler<HTMLElement>;
   background?: string;
-};
+} & BoxProps;
 
 export const CellPlain: React.FC<Props> = ({
   children,
   onClick,
   background,
+  ...props
 }) => {
   return (
     <Box
@@ -18,9 +19,11 @@ export const CellPlain: React.FC<Props> = ({
       whiteSpace="nowrap"
       overflow="hidden"
       textOverflow="ellipsis"
+      position="relative"
       padding="5px 10px"
       bgcolor={background}
       onClick={onClick}
+      {...props}
     >
       {children}
     </Box>

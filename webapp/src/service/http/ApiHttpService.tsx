@@ -177,7 +177,15 @@ export class ApiHttpService {
   buildQuery(object: { [key: string]: any }): string {
     return Object.keys(object)
       .filter((k) => !!object[k])
-      .map((k) => encodeURIComponent(k) + '=' + encodeURIComponent(object[k]))
+      .map((k) => {
+        if (Array.isArray(object[k])) {
+          return object[k]
+            .map((v) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
+            .join('&');
+        } else {
+          return encodeURIComponent(k) + '=' + encodeURIComponent(object[k]);
+        }
+      })
       .join('&');
   }
 

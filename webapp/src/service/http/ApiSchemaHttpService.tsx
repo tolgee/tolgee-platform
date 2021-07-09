@@ -135,6 +135,8 @@ export type ResponseContent<
       Url,
       Method
     >['responses'][200]['content']['application/json']
+  : OperationSchema<Url, Method>['responses'][201] extends NotNullAnyContent
+  ? OperationSchema<Url, Method>['responses'][201]['content']['*/*']
   : void;
 
 type NotNullAnyContent = {
@@ -156,12 +158,19 @@ type NotNullJsonContent = {
 };
 
 type ResponseType = {
-  200:
+  200?:
     | {
         content?: {
           '*/*'?: any;
           'application/json'?: any;
           'application/hal+json'?: any;
+        };
+      }
+    | unknown;
+  201?:
+    | {
+        content?: {
+          '*/*'?: any;
         };
       }
     | unknown;

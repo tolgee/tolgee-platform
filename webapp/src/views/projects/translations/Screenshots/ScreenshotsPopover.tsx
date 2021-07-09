@@ -2,15 +2,10 @@ import { FunctionComponent } from 'react';
 import { Box, Popover, Typography } from '@material-ui/core';
 import { T } from '@tolgee/react';
 
-import { components } from 'tg.service/apiSchema.generated';
-
 import { ScreenshotGallery } from './ScreenshotGallery';
 
-type KeyTranslationsDTO =
-  components['schemas']['KeyWithTranslationsResponseDto'];
-
 export interface ScreenshotsPopoverProps {
-  data: KeyTranslationsDTO;
+  keyId: number;
   anchorEl: Element;
   onClose: () => void;
 }
@@ -18,7 +13,7 @@ export interface ScreenshotsPopoverProps {
 export const ScreenshotsPopover: FunctionComponent<ScreenshotsPopoverProps> = (
   props
 ) => {
-  const id = `screenshot-popover-${props.data.id}`;
+  const id = `screenshot-popover-${props.keyId}`;
 
   return (
     <>
@@ -42,7 +37,7 @@ export const ScreenshotsPopover: FunctionComponent<ScreenshotsPopoverProps> = (
               <T>translations_screenshots_popover_title</T>
             </Typography>
           </Box>
-          <ScreenshotGallery data={props.data} />
+          <ScreenshotGallery keyId={props.keyId} />
         </Box>
       </Popover>
     </>

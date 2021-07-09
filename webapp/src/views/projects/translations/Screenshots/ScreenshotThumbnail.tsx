@@ -19,7 +19,7 @@ import { ProjectPermissionType } from 'tg.service/response.types';
 
 export interface ScreenshotThumbnailProps {
   onClick: () => void;
-  screenshotData: components['schemas']['ScreenshotDTO'];
+  screenshotData: components['schemas']['ScreenshotModel'];
   onDelete: (id: number) => void;
 }
 

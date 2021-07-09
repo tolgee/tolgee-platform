@@ -6,12 +6,13 @@ import {
   TranslationsContext,
   useTranslationsDispatch,
 } from './TranslationsContext';
-import { Cell } from './Cell';
+import { CellData } from './CellData';
 import { resizeColumn, useResize } from './tableTools';
 import { ColumnResizer } from './ColumnResizer';
 import { CellPlain } from './CellPlain';
 import { CellLanguage } from './CellLanguage';
 import { SortableHeading } from './SortableHeading';
+import { CellKey } from './CellKey';
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.divider;
@@ -78,6 +79,8 @@ export const TranslationsTable = () => {
     TranslationsContext,
     (v) => v.translations
   );
+  const selectedLanguages =
+    useContextSelector(TranslationsContext, (v) => v.selectedLanguages) || [];
 
   const languages = useContextSelector(TranslationsContext, (v) => v.languages);
   const isFetchingMore = useContextSelector(
@@ -96,14 +99,6 @@ export const TranslationsTable = () => {
   };
 
   const data = useMemo(() => translations || [], [translations]);
-
-  const selectedLanguages = useMemo(
-    () =>
-      data?.[0]?.translations && languages
-        ? Object.keys(data[0].translations)
-        : [],
-    [data, languages]
-  );
 
   const [columnsOrder, setColumnsOrder] = useState<string[]>([]);
 
@@ -183,6 +178,10 @@ export const TranslationsTable = () => {
     };
   }, [handleFetchMore, containerRef]);
 
+  if (!translations) {
+    return null;
+  }
+
   return (
     <div className={classes.table} ref={tableRef}>
       <div className={classes.rowWrapper}>
@@ -230,12 +229,21 @@ export const TranslationsTable = () => {
                       className={classes.cell}
                       style={{ flexBasis: columnSizes[i] || 0 }}
                     >
-                      <Cell
-                        keyId={row.keyId}
-                        keyName={row.keyName}
-                        language={col.language?.tag}
-                        text={col.accessor(row)}
-                      />
+                      {col.language ? (
+                        <CellData
+                          keyId={row.keyId}
+                          keyName={row.keyName}
+                          language={col.language?.tag}
+                          text={col.accessor(row)}
+                        />
+                      ) : (
+                        <CellKey
+                          keyId={row.keyId}
+                          keyName={row.keyName}
+                          text={col.accessor(row)}
+                          screenshotCount={row.screenshotCount}
+                        />
+                      )}
                     </div>
                   );
                 })}
