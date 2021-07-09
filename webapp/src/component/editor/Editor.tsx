@@ -37,6 +37,7 @@ type Props = {
   onSave?: (nextDirection: DirectionType) => void;
   onCancel?: () => void;
   autoFocus?: boolean;
+  language?: 'icu' | 'plaintext';
 };
 
 export type DirectionType = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
@@ -50,6 +51,7 @@ export const Editor = ({
   onSave,
   onCancel,
   autoFocus,
+  language = 'icu',
 }: Props) => {
   const [dynamicHeight, setDynamicHeight] = useState(
     minHeight as string | number | undefined
@@ -118,7 +120,7 @@ export const Editor = ({
     <div className={classes.wrapper}>
       <MonacoEditor
         defaultValue={initialValue}
-        defaultLanguage="icu"
+        defaultLanguage={language}
         height={dynamicHeight}
         loading={<></>}
         options={{
