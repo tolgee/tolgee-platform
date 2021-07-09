@@ -4,19 +4,19 @@ import { IconButton, Checkbox, Box, makeStyles } from '@material-ui/core';
 import { Done, Close, Edit, CameraAlt } from '@material-ui/icons';
 
 import { Editor } from 'tg.component/editor/Editor';
-import { useEditableCell } from '../useEditableCell';
+import { useEditableCell } from './TranslationsTable/useEditableCell';
 import {
   TranslationsContext,
   useTranslationsDispatch,
-} from '../TranslationsContext';
-import { ScreenshotsPopover } from '../Screenshots/ScreenshotsPopover';
+} from './TranslationsContext';
+import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
 import { CellPlain } from './CellPlain';
 import { CellControls } from './CellControls';
 
 const useStyles = makeStyles({
   cell: {
     '&:hover $controls': {
-      display: undefined,
+      display: 'flex',
     },
   },
   controls: {
