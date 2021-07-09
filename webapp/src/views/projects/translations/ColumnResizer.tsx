@@ -10,10 +10,12 @@ const useStyles = makeStyles({
     position: 'absolute',
     top: 0,
     width: 5,
-    marginLeft: -4,
+    marginLeft: -2,
+    background: 'transparent',
     cursor: 'col-resize',
     '&:hover': {
       background: 'lightgray',
+      transition: 'background 0.5s step-end',
     },
   },
 });
@@ -62,8 +64,9 @@ export const ColumnResizer: React.FC<Props> = ({ size, left, onResize }) => {
       <div
         style={{
           left: offset,
-          height: isDragging ? '100%' : 20,
-          backgroundColor: isDragging ? 'darkgrey' : undefined,
+          height: '100%',
+          background: isDragging ? 'darkgrey' : undefined,
+          ...(isDragging && { transition: 'background 0s' }),
         }}
         className={classes.draggable}
       />

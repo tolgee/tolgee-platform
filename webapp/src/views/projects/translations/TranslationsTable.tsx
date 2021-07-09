@@ -9,39 +9,60 @@ import {
 import { Cell } from './Cell';
 import { resizeColumn, useResize } from './tableTools';
 import { ColumnResizer } from './ColumnResizer';
+import { CellPlain } from './CellPlain';
+import { CellLanguage } from './CellLanguage';
+import { SortableHeading } from './SortableHeading';
 
-const useStyles = makeStyles(() => {
+const useStyles = makeStyles((theme) => {
+  const borderColor = theme.palette.divider;
   return {
     table: {
-      marginTop: 10,
-      width: '100%',
       position: 'relative',
+      margin: '10px -56px 0px -10px',
+      borderLeft: 0,
+      borderRight: 0,
+      '& $rowWrapper:last-of-type': {
+        borderWidth: '1px 0px 1px 0px',
+      },
     },
-    headerRow: {
-      display: 'flex',
-      position: 'relative',
+    rowWrapper: {
+      margin: '0px 0px 0px -46px',
+      padding: '0px 0px 0px 46px',
+      border: `1px solid ${borderColor}`,
+      borderWidth: '1px 0px 0px 0px',
     },
     resizer: {
       width: 3,
       background: 'black',
     },
-    dataRow: {
+    row: {
       display: 'flex',
     },
     headerCell: {
+      boxSizing: 'border-box',
       display: 'flex',
       flexBasis: 1,
       alignItems: 'stretch',
-      position: 'relative',
+      flexGrow: 0,
+      borderLeft: `1px solid ${borderColor}`,
+    },
+    keyCell: {
+      boxSizing: 'border-box',
+      display: 'flex',
+      flexBasis: 1,
+      alignItems: 'stretch',
+      flexGrow: 0,
     },
     cell: {
       boxSizing: 'border-box',
       display: 'flex',
       flexBasis: 1,
       alignItems: 'stretch',
-      paddingRight: 5,
       flexGrow: 0,
       overflow: 'hidden',
+      '& + &': {
+        borderLeft: `1px solid ${borderColor}`,
+      },
     },
   };
 });
@@ -76,18 +97,49 @@ export const TranslationsTable = () => {
 
   const data = useMemo(() => translations || [], [translations]);
 
+  const selectedLanguages = useMemo(
+    () =>
+      data?.[0]?.translations && languages
+        ? Object.keys(data[0].translations)
+        : [],
+    [data, languages]
+  );
+
+  const [columnsOrder, setColumnsOrder] = useState<string[]>([]);
+
+  useEffect(() => {
+    const newOrder = [
+      ...columnsOrder?.filter((tag) => selectedLanguages.includes(tag)),
+      ...selectedLanguages.filter((tag) => !columnsOrder.includes(tag)),
+    ];
+    setColumnsOrder(newOrder);
+  }, [translations, languages]);
+
+  const handleColmnsSwap = (a, b) => {
+    const arr = [...columnsOrder];
+    [arr[a], arr[b]] = [arr[b], arr[a]];
+    setColumnsOrder(arr);
+  };
+
   const columns = useMemo(
     () => [
-      { Header: 'Klíč', lang: undefined, accessor: (item) => item.keyName },
-      ...(languages
-        ?.filter((l) => data?.[0]?.translations[l.tag])
-        .map((l) => ({
-          Header: l.name,
-          lang: l.tag,
-          accessor: (item) => item.translations[l.tag]?.text,
-        })) || []),
+      {
+        id: 'key',
+        label: 'Klíč',
+        language: undefined,
+        accessor: (item) => item.keyName,
+      },
+      ...(columnsOrder?.map((tag) => {
+        const lang = languages!.find((l) => l.tag === tag)!;
+        return {
+          id: String(lang.tag),
+          label: lang.name,
+          language: lang,
+          accessor: (item) => item.translations[lang.tag]?.text,
+        };
+      }) || []),
     ],
-    [translations, languages]
+    [columnsOrder]
   );
 
   const [columnSizes, setColumnSizes] = useState(columns.map(() => 1));
@@ -133,16 +185,26 @@ export const TranslationsTable = () => {
 
   return (
     <div className={classes.table} ref={tableRef}>
-      <div className={classes.headerRow}>
-        {columns.map((column, i) => (
-          <div
-            key={i}
-            className={classes.headerCell}
-            style={{ flexBasis: columnSizes[i] || 0 }}
-          >
-            {column.Header}
-          </div>
-        ))}
+      <div className={classes.rowWrapper}>
+        <div className={classes.row}>
+          <SortableHeading
+            onSwap={handleColmnsSwap}
+            columns={columns.map((col, i) => ({
+              id: String(col.language?.tag || 'key'),
+              width: columnSizes[i],
+              draggable: Boolean(col.language),
+              item: col.language ? (
+                <div className={classes.headerCell}>
+                  <CellLanguage language={col.language} />
+                </div>
+              ) : (
+                <div className={classes.keyCell}>
+                  <CellPlain>{col.label}</CellPlain>
+                </div>
+              ),
+            }))}
+          />
+        </div>
       </div>
       {columnSizes.slice(0, -1).map((w, i) => {
         const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
@@ -159,23 +221,25 @@ export const TranslationsTable = () => {
       <div>
         {data.map((row) => {
           return (
-            <div key={row.keyId} className={classes.dataRow}>
-              {columns.map((col, i) => {
-                return (
-                  <div
-                    key={col.lang || 'key'}
-                    className={classes.cell}
-                    style={{ flexBasis: columnSizes[i] || 0 }}
-                  >
-                    <Cell
-                      keyId={row.keyId}
-                      keyName={row.keyName}
-                      language={col.lang}
-                      text={col.accessor(row)}
-                    />
-                  </div>
-                );
-              })}
+            <div key={row.keyId} className={classes.rowWrapper}>
+              <div className={classes.row}>
+                {columns.map((col, i) => {
+                  return (
+                    <div
+                      key={col.language?.tag || 'key'}
+                      className={classes.cell}
+                      style={{ flexBasis: columnSizes[i] || 0 }}
+                    >
+                      <Cell
+                        keyId={row.keyId}
+                        keyName={row.keyName}
+                        language={col.language?.tag}
+                        text={col.accessor(row)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           );
         })}
