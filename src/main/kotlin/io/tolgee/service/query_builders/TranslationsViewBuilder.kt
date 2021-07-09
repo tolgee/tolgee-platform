@@ -94,7 +94,8 @@ class TranslationsViewBuilder(
       selection[KeyWithTranslationsView::translations.name + "." + language.tag] = languageTag
       groupByExpressions.add(languageTag)
       val translationId = translations.get(Translation_.id)
-      selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::id.name] = translationId
+      selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::id.name] =
+        translationId
       groupByExpressions.add(translationId)
 
       val translationTextField = translations.get(Translation_.text)
