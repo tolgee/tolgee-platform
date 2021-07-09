@@ -1,4 +1,8 @@
 spring:
+  data:
+    redis:
+      repositories:
+        enabled: false
   datasource:
     url: jdbc:h2:${user.home}/.tolgee/db.h2;AUTO_SERVER=TRUE
   #    username: sa
@@ -58,3 +62,7 @@ server:
     include-stacktrace: never
 sentry:
   dsn: ${tolgee.sentry.server-dsn:}
+management:
+  health:
+    ldap:
+      enabled: false

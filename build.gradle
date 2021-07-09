@@ -135,6 +135,7 @@ def LIQUIBASE_VERSION = "4.3.5"
 def LIQUIBASE_HIBERNATE_VERSION = "4.3.5"
 def JJWT_VERSION = "0.11.2"
 def SPRING_DOC_VERSION = "1.5.9"
+def NETTY_SOCKET_IO_VERSION = "1.7.19"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -194,11 +195,14 @@ dependencies {
     testImplementation('org.mockito.kotlin:mockito-kotlin:3.2.0')
     testCompile("io.findify:s3mock_2.13:0.2.6")
     implementation group: 'com.ibm.icu', name: 'icu4j', version: '69.1'
+    implementation("com.corundumstudio.socketio:netty-socketio:$NETTY_SOCKET_IO_VERSION")
     ktlint("com.pinterest:ktlint:0.41.0") {
         attributes {
             attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
         }
     }
+    implementation("org.redisson:redisson-spring-boot-starter:3.15.6")
+    testImplementation("io.socket:socket.io-client:1.0.1")
 }
 
 test {

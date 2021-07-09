@@ -16,4 +16,5 @@ interface KeyRepository : JpaRepository<Key, Long> {
   @Query("select k.id from Key k where k.project.id = :projectId")
   fun getIdsByProjectId(projectId: Long?): List<Long>
   fun deleteAllByIdIn(ids: Collection<Long>)
+  fun findAllByIdIn(ids: Collection<Long>): List<Key>
 }

@@ -29,6 +29,10 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
     return getProjectPermission(projectId) ?: throw PermissionException()
   }
 
+  fun checkAnyProjectPermission(projectId: Long, user: UserAccount): ProjectPermissionType {
+    return getProjectPermission(projectId, user) ?: throw PermissionException()
+  }
+
   fun checkProjectPermission(projectId: Long, requiredPermission: ProjectPermissionType): ProjectPermissionType {
     val usersPermission = checkAnyProjectPermission(projectId)
     if (requiredPermission.power > usersPermission.power) {
@@ -37,22 +41,22 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
     return usersPermission
   }
 
-  fun checkApiKeyScopes(scopes: Set<ApiScope>, project: Project?) {
-    if (!apiKeyService.getAvailableScopes(activeUser, project!!).containsAll(scopes)) {
+  fun checkApiKeyScopes(scopes: Set<ApiScope>, project: Project?, user: UserAccount = activeUser) {
+    if (!apiKeyService.getAvailableScopes(user, project!!).containsAll(scopes)) {
       throw PermissionException()
     }
   }
 
   fun checkApiKeyScopes(scopes: Set<ApiScope>, apiKey: ApiKey) {
     // checks if user's has permissions to use api key with api key's permissions
-    checkApiKeyScopes(scopes, apiKey.project)
+    checkApiKeyScopes(scopes, apiKey.project, apiKey.userAccount)
     if (!apiKey.scopesEnum.containsAll(scopes)) {
       throw PermissionException()
     }
   }
 
-  private fun getProjectPermission(projectId: Long): ProjectPermissionType? {
-    return permissionService.getProjectPermissionType(projectId, activeUser)
+  private fun getProjectPermission(projectId: Long, user: UserAccount = activeUser): ProjectPermissionType? {
+    return permissionService.getProjectPermissionType(projectId, user)
   }
 
   private val activeUser: UserAccount
