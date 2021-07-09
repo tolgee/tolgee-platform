@@ -1,4 +1,3 @@
-import { Box } from '@material-ui/core';
 import React from 'react';
 import { useState } from 'react';
 import { useContextSelector } from 'use-context-selector';
@@ -10,6 +9,7 @@ import {
   useTranslationsDispatch,
 } from './TranslationsContext';
 import { useEffect } from 'react';
+import { CellPlain } from './CellPlain';
 
 type Props = {
   text: string;
@@ -66,13 +66,9 @@ export const Cell: React.FC<Props> = React.memo(function Cell({
   };
 
   return (
-    <Box
+    <CellPlain
       onClick={switchToEdit}
-      width="100%"
-      minHeight="1.5em"
-      whiteSpace="nowrap"
-      overflow="hidden"
-      textOverflow="ellipsis"
+      background={isEditing ? '#efefef' : undefined}
     >
       {isEditing ? (
         <Editor
@@ -87,6 +83,6 @@ export const Cell: React.FC<Props> = React.memo(function Cell({
       ) : (
         text
       )}
-    </Box>
+    </CellPlain>
   );
 });
