@@ -3,10 +3,13 @@ import React from 'react';
 import { useState } from 'react';
 import { useContextSelector } from 'use-context-selector';
 
+import { Editor, DirectionType } from 'tg.component/editor/Editor';
+
 import {
   TranslationsContext,
   useTranslationsDispatch,
 } from './TranslationsContext';
+import { useEffect } from 'react';
 
 type Props = {
   text: string;
@@ -28,6 +31,12 @@ export const Cell: React.FC<Props> = React.memo(function Cell({
   );
   const dispatch = useTranslationsDispatch();
 
+  useEffect(() => {
+    if (isEditing) {
+      setValue(text);
+    }
+  }, [isEditing]);
+
   const switchToEdit = () => {
     dispatch({
       type: 'SET_EDIT',
@@ -39,7 +48,7 @@ export const Cell: React.FC<Props> = React.memo(function Cell({
     });
   };
 
-  const handleSave = () => {
+  const handleSave = (direction: DirectionType) => {
     dispatch({
       type: 'CHANGE_FIELD',
       payload: {
@@ -47,9 +56,13 @@ export const Cell: React.FC<Props> = React.memo(function Cell({
         keyName,
         language,
         value,
-        after: 'GO_TO_NEXT_KEY',
+        after: direction,
       },
     });
+  };
+
+  const handleEditCancel = () => {
+    dispatch({ type: 'SET_EDIT', payload: undefined });
   };
 
   return (
@@ -62,14 +75,14 @@ export const Cell: React.FC<Props> = React.memo(function Cell({
       textOverflow="ellipsis"
     >
       {isEditing ? (
-        <input
+        <Editor
+          minHeight={100}
+          initialValue={value}
+          variables={[]}
+          onChange={(v) => setValue(v as string)}
+          onSave={handleSave}
+          onCancel={handleEditCancel}
           autoFocus
-          style={{
-            width: '100%',
-          }}
-          value={value}
-          onChange={(e) => setValue(e.currentTarget.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSave()}
         />
       ) : (
         text

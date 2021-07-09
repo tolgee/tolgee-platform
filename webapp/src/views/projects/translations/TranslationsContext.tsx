@@ -25,18 +25,19 @@ type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
 
 type ActionType =
-  | { type: 'SET_EDIT'; payload: CellLocation }
+  | { type: 'SET_EDIT'; payload: CellLocation | undefined }
   | { type: 'EDIT_NEXT' }
+  | { type: 'EDIT_MOVE'; payload: Direction }
   | { type: 'SET_SEARCH'; payload: string }
   | { type: 'TOGGLE_SELECT'; payload: string }
   | { type: 'CHANGE_FIELD'; payload: ChangeValueType }
   | { type: 'FETCH_MORE' };
 
-type AfterCellUpdate = undefined | 'GO_TO_NEXT_KEY';
+type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
 type ChangeValueType = CellLocation & {
   value: string;
-  after?: AfterCellUpdate;
+  after?: Direction;
 };
 
 type CellLocation = {
@@ -146,14 +147,19 @@ export const TranslationsContextProvider: React.FC<{
     method: 'put',
   });
 
-  const afterCellUpdateAction = (action: AfterCellUpdate) => {
+  const moveEditToDirection = (direction: Direction | undefined) => {
     const currentIndex = fixedTranslations.findIndex(
       (k) => k.keyId === edit?.keyId
     );
+    if (currentIndex === -1 || !direction) {
+      setEdit(undefined);
+      return;
+    }
     let nextKey = undefined as KeyWithTranslationsModelType | undefined;
-    if (action === 'GO_TO_NEXT_KEY') {
-      nextKey =
-        currentIndex !== -1 ? fixedTranslations[currentIndex + 1] : undefined;
+    if (direction === 'DOWN') {
+      nextKey = fixedTranslations[currentIndex + 1];
+    } else if (direction === 'UP') {
+      nextKey = fixedTranslations[currentIndex - 1];
     }
     setEdit(
       nextKey
@@ -166,8 +172,8 @@ export const TranslationsContextProvider: React.FC<{
     const key = fixedTranslations.find((k) => k.keyId === edit?.keyId);
     if (key) {
       return edit?.language
-        ? key.translations[edit.language]?.text || ''
-        : key.keyName || '';
+        ? key.translations[edit.language]?.text
+        : key.keyName;
     }
   };
 
@@ -236,7 +242,7 @@ export const TranslationsContextProvider: React.FC<{
       case 'CHANGE_FIELD':
         return mutateTranslation(action.payload)
           .then(() => {
-            afterCellUpdateAction(action.payload.after);
+            moveEditToDirection(action.payload.after);
           })
           .catch((e) => {
             const parsed = parseErrorResponse(e);
