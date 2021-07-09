@@ -119,6 +119,7 @@ const Item: React.FC<ItemProps> = ({ item, index, moveCard }) => {
     <div
       style={{
         flexBasis: item.width || 0,
+        overflow: 'hidden',
         position: 'relative',
         opacity,
       }}

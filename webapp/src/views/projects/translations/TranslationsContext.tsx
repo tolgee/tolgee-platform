@@ -36,7 +36,8 @@ type ActionType =
   | { type: 'SELECT_LANGUAGES'; payload: string[] | undefined }
   | { type: 'UPDATE_SCREENSHOT_COUNT'; payload: ChangeScreenshotNum }
   | { type: 'CHANGE_VIEW'; payload: ViewType }
-  | { type: 'UPDATE_LANGUAGES' };
+  | { type: 'UPDATE_LANGUAGES' }
+  | { type: 'DELETE_TRANSLATIONS'; payload: number[] };
 
 export type ViewType = 'TABLE' | 'LIST';
 
@@ -176,6 +177,11 @@ export const TranslationsContextProvider: React.FC<{
     method: 'put',
   });
 
+  const deleteKeys = useApiMutation({
+    url: '/v2/projects/{projectId}/keys/{ids}',
+    method: 'delete',
+  });
+
   const moveEditToDirection = (direction: Direction | undefined) => {
     const currentIndex = fixedTranslations.findIndex(
       (k) => k.keyId === edit?.keyId
@@ -308,6 +314,31 @@ export const TranslationsContextProvider: React.FC<{
         return;
       case 'CHANGE_VIEW':
         setView(action.payload);
+        return;
+      case 'DELETE_TRANSLATIONS':
+        confirmation({
+          title: <T>translations_delete_selected</T>,
+          message: (
+            <T parameters={{ count: String(action.payload.length) }}>
+              translations_key_delete_confirmation_text
+            </T>
+          ),
+          onConfirm() {
+            deleteKeys.mutate(
+              {
+                path: { projectId: props.projectId, ids: action.payload },
+              },
+              {
+                onSuccess() {
+                  updateQuery({});
+                  messaging.success(
+                    <T>Translation grid - Successfully deleted!</T>
+                  );
+                },
+              }
+            );
+          },
+        });
         return;
     }
   };

@@ -3,6 +3,7 @@ import { makeStyles, Box, CircularProgress } from '@material-ui/core';
 import ReactList from 'react-list';
 import { useContextSelector } from 'use-context-selector';
 
+import { components } from 'tg.service/apiSchema.generated';
 import {
   TranslationsContext,
   useTranslationsDispatch,
@@ -11,6 +12,8 @@ import { CellKey } from '../CellKey';
 import { LanguagesRow } from './LanguagesRow';
 import { useResize, resizeColumn } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
+
+type LanguageModel = components['schemas']['LanguageModel'];
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.divider;
@@ -119,11 +122,11 @@ export const TranslationsList = () => {
 
   const languagesRow = useMemo(
     () =>
-      selectedLanguages
+      (selectedLanguages
         ?.map((tag) => {
-          return languages!.find((l) => l.tag === tag)!;
+          return languages?.find((l) => l.tag === tag);
         })
-        .filter(Boolean) || [],
+        .filter(Boolean) as LanguageModel[]) || [],
     [languages, selectedLanguages]
   );
 

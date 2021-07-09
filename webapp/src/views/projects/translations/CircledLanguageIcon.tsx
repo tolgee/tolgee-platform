@@ -18,6 +18,7 @@ export const CircledLanguageIcon: React.FC<Props> = ({ flag }) => {
       width={size}
       height={size}
       border="1px solid grey"
+      flexShrink="0"
     >
       <FlagImage
         height={Math.floor(size * 0.7) * 2}

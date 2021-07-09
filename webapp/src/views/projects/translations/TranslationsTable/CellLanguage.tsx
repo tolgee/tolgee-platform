@@ -13,6 +13,7 @@ const useStyles = makeStyles({
     alignItems: 'center',
     position: 'relative',
     flexGrow: 1,
+    flexShrink: 0,
     '& > * + *': {
       marginLeft: '5px',
     },

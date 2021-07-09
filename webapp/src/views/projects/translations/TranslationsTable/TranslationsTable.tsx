@@ -55,6 +55,7 @@ const useStyles = makeStyles((theme) => {
       alignItems: 'stretch',
       flexGrow: 0,
       borderLeft: `1px solid ${borderColor}`,
+      overflow: 'hidden',
     },
     keyCell: {
       boxSizing: 'border-box',
