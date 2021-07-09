@@ -102,7 +102,7 @@ const Item: React.FC<ItemProps> = ({ item, index, moveCard }) => {
     },
   });
 
-  const [{ isDragging }, drag] = useDrag({
+  const [{ isDragging }, drag, preview] = useDrag({
     type: 'card',
     item: () => {
       return { id: item.id, index };
@@ -113,7 +113,7 @@ const Item: React.FC<ItemProps> = ({ item, index, moveCard }) => {
   });
 
   const opacity = isDragging ? 0.3 : 1;
-  drag(drop(ref));
+  preview(drop(ref));
 
   return (
     <div
@@ -123,9 +123,21 @@ const Item: React.FC<ItemProps> = ({ item, index, moveCard }) => {
         opacity,
       }}
       ref={ref}
-      data-handler-id={handlerId}
     >
       {item.item}
+      <div
+        style={{
+          width: '12px',
+          height: '100%',
+          background: 'lightgrey',
+          position: 'absolute',
+          right: 5,
+          top: 0,
+          cursor: 'grab',
+        }}
+        ref={drag}
+        data-handler-id={handlerId}
+      />
     </div>
   );
 };

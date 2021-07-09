@@ -1,6 +1,7 @@
 import { useMemo, useRef, useCallback, useEffect, useState } from 'react';
 import { useContextSelector } from 'use-context-selector';
-import { CircularProgress, Box, makeStyles } from '@material-ui/core';
+import { makeStyles, Box, CircularProgress } from '@material-ui/core';
+import ReactList from 'react-list';
 
 import {
   TranslationsContext,
@@ -31,6 +32,14 @@ const useStyles = makeStyles((theme) => {
       padding: '0px 0px 0px 46px',
       border: `1px solid ${borderColor}`,
       borderWidth: '1px 0px 0px 0px',
+    },
+    headerRow: {
+      position: 'sticky',
+      background: 'white',
+      zIndex: 1,
+      top: 0,
+      borderWidth: '1px 0px 1px 0px',
+      marginBottom: -1,
     },
     resizer: {
       width: 3,
@@ -72,7 +81,6 @@ export const TranslationsTable = () => {
   const tableRef = useRef<HTMLDivElement>(null);
 
   const classes = useStyles();
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const dispatch = useTranslationsDispatch();
   const translations = useContextSelector(
@@ -91,14 +99,6 @@ export const TranslationsTable = () => {
     TranslationsContext,
     (v) => v.hasMoreToFetch
   );
-
-  const options = {
-    root: null,
-    rootMargin: '0px',
-    treshold: 1.0,
-  };
-
-  const data = useMemo(() => translations || [], [translations]);
 
   const [columnsOrder, setColumnsOrder] = useState<string[]>([]);
 
@@ -139,7 +139,7 @@ export const TranslationsTable = () => {
 
   const [columnSizes, setColumnSizes] = useState(columns.map(() => 1));
 
-  const { width } = useResize(tableRef);
+  const { width } = useResize(tableRef, translations);
 
   const handleColumnResize = (i: number) => (size: number) => {
     setColumnSizes(resizeColumn(columnSizes, i, size));
@@ -155,28 +155,11 @@ export const TranslationsTable = () => {
     setColumnSizes(newSizes);
   }, [width, columns]);
 
-  const handleFetchMore = useCallback(
-    (e) => {
-      if (e[0].isIntersecting && translations) {
-        dispatch({
-          type: 'FETCH_MORE',
-        });
-      }
-    },
-    [translations]
-  );
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(handleFetchMore, options);
-    if (containerRef.current) {
-      observer.observe(containerRef!.current);
-    }
-    return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
-      }
-    };
-  }, [handleFetchMore, containerRef]);
+  const handleFetchMore = useCallback(() => {
+    dispatch({
+      type: 'FETCH_MORE',
+    });
+  }, [translations]);
 
   if (!translations) {
     return null;
@@ -184,7 +167,7 @@ export const TranslationsTable = () => {
 
   return (
     <div className={classes.table} ref={tableRef}>
-      <div className={classes.rowWrapper}>
+      <div className={`${classes.rowWrapper} ${classes.headerRow}`}>
         <div className={classes.row}>
           <SortableHeading
             onSwap={handleColmnsSwap}
@@ -217,8 +200,21 @@ export const TranslationsTable = () => {
         );
       })}
 
-      <div>
-        {data.map((row) => {
+      <ReactList
+        threshold={200}
+        type="variable"
+        itemSizeEstimator={(index, cache) => {
+          const isLast = index === translations.length - 1;
+          return cache[index] || 40 + (isLast ? 200 : 0);
+        }}
+        length={translations.length}
+        useTranslate3d
+        itemRenderer={(index) => {
+          const row = translations[index];
+          const isLast = index === translations.length - 1;
+          if (isLast && !isFetchingMore && hasMoreToFetch) {
+            handleFetchMore();
+          }
           return (
             <div key={row.keyId} className={classes.rowWrapper}>
               <div className={classes.row}>
@@ -248,26 +244,20 @@ export const TranslationsTable = () => {
                   );
                 })}
               </div>
+              {isLast && isFetchingMore && (
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  minHeight={200}
+                >
+                  <CircularProgress />
+                </Box>
+              )}
             </div>
           );
-        })}
-      </div>
-      {hasMoreToFetch && (
-        <>
-          <div
-            ref={containerRef}
-            style={{
-              position: 'relative',
-              top: -200,
-              height: 200,
-              pointerEvents: 'none',
-            }}
-          />
-          <Box display="flex" justifyContent="center" minHeight={200}>
-            {isFetchingMore && <CircularProgress />}
-          </Box>
-        </>
-      )}
+        }}
+      />
     </div>
   );
 };

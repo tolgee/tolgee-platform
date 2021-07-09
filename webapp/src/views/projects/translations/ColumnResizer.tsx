@@ -2,7 +2,6 @@ import { makeStyles } from '@material-ui/core';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import Draggable from 'react-draggable';
-import { useDebounce } from 'use-debounce/lib';
 
 const useStyles = makeStyles({
   draggable: {
@@ -33,10 +32,9 @@ export const ColumnResizer: React.FC<Props> = ({ size, left, onResize }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const [debouncedPos] = useDebounce(position.x, 300);
   useEffect(() => {
     onResize(originalSize + position.x);
-  }, [debouncedPos, isDragging]);
+  }, [position, isDragging]);
 
   useEffect(() => {
     if (!isDragging) {
