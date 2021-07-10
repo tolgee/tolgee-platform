@@ -22,49 +22,49 @@ class TranslationsSocketIoModule(
     translationsConnectionListener.listen()
   }
 
+  fun onKeyCreated(key: Key) {
+    onKeyChange(key, TranslationEvent.KEY_CREATED)
+  }
+
   fun onKeyModified(key: Key, oldName: String) {
     key.project?.getRoomName()?.let { roomName ->
       namespace.getRoomOperations(roomName).sendEvent(
-        "key_modified",
+        TranslationEvent.KEY_MODIFIED.eventName,
         KeyModifiedModel(key.id, key.name, oldName)
       )
     }
   }
 
-  fun onKeyCreated(key: Key) {
-    onKeyChange(key, "key_created")
-  }
-
   fun onKeyDeleted(key: Key) {
-    onKeyChange(key, "key_deleted")
+    onKeyChange(key, TranslationEvent.KEY_DELETED)
   }
 
-  fun onKeyChange(key: Key, eventName: String) {
+  fun onKeyChange(key: Key, event: TranslationEvent) {
     key.project?.getRoomName()?.let { roomName ->
       namespace.getRoomOperations(roomName).sendEvent(
-        eventName,
+        event.eventName,
         keyModelAssembler.toModel(key)
       )
     }
   }
 
-  fun onTranslationsModified(translations: Collection<Translation>) {
-    onTranslationsChange(translations, "translation_modified")
+  fun onTranslationsCreated(translations: Collection<Translation>) {
+    onTranslationsChange(translations, TranslationEvent.TRANSLATION_CREATED)
   }
 
-  fun onTranslationsCreated(translations: Collection<Translation>) {
-    onTranslationsChange(translations, "translation_created")
+  fun onTranslationsModified(translations: Collection<Translation>) {
+    onTranslationsChange(translations, TranslationEvent.TRANSLATION_MODIFIED)
   }
 
   fun onTranslationsDeleted(translations: Collection<Translation>) {
-    onTranslationsChange(translations, "translation_deleted")
+    onTranslationsChange(translations, TranslationEvent.TRANSLATION_DELETED)
   }
 
-  fun onTranslationsChange(translations: Collection<Translation>, eventName: String) {
+  fun onTranslationsChange(translations: Collection<Translation>, event: TranslationEvent) {
     translations.map { translation ->
       translation.key?.project?.getRoomName()?.let { roomName ->
         namespace.getRoomOperations(roomName).sendEvent(
-          eventName,
+          event.eventName,
           TranslationWithKeyModel(
             id = translation.id,
             text = translation.text,
