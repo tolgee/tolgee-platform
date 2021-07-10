@@ -16,12 +16,13 @@ import org.springframework.test.context.ContextConfiguration
 import org.testng.annotations.AfterClass
 import org.testng.annotations.Test
 
-
-@SpringBootTest(properties = [
-  "spring.redis.port=56379",
-  "tolgee.socket-io.enabled=true",
-  "tolgee.socket-io.use-redis=true"
-])
+@SpringBootTest(
+  properties = [
+    "spring.redis.port=56379",
+    "tolgee.socket-io.enabled=true",
+    "tolgee.socket-io.use-redis=true"
+  ]
+)
 @ContextConfiguration(initializers = [SocketIoWithRedisTest.Companion.Initializer::class])
 class SocketIoWithRedisTest : AbstractSocketIoTest() {
   companion object {
