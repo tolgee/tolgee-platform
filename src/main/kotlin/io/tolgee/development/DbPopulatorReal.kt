@@ -218,6 +218,7 @@ class DbPopulatorReal(
     translation.text = english
     key.translations.add(translation)
     key.translations.add(translation)
+    entityManager.persist(key)
     entityManager.persist(translation)
     val translationDe = Translation()
     translationDe.language = de
@@ -225,7 +226,6 @@ class DbPopulatorReal(
     translationDe.text = deutsch
     key.translations.add(translationDe)
     entityManager.persist(translationDe)
-    entityManager.persist(key)
     entityManager.flush()
   }
 
