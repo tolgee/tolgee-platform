@@ -41,8 +41,8 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
     return usersPermission
   }
 
-  fun checkApiKeyScopes(scopes: Set<ApiScope>, project: Project?, user: UserAccount = activeUser) {
-    if (!apiKeyService.getAvailableScopes(user, project!!).containsAll(scopes)) {
+  fun checkApiKeyScopes(scopes: Set<ApiScope>, project: Project?, user: UserAccount? = null) {
+    if (!apiKeyService.getAvailableScopes(user ?: activeUser, project!!).containsAll(scopes)) {
       throw PermissionException()
     }
   }

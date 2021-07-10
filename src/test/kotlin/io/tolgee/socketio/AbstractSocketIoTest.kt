@@ -1,5 +1,6 @@
 package io.tolgee.socketio
 
+import com.corundumstudio.socketio.SocketIOServer
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.tolgee.AbstractSpringTest
@@ -14,6 +15,8 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.json.JSONObject
+import org.springframework.beans.factory.annotation.Autowired
+import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.net.URI
@@ -26,6 +29,9 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
   lateinit var key: Key
 
   var socketPorts = mutableListOf("19090")
+
+  @Autowired
+  lateinit var socketIOServer: SocketIOServer
 
   /**
    * Asserts that event with provided name was triggered by runnable provided in "dispatch" function
@@ -68,6 +74,14 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
     prepareTestData()
     prepareSockets()
   }
+
+
+  @AfterClass
+  fun afterClass() {
+    socketIOServer.stop()
+    sockets.forEach { it.disconnect() }
+  }
+
 
   fun prepareSockets() {
     beforePrepareSockets()
