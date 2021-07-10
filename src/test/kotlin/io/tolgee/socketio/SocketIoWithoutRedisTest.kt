@@ -3,10 +3,12 @@ package io.tolgee.socketio
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.Test
 
-@SpringBootTest(properties = [
-  "tolgee.socket-io.use-redis=false",
-  "tolgee.socket-io.enabled=true"
-])
+@SpringBootTest(
+  properties = [
+    "tolgee.socket-io.use-redis=false",
+    "tolgee.socket-io.enabled=true"
+  ]
+)
 class SocketIoWithoutRedisTest : AbstractSocketIoTest() {
 
   @Test

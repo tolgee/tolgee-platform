@@ -18,7 +18,7 @@ class DockerContainerRunner(
       stop()
     }
     val rmString = if (rm) "--rm" else ""
-    "docker run $rmString -d ${exposeString} --name $containerName $image".runCommand()
+    "docker run $rmString -d $exposeString --name $containerName $image".runCommand()
     waitFor {
       val output = "docker logs $containerName".runCommand()
       output?.contains(waitForLog) ?: false
@@ -54,5 +54,4 @@ class DockerContainerRunner(
   }.onFailure {
     it.printStackTrace()
   }.getOrNull()
-
 }

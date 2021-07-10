@@ -66,7 +66,6 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
   }
 
   fun beforePrepareSockets() {
-
   }
 
   @BeforeClass
@@ -75,13 +74,11 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
     prepareSockets()
   }
 
-
   @AfterClass
   fun afterClass() {
     socketIOServer.stop()
     sockets.forEach { it.disconnect() }
   }
-
 
   fun prepareSockets() {
     beforePrepareSockets()
@@ -130,74 +127,100 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
   }
 
   fun assertKeyModify() {
-    assertNotified("key_modified", {
-      keyService.edit(key, "name edited")
-    }, {
-      assertThatJson(it.toString()).apply {
-        node("id").isValidId
-        node("oldName").isEqualTo("key")
-        node("name").isEqualTo("name edited")
+    assertNotified(
+      "key_modified",
+      {
+        keyService.edit(key, "name edited")
+      },
+      {
+        assertThatJson(it.toString()).apply {
+          node("id").isValidId
+          node("oldName").isEqualTo("key")
+          node("name").isEqualTo("name edited")
+        }
       }
-    })
+    )
   }
 
   fun assertKeyDelete() {
-    assertNotified("key_deleted", {
-      keyService.delete(key.id)
-    }, {
-      assertThatJson(it.toString()).apply {
-        node("id").isValidId
-        node("name").isEqualTo("key")
+    assertNotified(
+      "key_deleted",
+      {
+        keyService.delete(key.id)
+      },
+      {
+        assertThatJson(it.toString()).apply {
+          node("id").isValidId
+          node("name").isEqualTo("key")
+        }
       }
-    })
+    )
   }
 
   fun assertKeyCreate() {
-    assertNotified("key_created", {
-      keyService.create(project, "created_key")
-    }, {
-      assertThatJson(it.toString()).apply {
-        node("id").isValidId
-        node("name").isEqualTo("created_key")
+    assertNotified(
+      "key_created",
+      {
+        keyService.create(project, "created_key")
+      },
+      {
+        assertThatJson(it.toString()).apply {
+          node("id").isValidId
+          node("name").isEqualTo("created_key")
+        }
       }
-    })
+    )
   }
 
   fun assertTranslationModify() {
-    assertNotified("translation_modified", {
-      translationService.saveTranslation(translation.also { it.text = "modified text" })
-    }, {
-      assertThatJson(it.toString()).apply {
-        node("id").isValidId
-        node("text").isEqualTo("modified text")
+    assertNotified(
+      "translation_modified",
+      {
+        translationService.saveTranslation(translation.also { it.text = "modified text" })
+      },
+      {
+        assertThatJson(it.toString()).apply {
+          node("id").isValidId
+          node("text").isEqualTo("modified text")
+        }
       }
-    })
+    )
   }
 
   fun assertTranslationDelete() {
-    assertNotified("translation_deleted", {
-      translationService.deleteIfExists(translation.key!!, "en")
-    }, {
-      assertThatJson(it.toString()).apply {
-        node("id").isValidId
-        node("text").isEqualTo(translation.text)
+    assertNotified(
+      "translation_deleted",
+      {
+        translationService.deleteIfExists(translation.key!!, "en")
+      },
+      {
+        assertThatJson(it.toString()).apply {
+          node("id").isValidId
+          node("text").isEqualTo(translation.text)
+        }
       }
-    })
+    )
   }
 
   @Test
   fun assertTranslationCreate() {
-    assertNotified("translation_created", {
-      translationService.saveTranslation(Translation().apply {
-        text = "created translation"
-        this.key = this@AbstractSocketIoTest.key
-        language = language
-      })
-    }, {
-      assertThatJson(it.toString()).apply {
-        node("id").isValidId
-        node("text").isEqualTo("created translation")
+    assertNotified(
+      "translation_created",
+      {
+        translationService.saveTranslation(
+          Translation().apply {
+            text = "created translation"
+            this.key = this@AbstractSocketIoTest.key
+            language = language
+          }
+        )
+      },
+      {
+        assertThatJson(it.toString()).apply {
+          node("id").isValidId
+          node("text").isEqualTo("created translation")
+        }
       }
-    })
+    )
   }
 }
