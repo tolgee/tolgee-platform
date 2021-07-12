@@ -61,9 +61,8 @@ class StoredDataImporter(
         }
       }
     }
-
-    translationService.saveAll(translationsToSave)
     keyService.saveAll(keysToSave.values)
+    translationService.saveAll(translationsToSave)
 
     keysToSave.values.flatMap {
       it.keyMeta?.comments ?: emptyList()
