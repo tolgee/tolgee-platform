@@ -18,14 +18,18 @@ class PublicConfigurationDTO(
   val needsEmailVerification = properties.authentication.needsEmailVerification
   val userCanCreateProjects = properties.authentication.userCanCreateProjects
   val userCanCreateOrganizations = properties.authentication.userCanCreateOrganizations
-  val socket = SocketIo(properties.socketIo.enabled, properties.socketIo.port)
+  val socket = SocketIo(
+    enabled = properties.socketIo.enabled,
+    port = properties.socketIo.port,
+    serverUrl = properties.socketIo.externalUrl
+  )
 
   class AuthMethodsDTO(val github: GithubPublicConfigDTO)
   data class GithubPublicConfigDTO(val clientId: String?) {
     val isEnabled: Boolean = clientId != null && clientId.isNotEmpty()
   }
 
-  data class SocketIo(val enabled: Boolean, val port: Int)
+  data class SocketIo(val enabled: Boolean, val port: Int, val serverUrl: String?)
 
   init {
     if (isAuthentication) {

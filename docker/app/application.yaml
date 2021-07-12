@@ -1,4 +1,8 @@
 tolgee:
+  data:
+    redis:
+      repositories:
+        enabled: false
   file-storage:
     fs-data-path: /data
   authentication:
