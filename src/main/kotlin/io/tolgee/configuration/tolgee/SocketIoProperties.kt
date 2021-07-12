@@ -8,5 +8,5 @@ class SocketIoProperties(
   var port: Int = 9090,
   var host: String? = null,
   var useRedis: Boolean = false,
-  var externalUrl: String?
+  var externalUrl: String? = null
 )
