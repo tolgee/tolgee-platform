@@ -12,6 +12,7 @@ import { LanguageEditView } from './languages/LanguageEditView';
 import { ProjectPermissionsView } from './permissions/ProjectPermissionsVIew';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { TranslationView } from './translations/TranslationView';
+import { SocketIoPreview } from 'tg.views/projects/SocketIoPreview';
 
 export const ProjectRouter = () => {
   const match = useRouteMatch();
@@ -48,6 +49,10 @@ export const ProjectRouter = () => {
 
           <Route exact path={LINKS.PROJECT_EXPORT.template}>
             <ExportView />
+          </Route>
+
+          <Route exact path={LINKS.PROJECT_SOCKET_IO_PREVIEW.template}>
+            <SocketIoPreview />
           </Route>
         </ProjectPage>
       </ProjectProvider>
