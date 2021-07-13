@@ -42,6 +42,12 @@ export interface RemoteConfigurationDTO {
   needsEmailVerification: boolean;
   userCanCreateOrganizations: boolean;
   userCanCreateProjects: boolean;
+  socket: {
+    enabled: boolean;
+    port: number;
+    serverUrl?: string;
+    allowedTransports: ('websocket' | 'polling')[];
+  };
 }
 
 export interface TokenDTO {

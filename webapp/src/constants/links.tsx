@@ -191,4 +191,9 @@ export class LINKS {
   static PROJECT_IMPORT = Link.ofParent(LINKS.PROJECT, 'import');
 
   static PROJECT_EXPORT = Link.ofParent(LINKS.PROJECT, 'export');
+
+  static PROJECT_SOCKET_IO_PREVIEW = Link.ofParent(
+    LINKS.PROJECT,
+    'socket_io_preview'
+  );
 }
