@@ -21,7 +21,8 @@ class PublicConfigurationDTO(
   val socket = SocketIo(
     enabled = properties.socketIo.enabled,
     port = properties.socketIo.port,
-    serverUrl = properties.socketIo.externalUrl
+    serverUrl = properties.socketIo.externalUrl,
+    allowedTransports = properties.socketIo.allowedTransports
   )
 
   class AuthMethodsDTO(val github: GithubPublicConfigDTO)
@@ -29,7 +30,7 @@ class PublicConfigurationDTO(
     val isEnabled: Boolean = clientId != null && clientId.isNotEmpty()
   }
 
-  data class SocketIo(val enabled: Boolean, val port: Int, val serverUrl: String?)
+  data class SocketIo(val enabled: Boolean, val port: Int, val serverUrl: String?, val allowedTransports: List<String>)
 
   init {
     if (isAuthentication) {
