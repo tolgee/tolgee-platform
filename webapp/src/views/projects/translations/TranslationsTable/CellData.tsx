@@ -23,6 +23,7 @@ type Props = {
   keyId: number;
   keyName: string;
   language: string | undefined;
+  editEnabled: boolean;
 };
 
 export const CellData: React.FC<Props> = React.memo(function Cell({
@@ -30,6 +31,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
   keyName,
   language,
   keyId,
+  editEnabled,
 }) {
   const classes = useStyles();
 
@@ -63,6 +65,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
               onClick={() => handleSave()}
               color="primary"
               size="small"
+              data-cy="translations-cell-save-button"
             >
               <Done fontSize="small" />
             </IconButton>
@@ -70,6 +73,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
               onClick={handleEditCancel}
               color="secondary"
               size="small"
+              data-cy="translations-cell-cancel-button"
             >
               <Close fontSize="small" />
             </IconButton>
@@ -79,9 +83,11 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
         <>
           {text}
           <CellControls key="cell-controls" className={classes.controls}>
-            <IconButton onClick={() => handleEdit(language)} size="small">
-              <Edit fontSize="small" />
-            </IconButton>
+            {editEnabled && (
+              <IconButton onClick={() => handleEdit(language)} size="small">
+                <Edit fontSize="small" />
+              </IconButton>
+            )}
           </CellControls>
         </>
       )}

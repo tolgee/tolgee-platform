@@ -135,7 +135,7 @@ describe('Screenshots', () => {
         .and(($img) => {
           expect($img.length).to.be.equal(10);
         });
-      getPopover().xpath('./div[1]').click();
+      getPopover().xpath('./div[1]').click({ force: true });
       getCameraButton(1).click();
       cy.contains('No screenshots have been added yet.');
     });
@@ -192,4 +192,6 @@ describe('Screenshots', () => {
 });
 
 const getCameraButton = (nth: number) =>
-  cy.xpath(`(//*[contains(@data-cy, 'camera-button')])[${nth}]`);
+  cy.xpath(
+    `(//*[contains(@data-cy, 'translations-cell-screenshots-button')])[${nth}]`
+  );

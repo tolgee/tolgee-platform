@@ -47,8 +47,8 @@ export const TranslationNewDialog: React.FC<Props> = ({ onClose, onAdd }) => {
       {
         onSuccess: () => {
           messaging.success(t('translation_grid_translation_created'));
-          onClose();
           onAdd();
+          onClose();
         },
       }
     );
@@ -60,8 +60,12 @@ export const TranslationNewDialog: React.FC<Props> = ({ onClose, onAdd }) => {
     (v) => v.selectedLanguages
   );
 
+  if (!selectedLanguages) {
+    return null;
+  }
+
   const initialTranslations =
-    selectedLanguages!.reduce((res, l) => ({ ...res, [l]: '' }), {}) || {};
+    selectedLanguages.reduce((res, l) => ({ ...res, [l]: '' }), {}) || {};
 
   return (
     <Dialog

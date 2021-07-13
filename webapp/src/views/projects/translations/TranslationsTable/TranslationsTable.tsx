@@ -14,6 +14,8 @@ import { CellPlain } from '../CellPlain';
 import { CellLanguage } from './CellLanguage';
 import { SortableHeading } from './SortableHeading';
 import { CellKey } from '../CellKey';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { ProjectPermissionType } from 'tg.service/response.types';
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.divider;
@@ -83,6 +85,8 @@ export const TranslationsTable = () => {
   const reactListRef = useRef<ReactList>(null);
 
   const classes = useStyles();
+
+  const projectPermissions = useProjectPermissions();
 
   const dispatch = useTranslationsDispatch();
   const translations = useContextSelector(
@@ -247,6 +251,9 @@ export const TranslationsTable = () => {
                           keyName={row.keyName}
                           language={col.language?.tag}
                           text={col.accessor(row)}
+                          editEnabled={projectPermissions.satisfiesPermission(
+                            ProjectPermissionType.TRANSLATE
+                          )}
                         />
                       ) : (
                         <CellKey
@@ -254,6 +261,9 @@ export const TranslationsTable = () => {
                           keyName={row.keyName}
                           text={col.accessor(row)}
                           screenshotCount={row.screenshotCount}
+                          editEnabled={projectPermissions.satisfiesPermission(
+                            ProjectPermissionType.EDIT
+                          )}
                         />
                       )}
                     </div>

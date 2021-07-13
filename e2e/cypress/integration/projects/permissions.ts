@@ -16,9 +16,17 @@ import {
   enterProjectSettings,
   visitList,
 } from '../../common/projects';
+import {
+  getCellEditButton,
+  getCellSaveButton,
+} from '../../common/translations';
 
 describe('Project Permissions', () => {
   beforeEach(() => {});
+
+  afterEach(() => {
+    cy.gcy('global-base-view-loading').should('not.exist');
+  });
 
   describe("Cukrberg's permissions", () => {
     before(() => {
@@ -28,10 +36,6 @@ describe('Project Permissions', () => {
 
     beforeEach(() => {
       login('cukrberg@facebook.com', 'admin');
-    });
-
-    it('Has manage permissions on facebook (organization owner)', () => {
-      validateManagePermissions('Facebook');
     });
 
     it('Has edit permissions on microsoft word (organization base)', () => {
@@ -175,10 +179,6 @@ describe('Project Permissions', () => {
       });
     });
   });
-
-  after(() => {
-    cleanProjectsData();
-  });
 });
 
 const MANAGE_PROJECT_ITEMS = ['Permissions'];
@@ -214,7 +214,7 @@ const validateEditPermissions = (projectName: string) => {
   selectInProjectMenu('Translations');
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
-  gcy('global-plus-button').should('be.visible').click();
+  gcy('translations-add-button').should('be.visible').click();
   gcy('translations-add-key-field')
     .find('textarea')
     .filter(':visible')
@@ -233,13 +233,10 @@ const validateTranslatePermissions = (projectName: string) => {
   selectInProjectMenu('Translations');
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
-  gcy('global-plus-button').should('not.exist');
+  gcy('translations-add-button').should('not.exist');
   gcy('translations-row-checkbox').should('not.exist');
-  gcy('translations-editable-cell')
-    .contains('This is test text!')
-    .should('be.visible')
-    .click();
-  gcy('translations-editable-cell-editing').should('be.visible');
+  getCellEditButton('This is test text!').should('be.visible').click();
+  getCellSaveButton().should('be.visible');
 };
 
 const validateViewPermissions = (projectName: string) => {

@@ -67,11 +67,13 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
   languages: LanguageModel[];
   data: KeyWithTranslationsModel;
+  editEnabled: boolean;
 };
 
 export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
   languages,
   data,
+  editEnabled,
 }) {
   const classes = useStyles();
 
@@ -87,7 +89,11 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
     <div className={classes.content}>
       <div className={classes.languages}>
         {languages.map((l) => (
-          <div key={l.id} className={classes.rowWrapper}>
+          <div
+            key={l.id}
+            className={classes.rowWrapper}
+            data-cy="translations-cell-data"
+          >
             <CellPlain
               background={l.tag === editVal?.language ? '#efefef' : undefined}
             >
@@ -99,10 +105,17 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
                 <div className={classes.data}>
                   {data.translations[l.tag]?.text}
                 </div>
-                <CellControls key="cell-controls" className={classes.controls}>
-                  <IconButton onClick={() => handleEdit(l.tag)} size="small">
-                    <Edit fontSize="small" />
-                  </IconButton>
+                <CellControls key="cell-controls">
+                  {editEnabled && (
+                    <IconButton
+                      className={classes.controls}
+                      onClick={() => handleEdit(l.tag)}
+                      size="small"
+                      data-cy="translations-cell-edit-button"
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                  )}
                 </CellControls>
               </div>
             </CellPlain>
@@ -127,6 +140,7 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
                 onClick={() => handleSave()}
                 color="primary"
                 size="small"
+                data-cy="translations-cell-save-button"
               >
                 <Done fontSize="small" />
               </IconButton>
@@ -134,6 +148,7 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
                 onClick={handleEditCancel}
                 color="secondary"
                 size="small"
+                data-cy="translations-cell-cancel-button"
               >
                 <Close fontSize="small" />
               </IconButton>

@@ -16,7 +16,9 @@ const SearchField = (
   const { onSearch, ...otherProps } = props;
 
   useEffect(() => {
-    onSearch(debouncedSearch);
+    if (debouncedSearch !== (props.initial || '')) {
+      onSearch(debouncedSearch);
+    }
   }, [debouncedSearch]);
 
   return (
