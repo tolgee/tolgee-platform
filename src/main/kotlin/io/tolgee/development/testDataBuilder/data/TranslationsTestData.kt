@@ -130,6 +130,26 @@ class TranslationsTestData {
     }
   }
 
+  fun generateCursorSearchData() {
+    root.data.projects[0].apply {
+      addKey {
+        self { name = "Hello" }
+      }
+      addKey {
+        self { name = "Hello 2" }
+      }
+      addKey {
+        self { name = "Hello 3" }
+      }
+      addKey {
+        self { name = "Hi" }
+      }
+      addKey {
+        self { name = "Hi 2" }
+      }
+    }
+  }
+
   fun generateCursorTestData() {
     root.data.projects[0].apply {
       addKey {

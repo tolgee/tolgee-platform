@@ -90,6 +90,26 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `works with cursor and search`() {
+    testData.generateCursorSearchData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    var cursor = ""
+    performProjectAuthGet("/translations?sort=translations.de.text&sort=keyName&size=2&search=hello")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys[0].keyName").isEqualTo("Hello")
+        node("nextCursor").isString.satisfies { cursor = it }
+      }
+
+    performProjectAuthGet("/translations?sort=translations.de.text&size=2&sort=keyName&search=hello&cursor=$cursor")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys").isArray.hasSize(1)
+        node("_embedded.keys[0].keyName").isEqualTo("Hello 3")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `sorts data by translation text`() {
     testData.generateLotOfData()
     testDataService.saveTestData(testData.root)

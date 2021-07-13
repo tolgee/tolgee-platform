@@ -42,7 +42,6 @@ class TranslationsViewBuilder(
     fullTextFields.add(root.get(Key_.name))
     addLeftJoinedColumns()
     applyGlobalFilters()
-    query.where(*whereConditions.toTypedArray())
     query.having(*havingConditions.toTypedArray())
     return query
   }
@@ -62,15 +61,15 @@ class TranslationsViewBuilder(
       val condition: Predicate
       if (value.direction == Sort.Direction.ASC) {
         condition = if (isUnique)
-          cb.greaterThan(expression, value.value as String)
+          cb.greaterThan(expression, value.value)
         else
-          cb.greaterThanOrEqualTo(expression, value.value as String)
+          cb.greaterThanOrEqualToNullable(expression, value.value)
         strongCondition = cb.greaterThan(expression, value.value)
       } else {
         condition = if (isUnique)
-          cb.lessThan(expression, value.value as String)
+          cb.lessThan(expression, value.value)
         else
-          cb.lessThanOrEqualTo(expression, value.value as String)
+          cb.lessThanOrEqualToNullable(expression, value.value)
         strongCondition = cb.lessThan(expression, value.value)
       }
       result = result?.let {
@@ -78,6 +77,26 @@ class TranslationsViewBuilder(
       } ?: condition
     }
     return result
+  }
+
+  private fun CriteriaBuilder.greaterThanOrEqualToNullable(
+    expression: Expression<String>,
+    value: String?
+  ): Predicate {
+    if (value == null) {
+      return this.or(this.isNull(expression), this.greaterThan(expression, value as String?))
+    }
+    return this.greaterThanOrEqualTo(expression, value as String?)
+  }
+
+  private fun CriteriaBuilder.lessThanOrEqualToNullable(
+    expression: Expression<String>,
+    value: String?
+  ): Predicate {
+    if (value == null) {
+      return this.or(this.isNull(expression), this.lessThan(expression, value as String?))
+    }
+    return this.lessThanOrEqualTo(expression, value as String?)
   }
 
   private fun addLeftJoinedColumns() {
@@ -174,10 +193,12 @@ class TranslationsViewBuilder(
       if (orderList.isEmpty()) {
         orderList.add(cb.asc(selection[KEY_NAME_FIELD] as Expression<*>))
       }
+      val where = whereConditions.toMutableList()
       getCursorPredicate()?.let {
-        query.where(it)
+        where.add(it)
       }
       val groupBy = listOf(keyIdExpression, *groupByExpressions.toTypedArray())
+      query.where(*where.toTypedArray())
       query.groupBy(groupBy)
       query.orderBy(orderList)
       return query
@@ -192,6 +213,7 @@ class TranslationsViewBuilder(
       val query = getBaseQuery(cb.createQuery(Long::class.java))
       val file = query.roots.iterator().next() as Root<*>
       query.select(cb.count(file))
+      query.where(*whereConditions.toTypedArray())
       return query
     }
 
