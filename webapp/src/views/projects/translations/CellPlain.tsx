@@ -23,6 +23,7 @@ export const CellPlain: React.FC<Props> = ({
       padding="5px 10px"
       bgcolor={background}
       onClick={onClick}
+      data-cy="translations-table-cell"
       {...props}
     >
       {children}

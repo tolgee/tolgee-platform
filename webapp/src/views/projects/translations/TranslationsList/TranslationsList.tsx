@@ -4,6 +4,7 @@ import ReactList from 'react-list';
 import { useContextSelector } from 'use-context-selector';
 
 import { components } from 'tg.service/apiSchema.generated';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import {
   TranslationsContext,
   useTranslationsDispatch,
@@ -12,6 +13,7 @@ import { CellKey } from '../CellKey';
 import { LanguagesRow } from './LanguagesRow';
 import { useResize, resizeColumn } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
+import { ProjectPermissionType } from 'tg.service/response.types';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -67,6 +69,7 @@ const useStyles = makeStyles((theme) => {
 export const TranslationsList = () => {
   const classes = useStyles();
   const tableRef = useRef<HTMLDivElement>(null);
+  const projectPermissions = useProjectPermissions();
   const reactListRef = useRef<ReactList>(null);
   const dispatch = useTranslationsDispatch();
   const translations = useContextSelector(
@@ -175,13 +178,22 @@ export const TranslationsList = () => {
                     keyName={row.keyName}
                     text={row.keyName}
                     screenshotCount={row.screenshotCount}
+                    editEnabled={projectPermissions.satisfiesPermission(
+                      ProjectPermissionType.EDIT
+                    )}
                   />
                 </div>
                 <div
                   className={classes.languages}
                   style={{ flexBasis: columnSizes[1] }}
                 >
-                  <LanguagesRow languages={languagesRow} data={row} />
+                  <LanguagesRow
+                    languages={languagesRow}
+                    data={row}
+                    editEnabled={projectPermissions.satisfiesPermission(
+                      ProjectPermissionType.TRANSLATE
+                    )}
+                  />
                 </div>
               </div>
               {isLast && isFetchingMore && (

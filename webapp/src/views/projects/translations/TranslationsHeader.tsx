@@ -12,6 +12,8 @@ import {
   ViewType,
 } from './TranslationsContext';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { ProjectPermissionType } from 'tg.service/response.types';
 
 const useStyles = makeStyles({
   container: {
@@ -30,6 +32,7 @@ const useStyles = makeStyles({
 
 export const TranslationsHeader = () => {
   const classes = useStyles();
+  const projectPermissions = useProjectPermissions();
   const search = useContextSelector(TranslationsContext, (v) => v.search);
   const languages = useContextSelector(TranslationsContext, (v) => v.languages);
   const selectedLanguages = useContextSelector(
@@ -70,7 +73,11 @@ export const TranslationsHeader = () => {
     <div className={classes.container}>
       <div className={classes.spaced}>
         {selection.length > 0 && (
-          <Button size="small" onClick={handleDelete}>
+          <Button
+            size="small"
+            onClick={handleDelete}
+            data-cy="translations-delete-button"
+          >
             <Delete />
           </Button>
         )}
@@ -88,7 +95,7 @@ export const TranslationsHeader = () => {
           languages={
             languages?.map((l) => ({ label: l.name, value: l.tag })) || []
           }
-          context="global"
+          context="translations"
         />
 
         <ButtonGroup size="small">
@@ -106,15 +113,19 @@ export const TranslationsHeader = () => {
           </Button>
         </ButtonGroup>
 
-        <Button
-          startIcon={<Add />}
-          color="primary"
-          size="small"
-          variant="contained"
-          onClick={() => setNewDialogOpen(true)}
-        >
-          <T>language_create_add</T>
-        </Button>
+        {projectPermissions.satisfiesPermission(ProjectPermissionType.EDIT) && (
+          <Button
+            startIcon={<Add />}
+            color="primary"
+            size="small"
+            variant="contained"
+            aria-label="add"
+            onClick={() => setNewDialogOpen(true)}
+            data-cy="translations-add-button"
+          >
+            <T>language_create_add</T>
+          </Button>
+        )}
 
         {newDialogOpen && (
           <TranslationNewDialog

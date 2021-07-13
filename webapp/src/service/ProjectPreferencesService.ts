@@ -2,7 +2,7 @@ import { singleton } from 'tsyringe';
 
 const LOCAL_STORAGE_KEY = 'selectedLanguages';
 
-type AllType = { [projectId: number]: string[] };
+type AllType = { [projectId: number]: string[] | undefined };
 
 @singleton()
 export class ProjectPreferencesService {
@@ -17,7 +17,7 @@ export class ProjectPreferencesService {
     return Array.from(new Set(this.getAll()[projectId]));
   }
 
-  setForProject(projectId, languages: string[]) {
+  setForProject(projectId, languages: string[] | undefined) {
     this.setAll({ ...this.getAll(), [projectId]: languages });
   }
 

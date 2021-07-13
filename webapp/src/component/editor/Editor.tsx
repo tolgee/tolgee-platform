@@ -117,7 +117,7 @@ export const Editor = ({
   const classes = useStyles();
 
   return (
-    <div className={classes.wrapper}>
+    <div className={classes.wrapper} data-cy="global-editor">
       <MonacoEditor
         defaultValue={initialValue}
         defaultLanguage={language}

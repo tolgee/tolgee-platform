@@ -29,6 +29,7 @@ type Props = {
   keyId: number;
   keyName: string;
   screenshotCount: number;
+  editEnabled: boolean;
 };
 
 export const CellKey: React.FC<Props> = React.memo(function Cell({
@@ -36,6 +37,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
   keyName,
   keyId,
   screenshotCount,
+  editEnabled,
 }) {
   const classes = useStyles();
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
@@ -89,6 +91,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
                 onClick={() => handleSave()}
                 color="primary"
                 size="small"
+                data-cy="translations-cell-save-button"
               >
                 <Done fontSize="small" />
               </IconButton>
@@ -96,6 +99,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
                 onClick={handleEditCancel}
                 color="secondary"
                 size="small"
+                data-cy="translations-cell-cancel-button"
               >
                 <Close fontSize="small" />
               </IconButton>
@@ -103,6 +107,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
                 size="small"
                 ref={screenshotEl}
                 onClick={() => setScreenshotsOpen(true)}
+                data-cy="translations-cell-screenshots-button"
               >
                 <CameraAlt
                   fontSize="small"
@@ -113,24 +118,34 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
           </>
         ) : (
           <Box display="flex" alignItems="center" width="100%">
-            <Box margin={-1}>
-              <Checkbox checked={isSelected} onChange={toggleSelect} />
-            </Box>
+            {editEnabled && (
+              <Box margin={-1}>
+                <Checkbox
+                  checked={isSelected}
+                  onChange={toggleSelect}
+                  data-cy="translations-row-checkbox"
+                />
+              </Box>
+            )}
             <Box overflow="hidden" textOverflow="ellipsis">
               {text}
             </Box>
             <CellControls key="cell-controls">
-              <IconButton
-                onClick={() => handleEdit(undefined)}
-                size="small"
-                className={classes.controls}
-              >
-                <Edit fontSize="small" />
-              </IconButton>
+              {editEnabled && (
+                <IconButton
+                  onClick={() => handleEdit(undefined)}
+                  size="small"
+                  className={classes.controls}
+                  data-cy="translations-cell-edit-button"
+                >
+                  <Edit fontSize="small" />
+                </IconButton>
+              )}
               <IconButton
                 size="small"
                 ref={screenshotEl}
                 onClick={() => setScreenshotsOpen(true)}
+                data-cy="translations-cell-screenshots-button"
               >
                 <CameraAlt
                   fontSize="small"

@@ -1,6 +1,5 @@
-import { clickAdd, getPopover } from '../common/shared';
+import { clickAdd } from '../common/shared';
 import {
-  getAnyContainingAriaLabelAttribute,
   getAnyContainingText,
   getClosestContainingText,
 } from '../common/xPath';
@@ -17,6 +16,11 @@ import {
   visitLanguageSettings,
   visitProjectSettings,
 } from '../common/languages';
+import {
+  getCellCancelButton,
+  getCellEditButton,
+  getCellSaveButton,
+} from '../common/translations';
 
 describe('Translations', () => {
   let project: ProjectDTO = null;
@@ -68,55 +72,6 @@ describe('Translations', () => {
     cy.contains('Translated test key').should('be.visible');
   });
 
-  it('will paginate', () => {
-    const promises = [];
-    for (let i = 1; i < 21; i++) {
-      promises.push(
-        setTranslations(
-          project.id,
-          `Cool key ${i.toString().padStart(2, '0')}`,
-          { en: 'Cool' }
-        )
-      );
-    }
-    Cypress.Promise.all(promises).then(() => {
-      setPerPage(20, 10);
-      goToNextPage();
-      cy.contains('key 11').should('be.visible');
-      cy.contains('key 20').should('be.visible');
-      goToPreviousPage();
-      cy.contains('key 01').should('be.visible');
-      cy.contains('key 10').should('be.visible');
-      cy.contains('1-10 of 20').should('be.visible');
-    });
-  });
-
-  it('will ask for confirmation on page change', () => {
-    const promises = [];
-    for (let i = 1; i < 15; i++) {
-      promises.push(
-        setTranslations(
-          project.id,
-          `Cool key ${i.toString().padStart(2, '0')}`,
-          { en: 'Cool' }
-        )
-      );
-    }
-    Cypress.Promise.all(promises).then(() => {
-      visit();
-      setPerPage(20, 10);
-      editKey('Cool key 01', 'Cool key edited', false);
-      goToNextPage();
-      cy.contains(
-        `Do you want to discard your change from "Cool key 01" to "Cool key edited"?`
-      ).should('be.visible');
-      clickDiscardChanges();
-      cy.contains('Cool key 14')
-        .xpath("./parent::*//button[@type='button']")
-        .should('be.visible');
-    });
-  });
-
   it('will create translation', () => {
     createTranslation('Test key', 'Translated test key', { isFirst: true });
     cy.contains('Translation created').should('be.visible');
@@ -166,34 +121,15 @@ describe('Translations', () => {
     });
 
     it('will edit key', () => {
-      cy.contains('Cool key 01')
-        .xpath("./parent::div/button[@aria-label='edit']")
-        .click();
-      cy.contains('Cool key 01').type('{backspace}{backspace}edited');
-      cy.contains('Cool key edited')
-        .xpath("./parent::*//button[@type='submit']")
-        .click();
-      cy.xpath(
-        `${getAnyContainingText(
-          'Cool key edited'
-        )}/parent::*//button[@type='submit']`
-      ).should('not.exist');
+      editCell('Cool key 01', 'Cool key edited');
+
       cy.contains('Cool key edited').should('be.visible');
       cy.contains('Cool key 02').should('be.visible');
       cy.contains('Cool key 04').should('be.visible');
     });
 
     it('will edit translation', () => {
-      cy.contains('Cool translated text 1')
-        .last()
-        .xpath("./parent::div/button[@aria-label='edit']")
-        .click();
-      cy.contains('Cool translated text 1')
-        .clear()
-        .type('Super cool changed text...');
-      cy.contains('Super cool changed text...')
-        .xpath("./parent::*//button[@type='submit']")
-        .click();
+      editCell('Cool translated text 1', 'Super cool changed text...');
       cy.xpath(
         `${getAnyContainingText(
           'Super cool changed text...'
@@ -204,50 +140,34 @@ describe('Translations', () => {
     });
 
     it('will cancel key edit', () => {
-      cy.contains('Cool key 01')
-        .xpath("./parent::div/button[@aria-label='edit']")
-        .click();
-      cy.contains('Cool key 01').type('{backspace}{backspace}edited');
-      cy.contains('Cool key edited')
-        .xpath("./parent::*//button[@type='button']")
-        .click();
-      cy.contains('Do you want to discard your change from').should(
-        'be.visible'
-      );
+      editCell('Cool key 01', 'Cool key edited', false);
+      getCellCancelButton().click();
+
+      cy.contains('Discard changes?').should('be.visible');
       clickDiscardChanges();
       cy.contains('Cool key edited').should('not.exist');
       cy.contains('Cool key 01').should('be.visible');
     });
 
     it('will ask for confirmation on changed edit', () => {
-      editKey('Cool key 01', 'Cool key edited', false);
+      editCell('Cool key 01', 'Cool key edited', false);
       cy.contains('Cool key 04')
-        .xpath("./parent::div/button[@aria-label='edit']")
+        .xpath(
+          "./ancestor::*[@data-cy='translations-table-cell']//*[@data-cy='translations-cell-edit-button']"
+        )
+        .invoke('show')
         .click();
-      cy.contains(
-        `Do you want to discard your change from "Cool key 01" to "Cool key edited"?`
-      ).should('be.visible');
+      cy.contains(`Discard changes?`).should('be.visible');
       clickDiscardChanges();
       cy.contains('Cool key 04')
-        .xpath("./parent::*//button[@type='button']")
-        .should('be.visible');
-    });
-
-    it('will ask for confirmation on per page change', () => {
-      editKey('Cool key 01', 'Cool key edited', false);
-      setPerPage(20, 10);
-      cy.contains(
-        `Do you want to discard your change from "Cool key 01" to "Cool key edited"?`
-      ).should('be.visible');
-      clickDiscardChanges();
-      cy.contains('Cool key 04')
-        .xpath("./parent::*//button[@type='button']")
+        .xpath(
+          "./ancestor::*[@data-cy='translations-table-cell']//*[@data-cy='translations-cell-save-button']"
+        )
         .should('be.visible');
     });
 
     describe('Options', () => {
       it('will select language', () => {
-        toggleLang('Česky');
         cy.contains('Studený přeložený text 1').should('be.visible');
         toggleLang('Česky');
         cy.contains('Studený přeložený text 1').should('not.exist');
@@ -256,17 +176,9 @@ describe('Translations', () => {
       });
 
       it('will search', () => {
-        cy.get('#standard-search').type('Cool key 04');
+        cy.gcy('global-search-field').type('Cool key 04');
         cy.contains('Cool key 01').should('not.exist');
         cy.contains('Cool key 04').should('be.visible');
-      });
-
-      it('will toggle key', () => {
-        cy.contains('Cool key 01').should('be.visible');
-        cy.contains('Show keys').click();
-        cy.contains('Cool key 01').should('not.exist');
-        cy.contains('Show keys').click();
-        cy.contains('Cool key 01').should('be.visible');
       });
     });
   });
@@ -276,15 +188,17 @@ describe('Translations', () => {
   };
 });
 
-const editKey = (oldValue: string, newValue: string, save = true) => {
-  cy.contains(oldValue)
-    .xpath("./parent::div/button[@aria-label='edit']")
-    .click();
-  cy.contains('Cool key 01').clear().type(newValue);
+const editCell = (oldValue: string, newValue: string, save = true) => {
+  getCellEditButton(oldValue).click();
+
+  // wait for editor to appear
+  cy.gcy('global-editor').should('be.visible');
+  cy.contains(oldValue).should('be.visible');
+  // select all, delete and type new text
+  cy.focused().type('{selectall}').type('{backspace}').type(newValue);
+
   if (save) {
-    cy.contains('Super cool changed text...')
-      .xpath("./parent::*//button[@type='submit']")
-      .click();
+    getCellSaveButton().click();
   }
 };
 
@@ -301,23 +215,6 @@ function createTranslation(
   cy.xpath("//textarea[@name='key']").type(testKey);
   cy.xpath("//textarea[@name='translations.en']").type(testTranslated);
   cy.xpath(getAnyContainingText('save')).click();
-}
-
-function setPerPage(current: number, newValue: number) {
-  cy.xpath(getAnyContainingText('Per page:'))
-    .xpath(getClosestContainingText(current.toString()))
-    .click();
-  getPopover().contains(newValue.toString()).click();
-  // wait for loading to disappear
-  cy.gcy('global-base-view-loading').should('not.exist');
-}
-
-function goToNextPage() {
-  cy.xpath(getAnyContainingAriaLabelAttribute('Next page')).click();
-}
-
-function goToPreviousPage() {
-  cy.xpath(getAnyContainingAriaLabelAttribute('Previous page')).click();
 }
 
 function clickDiscardChanges() {

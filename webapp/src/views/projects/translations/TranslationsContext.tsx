@@ -2,7 +2,7 @@ import React, { useState, useRef, useMemo, useCallback } from 'react';
 import { createContext, useContext } from 'use-context-selector';
 import { T } from '@tolgee/react';
 
-import { components } from 'tg.service/apiSchema.generated';
+import { components, operations } from 'tg.service/apiSchema.generated';
 import {
   useApiInfiniteQuery,
   useApiMutation,
@@ -10,6 +10,7 @@ import {
 } from 'tg.service/http/useQueryApi';
 import { container } from 'tsyringe';
 import { MessageService } from 'tg.service/MessageService';
+import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
 import {
@@ -23,6 +24,8 @@ const PAGE_SIZE = 60;
 type LanguagesType = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
+type TranslationsQueryType =
+  operations['getTranslations']['parameters']['query'];
 
 type ActionType =
   | { type: 'SET_EDIT'; payload: EditType | undefined }
@@ -87,6 +90,7 @@ export const DispatchContext =
 export const useTranslationsDispatch = () => useContext(DispatchContext);
 
 const messaging = container.resolve(MessageService);
+const projectPreferences = container.resolve(ProjectPreferencesService);
 
 export const TranslationsContextProvider: React.FC<{
   projectId: number;
@@ -98,27 +102,54 @@ export const TranslationsContextProvider: React.FC<{
     [] as KeyWithTranslationsModelType[]
   );
   const [view, setView] = useState('LIST' as ViewType);
+  const [query, setQuery] = useState<TranslationsQueryType>({
+    search: '',
+    size: PAGE_SIZE,
+    sort: ['keyName'],
+    languages: undefined,
+  });
+
+  const languages = useApiQuery({
+    url: '/v2/projects/{projectId}/languages',
+    method: 'get',
+    path: { projectId: props.projectId },
+    query: { size: 1000, sort: ['tag'] },
+    options: {
+      onSuccess(data) {
+        const languages = projectPreferences
+          .getForProject(props.projectId)
+          ?.filter((l) =>
+            data._embedded?.languages?.find((lang) => lang.tag === l)
+          );
+        setQuery({
+          ...query,
+          languages: languages.length ? languages : undefined,
+        });
+      },
+      cacheTime: 0,
+    },
+  });
 
   const path = useMemo(
     () => ({ projectId: props.projectId }),
     [props.projectId]
   );
-  const [query, setQuery] = useState({
-    search: '',
-    size: PAGE_SIZE,
-    sort: ['keyName'],
-    languages: undefined as string[] | undefined,
-  });
 
   const translations = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/translations',
     method: 'get',
     path,
-    query,
+    query: query!,
     options: {
+      // fetch after languages are loaded,
+      // so we dont't try to fetch nonexistant languages
+      enabled: languages.isSuccess,
       keepPreviousData: true,
       getNextPageParam: (lastPage) => {
-        if (lastPage.nextCursor) {
+        if (
+          lastPage.nextCursor &&
+          lastPage._embedded?.keys?.length === PAGE_SIZE
+        ) {
           return {
             path,
             query: {
@@ -130,6 +161,10 @@ export const TranslationsContextProvider: React.FC<{
       },
       onSuccess(data) {
         const flatKeys = flattenKeys(data);
+        projectPreferences.setForProject(
+          props.projectId,
+          data.pages[0].selectedLanguages.map((l) => l.tag)
+        );
         if (data?.pages.length === 1) {
           // reset fixed translations when fetching first page
           setFixedTranslations(flatKeys);
@@ -157,13 +192,6 @@ export const TranslationsContextProvider: React.FC<{
     translations.remove();
     translations.refetch();
   };
-
-  const languages = useApiQuery({
-    url: '/v2/projects/{projectId}/languages',
-    method: 'get',
-    path: { projectId: props.projectId },
-    query: { size: 1000, sort: ['tag'] },
-  });
 
   const updateValue = useApiMutation({
     url: '/v2/projects/{projectId}/translations',
@@ -365,11 +393,11 @@ export const TranslationsContextProvider: React.FC<{
             updateKey.isLoading,
           isFetchingMore: translations.isFetchingNextPage,
           hasMoreToFetch: translations.hasNextPage,
-          search: query.search,
+          search: query?.search,
           edit,
           selection,
           selectedLanguages:
-            query.languages ||
+            query?.languages ||
             translations.data?.pages[0]?.selectedLanguages.map((l) => l.tag),
           view,
         }}
