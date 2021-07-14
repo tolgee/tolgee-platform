@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useContextSelector } from 'use-context-selector';
-import { IconButton, Checkbox, Box, makeStyles } from '@material-ui/core';
-import { Done, Close, Edit, CameraAlt } from '@material-ui/icons';
+import { Checkbox, Box } from '@material-ui/core';
 
 import { Editor } from 'tg.component/editor/Editor';
 import { useEditableRow } from './useEditableRow';
@@ -10,19 +9,7 @@ import {
   useTranslationsDispatch,
 } from './TranslationsContext';
 import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
-import { CellPlain } from './CellPlain';
-import { CellControls } from './CellControls';
-
-const useStyles = makeStyles({
-  cell: {
-    '&:hover $controls': {
-      display: 'flex',
-    },
-  },
-  controls: {
-    display: 'none',
-  },
-});
+import { CellContent, CellPlain, CellControls, stopBubble } from './CellBase';
 
 type Props = {
   text: string;
@@ -39,7 +26,6 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
   screenshotCount,
   editEnabled,
 }) {
-  const classes = useStyles();
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
 
   const screenshotEl = useRef<HTMLButtonElement | null>(null);
@@ -69,102 +55,64 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
   };
 
   return (
-    <CellPlain
-      background={isEditing ? '#efefef' : undefined}
-      className={classes.cell}
-    >
-      <>
-        {isEditing ? (
-          <>
-            <Editor
-              minHeight={100}
-              initialValue={value}
-              variables={[]}
-              onChange={(v) => setValue(v as string)}
-              onSave={handleSave}
-              onCancel={handleEditCancel}
-              language="plaintext"
-              autoFocus
-            />
-            <CellControls>
-              <IconButton
-                onClick={() => handleSave()}
-                color="primary"
-                size="small"
-                data-cy="translations-cell-save-button"
-              >
-                <Done fontSize="small" />
-              </IconButton>
-              <IconButton
-                onClick={handleEditCancel}
-                color="secondary"
-                size="small"
-                data-cy="translations-cell-cancel-button"
-              >
-                <Close fontSize="small" />
-              </IconButton>
-              <IconButton
-                size="small"
-                ref={screenshotEl}
-                onClick={() => setScreenshotsOpen(true)}
-                data-cy="translations-cell-screenshots-button"
-              >
-                <CameraAlt
-                  fontSize="small"
-                  color={screenshotCount > 0 ? 'secondary' : 'disabled'}
-                />
-              </IconButton>
-            </CellControls>
-          </>
-        ) : (
-          <Box display="flex" alignItems="center" width="100%">
-            {editEnabled && (
-              <Box margin={-1}>
-                <Checkbox
-                  checked={isSelected}
-                  onChange={toggleSelect}
-                  data-cy="translations-row-checkbox"
-                />
-              </Box>
-            )}
-            <Box overflow="hidden" textOverflow="ellipsis">
-              {text}
-            </Box>
-            <CellControls key="cell-controls">
+    <>
+      <CellPlain
+        background={isEditing ? '#efefef' : undefined}
+        onClick={
+          !isEditing && editEnabled ? () => handleEdit(undefined) : undefined
+        }
+      >
+        <CellContent>
+          {isEditing ? (
+            <>
+              <Editor
+                minHeight={100}
+                initialValue={value}
+                variables={[]}
+                onChange={(v) => setValue(v as string)}
+                onSave={handleSave}
+                onCancel={handleEditCancel}
+                language="plaintext"
+                autoFocus
+              />
+            </>
+          ) : (
+            <Box display="flex" alignItems="baseline">
               {editEnabled && (
-                <IconButton
-                  onClick={() => handleEdit(undefined)}
-                  size="small"
-                  className={classes.controls}
-                  data-cy="translations-cell-edit-button"
-                >
-                  <Edit fontSize="small" />
-                </IconButton>
+                <Box margin={-1} onClick={stopBubble()}>
+                  <Checkbox
+                    checked={isSelected}
+                    onChange={toggleSelect}
+                    data-cy="translations-row-checkbox"
+                  />
+                </Box>
               )}
-              <IconButton
-                size="small"
-                ref={screenshotEl}
-                onClick={() => setScreenshotsOpen(true)}
-                data-cy="translations-cell-screenshots-button"
-              >
-                <CameraAlt
-                  fontSize="small"
-                  color={screenshotCount > 0 ? 'secondary' : 'disabled'}
-                />
-              </IconButton>
-            </CellControls>
-          </Box>
-        )}
-        {screenshotsOpen && (
-          <ScreenshotsPopover
-            anchorEl={screenshotEl.current!}
-            keyId={keyId}
-            onClose={() => {
-              setScreenshotsOpen(false);
-            }}
-          />
-        )}
-      </>
-    </CellPlain>
+              <Box overflow="hidden" textOverflow="ellipsis">
+                {text}
+              </Box>
+            </Box>
+          )}
+        </CellContent>
+        <CellControls
+          mode={isEditing ? 'edit' : 'view'}
+          onEdit={() => handleEdit(undefined)}
+          onCancel={handleEditCancel}
+          onSave={handleSave}
+          onScreenshots={() => setScreenshotsOpen(true)}
+          screenshotRef={screenshotEl}
+          screenshotsPresent={screenshotCount > 0}
+          editEnabled={editEnabled}
+        />
+      </CellPlain>
+      {screenshotsOpen && (
+        <ScreenshotsPopover
+          anchorEl={screenshotEl.current!}
+          keyId={keyId}
+          onClose={() => {
+            setScreenshotsOpen(false);
+          }}
+        />
+      )}
+    </>
   );
 });
