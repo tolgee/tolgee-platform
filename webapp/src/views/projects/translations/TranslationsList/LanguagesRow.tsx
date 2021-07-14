@@ -11,51 +11,56 @@ type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 
-const useStyles = makeStyles((theme) => ({
-  content: {
-    display: 'flex',
-    width: '100%',
-    alignItems: 'stretch',
-  },
-  languages: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexBasis: '50%',
-    width: '50%',
-    flexGrow: 1,
-    overflow: 'hidden',
-  },
-  editor: {
-    display: 'flex',
-    flexBasis: '50%',
-    width: '50%',
-    flexGrow: 1,
-    justifyContent: 'stretch',
-  },
-  rowContent: {
-    display: 'flex',
-    flexGrow: 1,
-    overflow: 'hidden',
-    alignItems: 'flex-start',
-  },
-  data: {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxHeight: '4.5em',
-  },
-  languageContent: {
-    width: 100,
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'center',
-    '& > * + *': {
-      marginLeft: 4,
+const useStyles = makeStyles((theme) => {
+  const borderColor = theme.palette.grey[200];
+  return {
+    content: {
+      display: 'flex',
+      width: '100%',
+      alignItems: 'stretch',
     },
-  },
-  controls: {
-    display: 'none',
-  },
-}));
+    languages: {
+      display: 'flex',
+      flexDirection: 'column',
+      flexBasis: '50%',
+      width: '50%',
+      flexGrow: 1,
+      overflow: 'hidden',
+    },
+    editor: {
+      display: 'flex',
+      flexBasis: '50%',
+      width: '50%',
+      flexGrow: 1,
+      justifyContent: 'stretch',
+      border: `1px solid ${borderColor}`,
+      borderWidth: '0px 0px 0px 1px',
+    },
+    rowContent: {
+      display: 'flex',
+      flexGrow: 1,
+      overflow: 'hidden',
+      alignItems: 'flex-start',
+    },
+    data: {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      maxHeight: '4.5em',
+    },
+    languageContent: {
+      width: 100,
+      flexShrink: 0,
+      display: 'flex',
+      alignItems: 'center',
+      '& > * + *': {
+        marginLeft: 4,
+      },
+    },
+    controls: {
+      display: 'none',
+    },
+  };
+});
 
 type Props = {
   languages: LanguageModel[];
@@ -106,6 +111,7 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
                 mode="view"
                 editEnabled={editEnabled}
                 onEdit={() => handleEdit(l.tag)}
+                absolute
               />
             </CellPlain>
           );
@@ -113,7 +119,7 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
       </div>
       {editVal?.language && (
         <div className={classes.editor}>
-          <CellPlain background="#efefef">
+          <CellPlain>
             <CellContent>
               <Editor
                 key={editVal.language}
@@ -123,6 +129,7 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
                 onChange={(v) => setValue(v as string)}
                 onSave={(direction) => handleSave(direction)}
                 onCancel={handleEditCancel}
+                background="#ffffff"
                 autoFocus
               />
             </CellContent>

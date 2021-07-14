@@ -293,6 +293,7 @@ export const TranslationsContextProvider: React.FC<{
         if (edit?.changed) {
           confirmation({
             title: <T>translations_leave_save_confirmation</T>,
+            message: <T>translations_leave_save_confirmation_message_1</T>,
             cancelButtonText: <T>back_to_editing</T>,
             confirmButtonText: <T>discard_changes</T>,
             onConfirm: () => setEdit(action.payload),

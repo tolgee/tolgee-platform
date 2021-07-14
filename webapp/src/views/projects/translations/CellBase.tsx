@@ -27,10 +27,15 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   showOnHover: {},
+  controlsAbsolute: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+  },
   controlsSpaced: {
-    marginBottom: 5,
     '& > *': {
       marginLeft: 10,
+      marginBottom: 5,
     },
   },
 }));
@@ -59,7 +64,6 @@ export const CellPlain: React.FC<Props> = ({
       display="flex"
       flexDirection="column"
       width="100%"
-      overflow="hidden"
       bgcolor={background}
       position="relative"
       data-cy="translations-table-cell"
@@ -74,8 +78,6 @@ export const CellContent: React.FC<BoxProps> = ({ children, ...props }) => {
   return (
     <Box
       width="100%"
-      overflow="hidden"
-      textOverflow="ellipsis"
       padding="5px 10px"
       position="relative"
       flexGrow={1}
@@ -84,6 +86,11 @@ export const CellContent: React.FC<BoxProps> = ({ children, ...props }) => {
       {children}
     </Box>
   );
+};
+
+export const stopBubble = (func?) => (e) => {
+  e.stopPropagation();
+  func?.(e);
 };
 
 type ControlsProps = {
@@ -96,11 +103,7 @@ type ControlsProps = {
   onScreenshots?: () => void;
   screenshotRef?: React.Ref<HTMLButtonElement>;
   screenshotsPresent?: boolean;
-};
-
-export const stopBubble = (func?) => (e) => {
-  e.stopPropagation();
-  func?.(e);
+  absolute?: boolean;
 };
 
 export const CellControls: React.FC<ControlsProps> = ({
@@ -112,11 +115,18 @@ export const CellControls: React.FC<ControlsProps> = ({
   onScreenshots,
   screenshotRef,
   screenshotsPresent,
+  absolute,
 }) => {
   const classes = useStyles();
 
   return mode === 'view' ? (
-    <Box display="flex" justifyContent="flex-end" width="100%" minHeight={26}>
+    <Box
+      display="flex"
+      justifyContent="flex-end"
+      width="100%"
+      minHeight={26}
+      className={absolute ? classes.controlsAbsolute : undefined}
+    >
       {editEnabled && (
         <IconButton
           onClick={onEdit}

@@ -51,6 +51,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
         )}
       </CellContent>
       <CellControls
+        absolute
         mode={isEditing ? 'edit' : 'view'}
         editEnabled={editEnabled}
         onCancel={handleEditCancel}

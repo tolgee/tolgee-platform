@@ -29,10 +29,10 @@ describe('Import application', () => {
       'French',
       'English',
     ]);
-    cy.gcy('translations-cell-data')
+    cy.gcy('translations-table-cell')
       .contains('What a text')
       .should('be.visible');
-    cy.gcy('translations-cell-data')
+    cy.gcy('translations-table-cell')
       .contains('What a french text')
       .should('be.visible');
   });
