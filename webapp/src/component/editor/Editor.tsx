@@ -25,6 +25,9 @@ const useStyles = makeStyles((theme) => ({
     '& .overflowingContentWidgets *': {
       zIndex: theme.zIndex.tooltip,
     },
+    '& div.hover-row.status-bar': {
+      display: 'none !important',
+    },
   },
 }));
 
@@ -38,6 +41,7 @@ type Props = {
   onCancel?: () => void;
   autoFocus?: boolean;
   language?: 'icu' | 'plaintext';
+  background?: string;
 };
 
 export type DirectionType = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
@@ -51,6 +55,7 @@ export const Editor = ({
   onCancel,
   autoFocus,
   language = 'icu',
+  background,
 }: Props) => {
   const [dynamicHeight, setDynamicHeight] = useState(
     minHeight as string | number | undefined
@@ -78,8 +83,9 @@ export const Editor = ({
 
   const onMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
-    monaco.editor.defineTheme('icuTheme', icuTheme);
+    monaco.editor.defineTheme('icuTheme', icuTheme(background));
     monaco.editor.setTheme('icuTheme');
+
     editor.addAction({
       id: 'save-data-down',
       label: 'Save data',
@@ -139,7 +145,6 @@ export const Editor = ({
           overviewRulerLanes: 0,
           folding: false,
           wordBasedSuggestions: false,
-          fixedOverflowWidgets: true,
           wordWrap: 'on',
           padding: { top: 0, bottom: 0 },
           glyphMargin: false,

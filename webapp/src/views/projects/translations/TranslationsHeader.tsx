@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { Button, ButtonGroup, makeStyles } from '@material-ui/core';
+import {
+  Button,
+  ButtonGroup,
+  IconButton,
+  Box,
+  makeStyles,
+} from '@material-ui/core';
 import { ViewListRounded, AppsRounded, Add, Delete } from '@material-ui/icons';
 import SearchField from 'tg.component/common/form/fields/SearchField';
 import { useContextSelector } from 'use-context-selector';
@@ -73,13 +79,15 @@ export const TranslationsHeader = () => {
     <div className={classes.container}>
       <div className={classes.spaced}>
         {selection.length > 0 && (
-          <Button
-            size="small"
-            onClick={handleDelete}
-            data-cy="translations-delete-button"
-          >
-            <Delete />
-          </Button>
+          <Box display="flex" justifyContent="center" alignItems="center">
+            <IconButton
+              size="small"
+              onClick={handleDelete}
+              data-cy="translations-delete-button"
+            >
+              <Delete />
+            </IconButton>
+          </Box>
         )}
         <SearchField
           label={''}

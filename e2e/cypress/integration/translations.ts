@@ -67,7 +67,7 @@ describe('Translations', () => {
     deleteLanguage();
     visit();
     // wait for loading to appear and disappear again
-    cy.gcy('global-base-view-loading').should('be.visible');
+    cy.gcy('global-base-view-content').should('be.visible');
     cy.gcy('global-base-view-loading').should('not.exist');
     cy.contains('Translated test key').should('be.visible');
   });
@@ -167,7 +167,18 @@ describe('Translations', () => {
     });
 
     describe('Options', () => {
+      it('will remember selected language', () => {
+        toggleLang('Česky');
+        toggleLang('English');
+        cy.contains('Studený přeložený text 1').should('be.visible');
+        cy.contains('Cool translated text 1').should('not.exist');
+        visit();
+        cy.contains('Studený přeložený text 1').should('be.visible');
+        cy.contains('Cool translated text 1').should('not.exist');
+      });
+
       it('will select language', () => {
+        toggleLang('Česky');
         cy.contains('Studený přeložený text 1').should('be.visible');
         toggleLang('Česky');
         cy.contains('Studený přeložený text 1').should('not.exist');

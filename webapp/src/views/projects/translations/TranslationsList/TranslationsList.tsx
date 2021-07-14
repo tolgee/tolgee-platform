@@ -18,11 +18,11 @@ import { ProjectPermissionType } from 'tg.service/response.types';
 type LanguageModel = components['schemas']['LanguageModel'];
 
 const useStyles = makeStyles((theme) => {
-  const borderColor = theme.palette.divider;
+  const borderColor = theme.palette.grey[200];
   return {
     table: {
       position: 'relative',
-      margin: '10px -56px 0px -10px',
+      margin: '10px -40px 0px -10px',
       borderLeft: 0,
       borderRight: 0,
       '& $rowWrapper:last-of-type': {
@@ -30,8 +30,8 @@ const useStyles = makeStyles((theme) => {
       },
     },
     rowWrapper: {
-      margin: '0px 0px 0px -46px',
-      padding: '0px 0px 0px 46px',
+      margin: '0px -16px 0px -46px',
+      padding: '0px 16px 0px 46px',
       border: `1px solid ${borderColor}`,
       borderWidth: '1px 0px 0px 0px',
     },

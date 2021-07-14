@@ -2,17 +2,35 @@ import { useRef, useCallback } from 'react';
 import { DndProvider, useDrag, useDrop, DropTargetMonitor } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { XYCoord } from 'dnd-core';
+import { DragIndicator } from '@material-ui/icons';
+import { makeStyles } from '@material-ui/core';
 
-type Props = {
-  columns: ItemType[];
-  onSwap: (a: number, b: number) => void;
-};
+const useStyles = makeStyles((theme) => ({
+  handle: {
+    width: '12px',
+    height: '100%',
+    position: 'absolute',
+    right: 5,
+    top: 0,
+    cursor: 'grab',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    color: theme.palette.grey[500],
+  },
+}));
 
 type ItemType = {
   width: number;
   draggable: boolean;
   item: React.ReactNode;
   id: any;
+};
+
+type Props = {
+  columns: ItemType[];
+  onSwap: (a: number, b: number) => void;
 };
 
 export const SortableHeading: React.FC<Props> = ({ columns, onSwap }) => {
@@ -51,6 +69,7 @@ type ItemProps = {
 };
 
 const Item: React.FC<ItemProps> = ({ item, index, moveCard }) => {
+  const classes = useStyles();
   const ref = useRef<HTMLDivElement>(null);
   const [{ handlerId }, drop] = useDrop({
     accept: 'card',
@@ -126,19 +145,9 @@ const Item: React.FC<ItemProps> = ({ item, index, moveCard }) => {
       ref={ref}
     >
       {item.item}
-      <div
-        style={{
-          width: '12px',
-          height: '100%',
-          background: 'lightgrey',
-          position: 'absolute',
-          right: 5,
-          top: 0,
-          cursor: 'grab',
-        }}
-        ref={drag}
-        data-handler-id={handlerId}
-      />
+      <div ref={drag} className={classes.handle} data-handler-id={handlerId}>
+        <DragIndicator fill="currentColor" />
+      </div>
     </div>
   );
 };
