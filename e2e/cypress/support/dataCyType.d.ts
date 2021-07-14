@@ -114,7 +114,6 @@ declare namespace DataCy {
         "translations-add-key-dialog" |
         "translations-add-key-field" |
         "translations-cell-cancel-button" |
-        "translations-cell-data" |
         "translations-cell-edit-button" |
         "translations-cell-save-button" |
         "translations-cell-screenshots-button" |

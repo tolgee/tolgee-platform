@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CircledLanguageIcon } from '../CircledLanguageIcon';
-import { CellPlain } from '../CellPlain';
+import { CellContent, CellPlain } from '../CellBase';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -28,10 +28,12 @@ export const CellLanguage: React.FC<Props> = ({ language }) => {
   const classes = useStyles();
   return (
     <CellPlain>
-      <div className={classes.content}>
-        <CircledLanguageIcon flag={language.flagEmoji} />
-        <div>{language.name}</div>
-      </div>
+      <CellContent>
+        <div className={classes.content}>
+          <CircledLanguageIcon flag={language.flagEmoji} />
+          <div>{language.name}</div>
+        </div>
+      </CellContent>
     </CellPlain>
   );
 };

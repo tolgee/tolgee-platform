@@ -10,7 +10,7 @@ import {
 import { CellData } from './CellData';
 import { resizeColumn, useResize } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
-import { CellPlain } from '../CellPlain';
+import { CellContent, CellPlain } from '../CellBase';
 import { CellLanguage } from './CellLanguage';
 import { SortableHeading } from './SortableHeading';
 import { CellKey } from '../CellKey';
@@ -200,7 +200,9 @@ export const TranslationsTable = () => {
                 </div>
               ) : (
                 <div className={classes.keyCell}>
-                  <CellPlain>{col.label}</CellPlain>
+                  <CellPlain>
+                    <CellContent>{col.label}</CellContent>
+                  </CellPlain>
                 </div>
               ),
             }))}

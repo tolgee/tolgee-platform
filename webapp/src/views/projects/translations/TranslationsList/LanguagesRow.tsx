@@ -1,11 +1,9 @@
 import React from 'react';
-import { makeStyles, Box, IconButton } from '@material-ui/core';
-import { Done, Close, Edit } from '@material-ui/icons';
+import { makeStyles, Box } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { CellPlain } from '../CellPlain';
+import { CellContent, CellPlain, CellControls } from '../CellBase';
 import { CircledLanguageIcon } from '../CircledLanguageIcon';
-import { CellControls } from '../CellControls';
 import { useEditableRow } from '../useEditableRow';
 import { Editor } from 'tg.component/editor/Editor';
 
@@ -23,32 +21,27 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     flexBasis: '50%',
+    width: '50%',
     flexGrow: 1,
     overflow: 'hidden',
   },
   editor: {
     display: 'flex',
     flexBasis: '50%',
+    width: '50%',
     flexGrow: 1,
     justifyContent: 'stretch',
   },
-  rowWrapper: {
-    display: 'flex',
-    flexGrow: 1,
-    '&:hover': {
-      background: theme.palette.grey[50],
-    },
-  },
   rowContent: {
     display: 'flex',
+    flexGrow: 1,
     overflow: 'hidden',
-    '&:hover $controls': {
-      display: 'flex',
-    },
+    alignItems: 'flex-start',
   },
   data: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    maxHeight: '4.5em',
   },
   languageContent: {
     width: 100,
@@ -88,71 +81,56 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
   return (
     <div className={classes.content}>
       <div className={classes.languages}>
-        {languages.map((l) => (
-          <div
-            key={l.id}
-            className={classes.rowWrapper}
-            data-cy="translations-cell-data"
-          >
+        {languages.map((l) => {
+          const isEditing = l.tag === editVal?.language;
+          return (
             <CellPlain
-              background={l.tag === editVal?.language ? '#efefef' : undefined}
+              key={l.id}
+              hover={!isEditing}
+              background={isEditing ? '#efefef' : undefined}
+              onClick={editEnabled ? () => handleEdit(l.tag) : undefined}
+              flexGrow={1}
             >
-              <div className={classes.rowContent}>
-                <div className={classes.languageContent}>
-                  <CircledLanguageIcon flag={l.flagEmoji} />
-                  <Box>{l.tag}</Box>
+              <CellContent>
+                <div className={classes.rowContent}>
+                  <div className={classes.languageContent}>
+                    <CircledLanguageIcon flag={l.flagEmoji} />
+                    <Box>{l.tag}</Box>
+                  </div>
+                  <div className={classes.data}>
+                    {data.translations[l.tag]?.text}
+                  </div>
                 </div>
-                <div className={classes.data}>
-                  {data.translations[l.tag]?.text}
-                </div>
-                <CellControls key="cell-controls">
-                  {editEnabled && (
-                    <IconButton
-                      className={classes.controls}
-                      onClick={() => handleEdit(l.tag)}
-                      size="small"
-                      data-cy="translations-cell-edit-button"
-                    >
-                      <Edit fontSize="small" />
-                    </IconButton>
-                  )}
-                </CellControls>
-              </div>
+              </CellContent>
+              <CellControls
+                mode="view"
+                editEnabled={editEnabled}
+                onEdit={() => handleEdit(l.tag)}
+              />
             </CellPlain>
-          </div>
-        ))}
+          );
+        })}
       </div>
       {editVal?.language && (
         <div className={classes.editor}>
           <CellPlain background="#efefef">
-            <Editor
-              key={editVal.language}
-              minHeight={100}
-              initialValue={value}
-              variables={[]}
-              onChange={(v) => setValue(v as string)}
-              onSave={(direction) => handleSave(direction)}
+            <CellContent>
+              <Editor
+                key={editVal.language}
+                minHeight={100}
+                initialValue={value}
+                variables={[]}
+                onChange={(v) => setValue(v as string)}
+                onSave={(direction) => handleSave(direction)}
+                onCancel={handleEditCancel}
+                autoFocus
+              />
+            </CellContent>
+            <CellControls
+              mode="edit"
+              onSave={handleSave}
               onCancel={handleEditCancel}
-              autoFocus
             />
-            <CellControls>
-              <IconButton
-                onClick={() => handleSave()}
-                color="primary"
-                size="small"
-                data-cy="translations-cell-save-button"
-              >
-                <Done fontSize="small" />
-              </IconButton>
-              <IconButton
-                onClick={handleEditCancel}
-                color="secondary"
-                size="small"
-                data-cy="translations-cell-cancel-button"
-              >
-                <Close fontSize="small" />
-              </IconButton>
-            </CellControls>
           </CellPlain>
         </div>
       )}

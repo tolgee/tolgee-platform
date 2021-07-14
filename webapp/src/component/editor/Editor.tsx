@@ -46,7 +46,6 @@ export const Editor = ({
   variables,
   initialValue,
   minHeight = 20,
-  width,
   onChange,
   onSave,
   onCancel,
