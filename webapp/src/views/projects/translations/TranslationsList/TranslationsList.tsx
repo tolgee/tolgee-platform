@@ -14,6 +14,7 @@ import { LanguagesRow } from './LanguagesRow';
 import { useResize, resizeColumn } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -133,10 +134,20 @@ export const TranslationsList = () => {
     [languages, selectedLanguages]
   );
 
-  const translationsList = translations || [];
+  if (!translations) {
+    return null;
+  }
+
+  if (translations.length === 0) {
+    return <EmptyListMessage />;
+  }
 
   return (
-    <div className={classes.table} ref={tableRef}>
+    <div
+      className={classes.table}
+      ref={tableRef}
+      data-cy="translations-view-list"
+    >
       {columnSizes.slice(0, -1).map((w, i) => {
         const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
         return (
@@ -153,16 +164,21 @@ export const TranslationsList = () => {
         threshold={200}
         type="variable"
         itemSizeEstimator={(index, cache) => {
-          const isLast = index === translationsList.length - 1;
+          const isLast = index === translations.length - 1;
           return (
             cache[index] ||
-            (selectedLanguages?.length || 0) * 30 + (isLast ? 200 : 0)
+            // items count
+            Math.max(selectedLanguages?.length || 0, 2) * 20 +
+              // + padding
+              20 +
+              // + loading container if last
+              (isLast ? 200 : 0)
           );
         }}
-        length={translationsList.length}
+        length={translations.length}
         itemRenderer={(index) => {
-          const row = translationsList[index];
-          const isLast = index === translationsList.length - 1;
+          const row = translations[index];
+          const isLast = index === translations.length - 1;
           if (isLast && !isFetchingMore && hasMoreToFetch) {
             handleFetchMore();
           }

@@ -10,6 +10,7 @@ declare namespace DataCy {
         "dropzone" |
         "dropzone-inner" |
         "global-base-view-content" |
+        "global-base-view-content-scrollable" |
         "global-base-view-loading" |
         "global-base-view-title" |
         "global-confirmation-cancel" |
@@ -26,6 +27,7 @@ declare namespace DataCy {
         "global-list-search" |
         "global-paginated-list" |
         "global-plus-button" |
+        "global-project-scrollable-content" |
         "global-search-field" |
         "global-snackbars" |
         "global-user-menu-button" |
@@ -121,6 +123,10 @@ declare namespace DataCy {
         "translations-language-select-form-control" |
         "translations-row-checkbox" |
         "translations-table-cell" |
+        "translations-view-list" |
+        "translations-view-list-button" |
+        "translations-view-table" |
+        "translations-view-table-button" |
         "user-account-side-menu" |
         "user-organizations-settings-subtitle-link"
 }

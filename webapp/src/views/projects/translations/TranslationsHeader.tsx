@@ -110,12 +110,14 @@ export const TranslationsHeader = () => {
           <Button
             color={view === 'LIST' ? 'primary' : undefined}
             onClick={() => handleViewChange('LIST')}
+            data-cy="translations-view-list-button"
           >
             <ViewListRounded />
           </Button>
           <Button
             color={view === 'TABLE' ? 'primary' : undefined}
             onClick={() => handleViewChange('TABLE')}
+            data-cy="translations-view-table-button"
           >
             <AppsRounded />
           </Button>

@@ -30,6 +30,7 @@ export const BaseView = (props: BaseViewProps) => {
 
   return (
     <Container
+      data-cy="global-base-view-content-scrollable"
       maxWidth={false}
       style={{
         backgroundColor: 'white',
