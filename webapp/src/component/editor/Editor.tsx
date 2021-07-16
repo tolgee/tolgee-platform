@@ -71,7 +71,7 @@ export const Editor = ({
       'icu',
       completion({
         variables,
-        enableSnippets: true,
+        enableSnippets: false,
       })
     );
     disposeRef.current = dispose;
@@ -89,16 +89,8 @@ export const Editor = ({
     editor.addAction({
       id: 'save-data-down',
       label: 'Save data',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+      keybindings: [monaco.KeyCode.Enter],
       run: () => onSaveRef.current?.('DOWN'),
-    });
-    editor.addAction({
-      id: 'save-data-up',
-      label: 'Save data',
-      keybindings: [
-        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter,
-      ],
-      run: () => onSaveRef.current?.('UP'),
     });
     editor.addAction({
       id: 'cancel-edit',

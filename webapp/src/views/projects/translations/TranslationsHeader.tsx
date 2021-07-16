@@ -26,7 +26,6 @@ const useStyles = makeStyles({
     display: 'flex',
     justifyContent: 'space-between',
     flexWrap: 'wrap',
-    marginRight: -40,
   },
   spaced: {
     display: 'flex',
@@ -79,7 +78,12 @@ export const TranslationsHeader = () => {
     <div className={classes.container}>
       <div className={classes.spaced}>
         {selection.length > 0 && (
-          <Box display="flex" justifyContent="center" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            marginLeft="-4px"
+          >
             <IconButton
               size="small"
               onClick={handleDelete}
