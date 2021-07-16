@@ -6,12 +6,14 @@ type Props = {
 };
 
 const useStyles = makeStyles({
+  '@keyframes fadeIn': {
+    from: { opacity: 0 },
+    to: { opacity: 1 },
+  },
   container: {
     position: 'relative',
     overflow: 'hidden',
     lineHeight: '1.2rem',
-    paddingRight: '1rem',
-    background: 'inherit',
 
     // clever word breaking
     overflowWrap: 'break-word',
@@ -24,6 +26,7 @@ const useStyles = makeStyles({
     '-moz-hyphens': 'auto',
     '-webkit-hyphens': 'auto',
     hyphens: 'auto',
+    animation: 'fadeIn .2s ease-in-out',
   },
 });
 
@@ -63,7 +66,6 @@ export const LimitedHeightText: React.FC<Props> = ({ maxLines, children }) => {
       ref={textRef as RefObject<HTMLDivElement>}
       style={{
         maxHeight: maxLines ? `calc(1.2rem * ${maxLines})` : undefined,
-        color: expandable === undefined ? 'transparent' : undefined,
         WebkitMaskImage: gradient,
         maskImage: gradient,
       }}

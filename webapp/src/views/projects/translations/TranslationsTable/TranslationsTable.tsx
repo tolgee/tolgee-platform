@@ -23,16 +23,17 @@ const useStyles = makeStyles((theme) => {
   return {
     table: {
       position: 'relative',
-      margin: '10px -40px 0px -10px',
+      margin: '10px -10px 0px -10px',
       borderLeft: 0,
       borderRight: 0,
+      background: 'white',
       '& $rowWrapper:last-of-type': {
         borderWidth: '1px 0px 1px 0px',
       },
     },
     rowWrapper: {
-      margin: '0px -16px 0px -46px',
-      padding: '0px 16px 0px 46px',
+      margin: `0px -${theme.spacing(2)}px 0px -${theme.spacing(2)}px`,
+      padding: `0px ${theme.spacing(2)}px 0px ${theme.spacing(2)}px`,
       border: `1px solid ${borderColor}`,
       borderWidth: '1px 0px 0px 0px',
     },
@@ -232,7 +233,7 @@ export const TranslationsTable = () => {
 
       <ReactList
         ref={reactListRef}
-        threshold={200}
+        threshold={500}
         type="variable"
         itemSizeEstimator={(index, cache) => {
           const isLast = index === translations.length - 1;

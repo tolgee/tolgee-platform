@@ -81,6 +81,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
               {editEnabled && (
                 <Box margin={-1} onClick={stopBubble()}>
                   <Checkbox
+                    size="small"
                     checked={isSelected}
                     onChange={toggleSelect}
                     data-cy="translations-row-checkbox"

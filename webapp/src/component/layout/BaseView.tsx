@@ -71,8 +71,11 @@ export const BaseView = (props: BaseViewProps) => {
             )}
           </Box>
         </Box>
-        <Box p={4} pt={2} pb={2}>
-          <Container maxWidth={props.containerMaxWidth || false}>
+        <Box pl={4} pr={4} pt={2} pb={2}>
+          <Container
+            maxWidth={props.containerMaxWidth || false}
+            style={{ padding: 0 }}
+          >
             <Grid container justify="center" alignItems="center">
               <Grid
                 item

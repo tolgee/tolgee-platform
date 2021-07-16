@@ -10,7 +10,7 @@ const useStyles = makeStyles((theme) => ({
     width: '12px',
     height: '100%',
     position: 'absolute',
-    right: 5,
+    right: 10,
     top: 0,
     cursor: 'grab',
     display: 'flex',
