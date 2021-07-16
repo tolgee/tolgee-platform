@@ -204,6 +204,7 @@ export const TranslationsList = () => {
                   style={{ flexBasis: columnSizes[1] }}
                 >
                   <LanguagesRow
+                    width={columnSizes[1]}
                     languages={languagesRow}
                     data={row}
                     editEnabled={projectPermissions.satisfiesPermission(

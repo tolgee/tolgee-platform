@@ -106,17 +106,25 @@ export const Editor = ({
       keybindings: [monaco.KeyCode.Escape],
       run: () => onCancel?.(),
     });
+
+    window.requestAnimationFrame(() =>
+      window.requestAnimationFrame(updateHeight)
+    );
     if (autoFocus) {
       editor.focus();
     }
   };
 
-  const handleChange: OnChange = (...attr) => {
-    onChange?.(...attr);
+  const updateHeight = () => {
     const realHeight = editorRef.current?.getContentHeight();
     setDynamicHeight(
       realHeight && realHeight > minHeight ? realHeight : minHeight
     );
+  };
+
+  const handleChange: OnChange = (...attr) => {
+    onChange?.(...attr);
+    updateHeight();
   };
 
   const classes = useStyles();
@@ -126,7 +134,7 @@ export const Editor = ({
       <MonacoEditor
         defaultValue={initialValue}
         defaultLanguage={language}
-        height={dynamicHeight}
+        height={dynamicHeight || '100%'}
         loading={<></>}
         options={{
           lineNumbers: 'off',

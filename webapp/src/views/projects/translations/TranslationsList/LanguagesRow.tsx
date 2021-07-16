@@ -6,6 +6,7 @@ import { CellContent, CellPlain, CellControls } from '../CellBase';
 import { CircledLanguageIcon } from '../CircledLanguageIcon';
 import { useEditableRow } from '../useEditableRow';
 import { Editor } from 'tg.component/editor/Editor';
+import { LimitedHeightText } from '../LimitedHeightText';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -42,11 +43,6 @@ const useStyles = makeStyles((theme) => {
       overflow: 'hidden',
       alignItems: 'flex-start',
     },
-    data: {
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      maxHeight: '4.5em',
-    },
     languageContent: {
       width: 100,
       flexShrink: 0,
@@ -66,6 +62,7 @@ type Props = {
   languages: LanguageModel[];
   data: KeyWithTranslationsModel;
   editEnabled: boolean;
+  width: number;
 };
 
 export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
@@ -75,24 +72,31 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
 }) {
   const classes = useStyles();
 
-  const { editVal, value, setValue, handleEdit, handleEditCancel, handleSave } =
-    useEditableRow({
-      keyId: data.keyId,
-      keyName: data.keyName,
-      translations: data.translations,
-      language: null,
-    });
+  const {
+    isEditing,
+    editVal,
+    value,
+    setValue,
+    handleEdit,
+    handleEditCancel,
+    handleSave,
+  } = useEditableRow({
+    keyId: data.keyId,
+    keyName: data.keyName,
+    translations: data.translations,
+    language: null,
+  });
 
   return (
     <div className={classes.content}>
       <div className={classes.languages}>
         {languages.map((l) => {
-          const isEditing = l.tag === editVal?.language;
+          const langIsEditing = l.tag === editVal?.language;
           return (
             <CellPlain
               key={l.id}
-              hover={!isEditing}
-              background={isEditing ? '#efefef' : undefined}
+              hover={!langIsEditing}
+              background={langIsEditing ? '#efefef' : undefined}
               onClick={editEnabled ? () => handleEdit(l.tag) : undefined}
               flexGrow={1}
             >
@@ -102,8 +106,10 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
                     <CircledLanguageIcon flag={l.flagEmoji} />
                     <Box>{l.tag}</Box>
                   </div>
-                  <div className={classes.data}>
-                    {data.translations[l.tag]?.text}
+                  <div>
+                    <LimitedHeightText maxLines={isEditing ? undefined : 3}>
+                      {data.translations[l.tag]?.text}
+                    </LimitedHeightText>
                   </div>
                 </div>
               </CellContent>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { RefObject } from 'react';
 import {
   Box,
   BoxProps,
@@ -8,6 +8,8 @@ import {
 } from '@material-ui/core';
 import { Edit, CameraAlt } from '@material-ui/icons';
 import { T } from '@tolgee/react';
+
+import { LimitedHeightText } from './LimitedHeightText';
 
 const useStyles = makeStyles((theme) => ({
   cellPlain: {
@@ -74,16 +76,24 @@ export const CellPlain: React.FC<Props> = ({
   );
 };
 
-export const CellContent: React.FC<BoxProps> = ({ children, ...props }) => {
+type CellContentProps = BoxProps & {
+  forwardRef?: RefObject<HTMLElement | undefined | null>;
+  maxLines?: number;
+};
+
+export const CellContent: React.FC<CellContentProps> = ({
+  children,
+  forwardRef,
+  maxLines,
+  ...props
+}) => {
   return (
-    <Box
-      width="100%"
-      padding="5px 10px"
-      position="relative"
-      flexGrow={1}
-      {...props}
-    >
-      {children}
+    <Box margin="5px 10px" position="relative" flexGrow={1} {...props}>
+      {maxLines !== undefined ? (
+        <LimitedHeightText maxLines={maxLines}>{children}</LimitedHeightText>
+      ) : (
+        children
+      )}
     </Box>
   );
 };
