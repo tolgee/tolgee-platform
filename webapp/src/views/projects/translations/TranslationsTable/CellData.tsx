@@ -10,6 +10,7 @@ type Props = {
   keyName: string;
   language: string | undefined;
   editEnabled: boolean;
+  width: number;
 };
 
 export const CellData: React.FC<Props> = React.memo(function Cell({
@@ -35,8 +36,8 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
         !isEditing && editEnabled ? () => handleEdit(language) : undefined
       }
     >
-      <CellContent maxHeight={isEditing ? undefined : '5em'}>
-        {isEditing ? (
+      {isEditing ? (
+        <CellContent>
           <Editor
             minHeight={100}
             initialValue={value}
@@ -46,10 +47,10 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
             onCancel={handleEditCancel}
             autoFocus
           />
-        ) : (
-          text
-        )}
-      </CellContent>
+        </CellContent>
+      ) : (
+        <CellContent maxLines={3}>{text}</CellContent>
+      )}
       <CellControls
         absolute
         mode={isEditing ? 'edit' : 'view'}

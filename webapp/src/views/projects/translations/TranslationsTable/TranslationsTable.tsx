@@ -262,6 +262,7 @@ export const TranslationsTable = () => {
                           keyName={row.keyName}
                           language={col.language?.tag}
                           text={col.accessor(row)}
+                          width={columnSizes[i]}
                           editEnabled={projectPermissions.satisfiesPermission(
                             ProjectPermissionType.TRANSLATE
                           )}
