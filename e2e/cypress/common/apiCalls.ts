@@ -109,6 +109,11 @@ export const setTranslations = (
     method: 'POST',
   });
 
+export const generateExampleKeys = (
+  projectId: number,
+  numberOfExamples: number
+) => internalFetch(`e2e-data/keys/generate/${projectId}/${numberOfExamples}`);
+
 export const deleteProject = (id: number) => {
   return v2apiFetch(`projects/${id}`, { method: 'DELETE' });
 };

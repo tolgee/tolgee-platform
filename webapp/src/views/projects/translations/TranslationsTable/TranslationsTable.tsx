@@ -16,6 +16,7 @@ import { SortableHeading } from './SortableHeading';
 import { CellKey } from '../CellKey';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.grey[200];
@@ -184,8 +185,16 @@ export const TranslationsTable = () => {
     return null;
   }
 
+  if (translations.length === 0) {
+    return <EmptyListMessage />;
+  }
+
   return (
-    <div className={classes.table} ref={tableRef}>
+    <div
+      className={classes.table}
+      ref={tableRef}
+      data-cy="translations-view-table"
+    >
       <div className={`${classes.rowWrapper} ${classes.headerRow}`}>
         <div className={classes.row}>
           <SortableHeading
@@ -227,7 +236,7 @@ export const TranslationsTable = () => {
         type="variable"
         itemSizeEstimator={(index, cache) => {
           const isLast = index === translations.length - 1;
-          return cache[index] || 40 + (isLast ? 200 : 0);
+          return cache[index] || 62 + (isLast ? 200 : 0);
         }}
         length={translations.length}
         useTranslate3d

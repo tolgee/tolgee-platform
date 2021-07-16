@@ -6,6 +6,7 @@ import {
 import {
   createProject,
   deleteProject,
+  generateExampleKeys,
   login,
   setTranslations,
 } from '../common/apiCalls';
@@ -116,54 +117,65 @@ describe('Translations', () => {
       );
 
       // wait for loading to appear and disappear again
-      cy.gcy('global-base-view-loading').should('be.visible');
+      cy.gcy('global-base-view-content').should('be.visible');
       cy.gcy('global-base-view-loading').should('not.exist');
     });
 
-    it('will edit key', () => {
-      editCell('Cool key 01', 'Cool key edited');
+    // run same tests for list view and table view
+    ['list', 'table'].forEach((viewType) => {
+      describe(`with ${viewType} view`, () => {
+        beforeEach(() => {
+          if (viewType === 'table') {
+            cy.gcy('translations-view-table-button').click();
+          }
+        });
 
-      cy.contains('Cool key edited').should('be.visible');
-      cy.contains('Cool key 02').should('be.visible');
-      cy.contains('Cool key 04').should('be.visible');
-    });
+        it('will edit key', () => {
+          editCell('Cool key 01', 'Cool key edited');
 
-    it('will edit translation', () => {
-      editCell('Cool translated text 1', 'Super cool changed text...');
-      cy.xpath(
-        `${getAnyContainingText(
-          'Super cool changed text...'
-        )}/parent::*//button[@type='submit']`
-      ).should('not.exist');
-      cy.contains('Super cool changed text...').should('be.visible');
-      cy.contains('Cool translated text 2').should('be.visible');
-    });
+          cy.contains('Cool key edited').should('be.visible');
+          cy.contains('Cool key 02').should('be.visible');
+          cy.contains('Cool key 04').should('be.visible');
+        });
 
-    it('will cancel key edit', () => {
-      editCell('Cool key 01', 'Cool key edited', false);
-      getCellCancelButton().click();
+        it('will edit translation', () => {
+          editCell('Cool translated text 1', 'Super cool changed text...');
+          cy.xpath(
+            `${getAnyContainingText(
+              'Super cool changed text...'
+            )}/parent::*//button[@type='submit']`
+          ).should('not.exist');
+          cy.contains('Super cool changed text...').should('be.visible');
+          cy.contains('Cool translated text 2').should('be.visible');
+        });
 
-      cy.contains('Discard changes?').should('be.visible');
-      clickDiscardChanges();
-      cy.contains('Cool key edited').should('not.exist');
-      cy.contains('Cool key 01').should('be.visible');
-    });
+        it('will cancel key edit', () => {
+          editCell('Cool key 01', 'Cool key edited', false);
+          getCellCancelButton().click();
 
-    it('will ask for confirmation on changed edit', () => {
-      editCell('Cool key 01', 'Cool key edited', false);
-      cy.contains('Cool key 04')
-        .xpath(
-          "./ancestor::*[@data-cy='translations-table-cell']//*[@data-cy='translations-cell-edit-button']"
-        )
-        .invoke('show')
-        .click();
-      cy.contains(`Discard changes?`).should('be.visible');
-      clickDiscardChanges();
-      cy.contains('Cool key 04')
-        .xpath(
-          "./ancestor::*[@data-cy='translations-table-cell']//*[@data-cy='translations-cell-save-button']"
-        )
-        .should('be.visible');
+          cy.contains('Discard changes?').should('be.visible');
+          clickDiscardChanges();
+          cy.contains('Cool key edited').should('not.exist');
+          cy.contains('Cool key 01').should('be.visible');
+        });
+
+        it('will ask for confirmation on changed edit', () => {
+          editCell('Cool key 01', 'Cool key edited', false);
+          cy.contains('Cool key 04')
+            .xpath(
+              "./ancestor::*[@data-cy='translations-table-cell']//*[@data-cy='translations-cell-edit-button']"
+            )
+            .invoke('show')
+            .click();
+          cy.contains(`Discard changes?`).should('be.visible');
+          clickDiscardChanges();
+          cy.contains('Cool key 04')
+            .xpath(
+              "./ancestor::*[@data-cy='translations-table-cell']//*[@data-cy='translations-cell-save-button']"
+            )
+            .should('be.visible');
+        });
+      });
     });
 
     describe('Options', () => {
@@ -191,6 +203,39 @@ describe('Translations', () => {
         cy.contains('Cool key 01').should('not.exist');
         cy.contains('Cool key 04').should('be.visible');
       });
+    });
+  });
+
+  describe('with 100 translations', () => {
+    beforeEach(() => {
+      cy.wrap(null).then(() =>
+        Cypress.Promise.all([generateExampleKeys(project.id, 100)]).then(() => {
+          visit();
+        })
+      );
+
+      // wait for loading to appear and disappear again
+      cy.gcy('global-base-view-content').should('be.visible');
+      cy.gcy('global-base-view-loading').should('not.exist');
+    });
+
+    it('will scroll properly in list view', () => {
+      cy.gcy('global-project-scrollable-content').scrollTo('bottom');
+      // it should load key 60 on bottom of the page if, heights of cells are estimated correctly
+      cy.contains('Cool key 60').should('exist');
+      // now we scroll to the end of newly loaded data
+      cy.gcy('global-project-scrollable-content').scrollTo('bottom');
+      cy.contains('Cool translated text 99').should('be.visible');
+    });
+
+    it('will scroll properly in table view', () => {
+      cy.gcy('translations-view-table-button').click();
+      cy.gcy('global-project-scrollable-content').scrollTo('bottom');
+      // it should load key 60 on bottom of the page if, heights of cells are estimated correctly
+      cy.contains('Cool key 60').should('exist');
+      // now we scroll to the end of newly loaded data
+      cy.gcy('global-project-scrollable-content').scrollTo('bottom');
+      cy.contains('Cool translated text 99').should('be.visible');
     });
   });
 

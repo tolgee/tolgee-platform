@@ -25,7 +25,12 @@ export const ProjectPage: FunctionComponent<Props> = (props) => {
   return (
     <DashboardPage fullWidth={props.fullWidth} projectName={project.name}>
       <ProjectMenu id={project.id} />
-      <div className={classes.content}>{props.children}</div>
+      <div
+        className={classes.content}
+        data-cy="global-project-scrollable-content"
+      >
+        {props.children}
+      </div>
     </DashboardPage>
   );
 };
