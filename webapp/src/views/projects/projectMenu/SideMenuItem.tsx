@@ -1,7 +1,7 @@
 import React from 'react';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import { useRouteMatch } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { ListItemLink } from 'tg.component/common/list/ListItemLink';
 
@@ -18,11 +18,11 @@ export function SideMenuItem({
   text,
   selected,
 }: SideMenuItemProps) {
-  const match = useRouteMatch();
+  const match = useLocation();
 
   return (
     <ListItemLink
-      selected={selected ? true : match.url === linkTo}
+      selected={selected ? true : match.pathname === linkTo}
       to={linkTo || ''}
     >
       <ListItemIcon>{icon}</ListItemIcon>
