@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
-import { makeStyles, Box, CircularProgress } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import ReactList from 'react-list';
 import { useContextSelector } from 'use-context-selector';
 
@@ -165,15 +165,10 @@ export const TranslationsList = () => {
         threshold={500}
         type="variable"
         itemSizeEstimator={(index, cache) => {
-          const isLast = index === translations.length - 1;
           return (
             cache[index] ||
             // items count
-            Math.max(selectedLanguages?.length || 0, 2) * 20 +
-              // + padding
-              20 +
-              // + loading container if last
-              (isLast ? 200 : 0)
+            Math.max(selectedLanguages?.length || 0, 2) * 20 + 20
           );
         }}
         length={translations.length}
@@ -214,16 +209,6 @@ export const TranslationsList = () => {
                   />
                 </div>
               </div>
-              {isLast && isFetchingMore && (
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  minHeight={200}
-                >
-                  <CircularProgress />
-                </Box>
-              )}
             </div>
           );
         }}
