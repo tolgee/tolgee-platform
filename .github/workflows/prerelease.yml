@@ -7,6 +7,9 @@ on:
 
 jobs:
   main:
+    concurrency:
+      group: prerelease
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
