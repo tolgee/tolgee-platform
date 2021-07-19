@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Box, Link, MenuItem, Popover } from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
 import { T } from '@tolgee/react';
@@ -20,46 +20,45 @@ type ListDataType = {
 const UserOrganizationSettingsSubtitleLink = (
   props: UserOrganizationSettingsSubtitleLinkProps
 ) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const anchorEl = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleClose = () => {
-    setAnchorEl(null);
+    setIsOpen(false);
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleClick = () => {
+    setIsOpen(true);
   };
 
-  const isOpen = !!anchorEl;
+  const user = useUser();
 
-  const MenuItems = () => {
-    const user = useUser();
+  const organizationsLoadable = useApiQuery({
+    url: '/v2/organizations',
+    method: 'get',
+    query: {
+      params: { filterCurrentUserOwner: false },
+      size: 1000,
+    },
+  });
 
-    const organizationsLoadable = useApiQuery({
-      url: '/v2/organizations',
-      method: 'get',
-      query: {
-        params: { filterCurrentUserOwner: false },
-        size: 1000,
-      },
-    });
-
-    const data: ListDataType = [
+  const data: ListDataType = useMemo(
+    () => [
       {
         name: user?.name as string,
         linkTo: LINKS.USER_SETTINGS.build(),
       },
-    ];
-
-    organizationsLoadable.data?._embedded?.organizations?.map((i) => {
-      data.push({
+      ...(organizationsLoadable.data?._embedded?.organizations?.map((i) => ({
         name: i.name,
         linkTo: LINKS.ORGANIZATION_PROFILE.build({
           [PARAMS.ORGANIZATION_SLUG]: i.slug,
         }),
-      });
-    });
+      })) || []),
+    ],
+    [organizationsLoadable.data]
+  );
 
+  const MenuItems = () => {
     return (
       <>
         {data.map((item, idx) => (
@@ -80,6 +79,7 @@ const UserOrganizationSettingsSubtitleLink = (
     <>
       <Box display="flex" data-cy="user-organizations-settings-subtitle-link">
         <Link
+          ref={anchorEl}
           style={{
             cursor: 'pointer',
             display: 'flex',
@@ -100,10 +100,9 @@ const UserOrganizationSettingsSubtitleLink = (
         <Popover
           elevation={1}
           id="simple-menu"
-          anchorEl={anchorEl}
-          getContentAnchorEl={null}
+          anchorEl={anchorEl.current}
           keepMounted
-          open={Boolean(anchorEl)}
+          open={isOpen}
           onClose={handleClose}
           anchorOrigin={{
             vertical: 'bottom',
