@@ -114,7 +114,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
             ],
             [
               t('project_settings_title'),
-              LINKS.PROJECT_TRANSLATIONS.build({
+              LINKS.PROJECT_EDIT.build({
                 [PARAMS.PROJECT_ID]: project.id,
               }),
             ],

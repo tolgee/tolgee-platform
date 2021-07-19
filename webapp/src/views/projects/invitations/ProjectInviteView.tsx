@@ -102,7 +102,7 @@ export const ProjectInviteView: FunctionComponent = () => {
             ],
             [
               t('invite_user_title'),
-              LINKS.PROJECT_TRANSLATIONS.build({
+              LINKS.PROJECT_INVITATION.build({
                 [PARAMS.PROJECT_ID]: project.id,
               }),
             ],

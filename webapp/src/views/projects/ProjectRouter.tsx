@@ -31,7 +31,7 @@ export const ProjectRouter = () => {
             <ProjectSettingsView />
           </Route>
 
-          <Route exact path={LINKS.PROJECT_LANGUAGE_EDIT.template}>
+          <Route exact path={LINKS.PROJECT_EDIT_LANGUAGE.template}>
             <LanguageEditView />
           </Route>
 

@@ -10,6 +10,7 @@ interface SideMenuItemProps {
   icon: React.ReactElement;
   text: string;
   selected?: boolean;
+  matchAsPrefix?: boolean;
 }
 
 export function SideMenuItem({
@@ -17,14 +18,18 @@ export function SideMenuItem({
   icon,
   text,
   selected,
+  matchAsPrefix,
 }: SideMenuItemProps) {
   const match = useLocation();
 
+  const isSelected = selected
+    ? true
+    : matchAsPrefix
+    ? match.pathname.startsWith(String(linkTo))
+    : match.pathname === linkTo;
+
   return (
-    <ListItemLink
-      selected={selected ? true : match.pathname === linkTo}
-      to={linkTo || ''}
-    >
+    <ListItemLink selected={isSelected} to={linkTo || ''}>
       <ListItemIcon>{icon}</ListItemIcon>
       <ListItemText primary={text} />
     </ListItemLink>

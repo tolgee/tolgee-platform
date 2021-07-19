@@ -65,6 +65,7 @@ export const ProjectMenu = ({ id }) => {
                 linkTo={LINKS.PROJECT_EDIT.build({
                   [PARAMS.PROJECT_ID]: id,
                 })}
+                matchAsPrefix
                 icon={<SettingsIcon />}
                 text={t('project_menu_project_settings')}
               />

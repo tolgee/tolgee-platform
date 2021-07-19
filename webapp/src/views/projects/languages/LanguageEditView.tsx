@@ -1,5 +1,5 @@
 import { Box, Button } from '@material-ui/core';
-import { T } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
 
@@ -13,6 +13,8 @@ import { useRedirect } from 'tg.hooks/useRedirect';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { Navigation } from 'tg.component/navigation/Navigation';
+import { useProject } from 'tg.hooks/useProject';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -23,6 +25,8 @@ export const LanguageEditView = () => {
     confirmation({ title: 'Delete language', ...options });
 
   const match = useRouteMatch();
+  const project = useProject();
+  const t = useTranslate();
 
   const projectId = match.params[PARAMS.PROJECT_ID];
   const languageId = match.params[PARAMS.LANGUAGE_ID] as number;
@@ -96,7 +100,31 @@ export const LanguageEditView = () => {
       lg={6}
       md={8}
       xs={10}
-      title={<T>language_settings_title</T>}
+      navigation={
+        <Navigation
+          path={[
+            [
+              project.name,
+              LINKS.PROJECT_TRANSLATIONS.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+            [
+              t('project_settings_title'),
+              LINKS.PROJECT_EDIT.build({
+                [PARAMS.PROJECT_ID]: project.id,
+              }),
+            ],
+            [
+              t('language_settings_title'),
+              LINKS.PROJECT_EDIT_LANGUAGE.build({
+                [PARAMS.PROJECT_ID]: project.id,
+                [PARAMS.LANGUAGE_ID]: languageId,
+              }),
+            ],
+          ]}
+        />
+      }
       initialValues={{
         ...languageLoadable.data!,
         flagEmoji: languageLoadable.data?.flagEmoji || '🏁',
