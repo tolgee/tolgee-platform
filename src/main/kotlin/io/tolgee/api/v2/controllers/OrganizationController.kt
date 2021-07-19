@@ -169,7 +169,7 @@ class OrganizationController(
     organizationRoleService.removeUser(organizationId, userId)
   }
 
-  @GetMapping("/{id:[0-9]+]}/projects")
+  @GetMapping("/{id:[0-9]+}/projects")
   @Operation(summary = "Returns all organization projects")
   fun getAllProjects(
     @PathVariable("id") id: Long,

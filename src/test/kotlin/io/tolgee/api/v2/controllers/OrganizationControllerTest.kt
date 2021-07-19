@@ -357,6 +357,23 @@ class OrganizationControllerTest : SignedInControllerTest() {
   }
 
   @Test
+  fun testGetAllProjectsWithId() {
+    val users = dbPopulator.createUsersAndOrganizations()
+    loginAsUser(users[1].username!!)
+    users[1].organizationRoles[0].organization.let { organization ->
+      performAuthGet("/v2/organizations/${organization!!.id}/projects")
+        .andIsOk.andAssertThatJson.let {
+          it.node("_embedded.projects").let { projectsNode ->
+            projectsNode.isArray.hasSize(3)
+            projectsNode.node("[1].name").isEqualTo("user 2's organization 1 project 2")
+            projectsNode.node("[1].organizationOwnerSlug").isEqualTo("user-2-s-organization-1")
+            projectsNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
+          }
+        }
+    }
+  }
+
+  @Test
   fun testGetAllInvitations() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
 
