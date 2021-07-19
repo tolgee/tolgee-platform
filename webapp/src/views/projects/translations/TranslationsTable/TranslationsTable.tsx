@@ -2,6 +2,7 @@ import { useMemo, useRef, useCallback, useEffect, useState } from 'react';
 import ReactList from 'react-list';
 import { makeStyles, Box, CircularProgress } from '@material-ui/core';
 import { useContextSelector } from 'use-context-selector';
+import { T } from '@tolgee/react';
 
 import {
   TranslationsContext,
@@ -141,7 +142,7 @@ export const TranslationsTable = () => {
     () => [
       {
         id: 'key',
-        label: 'Klíč',
+        label: <T>translation_grid_key_text</T>,
         language: undefined,
         accessor: (item) => item.keyName,
       },
