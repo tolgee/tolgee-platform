@@ -1,6 +1,6 @@
 import { useMemo, useRef, useCallback, useEffect, useState } from 'react';
 import ReactList from 'react-list';
-import { makeStyles, Box, CircularProgress } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import { useContextSelector } from 'use-context-selector';
 import { T } from '@tolgee/react';
 
@@ -237,8 +237,7 @@ export const TranslationsTable = () => {
         threshold={500}
         type="variable"
         itemSizeEstimator={(index, cache) => {
-          const isLast = index === translations.length - 1;
-          return cache[index] || 62 + (isLast ? 200 : 0);
+          return cache[index] || 62;
         }}
         length={translations.length}
         useTranslate3d
@@ -284,16 +283,6 @@ export const TranslationsTable = () => {
                   );
                 })}
               </div>
-              {isLast && isFetchingMore && (
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  minHeight={200}
-                >
-                  <CircularProgress />
-                </Box>
-              )}
             </div>
           );
         }}
