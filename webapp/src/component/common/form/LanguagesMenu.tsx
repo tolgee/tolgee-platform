@@ -5,6 +5,7 @@ import {
   ListItemText,
   MenuItem,
   Select,
+  Typography,
 } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
@@ -16,6 +17,7 @@ import { MessageService } from 'tg.service/MessageService';
 const useStyles = makeStyles({
   input: {
     minWidth: 200,
+    height: 40,
   },
 });
 
@@ -44,14 +46,14 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
   };
 
   const menuProps = {
+    variant: 'menu',
     PaperProps: {
       style: {
-        maxHeight: 300,
         width: 250,
       },
     },
     id: `language-select-${props.context}-menu`,
-  };
+  } as const;
 
   return (
     <Box display="flex" alignItems="right">
@@ -66,9 +68,14 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
           multiple
           value={props.value}
           onChange={(e) => langsChange(e)}
-          renderValue={(selected) => (selected as string[]).join(', ')}
+          renderValue={(selected) => (
+            <Typography color="textPrimary" variant="body2">
+              {(selected as string[]).join(', ')}
+            </Typography>
+          )}
           className={classes.input}
           MenuProps={menuProps}
+          margin="dense"
         >
           {props.languages.map((lang) => (
             <MenuItem key={lang.value} value={lang.value}>
