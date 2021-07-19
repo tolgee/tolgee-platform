@@ -28,11 +28,12 @@ type TranslationsQueryType =
   operations['getTranslations']['parameters']['query'];
 
 type ActionType =
+  | { type: 'SET_SEARCH'; payload: string }
+  | { type: 'SET_FILTERS'; payload: FiltersType }
   | { type: 'SET_EDIT'; payload: EditType | undefined }
   | { type: 'UPDATE_EDIT'; payload: Partial<EditType> }
   | { type: 'EDIT_NEXT' }
   | { type: 'EDIT_MOVE'; payload: Direction }
-  | { type: 'SET_SEARCH'; payload: string }
   | { type: 'TOGGLE_SELECT'; payload: number }
   | { type: 'CHANGE_FIELD'; payload: ChangeValueType }
   | { type: 'FETCH_MORE' }
@@ -45,6 +46,16 @@ type ActionType =
 export type ViewType = 'TABLE' | 'LIST';
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
+
+type FiltersType = Pick<
+  TranslationsQueryType,
+  | 'filterHasNoScreenshot'
+  | 'filterHasScreenshot'
+  | 'filterTranslatedAny'
+  | 'filterUntranslatedAny'
+  | 'filterTranslatedInLang'
+  | 'filterUntranslatedInLang'
+>;
 
 type ChangeValueType = CellLocation & {
   value: string;
@@ -79,6 +90,7 @@ export type TranslationsContextType = {
   edit?: EditType;
   selectedLanguages?: string[];
   view: ViewType;
+  filters: FiltersType;
 };
 
 // @ts-ignore
@@ -101,6 +113,7 @@ export const TranslationsContextProvider: React.FC<{
   const [fixedTranslations, setFixedTranslations] = useState(
     [] as KeyWithTranslationsModelType[]
   );
+  const [filters, setFilters] = useState<FiltersType>({});
   const [view, setView] = useState('LIST' as ViewType);
   const [query, setQuery] = useState<TranslationsQueryType>({
     search: '',
@@ -139,7 +152,7 @@ export const TranslationsContextProvider: React.FC<{
     url: '/v2/projects/{projectId}/translations',
     method: 'get',
     path,
-    query: query!,
+    query: { ...query, ...filters },
     options: {
       // fetch after languages are loaded,
       // so we dont't try to fetch nonexistant languages
@@ -180,17 +193,26 @@ export const TranslationsContextProvider: React.FC<{
     },
   });
 
+  const resetTranslations = () => {
+    setEdit(undefined);
+    setSelection([]);
+    // force refetch from first page
+    translations.remove();
+    translations.refetch();
+  };
+
   const updateQuery = (q: Partial<typeof query>) => {
     const newQuery = { ...query, ...q };
     setQuery({
       ...newQuery,
       languages: newQuery.languages?.length ? newQuery.languages : undefined,
     });
-    setEdit(undefined);
-    setSelection([]);
-    // force refetch from first page
-    translations.remove();
-    translations.refetch();
+    resetTranslations();
+  };
+
+  const updateFilters = (filters: FiltersType) => {
+    setFilters(filters);
+    resetTranslations();
   };
 
   const updateValue = useApiMutation({
@@ -289,6 +311,9 @@ export const TranslationsContextProvider: React.FC<{
       case 'SET_SEARCH':
         updateQuery({ search: action.payload });
         return;
+      case 'SET_FILTERS':
+        updateFilters(action.payload);
+        return;
       case 'SET_EDIT':
         if (edit?.changed) {
           confirmation({
@@ -301,7 +326,6 @@ export const TranslationsContextProvider: React.FC<{
         } else {
           setEdit(action.payload);
         }
-
         return;
       case 'UPDATE_EDIT':
         setEdit((edit) => (edit ? { ...edit, ...action.payload } : edit));
@@ -395,6 +419,7 @@ export const TranslationsContextProvider: React.FC<{
           isFetchingMore: translations.isFetchingNextPage,
           hasMoreToFetch: translations.hasNextPage,
           search: query?.search,
+          filters,
           edit,
           selection,
           selectedLanguages:

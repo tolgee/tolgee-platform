@@ -235,7 +235,7 @@ const validateTranslatePermissions = (projectName: string) => {
   assertOtherMenuItemsVisible();
   gcy('translations-add-button').should('not.exist');
   gcy('translations-row-checkbox').should('not.exist');
-  getCellEditButton('This is test text!').should('be.visible').click();
+  getCellEditButton('This is test text!').click();
   getCellSaveButton().should('be.visible');
 };
 

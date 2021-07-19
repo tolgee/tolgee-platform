@@ -20,12 +20,14 @@ import {
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { Filters } from './Filters/Filters';
 
 const useStyles = makeStyles({
   container: {
     display: 'flex',
     justifyContent: 'space-between',
     flexWrap: 'wrap',
+    alignItems: 'flex-start',
   },
   spaced: {
     display: 'flex',
@@ -97,7 +99,9 @@ export const TranslationsHeader = () => {
           label={''}
           initial={search}
           onSearch={handleSearchChange}
+          margin="dense"
         />
+        <Filters />
       </div>
 
       <div className={classes.spaced}>
@@ -115,6 +119,7 @@ export const TranslationsHeader = () => {
             color={view === 'LIST' ? 'primary' : undefined}
             onClick={() => handleViewChange('LIST')}
             data-cy="translations-view-list-button"
+            size="small"
           >
             <ViewListRounded />
           </Button>
@@ -122,6 +127,7 @@ export const TranslationsHeader = () => {
             color={view === 'TABLE' ? 'primary' : undefined}
             onClick={() => handleViewChange('TABLE')}
             data-cy="translations-view-table-button"
+            size="small"
           >
             <AppsRounded />
           </Button>
