@@ -53,4 +53,4 @@ jobs:
         uses: nickgronow/kubectl@master
         with:
           args: '"rollout restart deployment/tolgee-deployment-${{ steps.version.outputs.VERSION }}"'
-          config_data: ${{ secrets.KUBERNETES_SERVICE_CONFIG }}
+          config_data: ${{ secrets.KUBERNETES_DO_SERVICE_CONFIG }}
