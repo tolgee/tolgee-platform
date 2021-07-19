@@ -59,7 +59,7 @@ export const ProjectPermissionsView: FunctionComponent = () => {
             ],
             [
               t('edit_project_permissions_title'),
-              LINKS.PROJECT_TRANSLATIONS.build({
+              LINKS.PROJECT_PERMISSIONS.build({
                 [PARAMS.PROJECT_ID]: project.id,
               }),
             ],

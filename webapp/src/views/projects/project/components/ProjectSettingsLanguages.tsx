@@ -46,7 +46,7 @@ export const ProjectSettingsLanguages = () => {
             <ListItemSecondaryAction>
               <Link
                 data-cy="project-settings-languages-list-edit-button"
-                to={LINKS.PROJECT_LANGUAGE_EDIT.build({
+                to={LINKS.PROJECT_EDIT_LANGUAGE.build({
                   [PARAMS.PROJECT_ID]: project.id,
                   [PARAMS.LANGUAGE_ID]: l.id,
                 })}

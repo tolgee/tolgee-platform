@@ -1,5 +1,5 @@
-import { default as React, ReactNode } from 'react';
-import { Box, Container, LinearProgress } from '@material-ui/core';
+import { ReactNode } from 'react';
+import { Box, Container, LinearProgress, useTheme } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import grey from '@material-ui/core/colors/grey';
@@ -23,81 +23,83 @@ export interface BaseViewProps {
 }
 
 export const BaseView = (props: BaseViewProps) => {
+  const theme = useTheme();
   const hideChildrenOnLoading =
     props.hideChildrenOnLoading === undefined || props.hideChildrenOnLoading;
 
   const globalLoading = useLoading();
 
   return (
-    <Container
-      data-cy="global-base-view-content-scrollable"
-      maxWidth={false}
-      style={{
-        backgroundColor: 'white',
-        borderBottom: `1px solid ${grey[100]}`,
-        padding: 0,
-        minHeight: '100%',
-      }}
-    >
-      <Box minHeight="100%">
-        {props.navigation}
-        {(props.title || props.customHeader) && (
-          <SecondaryBar>
-            <Container maxWidth={props.containerMaxWidth || false}>
+    <>
+      <Box position="absolute" width="100%" top={0} zIndex={theme.zIndex.modal}>
+        {(globalLoading || props.loading) && (
+          <LinearProgress
+            data-cy="global-base-view-loading"
+            style={{ height: '3px' }}
+          />
+        )}
+      </Box>
+
+      <Container
+        data-cy="global-base-view-content-scrollable"
+        maxWidth={false}
+        style={{
+          backgroundColor: 'white',
+          borderBottom: `1px solid ${grey[100]}`,
+          padding: 0,
+          minHeight: '100%',
+        }}
+      >
+        <Box minHeight="100%">
+          {props.navigation}
+          {(props.title || props.customHeader) && (
+            <SecondaryBar>
+              <Container maxWidth={props.containerMaxWidth || false}>
+                <Grid container justify="center" alignItems="center">
+                  <Grid
+                    data-cy="global-base-view-title"
+                    item
+                    xs={props.xs || 12}
+                    md={props.md || 12}
+                    lg={props.lg || 12}
+                    sm={props.sm || 12}
+                  >
+                    {props.customHeader || (
+                      <Typography variant="h5">{props.title}</Typography>
+                    )}
+                  </Grid>
+                </Grid>
+              </Container>
+            </SecondaryBar>
+          )}
+          <Box pl={4} pr={4} pt={2} pb={2}>
+            <Container
+              maxWidth={props.containerMaxWidth || false}
+              style={{ padding: 0 }}
+            >
               <Grid container justify="center" alignItems="center">
                 <Grid
-                  data-cy="global-base-view-title"
                   item
                   xs={props.xs || 12}
                   md={props.md || 12}
                   lg={props.lg || 12}
                   sm={props.sm || 12}
                 >
-                  {props.customHeader || (
-                    <Typography variant="h5">{props.title}</Typography>
+                  {!props.loading || !hideChildrenOnLoading ? (
+                    <Box data-cy="global-base-view-content">
+                      {typeof props.children === 'function'
+                        ? props.children()
+                        : props.children}
+                    </Box>
+                  ) : (
+                    <></>
                   )}
                 </Grid>
               </Grid>
             </Container>
-          </SecondaryBar>
-        )}
-        <Box position="relative" overflow="visible">
-          <Box position="absolute" width="100%">
-            {(globalLoading || props.loading) && (
-              <LinearProgress
-                data-cy="global-base-view-loading"
-                style={{ height: '2px' }}
-              />
-            )}
           </Box>
         </Box>
-        <Box pl={4} pr={4} pt={2} pb={2}>
-          <Container
-            maxWidth={props.containerMaxWidth || false}
-            style={{ padding: 0 }}
-          >
-            <Grid container justify="center" alignItems="center">
-              <Grid
-                item
-                xs={props.xs || 12}
-                md={props.md || 12}
-                lg={props.lg || 12}
-                sm={props.sm || 12}
-              >
-                {!props.loading || !hideChildrenOnLoading ? (
-                  <Box data-cy="global-base-view-content">
-                    {typeof props.children === 'function'
-                      ? props.children()
-                      : props.children}
-                  </Box>
-                ) : (
-                  <></>
-                )}
-              </Grid>
-            </Grid>
-          </Container>
-        </Box>
-      </Box>
-    </Container>
+      </Container>
+    </>
   );
 };
