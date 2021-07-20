@@ -167,6 +167,7 @@ export const TranslationsContextProvider: React.FC<{
             path,
             query: {
               ...query,
+              ...filters,
               cursor: lastPage.nextCursor,
             },
           };
