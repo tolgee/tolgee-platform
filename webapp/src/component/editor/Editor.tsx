@@ -1,160 +1,172 @@
-import { useRef } from 'react';
-import MonacoEditor, {
-  BeforeMount,
-  OnChange,
-  OnMount,
-  loader,
-} from '@monaco-editor/react';
-import * as monaco from 'monaco-editor';
-import completion from './icuCompletion';
-import tokenizer from './icuTokenizer';
-import icuValidator from './icuValidator';
-import icuTheme from './icuTheme';
+import React, { useRef, useState, useEffect } from 'react';
+import AceEditor from 'react-ace';
+import { Ace } from 'ace-builds';
 import { makeStyles } from '@material-ui/core';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import clsx from 'clsx';
+import 'ace-builds/src-noconflict/ext-language_tools';
 
-loader.init().then((monaco) => {
-  monaco.languages.register({ id: 'icu' });
-  monaco.languages.setMonarchTokensProvider('icu', tokenizer);
-  monaco.editor.onDidCreateModel(icuValidator(monaco.editor));
-});
+import IcuMode from './icuMode';
+import icuValidator from './icuValidator';
+import { icuAutocompete } from './icuAutocomplete';
 
 const useStyles = makeStyles((theme) => ({
-  wrapper: {
-    '& .overflowingContentWidgets *': {
-      zIndex: theme.zIndex.tooltip,
+  editor: {
+    overflow: 'visible',
+    marginBottom: '16px',
+    // @ts-ignore
+    background: (props) => props.background || 'white',
+    '& .error, & .error-highlight': {
+      position: 'absolute',
+      pointerEvents: 'auto',
+      'z-index': 'unset !important',
     },
-    '& div.hover-row.status-bar': {
-      display: 'none !important',
+    '& .error-highlight': {
+      backgroundColor: '#ff00004d',
+    },
+    '& .error:before, & .error-highlight:before': {
+      content: "''",
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      zIndex: 2,
+      borderBottom: `2px dotted ${theme.palette.error.main}`,
+      borderRadius: 0,
+    },
+
+    '& .error:hover:after, & .error-highlight:hover:after': {
+      pointerEvents: 'none',
+      position: 'absolute',
+      left: 0,
+      padding: '3px 5px',
+      top: 'calc(100% + 3px)',
+      zIndex: 1000,
+      // @ts-ignore
+      content: (props) => `'${props.error || ''}'`,
+      backgroundColor: '#000',
+      color: '#fff',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+    },
+    '& .ace_marker-layer': {
+      zIndex: 'unset',
+      overflow: 'visible',
+    },
+    '& .ace_marker-layer > *': {
+      zIndex: 1,
+      overflow: 'visible',
+    },
+    '& .ace_scroller': {
+      overflow: 'visible',
+    },
+  },
+  icuSyntax: {
+    '& .ace_text-layer .ace_function': {
+      color: '#007300',
+    },
+    '& .ace_text-layer .ace_parameter': {
+      color: '#002bff',
+    },
+    '& .ace_text-layer .ace_option': {
+      color: '#002bff',
+    },
+    '& .ace_text-layer .ace_string': {
+      color: '#000000',
+    },
+    '& .ace_text-layer .ace_bracket': {
+      color: '#002bff',
     },
   },
 }));
 
 type Props = {
   initialValue: string;
-  variables: string[];
-  minHeight?: number;
-  width?: string;
-  onChange?: OnChange;
-  onSave?: (nextDirection: DirectionType) => void;
-  onCancel?: () => void;
-  autoFocus?: boolean;
-  language?: 'icu' | 'plaintext';
+  onChange?: (val: string) => void;
+  onSave?: (val: string) => void;
+  onCancel?: (val: string) => void;
   background?: string;
+  plaintext?: boolean;
 };
 
-export type DirectionType = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
-
-export const Editor = ({
-  variables,
+export const Editor: React.FC<Props> = ({
   initialValue,
-  minHeight = 20,
   onChange,
   onSave,
   onCancel,
-  autoFocus,
-  language = 'icu',
   background,
-}: Props) => {
-  const [dynamicHeight, setDynamicHeight] = useState(
-    minHeight as string | number | undefined
-  );
-
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+  plaintext,
+}) => {
+  const editorRef = useRef<Ace.Editor>();
+  const [error, setError] = useState<string>();
+  const classes = useStyles({ error, background });
+  // editor is not updating references
+  // so we need to go through refs with callbacks
   const onSaveRef = useRef<typeof onSave>();
   onSaveRef.current = onSave;
-  const disposeRef = useRef<() => void>();
+  const onCancelRef = useRef<typeof onCancel>();
+  onCancelRef.current = onCancel;
 
-  const beforeMount: BeforeMount = (monaco) => {
-    const { dispose } = monaco.languages.registerCompletionItemProvider(
-      'icu',
-      completion({
-        variables,
-        enableSnippets: false,
-      })
-    );
-    disposeRef.current = dispose;
+  const handleChange = (text: string) => {
+    onChange?.(text);
   };
 
-  useEffect(() => {
-    return () => disposeRef.current?.();
-  }, []);
-
-  const onMount: OnMount = (editor, monaco) => {
+  const onLoad = (editor: Ace.Editor) => {
+    const myCustomMode = new IcuMode();
     editorRef.current = editor;
-    monaco.editor.defineTheme('icuTheme', icuTheme(background));
-    monaco.editor.setTheme('icuTheme');
-
-    editor.addAction({
-      id: 'save-data-down',
-      label: 'Save data',
-      keybindings: [monaco.KeyCode.Enter],
-      run: () => onSaveRef.current?.('DOWN'),
+    editor.focus();
+    editor.setOption('indentedSoftWrap', false);
+    editor.commands.addCommand({
+      name: 'save',
+      bindKey: { win: 'Enter', mac: 'Enter' },
+      exec: (editor) => onSaveRef.current?.(editor.getSession().getValue()),
     });
-    editor.addAction({
-      id: 'cancel-edit',
-      label: 'Cancel edit',
-      keybindings: [monaco.KeyCode.Escape],
-      run: () => onCancel?.(),
+    editor.commands.addCommand({
+      name: 'cancel',
+      bindKey: { win: 'Esc', mac: 'Esc' },
+      exec: (editor) => onCancelRef.current?.(editor.getSession().getValue()),
     });
 
-    window.requestAnimationFrame(() =>
-      window.requestAnimationFrame(updateHeight)
-    );
-    if (autoFocus) {
-      editor.focus();
+    if (!plaintext) {
+      icuValidator(editor, setError);
+      editor.completers = [icuAutocompete];
+      // @ts-ignore
+      editor.setOption('enableBasicAutocompletion', true);
+      // @ts-ignore
+      editor.setOption('enableLiveAutocompletion', true);
+      // @ts-ignore
+      editor.setOption('enableSnippets', true);
+      // @ts-ignore
+      editor.getSession().setMode(myCustomMode);
     }
   };
 
-  const updateHeight = () => {
-    const realHeight = editorRef.current?.getContentHeight();
-    setDynamicHeight(
-      realHeight && realHeight > minHeight ? realHeight : minHeight
-    );
-  };
-
-  const handleChange: OnChange = (...attr) => {
-    onChange?.(...attr);
-    updateHeight();
-  };
-
-  const classes = useStyles();
+  useEffect(() => {
+    editorRef.current?.resize();
+  });
 
   return (
-    <div className={classes.wrapper} data-cy="global-editor">
-      <MonacoEditor
-        defaultValue={initialValue}
-        defaultLanguage={language}
-        height={dynamicHeight || '100%'}
-        loading={<></>}
-        options={{
-          lineNumbers: 'off',
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          theme: 'icuTheme',
-          renderValidationDecorations: 'on',
-          contextmenu: false,
-          scrollbar: {
-            alwaysConsumeMouseWheel: false,
-            vertical: 'hidden',
-            verticalScrollbarSize: 8,
-          },
-          overviewRulerBorder: false,
-          hideCursorInOverviewRuler: true,
-          overviewRulerLanes: 0,
-          folding: false,
-          wordBasedSuggestions: false,
-          wordWrap: 'on',
-          padding: { top: 0, bottom: 0 },
-          glyphMargin: false,
-          lineDecorationsWidth: 0,
-          lineNumbersMinChars: 0,
-          automaticLayout: true,
-        }}
-        beforeMount={beforeMount}
-        onMount={onMount}
+    <div data-cy="global-editor">
+      <AceEditor
+        className={clsx(classes.editor, !plaintext && classes.icuSyntax)}
+        value={initialValue}
         onChange={handleChange}
+        // @ts-ignore
+        theme={null}
+        width="100%"
+        height="100%"
+        // @ts-ignore
+        mode={null}
+        minLines={5}
+        setOptions={{
+          showLineNumbers: false,
+          showGutter: false,
+          wrap: true,
+          maxLines: Infinity,
+          highlightActiveLine: false,
+        }}
+        onLoad={onLoad}
       />
     </div>
   );

@@ -1,36 +1,47 @@
-import * as monaco from 'monaco-editor';
+import { Ace, Range } from 'ace-builds';
 import { parse } from '@formatjs/icu-messageformat-parser';
 
-const icuValidator =
-  (editor: typeof monaco.editor) => (model: monaco.editor.ITextModel) => {
-    function validate() {
-      const textToValidate = model.getValue();
+const icuValidator = (
+  editor: Ace.Editor,
+  onError?: (err: string | undefined) => void
+) => {
+  let lastMarker: number | undefined;
+  function validate() {
+    const textToValidate = editor.getSession().getValue();
 
-      const markers: monaco.editor.IMarkerData[] = [];
-
-      try {
-        parse(textToValidate, { captureLocation: true });
-      } catch (e) {
-        const location = e.location;
-
-        markers.push({
-          severity: monaco.MarkerSeverity.Error,
-          startLineNumber: location.start.line,
-          startColumn: location.start.column,
-          endLineNumber: location.end.line,
-          endColumn: location.end.column,
-          message: e.message,
-        });
-      }
-
-      // change mySpecialLanguage to whatever your language id is
-      editor.setModelMarkers(model, 'icu', markers);
+    if (lastMarker !== undefined) {
+      onError?.(undefined);
+      editor.getSession().removeMarker(lastMarker);
+      lastMarker = undefined;
     }
 
-    model.onDidChangeContent(() => {
-      validate();
-    });
+    try {
+      parse(textToValidate, { captureLocation: true });
+    } catch (e) {
+      const location = e.location;
+
+      const range = new Range(
+        location.start.line - 1,
+        location.start.column - 1,
+        location.end.line - 1,
+        location.end.column
+      );
+
+      const isShort =
+        range.end.row === range.start.row &&
+        range.end.column - range.start.column == 1;
+
+      onError?.(e.message);
+      lastMarker = editor
+        .getSession()
+        .addMarker(range, isShort ? `error-highlight` : 'error', 'text', true);
+    }
+  }
+
+  editor.on('change', () => {
     validate();
-  };
+  });
+  validate();
+};
 
 export default icuValidator;

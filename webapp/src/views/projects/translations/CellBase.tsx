@@ -176,7 +176,11 @@ export const CellControls: React.FC<ControlsProps> = ({
       width="100%"
       minHeight={26}
     >
-      <Box className={classes.controlsSpaced}>
+      <Box
+        className={classes.controlsSpaced}
+        display="flex"
+        alignItems="center"
+      >
         <Button
           onClick={onCancel}
           color="primary"

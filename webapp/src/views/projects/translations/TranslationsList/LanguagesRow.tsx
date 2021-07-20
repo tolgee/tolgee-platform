@@ -129,14 +129,10 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
             <CellContent>
               <Editor
                 key={editVal.language}
-                minHeight={100}
                 initialValue={value}
-                variables={[]}
                 onChange={(v) => setValue(v as string)}
-                onSave={(direction) => handleSave(direction)}
+                onSave={() => handleSave('DOWN')}
                 onCancel={handleEditCancel}
-                background="#ffffff"
-                autoFocus
               />
             </CellContent>
             <CellControls
