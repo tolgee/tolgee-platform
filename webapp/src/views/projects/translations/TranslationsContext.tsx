@@ -45,7 +45,7 @@ type ActionType =
 
 export type ViewType = 'TABLE' | 'LIST';
 
-type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
+export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
 type FiltersType = Pick<
   TranslationsQueryType,

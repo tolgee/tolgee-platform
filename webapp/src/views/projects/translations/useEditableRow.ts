@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useContextSelector } from 'use-context-selector';
-
-import { DirectionType } from 'tg.component/editor/Editor';
 import { components } from 'tg.service/apiSchema.generated';
+
 import {
   TranslationsContext,
   useTranslationsDispatch,
+  Direction,
 } from './TranslationsContext';
 
 type TranslationModel = components['schemas']['TranslationModel'];
@@ -67,7 +67,7 @@ export const useEditableRow = ({
     });
   };
 
-  const handleSave = (direction?: DirectionType) => {
+  const handleSave = (direction?: Direction) => {
     dispatch({
       type: 'CHANGE_FIELD',
       payload: {

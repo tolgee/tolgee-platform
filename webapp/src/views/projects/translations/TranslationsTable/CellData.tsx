@@ -39,13 +39,11 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
       {isEditing ? (
         <CellContent>
           <Editor
-            minHeight={100}
             initialValue={value}
-            variables={[]}
             onChange={(v) => setValue(v as string)}
-            onSave={handleSave}
+            background="#efefef"
+            onSave={() => handleSave('DOWN')}
             onCancel={handleEditCancel}
-            autoFocus
           />
         </CellContent>
       ) : (

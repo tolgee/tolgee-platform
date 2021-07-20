@@ -194,4 +194,6 @@ export class LINKS {
     LINKS.PROJECT,
     'socket_io_preview'
   );
+
+  static EDITOR_PREVIEW = Link.ofParent(LINKS.PROJECT, 'editor_preview');
 }
