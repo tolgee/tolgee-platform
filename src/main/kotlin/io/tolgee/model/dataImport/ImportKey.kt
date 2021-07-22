@@ -13,7 +13,7 @@ class ImportKey(
   @field:Size(max = 2000)
   @Column(length = 2000)
   var name: String,
-) : StandardAuditModel() {
+) : StandardAuditModel(), WithKeyMeta {
   @ManyToMany(mappedBy = "keys")
   @field:NotEmpty
   var files: MutableList<ImportFile> = mutableListOf()
@@ -22,7 +22,7 @@ class ImportKey(
   var translations: MutableList<ImportTranslation> = mutableListOf()
 
   @OneToOne(mappedBy = "importKey")
-  var keyMeta: KeyMeta? = null
+  override var keyMeta: KeyMeta? = null
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

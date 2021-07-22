@@ -8,6 +8,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.Tag
 import io.tolgee.model.translation.Translation
 
 class TranslationsTestData {
@@ -62,6 +63,16 @@ class TranslationsTestData {
             language = germanLanguage
             text = "Z translation"
             state = TranslationState.REVIEWED
+          }
+          addMeta {
+            self {
+              tags.add(
+                Tag().apply {
+                  this.project = this@addProject.self
+                  name = "Cool tag"
+                }
+              )
+            }
           }
         }.self
       }.self

@@ -6,6 +6,7 @@ package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.development.testDataBuilder.data.TagsTestData
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
@@ -16,10 +17,10 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-open class ProjectServiceTest : AbstractSpringTest() {
+class ProjectServiceTest : AbstractSpringTest() {
 
   @Test
-  open fun testFindAllPermitted() {
+  fun testFindAllPermitted() {
     val users = dbPopulator.createUsersAndOrganizations()
     dbPopulator.createBase("Test", users[3].username!!)
     val projects = projectService.findAllPermitted(users[3])
@@ -27,7 +28,7 @@ open class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  open fun testFindAllEmpty() {
+  fun testFindAllEmpty() {
     dbPopulator.createUsersAndOrganizations() // create some data
     val user = dbPopulator.createUserIfNotExists("user")
     val projects = projectService.findAllPermitted(user)
@@ -35,7 +36,7 @@ open class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  open fun testFindAllSingleProject() {
+  fun testFindAllSingleProject() {
     dbPopulator.createUsersAndOrganizations() // create some data
     val repo = dbPopulator.createBase("Hello world", generateUniqueString())
     val projects = projectService.findAllPermitted(repo.userOwner!!)
@@ -45,7 +46,7 @@ open class ProjectServiceTest : AbstractSpringTest() {
 
   @Test
   @Transactional
-  open fun testFindMultiple() {
+  fun testFindMultiple() {
     val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("helga") // create some data
     val repo = dbPopulator.createBase("Hello world")
     repo.userOwner = userAccountService.get(repo.userOwner!!.id!!).get()
@@ -65,7 +66,7 @@ open class ProjectServiceTest : AbstractSpringTest() {
   }
 
   @Test
-  open fun testFindMultiplePermissions() {
+  fun testFindMultiplePermissions() {
     val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("agnes") // create some data
     val repo = dbPopulator.createBase("Hello world")
     repo.userOwner = userAccountService.get(repo.userOwner!!.id!!).get()
@@ -101,5 +102,20 @@ open class ProjectServiceTest : AbstractSpringTest() {
     assertThat(projects[2].permissionType).isEqualTo(Permission.ProjectPermissionType.TRANSLATE)
     assertThat(projects[1].permissionType).isEqualTo(Permission.ProjectPermissionType.VIEW)
     assertThat(projects[5].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
+  }
+
+  @Test
+  fun testDeleteProjectWithTags() {
+    val testData = TagsTestData()
+    testData.generateVeryLotOfData()
+    testDataService.saveTestData(testData.root)
+    val start = System.currentTimeMillis()
+    projectService.deleteProject(testData.projectBuilder.self.id)
+    entityManager.flush()
+    entityManager.clear()
+    val time = System.currentTimeMillis() - start
+    println(time)
+    assertThat(time).isLessThan(10000)
+    assertThat(tagService.find(testData.existingTag.id)).isNull()
   }
 }

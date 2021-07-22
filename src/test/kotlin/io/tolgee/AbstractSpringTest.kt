@@ -80,6 +80,8 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired lateinit var translationCommentService: TranslationCommentService
 
+  @Autowired lateinit var tagService: TagService
+
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {
     initialUsername = authenticationProperties.initialUsername

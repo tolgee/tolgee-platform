@@ -1222,4 +1222,65 @@
     <changeSet author="jenik (generated)" id="1624978579675-3">
         <dropForeignKeyConstraint baseTableName="revision" constraintName="FKb7qk3ljn3o8bqwum6a5io3tpe"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1626873700632-5">
+        <createTable tableName="key_meta_tags">
+            <column name="key_metas_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tags_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626873700632-6">
+        <createTable tableName="tag">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tagPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626873700632-7">
+        <addForeignKeyConstraint baseColumnNames="tags_id" baseTableName="key_meta_tags" constraintName="FK1hhq8sx3mn7isckcoaq277ix6" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tag" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626873700632-8">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="tag" constraintName="FKbyy56vice9njgl86752up8120" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626873700632-9">
+        <addForeignKeyConstraint baseColumnNames="key_metas_id" baseTableName="key_meta_tags" constraintName="FKsbnhi8xkxfybrf26ypraemrmk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key_meta" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626957302292-5">
+        <addPrimaryKey columnNames="key_metas_id, tags_id" tableName="key_meta_tags"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626957302292-6">
+        <dropForeignKeyConstraint baseTableName="translation_comment" constraintName="FKi84l90hnwf1m1wg1hn2ov7ykr"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626957302292-7">
+        <dropColumn columnName="scopes" tableName="api_key"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626957302292-8">
+        <dropColumn columnName="scopes" tableName="api_key_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626957302292-9">
+        <dropColumn columnName="updated_by_id" tableName="translation_comment"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626957302292-10">
+        <dropColumn columnName="updated_by_id" tableName="translation_comment_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626957302292-3">
+        <addNotNullConstraint columnDataType="bigint" columnName="author_id" tableName="translation_comment" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626957302292-4">
+        <addNotNullConstraint columnDataType="bigint" columnName="key_id" tableName="translation" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1626957302295-1">
+        <modifyDataType tableName="revision" columnName="id" newDataType="BIGINT"/>
+    </changeSet>
 </databaseChangeLog>

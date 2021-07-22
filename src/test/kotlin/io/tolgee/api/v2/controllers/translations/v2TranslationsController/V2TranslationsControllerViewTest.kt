@@ -43,6 +43,8 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
         node("[0]") {
           node("keyName").isEqualTo("A key")
           node("keyId").isValidId
+          node("keyTags").isArray.hasSize(1)
+          node("keyTags[0].name").isEqualTo("Cool tag")
           node("screenshotCount").isEqualTo(0)
           node("translations.de") {
             node("id").isValidId

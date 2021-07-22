@@ -3,6 +3,7 @@ package io.tolgee.model.key
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.ImportKey
+import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -20,6 +21,10 @@ class KeyMeta(
 
   @OneToMany(mappedBy = "keyMeta")
   var codeReferences = mutableListOf<KeyCodeReference>()
+
+  @ManyToMany
+  @OrderBy("id")
+  var tags: MutableSet<Tag> = mutableSetOf()
 
   fun addComment(author: UserAccount? = null, ft: KeyComment.() -> Unit) {
     KeyComment(this, author).apply(ft).also {

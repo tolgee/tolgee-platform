@@ -26,6 +26,7 @@ import io.tolgee.socketio.TranslationsSocketIoModule
 import org.hibernate.envers.AuditReaderFactory
 import org.hibernate.envers.query.AuditEntity
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -40,7 +41,8 @@ class TranslationService(
   private val translationRepository: TranslationRepository,
   private val entityManager: EntityManager,
   private val importService: ImportService,
-  private val translationsSocketIoModule: TranslationsSocketIoModule
+  private val translationsSocketIoModule: TranslationsSocketIoModule,
+  private val applicationContext: ApplicationContext
 ) {
   @Autowired
   private lateinit var languageService: LanguageService
@@ -139,7 +141,7 @@ class TranslationService(
     params: GetTranslationsParams,
     languages: Set<Language>
   ): Page<KeyWithTranslationsView> {
-    return TranslationsViewBuilder.getData(entityManager, project, languages, pageable, params)
+    return TranslationsViewBuilder.getData(applicationContext, project, languages, pageable, params)
   }
 
   fun setTranslation(key: Key, languageTag: String?, text: String?): Translation {
