@@ -234,7 +234,7 @@ export const TranslationsTable = () => {
 
       <ReactList
         ref={reactListRef}
-        threshold={500}
+        threshold={300}
         type="variable"
         itemSizeEstimator={(index, cache) => {
           return cache[index] || 62;
@@ -260,8 +260,9 @@ export const TranslationsTable = () => {
                       {col.language ? (
                         <CellData
                           keyId={row.keyId}
+                          locale={col.language.tag}
                           keyName={row.keyName}
-                          language={col.language?.tag}
+                          language={col.language.tag}
                           text={col.accessor(row)}
                           width={columnSizes[i]}
                           editEnabled={projectPermissions.satisfiesPermission(

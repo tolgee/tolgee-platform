@@ -9,8 +9,6 @@ import {
 import { Edit, CameraAlt } from '@material-ui/icons';
 import { T } from '@tolgee/react';
 
-import { LimitedHeightText } from './LimitedHeightText';
-
 const useStyles = makeStyles((theme) => ({
   cellPlain: {
     '& $showOnHover': {
@@ -85,22 +83,16 @@ export const CellPlain: React.FC<Props> = ({
 
 type CellContentProps = BoxProps & {
   forwardRef?: RefObject<HTMLElement | undefined | null>;
-  maxLines?: number;
 };
 
 export const CellContent: React.FC<CellContentProps> = ({
   children,
   forwardRef,
-  maxLines,
   ...props
 }) => {
   return (
     <Box margin="5px 10px" position="relative" flexGrow={1} {...props}>
-      {maxLines !== undefined ? (
-        <LimitedHeightText maxLines={maxLines}>{children}</LimitedHeightText>
-      ) : (
-        children
-      )}
+      {children}
     </Box>
   );
 };
