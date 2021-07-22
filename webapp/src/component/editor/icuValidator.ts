@@ -18,7 +18,12 @@ const icuValidator = (
     try {
       parse(textToValidate, { captureLocation: true });
     } catch (e) {
+      onError?.(e.message);
+
       const location = e.location;
+      if (!location) {
+        return;
+      }
 
       const range = new Range(
         location.start.line - 1,
@@ -31,7 +36,6 @@ const icuValidator = (
         range.end.row === range.start.row &&
         range.end.column - range.start.column == 1;
 
-      onError?.(e.message);
       lastMarker = editor
         .getSession()
         .addMarker(range, isShort ? `error-highlight` : 'error', 'text', true);

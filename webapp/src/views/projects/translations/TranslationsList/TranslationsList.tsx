@@ -162,7 +162,7 @@ export const TranslationsList = () => {
       })}
       <ReactList
         ref={reactListRef}
-        threshold={500}
+        threshold={300}
         type="variable"
         itemSizeEstimator={(index, cache) => {
           return (

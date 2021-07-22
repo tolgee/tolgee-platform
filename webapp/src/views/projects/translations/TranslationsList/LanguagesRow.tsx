@@ -6,7 +6,7 @@ import { CellContent, CellPlain, CellControls } from '../CellBase';
 import { CircledLanguageIcon } from '../CircledLanguageIcon';
 import { useEditableRow } from '../useEditableRow';
 import { Editor } from 'tg.component/editor/Editor';
-import { LimitedHeightText } from '../LimitedHeightText';
+import { TranslationVisual } from '../TranslationVisual';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -52,6 +52,9 @@ const useStyles = makeStyles((theme) => {
         marginLeft: 4,
       },
     },
+    translation: {
+      overflow: 'hidden',
+    },
     controls: {
       display: 'none',
     },
@@ -72,20 +75,13 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
 }) {
   const classes = useStyles();
 
-  const {
-    isEditing,
-    editVal,
-    value,
-    setValue,
-    handleEdit,
-    handleEditCancel,
-    handleSave,
-  } = useEditableRow({
-    keyId: data.keyId,
-    keyName: data.keyName,
-    translations: data.translations,
-    language: null,
-  });
+  const { editVal, value, setValue, handleEdit, handleEditCancel, handleSave } =
+    useEditableRow({
+      keyId: data.keyId,
+      keyName: data.keyName,
+      translations: data.translations,
+      language: null,
+    });
 
   return (
     <div className={classes.content}>
@@ -106,10 +102,15 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
                     <CircledLanguageIcon flag={l.flagEmoji} />
                     <Box>{l.tag}</Box>
                   </div>
-                  <div>
-                    <LimitedHeightText maxLines={isEditing ? undefined : 3}>
-                      {data.translations[l.tag]?.text}
-                    </LimitedHeightText>
+                  <div className={classes.translation}>
+                    <TranslationVisual
+                      locale={l.tag}
+                      maxLines={langIsEditing ? undefined : 3}
+                      text={
+                        langIsEditing ? value : data.translations[l.tag]?.text
+                      }
+                      wrapVariants={!langIsEditing}
+                    />
                   </div>
                 </div>
               </CellContent>

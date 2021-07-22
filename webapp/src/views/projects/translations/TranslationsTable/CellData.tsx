@@ -3,6 +3,7 @@ import React from 'react';
 import { Editor } from 'tg.component/editor/Editor';
 import { useEditableRow } from '../useEditableRow';
 import { CellContent, CellPlain, CellControls } from '../CellBase';
+import { TranslationVisual } from '../TranslationVisual';
 
 type Props = {
   text: string;
@@ -11,6 +12,7 @@ type Props = {
   language: string | undefined;
   editEnabled: boolean;
   width: number;
+  locale: string;
 };
 
 export const CellData: React.FC<Props> = React.memo(function Cell({
@@ -19,6 +21,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
   language,
   keyId,
   editEnabled,
+  locale,
 }) {
   const {
     isEditing,
@@ -47,7 +50,14 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
           />
         </CellContent>
       ) : (
-        <CellContent maxLines={3}>{text}</CellContent>
+        <CellContent>
+          <TranslationVisual
+            locale={locale}
+            maxLines={3}
+            wrapVariants={true}
+            text={text}
+          />
+        </CellContent>
       )}
       <CellControls
         absolute
