@@ -25,7 +25,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
   @Test
   fun `returns correct page size and page meta`() {
     val result = TranslationsViewBuilder.getData(
-      em = entityManager,
+      applicationContext = applicationContext!!,
       project = testData.project,
       languages = setOf(testData.englishLanguage, testData.germanLanguage),
       PageRequest.of(0, 10),
@@ -39,7 +39,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
     val pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Order.desc("translations.de.text")))
 
     val result = TranslationsViewBuilder.getData(
-      em = entityManager,
+      applicationContext = applicationContext!!,
       project = testData.project,
       languages = setOf(testData.englishLanguage, testData.germanLanguage),
       pageRequest
@@ -52,7 +52,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
     val pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("translations.en.text")))
 
     val result = TranslationsViewBuilder.getData(
-      em = entityManager,
+      applicationContext = applicationContext!!,
       project = testData.project,
       languages = setOf(testData.englishLanguage),
       pageRequest,
@@ -63,7 +63,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
   @Test
   fun `selects languages`() {
     val result = TranslationsViewBuilder.getData(
-      em = entityManager,
+      applicationContext = applicationContext!!,
       project = testData.project,
       languages = setOf(testData.englishLanguage),
       PageRequest.of(
@@ -76,7 +76,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
   @Test
   fun `searches in data`() {
     val result = TranslationsViewBuilder.getData(
-      em = entityManager,
+      applicationContext = applicationContext!!,
       project = testData.project,
       languages = setOf(testData.englishLanguage),
       PageRequest.of(0, 10),

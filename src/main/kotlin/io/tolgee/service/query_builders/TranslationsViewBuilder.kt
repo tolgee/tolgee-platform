@@ -8,6 +8,8 @@ import io.tolgee.model.key.Key_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
+import io.tolgee.service.TagService
+import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.*
 import java.util.*
 import javax.persistence.EntityManager
@@ -222,12 +224,14 @@ class TranslationsViewBuilder(
 
     @JvmStatic
     fun getData(
-      em: EntityManager,
+      applicationContext: ApplicationContext,
       project: Project?,
       languages: Set<Language>,
       pageable: Pageable,
       params: GetTranslationsParams = GetTranslationsParams()
     ): Page<KeyWithTranslationsView> {
+      val em = applicationContext.getBean(EntityManager::class.java)
+      val tagService = applicationContext.getBean(TagService::class.java)
 
       var sort = if (pageable.sort.isSorted)
         pageable.sort
@@ -258,6 +262,10 @@ class TranslationsViewBuilder(
         query.firstResult = pageable.offset.toInt()
       }
       val views = query.resultList.map { KeyWithTranslationsView.of(it) }
+      val keyIds = views.map { it.keyId }
+      tagService.getTagsForKeyIds(keyIds).let { tagMap ->
+        views.forEach { it.keyTags = tagMap[it.keyId] ?: listOf() }
+      }
       return PageImpl(views, pageable, count)
     }
   }

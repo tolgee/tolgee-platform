@@ -2,14 +2,12 @@ package io.tolgee.service
 
 import io.tolgee.model.Project
 import io.tolgee.model.dataImport.Import
-import io.tolgee.model.key.KeyCodeReference
-import io.tolgee.model.key.KeyComment
-import io.tolgee.model.key.KeyMeta
-import io.tolgee.model.key.WithKeyMetaReference
+import io.tolgee.model.key.*
 import io.tolgee.repository.KeyCodeReferenceRepository
 import io.tolgee.repository.KeyCommentRepository
 import io.tolgee.repository.KeyMetaRepository
 import org.hibernate.annotations.QueryHints.PASS_DISTINCT_THROUGH
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.persistence.EntityManager
 
@@ -18,8 +16,11 @@ class KeyMetaService(
   private val keyMetaRepository: KeyMetaRepository,
   private val keyCodeReferenceRepository: KeyCodeReferenceRepository,
   private val keyCommentRepository: KeyCommentRepository,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
 ) {
+  @set:Autowired
+  lateinit var tagService: TagService
+
   fun saveAll(entities: Iterable<KeyMeta>): MutableList<KeyMeta> = keyMetaRepository.saveAll(entities)
 
   fun saveAllComments(entities: Iterable<KeyComment>): MutableList<KeyComment> =
@@ -109,27 +110,33 @@ class KeyMetaService(
     return result
   }
 
-  fun deleteAllByProjectId(projectId: Long) {
-    keyMetaRepository.deleteAllKeyCodeReferencesByProjectId(projectId)
-    keyMetaRepository.deleteAllKeyCommentsByProjectId(projectId)
-    keyMetaRepository.deleteAllByProjectId(projectId)
+  fun getOrCreateForKey(key: Key): KeyMeta {
+    var keyMeta = key.keyMeta
+    if (keyMeta == null) {
+      keyMeta = KeyMeta(key)
+      keyMetaRepository.save(keyMeta)
+    }
+    return keyMeta
   }
 
   fun save(meta: KeyMeta): KeyMeta = this.keyMetaRepository.save(meta)
 
-  fun deleteAllByImportKeyIdIn(keyIds: List<Long>) {
-    keyCommentRepository.deleteAllByImportKeyIds(keyIds)
-    keyCodeReferenceRepository.deleteAllByImportKeyIds(keyIds)
-    this.keyMetaRepository.deleteAllByImportKeyIdIn(keyIds)
+  fun deleteAllByImportKeyIdIn(importKeyIds: List<Long>) {
+    tagService.deleteAllByImportKeyIdIn(importKeyIds)
+    keyCommentRepository.deleteAllByImportKeyIds(importKeyIds)
+    keyCodeReferenceRepository.deleteAllByImportKeyIds(importKeyIds)
+    this.keyMetaRepository.deleteAllByImportKeyIdIn(importKeyIds)
   }
 
   fun deleteAllByKeyIdIn(ids: Collection<Long>) {
+    tagService.deleteAllByKeyIdIn(ids)
     keyCommentRepository.deleteAllByKeyIds(ids)
     keyCodeReferenceRepository.deleteAllByKeyIds(ids)
     this.keyMetaRepository.deleteAllByKeyIds(ids)
   }
 
   fun deleteAllByKeyId(id: Long) {
+    tagService.deleteAllByKeyIdIn(listOf(id))
     keyCommentRepository.deleteAllByKeyId(id)
     keyCodeReferenceRepository.deleteAllByKeyId(id)
     this.keyMetaRepository.deleteAllByKeyId(id)

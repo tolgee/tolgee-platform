@@ -18,7 +18,8 @@ class TestDataService(
   private val permissionService: PermissionService,
   private val entityManager: EntityManager,
   private val screenshotService: ScreenshotService,
-  private val translationCommentService: TranslationCommentService
+  private val translationCommentService: TranslationCommentService,
+  private val tagService: TagService
 ) {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
@@ -35,7 +36,9 @@ class TestDataService(
 
     val keyBuilders = builder.data.projects.flatMap { it.data.keys.map { it } }
     keyService.saveAll(keyBuilders.map { it.self })
-    keyMetaService.saveAll(keyBuilders.map { it.data.meta?.self }.filterNotNull())
+    val metas = keyBuilders.map { it.data.meta?.self }.filterNotNull()
+    keyMetaService.saveAll(metas)
+    tagService.saveAll(metas.flatMap { it.tags })
     screenshotService.saveAll(keyBuilders.flatMap { it.data.screenshots.map { it.self } }.toList())
 
     val translationBuilders = builder.data.projects.flatMap { it.data.translations }
@@ -52,7 +55,6 @@ class TestDataService(
     keyMetaService.saveAll(importKeyMetas)
     keyMetaService.saveAllCodeReferences(importKeyMetas.flatMap { it.codeReferences })
     keyMetaService.saveAllComments(importKeyMetas.flatMap { it.comments })
-
     importService.saveAllKeys(importFileBuilders.flatMap { it.data.importKeys.map { it.self } })
 
     val importFiles = importFileBuilders.map { it.self }

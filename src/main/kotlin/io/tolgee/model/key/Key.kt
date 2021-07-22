@@ -4,6 +4,7 @@ import io.tolgee.dtos.PathDTO
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.StandardAuditModel
+import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.translation.Translation
 import org.hibernate.envers.Audited
 import javax.persistence.*
@@ -19,7 +20,7 @@ data class Key(
   @field:Size(max = 200)
   @Column(length = 2000)
   var name: String = "",
-) : StandardAuditModel() {
+) : StandardAuditModel(), WithKeyMeta {
   @field:NotNull
   @ManyToOne(optional = false)
   var project: Project? = null
@@ -28,7 +29,7 @@ data class Key(
   var translations: MutableSet<Translation> = HashSet()
 
   @OneToOne(mappedBy = "key")
-  var keyMeta: KeyMeta? = null
+  override var keyMeta: KeyMeta? = null
 
   @OneToMany(mappedBy = "key")
   var screenshots: MutableList<Screenshot> = mutableListOf()

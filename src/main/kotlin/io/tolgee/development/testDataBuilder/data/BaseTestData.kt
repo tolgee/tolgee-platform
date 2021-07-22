@@ -6,7 +6,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 
-class BaseTestData(
+open class BaseTestData(
   userName: String = "test_username",
   projectName: String = "test_project"
 ) {
