@@ -5,7 +5,7 @@ import { T } from '@tolgee/react';
 
 type States = keyof typeof translationStates;
 
-const HEIGHT = 10;
+const HEIGHT = 6;
 const BORDER_RADIUS = HEIGHT / 2;
 const DOT_SIZE = 6;
 const useStyles = makeStyles((theme) => ({

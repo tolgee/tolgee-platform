@@ -46,12 +46,8 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       it.isArray.hasSize(2)
       it.node("[0].userOwner.username").isEqualTo("test_username")
       it.node("[0].directPermissions").isEqualTo("MANAGE")
-      it.node("[1].stats").isEqualTo(
+      it.node("[1].stats.translationStateCounts").isEqualTo(
         """
-      {
-        "projectId" : 2,
-        "keyCount" : 5,
-        "languageCount" : 2,
         "translationStateCounts" : {
           "UNTRANSLATED" : 4,
           "MACHINE_TRANSLATED" : 1,
@@ -59,23 +55,17 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           "REVIEWED" : 1,
           "NEEDS_REVIEW" : 2
         }
-      }
       """
       )
-      it.node("[0].stats").isEqualTo(
+      it.node("[0].stats.translationStateCounts").isEqualTo(
         """
-      {
-        "projectId" : 1,
-        "keyCount" : 1,
-        "languageCount" : 1,
-        "translationStateCounts" : {
+       "translationStateCounts" : {
           "UNTRANSLATED" : 1,
           "MACHINE_TRANSLATED" : 0,
           "TRANSLATED" : 0,
           "REVIEWED" : 0,
           "NEEDS_REVIEW" : 0
         }
-      }
       """
       )
     }
