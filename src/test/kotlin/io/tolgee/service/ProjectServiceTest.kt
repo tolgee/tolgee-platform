@@ -6,6 +6,7 @@ package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.development.testDataBuilder.data.ProjectsTestData
 import io.tolgee.development.testDataBuilder.data.TagsTestData
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Permission
@@ -117,5 +118,18 @@ class ProjectServiceTest : AbstractSpringTest() {
     println(time)
     assertThat(time).isLessThan(10000)
     assertThat(tagService.find(testData.existingTag.id)).isNull()
+  }
+
+  @Test
+  fun `test get statistics`() {
+    val projectTestData = ProjectsTestData()
+    testDataService.saveTestData(projectTestData.root)
+    val result = projectService.getProjectsStatistics(
+      listOf(
+        projectTestData.projectBuilder.self.id,
+        projectTestData.project2.id
+      )
+    )
+    result[0]
   }
 }

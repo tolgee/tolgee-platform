@@ -47,7 +47,7 @@ class DataBuilders {
     fun addLanguage(ft: FT<LanguageBuilder>) =
       addOperation(data.languages, ft)
 
-    fun addKey(ft: FT<KeyBuilder>) = addOperation(data.keys, ft)
+    fun addKey(ft: FT<KeyBuilder>) = addOperation(data.keys, ft).also { it.self { project = this@ProjectBuilder.self } }
 
     fun addTranslation(ft: FT<TranslationBuilder>) = addOperation(data.translations, ft)
   }
@@ -227,6 +227,8 @@ class DataBuilders {
   class PermissionBuilder(
     val projectBuilder: ProjectBuilder
   ) : EntityDataBuilder<Permission> {
-    override var self: Permission = Permission()
+    override var self: Permission = Permission().apply {
+      project = projectBuilder.self
+    }
   }
 }

@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.project.ProjectModel
 import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
+import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModel
+import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -21,6 +23,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectView
+import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
@@ -29,6 +32,7 @@ import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.*
 import org.springdoc.api.annotations.ParameterObject
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.MediaTypes
@@ -50,6 +54,9 @@ class V2ProjectsController(
   private val userArrayResourcesAssembler: PagedResourcesAssembler<UserAccountInProjectView>,
   private val userAccountInProjectModelAssembler: UserAccountInProjectModelAssembler,
   private val projectModelAssembler: ProjectModelAssembler,
+  private val projectWithStatsModelAssembler: ProjectWithStatsModelAssembler,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  private val arrayWithStatsResourcesAssembler: PagedResourcesAssembler<ProjectWithStatsView>,
   private val userAccountService: UserAccountService,
   private val permissionService: PermissionService,
   private val authenticationFacade: AuthenticationFacade,
@@ -57,14 +64,30 @@ class V2ProjectsController(
   private val securityService: SecurityService,
   private val invitationService: InvitationService,
 ) {
-  @Operation(summary = "Returns all projects, which are current user permitted to view")
+  @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   fun getAll(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?
-  ): PagedModel<ProjectModel>? {
+  ): PagedModel<ProjectModel> {
     val projects = projectService.findPermittedPaged(pageable, search)
     return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
+  }
+
+  @Operation(summary = "Returns all projects (includingStatistics) where current user has any permission")
+  @GetMapping("/with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
+  fun getAllWithStatistics(
+    @ParameterObject pageable: Pageable,
+    @RequestParam("search") search: String?
+  ): PagedModel<ProjectWithStatsModel> {
+    val projects = projectService.findPermittedPaged(pageable, search)
+    val projectIds = projects.content.map { it.id }
+    val stats = projectService.getProjectsStatistics(projectIds).associateBy { it.projectId }
+    val languages = projectService.getProjectsWithFetchedLanguages(projectIds)
+      .associate { it.id to it.languages.toList() }
+    val projectsWithStatsContent = projects.content.map { ProjectWithStatsView(it, stats[it.id]!!, languages[it.id]!!) }
+    val page = PageImpl(projectsWithStatsContent, projects.pageable, projects.totalElements)
+    return arrayWithStatsResourcesAssembler.toModel(page, projectWithStatsModelAssembler)
   }
 
   @GetMapping("/{projectId}")
