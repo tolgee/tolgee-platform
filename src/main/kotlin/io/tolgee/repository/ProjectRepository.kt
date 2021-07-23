@@ -25,7 +25,6 @@ interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
         left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId
         where (p is not null or role is not null)
         """
-    const val BASE_VIEW_QUERY_END = """ group by r.id"""
   }
 
   @Query(
@@ -43,7 +42,6 @@ interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
                 and (:search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
                 or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
                 or lower(ua.name) like lower(concat('%', cast(:search as text),'%')))
-           $BASE_VIEW_QUERY_END
     """
   )
   fun findAllPermitted(
@@ -60,7 +58,6 @@ interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
       and ((lower(r.name) like lower(concat('%', cast(:search as text),'%'))
       or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
       or lower(ua.name) like lower(concat('%', cast(:search as text),'%')) or cast(:search as text) is null)
-      $BASE_VIEW_QUERY_END
         """
   )
   fun findAllPermittedInOrganization(
@@ -76,7 +73,6 @@ interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
   @Query(
     """
     $BASE_VIEW_QUERY and r.id = :projectId
-    $BASE_VIEW_QUERY_END
   """
   )
   fun findViewById(userAccountId: Long, projectId: Long): ProjectView?
