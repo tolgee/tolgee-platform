@@ -87,6 +87,15 @@ const theme = createMuiTheme({
     },
   },
   overrides: {
+    MuiTooltip: {
+      tooltip: {
+        fontSize: 12,
+        boxShadow: '1px 1px 6px rgba(0, 0, 0, 0.25)',
+        borderRadius: '11px',
+        color: 'black',
+        backgroundColor: 'white',
+      },
+    },
     MuiCssBaseline: {
       // @ts-ignore
       '@global': {

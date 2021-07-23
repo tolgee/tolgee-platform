@@ -2,6 +2,8 @@ import { translationStates } from 'tg.constants/translationStates';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { Box, Tooltip } from '@material-ui/core';
 import { T } from '@tolgee/react';
+import clsx from 'clsx';
+import { useEffect, useState } from 'react';
 
 type States = keyof typeof translationStates;
 
@@ -27,16 +29,22 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
     borderRadius: BORDER_RADIUS,
     marginLeft: -BORDER_RADIUS,
+    transition: 'width 1s ease-in-out',
+  },
+  loadedState: {
+    width: '0 !important',
   },
   legend: {
     display: 'flex',
     flexWrap: 'wrap',
-    marginLeft: -theme.spacing(1),
+    margin: `0 -${theme.spacing(1)}px`,
     '& > *': {
-      marginLeft: theme.spacing(1),
+      flexGrow: 1,
+      flexShrink: 0,
+      margin: `0 ${theme.spacing(1)}px`,
       marginTop: theme.spacing(0.5),
     },
-    fontSize: 12,
+    fontSize: 11,
   },
   legendDot: {
     width: DOT_SIZE,
@@ -57,6 +65,7 @@ export function TranslationStatesBar(props: {
 }) {
   const classes = useStyles();
   const translationsCount = props.stats.languageCount * props.stats.keyCount;
+  const [loaded, setLoaded] = useState(false);
   const percents = Object.entries(props.stats.translationStateCounts).reduce(
     (acc, [state, count]) => ({
       ...acc,
@@ -64,6 +73,10 @@ export function TranslationStatesBar(props: {
     }),
     {} as { [state in States]: number }
   );
+
+  useEffect(() => {
+    setTimeout(() => setLoaded(true), 50);
+  }, []);
 
   return (
     <Box className={classes.root}>
@@ -82,7 +95,10 @@ export function TranslationStatesBar(props: {
             title={<T noWrap>{translationStates[state].translationKey}</T>}
           >
             <Box
-              className={classes.state}
+              className={clsx({
+                [classes.state]: true,
+                [classes.loadedState]: !loaded,
+              })}
               style={{
                 visibility: percents[state] < 0.01 ? 'hidden' : 'initial',
                 zIndex: 5 - idx,
