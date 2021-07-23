@@ -8,24 +8,27 @@ type Props = {
 };
 
 const useStyles = makeStyles((theme) => ({
-  icon: {
-    borderRadius: '50%',
+  wrapper: {
+    padding: 2,
+  },
+  iconWrapper: {
     overflow: 'hidden',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
     position: 'relative',
-  },
-  shadow: {
-    top: 0,
     borderRadius: '50%',
-    boxShadow: 'inset 0px 0px 0px 1px rgba(0,0,0,0.2)',
-    content: '',
-    display: 'block',
-    height: '100%',
+    filter: 'drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.2))',
+  },
+  iconImage: {
     position: 'absolute',
-    width: '100%',
+  },
+  iconImageBlur: {
+    zIndex: 2,
+    position: 'absolute',
+    filter: 'blur(1px)',
+    opacity: '0.05',
   },
 }));
 
@@ -33,13 +36,21 @@ export const CircledLanguageIcon: React.FC<Props> = ({ flag, size }) => {
   const classes = useStyles();
   size = size || 18;
   return (
-    <Box className={classes.icon} width={size} height={size}>
-      <FlagImage
-        height={Math.floor(size * 0.7) * 2}
-        width={Math.floor(size * 0.7) * 2}
-        flagEmoji={flag || ''}
-      />
-      <div className={classes.shadow} />
+    <Box className={classes.wrapper}>
+      <Box className={classes.iconWrapper} width={size} height={size}>
+        <FlagImage
+          className={classes.iconImage}
+          height={Math.floor(size * 0.75) * 2}
+          width={Math.floor(size * 0.75) * 2}
+          flagEmoji={flag || ''}
+        />
+        <FlagImage
+          className={classes.iconImageBlur}
+          height={Math.floor(size * 0.75) * 2}
+          width={Math.floor(size * 0.75) * 2}
+          flagEmoji={flag || ''}
+        />
+      </Box>
     </Box>
   );
 };

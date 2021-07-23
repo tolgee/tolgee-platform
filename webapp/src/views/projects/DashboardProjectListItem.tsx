@@ -81,7 +81,7 @@ const DashboardProjectListItem = (
             <Grid key={l.id} item>
               <Tooltip title={`${l.name} | ${l.originalName}`}>
                 <Box m={0.125}>
-                  <CircledLanguageIcon size={18} flag={l.flagEmoji} />
+                  <CircledLanguageIcon size={20} flag={l.flagEmoji} />
                 </Box>
               </Tooltip>
             </Grid>
