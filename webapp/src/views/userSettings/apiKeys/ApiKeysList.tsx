@@ -73,7 +73,7 @@ const Item: FunctionComponent<{ keyDTO: ApiKeyDTO }> = (props) => {
         </Grid>
       </Grid>
       <Grid container justify="space-between">
-        <Grid item>
+        <Grid item lg={10} md={9} sm={8} xs={6}>
           <T>Api key list label - Scopes</T>&nbsp;
           {props.keyDTO.scopes?.join(', ')}
         </Grid>
