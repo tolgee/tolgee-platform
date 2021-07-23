@@ -16,7 +16,6 @@ declare namespace DataCy {
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |
         "global-confirmation-hard-mode-text-field" |
-        "global-editor" |
         "global-form-cancel-button" |
         "global-form-save-button" |
         "global-form-select" |

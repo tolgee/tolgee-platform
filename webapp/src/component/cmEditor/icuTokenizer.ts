@@ -1,4 +1,6 @@
+import 'ace-builds/src-noconflict/ace';
 import 'ace-builds/src-noconflict/mode-text';
+const Tokenizer = ace.require('ace/tokenizer').Tokenizer;
 
 export const rules = {
   start: [
@@ -28,4 +30,14 @@ export const rules = {
     { regex: /}/, token: 'expression.bracket', next: 'start' },
     { regex: /[^\s]/, token: 'expression.option' },
   ],
+};
+
+export type TokenType = {
+  type: string;
+  value: string;
+};
+
+const tokenizer = new Tokenizer(rules);
+export const tokenize = (text: string): TokenType[] => {
+  return tokenizer.getLineTokens(text).tokens;
 };

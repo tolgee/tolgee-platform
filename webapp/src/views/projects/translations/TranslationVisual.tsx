@@ -1,8 +1,8 @@
-import { makeStyles } from '@material-ui/core';
+import React, { useMemo } from 'react';
 import clsx from 'clsx';
-import React from 'react';
-import { useMemo } from 'react';
-import { icuVariants } from 'tg.component/editor/icuVariants';
+import { makeStyles } from '@material-ui/core';
+
+import { icuVariants } from 'tg.component/cmEditor/icuVariants';
 import { LimitedHeightText } from './LimitedHeightText';
 
 const gradient = (color) =>

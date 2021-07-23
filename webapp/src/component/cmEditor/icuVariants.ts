@@ -8,6 +8,7 @@ type VariantType = { option: string; value: string };
 type VariantsSummaryType = {
   parameters: ParameterType[];
   variants: VariantType[] | null;
+  parseError: string | null;
 };
 
 // Taken from
@@ -68,6 +69,7 @@ export const icuVariants = (
 ): VariantsSummaryType => {
   const parameters = getParameters(text);
   let variants: VariantType[] | null = null;
+  let parseError: string | null = null;
   const functions: ParameterType[] = [];
   const variables: ParameterType[] = [];
 
@@ -143,11 +145,11 @@ export const icuVariants = (
     }
   } catch (e) {
     variants = null;
-    // eslint-disable-next-line no-console
-    console.error(e);
+    parseError = e.message;
   }
   return {
     parameters,
     variants: variants?.length ? variants : null,
+    parseError,
   };
 };

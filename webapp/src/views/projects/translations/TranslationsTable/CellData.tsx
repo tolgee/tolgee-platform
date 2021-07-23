@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Editor } from 'tg.component/editor/Editor';
+import { Editor } from 'tg.component/cmEditor/Editor';
 import { useEditableRow } from '../useEditableRow';
 import { CellContent, CellPlain, CellControls } from '../CellBase';
 import { TranslationVisual } from '../TranslationVisual';
