@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Box from '@material-ui/core/Box';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
@@ -8,16 +8,18 @@ import { BaseView } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-
-import ProjectListItem from './ProjectListItem';
+import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
 
 export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
 
   const listPermitted = useApiQuery({
-    url: '/v2/projects',
+    url: '/v2/projects/with-stats',
     method: 'get',
+    options: {
+      keepPreviousData: true,
+    },
     query: {
       page,
       size: 20,
@@ -30,16 +32,17 @@ export const ProjectListView = () => {
   return (
     <DashboardPage>
       <BaseView
-        title={t('projects_title')}
-        containerMaxWidth="md"
+        title={<T>projects_title</T>}
+        windowTitle={t('projects_title', undefined, true)}
+        onSearch={setSearch}
+        containerMaxWidth="lg"
         hideChildrenOnLoading={false}
-        loading={listPermitted.isLoading}
+        loading={listPermitted.isFetching}
       >
         <PaginatedHateoasList
           onPageChange={setPage}
-          onSearchChange={setSearch}
           loadable={listPermitted}
-          renderItem={(r) => <ProjectListItem key={r.id} {...r} />}
+          renderItem={(r) => <DashboardProjectListItem key={r.id} {...r} />}
         />
         <Box
           display="flex"

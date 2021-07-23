@@ -24,6 +24,7 @@ class PublicConfigurationDTO(
     serverUrl = properties.socketIo.externalUrl,
     allowedTransports = properties.socketIo.allowedTransports
   )
+  val appName = properties.appName
 
   class AuthMethodsDTO(val github: GithubPublicConfigDTO)
   data class GithubPublicConfigDTO(val clientId: String?) {

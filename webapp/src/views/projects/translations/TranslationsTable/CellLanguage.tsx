@@ -2,7 +2,7 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { CircledLanguageIcon } from '../CircledLanguageIcon';
+import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { CellContent, CellPlain } from '../CellBase';
 
 type LanguageModel = components['schemas']['LanguageModel'];
