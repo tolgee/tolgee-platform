@@ -15,6 +15,9 @@ export interface paths {
   "/v2/projects/{projectId}/users/{userId}/revoke-access": {
     put: operations["revokePermission"];
   };
+  "/v2/projects/{projectId}/keys/{keyId}/tags": {
+    put: operations["tagKey"];
+  };
   "/v2/projects/{projectId}/keys/{id}": {
     put: operations["edit"];
   };
@@ -130,11 +133,11 @@ export interface paths {
     post: operations["addFilesStreaming"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
-    get: operations["getAll_1"];
+    get: operations["getAll_3"];
     post: operations["create_4"];
   };
   "/v2/projects/{projectId}/languages": {
-    get: operations["getAll_3"];
+    get: operations["getAll_5"];
     post: operations["createLanguage"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
@@ -142,11 +145,11 @@ export interface paths {
     post: operations["uploadScreenshot_1"];
   };
   "/v2/organizations": {
-    get: operations["getAll_5"];
+    get: operations["getAll_7"];
     post: operations["create_6"];
   };
   "/api/organizations": {
-    get: operations["getAll_6"];
+    get: operations["getAll_8"];
     post: operations["create_7"];
   };
   "/api/user": {
@@ -206,6 +209,9 @@ export interface paths {
   "/v2/projects/{projectId}/users": {
     get: operations["getAllUsers"];
   };
+  "/v2/projects/{projectId}/tags": {
+    get: operations["getAll_1"];
+  };
   "/v2/projects/{projectId}/import/result": {
     get: operations["getImportResult"];
   };
@@ -221,6 +227,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translations/{languages}": {
     get: operations["getAllTranslations"];
+  };
+  "/v2/projects/with-stats": {
+    get: operations["getAllWithStatistics"];
   };
   "/v2/organizations/{slug}/projects": {
     get: operations["getAllProjects"];
@@ -295,6 +304,9 @@ export interface paths {
   "/api/apiKeys/availableScopes": {
     get: operations["getScopes"];
   };
+  "/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}": {
+    delete: operations["removeTag"];
+  };
   "/v2/projects/{projectId}/keys/{ids}": {
     delete: operations["delete"];
   };
@@ -362,6 +374,13 @@ export interface components {
       id: number;
       username: string;
       name?: string;
+    };
+    TagKeyDto: {
+      name: string;
+    };
+    TagModel: {
+      id: number;
+      name: string;
     };
     EditKeyDto: {
       name: string;
@@ -601,6 +620,12 @@ export interface components {
       /** Actual user's permissions on selected project. You can not sort data by this column! */
       computedPermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
+    PagedModelTagModel: {
+      _embedded?: {
+        tags?: components["schemas"]["TagModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
     ImportTranslationModel: {
       id: number;
       text?: string;
@@ -618,7 +643,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -629,6 +653,7 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -658,6 +683,8 @@ export interface components {
       keyId: number;
       /** Name of key */
       keyName: string;
+      /** Tags of key */
+      keyTags: components["schemas"]["TagModel"][];
       /** Count of screenshots provided for the key */
       screenshotCount: number;
       /** Translations object */
@@ -680,6 +707,40 @@ export interface components {
         languages?: components["schemas"]["LanguageModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelProjectWithStatsModel: {
+      _embedded?: {
+        projects?: components["schemas"]["ProjectWithStatsModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    ProjectStatistics: {
+      projectId: number;
+      keyCount: number;
+      languageCount: number;
+      translationStateCounts: { [key: string]: number };
+    };
+    ProjectWithStatsModel: {
+      id: number;
+      name: string;
+      description?: string;
+      slug?: string;
+      userOwner?: components["schemas"]["UserAccountModel"];
+      baseLanguage?: components["schemas"]["LanguageModel"];
+      organizationOwnerName?: string;
+      organizationOwnerSlug?: string;
+      organizationOwnerBasePermissions?:
+        | "VIEW"
+        | "TRANSLATE"
+        | "EDIT"
+        | "MANAGE";
+      organizationRole?: "MEMBER" | "OWNER";
+      /** Current user's direct permission */
+      directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      /** Actual current user's permissions on this project. You can not sort data by this column! */
+      computedPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      stats: components["schemas"]["ProjectStatistics"];
+      languages: components["schemas"]["LanguageModel"][];
     };
     CollectionModelScreenshotModel: {
       _embedded?: {
@@ -740,6 +801,13 @@ export interface components {
       needsEmailVerification: boolean;
       userCanCreateProjects: boolean;
       userCanCreateOrganizations: boolean;
+      socket: components["schemas"]["SocketIo"];
+    };
+    SocketIo: {
+      enabled: boolean;
+      port: number;
+      serverUrl?: string;
+      allowedTransports: string[];
     };
     DeprecatedKeyDto: {
       /** This means name of key. Will be renamed in v2 */
@@ -900,6 +968,39 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+  };
+  tagKey: {
+    parameters: {
+      path: {
+        keyId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TagModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TagKeyDto"];
       };
     };
   };
@@ -2295,7 +2396,7 @@ export interface operations {
       };
     };
   };
-  getAll_1: {
+  getAll_3: {
     parameters: {
       path: {
         translationId: number;
@@ -2364,7 +2465,7 @@ export interface operations {
       };
     };
   };
-  getAll_3: {
+  getAll_5: {
     parameters: {
       path: {
         projectId: number;
@@ -2494,7 +2595,7 @@ export interface operations {
       };
     };
   };
-  getAll_5: {
+  getAll_7: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -2554,7 +2655,7 @@ export interface operations {
       };
     };
   };
-  getAll_6: {
+  getAll_8: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
@@ -3161,6 +3262,42 @@ export interface operations {
       };
     };
   };
+  getAll_1: {
+    parameters: {
+      query: {
+        search?: string;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelTagModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getImportResult: {
     parameters: {
       path: {
@@ -3335,6 +3472,39 @@ export interface operations {
       200: {
         content: {
           "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllWithStatistics: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
         };
       };
       /** Bad Request */
@@ -4055,6 +4225,31 @@ export interface operations {
           "*/*": { [key: string]: string[] };
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  removeTag: {
+    parameters: {
+      path: {
+        keyId: number;
+        tagId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {

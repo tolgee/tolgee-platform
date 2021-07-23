@@ -3,7 +3,7 @@ import { makeStyles, Box } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CellContent, CellPlain, CellControls } from '../CellBase';
-import { CircledLanguageIcon } from '../CircledLanguageIcon';
+import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { useEditableRow } from '../useEditableRow';
 import { Editor } from 'tg.component/editor/Editor';
 import { TranslationVisual } from '../TranslationVisual';

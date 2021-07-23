@@ -4,6 +4,7 @@ import { FlagImage } from 'tg.component/languages/FlagImage';
 
 type Props = {
   flag: string | null | undefined;
+  size?: number;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -28,9 +29,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const CircledLanguageIcon: React.FC<Props> = ({ flag }) => {
+export const CircledLanguageIcon: React.FC<Props> = ({ flag, size }) => {
   const classes = useStyles();
-  const size = 18;
+  size = size || 18;
   return (
     <Box className={classes.icon} width={size} height={size}>
       <FlagImage

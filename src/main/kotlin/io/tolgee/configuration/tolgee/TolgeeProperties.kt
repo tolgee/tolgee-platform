@@ -19,5 +19,6 @@ open class TolgeeProperties(
   val maxScreenshotsPerKey: Int = 20,
   var fileStorage: FileStorageProperties = FileStorageProperties(),
   var frontEndUrl: String? = null,
-  var socketIo: SocketIoProperties = SocketIoProperties()
+  var socketIo: SocketIoProperties = SocketIoProperties(),
+  var appName: String = "Tolgee",
 )

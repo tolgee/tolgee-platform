@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { LocaleMenu } from '../LocaleMenu';
 import { TolgeeLogo } from '../common/icons/TolgeeLogo';
 import { UserMenu } from '../security/UserMenu';
+import { useConfig } from 'tg.hooks/useConfig';
 
 const drawerWidth = 240;
 
@@ -47,7 +48,7 @@ interface TopBarProps {}
 
 export function TopBar(props: TopBarProps) {
   const classes = useStyles({});
-
+  const config = useConfig();
   return (
     <AppBar position="absolute" className={clsx(classes.appBar)}>
       <Toolbar className={classes.toolbar}>
@@ -63,7 +64,7 @@ export function TopBar(props: TopBarProps) {
                   color="inherit"
                   style={{ fontFamily: 'Righteous, Rubik, Arial' }}
                 >
-                  Tolgee
+                  {config.appName}
                 </Typography>
               </Box>
             </Link>

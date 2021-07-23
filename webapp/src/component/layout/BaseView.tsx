@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { Box, Container, LinearProgress, useTheme } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -7,8 +7,11 @@ import grey from '@material-ui/core/colors/grey';
 import { useLoading } from 'tg.hooks/loading';
 
 import { SecondaryBar } from './SecondaryBar';
+import { useConfig } from 'tg.hooks/useConfig';
+import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
 
 export interface BaseViewProps {
+  windowTitle?: string;
   loading?: boolean;
   title?: ReactNode;
   children: (() => ReactNode) | ReactNode;
@@ -16,6 +19,7 @@ export interface BaseViewProps {
   sm?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   md?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   lg?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  onSearch?: (string) => void;
   navigation?: ReactNode;
   customHeader?: ReactNode;
   hideChildrenOnLoading?: boolean;
@@ -28,6 +32,17 @@ export const BaseView = (props: BaseViewProps) => {
     props.hideChildrenOnLoading === undefined || props.hideChildrenOnLoading;
 
   const globalLoading = useLoading();
+  const config = useConfig();
+
+  useEffect(() => {
+    if (props.windowTitle) {
+      const oldTitle = window.document.title;
+      window.document.title = `${config.appName} - ${props.windowTitle}`;
+      return () => {
+        window.document.title = oldTitle;
+      };
+    }
+  }, []);
 
   return (
     <>
@@ -54,7 +69,10 @@ export const BaseView = (props: BaseViewProps) => {
           {props.navigation}
           {(props.title || props.customHeader) && (
             <SecondaryBar>
-              <Container maxWidth={props.containerMaxWidth || false}>
+              <Container
+                maxWidth={props.containerMaxWidth || false}
+                style={{ padding: 0 }}
+              >
                 <Grid container justify="center" alignItems="center">
                   <Grid
                     data-cy="global-base-view-title"
@@ -65,7 +83,16 @@ export const BaseView = (props: BaseViewProps) => {
                     sm={props.sm || 12}
                   >
                     {props.customHeader || (
-                      <Typography variant="h5">{props.title}</Typography>
+                      <Box display="flex" alignItems={'center'}>
+                        <Typography variant="h5">{props.title}</Typography>
+                        {typeof props.onSearch === 'function' && (
+                          <Box ml={2}>
+                            <SecondaryBarSearchField
+                              onSearch={props.onSearch}
+                            />
+                          </Box>
+                        )}
+                      </Box>
                     )}
                   </Grid>
                 </Grid>
