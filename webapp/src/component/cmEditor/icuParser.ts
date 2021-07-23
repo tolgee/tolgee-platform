@@ -1,12 +1,4 @@
-import { rules } from './icuHighlightRules';
-const Tokenizer = ace.require('ace/tokenizer').Tokenizer;
-
-const tokenizer = new Tokenizer(rules);
-
-export type TokenType = {
-  type: string;
-  value: string;
-};
+import { tokenize } from './icuTokenizer';
 
 export type ParameterType = {
   name: string;
@@ -14,15 +6,11 @@ export type ParameterType = {
   options: string[];
 };
 
-export const getTokens = (text: string): TokenType[] => {
-  return tokenizer.getLineTokens(text).tokens;
-};
-
 export const getParameters = (text: string) => {
   const final: ParameterType[] = [];
   const stack: ParameterType[] = [];
 
-  const tokens = getTokens(text);
+  const tokens = tokenize(text);
 
   for (const token of tokens) {
     const lastOnStack = stack[stack.length - 1];

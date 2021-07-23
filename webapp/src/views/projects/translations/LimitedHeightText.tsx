@@ -12,6 +12,7 @@ const useStyles = makeStyles({
   },
   container: {
     position: 'relative',
+    display: 'flex',
     overflow: 'hidden',
     lineHeight: '1.2rem',
 

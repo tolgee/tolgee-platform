@@ -5,7 +5,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { CellContent, CellPlain, CellControls } from '../CellBase';
 import { CircledLanguageIcon } from '../CircledLanguageIcon';
 import { useEditableRow } from '../useEditableRow';
-import { Editor } from 'tg.component/editor/Editor';
+import { Editor } from 'tg.component/cmEditor/Editor';
 import { TranslationVisual } from '../TranslationVisual';
 
 type LanguageModel = components['schemas']['LanguageModel'];

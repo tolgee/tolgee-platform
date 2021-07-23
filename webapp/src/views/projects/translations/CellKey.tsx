@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { Checkbox, Box } from '@material-ui/core';
 
-import { Editor } from 'tg.component/editor/Editor';
+import { Editor } from 'tg.component/cmEditor/Editor';
 import { useEditableRow } from './useEditableRow';
 import {
   TranslationsContext,
