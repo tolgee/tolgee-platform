@@ -39,7 +39,6 @@ const useStyles = makeStyles((theme) => ({
     flexWrap: 'wrap',
     margin: `0 -${theme.spacing(1)}px`,
     '& > *': {
-      flexGrow: 1,
       flexShrink: 0,
       margin: `0 ${theme.spacing(1)}px`,
       marginTop: theme.spacing(0.5),
@@ -128,7 +127,14 @@ export function TranslationStatesBar(props: {
                   style={{ backgroundColor: translationStates[state].color }}
                 />
                 <T>{translationStates[state].translationKey}</T>:{' '}
-                {props.stats.translationStateCounts[state]}
+                <T
+                  parameters={{
+                    keyCount:
+                      props.stats.translationStateCounts[state].toString(),
+                  }}
+                >
+                  translion_states_key_count
+                </T>
               </Box>
             )
         )}
