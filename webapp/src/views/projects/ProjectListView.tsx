@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import Box from '@material-ui/core/Box';
 import { T, useTranslate } from '@tolgee/react';
-
-import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
@@ -36,6 +33,7 @@ export const ProjectListView = () => {
         windowTitle={t('projects_title', undefined, true)}
         onSearch={setSearch}
         containerMaxWidth="lg"
+        addLinkTo={LINKS.PROJECT_ADD.build()}
         hideChildrenOnLoading={false}
         loading={listPermitted.isFetching}
       >
@@ -44,15 +42,6 @@ export const ProjectListView = () => {
           loadable={listPermitted}
           renderItem={(r) => <DashboardProjectListItem key={r.id} {...r} />}
         />
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="flex-end"
-          mt={2}
-          pr={2}
-        >
-          <FabAddButtonLink to={LINKS.PROJECT_ADD.build()} />
-        </Box>
       </BaseView>
     </DashboardPage>
   );

@@ -1,5 +1,11 @@
 import React, { ReactNode, useEffect } from 'react';
-import { Box, Container, LinearProgress, useTheme } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Container,
+  LinearProgress,
+  useTheme,
+} from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import grey from '@material-ui/core/colors/grey';
@@ -9,11 +15,16 @@ import { useLoading } from 'tg.hooks/loading';
 import { SecondaryBar } from './SecondaryBar';
 import { useConfig } from 'tg.hooks/useConfig';
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
+import { Add } from '@material-ui/icons';
+import { T } from '@tolgee/react';
+import { Link } from 'react-router-dom';
 
 export interface BaseViewProps {
   windowTitle?: string;
   loading?: boolean;
   title?: ReactNode;
+  onAdd?: () => void;
+  addLinkTo?: string;
   children: (() => ReactNode) | ReactNode;
   xs?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   sm?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
@@ -83,15 +94,34 @@ export const BaseView = (props: BaseViewProps) => {
                     sm={props.sm || 12}
                   >
                     {props.customHeader || (
-                      <Box display="flex" alignItems={'center'}>
-                        <Typography variant="h5">{props.title}</Typography>
-                        {typeof props.onSearch === 'function' && (
-                          <Box ml={2}>
-                            <SecondaryBarSearchField
-                              onSearch={props.onSearch}
-                            />
-                          </Box>
-                        )}
+                      <Box display="flex" justifyContent="space-between">
+                        <Box display="flex" alignItems={'center'}>
+                          <Typography variant="h5">{props.title}</Typography>
+                          {typeof props.onSearch === 'function' && (
+                            <Box ml={2}>
+                              <SecondaryBarSearchField
+                                onSearch={props.onSearch}
+                              />
+                            </Box>
+                          )}
+                        </Box>
+                        <Box display="flex">
+                          {(props.onAdd || props.addLinkTo) && (
+                            <Button
+                              component={props.addLinkTo ? Link : Button}
+                              to={props.addLinkTo}
+                              startIcon={<Add />}
+                              color="primary"
+                              size="small"
+                              variant="contained"
+                              aria-label="add"
+                              onClick={props.onAdd}
+                              data-cy="translations-add-button"
+                            >
+                              <T>global_add_button</T>
+                            </Button>
+                          )}
+                        </Box>
                       </Box>
                     )}
                   </Grid>

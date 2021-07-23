@@ -1,12 +1,12 @@
 import {
   Box,
-  Button,
   Chip,
   Grid,
+  IconButton,
   Tooltip,
   Typography,
 } from '@material-ui/core';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
@@ -15,10 +15,11 @@ import { TranslationStatesBar } from 'tg.views/projects/TranslationStatesBar';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { useConfig } from 'tg.hooks/useConfig';
+import { Settings } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    padding: theme.spacing(2),
+    padding: `${theme.spacing(3)}px ${theme.spacing(2)}px`,
   },
   projectName: {
     fontSize: 16,
@@ -41,10 +42,11 @@ const DashboardProjectListItem = (
 ) => {
   const classes = useStyles();
   const config = useConfig();
+  const t = useTranslate();
 
   return (
     <Grid container spacing={2} className={classes.root}>
-      <Grid item lg={2} md={3} sm={4} className={classes.centered}>
+      <Grid item lg={2} md={3} sm={4}>
         <Link
           className={classes.projectLink}
           to={LINKS.PROJECT_TRANSLATIONS.build({ [PARAMS.PROJECT_ID]: p.id })}
@@ -70,7 +72,7 @@ const DashboardProjectListItem = (
           </T>
         </Typography>
       </Grid>
-      <Grid item lg md sm className={classes.centered}>
+      <Grid item lg md sm>
         <TranslationStatesBar stats={p.stats as any} />
       </Grid>
       <Grid item lg={3} md={2} sm={3} className={classes.centered}>
@@ -89,15 +91,15 @@ const DashboardProjectListItem = (
       <Grid item className={classes.centered}>
         <Box width="100%" display="flex" justifyContent="flex-end">
           {p.computedPermissions === ProjectPermissionType.MANAGE && (
-            <Button
-              data-cy="project-settings-button"
+            <IconButton
               component={Link}
-              size="small"
-              variant="outlined"
               to={LINKS.PROJECT_EDIT.build({ [PARAMS.PROJECT_ID]: p.id })}
+              data-cy="project-settings-button"
+              aria-label={t('project_settings_button')}
+              size="small"
             >
-              <T>project_settings_button</T>
-            </Button>
+              <Settings />
+            </IconButton>
           )}
         </Box>
       </Grid>
