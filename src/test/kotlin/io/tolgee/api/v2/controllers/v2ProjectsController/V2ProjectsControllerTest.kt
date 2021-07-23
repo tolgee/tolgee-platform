@@ -3,6 +3,7 @@ package io.tolgee.api.v2.controllers.v2ProjectsController
 import io.tolgee.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.ProjectsTestData
 import io.tolgee.dtos.request.ProjectInviteUserDto
 import io.tolgee.fixtures.*
 import io.tolgee.model.Permission
@@ -32,6 +33,51 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       it.node("[2].userOwner").isEqualTo("null")
       it.node("[2].organizationOwnerName").isEqualTo("cool")
       it.node("[2].organizationOwnerSlug").isEqualTo("cool")
+    }
+  }
+
+  @Test
+  fun getAllWithStats() {
+    val testData = ProjectsTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+
+    performAuthGet("/v2/projects/with-stats").andPrettyPrint.andIsOk.andAssertThatJson.node("_embedded.projects").let {
+      it.isArray.hasSize(2)
+      it.node("[0].userOwner.username").isEqualTo("test_username")
+      it.node("[0].directPermissions").isEqualTo("MANAGE")
+      it.node("[1].stats").isEqualTo(
+        """
+      {
+        "projectId" : 2,
+        "keyCount" : 5,
+        "languageCount" : 2,
+        "translationStateCounts" : {
+          "UNTRANSLATED" : 4,
+          "MACHINE_TRANSLATED" : 1,
+          "TRANSLATED" : 2,
+          "REVIEWED" : 1,
+          "NEEDS_REVIEW" : 2
+        }
+      }
+      """
+      )
+      it.node("[0].stats").isEqualTo(
+        """
+      {
+        "projectId" : 1,
+        "keyCount" : 1,
+        "languageCount" : 1,
+        "translationStateCounts" : {
+          "UNTRANSLATED" : 1,
+          "MACHINE_TRANSLATED" : 0,
+          "TRANSLATED" : 0,
+          "REVIEWED" : 0,
+          "NEEDS_REVIEW" : 0
+        }
+      }
+      """
+      )
     }
   }
 
