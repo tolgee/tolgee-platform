@@ -24,7 +24,7 @@ import { ProjectPermissionType } from 'tg.service/response.types';
 import { ScreenshotDetail } from './ScreenshotDetail';
 import { ScreenshotDropzone } from './ScreenshotDropzone';
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
-import { useTranslationsDispatch } from '../TranslationsContext';
+import { useTranslationsDispatch } from '../context/TranslationsContext';
 
 export interface ScreenshotGalleryProps {
   keyId: number;

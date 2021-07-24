@@ -8,7 +8,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import {
   TranslationsContext,
   useTranslationsDispatch,
-} from '../TranslationsContext';
+} from '../context/TranslationsContext';
 import { CellKey } from '../CellKey';
 import { LanguagesRow } from './LanguagesRow';
 import { useResize, resizeColumn } from '../useResize';

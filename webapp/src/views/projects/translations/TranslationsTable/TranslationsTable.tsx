@@ -7,7 +7,7 @@ import { T } from '@tolgee/react';
 import {
   TranslationsContext,
   useTranslationsDispatch,
-} from '../TranslationsContext';
+} from '../context/TranslationsContext';
 import { CellData } from './CellData';
 import { resizeColumn, useResize } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
