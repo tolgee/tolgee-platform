@@ -108,6 +108,7 @@ export const BaseView = (props: BaseViewProps) => {
                         <Box display="flex">
                           {(props.onAdd || props.addLinkTo) && (
                             <Button
+                              data-cy="global-plus-button"
                               component={props.addLinkTo ? Link : Button}
                               to={props.addLinkTo}
                               startIcon={<Add />}
@@ -116,7 +117,6 @@ export const BaseView = (props: BaseViewProps) => {
                               variant="contained"
                               aria-label="add"
                               onClick={props.onAdd}
-                              data-cy="translations-add-button"
                             >
                               <T>global_add_button</T>
                             </Button>

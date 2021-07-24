@@ -7,6 +7,7 @@ declare namespace DataCy {
         "base-language-select" |
         "camera-button" |
         "create-project-language-add-button" |
+        "dashboard-projects-list-item" |
         "dropzone" |
         "dropzone-inner" |
         "global-base-view-content" |

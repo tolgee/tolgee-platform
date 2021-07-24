@@ -18,7 +18,9 @@ describe('Projects Basics', () => {
   it('Searches in list', () => {
     gcy('global-list-search').find('input').type('Facebook');
     gcy('global-paginated-list')
-      .within(() => gcy('global-list-item').should('have.length', 1))
+      .within(() =>
+        gcy('dashboard-projects-list-item').should('have.length', 1)
+      )
       .contains('Facebook itself');
   });
 
@@ -39,7 +41,7 @@ describe('Projects Basics', () => {
     assertMessage('Project created');
     gcy('global-paginated-list')
       .contains(name)
-      .closest('li')
+      .closestDcy('dashboard-projects-list-item')
       .within(() => {
         gcy('project-list-owner').contains(owner).should('be.visible');
       });

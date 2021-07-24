@@ -129,8 +129,7 @@ describe('Language creation in new project', () => {
     selectInSelect(gcy('base-language-select'), 'German');
     gcy('global-form-save-button').click();
     cy.contains('Super project')
-      .closestDcy('global-list-item')
-      .parent()
+      .closestDcy('dashboard-projects-list-item')
       .findDcy('project-settings-button')
       .click();
     languagesToAdd.forEach((l) =>
