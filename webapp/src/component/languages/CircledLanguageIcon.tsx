@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { Box, makeStyles } from '@material-ui/core';
 import { FlagImage } from 'tg.component/languages/FlagImage';
+import clsx from 'clsx';
 
 type Props = {
   flag: string | null | undefined;
   size?: number;
-};
+} & ComponentProps<typeof Box>;
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -32,11 +33,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const CircledLanguageIcon: React.FC<Props> = ({ flag, size }) => {
+export const CircledLanguageIcon: React.FC<Props> = ({
+  flag,
+  size,
+  ...boxProps
+}) => {
   const classes = useStyles();
   size = size || 18;
   return (
-    <Box className={classes.wrapper}>
+    <Box {...boxProps} className={clsx(classes.wrapper, boxProps.className)}>
       <Box className={classes.iconWrapper} width={size} height={size}>
         <FlagImage
           className={classes.iconImage}

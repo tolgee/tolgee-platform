@@ -1,7 +1,7 @@
 import { container, singleton } from 'tsyringe';
 
 import { LINKS } from '../constants/links';
-import { useRedirect } from '../hooks/useRedirect';
+import { redirect } from 'tg.hooks/redirect';
 import { components } from './apiSchema.generated';
 import { ApiV1HttpService } from './http/ApiV1HttpService';
 import { ApiV2HttpService } from './http/ApiV2HttpService';
@@ -49,7 +49,7 @@ export class ProjectService {
 
   public deleteProject = async (id) => {
     await http.delete('projects/' + id);
-    useRedirect(LINKS.PROJECTS);
+    redirect(LINKS.PROJECTS);
   };
 
   public getPermissions = async (projectId): Promise<PermissionDTO[]> =>

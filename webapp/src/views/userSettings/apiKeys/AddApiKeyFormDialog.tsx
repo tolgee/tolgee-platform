@@ -17,7 +17,7 @@ import { CheckBoxGroupMultiSelect } from 'tg.component/common/form/fields/CheckB
 import { Select } from 'tg.component/common/form/fields/Select';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { useRedirect } from 'tg.hooks/useRedirect';
+import { redirect } from 'tg.hooks/redirect';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -41,7 +41,7 @@ const setsIntersection = (set1: Set<unknown>, set2: Set<unknown>) =>
   new Set([...set1].filter((v) => set2.has(v)));
 
 export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
-  const onDialogClose = () => useRedirect(LINKS.USER_API_KEYS);
+  const onDialogClose = () => redirect(LINKS.USER_API_KEYS);
 
   const projects = useApiQuery({
     url: '/v2/projects',
@@ -86,7 +86,7 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
       {
         onSuccess: () => {
           messageService.success(<T>api_key_successfully_edited</T>);
-          useRedirect(LINKS.USER_API_KEYS);
+          redirect(LINKS.USER_API_KEYS);
         },
       }
     );
@@ -105,7 +105,7 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
       {
         onSuccess() {
           messageService.success(<T>api_key_successfully_generated</T>);
-          useRedirect(LINKS.USER_API_KEYS);
+          redirect(LINKS.USER_API_KEYS);
         },
       }
     );

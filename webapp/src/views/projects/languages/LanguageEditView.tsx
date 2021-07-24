@@ -9,7 +9,7 @@ import { BaseFormView } from 'tg.component/layout/BaseFormView';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
-import { useRedirect } from 'tg.hooks/useRedirect';
+import { redirect } from 'tg.hooks/redirect';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -68,7 +68,7 @@ export const LanguageEditView = () => {
       {
         onSuccess() {
           messageService.success(<T>language_edited_message</T>);
-          useRedirect(LINKS.PROJECT_EDIT, {
+          redirect(LINKS.PROJECT_EDIT, {
             [PARAMS.PROJECT_ID]: projectId,
           });
         },
@@ -87,7 +87,7 @@ export const LanguageEditView = () => {
       {
         onSuccess() {
           messageService.success(<T>language_deleted_message</T>);
-          useRedirect(LINKS.PROJECT_EDIT, {
+          redirect(LINKS.PROJECT_EDIT, {
             [PARAMS.PROJECT_ID]: projectId,
           });
         },
