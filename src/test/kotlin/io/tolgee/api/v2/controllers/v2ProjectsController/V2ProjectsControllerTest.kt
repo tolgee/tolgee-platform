@@ -48,7 +48,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       it.node("[0].directPermissions").isEqualTo("MANAGE")
       it.node("[1].stats.translationStateCounts").isEqualTo(
         """
-        "translationStateCounts" : {
+        {
           "UNTRANSLATED" : 4,
           "MACHINE_TRANSLATED" : 1,
           "TRANSLATED" : 2,
@@ -59,7 +59,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       )
       it.node("[0].stats.translationStateCounts").isEqualTo(
         """
-       "translationStateCounts" : {
+       {
           "UNTRANSLATED" : 1,
           "MACHINE_TRANSLATED" : 0,
           "TRANSLATED" : 0,

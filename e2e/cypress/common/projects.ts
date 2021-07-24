@@ -6,7 +6,7 @@ export const enterProjectSettings = (projectName: string) => {
 
   gcy('global-paginated-list')
     .contains(projectName)
-    .closest('li')
+    .closestDcy('dashboard-projects-list-item')
     .within(() => {
       cy.gcy('project-settings-button').should('be.visible').click();
     });

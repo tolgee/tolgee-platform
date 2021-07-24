@@ -45,7 +45,12 @@ const DashboardProjectListItem = (
   const t = useTranslate();
 
   return (
-    <Grid container spacing={2} className={classes.root}>
+    <Grid
+      container
+      spacing={2}
+      className={classes.root}
+      data-cy="dashboard-projects-list-item"
+    >
       <Grid item lg={2} md={3} sm={4}>
         <Link
           className={classes.projectLink}

@@ -24,6 +24,7 @@ export const SecondaryBarSearchField: FC<ComponentProps<typeof SearchField>> = (
 
   return (
     <SearchField
+      data-cy="global-list-search"
       className={clsx({ [classes.root]: true, [classes.focused]: focused })}
       onFocus={() => {
         setFocused(true);
