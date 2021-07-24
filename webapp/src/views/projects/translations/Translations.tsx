@@ -3,7 +3,7 @@ import { useTranslate } from '@tolgee/react';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { BaseView } from 'tg.component/layout/BaseView';
-import { TranslationsContext } from './TranslationsContext';
+import { TranslationsContext } from './context/TranslationsContext';
 import { useProject } from 'tg.hooks/useProject';
 import { Navigation } from 'tg.component/navigation/Navigation';
 import { TranslationsTable } from './TranslationsTable/TranslationsTable';

@@ -12,7 +12,7 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { useProject } from 'tg.hooks/useProject';
 import { MessageService } from 'tg.service/MessageService';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { TranslationsContext } from './TranslationsContext';
+import { TranslationsContext } from './context/TranslationsContext';
 
 export type TranslationCreationValue = {
   key: string;

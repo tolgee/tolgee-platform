@@ -1,6 +1,6 @@
 import { useTranslate } from '@tolgee/react';
 import { useContextSelector } from 'use-context-selector';
-import { TranslationsContext } from '../TranslationsContext';
+import { TranslationsContext } from '../context/TranslationsContext';
 
 export const useAvailableFilters = (selectedLanguages?: string[]) => {
   const languages = useContextSelector(TranslationsContext, (v) => v.languages);

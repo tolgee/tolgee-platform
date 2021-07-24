@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { components } from 'tg.service/apiSchema.generated';
 
+import { Direction } from './context/useEdit';
 import {
   TranslationsContext,
   useTranslationsDispatch,
-  Direction,
-} from './TranslationsContext';
+} from './context/TranslationsContext';
 
 type TranslationModel = components['schemas']['TranslationModel'];
 

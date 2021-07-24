@@ -1,5 +1,5 @@
 import { Translations } from './Translations';
-import { TranslationsContextProvider } from './TranslationsContext';
+import { TranslationsContextProvider } from './context/TranslationsContext';
 import { useProject } from 'tg.hooks/useProject';
 
 export const TranslationsView = () => {
