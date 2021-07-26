@@ -12,7 +12,7 @@ import { useContextSelector } from 'use-context-selector';
 import {
   TranslationsContext,
   useTranslationsDispatch,
-} from '../TranslationsContext';
+} from '../context/TranslationsContext';
 import { useAvailableFilters } from './useAvailableFilters';
 
 const useStyles = makeStyles({

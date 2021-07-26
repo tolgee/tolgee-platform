@@ -7,7 +7,7 @@ import { useEditableRow } from './useEditableRow';
 import {
   TranslationsContext,
   useTranslationsDispatch,
-} from './TranslationsContext';
+} from './context/TranslationsContext';
 import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
 import { CellContent, CellPlain, CellControls, stopBubble } from './CellBase';
 

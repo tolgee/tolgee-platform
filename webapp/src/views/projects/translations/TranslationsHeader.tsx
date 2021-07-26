@@ -16,7 +16,7 @@ import {
   TranslationsContext,
   useTranslationsDispatch,
   ViewType,
-} from './TranslationsContext';
+} from './context/TranslationsContext';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
