@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core';
 
-import { icuVariants } from 'tg.component/cmEditor/icuVariants';
+import { icuVariants } from 'tg.component/editor/icuVariants';
 import { LimitedHeightText } from './LimitedHeightText';
 
 const gradient = (color) =>
@@ -23,6 +23,7 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'flex-start',
     width: 80,
+    flexShrink: 0,
     overflow: 'hidden',
     position: 'relative',
     margin: '0px 8px 1px 0px',

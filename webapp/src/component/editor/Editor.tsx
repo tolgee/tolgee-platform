@@ -7,19 +7,12 @@ import 'codemirror/keymap/sublime';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/lint/lint';
 import 'codemirror/addon/lint/lint.css';
+import 'codemirror/addon/hint/show-hint';
+import 'codemirror/addon/hint/show-hint.css';
 
 import { makeStyles } from '@material-ui/core';
 import { useMemo } from 'react';
 import { useEffect } from 'react';
-
-type Props = {
-  initialValue: string;
-  onChange?: (val: string) => void;
-  onSave?: (val: string) => void;
-  onCancel?: () => void;
-  background?: string;
-  plaintext?: boolean;
-};
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
@@ -40,12 +33,21 @@ const useStyles = makeStyles((theme) => ({
     '& .CodeMirror': {
       minHeight: 100,
       height: '100%',
+      marginLeft: -5,
       // @ts-ignore
       background: (props) => props.background,
     },
     '& .CodeMirror-line': {
       fontFamily:
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important',
+    },
+    '& .CodeMirror-lint-markers': {
+      width: 5,
+    },
+    '& .CodeMirror-lint-marker-error': {
+      width: 5,
+      background: 'red',
+      cursor: 'default',
     },
     '& .cm-function': {
       color: '#007300',
@@ -71,25 +73,35 @@ const useStyles = makeStyles((theme) => ({
 function linter(text: string, data: any) {
   const { errors } = data;
   return errors?.map((error) => {
-    const { location = { start: { line: 1 } } } = error;
-    const {
-      start,
-      end = { ...start, column: start.column ? start.column + 1 : 1 },
-    } = location;
-    const startColumn = start.column ? start.column - 1 : 0;
-    const endColumn = end.column ? end.column - 1 : 0;
+    const location = error.location;
+    const start = location?.start;
+    const end = location?.end;
+
+    const startColumn = start?.column - 1;
+    const endColumn =
+      start?.column === start?.column ? end?.column : end?.column - 1;
     const hint = {
       message: error.message,
       severity: 'error',
       type: 'validation',
-      from: CodeMirror.Pos(start.line - 1, startColumn - 1),
-      to: CodeMirror.Pos(end.line - 1, endColumn - 1),
+      from: CodeMirror.Pos(start.line - 1, startColumn),
+      to: CodeMirror.Pos(end.line - 1, endColumn),
     };
     return hint;
   });
 }
 
 CodeMirror.registerHelper('lint', 'icu', linter);
+
+type Props = {
+  initialValue: string;
+  onChange?: (val: string) => void;
+  onSave?: (val: string) => void;
+  onCancel?: () => void;
+  background?: string;
+  plaintext?: boolean;
+  autofocus: boolean;
+};
 
 export const Editor: React.FC<Props> = ({
   initialValue,
@@ -98,6 +110,7 @@ export const Editor: React.FC<Props> = ({
   onSave,
   plaintext,
   background,
+  autofocus,
 }) => {
   const classes = useStyles({ background });
 
@@ -123,7 +136,7 @@ export const Editor: React.FC<Props> = ({
   const options: CodeMirror.EditorConfiguration = {
     lineNumbers: false,
     mode: plaintext ? undefined : 'icu',
-    autofocus: true,
+    autofocus,
     lineWrapping: true,
     keyMap: 'sublime',
     extraKeys: {
@@ -138,15 +151,17 @@ export const Editor: React.FC<Props> = ({
   };
 
   return (
-    <CodeMirrorReact
-      className={classes.editor}
-      value={value}
-      // @ts-ignore
-      defineMode={{ name: 'icu', fn: icuMode }}
-      options={options}
-      onBeforeChange={(editor, data, value) => {
-        handleChange(value);
-      }}
-    />
+    <div data-cy="global-editor">
+      <CodeMirrorReact
+        className={classes.editor}
+        value={value}
+        // @ts-ignore
+        defineMode={{ name: 'icu', fn: icuMode }}
+        options={options}
+        onBeforeChange={(editor, data, value) => {
+          handleChange(value);
+        }}
+      />
+    </div>
   );
 };

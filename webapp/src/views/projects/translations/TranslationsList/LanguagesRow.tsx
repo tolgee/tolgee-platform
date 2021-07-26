@@ -5,7 +5,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { CellContent, CellPlain, CellControls } from '../CellBase';
 import { CircledLanguageIcon } from '../CircledLanguageIcon';
 import { useEditableRow } from '../useEditableRow';
-import { Editor } from 'tg.component/cmEditor/Editor';
+import { Editor } from 'tg.component/editor/Editor';
 import { TranslationVisual } from '../TranslationVisual';
 
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -75,13 +75,20 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
 }) {
   const classes = useStyles();
 
-  const { editVal, value, setValue, handleEdit, handleEditCancel, handleSave } =
-    useEditableRow({
-      keyId: data.keyId,
-      keyName: data.keyName,
-      translations: data.translations,
-      language: null,
-    });
+  const {
+    editVal,
+    value,
+    setValue,
+    handleEdit,
+    handleEditCancel,
+    handleSave,
+    autofocus,
+  } = useEditableRow({
+    keyId: data.keyId,
+    keyName: data.keyName,
+    translations: data.translations,
+    language: null,
+  });
 
   return (
     <div className={classes.content}>
@@ -134,6 +141,7 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
                 onChange={(v) => setValue(v as string)}
                 onSave={() => handleSave('DOWN')}
                 onCancel={handleEditCancel}
+                autofocus={autofocus}
               />
             </CellContent>
             <CellControls
