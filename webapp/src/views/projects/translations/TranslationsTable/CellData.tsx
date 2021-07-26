@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Editor } from 'tg.component/cmEditor/Editor';
+import { Editor } from 'tg.component/editor/Editor';
 import { useEditableRow } from '../useEditableRow';
 import { CellContent, CellPlain, CellControls } from '../CellBase';
 import { TranslationVisual } from '../TranslationVisual';
@@ -30,6 +30,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
     handleEdit,
     handleEditCancel,
     handleSave,
+    autofocus,
   } = useEditableRow({ keyId, keyName, defaultVal: text, language: language });
 
   return (
@@ -47,6 +48,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
             background="#efefef"
             onSave={() => handleSave('DOWN')}
             onCancel={handleEditCancel}
+            autofocus={autofocus}
           />
         </CellContent>
       ) : (

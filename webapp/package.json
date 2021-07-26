@@ -25,7 +25,6 @@
     "notistack": "^1.0.9",
     "openapi-typescript": "^4.0.0",
     "react": "^17.0.1",
-    "react-ace": "^9.4.1",
     "react-codemirror2": "^7.2.1",
     "react-dnd": "^14.0.2",
     "react-dnd-html5-backend": "^14.0.0",

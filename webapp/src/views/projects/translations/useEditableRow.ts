@@ -118,5 +118,6 @@ export const useEditableRow = ({
     setValue,
     editVal: edit,
     isEditing,
+    autofocus: edit?.savedValue === undefined,
   };
 };

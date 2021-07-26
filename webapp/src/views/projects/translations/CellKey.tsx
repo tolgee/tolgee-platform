@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { Checkbox, Box } from '@material-ui/core';
 
-import { Editor } from 'tg.component/cmEditor/Editor';
+import { Editor } from 'tg.component/editor/Editor';
 import { useEditableRow } from './useEditableRow';
 import {
   TranslationsContext,
@@ -37,6 +37,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
     handleEdit,
     handleEditCancel,
     handleSave,
+    autofocus,
   } = useEditableRow({
     keyId,
     keyName,
@@ -72,8 +73,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
                 onChange={(v) => setValue(v as string)}
                 onSave={() => handleSave('DOWN')}
                 onCancel={handleEditCancel}
-                // language="plaintext"
-                // autoFocus
+                autofocus={autofocus}
               />
             </>
           ) : (
