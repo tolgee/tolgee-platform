@@ -7,8 +7,6 @@ import 'codemirror/keymap/sublime';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/lint/lint';
 import 'codemirror/addon/lint/lint.css';
-import 'codemirror/addon/hint/show-hint';
-import 'codemirror/addon/hint/show-hint.css';
 
 import { makeStyles } from '@material-ui/core';
 import { useMemo } from 'react';
