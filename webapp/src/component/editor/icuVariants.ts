@@ -67,28 +67,32 @@ export const icuVariants = (
   text: string,
   locale = 'en'
 ): VariantsSummaryType => {
-  const parameters = getParameters(text);
   let variants: VariantType[] | null = null;
   let parseError: string | null = null;
   const functions: ParameterType[] = [];
   const variables: ParameterType[] = [];
 
-  for (const p of parameters) {
-    if (ENUMERABLE_FUNCTIONS.includes(p.function!) && p.options?.length > 0) {
-      functions.push(p);
-    } else {
-      variables.push(p);
-    }
-  }
+  let parameters: ParameterType[] = [];
 
-  const staticVariables = variables.reduce(
-    (obj, item) => ({
-      ...obj,
-      [item.name]: getExampleValue(item.name, item.function),
-    }),
-    {}
-  );
   try {
+    parameters = getParameters(text);
+
+    for (const p of parameters) {
+      if (ENUMERABLE_FUNCTIONS.includes(p.function!) && p.options?.length > 0) {
+        functions.push(p);
+      } else {
+        variables.push(p);
+      }
+    }
+
+    const staticVariables = variables.reduce(
+      (obj, item) => ({
+        ...obj,
+        [item.name]: getExampleValue(item.name, item.function),
+      }),
+      {}
+    );
+
     if (functions.length === 0 && parameters.length) {
       const formattedValue = new IntlMessageFormat(text, locale).format(
         staticVariables

@@ -1,4 +1,9 @@
-import { tokenize } from './icuTokenizer';
+import {
+  parse,
+  TYPE,
+  MessageFormatElement,
+  PluralOrSelectOption,
+} from '@formatjs/icu-messageformat-parser';
 
 export type ParameterType = {
   name: string;
@@ -6,34 +11,57 @@ export type ParameterType = {
   options: string[];
 };
 
+const flatOptions = (options: PluralOrSelectOption[]) => {
+  let elements: ParameterType[] = [];
+  options.forEach((o) =>
+    o.value.forEach((el) => {
+      elements = [...elements, ...flatTree(el)];
+    })
+  );
+  return elements;
+};
+
+const flatTree = (root: MessageFormatElement): ParameterType[] => {
+  switch (root.type) {
+    case TYPE.select:
+      return [
+        {
+          name: root.value,
+          function: TYPE[root.type],
+          options: Object.keys(root.options),
+        },
+        ...flatOptions(Object.values(root.options)),
+      ];
+    case TYPE.plural:
+      return [
+        {
+          name: root.value,
+          function: root.pluralType === 'cardinal' ? 'plural' : 'selectordinal',
+          options: Object.keys(root.options),
+        },
+        ...flatOptions(Object.values(root.options)),
+      ];
+    case TYPE.date:
+    case TYPE.time:
+    case TYPE.number:
+    case TYPE.argument:
+      return [
+        {
+          name: root.value,
+          function: TYPE[root.type],
+          options: [],
+        },
+      ];
+    default:
+      return [];
+  }
+};
+
 export const getParameters = (text: string) => {
-  const final: ParameterType[] = [];
-  const stack: ParameterType[] = [];
-
-  const tokens = tokenize(text);
-
-  for (const token of tokens) {
-    const lastOnStack = stack[stack.length - 1];
-    if (token.type === 'expression.bracket') {
-      if (token.value === '}') {
-        const last = stack.pop();
-        if (last) {
-          final.push(last);
-        }
-      }
-    } else if (token.type === 'expression.parameter') {
-      stack.push({
-        name: token.value,
-        function: null,
-        options: [],
-      });
-    } else if (token.type === 'expression.function') {
-      if (lastOnStack) {
-        lastOnStack.function = token.value;
-      }
-    } else if (token.type === 'expression.option') {
-      lastOnStack?.options.push(token.value);
-    }
+  let final: ParameterType[] = [];
+  const elements = parse(text);
+  for (const element of elements) {
+    final = [...final, ...flatTree(element)];
   }
   return final;
 };
