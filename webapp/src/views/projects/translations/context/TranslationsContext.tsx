@@ -11,6 +11,7 @@ import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useTranslationsInfinite } from './useTranslationsInfinite';
 import { useEdit, Direction, EditType, ChangeValueType } from './useEdit';
+import { StateType } from '../CellBase';
 
 type LanguagesType = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModelType =
@@ -32,7 +33,8 @@ type ActionType =
   | { type: 'UPDATE_SCREENSHOT_COUNT'; payload: ChangeScreenshotNum }
   | { type: 'CHANGE_VIEW'; payload: ViewType }
   | { type: 'UPDATE_LANGUAGES' }
-  | { type: 'DELETE_TRANSLATIONS'; payload: number[] };
+  | { type: 'DELETE_TRANSLATIONS'; payload: number[] }
+  | { type: 'SET_TRANSLATION_STATE'; payload: SetTranslationStatePayload };
 
 export type ViewType = 'TABLE' | 'LIST';
 
@@ -45,6 +47,13 @@ type FiltersType = Pick<
   | 'filterTranslatedInLang'
   | 'filterUntranslatedInLang'
 >;
+
+type SetTranslationStatePayload = {
+  keyId: number;
+  translationId: number;
+  language: string;
+  state: StateType;
+};
 
 type ChangeScreenshotNum = {
   keyId: number;
@@ -127,6 +136,11 @@ export const TranslationsContextProvider: React.FC<{
     method: 'delete',
   });
 
+  const updateTranslationState = useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/set-state/{state}',
+    method: 'put',
+  });
+
   dispatchRef.current = (action: ActionType) => {
     switch (action.type) {
       case 'SET_SEARCH':
@@ -166,8 +180,14 @@ export const TranslationsContextProvider: React.FC<{
       case 'CHANGE_FIELD': {
         const { keyId, language, value } = action.payload;
         (language
-          ? edit.mutateTranslation(action.payload).then(() => {
-              translations.updateTranslation(keyId, language, value);
+          ? edit.mutateTranslation(action.payload).then((data) => {
+              if (data) {
+                translations.updateTranslation(
+                  keyId,
+                  language,
+                  data?.translations[language]
+                );
+              }
             })
           : edit.mutateTranslationKey(action.payload).then(() => {
               translations.updateTranslationKey(keyId, { keyName: value });
@@ -220,6 +240,25 @@ export const TranslationsContextProvider: React.FC<{
           },
         });
         return;
+      case 'SET_TRANSLATION_STATE':
+        updateTranslationState.mutate(
+          {
+            path: {
+              projectId: props.projectId,
+              translationId: action.payload.translationId,
+              state: action.payload.state,
+            },
+          },
+          {
+            onSuccess(data) {
+              translations.updateTranslation(
+                action.payload.keyId,
+                action.payload.language,
+                data
+              );
+            },
+          }
+        );
     }
   };
 
@@ -239,12 +278,13 @@ export const TranslationsContextProvider: React.FC<{
           languages: dataReady
             ? languages.data?._embedded?.languages
             : undefined,
-          isLoading:
-            translations.isLoading ||
-            languages.isLoading ||
-            deleteKeys.isLoading,
+          isLoading: translations.isLoading || languages.isLoading,
           isFetching:
-            translations.isFetching || languages.isFetching || edit.isLoading,
+            translations.isFetching ||
+            languages.isFetching ||
+            edit.isLoading ||
+            deleteKeys.isLoading ||
+            updateTranslationState.isLoading,
           isFetchingMore: translations.isFetchingNextPage,
           hasMoreToFetch: translations.hasNextPage,
           search: translations.query?.search,

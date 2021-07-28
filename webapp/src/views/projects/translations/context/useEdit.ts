@@ -90,20 +90,22 @@ export const useEdit = ({ projectId, translations }: Props) => {
   const mutateTranslation = async (payload: ChangeValueType) => {
     const { keyName, language, value } = payload;
 
-    if (payload.value !== getEditOldValue()) {
-      await updateValue.mutateAsync({
-        path: { projectId },
-        content: {
-          'application/json': {
-            key: keyName,
-            translations: {
-              [language!]: value,
+    const newVal =
+      payload.value !== getEditOldValue()
+        ? await updateValue.mutateAsync({
+            path: { projectId },
+            content: {
+              'application/json': {
+                key: keyName,
+                translations: {
+                  [language!]: value,
+                },
+              },
             },
-          },
-        },
-      });
-    }
+          })
+        : null;
     moveEditToDirection(payload.after);
+    return newVal;
   };
 
   return {
