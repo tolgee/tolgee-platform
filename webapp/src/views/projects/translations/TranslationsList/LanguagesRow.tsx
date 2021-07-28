@@ -2,11 +2,12 @@ import React from 'react';
 import { makeStyles, Box } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { CellContent, CellPlain, CellControls } from '../CellBase';
+import { CellContent, CellPlain, CellControls, StateType } from '../CellBase';
 import { CircledLanguageIcon } from '../CircledLanguageIcon';
 import { useEditableRow } from '../useEditableRow';
 import { Editor } from 'tg.component/editor/Editor';
 import { TranslationVisual } from '../TranslationVisual';
+import { useTranslationsDispatch } from '../context/TranslationsContext';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -66,15 +67,20 @@ type Props = {
   data: KeyWithTranslationsModel;
   editEnabled: boolean;
   width: number;
+  colIndex: number;
+  onResize: (colIndex: number) => void;
 };
 
 export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
   languages,
   data,
   editEnabled,
+  onResize,
+  colIndex,
 }) {
   const classes = useStyles();
 
+  const dispatch = useTranslationsDispatch();
   const { editVal, value, setValue, handleEdit, handleEditCancel, handleSave } =
     useEditableRow({
       keyId: data.keyId,
@@ -83,11 +89,25 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
       language: null,
     });
 
+  const handleStateChange = (language: string) => (state: StateType) => {
+    dispatch({
+      type: 'SET_TRANSLATION_STATE',
+      payload: {
+        keyId: data.keyId,
+        language: language,
+        translationId: data.translations[language]?.id,
+        state,
+      },
+    });
+  };
+
   return (
     <div className={classes.content}>
       <div className={classes.languages}>
         {languages.map((l) => {
           const langIsEditing = l.tag === editVal?.language;
+          const translation = data.translations[l.tag];
+
           return (
             <CellPlain
               key={l.id}
@@ -95,6 +115,8 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
               background={langIsEditing ? '#efefef' : undefined}
               onClick={editEnabled ? () => handleEdit(l.tag) : undefined}
               flexGrow={1}
+              state={translation?.state || 'UNTRANSLATED'}
+              onResize={() => onResize(colIndex)}
             >
               <CellContent>
                 <div className={classes.rowContent}>
@@ -106,9 +128,7 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
                     <TranslationVisual
                       locale={l.tag}
                       maxLines={langIsEditing ? undefined : 3}
-                      text={
-                        langIsEditing ? value : data.translations[l.tag]?.text
-                      }
+                      text={langIsEditing ? value : translation?.text}
                       wrapVariants={!langIsEditing}
                     />
                   </div>
@@ -116,6 +136,8 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
               </CellContent>
               <CellControls
                 mode="view"
+                state={translation?.state}
+                onStateChange={handleStateChange(l.tag)}
                 editEnabled={editEnabled}
                 onEdit={() => handleEdit(l.tag)}
                 absolute
@@ -138,8 +160,10 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
             </CellContent>
             <CellControls
               mode="edit"
+              state={data.translations[editVal.language]?.state}
               onSave={handleSave}
               onCancel={handleEditCancel}
+              onStateChange={handleStateChange(editVal.language)}
             />
           </CellPlain>
         </div>

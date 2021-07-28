@@ -7,14 +7,9 @@ const useStyles = makeStyles({
     zIndex: 1,
     position: 'absolute',
     top: 0,
-    width: 5,
-    marginLeft: -2,
+    width: 4,
     background: 'transparent',
     cursor: 'col-resize',
-    '&:hover': {
-      background: 'lightgray',
-      transition: 'background 0.5s step-end',
-    },
   },
 });
 
@@ -22,9 +17,15 @@ type Props = {
   onResize: (change: number) => void;
   left: number;
   size: number;
+  passResizeCallback?: (callback: () => void) => void;
 };
 
-export const ColumnResizer: React.FC<Props> = ({ size, left, onResize }) => {
+export const ColumnResizer: React.FC<Props> = ({
+  size,
+  left,
+  onResize,
+  passResizeCallback,
+}) => {
   const classes = useStyles();
   const [offset, setOffset] = useState(left);
   const [originalSize, setOriginalSize] = useState(size);
@@ -59,10 +60,16 @@ export const ColumnResizer: React.FC<Props> = ({ size, left, onResize }) => {
       bounds="parent"
     >
       <div
+        ref={(el) =>
+          passResizeCallback?.(() =>
+            el?.dispatchEvent(new Event('mousedown', { bubbles: true }))
+          )
+        }
         style={{
           left: offset,
           height: '100%',
-          background: isDragging ? 'darkgrey' : undefined,
+          background: isDragging ? '#00000030' : undefined,
+          pointerEvents: isDragging ? 'auto' : 'none',
           ...(isDragging && { transition: 'background 0s' }),
         }}
         className={classes.draggable}

@@ -16,6 +16,7 @@ type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
 type TranslationsResponse =
   components['schemas']['KeysWithTranslationsPageModel'];
+type TranslationModel = components['schemas']['TranslationModel'];
 
 type FiltersType = Pick<
   TranslationsQueryType,
@@ -152,7 +153,7 @@ export const useTranslationsInfinite = (props: Props) => {
   const updateTranslation = (
     keyId: number,
     language: string,
-    value: string
+    value: Partial<TranslationModel>
   ) => {
     setFixedTranslations(
       fixedTranslations?.map((k) => {
@@ -163,7 +164,7 @@ export const useTranslationsInfinite = (props: Props) => {
               ...k.translations,
               [language]: {
                 ...k.translations[language],
-                text: value,
+                ...value,
               },
             },
           };

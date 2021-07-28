@@ -40,14 +40,6 @@ const useStyles = makeStyles((theme) => {
     row: {
       display: 'flex',
     },
-    headerCell: {
-      boxSizing: 'border-box',
-      display: 'flex',
-      flexBasis: '30%',
-      alignItems: 'stretch',
-      flexGrow: 0,
-      borderLeft: `1px solid ${borderColor}`,
-    },
     keyCell: {
       display: 'flex',
       boxSizing: 'border-box',
@@ -63,7 +55,6 @@ const useStyles = makeStyles((theme) => {
       flexGrow: 0,
       flexShrink: 0,
       overflow: 'hidden',
-      borderLeft: `1px solid ${borderColor}`,
     },
   };
 });
@@ -71,6 +62,7 @@ const useStyles = makeStyles((theme) => {
 export const TranslationsList = () => {
   const classes = useStyles();
   const tableRef = useRef<HTMLDivElement>(null);
+  const resizersCallbacksRef = useRef<(() => void)[]>([]);
   const projectPermissions = useProjectPermissions();
   const reactListRef = useRef<ReactList>(null);
   const dispatch = useTranslationsDispatch();
@@ -113,6 +105,13 @@ export const TranslationsList = () => {
     setColumnSizes(resizeColumn(columnSizes, i, size, 0.25));
   };
 
+  const handleResize = useCallback(
+    (colIndex: number) => {
+      resizersCallbacksRef.current[colIndex]?.();
+    },
+    [resizersCallbacksRef]
+  );
+
   useEffect(() => {
     const previousWidth = columnSizes.reduce((a, b) => a + b, 0) || 1;
     const newSizes = columnSizes.map((w) => (w / previousWidth) * (width || 1));
@@ -153,6 +152,9 @@ export const TranslationsList = () => {
         const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
         return (
           <ColumnResizer
+            passResizeCallback={(callback) =>
+              (resizersCallbacksRef.current[i] = callback)
+            }
             key={i}
             size={w}
             left={left}
@@ -200,6 +202,8 @@ export const TranslationsList = () => {
                   style={{ flexBasis: columnSizes[1] }}
                 >
                   <LanguagesRow
+                    colIndex={0}
+                    onResize={handleResize}
                     width={columnSizes[1]}
                     languages={languagesRow}
                     data={row}

@@ -59,7 +59,6 @@ const useStyles = makeStyles((theme) => {
       flexBasis: 1,
       alignItems: 'stretch',
       flexGrow: 0,
-      borderLeft: `1px solid ${borderColor}`,
       overflow: 'hidden',
     },
     keyCell: {
@@ -76,9 +75,6 @@ const useStyles = makeStyles((theme) => {
       alignItems: 'stretch',
       flexGrow: 0,
       overflow: 'hidden',
-      '& + &': {
-        borderLeft: `1px solid ${borderColor}`,
-      },
     },
   };
 });
@@ -86,6 +82,7 @@ const useStyles = makeStyles((theme) => {
 export const TranslationsTable = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
+  const resizersCallbacksRef = useRef<(() => void)[]>([]);
 
   const classes = useStyles();
 
@@ -167,6 +164,13 @@ export const TranslationsTable = () => {
     setColumnSizes(resizeColumn(columnSizes, i, size));
   };
 
+  const handleResize = useCallback(
+    (colIndex: number) => {
+      resizersCallbacksRef.current[colIndex]?.();
+    },
+    [resizersCallbacksRef]
+  );
+
   useEffect(() => {
     const prevSizes =
       columnSizes.length === columns.length
@@ -207,7 +211,11 @@ export const TranslationsTable = () => {
               draggable: Boolean(col.language),
               item: col.language ? (
                 <div className={classes.headerCell}>
-                  <CellLanguage language={col.language} />
+                  <CellLanguage
+                    colIndex={i - 1}
+                    onResize={handleResize}
+                    language={col.language}
+                  />
                 </div>
               ) : (
                 <div className={classes.keyCell}>
@@ -228,6 +236,9 @@ export const TranslationsTable = () => {
             size={w}
             left={left}
             onResize={handleColumnResize(i)}
+            passResizeCallback={(callback) =>
+              (resizersCallbacksRef.current[i] = callback)
+            }
           />
         );
       })}
@@ -263,11 +274,13 @@ export const TranslationsTable = () => {
                           locale={col.language.tag}
                           keyName={row.keyName}
                           language={col.language.tag}
-                          text={col.accessor(row)}
+                          translation={row.translations[col.language.tag]}
                           width={columnSizes[i]}
                           editEnabled={projectPermissions.satisfiesPermission(
                             ProjectPermissionType.TRANSLATE
                           )}
+                          colIndex={i - 1}
+                          onResize={handleResize}
                         />
                       ) : (
                         <CellKey
