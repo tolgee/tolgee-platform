@@ -22,12 +22,14 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { Filters } from './Filters/Filters';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   container: {
     display: 'flex',
     justifyContent: 'space-between',
-    flexWrap: 'wrap',
     alignItems: 'flex-start',
+    '& > * + *': {
+      marginLeft: 20,
+    },
   },
   spaced: {
     display: 'flex',
@@ -35,7 +37,22 @@ const useStyles = makeStyles({
       marginLeft: 10,
     },
   },
-});
+  [`@media (max-width: ${theme.breakpoints.values.md}px)`]: {
+    container: {
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      '& > * + *': {
+        marginTop: 10,
+        marginLeft: 0,
+      },
+    },
+  },
+  search: {
+    marginTop: 0,
+    marginBottom: 0,
+    minWidth: 80,
+  },
+}));
 
 export const TranslationsHeader = () => {
   const classes = useStyles();
@@ -96,10 +113,11 @@ export const TranslationsHeader = () => {
           </Box>
         )}
         <SearchField
-          label={''}
           initial={search}
           onSearch={handleSearchChange}
           margin="dense"
+          variant="outlined"
+          className={classes.search}
         />
         <Filters />
       </div>

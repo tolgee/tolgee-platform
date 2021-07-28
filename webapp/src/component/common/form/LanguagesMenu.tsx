@@ -1,6 +1,5 @@
 import { FunctionComponent } from 'react';
 import {
-  Box,
   Checkbox,
   ListItemText,
   MenuItem,
@@ -16,8 +15,11 @@ import { MessageService } from 'tg.service/MessageService';
 
 const useStyles = makeStyles({
   input: {
-    minWidth: 200,
+    display: 'flex',
+    minWidth: 80,
+    width: 200,
     height: 40,
+    flexShrink: 1,
   },
 });
 
@@ -56,38 +58,36 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
   } as const;
 
   return (
-    <Box display="flex" alignItems="right">
-      <FormControl
-        data-cy="translations-language-select-form-control"
-        variant="outlined"
-        size="small"
+    <FormControl
+      data-cy="translations-language-select-form-control"
+      variant="outlined"
+      size="small"
+      className={classes.input}
+    >
+      <Select
+        labelId={`languages-${props.context}`}
+        id={`languages-select-${props.context}`}
+        multiple
+        value={props.value}
+        onChange={(e) => langsChange(e)}
+        renderValue={(selected) => (
+          <Typography color="textPrimary" variant="body2">
+            {(selected as string[]).join(', ')}
+          </Typography>
+        )}
+        MenuProps={menuProps}
+        margin="dense"
       >
-        <Select
-          labelId={`languages-${props.context}`}
-          id={`languages-select-${props.context}`}
-          multiple
-          value={props.value}
-          onChange={(e) => langsChange(e)}
-          renderValue={(selected) => (
-            <Typography color="textPrimary" variant="body2">
-              {(selected as string[]).join(', ')}
-            </Typography>
-          )}
-          className={classes.input}
-          MenuProps={menuProps}
-          margin="dense"
-        >
-          {props.languages.map((lang) => (
-            <MenuItem key={lang.value} value={lang.value}>
-              <Checkbox
-                checked={props.value.indexOf(lang.value) > -1}
-                size="small"
-              />
-              <ListItemText primary={lang.label} />
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </Box>
+        {props.languages.map((lang) => (
+          <MenuItem key={lang.value} value={lang.value}>
+            <Checkbox
+              checked={props.value.indexOf(lang.value) > -1}
+              size="small"
+            />
+            <ListItemText primary={lang.label} />
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
   );
 };

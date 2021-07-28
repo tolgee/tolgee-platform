@@ -17,10 +17,13 @@ import { useAvailableFilters } from './useAvailableFilters';
 
 const useStyles = makeStyles({
   input: {
-    minWidth: 150,
+    minWidth: 70,
     height: 40,
     marginTop: 0,
     marginBottom: 0,
+    '& p': {
+      minWidth: 100,
+    },
   },
 });
 
