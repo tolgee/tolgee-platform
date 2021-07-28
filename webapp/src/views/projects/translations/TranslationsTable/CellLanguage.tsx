@@ -22,12 +22,18 @@ const useStyles = makeStyles({
 
 type Props = {
   language: LanguageModel;
+  colIndex: number;
+  onResize: (colIndex: number) => void;
 };
 
-export const CellLanguage: React.FC<Props> = ({ language }) => {
+export const CellLanguage: React.FC<Props> = ({
+  language,
+  onResize,
+  colIndex,
+}) => {
   const classes = useStyles();
   return (
-    <CellPlain>
+    <CellPlain state="NONE" onResize={() => onResize(colIndex)}>
       <CellContent>
         <div className={classes.content}>
           <CircledLanguageIcon flag={language.flagEmoji} />
