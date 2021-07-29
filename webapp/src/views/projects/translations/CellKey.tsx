@@ -9,7 +9,7 @@ import {
   useTranslationsDispatch,
 } from './context/TranslationsContext';
 import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
-import { CellContent, CellPlain, CellControls, stopBubble } from './CellBase';
+import { CellContent, CellPlain, CellControls, stopBubble } from './cell';
 
 type Props = {
   text: string;

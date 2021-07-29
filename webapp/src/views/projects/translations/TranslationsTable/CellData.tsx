@@ -2,8 +2,9 @@ import React from 'react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { Editor } from 'tg.component/editor/Editor';
+import { StateType } from 'tg.constants/translationStates';
 import { useEditableRow } from '../useEditableRow';
-import { CellContent, CellPlain, CellControls, StateType } from '../CellBase';
+import { CellContent, CellPlain, CellControls } from '../cell';
 import { TranslationVisual } from '../TranslationVisual';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
 

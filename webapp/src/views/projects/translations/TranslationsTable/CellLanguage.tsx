@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
-import { CellContent, CellPlain } from '../CellBase';
+import { CellContent, CellPlain } from '../cell';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
