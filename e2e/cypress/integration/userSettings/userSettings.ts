@@ -12,6 +12,7 @@ describe('User settings', () => {
 
   it('Will access api keys', () => {
     cy.xpath("//*[@aria-controls='user-menu']").click();
+    cy.wait(50);
     cy.xpath(getAnyContainingText('Api keys')).click();
   });
 
