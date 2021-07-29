@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
       margin: `0 ${theme.spacing(1)}px`,
       marginTop: theme.spacing(0.5),
     },
-    fontSize: 11,
+    fontSize: 14,
   },
   legendDot: {
     width: DOT_SIZE,
@@ -51,6 +51,14 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: DOT_SIZE / 2,
   },
 }));
+
+const STATES_ORDER = [
+  'NEEDS_REVIEW',
+  'REVIEWED',
+  'TRANSLATED',
+  'MACHINE_TRANSLATED',
+  'UNTRANSLATED',
+] as States[];
 
 export function TranslationStatesBar(props: {
   stats: {
@@ -80,15 +88,7 @@ export function TranslationStatesBar(props: {
   return (
     <Box className={classes.root}>
       <Box className={classes.bar}>
-        {(
-          [
-            'REVIEWED',
-            'TRANSLATED',
-            'MACHINE_TRANSLATED',
-            'NEEDS_REVIEW',
-            'UNTRANSLATED',
-          ] as States[]
-        ).map((state, idx) => (
+        {STATES_ORDER.map((state, idx) => (
           <Tooltip
             key={idx}
             title={<T noWrap>{translationStates[state].translationKey}</T>}
@@ -109,15 +109,7 @@ export function TranslationStatesBar(props: {
         ))}
       </Box>
       <Box className={classes.legend}>
-        {(
-          [
-            'REVIEWED',
-            'TRANSLATED',
-            'MACHINE_TRANSLATED',
-            'NEEDS_REVIEW',
-            'UNTRANSLATED',
-          ] as States[]
-        ).map(
+        {STATES_ORDER.map(
           (state, idx) =>
             props.stats.translationStateCounts[state] > 0 && (
               <Box key={idx} display="flex" alignItems="center" mr={2}>
@@ -133,7 +125,7 @@ export function TranslationStatesBar(props: {
                       props.stats.translationStateCounts[state].toString(),
                   }}
                 >
-                  translion_states_key_count
+                  translation_states_count
                 </T>
               </Box>
             )
