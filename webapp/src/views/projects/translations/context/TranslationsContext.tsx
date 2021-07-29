@@ -11,7 +11,7 @@ import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useTranslationsInfinite } from './useTranslationsInfinite';
 import { useEdit, Direction, EditType, ChangeValueType } from './useEdit';
-import { StateType } from '../CellBase';
+import { StateType } from 'tg.constants/translationStates';
 
 type LanguagesType = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModelType =

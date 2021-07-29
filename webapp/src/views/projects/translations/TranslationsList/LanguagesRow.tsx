@@ -2,10 +2,11 @@ import React from 'react';
 import { makeStyles, Box } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { CellContent, CellPlain, CellControls, StateType } from '../CellBase';
+import { StateType } from 'tg.constants/translationStates';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
-import { useEditableRow } from '../useEditableRow';
 import { Editor } from 'tg.component/editor/Editor';
+import { CellControls, CellPlain, CellContent } from '../cell';
+import { useEditableRow } from '../useEditableRow';
 import { TranslationVisual } from '../TranslationVisual';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
 

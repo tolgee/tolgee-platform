@@ -11,7 +11,7 @@ import {
 import { CellData } from './CellData';
 import { resizeColumn, useResize } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
-import { CellContent, CellPlain } from '../CellBase';
+import { CellContent, CellPlain } from '../cell';
 import { CellLanguage } from './CellLanguage';
 import { SortableHeading } from './SortableHeading';
 import { CellKey } from '../CellKey';
