@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   keyCount: {
-    fontSize: 14,
+    fontSize: 16,
   },
   flagIcon: {
     cursor: 'default',
@@ -91,8 +91,8 @@ const DashboardProjectListItem = (
             )}
           </Link>
         </Grid>
-        <Grid item lg={1} md={1} sm={1} xs={3}>
-          <Typography variant={'body1'} className={classes.keyCount}>
+        <Grid item lg={1} md={1} sm={1} xs={3} className={classes.centered}>
+          <Typography className={classes.keyCount}>
             <T parameters={{ keysCount: p.stats.keyCount.toString() }}>
               project_list_keys_count
             </T>
