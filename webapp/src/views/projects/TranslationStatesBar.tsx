@@ -121,11 +121,13 @@ export function TranslationStatesBar(props: {
                 <T>{translationStates[state].translationKey}</T>:{' '}
                 <T
                   parameters={{
-                    keyCount:
-                      props.stats.translationStateCounts[state].toString(),
+                    percent: (
+                      props.stats.keyCount /
+                      props.stats.translationStateCounts[state]
+                    ).toString(),
                   }}
                 >
-                  translation_states_count
+                  project_dashboard_translations_percent
                 </T>
               </Box>
             )
