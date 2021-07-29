@@ -1,16 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import CodeMirror from 'codemirror';
 import { Controlled as CodeMirrorReact } from 'react-codemirror2';
-import icuMode from './icuMode';
 import { parse } from '@formatjs/icu-messageformat-parser';
 import 'codemirror/keymap/sublime';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/lint/lint';
 import 'codemirror/addon/lint/lint.css';
-
 import { makeStyles } from '@material-ui/core';
-import { useMemo } from 'react';
-import { useEffect } from 'react';
+import { useTranslate } from '@tolgee/react';
+
+import icuMode from './icuMode';
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
@@ -69,7 +68,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function linter(text: string, data: any) {
-  const { errors } = data;
+  const errors = data.errors;
+  const t = data.t as ReturnType<typeof useTranslate>;
   return errors?.map((error) => {
     const location = error.location;
     const start = location?.start;
@@ -79,7 +79,7 @@ function linter(text: string, data: any) {
     const endColumn =
       start?.column === start?.column ? end?.column : end?.column - 1;
     const hint = {
-      message: error.message,
+      message: t(`parser_${error.message?.toLowerCase()}`, undefined, true),
       severity: 'error',
       type: 'validation',
       from: CodeMirror.Pos(start.line - 1, startColumn),
@@ -111,6 +111,7 @@ export const Editor: React.FC<Props> = ({
   autofocus,
 }) => {
   const classes = useStyles({ background });
+  const t = useTranslate();
 
   const [value, setValue] = useState(initialValue);
 
@@ -145,6 +146,7 @@ export const Editor: React.FC<Props> = ({
     lint: {
       // @ts-ignore
       errors: error ? [error] : [],
+      t,
     },
   };
 
