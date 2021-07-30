@@ -3,7 +3,7 @@ name: Prerelease
 on:
   push:
     branches:
-      - 'main'
+      - 'testsr'
 
 jobs:
   main:
@@ -23,11 +23,9 @@ jobs:
         with:
           node-version: '12.x'
 
-      - name: Build with Gradle
-        run: ./gradlew build
-        env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
+      - name: Install node modules
+        run: npm ci
 
       - name: Set git globals
         run: |
@@ -41,88 +39,3 @@ jobs:
       - name: Set version property
         id: version
         run: echo ::set-output name=VERSION::$(git describe --exact-match --tags $(git log -n1 --pretty='%h'))
-
-      - name: BootJar with version
-        run: ./gradlew bootJar
-        env:
-          VERSION: ${{ steps.version.outputs.VERSION }}
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-
-      - name: Create docker image
-        run: ./gradlew docker
-        env:
-          VERSION: ${{ steps.version.outputs.VERSION }}
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-
-      - name: Pack with webapp
-        run: ./gradlew packWebapp
-        env:
-          VERSION: ${{ steps.version.outputs.VERSION }}
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-          tags: true
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.version.outputs.VERSION }}
-          release_name: Release ${{ steps.version.outputs.VERSION }}
-          draft: false
-          prerelease: true
-
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/libs/tolgee-${{ steps.version.outputs.VERSION }}.jar
-          asset_name: tolgee-${{ steps.version.outputs.VERSION }}.jar
-          asset_content_type: application/java-archive
-
-      - name: Login to docker
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
-      - name: Tag the image
-        run: |
-          docker tag tolgee/tolgee tolgee/tolgee:${{ steps.version.outputs.VERSION }}
-          docker tag tolgee/tolgee tolgee/tolgee:latest
-
-      - name: Publish docker image
-        run: |
-          docker push tolgee/tolgee:${{ steps.version.outputs.VERSION }}
-          docker push tolgee/tolgee:latest
-
-      - name: Deploy testing
-        run: |
-          mkdir -p ~/.kube
-          echo $KUBERNETES_DO_SERVICE_CONFIG | base64 -d > ~/.kube/config
-          kubectl exec $(kubectl get pods -l app=testing-migrator -o jsonpath={.items\[0\].metadata.name}) -- /bin/bash -c "MIGRATE_TARGET_IMAGE=tolgee/tolgee:latest /migrate.sh"
-        env:
-          KUBERNETES_DO_SERVICE_CONFIG: ${{secrets.KUBERNETES_DO_SERVICE_CONFIG}}
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v1
-        with:
-          version: 'v1.21.2'
-        id: install
-
-      - uses: actions/upload-artifact@v2
-        if: always()
-        with:
-          name: test
-          path: |
-            ./e2e/cypress/videos/**/*
-            ./e2e/cypress/screenshots/**/*
-            ./build/reports/**/*
