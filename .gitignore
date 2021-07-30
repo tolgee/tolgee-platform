@@ -46,3 +46,4 @@ e2e/cypress/integration/examples/
 /**/.vscode
 
 /**/.idea
+.VERSION

@@ -34,12 +34,15 @@ jobs:
           git config --local user.email "machine@tolgee.io"
           git config --local user.name "Tolgee Machine"
 
-      - name: Increase version
-        run: npm run release
+      - name: Install node modules
+        run: npm ci
+
+      - name: Run get new version
+        run: npm run release-dry
 
       - name: Set version property
         id: version
-        run: echo ::set-output name=VERSION::$(git describe --exact-match --tags $(git log -n1 --pretty='%h'))
+        run: echo ::set-output name=VERSION::$(cat .VERSION)
 
       - name: BootJar with version
         run: ./gradlew bootJar
@@ -62,12 +65,8 @@ jobs:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-          tags: true
+      - name: Run npm release
+        run: npm run release
 
       - name: Create Release
         id: create_release

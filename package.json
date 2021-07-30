@@ -1,13 +1,12 @@
 {
   "name": "@tolgee/server",
-  "description": "Dummy package.json to achieve same versioning as tolgee js libraries",
   "scripts": {
     "release": "semantic-release",
     "release-dry": "semantic-release --no-ci -d"
-
   },
   "devDependencies": {
     "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/exec": "^5.0.0",
     "@semantic-release/git": "^9.0.0",
     "semantic-release": "^17.4.4"
   },
@@ -16,9 +15,16 @@
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
       "@semantic-release/changelog",
-      "@semantic-release/git"
+      "@semantic-release/git",
+      [
+        "@semantic-release/exec",
+        {
+          "verifyReleaseCmd": "echo ${nextRelease.version} > .VERSION"
+        }
+      ]
     ],
     "branches": [
+      "next",
       {
         "name": "main",
         "prerelease": "alpha"
