@@ -23,7 +23,6 @@ jobs:
         with:
           node-version: '12.x'
 
-
       - name: Install node modules
         run: npm ci
 
@@ -32,8 +31,7 @@ jobs:
           git config --local user.email "machine@tolgee.io"
           git config --local user.name "Tolgee Machine"
 
-      - name: Increase version
-        id: version
+      - name: Run npm release
         run: echo ::set-output name=VERSION::$(npm run release)
 
       - name: Set version property
