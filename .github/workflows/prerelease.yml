@@ -32,7 +32,7 @@ jobs:
           git config --local user.name "Tolgee Machine"
 
       - name: Run npm release
-        run: echo ::set-output name=VERSION::$(npm run release)
+        run: npm run release
 
       - name: Set version property
         id: version
