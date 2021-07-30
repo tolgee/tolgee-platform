@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
-export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
+export type Direction = 'DOWN';
 
 type CellLocation = {
   keyId: number;
@@ -11,9 +11,8 @@ type CellLocation = {
   language?: string;
 };
 
-export type ChangeValueType = CellLocation & {
+export type SetEditType = CellLocation & {
   value: string;
-  after?: Direction;
 };
 
 export type EditType = CellLocation & {
@@ -57,7 +56,11 @@ export const useEdit = ({ projectId, translations }: Props) => {
     }
     setPosition(
       nextKey
-        ? { ...position, keyId: nextKey.keyId, keyName: nextKey.keyName }
+        ? {
+            keyId: nextKey.keyId,
+            keyName: nextKey.keyName,
+            language: position?.language,
+          }
         : undefined
     );
   };
@@ -73,7 +76,7 @@ export const useEdit = ({ projectId, translations }: Props) => {
     }
   };
 
-  const mutateTranslationKey = async (payload: ChangeValueType) => {
+  const mutateTranslationKey = async (payload: SetEditType) => {
     if (payload.value !== getEditOldValue()) {
       await updateKey.mutateAsync({
         path: { projectId, id: payload.keyId },
@@ -84,10 +87,9 @@ export const useEdit = ({ projectId, translations }: Props) => {
         },
       });
     }
-    moveEditToDirection(payload.after);
   };
 
-  const mutateTranslation = async (payload: ChangeValueType) => {
+  const mutateTranslation = async (payload: SetEditType) => {
     const { keyName, language, value } = payload;
 
     const newVal =
@@ -104,7 +106,6 @@ export const useEdit = ({ projectId, translations }: Props) => {
             },
           })
         : null;
-    moveEditToDirection(payload.after);
     return newVal;
   };
 
@@ -112,6 +113,7 @@ export const useEdit = ({ projectId, translations }: Props) => {
     position,
     setPosition,
     isLoading: updateKey.isLoading || updateValue.isLoading,
+    moveEditToDirection,
     mutateTranslation,
     mutateTranslationKey,
   };

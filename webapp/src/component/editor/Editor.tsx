@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 import CodeMirror from 'codemirror';
 import { Controlled as CodeMirrorReact } from 'react-codemirror2';
 import { parse } from '@formatjs/icu-messageformat-parser';
@@ -10,6 +10,8 @@ import { makeStyles } from '@material-ui/core';
 import { useTranslate } from '@tolgee/react';
 
 import icuMode from './icuMode';
+
+export type Direction = 'DOWN';
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
@@ -92,9 +94,10 @@ function linter(text: string, data: any) {
 CodeMirror.registerHelper('lint', 'icu', linter);
 
 type Props = {
-  initialValue: string;
+  value: string;
   onChange?: (val: string) => void;
   onSave?: (val: string) => void;
+  onCmdSave?: (val: string) => void;
   onCancel?: () => void;
   background?: string;
   plaintext?: boolean;
@@ -102,10 +105,11 @@ type Props = {
 };
 
 export const Editor: React.FC<Props> = ({
-  initialValue,
+  value,
   onChange,
   onCancel,
   onSave,
+  onCmdSave,
   plaintext,
   background,
   autofocus,
@@ -113,15 +117,8 @@ export const Editor: React.FC<Props> = ({
   const classes = useStyles({ background });
   const t = useTranslate();
 
-  const [value, setValue] = useState(initialValue);
-
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
   const handleChange = (val: string) => {
     onChange?.(val);
-    setValue(val);
   };
 
   const error = useMemo(() => {
@@ -141,6 +138,8 @@ export const Editor: React.FC<Props> = ({
     extraKeys: {
       Enter: (editor) => onSave?.(editor.getValue()),
       Esc: () => onCancel?.(),
+      'Ctrl-Enter': (editor) => onCmdSave?.(editor.getValue()),
+      'Cmd-Enter': (editor) => onCmdSave?.(editor.getValue()),
     },
     gutters: ['CodeMirror-lint-markers'],
     lint: {
