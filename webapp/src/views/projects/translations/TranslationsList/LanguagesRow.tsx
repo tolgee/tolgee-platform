@@ -9,6 +9,7 @@ import { CellControls, CellPlain, CellContent } from '../cell';
 import { useEditableRow } from '../useEditableRow';
 import { TranslationVisual } from '../TranslationVisual';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
+import { EmptyKeyPlaceholder } from '../cell/EmptyKeyPlaceholder';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -109,6 +110,10 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
     });
   };
 
+  if (data.keyId < 0) {
+    return <EmptyKeyPlaceholder colIndex={0} onResize={onResize} />;
+  }
+
   return (
     <div className={classes.content}>
       <div className={classes.languages}>
@@ -160,9 +165,10 @@ export const LanguagesRow: React.FC<Props> = React.memo(function Cell({
             <CellContent>
               <Editor
                 key={editVal.language}
-                initialValue={value}
+                value={value}
                 onChange={(v) => setValue(v as string)}
-                onSave={() => handleSave('DOWN')}
+                onSave={() => handleSave()}
+                onCmdSave={() => handleSave('EDIT_NEXT')}
                 onCancel={handleEditCancel}
                 autofocus={autofocus}
               />

@@ -194,5 +194,6 @@ export const useTranslationsInfinite = (props: Props) => {
     updateFilters,
     updateTranslationKey,
     updateTranslation,
+    setTranslations: setFixedTranslations,
   };
 };

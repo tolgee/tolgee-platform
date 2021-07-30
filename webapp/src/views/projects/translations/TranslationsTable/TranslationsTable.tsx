@@ -18,6 +18,7 @@ import { CellKey } from '../CellKey';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { EmptyKeyPlaceholder } from '../cell/EmptyKeyPlaceholder';
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.grey[200];
@@ -52,6 +53,7 @@ const useStyles = makeStyles((theme) => {
     },
     row: {
       display: 'flex',
+      position: 'relative',
     },
     headerCell: {
       boxSizing: 'border-box',
@@ -255,47 +257,54 @@ export const TranslationsTable = () => {
         itemRenderer={(index) => {
           const row = translations[index];
           const isLast = index === translations.length - 1;
+          const isEmpty = row.keyId < 0;
           if (isLast && !isFetchingMore && hasMoreToFetch) {
             handleFetchMore();
           }
           return (
             <div key={row.keyId} className={classes.rowWrapper}>
               <div className={classes.row}>
-                {columns.map((col, i) => {
-                  return (
-                    <div
-                      key={col.language?.tag || 'key'}
-                      className={classes.cell}
-                      style={{ flexBasis: columnSizes[i] || 0 }}
-                    >
-                      {col.language ? (
+                <div
+                  className={classes.cell}
+                  style={{ flexBasis: columnSizes[0] }}
+                >
+                  <CellKey
+                    keyId={row.keyId}
+                    keyName={row.keyName}
+                    text={row.keyName}
+                    screenshotCount={row.screenshotCount}
+                    editEnabled={projectPermissions.satisfiesPermission(
+                      ProjectPermissionType.EDIT
+                    )}
+                  />
+                </div>
+                {isEmpty ? (
+                  <EmptyKeyPlaceholder colIndex={0} onResize={handleResize} />
+                ) : (
+                  columnsOrder.map((lang, i) => {
+                    return (
+                      <div
+                        key={lang}
+                        className={classes.cell}
+                        style={{ flexBasis: columnSizes[i + 1] }}
+                      >
                         <CellData
                           keyId={row.keyId}
-                          locale={col.language.tag}
+                          locale={lang}
                           keyName={row.keyName}
-                          language={col.language.tag}
-                          translation={row.translations[col.language.tag]}
+                          language={lang}
+                          translation={row.translations[lang]}
                           width={columnSizes[i]}
                           editEnabled={projectPermissions.satisfiesPermission(
                             ProjectPermissionType.TRANSLATE
                           )}
-                          colIndex={i - 1}
+                          colIndex={i}
                           onResize={handleResize}
                         />
-                      ) : (
-                        <CellKey
-                          keyId={row.keyId}
-                          keyName={row.keyName}
-                          text={col.accessor(row)}
-                          screenshotCount={row.screenshotCount}
-                          editEnabled={projectPermissions.satisfiesPermission(
-                            ProjectPermissionType.EDIT
-                          )}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           );

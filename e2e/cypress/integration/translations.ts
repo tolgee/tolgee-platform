@@ -1,4 +1,3 @@
-import { clickAdd } from '../common/shared';
 import {
   getAnyContainingText,
   getClosestContainingText,
@@ -18,6 +17,7 @@ import {
   visitProjectSettings,
 } from '../common/languages';
 import {
+  createTranslation,
   getCellCancelButton,
   getCellEditButton,
   getCellSaveButton,
@@ -60,8 +60,10 @@ describe('Translations', () => {
   });
 
   it("won't fail when language deleted", () => {
-    createTranslation('Test key', 'Translated test key', { isFirst: true });
-    cy.contains('Translation created').should('be.visible');
+    cy.gcy('global-base-view-loading').should('be.visible');
+    cy.gcy('global-base-view-loading').should('not.exist');
+
+    createTranslation('Test key', 'Translated test key');
     toggleLang('Česky');
     visitProjectSettings(project.id);
     visitLanguageSettings('Česky');
@@ -74,8 +76,9 @@ describe('Translations', () => {
   });
 
   it('will create translation', () => {
-    createTranslation('Test key', 'Translated test key', { isFirst: true });
-    cy.contains('Translation created').should('be.visible');
+    cy.gcy('global-empty-list').should('be.visible');
+    createTranslation('Test key', 'Translated test key');
+    cy.contains('Key created').should('be.visible');
     cy.xpath(getAnyContainingText('Key', 'a'))
       .xpath(getClosestContainingText('Test key'))
       .scrollIntoView()
@@ -83,9 +86,7 @@ describe('Translations', () => {
     cy.xpath(getAnyContainingText('Key', 'a'))
       .xpath(getClosestContainingText('Translated test key'))
       .should('be.visible');
-    createTranslation('Test key 2', 'Translated test key 2', {
-      isFirst: false,
-    });
+    createTranslation('Test key 2', 'Translated test key 2');
     cy.xpath(getAnyContainingText('Key', 'a'))
       .xpath(getClosestContainingText('Test key 2'))
       .scrollIntoView()
@@ -251,27 +252,12 @@ const editCell = (oldValue: string, newValue: string, save = true) => {
   cy.gcy('global-editor').should('be.visible');
   cy.contains(oldValue).should('be.visible');
   // select all, delete and type new text
-  cy.focused().type('{selectall}').type('{backspace}').type(newValue);
+  cy.focused().type('{meta}a').type('{backspace}').type(newValue);
 
   if (save) {
     getCellSaveButton().click();
   }
 };
-
-function createTranslation(
-  testKey: string,
-  testTranslated: string,
-  options: { isFirst?: boolean }
-) {
-  if (options?.isFirst) {
-    clickAdd();
-  } else {
-    cy.xpath(getAnyContainingText('Add', 'span')).click();
-  }
-  cy.xpath("//textarea[@name='key']").type(testKey);
-  cy.xpath("//textarea[@name='translations.en']").type(testTranslated);
-  cy.xpath(getAnyContainingText('save')).click();
-}
 
 function clickDiscardChanges() {
   cy.xpath(getAnyContainingText('Discard changes', 'button')).click();

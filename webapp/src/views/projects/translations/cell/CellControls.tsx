@@ -46,6 +46,7 @@ type ControlsProps = {
   onClick?: () => void;
   onEdit?: () => void;
   onSave?: () => void;
+  onSaveAndNew?: () => void;
   onCancel?: () => void;
   onScreenshots?: () => void;
   onStateChange?: (state: StateType) => void;

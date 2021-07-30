@@ -10,8 +10,10 @@ import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService'
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useTranslationsInfinite } from './useTranslationsInfinite';
-import { useEdit, Direction, EditType, ChangeValueType } from './useEdit';
+import { useEdit, EditType, SetEditType } from './useEdit';
 import { StateType } from 'tg.constants/translationStates';
+
+export type AfterCommand = 'EDIT_NEXT' | 'NEW_EMPTY_KEY';
 
 type LanguagesType = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModelType =
@@ -24,8 +26,6 @@ type ActionType =
   | { type: 'SET_FILTERS'; payload: FiltersType }
   | { type: 'SET_EDIT'; payload: EditType | undefined }
   | { type: 'UPDATE_EDIT'; payload: Partial<EditType> }
-  | { type: 'EDIT_NEXT' }
-  | { type: 'EDIT_MOVE'; payload: Direction }
   | { type: 'TOGGLE_SELECT'; payload: number }
   | { type: 'CHANGE_FIELD'; payload: ChangeValueType }
   | { type: 'FETCH_MORE' }
@@ -34,9 +34,18 @@ type ActionType =
   | { type: 'CHANGE_VIEW'; payload: ViewType }
   | { type: 'UPDATE_LANGUAGES' }
   | { type: 'DELETE_TRANSLATIONS'; payload: number[] }
-  | { type: 'SET_TRANSLATION_STATE'; payload: SetTranslationStatePayload };
+  | { type: 'SET_TRANSLATION_STATE'; payload: SetTranslationStatePayload }
+  | { type: 'ADD_EMPTY_KEY'; payload?: AddEmptyKeyType };
 
 export type ViewType = 'TABLE' | 'LIST';
+
+type AddEmptyKeyType = {
+  prevId?: number;
+};
+
+type ChangeValueType = SetEditType & {
+  after?: AfterCommand;
+};
 
 type FiltersType = Pick<
   TranslationsQueryType,
@@ -141,7 +150,12 @@ export const TranslationsContextProvider: React.FC<{
     method: 'put',
   });
 
-  dispatchRef.current = (action: ActionType) => {
+  const createKey = useApiMutation({
+    url: '/v2/projects/{projectId}/keys/create',
+    method: 'post',
+  });
+
+  dispatchRef.current = async (action: ActionType) => {
     switch (action.type) {
       case 'SET_SEARCH':
         translations.updateQuery({ search: action.payload });
@@ -152,7 +166,13 @@ export const TranslationsContextProvider: React.FC<{
         handleTranslationsReset();
         return;
       case 'SET_EDIT':
-        if (edit.position?.changed) {
+        if (edit.position && edit.position.keyId < 0) {
+          // if selected key was empty - remove it
+          translations.setTranslations((translations) =>
+            translations?.filter((t) => t.keyId >= 0)
+          );
+          edit.setPosition(action.payload);
+        } else if (edit.position?.changed) {
           confirmation({
             title: <T>translations_leave_save_confirmation</T>,
             message: <T>translations_leave_save_confirmation_message_1</T>,
@@ -179,23 +199,57 @@ export const TranslationsContextProvider: React.FC<{
         return;
       case 'CHANGE_FIELD': {
         const { keyId, language, value } = action.payload;
-        (language
-          ? edit.mutateTranslation(action.payload).then((data) => {
+        if (!language && !value) {
+          // key can't be empty
+          messaging.error(<T>global_empty_value</T>);
+          return;
+        }
+        try {
+          if (keyId < 0) {
+            // empty key - not created yet
+            await createKey
+              .mutateAsync({
+                path: { projectId: props.projectId },
+                content: {
+                  'application/json': {
+                    name: action.payload.value,
+                  },
+                },
+              })
+              .then((data) =>
+                translations.updateTranslationKey(keyId, {
+                  keyId: data.id,
+                  keyName: data.name,
+                  keyTags: [],
+                  screenshotCount: 0,
+                  translations: {},
+                })
+              )
+              .then(() => messaging.success(<T>translations_key_created</T>));
+          } else if (language) {
+            // update translation
+            await edit.mutateTranslation(action.payload).then((data) => {
               if (data) {
-                translations.updateTranslation(
+                return translations.updateTranslation(
                   keyId,
                   language,
                   data?.translations[language]
                 );
               }
-            })
-          : edit.mutateTranslationKey(action.payload).then(() => {
-              translations.updateTranslationKey(keyId, { keyName: value });
-            })
-        ).catch((e) => {
+            });
+          } else {
+            // update key
+            await edit
+              .mutateTranslationKey(action.payload)
+              .then(() =>
+                translations.updateTranslationKey(keyId, { keyName: value })
+              );
+          }
+          doAfterCommand(action.payload.after);
+        } catch (e) {
           const parsed = parseErrorResponse(e);
           parsed.forEach((error) => messaging.error(<T>{error}</T>));
-        });
+        }
         return;
       }
       case 'SELECT_LANGUAGES':
@@ -259,6 +313,31 @@ export const TranslationsContextProvider: React.FC<{
             },
           }
         );
+        return;
+      case 'ADD_EMPTY_KEY': {
+        const newId = (action.payload?.prevId || 0) - 1;
+        const existingEmptyKey = translations.data?.find(
+          (t) => t.keyId === newId
+        );
+        if (existingEmptyKey) {
+          return;
+        }
+        const newKey = {
+          keyId: newId,
+          keyName: '',
+          keyTags: [],
+          screenshotCount: 0,
+          translations: {},
+        };
+        translations.setTranslations((translations) =>
+          translations ? [newKey, ...translations] : [newKey]
+        );
+        edit.setPosition({
+          keyId: newKey.keyId,
+          keyName: newKey.keyName,
+        });
+        return;
+      }
     }
   };
 
@@ -267,6 +346,22 @@ export const TranslationsContextProvider: React.FC<{
     (action: ActionType) => dispatchRef.current(action),
     [dispatchRef]
   );
+
+  const doAfterCommand = (command?: AfterCommand) => {
+    switch (command) {
+      case 'EDIT_NEXT':
+        edit.moveEditToDirection('DOWN');
+        return;
+
+      case 'NEW_EMPTY_KEY': {
+        const prevId = edit.position?.keyId;
+        dispatch({ type: 'ADD_EMPTY_KEY', payload: { prevId } });
+        return;
+      }
+      default:
+        edit.setPosition(undefined);
+    }
+  };
 
   const dataReady = translations.data && languages.data;
 

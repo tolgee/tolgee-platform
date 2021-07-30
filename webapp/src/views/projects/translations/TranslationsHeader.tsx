@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Button,
   ButtonGroup,
@@ -11,7 +10,6 @@ import SearchField from 'tg.component/common/form/fields/SearchField';
 import { useContextSelector } from 'use-context-selector';
 import { T } from '@tolgee/react';
 
-import { TranslationNewDialog } from './TranslationNewDialog';
 import {
   TranslationsContext,
   useTranslationsDispatch,
@@ -66,8 +64,6 @@ export const TranslationsHeader = () => {
   const view = useContextSelector(TranslationsContext, (v) => v.view);
   const selection = useContextSelector(TranslationsContext, (v) => v.selection);
 
-  const [newDialogOpen, setNewDialogOpen] = useState(false);
-
   const dispatch = useTranslationsDispatch();
 
   const handleSearchChange = (value: string) => {
@@ -85,12 +81,12 @@ export const TranslationsHeader = () => {
     dispatch({ type: 'CHANGE_VIEW', payload: val });
   };
 
-  const handleAfterAdd = () => {
-    dispatch({ type: 'UPDATE_LANGUAGES' });
-  };
-
   const handleDelete = () => {
     dispatch({ type: 'DELETE_TRANSLATIONS', payload: selection });
+  };
+
+  const handleAddTranslation = () => {
+    dispatch({ type: 'ADD_EMPTY_KEY' });
   };
 
   return (
@@ -158,18 +154,11 @@ export const TranslationsHeader = () => {
             size="small"
             variant="contained"
             aria-label="add"
-            onClick={() => setNewDialogOpen(true)}
+            onClick={handleAddTranslation}
             data-cy="translations-add-button"
           >
             <T>language_create_add</T>
           </Button>
-        )}
-
-        {newDialogOpen && (
-          <TranslationNewDialog
-            onClose={() => setNewDialogOpen(false)}
-            onAdd={handleAfterAdd}
-          />
         )}
       </div>
     </div>

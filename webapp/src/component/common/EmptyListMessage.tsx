@@ -6,7 +6,7 @@ import { SadEmotionMessage } from './SadEmotionMessage';
 
 export const EmptyListMessage: FunctionComponent = (props) => {
   return (
-    <Box p={8}>
+    <Box p={8} data-cy="global-empty-list">
       <SadEmotionMessage>
         {props.children || <T>global_empty_list_message</T>}
       </SadEmotionMessage>

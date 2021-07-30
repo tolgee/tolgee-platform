@@ -18,6 +18,7 @@ declare namespace DataCy {
         "global-confirmation-confirm" |
         "global-confirmation-hard-mode-text-field" |
         "global-editor" |
+        "global-empty-list" |
         "global-form-cancel-button" |
         "global-form-save-button" |
         "global-form-select" |
@@ -114,8 +115,6 @@ declare namespace DataCy {
         "project-settings-languages-list-item" |
         "screenshot-box" |
         "translations-add-button" |
-        "translations-add-key-dialog" |
-        "translations-add-key-field" |
         "translations-cell-cancel-button" |
         "translations-cell-edit-button" |
         "translations-cell-save-button" |

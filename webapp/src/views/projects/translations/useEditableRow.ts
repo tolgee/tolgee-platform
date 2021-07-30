@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { components } from 'tg.service/apiSchema.generated';
 
-import { Direction } from './context/useEdit';
 import {
+  AfterCommand,
   TranslationsContext,
   useTranslationsDispatch,
 } from './context/TranslationsContext';
@@ -67,7 +67,7 @@ export const useEditableRow = ({
     });
   };
 
-  const handleSave = (direction?: Direction) => {
+  const handleSave = (after?: AfterCommand) => {
     dispatch({
       type: 'CHANGE_FIELD',
       payload: {
@@ -75,7 +75,7 @@ export const useEditableRow = ({
         keyName,
         language: edit?.language,
         value,
-        after: direction,
+        after,
       },
     });
   };

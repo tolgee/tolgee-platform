@@ -17,6 +17,7 @@ import {
   visitList,
 } from '../../common/projects';
 import {
+  createTranslation,
   getCellEditButton,
   getCellSaveButton,
 } from '../../common/translations';
@@ -215,12 +216,8 @@ const validateEditPermissions = (projectName: string) => {
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
   gcy('translations-add-button').should('be.visible').click();
-  gcy('translations-add-key-field')
-    .find('textarea')
-    .filter(':visible')
-    .type('test');
-  gcy('global-form-save-button').should('be.visible').click();
-  assertMessage('Translation created');
+  createTranslation('test');
+  assertMessage('Key created');
   gcy('translations-row-checkbox').click();
   gcy('translations-delete-button').click();
   confirmStandard();

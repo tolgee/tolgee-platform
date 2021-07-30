@@ -49,6 +49,8 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
     c.selection.includes(keyId)
   );
 
+  const isEmpty = keyId < 0;
+
   const dispatch = useTranslationsDispatch();
 
   const toggleSelect = () => {
@@ -69,9 +71,12 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
               <Editor
                 background="#efefef"
                 plaintext
-                initialValue={value}
+                value={value}
                 onChange={(v) => setValue(v as string)}
-                onSave={() => handleSave('DOWN')}
+                onSave={() => handleSave()}
+                onCmdSave={() =>
+                  handleSave(isEmpty ? 'NEW_EMPTY_KEY' : 'EDIT_NEXT')
+                }
                 onCancel={handleEditCancel}
                 autofocus={autofocus}
               />
@@ -99,7 +104,8 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
           onEdit={() => handleEdit(undefined)}
           onCancel={handleEditCancel}
           onSave={handleSave}
-          onScreenshots={() => setScreenshotsOpen(true)}
+          onScreenshots={isEmpty ? undefined : () => setScreenshotsOpen(true)}
+          onSaveAndNew={isEmpty ? () => handleSave('NEW_EMPTY_KEY') : undefined}
           screenshotRef={screenshotEl}
           screenshotsPresent={screenshotCount > 0}
           editEnabled={editEnabled}
