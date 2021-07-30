@@ -14,8 +14,11 @@ import { container } from 'tsyringe';
 import { App } from './component/App';
 import ErrorBoundary from './component/ErrorBoundary';
 import { FullPageLoading } from './component/common/FullPageLoading';
+// @ts-ignore
 import RighteousLatinExtWoff2 from './fonts/Righteous/righteous-latin-ext.woff2';
+// @ts-ignore
 import RighteousLatinWoff2 from './fonts/Righteous/righteous-latin.woff2';
+// @ts-ignore
 import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
 import reportWebVitals from './reportWebVitals';
 import { DispatchService } from './service/DispatchService';
@@ -84,6 +87,12 @@ const theme = createMuiTheme({
     },
     secondary: {
       main: '#2B5582',
+    },
+    lightDivider: {
+      main: 'rgba(0, 0, 0, 0.12)',
+    },
+    extraLightDivider: {
+      main: 'rgba(0, 0, 0, 0.08)',
     },
   },
   overrides: {

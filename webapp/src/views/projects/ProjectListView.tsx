@@ -6,10 +6,21 @@ import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+
+const useStyles = makeStyles((t) => ({
+  listWrapper: {
+    '& > * > * + *': {
+      borderTop: `1px solid ${t.palette.extraLightDivider.main}`,
+    },
+  },
+}));
 
 export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
+
+  const classes = useStyles();
 
   const listPermitted = useApiQuery({
     url: '/v2/projects/with-stats',
@@ -38,6 +49,7 @@ export const ProjectListView = () => {
         loading={listPermitted.isFetching}
       >
         <PaginatedHateoasList
+          wrapperComponentProps={{ className: classes.listWrapper }}
           onPageChange={setPage}
           loadable={listPermitted}
           renderItem={(r) => <DashboardProjectListItem key={r.id} {...r} />}

@@ -3,7 +3,18 @@ declare module '*.svg' {
   export default content;
 }
 
-declare module '*.woff2' {
-  const content: any;
-  export default content;
+import { PaletteColor } from '@material-ui/core/styles/createPalette';
+import '@material-ui/core/styles';
+import { PaletteColorOptions } from '@material-ui/core';
+
+declare module '@material-ui/core/styles/createPalette' {
+  interface Palette {
+    lightDivider: PaletteColor;
+    extraLightDivider: PaletteColor;
+  }
+
+  interface PaletteOptions {
+    lightDivider: PaletteColorOptions;
+    extraLightDivider: PaletteColorOptions;
+  }
 }

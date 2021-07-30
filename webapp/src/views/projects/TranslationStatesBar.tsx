@@ -44,6 +44,7 @@ const useStyles = makeStyles((theme) => ({
       marginTop: theme.spacing(0.5),
     },
     fontSize: 14,
+    justifyContent: 'space-between',
   },
   legendDot: {
     width: DOT_SIZE,
@@ -59,6 +60,12 @@ const STATES_ORDER = [
   'MACHINE_TRANSLATED',
   'UNTRANSLATED',
 ] as States[];
+
+const STATES_LEGEND = [
+  ['NEEDS_REVIEW', 'REVIEWED'],
+  ['TRANSLATED', 'MACHINE_TRANSLATED'],
+  ['UNTRANSLATED'],
+] as States[][];
 
 export function TranslationStatesBar(props: {
   stats: {
@@ -109,26 +116,38 @@ export function TranslationStatesBar(props: {
         ))}
       </Box>
       <Box className={classes.legend}>
-        {STATES_ORDER.map(
-          (state, idx) =>
-            props.stats.translationStateCounts[state] > 0 && (
-              <Box key={idx} display="flex" alignItems="center" mr={2}>
-                <Box
-                  mr={0.5}
-                  className={classes.legendDot}
-                  style={{ backgroundColor: translationStates[state].color }}
-                />
-                <T>{translationStates[state].translationKey}</T>:{' '}
-                <T
-                  parameters={{
-                    percent: (
-                      props.stats.keyCount /
-                      props.stats.translationStateCounts[state]
-                    ).toString(),
-                  }}
-                >
-                  project_dashboard_translations_percent
-                </T>
+        {STATES_LEGEND.map(
+          (states, idx) =>
+            states.reduce(
+              (acc, state) => acc + props.stats.translationStateCounts[state],
+              0
+            ) > 0 && (
+              <Box key={idx}>
+                {states.map(
+                  (state, idx2) =>
+                    props.stats.translationStateCounts[state] > 0 && (
+                      <Box key={idx2} display="flex" alignItems="center" mr={2}>
+                        <Box
+                          mr={0.5}
+                          className={classes.legendDot}
+                          style={{
+                            backgroundColor: translationStates[state].color,
+                          }}
+                        />
+                        <T>{translationStates[state].translationKey}</T>:{' '}
+                        <T
+                          parameters={{
+                            percent: (
+                              props.stats.translationStateCounts[state] /
+                              (props.stats.keyCount * props.stats.languageCount)
+                            ).toString(),
+                          }}
+                        >
+                          project_dashboard_translations_percent
+                        </T>
+                      </Box>
+                    )
+                )}
               </Box>
             )
         )}
