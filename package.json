@@ -19,7 +19,7 @@
       [
         "@semantic-release/exec",
         {
-          "verifyReleaseCmd": "export TOLGEE_NEXT_VERSION=${nextRelease.version}"
+          "verifyReleaseCmd": "echo ${nextRelease.version} > .VERSION"
         }
       ]
     ],

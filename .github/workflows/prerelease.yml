@@ -32,8 +32,11 @@ jobs:
           git config --local user.name "Tolgee Machine"
 
       - name: Run npm release
-        run: npm run release
+        run: npm run release-dry
 
       - name: Set version property
         id: version
-        run: echo ::set-output name=VERSION::$(git describe --exact-match --tags $(git log -n1 --pretty='%h'))
+        run: echo ::set-output name=VERSION::$(cat .VERSION)
+
+      - name: Run npm release
+        run: npm run release
