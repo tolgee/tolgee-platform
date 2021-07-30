@@ -34,9 +34,22 @@ jobs:
           git config --local user.email "machine@tolgee.io"
           git config --local user.name "Tolgee Machine"
 
-      - name: Increase npm version
+      - name: Install node modules
+        run: npm ci
+
+      - name: Run get new version
+        run: npm run release-dry
+
+      - name: Set version property
         id: version
-        run: echo ::set-output name=VERSION::$(npm version prerelease -f)
+        run: echo ::set-output name=VERSION::v$(cat .VERSION)
+
+      - name: BootJar with version
+        run: ./gradlew bootJar
+        env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
       - name: Create docker image
         run: ./gradlew docker
@@ -52,12 +65,8 @@ jobs:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-          tags: true
+      - name: Run npm release
+        run: npm run release
 
       - name: Create Release
         id: create_release
@@ -100,13 +109,6 @@ jobs:
           kubectl exec $(kubectl get pods -l app=testing-migrator -o jsonpath={.items\[0\].metadata.name}) -- /bin/bash -c "MIGRATE_TARGET_IMAGE=tolgee/tolgee:latest /migrate.sh"
         env:
           KUBERNETES_DO_SERVICE_CONFIG: ${{secrets.KUBERNETES_DO_SERVICE_CONFIG}}
-
-      - name: Merge to develop
-        uses: devmasx/merge-branch@v1.3.1
-        with:
-          type: now
-          target_branch: develop
-          github_token: ${{ github.token }}
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v1
