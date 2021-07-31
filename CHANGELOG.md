@@ -1,3 +1,11 @@
+# [1.0.0-test.2](https://github.com/tolgee/server/compare/v1.0.0-test.1...v1.0.0-test.2) (2021-07-31)
+
+
+### Features
+
+* Semantic release ([ba29155](https://github.com/tolgee/server/commit/ba291550cf6537a9c515eb43e042040c25c8972c))
+* Semantic release ([ed3eb25](https://github.com/tolgee/server/commit/ed3eb25838440aeb767c9f1d89eaa2dd230525ce))
+
 # 1.0.0-test.1 (2021-07-30)
 
 

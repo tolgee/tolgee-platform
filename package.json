@@ -2,6 +2,7 @@
   "name": "@tolgee/server",
   "scripts": {
     "release": "semantic-release",
+    "release-no-ci": "semantic-release --no-ci",
     "release-dry": "semantic-release --no-ci -d"
   },
   "devDependencies": {
