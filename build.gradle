@@ -201,7 +201,7 @@ dependencies {
             attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
         }
     }
-    implementation("org.redisson:redisson-spring-boot-starter:3.15.6")
+    implementation("org.redisson:redisson-spring-boot-starter:3.16.1")
     testImplementation("io.socket:socket.io-client:1.0.1")
 }
 
