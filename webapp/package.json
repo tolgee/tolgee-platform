@@ -10,7 +10,7 @@
     "@sentry/browser": "^6.10.0",
     "@testing-library/jest-dom": "^5.13.0",
     "@testing-library/react": "^11.2.7",
-    "@testing-library/user-event": "^13.1.9",
+    "@testing-library/user-event": "^13.2.1",
     "@tolgee/react": "^1.0.0-alpha.45",
     "@tolgee/socketio-client": "^1.0.0-alpha.52",
     "@tolgee/ui": "^1.0.0-alpha.45",
