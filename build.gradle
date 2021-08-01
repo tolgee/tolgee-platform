@@ -188,7 +188,7 @@ dependencies {
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3'
     implementation 'commons-codec:commons-codec:1.15'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.3'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.37'
     compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
     implementation('org.reflections:reflections:0.9.12')
     implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.26.0'
