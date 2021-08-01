@@ -134,7 +134,7 @@ compileKotlin {
 def LIQUIBASE_VERSION = "4.3.5"
 def LIQUIBASE_HIBERNATE_VERSION = "4.3.5"
 def JJWT_VERSION = "0.11.2"
-def SPRING_DOC_VERSION = "1.5.9"
+def SPRING_DOC_VERSION = "1.5.10"
 def NETTY_SOCKET_IO_VERSION = "1.7.19"
 
 dependencies {
