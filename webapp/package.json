@@ -21,7 +21,7 @@
     "formik-material-ui": "^3.0.1",
     "intl-messageformat": "^9.7.1",
     "notistack": "^1.0.9",
-    "openapi-typescript": "^4.0.0",
+    "openapi-typescript": "^4.0.2",
     "react": "^17.0.1",
     "react-ace": "^9.4.1",
     "react-dnd": "^14.0.2",
