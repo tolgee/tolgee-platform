@@ -15,7 +15,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
         classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
         classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
-        classpath group: 'commons-io', name: 'commons-io', version: '2.10.0'
+        classpath group: 'commons-io', name: 'commons-io', version: '2.11.0'
     }
 }
 
