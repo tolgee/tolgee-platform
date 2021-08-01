@@ -131,7 +131,7 @@ compileKotlin {
     }
 }
 
-def LIQUIBASE_VERSION = "4.3.5"
+def LIQUIBASE_VERSION = "4.4.2"
 def LIQUIBASE_HIBERNATE_VERSION = "4.3.5"
 def JJWT_VERSION = "0.11.2"
 def SPRING_DOC_VERSION = "1.5.9"
