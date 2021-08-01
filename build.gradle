@@ -196,7 +196,7 @@ dependencies {
     testCompile("io.findify:s3mock_2.13:0.2.6")
     implementation group: 'com.ibm.icu', name: 'icu4j', version: '69.1'
     implementation("com.corundumstudio.socketio:netty-socketio:$NETTY_SOCKET_IO_VERSION")
-    ktlint("com.pinterest:ktlint:0.41.0") {
+    ktlint("com.pinterest:ktlint:0.42.0") {
         attributes {
             attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
         }
