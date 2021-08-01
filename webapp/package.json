@@ -12,7 +12,7 @@
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^13.1.9",
     "@tolgee/react": "^1.0.0-alpha.45",
-    "@tolgee/socketio-client": "^1.0.0-alpha.52",
+    "@tolgee/socketio-client": "^1.0.0-alpha.55",
     "@tolgee/ui": "^1.0.0-alpha.45",
     "ace-builds": "^1.4.12",
     "babel-plugin-transform-typescript-metadata": "^0.3.2",
