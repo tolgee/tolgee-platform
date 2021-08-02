@@ -202,7 +202,7 @@ dependencies {
         }
     }
     implementation("org.redisson:redisson-spring-boot-starter:3.16.1")
-    testImplementation("io.socket:socket.io-client:1.0.1")
+    testImplementation("io.socket:socket.io-client:2.0.1")
 }
 
 test {
