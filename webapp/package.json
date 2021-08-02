@@ -11,7 +11,7 @@
     "@testing-library/jest-dom": "^5.13.0",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^13.2.1",
-    "@tolgee/react": "^1.0.0-alpha.45",
+    "@tolgee/react": "^1.0.0-alpha.55",
     "@tolgee/socketio-client": "^1.0.0-alpha.55",
     "@tolgee/ui": "^1.0.0-alpha.45",
     "ace-builds": "^1.4.12",
