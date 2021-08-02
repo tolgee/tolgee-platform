@@ -93,7 +93,11 @@ export const Filters = () => {
   availableFilters.forEach((group, i) => {
     if (group.options?.length) {
       options.push(
-        <ListSubheader key={`${i}.group`} disableSticky>
+        <ListSubheader
+          key={`${i}.group`}
+          disableSticky
+          data-cy="translations-filters-subheader"
+        >
           {group.name}
         </ListSubheader>
       );
@@ -101,6 +105,7 @@ export const Filters = () => {
       group.options.forEach((option) => {
         options.push(
           <MenuItem
+            data-cy="translations-filter-option"
             key={option.value}
             value={option.value}
             onClick={handleToggle(option.value)}
@@ -124,6 +129,7 @@ export const Filters = () => {
       className={classes.input}
       variant="outlined"
       value={activeFilters}
+      data-cy="translations-filter-select"
       renderValue={(value: any) =>
         value.length === 0 ? (
           <Typography color="textSecondary" variant="body2">

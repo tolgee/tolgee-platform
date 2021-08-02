@@ -105,6 +105,8 @@ declare namespace DataCy {
         "permissions-menu" |
         "permissions-menu-button" |
         "permissions-revoke-button" |
+        "project-list-languages" |
+        "project-list-languages-item" |
         "project-list-owner" |
         "project-menu-items" |
         "project-name-field" |
@@ -113,15 +115,25 @@ declare namespace DataCy {
         "project-settings-button" |
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-item" |
+        "project-states-bar-bar" |
+        "project-states-bar-dot" |
+        "project-states-bar-legend" |
+        "project-states-bar-root" |
+        "project-states-bar-state-progress" |
         "screenshot-box" |
+        "translation-state-button" |
         "translations-add-button" |
         "translations-cell-cancel-button" |
         "translations-cell-edit-button" |
         "translations-cell-save-button" |
         "translations-cell-screenshots-button" |
         "translations-delete-button" |
+        "translations-filter-option" |
+        "translations-filter-select" |
+        "translations-filters-subheader" |
         "translations-language-select-form-control" |
         "translations-row-checkbox" |
+        "translations-state-indicator" |
         "translations-table-cell" |
         "translations-view-list" |
         "translations-view-list-button" |

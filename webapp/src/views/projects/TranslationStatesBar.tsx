@@ -93,14 +93,15 @@ export function TranslationStatesBar(props: {
   }, []);
 
   return (
-    <Box className={classes.root}>
-      <Box className={classes.bar}>
+    <Box className={classes.root} data-cy="project-states-bar-root">
+      <Box className={classes.bar} data-cy="project-states-bar-bar">
         {STATES_ORDER.map((state, idx) => (
           <Tooltip
             key={idx}
             title={<T noWrap>{translationStates[state].translationKey}</T>}
           >
             <Box
+              data-cy="project-states-bar-state-progress"
               className={clsx({
                 [classes.state]: true,
                 [classes.loadedState]: !loaded,
@@ -115,7 +116,7 @@ export function TranslationStatesBar(props: {
           </Tooltip>
         ))}
       </Box>
-      <Box className={classes.legend}>
+      <Box className={classes.legend} data-cy="project-states-bar-legend">
         {STATES_LEGEND.map(
           (states, idx) =>
             states.reduce(
@@ -128,6 +129,7 @@ export function TranslationStatesBar(props: {
                     props.stats.translationStateCounts[state] > 0 && (
                       <Box key={idx2} display="flex" alignItems="center" mr={2}>
                         <Box
+                          data-cy="project-states-bar-dot"
                           mr={0.5}
                           className={classes.legendDot}
                           style={{

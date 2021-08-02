@@ -102,11 +102,11 @@ const DashboardProjectListItem = (
           <TranslationStatesBar stats={p.stats as any} />
         </Grid>
         <Grid item lg={2} md={2} sm={9} xs={9}>
-          <Grid container>
+          <Grid container data-cy="project-list-languages">
             {p.languages.map((l) => (
               <Grid key={l.id} item>
                 <Tooltip title={`${l.name} | ${l.originalName}`}>
-                  <Box m={0.125}>
+                  <Box m={0.125} data-cy="project-list-languages-item">
                     <CircledLanguageIcon
                       className={classes.flagIcon}
                       size={20}

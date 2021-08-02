@@ -55,6 +55,10 @@ export const assertMessage = (message: string) => {
   gcy('global-snackbars').should('contain', message);
 };
 
+export const assertTooltip = (message: string) => {
+  cy.xpath("//*[@role='tooltip']").should('contain', message);
+};
+
 export const selectInProjectMenu = (itemName: string) => {
   gcy('project-menu-items').contains(itemName).click();
 };

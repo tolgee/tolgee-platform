@@ -75,7 +75,7 @@ context('Login', () => {
       cy.wrap(r.fromAddress).should('contain', 'no-reply@tolgee.io');
       cy.wrap(r.toAddress).should('contain', TEST_USERNAME);
       cy.visit(r.verifyEmailLink);
-      assertMessage('E-mail was verified.');
+      assertMessage('E-mail was verified');
     });
   });
 

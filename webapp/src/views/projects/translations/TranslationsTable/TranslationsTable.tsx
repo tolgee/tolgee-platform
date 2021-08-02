@@ -1,4 +1,4 @@
-import { useMemo, useRef, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactList from 'react-list';
 import { makeStyles } from '@material-ui/core';
 import { useContextSelector } from 'use-context-selector';
@@ -145,17 +145,23 @@ export const TranslationsTable = () => {
         language: undefined,
         accessor: (item) => item.keyName,
       },
-      ...(columnsOrder?.map((tag) => {
-        const lang = languages!.find((l) => l.tag === tag)!;
-        return {
-          id: String(lang.tag),
-          label: lang.name,
-          language: lang,
-          accessor: (item) => item.translations[lang.tag]?.text,
-        };
-      }) || []),
+      ...(columnsOrder?.reduce((acc, tag) => {
+        if (languages) {
+          const lang = languages.find((l) => l.tag === tag)!;
+          return [
+            ...acc,
+            {
+              id: String(lang.tag),
+              label: lang.name,
+              language: lang,
+              accessor: (item) => item.translations[lang.tag]?.text,
+            },
+          ];
+        }
+        return acc;
+      }, [] as any[]) || []),
     ],
-    [columnsOrder]
+    [columnsOrder, languages]
   );
 
   const [columnSizes, setColumnSizes] = useState(columns.map(() => 1));
