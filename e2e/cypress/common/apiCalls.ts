@@ -1,6 +1,9 @@
 import { API_URL, PASSWORD, USERNAME } from './constants';
 import { ArgumentTypes, Scope } from './types';
-import { ApiKeyDTO } from '../../../webapp/src/service/response.types';
+import {
+  ApiKeyDTO,
+  ProjectDTO,
+} from '../../../webapp/src/service/response.types';
 import { components } from '../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');
 
@@ -112,7 +115,10 @@ export const setTranslations = (
 export const generateExampleKeys = (
   projectId: number,
   numberOfExamples: number
-) => internalFetch(`e2e-data/keys/generate/${projectId}/${numberOfExamples}`);
+) =>
+  internalFetch(
+    `e2e-data/translations/generate/${projectId}/${numberOfExamples}`
+  );
 
 export const deleteProject = (id: number) => {
   return v2apiFetch(`projects/${id}`, { method: 'DELETE' });
@@ -244,9 +250,21 @@ export const generateManyLanguagesImportData = () =>
 export const generateWithLongTextImportData = () =>
   internalFetch('e2e-data/import/generate-with-long-text');
 
+export const cleanProjectsDashboardData = () =>
+  internalFetch('e2e-data/projects-list-dashboard/clean');
+export const createProjectsDashboardData = () =>
+  internalFetch('e2e-data/projects-list-dashboard/generate');
+
 export const cleanProjectsData = () => internalFetch('e2e-data/projects/clean');
 export const createProjectsData = () =>
   internalFetch('e2e-data/projects/create');
+
+export const cleanTranslationFiltersData = () =>
+  internalFetch('e2e-data/translations/cleanup-for-filters');
+export const createTranslationFiltersData = () =>
+  internalFetch('e2e-data/translations/generate-for-filters').then(
+    (r) => r.body as ProjectDTO
+  );
 
 export const enableEmailVerification = () =>
   setProperty('authentication.needsEmailVerification', true);

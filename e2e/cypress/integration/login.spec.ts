@@ -14,7 +14,7 @@ export const loginWithFakeGithub = () => {
     statusCode: 200,
     body: 'Fake GitHub',
   });
-  cy.contains('Github login').click();
+  cy.contains('GitHub login').click();
   cy.contains('Fake GitHub').should('be.visible');
   cy.visit(
     HOST +

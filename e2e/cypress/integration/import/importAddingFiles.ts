@@ -66,8 +66,8 @@ describe('Import Adding files', () => {
       .should('be.visible');
     getFileIssuesDialog()
       .contains(
-        'Translation id attribute not provided ' +
-          '(File original: ../src/platforms/android/androidauthenticationview.qml)'
+        'Id attribute of translation not provided ' +
+          '(File: ../src/platforms/android/androidauthenticationview.qml)'
       )
       .should('be.visible');
   });

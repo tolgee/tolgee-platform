@@ -44,7 +44,7 @@ describe('User profile', () => {
     );
     getParsedEmailVerification().then((v) => {
       cy.visit(v.verifyEmailLink);
-      assertMessage('E-mail was verified.');
+      assertMessage('E-mail was verified');
       visit();
       cy.contains('E-mail waiting for verification: pavel@honza.com').should(
         'not.exist'

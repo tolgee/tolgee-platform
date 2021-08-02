@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, BoxProps, useTheme, Tooltip } from '@material-ui/core';
+import { Box, BoxProps, Tooltip, useTheme } from '@material-ui/core';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { useCellStyles } from './styles';
@@ -59,7 +59,12 @@ export const CellPlain: React.FC<Props> = ({
           <Tooltip
             title={<T noWrap>{translationStates[state]?.translationKey}</T>}
           >
-            <Box position="absolute" width={12} height="100%">
+            <Box
+              position="absolute"
+              width={12}
+              height="100%"
+              data-cy="translations-state-indicator"
+            >
               <Box
                 onMouseDown={stopBubble(onResize)}
                 onClick={stopBubble()}

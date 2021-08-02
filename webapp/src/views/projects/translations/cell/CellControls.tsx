@@ -28,6 +28,7 @@ const getStateTransitionButtons = (
         )}
       >
         <IconButton
+          data-cy="translation-state-button"
           onClick={stopBubble(() => onStateChange?.(s))}
           size="small"
           className={className}
