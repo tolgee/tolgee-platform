@@ -78,7 +78,7 @@
     "@tginternal/language-util": "^1.0.3",
     "@types/ace": "^0.0.47",
     "@types/jest": "^26.0.24",
-    "@types/node": "^15.12.2",
+    "@types/node": "^16.4.10",
     "@types/react": "^17.0.15",
     "@types/react-dom": "^17.0.9",
     "@types/react-list": "^0.8.6",
