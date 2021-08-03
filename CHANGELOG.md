@@ -1,3 +1,16 @@
+# [1.0.0-alpha.100](https://github.com/tolgee/server/compare/v1.0.0-alpha.99...v1.0.0-alpha.100) (2021-08-03)
+
+
+### Bug Fixes
+
+* **i18n:** Fix tests after i18n review TG-233 ([cbe66f0](https://github.com/tolgee/server/commit/cbe66f0694efe617efffacbb49a68032cc2d75c6))
+
+
+### Features
+
+* **languages:** Language suggestion order TG-210 ([7148c91](https://github.com/tolgee/server/commit/7148c917df6e6399442a2ce9bae82a66287932ad))
+* **translations:** Backend > Filter by state TG-231 ([d9a4f9c](https://github.com/tolgee/server/commit/d9a4f9c93c55e5419660ec788cfea6600eaeb2e1))
+
 # [1.0.0-alpha.99](https://github.com/tolgee/server/compare/v1.0.0-alpha.98...v1.0.0-alpha.99) (2021-08-03)
 
 
