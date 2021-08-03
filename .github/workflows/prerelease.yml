@@ -45,6 +45,7 @@ jobs:
         run: echo ::set-output name=VERSION::v$(cat .VERSION)
 
       - name: BootJar with version
+        if: ${{ steps.version.outputs.VERSION != '' }}
         run: ./gradlew bootJar
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
@@ -52,6 +53,7 @@ jobs:
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
       - name: Create docker image
+        if: ${{ steps.version.outputs.VERSION != '' }}
         run: ./gradlew docker
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
@@ -59,6 +61,7 @@ jobs:
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
       - name: Pack with webapp
+        if: ${{ steps.version.outputs.VERSION != '' }}
         run: ./gradlew packWebapp
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
@@ -66,9 +69,11 @@ jobs:
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
       - name: Run npm release
+        if: ${{ steps.version.outputs.VERSION != '' }}
         run: npm run release
 
       - name: Create Release
+        if: ${{ steps.version.outputs.VERSION != '' }}
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -80,6 +85,7 @@ jobs:
           prerelease: true
 
       - name: Upload Release Asset
+        if: ${{ steps.version.outputs.VERSION != '' }}
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
@@ -91,6 +97,7 @@ jobs:
           asset_content_type: application/java-archive
 
       - name: Login to docker
+        if: ${{ steps.version.outputs.VERSION != '' }}
         run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
       - name: Tag the image
         run: |
@@ -98,23 +105,19 @@ jobs:
           docker tag tolgee/tolgee tolgee/tolgee:latest
 
       - name: Publish docker image
+        if: ${{ steps.version.outputs.VERSION != '' }}
         run: |
           docker push tolgee/tolgee:${{ steps.version.outputs.VERSION }}
           docker push tolgee/tolgee:latest
 
       - name: Deploy testing
+        if: ${{ steps.version.outputs.VERSION != '' }}
         run: |
           mkdir -p ~/.kube
           echo $KUBERNETES_DO_SERVICE_CONFIG | base64 -d > ~/.kube/config
           kubectl exec $(kubectl get pods -l app=testing-migrator -o jsonpath={.items\[0\].metadata.name}) -- /bin/bash -c "MIGRATE_TARGET_IMAGE=tolgee/tolgee:latest /migrate.sh"
         env:
           KUBERNETES_DO_SERVICE_CONFIG: ${{secrets.KUBERNETES_DO_SERVICE_CONFIG}}
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v1
-        with:
-          version: 'v1.21.2'
-        id: install
 
       - uses: actions/upload-artifact@v2
         if: always()
