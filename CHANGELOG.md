@@ -1,3 +1,10 @@
+# [1.0.0-alpha.99](https://github.com/tolgee/server/compare/v1.0.0-alpha.98...v1.0.0-alpha.99) (2021-08-03)
+
+
+### Bug Fixes
+
+* Show more fraction digits in project list legend TG-221 ([1e651ff](https://github.com/tolgee/server/commit/1e651fff8ff60c6d1d4dd518436b03b54a909f4c))
+
 # [1.0.0-alpha.98](https://github.com/tolgee/server/compare/v1.0.0-alpha.97...v1.0.0-alpha.98) (2021-07-31)
 
 
