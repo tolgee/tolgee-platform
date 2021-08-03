@@ -75,7 +75,7 @@
   },
   "devDependencies": {
     "@sentry/types": "^6.5.1",
-    "@tginternal/language-util": "^1.0.3",
+    "@tginternal/language-util": "^1.0.5",
     "@types/ace": "^0.0.47",
     "@types/codemirror": "^5.60.2",
     "@types/jest": "^26.0.24",
