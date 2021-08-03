@@ -201,7 +201,7 @@ const validateManagePermissions = (projectName: string) => {
   visitList();
   enterProjectSettings(projectName);
   cy.gcy('global-form-save-button').click();
-  assertMessage('Project settings are successfully saved.');
+  assertMessage('Project settings successfully saved');
   enterProject(projectName);
   MANAGE_PROJECT_ITEMS.forEach((item) => {
     gcy('project-menu-items').should('contain', item);

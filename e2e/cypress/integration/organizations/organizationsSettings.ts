@@ -48,19 +48,19 @@ describe('Organization Settings', () => {
   });
 
   it('changes member privileges', () => {
-    gcy('organization-side-menu').contains('Member privileges').click();
+    gcy('organization-side-menu').contains('Member permissions').click();
     gcy('permissions-menu-button').click();
     gcy('permissions-menu').within(() => {
       cy.contains('Translate').click();
     });
     confirmHardMode();
-    assertMessage('Privileges set');
+    assertMessage('Permissions set');
     visitMemberPrivileges();
     gcy('permissions-menu-button').contains('Translate');
   });
 
   it("member privileges change doesn't affect profile", () => {
-    gcy('organization-side-menu').contains('Member privileges').click();
+    gcy('organization-side-menu').contains('Member permissions').click();
     gcy('permissions-menu-button').click();
     gcy('permissions-menu').within(() => {
       cy.contains('Translate').click();
