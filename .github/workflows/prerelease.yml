@@ -42,7 +42,7 @@ jobs:
 
       - name: Set version property
         id: version
-        run: echo ::set-output name=VERSION::v$(cat .VERSION)
+        run: echo ::set-output name=VERSION::$(test -e .VERSION && echo v$(cat .VERSION))
 
       - name: BootJar with version
         if: ${{ steps.version.outputs.VERSION != '' }}
