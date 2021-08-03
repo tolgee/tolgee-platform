@@ -30,9 +30,9 @@ describe('Projects Dashboard', () => {
       .should('be.visible')
       .findDcy('project-states-bar-state-progress')
       .should('have.length', 5)
+      //wait for animation
+      .wait(500)
       .should('be.visible');
-    //wait for animation
-    cy.wait(500);
     getNthStateInProject(project2, 0).trigger('mouseover');
     assertTooltip('Needs review');
     getNthStateInProject(project2, 0).trigger('mouseout');
