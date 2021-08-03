@@ -47,6 +47,7 @@ describe('Translations Base', () => {
     cy.gcy('global-empty-list').should('be.visible');
     createTranslation('Test key', 'Translated test key');
     cy.contains('Key created').should('be.visible');
+    cy.wait(100);
     cy.xpath(getAnyContainingText('Key', 'a'))
       .xpath(getClosestContainingText('Test key'))
       .scrollIntoView()
