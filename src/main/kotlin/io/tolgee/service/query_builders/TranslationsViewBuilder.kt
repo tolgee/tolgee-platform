@@ -1,8 +1,10 @@
 package io.tolgee.service.query_builders
 
+import io.tolgee.dtos.request.FilterByState
 import io.tolgee.dtos.request.GetTranslationsParams
 import io.tolgee.dtos.response.CursorValue
 import io.tolgee.model.*
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Key_
 import io.tolgee.model.translation.Translation_
@@ -48,7 +50,7 @@ class TranslationsViewBuilder(
     return query
   }
 
-  @Suppress("UNCHECKED_CAST")
+  @Suppress("UNCHECKED_CAST", "TYPE_MISMATCH_WARNING")
   /**
    * This function body is inspired by this thread
    * https://stackoverflow.com/questions/38017054/mysql-cursor-based-pagination-with-multiple-columns
@@ -81,6 +83,7 @@ class TranslationsViewBuilder(
     return result
   }
 
+  @Suppress("TYPE_MISMATCH_WARNING")
   private fun CriteriaBuilder.greaterThanOrEqualToNullable(
     expression: Expression<String>,
     value: String?
@@ -91,6 +94,7 @@ class TranslationsViewBuilder(
     return this.greaterThanOrEqualTo(expression, value as String?)
   }
 
+  @Suppress("TYPE_MISMATCH_WARNING")
   private fun CriteriaBuilder.lessThanOrEqualToNullable(
     expression: Expression<String>,
     value: String?
@@ -122,15 +126,26 @@ class TranslationsViewBuilder(
       val translationTextField = translations.get(Translation_.text)
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::text.name] =
         translationTextField
+      val translationStateField = translations.get(Translation_.state)
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::state.name] =
-        translations.get(Translation_.state)
+        translationStateField
       fullTextFields.add(translationTextField)
       translationsTextFields.add(translationTextField)
-      applyTranslationFilters(language, translationTextField)
+      applyTranslationFilters(language, translationTextField, translationStateField)
     }
   }
 
-  private fun applyTranslationFilters(language: Language, translationTextField: Path<String>) {
+  private fun applyTranslationFilters(
+    language: Language,
+    translationTextField: Path<String>,
+    translationStateField: Path<TranslationState>
+  ) {
+    filterByState?.let {
+      if (it.languageTag == language.tag) {
+        whereConditions.add(cb.equal(translationStateField, it.state))
+      }
+    }
+
     if (params.filterUntranslatedInLang == language.tag) {
       whereConditions.add(translationTextField.isNullOrBlank)
     }
@@ -218,6 +233,10 @@ class TranslationsViewBuilder(
       query.where(*whereConditions.toTypedArray())
       return query
     }
+
+  private val filterByState: FilterByState? by lazy {
+    params.filterState?.let { FilterByState.valueOf(it) }
+  }
 
   companion object {
     val KEY_NAME_FIELD = KeyWithTranslationsView::keyName.name

@@ -280,6 +280,30 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
       }
   }
 
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `filters by state`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterState=de,REVIEWED")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys[0].keyName").isEqualTo("A key")
+        node("page.totalElements").isEqualTo(1)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `validates filter state`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterState=de,REVIEWED,a")
+      .andIsBadRequest.andAssertError.hasCode("filter_by_value_state_not_valid")
+
+    performProjectAuthGet("/translations?filterState=de,REVIIIIIIEWED")
+      .andIsBadRequest.andAssertError.hasCode("filter_by_value_state_not_valid")
+  }
+
   @ProjectApiKeyAuthTestMethod
   @Test
   fun `works with API key`() {

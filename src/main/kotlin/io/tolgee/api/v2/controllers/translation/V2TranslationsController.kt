@@ -56,7 +56,6 @@ class V2TranslationsController(
   private val translationService: TranslationService,
   private val keyService: KeyService,
   private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
-  private val keyTranslationsModelAssembler: KeyWithTranslationsModelAssembler,
   private val translationModelAssembler: TranslationModelAssembler,
   private val languageService: LanguageService
 ) : IController {
@@ -109,7 +108,7 @@ class V2TranslationsController(
   @PutMapping("/{translationId}/set-state/{state}")
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
-  @Operation(summary = "Sets translations for existing or not existing key")
+  @Operation(summary = "Sets translation state")
   fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {
     val translation = translationService.find(translationId) ?: throw NotFoundException()
     translation.checkFromProject()

@@ -61,7 +61,8 @@ enum class Message {
   TRANSLATION_NOT_FROM_PROJECT,
   CAN_EDIT_ONLY_OWN_COMMENT,
   REQUEST_PARSE_ERROR,
-  TAG_NOT_FROM_PROJECT;
+  TAG_NOT_FROM_PROJECT,
+  FILTER_BY_VALUE_STATE_NOT_VALID;
 
   val code: String
     get() = name.toLowerCase()
