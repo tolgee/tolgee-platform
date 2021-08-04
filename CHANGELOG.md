@@ -1,3 +1,10 @@
+# [1.0.0-alpha.101](https://github.com/tolgee/server/compare/v1.0.0-alpha.100...v1.0.0-alpha.101) (2021-08-04)
+
+
+### Features
+
+* **languages:** Move languages out from project settings TG-212 ([8332185](https://github.com/tolgee/server/commit/8332185fd79b659fa1e34bec74a136fb79ca8bc5))
+
 # [1.0.0-alpha.100](https://github.com/tolgee/server/compare/v1.0.0-alpha.99...v1.0.0-alpha.100) (2021-08-03)
 
 
