@@ -103,7 +103,7 @@ describe('Import result & manipulation', () => {
       .click();
     gcy('languages-create-submit-button').click();
     getLanguageSelect(filename).should('contain.text', 'Azerbaijani');
-    selectInProjectMenu('Project settings');
+    selectInProjectMenu('Languages');
     cy.contains('Azerbaijani').should('be.visible');
   });
 

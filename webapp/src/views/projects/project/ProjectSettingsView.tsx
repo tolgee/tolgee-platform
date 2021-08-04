@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, Button, Typography } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
 import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
@@ -20,7 +20,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
-import { ProjectSettingsLanguages } from './components/ProjectSettingsLanguages';
 
 const messageService = container.resolve(MessageService);
 
@@ -143,12 +142,6 @@ export const ProjectSettingsView: FunctionComponent = () => {
           <LanguageSelect />
         </ProjectLanguagesProvider>
       </StandardForm>
-      <Box mt={4} mb={2}>
-        <Typography variant="h5">
-          <T>languages_title</T>
-        </Typography>
-      </Box>
-      <ProjectSettingsLanguages />
     </BaseView>
   );
 };

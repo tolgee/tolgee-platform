@@ -8,7 +8,7 @@ import {
   selectInAutocomplete,
   setLanguageData,
   typeToAutocomplete,
-  visitProjectSettings,
+  visitProjectLanguages,
 } from '../../common/languages';
 import { assertMessage, gcy, getInputByName } from '../../common/shared';
 
@@ -18,7 +18,7 @@ describe('Language creation', () => {
 
     generateLanguagesData().then((languageData) => {
       login('franta');
-      visitProjectSettings(languageData.body.id);
+      visitProjectLanguages(languageData.body.id);
     });
   });
 
@@ -86,7 +86,7 @@ describe('Language creation', () => {
   });
 
   after(() => {
-    //  cleanLanguagesData();
+    cleanLanguagesData();
   });
 });
 

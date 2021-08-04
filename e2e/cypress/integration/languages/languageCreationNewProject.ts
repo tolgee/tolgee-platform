@@ -8,6 +8,7 @@ import {
   gcy,
   getInputByName,
   getPopover,
+  selectInProjectMenu,
   selectInSelect,
 } from '../../common/shared';
 import {
@@ -120,7 +121,7 @@ describe('Language creation in new project', () => {
     cy.contains('Add at least one language').should('be.visible');
   });
 
-  it('creates the repository with languages', () => {
+  it('creates a project with languages', () => {
     const languagesToAdd = ['German', 'Hindi', 'Czech'];
     languagesToAdd.forEach((l) => addLanguage(l));
     getInputByName('name').type('Super project');
@@ -130,6 +131,7 @@ describe('Language creation in new project', () => {
       .closestDcy('dashboard-projects-list-item')
       .findDcy('project-settings-button')
       .click();
+    selectInProjectMenu('Languages');
     languagesToAdd.forEach((l) =>
       gcy('global-paginated-list').contains(l).should('be.visible')
     );

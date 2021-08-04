@@ -36,7 +36,7 @@ export const ProjectSettingsLanguages = () => {
         renderItem={(l) => (
           <ListItem key={l.id} data-cy="project-settings-languages-list-item">
             <ListItemText>
-              <Box display="inline-flex" justifyContent="center">
+              <Box display="inline-flex" justifyContent="center" mr={2}>
                 <Box mr={1} display="inline-flex" justifyContent="center">
                   <FlagImage width={20} flagEmoji={l.flagEmoji || '🏁'} />
                 </Box>
@@ -51,7 +51,7 @@ export const ProjectSettingsLanguages = () => {
                   [PARAMS.LANGUAGE_ID]: l.id,
                 })}
               >
-                <SettingsIconButton />
+                <SettingsIconButton size="small" />
               </Link>
             </ListItemSecondaryAction>
           </ListItem>

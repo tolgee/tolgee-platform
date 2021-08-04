@@ -7,7 +7,7 @@ import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import {
   deleteLanguage,
   visitLanguageSettings,
-  visitProjectSettings,
+  visitProjectLanguages,
 } from '../../common/languages';
 import {
   createTranslation,
@@ -33,7 +33,7 @@ describe('Translations Base', () => {
 
     createTranslation('Test key', 'Translated test key');
     toggleLang('Česky');
-    visitProjectSettings(project.id);
+    visitProjectLanguages(project.id);
     visitLanguageSettings('Česky');
     deleteLanguage();
     visit();

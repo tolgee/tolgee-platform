@@ -13,6 +13,7 @@ import { ProjectPermissionsView } from './permissions/ProjectPermissionsVIew';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { SocketIoPreview } from 'tg.views/projects/SocketIoPreview';
 import { TranslationsView } from './translations/TranslationsView';
+import { ProjectLanguagesView } from 'tg.views/projects/languages/ProjectLanguagesView';
 
 export const ProjectRouter = () => {
   const match = useRouteMatch();
@@ -29,6 +30,10 @@ export const ProjectRouter = () => {
 
           <Route exact path={LINKS.PROJECT_EDIT.template}>
             <ProjectSettingsView />
+          </Route>
+
+          <Route exact path={LINKS.PROJECT_LANGUAGES.template}>
+            <ProjectLanguagesView />
           </Route>
 
           <Route exact path={LINKS.PROJECT_EDIT_LANGUAGE.template}>

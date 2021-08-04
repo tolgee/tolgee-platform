@@ -1,5 +1,5 @@
 import { Box, Button } from '@material-ui/core';
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
 
@@ -68,7 +68,7 @@ export const LanguageEditView = () => {
       {
         onSuccess() {
           messageService.success(<T>language_edited_message</T>);
-          redirect(LINKS.PROJECT_EDIT, {
+          redirect(LINKS.PROJECT_LANGUAGES, {
             [PARAMS.PROJECT_ID]: projectId,
           });
         },
