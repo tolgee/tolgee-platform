@@ -3,16 +3,23 @@ import {
   generateLanguagesData,
   login,
 } from '../../common/apiCalls';
-import { setLanguageData, visitProjectSettings } from '../../common/languages';
+import {
+  setLanguageData,
+  visitProjectLanguages,
+  visitProjectSettings,
+} from '../../common/languages';
 import { assertMessage, gcy, selectInSelect } from '../../common/shared';
 
 describe('Language modification', () => {
+  let projectId: number;
+
   beforeEach(() => {
     cleanLanguagesData();
 
     generateLanguagesData().then((languageData) => {
+      projectId = languageData.body.id;
       login('franta');
-      visitProjectSettings(languageData.body.id);
+      visitProjectLanguages(projectId);
     });
   });
 
@@ -38,6 +45,7 @@ describe('Language modification', () => {
   });
 
   it('Sets project base language', () => {
+    visitProjectSettings(projectId);
     selectInSelect(gcy('base-language-select'), 'German');
     gcy('global-form-save-button').click();
     cy.reload();

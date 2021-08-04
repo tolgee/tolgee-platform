@@ -25,6 +25,10 @@ export const visitProjectSettings = (projectId: number) => {
   cy.visit(`${HOST}/projects/${projectId}/manage/edit`);
 };
 
+export const visitProjectLanguages = (projectId: number) => {
+  cy.visit(`${HOST}/projects/${projectId}/languages`);
+};
+
 export const typeToAutocomplete = (text: string) => {
   gcy('languages-create-autocomplete-field').find('input').type(text);
 };

@@ -23,6 +23,7 @@ import { AppState } from 'tg.store/index';
 
 import { SideMenu } from './SideMenu';
 import { SideMenuItem } from './SideMenuItem';
+import LanguageIcon from '@material-ui/icons/Language';
 
 const actions = container.resolve(GlobalActions);
 
@@ -69,7 +70,14 @@ export const ProjectMenu = ({ id }) => {
                 icon={<SettingsIcon />}
                 text={t('project_menu_project_settings')}
               />
-
+              <SideMenuItem
+                linkTo={LINKS.PROJECT_LANGUAGES.build({
+                  [PARAMS.PROJECT_ID]: id,
+                })}
+                matchAsPrefix
+                icon={<LanguageIcon />}
+                text={t('project_menu_languages')}
+              />
               {config.authentication && (
                 <>
                   <SideMenuItem
