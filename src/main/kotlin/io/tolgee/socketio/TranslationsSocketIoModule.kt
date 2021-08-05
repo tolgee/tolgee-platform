@@ -4,7 +4,7 @@ import com.corundumstudio.socketio.SocketIONamespace
 import com.corundumstudio.socketio.SocketIOServer
 import io.tolgee.api.v2.hateoas.key.KeyModelAssembler
 import io.tolgee.api.v2.hateoas.key.KeyModifiedModel
-import io.tolgee.api.v2.hateoas.translations.TranslationWithKeyModel
+import io.tolgee.api.v2.hateoas.translations.TranslationSocketModel
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
@@ -65,10 +65,11 @@ class TranslationsSocketIoModule(
       translation.key?.project?.getRoomName()?.let { roomName ->
         namespace.getRoomOperations(roomName).sendEvent(
           event.eventName,
-          TranslationWithKeyModel(
+          TranslationSocketModel(
             id = translation.id,
             text = translation.text,
             state = translation.state,
+            languageTag = translation.language?.tag ?: "",
             key = keyModelAssembler.toModel(translation.key!!)
           )
         )
