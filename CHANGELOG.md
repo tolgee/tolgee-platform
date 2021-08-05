@@ -1,3 +1,11 @@
+# [1.0.0-alpha.102](https://github.com/tolgee/server/compare/v1.0.0-alpha.101...v1.0.0-alpha.102) (2021-08-05)
+
+
+### Bug Fixes
+
+* **import:** Let import expire in 2 hours TG-127 ([db1ad63](https://github.com/tolgee/server/commit/db1ad63e969e572a892d3cc82e1256949c02518c))
+* **logo:** Update Tolgee Logo TG-225 ([cf42cb6](https://github.com/tolgee/server/commit/cf42cb633894d4254a8caffd8d8ee88182072ec1))
+
 # [1.0.0-alpha.101](https://github.com/tolgee/server/compare/v1.0.0-alpha.100...v1.0.0-alpha.101) (2021-08-04)
 
 
