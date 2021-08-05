@@ -85,7 +85,7 @@ class V2ImportController(
         responseStream.write(";;;".toByteArray())
         responseStream.flush()
       }
-      val fileDtos = files.map { ImportFileDto(it.originalFilename, it.inputStream) }
+      val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream) }
       val errors = importService.addFiles(files = fileDtos, messageClient)
       val result = getImportAddFilesResultModel(projectId, errors)
 
@@ -106,7 +106,7 @@ class V2ImportController(
     @PathVariable("projectId") projectId: Long,
     @RequestPart("files") files: Array<MultipartFile>,
   ): ImportAddFilesResultModel {
-    val fileDtos = files.map { ImportFileDto(it.originalFilename, it.inputStream) }
+    val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream) }
     val errors = importService.addFiles(files = fileDtos)
     return getImportAddFilesResultModel(projectId, errors)
   }
