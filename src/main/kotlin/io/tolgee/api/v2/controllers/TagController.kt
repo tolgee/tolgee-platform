@@ -44,7 +44,7 @@ class TagController(
 ) : IController {
 
   @PutMapping(value = ["keys/{keyId:[0-9]+}/tags"])
-  @Operation(summary = "Tags a key with tag. If tag with provided name doesn't exist, it created")
+  @Operation(summary = "Tags a key with tag. If tag with provided name doesn't exist, it is created")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
   fun tagKey(@PathVariable keyId: Long, @Valid @RequestBody tagKeyDto: TagKeyDto): TagModel {
