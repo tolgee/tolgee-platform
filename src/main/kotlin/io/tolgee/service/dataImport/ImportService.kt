@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.constants.Message
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
@@ -24,6 +25,7 @@ import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyMetaService
+import org.apache.commons.lang3.time.DateUtils
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -45,6 +47,7 @@ class ImportService(
   private val importTranslationRepository: ImportTranslationRepository,
   private val importFileIssueParamRepository: ImportFileIssueParamRepository,
   private val keyMetaService: KeyMetaService,
+  private val currentDateProvider: CurrentDateProvider
 ) {
   @Transactional
   fun addFiles(
@@ -52,6 +55,7 @@ class ImportService(
     messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null
   ): List<ErrorResponseBody> {
     val import = find(projectHolder.project.id, authenticationFacade.userAccount.id!!)
+      .removeIfExpired()
       ?: Import(authenticationFacade.userAccount, projectHolder.project)
 
     val nonNullMessageClient = messageClient ?: { _, _ -> }
@@ -76,7 +80,7 @@ class ImportService(
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
   fun import(projectId: Long, authorId: Long, forceMode: ForceMode = ForceMode.NO_FORCE) {
-    import(findOrThrow(projectId, authorId), forceMode)
+    import(getNotExpired(projectId, authorId), forceMode)
   }
 
   @Transactional(noRollbackFor = [ImportConflictNotResolvedException::class])
@@ -109,8 +113,32 @@ class ImportService(
   fun saveFile(importFile: ImportFile): ImportFile =
     importFileRepository.save(importFile)
 
-  fun find(projectId: Long, authorId: Long) =
-    this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
+  /**
+   * Returns import when not expired.
+   * When expired import is found, it is removed
+   */
+  fun getNotExpired(projectId: Long, authorId: Long): Import {
+    return find(projectId, authorId).removeIfExpired() ?: throw NotFoundException()
+  }
+
+  fun find(projectId: Long, authorId: Long): Import? {
+    return this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
+  }
+
+  private fun Import?.removeIfExpired(): Import? {
+    this?.let { import ->
+      if (import.createdAt == null) {
+        return null
+      }
+      val minDate = DateUtils.addHours(currentDateProvider.getDate(), -2)
+      if (minDate > import.createdAt) {
+        deleteImport(import)
+        throw NotFoundException(Message.IMPORT_HAS_EXPIRED)
+      }
+      return import
+    }
+    return null
+  }
 
   fun findOrThrow(projectId: Long, authorId: Long) =
     this.find(projectId, authorId) ?: throw NotFoundException()
@@ -147,9 +175,9 @@ class ImportService(
   }
 
   fun getResult(projectId: Long, userId: Long, pageable: Pageable): Page<ImportLanguageView> {
-    return this.find(projectId, userId)?.let {
+    return this.getNotExpired(projectId, userId).let {
       this.importLanguageRepository.findImportLanguagesView(it.id, pageable)
-    } ?: throw NotFoundException()
+    }
   }
 
   fun findLanguage(languageId: Long): ImportLanguage? {

@@ -62,7 +62,8 @@ enum class Message {
   CAN_EDIT_ONLY_OWN_COMMENT,
   REQUEST_PARSE_ERROR,
   TAG_NOT_FROM_PROJECT,
-  FILTER_BY_VALUE_STATE_NOT_VALID;
+  FILTER_BY_VALUE_STATE_NOT_VALID,
+  IMPORT_HAS_EXPIRED;
 
   val code: String
     get() = name.toLowerCase()

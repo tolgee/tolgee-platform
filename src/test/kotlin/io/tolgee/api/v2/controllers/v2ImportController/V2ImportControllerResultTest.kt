@@ -1,13 +1,32 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import org.apache.commons.lang3.time.DateUtils
+import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
+import java.util.*
 
 class V2ImportControllerResultTest : SignedInControllerTest() {
+  @MockBean
+  @Autowired
+  lateinit var currentDateProvider: CurrentDateProvider
+
+  @BeforeMethod
+  fun setup() {
+    whenever(currentDateProvider.getDate()).then {
+      Date()
+    }
+  }
+
   @Test
   fun `it returns correct result data`() {
     val testData = ImportTestData()
@@ -26,6 +45,21 @@ class V2ImportControllerResultTest : SignedInControllerTest() {
           it.node("conflictCount").isEqualTo("4")
         }
       }
+  }
+
+  @Test
+  fun `it removes expired import`() {
+    val testData = ImportTestData()
+    testDataService.saveTestData(testData.root)
+
+    whenever(currentDateProvider.getDate()).then {
+      DateUtils.addHours(Date(), 2)
+    }
+
+    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+
+    performAuthGet("/v2/projects/${testData.project.id}/import/result")
+      .andIsNotFound
   }
 
   @Test

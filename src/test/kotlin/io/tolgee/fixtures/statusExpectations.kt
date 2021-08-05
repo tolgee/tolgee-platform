@@ -14,6 +14,9 @@ import java.math.BigDecimal
 val ResultActions.andIsOk: ResultActions
   get() = this.andExpect(status().isOk)
 
+val ResultActions.andIsNotFound: ResultActions
+  get() = this.andExpect(status().isNotFound)
+
 val ResultActions.andIsCreated: ResultActions
   get() = this.andExpect(status().isCreated)
 
