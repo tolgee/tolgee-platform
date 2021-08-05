@@ -182,6 +182,7 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
         assertThatJson(it.toString()).apply {
           node("id").isValidId
           node("text").isEqualTo("modified text")
+          node("languageTag").isEqualTo("en")
         }
       }
     )
@@ -197,6 +198,7 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
         assertThatJson(it.toString()).apply {
           node("id").isValidId
           node("text").isEqualTo(translation.text)
+          node("languageTag").isEqualTo("en")
         }
       }
     )
@@ -211,7 +213,7 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
           Translation().apply {
             text = "created translation"
             this.key = this@AbstractSocketIoTest.key
-            language = language
+            language = testData.englishLanguage
           }
         )
       },
@@ -219,6 +221,7 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
         assertThatJson(it.toString()).apply {
           node("id").isValidId
           node("text").isEqualTo("created translation")
+          node("languageTag").isEqualTo("en")
         }
       }
     )
