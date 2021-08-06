@@ -2,7 +2,7 @@
 
 # Tolgee Toolkit Server & Web Application
 
-For more detailed documentation about Tolgee, visit [toolkit.tolgee.io](https://toolkit.tolgee.io).
+For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.io).
 
 ![Tolgee Web Application](./screenshot.png)
 
@@ -10,7 +10,6 @@ For more detailed documentation about Tolgee, visit [toolkit.tolgee.io](https://
 To run Tolgee Server with docker
 
     docker run -v tolgee_data:/data/ -p 8085:8080 \
-    -e tolgee.authentication.enabled=false \
     tolgee/tolgee
 
 Now you should be able to access Tolgee web application on http://localhost:8085
