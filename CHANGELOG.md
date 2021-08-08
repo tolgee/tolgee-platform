@@ -1,3 +1,10 @@
+# [1.0.0-alpha.103](https://github.com/tolgee/server/compare/v1.0.0-alpha.102...v1.0.0-alpha.103) (2021-08-08)
+
+
+### Bug Fixes
+
+* **Socket:** add language to translation events TG-230 ([034f923](https://github.com/tolgee/server/commit/034f923e0deba945128924defd76d0f8ee093d8a))
+
 # [1.0.0-alpha.102](https://github.com/tolgee/server/compare/v1.0.0-alpha.101...v1.0.0-alpha.102) (2021-08-05)
 
 
