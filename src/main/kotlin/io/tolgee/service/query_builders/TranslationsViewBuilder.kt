@@ -142,7 +142,11 @@ class TranslationsViewBuilder(
   ) {
     filterByState?.let {
       if (it.languageTag == language.tag) {
-        whereConditions.add(cb.equal(translationStateField, it.state))
+        var condition = cb.equal(translationStateField, it.state)
+        if (it.state == TranslationState.UNTRANSLATED) {
+          condition = cb.or(condition, cb.isNull(translationStateField))
+        }
+        whereConditions.add(condition)
       }
     }
 
