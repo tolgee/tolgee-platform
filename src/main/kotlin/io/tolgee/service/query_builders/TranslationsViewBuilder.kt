@@ -142,14 +142,16 @@ class TranslationsViewBuilder(
     translationTextField: Path<String>,
     translationStateField: Path<TranslationState>
   ) {
-    filterByState?.let {
-      if (it.languageTag == language.tag) {
-        var condition = cb.equal(translationStateField, it.state)
-        if (it.state == TranslationState.UNTRANSLATED) {
+    filterByStateMap?.get(language.tag)?.let { states ->
+      val languageStateConditions = mutableListOf<Predicate>()
+      states.forEach { state ->
+        var condition = cb.equal(translationStateField, state)
+        if (state == TranslationState.UNTRANSLATED) {
           condition = cb.or(condition, cb.isNull(translationStateField))
         }
-        whereConditions.add(condition)
+        languageStateConditions.add(condition)
       }
+      whereConditions.add(cb.or(*languageStateConditions.toTypedArray()))
     }
 
     if (params.filterUntranslatedInLang == language.tag) {
@@ -245,8 +247,20 @@ class TranslationsViewBuilder(
       return query
     }
 
-  private val filterByState: FilterByState? by lazy {
-    params.filterState?.let { FilterByState.valueOf(it) }
+  private val filterByStateMap: Map<String, List<TranslationState>>? by lazy {
+    params.filterState
+      ?.let { filterStateStrings -> filterStateStrings.map { FilterByState.valueOf(it) } }
+      ?.let { filterByState ->
+        val filterByStateMap = mutableMapOf<String, MutableList<TranslationState>>()
+
+        filterByState.forEach {
+          if (!filterByStateMap.containsKey(it.languageTag)) {
+            filterByStateMap[it.languageTag] = mutableListOf()
+          }
+          filterByStateMap[it.languageTag]!!.add(it.state)
+        }
+        return@lazy filterByStateMap
+      }
   }
 
   companion object {

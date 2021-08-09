@@ -91,6 +91,60 @@ class TranslationsTestData {
     }.self
   }
 
+  fun addTranslationsWithStates() {
+    projectBuilder.apply {
+      addKey {
+        self { name = "state test key" }
+        addTranslation {
+          self {
+            key = this@addKey.self
+            language = germanLanguage
+            text = "a"
+            state = TranslationState.REVIEWED
+          }
+        }
+        addTranslation {
+          self {
+            key = this@addKey.self
+            language = englishLanguage
+            text = "aa"
+            state = TranslationState.REVIEWED
+          }
+        }
+      }
+      addKey {
+        self { name = "state test key 2" }
+        addTranslation {
+          self {
+            key = this@addKey.self
+            language = germanLanguage
+            text = "a"
+            state = TranslationState.TRANSLATED
+          }
+        }
+        addTranslation {
+          self {
+            key = this@addKey.self
+            language = englishLanguage
+            text = "aa"
+            state = TranslationState.REVIEWED
+          }
+        }
+      }
+      addKey {
+        self { name = "state test key 3" }
+        addTranslation {
+          self {
+            key = this@addKey.self
+            language = englishLanguage
+            text = "aa"
+            state = TranslationState.REVIEWED
+          }
+        }
+      }
+    }
+  }
+
   fun addKeyWithDot() {
     projectBuilder.addKey {
       self {

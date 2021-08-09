@@ -46,7 +46,12 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
   val filterHasNoScreenshot: Boolean = false,
 
   @field:Parameter(
-    description = "Translation state in format \"languageTag,state\"",
+    description = """Translation state in the format: languageTag,state. You can use this parameter multiple times.
+
+When used with multiple states for same language it is applied with logical OR. 
+ 
+When used with multiple languages, it is applied with logical AND.
+    """,
     examples = [
       ExampleObject("en,TRANSLATED"),
       ExampleObject("en-US,UNTRANSLATED"),
@@ -54,7 +59,7 @@ To add multiple languages, repeat this param (eg. ?languages=en&languages=de)"""
       ExampleObject("fr,MACHINE_TRANSLATED"),
     ]
   )
-  val filterState: String? = null,
+  val filterState: List<String>? = null,
 
   @field:Parameter(description = "Selects only keys with provided tag")
   val filterTag: String? = null,
