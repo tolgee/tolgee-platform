@@ -6,7 +6,9 @@ import io.tolgee.dtos.response.CursorValue
 import io.tolgee.model.*
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
+import io.tolgee.model.key.Tag_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
@@ -159,6 +161,11 @@ class TranslationsViewBuilder(
   }
 
   private fun applyGlobalFilters() {
+    if (params.filterTag != null) {
+      val keyMetaJoin = root.join(Key_.keyMeta, JoinType.LEFT)
+      val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
+      whereConditions.add(cb.equal(tagsJoin.get(Tag_.name), params.filterTag))
+    }
     if (params.filterKeyName != null) {
       whereConditions.add(cb.equal(keyNameExpression, params.filterKeyName))
     } else if (params.filterKeyId != null) {

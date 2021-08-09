@@ -306,6 +306,22 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `filters by tag`() {
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterTag=Cool tag")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys[0].keyName").isEqualTo("A key")
+        node("_embedded.keys[0].keyTags[0].name").isEqualTo("Cool tag")
+        node("_embedded.keys[1].keyTags[0].name").isEqualTo("Cool tag")
+        node("_embedded.keys[2].keyTags[0].name").isEqualTo("Cool tag")
+        node("page.totalElements").isEqualTo(3)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `validates filter state`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
