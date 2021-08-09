@@ -1,3 +1,15 @@
+# [1.0.0-alpha.105](https://github.com/tolgee/server/compare/v1.0.0-alpha.104...v1.0.0-alpha.105) (2021-08-09)
+
+
+### Bug Fixes
+
+* Fix dashboard legend percent counter TG-238 ([d60bc0b](https://github.com/tolgee/server/commit/d60bc0b887156af30b983dc451bcbef297cda4f5))
+
+
+### Features
+
+* **filter:** By multiple language/state TG-242 ([2ce9a08](https://github.com/tolgee/server/commit/2ce9a0851bcc7740afbe02c8bce217ae5b8ebeb7))
+
 # [1.0.0-alpha.104](https://github.com/tolgee/server/compare/v1.0.0-alpha.103...v1.0.0-alpha.104) (2021-08-09)
 
 
