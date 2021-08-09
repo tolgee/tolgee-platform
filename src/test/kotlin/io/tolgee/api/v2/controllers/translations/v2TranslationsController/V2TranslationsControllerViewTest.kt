@@ -294,6 +294,18 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `filters by untranslated state`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterState=de,UNTRANSLATED")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys[0].keyName").isEqualTo("Z key")
+        node("page.totalElements").isEqualTo(1)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `validates filter state`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
