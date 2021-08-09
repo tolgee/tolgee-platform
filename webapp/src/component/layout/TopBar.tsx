@@ -42,6 +42,10 @@ const useStyles = makeStyles((theme) => ({
     color: 'inherit',
     textDecoration: 'inherit',
   },
+  version: {
+    marginLeft: theme.spacing(2),
+    fontSize: 11,
+  },
 }));
 
 interface TopBarProps {}
@@ -66,6 +70,11 @@ export function TopBar(props: TopBarProps) {
                 >
                   {config.appName}
                 </Typography>
+                {config.showVersion && (
+                  <Typography variant={'body1'} className={classes.version}>
+                    {config.version}
+                  </Typography>
+                )}
               </Box>
             </Link>
           </Box>

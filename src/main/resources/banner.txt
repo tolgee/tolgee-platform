@@ -1,8 +1,0 @@
-
-${Ansi.BLUE}
-${Ansi.BLUE} ______     __               _
-${Ansi.BLUE}/_  __/__  / /__ ____ ___   (_)__
-${Ansi.BLUE} / / / _ \/ / _ `/ -_) -_) / / _ \
-${Ansi.BLUE}/_/  \___/_/\_, /\__/\__(_)_/\___/
-${Ansi.BLUE}           /___/
-${Ansi.RED}version: ${application.version}          - The localization framework ${Ansi.DEFAULT}

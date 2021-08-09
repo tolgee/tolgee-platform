@@ -1,5 +1,6 @@
 package io.tolgee
 
+import io.tolgee.configuration.Banner
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.dtos.request.SignUpDto
@@ -23,7 +24,9 @@ class Application(
   companion object {
     @JvmStatic
     fun main(args: Array<String>) {
-      SpringApplication.run(Application::class.java, *args)
+      val app = SpringApplication(Application::class.java)
+      app.setBanner(Banner())
+      app.run(*args)
     }
   }
 

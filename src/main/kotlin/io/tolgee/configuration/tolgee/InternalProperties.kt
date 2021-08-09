@@ -7,4 +7,5 @@ class InternalProperties {
   var populate: Boolean = false
   var controllerEnabled = false
   var fakeGithubLogin = false
+  var showVersion: Boolean = false
 }
