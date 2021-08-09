@@ -1,6 +1,7 @@
 package io.tolgee.dtos.request
 
 import io.swagger.v3.oas.annotations.media.Schema
+import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.Pattern
@@ -11,6 +12,7 @@ data class CreateProjectDTO(
   var name: String = "",
 
   @field:NotEmpty
+  @field:Valid
   var languages: List<LanguageDto>? = null,
 
   @field:Size(min = 3, max = 60)

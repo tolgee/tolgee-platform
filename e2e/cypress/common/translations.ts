@@ -59,10 +59,12 @@ export function translationsBeforeEach(): Chainable<ProjectDTO> {
         {
           tag: 'en',
           name: 'English',
+          originalName: 'English',
         },
         {
           tag: 'cs',
           name: 'Česky',
+          originalName: 'česky',
         },
       ],
     }).then((r) => {

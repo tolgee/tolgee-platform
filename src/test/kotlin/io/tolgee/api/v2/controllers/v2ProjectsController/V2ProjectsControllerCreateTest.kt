@@ -77,6 +77,25 @@ class V2ProjectsControllerCreateTest : SignedInControllerTest() {
     performAuthPost("/v2/projects", request).andIsBadRequest
   }
 
+  @Test
+  fun `validates languages`() {
+    val request = CreateProjectDTO(
+      "A name",
+      listOf(
+        LanguageDto(
+          name = "English",
+          originalName = "English",
+          tag = "en,aa",
+          flagEmoji = "a"
+        )
+      )
+    )
+    performAuthPost("/v2/projects", request)
+      .andPrettyPrint
+      .andIsBadRequest
+      .andAssertError.isStandardValidation.onField("languages[0].tag").isEqualTo("can not contain coma")
+  }
+
   private fun testCreateCorrectRequest() {
     val request = CreateProjectDTO("aaa", listOf(languageDTO))
     mvc.perform(

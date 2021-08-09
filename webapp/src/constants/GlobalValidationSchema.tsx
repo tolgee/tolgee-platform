@@ -1,4 +1,4 @@
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 import * as Yup from 'yup';
 
@@ -109,16 +109,23 @@ export class Validation {
   static readonly TRANSLATION_TRANSLATION = Yup.string();
 
   static readonly LANGUAGE_NAME = Yup.string().required().max(100);
-  static readonly LANGUAGE_TAG = Yup.string().required().max(20);
+  static readonly LANGUAGE_TAG = (t: ReturnType<typeof useTranslate>) =>
+    Yup.string()
+      .required()
+      .max(20)
+      .matches(/^[^,]*$/, {
+        message: t('validation_cannot_contain_coma'),
+      });
   static readonly LANGUAGE_ORIGINAL_NAME = Yup.string().required().max(100);
   static readonly LANGUAGE_FLAG_EMOJI = Yup.string().required().max(20);
 
-  static readonly LANGUAGE = Yup.object().shape({
-    name: Validation.LANGUAGE_NAME,
-    originalName: Validation.LANGUAGE_ORIGINAL_NAME,
-    tag: Validation.LANGUAGE_TAG,
-    flagEmoji: Validation.LANGUAGE_FLAG_EMOJI,
-  });
+  static readonly LANGUAGE = (t: ReturnType<typeof useTranslate>) =>
+    Yup.object().shape({
+      name: Validation.LANGUAGE_NAME,
+      originalName: Validation.LANGUAGE_ORIGINAL_NAME,
+      tag: Validation.LANGUAGE_TAG(t),
+      flagEmoji: Validation.LANGUAGE_FLAG_EMOJI,
+    });
 
   static readonly KEY_TRANSLATION_CREATION = (langs: string[]) => {
     const translationValidation = langs.reduce(
@@ -140,7 +147,7 @@ export class Validation {
       languages: Yup.array()
         .required()
         .min(1, t('project_creation_add_at_least_one_language'))
-        .of(Validation.LANGUAGE.nullable())
+        .of(Validation.LANGUAGE(t).nullable())
         .test(
           'language-repeated',
           t('create_project_validation_language_repeated'),

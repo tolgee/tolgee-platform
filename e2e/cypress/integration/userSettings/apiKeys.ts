@@ -28,7 +28,7 @@ describe('Api keys', () => {
       login();
       createProject({
         name: 'Test',
-        languages: [{ tag: 'en', name: 'English' }],
+        languages: [{ tag: 'en', name: 'English', originalName: 'English' }],
       }).then((r) => (project = r.body));
       cy.visit(HOST + '/apiKeys');
     });
