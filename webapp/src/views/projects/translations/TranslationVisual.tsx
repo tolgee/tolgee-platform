@@ -63,10 +63,14 @@ export const TranslationVisual: React.FC<Props> = ({
   const { variants } = useMemo(() => icuVariants(text || '', locale), [text]);
 
   if (!variants) {
-    return <LimitedHeightText maxLines={maxLines}>{text}</LimitedHeightText>;
+    return (
+      <LimitedHeightText maxLines={maxLines} lang={locale}>
+        {text}
+      </LimitedHeightText>
+    );
   } else if (variants.length === 1) {
     return (
-      <LimitedHeightText maxLines={maxLines}>
+      <LimitedHeightText maxLines={maxLines} lang={locale}>
         {variants[0].value}
       </LimitedHeightText>
     );
