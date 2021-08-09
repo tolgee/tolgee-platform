@@ -170,7 +170,7 @@ export const TranslationsList = () => {
           return (
             cache[index] ||
             // items count
-            Math.max(selectedLanguages?.length || 0, 2) * 20 + 20
+            Math.max((selectedLanguages?.length || 0) * 32, 82)
           );
         }}
         length={translations.length}
@@ -190,6 +190,7 @@ export const TranslationsList = () => {
                   <CellKey
                     keyId={row.keyId}
                     keyName={row.keyName}
+                    tags={row.keyTags}
                     text={row.keyName}
                     screenshotCount={row.screenshotCount}
                     editEnabled={projectPermissions.satisfiesPermission(

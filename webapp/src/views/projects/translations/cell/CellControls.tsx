@@ -5,7 +5,7 @@ import { Edit, CameraAlt } from '@material-ui/icons';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { StateIcon } from './StateIcon';
-import { stopBubble } from './stopBubble';
+import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useCellStyles } from './styles';
 
 const getStateTransitionButtons = (

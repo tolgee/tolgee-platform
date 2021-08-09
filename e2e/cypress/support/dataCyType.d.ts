@@ -121,6 +121,8 @@ declare namespace DataCy {
         "project-states-bar-root" |
         "project-states-bar-state-progress" |
         "screenshot-box" |
+        "tag-autocomplete-input" |
+        "tag-autocomplete-option" |
         "translation-state-button" |
         "translations-add-button" |
         "translations-cell-cancel-button" |
@@ -135,6 +137,11 @@ declare namespace DataCy {
         "translations-row-checkbox" |
         "translations-state-indicator" |
         "translations-table-cell" |
+        "translations-tag" |
+        "translations-tag-add" |
+        "translations-tag-close" |
+        "translations-tag-input" |
+        "translations-tags-add" |
         "translations-view-list" |
         "translations-view-list-button" |
         "translations-view-table" |

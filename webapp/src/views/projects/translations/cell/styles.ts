@@ -10,7 +10,7 @@ export const useCellStyles = makeStyles((theme) => ({
       transition: 'opacity 0.1s ease-in-out',
     },
     '&:hover $showOnHover': {
-      opacity: 0.7,
+      opacity: 1,
       transition: 'opacity 0.5s ease-in-out',
     },
   },

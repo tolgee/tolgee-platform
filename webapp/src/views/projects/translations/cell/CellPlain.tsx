@@ -3,7 +3,7 @@ import { Box, BoxProps, Tooltip, useTheme } from '@material-ui/core';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { useCellStyles } from './styles';
-import { stopBubble } from './stopBubble';
+import { stopBubble } from 'tg.fixtures/eventHandler';
 import clsx from 'clsx';
 import { T } from '@tolgee/react';
 

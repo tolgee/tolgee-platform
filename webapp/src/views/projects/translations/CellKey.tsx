@@ -2,14 +2,19 @@ import React, { useRef, useState } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { Checkbox, Box } from '@material-ui/core';
 
+import { components } from 'tg.service/apiSchema.generated';
 import { Editor } from 'tg.component/editor/Editor';
 import { useEditableRow } from './useEditableRow';
 import {
   TranslationsContext,
   useTranslationsDispatch,
 } from './context/TranslationsContext';
+import { stopBubble } from 'tg.fixtures/eventHandler';
 import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
-import { CellContent, CellPlain, CellControls, stopBubble } from './cell';
+import { CellContent, CellPlain, CellControls } from './cell';
+import { Tags } from './Tags/Tags';
+
+type TagModel = components['schemas']['TagModel'];
 
 type Props = {
   text: string;
@@ -17,6 +22,7 @@ type Props = {
   keyName: string;
   screenshotCount: number;
   editEnabled: boolean;
+  tags: TagModel[] | null;
 };
 
 export const CellKey: React.FC<Props> = React.memo(function Cell({
@@ -25,6 +31,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
   keyId,
   screenshotCount,
   editEnabled,
+  tags,
 }) {
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
 
@@ -67,36 +74,37 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
       >
         <CellContent>
           {isEditing ? (
-            <>
-              <Editor
-                background="#efefef"
-                plaintext
-                value={value}
-                onChange={(v) => setValue(v as string)}
-                onSave={() => handleSave()}
-                onCmdSave={() =>
-                  handleSave(isEmpty ? 'NEW_EMPTY_KEY' : 'EDIT_NEXT')
-                }
-                onCancel={handleEditCancel}
-                autofocus={autofocus}
-              />
-            </>
+            <Editor
+              background="#efefef"
+              plaintext
+              value={value}
+              onChange={(v) => setValue(v as string)}
+              onSave={() => handleSave()}
+              onCmdSave={() =>
+                handleSave(isEmpty ? 'NEW_EMPTY_KEY' : 'EDIT_NEXT')
+              }
+              onCancel={handleEditCancel}
+              autofocus={autofocus}
+            />
           ) : (
-            <Box display="flex" alignItems="baseline">
-              {editEnabled && (
-                <Box margin={-1} onClick={stopBubble()}>
-                  <Checkbox
-                    size="small"
-                    checked={isSelected}
-                    onChange={toggleSelect}
-                    data-cy="translations-row-checkbox"
-                  />
+            <>
+              <Box display="flex" alignItems="baseline">
+                {editEnabled && (
+                  <Box margin={-1} onClick={stopBubble()}>
+                    <Checkbox
+                      size="small"
+                      checked={isSelected}
+                      onChange={toggleSelect}
+                      data-cy="translations-row-checkbox"
+                    />
+                  </Box>
+                )}
+                <Box overflow="hidden" textOverflow="ellipsis">
+                  {text}
                 </Box>
-              )}
-              <Box overflow="hidden" textOverflow="ellipsis">
-                {text}
               </Box>
-            </Box>
+              <Tags keyId={keyId} tags={tags} />
+            </>
           )}
         </CellContent>
         <CellControls

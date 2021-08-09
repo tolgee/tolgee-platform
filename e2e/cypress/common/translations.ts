@@ -35,6 +35,7 @@ export function getCellSaveButton() {
 }
 
 export function createTranslation(testKey: string, testTranslated?: string) {
+  cy.gcy('global-base-view-loading').should('not.exist');
   cy.gcy('translations-add-button').click();
   cy.gcy('global-editor').should('be.visible');
   cy.gcy('global-editor').find('textarea').type(testKey, { force: true });
