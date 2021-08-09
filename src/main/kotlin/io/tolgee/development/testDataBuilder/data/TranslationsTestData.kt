@@ -141,6 +141,50 @@ class TranslationsTestData {
     }
   }
 
+  fun addFewKeysWithTags() {
+    root.data.projects[0].apply {
+      addKey {
+        self {
+          name = "Key with tag"
+          addMeta {
+            self.tags.add(
+              Tag().apply {
+                name = "Cool tag"
+                project = root.data.projects[0].self
+              }
+            )
+          }
+        }
+      }
+      addKey {
+        self {
+          name = "Another key with tag"
+          addMeta {
+            self.tags.add(
+              Tag().apply {
+                name = "Another cool tag"
+                project = root.data.projects[0].self
+              }
+            )
+          }
+        }
+      }
+      addKey {
+        self {
+          name = "Key with tag 2"
+          addMeta {
+            self.tags.add(
+              Tag().apply {
+                name = "Cool tag"
+                project = root.data.projects[0].self
+              }
+            )
+          }
+        }
+      }
+    }
+  }
+
   fun generateCursorSearchData() {
     root.data.projects[0].apply {
       addKey {
