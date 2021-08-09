@@ -1,10 +1,6 @@
 import { useState, useRef, useEffect, RefObject } from 'react';
 import { makeStyles } from '@material-ui/core';
 
-type Props = {
-  maxLines?: number | undefined;
-};
-
 const useStyles = makeStyles({
   '@keyframes fadeIn': {
     from: { opacity: 0 },
@@ -31,7 +27,16 @@ const useStyles = makeStyles({
   },
 });
 
-export const LimitedHeightText: React.FC<Props> = ({ maxLines, children }) => {
+type Props = {
+  maxLines?: number | undefined;
+  lang: string;
+};
+
+export const LimitedHeightText: React.FC<Props> = ({
+  maxLines,
+  children,
+  lang,
+}) => {
   const classes = useStyles();
   const textRef = useRef<HTMLDivElement>();
   const [expandable, setExpandable] = useState<boolean>();
@@ -70,6 +75,7 @@ export const LimitedHeightText: React.FC<Props> = ({ maxLines, children }) => {
         WebkitMaskImage: gradient,
         maskImage: gradient,
       }}
+      lang={lang}
     >
       {children}
     </div>
