@@ -4,8 +4,9 @@ import { Box, Tooltip } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
+import { ClassNameMap } from 'notistack';
 
-type States = keyof typeof translationStates;
+type State = keyof typeof translationStates;
 
 const HEIGHT = 6;
 const BORDER_RADIUS = HEIGHT / 2;
@@ -59,13 +60,13 @@ const STATES_ORDER = [
   'TRANSLATED',
   'MACHINE_TRANSLATED',
   'UNTRANSLATED',
-] as States[];
+] as State[];
 
 const STATES_LEGEND = [
   ['NEEDS_REVIEW', 'REVIEWED'],
   ['TRANSLATED', 'MACHINE_TRANSLATED'],
   ['UNTRANSLATED'],
-] as States[][];
+] as State[][];
 
 export function TranslationStatesBar(props: {
   stats: {
@@ -73,7 +74,7 @@ export function TranslationStatesBar(props: {
     keyCount: number;
     languageCount: number;
     translationStateCounts: {
-      [state in States]: number;
+      [state in State]: number;
     };
   };
 }) {
@@ -85,12 +86,48 @@ export function TranslationStatesBar(props: {
       ...acc,
       [state]: (count / translationsCount) * 100,
     }),
-    {} as { [state in States]: number }
+    {} as { [state in State]: number }
   );
 
   useEffect(() => {
     setTimeout(() => setLoaded(true), 50);
   }, []);
+
+  const LegendItem = (legendItemProps: {
+    classes: ClassNameMap<
+      'legendDot' | 'bar' | 'loadedState' | 'legend' | 'root' | 'state'
+    >;
+    state: State;
+  }) => {
+    const percent =
+      props.stats.translationStateCounts[legendItemProps.state] /
+      (props.stats.keyCount * props.stats.languageCount);
+
+    return (
+      <Box display="flex" alignItems="center" mr={2}>
+        <Box
+          data-cy="project-states-bar-dot"
+          mr={0.5}
+          className={legendItemProps.classes.legendDot}
+          style={{
+            backgroundColor: translationStates[legendItemProps.state].color,
+          }}
+        />
+        <T>{translationStates[legendItemProps.state].translationKey}</T>:{' '}
+        {percent >= 0.01 ? (
+          <T
+            parameters={{
+              percent: percent.toString(),
+            }}
+          >
+            project_dashboard_translations_percent
+          </T>
+        ) : (
+          <T>project_dashboard_translations_less_then_1_percent</T>
+        )}
+      </Box>
+    );
+  };
 
   return (
     <Box className={classes.root} data-cy="project-states-bar-root">
@@ -127,27 +164,7 @@ export function TranslationStatesBar(props: {
                 {states.map(
                   (state, idx2) =>
                     props.stats.translationStateCounts[state] > 0 && (
-                      <Box key={idx2} display="flex" alignItems="center" mr={2}>
-                        <Box
-                          data-cy="project-states-bar-dot"
-                          mr={0.5}
-                          className={classes.legendDot}
-                          style={{
-                            backgroundColor: translationStates[state].color,
-                          }}
-                        />
-                        <T>{translationStates[state].translationKey}</T>:{' '}
-                        <T
-                          parameters={{
-                            percent: (
-                              props.stats.translationStateCounts[state] /
-                              (props.stats.keyCount * props.stats.languageCount)
-                            ).toString(),
-                          }}
-                        >
-                          project_dashboard_translations_percent
-                        </T>
-                      </Box>
+                      <LegendItem key={idx2} classes={classes} state={state} />
                     )
                 )}
               </Box>
