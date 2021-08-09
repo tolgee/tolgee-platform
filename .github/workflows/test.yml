@@ -3,7 +3,6 @@ name: Test
 on:
   push:
     branches-ignore:
-      "main"
 
 jobs:
   backend-build:
@@ -345,4 +344,3 @@ jobs:
             e2e_deps
             webapp
             backend
-

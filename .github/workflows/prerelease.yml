@@ -1,12 +1,15 @@
 name: Prerelease
 
 on:
-  push:
-    branches:
-      - 'main'
+  workflow_run:
+    workflows: [ "Test" ]
+    branches: [ "main", "next" ]
+    types:
+      - completed
 
 jobs:
   main:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     concurrency:
       group: prerelease
     runs-on: ubuntu-latest
@@ -21,12 +24,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-
-      - name: Build with Gradle
-        run: ./gradlew build
-        env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
       - name: Set git globals
         run: |
@@ -98,7 +95,9 @@ jobs:
       - name: Login to docker
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
+
       - name: Tag the image
+        if: ${{ steps.version.outputs.VERSION != '' }}
         run: |
           docker tag tolgee/tolgee tolgee/tolgee:${{ steps.version.outputs.VERSION }}
           docker tag tolgee/tolgee tolgee/tolgee:latest
