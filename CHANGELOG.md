@@ -1,3 +1,10 @@
+# [1.0.0-alpha.106](https://github.com/tolgee/server/compare/v1.0.0-alpha.105...v1.0.0-alpha.106) (2021-08-09)
+
+
+### Bug Fixes
+
+* Fix project creation language validation TG-244 ([7bdd00e](https://github.com/tolgee/server/commit/7bdd00e27e50491c18d3a5c9a31118fc3b054c22))
+
 # [1.0.0-alpha.105](https://github.com/tolgee/server/compare/v1.0.0-alpha.104...v1.0.0-alpha.105) (2021-08-09)
 
 
