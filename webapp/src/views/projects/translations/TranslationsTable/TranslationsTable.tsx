@@ -256,7 +256,7 @@ export const TranslationsTable = () => {
         threshold={300}
         type="variable"
         itemSizeEstimator={(index, cache) => {
-          return cache[index] || 62;
+          return cache[index] || 82;
         }}
         length={translations.length}
         useTranslate3d
@@ -278,6 +278,7 @@ export const TranslationsTable = () => {
                     keyId={row.keyId}
                     keyName={row.keyName}
                     text={row.keyName}
+                    tags={row.keyTags}
                     screenshotCount={row.screenshotCount}
                     editEnabled={projectPermissions.satisfiesPermission(
                       ProjectPermissionType.EDIT

@@ -35,9 +35,21 @@ type ActionType =
   | { type: 'UPDATE_LANGUAGES' }
   | { type: 'DELETE_TRANSLATIONS'; payload: number[] }
   | { type: 'SET_TRANSLATION_STATE'; payload: SetTranslationStatePayload }
-  | { type: 'ADD_EMPTY_KEY'; payload?: AddEmptyKeyType };
+  | { type: 'ADD_EMPTY_KEY'; payload?: AddEmptyKeyType }
+  | { type: 'ADD_TAG'; payload: AddTagPayload; onSuccess?: () => void }
+  | { type: 'REMOVE_TAG'; payload: RemoveTagPayload };
 
 export type ViewType = 'TABLE' | 'LIST';
+
+type RemoveTagPayload = {
+  keyId: number;
+  tagId: number;
+};
+
+type AddTagPayload = {
+  keyId: number;
+  name: string;
+};
 
 type AddEmptyKeyType = {
   prevId?: number;
@@ -153,6 +165,16 @@ export const TranslationsContextProvider: React.FC<{
   const createKey = useApiMutation({
     url: '/v2/projects/{projectId}/keys/create',
     method: 'post',
+  });
+
+  const addTag = useApiMutation({
+    url: '/v2/projects/{projectId}/keys/{keyId}/tags',
+    method: 'put',
+  });
+
+  const removeTag = useApiMutation({
+    url: '/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}',
+    method: 'delete',
   });
 
   dispatchRef.current = async (action: ActionType) => {
@@ -338,6 +360,49 @@ export const TranslationsContextProvider: React.FC<{
         });
         return;
       }
+      case 'ADD_TAG':
+        return addTag
+          .mutateAsync({
+            path: { projectId: props.projectId, keyId: action.payload.keyId },
+            content: { 'application/json': { name: action.payload.name } },
+          })
+          .then((data) => {
+            const previousTags =
+              translations.data
+                ?.find((key) => key.keyId === action.payload.keyId)
+                ?.keyTags.filter((t) => t.id !== data.id) || [];
+            translations.updateTranslationKey(action.payload.keyId, {
+              keyTags: [...previousTags, data!],
+            });
+            action.onSuccess?.();
+          })
+          .catch((e) => {
+            messaging.error(parseErrorResponse(e));
+            // return never fullfilling promise to prevent after action
+            return new Promise(() => {});
+          });
+      case 'REMOVE_TAG':
+        await removeTag
+          .mutateAsync({
+            path: {
+              keyId: action.payload.keyId,
+              tagId: action.payload.tagId,
+              projectId: props.projectId,
+            },
+          })
+          .then(() => {
+            const previousTags = translations.data?.find(
+              (key) => key.keyId === action.payload.keyId
+            )?.keyTags;
+            translations.updateTranslationKey(action.payload.keyId, {
+              keyTags: previousTags?.filter(
+                (t) => t.id !== action.payload.tagId
+              ),
+            });
+          })
+          .catch((e) => {
+            messaging.error(parseErrorResponse(e));
+          });
     }
   };
 
@@ -379,7 +444,9 @@ export const TranslationsContextProvider: React.FC<{
             languages.isFetching ||
             edit.isLoading ||
             deleteKeys.isLoading ||
-            updateTranslationState.isLoading,
+            updateTranslationState.isLoading ||
+            addTag.isLoading ||
+            removeTag.isLoading,
           isFetchingMore: translations.isFetchingNextPage,
           hasMoreToFetch: translations.hasNextPage,
           search: translations.query?.search,
