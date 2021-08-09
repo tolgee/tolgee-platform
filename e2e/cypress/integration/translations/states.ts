@@ -69,7 +69,7 @@ describe('Translation states', () => {
 
     if (stateName != 'Translated') {
       selectInProjectMenu('Projects');
-      gcy('project-states-bar-legend').contains(`${stateName}: 12.5%`);
+      gcy('project-states-bar-legend').contains(`${stateName}: 13%`);
     }
 
     visit();
