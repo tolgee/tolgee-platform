@@ -44,7 +44,7 @@ export const FlagSelector: FunctionComponent<{
   const [field, _, helpers] = useField(props.name);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const selectedEmoji = field.value || '🏁';
+  const selectedEmoji = field.value || '🏳️';
   const flags = [...new Set([...props.preferredEmojis, ...supportedFlags])];
   return (
     <>

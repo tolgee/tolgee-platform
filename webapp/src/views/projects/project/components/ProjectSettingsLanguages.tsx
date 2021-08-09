@@ -38,7 +38,7 @@ export const ProjectSettingsLanguages = () => {
             <ListItemText>
               <Box display="inline-flex" justifyContent="center" mr={2}>
                 <Box mr={1} display="inline-flex" justifyContent="center">
-                  <FlagImage width={20} flagEmoji={l.flagEmoji || '🏁'} />
+                  <FlagImage width={20} flagEmoji={l.flagEmoji || '🏳️'} />
                 </Box>
                 {l.name} | {l.originalName} ({l.tag})
               </Box>

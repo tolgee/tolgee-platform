@@ -11,7 +11,7 @@ export const FlagImage: FC<
     <img
       {...props}
       loading="lazy"
-      src={getFlagPath(flagEmoji || '🏁')}
+      src={getFlagPath(flagEmoji || '🏳️')}
       alt={flagEmoji}
     />
   );
