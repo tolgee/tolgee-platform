@@ -1,3 +1,16 @@
+# [1.0.0-alpha.104](https://github.com/tolgee/server/compare/v1.0.0-alpha.103...v1.0.0-alpha.104) (2021-08-09)
+
+
+### Bug Fixes
+
+* Set lang property in DOM TG-219 ([7154919](https://github.com/tolgee/server/commit/7154919b3d40f112b914f1bc3b1193034162edc2))
+* **filter:** Fix filter by state TG-239 ([adae02a](https://github.com/tolgee/server/commit/adae02ac7cb304bcceac278bebd57ba11d1f3e9c))
+
+
+### Features
+
+* Filter by tag TG-240 ([dac9cd0](https://github.com/tolgee/server/commit/dac9cd055afcdad651efda4d6658861f13767a83))
+
 # [1.0.0-alpha.103](https://github.com/tolgee/server/compare/v1.0.0-alpha.102...v1.0.0-alpha.103) (2021-08-08)
 
 
