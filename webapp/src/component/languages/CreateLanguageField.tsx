@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { Box, BoxProps, Button } from '@material-ui/core';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { components } from 'tg.service/apiSchema.generated';
@@ -27,6 +27,8 @@ export const CreateLanguageField: FC<{
 }> = (props) => {
   const [preferredEmojis, setPreferredEmojis] = useState([] as string[]);
   const [edit, setEdit] = useState(false);
+
+  const t = useTranslate();
 
   useEffect(() => {
     props.onEditChange?.(edit);
@@ -100,7 +102,8 @@ export const CreateLanguageField: FC<{
           }}
           onCancel={() => {
             //don't submit invalid value in case of new custom language selection
-            Validation.LANGUAGE.validate(props.value)
+            Validation.LANGUAGE(t)
+              .validate(props.value)
               .then(() => {
                 setEdit(false);
               })

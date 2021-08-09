@@ -58,6 +58,7 @@ describe('Import errors', () => {
         login('franta');
         visitImport(res.body.id);
       });
+      cy.wait(100);
       cy.get('[data-cy=dropzone]').attachFile(
         { filePath: 'import/error.jsn', fileName: 'error.json' },
         { subjectType: 'drag-n-drop' }

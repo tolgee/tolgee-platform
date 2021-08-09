@@ -137,7 +137,7 @@ export const LanguageEditView = () => {
         deleteLoadable.isLoading
       }
       hideChildrenOnLoading={languageLoadable.isLoading}
-      validationSchema={Validation.LANGUAGE}
+      validationSchema={Validation.LANGUAGE(t)}
       customActions={
         <Button
           variant="outlined"

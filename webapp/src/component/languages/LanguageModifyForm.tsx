@@ -1,6 +1,6 @@
 import { FC, FunctionComponent } from 'react';
 import { Box, Button, Dialog, DialogContent } from '@material-ui/core';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
@@ -26,11 +26,13 @@ export const LanguageModifyForm: FC<{
       <>{wrapperProps.children}</>
     );
 
+  const t = useTranslate();
+
   return (
     <Wrapper>
       <Formik
         initialValues={props.values}
-        validationSchema={Validation.LANGUAGE}
+        validationSchema={Validation.LANGUAGE(t)}
         onSubmit={(values) => {
           props.onModified(values);
         }}
