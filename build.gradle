@@ -235,6 +235,14 @@ task unpack(type: Copy) {
     }
 }
 
+task addVersionFile(type: Task) {
+    mustRunAfter unpack
+    doLast {
+        def file = new File("${project.buildDir}/dependency/BOOT-INF/classes/.VERSION")
+        file.write(project.version.toString())
+    }
+}
+
 apply from: "./gradle/webapp.gradle"
 apply from: "./gradle/docker.gradle"
 apply from: "./gradle/e2e.gradle"
@@ -247,9 +255,10 @@ project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SE
 project.tasks.findByName("dockerPrepare").mustRunAfter(copyDist)
 
 task buildProd(dependsOn: ['bootJar'])
-task packWebapp(type: Zip) {
+task packResources(type: Zip) {
     dependsOn "unpack"
     dependsOn "copyDist"
+    dependsOn "addVersionFile"
     from "${project.projectDir}/build/dependency"
     archiveFileName = "tolgee-${project.version}.jar"
     destinationDirectory = file("$buildDir/libs")

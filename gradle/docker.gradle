@@ -15,4 +15,4 @@ task copyDockerIgnore(type: Copy) {
     into "build/docker"
 }
 
-project.tasks.findByName("docker").dependsOn(unpack, copyDist, copyDockerIgnore)
+project.tasks.findByName("docker").dependsOn(unpack, copyDist, copyDockerIgnore, addVersionFile)

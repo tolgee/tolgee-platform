@@ -58,7 +58,7 @@ jobs:
 
       - name: Pack with webapp
         if: ${{ steps.version.outputs.VERSION != '' }}
-        run: ./gradlew packWebapp
+        run: ./gradlew packResources
         env:
           VERSION: ${{ steps.version.outputs.VERSION }}
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}

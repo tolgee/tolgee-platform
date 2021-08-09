@@ -49,6 +49,8 @@ export interface RemoteConfigurationDTO {
     allowedTransports: ('websocket' | 'polling')[];
   };
   appName: string;
+  version: string;
+  showVersion: boolean;
 }
 
 export interface TokenDTO {

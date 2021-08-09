@@ -2,6 +2,7 @@ package io.tolgee.dtos.response
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.util.VersionProvider
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class PublicConfigurationDTO(
@@ -25,6 +26,8 @@ class PublicConfigurationDTO(
     allowedTransports = properties.socketIo.allowedTransports
   )
   val appName = properties.appName
+  val version: String = VersionProvider.version
+  val showVersion: Boolean = properties.internal.showVersion
 
   class AuthMethodsDTO(val github: GithubPublicConfigDTO)
   data class GithubPublicConfigDTO(val clientId: String?) {
