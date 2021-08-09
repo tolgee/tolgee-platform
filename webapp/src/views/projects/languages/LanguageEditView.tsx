@@ -127,7 +127,7 @@ export const LanguageEditView = () => {
       }
       initialValues={{
         ...languageLoadable.data!,
-        flagEmoji: languageLoadable.data?.flagEmoji || '🏁',
+        flagEmoji: languageLoadable.data?.flagEmoji || '🏳️',
         originalName: languageLoadable.data?.originalName || '',
       }}
       onSubmit={onSubmit}

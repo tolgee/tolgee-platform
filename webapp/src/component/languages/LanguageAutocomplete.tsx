@@ -19,7 +19,7 @@ const getOptions = (input: string): AutocompleteOption[] => {
 
   const newLang: AutocompleteOption = {
     isNew: true,
-    flags: ['🏁'],
+    flags: ['🏳️'],
     languageId: 'custom',
     originalName: '',
     englishName: input,
@@ -29,7 +29,7 @@ const getOptions = (input: string): AutocompleteOption[] => {
           <Add />
         </Box>
         <T>language_field_autocomplete_label_new_language</T>
-        &nbsp;🏁
+        &nbsp;🏳️
       </Box>
     ),
   };
