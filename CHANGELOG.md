@@ -1,3 +1,11 @@
+# [1.0.0-alpha.107](https://github.com/tolgee/server/compare/v1.0.0-alpha.106...v1.0.0-alpha.107) (2021-08-10)
+
+
+### Bug Fixes
+
+* Add version to the banner and UI TG-237 ([c5f8452](https://github.com/tolgee/server/commit/c5f8452dfe81d5de0f19c6896faaca2178ac243c))
+* Fix universal flag TG-211 ([a09903a](https://github.com/tolgee/server/commit/a09903a7b55f5d0b7c28b46eb5bceffbbef77ba9))
+
 # [1.0.0-alpha.106](https://github.com/tolgee/server/compare/v1.0.0-alpha.105...v1.0.0-alpha.106) (2021-08-09)
 
 
