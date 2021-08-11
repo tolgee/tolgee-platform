@@ -34,7 +34,13 @@ export const OrganizationsProjectListView = () => {
 
   return (
     <BaseView
-      title={t('organization_projects_title', { name: organization!.name })}
+      navigation={[
+        [t('organizations_title'), LINKS.ORGANIZATIONS.build()],
+        [
+          t('organization_projects_title', { name: organization!.name }),
+          LINKS.ORGANIZATION_PROJECTS.build({ slug: organization!.slug }),
+        ],
+      ]}
       containerMaxWidth="md"
       hideChildrenOnLoading={false}
       loading={loadable.isFetching}

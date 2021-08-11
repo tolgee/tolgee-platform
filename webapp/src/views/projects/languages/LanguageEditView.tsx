@@ -13,7 +13,6 @@ import { redirect } from 'tg.hooks/redirect';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { Navigation } from 'tg.component/navigation/Navigation';
 import { useProject } from 'tg.hooks/useProject';
 
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -100,31 +99,27 @@ export const LanguageEditView = () => {
       lg={6}
       md={8}
       xs={10}
-      navigation={
-        <Navigation
-          path={[
-            [
-              project.name,
-              LINKS.PROJECT_TRANSLATIONS.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-            [
-              t('project_settings_title'),
-              LINKS.PROJECT_EDIT.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-            [
-              t('language_settings_title'),
-              LINKS.PROJECT_EDIT_LANGUAGE.build({
-                [PARAMS.PROJECT_ID]: project.id,
-                [PARAMS.LANGUAGE_ID]: languageId,
-              }),
-            ],
-          ]}
-        />
-      }
+      navigation={[
+        [
+          project.name,
+          LINKS.PROJECT_TRANSLATIONS.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+        [
+          t('project_settings_title'),
+          LINKS.PROJECT_EDIT.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+        [
+          t('language_settings_title'),
+          LINKS.PROJECT_EDIT_LANGUAGE.build({
+            [PARAMS.PROJECT_ID]: project.id,
+            [PARAMS.LANGUAGE_ID]: languageId,
+          }),
+        ],
+      ]}
       initialValues={{
         ...languageLoadable.data!,
         flagEmoji: languageLoadable.data?.flagEmoji || '🏳️',

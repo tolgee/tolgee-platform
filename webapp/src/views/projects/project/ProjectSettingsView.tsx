@@ -8,7 +8,6 @@ import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog'
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { BaseView } from 'tg.component/layout/BaseView';
-import { Navigation } from 'tg.component/navigation/Navigation';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
@@ -102,24 +101,20 @@ export const ProjectSettingsView: FunctionComponent = () => {
     <BaseView
       lg={6}
       md={8}
-      navigation={
-        <Navigation
-          path={[
-            [
-              project.name,
-              LINKS.PROJECT_TRANSLATIONS.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-            [
-              t('project_settings_title'),
-              LINKS.PROJECT_EDIT.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-          ]}
-        />
-      }
+      navigation={[
+        [
+          project.name,
+          LINKS.PROJECT_TRANSLATIONS.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+        [
+          t('project_settings_title'),
+          LINKS.PROJECT_EDIT.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+      ]}
     >
       <StandardForm
         loading={deleteLoadable.isLoading}
