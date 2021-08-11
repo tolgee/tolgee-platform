@@ -1,3 +1,10 @@
+# [1.0.0-alpha.112](https://github.com/tolgee/server/compare/v1.0.0-alpha.111...v1.0.0-alpha.112) (2021-08-11)
+
+
+### Features
+
+* Enable basic caching TG-247 ([ba8b07d](https://github.com/tolgee/server/commit/ba8b07d830878ff81785a04d1091755ef92731e1))
+
 # [1.0.0-alpha.111](https://github.com/tolgee/server/compare/v1.0.0-alpha.110...v1.0.0-alpha.111) (2021-08-11)
 
 
