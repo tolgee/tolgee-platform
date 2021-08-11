@@ -1,22 +1,23 @@
-import React, { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
+import { Add } from '@material-ui/icons';
+import { T } from '@tolgee/react';
+import { Link } from 'react-router-dom';
 import {
   Box,
   Button,
   Container,
   LinearProgress,
   useTheme,
+  Typography,
+  Grid,
 } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 
 import { useLoading } from 'tg.hooks/loading';
+import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
+import { useConfig } from 'tg.hooks/useConfig';
+import { Navigation } from 'tg.component/navigation/Navigation';
 
 import { SecondaryBar } from './SecondaryBar';
-import { useConfig } from 'tg.hooks/useConfig';
-import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
-import { Add } from '@material-ui/icons';
-import { T } from '@tolgee/react';
-import { Link } from 'react-router-dom';
 
 export interface BaseViewProps {
   windowTitle?: string;
@@ -30,7 +31,7 @@ export interface BaseViewProps {
   md?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   lg?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   onSearch?: (string) => void;
-  navigation?: ReactNode;
+  navigation?: React.ComponentProps<typeof Navigation>['path'];
   customHeader?: ReactNode;
   hideChildrenOnLoading?: boolean;
   containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
@@ -74,7 +75,21 @@ export const BaseView = (props: BaseViewProps) => {
         }}
       >
         <Box minHeight="100%">
-          {props.navigation}
+          {props.navigation && (
+            <SecondaryBar
+              height={49}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Container
+                maxWidth={props.containerMaxWidth || false}
+                style={{ padding: 0, margin: 0 }}
+              >
+                <Navigation path={props.navigation} />
+              </Container>
+            </SecondaryBar>
+          )}
           {(props.title || props.customHeader) && (
             <SecondaryBar>
               <Container

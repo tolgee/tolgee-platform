@@ -9,7 +9,6 @@ import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
 import { BaseView } from 'tg.component/layout/BaseView';
-import { Navigation } from 'tg.component/navigation/Navigation';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
@@ -130,24 +129,20 @@ export const ImportView: FunctionComponent = () => {
 
   return (
     <BaseView
-      navigation={
-        <Navigation
-          path={[
-            [
-              project.name,
-              LINKS.PROJECT_TRANSLATIONS.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-            [
-              t('import_translations_title'),
-              LINKS.PROJECT_IMPORT.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-          ]}
-        />
-      }
+      navigation={[
+        [
+          project.name,
+          LINKS.PROJECT_TRANSLATIONS.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+        [
+          t('import_translations_title'),
+          LINKS.PROJECT_IMPORT.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+      ]}
       xs={12}
       md={10}
       lg={8}

@@ -6,7 +6,6 @@ import { useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
 
 import { BaseView } from 'tg.component/layout/BaseView';
-import { Navigation } from 'tg.component/navigation/Navigation';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { AppState } from 'tg.store/index';
@@ -45,24 +44,20 @@ export const ExportView: FunctionComponent = () => {
 
   return (
     <BaseView
-      navigation={
-        <Navigation
-          path={[
-            [
-              project.name,
-              LINKS.PROJECT_TRANSLATIONS.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-            [
-              t('export_translations_title'),
-              LINKS.PROJECT_EXPORT.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-          ]}
-        />
-      }
+      navigation={[
+        [
+          project.name,
+          LINKS.PROJECT_TRANSLATIONS.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+        [
+          t('export_translations_title'),
+          LINKS.PROJECT_EXPORT.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+      ]}
       xs={12}
       md={10}
       lg={8}

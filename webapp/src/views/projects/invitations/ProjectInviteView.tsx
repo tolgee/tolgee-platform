@@ -14,7 +14,6 @@ import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { MessageService } from 'tg.service/MessageService';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { BaseView } from 'tg.component/layout/BaseView';
-import { Navigation } from 'tg.component/navigation/Navigation';
 import { PermissionSelect } from 'tg.component/security/PermissionSelect';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
@@ -100,24 +99,20 @@ export const ProjectInviteView: FunctionComponent = () => {
     <BaseView
       loading={invitations.isFetching || deleteInvitation.isLoading}
       hideChildrenOnLoading={false}
-      navigation={
-        <Navigation
-          path={[
-            [
-              project.name,
-              LINKS.PROJECT_TRANSLATIONS.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-            [
-              t('invite_user_title'),
-              LINKS.PROJECT_INVITATION.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-          ]}
-        />
-      }
+      navigation={[
+        [
+          project.name,
+          LINKS.PROJECT_TRANSLATIONS.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+        [
+          t('invite_user_title'),
+          LINKS.PROJECT_INVITATION.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+      ]}
       xs={12}
       md={8}
       lg={6}

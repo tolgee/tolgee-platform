@@ -11,7 +11,6 @@ import { T, useTranslate } from '@tolgee/react';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { SimpleListItem } from 'tg.component/common/list/SimpleListItem';
 import { BaseView } from 'tg.component/layout/BaseView';
-import { Navigation } from 'tg.component/navigation/Navigation';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { translatedPermissionType } from 'tg.fixtures/translatePermissionFile';
 import { useProject } from 'tg.hooks/useProject';
@@ -48,24 +47,20 @@ export const ProjectPermissionsView: FunctionComponent = () => {
 
   return (
     <BaseView
-      navigation={
-        <Navigation
-          path={[
-            [
-              project.name,
-              LINKS.PROJECT_TRANSLATIONS.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-            [
-              t('edit_project_permissions_title'),
-              LINKS.PROJECT_PERMISSIONS.build({
-                [PARAMS.PROJECT_ID]: project.id,
-              }),
-            ],
-          ]}
-        />
-      }
+      navigation={[
+        [
+          project.name,
+          LINKS.PROJECT_TRANSLATIONS.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+        [
+          t('edit_project_permissions_title'),
+          LINKS.PROJECT_PERMISSIONS.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+      ]}
       containerMaxWidth="lg"
       loading={listLoadable.isFetching}
       hideChildrenOnLoading={false}
