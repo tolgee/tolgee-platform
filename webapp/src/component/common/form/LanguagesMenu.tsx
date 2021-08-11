@@ -20,6 +20,12 @@ const useStyles = makeStyles({
     width: 200,
     height: 40,
     flexShrink: 1,
+    maxWidth: '100%',
+  },
+  inputContent: {
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
   },
 });
 
@@ -71,12 +77,17 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
         value={props.value}
         onChange={(e) => langsChange(e)}
         renderValue={(selected) => (
-          <Typography color="textPrimary" variant="body2">
+          <Typography
+            color="textPrimary"
+            variant="body2"
+            className={classes.inputContent}
+          >
             {(selected as string[]).join(', ')}
           </Typography>
         )}
         MenuProps={menuProps}
         margin="dense"
+        inputProps={{ style: { width: 100 } }}
       >
         {props.languages.map((lang) => (
           <MenuItem key={lang.value} value={lang.value}>

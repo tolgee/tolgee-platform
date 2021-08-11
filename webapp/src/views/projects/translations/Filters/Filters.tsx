@@ -25,6 +25,11 @@ const useStyles = makeStyles({
       minWidth: 100,
     },
   },
+  inputContent: {
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+  },
 });
 
 export const Filters = () => {
@@ -130,23 +135,23 @@ export const Filters = () => {
       variant="outlined"
       value={activeFilters}
       data-cy="translations-filter-select"
-      renderValue={(value: any) =>
-        value.length === 0 ? (
-          <Typography color="textSecondary" variant="body2">
+      renderValue={(value: any) => (
+        <Typography
+          color={value.length === 0 ? 'textSecondary' : 'textPrimary'}
+          variant="body2"
+          className={classes.inputContent}
+        >
+          {value.length === 0 ? (
             <T>translations_filter_placeholder</T>
-          </Typography>
-        ) : value.length === 1 && findOption(value[0])?.label ? (
-          <Typography color="textPrimary" variant="body2">
-            {findOption(value[0])?.label}
-          </Typography>
-        ) : (
-          <Typography color="textPrimary" variant="body2">
+          ) : value.length === 1 && findOption(value[0])?.label ? (
+            findOption(value[0])?.label
+          ) : (
             <T parameters={{ filtersNum: String(activeFilters.length) }}>
               translations_filters_text
             </T>
-          </Typography>
-        )
-      }
+          )}
+        </Typography>
+      )}
       MenuProps={{
         variant: 'menu',
       }}
