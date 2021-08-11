@@ -1,3 +1,15 @@
+# [1.0.0-alpha.111](https://github.com/tolgee/server/compare/v1.0.0-alpha.110...v1.0.0-alpha.111) (2021-08-11)
+
+
+### Bug Fixes
+
+* Fix tag creation in safari and firefox TG-248 ([9a2b3d7](https://github.com/tolgee/server/commit/9a2b3d7741026e170ec9ad1493a91cbedde4d156))
+
+
+### Features
+
+* **translations:** Restrict translation length to 2000 characters TG-126 ([0a5de35](https://github.com/tolgee/server/commit/0a5de35e697d4d11daa41b453db9daf942f15943))
+
 # [1.0.0-alpha.110](https://github.com/tolgee/server/compare/v1.0.0-alpha.109...v1.0.0-alpha.110) (2021-08-11)
 
 
