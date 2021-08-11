@@ -1,3 +1,11 @@
+# [1.0.0-alpha.110](https://github.com/tolgee/server/compare/v1.0.0-alpha.109...v1.0.0-alpha.110) (2021-08-11)
+
+
+### Bug Fixes
+
+* Background of base view TG-216 ([2784bef](https://github.com/tolgee/server/commit/2784bef91075f9cd2fe082b14e417c8de55994f2))
+* Filter select text too long TG-222 ([ef919b4](https://github.com/tolgee/server/commit/ef919b4fbb09adb66baef3d7158a2c86b2ebdb75))
+
 # [1.0.0-alpha.109](https://github.com/tolgee/server/compare/v1.0.0-alpha.108...v1.0.0-alpha.109) (2021-08-11)
 
 

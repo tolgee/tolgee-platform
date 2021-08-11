@@ -37,7 +37,7 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
   const githubRedirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({
     [PARAMS.SERVICE_TYPE]: 'github',
   });
-  const clientId = remoteConfig.authMethods.github.clientId;
+  const clientId = remoteConfig.authMethods!.github.clientId;
   const gitHubUrl =
     GITHUB_BASE +
     `?client_id=${clientId}&redirect_uri=${githubRedirectUri}&scope=user%3Aemail`;
@@ -87,7 +87,7 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
               </Box>
               <Box display="flex">
                 <Box flexGrow={1}>
-                  {remoteConfig.authMethods.github?.enabled && (
+                  {remoteConfig.authMethods?.github?.enabled && (
                     <Button
                       component="a"
                       href={gitHubUrl}

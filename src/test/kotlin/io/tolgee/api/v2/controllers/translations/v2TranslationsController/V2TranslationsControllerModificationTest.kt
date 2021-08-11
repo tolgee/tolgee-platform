@@ -6,10 +6,7 @@ import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
-import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andIsForbidden
-import io.tolgee.fixtures.andIsOk
-import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.*
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.enums.TranslationState
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -46,6 +43,18 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
         node("keyId").isValidId
         node("keyName").isEqualTo("A key")
       }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `validated translation length`() {
+    val text = "a".repeat(10001)
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "A key", mutableMapOf("en" to text)
+      )
+    ).andIsBadRequest
   }
 
   @ProjectJWTAuthTestMethod

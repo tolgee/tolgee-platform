@@ -9,10 +9,11 @@ class PublicConfigurationDTO(
   @Schema(hidden = true)
   properties: TolgeeProperties
 ) {
-  val isAuthentication: Boolean = properties.authentication.enabled
+
+  val authentication: Boolean = properties.authentication.enabled
   var authMethods: AuthMethodsDTO? = null
-  val isPasswordResettable: Boolean
-  val isAllowRegistrations: Boolean
+  val passwordResettable: Boolean
+  val allowRegistrations: Boolean
   val screenshotsUrl = properties.screenshotsUrl
   val maxUploadFileSize = properties.maxUploadFileSize
   val clientSentryDsn = if (properties.sentry.enabled) properties.sentry.clientDsn else null
@@ -28,19 +29,20 @@ class PublicConfigurationDTO(
   val appName = properties.appName
   val version: String = VersionProvider.version
   val showVersion: Boolean = properties.internal.showVersion
+  val maxTranslationTextLength: Long = properties.maxTranslationTextLength
 
   class AuthMethodsDTO(val github: GithubPublicConfigDTO)
   data class GithubPublicConfigDTO(val clientId: String?) {
-    val isEnabled: Boolean = clientId != null && clientId.isNotEmpty()
+    val enabled: Boolean = clientId != null && clientId.isNotEmpty()
   }
 
   data class SocketIo(val enabled: Boolean, val port: Int, val serverUrl: String?, val allowedTransports: List<String>)
 
   init {
-    if (isAuthentication) {
+    if (authentication) {
       authMethods = AuthMethodsDTO(GithubPublicConfigDTO(properties.authentication.github.clientId))
     }
-    isPasswordResettable = properties.authentication.nativeEnabled
-    isAllowRegistrations = properties.authentication.registrationsAllowed
+    passwordResettable = properties.authentication.nativeEnabled
+    allowRegistrations = properties.authentication.registrationsAllowed
   }
 }

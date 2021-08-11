@@ -500,7 +500,7 @@ export interface components {
     };
     ErrorResponseBody: {
       code: string;
-      params?: { [key: string]: any }[];
+      params?: { [key: string]: unknown }[];
     };
     ImportAddFilesResultModel: {
       errors: components["schemas"]["ErrorResponseBody"][];
@@ -532,7 +532,7 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    StreamingResponseBody: { [key: string]: any };
+    StreamingResponseBody: { [key: string]: unknown };
     ScreenshotModel: {
       id: number;
       filename: string;
@@ -545,7 +545,7 @@ export interface components {
       /** Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
       callbackUrl?: string;
     };
-    TextNode: { [key: string]: any };
+    TextNode: { [key: string]: unknown };
     SignUpDto: {
       name: string;
       email: string;
@@ -643,6 +643,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -653,7 +654,6 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -788,13 +788,13 @@ export interface components {
     };
     GithubPublicConfigDTO: {
       clientId?: string;
-      isEnabled: boolean;
+      enabled: boolean;
     };
     PublicConfigurationDTO: {
-      isAuthentication: boolean;
+      authentication: boolean;
       authMethods?: components["schemas"]["AuthMethodsDTO"];
-      isPasswordResettable: boolean;
-      isAllowRegistrations: boolean;
+      passwordResettable: boolean;
+      allowRegistrations: boolean;
       screenshotsUrl: string;
       maxUploadFileSize: number;
       clientSentryDsn?: string;
@@ -802,6 +802,10 @@ export interface components {
       userCanCreateProjects: boolean;
       userCanCreateOrganizations: boolean;
       socket: components["schemas"]["SocketIo"];
+      appName: string;
+      version: string;
+      showVersion: boolean;
+      maxTranslationTextLength: number;
     };
     SocketIo: {
       enabled: boolean;
@@ -1418,6 +1422,16 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
+        /**
+         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
+         *
+         * When used with multiple states for same language it is applied with logical OR.
+         *
+         * When used with multiple languages, it is applied with logical AND.
+         */
+        filterState?: string[];
+        /** Selects only keys with provided tag */
+        filterTag?: string;
         /** Cursor to get next data */
         cursor?: string;
         /** Zero-based page index (0..N) */
@@ -2792,7 +2806,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": { [key: string]: any };
+          "*/*": { [key: string]: unknown };
         };
       };
       /** Bad Request */
@@ -2865,7 +2879,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": { [key: string]: any };
+          "*/*": { [key: string]: unknown };
         };
       };
       /** Bad Request */
@@ -4067,7 +4081,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": { [key: string]: { [key: string]: any } };
+          "*/*": { [key: string]: { [key: string]: unknown } };
         };
       };
       /** Bad Request */

@@ -3,7 +3,7 @@ import { singleton } from 'tsyringe';
 import { GlobalError } from '../error/GlobalError';
 import { ErrorActions } from '../store/global/ErrorActions';
 import { ApiV1HttpService } from './http/ApiV1HttpService';
-import { RemoteConfigurationDTO } from './response.types';
+import { components } from 'tg.service/apiSchema.generated';
 
 @singleton()
 export class RemoteConfigService {
@@ -12,7 +12,9 @@ export class RemoteConfigService {
     private errorActions: ErrorActions
   ) {}
 
-  public async getConfiguration(): Promise<RemoteConfigurationDTO | undefined> {
+  public async getConfiguration(): Promise<
+    components['schemas']['PublicConfigurationDTO'] | undefined
+  > {
     try {
       return await (await this.http.fetch(`public/configuration`)).json();
     } catch (e) {

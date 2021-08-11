@@ -26,33 +26,6 @@ export type ProjectDTO = {
   permissionType: ProjectPermissionType;
 };
 
-export interface RemoteConfigurationDTO {
-  clientSentryDsn: string;
-  authentication: boolean;
-  passwordResettable: boolean;
-  allowRegistrations: boolean;
-  authMethods: {
-    github: {
-      enabled: boolean;
-      clientId: string;
-    };
-  };
-  screenshotsUrl: string;
-  maxUploadFileSize: number;
-  needsEmailVerification: boolean;
-  userCanCreateOrganizations: boolean;
-  userCanCreateProjects: boolean;
-  socket: {
-    enabled: boolean;
-    port: number;
-    serverUrl?: string;
-    allowedTransports: ('websocket' | 'polling')[];
-  };
-  appName: string;
-  version: string;
-  showVersion: boolean;
-}
-
 export interface TokenDTO {
   accessToken: string;
 }
