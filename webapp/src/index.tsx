@@ -94,6 +94,9 @@ const theme = createMuiTheme({
     extraLightDivider: {
       main: 'rgba(0, 0, 0, 0.08)',
     },
+    background: {
+      default: 'rgb(255, 255, 255)',
+    },
   },
   overrides: {
     MuiTooltip: {

@@ -8,7 +8,6 @@ import {
 } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import grey from '@material-ui/core/colors/grey';
 
 import { useLoading } from 'tg.hooks/loading';
 
@@ -70,8 +69,6 @@ export const BaseView = (props: BaseViewProps) => {
         data-cy="global-base-view-content-scrollable"
         maxWidth={false}
         style={{
-          backgroundColor: 'white',
-          borderBottom: `1px solid ${grey[100]}`,
           padding: 0,
           minHeight: '100%',
         }}
