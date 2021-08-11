@@ -1,3 +1,10 @@
+# [1.0.0-alpha.109](https://github.com/tolgee/server/compare/v1.0.0-alpha.108...v1.0.0-alpha.109) (2021-08-11)
+
+
+### Bug Fixes
+
+* Fix base form validation and loading TG-245 ([06fe534](https://github.com/tolgee/server/commit/06fe5349d0156e51dbd73af10eb1b4d96e77e2dd))
+
 # [1.0.0-alpha.108](https://github.com/tolgee/server/compare/v1.0.0-alpha.107...v1.0.0-alpha.108) (2021-08-11)
 
 
