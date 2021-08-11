@@ -131,11 +131,8 @@ export const LanguageEditView = () => {
         originalName: languageLoadable.data?.originalName || '',
       }}
       onSubmit={onSubmit}
-      loading={
-        languageLoadable.isFetching ||
-        editLoadable.isLoading ||
-        deleteLoadable.isLoading
-      }
+      loading={languageLoadable.isFetching || deleteLoadable.isLoading}
+      saveActionLoadable={editLoadable}
       hideChildrenOnLoading={languageLoadable.isLoading}
       validationSchema={Validation.LANGUAGE(t)}
       customActions={

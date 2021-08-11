@@ -3,6 +3,7 @@ import { Button, ListItemText, TextField, Typography } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import { T } from '@tolgee/react';
+import { container } from 'tsyringe';
 
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { SimpleList } from 'tg.component/common/list/SimpleList';
@@ -10,10 +11,15 @@ import { SimpleListItem } from 'tg.component/common/list/SimpleListItem';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { OrganizationRoleType } from 'tg.service/response.types';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { MessageService } from 'tg.service/MessageService';
 
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { OrganizationRoleSelect } from './components/OrganizationRoleSelect';
 import { useOrganization } from './useOrganization';
+import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+
+const messaging = container.resolve(MessageService);
 
 export const OrganizationInvitationsView: FunctionComponent = () => {
   const organization = useOrganization();
@@ -34,6 +40,13 @@ export const OrganizationInvitationsView: FunctionComponent = () => {
   const cancelInviteLoadable = useApiMutation({
     url: '/api/invitation/{invitationId}',
     method: 'delete',
+    fetchOptions: { disableNotFoundHandling: true },
+    options: {
+      onError(e) {
+        messaging.error(parseErrorResponse(e));
+        invitationsLoadable.refetch();
+      },
+    },
   });
 
   const onSubmit = (values) => {
@@ -64,19 +77,22 @@ export const OrganizationInvitationsView: FunctionComponent = () => {
   };
 
   return (
-    <BaseOrganizationSettingsView title={<T>organization_invitations_title</T>}>
+    <BaseOrganizationSettingsView
+      title={<T>organization_invitations_title</T>}
+      loading={invitationsLoadable.isFetching || cancelInviteLoadable.isLoading}
+    >
       <StandardForm
-        loading={inviteLoadable.isLoading}
         submitButtons={
-          <Button
+          <LoadingButton
             data-cy="organization-invitation-generate-button"
             variant="contained"
             color="primary"
             type="submit"
             size="large"
+            loading={inviteLoadable.isLoading}
           >
             <T>invite_user_generate_invitation_link</T>
-          </Button>
+          </LoadingButton>
         }
         onSubmit={onSubmit}
         initialValues={{ type: OrganizationRoleType.MEMBER }}

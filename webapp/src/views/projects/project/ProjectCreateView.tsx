@@ -81,7 +81,7 @@ export const ProjectCreateView: FunctionComponent = () => {
         initialValues={initialValues}
         onSubmit={onSubmit}
         onCancel={() => setCancelled(true)}
-        loading={createProjectLoadable.isLoading}
+        saveActionLoadable={createProjectLoadable}
         validationSchema={Validation.PROJECT_CREATION(t)}
       >
         {(props: FormikProps<CreateProjectValueType>) => {

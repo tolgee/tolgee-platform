@@ -12,7 +12,7 @@ import { ErrorResponseDto } from 'tg.service/response.types';
 import LoadingButton from './LoadingButton';
 import { ResourceErrorComponent } from './ResourceErrorComponent';
 
-interface LoadableType {
+export interface LoadableType {
   loading?: boolean;
   isLoading?: boolean;
   error?: ErrorResponseDto;
