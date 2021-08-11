@@ -122,7 +122,8 @@ export const ProjectSettingsView: FunctionComponent = () => {
       }
     >
       <StandardForm
-        loading={updateLoadable.isLoading || deleteLoadable.isLoading}
+        loading={deleteLoadable.isLoading}
+        saveActionLoadable={updateLoadable}
         validationSchema={Validation.PROJECT_SETTINGS}
         onSubmit={handleEdit}
         onCancel={() => setCancelled(true)}

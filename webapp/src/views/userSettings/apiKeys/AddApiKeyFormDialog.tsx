@@ -157,6 +157,9 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
             {projects.data && scopes.data && (
               <StandardForm
                 onSubmit={props.editKey ? handleEdit : handleAdd}
+                saveActionLoadable={
+                  props.editKey ? editLoadable : generateLoadable
+                }
                 onCancel={() => onDialogClose()}
                 initialValues={getInitialValues()}
                 validationSchema={

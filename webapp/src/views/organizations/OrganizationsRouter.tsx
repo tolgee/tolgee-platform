@@ -1,3 +1,4 @@
+import { Box } from '@material-ui/core';
 import { Switch } from 'react-router-dom';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
@@ -41,7 +42,15 @@ const SpecificOrganizationRouter = () => {
           </PrivateRoute>
         </>
       ) : (
-        <BoxLoading />
+        <Box
+          width="100%"
+          height="100%"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <BoxLoading />
+        </Box>
       )}
     </DashboardPage>
   );

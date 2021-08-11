@@ -11,6 +11,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
 
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { MessageService } from 'tg.service/MessageService';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { Navigation } from 'tg.component/navigation/Navigation';
@@ -20,6 +21,10 @@ import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { ProjectInvitationActions } from 'tg.store/project/invitations/ProjectInvitationActions';
+import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
+
+const messaging = container.resolve(MessageService);
 
 type FormType = {
   type: string;
@@ -50,6 +55,13 @@ export const ProjectInviteView: FunctionComponent = () => {
   const deleteInvitation = useApiMutation({
     url: '/api/invitation/{invitationId}',
     method: 'delete',
+    fetchOptions: { disableNotFoundHandling: true },
+    options: {
+      onError(e) {
+        messaging.error(parseErrorResponse(e));
+        invitations.refetch();
+      },
+    },
   });
 
   const handleSubmit = (values: FormType) => {
@@ -84,12 +96,9 @@ export const ProjectInviteView: FunctionComponent = () => {
     );
   };
 
-  const loading =
-    invitations.isFetching || invite.isLoading || deleteInvitation.isLoading;
-
   return (
     <BaseView
-      loading={loading}
+      loading={invitations.isFetching || deleteInvitation.isLoading}
       hideChildrenOnLoading={false}
       navigation={
         <Navigation
@@ -116,17 +125,18 @@ export const ProjectInviteView: FunctionComponent = () => {
       {() => (
         <>
           <StandardForm
+            saveActionLoadable={invite}
             submitButtons={
-              <Button
+              <LoadingButton
                 variant="contained"
                 color="primary"
                 type="submit"
                 size="large"
-                disabled={invite.isLoading}
+                loading={invite.isLoading}
                 data-cy="invite-generate-button"
               >
                 <T>invite_user_generate_invitation_link</T>
-              </Button>
+              </LoadingButton>
             }
             onSubmit={handleSubmit}
             initialValues={{ type: 'MANAGE' }}
@@ -178,9 +188,6 @@ export const ProjectInviteView: FunctionComponent = () => {
                         <Button
                           color="secondary"
                           onClick={() => handleCancel(i!.id!)}
-                          disabled={
-                            deleteInvitation.isLoading || invitations.isFetching
-                          }
                         >
                           <T>invite_user_invitation_cancel_button</T>
                         </Button>

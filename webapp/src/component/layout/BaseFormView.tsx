@@ -2,9 +2,7 @@ import { FunctionComponent, ReactNode } from 'react';
 import { ObjectSchema } from 'yup';
 
 import { Link } from 'tg.constants/links';
-import { Loadable } from 'tg.store/AbstractLoadableActions';
-
-import { StandardForm } from '../common/form/StandardForm';
+import { LoadableType, StandardForm } from '../common/form/StandardForm';
 import { BaseView, BaseViewProps } from './BaseView';
 
 interface BaseFormViewProps {
@@ -14,8 +12,7 @@ interface BaseFormViewProps {
   onSubmit: (v: any) => void;
   onCancel?: () => void;
   validationSchema: ObjectSchema<any>;
-  resourceLoadable?: Loadable;
-  saveActionLoadable?: Loadable;
+  saveActionLoadable?: LoadableType;
   redirectAfter?: Link;
   customActions?: ReactNode;
   submitButtons?: ReactNode;
@@ -26,13 +23,7 @@ export const BaseFormView: FunctionComponent<
   BaseFormViewProps & BaseViewProps
 > = (props) => {
   return (
-    <BaseView
-      loading={
-        (props.resourceLoadable && !props.resourceLoadable.data) ||
-        (props.resourceLoadable && !props.resourceLoadable.touched)
-      }
-      {...props}
-    >
+    <BaseView {...props}>
       <StandardForm
         initialValues={props.initialValues}
         onSubmit={props.onSubmit}

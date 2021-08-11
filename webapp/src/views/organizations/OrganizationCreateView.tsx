@@ -58,7 +58,7 @@ export const OrganizationCreateView: FunctionComponent = () => {
         initialValues={initialValues}
         onSubmit={onSubmit}
         onCancel={onCancel}
-        loading={loadable.isLoading}
+        saveActionLoadable={loadable}
         validationSchema={Validation.ORGANIZATION_CREATE_OR_EDIT(t, '')}
       >
         <>

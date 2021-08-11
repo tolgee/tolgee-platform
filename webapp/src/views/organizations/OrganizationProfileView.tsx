@@ -97,9 +97,14 @@ export const OrganizationProfileView: FunctionComponent = () => {
   }
 
   return (
-    <BaseOrganizationSettingsView title={<T>edit_organization_title</T>}>
+    <BaseOrganizationSettingsView
+      title={<T>edit_organization_title</T>}
+      loading={organization.isFetching || deleteOrganization.isLoading}
+      hideChildrenOnLoading={false}
+    >
       <StandardForm
         initialValues={initialValues!}
+        saveActionLoadable={editOrganization}
         onSubmit={onSubmit}
         onCancel={() => setCancelled(true)}
         validationSchema={Validation.ORGANIZATION_CREATE_OR_EDIT(
