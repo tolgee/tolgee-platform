@@ -1,6 +1,6 @@
 package io.tolgee.security.api_key_auth
 
-import io.tolgee.exceptions.NotFoundException
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.ApiKeyService
@@ -43,7 +43,7 @@ class ApiKeyAuthFilter(
           try {
             val key = ak.get()
             securityService.checkApiKeyScopes(setOf(*apiScopes), key)
-            projectHolder.project = key.project ?: throw NotFoundException()
+            projectHolder.project = ProjectDto.fromEntity(key.project)
           } catch (e: PermissionException) {
             resolver.resolveException(request, response, null, e)
             return

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface UserAccountRepository : JpaRepository<UserAccount?, Long?> {
+interface UserAccountRepository : JpaRepository<UserAccount, Long> {
   fun findByUsername(username: String?): Optional<UserAccount>
   fun findByThirdPartyAuthTypeAndThirdPartyAuthId(
     thirdPartyAuthId: String,

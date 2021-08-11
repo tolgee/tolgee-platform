@@ -21,7 +21,7 @@ import javax.persistence.criteria.*
 
 class TranslationsViewBuilder(
   private val cb: CriteriaBuilder,
-  private val project: Project?,
+  private val projectId: Long,
   private val languages: Set<Language>,
   private val params: GetTranslationsParams,
   private val sort: Sort,
@@ -44,7 +44,7 @@ class TranslationsViewBuilder(
     selection[KeyWithTranslationsView::keyId.name] = keyIdExpression
     keyNameExpression = root.get(Key_.name)
     selection[KEY_NAME_FIELD] = keyNameExpression
-    whereConditions.add(cb.equal(root.get<Any>(Key_.PROJECT), this.project))
+    whereConditions.add(cb.equal(root.get<Any>(Key_.PROJECT).get<Any>(Project_.ID), this.projectId))
     fullTextFields.add(root.get(Key_.name))
     addLeftJoinedColumns()
     applyGlobalFilters()
@@ -269,7 +269,7 @@ class TranslationsViewBuilder(
     @JvmStatic
     fun getData(
       applicationContext: ApplicationContext,
-      project: Project?,
+      projectId: Long,
       languages: Set<Language>,
       pageable: Pageable,
       params: GetTranslationsParams = GetTranslationsParams()
@@ -286,7 +286,7 @@ class TranslationsViewBuilder(
 
       var translationsViewBuilder = TranslationsViewBuilder(
         cb = em.criteriaBuilder,
-        project = project,
+        projectId = projectId,
         languages = languages,
         params = params,
         sort = sort,
@@ -295,7 +295,7 @@ class TranslationsViewBuilder(
       val count = em.createQuery(translationsViewBuilder.countQuery).singleResult
       translationsViewBuilder = TranslationsViewBuilder(
         cb = em.criteriaBuilder,
-        project = project,
+        projectId = projectId,
         languages = languages,
         params = params,
         sort = sort,

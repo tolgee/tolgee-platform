@@ -19,14 +19,14 @@ import java.time.Instant
 import java.util.*
 
 @Service
-open class InvitationService @Autowired constructor(
+class InvitationService @Autowired constructor(
   private val invitationRepository: InvitationRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val permissionService: PermissionService
 ) {
   @Transactional
-  open fun create(project: Project, type: ProjectPermissionType): String {
+  fun create(project: Project, type: ProjectPermissionType): String {
     val code = RandomStringUtils.randomAlphabetic(50)
     val invitation = Invitation(null, code)
     invitation.permission = permissionService.createForInvitation(invitation, project, type)
@@ -35,7 +35,7 @@ open class InvitationService @Autowired constructor(
   }
 
   @Transactional
-  open fun create(organization: Organization, type: OrganizationRoleType): Invitation {
+  fun create(organization: Organization, type: OrganizationRoleType): Invitation {
     val code = RandomStringUtils.randomAlphabetic(50)
     val invitation = Invitation(null, code)
     invitation.organizationRole = organizationRoleService.createForInvitation(invitation, type, organization)
@@ -44,17 +44,17 @@ open class InvitationService @Autowired constructor(
   }
 
   @Transactional
-  open fun removeExpired() {
+  fun removeExpired() {
     invitationRepository.deleteAllByCreatedAtLessThan(Date.from(Instant.now().minus(Duration.ofDays(30))))
   }
 
   @Transactional
-  open fun accept(code: String?) {
-    this.accept(code, authenticationFacade.userAccount)
+  fun accept(code: String?) {
+    this.accept(code, authenticationFacade.userAccountEntity)
   }
 
   @Transactional
-  open fun accept(code: String?, userAccount: UserAccount) {
+  fun accept(code: String?, userAccount: UserAccount) {
     val invitation = getInvitation(code)
     val permission = invitation.permission
     val organizationRole = invitation.organizationRole
@@ -83,23 +83,23 @@ open class InvitationService @Autowired constructor(
     invitationRepository.delete(invitation)
   }
 
-  open fun getInvitation(code: String?): Invitation {
+  fun getInvitation(code: String?): Invitation {
     return invitationRepository.findOneByCode(code).orElseThrow { // this exception is important for sign up service! Do not remove!!
       BadRequestException(Message.INVITATION_CODE_DOES_NOT_EXIST_OR_EXPIRED)
     }!!
   }
 
-  open fun findById(id: Long): Optional<Invitation> {
+  fun findById(id: Long): Optional<Invitation> {
     @Suppress("UNCHECKED_CAST")
     return invitationRepository.findById(id) as Optional<Invitation>
   }
 
-  open fun getForProject(project: Project): Set<Invitation> {
+  fun getForProject(project: Project): Set<Invitation> {
     return invitationRepository.findAllByPermissionProjectOrderByCreatedAt(project)
   }
 
   @Transactional
-  open fun delete(invitation: Invitation) {
+  fun delete(invitation: Invitation) {
     invitation.permission?.let {
       permissionService.delete(it)
     }
@@ -109,7 +109,7 @@ open class InvitationService @Autowired constructor(
     invitationRepository.delete(invitation)
   }
 
-  open fun getForOrganization(organization: Organization): List<Invitation> {
+  fun getForOrganization(organization: Organization): List<Invitation> {
     return invitationRepository.getAllByOrganizationRoleOrganizationOrderByCreatedAt(organization)
   }
 }

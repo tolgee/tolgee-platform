@@ -77,9 +77,9 @@ class TranslationService(
 
   fun getKeyTranslationsResult(projectId: Long, path: PathDTO?, languageTags: Set<String>?): Map<String, String?> {
     val project = projectService.get(projectId).orElseThrow { NotFoundException() }!!
-    val key = keyService.get(project, path!!).orElse(null)
+    val key = keyService.get(projectId, path!!).orElse(null)
     val languages: Set<Language> = if (languageTags == null) {
-      languageService.getImplicitLanguages(project)
+      languageService.getImplicitLanguages(projectId)
     } else {
       languageService.findByTags(languageTags, projectId)
     }
@@ -125,7 +125,7 @@ class TranslationService(
     search: String?
   ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
     val project = projectService.get(projectId!!).orElseThrow { NotFoundException() }!!
-    val languages: Set<Language> = languageService.getLanguagesForTranslationsView(languageTags, project)
+    val languages: Set<Language> = languageService.getLanguagesForTranslationsView(languageTags, projectId)
     val (count, data1) = TranslationsViewBuilderOld.getData(entityManager, project, languages, search, limit, offset)
     return ViewDataResponse(
       data1
@@ -139,12 +139,12 @@ class TranslationService(
 
   @Suppress("UNCHECKED_CAST")
   fun getViewData(
-    project: Project,
+    projectId: Long,
     pageable: Pageable,
     params: GetTranslationsParams,
     languages: Set<Language>
   ): Page<KeyWithTranslationsView> {
-    return TranslationsViewBuilder.getData(applicationContext, project, languages, pageable, params)
+    return TranslationsViewBuilder.getData(applicationContext, projectId, languages, pageable, params)
   }
 
   fun setTranslation(key: Key, languageTag: String?, text: String?): Translation {

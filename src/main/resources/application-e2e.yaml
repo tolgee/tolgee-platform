@@ -28,6 +28,11 @@ tolgee:
     tls-enabled: false
     tls-required: false
     from: Tolgee <no-reply@tolgee.io>
+  cache:
+    enabled: true
+    use-redis: false
+    default-ttl: 120000
+    caffeine-max-size: 1000
 server:
   port: 8201
   error:

@@ -86,7 +86,7 @@ class V2ScreenshotController(
   }
 
   private fun Key.checkInProject() {
-    keyService.checkInProject(this, projectHolder.project)
+    keyService.checkInProject(this, projectHolder.project.id)
   }
 
   private val Screenshot.model: ScreenshotModel

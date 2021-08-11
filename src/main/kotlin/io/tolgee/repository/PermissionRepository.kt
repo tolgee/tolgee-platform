@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
-interface PermissionRepository : JpaRepository<Permission?, Long?> {
+interface PermissionRepository : JpaRepository<Permission, Long> {
   fun findOneByProjectIdAndUserId(projectId: Long?, userId: Long?): Permission?
 
   fun getAllByProjectAndUserNotNull(project: io.tolgee.model.Project?): Set<Permission>

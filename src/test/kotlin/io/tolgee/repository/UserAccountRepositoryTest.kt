@@ -46,7 +46,7 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
     val usersAndOrganizations = dbPopulatorReal.createUsersAndOrganizations()
     val repo = usersAndOrganizations[0].organizationRoles[0].organization!!.projects[0]
 
-    permissionService.grantFullAccessToRepo(franta, repo)
+    permissionService.grantFullAccessToProject(franta, repo)
 
     val returned = userAccountRepository.getAllInProject(repo.id, PageRequest.of(0, 20))
     assertThat(returned.content).hasSize(3)
@@ -61,7 +61,7 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
     val usersAndOrganizations = dbPopulatorReal.createUsersAndOrganizations()
     val repo = usersAndOrganizations[0].organizationRoles[0].organization!!.projects[0]
 
-    permissionService.grantFullAccessToRepo(franta, repo)
+    permissionService.grantFullAccessToProject(franta, repo)
 
     val returned = userAccountRepository.getAllInProject(repo.id, PageRequest.of(0, 20), "franta")
     assertThat(returned.content).hasSize(1)

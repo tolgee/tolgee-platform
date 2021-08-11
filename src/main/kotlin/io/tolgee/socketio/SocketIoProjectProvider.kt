@@ -33,7 +33,7 @@ class SocketIoProjectProvider(
         jwtTokenProvider.validateToken(jwtToken)
         val userAccount = jwtTokenProvider.getUser(jwtToken)
         val projectId = projectIdString.toLong()
-        securityService.checkAnyProjectPermission(projectId = projectId, userAccount)
+        securityService.checkAnyProjectPermission(projectId = projectId, userAccount.id)
         return projectService.get(projectId).orElseThrow { NotFoundException() }
       }
     } ?: let { throw AuthenticationException(Message.GENERAL_JWT_ERROR) }

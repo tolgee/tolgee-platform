@@ -78,7 +78,7 @@ class TranslationCommentService(
 
   fun update(
     entity: TranslationComment,
-    updatedBy: UserAccount = authenticationFacade.userAccount
+    updatedBy: UserAccount = authenticationFacade.userAccountEntity
   ): TranslationComment {
     return translationCommentRepository.save(entity)
   }

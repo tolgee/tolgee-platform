@@ -43,7 +43,7 @@ data class Project(
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var apiKeys: MutableSet<ApiKey> = LinkedHashSet()
 
-  @ManyToOne(optional = true)
+  @ManyToOne(optional = true, fetch = FetchType.LAZY)
   var userOwner: UserAccount? = null
 
   @ManyToOne(optional = true)

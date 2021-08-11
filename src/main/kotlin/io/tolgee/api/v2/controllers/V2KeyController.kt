@@ -43,7 +43,7 @@ class V2KeyController(
   @Operation(summary = "Creates new key")
   @ResponseStatus(HttpStatus.CREATED)
   fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyModel> {
-    return ResponseEntity(keyService.create(projectHolder.project, dto.name).model, HttpStatus.CREATED)
+    return ResponseEntity(keyService.create(projectHolder.projectEntity, dto.name).model, HttpStatus.CREATED)
   }
 
   @PutMapping(value = ["/{id}"])
@@ -53,7 +53,7 @@ class V2KeyController(
   fun edit(@PathVariable id: Long, @RequestBody @Valid dto: EditKeyDto): KeyModel {
     val key = keyService.get(id).orElseThrow { NotFoundException() }
     key.checkInProject()
-    return keyService.edit(projectHolder.project, id, dto).model
+    return keyService.edit(id, dto).model
   }
 
   @DeleteMapping(value = ["/{ids:[0-9,]+}"])
@@ -67,7 +67,7 @@ class V2KeyController(
   }
 
   private fun Key.checkInProject() {
-    keyService.checkInProject(this, projectHolder.project)
+    keyService.checkInProject(this, projectHolder.project.id)
   }
 
   private val Key.model: KeyModel

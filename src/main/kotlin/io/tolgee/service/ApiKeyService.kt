@@ -33,8 +33,8 @@ class ApiKeyService @Autowired constructor(
     return ApiKeyDTO.fromEntity(apiKey)
   }
 
-  fun getAllByUser(userAccount: UserAccount): Set<ApiKey> {
-    return apiKeyRepository.getAllByUserAccountOrderById(userAccount)
+  fun getAllByUser(userAccountId: Long): Set<ApiKey> {
+    return apiKeyRepository.getAllByUserAccountIdOrderById(userAccountId)
   }
 
   fun getAllByProject(projectId: Long): Set<ApiKey> {
@@ -53,8 +53,8 @@ class ApiKeyService @Autowired constructor(
     apiKeyRepository.delete(apiKey)
   }
 
-  fun getAvailableScopes(userAccount: UserAccount, project: Project): Set<ApiScope> {
-    return permissionService.getProjectPermissionType(project.id, userAccount)?.availableScopes?.toSet()
+  fun getAvailableScopes(userAccountId: Long, project: Project): Set<ApiScope> {
+    return permissionService.getProjectPermissionType(project.id, userAccountId)?.availableScopes?.toSet()
       ?: throw NotFoundException()
   }
 

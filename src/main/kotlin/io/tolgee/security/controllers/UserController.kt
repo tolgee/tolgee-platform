@@ -19,7 +19,7 @@ class UserController(
   @Operation(summary = "Returns current user's data")
   @GetMapping("")
   fun getInfo(): UserResponseDTO {
-    val userAccount = authenticationFacade.userAccount
+    val userAccount = authenticationFacade.userAccountEntity
     return UserResponseDTO(
       name = userAccount.name,
       username = userAccount.username,
@@ -31,6 +31,6 @@ class UserController(
   @PostMapping("")
   @Operation(summary = "Updates current user's data")
   fun updateUser(@RequestBody @Valid dto: UserUpdateRequestDTO?) {
-    userAccountService.update(authenticationFacade.userAccount, dto!!)
+    userAccountService.update(authenticationFacade.userAccountEntity, dto!!)
   }
 }

@@ -14,11 +14,11 @@ interface TagRepository : JpaRepository<Tag, Long> {
 
   @Query(
     """
-    from Tag t where t.project = :project
+    from Tag t where t.project.id = :projectId
     and (:search is null or lower(name) like lower(concat('%', cast(:search as text),'%')))
   """
   )
-  fun findAllByProject(project: Project, search: String? = null, pageable: Pageable): Page<Tag>
+  fun findAllByProject(projectId: Long, search: String? = null, pageable: Pageable): Page<Tag>
 
   @Query(
     """

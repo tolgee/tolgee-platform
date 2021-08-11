@@ -24,9 +24,7 @@ class ProjectPermissionFilter(
   private val projectHolder: ProjectHolder,
   private val projectService: ProjectService,
   private val authenticationFacade: AuthenticationFacade
-
 ) : OncePerRequestFilter() {
-
   companion object {
     const val REGEX = "/(?:v2|api)/(?:repositor(?:y|ies)|projects?)/([0-9]+)/?.*"
   }
@@ -50,7 +48,7 @@ class ProjectPermissionFilter(
 
       try {
         val projectId = request.projectId
-        projectHolder.project = projectService.get(projectId).orElseThrow { NotFoundException() }!!
+        projectHolder.project = projectService.findDto(projectId) ?: throw NotFoundException()
 
         if (specificPermissionAnnotation != null) {
           securityService.checkProjectPermission(projectId, specificPermissionAnnotation.permission)

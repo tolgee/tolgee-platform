@@ -9,11 +9,11 @@ import javax.validation.constraints.Size
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserUpdateRequestDTO(
   @field:NotBlank
-  var name: String? = null,
+  var name: String = "",
 
   @field:NotBlank
   @field:Email
-  var email: String? = null,
+  var email: String = "",
 
   @field:Size(min = 8, max = 100)
   var password: String? = null,

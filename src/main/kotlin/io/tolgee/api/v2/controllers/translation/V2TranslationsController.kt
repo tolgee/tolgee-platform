@@ -100,7 +100,7 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    val key = keyService.getOrCreateKey(projectHolder.project, PathDTO.fromFullPath(dto.key))
+    val key = keyService.getOrCreateKey(projectHolder.projectEntity, PathDTO.fromFullPath(dto.key))
     val translations = translationService.setForKey(key, dto.translations)
     return getSetTranslationsResponse(key, translations)
   }
@@ -124,8 +124,8 @@ class V2TranslationsController(
     @ParameterObject pageable: Pageable
   ): KeysWithTranslationsPageModel {
     val languages: Set<Language> = languageService
-      .getLanguagesForTranslationsView(params.languages, projectHolder.project)
-    val data = translationService.getViewData(projectHolder.project, pageable, params, languages)
+      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id)
+    val data = translationService.getViewData(projectHolder.project.id, pageable, params, languages)
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
     return pagedAssembler.toTranslationModel(data, languages, cursor)
   }

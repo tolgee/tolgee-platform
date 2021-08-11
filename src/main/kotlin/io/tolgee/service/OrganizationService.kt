@@ -12,6 +12,7 @@ import io.tolgee.model.views.OrganizationView
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.util.SlugGenerator
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -24,14 +25,16 @@ class OrganizationService(
   private val organizationRepository: OrganizationRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val slugGenerator: SlugGenerator,
-  private val projectService: ProjectService,
   private val organizationRoleService: OrganizationRoleService,
   private val invitationService: InvitationService,
 ) {
 
+  @set:Autowired
+  lateinit var projectService: ProjectService
+
   @Transactional
   fun create(createDto: OrganizationDto): Organization {
-    return this.create(createDto, authenticationFacade.userAccount)
+    return this.create(createDto, authenticationFacade.userAccountEntity)
   }
 
   @Transactional

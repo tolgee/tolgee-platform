@@ -73,12 +73,12 @@ class TagController(
     @RequestParam search: String? = null,
     @ParameterObject pageable: Pageable
   ): PagedModel<TagModel> {
-    val data = tagService.getProjectTags(projectHolder.project, search, pageable)
+    val data = tagService.getProjectTags(projectHolder.project.id, search, pageable)
     return pagedResourcesAssembler.toModel(data, tagModelAssembler)
   }
 
   private fun Key.checkInProject() {
-    keyService.checkInProject(this, projectHolder.project)
+    keyService.checkInProject(this, projectHolder.project.id)
   }
 
   private fun Tag.checkInProject() {

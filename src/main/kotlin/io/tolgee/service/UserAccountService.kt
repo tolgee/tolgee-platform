@@ -1,7 +1,9 @@
 package io.tolgee.service
 
+import io.tolgee.configuration.Caches
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.dtos.request.UserUpdateRequestDTO
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -9,6 +11,9 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -20,16 +25,26 @@ import java.util.*
 class UserAccountService(
   private val userAccountRepository: UserAccountRepository,
   private val tolgeeProperties: TolgeeProperties,
-  private val emailVerificationService: EmailVerificationService
 ) {
+  @Autowired
+  lateinit var emailVerificationService: EmailVerificationService
+
   fun getByUserName(username: String?): Optional<UserAccount> {
     return userAccountRepository.findByUsername(username)
   }
 
-  operator fun get(id: Long): Optional<UserAccount?> {
+  operator fun get(id: Long): Optional<UserAccount> {
     return userAccountRepository.findById(id)
   }
 
+  @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
+  fun getDto(id: Long): UserAccountDto? {
+    return userAccountRepository.findById(id).orElse(null)?.let {
+      UserAccountDto.fromEntity(it)
+    }
+  }
+
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun createUser(userAccount: UserAccount): UserAccount {
     userAccountRepository.save(userAccount)
     return userAccount
@@ -42,6 +57,7 @@ class UserAccountService(
     }
   }
 
+  @CacheEvict(Caches.USER_ACCOUNTS, key = "#userAccount.id")
   fun delete(userAccount: UserAccount) {
     userAccountRepository.delete(userAccount)
   }
@@ -51,6 +67,7 @@ class UserAccountService(
     return UserAccount(name = request.name, username = request.email, password = encodedPassword)
   }
 
+  @get:Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "'implicit'")
   val implicitUser: UserAccount
     get() {
       val username = "___implicit_user"
@@ -66,17 +83,19 @@ class UserAccountService(
   }
 
   @Transactional
-  fun setResetPasswordCode(userAccount: UserAccount, code: String?) {
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun setResetPasswordCode(userAccount: UserAccount, code: String?): UserAccount {
     val bCryptPasswordEncoder = BCryptPasswordEncoder()
     userAccount.resetPasswordCode = bCryptPasswordEncoder.encode(code)
-    userAccountRepository.save(userAccount)
+    return userAccountRepository.save(userAccount)
   }
 
   @Transactional
-  fun setUserPassword(userAccount: UserAccount, password: String?) {
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun setUserPassword(userAccount: UserAccount, password: String?): UserAccount {
     val bCryptPasswordEncoder = BCryptPasswordEncoder()
     userAccount.password = bCryptPasswordEncoder.encode(password)
-    userAccountRepository.save(userAccount)
+    return userAccountRepository.save(userAccount)
   }
 
   @Transactional
@@ -86,8 +105,10 @@ class UserAccountService(
   }
 
   @Transactional
-  fun removeResetCode(userAccount: UserAccount) {
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun removeResetCode(userAccount: UserAccount): UserAccount {
     userAccount.resetPasswordCode = null
+    return userAccountRepository.save(userAccount)
   }
 
   fun getAllInOrganization(
@@ -108,7 +129,8 @@ class UserAccountService(
   }
 
   @Transactional
-  fun update(userAccount: UserAccount, dto: UserUpdateRequestDTO) {
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun update(userAccount: UserAccount, dto: UserUpdateRequestDTO): UserAccount {
     if (userAccount.username != dto.email) {
       getByUserName(dto.email).ifPresent { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
       if (tolgeeProperties.authentication.needsEmailVerification) {
@@ -125,11 +147,16 @@ class UserAccountService(
     }
 
     userAccount.name = dto.name
-    userAccountRepository.save(userAccount)
+    return userAccountRepository.save(userAccount)
   }
 
   fun saveAll(userAccounts: Collection<UserAccount>): MutableList<UserAccount> =
     userAccountRepository.saveAll(userAccounts)
+
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun save(user: UserAccount): UserAccount {
+    return userAccountRepository.save(user)
+  }
 
   val isAnyUserAccount: Boolean
     get() = userAccountRepository.count() > 0

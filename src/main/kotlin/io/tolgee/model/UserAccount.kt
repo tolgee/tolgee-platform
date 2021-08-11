@@ -2,6 +2,7 @@ package io.tolgee.model
 
 import org.hibernate.envers.Audited
 import javax.persistence.*
+import javax.validation.constraints.NotBlank
 
 @Entity
 @Table(
@@ -20,10 +21,14 @@ import javax.persistence.*
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Long? = null,
-  var username: String? = null,
+  var id: Long = 0L,
+
+  @field:NotBlank
+  var username: String = "",
+
   var password: String? = null,
-  var name: String? = null,
+
+  var name: String = "",
   @Enumerated(EnumType.STRING)
   var role: Role? = Role.USER
 ) : AuditModel() {
@@ -56,7 +61,7 @@ data class UserAccount(
     thirdPartyAuthType: String?,
     thirdPartyAuthId: String?,
     resetPasswordCode: String?
-  ) : this(id, username, password, name) {
+  ) : this(id = 0L, username = "", password, name = "") {
     this.permissions = permissions
     this.role = role
     this.thirdPartyAuthType = thirdPartyAuthType
