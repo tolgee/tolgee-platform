@@ -13,8 +13,9 @@ import { CustomPopper } from './CustomPopper';
 const useStyles = makeStyles({
   autocomplete: {
     display: 'flex',
-    flexShrink: 1,
-    flexBasis: '100%',
+    alignItems: 'center',
+    width: 150,
+    overflow: 'hidden',
   },
   input: {
     display: 'flex',
@@ -24,8 +25,8 @@ const useStyles = makeStyles({
     outline: 0,
     minWidth: 0,
     width: '100%',
-    flexBasis: 150,
     fontSize: 14,
+    flexShrink: 1,
   },
   option: {
     whiteSpace: 'nowrap',
