@@ -1,3 +1,10 @@
+# [1.0.0-alpha.108](https://github.com/tolgee/server/compare/v1.0.0-alpha.107...v1.0.0-alpha.108) (2021-08-11)
+
+
+### Features
+
+* **Tags:** add autocomplete and tests TG-184 ([a91782f](https://github.com/tolgee/server/commit/a91782f24fd0323abba5ded39a9ca217662fd914))
+
 # [1.0.0-alpha.107](https://github.com/tolgee/server/compare/v1.0.0-alpha.106...v1.0.0-alpha.107) (2021-08-10)
 
 
