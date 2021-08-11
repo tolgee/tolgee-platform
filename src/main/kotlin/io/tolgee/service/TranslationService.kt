@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.query_results.KeyWithTranslationsDto
@@ -8,6 +9,7 @@ import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto.Companion.fromQueryResult
 import io.tolgee.dtos.response.ViewDataResponse
 import io.tolgee.dtos.response.translations_view.ResponseParams
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.InternalException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
@@ -42,7 +44,8 @@ class TranslationService(
   private val entityManager: EntityManager,
   private val importService: ImportService,
   private val translationsSocketIoModule: TranslationsSocketIoModule,
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
+  private val tolgeeProperties: TolgeeProperties
 ) {
   @Autowired
   private lateinit var languageService: LanguageService
@@ -158,6 +161,10 @@ class TranslationService(
   }
 
   fun saveTranslation(translation: Translation): Translation {
+    val translationTextLength = translation.text?.length ?: 0
+    if (translationTextLength > tolgeeProperties.maxTranslationTextLength) {
+      throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG, listOf(tolgeeProperties.maxTranslationTextLength))
+    }
     val wasCreated = translation.id == 0L
     return translationRepository.save(translation).also {
       if (wasCreated) {

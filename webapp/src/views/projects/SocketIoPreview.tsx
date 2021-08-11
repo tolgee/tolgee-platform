@@ -28,7 +28,7 @@ export const SocketIoPreview = () => {
 
   const client = useMemo(() => {
     return new TranslationsClient({
-      transports: config.socket.allowedTransports,
+      transports: config.socket.allowedTransports as any,
       serverUrl:
         config.socket.serverUrl ||
         `${window.location.protocol}//${window.location.host}:9090`,
