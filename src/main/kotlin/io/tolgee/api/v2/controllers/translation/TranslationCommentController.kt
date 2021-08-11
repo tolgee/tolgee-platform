@@ -144,7 +144,7 @@ class TranslationCommentController(
   ): ResponseEntity<TranslationCommentModel> {
     val translation = translationService.find(translationId) ?: throw NotFoundException()
     translation.checkFromProject()
-    val comment = translationCommentService.create(dto, translation, authenticationFacade.userAccount)
+    val comment = translationCommentService.create(dto, translation, authenticationFacade.userAccountEntity)
     return ResponseEntity(translationCommentModelAssembler.toModel(comment), HttpStatus.CREATED)
   }
 

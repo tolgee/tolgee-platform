@@ -21,6 +21,7 @@ import javax.persistence.EntityManager
 class LanguageService(
   private val languageRepository: LanguageRepository,
   private val entityManager: EntityManager,
+  private val projectService: ProjectService
 ) {
   private var translationService: TranslationService? = null
 
@@ -28,7 +29,7 @@ class LanguageService(
   fun createLanguage(dto: LanguageDto?, project: Project): Language {
     val language = fromRequestDTO(dto!!)
     language.project = project
-    project.languages.add(language)
+    projectService.refresh(project).languages.add(language)
     languageRepository.save(language)
     return language
   }
@@ -48,8 +49,8 @@ class LanguageService(
     return language
   }
 
-  fun getImplicitLanguages(project: Project): Set<Language> {
-    val data = getPaged(projectId = project.id, PageRequest.of(0, 2))
+  fun getImplicitLanguages(projectId: Long): Set<Language> {
+    val data = getPaged(projectId = projectId, PageRequest.of(0, 2))
     return data.content.toSet()
   }
 
@@ -78,10 +79,10 @@ class LanguageService(
     return languages.toSet()
   }
 
-  fun getLanguagesForTranslationsView(languages: Set<String>?, project: Project): Set<Language> {
+  fun getLanguagesForTranslationsView(languages: Set<String>?, projectId: Long): Set<Language> {
     return if (languages == null) {
-      getImplicitLanguages(project)
-    } else findByTags(languages, project.id)
+      getImplicitLanguages(projectId)
+    } else findByTags(languages, projectId)
   }
 
   fun findByName(name: String?, project: Project): Optional<Language> {

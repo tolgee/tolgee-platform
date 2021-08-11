@@ -82,7 +82,7 @@ class GithubOAuthDelegate(
         }
 
         val newUserAccount = UserAccount()
-        newUserAccount.username = githubEmail.email
+        newUserAccount.username = githubEmail.email ?: throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
         newUserAccount.name = userResponse.name ?: userResponse.login
         newUserAccount.thirdPartyAuthId = userResponse.id
         newUserAccount.thirdPartyAuthType = "github"
@@ -92,7 +92,7 @@ class GithubOAuthDelegate(
         }
         newUserAccount
       }
-      val jwt = tokenProvider.generateToken(user.id!!).toString()
+      val jwt = tokenProvider.generateToken(user.id).toString()
       return JwtAuthenticationResponse(jwt)
     }
     if (response == null) {
@@ -115,6 +115,6 @@ class GithubOAuthDelegate(
   class GithubUserResponse {
     var name: String? = null
     var id: String? = null
-    val login: String? = null
+    val login: String = ""
   }
 }

@@ -1,6 +1,7 @@
 package io.tolgee.unit
 
 import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -74,7 +75,7 @@ class CoreImportFileProcessorUnitTest {
     whenever(importServiceMock.saveFile(any())).thenReturn(importFile)
     whenever(languageServiceMock.findByTag(eq("lng"), any<Long>()))
       .thenReturn(Optional.of(existingLanguage))
-    whenever(authenticationFacadeMock.userAccount).thenReturn(UserAccount())
+    whenever(authenticationFacadeMock.userAccount).thenReturn(UserAccountDto.fromEntity(UserAccount()))
   }
 
   @Test

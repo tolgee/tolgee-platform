@@ -96,7 +96,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
     val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
     val user = dbPopulator.createUserIfNotExists("jirina")
-    permissionService.grantFullAccessToRepo(user, repo)
+    permissionService.grantFullAccessToProject(user, repo)
 
     loginAsUser(usersAndOrganizations[1].name!!)
 

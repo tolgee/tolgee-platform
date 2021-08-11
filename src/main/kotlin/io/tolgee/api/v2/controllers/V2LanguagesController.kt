@@ -52,7 +52,7 @@ class V2LanguagesController(
   private val securityService: SecurityService,
   private val languageModelAssembler: LanguageModelAssembler,
   private val pagedAssembler: PagedResourcesAssembler<Language>,
-  private val projectHolder: ProjectHolder
+  private val projectHolder: ProjectHolder,
 ) : IController {
 
   @PostMapping(value = [""])

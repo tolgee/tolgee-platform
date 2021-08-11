@@ -4,32 +4,36 @@ import io.tolgee.model.enums.ApiScope
 import org.hibernate.envers.Audited
 import javax.persistence.*
 
+@Suppress("LeakingThis")
 @Entity
 @Audited
 data class Permission(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Long? = null,
+  var id: Long = 0L,
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   var user: UserAccount? = null,
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   var invitation: Invitation? = null,
 
   @Enumerated(EnumType.STRING)
-  var type: ProjectPermissionType? = null
+  var type: ProjectPermissionType = ProjectPermissionType.VIEW
 ) : AuditModel() {
 
   constructor(
-    id: Long? = null,
+    id: Long = 0L,
     user: UserAccount? = null,
     invitation: Invitation? = null,
-    project: Project?,
-    type: ProjectPermissionType?
+    project: Project,
+    type: ProjectPermissionType = ProjectPermissionType.VIEW
   ) : this(id, user, invitation, type) {
     this.project = project
   }
+
+  @ManyToOne
+  var project: Project = Project()
 
   enum class ProjectPermissionType(val power: Int, val availableScopes: Array<ApiScope>) {
     VIEW(1, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.SCREENSHOTS_VIEW)),
@@ -56,56 +60,5 @@ data class Permission(
         ApiScope.SCREENSHOTS_DELETE
       )
     );
-  }
-
-  @ManyToOne
-  var project: Project? = null
-
-  class PermissionBuilder internal constructor() {
-    private var id: Long? = null
-    private var user: UserAccount? = null
-    private var invitation: Invitation? = null
-    private var project: Project? = null
-    private var type: ProjectPermissionType? = null
-    fun id(id: Long?): PermissionBuilder {
-      this.id = id
-      return this
-    }
-
-    fun user(user: UserAccount?): PermissionBuilder {
-      this.user = user
-      return this
-    }
-
-    fun invitation(invitation: Invitation?): PermissionBuilder {
-      this.invitation = invitation
-      return this
-    }
-
-    fun project(project: Project?): PermissionBuilder {
-      this.project = project
-      return this
-    }
-
-    fun type(type: ProjectPermissionType?): PermissionBuilder {
-      this.type = type
-      return this
-    }
-
-    fun build(): Permission {
-      return Permission(id, user, invitation, project, type)
-    }
-
-    override fun toString(): String {
-      return "Permission.PermissionBuilder(id=" + id + "," +
-        " user=" + user + ", invitation=" + invitation + ", project=" + project + ", type=" + type + ")"
-    }
-  }
-
-  companion object {
-    @JvmStatic
-    fun builder(): PermissionBuilder {
-      return PermissionBuilder()
-    }
   }
 }

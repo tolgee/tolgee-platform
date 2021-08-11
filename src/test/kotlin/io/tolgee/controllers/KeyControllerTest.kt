@@ -38,7 +38,7 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     performCreate(projectId = project.id, content = keyDto).andExpect(status().`is`(200))
       .andReturn()
 
-    assertThat(keyService.get(project, PathDTO.fromFullPath("test string"))).isNotEmpty
+    assertThat(keyService.get(project.id, PathDTO.fromFullPath("test string"))).isNotEmpty
   }
 
   @Test
@@ -65,8 +65,8 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     ).andExpect(status().`is`(200))
       .andReturn()
 
-    assertThat(keyService.get(project, PathDTO.fromFullPath("test string"))).isEmpty
-    assertThat(keyService.get(project, PathDTO.fromFullPath("hello"))).isNotEmpty
+    assertThat(keyService.get(project.id, PathDTO.fromFullPath("test string"))).isEmpty
+    assertThat(keyService.get(project.id, PathDTO.fromFullPath("hello"))).isNotEmpty
   }
 
   @Test
@@ -83,8 +83,8 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
       .andExpect(status().`is`(200))
       .andReturn()
 
-    assertThat(keyService.get(project, PathDTO.fromFullPath("test string"))).isEmpty
-    assertThat(keyService.get(project, PathDTO.fromFullPath("hello"))).isNotEmpty
+    assertThat(keyService.get(project.id, PathDTO.fromFullPath("test string"))).isEmpty
+    assertThat(keyService.get(project.id, PathDTO.fromFullPath("hello"))).isNotEmpty
   }
 
   @Test
@@ -92,12 +92,12 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     keyService.create(project, keyDto)
     keyService.create(project, keyDto2)
 
-    val keyInstance = keyService.get(project, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
+    val keyInstance = keyService.get(project.id, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
 
     performDelete(projectId = project.id, keyInstance.id!!)
 
-    assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto.key))).isEmpty
-    assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto2.key))).isNotEmpty
+    assertThat(keyService.get(project.id, PathDTO.fromFullPath(keyDto.key))).isEmpty
+    assertThat(keyService.get(project.id, PathDTO.fromFullPath(keyDto2.key))).isNotEmpty
   }
 
   @Test
@@ -105,13 +105,13 @@ class KeyControllerTest : SignedInControllerTest(), ITest {
     keyService.create(project, keyDto)
     keyService.create(project, keyDto2)
 
-    val keyInstance = keyService.get(project, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
-    val keyInstance2 = keyService.get(project, PathDTO.fromFullPath(keyDto2.key)).orElseGet(null)
+    val keyInstance = keyService.get(project.id, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
+    val keyInstance2 = keyService.get(project.id, PathDTO.fromFullPath(keyDto2.key)).orElseGet(null)
 
     performDelete(projectId = project.id, setOf(keyInstance.id!!, keyInstance2.id!!))
 
-    assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto.key))).isEmpty
-    assertThat(keyService.get(project, PathDTO.fromFullPath(keyDto2.key))).isEmpty
+    assertThat(keyService.get(project.id, PathDTO.fromFullPath(keyDto.key))).isEmpty
+    assertThat(keyService.get(project.id, PathDTO.fromFullPath(keyDto2.key))).isEmpty
   }
 
   @Test

@@ -62,10 +62,6 @@ class KeyService(
     return keyRepository.getByNameAndProjectId(pathDTO.fullPathString, projectId)
   }
 
-  fun get(project: Project, pathDTO: PathDTO): Optional<Key> {
-    return keyRepository.getByNameAndProject(pathDTO.fullPathString, project)
-  }
-
   fun get(id: Long): Optional<Key> {
     return keyRepository.findById(id)
   }
@@ -86,7 +82,7 @@ class KeyService(
 
   @Deprecated("Use other create method")
   fun create(project: Project, dto: DeprecatedKeyDto): Key {
-    if (this.get(project, dto.pathDto).isPresent) {
+    if (this.get(project.id, dto.pathDto).isPresent) {
       throw ValidationException(Message.KEY_EXISTS)
     }
     val key = Key(name = dto.fullPathString, project = project)
@@ -99,22 +95,22 @@ class KeyService(
     if (dto.newFullPathString == dto.oldFullPathString) {
       return
     }
-    if (get(project, dto.newPathDto).isPresent) {
+    if (get(project.id, dto.newPathDto).isPresent) {
       throw ValidationException(Message.KEY_EXISTS)
     }
-    val key = get(project, dto.oldPathDto).orElseThrow { NotFoundException() }
+    val key = get(project.id, dto.oldPathDto).orElseThrow { NotFoundException() }
     val oldName = key.name
     key.name = dto.newFullPathString
     translationsSocketIoModule.onKeyModified(key, oldName)
     save(key)
   }
 
-  fun edit(project: Project, dto: OldEditKeyDto): Key {
-    val key = get(project, dto.oldPathDto).orElseThrow { NotFoundException() }
+  fun edit(projectId: Long, dto: OldEditKeyDto): Key {
+    val key = get(projectId, dto.oldPathDto).orElseThrow { NotFoundException() }
     return edit(key, dto.newName)
   }
 
-  fun edit(project: Project, keyId: Long, dto: EditKeyDto): Key {
+  fun edit(keyId: Long, dto: EditKeyDto): Key {
     val key = get(keyId).orElseThrow { NotFoundException() }
     return edit(key, dto.name)
   }
@@ -180,8 +176,8 @@ class KeyService(
     this.translationService = translationService
   }
 
-  fun checkInProject(key: Key, project: Project) {
-    if (key.project!!.id != project.id) {
+  fun checkInProject(key: Key, projectId: Long) {
+    if (key.project!!.id != projectId) {
       throw BadRequestException(Message.KEY_NOT_FROM_PROJECT)
     }
   }

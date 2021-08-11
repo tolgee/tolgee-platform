@@ -88,9 +88,9 @@ class CoreImportFilesProcessor(
         if (meta.id == 0L) {
           keyMetaService.save(meta)
         }
-        meta.comments.onEach { comment -> comment.author = comment.author ?: authenticationFacade.userAccount }
+        meta.comments.onEach { comment -> comment.author = comment.author ?: authenticationFacade.userAccountEntity }
         keyMetaService.saveAllComments(meta.comments)
-        meta.codeReferences.onEach { ref -> ref.author = ref.author ?: authenticationFacade.userAccount }
+        meta.codeReferences.onEach { ref -> ref.author = ref.author ?: authenticationFacade.userAccountEntity }
         keyMetaService.saveAllCodeReferences(meta.codeReferences)
       }
     }

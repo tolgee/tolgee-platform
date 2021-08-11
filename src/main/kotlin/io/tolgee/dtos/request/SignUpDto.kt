@@ -6,10 +6,10 @@ import javax.validation.constraints.Size
 
 data class SignUpDto(
   @field:NotBlank
-  var name: String? = null,
+  var name: String = "",
 
   @field:Email @field:NotBlank
-  var email: String? = null,
+  var email: String = "",
 
   @field:Size(min = 8, max = 100)
   @field:NotBlank

@@ -26,7 +26,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
   fun `returns correct page size and page meta`() {
     val result = TranslationsViewBuilder.getData(
       applicationContext = applicationContext!!,
-      project = testData.project,
+      projectId = testData.project.id,
       languages = setOf(testData.englishLanguage, testData.germanLanguage),
       PageRequest.of(0, 10),
     )
@@ -40,7 +40,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
 
     val result = TranslationsViewBuilder.getData(
       applicationContext = applicationContext!!,
-      project = testData.project,
+      projectId = testData.project.id,
       languages = setOf(testData.englishLanguage, testData.germanLanguage),
       pageRequest
     )
@@ -53,7 +53,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
 
     val result = TranslationsViewBuilder.getData(
       applicationContext = applicationContext!!,
-      project = testData.project,
+      projectId = testData.project.id,
       languages = setOf(testData.englishLanguage),
       pageRequest,
     )
@@ -64,7 +64,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
   fun `selects languages`() {
     val result = TranslationsViewBuilder.getData(
       applicationContext = applicationContext!!,
-      project = testData.project,
+      projectId = testData.project.id,
       languages = setOf(testData.englishLanguage),
       PageRequest.of(
         0, 10,
@@ -77,7 +77,7 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
   fun `searches in data`() {
     val result = TranslationsViewBuilder.getData(
       applicationContext = applicationContext!!,
-      project = testData.project,
+      projectId = testData.project.id,
       languages = setOf(testData.englishLanguage),
       PageRequest.of(0, 10),
       params = GetTranslationsParams(search = "A tr")

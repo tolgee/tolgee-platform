@@ -1,6 +1,7 @@
 package io.tolgee.security
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.service.UserAccountService
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,7 +34,7 @@ class DisabledAuthenticationFilter @Autowired constructor(
     try {
       if (!this.configuration.authentication.enabled) {
         SecurityContextHolder.getContext().authentication =
-          authenticationProvider.getAuthentication(userAccountService.implicitUser)
+          authenticationProvider.getAuthentication(UserAccountDto.fromEntity(userAccountService.implicitUser))
       }
       filterChain.doFilter(req, res)
     } catch (e: AuthenticationException) {

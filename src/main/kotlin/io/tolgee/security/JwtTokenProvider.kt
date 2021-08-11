@@ -11,8 +11,8 @@ import io.jsonwebtoken.security.Keys
 import io.jsonwebtoken.security.SignatureException
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.model.UserAccount
 import io.tolgee.service.UserAccountService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
@@ -67,11 +67,11 @@ class JwtTokenProvider(
 
   fun getAuthentication(token: JwtToken): Authentication {
     val user = getUser(token)
-    return authenticationProvider.getAuthentication(user!!)
+    return authenticationProvider.getAuthentication(user)
   }
 
-  fun getUser(token: JwtToken): UserAccount {
-    return userAccountService[token.id].orElseThrow { AuthenticationException(Message.USER_NOT_FOUND) }!!
+  fun getUser(token: JwtToken): UserAccountDto {
+    return userAccountService.getDto(token.id) ?: throw AuthenticationException(Message.USER_NOT_FOUND)
   }
 
   fun resolveToken(req: HttpServletRequest): JwtToken? {

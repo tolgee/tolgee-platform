@@ -21,5 +21,6 @@ open class TolgeeProperties(
   var frontEndUrl: String? = null,
   var socketIo: SocketIoProperties = SocketIoProperties(),
   var appName: String = "Tolgee",
-  var maxTranslationTextLength: Long = 10000
+  var maxTranslationTextLength: Long = 10000,
+  var cache: CacheProperties = CacheProperties()
 )

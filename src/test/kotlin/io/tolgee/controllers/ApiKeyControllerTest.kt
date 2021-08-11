@@ -132,7 +132,7 @@ class ApiKeyControllerTest : ProjectAuthControllerTest(), ITest {
     loginAsUser("testUser")
     performAuthGet("/api/apiKeys/project/" + project2.id)
       .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
-    permissionService.grantFullAccessToRepo(testUser, project2)
+    permissionService.grantFullAccessToProject(testUser, project2)
     mvcResult = performAuthGet("/api/apiKeys/project/" + project2.id)
       .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
     set = mapResponse(

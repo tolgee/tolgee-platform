@@ -45,6 +45,7 @@ task waitForRunningContainer(type: Task, group: "e2e") {
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()))
             String s = null
             while ((s = stdInput.readLine()) != null) {
+                println(s)
                 if (s.contains("Tomcat started on port(s):")) {
                     return
                 }

@@ -1,5 +1,7 @@
 package io.tolgee.service
 
+import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.exceptions.InvalidStateException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Permission.ProjectPermissionType
@@ -20,17 +22,24 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
   @set:Autowired
   lateinit var permissionService: PermissionService
 
+  @set:Autowired
+  lateinit var userAccountService: UserAccountService
+
   @Transactional
-  fun grantFullAccessToRepo(project: Project?) {
-    permissionService.grantFullAccessToRepo(activeUser, project)
+  fun grantFullAccessToRepo(project: Project) {
+    permissionService.grantFullAccessToProject(
+      userAccountService[activeUser.id]
+        .orElseThrow { InvalidStateException() }!!,
+      project
+    )
   }
 
   fun checkAnyProjectPermission(projectId: Long): ProjectPermissionType {
     return getProjectPermission(projectId) ?: throw PermissionException()
   }
 
-  fun checkAnyProjectPermission(projectId: Long, user: UserAccount): ProjectPermissionType {
-    return getProjectPermission(projectId, user) ?: throw PermissionException()
+  fun checkAnyProjectPermission(projectId: Long, userId: Long): ProjectPermissionType {
+    return getProjectPermission(projectId, userId) ?: throw PermissionException()
   }
 
   fun checkProjectPermission(projectId: Long, requiredPermission: ProjectPermissionType): ProjectPermissionType {
@@ -42,7 +51,7 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
   }
 
   fun checkApiKeyScopes(scopes: Set<ApiScope>, project: Project?, user: UserAccount? = null) {
-    if (!apiKeyService.getAvailableScopes(user ?: activeUser, project!!).containsAll(scopes)) {
+    if (!apiKeyService.getAvailableScopes(user?.id ?: activeUser.id, project!!).containsAll(scopes)) {
       throw PermissionException()
     }
   }
@@ -55,10 +64,10 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
     }
   }
 
-  private fun getProjectPermission(projectId: Long, user: UserAccount = activeUser): ProjectPermissionType? {
-    return permissionService.getProjectPermissionType(projectId, user)
+  private fun getProjectPermission(projectId: Long, userId: Long = activeUser.id): ProjectPermissionType? {
+    return permissionService.getProjectPermissionType(projectId, userId)
   }
 
-  private val activeUser: UserAccount
+  private val activeUser: UserAccountDto
     get() = authenticationFacade.userAccount
 }

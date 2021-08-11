@@ -66,7 +66,7 @@ class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
   @Test
   @Transactional
   fun createsApiKey() {
-    val key = apiKeyService.getAllByUser(userAccount).stream().findFirst()
+    val key = apiKeyService.getAllByUser(userAccount.id).stream().findFirst()
     Assertions.assertThat(key).isPresent
     Assertions.assertThat(key.get().key).isEqualTo("this_is_dummy_api_key")
   }

@@ -48,7 +48,7 @@ class KeyController(
     @PathVariable("projectId") projectId: Long?,
     @RequestBody @Valid dto: SetTranslationsWithKeyDto?
   ) {
-    keyService.create(projectHolder.project, dto!!)
+    keyService.create(projectHolder.projectEntity, dto!!)
   }
 
   @PostMapping(value = ["/edit"])
@@ -59,14 +59,14 @@ class KeyController(
     @PathVariable("projectId") projectId: Long?,
     @RequestBody @Valid dto: DeprecatedEditKeyDTO?
   ) {
-    keyService.edit(projectHolder.project, dto!!)
+    keyService.edit(projectHolder.projectEntity, dto!!)
   }
 
   @PutMapping(value = [""])
   @Operation(summary = "Edits key name")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   fun edit(@PathVariable("projectId") projectId: Long?, @RequestBody @Valid dto: OldEditKeyDto) {
-    keyService.edit(projectHolder.project, dto)
+    keyService.edit(projectHolder.project.id, dto)
   }
 
   @GetMapping(value = ["{id}"])

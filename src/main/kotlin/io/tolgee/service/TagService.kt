@@ -47,8 +47,8 @@ class TagService(
     }
   }
 
-  fun getProjectTags(project: Project, search: String? = null, pageable: Pageable): Page<Tag> {
-    return tagRepository.findAllByProject(project, search, pageable)
+  fun getProjectTags(projectId: Long, search: String? = null, pageable: Pageable): Page<Tag> {
+    return tagRepository.findAllByProject(projectId, search, pageable)
   }
 
   fun getTagsForKeyIds(keyIds: Iterable<Long>): Map<Long, List<Tag>> {

@@ -1,5 +1,6 @@
 package io.tolgee.security.api_key_auth;
 
+import io.tolgee.dtos.cacheable.UserAccountDto;
 import io.tolgee.model.ApiKey;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -10,7 +11,7 @@ public class ApiKeyAuthenticationToken extends UsernamePasswordAuthenticationTok
     private ApiKey apiKey;
 
     public ApiKeyAuthenticationToken(ApiKey apiKey) {
-        super(apiKey.getUserAccount(), null, Collections.singleton(() -> "api"));
+        super(UserAccountDto.Companion.fromEntity(apiKey.getUserAccount()), null, Collections.singleton(() -> "api"));
         this.apiKey = apiKey;
     }
 

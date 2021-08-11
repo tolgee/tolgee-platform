@@ -71,7 +71,7 @@ class TranslationController @Autowired constructor(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto) {
-    val project = projectHolder.project
+    val project = projectHolder.projectEntity
     val key = keyService.getOrCreateKey(project, PathDTO.fromFullPath(dto.key))
     translationService.setForKey(key, dto.translations)
   }

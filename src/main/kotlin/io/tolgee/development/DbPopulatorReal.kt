@@ -112,7 +112,7 @@ class DbPopulatorReal(
     project.userOwner = userAccount
     en = createLanguage("en", project)
     de = createLanguage("de", project)
-    permissionService.grantFullAccessToRepo(userAccount, project)
+    permissionService.grantFullAccessToProject(userAccount, project)
     projectRepository.saveAndFlush(project)
     entityManager.flush()
     entityManager.clear()

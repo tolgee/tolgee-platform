@@ -12,7 +12,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.EmailVerification
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.EmailVerificationRepository
-import io.tolgee.repository.UserAccountRepository
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mail.MailSender
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.stereotype.Service
@@ -20,14 +20,16 @@ import org.springframework.transaction.annotation.Transactional
 import kotlin.random.Random
 
 @Service
-open class EmailVerificationService(
+class EmailVerificationService(
   private val tolgeeProperties: TolgeeProperties,
-  private val userAccountRepository: UserAccountRepository,
   private val emailVerificationRepository: EmailVerificationRepository,
-  private val mailSender: MailSender
+  private val mailSender: MailSender,
 ) {
+  @Autowired
+  lateinit var userAccountService: UserAccountService
+
   @Transactional
-  open fun createForUser(
+  fun createForUser(
     userAccount: UserAccount,
     callbackUrl: String? = null,
     newEmail: String? = null
@@ -55,7 +57,7 @@ open class EmailVerificationService(
     return null
   }
 
-  open fun check(userAccount: UserAccount) {
+  fun check(userAccount: UserAccount) {
     if (
       tolgeeProperties.authentication.needsEmailVerification &&
       userAccount.emailVerification != null
@@ -64,16 +66,17 @@ open class EmailVerificationService(
     }
   }
 
-  open fun verify(userId: Long, code: String) {
-    val user = userAccountRepository.findById(userId).orElseThrow { NotFoundException() }
+  fun verify(userId: Long, code: String) {
+    val user = userAccountService.get(userId).orElseThrow { NotFoundException() }
     if (user!!.emailVerification == null || user.emailVerification?.code != code) {
       throw NotFoundException()
     }
 
     user.emailVerification?.newEmail?.let {
-      user.username = user.emailVerification?.newEmail
+      user.username = user.emailVerification?.newEmail!!
     }
 
+    userAccountService.save(user)
     emailVerificationRepository.delete(user.emailVerification!!)
   }
 

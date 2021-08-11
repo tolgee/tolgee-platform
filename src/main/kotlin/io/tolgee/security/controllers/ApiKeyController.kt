@@ -34,7 +34,7 @@ class ApiKeyController(
   @Operation(summary = "Returns all user's api keys")
   @GetMapping(path = [""])
   fun allByUser(): Set<ApiKeyDTO> {
-    return apiKeyService.getAllByUser(authenticationFacade.userAccount)
+    return apiKeyService.getAllByUser(authenticationFacade.userAccount.id)
       .map { apiKey: ApiKey -> ApiKeyDTO.fromEntity(apiKey) }
       .toCollection(linkedSetOf())
   }
@@ -54,7 +54,7 @@ class ApiKeyController(
     val project = projectService.get(createApiKeyDTO!!.projectId!!)
       .orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }
     securityService.checkApiKeyScopes(createApiKeyDTO.scopes!!, project)
-    return apiKeyService.createApiKey(authenticationFacade.userAccount, createApiKeyDTO.scopes!!, project!!)
+    return apiKeyService.createApiKey(authenticationFacade.userAccountEntity, createApiKeyDTO.scopes!!, project!!)
   }
 
   @PostMapping(path = ["/edit"])
