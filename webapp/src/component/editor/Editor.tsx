@@ -147,6 +147,8 @@ export const Editor: React.FC<Props> = ({
       errors: error ? [error] : [],
       t,
     },
+    inputStyle: 'contenteditable',
+    spellcheck: true,
   };
 
   return (
