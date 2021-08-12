@@ -22,5 +22,6 @@ open class TolgeeProperties(
   var socketIo: SocketIoProperties = SocketIoProperties(),
   var appName: String = "Tolgee",
   var maxTranslationTextLength: Long = 10000,
-  var cache: CacheProperties = CacheProperties()
+  var cache: CacheProperties = CacheProperties(),
+  var recaptcha: ReCaptchaProperties = ReCaptchaProperties()
 )

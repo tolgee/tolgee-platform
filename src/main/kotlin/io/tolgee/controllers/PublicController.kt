@@ -17,6 +17,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Invitation
 import io.tolgee.model.UserAccount
 import io.tolgee.security.JwtTokenProvider
+import io.tolgee.security.ReCaptchaValidationService
 import io.tolgee.security.payload.ApiResponse
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.payload.LoginRequest
@@ -42,8 +43,8 @@ import javax.validation.constraints.NotBlank
 
 @RestController
 @RequestMapping("/api/public")
-@Tag(name = "Public controller for authentication")
-open class PublicController(
+@Tag(name = "Authentication")
+class PublicController(
   private val authenticationManager: AuthenticationManager,
   private val tokenProvider: JwtTokenProvider,
   private val githubOAuthDelegate: GithubOAuthDelegate,
@@ -52,11 +53,12 @@ open class PublicController(
   private val mailSender: JavaMailSender,
   private val invitationService: InvitationService,
   private val emailVerificationService: EmailVerificationService,
-  private val dbPopulatorReal: DbPopulatorReal
+  private val dbPopulatorReal: DbPopulatorReal,
+  private val reCaptchaValidationService: ReCaptchaValidationService
 ) {
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
-  open fun authenticateUser(@RequestBody loginRequest: LoginRequest): ResponseEntity<*> {
+  fun authenticateUser(@RequestBody loginRequest: LoginRequest): ResponseEntity<*> {
     if (loginRequest.username.isEmpty() || loginRequest.password.isEmpty()) {
       return ResponseEntity(
         ApiResponse(false, Message.USERNAME_OR_PASSWORD_INVALID.code),
@@ -83,7 +85,7 @@ open class PublicController(
 
   @Operation(summary = "Reset password request")
   @PostMapping("/reset_password_request")
-  open fun resetPasswordRequest(@RequestBody @Valid request: ResetPasswordRequest) {
+  fun resetPasswordRequest(@RequestBody @Valid request: ResetPasswordRequest) {
     val userAccount = userAccountService.getByUserName(request.email).orElse(null) ?: return
     val code = RandomStringUtils.randomAlphabetic(50)
     userAccountService.setResetPasswordCode(userAccount, code)
@@ -102,7 +104,7 @@ $url
 
   @GetMapping("/reset_password_validate/{email}/{code}")
   @Operation(summary = "Validates key sent by email")
-  open fun resetPasswordValidate(
+  fun resetPasswordValidate(
     @PathVariable("code") code: String,
     @PathVariable("email") email: String
   ) {
@@ -111,7 +113,7 @@ $url
 
   @PostMapping("/reset_password_set")
   @Operation(summary = "Sets new password with password reset code from e-mail")
-  open fun resetPasswordSet(@RequestBody @Valid request: ResetPassword) {
+  fun resetPasswordSet(@RequestBody @Valid request: ResetPassword) {
     val userAccount = validateEmailCode(request.code!!, request.email!!)
     userAccountService.setUserPassword(userAccount, request.password)
     userAccountService.removeResetCode(userAccount)
@@ -119,35 +121,45 @@ $url
 
   @PostMapping("/sign_up")
   @Transactional
-  @Operation(summary = "Creates new user account")
-  open fun signUp(@RequestBody @Valid request: SignUpDto?): Any {
+  @Operation(
+    summary = """
+Creates new user account.
+
+When E-mail verification is enabled, null is returned. Otherwise JWT token is provided.
+    """
+  )
+  fun signUp(@RequestBody @Valid dto: SignUpDto): JwtAuthenticationResponse? {
     var invitation: Invitation? = null
-    if (request!!.invitationCode == null || request.invitationCode == null) {
+    if (dto.invitationCode == null || dto.invitationCode == null) {
       properties.authentication.checkAllowedRegistrations()
     } else {
-      invitation = invitationService.getInvitation(request.invitationCode) // it throws an exception
+      invitation = invitationService.getInvitation(dto.invitationCode) // it throws an exception
     }
 
-    userAccountService.getByUserName(request.email).ifPresent {
+    userAccountService.getByUserName(dto.email).ifPresent {
       throw BadRequestException(Message.USERNAME_ALREADY_EXISTS)
     }
 
-    val user = userAccountService.createUser(request)
+    if (!reCaptchaValidationService.validate(dto.recaptchaToken, "")) {
+      throw BadRequestException(Message.INVALID_RECAPTCHA_TOKEN)
+    }
+
+    val user = userAccountService.createUser(dto)
     if (invitation != null) {
       invitationService.accept(invitation.code, user)
     }
 
     if (!properties.authentication.needsEmailVerification) {
-      return JwtAuthenticationResponse(tokenProvider.generateToken(user.id!!).toString())
+      return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
     }
 
-    emailVerificationService.createForUser(user, request.callbackUrl)
-    return Unit
+    emailVerificationService.createForUser(user, dto.callbackUrl)
+    return null
   }
 
   @GetMapping("/verify_email/{userId}/{code}")
   @Operation(summary = "Sets user account as verified, when code from email is OK")
-  open fun verifyEmail(
+  fun verifyEmail(
     @PathVariable("userId") @NotNull userId: Long,
     @PathVariable("code") @NotBlank code: String
   ): JwtAuthenticationResponse {
@@ -157,13 +169,13 @@ $url
 
   @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
   @Operation(summary = "Validates if email is not in use")
-  open fun validateEmail(@RequestBody email: TextNode): Boolean {
+  fun validateEmail(@RequestBody email: TextNode): Boolean {
     return userAccountService.getByUserName(email.asText()).isEmpty
   }
 
   @GetMapping("/authorize_oauth/{serviceType}/{code}")
   @Operation(summary = "Authenticates user using third party oAuth service")
-  open fun authenticateUser(
+  fun authenticateUser(
     @PathVariable("serviceType") serviceType: String?,
     @PathVariable("code") code: String?,
     @RequestParam(value = "invitationCode", required = false) invitationCode: String?

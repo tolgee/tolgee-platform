@@ -60,7 +60,7 @@ const Item: FunctionComponent<{ keyDTO: ApiKeyDTO }> = (props) => {
 
   return (
     <Box p={2} className={classes.root}>
-      <Grid container justify="space-between">
+      <Grid container justifyContent="space-between">
         <Grid item>
           <Box mr={2}>
             <b>
@@ -72,7 +72,7 @@ const Item: FunctionComponent<{ keyDTO: ApiKeyDTO }> = (props) => {
           <T>Api key list label - Project</T> {props.keyDTO.projectName}
         </Grid>
       </Grid>
-      <Grid container justify="space-between">
+      <Grid container justifyContent="space-between">
         <Grid item lg={10} md={9} sm={8} xs={6}>
           <T>Api key list label - Scopes</T>&nbsp;
           {props.keyDTO.scopes?.join(', ')}

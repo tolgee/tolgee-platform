@@ -62,7 +62,7 @@ export const OrganizationMembersView: FunctionComponent = () => {
         onPageChange={setPage}
         renderItem={(i) => (
           <SimpleListItem className={classes.container} key={i.id}>
-            <Grid container justify="space-between" alignItems="center">
+            <Grid container justifyContent="space-between" alignItems="center">
               <Grid
                 item
                 data-cy={'organizations-user-name'}

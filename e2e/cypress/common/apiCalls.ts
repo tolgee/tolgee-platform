@@ -283,3 +283,17 @@ export const setProperty = (name: string, value: any) =>
       value,
     },
   });
+
+export const getRecaptchaSiteKey = () => {
+  return apiFetch('public/configuration').then(
+    (res) => res.body.recaptchaSiteKey
+  );
+};
+
+export const setRecaptchaSiteKey = (siteKey: string) => {
+  setProperty('recaptcha.siteKey', siteKey);
+};
+
+export const setRecaptchaSecretKey = (secretKey: string) => {
+  setProperty('recaptcha.secretKey', secretKey);
+};

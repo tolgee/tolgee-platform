@@ -7,8 +7,12 @@ import {
   disableEmailVerification,
   enableEmailVerification,
   getParsedEmailVerification,
+  getRecaptchaSiteKey,
   getUser,
   login,
+  setProperty,
+  setRecaptchaSecretKey,
+  setRecaptchaSiteKey,
 } from '../common/apiCalls';
 import { assertMessage, selectInProjectMenu } from '../common/shared';
 import { loginWithFakeGithub } from './login.spec';
@@ -49,21 +53,61 @@ const createProjectWithInvitation = (
 };
 
 const TEST_USERNAME = 'johndoe@doe.com';
-context('Login', () => {
+context('Sign up', () => {
   beforeEach(() => {
-    cy.visit(HOST + '/sign_up');
+    visit();
     deleteUserWithEmailVerification(TEST_USERNAME);
     deleteAllEmails();
     enableEmailVerification();
   });
 
   afterEach(() => {
-    //enableEmailVerification()
     deleteUserWithEmailVerification(TEST_USERNAME);
   });
 
-  it('Will sign up', () => {
+  describe('without recaptcha', () => {
+    let recaptchaSiteKey;
+
+    beforeEach(() => {
+      getRecaptchaSiteKey().then((it) => (recaptchaSiteKey = it));
+      setRecaptchaSiteKey(null);
+    });
+
+    afterEach(() => {
+      setRecaptchaSiteKey(recaptchaSiteKey);
+    });
+
+    it('Will sign up without recaptcha', () => {
+      visit();
+      cy.intercept('/**/sign_up', (req) => {
+        expect(req.body.recaptchaToken).be.undefined;
+      }).as('signUp');
+      fillAndSubmitForm();
+      cy.wait(['@signUp']);
+      cy.contains(
+        'Thank you for signing up. To verify your e-mail please follow instructions sent to provided e-mail address.'
+      ).should('be.visible');
+      setProperty('recaptcha.siteKey', recaptchaSiteKey);
+    });
+  });
+
+  it('Will fail on recaptcha', () => {
+    setRecaptchaSecretKey('negative_dummy_secret_key');
+    cy.intercept('/**/sign_up', (req) => {
+      expect(req.body.recaptchaToken).have.length.greaterThan(10);
+    }).as('signUp');
     fillAndSubmitForm();
+    cy.wait(['@signUp']);
+    setRecaptchaSecretKey('dummy_secret_key');
+    cy.contains('You are robot').should('be.visible');
+  });
+
+  it('Will sign up', () => {
+    cy.intercept('/**/sign_up', (req) => {
+      expect(req.body.recaptchaToken).have.length.greaterThan(10);
+    }).as('signUp');
+    fillAndSubmitForm();
+    cy.wait(['@signUp']);
     cy.contains(
       'Thank you for signing up. To verify your e-mail please follow instructions sent to provided e-mail address.'
     ).should('be.visible');
@@ -141,3 +185,5 @@ const fillAndSubmitForm = () => {
   cy.xpath(getInput('passwordRepeat')).type('password');
   cy.contains('Submit').click();
 };
+
+const visit = () => cy.visit(HOST + '/sign_up');

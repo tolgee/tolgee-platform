@@ -161,7 +161,7 @@ open class EmailVerificationTest : AbstractControllerTest() {
 
   @Test
   fun signUpDoesNotReturnToken() {
-    assertThat(perform().response.contentAsString).isEqualTo("{}")
+    assertThat(perform().response.contentAsString).isEqualTo("")
   }
 
   @SpringBootTest(

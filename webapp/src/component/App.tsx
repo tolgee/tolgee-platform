@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useSelector } from 'react-redux';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
@@ -20,6 +20,7 @@ import ConfirmationDialog from './common/ConfirmationDialog';
 import { FullPageLoading } from './common/FullPageLoading';
 import { PrivateRoute } from './common/PrivateRoute';
 import SnackBar from './common/SnackBar';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/LoginRouter')
@@ -133,6 +134,19 @@ export class App extends React.Component {
   }
 
   render() {
+    const RecaptchaProvider: FC = (props) => {
+      const config = useConfig();
+      if (!config.recaptchaSiteKey) {
+        return <>{props.children}</>;
+      }
+
+      return (
+        <GoogleReCaptchaProvider reCaptchaKey={config.recaptchaSiteKey}>
+          {props.children}
+        </GoogleReCaptchaProvider>
+      );
+    };
+
     return (
       <BrowserRouter>
         <Redirection />
@@ -145,7 +159,9 @@ export class App extends React.Component {
               <PasswordResetSetView />
             </Route>
             <Route exact path={LINKS.SIGN_UP.template}>
-              <SignUpView />
+              <RecaptchaProvider>
+                <SignUpView />
+              </RecaptchaProvider>
             </Route>
             <Route path={LINKS.LOGIN.template}>
               <LoginRouter />

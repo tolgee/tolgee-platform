@@ -30,6 +30,7 @@ class PublicConfigurationDTO(
   val version: String = VersionProvider.version
   val showVersion: Boolean = properties.internal.showVersion
   val maxTranslationTextLength: Long = properties.maxTranslationTextLength
+  val recaptchaSiteKey = properties.recaptcha.siteKey
 
   class AuthMethodsDTO(val github: GithubPublicConfigDTO)
   data class GithubPublicConfigDTO(val clientId: String?) {

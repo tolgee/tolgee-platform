@@ -17,5 +17,7 @@ data class SignUpDto(
 
   var invitationCode: String? = null,
 
-  var callbackUrl: String? = null
-)
+  var callbackUrl: String? = null,
+) {
+  var recaptchaToken: String? = null
+}

@@ -209,6 +209,7 @@ dependencies {
 
 test {
     useTestNG()
+    maxHeapSize = "2048m"
 }
 
 springBoot {
