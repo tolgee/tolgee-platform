@@ -283,6 +283,7 @@ export const TranslationsTable = () => {
                     editEnabled={projectPermissions.satisfiesPermission(
                       ProjectPermissionType.EDIT
                     )}
+                    width={columnSizes[0]}
                   />
                 </div>
                 {isEmpty ? (

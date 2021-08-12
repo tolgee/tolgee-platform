@@ -13,6 +13,7 @@ import { stopBubble } from 'tg.fixtures/eventHandler';
 import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
 import { CellContent, CellPlain, CellControls } from './cell';
 import { Tags } from './Tags/Tags';
+import { LimitedHeightText } from './LimitedHeightText';
 
 type TagModel = components['schemas']['TagModel'];
 
@@ -23,6 +24,7 @@ type Props = {
   screenshotCount: number;
   editEnabled: boolean;
   tags: TagModel[] | null;
+  width: number;
 };
 
 export const CellKey: React.FC<Props> = React.memo(function Cell({
@@ -99,8 +101,10 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
                     />
                   </Box>
                 )}
-                <Box overflow="hidden" textOverflow="ellipsis">
-                  {text}
+                <Box position="relative">
+                  <LimitedHeightText maxLines={3} wrap="break-all">
+                    {text}
+                  </LimitedHeightText>
                 </Box>
               </Box>
               <Tags keyId={keyId} tags={tags} />
@@ -116,6 +120,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
           onSaveAndNew={isEmpty ? () => handleSave('NEW_EMPTY_KEY') : undefined}
           screenshotRef={screenshotEl}
           screenshotsPresent={screenshotCount > 0}
+          screenshotsOpen={screenshotsOpen}
           editEnabled={editEnabled}
         />
       </CellPlain>

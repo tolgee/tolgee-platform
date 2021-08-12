@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core';
 export const useCellStyles = makeStyles((theme) => ({
   cellPlain: {
     '&:focus-within $showOnHover': {
-      opacity: 0.7,
+      opacity: 1,
     },
     '& $showOnHover': {
       opacity: 0,

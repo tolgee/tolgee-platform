@@ -75,7 +75,11 @@ export const TranslationVisual: React.FC<Props> = ({
       </LimitedHeightText>
     );
   } else {
-    const croppedVariants = variants.slice(0, maxLines);
+    const croppedVariants = variants.slice(
+      0,
+      // display first 6 should be enough for plurals
+      maxLines !== undefined ? 6 : undefined
+    );
     const isOverflow = croppedVariants.length !== variants.length;
     return (
       <>
