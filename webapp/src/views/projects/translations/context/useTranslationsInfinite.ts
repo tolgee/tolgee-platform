@@ -102,7 +102,11 @@ export const useTranslationsInfinite = (props: Props) => {
         );
         if (data?.pages.length === 1) {
           // reset fixed translations when fetching first page
-          setFixedTranslations(flatKeys);
+          // keep unsaved translations
+          setFixedTranslations((data) => [
+            ...(data || []).filter((key) => key.keyId < 0),
+            ...flatKeys,
+          ]);
         } else {
           // add only nonexistent keys
           const newKeys =
@@ -119,6 +123,8 @@ export const useTranslationsInfinite = (props: Props) => {
     // force refetch from first page
     translations.remove();
     translations.refetch();
+    // remove unsaved translations
+    setFixedTranslations((data) => data?.filter((key) => key.keyId >= 0));
   };
 
   const updateQuery = (q: Partial<typeof query>) => {
