@@ -12,12 +12,6 @@ const useStyles = makeStyles({
     overflow: 'hidden',
     lineHeight: '1.2rem',
 
-    // clever word breaking
-    overflowWrap: 'break-word',
-    wordWrap: 'break-word',
-    'word-break': 'break-all',
-    wordBreak: 'break-word',
-
     // Adds a hyphen where the word breaks
     '-ms-hyphens': 'auto',
     '-moz-hyphens': 'auto',
@@ -29,13 +23,15 @@ const useStyles = makeStyles({
 
 type Props = {
   maxLines?: number | undefined;
-  lang: string;
+  lang?: string;
+  wrap?: 'break-word' | 'break-all';
 };
 
 export const LimitedHeightText: React.FC<Props> = ({
   maxLines,
   children,
   lang,
+  wrap = 'break-word',
 }) => {
   const classes = useStyles();
   const textRef = useRef<HTMLDivElement>();
@@ -44,7 +40,7 @@ export const LimitedHeightText: React.FC<Props> = ({
   const detectExpandability = () => {
     const textElement = textRef.current;
     if (textElement != null) {
-      const clone = textRef.current?.cloneNode(true) as HTMLDivElement;
+      const clone = textElement.cloneNode(true) as HTMLDivElement;
       clone.style.position = 'absolute';
       clone.style.visibility = 'hidden';
       textElement.parentElement?.append(clone);
@@ -74,6 +70,7 @@ export const LimitedHeightText: React.FC<Props> = ({
         maxHeight: maxLines ? `calc(1.2rem * ${maxLines})` : undefined,
         WebkitMaskImage: gradient,
         maskImage: gradient,
+        wordBreak: wrap,
       }}
       lang={lang}
     >

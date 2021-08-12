@@ -8,7 +8,7 @@ import {
 import { ViewListRounded, AppsRounded, Add, Delete } from '@material-ui/icons';
 import SearchField from 'tg.component/common/form/fields/SearchField';
 import { useContextSelector } from 'use-context-selector';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import {
   TranslationsContext,
@@ -53,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const TranslationsHeader = () => {
+  const t = useTranslate();
   const classes = useStyles();
   const projectPermissions = useProjectPermissions();
   const search = useContextSelector(TranslationsContext, (v) => v.search);
@@ -114,6 +115,8 @@ export const TranslationsHeader = () => {
           margin="dense"
           variant="outlined"
           className={classes.search}
+          label={null}
+          placeholder={t('standard_search_label')}
         />
         <Filters />
       </div>

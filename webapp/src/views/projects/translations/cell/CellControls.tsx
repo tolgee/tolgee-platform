@@ -53,6 +53,7 @@ type ControlsProps = {
   onStateChange?: (state: StateType) => void;
   screenshotRef?: React.Ref<HTMLButtonElement>;
   screenshotsPresent?: boolean;
+  screenshotsOpen?: boolean;
   absolute?: boolean;
 };
 
@@ -67,6 +68,7 @@ export const CellControls: React.FC<ControlsProps> = ({
   onStateChange,
   screenshotRef,
   screenshotsPresent,
+  screenshotsOpen,
   absolute,
 }) => {
   const classes = useCellStyles();
@@ -104,6 +106,11 @@ export const CellControls: React.FC<ControlsProps> = ({
           ref={screenshotRef}
           onClick={stopBubble(onScreenshots)}
           data-cy="translations-cell-screenshots-button"
+          className={
+            screenshotsPresent || screenshotsOpen
+              ? undefined
+              : classes.showOnHover
+          }
         >
           <CameraAlt
             fontSize="small"

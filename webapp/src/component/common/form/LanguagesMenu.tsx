@@ -87,7 +87,6 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
         )}
         MenuProps={menuProps}
         margin="dense"
-        inputProps={{ style: { width: 100 } }}
       >
         {props.languages.map((lang) => (
           <MenuItem key={lang.value} value={lang.value}>
