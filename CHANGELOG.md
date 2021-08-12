@@ -1,3 +1,10 @@
+# [1.0.0-alpha.113](https://github.com/tolgee/server/compare/v1.0.0-alpha.112...v1.0.0-alpha.113) (2021-08-12)
+
+
+### Features
+
+* Organizations project view navigation TG-194 ([5b003a4](https://github.com/tolgee/server/commit/5b003a48f8248aba13c51ac8fc0888dfdc50fdc6))
+
 # [1.0.0-alpha.112](https://github.com/tolgee/server/compare/v1.0.0-alpha.111...v1.0.0-alpha.112) (2021-08-11)
 
 
