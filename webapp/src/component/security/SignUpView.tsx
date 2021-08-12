@@ -1,4 +1,4 @@
-import { default as React, FunctionComponent } from 'react';
+import { default as React, FunctionComponent, useCallback } from 'react';
 import { Button } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import { T, useTranslate } from '@tolgee/react';
@@ -18,6 +18,7 @@ import { BaseFormView } from '../layout/BaseFormView';
 import { BaseView } from '../layout/BaseView';
 import { DashboardPage } from '../layout/DashboardPage';
 import { SetPasswordFields } from './SetPasswordFields';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 const actions = container.resolve(SignUpActions);
 
@@ -36,6 +37,42 @@ const SignUpView: FunctionComponent = () => {
   const remoteConfig = useConfig();
   const t = useTranslate();
 
+  const WithRecaptcha = () => {
+    const { executeRecaptcha } = useGoogleReCaptcha();
+
+    const handleReCaptchaVerify = useCallback(async () => {
+      if (!executeRecaptcha) {
+        throw Error('Execute recaptcha not yet available');
+      }
+
+      return await executeRecaptcha('sign_up');
+    }, [executeRecaptcha]);
+
+    return (
+      <View
+        onSubmit={async (v: SignUpType) => {
+          const recaptchaToken = await handleReCaptchaVerify();
+          actions.loadableActions.signUp.dispatch({
+            ...v,
+            recaptchaToken: recaptchaToken,
+          });
+        }}
+      />
+    );
+  };
+
+  const WithoutRecaptcha = () => {
+    return (
+      <View
+        onSubmit={async (v: SignUpType) => {
+          actions.loadableActions.signUp.dispatch({
+            ...v,
+          });
+        }}
+      />
+    );
+  };
+
   if (
     !remoteConfig.authentication ||
     security.allowPrivate ||
@@ -44,7 +81,7 @@ const SignUpView: FunctionComponent = () => {
     return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
   }
 
-  return (
+  const View = (props: { onSubmit: (v) => void }) => (
     <DashboardPage>
       {state.loaded && config.needsEmailVerification ? (
         <BaseView title={<T>sign_up_success_title</T>} lg={4} md={6} xs={12}>
@@ -76,9 +113,7 @@ const SignUpView: FunctionComponent = () => {
               </Button>
             </Box>
           }
-          onSubmit={(v: SignUpType) => {
-            actions.loadableActions.signUp.dispatch(v);
-          }}
+          onSubmit={props.onSubmit}
         >
           <TextField name="name" label={<T>sign_up_form_full_name</T>} />
           <TextField name="email" label={<T>sign_up_form_email</T>} />
@@ -87,6 +122,8 @@ const SignUpView: FunctionComponent = () => {
       )}
     </DashboardPage>
   );
+
+  return config.recaptchaSiteKey ? <WithRecaptcha /> : <WithoutRecaptcha />;
 };
 
 export default SignUpView;

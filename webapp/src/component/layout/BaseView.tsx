@@ -96,7 +96,7 @@ export const BaseView = (props: BaseViewProps) => {
                 maxWidth={props.containerMaxWidth || false}
                 style={{ padding: 0 }}
               >
-                <Grid container justify="center" alignItems="center">
+                <Grid container justifyContent="center" alignItems="center">
                   <Grid
                     data-cy="global-base-view-title"
                     item
@@ -146,7 +146,7 @@ export const BaseView = (props: BaseViewProps) => {
               maxWidth={props.containerMaxWidth || false}
               style={{ padding: 0 }}
             >
-              <Grid container justify="center" alignItems="center">
+              <Grid container justifyContent="center" alignItems="center">
                 <Grid
                   item
                   xs={props.xs || 12}

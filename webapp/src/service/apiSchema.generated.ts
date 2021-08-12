@@ -552,6 +552,7 @@ export interface components {
       password: string;
       invitationCode?: string;
       callbackUrl?: string;
+      recaptchaToken?: { [key: string]: unknown };
     };
     ResetPassword: {
       email: string;
@@ -643,7 +644,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -654,6 +654,7 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -806,6 +807,7 @@ export interface components {
       version: string;
       showVersion: boolean;
       maxTranslationTextLength: number;
+      recaptchaSiteKey?: string;
     };
     SocketIo: {
       enabled: boolean;
