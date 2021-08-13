@@ -21,6 +21,7 @@ describe('Test no authentication mode', () => {
     disableAuthentication();
     createTestProject();
     cy.reload();
+    gcy('project-list-more-button').click();
     gcy('project-settings-button').click();
     gcy('project-menu-items').should('contain', 'API keys');
   });

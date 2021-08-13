@@ -18,12 +18,17 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
         o.basePermissions as basePermissions, r.type as currentUserRole 
         from Organization o 
         join OrganizationRole r on r.user.id = :userId 
-        and r.organization = o and (r.type = :roleType or :roleType is null)"""
+        and r.organization = o and (r.type = :roleType or :roleType is null)
+        and (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
+        and (:exceptOrganizationId is null or (o.id <> :exceptOrganizationId))
+        """
   )
   fun findAllPermitted(
     userId: Long?,
     pageable: Pageable,
-    roleType: OrganizationRoleType? = null
+    roleType: OrganizationRoleType? = null,
+    search: String? = null,
+    exceptOrganizationId: Long? = null
   ): Page<OrganizationView>
 
   fun countAllBySlug(slug: String): Long

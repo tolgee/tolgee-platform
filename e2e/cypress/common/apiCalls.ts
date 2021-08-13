@@ -6,6 +6,7 @@ import {
 } from '../../../webapp/src/service/response.types';
 import { components } from '../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');
+import Chainable = Cypress.Chainable;
 
 let token = null;
 
@@ -76,20 +77,23 @@ export const login = (username = USERNAME, password = PASSWORD) => {
 export const createProject = (createProjectDto: {
   name: string;
   languages: Partial<components['schemas']['LanguageDto']>[];
-}) => {
+}): Chainable<Cypress.Response> => {
   const create = () =>
     v2apiFetch('projects', {
       body: JSON.stringify(createProjectDto),
       method: 'POST',
     });
   return v2apiFetch('projects').then((res) => {
-    const test = res.body?._embeddded?.projects.find(
+    const projects = res.body?._embedded?.projects.filter(
       (i) => i.name === createProjectDto.name
     );
-    if (test) {
-      return deleteProject(test.id).then(() => create());
-    }
+    const deletePromises = projects?.map((p) => deleteProject(p.id));
 
+    if (deletePromises) {
+      return Cypress.Promise.all(deletePromises).then(() =>
+        create()
+      ) as any as Chainable<Cypress.Response>;
+    }
     return create();
   });
 };
@@ -263,6 +267,20 @@ export const cleanTranslationFiltersData = () =>
   internalFetch('e2e-data/translations/cleanup-for-filters');
 export const createTranslationFiltersData = () =>
   internalFetch('e2e-data/translations/generate-for-filters').then(
+    (r) => r.body as ProjectDTO
+  );
+
+export const createProjectLeavingData = () =>
+  internalFetch('e2e-data/project-leaving/generate');
+export const cleanProjectLeavingData = () =>
+  internalFetch('e2e-data/project-leaving/clean').then(
+    (r) => r.body as ProjectDTO
+  );
+
+export const createProjectTransferringData = () =>
+  internalFetch('e2e-data/project-transferring/generate');
+export const cleanProjectTransferringData = () =>
+  internalFetch('e2e-data/project-transferring/clean').then(
     (r) => r.body as ProjectDTO
   );
 

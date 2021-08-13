@@ -43,27 +43,34 @@ describe('Translations Base', () => {
     cy.contains('Translated test key').should('be.visible');
   });
 
-  it('will create translation', () => {
-    cy.gcy('global-empty-list').should('be.visible');
-    createTranslation('Test key', 'Translated test key');
-    cy.contains('Key created').should('be.visible');
-    cy.wait(100);
-    cy.xpath(getAnyContainingText('Key', 'a'))
-      .xpath(getClosestContainingText('Test key'))
-      .scrollIntoView()
-      .should('be.visible');
-    cy.xpath(getAnyContainingText('Key', 'a'))
-      .xpath(getClosestContainingText('Translated test key'))
-      .should('be.visible');
-    createTranslation('Test key 2', 'Translated test key 2');
-    cy.xpath(getAnyContainingText('Key', 'a'))
-      .xpath(getClosestContainingText('Test key 2'))
-      .scrollIntoView()
-      .should('be.visible');
-    cy.xpath(getAnyContainingText('Key', 'a'))
-      .xpath(getClosestContainingText('Translated test key 2'))
-      .should('be.visible');
-  });
+  it(
+    'will create translation',
+    {
+      retries: { openMode: 0, runMode: 10 },
+    },
+    () => {
+      cy.wait(100);
+      cy.gcy('global-empty-list').should('be.visible');
+      createTranslation('Test key', 'Translated test key');
+      cy.contains('Key created').should('be.visible');
+      cy.wait(100);
+      cy.xpath(getAnyContainingText('Key', 'a'))
+        .xpath(getClosestContainingText('Test key'))
+        .scrollIntoView()
+        .should('be.visible');
+      cy.xpath(getAnyContainingText('Key', 'a'))
+        .xpath(getClosestContainingText('Translated test key'))
+        .should('be.visible');
+      createTranslation('Test key 2', 'Translated test key 2');
+      cy.xpath(getAnyContainingText('Key', 'a'))
+        .xpath(getClosestContainingText('Test key 2'))
+        .scrollIntoView()
+        .should('be.visible');
+      cy.xpath(getAnyContainingText('Key', 'a'))
+        .xpath(getClosestContainingText('Translated test key 2'))
+        .should('be.visible');
+    }
+  );
 
   const visit = () => {
     visitTranslations(project.id);

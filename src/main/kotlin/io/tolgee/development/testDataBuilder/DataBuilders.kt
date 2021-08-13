@@ -156,8 +156,25 @@ class DataBuilders {
 
   class OrganizationBuilder(
     val testDataBuilder: TestDataBuilder
-  ) : EntityDataBuilder<Organization> {
+  ) : BaseEntityDataBuilder<Organization>() {
+    class DATA {
+      var roles: MutableList<OrganizationRoleBuilder> = mutableListOf()
+    }
+
+    val data = DATA()
+
+    fun addRole(ft: FT<OrganizationRoleBuilder>) = addOperation(data.roles, ft)
+
     override var self: Organization = Organization()
+  }
+
+  class OrganizationRoleBuilder(
+    val organizationBuilder: OrganizationBuilder
+  ) : EntityDataBuilder<OrganizationRole> {
+
+    override var self: OrganizationRole = OrganizationRole().apply {
+      organization = organizationBuilder.self
+    }
   }
 
   class KeyBuilder(

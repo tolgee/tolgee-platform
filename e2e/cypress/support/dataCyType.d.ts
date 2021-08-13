@@ -103,8 +103,10 @@ declare namespace DataCy {
         "permissions-menu" |
         "permissions-menu-button" |
         "permissions-revoke-button" |
+        "project-leave-button" |
         "project-list-languages" |
         "project-list-languages-item" |
+        "project-list-more-button" |
         "project-list-owner" |
         "project-menu-items" |
         "project-name-field" |
@@ -113,14 +115,20 @@ declare namespace DataCy {
         "project-settings-button" |
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-item" |
+        "project-settings-transfer-button" |
         "project-states-bar-bar" |
         "project-states-bar-dot" |
         "project-states-bar-legend" |
         "project-states-bar-root" |
         "project-states-bar-state-progress" |
+        "project-transfer-autocomplete-field" |
+        "project-transfer-autocomplete-suggested-option" |
+        "project-transfer-confirmation-field" |
+        "project-transfer-dialog" |
         "screenshot-box" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
+        "transfer-project-apply-button" |
         "translation-state-button" |
         "translations-add-button" |
         "translations-cell-cancel-button" |

@@ -15,7 +15,7 @@ import javax.validation.constraints.Size
 @Audited
 class Organization(
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-  open var id: Long? = null,
+  open var id: Long = 0,
 
   @field:NotBlank @field:Size(min = 3, max = 50)
   open var name: String? = null,
@@ -35,7 +35,7 @@ class Organization(
     description: String? = null,
     slug: String?,
     basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
-  ) : this(null, name, description, slug, basePermissions)
+  ) : this(0, name, description, slug, basePermissions)
 
   @OneToMany(mappedBy = "organization")
   var memberRoles: MutableList<OrganizationRole> = mutableListOf()

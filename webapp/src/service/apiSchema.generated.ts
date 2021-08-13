@@ -61,6 +61,15 @@ export interface paths {
     put: operations["setTranslations"];
     post: operations["createOrUpdateTranslations"];
   };
+  "/v2/projects/{projectId}/transfer-to-user/{userId}": {
+    put: operations["transferProjectToUser"];
+  };
+  "/v2/projects/{projectId}/transfer-to-organization/{organizationId}": {
+    put: operations["transferProjectToOrganization"];
+  };
+  "/v2/projects/{projectId}/leave": {
+    put: operations["leaveProject"];
+  };
   "/v2/projects/{projectId}/languages/{languageId}": {
     get: operations["get_3"];
     put: operations["editLanguage"];
@@ -227,6 +236,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translations/{languages}": {
     get: operations["getAllTranslations"];
+  };
+  "/v2/projects/{projectId}/transfer-options": {
+    get: operations["getTransferOptions"];
   };
   "/v2/projects/with-stats": {
     get: operations["getAllWithStatistics"];
@@ -552,7 +564,11 @@ export interface components {
       password: string;
       invitationCode?: string;
       callbackUrl?: string;
-      recaptchaToken?: { [key: string]: unknown };
+      recaptchaToken?: string;
+    };
+    JwtAuthenticationResponse: {
+      accessToken?: string;
+      tokenType?: string;
     };
     ResetPassword: {
       email: string;
@@ -644,6 +660,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -654,7 +671,6 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -702,6 +718,17 @@ export interface components {
       selectedLanguages: components["schemas"]["LanguageModel"][];
       /** Cursor to get next data */
       nextCursor?: string;
+    };
+    CollectionModelProjectTransferOptionModel: {
+      _embedded?: {
+        transferOptions?: components["schemas"]["ProjectTransferOptionModel"][];
+      };
+    };
+    ProjectTransferOptionModel: {
+      name?: string;
+      username?: string;
+      id: number;
+      type: "USER" | "ORGANIZATION";
     };
     PagedModelLanguageModel: {
       _embedded?: {
@@ -779,10 +806,6 @@ export interface components {
       name?: string;
       username?: string;
       emailAwaitingVerification?: string;
-    };
-    JwtAuthenticationResponse: {
-      accessToken?: string;
-      tokenType?: string;
     };
     AuthMethodsDTO: {
       github: components["schemas"]["GithubPublicConfigDTO"];
@@ -1529,6 +1552,77 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
+      };
+    };
+  };
+  transferProjectToUser: {
+    parameters: {
+      path: {
+        projectId: number;
+        userId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  transferProjectToOrganization: {
+    parameters: {
+      path: {
+        projectId: number;
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  leaveProject: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
       };
     };
   };
@@ -2808,7 +2902,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": { [key: string]: unknown };
+          "*/*": components["schemas"]["JwtAuthenticationResponse"];
         };
       };
       /** Bad Request */
@@ -3488,6 +3582,36 @@ export interface operations {
       200: {
         content: {
           "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getTransferOptions: {
+    parameters: {
+      query: {
+        search?: string;
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelProjectTransferOptionModel"];
         };
       };
       /** Bad Request */

@@ -6,10 +6,7 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.api.v2.hateoas.project.ProjectModel
-import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
-import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModel
-import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModelAssembler
+import io.tolgee.api.v2.hateoas.project.*
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -33,8 +30,10 @@ import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.*
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.*
@@ -63,6 +62,8 @@ class V2ProjectsController(
   private val tolgeeProperties: TolgeeProperties,
   private val securityService: SecurityService,
   private val invitationService: InvitationService,
+  private val organizationService: OrganizationService,
+  private val organizationRoleService: OrganizationRoleService
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -163,9 +164,86 @@ class V2ProjectsController(
 
   @DeleteMapping(value = ["/{projectId}"])
   @Operation(summary = "Deletes project by id")
-  fun deleteProject(@PathVariable projectId: Long?) {
-    securityService.checkProjectPermission(projectId!!, Permission.ProjectPermissionType.MANAGE)
+  fun deleteProject(@PathVariable projectId: Long) {
+    securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.MANAGE)
     projectService.deleteProject(projectId)
+  }
+
+  @PutMapping(value = ["/{projectId:[0-9]+}/transfer-to-organization/{organizationId:[0-9]+}"])
+  @Operation(summary = "Transfers project's ownership to organization")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  fun transferProjectToOrganization(@PathVariable projectId: Long, @PathVariable organizationId: Long) {
+    organizationRoleService.checkUserIsOwner(organizationId)
+    projectService.transferToOrganization(projectId, organizationId)
+  }
+
+  @PutMapping(value = ["/{projectId:[0-9]+}/transfer-to-user/{userId:[0-9]+}"])
+  @Operation(summary = "Transfers project's ownership to user")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  fun transferProjectToUser(@PathVariable projectId: Long, @PathVariable userId: Long) {
+    securityService.checkAnyProjectPermission(projectId, userId)
+    projectService.transferToUser(projectId, userId)
+  }
+
+  @PutMapping(value = ["/{projectId:[0-9]+}/leave"])
+  @Operation(summary = "Leave project")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  fun leaveProject(@PathVariable projectId: Long) {
+    val project = projectHolder.projectEntity
+    if (project.userOwner?.id == authenticationFacade.userAccount.id) {
+      throw BadRequestException(Message.CANNOT_LEAVE_OWNING_PROJECT)
+    }
+    val permissionData = permissionService.getProjectPermissionData(project.id, authenticationFacade.userAccount.id)
+    if (permissionData.organizationRole != null) {
+      throw BadRequestException(Message.CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE)
+    }
+
+    if (permissionData.directPermissions == null) {
+      throw BadRequestException(Message.DONT_HAVE_DIRECT_PERMISSIONS)
+    }
+
+    val permissionEntity = permissionService.findById(permissionData.directPermissions.id)
+      ?: throw NotFoundException()
+
+    permissionService.delete(permissionEntity)
+  }
+
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  @Operation(summary = "Returns transfer option")
+  @GetMapping(value = ["/{projectId:[0-9]+}/transfer-options"])
+  fun getTransferOptions(@RequestParam search: String? = ""): CollectionModel<ProjectTransferOptionModel> {
+    val project = projectHolder.project
+    val organizations = organizationService.findPermittedPaged(
+      PageRequest.of(0, 10),
+      true,
+      search,
+      project.organizationOwnerId
+    )
+    val options = organizations.content.map {
+      ProjectTransferOptionModel(
+        name = it.name,
+        id = it.id,
+        type = ProjectTransferOptionModel.TransferOptionType.ORGANIZATION
+      )
+    }.toMutableList()
+    val users = userAccountService.getAllInProject(
+      projectId = project.id,
+      PageRequest.of(0, 10),
+      search,
+      project.userOwnerId
+    )
+    options.addAll(
+      users.content.map {
+        ProjectTransferOptionModel(
+          name = it.name,
+          username = it.username,
+          id = it.id,
+          type = ProjectTransferOptionModel.TransferOptionType.USER
+        )
+      }
+    )
+    options.sortBy { it.name }
+    return CollectionModel.of(options)
   }
 
   @PutMapping("/{projectId}/invite")

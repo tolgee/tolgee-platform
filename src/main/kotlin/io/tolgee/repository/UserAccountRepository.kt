@@ -40,10 +40,16 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
         left join OrganizationRole orl on orl.user = ua and r.organizationOwner = orl.organization
         left join Organization  o on orl.organization = o
         where r.id = :projectId and (p is not null or orl is not null)
+        and ( :exceptUserId is null or ua.id <> :exceptUserId)
         and ((lower(ua.name)
         like lower(concat('%', cast(:search as text),'%'))
         or lower(ua.username) like lower(concat('%', cast(:search as text),'%'))) or cast(:search as text) is null)
     """
   )
-  fun getAllInProject(projectId: Long, pageable: Pageable, search: String? = ""): Page<UserAccountInProjectView>
+  fun getAllInProject(
+    projectId: Long,
+    pageable: Pageable,
+    search: String? = "",
+    exceptUserId: Long? = null
+  ): Page<UserAccountInProjectView>
 }

@@ -46,6 +46,7 @@ class ProjectService constructor(
   private val organizationRoleService: OrganizationRoleService,
   private val authenticationFacade: AuthenticationFacade,
   private val slugGenerator: SlugGenerator,
+  private val userAccountService: UserAccountService
 ) {
   @set:Autowired
   lateinit var keyService: KeyService
@@ -281,5 +282,24 @@ class ProjectService constructor(
         ?: throw BadRequestException(Message.LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND)
     }
     return createdLanguages[0]
+  }
+
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
+  fun transferToOrganization(projectId: Long, organizationId: Long) {
+    val project = get(projectId).orElseThrow { NotFoundException() }
+    project.userOwner = null
+    val organization = organizationService.get(organizationId) ?: throw NotFoundException()
+    project.organizationOwner = organization
+    save(project)
+  }
+
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
+  fun transferToUser(projectId: Long, userId: Long) {
+    val project = get(projectId).orElseThrow { NotFoundException() }
+    val userAccount = userAccountService[userId].orElseThrow { NotFoundException() }
+    project.organizationOwner = null
+    project.userOwner = userAccount
+    permissionService.setUserDirectPermission(projectId, userId, Permission.ProjectPermissionType.MANAGE, true)
+    save(project)
   }
 }
