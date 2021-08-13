@@ -1,3 +1,10 @@
+# [1.0.0-alpha.114](https://github.com/tolgee/server/compare/v1.0.0-alpha.113...v1.0.0-alpha.114) (2021-08-13)
+
+
+### Bug Fixes
+
+* Add registration captcha TG-31 ([2fd644f](https://github.com/tolgee/server/commit/2fd644f78c084b6db9ac99e1165a43aee959d4af))
+
 # [1.0.0-alpha.113](https://github.com/tolgee/server/compare/v1.0.0-alpha.112...v1.0.0-alpha.113) (2021-08-12)
 
 
