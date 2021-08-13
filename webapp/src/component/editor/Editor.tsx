@@ -138,6 +138,8 @@ export const Editor: React.FC<Props> = ({
     extraKeys: {
       Enter: (editor) => onSave?.(editor.getValue()),
       Esc: () => onCancel?.(),
+      Tab: false,
+      'Shift-Tab': false,
       'Ctrl-Enter': (editor) => onCmdSave?.(editor.getValue()),
       'Cmd-Enter': (editor) => onCmdSave?.(editor.getValue()),
     },

@@ -15,6 +15,7 @@ import { useResize, resizeColumn } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { ListRow } from '../TranslationsListOptimized/ListRow';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -162,6 +163,16 @@ export const TranslationsList = () => {
           />
         );
       })}
+      {translations[0] && (
+        <ListRow
+          data={translations[0]}
+          languages={languagesRow}
+          columnSizes={columnSizes}
+          editEnabled={projectPermissions.satisfiesPermission(
+            ProjectPermissionType.EDIT
+          )}
+        />
+      )}
       <ReactList
         ref={reactListRef}
         threshold={300}
