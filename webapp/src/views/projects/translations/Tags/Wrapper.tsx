@@ -5,18 +5,15 @@ import { stopBubble } from 'tg.fixtures/eventHandler';
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
+    display: 'flex',
     outline: 0,
-    margin: 0,
     cursor: 'default',
     padding: '3px 7px',
     borderRadius: '12px',
-    display: 'flex',
     alignItems: 'center',
     height: '22px',
     fontSize: 14,
     background: 'lightgrey',
-    marginTop: 2,
-    zIndex: 1,
     border: '1px solid transparent',
     maxWidth: '100%',
   },
@@ -26,8 +23,6 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.secondary,
     '&:focus-within': {
       border: `1px solid ${theme.palette.primary.main}`,
-      '-webkit-box-shadow': '0px 0px 2px 0px #000000',
-      'box-shadow': '0px 0px 2px 0px #000000',
     },
   },
   clickable: {

@@ -1,17 +1,36 @@
 import { makeStyles } from '@material-ui/core';
 
 export const useCellStyles = makeStyles((theme) => ({
-  cellPlain: {
-    '&:focus-within $showOnHover': {
+  '@keyframes easeIn': {
+    '0%': {
+      opacity: 0,
+    },
+    '100%': {
       opacity: 1,
     },
+  },
+  '@keyframes easeOut': {
+    '0%': {
+      opacity: 1,
+    },
+    '100%': {
+      opacity: 0,
+    },
+  },
+  cellPlain: {
     '& $showOnHover': {
       opacity: 0,
-      transition: 'opacity 0.1s ease-in-out',
+      transition: 'opacity 0.1s ease-out',
     },
     '&:hover $showOnHover': {
       opacity: 1,
-      transition: 'opacity 0.5s ease-in-out',
+      animationName: '$easeIn',
+      animationDuration: '0.4s',
+      animationTimingFunction: 'ease-in',
+    },
+    '&:focus-within $showOnHover': {
+      opacity: 1,
+      animationName: 'none',
     },
   },
   cellClickable: {
@@ -30,16 +49,15 @@ export const useCellStyles = makeStyles((theme) => ({
       opacity: 1,
     },
   },
+  cellRaised: {
+    '-webkit-box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2)',
+    'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2)',
+    zIndex: 1,
+  },
 
   controlsAbsolute: {
     position: 'absolute',
     right: 0,
     bottom: 0,
-  },
-  controlsSpaced: {
-    '& > *': {
-      marginLeft: 10,
-      marginBottom: 5,
-    },
   },
 }));

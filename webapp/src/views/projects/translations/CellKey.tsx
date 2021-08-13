@@ -117,7 +117,6 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
           onCancel={handleEditCancel}
           onSave={handleSave}
           onScreenshots={isEmpty ? undefined : () => setScreenshotsOpen(true)}
-          onSaveAndNew={isEmpty ? () => handleSave('NEW_EMPTY_KEY') : undefined}
           screenshotRef={screenshotEl}
           screenshotsPresent={screenshotCount > 0}
           screenshotsOpen={screenshotsOpen}
