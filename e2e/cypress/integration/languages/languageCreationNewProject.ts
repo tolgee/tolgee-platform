@@ -129,8 +129,9 @@ describe('Language creation in new project', () => {
     gcy('global-form-save-button').click();
     cy.contains('Super project')
       .closestDcy('dashboard-projects-list-item')
-      .findDcy('project-settings-button')
+      .findDcy('project-list-more-button')
       .click();
+    gcy('project-settings-button').click();
     selectInProjectMenu('Languages');
     languagesToAdd.forEach((l) =>
       gcy('global-paginated-list').contains(l).should('be.visible')

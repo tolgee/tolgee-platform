@@ -10,19 +10,17 @@ import { T, useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { TranslationStatesBar } from 'tg.views/projects/TranslationStatesBar';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { useConfig } from 'tg.hooks/useConfig';
-import { Settings } from '@material-ui/icons';
-import { redirect } from 'tg.hooks/redirect';
 import { TranslationIcon } from 'tg.component/CustomIcons';
+import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     padding: `${theme.spacing(3)}px ${theme.spacing(2)}px`,
-    cursor: 'pointer',
+    //cursor: 'pointer',
     overflow: 'hidden',
     '&:hover': {
       backgroundColor: theme.palette.grey['50'],
@@ -34,6 +32,9 @@ const useStyles = makeStyles((theme) => ({
   projectName: {
     fontSize: 16,
     fontWeight: 'bold',
+    '&:hover': {
+      textDecoration: 'underline',
+    },
   },
   projectLink: {
     textDecoration: 'none',
@@ -67,11 +68,11 @@ const DashboardProjectListItem = (
   return (
     <Box
       className={classes.root}
-      onClick={() =>
-        redirect(LINKS.PROJECT_TRANSLATIONS, {
-          [PARAMS.PROJECT_ID]: p.id,
-        })
-      }
+      // onClick={() =>
+      //   redirect(LINKS.PROJECT_TRANSLATIONS, {
+      //     [PARAMS.PROJECT_ID]: p.id,
+      //   })
+      // }
       data-cy="dashboard-projects-list-item"
     >
       <Grid container spacing={3}>
@@ -133,22 +134,11 @@ const DashboardProjectListItem = (
                 <TranslationIcon />
               </IconButton>
             </Tooltip>
-            {p.computedPermissions === ProjectPermissionType.MANAGE && (
-              <Tooltip title={t('project_settings_button', undefined, true)}>
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  component={Link}
-                  to={LINKS.PROJECT_EDIT.build({ [PARAMS.PROJECT_ID]: p.id })}
-                  data-cy="project-settings-button"
-                  aria-label={t('project_settings_button')}
-                  size="small"
-                >
-                  <Settings />
-                </IconButton>
-              </Tooltip>
-            )}
+            <ProjectListItemMenu
+              projectId={p.id}
+              computedPermissions={p.computedPermissions}
+              projectName={p.name}
+            />
           </Box>
         </Grid>
       </Grid>

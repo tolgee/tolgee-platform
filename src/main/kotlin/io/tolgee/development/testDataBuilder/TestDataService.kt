@@ -19,7 +19,9 @@ class TestDataService(
   private val entityManager: EntityManager,
   private val screenshotService: ScreenshotService,
   private val translationCommentService: TranslationCommentService,
-  private val tagService: TagService
+  private val tagService: TagService,
+  private val organizationService: OrganizationService,
+  private val organizationRoleService: OrganizationRoleService
 ) {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
@@ -29,8 +31,22 @@ class TestDataService(
         it.self
       }
     )
+
+    organizationService.saveAll(
+      builder.data.organizations.map {
+        it.self.apply {
+          val slug = this.slug
+          if (slug == null || slug.isEmpty()) {
+            this.slug = organizationService.generateSlug(this.name!!)
+          }
+        }
+      }
+    )
+
     projectService.saveAll(builder.data.projects.map { it.self })
     permissionService.saveAll(builder.data.projects.flatMap { it.data.permissions.map { it.self } })
+    organizationRoleService.saveAll(builder.data.organizations.flatMap { it.data.roles.map { it.self } })
+
     val languages = builder.data.projects.flatMap { it.data.languages.map { it.self } }
     languageService.saveAll(languages)
 

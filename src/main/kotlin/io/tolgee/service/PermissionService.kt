@@ -148,14 +148,15 @@ class PermissionService(
   fun setUserDirectPermission(
     projectId: Long,
     userId: Long,
-    newPermissionType: ProjectPermissionType
+    newPermissionType: ProjectPermissionType,
+    ignoreUserOrganizationOwner: Boolean = false
   ): Permission? {
     val data = this.getProjectPermissionData(projectId, userId)
 
     data.computedPermissions ?: throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
 
     data.organizationRole?.let {
-      if (data.organizationRole == OrganizationRoleType.OWNER) {
+      if (data.organizationRole == OrganizationRoleType.OWNER && !ignoreUserOrganizationOwner) {
         throw BadRequestException(Message.USER_IS_ORGANIZATION_OWNER)
       }
 

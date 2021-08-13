@@ -42,12 +42,13 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
 
-    performAuthGet("/v2/projects/with-stats").andPrettyPrint.andIsOk.andAssertThatJson.node("_embedded.projects").let {
-      it.isArray.hasSize(2)
-      it.node("[0].userOwner.username").isEqualTo("test_username")
-      it.node("[0].directPermissions").isEqualTo("MANAGE")
-      it.node("[1].stats.translationStateCounts").isEqualTo(
-        """
+    performAuthGet("/v2/projects/with-stats")
+      .andIsOk.andAssertThatJson.node("_embedded.projects").let {
+        it.isArray.hasSize(2)
+        it.node("[0].userOwner.username").isEqualTo("test_username")
+        it.node("[0].directPermissions").isEqualTo("MANAGE")
+        it.node("[1].stats.translationStateCounts").isEqualTo(
+          """
         {
           "UNTRANSLATED" : 4,
           "MACHINE_TRANSLATED" : 1,
@@ -56,9 +57,9 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           "NEEDS_REVIEW" : 2
         }
       """
-      )
-      it.node("[0].stats.translationStateCounts").isEqualTo(
-        """
+        )
+        it.node("[0].stats.translationStateCounts").isEqualTo(
+          """
        {
           "UNTRANSLATED" : 1,
           "MACHINE_TRANSLATED" : 0,
@@ -67,8 +68,8 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           "NEEDS_REVIEW" : 0
         }
       """
-      )
-    }
+        )
+      }
   }
 
   @Test
@@ -86,7 +87,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val base = dbPopulator.createBase("one")
 
     val account = dbPopulator.createUserIfNotExists("peter")
-    loginAsUser(account.name!!)
+    loginAsUser(account.name)
 
     performAuthGet("/v2/projects/${base.id}").andIsForbidden
   }
@@ -98,14 +99,15 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val user = dbPopulator.createUserIfNotExists("jirina")
     permissionService.grantFullAccessToProject(user, repo)
 
-    loginAsUser(usersAndOrganizations[1].name!!)
+    loginAsUser(usersAndOrganizations[1].name)
 
-    performAuthGet("/v2/projects/${repo.id}/users").andPrettyPrint.andAssertThatJson.node("_embedded.users").let {
-      it.isArray.hasSize(3)
-      it.node("[0].organizationRole").isEqualTo("MEMBER")
-      it.node("[1].organizationRole").isEqualTo("OWNER")
-      it.node("[2].directPermissions").isEqualTo("MANAGE")
-    }
+    performAuthGet("/v2/projects/${repo.id}/users").andPrettyPrint.andAssertThatJson
+      .node("_embedded.users").let {
+        it.isArray.hasSize(3)
+        it.node("[0].organizationRole").isEqualTo("MEMBER")
+        it.node("[1].organizationRole").isEqualTo("OWNER")
+        it.node("[2].directPermissions").isEqualTo("MANAGE")
+      }
   }
 
   @Test
@@ -116,7 +118,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     permissionService.create(Permission(user = user, project = repo, type = Permission.ProjectPermissionType.VIEW))
 
-    loginAsUser(usersAndOrganizations[1].name!!)
+    loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
@@ -136,11 +138,11 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     repo.organizationOwner!!.basePermissions = Permission.ProjectPermissionType.EDIT
     organizationRepository.save(repo.organizationOwner!!)
 
-    loginAsUser(usersAndOrganizations[1].name!!)
+    loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
-    permissionService.getProjectPermissionData(repo.id, user.id!!)
+    permissionService.getProjectPermissionData(repo.id, user.id)
       .let { assertThat(it.directPermissions).isEqualTo(null) }
   }
 
@@ -150,7 +152,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
     val user = dbPopulator.createUserIfNotExists("jirina")
 
-    loginAsUser(usersAndOrganizations[1].name!!)
+    loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null)
       .andIsBadRequest.andReturn().let {
@@ -165,7 +167,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val user = dbPopulator.createUserIfNotExists("jirina")
     organizationRoleService.grantOwnerRoleToUser(user, repo.organizationOwner!!)
 
-    loginAsUser(usersAndOrganizations[1].name!!)
+    loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null)
       .andIsBadRequest.andReturn().let {
@@ -183,7 +185,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     repo.organizationOwner!!.basePermissions = Permission.ProjectPermissionType.EDIT
     organizationRepository.save(repo.organizationOwner!!)
 
-    loginAsUser(usersAndOrganizations[1].name!!)
+    loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/TRANSLATE", null)
       .andIsBadRequest.andReturn().let {
@@ -196,9 +198,9 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
     val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
 
-    loginAsUser(usersAndOrganizations[1].name!!)
+    loginAsUser(usersAndOrganizations[1].name)
 
-    performAuthPut("/v2/projects/${repo.id}/users/${usersAndOrganizations[1].id!!}/set-permissions/EDIT", null)
+    performAuthPut("/v2/projects/${repo.id}/users/${usersAndOrganizations[1].id}/set-permissions/EDIT", null)
       .andIsBadRequest.andReturn().let {
         assertThat(it).error().hasCode("cannot_set_your_own_permissions")
       }
@@ -212,7 +214,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     permissionService.create(Permission(user = user, project = repo, type = Permission.ProjectPermissionType.VIEW))
 
-    loginAsUser(usersAndOrganizations[1].name!!)
+    loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null).andIsOk
 
@@ -237,7 +239,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     val user = dbPopulator.createUserIfNotExists("jirina")
 
     organizationRoleService.grantMemberRoleToUser(user, repo.organizationOwner!!)
-    loginAsUser(usersAndOrganizations[1].name!!)
+    loginAsUser(usersAndOrganizations[1].name)
 
     performAuthPut("/v2/projects/${repo.id}/users/${user.id}/revoke-access", null)
       .andIsBadRequest.andReturn().let { assertThat(it).error().hasCode("user_is_organization_member") }
@@ -256,7 +258,6 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun inviteUserToProject() {
     val key = performProjectAuthPut("/invite", ProjectInviteUserDto(Permission.ProjectPermissionType.MANAGE))
       .andIsOk.andGetContentAsString
-
     assertThat(key).hasSize(50)
   }
 }

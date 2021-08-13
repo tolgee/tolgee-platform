@@ -60,15 +60,28 @@ class OrganizationService(
     }
   }
 
-  fun findPermittedPaged(pageable: Pageable, requestParamsDto: OrganizationRequestParamsDto): Page<OrganizationView> {
-    if (requestParamsDto.filterCurrentUserOwner) {
-      return organizationRepository.findAllPermitted(
-        userId = authenticationFacade.userAccount.id,
-        pageable = pageable,
-        roleType = OrganizationRoleType.OWNER
-      )
-    }
-    return organizationRepository.findAllPermitted(authenticationFacade.userAccount.id, pageable, null)
+  fun findPermittedPaged(
+    pageable: Pageable,
+    filterCurrentUserOwner: Boolean = false,
+    search: String? = null,
+    exceptOrganizationId: Long? = null
+  ): Page<OrganizationView> {
+    return organizationRepository.findAllPermitted(
+      userId = authenticationFacade.userAccount.id,
+      pageable = pageable,
+      roleType = if (filterCurrentUserOwner) OrganizationRoleType.OWNER else null,
+      search = search,
+      exceptOrganizationId = exceptOrganizationId
+    )
+  }
+
+  fun findPermittedPaged(
+    pageable: Pageable,
+    requestParamsDto: OrganizationRequestParamsDto,
+    search: String? = null,
+    exceptOrganizationId: Long? = null
+  ): Page<OrganizationView> {
+    return findPermittedPaged(pageable, requestParamsDto.filterCurrentUserOwner, search, exceptOrganizationId)
   }
 
   fun get(id: Long): Organization? {
@@ -140,5 +153,9 @@ class OrganizationService(
     organizationRepository.findAllByName(name).forEach {
       this.delete(it.id!!)
     }
+  }
+
+  fun saveAll(organizations: List<Organization>) {
+    organizationRepository.saveAll(organizations)
   }
 }
