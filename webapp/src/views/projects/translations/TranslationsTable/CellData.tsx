@@ -31,6 +31,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
   translation,
   onResize,
   colIndex,
+  width,
 }) {
   const {
     isEditing,
@@ -82,8 +83,9 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
           />
         ) : (
           <TranslationVisual
+            width={width}
             locale={locale}
-            maxLines={3}
+            limitLines={true}
             wrapVariants={true}
             text={translation?.text}
           />

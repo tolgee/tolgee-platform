@@ -17,7 +17,9 @@ const useStyles = makeStyles({
     '-moz-hyphens': 'auto',
     '-webkit-hyphens': 'auto',
     hyphens: 'auto',
-    animation: 'fadeIn .2s ease-in-out',
+    animationName: '$fadeIn',
+    animationDuration: '0.1s',
+    animationTimingFunction: 'ease-in-out',
   },
 });
 
@@ -25,6 +27,7 @@ type Props = {
   maxLines?: number | undefined;
   lang?: string;
   wrap?: 'break-word' | 'break-all';
+  width: number;
 };
 
 export const LimitedHeightText: React.FC<Props> = ({
@@ -32,6 +35,7 @@ export const LimitedHeightText: React.FC<Props> = ({
   children,
   lang,
   wrap = 'break-word',
+  width,
 }) => {
   const classes = useStyles();
   const textRef = useRef<HTMLDivElement>();
@@ -43,18 +47,16 @@ export const LimitedHeightText: React.FC<Props> = ({
       const clone = textElement.cloneNode(true) as HTMLDivElement;
       clone.style.position = 'absolute';
       clone.style.visibility = 'hidden';
+      clone.style.top = '0px';
       textElement.parentElement?.append(clone);
-      setExpandable(
-        textElement.clientWidth < clone.clientWidth ||
-          textElement.clientHeight < clone.scrollHeight
-      );
+      setExpandable(textElement.clientHeight < clone.scrollHeight);
       textElement.parentElement?.removeChild(clone);
     }
   };
 
   useEffect(() => {
     detectExpandability();
-  });
+  }, [width, children, wrap, maxLines]);
 
   const gradient = expandable
     ? `linear-gradient(to top, rgba(0,0,0,0) 0%, rgba(0,0,0,0.87) 1.2rem, rgba(0,0,0,0.87) ${

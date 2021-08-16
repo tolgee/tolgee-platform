@@ -12,6 +12,7 @@ import { UserMenu } from '../security/UserMenu';
 import { useConfig } from 'tg.hooks/useConfig';
 
 const drawerWidth = 240;
+export const TOP_BAR_HEIGHT = 64;
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -54,7 +55,7 @@ export function TopBar(props: TopBarProps) {
   const classes = useStyles({});
   const config = useConfig();
   return (
-    <AppBar position="absolute" className={clsx(classes.appBar)}>
+    <AppBar position="fixed" className={clsx(classes.appBar)}>
       <Toolbar className={classes.toolbar}>
         <Box flexGrow={1} display="flex">
           <Box>

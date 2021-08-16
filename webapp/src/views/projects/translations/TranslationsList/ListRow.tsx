@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { KeyCell } from './KeyCell';
+import { KeyCell } from '../KeyCell';
 import { useDebounce } from 'use-debounce/lib';
+import { LanguageCell } from './LanguageCell';
+import { EmptyKeyPlaceholder } from '../cell/EmptyKeyPlaceholder';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -17,6 +19,12 @@ const useStyles = makeStyles((theme) => {
       border: `1px solid ${borderColor}`,
       borderWidth: '1px 0px 0px 0px',
     },
+    languages: {
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+      alignItems: 'stretch',
+    },
   };
 });
 
@@ -25,12 +33,15 @@ type Props = {
   languages: LanguageModel[];
   columnSizes: number[];
   editEnabled: boolean;
+  onResize: (colIndex: number) => void;
 };
 
 export const ListRow: React.FC<Props> = React.memo(function ListRow({
   data,
   columnSizes,
   editEnabled,
+  languages,
+  onResize,
 }) {
   const classes = useStyles();
   const [hover, setHover] = useState(false);
@@ -55,6 +66,26 @@ export const ListRow: React.FC<Props> = React.memo(function ListRow({
         width={columnSizes[0]}
         active={relaxedActive}
       />
+      <div className={classes.languages} style={{ width: columnSizes[1] }}>
+        {data.keyId < 0 ? (
+          <EmptyKeyPlaceholder colIndex={0} onResize={onResize} />
+        ) : (
+          languages.map((language, index) => (
+            <LanguageCell
+              key={language.tag}
+              data={data}
+              language={language}
+              colIndex={0}
+              onResize={onResize}
+              editEnabled={editEnabled}
+              width={columnSizes[1]}
+              active={relaxedActive}
+              // render edit button on last item, so it's focusable
+              renderEdit={index === languages.length - 1}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 });

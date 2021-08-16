@@ -36,7 +36,11 @@ const useStyles = makeStyles((theme) => ({
       // @ts-ignore
       background: (props) => props.background,
     },
+    '& .CodeMirror-lines': {
+      padding: '0px !important',
+    },
     '& .CodeMirror-line': {
+      padding: '0px !important',
       fontFamily:
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important',
     },

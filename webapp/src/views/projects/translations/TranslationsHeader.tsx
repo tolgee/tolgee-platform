@@ -1,10 +1,4 @@
-import {
-  Button,
-  ButtonGroup,
-  IconButton,
-  Box,
-  makeStyles,
-} from '@material-ui/core';
+import { Button, ButtonGroup, IconButton, makeStyles } from '@material-ui/core';
 import { ViewListRounded, AppsRounded, Add, Delete } from '@material-ui/icons';
 import SearchField from 'tg.component/common/form/fields/SearchField';
 import { useContextSelector } from 'use-context-selector';
@@ -34,6 +28,13 @@ const useStyles = makeStyles((theme) => ({
     '& > * + *': {
       marginLeft: 10,
     },
+  },
+  deleteButton: {
+    display: 'flex',
+    flexShrink: 1,
+    width: 38,
+    height: 38,
+    marginLeft: 3,
   },
   [`@media (max-width: ${theme.breakpoints.values.md}px)`]: {
     container: {
@@ -94,20 +95,14 @@ export const TranslationsHeader = () => {
     <div className={classes.container}>
       <div className={classes.spaced}>
         {selection.length > 0 && (
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            marginLeft="-4px"
+          <IconButton
+            className={classes.deleteButton}
+            size="small"
+            onClick={handleDelete}
+            data-cy="translations-delete-button"
           >
-            <IconButton
-              size="small"
-              onClick={handleDelete}
-              data-cy="translations-delete-button"
-            >
-              <Delete />
-            </IconButton>
-          </Box>
+            <Delete />
+          </IconButton>
         )}
         <SearchField
           initial={search}

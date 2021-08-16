@@ -34,6 +34,7 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
   screenshotCount,
   editEnabled,
   tags,
+  width,
 }) {
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
 
@@ -102,7 +103,11 @@ export const CellKey: React.FC<Props> = React.memo(function Cell({
                   </Box>
                 )}
                 <Box position="relative">
-                  <LimitedHeightText maxLines={3} wrap="break-all">
+                  <LimitedHeightText
+                    maxLines={3}
+                    wrap="break-all"
+                    width={width}
+                  >
                     {text}
                   </LimitedHeightText>
                 </Box>

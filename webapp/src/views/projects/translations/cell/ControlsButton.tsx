@@ -1,49 +1,33 @@
 import React from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core';
+import { IconButton, makeStyles } from '@material-ui/core';
+import { stopBubble } from 'tg.fixtures/eventHandler';
 
 const useStyles = makeStyles({
   button: {
     display: 'flex',
     cursor: 'pointer',
-    justifyContent: 'center',
-    alignItems: 'center',
-    background: 'transparent',
-    margin: 0,
-    padding: 0,
-    border: 0,
-    outline: 0,
-    width: 20,
-    height: 20,
-    borderRadius: '50%',
-    '&:hover': {
-      background: '#d3d3d36e',
-    },
-    '&:focus, &:active': {
-      background: 'lightgrey',
-    },
-    transition: 'background 200ms ease-in-out',
+    width: 36,
+    height: 36,
+    margin: -8,
   },
 });
 
-type Props = React.ComponentProps<'button'> & {
-  passRef?: React.Ref<HTMLButtonElement>;
-};
+type Props = React.ComponentProps<typeof IconButton>;
 
-export const ControlsButton: React.FC<Props> = ({
-  children,
-  className,
-  passRef,
-  ...props
-}) => {
-  const classes = useStyles();
-  return (
-    <button
-      className={clsx(classes.button, className)}
-      ref={passRef}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
+export const ControlsButton: React.FC<Props> = React.forwardRef(
+  function ControlsButton({ children, className, onClick, ...props }, ref) {
+    const classes = useStyles();
+    return (
+      <IconButton
+        size="small"
+        className={clsx(classes.button, className)}
+        onClick={stopBubble(onClick)}
+        ref={ref}
+        {...props}
+      >
+        {children}
+      </IconButton>
+    );
+  }
+);

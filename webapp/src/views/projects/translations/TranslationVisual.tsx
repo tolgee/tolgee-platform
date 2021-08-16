@@ -47,30 +47,39 @@ const useStyles = makeStyles({
 });
 
 type Props = {
-  maxLines?: number;
+  limitLines?: boolean;
   wrapVariants?: boolean;
   text: string | undefined;
   locale: string;
+  width;
 };
 
 export const TranslationVisual: React.FC<Props> = ({
   text,
-  maxLines,
-  wrapVariants,
+  limitLines,
   locale,
+  width,
 }) => {
   const classes = useStyles();
   const { variants } = useMemo(() => icuVariants(text || '', locale), [text]);
 
   if (!variants) {
     return (
-      <LimitedHeightText maxLines={maxLines} lang={locale}>
+      <LimitedHeightText
+        width={width}
+        maxLines={limitLines ? 3 : undefined}
+        lang={locale}
+      >
         {text}
       </LimitedHeightText>
     );
   } else if (variants.length === 1) {
     return (
-      <LimitedHeightText maxLines={maxLines} lang={locale}>
+      <LimitedHeightText
+        width={width}
+        maxLines={limitLines ? 3 : undefined}
+        lang={locale}
+      >
         {variants[0].value}
       </LimitedHeightText>
     );
@@ -78,7 +87,7 @@ export const TranslationVisual: React.FC<Props> = ({
     const croppedVariants = variants.slice(
       0,
       // display first 6 should be enough for plurals
-      maxLines !== undefined ? 6 : undefined
+      limitLines ? 6 : undefined
     );
     const isOverflow = croppedVariants.length !== variants.length;
     return (
@@ -96,7 +105,7 @@ export const TranslationVisual: React.FC<Props> = ({
             <div className={classes.chipWrapper}>
               <div className={classes.chip}>{option}</div>
             </div>
-            <div className={wrapVariants ? classes.wrapped : undefined}>
+            <div className={limitLines ? classes.wrapped : undefined}>
               {value}
             </div>
           </div>

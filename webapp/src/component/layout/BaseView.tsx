@@ -18,6 +18,7 @@ import { useConfig } from 'tg.hooks/useConfig';
 import { Navigation } from 'tg.component/navigation/Navigation';
 
 import { SecondaryBar } from './SecondaryBar';
+import { TOP_BAR_HEIGHT } from './TopBar';
 
 export interface BaseViewProps {
   windowTitle?: string;
@@ -57,7 +58,12 @@ export const BaseView = (props: BaseViewProps) => {
 
   return (
     <>
-      <Box position="absolute" width="100%" top={0} zIndex={theme.zIndex.modal}>
+      <Box
+        position="fixed"
+        width="100%"
+        top={TOP_BAR_HEIGHT}
+        zIndex={theme.zIndex.modal}
+      >
         {(globalLoading || props.loading) && (
           <LinearProgress
             data-cy="global-base-view-loading"
@@ -67,11 +73,10 @@ export const BaseView = (props: BaseViewProps) => {
       </Box>
 
       <Container
-        data-cy="global-base-view-content-scrollable"
         maxWidth={false}
         style={{
+          position: 'relative',
           padding: 0,
-          minHeight: '100%',
         }}
       >
         <Box minHeight="100%">

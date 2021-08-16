@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import { IconButton, Button, Tooltip, makeStyles } from '@material-ui/core';
+import { Button, Tooltip, makeStyles } from '@material-ui/core';
 import { Edit, CameraAlt } from '@material-ui/icons';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { StateIcon } from './StateIcon';
-import { stopBubble } from 'tg.fixtures/eventHandler';
 import { useCellStyles } from './styles';
 import { ControlsButton } from './ControlsButton';
 import { TagInput } from '../Tags/TagInput';
@@ -19,9 +18,9 @@ const getStateTransitionButtons = (
 ) => {
   return (
     state &&
-    translationStates[state]?.next.map((s) => (
+    translationStates[state]?.next.map((s, i) => (
       <Tooltip
-        key={s}
+        key={i}
         title={t(
           'translation_state_change',
           {
@@ -30,40 +29,37 @@ const getStateTransitionButtons = (
           true
         )}
       >
-        <IconButton
+        <ControlsButton
           data-cy="translation-state-button"
-          onClick={stopBubble(() => onStateChange?.(s))}
-          size="small"
+          onClick={() => onStateChange?.(s)}
           className={className}
         >
           <StateIcon state={s} fontSize="small" />
-        </IconButton>
+        </ControlsButton>
       </Tooltip>
     ))
   );
 };
 
 const useStyles = makeStyles({
-  container: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    minHeight: 26,
-    margin: -2,
-    overflow: 'hidden',
-    '& > *': {
-      margin: 2,
-    },
-  },
   leftPart: {
     display: 'flex',
+    alignItems: 'flex-start',
     overflow: 'hidden',
+    padding: 12,
     '& > * + *': {
       marginLeft: 10,
     },
   },
   rightPart: {
     display: 'flex',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    padding: 12,
+    '& > * + *': {
+      marginLeft: 4,
+    },
+    flexGrow: 1,
   },
 });
 
@@ -77,7 +73,7 @@ type ControlsProps = {
   onCancel?: () => void;
   onScreenshots?: () => void;
   onStateChange?: (state: StateType) => void;
-  screenshotRef?: React.Ref<HTMLButtonElement>;
+  screenshotRef?: React.Ref<any>;
   screenshotsPresent?: boolean;
   screenshotsOpen?: boolean;
   absolute?: boolean;
@@ -113,52 +109,68 @@ export const CellControls: React.FC<ControlsProps> = ({
 
   const modeEdit = mode === 'edit';
 
+  // left section
+  const displayTagInput = onAddTag && tagEdit;
+  const displayTagAdd = onAddTag && !tagEdit && addTag;
+  const displayEditorButtons = modeEdit && !tagEdit;
+  const displayLeftPart =
+    displayTagInput || displayTagAdd || displayEditorButtons;
+
+  // right section
+  const displayTransitionButtons = !tagEdit && state;
+  const displayEdit = !tagEdit && editEnabled && !modeEdit && onEdit;
+  const displayScreenshots = !tagEdit && onScreenshots;
+  const displayRightPart =
+    displayTransitionButtons || displayEdit || displayScreenshots;
+
   return (
-    <div className={classes.container}>
-      <div className={classes.leftPart} onClick={stopBubble()}>
-        {onAddTag &&
-          (tagEdit ? (
+    <>
+      {displayLeftPart && (
+        <div className={classes.leftPart}>
+          {displayTagInput && (
             <TagInput onClose={() => setTagEdit(false)} onAdd={handleAddTag} />
-          ) : (
-            addTag && (
-              <TagAdd
-                withFullLabel={Boolean(firstTag)}
-                onClick={() => setTagEdit(true)}
-              />
-            )
-          ))}
-        {modeEdit && !tagEdit && (
-          <>
-            <Button
-              onClick={onCancel}
-              color="primary"
-              variant="outlined"
-              size="small"
-              data-cy="translations-cell-cancel-button"
-            >
-              <T>translations_cell_cancel</T>
-            </Button>
-            <Button
-              onClick={onSave}
-              color="primary"
-              variant="contained"
-              size="small"
-              data-cy="translations-cell-save-button"
-            >
-              <T>translations_cell_save</T>
-            </Button>
-          </>
-        )}
-      </div>
-      {!tagEdit && (
-        <div className={classes.rightPart} onClick={stopBubble()}>
-          {getStateTransitionButtons(
-            state,
-            onStateChange,
-            modeEdit ? '' : cellClasses.showOnHover,
-            t
           )}
-          {editEnabled && !modeEdit && onEdit && (
+          {displayTagAdd && (
+            <TagAdd
+              withFullLabel={Boolean(firstTag)}
+              onClick={() => setTagEdit(true)}
+            />
+          )}
+          {displayEditorButtons && (
+            <>
+              <Button
+                onClick={onCancel}
+                color="primary"
+                variant="outlined"
+                size="small"
+                data-cy="translations-cell-cancel-button"
+              >
+                <T>translations_cell_cancel</T>
+              </Button>
+              <Button
+                onClick={onSave}
+                color="primary"
+                variant="contained"
+                size="small"
+                data-cy="translations-cell-save-button"
+              >
+                <T>translations_cell_save</T>
+              </Button>
+            </>
+          )}
+        </div>
+      )}
+
+      {displayRightPart && (
+        <div className={classes.rightPart}>
+          {displayTransitionButtons &&
+            getStateTransitionButtons(
+              state,
+              onStateChange,
+              modeEdit ? '' : cellClasses.showOnHover,
+              t
+            )}
+          {displayEdit && (
             <ControlsButton
               onClick={onEdit}
               data-cy="translations-cell-edit-button"
@@ -167,10 +179,10 @@ export const CellControls: React.FC<ControlsProps> = ({
               <Edit fontSize="small" />
             </ControlsButton>
           )}
-          {onScreenshots && (
+          {displayScreenshots && (
             <ControlsButton
-              passRef={screenshotRef}
               onClick={onScreenshots}
+              ref={screenshotRef}
               data-cy="translations-cell-screenshots-button"
               className={
                 screenshotsPresent || screenshotsOpen || modeEdit
@@ -186,6 +198,6 @@ export const CellControls: React.FC<ControlsProps> = ({
           )}
         </div>
       )}
-    </div>
+    </>
   );
 };

@@ -9,53 +9,23 @@ import {
   TranslationsContext,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
-import { CellKey } from '../CellKey';
-import { LanguagesRow } from './LanguagesRow';
 import { useResize, resizeColumn } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
-import { ListRow } from '../TranslationsListOptimized/ListRow';
+import { ListRow } from './ListRow';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
 const useStyles = makeStyles((theme) => {
-  const borderColor = theme.palette.grey[200];
   return {
     table: {
+      display: 'flex',
       position: 'relative',
-      margin: '10px -10px 0px -10px',
+      margin: '10px 0px 0px 0px',
       borderLeft: 0,
       borderRight: 0,
       background: 'white',
-      '& $rowWrapper:last-of-type': {
-        borderWidth: '1px 0px 1px 0px',
-      },
-    },
-    rowWrapper: {
-      margin: `0px -${theme.spacing(2)}px 0px -${theme.spacing(2)}px`,
-      padding: `0px ${theme.spacing(2)}px 0px ${theme.spacing(2)}px`,
-      border: `1px solid ${borderColor}`,
-      borderWidth: '1px 0px 0px 0px',
-    },
-    row: {
-      display: 'flex',
-    },
-    keyCell: {
-      display: 'flex',
-      boxSizing: 'border-box',
-      alignItems: 'stretch',
-      flexGrow: 0,
-      flexShrink: 0,
-      overflow: 'hidden',
-    },
-    languages: {
-      boxSizing: 'border-box',
-      display: 'flex',
-      alignItems: 'stretch',
-      flexGrow: 0,
-      flexShrink: 0,
-      overflow: 'hidden',
     },
   };
 });
@@ -163,27 +133,19 @@ export const TranslationsList = () => {
           />
         );
       })}
-      {translations[0] && (
-        <ListRow
-          data={translations[0]}
-          languages={languagesRow}
-          columnSizes={columnSizes}
-          editEnabled={projectPermissions.satisfiesPermission(
-            ProjectPermissionType.EDIT
-          )}
-        />
-      )}
       <ReactList
-        ref={reactListRef}
-        threshold={300}
+        useTranslate3d
+        threshold={800}
         type="variable"
         itemSizeEstimator={(index, cache) => {
           return (
             cache[index] ||
             // items count
-            Math.max((selectedLanguages?.length || 0) * 32, 82)
+            Math.max((selectedLanguages?.length || 0) * 66, 73) + 1
           );
         }}
+        // @ts-ignore
+        scrollParentGetter={() => window}
         length={translations.length}
         itemRenderer={(index) => {
           const row = translations[index];
@@ -192,41 +154,16 @@ export const TranslationsList = () => {
             handleFetchMore();
           }
           return (
-            <div key={row.keyId} className={classes.rowWrapper}>
-              <div className={classes.row}>
-                <div
-                  className={classes.keyCell}
-                  style={{ flexBasis: columnSizes[0] }}
-                >
-                  <CellKey
-                    keyId={row.keyId}
-                    keyName={row.keyName}
-                    tags={row.keyTags}
-                    text={row.keyName}
-                    screenshotCount={row.screenshotCount}
-                    editEnabled={projectPermissions.satisfiesPermission(
-                      ProjectPermissionType.EDIT
-                    )}
-                    width={columnSizes[0]}
-                  />
-                </div>
-                <div
-                  className={classes.languages}
-                  style={{ flexBasis: columnSizes[1] }}
-                >
-                  <LanguagesRow
-                    colIndex={0}
-                    onResize={handleResize}
-                    width={columnSizes[1]}
-                    languages={languagesRow}
-                    data={row}
-                    editEnabled={projectPermissions.satisfiesPermission(
-                      ProjectPermissionType.TRANSLATE
-                    )}
-                  />
-                </div>
-              </div>
-            </div>
+            <ListRow
+              key={index}
+              data={row}
+              languages={languagesRow}
+              columnSizes={columnSizes}
+              editEnabled={projectPermissions.satisfiesPermission(
+                ProjectPermissionType.TRANSLATE
+              )}
+              onResize={handleResize}
+            />
           );
         }}
       />

@@ -258,6 +258,8 @@ export const TranslationsTable = () => {
         itemSizeEstimator={(index, cache) => {
           return cache[index] || 82;
         }}
+        // @ts-ignore
+        scrollParentGetter={() => window}
         length={translations.length}
         useTranslate3d
         itemRenderer={(index) => {
