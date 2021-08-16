@@ -1,13 +1,17 @@
-import { Box, makeStyles } from '@material-ui/core';
-import React from 'react';
-import { Editor } from 'tg.component/editor/Editor';
-import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
-import { StateType } from 'tg.constants/translationStates';
+import clsx from 'clsx';
+import { makeStyles, Tooltip } from '@material-ui/core';
+import { T } from '@tolgee/react';
+
 import { components } from 'tg.service/apiSchema.generated';
-import { CellContent, CellControls, CellPlain } from '../cell';
+import { Editor } from 'tg.component/editor/Editor';
+import { stopBubble } from 'tg.fixtures/eventHandler';
+import { StateType, translationStates } from 'tg.constants/translationStates';
+import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
+import { useCellStyles } from '../cell/styles';
+import { useEditableRow } from '../useEditableRow';
+import { CellControls } from '../cell';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
 import { TranslationVisual } from '../TranslationVisual';
-import { useEditableRow } from '../useEditableRow';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -15,49 +19,69 @@ type KeyWithTranslationsModel =
 
 const useStyles = makeStyles((theme) => {
   return {
-    content: {
+    splitContainer: {
       display: 'flex',
-      width: '100%',
-      alignItems: 'stretch',
       flexGrow: 1,
+      position: 'relative',
     },
-    languageRow: {
-      display: 'flex',
-      flexDirection: 'column',
+    container: {
       flexBasis: '50%',
-      width: '50%',
       flexGrow: 1,
-      overflow: 'hidden',
+      position: 'relative',
+      display: 'grid',
+      gridTemplateColumns: 'auto 80px 1fr',
+      gridTemplateAreas: `
+        "flag     language translation"
+        "controls controls controls   "
+      `,
+    },
+    stateHover: {
+      position: 'absolute',
+      width: 12,
+      height: '100%',
+    },
+    stateBorder: {
+      position: 'absolute',
+      height: '100%',
+    },
+    flag: {
+      gridArea: 'flag',
+      margin: '12px 8px 8px 12px',
+      width: 20,
+      height: 20,
+      padding: 1,
+    },
+    language: {
+      margin: '12px 8px 8px 0px',
     },
     editor: {
-      display: 'flex',
-      flexBasis: '50%',
-      width: '50%',
-      flexGrow: 1,
-      justifyContent: 'stretch',
-      border: `1px solid white`,
-      borderWidth: '0px 0px 0px 1px',
-    },
-    rowContent: {
-      display: 'flex',
-      flexGrow: 1,
       overflow: 'hidden',
-      alignItems: 'flex-start',
-    },
-    languageContent: {
-      width: 100,
-      flexShrink: 0,
+      flexBasis: '50%',
+      flexGrow: 1,
       display: 'flex',
-      alignItems: 'center',
-      '& > * + *': {
-        marginLeft: 4,
-      },
+      flexDirection: 'column',
+    },
+    editorContainer: {
+      padding: '12px 12px 0px 12px',
+      flexGrow: 1,
+    },
+    editorControls: {
+      display: 'flex',
     },
     translation: {
+      gridArea: 'translation',
+      margin: '12px 12px 8px 0px',
       overflow: 'hidden',
+      position: 'relative',
     },
     controls: {
-      display: 'none',
+      gridArea: 'controls',
+      display: 'flex',
+      justifyContent: 'space-between',
+      overflow: 'hidden',
+      alignItems: 'stretch',
+      minHeight: 46,
+      marginTop: -20,
     },
   };
 });
@@ -68,18 +92,26 @@ type Props = {
   colIndex: number;
   onResize: (colIndex: number) => void;
   editEnabled: boolean;
+  width: number;
+  active: boolean;
+  renderEdit: boolean;
 };
 
 export const LanguageCell: React.FC<Props> = ({
   data,
-  language: l,
+  language,
   colIndex,
   onResize,
   editEnabled,
+  width,
+  active,
+  renderEdit,
 }) => {
-  const dispatch = useTranslationsDispatch();
   const classes = useStyles();
+  const cellClasses = useCellStyles();
+  const dispatch = useTranslationsDispatch();
 
+  const translation = data.translations[language.tag];
   const {
     isEditing,
     value,
@@ -91,8 +123,8 @@ export const LanguageCell: React.FC<Props> = ({
   } = useEditableRow({
     keyId: data.keyId,
     keyName: data.keyName,
-    translations: data.translations,
-    language: l.tag,
+    defaultVal: translation?.text,
+    language: language.tag,
   });
 
   const handleStateChange = (language: string) => (state: StateType) => {
@@ -107,77 +139,118 @@ export const LanguageCell: React.FC<Props> = ({
     });
   };
 
-  const translation = data.translations[l.tag];
+  const handleResize = () => {
+    onResize(colIndex);
+  };
 
   const toggleEdit = () => {
     if (isEditing) {
       handleEditCancel();
     } else {
-      handleEdit(l.tag);
+      handleEdit(language.tag);
     }
   };
 
+  const state = translation?.state || 'UNTRANSLATED';
+
   return (
-    <div className={classes.content}>
-      <div className={classes.languageRow}>
-        <CellPlain
-          hover={!isEditing}
-          background={isEditing ? '#efefef' : undefined}
-          onClick={editEnabled ? () => toggleEdit() : undefined}
-          flexGrow={1}
-          state={translation?.state || 'UNTRANSLATED'}
-          onResize={() => onResize(colIndex)}
+    <div
+      className={clsx({
+        [classes.splitContainer]: true,
+        [cellClasses.cellRaised]: isEditing,
+      })}
+    >
+      <div
+        className={clsx({
+          [classes.container]: true,
+          [cellClasses.cellPlain]: true,
+          [cellClasses.hover]: !isEditing,
+          [cellClasses.cellClickable]: editEnabled,
+          [cellClasses.cellSelected]: isEditing,
+        })}
+        style={{ width }}
+        onClick={editEnabled ? () => toggleEdit() : undefined}
+      >
+        <CircledLanguageIcon
+          flag={language.flagEmoji}
+          className={classes.flag}
+        />
+
+        <div className={classes.language}>{language.tag}</div>
+
+        <div className={classes.translation}>
+          <TranslationVisual
+            width={width}
+            text={isEditing ? value : translation?.text}
+            locale={language.tag}
+            limitLines={!isEditing}
+          />
+        </div>
+
+        <Tooltip
+          title={<T noWrap>{translationStates[state]?.translationKey}</T>}
         >
-          <CellContent>
-            <div className={classes.rowContent}>
-              <div className={classes.languageContent}>
-                <CircledLanguageIcon flag={l.flagEmoji} />
-                <Box>{l.tag}</Box>
-              </div>
-              <div className={classes.translation}>
-                <TranslationVisual
-                  locale={l.tag}
-                  maxLines={isEditing ? undefined : 3}
-                  text={isEditing ? value : translation?.text}
-                  wrapVariants={!isEditing}
-                />
-              </div>
-            </div>
-          </CellContent>
-          {!isEditing && (
+          <div
+            className={classes.stateHover}
+            data-cy="translations-state-indicator"
+          >
+            <div
+              className={clsx(classes.stateBorder, cellClasses.state)}
+              onMouseDown={stopBubble(handleResize)}
+              onClick={stopBubble()}
+              onMouseUp={stopBubble()}
+              style={{
+                borderLeft: `4px solid ${translationStates[state]?.color}`,
+              }}
+            />
+          </div>
+        </Tooltip>
+
+        <div className={classes.controls}>
+          {isEditing ? (
+            <CellControls mode="view" />
+          ) : active ? (
             <CellControls
               mode="view"
-              state={translation?.state}
-              onStateChange={handleStateChange(l.tag)}
+              onEdit={() => handleEdit(language.tag)}
+              onCancel={handleEditCancel}
+              onSave={handleSave}
               editEnabled={editEnabled}
-              onEdit={() => toggleEdit()}
-              absolute
+              state={state}
+              onStateChange={handleStateChange(language.tag)}
+            />
+          ) : (
+            // hide as many components as possible in order to be performant
+            <CellControls
+              mode="view"
+              editEnabled={editEnabled}
+              onEdit={renderEdit ? () => handleEdit(language.tag) : undefined}
             />
           )}
-        </CellPlain>
+        </div>
       </div>
+
       {isEditing && (
         <div className={classes.editor}>
-          <CellPlain background="#efefef">
-            <CellContent>
-              <Editor
-                value={value}
-                onChange={(v) => setValue(v as string)}
-                onSave={() => handleSave()}
-                onCmdSave={() => handleSave('EDIT_NEXT')}
-                onCancel={handleEditCancel}
-                autofocus={autofocus}
-                background="#efefef"
-              />
-            </CellContent>
+          <div className={classes.editorContainer}>
+            <Editor
+              value={value}
+              onChange={(v) => setValue(v as string)}
+              onSave={() => handleSave()}
+              onCmdSave={() => handleSave('EDIT_NEXT')}
+              onCancel={handleEditCancel}
+              autofocus={autofocus}
+            />
+          </div>
+          <div className={classes.editorControls}>
             <CellControls
               mode="edit"
-              state={translation?.state}
+              state={state}
               onSave={handleSave}
               onCancel={handleEditCancel}
-              onStateChange={handleStateChange(l.tag)}
+              onStateChange={handleStateChange(language.tag)}
             />
-          </CellPlain>
+          </div>
         </div>
       )}
     </div>

@@ -32,6 +32,7 @@ const SearchField = (
             <Search />
           </InputAdornment>
         ),
+        style: { paddingLeft: 12 },
       }}
       value={search}
       {...otherProps}

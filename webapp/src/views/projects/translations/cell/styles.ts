@@ -54,10 +54,7 @@ export const useCellStyles = makeStyles((theme) => ({
     'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2)',
     zIndex: 1,
   },
-
-  controlsAbsolute: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
+  cellSelected: {
+    background: '#efefef',
   },
 }));

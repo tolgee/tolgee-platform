@@ -5,6 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import clsx from 'clsx';
+import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar';
 
 const drawerWidth = 240;
 
@@ -18,13 +19,21 @@ const useStyles = makeStyles((theme) => ({
     ...theme.mixins.toolbar,
   },
   drawerPaper: {
-    position: 'relative',
     whiteSpace: 'nowrap',
     width: drawerWidth,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+  },
+  drawerFixed: {
+    position: 'fixed',
+    top: TOP_BAR_HEIGHT,
+    bottom: 0,
+  },
+  drawerFake: {
+    position: 'relative',
+    visibility: 'hidden',
   },
   drawerPaperClose: {
     overflowX: 'hidden',
@@ -49,21 +58,38 @@ export const SideMenu: React.FC<SideMenuProps> = ({
   const classes = useStyles({});
 
   return (
-    <Drawer
-      variant="permanent"
-      classes={{
-        paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-      }}
-      open={open}
-      color="secondary"
-    >
-      {children}
-      <Divider />
-      <ListItem button onClick={onSideMenuToggle}>
-        <ListItemIcon>
-          {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-        </ListItemIcon>
-      </ListItem>
-    </Drawer>
+    <>
+      <Drawer
+        variant="permanent"
+        classes={{
+          paper: clsx(
+            classes.drawerPaper,
+            classes.drawerFixed,
+            !open && classes.drawerPaperClose
+          ),
+        }}
+        open={open}
+        color="secondary"
+      >
+        {children}
+        <Divider />
+        <ListItem button onClick={onSideMenuToggle}>
+          <ListItemIcon>
+            {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </ListItemIcon>
+        </ListItem>
+      </Drawer>
+      <Drawer
+        variant="permanent"
+        open={open}
+        classes={{
+          paper: clsx(
+            classes.drawerPaper,
+            classes.drawerFake,
+            !open && classes.drawerPaperClose
+          ),
+        }}
+      ></Drawer>
+    </>
   );
 };

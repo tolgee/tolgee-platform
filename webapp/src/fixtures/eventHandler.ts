@@ -1,8 +1,8 @@
-import { SyntheticEvent } from 'react';
+import { MouseEvent } from 'react';
 
 export const stopBubble =
-  <T = any>(func?: (e: SyntheticEvent<T>) => any): any =>
-  (e: SyntheticEvent<T>) => {
+  <T = any>(func?: (e: MouseEvent<T>) => any): any =>
+  (e: MouseEvent<T>) => {
     e.stopPropagation();
     func?.(e);
   };
