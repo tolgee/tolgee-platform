@@ -12,11 +12,9 @@ import {
 } from '../context/TranslationsContext';
 import { resizeColumn, useResize } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
-import { CellContent, CellPlain } from '../cell';
 import { CellLanguage } from './CellLanguage';
 import { SortableHeading } from './SortableHeading';
-import { TableRow } from './TableRow';
-import { useDebounce } from 'use-debounce/lib';
+import { RowTable } from './RowTable';
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.grey[200];
@@ -197,11 +195,7 @@ export const TranslationsTable = () => {
                   />
                 </div>
               ) : (
-                <div className={classes.keyCell}>
-                  <CellPlain>
-                    <CellContent>{language?.name}</CellContent>
-                  </CellPlain>
-                </div>
+                <div className={classes.keyCell} />
               ),
             };
           })}
@@ -240,7 +234,7 @@ export const TranslationsTable = () => {
             handleFetchMore();
           }
           return (
-            <TableRow
+            <RowTable
               key={index}
               data={row}
               languages={languageCols}

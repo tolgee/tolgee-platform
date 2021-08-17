@@ -11,7 +11,6 @@ export const ProjectLanguagesView = () => {
 
   return (
     <BaseView
-      containerMaxWidth="sm"
       navigation={[
         [
           project.name,

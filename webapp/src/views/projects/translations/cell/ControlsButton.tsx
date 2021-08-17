@@ -10,6 +10,9 @@ const useStyles = makeStyles({
     width: 36,
     height: 36,
     margin: -8,
+    '& + &': {
+      marginLeft: 4,
+    },
   },
 });
 

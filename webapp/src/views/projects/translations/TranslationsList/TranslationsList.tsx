@@ -5,15 +5,15 @@ import { useContextSelector } from 'use-context-selector';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { ProjectPermissionType } from 'tg.service/response.types';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import {
   TranslationsContext,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
 import { useResize, resizeColumn } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
-import { ProjectPermissionType } from 'tg.service/response.types';
-import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
-import { ListRow } from './ListRow';
+import { RowList } from './RowList';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -155,7 +155,7 @@ export const TranslationsList = () => {
             handleFetchMore();
           }
           return (
-            <ListRow
+            <RowList
               key={index}
               data={row}
               languages={languagesRow}

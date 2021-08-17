@@ -1,142 +1,261 @@
-import React, { useRef, useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { Checkbox, makeStyles } from '@material-ui/core';
 import { useContextSelector } from 'use-context-selector';
-import { Checkbox, Box } from '@material-ui/core';
+import clsx from 'clsx';
 
-import { components } from 'tg.service/apiSchema.generated';
 import { Editor } from 'tg.component/editor/Editor';
+import { components } from 'tg.service/apiSchema.generated';
+import { LimitedHeightText } from './LimitedHeightText';
+import { Tags } from './Tags/Tags';
 import { useEditableRow } from './useEditableRow';
+import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
+import { useCellStyles } from './cell/styles';
 import {
   TranslationsContext,
   useTranslationsDispatch,
 } from './context/TranslationsContext';
 import { stopBubble } from 'tg.fixtures/eventHandler';
-import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
-import { CellContent, CellPlain, CellControls } from './cell';
-import { Tags } from './Tags/Tags';
-import { LimitedHeightText } from './LimitedHeightText';
+import { useDebounce } from 'use-debounce/lib';
+import { ControlsEditor } from './cell/ControlsEditor';
+import { ControlsKey } from './cell/ControlsKey';
+import { TagAdd } from './Tags/TagAdd';
+import { TagInput } from './Tags/TagInput';
 
-type TagModel = components['schemas']['TagModel'];
+type KeyWithTranslationsModel =
+  components['schemas']['KeyWithTranslationsModel'];
+
+const useStyles = makeStyles((theme) => {
+  return {
+    container: {
+      display: 'grid',
+      gridTemplateColumns: '40px auto',
+      gridTemplateRows: 'auto auto 1fr auto',
+      gridTemplateAreas: `
+        "checkbox key          "
+        "space    tags         "
+        "editor   editor       "
+        "controls controls     "
+      `,
+    },
+    checkbox: {
+      gridArea: 'checkbox',
+      width: 38,
+      height: 38,
+      margin: '3px -9px -9px 3px',
+    },
+    key: {
+      gridArea: 'key',
+      margin: '12px 12px 8px 0px',
+      overflow: 'hidden',
+      position: 'relative',
+    },
+    tags: {
+      gridArea: 'tags',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      alignItems: 'flex-start',
+      margin: '0px 12px 0px 0px',
+      position: 'relative',
+      marginBottom: -16,
+    },
+    tagsWrapper: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'flex-start',
+      maxWidth: '100%',
+      overflow: 'hidden',
+      '& > *': {
+        margin: '0px 2px 2px 0px',
+      },
+    },
+    editor: {
+      gridArea: 'editor',
+      overflow: 'hidden',
+      padding: '12px 12px 0px 12px',
+    },
+    controls: {
+      gridArea: 'controls',
+      display: 'flex',
+      justifyContent: 'space-between',
+      overflow: 'hidden',
+      alignItems: 'flex-end',
+    },
+    controlsSmall: {
+      boxSizing: 'border-box',
+      gridArea: 'controls',
+      display: 'flex',
+      justifyContent: 'flex-end',
+      overflow: 'hidden',
+      minHeight: 44,
+      padding: '12px 12px 12px 12px',
+    },
+  };
+});
 
 type Props = {
-  text: string;
-  keyId: number;
-  keyName: string;
-  screenshotCount: number;
-  editEnabled: boolean;
-  tags: TagModel[] | null;
+  data: KeyWithTranslationsModel;
   width: number;
+  editEnabled: boolean;
+  active: boolean;
 };
 
-export const CellKey: React.FC<Props> = React.memo(function Cell({
-  text,
-  keyName,
-  keyId,
-  screenshotCount,
-  editEnabled,
-  tags,
-  width,
-}) {
-  const [screenshotsOpen, setScreenshotsOpen] = useState(false);
+export const CellKey: React.FC<Props> = React.memo(
+  ({ data, width, editEnabled, active }) => {
+    const classes = useStyles();
+    const cellClasses = useCellStyles();
+    const [screenshotsOpen, setScreenshotsOpen] = useState(false);
+    const dispatch = useTranslationsDispatch();
 
-  const screenshotEl = useRef<HTMLButtonElement | null>(null);
+    const screenshotEl = useRef<HTMLButtonElement | null>(null);
 
-  const {
-    isEditing,
-    value,
-    setValue,
-    handleEdit,
-    handleEditCancel,
-    handleSave,
-    autofocus,
-  } = useEditableRow({
-    keyId,
-    keyName,
-    defaultVal: keyName,
-    language: undefined,
-  });
+    const isSelected = useContextSelector(TranslationsContext, (c) =>
+      c.selection.includes(data.keyId)
+    );
 
-  const isSelected = useContextSelector(TranslationsContext, (c) =>
-    c.selection.includes(keyId)
-  );
+    // prevent blinking, when closing popup
+    const [screenshotsOpenDebounced] = useDebounce(screenshotsOpen, 100);
 
-  const isEmpty = keyId < 0;
+    const toggleSelect = () => {
+      dispatch({ type: 'TOGGLE_SELECT', payload: data.keyId });
+    };
 
-  const dispatch = useTranslationsDispatch();
+    const handleAddTag = (name: string) => {
+      dispatch({
+        type: 'ADD_TAG',
+        payload: { keyId: data.keyId, name },
+        onSuccess: () => setTagEdit(false),
+      });
+    };
 
-  const toggleSelect = () => {
-    dispatch({ type: 'TOGGLE_SELECT', payload: keyId });
-  };
+    const [tagEdit, setTagEdit] = useState(false);
 
-  return (
-    <>
-      <CellPlain
-        background={isEditing ? '#efefef' : undefined}
-        onClick={
-          !isEditing && editEnabled ? () => handleEdit(undefined) : undefined
-        }
-      >
-        <CellContent>
-          {isEditing ? (
-            <Editor
-              background="#efefef"
-              plaintext
-              value={value}
-              onChange={(v) => setValue(v as string)}
-              onSave={() => handleSave()}
-              onCmdSave={() =>
-                handleSave(isEmpty ? 'NEW_EMPTY_KEY' : 'EDIT_NEXT')
-              }
-              onCancel={handleEditCancel}
-              autofocus={autofocus}
-            />
-          ) : (
+    const {
+      isEditing,
+      value,
+      setValue,
+      handleEdit,
+      handleEditCancel,
+      handleSave,
+      autofocus,
+    } = useEditableRow({
+      keyId: data.keyId,
+      keyName: data.keyName,
+      defaultVal: data.keyName,
+      language: undefined,
+    });
+
+    const isEmpty = data.keyId < 0;
+
+    return (
+      <>
+        <div
+          className={clsx({
+            [classes.container]: true,
+            [cellClasses.cellPlain]: true,
+            [cellClasses.cellClickable]: editEnabled && !isEditing,
+            [cellClasses.cellRaised]: isEditing,
+          })}
+          style={{ width }}
+          onClick={!isEditing && editEnabled ? handleEdit : undefined}
+        >
+          {!isEditing ? (
             <>
-              <Box display="flex" alignItems="baseline">
-                {editEnabled && (
-                  <Box margin={-1} onClick={stopBubble()}>
-                    <Checkbox
-                      size="small"
-                      checked={isSelected}
-                      onChange={toggleSelect}
-                      data-cy="translations-row-checkbox"
-                    />
-                  </Box>
+              <Checkbox
+                className={classes.checkbox}
+                size="small"
+                checked={isSelected}
+                onChange={toggleSelect}
+                onClick={stopBubble()}
+                data-cy="translations-row-checkbox"
+              />
+              <div className={classes.key}>
+                <LimitedHeightText width={width} maxLines={3} wrap="break-all">
+                  {data.keyName}
+                </LimitedHeightText>
+              </div>
+              <div className={classes.tags}>
+                <div className={classes.tagsWrapper}>
+                  <Tags keyId={data.keyId} tags={data.keyTags} />
+                </div>
+                {tagEdit ? (
+                  <TagInput
+                    onAdd={handleAddTag}
+                    onClose={() => setTagEdit(false)}
+                  />
+                ) : (
+                  <TagAdd
+                    onClick={() => setTagEdit(true)}
+                    withFullLabel={!data.keyTags?.length}
+                  />
                 )}
-                <Box position="relative">
-                  <LimitedHeightText
-                    maxLines={3}
-                    wrap="break-all"
-                    width={width}
-                  >
-                    {text}
-                  </LimitedHeightText>
-                </Box>
-              </Box>
-              <Tags keyId={keyId} tags={tags} />
+              </div>
             </>
+          ) : (
+            <div className={classes.editor}>
+              <Editor
+                plaintext
+                value={value}
+                onChange={(v) => setValue(v as string)}
+                onSave={() => handleSave()}
+                onCmdSave={() =>
+                  handleSave(isEmpty ? 'NEW_EMPTY_KEY' : 'EDIT_NEXT')
+                }
+                onCancel={handleEditCancel}
+                autofocus={autofocus}
+              />
+            </div>
           )}
-        </CellContent>
-        <CellControls
-          mode={isEditing ? 'edit' : 'view'}
-          onEdit={() => handleEdit(undefined)}
-          onCancel={handleEditCancel}
-          onSave={handleSave}
-          onScreenshots={isEmpty ? undefined : () => setScreenshotsOpen(true)}
-          screenshotRef={screenshotEl}
-          screenshotsPresent={screenshotCount > 0}
-          screenshotsOpen={screenshotsOpen}
-          editEnabled={editEnabled}
-        />
-      </CellPlain>
-      {screenshotsOpen && (
-        <ScreenshotsPopover
-          anchorEl={screenshotEl.current!}
-          keyId={keyId}
-          onClose={() => {
-            setScreenshotsOpen(false);
-          }}
-        />
-      )}
-    </>
-  );
-});
+
+          <div className={isEditing ? classes.controls : classes.controlsSmall}>
+            {isEditing ? (
+              <ControlsEditor
+                onCancel={handleEditCancel}
+                onSave={handleSave}
+                onScreenshots={
+                  isEmpty ? undefined : () => setScreenshotsOpen(true)
+                }
+                screenshotRef={screenshotEl}
+                screenshotsPresent={data.screenshotCount > 0}
+              />
+            ) : !tagEdit ? (
+              active || screenshotsOpen || screenshotsOpenDebounced ? (
+                <ControlsKey
+                  onEdit={handleEdit}
+                  onScreenshots={
+                    isEmpty ? undefined : () => setScreenshotsOpen(true)
+                  }
+                  screenshotRef={screenshotEl}
+                  screenshotsPresent={data.screenshotCount > 0}
+                  screenshotsOpen={screenshotsOpen || screenshotsOpenDebounced}
+                  editEnabled={editEnabled}
+                />
+              ) : (
+                // hide as many components as possible in order to be performant
+                <ControlsKey
+                  onScreenshots={
+                    !isEmpty && data.screenshotCount > 0
+                      ? () => setScreenshotsOpen(true)
+                      : undefined
+                  }
+                  screenshotRef={screenshotEl}
+                  screenshotsPresent={data.screenshotCount > 0}
+                  editEnabled={editEnabled}
+                />
+              )
+            ) : null}
+          </div>
+        </div>
+        {screenshotsOpen && (
+          <ScreenshotsPopover
+            anchorEl={screenshotEl.current!}
+            keyId={data.keyId}
+            onClose={() => {
+              setScreenshotsOpen(false);
+            }}
+          />
+        )}
+      </>
+    );
+  }
+);

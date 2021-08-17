@@ -134,7 +134,6 @@ declare namespace DataCy {
         "translations-language-select-form-control" |
         "translations-row-checkbox" |
         "translations-state-indicator" |
-        "translations-table-cell" |
         "translations-tag" |
         "translations-tag-add" |
         "translations-tag-close" |

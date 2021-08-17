@@ -29,6 +29,9 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   editor: {
+    '& *': {
+      overflow: 'hidden !important',
+    },
     '& .CodeMirror': {
       minHeight: 100,
       height: '100%',

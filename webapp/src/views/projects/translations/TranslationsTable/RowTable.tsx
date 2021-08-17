@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core';
+import { useDebounce } from 'use-debounce';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { KeyCell } from '../KeyCell';
-import { useDebounce } from 'use-debounce/lib';
-import { CellData } from './CellData';
+import { CellKey } from '../CellKey';
+import { CellTranslation } from './CellTranslation';
 import { EmptyKeyPlaceholder } from '../cell/EmptyKeyPlaceholder';
 
 type KeyWithTranslationsModel =
@@ -36,8 +36,7 @@ type Props = {
   onResize: (colIndex: number) => void;
 };
 
-// eslint-disable-next-line react/display-name
-export const TableRow: React.FC<Props> = React.memo(function TableRow({
+export const RowTable: React.FC<Props> = React.memo(function RowTable({
   data,
   columnSizes,
   editEnabled,
@@ -61,7 +60,7 @@ export const TableRow: React.FC<Props> = React.memo(function TableRow({
       onBlur={() => setFocus(false)}
       className={classes.container}
     >
-      <KeyCell
+      <CellKey
         editEnabled={editEnabled}
         data={data}
         width={columnSizes[0]}
@@ -71,7 +70,7 @@ export const TableRow: React.FC<Props> = React.memo(function TableRow({
         <EmptyKeyPlaceholder colIndex={0} onResize={onResize} />
       ) : (
         languages.map((language, index) => (
-          <CellData
+          <CellTranslation
             key={language.tag}
             data={data}
             language={language}
