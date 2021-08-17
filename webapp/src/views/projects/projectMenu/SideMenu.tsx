@@ -30,6 +30,7 @@ const useStyles = makeStyles((theme) => ({
     position: 'fixed',
     top: TOP_BAR_HEIGHT,
     bottom: 0,
+    overscrollBehavior: 'contain',
   },
   drawerFake: {
     position: 'relative',

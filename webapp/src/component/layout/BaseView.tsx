@@ -77,6 +77,7 @@ export const BaseView = (props: BaseViewProps) => {
         style={{
           position: 'relative',
           padding: 0,
+          flexGrow: 1,
         }}
       >
         <Box minHeight="100%">

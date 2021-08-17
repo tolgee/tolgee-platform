@@ -32,7 +32,12 @@ export const DashboardPage: FunctionComponent<DashboardPageProps> = ({
   const classes = useStyles({});
 
   return (
-    <Box display="flex" alignItems="stretch" flexDirection="column">
+    <Box
+      display="flex"
+      alignItems="stretch"
+      flexDirection="column"
+      flexGrow={1}
+    >
       <TopBar />
       <div className={classes.appBarSpacer} />
       <Box
@@ -40,6 +45,8 @@ export const DashboardPage: FunctionComponent<DashboardPageProps> = ({
         position="relative"
         overflow="hidden"
         display="flex"
+        flexGrow="1"
+        justifyContent="stretch"
       >
         {children}
       </Box>

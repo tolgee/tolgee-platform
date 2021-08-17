@@ -8,8 +8,12 @@ import { ProjectMenu } from './projectMenu/ProjectMenu';
 
 const useStyle = makeStyles({
   content: {
-    width: '100%',
+    flexGrow: 1,
     overflowX: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    position: 'relative',
   },
 });
 

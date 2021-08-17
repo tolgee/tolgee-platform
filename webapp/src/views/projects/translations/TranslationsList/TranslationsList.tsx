@@ -14,7 +14,6 @@ import { ColumnResizer } from '../ColumnResizer';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { ListRow } from './ListRow';
-import { useDebounce } from 'use-debounce/lib';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -27,6 +26,7 @@ const useStyles = makeStyles((theme) => {
       borderLeft: 0,
       borderRight: 0,
       background: 'white',
+      flexGrow: 1,
     },
   };
 });
@@ -68,10 +68,6 @@ export const TranslationsList = () => {
       );
     }
   }, [editKeyId]);
-
-  // forces re-render after edit click
-  // to recalculate react-list heights
-  useDebounce(editKeyId, 100);
 
   const [columnSizes, setColumnSizes] = useState([1, 3]);
 

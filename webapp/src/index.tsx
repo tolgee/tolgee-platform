@@ -114,6 +114,22 @@ const theme = createTheme({
       '@global': {
         // @ts-ignore
         '@font-face': [rubik, righteousLatinExt, righteousLatin],
+        html: {
+          height: '100%',
+        },
+        body: {
+          minHeight: '100%',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'stretch',
+        },
+        '#root': {
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'stretch',
+        },
       },
     },
     MuiButton: {
