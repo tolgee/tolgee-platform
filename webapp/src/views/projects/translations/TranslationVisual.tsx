@@ -1,48 +1,36 @@
 import React, { useMemo } from 'react';
-import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core';
 
 import { icuVariants } from 'tg.component/editor/icuVariants';
 import { LimitedHeightText } from './LimitedHeightText';
+import clsx from 'clsx';
 
 const gradient = (color) =>
   `linear-gradient(to top, rgba(0,0,0,0) 0%, ${color} 1.2rem, ${color} 100%)`;
 
 const useStyles = makeStyles({
-  container: {},
-  row: {
-    display: 'flex',
-    overflow: 'hidden',
+  variants: {
+    display: 'grid',
+    gridTemplateColumns: '80px 1fr',
+    gap: 2,
   },
   wrapped: {
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
   },
-  chipWrapper: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    width: 80,
-    flexShrink: 0,
-    overflow: 'hidden',
-    position: 'relative',
-    margin: '0px 8px 1px 0px',
-  },
   chip: {
-    display: 'inline',
-    flexGrow: 0,
     padding: '0px 5px 1px 5px',
     background: 'lightgrey',
     borderRadius: 5,
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
+    justifySelf: 'start',
   },
-  fadeItem: {
-    '& > *': {
-      WebkitMaskImage: gradient('black'),
-      maskImage: gradient('black'),
-    },
+  cropped: {
+    WebkitMaskImage: gradient('black'),
+    maskImage: gradient('black'),
   },
 });
 
@@ -91,26 +79,21 @@ export const TranslationVisual: React.FC<Props> = ({
     );
     const isOverflow = croppedVariants.length !== variants.length;
     return (
-      <>
+      <div
+        className={clsx({
+          [classes.variants]: true,
+          [classes.cropped]: isOverflow,
+        })}
+      >
         {croppedVariants.map(({ option, value }, i) => (
-          <div
-            key={i}
-            className={clsx(
-              classes.row,
-              i === croppedVariants.length - 1 && isOverflow
-                ? classes.fadeItem
-                : undefined
-            )}
-          >
-            <div className={classes.chipWrapper}>
-              <div className={classes.chip}>{option}</div>
-            </div>
+          <React.Fragment key={i}>
+            <div className={classes.chip}>{option}</div>
             <div className={limitLines ? classes.wrapped : undefined}>
               {value}
             </div>
-          </div>
+          </React.Fragment>
         ))}
-      </>
+      </div>
     );
   }
 };

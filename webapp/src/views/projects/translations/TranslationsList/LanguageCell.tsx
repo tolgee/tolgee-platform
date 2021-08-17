@@ -127,13 +127,13 @@ export const LanguageCell: React.FC<Props> = ({
     language: language.tag,
   });
 
-  const handleStateChange = (language: string) => (state: StateType) => {
+  const handleStateChange = (state: StateType) => {
     dispatch({
       type: 'SET_TRANSLATION_STATE',
       payload: {
         keyId: data.keyId,
-        language: language,
-        translationId: data.translations[language]?.id,
+        language: language.tag,
+        translationId: data.translations[language.tag]?.id,
         state,
       },
     });
@@ -217,7 +217,7 @@ export const LanguageCell: React.FC<Props> = ({
               onSave={handleSave}
               editEnabled={editEnabled}
               state={state}
-              onStateChange={handleStateChange(language.tag)}
+              onStateChange={handleStateChange}
             />
           ) : (
             // hide as many components as possible in order to be performant
@@ -248,7 +248,7 @@ export const LanguageCell: React.FC<Props> = ({
               state={state}
               onSave={handleSave}
               onCancel={handleEditCancel}
-              onStateChange={handleStateChange(language.tag)}
+              onStateChange={handleStateChange}
             />
           </div>
         </div>

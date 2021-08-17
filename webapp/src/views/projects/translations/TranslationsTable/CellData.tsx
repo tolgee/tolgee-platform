@@ -1,38 +1,95 @@
 import React from 'react';
+import clsx from 'clsx';
+import { Tooltip, makeStyles } from '@material-ui/core';
+import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { Editor } from 'tg.component/editor/Editor';
-import { StateType } from 'tg.constants/translationStates';
+import { StateType, translationStates } from 'tg.constants/translationStates';
 import { useEditableRow } from '../useEditableRow';
-import { CellContent, CellPlain, CellControls } from '../cell';
+import { CellControls } from '../cell';
 import { TranslationVisual } from '../TranslationVisual';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
+import { useCellStyles } from '../cell/styles';
+import { stopBubble } from 'tg.fixtures/eventHandler';
 
-type TranslationModel = components['schemas']['TranslationModel'];
+type LanguageModel = components['schemas']['LanguageModel'];
+type KeyWithTranslationsModel =
+  components['schemas']['KeyWithTranslationsModel'];
+
+const useStyles = makeStyles((theme) => {
+  return {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+    },
+    stateHover: {
+      position: 'absolute',
+      width: 12,
+      height: '100%',
+    },
+    stateBorder: {
+      position: 'absolute',
+      height: '100%',
+    },
+    editor: {
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    editorContainer: {
+      padding: '12px 12px 0px 12px',
+      flexGrow: 1,
+    },
+    editorControls: {
+      display: 'flex',
+    },
+    translation: {
+      flexGrow: 1,
+      margin: '12px 12px 8px 12px',
+      overflow: 'hidden',
+      position: 'relative',
+    },
+    controls: {
+      gridArea: 'controls',
+      display: 'flex',
+      justifyContent: 'space-between',
+      overflow: 'hidden',
+      alignItems: 'stretch',
+      minHeight: 46,
+      marginTop: -20,
+    },
+  };
+});
 
 type Props = {
-  keyId: number;
-  keyName: string;
-  language: string;
-  editEnabled: boolean;
-  width: number;
-  locale: string;
-  translation?: TranslationModel;
+  data: KeyWithTranslationsModel;
+  language: LanguageModel;
   colIndex: number;
   onResize: (colIndex: number) => void;
+  editEnabled: boolean;
+  width: number;
+  active: boolean;
+  renderEdit: boolean;
 };
 
 export const CellData: React.FC<Props> = React.memo(function Cell({
-  keyName,
+  data,
   language,
-  keyId,
-  editEnabled,
-  locale,
-  translation,
-  onResize,
   colIndex,
+  onResize,
+  editEnabled,
   width,
+  active,
+  renderEdit,
 }) {
+  const classes = useStyles();
+  const cellClasses = useCellStyles();
+
+  const translation = data.translations[language.tag];
+  const state = translation?.state || 'UNTRANSLATED';
+
   const {
     isEditing,
     value,
@@ -42,10 +99,10 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
     handleSave,
     autofocus,
   } = useEditableRow({
-    keyId,
-    keyName,
+    keyId: data.keyId,
+    keyName: data.keyName,
     defaultVal: translation?.text || '',
-    language: language,
+    language: language.tag,
   });
   const dispatch = useTranslationsDispatch();
 
@@ -53,54 +110,105 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
     dispatch({
       type: 'SET_TRANSLATION_STATE',
       payload: {
-        keyId,
+        keyId: data.keyId,
         translationId: translation?.id as number,
-        language: language as string,
+        language: language.tag as string,
         state,
       },
     });
   };
 
+  const handleResize = () => {
+    onResize(colIndex);
+  };
+
   return (
-    <CellPlain
-      state={translation?.state || 'UNTRANSLATED'}
-      background={isEditing ? '#efefef' : undefined}
+    <div
+      className={clsx({
+        [classes.container]: true,
+        [cellClasses.cellPlain]: true,
+        [cellClasses.hover]: !isEditing,
+        [cellClasses.cellClickable]: editEnabled && !isEditing,
+        [cellClasses.cellRaised]: isEditing,
+      })}
+      style={{ width }}
       onClick={
-        !isEditing && editEnabled ? () => handleEdit(language) : undefined
+        editEnabled && !isEditing ? () => handleEdit(language.tag) : undefined
       }
-      onResize={() => onResize(colIndex)}
     >
-      <CellContent>
-        {isEditing ? (
-          <Editor
-            value={value}
-            onChange={(v) => setValue(v as string)}
-            background="#efefef"
-            onSave={() => handleSave()}
-            onCmdSave={() => handleSave('EDIT_NEXT')}
-            onCancel={handleEditCancel}
-            autofocus={autofocus}
+      {isEditing ? (
+        <div className={classes.editor}>
+          <div className={classes.editorContainer}>
+            <Editor
+              value={value}
+              onChange={(v) => setValue(v as string)}
+              onSave={() => handleSave()}
+              onCmdSave={() => handleSave('EDIT_NEXT')}
+              onCancel={handleEditCancel}
+              autofocus={autofocus}
+            />
+          </div>
+          <div className={classes.editorControls}>
+            <CellControls
+              mode="edit"
+              state={state}
+              onSave={handleSave}
+              onCancel={handleEditCancel}
+              onStateChange={handleStateChange}
+            />
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className={classes.translation}>
+            <TranslationVisual
+              width={width}
+              text={isEditing ? value : translation?.text}
+              locale={language.tag}
+              limitLines={!isEditing}
+            />
+          </div>
+          <div className={classes.controls}>
+            {isEditing ? (
+              <CellControls mode="view" />
+            ) : active ? (
+              <CellControls
+                mode="view"
+                onEdit={() => handleEdit(language.tag)}
+                onCancel={handleEditCancel}
+                onSave={handleSave}
+                editEnabled={editEnabled}
+                state={state}
+                onStateChange={handleStateChange}
+              />
+            ) : (
+              // hide as many components as possible in order to be performant
+              <CellControls
+                mode="view"
+                editEnabled={editEnabled}
+                onEdit={renderEdit ? () => handleEdit(language.tag) : undefined}
+              />
+            )}
+          </div>
+        </>
+      )}
+
+      <Tooltip title={<T noWrap>{translationStates[state]?.translationKey}</T>}>
+        <div
+          className={classes.stateHover}
+          data-cy="translations-state-indicator"
+        >
+          <div
+            className={clsx(classes.stateBorder, cellClasses.state)}
+            onMouseDown={stopBubble(handleResize)}
+            onClick={stopBubble()}
+            onMouseUp={stopBubble()}
+            style={{
+              borderLeft: `4px solid ${translationStates[state]?.color}`,
+            }}
           />
-        ) : (
-          <TranslationVisual
-            width={width}
-            locale={locale}
-            limitLines={true}
-            wrapVariants={true}
-            text={translation?.text}
-          />
-        )}
-      </CellContent>
-      <CellControls
-        absolute
-        mode={isEditing ? 'edit' : 'view'}
-        state={translation?.state}
-        editEnabled={editEnabled}
-        onCancel={handleEditCancel}
-        onSave={handleSave}
-        onEdit={() => handleEdit(language)}
-        onStateChange={handleStateChange}
-      />
-    </CellPlain>
+        </div>
+      </Tooltip>
+    </div>
   );
 });
