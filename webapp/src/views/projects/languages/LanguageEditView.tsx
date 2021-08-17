@@ -107,8 +107,8 @@ export const LanguageEditView = () => {
           }),
         ],
         [
-          t('project_settings_title'),
-          LINKS.PROJECT_EDIT.build({
+          t('project_menu_languages'),
+          LINKS.PROJECT_LANGUAGES.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
         ],

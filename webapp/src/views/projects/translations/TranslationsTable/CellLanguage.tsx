@@ -3,16 +3,19 @@ import { makeStyles } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
-import { CellContent, CellPlain } from '../cell';
+import { CellStateBar } from '../cell/CellStateBar';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
 const useStyles = makeStyles({
+  container: {
+    flexGrow: 1,
+    position: 'relative',
+  },
   content: {
     display: 'flex',
     alignItems: 'center',
-    position: 'relative',
-    flexGrow: 1,
+    padding: '8px 12px',
     flexShrink: 0,
     '& > * + *': {
       marginLeft: '5px',
@@ -32,14 +35,14 @@ export const CellLanguage: React.FC<Props> = ({
   colIndex,
 }) => {
   const classes = useStyles();
+  const handleResize = () => onResize(colIndex);
   return (
-    <CellPlain state="NONE" onResize={() => onResize(colIndex)}>
-      <CellContent>
-        <div className={classes.content}>
-          <CircledLanguageIcon flag={language.flagEmoji} />
-          <div>{language.name}</div>
-        </div>
-      </CellContent>
-    </CellPlain>
+    <>
+      <div className={classes.content}>
+        <CircledLanguageIcon flag={language.flagEmoji} />
+        <div>{language.name}</div>
+      </div>
+      <CellStateBar onResize={handleResize} />
+    </>
   );
 };

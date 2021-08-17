@@ -1,17 +1,17 @@
 import clsx from 'clsx';
-import { makeStyles, Tooltip } from '@material-ui/core';
-import { T } from '@tolgee/react';
+import { makeStyles } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { Editor } from 'tg.component/editor/Editor';
-import { stopBubble } from 'tg.fixtures/eventHandler';
-import { StateType, translationStates } from 'tg.constants/translationStates';
+import { StateType } from 'tg.constants/translationStates';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
 import { useCellStyles } from '../cell/styles';
 import { useEditableRow } from '../useEditableRow';
-import { CellControls } from '../cell';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
 import { TranslationVisual } from '../TranslationVisual';
+import { CellStateBar } from '../cell/CellStateBar';
+import { ControlsTranslation } from '../cell/ControlsTranslation';
+import { ControlsEditor } from '../cell/ControlsEditor';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -34,15 +34,6 @@ const useStyles = makeStyles((theme) => {
         "flag     language translation"
         "controls controls controls   "
       `,
-    },
-    stateHover: {
-      position: 'absolute',
-      width: 12,
-      height: '100%',
-    },
-    stateBorder: {
-      position: 'absolute',
-      height: '100%',
     },
     flag: {
       gridArea: 'flag',
@@ -75,13 +66,14 @@ const useStyles = makeStyles((theme) => {
       position: 'relative',
     },
     controls: {
+      boxSizing: 'border-box',
       gridArea: 'controls',
       display: 'flex',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-end',
       overflow: 'hidden',
-      alignItems: 'stretch',
-      minHeight: 46,
-      marginTop: -20,
+      minHeight: 44,
+      padding: '12px 12px 12px 12px',
+      marginTop: -16,
     },
   };
 });
@@ -97,7 +89,7 @@ type Props = {
   renderEdit: boolean;
 };
 
-export const LanguageCell: React.FC<Props> = ({
+export const CellTranslation: React.FC<Props> = ({
   data,
   language,
   colIndex,
@@ -147,7 +139,7 @@ export const LanguageCell: React.FC<Props> = ({
     if (isEditing) {
       handleEditCancel();
     } else {
-      handleEdit(language.tag);
+      handleEdit();
     }
   };
 
@@ -187,46 +179,24 @@ export const LanguageCell: React.FC<Props> = ({
           />
         </div>
 
-        <Tooltip
-          title={<T noWrap>{translationStates[state]?.translationKey}</T>}
-        >
-          <div
-            className={classes.stateHover}
-            data-cy="translations-state-indicator"
-          >
-            <div
-              className={clsx(classes.stateBorder, cellClasses.state)}
-              onMouseDown={stopBubble(handleResize)}
-              onClick={stopBubble()}
-              onMouseUp={stopBubble()}
-              style={{
-                borderLeft: `4px solid ${translationStates[state]?.color}`,
-              }}
-            />
-          </div>
-        </Tooltip>
+        <CellStateBar state={state} onResize={handleResize} />
 
         <div className={classes.controls}>
-          {isEditing ? (
-            <CellControls mode="view" />
-          ) : active ? (
-            <CellControls
-              mode="view"
-              onEdit={() => handleEdit(language.tag)}
-              onCancel={handleEditCancel}
-              onSave={handleSave}
-              editEnabled={editEnabled}
-              state={state}
-              onStateChange={handleStateChange}
-            />
-          ) : (
-            // hide as many components as possible in order to be performant
-            <CellControls
-              mode="view"
-              editEnabled={editEnabled}
-              onEdit={renderEdit ? () => handleEdit(language.tag) : undefined}
-            />
-          )}
+          {!isEditing &&
+            (active ? (
+              <ControlsTranslation
+                onEdit={handleEdit}
+                editEnabled={editEnabled}
+                state={state}
+                onStateChange={handleStateChange}
+              />
+            ) : (
+              // hide as many components as possible in order to be performant
+              <ControlsTranslation
+                editEnabled={editEnabled}
+                onEdit={renderEdit ? handleEdit : undefined}
+              />
+            ))}
         </div>
       </div>
 
@@ -243,8 +213,7 @@ export const LanguageCell: React.FC<Props> = ({
             />
           </div>
           <div className={classes.editorControls}>
-            <CellControls
-              mode="edit"
+            <ControlsEditor
               state={state}
               onSave={handleSave}
               onCancel={handleEditCancel}

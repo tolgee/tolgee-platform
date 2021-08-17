@@ -1,12 +1,14 @@
 import { makeStyles } from '@material-ui/core';
-import { Box } from '@material-ui/core';
 import { T } from '@tolgee/react';
-
-import { CellContent } from './CellContent';
-import { CellPlain } from './CellPlain';
+import { CellStateBar } from './CellStateBar';
 
 const useStyles = makeStyles({
   cell: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexGrow: 1,
+    justifySelf: 'stretch',
     opacity: 0,
     transition: 'opacity 300ms ease-in-out',
     '&:hover': {
@@ -26,17 +28,11 @@ export const EmptyKeyPlaceholder: React.FC<Props> = ({
 }) => {
   const classes = useStyles();
   return (
-    <Box flexGrow="1" display="flex">
-      <CellPlain onResize={() => onResize(colIndex)} state="NONE">
-        <CellContent
-          alignItems="center"
-          justifyContent="center"
-          display="flex"
-          className={classes.cell}
-        >
-          <T>translations_new_key_empty_message</T>
-        </CellContent>
-      </CellPlain>
-    </Box>
+    <>
+      <div className={classes.cell}>
+        <T>translations_new_key_empty_message</T>
+      </div>
+      <CellStateBar onResize={() => onResize(colIndex)} />
+    </>
   );
 };

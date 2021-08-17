@@ -27,6 +27,7 @@ const useStyles = makeStyles({
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
     justifySelf: 'start',
+    alignSelf: 'start',
   },
   cropped: {
     WebkitMaskImage: gradient('black'),

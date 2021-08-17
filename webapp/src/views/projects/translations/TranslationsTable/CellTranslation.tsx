@@ -1,17 +1,17 @@
 import React from 'react';
 import clsx from 'clsx';
-import { Tooltip, makeStyles } from '@material-ui/core';
-import { T } from '@tolgee/react';
+import { makeStyles } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { Editor } from 'tg.component/editor/Editor';
-import { StateType, translationStates } from 'tg.constants/translationStates';
+import { StateType } from 'tg.constants/translationStates';
 import { useEditableRow } from '../useEditableRow';
-import { CellControls } from '../cell';
 import { TranslationVisual } from '../TranslationVisual';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
 import { useCellStyles } from '../cell/styles';
-import { stopBubble } from 'tg.fixtures/eventHandler';
+import { CellStateBar } from '../cell/CellStateBar';
+import { ControlsTranslation } from '../cell/ControlsTranslation';
+import { ControlsEditor } from '../cell/ControlsEditor';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -24,19 +24,11 @@ const useStyles = makeStyles((theme) => {
       flexDirection: 'column',
       position: 'relative',
     },
-    stateHover: {
-      position: 'absolute',
-      width: 12,
-      height: '100%',
-    },
-    stateBorder: {
-      position: 'absolute',
-      height: '100%',
-    },
     editor: {
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
+      flexGrow: 1,
     },
     editorContainer: {
       padding: '12px 12px 0px 12px',
@@ -52,13 +44,14 @@ const useStyles = makeStyles((theme) => {
       position: 'relative',
     },
     controls: {
+      boxSizing: 'border-box',
       gridArea: 'controls',
       display: 'flex',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-end',
       overflow: 'hidden',
-      alignItems: 'stretch',
-      minHeight: 46,
-      marginTop: -20,
+      minHeight: 44,
+      padding: '12px 12px 12px 12px',
+      marginTop: -16,
     },
   };
 });
@@ -74,7 +67,7 @@ type Props = {
   renderEdit: boolean;
 };
 
-export const CellData: React.FC<Props> = React.memo(function Cell({
+export const CellTranslation: React.FC<Props> = ({
   data,
   language,
   colIndex,
@@ -83,7 +76,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
   width,
   active,
   renderEdit,
-}) {
+}) => {
   const classes = useStyles();
   const cellClasses = useCellStyles();
 
@@ -132,9 +125,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
         [cellClasses.cellRaised]: isEditing,
       })}
       style={{ width }}
-      onClick={
-        editEnabled && !isEditing ? () => handleEdit(language.tag) : undefined
-      }
+      onClick={editEnabled && !isEditing ? handleEdit : undefined}
     >
       {isEditing ? (
         <div className={classes.editor}>
@@ -149,8 +140,7 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
             />
           </div>
           <div className={classes.editorControls}>
-            <CellControls
-              mode="edit"
+            <ControlsEditor
               state={state}
               onSave={handleSave}
               onCancel={handleEditCancel}
@@ -169,46 +159,25 @@ export const CellData: React.FC<Props> = React.memo(function Cell({
             />
           </div>
           <div className={classes.controls}>
-            {isEditing ? (
-              <CellControls mode="view" />
-            ) : active ? (
-              <CellControls
-                mode="view"
-                onEdit={() => handleEdit(language.tag)}
-                onCancel={handleEditCancel}
-                onSave={handleSave}
+            {active ? (
+              <ControlsTranslation
+                onEdit={handleEdit}
                 editEnabled={editEnabled}
                 state={state}
                 onStateChange={handleStateChange}
               />
             ) : (
               // hide as many components as possible in order to be performant
-              <CellControls
-                mode="view"
+              <ControlsTranslation
                 editEnabled={editEnabled}
-                onEdit={renderEdit ? () => handleEdit(language.tag) : undefined}
+                onEdit={renderEdit ? handleEdit : undefined}
               />
             )}
           </div>
         </>
       )}
 
-      <Tooltip title={<T noWrap>{translationStates[state]?.translationKey}</T>}>
-        <div
-          className={classes.stateHover}
-          data-cy="translations-state-indicator"
-        >
-          <div
-            className={clsx(classes.stateBorder, cellClasses.state)}
-            onMouseDown={stopBubble(handleResize)}
-            onClick={stopBubble()}
-            onMouseUp={stopBubble()}
-            style={{
-              borderLeft: `4px solid ${translationStates[state]?.color}`,
-            }}
-          />
-        </div>
-      </Tooltip>
+      <CellStateBar state={state} onResize={handleResize} />
     </div>
   );
-});
+};

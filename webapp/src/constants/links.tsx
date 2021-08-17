@@ -174,12 +174,12 @@ export class LINKS {
 
   static PROJECT_EDIT = Link.ofParent(LINKS.PROJECT_MANAGE, 'edit');
 
+  static PROJECT_LANGUAGES = Link.ofParent(LINKS.PROJECT, 'languages');
+
   static PROJECT_EDIT_LANGUAGE = Link.ofParent(
-    LINKS.PROJECT_EDIT,
+    LINKS.PROJECT_LANGUAGES,
     'language/' + p(PARAMS.LANGUAGE_ID)
   );
-
-  static PROJECT_LANGUAGES = Link.ofParent(LINKS.PROJECT, 'languages');
 
   static PROJECT_INVITATION = Link.ofParent(LINKS.PROJECT_MANAGE, 'invite');
 

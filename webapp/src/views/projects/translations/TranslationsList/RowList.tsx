@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core';
+import { useDebounce } from 'use-debounce';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { KeyCell } from '../KeyCell';
-import { useDebounce } from 'use-debounce/lib';
-import { LanguageCell } from './LanguageCell';
+import { CellKey } from '../CellKey';
+import { CellTranslation } from './CellTranslation';
 import { EmptyKeyPlaceholder } from '../cell/EmptyKeyPlaceholder';
 
 type KeyWithTranslationsModel =
@@ -36,7 +36,7 @@ type Props = {
   onResize: (colIndex: number) => void;
 };
 
-export const ListRow: React.FC<Props> = React.memo(function ListRow({
+export const RowList: React.FC<Props> = React.memo(function RowList({
   data,
   columnSizes,
   editEnabled,
@@ -60,7 +60,7 @@ export const ListRow: React.FC<Props> = React.memo(function ListRow({
       onBlur={() => setFocus(false)}
       className={classes.container}
     >
-      <KeyCell
+      <CellKey
         editEnabled={editEnabled}
         data={data}
         width={columnSizes[0]}
@@ -71,7 +71,7 @@ export const ListRow: React.FC<Props> = React.memo(function ListRow({
           <EmptyKeyPlaceholder colIndex={0} onResize={onResize} />
         ) : (
           languages.map((language, index) => (
-            <LanguageCell
+            <CellTranslation
               key={language.tag}
               data={data}
               language={language}
