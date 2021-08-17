@@ -2,58 +2,45 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactList from 'react-list';
 import { makeStyles } from '@material-ui/core';
 import { useContextSelector } from 'use-context-selector';
-import { T } from '@tolgee/react';
 
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { ProjectPermissionType } from 'tg.service/response.types';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import {
   TranslationsContext,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
-import { CellData } from './CellData';
 import { resizeColumn, useResize } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
 import { CellContent, CellPlain } from '../cell';
 import { CellLanguage } from './CellLanguage';
 import { SortableHeading } from './SortableHeading';
-import { CellKey } from '../CellKey';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
-import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
-import { EmptyKeyPlaceholder } from '../cell/EmptyKeyPlaceholder';
+import { TableRow } from './TableRow';
+import { useDebounce } from 'use-debounce/lib';
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.grey[200];
   return {
-    table: {
+    container: {
       position: 'relative',
-      margin: '10px -10px 0px -10px',
+      margin: '10px 0px 0px 0px',
       borderLeft: 0,
       borderRight: 0,
       background: 'white',
-      '& $rowWrapper:last-of-type': {
-        borderWidth: '1px 0px 1px 0px',
-      },
-    },
-    rowWrapper: {
-      margin: `0px -${theme.spacing(2)}px 0px -${theme.spacing(2)}px`,
-      padding: `0px ${theme.spacing(2)}px 0px ${theme.spacing(2)}px`,
-      border: `1px solid ${borderColor}`,
-      borderWidth: '1px 0px 0px 0px',
     },
     headerRow: {
+      border: `1px solid ${borderColor}`,
+      borderWidth: '1px 0px 1px 0px',
       position: 'sticky',
       background: 'white',
       zIndex: 1,
       top: 0,
-      borderWidth: '1px 0px 1px 0px',
       marginBottom: -1,
+      display: 'flex',
     },
     resizer: {
       width: 3,
       background: 'black',
-    },
-    row: {
-      display: 'flex',
-      position: 'relative',
     },
     headerCell: {
       boxSizing: 'border-box',
@@ -69,14 +56,6 @@ const useStyles = makeStyles((theme) => {
       flexBasis: 1,
       alignItems: 'stretch',
       flexGrow: 0,
-    },
-    cell: {
-      boxSizing: 'border-box',
-      display: 'flex',
-      flexBasis: 1,
-      alignItems: 'stretch',
-      flexGrow: 0,
-      overflow: 'hidden',
     },
   };
 });
@@ -121,6 +100,10 @@ export const TranslationsTable = () => {
     }
   }, [editKeyId]);
 
+  // forces re-render after edit click
+  // to recalculate react-list heights
+  useDebounce(editKeyId, 100);
+
   const [columnsOrder, setColumnsOrder] = useState<string[]>([]);
 
   useEffect(() => {
@@ -137,31 +120,21 @@ export const TranslationsTable = () => {
     setColumnsOrder(arr);
   };
 
+  const languageCols = useMemo(() => {
+    if (languages && columnsOrder) {
+      return (
+        columnsOrder?.map((lang) => {
+          return languages.find((l) => l.tag === lang)!;
+        }, [] as any[]) || []
+      );
+    } else {
+      return [];
+    }
+  }, [columnsOrder, languages]);
+
   const columns = useMemo(
-    () => [
-      {
-        id: 'key',
-        label: <T>translation_grid_key_text</T>,
-        language: undefined,
-        accessor: (item) => item.keyName,
-      },
-      ...(columnsOrder?.reduce((acc, tag) => {
-        if (languages) {
-          const lang = languages.find((l) => l.tag === tag)!;
-          return [
-            ...acc,
-            {
-              id: String(lang.tag),
-              label: lang.name,
-              language: lang,
-              accessor: (item) => item.translations[lang.tag]?.text,
-            },
-          ];
-        }
-        return acc;
-      }, [] as any[]) || []),
-    ],
-    [columnsOrder, languages]
+    () => [null, ...columnsOrder.map((tag) => tag)],
+    [columnsOrder]
   );
 
   const [columnSizes, setColumnSizes] = useState(columns.map(() => 1));
@@ -205,36 +178,37 @@ export const TranslationsTable = () => {
 
   return (
     <div
-      className={classes.table}
+      className={classes.container}
       ref={tableRef}
       data-cy="translations-view-table"
     >
-      <div className={`${classes.rowWrapper} ${classes.headerRow}`}>
-        <div className={classes.row}>
-          <SortableHeading
-            onSwap={handleColmnsSwap}
-            columns={columns.map((col, i) => ({
-              id: String(col.language?.tag || 'key'),
+      <div className={classes.headerRow}>
+        <SortableHeading
+          onSwap={handleColmnsSwap}
+          columns={columns.map((tag, i) => {
+            const language = languages!.find((lang) => lang.tag === tag)!;
+            return {
+              id: String(tag || 'key'),
               width: columnSizes[i],
-              draggable: Boolean(col.language),
-              item: col.language ? (
+              draggable: Boolean(tag),
+              item: tag ? (
                 <div className={classes.headerCell}>
                   <CellLanguage
                     colIndex={i - 1}
                     onResize={handleResize}
-                    language={col.language}
+                    language={language}
                   />
                 </div>
               ) : (
                 <div className={classes.keyCell}>
                   <CellPlain>
-                    <CellContent>{col.label}</CellContent>
+                    <CellContent>{language?.name}</CellContent>
                   </CellPlain>
                 </div>
               ),
-            }))}
-          />
-        </div>
+            };
+          })}
+        />
       </div>
       {columnSizes.slice(0, -1).map((w, i) => {
         const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
@@ -253,7 +227,7 @@ export const TranslationsTable = () => {
 
       <ReactList
         ref={reactListRef}
-        threshold={300}
+        threshold={800}
         type="variable"
         itemSizeEstimator={(index, cache) => {
           return cache[index] || 82;
@@ -265,58 +239,20 @@ export const TranslationsTable = () => {
         itemRenderer={(index) => {
           const row = translations[index];
           const isLast = index === translations.length - 1;
-          const isEmpty = row.keyId < 0;
           if (isLast && !isFetchingMore && hasMoreToFetch) {
             handleFetchMore();
           }
           return (
-            <div key={row.keyId} className={classes.rowWrapper}>
-              <div className={classes.row}>
-                <div
-                  className={classes.cell}
-                  style={{ flexBasis: columnSizes[0] }}
-                >
-                  <CellKey
-                    keyId={row.keyId}
-                    keyName={row.keyName}
-                    text={row.keyName}
-                    tags={row.keyTags}
-                    screenshotCount={row.screenshotCount}
-                    editEnabled={projectPermissions.satisfiesPermission(
-                      ProjectPermissionType.EDIT
-                    )}
-                    width={columnSizes[0]}
-                  />
-                </div>
-                {isEmpty ? (
-                  <EmptyKeyPlaceholder colIndex={0} onResize={handleResize} />
-                ) : (
-                  columnsOrder.map((lang, i) => {
-                    return (
-                      <div
-                        key={lang}
-                        className={classes.cell}
-                        style={{ flexBasis: columnSizes[i + 1] }}
-                      >
-                        <CellData
-                          keyId={row.keyId}
-                          locale={lang}
-                          keyName={row.keyName}
-                          language={lang}
-                          translation={row.translations[lang]}
-                          width={columnSizes[i]}
-                          editEnabled={projectPermissions.satisfiesPermission(
-                            ProjectPermissionType.TRANSLATE
-                          )}
-                          colIndex={i}
-                          onResize={handleResize}
-                        />
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
+            <TableRow
+              key={index}
+              data={row}
+              languages={languageCols}
+              columnSizes={columnSizes}
+              editEnabled={projectPermissions.satisfiesPermission(
+                ProjectPermissionType.TRANSLATE
+              )}
+              onResize={handleResize}
+            />
           );
         }}
       />

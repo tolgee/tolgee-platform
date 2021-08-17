@@ -39,7 +39,7 @@ export const LimitedHeightText: React.FC<Props> = ({
 }) => {
   const classes = useStyles();
   const textRef = useRef<HTMLDivElement>();
-  const [expandable, setExpandable] = useState<boolean>();
+  const [expandable, setExpandable] = useState<boolean>(false);
 
   const detectExpandability = () => {
     const textElement = textRef.current;

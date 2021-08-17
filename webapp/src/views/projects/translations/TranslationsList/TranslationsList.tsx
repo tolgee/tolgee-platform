@@ -14,12 +14,13 @@ import { ColumnResizer } from '../ColumnResizer';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { ListRow } from './ListRow';
+import { useDebounce } from 'use-debounce/lib';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
 const useStyles = makeStyles((theme) => {
   return {
-    table: {
+    container: {
       display: 'flex',
       position: 'relative',
       margin: '10px 0px 0px 0px',
@@ -68,6 +69,10 @@ export const TranslationsList = () => {
     }
   }, [editKeyId]);
 
+  // forces re-render after edit click
+  // to recalculate react-list heights
+  useDebounce(editKeyId, 100);
+
   const [columnSizes, setColumnSizes] = useState([1, 3]);
 
   const { width } = useResize(tableRef, translations);
@@ -115,7 +120,7 @@ export const TranslationsList = () => {
 
   return (
     <div
-      className={classes.table}
+      className={classes.container}
       ref={tableRef}
       data-cy="translations-view-list"
     >
