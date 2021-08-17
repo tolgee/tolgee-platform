@@ -27,6 +27,7 @@ const useStyles = makeStyles((theme) => {
       borderLeft: 0,
       borderRight: 0,
       background: 'white',
+      flexGrow: 1,
     },
     headerRow: {
       border: `1px solid ${borderColor}`,
@@ -99,10 +100,6 @@ export const TranslationsTable = () => {
       );
     }
   }, [editKeyId]);
-
-  // forces re-render after edit click
-  // to recalculate react-list heights
-  useDebounce(editKeyId, 100);
 
   const [columnsOrder, setColumnsOrder] = useState<string[]>([]);
 
