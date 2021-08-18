@@ -5,14 +5,10 @@ import { icuVariants } from 'tg.component/editor/icuVariants';
 import { LimitedHeightText } from './LimitedHeightText';
 import clsx from 'clsx';
 
-const gradient = (color) =>
-  `linear-gradient(to top, rgba(0,0,0,0) 0%, ${color} 1.2rem, ${color} 100%)`;
-
 const useStyles = makeStyles({
   variants: {
     display: 'grid',
     gridTemplateColumns: '80px 1fr',
-    rowGap: 2,
     columnGap: 4,
   },
   wrapped: {
@@ -22,6 +18,7 @@ const useStyles = makeStyles({
   },
   chip: {
     padding: '0px 5px 0px 5px',
+    boxSizing: 'border-box',
     background: '#E5E5E5',
     borderRadius: 4,
     overflow: 'hidden',
@@ -30,10 +27,9 @@ const useStyles = makeStyles({
     maxWidth: '100%',
     justifySelf: 'start',
     alignSelf: 'start',
-  },
-  cropped: {
-    WebkitMaskImage: gradient('black'),
-    maskImage: gradient('black'),
+    paddingBottom: 1,
+    height: 24,
+    marginBottom: 2,
   },
 });
 
@@ -60,7 +56,6 @@ export const TranslationVisual: React.FC<Props> = ({
         width={width}
         maxLines={limitLines ? 3 : undefined}
         lang={locale}
-        overlay="white"
       >
         {text}
       </LimitedHeightText>
@@ -71,34 +66,33 @@ export const TranslationVisual: React.FC<Props> = ({
         width={width}
         maxLines={limitLines ? 3 : undefined}
         lang={locale}
-        overlay="white"
       >
         {variants[0].value}
       </LimitedHeightText>
     );
   } else {
-    const croppedVariants = variants.slice(
-      0,
-      // display first 6 should be enough for plurals
-      limitLines ? 6 : undefined
-    );
-    const isOverflow = croppedVariants.length !== variants.length;
     return (
-      <div
-        className={clsx({
-          [classes.variants]: true,
-          [classes.cropped]: isOverflow,
-        })}
+      <LimitedHeightText
+        width={width}
+        maxLines={limitLines ? 6 : undefined}
+        lang={locale}
+        lineHeight="26px"
       >
-        {croppedVariants.map(({ option, value }, i) => (
-          <React.Fragment key={i}>
-            <div className={classes.chip}>{option}</div>
-            <div className={limitLines ? classes.wrapped : undefined}>
-              {value}
-            </div>
-          </React.Fragment>
-        ))}
-      </div>
+        <div
+          className={clsx({
+            [classes.variants]: true,
+          })}
+        >
+          {variants.map(({ option, value }, i) => (
+            <React.Fragment key={i}>
+              <div className={classes.chip}>{option}</div>
+              <div className={limitLines ? classes.wrapped : undefined}>
+                {value}
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+      </LimitedHeightText>
     );
   }
 };
