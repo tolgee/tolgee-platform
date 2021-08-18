@@ -44,13 +44,7 @@ export const LimitedHeightText: React.FC<Props> = ({
   const detectExpandability = () => {
     const textElement = textRef.current;
     if (textElement != null) {
-      const clone = textElement.cloneNode(true) as HTMLDivElement;
-      clone.style.position = 'absolute';
-      clone.style.visibility = 'hidden';
-      clone.style.top = '0px';
-      textElement.parentElement?.append(clone);
-      setExpandable(textElement.clientHeight < clone.scrollHeight);
-      textElement.parentElement?.removeChild(clone);
+      setExpandable(textElement.clientHeight < textElement.scrollHeight);
     }
   };
 

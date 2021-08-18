@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactList from 'react-list';
+import { T } from '@tolgee/react';
 import { makeStyles } from '@material-ui/core';
 import { useContextSelector } from 'use-context-selector';
 
@@ -15,6 +16,7 @@ import { ColumnResizer } from '../ColumnResizer';
 import { CellLanguage } from './CellLanguage';
 import { SortableHeading } from './SortableHeading';
 import { RowTable } from './RowTable';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.grey[200];
@@ -44,17 +46,12 @@ const useStyles = makeStyles((theme) => {
     headerCell: {
       boxSizing: 'border-box',
       display: 'flex',
-      flexBasis: 1,
-      alignItems: 'stretch',
       flexGrow: 0,
+      alignItems: 'center',
       overflow: 'hidden',
     },
     keyCell: {
-      boxSizing: 'border-box',
-      display: 'flex',
-      flexBasis: 1,
-      alignItems: 'stretch',
-      flexGrow: 0,
+      paddingLeft: 13,
     },
   };
 });
@@ -183,7 +180,7 @@ export const TranslationsTable = () => {
           columns={columns.map((tag, i) => {
             const language = languages!.find((lang) => lang.tag === tag)!;
             return {
-              id: String(tag || 'key'),
+              id: tag,
               width: columnSizes[i],
               draggable: Boolean(tag),
               item: tag ? (
@@ -195,7 +192,9 @@ export const TranslationsTable = () => {
                   />
                 </div>
               ) : (
-                <div className={classes.keyCell} />
+                <div className={clsx(classes.headerCell, classes.keyCell)}>
+                  <T>translation_grid_key_text</T>
+                </div>
               ),
             };
           })}

@@ -8,21 +8,22 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     outline: 0,
     cursor: 'default',
-    padding: '3px 7px',
+    padding: '4px 4px',
     borderRadius: '12px',
     alignItems: 'center',
-    height: '22px',
+    height: '24px',
     fontSize: 14,
-    background: 'lightgrey',
+    background: '#D3D3D3',
     border: '1px solid transparent',
     maxWidth: '100%',
   },
   preview: {
-    background: 'transparent',
-    border: '1px solid lightgrey',
+    background: 'white',
+    border: `1px solid ${theme.palette.text.secondary}`,
     color: theme.palette.text.secondary,
-    '&:focus-within': {
+    '&:focus-within, &:hover': {
       border: `1px solid ${theme.palette.primary.main}`,
+      color: theme.palette.primary.main,
     },
   },
   clickable: {

@@ -21,7 +21,7 @@ const useStyles = makeStyles({
     display: 'flex',
     border: 0,
     background: 'transparent',
-    padding: 0,
+    padding: '0px 4px',
     outline: 0,
     minWidth: 0,
     width: '100%',
@@ -40,9 +40,10 @@ const useStyles = makeStyles({
 type Props = {
   onClose: () => void;
   onAdd: (name: string) => void;
+  className?: string;
 };
 
-export const TagInput: React.FC<Props> = ({ onClose, onAdd }) => {
+export const TagInput: React.FC<Props> = ({ onClose, onAdd, className }) => {
   const classes = useStyles();
   const [value, setValue] = useState('');
   const [search] = useDebounce(value, 500);
@@ -70,7 +71,7 @@ export const TagInput: React.FC<Props> = ({ onClose, onAdd }) => {
   };
 
   return (
-    <Wrapper role="input">
+    <Wrapper role="input" className={className}>
       <Autocomplete
         loading={tags.isFetching}
         className={classes.autocomplete}

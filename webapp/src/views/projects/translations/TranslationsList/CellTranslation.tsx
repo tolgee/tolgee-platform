@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => {
       flexGrow: 1,
       position: 'relative',
       display: 'grid',
-      gridTemplateColumns: 'auto 80px 1fr',
+      gridTemplateColumns: '40px 60px 1fr',
       gridTemplateAreas: `
         "flag     language translation"
         "controls controls controls   "

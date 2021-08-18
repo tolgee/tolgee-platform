@@ -89,6 +89,9 @@ const theme = createTheme({
     secondary: {
       main: '#2B5582',
     },
+    text: {
+      secondary: '#808080',
+    },
     lightDivider: {
       main: 'rgba(0, 0, 0, 0.12)',
     },

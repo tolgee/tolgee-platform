@@ -51,7 +51,9 @@ export const SortableHeading: React.FC<Props> = ({ columns, onSwap }) => {
           <div
             key={item.id}
             style={{
+              display: 'flex',
               flexBasis: item.width || 0,
+              alignItems: 'stretch',
             }}
           >
             {item.item}
