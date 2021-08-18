@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => {
       gridTemplateRows: 'auto auto 1fr auto',
       gridTemplateAreas: `
         "checkbox key          "
-        "space    tags         "
+        ".        tags         "
         "editor   editor       "
         "controls controls     "
       `,
@@ -52,22 +52,21 @@ const useStyles = makeStyles((theme) => {
     tags: {
       gridArea: 'tags',
       display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-      alignItems: 'flex-start',
-      margin: '0px 12px 0px 0px',
-      position: 'relative',
-      marginBottom: -16,
-    },
-    tagsWrapper: {
-      display: 'flex',
       flexWrap: 'wrap',
       alignItems: 'flex-start',
-      maxWidth: '100%',
       overflow: 'hidden',
       '& > *': {
-        margin: '0px 2px 2px 0px',
+        margin: '0px 3px 3px 0px',
       },
+      margin: '0px 12px 0px 0px',
+      position: 'relative',
+      paddingBottom: 24,
+      marginBottom: -24,
+    },
+    tagAdd: {
+      position: 'absolute',
+      bottom: 0,
+      margin: 0,
     },
     editor: {
       gridArea: 'editor',
@@ -153,6 +152,7 @@ export const CellKey: React.FC<Props> = React.memo(
           className={clsx({
             [classes.container]: true,
             [cellClasses.cellPlain]: true,
+            [cellClasses.hover]: !isEditing,
             [cellClasses.cellClickable]: editEnabled && !isEditing,
             [cellClasses.cellRaised]: isEditing,
           })}
@@ -175,19 +175,21 @@ export const CellKey: React.FC<Props> = React.memo(
                 </LimitedHeightText>
               </div>
               <div className={classes.tags}>
-                <div className={classes.tagsWrapper}>
-                  <Tags keyId={data.keyId} tags={data.keyTags} />
-                </div>
+                <Tags keyId={data.keyId} tags={data.keyTags} />
                 {tagEdit ? (
                   <TagInput
+                    className={classes.tagAdd}
                     onAdd={handleAddTag}
                     onClose={() => setTagEdit(false)}
                   />
                 ) : (
-                  <TagAdd
-                    onClick={() => setTagEdit(true)}
-                    withFullLabel={!data.keyTags?.length}
-                  />
+                  active && (
+                    <TagAdd
+                      className={classes.tagAdd}
+                      onClick={() => setTagEdit(true)}
+                      withFullLabel={!data.keyTags?.length}
+                    />
+                  )
                 )}
               </div>
             </>

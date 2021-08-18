@@ -12,7 +12,8 @@ const useStyles = makeStyles({
   variants: {
     display: 'grid',
     gridTemplateColumns: '80px 1fr',
-    gap: 2,
+    rowGap: 2,
+    columnGap: 4,
   },
   wrapped: {
     overflow: 'hidden',
@@ -20,12 +21,13 @@ const useStyles = makeStyles({
     textOverflow: 'ellipsis',
   },
   chip: {
-    padding: '0px 5px 1px 5px',
-    background: 'lightgrey',
-    borderRadius: 5,
+    padding: '0px 5px 0px 5px',
+    background: '#E5E5E5',
+    borderRadius: 4,
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
+    maxWidth: '100%',
     justifySelf: 'start',
     alignSelf: 'start',
   },
@@ -40,7 +42,7 @@ type Props = {
   wrapVariants?: boolean;
   text: string | undefined;
   locale: string;
-  width;
+  width: number;
 };
 
 export const TranslationVisual: React.FC<Props> = ({
@@ -58,6 +60,7 @@ export const TranslationVisual: React.FC<Props> = ({
         width={width}
         maxLines={limitLines ? 3 : undefined}
         lang={locale}
+        overlay="white"
       >
         {text}
       </LimitedHeightText>
@@ -68,6 +71,7 @@ export const TranslationVisual: React.FC<Props> = ({
         width={width}
         maxLines={limitLines ? 3 : undefined}
         lang={locale}
+        overlay="white"
       >
         {variants[0].value}
       </LimitedHeightText>

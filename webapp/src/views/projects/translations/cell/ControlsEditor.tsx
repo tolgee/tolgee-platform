@@ -89,7 +89,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
             >
               <CameraAlt
                 fontSize="small"
-                color={screenshotsPresent ? 'secondary' : 'disabled'}
+                color={screenshotsPresent ? 'primary' : undefined}
               />
             </ControlsButton>
           )}
