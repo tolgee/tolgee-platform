@@ -40,8 +40,11 @@ export const useCellStyles = makeStyles((theme) => ({
     cursor: 'col-resize',
   },
   hover: {
+    background: 'transparent',
+    transition: 'background 0.1s ease-out',
     '&:hover': {
       background: theme.palette.grey[50],
+      transition: 'background 0.1s ease-in',
     },
   },
   showOnHover: {
