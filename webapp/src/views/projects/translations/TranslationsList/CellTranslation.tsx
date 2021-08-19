@@ -162,6 +162,7 @@ export const CellTranslation: React.FC<Props> = ({
         })}
         style={{ width }}
         onClick={editEnabled ? () => toggleEdit() : undefined}
+        data-cy="translations-table-cell"
       >
         <CircledLanguageIcon
           flag={language.flagEmoji}

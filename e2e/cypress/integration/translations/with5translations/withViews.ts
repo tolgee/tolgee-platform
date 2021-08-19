@@ -57,12 +57,7 @@ describe('Views with 5 Translations', () => {
 
       it('will ask for confirmation on changed edit', () => {
         editCell('Cool key 01', 'Cool key edited', false);
-        cy.contains('Cool key 04')
-          .xpath(
-            "./ancestor::*[@data-cy='translations-table-cell']//*[@data-cy='translations-cell-edit-button']"
-          )
-          .invoke('show')
-          .click();
+        cy.contains('Cool key 04').click();
         cy.contains(`Discard changes?`).should('be.visible');
         clickDiscardChanges();
         cy.contains('Cool key 04')

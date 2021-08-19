@@ -78,8 +78,13 @@ export class ApiHttpService {
             );
             throw new Error('Error status code from server');
           }
-          if (r.status == 403) {
-            redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
+          if (
+            r.status == 403 &&
+            (init?.method === undefined || init?.method === 'get')
+          ) {
+            if (init?.method === undefined || init?.method === 'get') {
+              redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
+            }
             this.messageService.error(<T>operation_not_permitted_error</T>);
             Sentry.captureException(new Error('Operation not permitted'));
             ApiHttpService.getResObject(r).then((b) =>
@@ -88,7 +93,9 @@ export class ApiHttpService {
             return;
           }
           if (r.status == 404 && !options.disableNotFoundHandling) {
-            redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
+            if (init?.method === undefined || init?.method === 'get') {
+              redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
+            }
             this.messageService.error(<T>resource_not_found_message</T>);
           }
           if (r.status >= 400 && r.status <= 500) {

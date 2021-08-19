@@ -1,4 +1,5 @@
 import { ProjectDTO } from '../../../../../webapp/src/service/response.types';
+import { createTag, getAddTagButton } from '../../../common/tags';
 import {
   create4Translations,
   translationsBeforeEach,
@@ -27,7 +28,8 @@ describe('Tags with 5 translations', () => {
 
   it('will reuse existing tag', () => {
     createTag('testTag');
-    cy.gcy('translations-tags-add').eq(1).click();
+
+    getAddTagButton(1).click();
     cy.focused().type('test');
     cy.gcy('tag-autocomplete-option').contains('testTag').should('be.visible');
     cy.contains('Add "test"').should('be.visible');
@@ -39,11 +41,3 @@ describe('Tags with 5 translations', () => {
       .each((el) => cy.wrap(el).contains('testTag').should('be.visible'));
   });
 });
-
-function createTag(name: string) {
-  cy.gcy('translations-tags-add').first().click();
-  cy.focused().type(name);
-  cy.gcy('tag-autocomplete-option').contains('Add').click();
-  // wait for loading to disappear
-  cy.gcy('global-base-view-loading').should('not.exist');
-}

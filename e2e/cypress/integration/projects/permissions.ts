@@ -18,9 +18,9 @@ import {
 } from '../../common/projects';
 import {
   createTranslation,
-  getCellEditButton,
   getCellSaveButton,
 } from '../../common/translations';
+import { createTag, getAddTagButton } from '../../common/tags';
 
 describe('Project Permissions', () => {
   beforeEach(() => {});
@@ -218,6 +218,8 @@ const validateEditPermissions = (projectName: string) => {
   gcy('translations-add-button').should('be.visible').click();
   createTranslation('test');
   assertMessage('Key created');
+  createTag('test_tag');
+  cy.contains('test_tag').should('be.visible');
   gcy('translations-row-checkbox').click();
   gcy('translations-delete-button').click();
   confirmStandard();
@@ -230,9 +232,10 @@ const validateTranslatePermissions = (projectName: string) => {
   selectInProjectMenu('Translations');
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
+  getAddTagButton().should('not.exist');
   gcy('translations-add-button').should('not.exist');
   gcy('translations-row-checkbox').should('not.exist');
-  getCellEditButton('This is test text!').click();
+  cy.contains('This is test text!').click();
   getCellSaveButton().should('be.visible');
 };
 

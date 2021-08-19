@@ -4,8 +4,6 @@ import { T } from '@tolgee/react';
 import { makeStyles } from '@material-ui/core';
 import { useContextSelector } from 'use-context-selector';
 
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import {
   TranslationsContext,
@@ -62,8 +60,6 @@ export const TranslationsTable = () => {
   const resizersCallbacksRef = useRef<(() => void)[]>([]);
 
   const classes = useStyles();
-
-  const projectPermissions = useProjectPermissions();
 
   const dispatch = useTranslationsDispatch();
   const translations = useContextSelector(
@@ -220,7 +216,7 @@ export const TranslationsTable = () => {
         threshold={800}
         type="variable"
         itemSizeEstimator={(index, cache) => {
-          return cache[index] || 82;
+          return cache[index] || 84;
         }}
         // @ts-ignore
         scrollParentGetter={() => window}
@@ -238,9 +234,6 @@ export const TranslationsTable = () => {
               data={row}
               languages={languageCols}
               columnSizes={columnSizes}
-              editEnabled={projectPermissions.satisfiesPermission(
-                ProjectPermissionType.TRANSLATE
-              )}
               onResize={handleResize}
             />
           );

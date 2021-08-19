@@ -150,7 +150,10 @@ export const CellTranslation: React.FC<Props> = ({
         </div>
       ) : (
         <>
-          <div className={classes.translation}>
+          <div
+            className={classes.translation}
+            data-cy="translations-table-cell"
+          >
             <TranslationVisual
               width={width}
               text={isEditing ? value : translation?.text}

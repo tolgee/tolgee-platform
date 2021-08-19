@@ -132,8 +132,10 @@ declare namespace DataCy {
         "translations-filter-select" |
         "translations-filters-subheader" |
         "translations-language-select-form-control" |
+        "translations-row" |
         "translations-row-checkbox" |
         "translations-state-indicator" |
+        "translations-table-cell" |
         "translations-tag" |
         "translations-tag-add" |
         "translations-tag-close" |
