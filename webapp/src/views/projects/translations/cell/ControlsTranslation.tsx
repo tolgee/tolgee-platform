@@ -33,6 +33,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
           <StateTransitionButtons
             state={state}
             onStateChange={onStateChange}
+            data-cy="translations-cell-edit-button"
             className={cellClasses.showOnHover}
           />
         )}

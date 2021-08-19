@@ -10,6 +10,7 @@ type Props = {
 const useStyles = makeStyles((theme) => ({
   tag: {
     marginLeft: 6,
+    marginRight: 6,
     marginTop: -1,
     flexShrink: 1,
     overflow: 'hidden',
@@ -17,6 +18,7 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: 'nowrap',
   },
   closeIcon: {
+    marginLeft: -6,
     padding: 1,
     cursor: 'pointer',
     width: 20,
@@ -30,12 +32,14 @@ export const Tag: React.FC<Props> = ({ name, onDelete }) => {
   return (
     <Wrapper>
       <div className={classes.tag}>{name}</div>
-      <Close
-        role="button"
-        data-cy="translations-tag-close"
-        className={classes.closeIcon}
-        onClick={onDelete}
-      />
+      {onDelete && (
+        <Close
+          role="button"
+          data-cy="translations-tag-close"
+          className={classes.closeIcon}
+          onClick={onDelete}
+        />
+      )}
     </Wrapper>
   );
 };

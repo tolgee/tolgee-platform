@@ -311,6 +311,10 @@ export const TranslationsContextProvider: React.FC<{
                     <T>Translation grid - Successfully deleted!</T>
                   );
                 },
+                onError(e) {
+                  const parsed = parseErrorResponse(e);
+                  parsed.forEach((error) => messaging.error(<T>{error}</T>));
+                },
               }
             );
           },
@@ -332,6 +336,10 @@ export const TranslationsContextProvider: React.FC<{
                 action.payload.language,
                 data
               );
+            },
+            onError(e) {
+              const parsed = parseErrorResponse(e);
+              parsed.forEach((error) => messaging.error(<T>{error}</T>));
             },
           }
         );
@@ -377,7 +385,8 @@ export const TranslationsContextProvider: React.FC<{
             action.onSuccess?.();
           })
           .catch((e) => {
-            messaging.error(parseErrorResponse(e));
+            const parsed = parseErrorResponse(e);
+            parsed.forEach((error) => messaging.error(<T>{error}</T>));
             // return never fullfilling promise to prevent after action
             return new Promise(() => {});
           });
@@ -401,7 +410,8 @@ export const TranslationsContextProvider: React.FC<{
             });
           })
           .catch((e) => {
-            messaging.error(parseErrorResponse(e));
+            const parsed = parseErrorResponse(e);
+            parsed.forEach((error) => messaging.error(<T>{error}</T>));
           });
     }
   };

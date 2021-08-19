@@ -4,8 +4,6 @@ import ReactList from 'react-list';
 import { useContextSelector } from 'use-context-selector';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import {
   TranslationsContext,
@@ -35,7 +33,6 @@ export const TranslationsList = () => {
   const classes = useStyles();
   const tableRef = useRef<HTMLDivElement>(null);
   const resizersCallbacksRef = useRef<(() => void)[]>([]);
-  const projectPermissions = useProjectPermissions();
   const reactListRef = useRef<ReactList>(null);
   const dispatch = useTranslationsDispatch();
   const translations = useContextSelector(
@@ -142,7 +139,7 @@ export const TranslationsList = () => {
           return (
             cache[index] ||
             // items count
-            Math.max((selectedLanguages?.length || 0) * 66, 73) + 1
+            Math.max((selectedLanguages?.length || 0) * 68, 83) + 1
           );
         }}
         // @ts-ignore
@@ -160,9 +157,6 @@ export const TranslationsList = () => {
               data={row}
               languages={languagesRow}
               columnSizes={columnSizes}
-              editEnabled={projectPermissions.satisfiesPermission(
-                ProjectPermissionType.TRANSLATE
-              )}
               onResize={handleResize}
             />
           );

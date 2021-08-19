@@ -191,7 +191,10 @@ describe('Screenshots', () => {
   };
 });
 
-const getCameraButton = (nth: number) =>
-  cy.xpath(
-    `(//*[contains(@data-cy, 'translations-cell-screenshots-button')])[${nth}]`
+const getCameraButton = (nth: number) => {
+  // focus row checkbox, to make sure, row buttons are in place
+  cy.xpath(`(//*[@data-cy='translations-row'])[${nth}]//input`).focus();
+  return cy.xpath(
+    `(//*[@data-cy='translations-row'])[${nth}]//*[@data-cy='translations-cell-screenshots-button']`
   );
+};

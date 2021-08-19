@@ -8,9 +8,10 @@ type TagModel = components['schemas']['TagModel'];
 type Props = {
   keyId: number;
   tags: TagModel[] | null;
+  deleteEnabled: boolean;
 };
 
-export const Tags: React.FC<Props> = ({ tags, keyId }) => {
+export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
   const dispatch = useTranslationsDispatch();
 
   const handleTagDelete = (tagId: number) => {
@@ -26,7 +27,9 @@ export const Tags: React.FC<Props> = ({ tags, keyId }) => {
         <Tag
           key={t.id}
           name={t.name}
-          onDelete={stopBubble(() => handleTagDelete(t.id))}
+          onDelete={
+            deleteEnabled ? stopBubble(() => handleTagDelete(t.id)) : undefined
+          }
         />
       ))}
     </>

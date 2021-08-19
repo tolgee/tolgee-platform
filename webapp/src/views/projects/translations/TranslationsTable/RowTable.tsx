@@ -3,6 +3,8 @@ import { makeStyles } from '@material-ui/core';
 import { useDebounce } from 'use-debounce';
 
 import { components } from 'tg.service/apiSchema.generated';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { ProjectPermissionType } from 'tg.service/response.types';
 import { CellKey } from '../CellKey';
 import { CellTranslation } from './CellTranslation';
 import { EmptyKeyPlaceholder } from '../cell/EmptyKeyPlaceholder';
@@ -32,17 +34,16 @@ type Props = {
   data: KeyWithTranslationsModel;
   languages: LanguageModel[];
   columnSizes: number[];
-  editEnabled: boolean;
   onResize: (colIndex: number) => void;
 };
 
 export const RowTable: React.FC<Props> = React.memo(function RowTable({
   data,
   columnSizes,
-  editEnabled,
   languages,
   onResize,
 }) {
+  const permissions = useProjectPermissions();
   const classes = useStyles();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
@@ -59,9 +60,12 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
       className={classes.container}
+      data-cy="translations-row"
     >
       <CellKey
-        editEnabled={editEnabled}
+        editEnabled={permissions.satisfiesPermission(
+          ProjectPermissionType.EDIT
+        )}
         data={data}
         width={columnSizes[0]}
         active={relaxedActive}
@@ -76,7 +80,9 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
             language={language}
             colIndex={index}
             onResize={onResize}
-            editEnabled={editEnabled}
+            editEnabled={permissions.satisfiesPermission(
+              ProjectPermissionType.TRANSLATE
+            )}
             width={columnSizes[index + 1]}
             active={relaxedActive}
             // render edit button on last item, so it's focusable

@@ -100,7 +100,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   };
 
   const addBox = projectPermissions.satisfiesPermission(
-    ProjectPermissionType.TRANSLATE
+    ProjectPermissionType.EDIT
   ) && (
     <Box
       key="add"

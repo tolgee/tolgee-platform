@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => {
   return {
     container: {
       display: 'grid',
-      gridTemplateColumns: '40px auto',
+      gridTemplateColumns: 'auto 1fr',
       gridTemplateRows: 'auto auto 1fr auto',
       gridTemplateAreas: `
         "checkbox key          "
@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => {
     },
     key: {
       gridArea: 'key',
-      margin: '12px 12px 8px 0px',
+      margin: '12px 12px 8px 12px',
       overflow: 'hidden',
       position: 'relative',
     },
@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => {
       '& > *': {
         margin: '0px 3px 3px 0px',
       },
-      margin: '0px 12px 0px 0px',
+      margin: '0px 12px 0px 12px',
       position: 'relative',
       paddingBottom: 24,
       marginBottom: -24,
@@ -158,39 +158,47 @@ export const CellKey: React.FC<Props> = React.memo(
           })}
           style={{ width }}
           onClick={!isEditing && editEnabled ? handleEdit : undefined}
+          data-cy="translations-table-cell"
         >
           {!isEditing ? (
             <>
-              <Checkbox
-                className={classes.checkbox}
-                size="small"
-                checked={isSelected}
-                onChange={toggleSelect}
-                onClick={stopBubble()}
-                data-cy="translations-row-checkbox"
-              />
+              {editEnabled && (
+                <Checkbox
+                  className={classes.checkbox}
+                  size="small"
+                  checked={isSelected}
+                  onChange={toggleSelect}
+                  onClick={stopBubble()}
+                  data-cy="translations-row-checkbox"
+                />
+              )}
               <div className={classes.key}>
                 <LimitedHeightText width={width} maxLines={3} wrap="break-all">
                   {data.keyName}
                 </LimitedHeightText>
               </div>
               <div className={classes.tags}>
-                <Tags keyId={data.keyId} tags={data.keyTags} />
-                {tagEdit ? (
-                  <TagInput
-                    className={classes.tagAdd}
-                    onAdd={handleAddTag}
-                    onClose={() => setTagEdit(false)}
-                  />
-                ) : (
-                  active && (
-                    <TagAdd
+                <Tags
+                  keyId={data.keyId}
+                  tags={data.keyTags}
+                  deleteEnabled={editEnabled}
+                />
+                {editEnabled &&
+                  (tagEdit ? (
+                    <TagInput
                       className={classes.tagAdd}
-                      onClick={() => setTagEdit(true)}
-                      withFullLabel={!data.keyTags?.length}
+                      onAdd={handleAddTag}
+                      onClose={() => setTagEdit(false)}
                     />
-                  )
-                )}
+                  ) : (
+                    active && (
+                      <TagAdd
+                        className={classes.tagAdd}
+                        onClick={() => setTagEdit(true)}
+                        withFullLabel={!data.keyTags?.length}
+                      />
+                    )
+                  ))}
               </div>
             </>
           ) : (

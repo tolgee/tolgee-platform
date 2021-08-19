@@ -35,13 +35,17 @@ describe('Translation states', () => {
   it('changes state to need review', () => {
     setStateToReviewed('Cool translated text 2');
     getCell('Cool translated text 2')
+      .trigger('mouseover')
       .findDcy('translation-state-button')
       .click();
     assertHasState('Cool translated text 2', 'Needs review');
   });
 
   const setStateToReviewed = (translationText: string) => {
-    getCell(translationText).findDcy('translation-state-button').click();
+    getCell(translationText)
+      .trigger('mouseover')
+      .findDcy('translation-state-button')
+      .click();
     assertHasState('Cool translated text 2', 'Reviewed');
   };
 
