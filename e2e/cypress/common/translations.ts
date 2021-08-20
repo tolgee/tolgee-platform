@@ -37,17 +37,16 @@ export function getCellSaveButton() {
 export function createTranslation(testKey: string, testTranslated?: string) {
   cy.gcy('global-base-view-loading').should('not.exist');
   cy.gcy('translations-add-button').click();
-  cy.gcy('global-editor').should('be.visible');
-  cy.gcy('global-editor')
-    .find('.CodeMirror-code')
+  cy.get('.CodeMirror-code')
+    .should('be.visible')
     .type(testKey, { force: true });
   cy.xpath(getAnyContainingText('save')).click();
   cy.contains('Key created').should('be.visible');
 
   if (testTranslated) {
     cy.gcy('translations-view-list').contains('en').first().click();
-    cy.gcy('global-editor')
-      .find('.CodeMirror-code')
+    cy.get('.CodeMirror-code')
+      .should('be.visible')
       .type(testTranslated, { force: true });
     cy.xpath(getAnyContainingText('save')).click();
     cy.gcy('global-base-view-loading').should('not.exist');
