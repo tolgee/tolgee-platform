@@ -1,5 +1,5 @@
 import React, { createContext } from 'react';
-import { FullPageLoading } from '../component/common/FullPageLoading';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { GlobalError } from '../error/GlobalError';
 import { components } from '../service/apiSchema.generated';
 import { useApiQuery } from '../service/http/useQueryApi';

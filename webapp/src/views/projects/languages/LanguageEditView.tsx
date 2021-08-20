@@ -86,7 +86,7 @@ export const LanguageEditView = () => {
       {
         onSuccess() {
           messageService.success(<T>language_deleted_message</T>);
-          redirect(LINKS.PROJECT_EDIT, {
+          redirect(LINKS.PROJECT_LANGUAGES, {
             [PARAMS.PROJECT_ID]: projectId,
           });
         },
@@ -126,7 +126,11 @@ export const LanguageEditView = () => {
         originalName: languageLoadable.data?.originalName || '',
       }}
       onSubmit={onSubmit}
-      loading={languageLoadable.isFetching || deleteLoadable.isLoading}
+      loading={
+        languageLoadable.isFetching ||
+        editLoadable.isLoading ||
+        deleteLoadable.isLoading
+      }
       saveActionLoadable={editLoadable}
       hideChildrenOnLoading={languageLoadable.isLoading}
       validationSchema={Validation.LANGUAGE(t)}

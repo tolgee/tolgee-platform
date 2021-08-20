@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { container } from 'tsyringe';
 
-import { startLoading, stopLoading } from 'tg.hooks/loading';
 import { useProject } from 'tg.hooks/useProject';
 import { ImportActions } from 'tg.store/project/ImportActions';
 
 import { useImportDataHelper } from './useImportDataHelper';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const actions = container.resolve(ImportActions);
 export const useApplyImportHelper = (
@@ -20,13 +20,7 @@ export const useApplyImportHelper = (
   const project = useProject();
   const error = importApplyLoadable.error;
 
-  useEffect(() => {
-    if (importApplyLoadable.loading) {
-      startLoading();
-      return;
-    }
-    stopLoading();
-  }, [importApplyLoadable.loading]);
+  useGlobalLoading(importApplyLoadable.loading);
 
   const onApplyImport = () => {
     const unResolvedCount = dataHelper.result?._embedded?.languages?.reduce(
@@ -55,7 +49,6 @@ export const useApplyImportHelper = (
   }, [importApplyLoadable.error]);
 
   useEffect(() => {
-    startLoading();
     if (importApplyLoadable.loaded) {
       dataHelper.loadData();
     }

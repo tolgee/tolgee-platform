@@ -13,7 +13,6 @@ import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { startLoading, stopLoading } from 'tg.hooks/loading';
 import { useConfig } from 'tg.hooks/useConfig';
 import { useProject } from 'tg.hooks/useProject';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -25,6 +24,7 @@ import { ScreenshotDetail } from './ScreenshotDetail';
 import { ScreenshotDropzone } from './ScreenshotDropzone';
 import { ScreenshotThumbnail } from './ScreenshotThumbnail';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export interface ScreenshotGalleryProps {
   keyId: number;
@@ -236,13 +236,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     validateAndUpload(toUpload);
   }
 
-  useEffect(() => {
-    if (uploadLoadable.isLoading || deleteLoadable.isLoading) {
-      startLoading();
-    } else {
-      stopLoading();
-    }
-  }, [uploadLoadable.isLoading, deleteLoadable.isLoading]);
+  useGlobalLoading(uploadLoadable.isLoading || deleteLoadable.isLoading);
 
   const loadingSkeleton = uploadLoadable.isLoading ? (
     <Skeleton variant="rect" width={100} height={100} />

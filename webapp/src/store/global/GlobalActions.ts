@@ -181,20 +181,6 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
       } as GlobalState)
   );
 
-  readonly startLoading = this.createAction('START_LOADING').build.on(
-    (state: GlobalState) => ({
-      ...state,
-      loading: true,
-    })
-  );
-
-  readonly stopLoading = this.createAction('STOP_LOADING').build.on(
-    (state: GlobalState) => ({
-      ...state,
-      loading: false,
-    })
-  );
-
   get prefix(): string {
     return 'GLOBAL';
   }

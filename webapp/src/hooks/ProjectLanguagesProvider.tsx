@@ -2,7 +2,6 @@ import { createContext, FunctionComponent, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { container } from 'tsyringe';
 
-import { FullPageLoading } from '../component/common/FullPageLoading';
 import { GlobalError } from '../error/GlobalError';
 import { ProjectPreferencesService } from '../service/ProjectPreferencesService';
 import { components } from '../service/apiSchema.generated';
@@ -10,6 +9,7 @@ import { useApiQuery } from '../service/http/useQueryApi';
 import { AppState } from '../store';
 import { TranslationActions } from '../store/project/TranslationActions';
 import { useProject } from './useProject';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 export const ProjectLanguagesContext =
   // @ts-ignore
