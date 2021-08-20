@@ -1,3 +1,10 @@
+# [1.0.0-alpha.115](https://github.com/tolgee/server/compare/v1.0.0-alpha.114...v1.0.0-alpha.115) (2021-08-20)
+
+
+### Features
+
+* Investigate intermittent test TG-249 ([c4c3cda](https://github.com/tolgee/server/commit/c4c3cda930c8d7ac6fb40982895347a262490f24))
+
 # [1.0.0-alpha.114](https://github.com/tolgee/server/compare/v1.0.0-alpha.113...v1.0.0-alpha.114) (2021-08-13)
 
 
