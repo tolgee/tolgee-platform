@@ -8,6 +8,7 @@ import {
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import Chainable = Cypress.Chainable;
+import { waitForGlobalLoading } from './loading';
 
 export function getCellCancelButton() {
   return cy.gcy('translations-cell-cancel-button');
@@ -18,7 +19,7 @@ export function getCellSaveButton() {
 }
 
 export function createTranslation(testKey: string, testTranslated?: string) {
-  cy.gcy('global-base-view-loading').should('not.exist');
+  waitForGlobalLoading();
   cy.gcy('translations-add-button').click();
   cy.get('.CodeMirror-code')
     .should('be.visible')
@@ -32,7 +33,7 @@ export function createTranslation(testKey: string, testTranslated?: string) {
       .should('be.visible')
       .type(testTranslated, { force: true });
     cy.xpath(getAnyContainingText('save')).click();
-    cy.gcy('global-base-view-loading').should('not.exist');
+    waitForGlobalLoading();
   }
 }
 
@@ -93,7 +94,7 @@ export const toggleLang = (lang) => {
     .click();
   cy.get('body').click();
   // wait for loading to disappear
-  cy.gcy('global-base-view-loading').should('not.exist');
+  waitForGlobalLoading();
 };
 
 export const create4Translations = (projectId: number) => {
@@ -113,7 +114,7 @@ export const create4Translations = (projectId: number) => {
 
   // wait for loading to appear and disappear again
   cy.gcy('global-base-view-content').should('be.visible');
-  cy.gcy('global-base-view-loading').should('not.exist');
+  waitForGlobalLoading();
 };
 
 export const forEachView = (

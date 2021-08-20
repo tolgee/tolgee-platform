@@ -3,6 +3,7 @@ import { getAnyContainingAriaLabelAttribute, getInput } from './xPath';
 import { Scope } from './types';
 import Value = DataCy.Value;
 import Chainable = Cypress.Chainable;
+import { waitForGlobalLoading } from './loading';
 
 export const allScopes: Scope[] = [
   'keys.edit',
@@ -104,8 +105,7 @@ export const toggleInMultiselect = (
     });
   });
   cy.get('body').click(0, 0);
-  // wait for loading to finish
-  cy.gcy('global-base-view-loading').should('not.exist');
+  waitForGlobalLoading();
 };
 
 export const getInputByName = (name: string): Chainable => {

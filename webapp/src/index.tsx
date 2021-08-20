@@ -24,6 +24,7 @@ import reportWebVitals from './reportWebVitals';
 import { DispatchService } from './service/DispatchService';
 import configureStore from './store';
 import { createTheme } from '@material-ui/core';
+import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
 
 const store = configureStore();
 
@@ -181,7 +182,10 @@ ReactDOM.render(
             {/* @ts-ignore */}
             <ErrorBoundary>
               <SnackbarProvider data-cy="global-snackbars">
-                <App />
+                <LoadingProvider>
+                  <GlobalLoading />
+                  <App />
+                </LoadingProvider>
               </SnackbarProvider>
             </ErrorBoundary>
             <ReactQueryDevtools />

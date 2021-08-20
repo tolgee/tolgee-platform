@@ -456,7 +456,8 @@ export const TranslationsContextProvider: React.FC<{
             deleteKeys.isLoading ||
             updateTranslationState.isLoading ||
             addTag.isLoading ||
-            removeTag.isLoading,
+            removeTag.isLoading ||
+            createKey.isLoading,
           isFetchingMore: translations.isFetchingNextPage,
           hasMoreToFetch: translations.hasNextPage,
           search: translations.query?.search,

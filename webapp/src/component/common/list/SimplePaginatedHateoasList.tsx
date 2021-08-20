@@ -3,7 +3,6 @@ import { Box, Grid, Typography } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { T } from '@tolgee/react';
 
-import { startLoading, stopLoading } from 'tg.hooks/loading';
 import {
   AbstractLoadableActions,
   StateWithLoadables,
@@ -17,6 +16,7 @@ import {
   EmbeddedDataItem,
   usePaginatedHateoasDataHelper,
 } from './usePaginatedHateoasDataHelper';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export type SimplePaginatedHateoasListProps<
   ActionsType extends AbstractLoadableActions<StateWithLoadables<ActionsType>>,
@@ -76,16 +76,7 @@ export function SimplePaginatedHateoasList<
     search: search || props.searchText,
   });
 
-  useEffect(() => {
-    //to trigger global loading just when data are present (when loading for the first time, BoxLoading is rendered lower)
-    if (helper.loading && helper.items) {
-      startLoading();
-    }
-
-    if (!helper.loading) {
-      stopLoading();
-    }
-  });
+  useGlobalLoading(helper.loading && helper.items);
 
   useEffect(() => {
     setSearch(props.searchText);

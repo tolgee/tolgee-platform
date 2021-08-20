@@ -15,6 +15,7 @@ import {
   translationsBeforeEach,
   visitTranslations,
 } from '../../common/translations';
+import { waitForGlobalLoading } from '../../common/loading';
 
 describe('Translations Base', () => {
   let project: ProjectDTO = null;
@@ -28,8 +29,7 @@ describe('Translations Base', () => {
   });
 
   it("won't fail when language deleted", () => {
-    cy.gcy('global-base-view-loading').should('be.visible');
-    cy.gcy('global-base-view-loading').should('not.exist');
+    waitForGlobalLoading();
 
     createTranslation('Test key', 'Translated test key');
     toggleLang('Česky');
@@ -39,7 +39,7 @@ describe('Translations Base', () => {
     visit();
     // wait for loading to appear and disappear again
     cy.gcy('global-base-view-content').should('be.visible');
-    cy.gcy('global-base-view-loading').should('not.exist');
+    waitForGlobalLoading();
     cy.contains('Translated test key').should('be.visible');
   });
 

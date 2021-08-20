@@ -6,7 +6,6 @@ import { container } from 'tsyringe';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
-import { startLoading, stopLoading } from 'tg.hooks/loading';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { ImportActions } from 'tg.store/project/ImportActions';
@@ -14,6 +13,7 @@ import { ImportActions } from 'tg.store/project/ImportActions';
 import { ImportConflictTranslationsPair } from './ImportConflictTranslationsPair';
 import { ImportConflictsDataHeader } from './ImportConflictsDataHeader';
 import { ImportConflictsSecondaryBar } from './ImportConflictsSecondaryBar';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const actions = container.resolve(ImportActions);
 export const ImportConflictsData: FunctionComponent<{
@@ -89,14 +89,14 @@ export const ImportConflictsData: FunctionComponent<{
     };
   }, []);
 
+  useGlobalLoading(conflictsLoadable.loading && !conflictsLoadable.loaded);
+
   useEffect(() => {
     if (!conflictsLoadable.loading) {
-      stopLoading();
       actions.loadableReset.resolveTranslationConflictKeep.dispatch();
       actions.loadableReset.resolveTranslationConflictOverride.dispatch();
       return;
     }
-    startLoading();
   }, [conflictsLoadable.loading]);
 
   if (!conflictsLoadable.loaded) {

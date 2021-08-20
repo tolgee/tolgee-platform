@@ -8,6 +8,7 @@ import {
 import 'cypress-file-upload';
 import { assertMessage, gcy } from '../../common/shared';
 import { visitImport } from '../../common/import';
+import { expectGlobalLoading } from '../../common/loading';
 
 describe('Import errors', () => {
   beforeEach(() => {
@@ -72,8 +73,7 @@ describe('Import errors', () => {
     });
 
     it('error shows more and less', () => {
-      cy.gcy('global-base-view-loading').should('be.visible');
-      cy.gcy('global-base-view-loading').should('not.exist');
+      expectGlobalLoading();
       gcy('import-file-error')
         .findDcy('import-file-error-more-less-button')
         .click();

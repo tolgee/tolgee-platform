@@ -13,6 +13,7 @@ import { FlagImage } from 'tg.component/languages/FlagImage';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export const ProjectSettingsLanguages = () => {
   const queryClient = useQueryClient();
@@ -27,6 +28,8 @@ export const ProjectSettingsLanguages = () => {
       page,
     },
   });
+
+  useGlobalLoading(languagesLoadable.isLoading);
 
   return (
     <Container maxWidth="sm">

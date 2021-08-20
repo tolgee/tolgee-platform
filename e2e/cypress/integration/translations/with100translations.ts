@@ -4,6 +4,7 @@ import {
   translationsBeforeEach,
   visitTranslations,
 } from '../../common/translations';
+import { waitForGlobalLoading } from '../../common/loading';
 
 describe('With 100 translations', () => {
   let project: ProjectDTO = null;
@@ -18,7 +19,7 @@ describe('With 100 translations', () => {
 
     // wait for loading to appear and disappear again
     cy.gcy('global-base-view-content').should('be.visible');
-    cy.gcy('global-base-view-loading').should('not.exist');
+    waitForGlobalLoading();
   });
 
   afterEach(() => {

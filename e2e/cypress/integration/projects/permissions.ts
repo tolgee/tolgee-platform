@@ -21,12 +21,13 @@ import {
   getCellSaveButton,
 } from '../../common/translations';
 import { createTag, getAddTagButton } from '../../common/tags';
+import { waitForGlobalLoading } from '../../common/loading';
 
 describe('Project Permissions', () => {
   beforeEach(() => {});
 
   afterEach(() => {
-    cy.gcy('global-base-view-loading').should('not.exist');
+    waitForGlobalLoading();
   });
 
   describe("Cukrberg's permissions", () => {

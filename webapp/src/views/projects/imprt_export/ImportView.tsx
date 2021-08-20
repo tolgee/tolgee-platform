@@ -1,9 +1,4 @@
-import {
-  default as React,
-  FunctionComponent,
-  useEffect,
-  useState,
-} from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { Box, Button } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
@@ -12,7 +7,6 @@ import { BaseView } from 'tg.component/layout/BaseView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
-import { startLoading, stopLoading } from 'tg.hooks/loading';
 import { useProject } from 'tg.hooks/useProject';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
@@ -25,6 +19,7 @@ import ImportFileInput from './component/ImportFileInput';
 import { ImportResult } from './component/ImportResult';
 import { useApplyImportHelper } from './hooks/useApplyImportHelper';
 import { useImportDataHelper } from './hooks/useImportDataHelper';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const actions = container.resolve(ImportActions);
 const messageService = container.resolve(MessageService);
@@ -64,11 +59,15 @@ export const ImportView: FunctionComponent = () => {
     setResolveRow(row);
   };
 
-  useEffect(() => {
-    if (!resultLoading) {
-      stopLoading();
-    }
+  useGlobalLoading(
+    (deleteLanguageLoadable.loading && deleteLanguageLoadable.loaded) ||
+      (selectLanguageLoadable.loading && selectLanguageLoadable.loaded) ||
+      (resetExistingLanguageLoadable.loading &&
+        resetExistingLanguageLoadable.loaded) ||
+      resultLoading
+  );
 
+  useEffect(() => {
     const error = resultLoadable.error;
     if (error?.code === 'resource_not_found') {
       dataHelper.resetResult();
@@ -76,14 +75,12 @@ export const ImportView: FunctionComponent = () => {
   }, [resultLoadable.loading, addFilesLoadable.loading]);
 
   useEffect(() => {
-    startLoading();
     if (
       (deleteLanguageLoadable.loaded && !deleteLanguageLoadable.loading) ||
       (selectLanguageLoadable.loaded && !selectLanguageLoadable.loading) ||
       (resetExistingLanguageLoadable.loaded &&
         !resetExistingLanguageLoadable.loading)
     ) {
-      stopLoading();
       dataHelper.loadData();
     }
   }, [

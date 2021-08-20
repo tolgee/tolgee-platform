@@ -1,4 +1,5 @@
 import { ProjectDTO } from '../../../../../webapp/src/service/response.types';
+import { waitForGlobalLoading } from '../../../common/loading';
 import { createTag, getAddTagButton } from '../../../common/tags';
 import {
   create4Translations,
@@ -35,7 +36,7 @@ describe('Tags with 5 translations', () => {
     cy.contains('Add "test"').should('be.visible');
     cy.gcy('tag-autocomplete-option').contains('testTag').click();
     // wait for loading to disappear
-    cy.gcy('global-base-view-loading').should('not.exist');
+    waitForGlobalLoading();
     cy.gcy('translations-tag')
       .should('have.length', 2)
       .each((el) => cy.wrap(el).contains('testTag').should('be.visible'));

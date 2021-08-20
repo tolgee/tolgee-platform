@@ -11,6 +11,7 @@ import { ErrorResponseDto } from 'tg.service/response.types';
 
 import { ResourceErrorComponent } from '../common/form/ResourceErrorComponent';
 import { CreateLanguageField } from './CreateLanguageField';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const messageService = container.resolve(MessageService);
 
@@ -26,6 +27,9 @@ export const CreateSingleLanguage: FunctionComponent<{
     url: '/v2/projects/{projectId}/languages',
     method: 'post',
   });
+
+  useGlobalLoading(createLoadable.isLoading);
+
   const [value, setValue] = useState(null as LanguageDto | null);
 
   const onSubmit = (values) => {

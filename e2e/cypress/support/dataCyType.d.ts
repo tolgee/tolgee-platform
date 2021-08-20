@@ -11,7 +11,6 @@ declare namespace DataCy {
         "dropzone" |
         "dropzone-inner" |
         "global-base-view-content" |
-        "global-base-view-loading" |
         "global-base-view-title" |
         "global-confirmation-cancel" |
         "global-confirmation-confirm" |
@@ -26,6 +25,7 @@ declare namespace DataCy {
         "global-list-items" |
         "global-list-pagination" |
         "global-list-search" |
+        "global-loading" |
         "global-paginated-list" |
         "global-plus-button" |
         "global-search-field" |
