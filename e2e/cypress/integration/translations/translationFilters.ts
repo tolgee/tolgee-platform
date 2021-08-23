@@ -12,21 +12,17 @@ describe('Translations Base', () => {
 
   before(() => {
     cleanTranslationFiltersData();
-    createTranslationFiltersData()
-      .then((p) => {
-        project = p;
-      })
-      .then(() => {
-        login('franta', 'admin');
-        visit();
-        cy.contains('Translations').should('be.visible');
-        cy.gcy('global-base-view-loading').should('be.visible');
-        cy.gcy('global-base-view-loading').should('not.exist');
-      });
+    createTranslationFiltersData().then((p) => {
+      project = p;
+    });
   });
 
   beforeEach(() => {
     login('franta', 'admin');
+    visit();
+    cy.contains('Translations').should('be.visible');
+    cy.gcy('global-base-view-loading').should('be.visible');
+    cy.gcy('global-base-view-loading').should('not.exist');
   });
 
   after(() => {
@@ -80,7 +76,7 @@ describe('Translations Base', () => {
   });
 
   describe('filter exclusiveness', () => {
-    before(() => {
+    beforeEach(() => {
       gcy('translations-filter-select').click();
     });
     [
