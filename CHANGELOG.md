@@ -1,3 +1,10 @@
+# [1.0.0-alpha.117](https://github.com/tolgee/server/compare/v1.0.0-alpha.116...v1.0.0-alpha.117) (2021-08-23)
+
+
+### Bug Fixes
+
+* translations filters test ([d34646d](https://github.com/tolgee/server/commit/d34646d43ed1e4dedb9fc02289b6b733dea5d1d0))
+
 # [1.0.0-alpha.116](https://github.com/tolgee/server/compare/v1.0.0-alpha.115...v1.0.0-alpha.116) (2021-08-23)
 
 
