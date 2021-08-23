@@ -1,3 +1,21 @@
+# [1.0.0-alpha.116](https://github.com/tolgee/server/compare/v1.0.0-alpha.115...v1.0.0-alpha.116) (2021-08-23)
+
+
+### Bug Fixes
+
+* fix tests TG-201 ([e009686](https://github.com/tolgee/server/commit/e009686b2368c07ca73fef020f9e6093033b5bbe))
+
+
+### Features
+
+* add overlay for limited height text TG-201 ([5471c20](https://github.com/tolgee/server/commit/5471c2042fb41eb011edb683afb6a83fdee7b001))
+* cell cleanup shared elements TG-201 ([f374dea](https://github.com/tolgee/server/commit/f374dea52a9d87f8ddb394a3180c6000db8fcee0))
+* improve global layout TG-201 ([48e5da4](https://github.com/tolgee/server/commit/48e5da4ce5a370f006c30fe251a38af670595327))
+* improve tags UX TG-201 ([bc8147f](https://github.com/tolgee/server/commit/bc8147ff0d6fd29c73a6b6ab848b87a205bedee6))
+* optimize key cell TG-201 ([e61712e](https://github.com/tolgee/server/commit/e61712eadee5488f0459d8dab626b595a543f574))
+* Optimize list view TG-201 ([3acac3b](https://github.com/tolgee/server/commit/3acac3b983419220f923211468899c75aadf977e))
+* Optimize table view TG-201 ([c056089](https://github.com/tolgee/server/commit/c05608993212d590e7c92591958d1990cf71be8d))
+
 # [1.0.0-alpha.115](https://github.com/tolgee/server/compare/v1.0.0-alpha.114...v1.0.0-alpha.115) (2021-08-20)
 
 
