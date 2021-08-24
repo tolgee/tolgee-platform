@@ -85,8 +85,8 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
             )}
             width={columnSizes[index + 1]}
             active={relaxedActive}
-            // render edit button on last item, so it's focusable
-            renderEdit={index === languages.length - 1}
+            // render last focusable button on last item, so it's focusable
+            lastFocusable={index === languages.length - 1}
           />
         ))
       )}

@@ -133,8 +133,8 @@ export const CellKey: React.FC<Props> = React.memo(
       isEditing,
       value,
       setValue,
-      handleEdit,
-      handleEditCancel,
+      handleOpen,
+      handleClose,
       handleSave,
       autofocus,
     } = useEditableRow({
@@ -157,7 +157,9 @@ export const CellKey: React.FC<Props> = React.memo(
             [cellClasses.cellRaised]: isEditing,
           })}
           style={{ width }}
-          onClick={!isEditing && editEnabled ? handleEdit : undefined}
+          onClick={
+            !isEditing && editEnabled ? () => handleOpen('editor') : undefined
+          }
           data-cy="translations-table-cell"
         >
           {!isEditing ? (
@@ -211,7 +213,7 @@ export const CellKey: React.FC<Props> = React.memo(
                 onCmdSave={() =>
                   handleSave(isEmpty ? 'NEW_EMPTY_KEY' : 'EDIT_NEXT')
                 }
-                onCancel={handleEditCancel}
+                onCancel={handleClose}
                 autofocus={autofocus}
               />
             </div>
@@ -220,7 +222,7 @@ export const CellKey: React.FC<Props> = React.memo(
           <div className={isEditing ? classes.controls : classes.controlsSmall}>
             {isEditing ? (
               <ControlsEditor
-                onCancel={handleEditCancel}
+                onCancel={handleClose}
                 onSave={handleSave}
                 onScreenshots={
                   isEmpty ? undefined : () => setScreenshotsOpen(true)
@@ -231,7 +233,7 @@ export const CellKey: React.FC<Props> = React.memo(
             ) : !tagEdit ? (
               active || screenshotsOpen || screenshotsOpenDebounced ? (
                 <ControlsKey
-                  onEdit={handleEdit}
+                  onEdit={() => handleOpen('editor')}
                   onScreenshots={
                     isEmpty ? undefined : () => setScreenshotsOpen(true)
                   }

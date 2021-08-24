@@ -16,7 +16,7 @@ type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
 type TranslationsResponse =
   components['schemas']['KeysWithTranslationsPageModel'];
-type TranslationModel = components['schemas']['TranslationModel'];
+type TranslationModel = components['schemas']['TranslationViewModel'];
 
 type FiltersType = Pick<
   TranslationsQueryType,

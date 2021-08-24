@@ -8,6 +8,7 @@ import {
   useQueryClient,
   UseQueryOptions,
   UseInfiniteQueryOptions,
+  Query,
 } from 'react-query';
 import { container } from 'tsyringe';
 
@@ -119,13 +120,17 @@ export const useApiMutation = <
   return { ...mutation, mutate, mutateAsync };
 };
 
+export const matchUrlPrefix = (prefix: string) => {
+  return {
+    predicate: (query: Query) => {
+      return (query.queryKey[0] as string)?.startsWith(prefix);
+    },
+  };
+};
+
 export const invalidateUrlPrefix = (
   queryClient: QueryClient,
   prefix: string
 ) => {
-  queryClient.invalidateQueries({
-    predicate: (query) => {
-      return (query.queryKey[0] as string)?.startsWith(prefix);
-    },
-  });
+  queryClient.invalidateQueries(matchUrlPrefix(prefix));
 };

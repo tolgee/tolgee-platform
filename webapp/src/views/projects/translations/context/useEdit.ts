@@ -18,7 +18,10 @@ export type SetEditType = CellLocation & {
 export type EditType = CellLocation & {
   savedValue?: string;
   changed?: boolean;
+  mode: EditModeType;
 };
+
+export type EditModeType = 'editor' | 'comments';
 
 type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
@@ -60,6 +63,7 @@ export const useEdit = ({ projectId, translations }: Props) => {
             keyId: nextKey.keyId,
             keyName: nextKey.keyName,
             language: position?.language,
+            mode: 'editor',
           }
         : undefined
     );
