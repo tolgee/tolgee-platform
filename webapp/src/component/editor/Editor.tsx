@@ -29,10 +29,19 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   editor: {
+    display: 'flex',
+    flexGrow: 1,
+    alignItems: 'stretch',
+    '& .react-codemirror2': {
+      display: 'flex',
+      flexGrow: 1,
+      position: 'relative',
+    },
     '& *': {
       overflow: 'hidden !important',
     },
     '& .CodeMirror': {
+      width: '100%',
       minHeight: 100,
       height: '100%',
       marginLeft: -5,
@@ -161,9 +170,8 @@ export const Editor: React.FC<Props> = ({
   };
 
   return (
-    <div data-cy="global-editor">
+    <div data-cy="global-editor" className={classes.editor}>
       <CodeMirrorReact
-        className={classes.editor}
         value={value}
         // @ts-ignore
         defineMode={{ name: 'icu', fn: icuMode }}

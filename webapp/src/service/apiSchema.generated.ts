@@ -105,7 +105,7 @@ export interface paths {
   };
   "/api/project/{projectId}/keys": {
     put: operations["edit_2"];
-    post: operations["create_9"];
+    post: operations["create_11"];
     delete: operations["delete_8"];
   };
   "/api/project/{projectId}/translations": {
@@ -145,6 +145,9 @@ export interface paths {
     get: operations["getAll_3"];
     post: operations["create_4"];
   };
+  "/v2/projects/{projectId}/translations/create-comment": {
+    post: operations["create_6"];
+  };
   "/v2/projects/{projectId}/languages": {
     get: operations["getAll_5"];
     post: operations["createLanguage"];
@@ -155,11 +158,11 @@ export interface paths {
   };
   "/v2/organizations": {
     get: operations["getAll_7"];
-    post: operations["create_6"];
+    post: operations["create_8"];
   };
   "/api/organizations": {
     get: operations["getAll_8"];
-    post: operations["create_7"];
+    post: operations["create_9"];
   };
   "/api/user": {
     get: operations["getInfo"];
@@ -188,7 +191,7 @@ export interface paths {
     post: operations["editDeprecated"];
   };
   "/api/project/{projectId}/keys/create": {
-    post: operations["create_8"];
+    post: operations["create_10"];
   };
   "/api/project/{projectId}/screenshots/get": {
     post: operations["getKeyScreenshots_1"];
@@ -198,7 +201,7 @@ export interface paths {
   };
   "/api/apiKeys": {
     get: operations["allByUser"];
-    post: operations["create_12"];
+    post: operations["create_14"];
   };
   "/api/apiKeys/edit": {
     post: operations["edit_4"];
@@ -545,6 +548,16 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     StreamingResponseBody: { [key: string]: unknown };
+    TranslationCommentWithLangKeyDto: {
+      keyId: number;
+      languageId: number;
+      text: string;
+      state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
+    };
+    TranslationWithCommentModel: {
+      translation: components["schemas"]["TranslationModel"];
+      comment: components["schemas"]["TranslationCommentModel"];
+    };
     ScreenshotModel: {
       id: number;
       filename: string;
@@ -660,7 +673,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -671,6 +683,7 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -706,7 +719,7 @@ export interface components {
       screenshotCount: number;
       /** Translations object */
       translations: {
-        [key: string]: components["schemas"]["TranslationModel"];
+        [key: string]: components["schemas"]["TranslationViewModel"];
       };
     };
     KeysWithTranslationsPageModel: {
@@ -718,6 +731,22 @@ export interface components {
       selectedLanguages: components["schemas"]["LanguageModel"][];
       /** Cursor to get next data */
       nextCursor?: string;
+    };
+    /** Translations object */
+    TranslationViewModel: {
+      /** Id of translation record */
+      id: number;
+      /** Translation text */
+      text?: string;
+      /** State of translation */
+      state:
+        | "UNTRANSLATED"
+        | "MACHINE_TRANSLATED"
+        | "TRANSLATED"
+        | "REVIEWED"
+        | "NEEDS_REVIEW";
+      /** Count of translation comments */
+      commentCount: number;
     };
     CollectionModelProjectTransferOptionModel: {
       _embedded?: {
@@ -2071,7 +2100,7 @@ export interface operations {
       };
     };
   };
-  create_9: {
+  create_11: {
     parameters: {
       path: {
         projectId: number;
@@ -2575,6 +2604,38 @@ export interface operations {
       };
     };
   };
+  create_6: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["TranslationWithCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TranslationCommentWithLangKeyDto"];
+      };
+    };
+  };
   getAll_5: {
     parameters: {
       path: {
@@ -2738,7 +2799,7 @@ export interface operations {
       };
     };
   };
-  create_6: {
+  create_8: {
     responses: {
       /** OK */
       200: {
@@ -2798,7 +2859,7 @@ export interface operations {
       };
     };
   };
-  create_7: {
+  create_9: {
     responses: {
       /** OK */
       200: {
@@ -3059,7 +3120,7 @@ export interface operations {
       };
     };
   };
-  create_8: {
+  create_10: {
     parameters: {
       path: {
         projectId: number;
@@ -3178,7 +3239,7 @@ export interface operations {
       };
     };
   };
-  create_12: {
+  create_14: {
     responses: {
       /** OK */
       200: {

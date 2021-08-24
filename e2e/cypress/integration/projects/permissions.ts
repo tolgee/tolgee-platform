@@ -217,7 +217,7 @@ const validateEditPermissions = (projectName: string) => {
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
   gcy('translations-add-button').should('be.visible').click();
-  createTranslation('test');
+  createTranslation('cool_key');
   assertMessage('Key created');
   createTag('test_tag');
   cy.contains('test_tag').should('be.visible');

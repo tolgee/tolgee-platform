@@ -6,6 +6,7 @@ import {
   TranslationsContext,
   useTranslationsDispatch,
 } from './context/TranslationsContext';
+import { EditModeType } from './context/useEdit';
 
 type Props = {
   keyId: number;
@@ -41,13 +42,14 @@ export const useEditableRow = ({
     }
   }, [isEditing, originalValue]);
 
-  const handleEdit = () => {
+  const handleOpen = (mode: EditModeType) => {
     dispatch({
       type: 'SET_EDIT',
       payload: {
         keyId,
         keyName,
-        language: language,
+        language,
+        mode,
       },
     });
   };
@@ -65,8 +67,12 @@ export const useEditableRow = ({
     });
   };
 
-  const handleEditCancel = () => {
+  const handleClose = () => {
     dispatch({ type: 'SET_EDIT', payload: undefined });
+  };
+
+  const handleModeChange = (mode: EditModeType) => {
+    dispatch({ type: 'UPDATE_EDIT', payload: { mode: mode } });
   };
 
   useEffect(() => {
@@ -96,9 +102,10 @@ export const useEditableRow = ({
   }, [valueRef]);
 
   return {
-    handleEdit,
+    handleOpen,
+    handleClose,
     handleSave,
-    handleEditCancel,
+    handleModeChange,
     value,
     setValue,
     editVal: edit,

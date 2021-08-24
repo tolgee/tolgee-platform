@@ -16,6 +16,7 @@ import { StateType } from 'tg.constants/translationStates';
 export type AfterCommand = 'EDIT_NEXT' | 'NEW_EMPTY_KEY';
 
 type LanguagesType = components['schemas']['LanguageModel'];
+type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
 type TranslationsQueryType =
@@ -37,9 +38,16 @@ type ActionType =
   | { type: 'SET_TRANSLATION_STATE'; payload: SetTranslationStatePayload }
   | { type: 'ADD_EMPTY_KEY'; payload?: AddEmptyKeyType }
   | { type: 'ADD_TAG'; payload: AddTagPayload; onSuccess?: () => void }
-  | { type: 'REMOVE_TAG'; payload: RemoveTagPayload };
+  | { type: 'REMOVE_TAG'; payload: RemoveTagPayload }
+  | { type: 'UPDATE_TRANSLATION'; payload: UpdateTranslationPayolad };
 
 export type ViewType = 'TABLE' | 'LIST';
+
+type UpdateTranslationPayolad = {
+  keyId: number;
+  lang: string;
+  data: Partial<TranslationViewModel>;
+};
 
 type RemoveTagPayload = {
   keyId: number;
@@ -195,6 +203,7 @@ export const TranslationsContextProvider: React.FC<{
           );
           edit.setPosition(action.payload);
         } else if (edit.position?.changed) {
+          edit.setPosition({ ...edit.position, mode: 'editor' });
           confirmation({
             title: <T>translations_leave_save_confirmation</T>,
             message: <T>translations_leave_save_confirmation_message_1</T>,
@@ -365,6 +374,7 @@ export const TranslationsContextProvider: React.FC<{
         edit.setPosition({
           keyId: newKey.keyId,
           keyName: newKey.keyName,
+          mode: 'editor',
         });
         return;
       }
@@ -391,7 +401,7 @@ export const TranslationsContextProvider: React.FC<{
             return new Promise(() => {});
           });
       case 'REMOVE_TAG':
-        await removeTag
+        return removeTag
           .mutateAsync({
             path: {
               keyId: action.payload.keyId,
@@ -413,6 +423,12 @@ export const TranslationsContextProvider: React.FC<{
             const parsed = parseErrorResponse(e);
             parsed.forEach((error) => messaging.error(<T>{error}</T>));
           });
+      case 'UPDATE_TRANSLATION':
+        return translations.updateTranslation(
+          action.payload.keyId,
+          action.payload.lang,
+          action.payload.data
+        );
     }
   };
 

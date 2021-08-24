@@ -6,6 +6,10 @@ declare namespace DataCy {
         "api-keys-project-select-item" |
         "base-language-select" |
         "camera-button" |
+        "comment" |
+        "comment-menu" |
+        "comment-menu-delete" |
+        "comment-text" |
         "create-project-language-add-button" |
         "dashboard-projects-list-item" |
         "dropzone" |
@@ -132,9 +136,15 @@ declare namespace DataCy {
         "translation-state-button" |
         "translations-add-button" |
         "translations-cell-cancel-button" |
+        "translations-cell-close" |
+        "translations-cell-comments-button" |
         "translations-cell-edit-button" |
         "translations-cell-save-button" |
         "translations-cell-screenshots-button" |
+        "translations-cell-tab-comments" |
+        "translations-cell-tab-edit" |
+        "translations-comments-input" |
+        "translations-comments-load-more-button" |
         "translations-delete-button" |
         "translations-filter-option" |
         "translations-filter-select" |
@@ -144,6 +154,7 @@ declare namespace DataCy {
         "translations-row-checkbox" |
         "translations-state-indicator" |
         "translations-table-cell" |
+        "translations-table-cell-language" |
         "translations-tag" |
         "translations-tag-add" |
         "translations-tag-close" |

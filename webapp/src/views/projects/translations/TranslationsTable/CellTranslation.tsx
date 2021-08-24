@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { Editor } from 'tg.component/editor/Editor';
 import { StateType } from 'tg.constants/translationStates';
 import { useEditableRow } from '../useEditableRow';
 import { TranslationVisual } from '../TranslationVisual';
@@ -11,7 +10,7 @@ import { useTranslationsDispatch } from '../context/TranslationsContext';
 import { useCellStyles } from '../cell/styles';
 import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
-import { ControlsEditor } from '../cell/ControlsEditor';
+import { TranslationOpened } from '../TranslationOpened';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -50,7 +49,7 @@ const useStyles = makeStyles((theme) => {
       justifyContent: 'flex-end',
       overflow: 'hidden',
       minHeight: 44,
-      padding: '12px 12px 12px 12px',
+      padding: '12px 14px 12px 12px',
       marginTop: -16,
     },
   };
@@ -64,7 +63,7 @@ type Props = {
   editEnabled: boolean;
   width: number;
   active: boolean;
-  renderEdit: boolean;
+  lastFocusable: boolean;
 };
 
 export const CellTranslation: React.FC<Props> = ({
@@ -75,7 +74,7 @@ export const CellTranslation: React.FC<Props> = ({
   editEnabled,
   width,
   active,
-  renderEdit,
+  lastFocusable,
 }) => {
   const classes = useStyles();
   const cellClasses = useCellStyles();
@@ -85,12 +84,14 @@ export const CellTranslation: React.FC<Props> = ({
 
   const {
     isEditing,
+    editVal,
     value,
     setValue,
-    handleEdit,
-    handleEditCancel,
+    handleOpen,
+    handleClose,
     handleSave,
     autofocus,
+    handleModeChange,
   } = useEditableRow({
     keyId: data.keyId,
     keyName: data.keyName,
@@ -125,29 +126,28 @@ export const CellTranslation: React.FC<Props> = ({
         [cellClasses.cellRaised]: isEditing,
       })}
       style={{ width }}
-      onClick={editEnabled && !isEditing ? handleEdit : undefined}
+      onClick={
+        editEnabled && !isEditing ? () => handleOpen('editor') : undefined
+      }
     >
-      {isEditing ? (
-        <div className={classes.editor}>
-          <div className={classes.editorContainer}>
-            <Editor
-              value={value}
-              onChange={(v) => setValue(v as string)}
-              onSave={() => handleSave()}
-              onCmdSave={() => handleSave('EDIT_NEXT')}
-              onCancel={handleEditCancel}
-              autofocus={autofocus}
-            />
-          </div>
-          <div className={classes.editorControls}>
-            <ControlsEditor
-              state={state}
-              onSave={handleSave}
-              onCancel={handleEditCancel}
-              onStateChange={handleStateChange}
-            />
-          </div>
-        </div>
+      {editVal ? (
+        <TranslationOpened
+          className={classes.editor}
+          keyId={data.keyId}
+          language={language}
+          translation={translation}
+          value={value}
+          onChange={(v) => setValue(v as string)}
+          onSave={() => handleSave()}
+          onCmdSave={() => handleSave('EDIT_NEXT')}
+          onCancel={handleClose}
+          autofocus={autofocus}
+          state={state}
+          onStateChange={handleStateChange}
+          mode={editVal.mode}
+          onModeChange={handleModeChange}
+          editEnabled={editEnabled}
+        />
       ) : (
         <>
           <div
@@ -164,16 +164,18 @@ export const CellTranslation: React.FC<Props> = ({
           <div className={classes.controls}>
             {active ? (
               <ControlsTranslation
-                onEdit={handleEdit}
+                onEdit={() => handleOpen('editor')}
                 editEnabled={editEnabled}
                 state={state}
                 onStateChange={handleStateChange}
+                onComments={() => handleOpen('comments')}
+                commentsCount={translation?.commentCount}
               />
             ) : (
               // hide as many components as possible in order to be performant
               <ControlsTranslation
-                editEnabled={editEnabled}
-                onEdit={renderEdit ? handleEdit : undefined}
+                commentsCount={translation?.commentCount}
+                lastFocusable={lastFocusable}
               />
             )}
           </div>

@@ -34,6 +34,7 @@ class TranslationCommentsTestData {
         username = "pepa"
       }
     }.self
+
     project = addProject {
       self {
         name = "Franta's project"
@@ -93,5 +94,79 @@ class TranslationCommentsTestData {
 
       projectBuilder = this
     }.self
+  }
+
+  fun addE2eTestData() {
+    this.root.apply {
+      val jindra = addUserAccount {
+        self {
+          username = "jindra"
+        }
+      }
+      val vojta = addUserAccount {
+        self {
+          username = "vojta"
+        }
+      }
+      projectBuilder.apply {
+        addPermission {
+          self {
+            project = projectBuilder.self
+            user = jindra.self
+            type = Permission.ProjectPermissionType.TRANSLATE
+          }
+        }
+        addPermission {
+          self {
+            project = projectBuilder.self
+            user = vojta.self
+            type = Permission.ProjectPermissionType.VIEW
+          }
+        }
+        addKey {
+          self.name = "C key"
+          addTranslation {
+            self {
+              key = this@addKey.self
+              language = englishLanguage
+              text = "Bla translation"
+              state = TranslationState.REVIEWED
+            }
+            firstComment = addComment {
+              self {
+                text = "First comment"
+                author = jindra.self
+              }
+            }.self
+
+            secondComment = addComment {
+              self {
+                text = "Second comment"
+              }
+            }.self
+          }.self
+        }.self
+
+        addKey {
+          self.name = "D key"
+          addTranslation {
+            self {
+              key = this@addKey.self
+              language = englishLanguage
+              text = "Bla translation"
+              state = TranslationState.REVIEWED
+            }
+            (1..50).forEach {
+              addComment {
+                self {
+                  text = "comment $it"
+                  author = jindra.self
+                }
+              }
+            }
+          }.self
+        }.self
+      }
+    }
   }
 }
