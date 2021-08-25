@@ -1,3 +1,13 @@
+# [1.0.0-alpha.118](https://github.com/tolgee/server/compare/v1.0.0-alpha.117...v1.0.0-alpha.118) (2021-08-25)
+
+
+### Features
+
+* **server:** Add option to leave project TG-220 ([cf58c4e](https://github.com/tolgee/server/commit/cf58c4e1eefd743c976d55ca596103e8a8aeb633))
+* Add comment count to translation view TG-253 ([191d5f7](https://github.com/tolgee/server/commit/191d5f7e3468270b0a8568de5fe0373329e5a441))
+* Enable comment not existing translation TG-252 ([bc65237](https://github.com/tolgee/server/commit/bc652373e98c5bcbb64803134c070b977107f57d))
+* Refactor loading - put it on top like github and use it globally TG-110 ([a0143ab](https://github.com/tolgee/server/commit/a0143ab03d91a68418d5d63f78d187e4e36578fe))
+
 # [1.0.0-alpha.117](https://github.com/tolgee/server/compare/v1.0.0-alpha.116...v1.0.0-alpha.117) (2021-08-23)
 
 
