@@ -104,6 +104,18 @@ class TranslationService(
     return find(key, language).orElseGet { builder().language(language).key(key).build() }
   }
 
+  fun getOrCreate(keyId: Long, languageId: Long): Translation {
+    return translationRepository.findOneByKeyIdAndLanguageId(keyId, languageId)
+      ?: let {
+        val key = keyService.get(keyId).orElseThrow { NotFoundException() }
+        val language = languageService.findById(languageId).orElseThrow { NotFoundException() }
+        Translation().apply {
+          this.key = key
+          this.language = language
+        }
+      }
+  }
+
   fun find(key: Key, language: Language): Optional<Translation> {
     return translationRepository.findOneByKeyAndLanguage(key, language)
   }

@@ -7,16 +7,20 @@ package io.tolgee.api.v2.controllers.translation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import io.tolgee.api.v2.hateoas.translations.TranslationModelAssembler
 import io.tolgee.api.v2.hateoas.translations.comments.TranslationCommentModel
 import io.tolgee.api.v2.hateoas.translations.comments.TranslationCommentModelAssembler
+import io.tolgee.api.v2.hateoas.translations.comments.TranslationWithCommentModel
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.TranslationCommentDto
+import io.tolgee.dtos.request.TranslationCommentWithLangKeyDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.enums.TranslationCommentState
+import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment
 import io.tolgee.security.AuthenticationFacade
@@ -41,8 +45,8 @@ import javax.validation.Valid
 @CrossOrigin(origins = ["*"])
 @RequestMapping(
   value = [
-    "/v2/projects/{projectId:[0-9]+}/translations/{translationId}/comments",
-    "/v2/projects/translations/{translationId}/comments"
+    "/v2/projects/{projectId:[0-9]+}/translations/",
+    "/v2/projects/translations/"
   ]
 )
 @Tags(
@@ -57,10 +61,11 @@ class TranslationCommentController(
   private val pagedResourcesAssembler: PagedResourcesAssembler<TranslationComment>,
   private val translationCommentModelAssembler: TranslationCommentModelAssembler,
   private val authenticationFacade: AuthenticationFacade,
-  private val securityService: SecurityService
+  private val securityService: SecurityService,
+  private val translationModelAssembler: TranslationModelAssembler
 ) {
 
-  @GetMapping(value = [""])
+  @GetMapping(value = ["{translationId}/comments"])
   @AccessWithAnyProjectPermission
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
   @Operation(summary = "Returns translation comments of translation")
@@ -76,7 +81,7 @@ class TranslationCommentController(
     )
   }
 
-  @GetMapping(value = ["/{commentId}"])
+  @GetMapping(value = ["{translationId}/comments/{commentId}"])
   @AccessWithAnyProjectPermission
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
   @Operation(summary = "Returns single translation comment")
@@ -86,7 +91,7 @@ class TranslationCommentController(
     return translationCommentModelAssembler.toModel(comment)
   }
 
-  @PutMapping(value = ["/{commentId}"])
+  @PutMapping(value = ["{translationId}/comments/{commentId}"])
   @AccessWithAnyProjectPermission
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @Operation(summary = "Updates single translation comment")
@@ -99,7 +104,7 @@ class TranslationCommentController(
     return translationCommentModelAssembler.toModel(comment)
   }
 
-  @PutMapping(value = ["/{commentId}/set-state/{state}"])
+  @PutMapping(value = ["{translationId}/comments/{commentId}/set-state/{state}"])
   @Operation(summary = "Sets state of translation comment")
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
@@ -113,7 +118,7 @@ class TranslationCommentController(
     return translationCommentModelAssembler.toModel(comment)
   }
 
-  @DeleteMapping(value = ["/{commentId}"])
+  @DeleteMapping(value = ["{translationId}/comments/{commentId}"])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @Operation(summary = "Deletes the translation comment")
@@ -133,7 +138,37 @@ class TranslationCommentController(
     translationCommentService.delete(comment)
   }
 
-  @PostMapping(value = [""])
+  @PostMapping(value = ["/create-comment"])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @ResponseStatus(HttpStatus.CREATED)
+  @Operation(summary = "Creates a translation comment. Empty translation is stored, when not exists.")
+  fun create(
+    @RequestBody @Valid dto: TranslationCommentWithLangKeyDto
+  ): ResponseEntity<TranslationWithCommentModel> {
+    val translation = translationService.getOrCreate(dto.keyId, dto.languageId)
+    if (translation.key?.project?.id != projectHolder.project.id) {
+      throw BadRequestException(Message.KEY_NOT_FROM_PROJECT)
+    }
+
+    if (translation.language?.project?.id != projectHolder.project.id) {
+      throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
+    }
+
+    translation.state = TranslationState.UNTRANSLATED
+    translationService.saveTranslation(translation)
+
+    val comment = translationCommentService.create(dto, translation, authenticationFacade.userAccountEntity)
+    return ResponseEntity(
+      TranslationWithCommentModel(
+        comment = translationCommentModelAssembler.toModel(comment),
+        translation = translationModelAssembler.toModel(translation)
+      ),
+      HttpStatus.CREATED
+    )
+  }
+
+  @PostMapping(value = ["{translationId}/comments"])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @ResponseStatus(HttpStatus.CREATED)

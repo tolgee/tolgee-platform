@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.dtos.request.ITranslationCommentDto
 import io.tolgee.dtos.request.TranslationCommentDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
@@ -20,7 +21,7 @@ class TranslationCommentService(
 ) {
   @Transactional
   fun create(
-    dto: TranslationCommentDto,
+    dto: ITranslationCommentDto,
     translation: Translation,
     author: UserAccount
   ): TranslationComment {
