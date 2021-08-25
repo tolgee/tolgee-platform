@@ -50,6 +50,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
             node("id").isValidId
             node("text").isEqualTo("Z translation")
             node("state").isEqualTo("REVIEWED")
+            node("commentCount").isEqualTo(1)
           }
           node("translations").isObject.doesNotContainKey("en")
         }
@@ -60,6 +61,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
             node("id").isValidId
             node("text").isEqualTo("I am key 18's german translation.")
             node("state").isEqualTo("TRANSLATED")
+            node("commentCount").isEqualTo(0)
           }
           node("translations.en") {
             node("id").isValidId

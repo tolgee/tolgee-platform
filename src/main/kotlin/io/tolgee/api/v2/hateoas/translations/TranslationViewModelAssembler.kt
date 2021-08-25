@@ -6,10 +6,10 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.stereotype.Component
 
 @Component
-class TranslationViewModelAssembler : RepresentationModelAssemblerSupport<TranslationView, TranslationModel>(
-  V2TranslationsController::class.java, TranslationModel::class.java
+class TranslationViewModelAssembler : RepresentationModelAssemblerSupport<TranslationView, TranslationViewModel>(
+  V2TranslationsController::class.java, TranslationViewModel::class.java
 ) {
-  override fun toModel(entity: TranslationView): TranslationModel {
-    return TranslationModel(id = entity.id, text = entity.text, state = entity.state)
+  override fun toModel(view: TranslationView): TranslationViewModel {
+    return TranslationViewModel(id = view.id, text = view.text, state = view.state, commentCount = view.commentCount)
   }
 }
