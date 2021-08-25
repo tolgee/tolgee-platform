@@ -74,6 +74,11 @@ class TranslationsTestData {
               )
             }
           }
+          addComment {
+            self {
+              text = "Comment"
+            }
+          }
         }.self
       }.self
 

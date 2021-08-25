@@ -35,6 +35,7 @@ class TranslationsViewBuilder(
   private var translationsTextFields: MutableSet<Expression<String>> = HashSet()
   private lateinit var root: Root<Key>
   private lateinit var screenshotCountExpression: Expression<Long>
+  private lateinit var commentCountExpression: Expression<Long>
   private val havingConditions: MutableSet<Predicate> = HashSet()
   private val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
 
@@ -124,13 +125,18 @@ class TranslationsViewBuilder(
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::id.name] =
         translationId
       groupByExpressions.add(translationId)
-
       val translationTextField = translations.get(Translation_.text)
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::text.name] =
         translationTextField
       val translationStateField = translations.get(Translation_.state)
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::state.name] =
         translationStateField
+
+      val commentsExpression = cb.count(translations.join(Translation_.comments, JoinType.LEFT))
+      selection[
+        KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::commentCount.name
+      ] = commentsExpression
+
       fullTextFields.add(translationTextField)
       translationsTextFields.add(translationTextField)
       applyTranslationFilters(language, translationTextField, translationStateField)

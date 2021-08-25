@@ -25,7 +25,8 @@ class CursorUtilUnitTest {
         "en" to TranslationView(
           1,
           "Super key translated \uD83C\uDF8C",
-          TranslationState.TRANSLATED
+          TranslationState.TRANSLATED,
+          0
         )
       )
     )

@@ -21,7 +21,16 @@ open class KeyWithTranslationsModel(
 
   @Schema(
     description = "Translations object",
-    example = "{\"en\": {\"id\": 100000003, \"text\": \"This is super translation!\" }}"
+    example = """
+    {
+      "en": {
+        "id": 100000003, 
+        "text": "This is super translation!"
+        "state": "TRANSLATED",
+        "commentCount": 1
+      }
+    }
+    """
   )
-  val translations: Map<String, TranslationModel>
+  val translations: Map<String, TranslationViewModel>
 ) : RepresentationModel<KeyWithTranslationsModel>()
