@@ -24,6 +24,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   )
   fun getTranslations(key: Key, project: io.tolgee.model.Project, languages: Collection<Language>): Set<Translation>
   fun findOneByKeyAndLanguage(key: Key, language: Language): Optional<Translation>
+  fun findOneByKeyIdAndLanguageId(key: Long, language: Long): Translation?
 
   @Query(
     """

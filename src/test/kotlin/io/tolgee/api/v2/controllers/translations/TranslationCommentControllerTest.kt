@@ -5,6 +5,7 @@ import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
 import io.tolgee.dtos.request.TranslationCommentDto
+import io.tolgee.dtos.request.TranslationCommentWithLangKeyDto
 import io.tolgee.fixtures.*
 import io.tolgee.model.enums.TranslationCommentState
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -73,6 +74,34 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
       node("author.username").isEqualTo("franta")
       node("createdAt").isNumber.isGreaterThan(BigDecimal(1624985181827))
       node("updatedAt").isNumber.isGreaterThan(BigDecimal(1624985181827))
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creates comment with keyId and languageId`() {
+    performProjectAuthPost(
+      "translations/create-comment",
+      TranslationCommentWithLangKeyDto(
+        keyId = testData.bKey.id,
+        testData.englishLanguage.id,
+        text = "Test",
+        state = TranslationCommentState.RESOLUTION_NOT_NEEDED
+      )
+    ).andIsCreated.andAssertThatJson {
+      node("comment") {
+        node("id").isValidId
+        node("text").isEqualTo("Test")
+        node("state").isEqualTo("RESOLUTION_NOT_NEEDED")
+        node("author.username").isEqualTo("franta")
+        node("createdAt").isNumber.isGreaterThan(BigDecimal(1624985181827))
+        node("updatedAt").isNumber.isGreaterThan(BigDecimal(1624985181827))
+      }
+      node("translation") {
+        node("id").isValidId
+        node("text").isEqualTo(null)
+        node("state").isEqualTo("UNTRANSLATED")
+      }
     }
   }
 

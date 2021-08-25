@@ -19,6 +19,7 @@ class TranslationCommentsTestData {
   var user: UserAccount
   var pepa: UserAccount
   lateinit var aKey: Key
+  lateinit var bKey: Key
   lateinit var projectBuilder: DataBuilders.ProjectBuilder
   lateinit var translation: Translation
 
@@ -85,6 +86,11 @@ class TranslationCommentsTestData {
           }.self
         }.self
       }.self
+
+      bKey = addKey {
+        self.name = "B key"
+      }.self
+
       projectBuilder = this
     }.self
   }
