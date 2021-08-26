@@ -1,3 +1,10 @@
+# [1.0.0-alpha.119](https://github.com/tolgee/server/compare/v1.0.0-alpha.118...v1.0.0-alpha.119) (2021-08-26)
+
+
+### Bug Fixes
+
+* Fix comment bugs TG-255 ([2808f98](https://github.com/tolgee/server/commit/2808f98d2f28c109f942d6469654dca236e43068))
+
 # [1.0.0-alpha.118](https://github.com/tolgee/server/compare/v1.0.0-alpha.117...v1.0.0-alpha.118) (2021-08-25)
 
 
