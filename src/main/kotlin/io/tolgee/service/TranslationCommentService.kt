@@ -60,6 +60,7 @@ class TranslationCommentService(
     return translationCommentRepository.getPagedByTranslation(translation, pageable)
   }
 
+  @Transactional
   fun delete(entity: TranslationComment) {
     deleteByIds(listOf(entity.id))
   }

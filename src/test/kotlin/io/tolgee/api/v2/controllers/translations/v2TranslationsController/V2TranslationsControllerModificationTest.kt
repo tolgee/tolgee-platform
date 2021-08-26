@@ -92,7 +92,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
 
   @ProjectJWTAuthTestMethod
   @Test
-  fun `removes translations if null value provided`() {
+  fun `sets untranslated state if null value provided`() {
     assertThat(translationService.find(testData.aKeyGermanTranslation.id)).isNotNull
     performProjectAuthPut(
       "/translations",
@@ -103,11 +103,14 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
       .andAssertThatJson {
         node("translations.en.text").isEqualTo("English")
         node("translations.en.id").isValidId
+        node("translations.de.text").isEqualTo(null)
+        node("translations.de.state").isEqualTo("UNTRANSLATED")
         node("keyId").isValidId
         node("keyName").isEqualTo("A key")
       }
 
-    assertThat(translationService.find(testData.aKeyGermanTranslation.id)).isNull()
+    assertThat(translationService.find(testData.aKeyGermanTranslation.id)!!.state)
+      .isEqualTo(TranslationState.UNTRANSLATED)
   }
 
   @ProjectJWTAuthTestMethod
@@ -123,6 +126,23 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
       node("translations.en.id").isValidId
       node("keyId").isValidId
       node("keyName").isEqualTo("Super ultra cool new key")
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `sets translated state when non blank text is provided`() {
+    testData.addUntranslated()
+    testDataService.saveTestData(testData.root)
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "lala", mutableMapOf("en" to "English")
+      )
+    ).andIsOk.andAssertThatJson {
+      node("translations.en.text").isEqualTo("English")
+      node("translations.en.id").isValidId
+      node("translations.en.state").isEqualTo("TRANSLATED")
     }
   }
 }

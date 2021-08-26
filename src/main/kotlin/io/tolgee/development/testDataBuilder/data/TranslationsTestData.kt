@@ -328,4 +328,58 @@ class TranslationsTestData {
       }
     }
   }
+
+  fun generateCommentTestData() {
+    root.data.projects[0].apply {
+      addKey {
+        self { name = "ee" }
+        addTranslation {
+          self {
+            key = this@addKey.self
+            language = germanLanguage
+            text = "d"
+            (1..5).forEach {
+              addComment {
+                self {
+                  text = "Comment $it"
+                }
+              }
+            }
+          }
+        }
+        addTranslation {
+          self {
+            key = this@addKey.self
+            language = englishLanguage
+            text = "d"
+            (1..3).forEach {
+              addComment {
+                self {
+                  text = "Comment $it"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  fun addUntranslated() {
+    return projectBuilder.run {
+      addKey {
+        self {
+          name = "lala"
+        }
+        addTranslation {
+          self {
+            key = this@addKey.self
+            text = null
+            language = englishLanguage
+            state = TranslationState.UNTRANSLATED
+          }
+        }.self
+      }
+    }
+  }
 }

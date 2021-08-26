@@ -168,6 +168,9 @@ class TranslationService(
   fun setTranslation(key: Key, language: Language, text: String?): Translation {
     val translation = getOrCreate(key, language)
     translation.text = text
+    if (translation.state == TranslationState.UNTRANSLATED && !translation.text.isNullOrEmpty()) {
+      translation.state = TranslationState.TRANSLATED
+    }
     saveTranslation(translation)
     return translation
   }
@@ -190,8 +193,7 @@ class TranslationService(
   fun setForKey(key: Key, translations: Map<String, String?>): Map<String, Translation> {
     return translations.entries.associate { (languageTag, value) ->
       if (value == null || value.isEmpty()) {
-        deleteIfExists(key, languageTag)
-        return@associate languageTag to null
+        return@associate languageTag to setUntranslatedStateIfExists(key, languageTag)
       }
       languageTag to setTranslation(key, languageTag, value)
     }.filterValues { it != null }.mapValues { it.value as Translation }
@@ -204,6 +206,18 @@ class TranslationService(
       .ifPresent { entity: Translation ->
         translationsSocketIoModule.onTranslationsDeleted(listOf(entity))
         translationRepository.delete(entity)
+      }
+  }
+
+  fun setUntranslatedStateIfExists(key: Key, languageTag: String): Translation? {
+    val language = languageService.findByTag(languageTag, key.project!!)
+      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
+    return translationRepository.findOneByKeyAndLanguage(key, language).orElse(null)
+      ?.let { entity: Translation ->
+        entity.state = TranslationState.UNTRANSLATED
+        entity.text = null
+        saveTranslation(entity)
+        entity
       }
   }
 

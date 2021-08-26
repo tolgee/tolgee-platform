@@ -73,6 +73,16 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     }
   }
 
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns correct comment counts`() {
+    testData.generateCommentTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations").andPrettyPrint.andIsOk.andAssertThatJson {
+    }
+  }
+
   @ProjectJWTAuthTestMethod
   @Test
   fun `works with cursor`() {
