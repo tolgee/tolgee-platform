@@ -47,9 +47,7 @@ describe('Import errors', () => {
       files.push('import/simple.json');
     }
 
-    cy.get('[data-cy=dropzone]').attachFile(files, {
-      subjectType: 'drag-n-drop',
-    });
+    gcy('import-file-input').attachFile(files);
     assertMessage('Cannot add more then 100 languages');
   });
 
@@ -59,11 +57,10 @@ describe('Import errors', () => {
         login('franta');
         visitImport(res.body.id);
       });
-      cy.wait(100);
-      cy.get('[data-cy=dropzone]').attachFile(
-        { filePath: 'import/error.jsn', fileName: 'error.json' },
-        { subjectType: 'drag-n-drop' }
-      );
+      gcy('import-file-input').attachFile({
+        filePath: 'import/error.jsn',
+        fileName: 'error.json',
+      });
     });
 
     it('shows error for bad file', () => {

@@ -54,17 +54,25 @@ describe('Import with lot of data', () => {
       .should('be.visible');
   });
 
-  it('Shows correct result', () => {
-    getLanguageRow('another.json (fr)')
-      .findDcy('import-result-show-all-translations-button')
-      .click();
-    getShowDataDialog().should('be.visible');
-    assertInResultDialog('this_is_key_1');
-    assertInResultDialog('I am import translation 1');
-    assertInResultDialog('this_is_key_50');
-    contextGoToPage(getShowDataDialog(), 6);
-    assertInResultDialog('this_is_key_300');
-  });
+  it(
+    'Shows correct result',
+    {
+      retries: {
+        runMode: 2,
+      },
+    },
+    () => {
+      getLanguageRow('another.json (fr)')
+        .findDcy('import-result-show-all-translations-button')
+        .click();
+      getShowDataDialog().should('be.visible');
+      assertInResultDialog('this_is_key_1');
+      assertInResultDialog('I am import translation 1');
+      assertInResultDialog('this_is_key_50');
+      contextGoToPage(getShowDataDialog(), 6);
+      assertInResultDialog('this_is_key_300');
+    }
+  );
 
   it('Searches', () => {
     getLanguageRow('another.json (fr)')

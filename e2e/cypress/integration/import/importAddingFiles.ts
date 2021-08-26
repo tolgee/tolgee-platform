@@ -21,7 +21,7 @@ describe('Import Adding files', () => {
     });
   });
 
-  it('uploads .po', () => {
+  it('uploads .po with dropzone', () => {
     cy.get('[data-cy=dropzone]').attachFile('import/po/example.po', {
       subjectType: 'drag-n-drop',
     });
@@ -34,14 +34,11 @@ describe('Import Adding files', () => {
   });
 
   it('uploads multiple xliffs', () => {
-    cy.get('[data-cy=dropzone]').attachFile(
-      [
-        'import/xliff/larger.xlf',
-        'import/xliff/example.xliff',
-        'import/xliff/error_example.xliff',
-      ],
-      { subjectType: 'drag-n-drop' }
-    );
+    gcy('import-file-input').attachFile([
+      'import/xliff/larger.xlf',
+      'import/xliff/example.xliff',
+      'import/xliff/error_example.xliff',
+    ]);
 
     gcy('import-result-total-count-cell', { timeout: 10000 }).should('exist');
     getLanguageRow('larger.xlf (en)').should('contain.text', '1151');
@@ -51,26 +48,33 @@ describe('Import Adding files', () => {
       .should('contain.text', '176');
   });
 
-  it('has valid xliff errors', () => {
-    cy.get('[data-cy=dropzone]').attachFile(
-      'import/xliff/error_example.xliff',
-      { subjectType: 'drag-n-drop' }
-    );
+  it(
+    'has valid xliff errors',
+    {
+      retries: {
+        runMode: 3,
+      },
+    },
+    () => {
+      gcy('import-file-input').attachFile('import/xliff/error_example.xliff');
 
-    gcy('import-result-file-cell')
-      .findDcy('import-result-file-warnings')
-      .should('contain.text', '4');
-    gcy('import-result-file-cell').findDcy('import-file-issues-button').click();
-    getFileIssuesDialog()
-      .contains('Target translation not provided (key name: vpn.main.back)')
-      .should('be.visible');
-    getFileIssuesDialog()
-      .contains(
-        'Id attribute of translation not provided ' +
-          '(File: ../src/platforms/android/androidauthenticationview.qml)'
-      )
-      .should('be.visible');
-  });
+      gcy('import-result-file-cell')
+        .findDcy('import-result-file-warnings')
+        .should('contain.text', '4');
+      gcy('import-result-file-cell')
+        .findDcy('import-file-issues-button')
+        .click();
+      getFileIssuesDialog()
+        .contains('Target translation not provided (key name: vpn.main.back)')
+        .should('be.visible');
+      getFileIssuesDialog()
+        .contains(
+          'Id attribute of translation not provided ' +
+            '(File: ../src/platforms/android/androidauthenticationview.qml)'
+        )
+        .should('be.visible');
+    }
+  );
 
   it('dropzone highlights on drag over', () => {
     cy.fixture('import/simple.json').then((json) => {
