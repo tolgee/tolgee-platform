@@ -116,23 +116,24 @@ class TranslationsViewBuilder(
     for (language in languages) {
       val languagesJoin = project.join(Project_.languages)
       languagesJoin.on(cb.equal(languagesJoin.get(Language_.tag), language.tag))
-      val translations = root.join(Key_.translations, JoinType.LEFT)
-      translations.on(cb.equal(translations.get(Translation_.language), languagesJoin))
+      val translation = root.join(Key_.translations, JoinType.LEFT)
+      translation.on(cb.equal(translation.get(Translation_.language), languagesJoin))
       val languageTag = languagesJoin.get(Language_.tag)
       selection[KeyWithTranslationsView::translations.name + "." + language.tag] = languageTag
       groupByExpressions.add(languageTag)
-      val translationId = translations.get(Translation_.id)
+      val translationId = translation.get(Translation_.id)
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::id.name] =
         translationId
       groupByExpressions.add(translationId)
-      val translationTextField = translations.get(Translation_.text)
+      val translationTextField = translation.get(Translation_.text)
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::text.name] =
         translationTextField
-      val translationStateField = translations.get(Translation_.state)
+      val translationStateField = translation.get(Translation_.state)
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::state.name] =
         translationStateField
 
-      val commentsExpression = cb.count(translations.join(Translation_.comments, JoinType.LEFT))
+      val commentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
+      val commentsExpression = cb.countDistinct(commentsJoin)
       selection[
         KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::commentCount.name
       ] = commentsExpression
