@@ -81,24 +81,32 @@ describe('Screenshots', () => {
       });
   });
 
-  it('uploads multiple', () => {
-    getCameraButton(1).click();
-    cy.contains('No screenshots have been added yet.');
-    cy.get('[data-cy=dropzone]')
-      .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
-      .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
-      .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' });
-    cy.xpath("//img[@alt='Screenshot']")
-      .should('be.visible')
-      .and(($img) => {
-        expect($img.length).to.be.equal(3);
-        for (let i = 0; i < $img.length; i++) {
-          expect(($img[i] as HTMLImageElement).naturalWidth).to.be.greaterThan(
-            0
-          );
-        }
-      });
-  });
+  it(
+    'uploads multiple',
+    {
+      retries: {
+        runMode: 3,
+      },
+    },
+    () => {
+      getCameraButton(1).click();
+      cy.contains('No screenshots have been added yet.');
+      cy.get('[data-cy=dropzone]')
+        .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
+        .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' })
+        .attachFile('screenshots/test_1.png', { subjectType: 'drag-n-drop' });
+      cy.xpath("//img[@alt='Screenshot']")
+        .should('be.visible')
+        .and(($img) => {
+          expect($img.length).to.be.equal(3);
+          for (let i = 0; i < $img.length; i++) {
+            expect(
+              ($img[i] as HTMLImageElement).naturalWidth
+            ).to.be.greaterThan(0);
+          }
+        });
+    }
+  );
 
   it('images and plus button is visible', () => {
     addScreenshot(project.id, 'Cool key 04', 'screenshots/test_1.png').then(
@@ -144,7 +152,7 @@ describe('Screenshots', () => {
   it('deletes screenshot', () => {
     const promises = [];
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 5; i++) {
       promises.push(
         addScreenshot(project.id, 'Cool key 02', 'screenshots/test_1.png')
       );
@@ -153,7 +161,7 @@ describe('Screenshots', () => {
     Cypress.Promise.all(promises).then(() => {
       getCameraButton(2).click();
 
-      for (let i = 10; i >= 1; i--) {
+      for (let i = 5; i >= 1; i--) {
         cy.xpath("//img[@alt='Screenshot']")
           .should('be.visible')
           .and(($img) => {
