@@ -30,6 +30,7 @@ const useStyles = makeStyles((theme) => {
       position: 'relative',
       display: 'grid',
       gridTemplateColumns: '40px 60px 1fr',
+      gridTemplateRows: '1fr auto',
       gridTemplateAreas: `
         "flag     language translation"
         "controls controls controls   "
