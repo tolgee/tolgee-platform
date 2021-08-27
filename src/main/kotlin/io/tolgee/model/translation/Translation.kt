@@ -19,7 +19,7 @@ import javax.validation.constraints.NotNull
   ]
 )
 @Audited
-data class Translation(
+class Translation(
   @Column(columnDefinition = "text")
   var text: String? = null
 ) : StandardAuditModel() {
