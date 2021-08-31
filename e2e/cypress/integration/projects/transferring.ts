@@ -55,7 +55,10 @@ describe('Projects Basics', () => {
 
 const openTransferDialog = (projectName: string) => {
   enterProjectSettings(projectName);
-  gcy('project-settings-transfer-button').should('contain', 'Transfer').click();
+  gcy('project-settings-transfer-button')
+    .should('contain', 'Transfer')
+    .wait(100)
+    .click();
 };
 
 const transferProject = (projectName: string, newOwner: string) => {

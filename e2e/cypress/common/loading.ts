@@ -3,7 +3,7 @@ export const expectGlobalLoading = () => {
   return cy.gcy('global-loading').should('not.exist');
 };
 
-export const waitForGlobalLoading = () => {
-  cy.wait(100);
+export const waitForGlobalLoading = (waitTime = 100) => {
+  cy.wait(waitTime);
   return cy.gcy('global-loading').should('not.exist');
 };

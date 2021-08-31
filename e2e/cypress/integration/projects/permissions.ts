@@ -201,7 +201,7 @@ const assertOtherMenuItemsVisible = () => {
 const validateManagePermissions = (projectName: string) => {
   visitList();
   enterProjectSettings(projectName);
-  cy.gcy('global-form-save-button').click();
+  cy.gcy('global-form-save-button').wait(100).click();
   assertMessage('Project settings successfully saved');
   enterProject(projectName);
   MANAGE_PROJECT_ITEMS.forEach((item) => {
