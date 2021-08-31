@@ -1,9 +1,11 @@
 import { gcy } from './shared';
 import { HOST } from './constants';
+import { waitForGlobalLoading } from './loading';
 
 export const enterProjectSettings = (projectName: string) => {
   visitList();
   selectInProjectMoreMenu(projectName, 'project-settings-button');
+  waitForGlobalLoading();
 };
 
 export const selectInProjectMoreMenu = (

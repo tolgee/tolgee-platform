@@ -24,6 +24,8 @@ describe('Import errors', () => {
     });
 
     it('Does not apply when row not resolved', () => {
+      gcy('import_apply_import_button').should('be.visible');
+      cy.wait(100);
       gcy('import_apply_import_button').click();
       gcy('import-conflicts-not-resolved-dialog').should(
         'contain',
