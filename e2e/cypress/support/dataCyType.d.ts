@@ -146,6 +146,7 @@ declare namespace DataCy {
         "translations-comments-input" |
         "translations-comments-load-more-button" |
         "translations-delete-button" |
+        "translations-filter-clear-all" |
         "translations-filter-option" |
         "translations-filter-select" |
         "translations-filters-subheader" |
