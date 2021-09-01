@@ -147,6 +147,28 @@ class TranslationsTestData {
           }
         }
       }
+      addKey {
+        self { name = "state test key 4" }
+        addTranslation {
+          self {
+            key = this@addKey.self
+            language = englishLanguage
+            text = "aa"
+            state = TranslationState.NEEDS_REVIEW
+          }
+        }
+      }
+      addKey {
+        self { name = "state test key 5" }
+        addTranslation {
+          self {
+            key = this@addKey.self
+            language = englishLanguage
+            text = "aa"
+            state = TranslationState.MACHINE_TRANSLATED
+          }
+        }
+      }
     }
   }
 

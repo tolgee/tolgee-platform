@@ -75,6 +75,7 @@ type FiltersType = Pick<
   | 'filterUntranslatedAny'
   | 'filterTranslatedInLang'
   | 'filterUntranslatedInLang'
+  | 'filterState'
 >;
 
 type SetTranslationStatePayload = {

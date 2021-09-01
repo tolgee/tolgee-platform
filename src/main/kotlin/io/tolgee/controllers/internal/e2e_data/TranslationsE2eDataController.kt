@@ -51,6 +51,7 @@ class TranslationsE2eDataController(
   fun generateForFilters(): Project {
     val testData = TranslationsTestData()
     testData.addKeysWithScreenshots()
+    testData.addTranslationsWithStates()
     testDataService.saveTestData(testData.root)
     return testData.project
   }
