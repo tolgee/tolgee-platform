@@ -1,3 +1,17 @@
+# [1.0.0-alpha.120](https://github.com/tolgee/server/compare/v1.0.0-alpha.119...v1.0.0-alpha.120) (2021-09-03)
+
+
+### Bug Fixes
+
+* **TranslationCell:** fix controls at the bottom of the cell ([016fea5](https://github.com/tolgee/server/commit/016fea5e4e50a392eca77eb003e04007d4e1ad0b))
+* Server getKeyTranslations ignores translation with same text TG-208 ([91662a4](https://github.com/tolgee/server/commit/91662a478394dbfea6723ab9be9d05595331f507))
+
+
+### Features
+
+* **ui:** Filters by translation state TG-234 ([98c5448](https://github.com/tolgee/server/commit/98c5448b8a1bf0cbe9f3bcb90e0b4706370f23d7))
+* Translations - comments TG-186 ([c7b06f5](https://github.com/tolgee/server/commit/c7b06f53dc2d1e0629193e97743d7777c78bf3e5))
+
 # [1.0.0-alpha.119](https://github.com/tolgee/server/compare/v1.0.0-alpha.118...v1.0.0-alpha.119) (2021-08-26)
 
 
