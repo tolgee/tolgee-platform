@@ -12,7 +12,6 @@ import { UserMenu } from '../security/UserMenu';
 import { useConfig } from 'tg.hooks/useConfig';
 
 const drawerWidth = 240;
-export const TOP_BAR_HEIGHT = 64;
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -21,6 +20,7 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
+    ...theme.mixins.toolbar,
   },
   appBarShift: {
     marginLeft: drawerWidth,

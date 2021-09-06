@@ -5,7 +5,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import clsx from 'clsx';
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar';
 
 const drawerWidth = 240;
 
@@ -28,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
   drawerFixed: {
     position: 'fixed',
-    top: TOP_BAR_HEIGHT,
+    top: theme.mixins.toolbar.minHeight,
     bottom: 0,
     overscrollBehavior: 'contain',
   },
