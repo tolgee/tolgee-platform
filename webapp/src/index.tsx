@@ -103,6 +103,11 @@ const theme = createTheme({
       default: 'rgb(255, 255, 255)',
     },
   },
+  mixins: {
+    toolbar: {
+      minHeight: 52,
+    },
+  },
   overrides: {
     MuiTooltip: {
       tooltip: {

@@ -5,19 +5,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import { TopBar } from './TopBar';
 
 const useStyles = makeStyles((theme) => ({
-  // root: {
-  //   display: 'flex',
-  //   height: '100vh',
-  //   flexDirection: 'column',
-  //   overflowY: 'hidden',
-  //   alignItems: 'stretch',
-  // },
-  // content: {
-  //   flexGrow: 1,
-  //   position: 'relative',
-  //   display: 'flex',
-  //   overflowY: 'auto',
-  // },
   appBarSpacer: theme.mixins.toolbar,
 }));
 
