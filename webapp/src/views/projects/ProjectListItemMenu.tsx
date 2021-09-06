@@ -10,6 +10,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { components } from 'tg.service/apiSchema.generated';
 import { confirmation } from 'tg.hooks/confirmation';
+import { stopBubble } from 'tg.fixtures/eventHandler';
 
 const messaging = container.resolve(MessageService);
 
@@ -50,17 +51,18 @@ export const ProjectListItemMenu: FC<{
       <Menu
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center',
+          horizontal: 'right',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'left',
+          horizontal: 'right',
         }}
         id="project-item-menu"
         anchorEl={anchorEl}
         getContentAnchorEl={null}
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEl(null)}
+        onClick={stopBubble()}
       >
         {props.computedPermissions === ProjectPermissionType.MANAGE && (
           <MenuItem
@@ -70,7 +72,7 @@ export const ProjectListItemMenu: FC<{
             })}
             data-cy="project-settings-button"
           >
-            <T>project_settings_button</T>
+            <T noWrap>project_settings_button</T>
           </MenuItem>
         )}
         <MenuItem
@@ -119,7 +121,7 @@ export const ProjectListItemMenu: FC<{
             });
           }}
         >
-          <T>project_leave_button</T>
+          <T noWrap>project_leave_button</T>
         </MenuItem>
       </Menu>
     </>

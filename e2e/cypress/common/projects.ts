@@ -25,7 +25,7 @@ export const selectInProjectMoreMenu = (
 
 export const enterProject = (projectName: string) => {
   visitList();
-  gcy('global-paginated-list').contains(projectName).closest('a').click();
+  gcy('global-paginated-list').contains(projectName).click();
   gcy('global-base-view-content').should('be.visible');
 };
 

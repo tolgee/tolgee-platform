@@ -7,6 +7,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
+import { useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
@@ -16,11 +17,12 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 import { useConfig } from 'tg.hooks/useConfig';
 import { TranslationIcon } from 'tg.component/CustomIcons';
 import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
+import { stopBubble } from 'tg.fixtures/eventHandler';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     padding: `${theme.spacing(3)}px ${theme.spacing(2)}px`,
-    //cursor: 'pointer',
+    cursor: 'pointer',
     overflow: 'hidden',
     '&:hover': {
       backgroundColor: theme.palette.grey['50'],
@@ -32,9 +34,6 @@ const useStyles = makeStyles((theme) => ({
   projectName: {
     fontSize: 16,
     fontWeight: 'bold',
-    '&:hover': {
-      textDecoration: 'underline',
-    },
   },
   projectLink: {
     textDecoration: 'none',
@@ -64,33 +63,34 @@ const DashboardProjectListItem = (
   const translationsLink = LINKS.PROJECT_TRANSLATIONS.build({
     [PARAMS.PROJECT_ID]: p.id,
   });
+  const history = useHistory();
 
   return (
     <Box
       className={classes.root}
-      // onClick={() =>
-      //   redirect(LINKS.PROJECT_TRANSLATIONS, {
-      //     [PARAMS.PROJECT_ID]: p.id,
-      //   })
-      // }
+      onClick={() =>
+        history.push(
+          LINKS.PROJECT_TRANSLATIONS.build({
+            [PARAMS.PROJECT_ID]: p.id,
+          })
+        )
+      }
       data-cy="dashboard-projects-list-item"
     >
       <Grid container spacing={3}>
         <Grid item lg={2} md={2} sm={4} xs={9}>
-          <Link className={classes.projectLink} to={translationsLink}>
-            <Typography variant={'h3'} className={classes.projectName}>
-              {p.name}
-            </Typography>
-            {config.authentication && (
-              <Box mt={0.5}>
-                <Chip
-                  data-cy="project-list-owner"
-                  size="small"
-                  label={p.organizationOwnerName || p.userOwner?.name}
-                />
-              </Box>
-            )}
-          </Link>
+          <Typography variant={'h3'} className={classes.projectName}>
+            {p.name}
+          </Typography>
+          {config.authentication && (
+            <Box mt={0.5}>
+              <Chip
+                data-cy="project-list-owner"
+                size="small"
+                label={p.organizationOwnerName || p.userOwner?.name}
+              />
+            </Box>
+          )}
         </Grid>
         <Grid item lg={1} md={1} sm={1} xs={3} className={classes.centered}>
           <Typography className={classes.keyCount}>
@@ -105,7 +105,7 @@ const DashboardProjectListItem = (
         <Grid item lg={2} md={2} sm={9} xs={9}>
           <Grid container data-cy="project-list-languages">
             {p.languages.map((l) => (
-              <Grid key={l.id} item>
+              <Grid key={l.id} item onClick={stopBubble()}>
                 <Tooltip title={`${l.name} | ${l.originalName}`}>
                   <Box m={0.125} data-cy="project-list-languages-item">
                     <CircledLanguageIcon
@@ -125,6 +125,7 @@ const DashboardProjectListItem = (
               title={t('project_list_translations_button', undefined, true)}
             >
               <IconButton
+                onClick={stopBubble()}
                 aria-label={t('project_list_translations_button')}
                 component={Link}
                 to={translationsLink}
