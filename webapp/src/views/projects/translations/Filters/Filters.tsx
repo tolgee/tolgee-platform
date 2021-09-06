@@ -124,6 +124,8 @@ export const Filters = () => {
     if (NON_EXCLUSIVE_FILTERS.includes(filterName)) {
       if (filtersObj[filterName]?.includes(filterValue)) {
         newValue = filtersObj[filterName].filter((v) => v !== filterValue);
+        // avoid keeping empty array, as it would stay in url
+        newValue = newValue.length ? newValue : undefined;
       } else {
         newValue = [...(filtersObj[filterName] || []), filterValue];
       }
