@@ -12,6 +12,7 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { useTranslationsInfinite } from './useTranslationsInfinite';
 import { useEdit, EditType, SetEditType } from './useEdit';
 import { StateType } from 'tg.constants/translationStates';
+import { useQueryState } from 'tg.hooks/useQueryState';
 
 export type AfterCommand = 'EDIT_NEXT' | 'NEW_EMPTY_KEY';
 
@@ -41,7 +42,7 @@ type ActionType =
   | { type: 'REMOVE_TAG'; payload: RemoveTagPayload }
   | { type: 'UPDATE_TRANSLATION'; payload: UpdateTranslationPayolad };
 
-export type ViewType = 'TABLE' | 'LIST';
+export type ViewType = 'LIST' | 'TABLE';
 
 type UpdateTranslationPayolad = {
   keyId: number;
@@ -121,7 +122,7 @@ export const TranslationsContextProvider: React.FC<{
 }> = (props) => {
   const dispatchRef = useRef(null as any as (action: ActionType) => void);
   const [selection, setSelection] = useState<number[]>([]);
-  const [view, setView] = useState('LIST' as ViewType);
+  const [view, setView] = useQueryState('view', 'LIST');
   const [initialLangs, setInitialLangs] = useState<string[] | null | undefined>(
     null
   );
@@ -189,7 +190,7 @@ export const TranslationsContextProvider: React.FC<{
   dispatchRef.current = async (action: ActionType) => {
     switch (action.type) {
       case 'SET_SEARCH':
-        translations.updateQuery({ search: action.payload });
+        translations.updateSearch(action.payload);
         handleTranslationsReset();
         return;
       case 'SET_FILTERS':
@@ -477,13 +478,13 @@ export const TranslationsContextProvider: React.FC<{
             createKey.isLoading,
           isFetchingMore: translations.isFetchingNextPage,
           hasMoreToFetch: translations.hasNextPage,
-          search: translations.query?.search,
+          search: translations.search,
           filters: translations.filters,
           edit: edit.position,
           selection,
           selectedLanguages:
             translations.query?.languages || translations.selectedLanguages,
-          view,
+          view: view as ViewType,
         }}
       >
         {props.children}

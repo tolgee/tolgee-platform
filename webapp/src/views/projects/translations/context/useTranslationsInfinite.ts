@@ -5,6 +5,7 @@ import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { components, operations } from 'tg.service/apiSchema.generated';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { InfiniteData } from 'react-query';
+import { useQueryState } from 'tg.hooks/useQueryState';
 
 const projectPreferences = container.resolve(ProjectPreferencesService);
 
@@ -39,12 +40,14 @@ const flattenKeys = (
   data?.pages.filter(Boolean).flatMap((p) => p._embedded?.keys || []) || [];
 
 export const useTranslationsInfinite = (props: Props) => {
-  const [filters, setFilters] = useState<FiltersType>({});
+  const [filters, setFilters] = useQueryState('filters', JSON.stringify({}));
+  const parsedFilters = (filters ? JSON.parse(filters) : {}) as FiltersType;
   // wait for initialLangs to not be null
   const [enabled, setEnabled] = useState(props.initialLangs !== null);
 
-  const [query, setQuery] = useState<TranslationsQueryType>({
-    search: '',
+  const [search, setSearch] = useQueryState('search', '');
+
+  const [query, setQuery] = useState<Omit<TranslationsQueryType, 'search'>>({
     size: PAGE_SIZE,
     sort: ['keyName'],
     languages: undefined,
@@ -73,7 +76,7 @@ export const useTranslationsInfinite = (props: Props) => {
     url: '/v2/projects/{projectId}/translations',
     method: 'get',
     path,
-    query: { ...query, ...filters },
+    query: { ...query, ...parsedFilters, search },
     options: {
       // fetch after languages are loaded,
       // so we dont't try to fetch nonexistant languages
@@ -88,7 +91,7 @@ export const useTranslationsInfinite = (props: Props) => {
             path,
             query: {
               ...query,
-              ...filters,
+              ...parsedFilters,
               cursor: lastPage.nextCursor,
             },
           };
@@ -122,9 +125,13 @@ export const useTranslationsInfinite = (props: Props) => {
   const refetchTranslations = () => {
     // force refetch from first page
     translations.remove();
-    translations.refetch();
     // remove unsaved translations
     setFixedTranslations((data) => data?.filter((key) => key.keyId >= 0));
+  };
+
+  const updateSearch = (value: string) => {
+    setSearch(value);
+    refetchTranslations();
   };
 
   const updateQuery = (q: Partial<typeof query>) => {
@@ -137,7 +144,7 @@ export const useTranslationsInfinite = (props: Props) => {
   };
 
   const updateFilters = (filters: FiltersType) => {
-    setFilters(filters);
+    setFilters(JSON.stringify(filters));
     refetchTranslations();
   };
 
@@ -189,7 +196,7 @@ export const useTranslationsInfinite = (props: Props) => {
     isFetchingNextPage: translations.isFetchingNextPage,
     hasNextPage: translations.hasNextPage,
     query,
-    filters,
+    filters: parsedFilters,
     fetchNextPage: translations.fetchNextPage,
     selectedLanguages: translations.data?.pages[0]?.selectedLanguages.map(
       (l) => l.tag
@@ -197,6 +204,8 @@ export const useTranslationsInfinite = (props: Props) => {
     data: fixedTranslations,
     refetchTranslations,
     updateQuery,
+    search,
+    updateSearch,
     updateFilters,
     updateTranslationKey,
     updateTranslation,
