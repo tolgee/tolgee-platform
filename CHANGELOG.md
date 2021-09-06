@@ -1,3 +1,11 @@
+# [1.0.0-alpha.121](https://github.com/tolgee/server/compare/v1.0.0-alpha.120...v1.0.0-alpha.121) (2021-09-06)
+
+
+### Features
+
+* Thinner top bar TG-218 ([c7d073e](https://github.com/tolgee/server/commit/c7d073ebfc1723f411bef3b3c9220c8bcaeb2c05))
+* Translations - reflect query in url TG-259 ([18c3370](https://github.com/tolgee/server/commit/18c337080989b3811852d5aba5996aa50e89e895))
+
 # [1.0.0-alpha.120](https://github.com/tolgee/server/compare/v1.0.0-alpha.119...v1.0.0-alpha.120) (2021-09-03)
 
 
