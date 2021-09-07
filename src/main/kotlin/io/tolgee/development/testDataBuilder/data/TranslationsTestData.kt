@@ -90,6 +90,16 @@ class TranslationsTestData {
             language = englishLanguage
             text = "A translation"
           }
+          addMeta {
+            self {
+              tags.add(
+                Tag().apply {
+                  this.project = this@addProject.self
+                  name = "Lame tag"
+                }
+              )
+            }
+          }
         }
       }
       projectBuilder = this

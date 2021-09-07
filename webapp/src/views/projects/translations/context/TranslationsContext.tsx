@@ -73,7 +73,7 @@ type ChangeValueType = SetEditType & {
   after?: AfterCommand;
 };
 
-type FiltersType = Pick<
+export type FiltersType = Pick<
   TranslationsQueryType,
   | 'filterHasNoScreenshot'
   | 'filterHasScreenshot'

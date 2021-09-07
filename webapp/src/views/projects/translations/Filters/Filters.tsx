@@ -18,8 +18,8 @@ import {
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
 import {
-  decodeValue,
   NON_EXCLUSIVE_FILTERS,
+  toggleFilter,
   useAvailableFilters,
 } from './useAvailableFilters';
 import { SubmenuStates } from './SubmenuStates';
@@ -88,9 +88,6 @@ export const Filters = () => {
 
   const availableFilters = useAvailableFilters(selectedLanguages);
 
-  const findGroup = (value: string) =>
-    availableFilters.find((g) => g.options?.find((o) => o.value === value));
-
   const findOption = (value: string) =>
     availableFilters
       .map((g) => g.options?.find((o) => o.value === value))
@@ -100,45 +97,8 @@ export const Filters = () => {
     dispatch({ type: 'SET_FILTERS', payload: {} });
   };
 
-  const handleToggle = (rawValue) => () => {
-    const jsonValue = JSON.parse(rawValue);
-    const filterName =
-      typeof jsonValue === 'string' ? jsonValue : jsonValue.filter;
-    const filterValue = typeof jsonValue === 'string' ? true : jsonValue.value;
-
-    const group = findGroup(rawValue);
-
-    let newFilters = {
-      ...filtersObj,
-    };
-
-    // remove all filters from new value group
-    // so the groups are exclusive
-    group?.options?.forEach((o) => {
-      if (o.value) newFilters[decodeValue(o.value).filter] = undefined;
-      o.submenu?.forEach((so) => {
-        if (so.value) newFilters[decodeValue(so.value).filter] = undefined;
-      });
-    });
-
-    let newValue: any;
-    if (NON_EXCLUSIVE_FILTERS.includes(filterName)) {
-      if (filtersObj[filterName]?.includes(filterValue)) {
-        newValue = filtersObj[filterName].filter((v) => v !== filterValue);
-        // avoid keeping empty array, as it would stay in url
-        newValue = newValue.length ? newValue : undefined;
-      } else {
-        newValue = [...(filtersObj[filterName] || []), filterValue];
-      }
-    } else {
-      newValue =
-        filtersObj[filterName] !== filterValue ? filterValue : undefined;
-    }
-    newFilters = {
-      ...newFilters,
-      [filterName]: newValue,
-    };
-
+  const handleFilterToggle = (rawValue: string) => () => {
+    const newFilters = toggleFilter(filtersObj, availableFilters, rawValue);
     dispatch({ type: 'SET_FILTERS', payload: newFilters });
   };
 
@@ -167,7 +127,7 @@ export const Filters = () => {
               data-cy="translations-filter-option"
               key={option.value}
               value={option.value!}
-              onClick={handleToggle(option.value)}
+              onClick={handleFilterToggle(option.value!)}
             >
               <Checkbox
                 size="small"
@@ -185,7 +145,7 @@ export const Filters = () => {
               key={i}
               data-cy="translations-filter-option"
               item={option}
-              handleToggle={handleToggle}
+              handleToggle={handleFilterToggle}
               activeFilters={activeFilters}
             />
           );
@@ -195,7 +155,7 @@ export const Filters = () => {
               key={i}
               data-cy="translations-filter-option"
               item={option}
-              handleToggle={handleToggle}
+              handleToggle={handleFilterToggle}
               activeFilters={activeFilters}
             />
           );
