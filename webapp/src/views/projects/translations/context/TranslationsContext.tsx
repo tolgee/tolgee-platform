@@ -1,9 +1,14 @@
 import React, { useState, useRef, useCallback } from 'react';
+import { useQueryClient } from 'react-query';
 import { createContext, useContext } from 'use-context-selector';
 import { T } from '@tolgee/react';
 
 import { components, operations } from 'tg.service/apiSchema.generated';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import {
+  invalidateUrlPrefix,
+  useApiMutation,
+  useApiQuery,
+} from 'tg.service/http/useQueryApi';
 import { container } from 'tsyringe';
 import { MessageService } from 'tg.service/MessageService';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
@@ -77,6 +82,7 @@ type FiltersType = Pick<
   | 'filterTranslatedInLang'
   | 'filterUntranslatedInLang'
   | 'filterState'
+  | 'filterTag'
 >;
 
 type SetTranslationStatePayload = {
@@ -120,6 +126,7 @@ const projectPreferences = container.resolve(ProjectPreferencesService);
 export const TranslationsContextProvider: React.FC<{
   projectId: number;
 }> = (props) => {
+  const queryClient = useQueryClient();
   const dispatchRef = useRef(null as any as (action: ActionType) => void);
   const [selection, setSelection] = useState<number[]>([]);
   const [view, setView] = useQueryState('view', 'LIST');
@@ -394,6 +401,7 @@ export const TranslationsContextProvider: React.FC<{
             translations.updateTranslationKey(action.payload.keyId, {
               keyTags: [...previousTags, data!],
             });
+            invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/tags');
             action.onSuccess?.();
           })
           .catch((e) => {
@@ -415,6 +423,7 @@ export const TranslationsContextProvider: React.FC<{
             const previousTags = translations.data?.find(
               (key) => key.keyId === action.payload.keyId
             )?.keyTags;
+            invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/tags');
             translations.updateTranslationKey(action.payload.keyId, {
               keyTags: previousTags?.filter(
                 (t) => t.id !== action.payload.tagId

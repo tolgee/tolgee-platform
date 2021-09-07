@@ -1,10 +1,13 @@
 import { makeStyles } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
+
 import { Wrapper } from './Wrapper';
 
 type Props = {
   name: string;
   onDelete?: React.MouseEventHandler<SVGElement>;
+  onClick?: (name: string) => void;
+  selected: boolean;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -25,12 +28,19 @@ const useStyles = makeStyles((theme) => ({
     height: 20,
     color: theme.palette.text.secondary,
   },
+  selected: {
+    borderColor: theme.palette.primary.main,
+    borderWidth: 1,
+  },
 }));
 
-export const Tag: React.FC<Props> = ({ name, onDelete }) => {
+export const Tag: React.FC<Props> = ({ name, onDelete, onClick, selected }) => {
   const classes = useStyles();
   return (
-    <Wrapper>
+    <Wrapper
+      onClick={() => onClick?.(name)}
+      className={selected ? classes.selected : undefined}
+    >
       <div className={classes.tag}>{name}</div>
       {onDelete && (
         <Close

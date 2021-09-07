@@ -1,14 +1,17 @@
 import { useTranslate } from '@tolgee/react';
 import { useContextSelector } from 'use-context-selector';
 
+import { useProject } from 'tg.hooks/useProject';
 import { translationStates } from 'tg.constants/translationStates';
 import { TranslationsContext } from '../context/TranslationsContext';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const NON_EXCLUSIVE_FILTERS = ['filterState'];
 
 type GroupType = {
-  name: string;
+  name: string | null;
   options: OptionType[];
+  type?: 'states' | 'tags';
 };
 
 export type OptionType = {
@@ -21,9 +24,37 @@ export const useAvailableFilters = (
   selectedLanguages?: string[]
 ): GroupType[] => {
   const languages = useContextSelector(TranslationsContext, (v) => v.languages);
+  const project = useProject();
   const t = useTranslate();
 
+  const tags = useApiQuery({
+    url: '/v2/projects/{projectId}/tags',
+    method: 'get',
+    path: { projectId: project.id },
+    query: { size: 1000 },
+  });
+
   return [
+    {
+      name: null,
+      type: 'tags',
+      options: [
+        {
+          label: t('translations_filters_heading_tags', undefined, true),
+          value: null,
+          submenu:
+            tags.data?._embedded?.tags?.map((val) => {
+              return {
+                label: val.name,
+                value: JSON.stringify({
+                  filter: 'filterTag',
+                  value: val.name,
+                }),
+              };
+            }) || [],
+        },
+      ],
+    },
     {
       name: t('translations_filters_heading_translations'),
       options: [
@@ -64,6 +95,7 @@ export const useAvailableFilters = (
     },
     {
       name: t('translations_filters_heading_states'),
+      type: 'states',
       options:
         selectedLanguages?.map((l) => {
           const language = languages?.find((lang) => lang.tag === l)?.name || l;
