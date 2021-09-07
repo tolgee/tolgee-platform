@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Checkbox, ListItemText, Menu, MenuItem } from '@material-ui/core';
 import { ArrowRight } from '@material-ui/icons';
 
-import { decodeValue, OptionType } from './useAvailableFilters';
+import { decodeFilter, OptionType } from './useAvailableFilters';
 import { makeStyles } from '@material-ui/core';
 import { translationStates } from 'tg.constants/translationStates';
 
@@ -71,7 +71,7 @@ export const SubmenuStates: React.FC<Props> = ({
         onClose={() => setMenuOpen(null)}
       >
         {item.submenu?.map((item) => {
-          const decodedValue = decodeValue(item.value!);
+          const decodedValue = decodeFilter(item.value!);
           const state = (decodedValue.value as string).split(',')[1];
           return (
             <MenuItem

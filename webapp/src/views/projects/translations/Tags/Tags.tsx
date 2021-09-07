@@ -5,6 +5,11 @@ import {
   TranslationsContext,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
+import {
+  encodeFilter,
+  toggleFilter,
+  useAvailableFilters,
+} from '../Filters/useAvailableFilters';
 import { Tag } from './Tag';
 
 type TagModel = components['schemas']['TagModel'];
@@ -18,6 +23,7 @@ type Props = {
 export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
   const dispatch = useTranslationsDispatch();
   const filters = useContextSelector(TranslationsContext, (c) => c.filters);
+  const availableFilters = useAvailableFilters();
 
   const handleTagDelete = (tagId: number) => {
     dispatch({
@@ -27,12 +33,17 @@ export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
   };
 
   const handleTagClick = (tagName: string) => {
+    const newFilters = toggleFilter(
+      filters,
+      availableFilters,
+      encodeFilter({
+        filter: 'filterTag',
+        value: tagName,
+      })
+    );
     dispatch({
       type: 'SET_FILTERS',
-      payload: {
-        ...filters,
-        filterTag: filters['filterTag'] === tagName ? undefined : tagName,
-      },
+      payload: newFilters,
     });
   };
 
@@ -42,7 +53,7 @@ export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
         <Tag
           key={t.id}
           name={t.name}
-          selected={filters['filterTag'] === t.name}
+          selected={Boolean(filters['filterTag']?.includes(t.name))}
           onDelete={
             deleteEnabled ? stopBubble(() => handleTagDelete(t.id)) : undefined
           }
