@@ -23,6 +23,7 @@ import {
   useAvailableFilters,
 } from './useAvailableFilters';
 import { SubmenuStates } from './SubmenuStates';
+import { SubmenuTags } from './SubmenuTags';
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -34,15 +35,15 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: -theme.spacing(),
   },
   input: {
-    minWidth: 70,
-    height: 40,
+    maxHeight: 40,
     marginTop: 0,
     marginBottom: 0,
-    '& p': {
-      minWidth: 100,
-    },
+    width: 200,
     '& div:focus': {
       backgroundColor: 'transparent',
+    },
+    '& .MuiSelect-root': {
+      paddingRight: 5,
     },
   },
   inputContent: {
@@ -147,38 +148,50 @@ export const Filters = () => {
     if (!group.options?.length) {
       return;
     } else {
-      options.push(
-        <ListSubheader
-          key={`${i}.group`}
-          disableSticky
-          data-cy="translations-filters-subheader"
-        >
-          {group.name}
-        </ListSubheader>
-      );
+      if (group.type !== 'tags') {
+        options.push(
+          <ListSubheader
+            key={`${i}.group`}
+            disableSticky
+            data-cy="translations-filters-subheader"
+          >
+            {group.name}
+          </ListSubheader>
+        );
+      }
 
       group.options.forEach((option, i) => {
-        if (option.value) {
+        if (group.type === undefined) {
           options.push(
             <MenuItem
               data-cy="translations-filter-option"
               key={option.value}
-              value={option.value}
+              value={option.value!}
               onClick={handleToggle(option.value)}
             >
               <Checkbox
                 size="small"
                 edge="start"
-                checked={activeFilters.includes(option.value)}
+                checked={activeFilters.includes(option.value!)}
                 tabIndex={-1}
                 disableRipple
               />
               <ListItemText primary={option.label} />
             </MenuItem>
           );
-        } else if (option.submenu) {
+        } else if (group.type === 'states') {
           options.push(
             <SubmenuStates
+              key={i}
+              data-cy="translations-filter-option"
+              item={option}
+              handleToggle={handleToggle}
+              activeFilters={activeFilters}
+            />
+          );
+        } else if (group.type === 'tags') {
+          options.push(
+            <SubmenuTags
               key={i}
               data-cy="translations-filter-option"
               item={option}

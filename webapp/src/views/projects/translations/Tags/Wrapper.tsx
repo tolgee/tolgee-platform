@@ -21,6 +21,8 @@ const useStyles = makeStyles((theme) => ({
     background: 'white',
     border: `1px solid ${theme.palette.text.secondary}`,
     color: theme.palette.text.secondary,
+  },
+  hover: {
     '&:focus-within, &:hover': {
       border: `1px solid ${theme.palette.primary.main}`,
       color: theme.palette.primary.main,
@@ -54,6 +56,7 @@ export const Wrapper: React.FC<Props> = ({
             classes.wrapper,
             classes.preview,
             classes.clickable,
+            classes.hover,
             className
           )}
           onClick={stopBubble(onClick)}
@@ -65,8 +68,13 @@ export const Wrapper: React.FC<Props> = ({
       return (
         <div
           data-cy="translations-tag-input"
-          className={clsx(classes.wrapper, classes.preview, className)}
-          onClick={stopBubble()}
+          className={clsx(
+            classes.wrapper,
+            classes.preview,
+            classes.hover,
+            className
+          )}
+          onClick={stopBubble(onClick)}
         >
           {children}
         </div>
@@ -75,8 +83,13 @@ export const Wrapper: React.FC<Props> = ({
       return (
         <div
           data-cy="translations-tag"
-          className={clsx(classes.wrapper, className)}
-          onClick={stopBubble()}
+          className={clsx(
+            classes.wrapper,
+            classes.hover,
+            classes.clickable,
+            className
+          )}
+          onClick={stopBubble(onClick)}
         >
           {children}
         </div>

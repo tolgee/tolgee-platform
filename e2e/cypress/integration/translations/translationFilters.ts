@@ -111,6 +111,25 @@ describe('Translations Base', () => {
     });
   });
 
+  it('filters by tag', () => {
+    selectInSelect(gcy('translations-filter-select'), 'Tags');
+    getPopover().contains('Cool tag').click();
+    cy.focused().type('{Esc}');
+    cy.focused().type('{Esc}');
+    cy.contains('Z translation').should('be.visible');
+    cy.contains('key with screenshot').should('not.exist');
+    cy.gcy('translations-tag').contains('Cool tag').click();
+    cy.contains('key with screenshot').should('be.visible');
+  });
+
+  it('filters after click on tag', () => {
+    cy.gcy('translations-tag').contains('Cool tag').click();
+    cy.contains('Z translation').should('be.visible');
+    cy.contains('key with screenshot').should('not.exist');
+    cy.gcy('translations-tag').contains('Cool tag').click();
+    cy.contains('key with screenshot').should('be.visible');
+  });
+
   const assertStateFilter = (
     states: string[],
     toMissAfter: string[],
