@@ -1,3 +1,10 @@
+# [1.0.0-alpha.123](https://github.com/tolgee/server/compare/v1.0.0-alpha.122...v1.0.0-alpha.123) (2021-09-07)
+
+
+### Bug Fixes
+
+* Dashboard clickable everywhere TG-262 ([e9d95d3](https://github.com/tolgee/server/commit/e9d95d30b76a2a6762c93aae1785aee9e857c389))
+
 # [1.0.0-alpha.122](https://github.com/tolgee/server/compare/v1.0.0-alpha.121...v1.0.0-alpha.122) (2021-09-07)
 
 
