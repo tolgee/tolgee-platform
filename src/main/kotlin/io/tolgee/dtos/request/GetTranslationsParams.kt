@@ -62,7 +62,7 @@ When used with multiple languages, it is applied with logical AND.
   val filterState: List<String>? = null,
 
   @field:Parameter(description = "Selects only keys with provided tag")
-  val filterTag: String? = null,
+  val filterTag: List<String>? = null,
 
   @field:Parameter(description = "Cursor to get next data")
   val cursor: String? = null
