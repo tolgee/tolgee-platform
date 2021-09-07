@@ -212,6 +212,22 @@ class V2TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projec
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `filters by multiple tags`() {
+    testData.addFewKeysWithTags()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?filterTag=Cool tag&filterTag=Another cool tag")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys[0].keyName").isEqualTo("A key")
+        node("_embedded.keys[0].keyTags[0].name").isEqualTo("Cool tag")
+        node("_embedded.keys[1].keyTags[0].name").isEqualTo("Another cool tag")
+        node("_embedded.keys[2].keyTags[0].name").isEqualTo("Cool tag")
+        node("page.totalElements").isEqualTo(4)
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `validates filter state`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user

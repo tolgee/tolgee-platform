@@ -173,7 +173,7 @@ class TranslationsViewBuilder(
     if (params.filterTag != null) {
       val keyMetaJoin = root.join(Key_.keyMeta, JoinType.LEFT)
       val tagsJoin = keyMetaJoin.join(KeyMeta_.tags, JoinType.LEFT)
-      whereConditions.add(cb.equal(tagsJoin.get(Tag_.name), params.filterTag))
+      whereConditions.add(tagsJoin.get(Tag_.name).`in`(params.filterTag))
     }
     if (params.filterKeyName != null) {
       whereConditions.add(cb.equal(keyNameExpression, params.filterKeyName))
