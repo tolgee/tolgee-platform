@@ -1,3 +1,10 @@
+# [1.0.0-alpha.122](https://github.com/tolgee/server/compare/v1.0.0-alpha.121...v1.0.0-alpha.122) (2021-09-07)
+
+
+### Bug Fixes
+
+* **backend:** filter by multiple tags TG-268 ([4f3b05f](https://github.com/tolgee/server/commit/4f3b05ffdd335e7d0b3ad334ebab294a04f1f94a))
+
 # [1.0.0-alpha.121](https://github.com/tolgee/server/compare/v1.0.0-alpha.120...v1.0.0-alpha.121) (2021-09-06)
 
 
