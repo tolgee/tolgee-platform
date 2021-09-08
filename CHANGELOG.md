@@ -1,3 +1,11 @@
+# [1.0.0-alpha.124](https://github.com/tolgee/server/compare/v1.0.0-alpha.123...v1.0.0-alpha.124) (2021-09-08)
+
+
+### Features
+
+* allow multiple selected tags TG-263 ([e4f0ea2](https://github.com/tolgee/server/commit/e4f0ea2b2edd24e04a3a7f6afd488533a97bb21b))
+* Filter by tags TG-263 ([a0ada15](https://github.com/tolgee/server/commit/a0ada1574aeaefa3a4b9e5680e03cde97fa63a0e))
+
 # [1.0.0-alpha.123](https://github.com/tolgee/server/compare/v1.0.0-alpha.122...v1.0.0-alpha.123) (2021-09-07)
 
 
