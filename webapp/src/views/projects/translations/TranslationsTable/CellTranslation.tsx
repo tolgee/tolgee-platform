@@ -77,7 +77,9 @@ export const CellTranslation: React.FC<Props> = ({
   lastFocusable,
 }) => {
   const classes = useStyles();
-  const cellClasses = useCellStyles();
+  const cellClasses = useCellStyles({
+    position: lastFocusable ? 'right' : undefined,
+  });
 
   const translation = data.translations[language.tag];
   const state = translation?.state || 'UNTRANSLATED';

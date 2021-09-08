@@ -21,7 +21,7 @@ export const ControlsKey: React.FC<ControlsProps> = ({
   screenshotsPresent,
   screenshotsOpen,
 }) => {
-  const cellClasses = useCellStyles();
+  const cellClasses = useCellStyles({});
 
   // right section
   const displayEdit = editEnabled && onEdit;

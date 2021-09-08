@@ -92,7 +92,7 @@ export const CellTranslation: React.FC<Props> = ({
   lastFocusable,
 }) => {
   const classes = useStyles();
-  const cellClasses = useCellStyles();
+  const cellClasses = useCellStyles({ position: 'right' });
   const dispatch = useTranslationsDispatch();
 
   const translation = data.translations[language.tag] as

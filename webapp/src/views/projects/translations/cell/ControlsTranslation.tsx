@@ -38,7 +38,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   lastFocusable,
 }) => {
   const classes = useStyles();
-  const cellClasses = useCellStyles();
+  const cellClasses = useCellStyles({});
 
   const displayTransitionButtons = editEnabled && state;
   const displayEdit = editEnabled && onEdit;

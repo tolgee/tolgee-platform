@@ -102,7 +102,7 @@ type Props = {
 export const CellKey: React.FC<Props> = React.memo(
   ({ data, width, editEnabled, active }) => {
     const classes = useStyles();
-    const cellClasses = useCellStyles();
+    const cellClasses = useCellStyles({ position: 'left' });
     const [screenshotsOpen, setScreenshotsOpen] = useState(false);
     const dispatch = useTranslationsDispatch();
 
