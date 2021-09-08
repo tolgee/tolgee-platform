@@ -14,4 +14,8 @@ data class CreateKeyDto(
   @field:NotBlank
   @field:Length(max = 200, min = 1)
   val name: String = "",
+
+  val translations: Map<String, String?>? = null,
+
+  val tags: List<String>? = null
 )

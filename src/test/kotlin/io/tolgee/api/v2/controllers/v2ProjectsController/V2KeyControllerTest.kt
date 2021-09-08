@@ -44,6 +44,27 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `creates key with translations and tags`() {
+    val keyName = "super_key"
+    performProjectAuthPost(
+      "keys",
+      CreateKeyDto(
+        name = keyName,
+        translations = mapOf("en" to "EN", "de" to "DE"),
+        tags = listOf("tag", "tag2")
+      )
+    )
+      .andIsCreated.andPrettyPrint.andAssertThatJson {
+        node("id").isValidId
+        node("name").isEqualTo(keyName)
+      }
+    assertThat(tagService.find(project, "tag")).isNotNull
+    val key = keyService.get(project.id, keyName).orElseThrow()
+    assertThat(translationService.find(key, testData.english).get().text).isEqualTo("EN")
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `does not create key when not valid`() {
     performProjectAuthPost("keys", CreateKeyDto(name = ""))
       .andIsBadRequest.andPrettyPrint.andAssertThatJson {

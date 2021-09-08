@@ -2,10 +2,7 @@ package io.tolgee.service
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
-import io.tolgee.dtos.request.DeprecatedEditKeyDTO
-import io.tolgee.dtos.request.EditKeyDto
-import io.tolgee.dtos.request.OldEditKeyDto
-import io.tolgee.dtos.request.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.*
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.exceptions.BadRequestException
@@ -26,9 +23,10 @@ class KeyService(
   private val entityManager: EntityManager,
   private val screenshotService: ScreenshotService,
   private val keyMetaService: KeyMetaService,
-  private val translationsSocketIoModule: TranslationsSocketIoModule
+  private val translationsSocketIoModule: TranslationsSocketIoModule,
+  private val tagService: TagService
 ) {
-  private var translationService: TranslationService? = null
+  private lateinit var translationService: TranslationService
 
   @Transactional
   fun getOrCreateKey(project: Project, path: PathDTO): Key {
@@ -87,6 +85,25 @@ class KeyService(
     }
     val key = Key(name = dto.fullPathString, project = project)
     return save(key)
+  }
+
+  @Transactional
+  fun create(project: Project, dto: CreateKeyDto): Key {
+    if (this.get(project.id, dto.name).isPresent) {
+      throw BadRequestException(Message.KEY_EXISTS)
+    }
+
+    val key = save(Key(name = dto.name, project = project))
+
+    dto.translations?.let {
+      translationService.setForKey(key, it)
+    }
+
+    dto.tags?.forEach {
+      tagService.tagKey(key, it)
+    }
+
+    return key
   }
 
   @Deprecated("Ugly naming")
@@ -172,7 +189,7 @@ class KeyService(
   }
 
   @Autowired
-  fun setTranslationService(translationService: TranslationService?) {
+  fun setTranslationService(translationService: TranslationService) {
     this.translationService = translationService
   }
 

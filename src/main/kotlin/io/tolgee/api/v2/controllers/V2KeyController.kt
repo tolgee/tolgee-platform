@@ -36,14 +36,14 @@ class V2KeyController(
   private val projectHolder: ProjectHolder,
   private val keyModelAssembler: KeyModelAssembler
 ) : IController {
-
   @PostMapping(value = ["/create", ""])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
   @Operation(summary = "Creates new key")
   @ResponseStatus(HttpStatus.CREATED)
   fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyModel> {
-    return ResponseEntity(keyService.create(projectHolder.projectEntity, dto.name).model, HttpStatus.CREATED)
+    val key = keyService.create(projectHolder.projectEntity, dto)
+    return ResponseEntity(key.model, HttpStatus.CREATED)
   }
 
   @PutMapping(value = ["/{id}"])
