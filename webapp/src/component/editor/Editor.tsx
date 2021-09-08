@@ -166,7 +166,7 @@ export const Editor: React.FC<Props> = ({
       t,
     },
     inputStyle: 'contenteditable',
-    spellcheck: true,
+    spellcheck: !plaintext,
   };
 
   return (
