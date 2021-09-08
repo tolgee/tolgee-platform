@@ -5,7 +5,7 @@ import { icuVariants } from 'tg.component/editor/icuVariants';
 import { LimitedHeightText } from './LimitedHeightText';
 import clsx from 'clsx';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   variants: {
     display: 'grid',
     gridTemplateColumns: '80px 1fr',
@@ -19,7 +19,7 @@ const useStyles = makeStyles({
   chip: {
     padding: '0px 5px 0px 5px',
     boxSizing: 'border-box',
-    background: '#E5E5E5',
+    background: theme.palette.chipBackground.main,
     borderRadius: 4,
     overflow: 'hidden',
     whiteSpace: 'nowrap',
@@ -31,7 +31,7 @@ const useStyles = makeStyles({
     height: 24,
     marginBottom: 2,
   },
-});
+}));
 
 type Props = {
   limitLines?: boolean;
