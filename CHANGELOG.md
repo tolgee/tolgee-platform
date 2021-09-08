@@ -1,3 +1,16 @@
+# [1.0.0-alpha.125](https://github.com/tolgee/server/compare/v1.0.0-alpha.124...v1.0.0-alpha.125) (2021-09-08)
+
+
+### Bug Fixes
+
+* Disable spellcheck on key TG-273 ([a2ac781](https://github.com/tolgee/server/commit/a2ac781bdccbe7154504932a6b5192dfb4e68a8c))
+* fix too many tags requests ([b37f082](https://github.com/tolgee/server/commit/b37f082b87a1e4e1109366a282be016b77d0f187))
+
+
+### Features
+
+* Tag improvements TG-274 ([e5eb406](https://github.com/tolgee/server/commit/e5eb4067fc09a3bf4fd1c9840e64c15f5d1074f3))
+
 # [1.0.0-alpha.124](https://github.com/tolgee/server/compare/v1.0.0-alpha.123...v1.0.0-alpha.124) (2021-09-08)
 
 
