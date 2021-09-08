@@ -1,5 +1,7 @@
 package io.tolgee.service
 
+import io.tolgee.constants.Message
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Project
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.Key
@@ -30,6 +32,11 @@ class TagService(
         keyMeta.tags.add(this)
       }
     }
+
+    if (tag.name.length > 100) {
+      throw BadRequestException(Message.TAG_TOO_LOG)
+    }
+
     tagRepository.save(tag)
     keyMetaService.save(keyMeta)
     return tag

@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
 import io.tolgee.development.testDataBuilder.TestDataBuilder
+import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
@@ -13,6 +14,9 @@ class KeysTestData {
   var user: UserAccount
   lateinit var firstKey: Key
   lateinit var secondKey: Key
+  lateinit var english: Language
+  lateinit var german: Language
+
   val root: TestDataBuilder = TestDataBuilder().apply {
     user = addUserAccount {
       self {
@@ -39,6 +43,20 @@ class KeysTestData {
         name = "Peter's project"
         userOwner = user
       }
+
+      english = addLanguage {
+        self {
+          name = "English"
+          tag = "en"
+        }
+      }.self
+
+      german = addLanguage {
+        self {
+          name = "German"
+          tag = "de"
+        }
+      }.self
 
       addPermission {
         self {
