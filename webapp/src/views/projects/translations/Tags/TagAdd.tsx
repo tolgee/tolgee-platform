@@ -31,7 +31,7 @@ export const TagAdd: React.FC<Props> = ({
   className,
 }) => {
   const classes = useStyles();
-  const cellClasses = useCellStyles();
+  const cellClasses = useCellStyles({});
 
   return (
     <Wrapper

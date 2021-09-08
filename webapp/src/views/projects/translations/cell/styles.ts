@@ -1,6 +1,17 @@
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, Theme, colors } from '@material-ui/core';
 
-export const useCellStyles = makeStyles((theme) => ({
+type PositionType = 'left' | 'right';
+
+const getCellGradientBackground = (position?: PositionType) => {
+  const color = colors.grey[50];
+  return position
+    ? `linear-gradient(${
+        position === 'right' ? '-90deg' : '90deg'
+      }, ${color}00 0%, ${color}ff 5px, ${color}ff 100%)`
+    : color;
+};
+
+export const useCellStyles = makeStyles<Theme, { position?: PositionType }>({
   '@keyframes easeIn': {
     '0%': {
       opacity: 0,
@@ -43,7 +54,7 @@ export const useCellStyles = makeStyles((theme) => ({
     background: 'transparent',
     transition: 'background 0.1s ease-out',
     '&:hover': {
-      background: theme.palette.grey[50],
+      background: ({ position }) => getCellGradientBackground(position),
       transition: 'background 0.1s ease-in',
     },
   },
@@ -60,4 +71,4 @@ export const useCellStyles = makeStyles((theme) => ({
   cellSelected: {
     background: '#efefef',
   },
-}));
+});

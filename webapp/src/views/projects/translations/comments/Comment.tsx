@@ -62,7 +62,7 @@ type Props = {
 export const Comment: React.FC<Props> = ({ data, onDelete }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const classes = useStyles();
-  const cellClasses = useCellStyles();
+  const cellClasses = useCellStyles({});
   const lang = useCurrentLanguage();
   const date = new Date(data.updatedAt);
   const isToday = date.toLocaleDateString() === new Date().toLocaleDateString();
