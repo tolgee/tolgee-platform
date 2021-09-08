@@ -5,11 +5,7 @@ import {
   TranslationsContext,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
-import {
-  encodeFilter,
-  toggleFilter,
-  useAvailableFilters,
-} from '../Filters/useAvailableFilters';
+import { encodeFilter, toggleFilter } from '../Filters/useAvailableFilters';
 import { Tag } from './Tag';
 
 type TagModel = components['schemas']['TagModel'];
@@ -23,7 +19,6 @@ type Props = {
 export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
   const dispatch = useTranslationsDispatch();
   const filters = useContextSelector(TranslationsContext, (c) => c.filters);
-  const availableFilters = useAvailableFilters();
 
   const handleTagDelete = (tagId: number) => {
     dispatch({
@@ -35,7 +30,7 @@ export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
   const handleTagClick = (tagName: string) => {
     const newFilters = toggleFilter(
       filters,
-      availableFilters,
+      [],
       encodeFilter({
         filter: 'filterTag',
         value: tagName,
