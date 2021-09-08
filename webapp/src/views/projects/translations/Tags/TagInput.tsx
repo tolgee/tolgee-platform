@@ -76,7 +76,6 @@ export const TagInput: React.FC<Props> = ({ onClose, onAdd, className }) => {
         loading={tags.isFetching}
         className={classes.autocomplete}
         autoHighlight
-        loadingText={<T>translations_tags_loading</T>}
         noOptionsText={<T>translations_tags_no_results</T>}
         PopperComponent={CustomPopper}
         options={
@@ -86,16 +85,9 @@ export const TagInput: React.FC<Props> = ({ onClose, onAdd, className }) => {
             translation: '',
           })) || []
         }
-        filterOptions={(options, params) => {
-          const filtered = options.filter((o) =>
-            o.value.startsWith(params.inputValue)
-          );
-          if (
-            search !== '' &&
-            search === value &&
-            !options.find((item) => item.value === params.inputValue) &&
-            !tags.isFetching
-          ) {
+        filterOptions={(options) => {
+          const filtered = options.filter((o) => o.value.startsWith(search));
+          if (search !== '' && !options.find((item) => item.value === search)) {
             filtered.push({
               value: search,
               label: '',
