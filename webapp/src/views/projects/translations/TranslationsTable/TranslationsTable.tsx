@@ -15,13 +15,14 @@ import { CellLanguage } from './CellLanguage';
 import { SortableHeading } from './SortableHeading';
 import { RowTable } from './RowTable';
 import clsx from 'clsx';
+import { TranslationsToolbar } from '../TranslationsToolbar';
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.grey[200];
   return {
     container: {
       position: 'relative',
-      margin: '10px 0px 0px 0px',
+      margin: '10px 0px 100px 0px',
       borderLeft: 0,
       borderRight: 0,
       background: 'white',
@@ -238,6 +239,11 @@ export const TranslationsTable = () => {
             />
           );
         }}
+      />
+      <TranslationsToolbar
+        getVisibleRange={reactListRef.current?.getVisibleRange.bind(
+          reactListRef.current
+        )}
       />
     </div>
   );

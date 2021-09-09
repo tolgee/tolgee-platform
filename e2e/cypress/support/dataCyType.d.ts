@@ -150,6 +150,7 @@ declare namespace DataCy {
         "translations-filter-option" |
         "translations-filter-select" |
         "translations-filters-subheader" |
+        "translations-key-count" |
         "translations-language-select-form-control" |
         "translations-row" |
         "translations-row-checkbox" |
@@ -161,6 +162,8 @@ declare namespace DataCy {
         "translations-tag-close" |
         "translations-tag-input" |
         "translations-tags-add" |
+        "translations-toolbar-counter" |
+        "translations-toolbar-to-top" |
         "translations-view-list" |
         "translations-view-list-button" |
         "translations-view-table" |

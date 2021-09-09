@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
   chip: {
     padding: '0px 5px 0px 5px',
     boxSizing: 'border-box',
-    background: theme.palette.chipBackground.main,
+    background: theme.palette.lightBackground.main,
     borderRadius: 4,
     overflow: 'hidden',
     whiteSpace: 'nowrap',

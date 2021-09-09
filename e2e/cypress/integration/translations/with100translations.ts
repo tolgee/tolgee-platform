@@ -27,23 +27,30 @@ describe('With 100 translations', () => {
   });
 
   it('will scroll properly in list view', () => {
-    cy.scrollTo('bottom');
-    // it should load key 60 on bottom of the page if, heights of cells are estimated correctly
-    cy.contains('Cool key 60').should('exist');
-    // now we scroll to the end of newly loaded data
-    cy.scrollTo('bottom');
-    cy.contains('Cool translated text 99').should('be.visible');
+    testScroll();
   });
 
   it('will scroll properly in table view', () => {
     cy.gcy('translations-view-table-button').click();
+    testScroll();
+  });
+
+  const testScroll = () => {
+    cy.gcy('translations-toolbar-to-top').should('not.be.visible');
+    cy.gcy('translations-key-count').contains('100 Keys').should('be.visible');
     cy.scrollTo('bottom');
     // it should load key 60 on bottom of the page if, heights of cells are estimated correctly
     cy.contains('Cool key 60').should('exist');
+    cy.gcy('translations-toolbar-to-top').should('be.visible');
     // now we scroll to the end of newly loaded data
     cy.scrollTo('bottom');
     cy.contains('Cool translated text 99').should('be.visible');
-  });
+    cy.gcy('translations-toolbar-counter')
+      .contains('100 / 100')
+      .should('be.visible');
+    cy.gcy('translations-toolbar-to-top').click();
+    cy.contains('Cool key 00').should('be.visible');
+  };
 
   const visit = () => {
     visitTranslations(project.id);

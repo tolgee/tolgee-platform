@@ -99,8 +99,11 @@ const theme = createTheme({
     extraLightDivider: {
       main: 'rgba(0, 0, 0, 0.08)',
     },
-    chipBackground: {
+    lightBackground: {
       main: '#E5E5E5',
+    },
+    extraLightBackground: {
+      main: '#F8F8F8',
     },
     background: {
       default: 'rgb(255, 255, 255)',

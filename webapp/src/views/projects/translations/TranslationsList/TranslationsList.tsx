@@ -12,6 +12,7 @@ import {
 import { useResize, resizeColumn } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
 import { RowList } from './RowList';
+import { TranslationsToolbar } from '../TranslationsToolbar';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -20,7 +21,7 @@ const useStyles = makeStyles((theme) => {
     container: {
       display: 'flex',
       position: 'relative',
-      margin: '10px 0px 0px 0px',
+      margin: '10px 0px 100px 0px',
       borderLeft: 0,
       borderRight: 0,
       background: 'white',
@@ -132,6 +133,7 @@ export const TranslationsList = () => {
         );
       })}
       <ReactList
+        ref={reactListRef}
         useTranslate3d
         threshold={800}
         type="variable"
@@ -161,6 +163,11 @@ export const TranslationsList = () => {
             />
           );
         }}
+      />
+      <TranslationsToolbar
+        getVisibleRange={reactListRef.current?.getVisibleRange.bind(
+          reactListRef.current
+        )}
       />
     </div>
   );

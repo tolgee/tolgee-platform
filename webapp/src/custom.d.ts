@@ -11,12 +11,14 @@ declare module '@material-ui/core/styles/createPalette' {
   interface Palette {
     lightDivider: PaletteColor;
     extraLightDivider: PaletteColor;
-    chipBackground: PaletteColor;
+    lightBackground: PaletteColor;
+    extraLightBackground: PaletteColor;
   }
 
   interface PaletteOptions {
     lightDivider: PaletteColorOptions;
     extraLightDivider: PaletteColorOptions;
-    chipBackground: PaletteColorOptions;
+    lightBackground: PaletteColorOptions;
+    extraLightBackground: PaletteColorOptions;
   }
 }
