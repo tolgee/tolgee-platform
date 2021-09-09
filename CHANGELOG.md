@@ -1,3 +1,10 @@
+# [1.0.0-alpha.126](https://github.com/tolgee/server/compare/v1.0.0-alpha.125...v1.0.0-alpha.126) (2021-09-09)
+
+
+### Bug Fixes
+
+* Background of hovered translation TG-217 ([def92ea](https://github.com/tolgee/server/commit/def92ea93fd0164b9b054ba5ab88047e0f52e7d3))
+
 # [1.0.0-alpha.125](https://github.com/tolgee/server/compare/v1.0.0-alpha.124...v1.0.0-alpha.125) (2021-09-08)
 
 
