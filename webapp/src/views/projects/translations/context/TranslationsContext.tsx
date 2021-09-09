@@ -99,6 +99,7 @@ type ChangeScreenshotNum = {
 
 export type TranslationsContextType = {
   translations?: KeyWithTranslationsModelType[];
+  translationsTotal?: number;
   languages?: LanguagesType[];
   isLoading?: boolean;
   isFetching?: boolean;
@@ -472,6 +473,7 @@ export const TranslationsContextProvider: React.FC<{
       <TranslationsContext.Provider
         value={{
           translations: dataReady ? translations.data : undefined,
+          translationsTotal: translations.totalCount,
           languages: dataReady
             ? languages.data?._embedded?.languages
             : undefined,

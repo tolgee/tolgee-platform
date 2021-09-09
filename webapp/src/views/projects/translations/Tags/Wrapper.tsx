@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     height: '24px',
     fontSize: 14,
-    background: theme.palette.chipBackground.main,
+    background: theme.palette.lightBackground.main,
     border: '1px solid transparent',
     maxWidth: '100%',
   },

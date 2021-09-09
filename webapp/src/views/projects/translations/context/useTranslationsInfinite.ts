@@ -202,6 +202,7 @@ export const useTranslationsInfinite = (props: Props) => {
       (l) => l.tag
     ),
     data: fixedTranslations,
+    totalCount: translations.data?.pages[0].page?.totalElements,
     refetchTranslations,
     updateQuery,
     search,
