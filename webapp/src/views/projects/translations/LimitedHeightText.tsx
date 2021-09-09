@@ -62,7 +62,7 @@ type Props = {
   maxLines?: number | undefined;
   lang?: string;
   wrap?: 'break-word' | 'break-all';
-  width: number;
+  width?: number;
   overlayPadding?: number;
   lineHeight?: string;
   overlay?: boolean;

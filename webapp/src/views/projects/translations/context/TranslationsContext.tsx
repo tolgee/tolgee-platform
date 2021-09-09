@@ -17,7 +17,7 @@ import { confirmation } from 'tg.hooks/confirmation';
 import { useTranslationsInfinite } from './useTranslationsInfinite';
 import { useEdit, EditType, SetEditType } from './useEdit';
 import { StateType } from 'tg.constants/translationStates';
-import { useQueryState } from 'tg.hooks/useQueryState';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 export type AfterCommand = 'EDIT_NEXT' | 'NEW_EMPTY_KEY';
 
@@ -126,11 +126,12 @@ const projectPreferences = container.resolve(ProjectPreferencesService);
 
 export const TranslationsContextProvider: React.FC<{
   projectId: number;
+  translationId?: number;
 }> = (props) => {
   const queryClient = useQueryClient();
   const dispatchRef = useRef(null as any as (action: ActionType) => void);
   const [selection, setSelection] = useState<number[]>([]);
-  const [view, setView] = useQueryState('view', 'LIST');
+  const [view, setView] = useUrlSearchState('view', { defaultVal: 'LIST' });
   const [initialLangs, setInitialLangs] = useState<string[] | null | undefined>(
     null
   );
@@ -156,6 +157,7 @@ export const TranslationsContextProvider: React.FC<{
 
   const translations = useTranslationsInfinite({
     projectId: props.projectId,
+    translationId: props.translationId,
     // when initial langs are null, fetching is postponed
     initialLangs,
   });
@@ -489,7 +491,7 @@ export const TranslationsContextProvider: React.FC<{
             createKey.isLoading,
           isFetchingMore: translations.isFetchingNextPage,
           hasMoreToFetch: translations.hasNextPage,
-          search: translations.search,
+          search: translations.search as string,
           filters: translations.filters,
           edit: edit.position,
           selection,

@@ -42,7 +42,8 @@ const useStyles = makeStyles((theme) => ({
     },
     '& .CodeMirror': {
       width: '100%',
-      minHeight: 100,
+      // @ts-ignore
+      minHeight: (props) => props.minHeight,
       height: '100%',
       marginLeft: -5,
       // @ts-ignore
@@ -117,7 +118,9 @@ type Props = {
   onCancel?: () => void;
   background?: string;
   plaintext?: boolean;
-  autofocus: boolean;
+  autofocus?: boolean;
+  minHeight?: number | string;
+  onBlur?: () => void;
 };
 
 export const Editor: React.FC<Props> = ({
@@ -126,11 +129,13 @@ export const Editor: React.FC<Props> = ({
   onCancel,
   onSave,
   onCmdSave,
+  onBlur,
   plaintext,
   background,
   autofocus,
+  minHeight = 100,
 }) => {
-  const classes = useStyles({ background });
+  const classes = useStyles({ background, minHeight });
   const t = useTranslate();
 
   const handleChange = (val: string) => {
@@ -152,7 +157,7 @@ export const Editor: React.FC<Props> = ({
     lineWrapping: true,
     keyMap: 'sublime',
     extraKeys: {
-      Enter: (editor) => onSave?.(editor.getValue()),
+      Enter: onSave ? (editor) => onSave(editor.getValue()) : 'default',
       Esc: () => onCancel?.(),
       Tab: false,
       'Shift-Tab': false,
@@ -179,6 +184,7 @@ export const Editor: React.FC<Props> = ({
         onBeforeChange={(editor, data, value) => {
           handleChange(value);
         }}
+        onBlur={() => onBlur?.()}
       />
     </div>
   );

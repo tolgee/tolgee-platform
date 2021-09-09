@@ -21,7 +21,7 @@ export interface LoadableType {
 interface FormProps<T> {
   initialValues: T;
   onSubmit: (values: T, formikHelpers: FormikHelpers<T>) => void | Promise<any>;
-  onCancel?: () => void;
+  onCancel?: (formikHelpers: FormikProps<T>) => void;
   loading?: boolean;
   validationSchema?: ObjectSchema<any>;
   submitButtons?: ReactNode;
@@ -36,9 +36,6 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
   ...props
 }) => {
   const history = useHistory();
-
-  const onCancel = () =>
-    typeof props.onCancel === 'function' ? props.onCancel() : history.goBack();
 
   const actionLoading =
     props.saveActionLoadable?.isLoading || props.saveActionLoadable?.loading;
@@ -56,6 +53,11 @@ export const StandardForm: FunctionComponent<FormProps<any>> = ({
         enableReinitialize
       >
         {(formikProps: FormikProps<any>) => {
+          const onCancel = () =>
+            typeof props.onCancel === 'function'
+              ? props.onCancel(formikProps)
+              : history.goBack();
+
           return (
             <Form>
               {(typeof props.children === 'function' &&

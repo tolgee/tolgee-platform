@@ -14,6 +14,7 @@ import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { SocketIoPreview } from 'tg.views/projects/SocketIoPreview';
 import { TranslationsView } from './translations/TranslationsView';
 import { ProjectLanguagesView } from 'tg.views/projects/languages/ProjectLanguagesView';
+import { SingleKeyView } from './translations/SingleKeyView';
 
 export const ProjectRouter = () => {
   const match = useRouteMatch();
@@ -24,7 +25,11 @@ export const ProjectRouter = () => {
     <Switch>
       <ProjectProvider id={Number(projectId)}>
         <ProjectPage fullWidth={true}>
-          <Route path={LINKS.PROJECT_TRANSLATIONS.template}>
+          <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
+            <SingleKeyView />
+          </Route>
+
+          <Route exact path={LINKS.PROJECT_TRANSLATIONS.template}>
             <TranslationsView />
           </Route>
 
