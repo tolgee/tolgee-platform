@@ -1,3 +1,10 @@
+# [1.0.0-alpha.127](https://github.com/tolgee/server/compare/v1.0.0-alpha.126...v1.0.0-alpha.127) (2021-09-09)
+
+
+### Features
+
+* **backend:** create key creation endpoint with translations and tags TG-277 ([202cfe3](https://github.com/tolgee/server/commit/202cfe3cc43405e6e928510050b5b11579e049d0))
+
 # [1.0.0-alpha.126](https://github.com/tolgee/server/compare/v1.0.0-alpha.125...v1.0.0-alpha.126) (2021-09-09)
 
 
