@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import clsx from 'clsx';
 import { makeStyles, Tabs, Tab, IconButton } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
@@ -105,10 +104,6 @@ export const TranslationOpened: React.FC<Props> = ({
   editEnabled,
 }) => {
   const classes = useStyles();
-
-  useEffect(() => {
-    window.dispatchEvent(new CustomEvent('resize'));
-  }, []);
 
   return (
     <div className={clsx(classes.editor, className)}>

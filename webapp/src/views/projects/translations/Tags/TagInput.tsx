@@ -38,12 +38,22 @@ const useStyles = makeStyles({
 });
 
 type Props = {
-  onClose: () => void;
+  onClose?: () => void;
   onAdd: (name: string) => void;
   className?: string;
+  autoFocus?: boolean;
+  existing?: string[];
+  placeholder?: string;
 };
 
-export const TagInput: React.FC<Props> = ({ onClose, onAdd, className }) => {
+export const TagInput: React.FC<Props> = ({
+  onClose,
+  onAdd,
+  className,
+  autoFocus,
+  existing,
+  placeholder,
+}) => {
   const classes = useStyles();
   const [value, setValue] = useState('');
   const [search] = useDebounce(value, 500);
@@ -66,9 +76,20 @@ export const TagInput: React.FC<Props> = ({ onClose, onAdd, className }) => {
 
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
-      onClose();
+      onClose?.();
     }
   };
+
+  const options = (tags.data?._embedded?.tags?.map(({ name }) => name) || [])
+    .concat(existing || [])
+    .filter((value, index, self) => {
+      return self.indexOf(value) === index;
+    })
+    .map((tag) => ({
+      label: tag,
+      value: tag,
+      translation: '',
+    }));
 
   return (
     <Wrapper role="input" className={className}>
@@ -78,13 +99,7 @@ export const TagInput: React.FC<Props> = ({ onClose, onAdd, className }) => {
         autoHighlight
         noOptionsText={<T>translations_tags_no_results</T>}
         PopperComponent={CustomPopper}
-        options={
-          tags.data?._embedded?.tags?.map((tag) => ({
-            label: tag.name,
-            value: tag.name,
-            translation: '',
-          })) || []
-        }
+        options={options}
         filterOptions={(options) => {
           const filtered = options.filter((o) => o.value.startsWith(search));
           if (search !== '' && !options.find((item) => item.value === search)) {
@@ -105,7 +120,8 @@ export const TagInput: React.FC<Props> = ({ onClose, onAdd, className }) => {
             onAdd(newValue.value);
           }
         }}
-        getOptionLabel={(option) => option.label}
+        getOptionLabel={() => ''}
+        getOptionSelected={() => true}
         renderOption={(option) => {
           return (
             <span data-cy="tag-autocomplete-option" className={classes.option}>
@@ -126,9 +142,10 @@ export const TagInput: React.FC<Props> = ({ onClose, onAdd, className }) => {
               size={0}
               className={classes.input}
               onKeyUp={handleKeyUp}
-              autoFocus
+              autoFocus={autoFocus}
+              placeholder={placeholder}
             />
-            <CloseButton onClick={onClose} />
+            {onClose && <CloseButton onClick={onClose} />}
           </div>
         )}
       />

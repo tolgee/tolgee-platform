@@ -1,9 +1,8 @@
+import clsx from 'clsx';
 import React, { FunctionComponent, useState } from 'react';
 import { Box, createStyles, makeStyles, Theme } from '@material-ui/core';
 import { green, red } from '@material-ui/core/colors';
-import BackupTwoToneIcon from '@material-ui/icons/BackupTwoTone';
-import HighlightOffTwoToneIcon from '@material-ui/icons/HighlightOffTwoTone';
-import clsx from 'clsx';
+import { Backup, HighlightOff } from '@material-ui/icons';
 
 import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -24,15 +23,27 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     valid: {
       backdropFilter: 'blur(5px)',
-      border: `10px solid ${green[200]}`,
-      backgroundColor: theme.palette.grey[200],
+      border: `1px solid ${green[200]}`,
+      backgroundColor: green[50],
       opacity: 0.9,
     },
     invalid: {
-      border: `10px solid ${red[200]}`,
+      border: `1px solid ${red[200]}`,
       opacity: 0.9,
-      backgroundColor: theme.palette.grey[200],
+      backgroundColor: red[50],
       backdropFilter: 'blur(5px)',
+    },
+    validIcon: {
+      filter: `drop-shadow(1px 1px 0px ${green[200]}) drop-shadow(-1px 1px 0px ${green[200]})
+         drop-shadow(1px -1px 0px ${green[200]}) drop-shadow(-1px -1px 0px ${green[200]})`,
+      fontSize: 100,
+      color: theme.palette.common.white,
+    },
+    invalidIcon: {
+      filter: `drop-shadow(1px 1px 0px ${red[200]}) drop-shadow(-1px 1px 0px ${red[200]})
+         drop-shadow(1px -1px 0px ${red[200]}) drop-shadow(-1px -1px 0px ${red[200]})`,
+      fontSize: 100,
+      color: theme.palette.common.white,
     },
   })
 );
@@ -112,11 +123,9 @@ export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
           alignItems="center"
           justifyContent="center"
         >
-          {dragOver === 'valid' && (
-            <BackupTwoToneIcon style={{ fontSize: 150 }} />
-          )}
+          {dragOver === 'valid' && <Backup className={classes.validIcon} />}
           {dragOver === 'invalid' && (
-            <HighlightOffTwoToneIcon style={{ fontSize: 150 }} />
+            <HighlightOff className={classes.invalidIcon} />
           )}
         </Box>
         {props.children}

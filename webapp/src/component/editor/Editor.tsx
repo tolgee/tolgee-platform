@@ -157,7 +157,7 @@ export const Editor: React.FC<Props> = ({
     lineWrapping: true,
     keyMap: 'sublime',
     extraKeys: {
-      Enter: onSave ? (editor) => onSave(editor.getValue()) : 'default',
+      Enter: (editor) => onSave?.(editor.getValue()),
       Esc: () => onCancel?.(),
       Tab: false,
       'Shift-Tab': false,

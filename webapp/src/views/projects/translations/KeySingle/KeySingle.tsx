@@ -1,14 +1,23 @@
 import { makeStyles } from '@material-ui/core';
+import { T, useTranslate } from '@tolgee/react';
 
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { BaseView } from 'tg.component/layout/BaseView';
+import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
-import { useUrlSearch } from 'tg.hooks/useUrlSearch.ts';
-import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useContextSelector } from 'use-context-selector';
+import {
+  TranslationsContext,
+  useTranslationsDispatch,
+} from '../context/TranslationsContext';
 import { KeyCreateForm } from './KeyCreateForm';
 import { KeyEditForm } from './KeyEditForm';
-import { LanguageType } from './TranslationsForm';
+
+export type LanguageType = {
+  tag: string;
+  name: string;
+};
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -24,75 +33,97 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-  exists: boolean;
-  defaultSelectedLanguages: LanguageType[];
+  keyName?: string;
 };
 
-export const KeySingle: React.FC<Props> = ({
-  exists,
-  defaultSelectedLanguages,
-}) => {
+export const KeySingle: React.FC<Props> = ({ keyName }) => {
   const classes = useStyles();
   const project = useProject();
-  const [languages, setLanguages] = useUrlSearchState('languages', {
-    array: true,
-  });
+  const t = useTranslate();
 
-  const keyName = useUrlSearch().key as string;
+  const dispatch = useTranslationsDispatch();
 
-  const translations = useApiQuery({
-    url: '/v2/projects/{projectId}/translations',
-    method: 'get',
-    path: { projectId: project.id },
-    query: { filterKeyName: keyName, languages: languages as string[] },
-    options: { keepPreviousData: true, enabled: exists },
-  });
+  const isFetching = useContextSelector(
+    TranslationsContext,
+    (c) => c.isFetching
+  );
+  const translations = useContextSelector(
+    TranslationsContext,
+    (c) => c.translations
+  );
+  const selectedLanguages = useContextSelector(
+    TranslationsContext,
+    (c) => c.selectedLanguages
+  )!;
+  const allLanguages = useContextSelector(
+    TranslationsContext,
+    (c) => c.languages
+  )!;
 
-  const selectedLanguages = (languages as string[]).length
-    ? (languages as string[])
-    : defaultSelectedLanguages.map((l) => l.tag) || [];
+  const handleLanguageChange = (languages: string[]) => {
+    dispatch({
+      type: 'SELECT_LANGUAGES',
+      payload: languages,
+    });
+  };
 
-  const allLanguages = useApiQuery({
-    url: '/v2/projects/{projectId}/languages',
-    method: 'get',
-    path: { projectId: project.id },
-    query: { size: 1000 },
-  });
+  const translation = translations?.[0];
 
-  useGlobalLoading(translations.isFetching || allLanguages.isFetching);
-
-  const translation = translations.data?._embedded?.keys?.[0];
-
-  const selectedLanguagesMapped = selectedLanguages.map((l) => {
-    const language = allLanguages.data?._embedded?.languages?.find(
-      ({ tag }) => tag === l
-    );
+  const selectedLanguagesMapped = selectedLanguages?.map((l) => {
+    const language = allLanguages?.find(({ tag }) => tag === l);
     return {
       name: language?.name || l,
       tag: l,
     };
   });
 
-  return allLanguages.data && (!exists || translation) ? (
-    <div className={classes.container}>
-      <div className={classes.languagesMenu}>
-        <LanguagesMenu
-          languages={allLanguages.data!._embedded!.languages!.map(
-            ({ tag, name }) => ({ value: tag, label: name })
-          )}
-          onChange={setLanguages}
-          value={selectedLanguages}
-          context="translation-single"
-        />
+  const keyExists = translation && keyName;
+
+  useGlobalLoading(isFetching);
+
+  return allLanguages && selectedLanguages ? (
+    <BaseView
+      navigation={[
+        [
+          project.name,
+          LINKS.PROJECT_TRANSLATIONS.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+        [
+          t('translations_view_title'),
+          LINKS.PROJECT_TRANSLATIONS.build({
+            [PARAMS.PROJECT_ID]: project.id,
+          }),
+        ],
+        [
+          keyExists ? (
+            translation!.keyName
+          ) : (
+            <T>translation_single_create_title</T>
+          ),
+          window.location.pathname + window.location.search,
+        ],
+      ]}
+    >
+      <div className={classes.container}>
+        <div className={classes.languagesMenu}>
+          <LanguagesMenu
+            languages={allLanguages.map(({ tag, name }) => ({
+              value: tag,
+              label: name,
+            }))}
+            onChange={handleLanguageChange}
+            value={selectedLanguages}
+            context="languages"
+          />
+        </div>
+        {keyExists ? (
+          <KeyEditForm />
+        ) : (
+          <KeyCreateForm languages={selectedLanguagesMapped} />
+        )}
       </div>
-      {translation ? (
-        <KeyEditForm
-          translation={translation}
-          languages={translations.data?.selectedLanguages || []}
-        />
-      ) : (
-        <KeyCreateForm languages={selectedLanguagesMapped} />
-      )}
-    </div>
+    </BaseView>
   ) : null;
 };

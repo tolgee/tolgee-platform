@@ -89,7 +89,11 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
         margin="dense"
       >
         {props.languages.map((lang) => (
-          <MenuItem key={lang.value} value={lang.value}>
+          <MenuItem
+            key={lang.value}
+            value={lang.value}
+            data-cy="translations-language-select-item"
+          >
             <Checkbox
               checked={props.value.indexOf(lang.value) > -1}
               size="small"

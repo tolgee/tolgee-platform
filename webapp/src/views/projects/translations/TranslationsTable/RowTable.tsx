@@ -69,6 +69,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
         data={data}
         width={columnSizes[0]}
         active={relaxedActive}
+        position="left"
       />
       {data.keyId < 0 ? (
         <EmptyKeyPlaceholder colIndex={0} onResize={onResize} />

@@ -83,12 +83,12 @@ export const Wrapper: React.FC<Props> = ({
       return (
         <div
           data-cy="translations-tag"
-          className={clsx(
-            classes.wrapper,
-            classes.hover,
-            classes.clickable,
-            className
-          )}
+          className={clsx({
+            [classes.wrapper]: true,
+            [classes.hover]: Boolean(onClick),
+            [classes.clickable]: Boolean(onClick),
+            [className || '']: true,
+          })}
           onClick={stopBubble(onClick)}
         >
           {children}

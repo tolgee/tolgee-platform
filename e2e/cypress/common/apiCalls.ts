@@ -243,6 +243,11 @@ export const generateCommentsData = () =>
 export const cleanCommentsData = () =>
   internalFetch('e2e-data/translation-comments/clean');
 
+export const generateSingleData = () =>
+  internalFetch('e2e-data/translation-single/generate');
+export const cleanSingleData = () =>
+  internalFetch('e2e-data/translation-single/clean');
+
 export const cleanImportData = () => internalFetch('e2e-data/import/clean');
 export const generateImportData = () =>
   internalFetch('e2e-data/import/generate');

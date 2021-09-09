@@ -1,14 +1,10 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useQueryClient } from 'react-query';
 import { createContext, useContext } from 'use-context-selector';
 import { T } from '@tolgee/react';
 
 import { components, operations } from 'tg.service/apiSchema.generated';
-import {
-  invalidateUrlPrefix,
-  useApiMutation,
-  useApiQuery,
-} from 'tg.service/http/useQueryApi';
+import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
 import { container } from 'tsyringe';
 import { MessageService } from 'tg.service/MessageService';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
@@ -18,6 +14,13 @@ import { useTranslationsInfinite } from './useTranslationsInfinite';
 import { useEdit, EditType, SetEditType } from './useEdit';
 import { StateType } from 'tg.constants/translationStates';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import {
+  usePostKey,
+  useDeleteKeys,
+  usePutTag,
+  useDeleteTag,
+  usePutTranslationState,
+} from '../../../../service/TranslationHooks';
 
 export type AfterCommand = 'EDIT_NEXT' | 'NEW_EMPTY_KEY';
 
@@ -126,7 +129,10 @@ const projectPreferences = container.resolve(ProjectPreferencesService);
 
 export const TranslationsContextProvider: React.FC<{
   projectId: number;
-  translationId?: number;
+  keyName?: string;
+  languages?: string[];
+  updateLocalStorageLanguages?: boolean;
+  pageSize?: number;
 }> = (props) => {
   const queryClient = useQueryClient();
   const dispatchRef = useRef(null as any as (action: ActionType) => void);
@@ -157,14 +163,24 @@ export const TranslationsContextProvider: React.FC<{
 
   const translations = useTranslationsInfinite({
     projectId: props.projectId,
-    translationId: props.translationId,
+    keyName: props.keyName,
+    pageSize: props.pageSize,
     // when initial langs are null, fetching is postponed
-    initialLangs,
+    initialLangs: props.languages || initialLangs,
   });
+
+  useEffect(() => {
+    if (props.updateLocalStorageLanguages && translations.data?.pages?.[0]) {
+      projectPreferences.setForProject(
+        props.projectId,
+        translations.data?.pages?.[0]?.selectedLanguages?.map((l) => l.tag)
+      );
+    }
+  }, [translations.data?.pages?.[0]]);
 
   const edit = useEdit({
     projectId: props.projectId,
-    translations: translations.data,
+    translations: translations.fixedTranslations,
   });
 
   const handleTranslationsReset = () => {
@@ -172,30 +188,11 @@ export const TranslationsContextProvider: React.FC<{
     setSelection([]);
   };
 
-  const deleteKeys = useApiMutation({
-    url: '/v2/projects/{projectId}/keys/{ids}',
-    method: 'delete',
-  });
-
-  const updateTranslationState = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/set-state/{state}',
-    method: 'put',
-  });
-
-  const createKey = useApiMutation({
-    url: '/v2/projects/{projectId}/keys/create',
-    method: 'post',
-  });
-
-  const addTag = useApiMutation({
-    url: '/v2/projects/{projectId}/keys/{keyId}/tags',
-    method: 'put',
-  });
-
-  const removeTag = useApiMutation({
-    url: '/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}',
-    method: 'delete',
-  });
+  const postKey = usePostKey();
+  const deleteKeys = useDeleteKeys();
+  const putTag = usePutTag();
+  const deleteTag = useDeleteTag();
+  const putTranslationState = usePutTranslationState();
 
   dispatchRef.current = async (action: ActionType) => {
     switch (action.type) {
@@ -250,7 +247,7 @@ export const TranslationsContextProvider: React.FC<{
         try {
           if (keyId < 0) {
             // empty key - not created yet
-            await createKey
+            await postKey
               .mutateAsync({
                 path: { projectId: props.projectId },
                 content: {
@@ -342,7 +339,7 @@ export const TranslationsContextProvider: React.FC<{
         });
         return;
       case 'SET_TRANSLATION_STATE':
-        updateTranslationState.mutate(
+        putTranslationState.mutate(
           {
             path: {
               projectId: props.projectId,
@@ -367,7 +364,7 @@ export const TranslationsContextProvider: React.FC<{
         return;
       case 'ADD_EMPTY_KEY': {
         const newId = (action.payload?.prevId || 0) - 1;
-        const existingEmptyKey = translations.data?.find(
+        const existingEmptyKey = translations.fixedTranslations?.find(
           (t) => t.keyId === newId
         );
         if (existingEmptyKey) {
@@ -391,14 +388,14 @@ export const TranslationsContextProvider: React.FC<{
         return;
       }
       case 'ADD_TAG':
-        return addTag
+        return putTag
           .mutateAsync({
             path: { projectId: props.projectId, keyId: action.payload.keyId },
             content: { 'application/json': { name: action.payload.name } },
           })
           .then((data) => {
             const previousTags =
-              translations.data
+              translations.fixedTranslations
                 ?.find((key) => key.keyId === action.payload.keyId)
                 ?.keyTags.filter((t) => t.id !== data.id) || [];
             translations.updateTranslationKey(action.payload.keyId, {
@@ -414,7 +411,7 @@ export const TranslationsContextProvider: React.FC<{
             return new Promise(() => {});
           });
       case 'REMOVE_TAG':
-        return removeTag
+        return deleteTag
           .mutateAsync({
             path: {
               keyId: action.payload.keyId,
@@ -423,7 +420,7 @@ export const TranslationsContextProvider: React.FC<{
             },
           })
           .then(() => {
-            const previousTags = translations.data?.find(
+            const previousTags = translations.fixedTranslations?.find(
               (key) => key.keyId === action.payload.keyId
             )?.keyTags;
             invalidateUrlPrefix(queryClient, '/v2/projects/{projectId}/tags');
@@ -468,13 +465,13 @@ export const TranslationsContextProvider: React.FC<{
     }
   };
 
-  const dataReady = translations.data && languages.data;
+  const dataReady = languages.data && translations.data;
 
   return (
     <DispatchContext.Provider value={dispatch}>
       <TranslationsContext.Provider
         value={{
-          translations: dataReady ? translations.data : undefined,
+          translations: dataReady ? translations.fixedTranslations : undefined,
           translationsTotal: translations.totalCount,
           languages: dataReady
             ? languages.data?._embedded?.languages
@@ -485,10 +482,10 @@ export const TranslationsContextProvider: React.FC<{
             languages.isFetching ||
             edit.isLoading ||
             deleteKeys.isLoading ||
-            updateTranslationState.isLoading ||
-            addTag.isLoading ||
-            removeTag.isLoading ||
-            createKey.isLoading,
+            putTranslationState.isLoading ||
+            putTag.isLoading ||
+            deleteTag.isLoading ||
+            postKey.isLoading,
           isFetchingMore: translations.isFetchingNextPage,
           hasMoreToFetch: translations.hasNextPage,
           search: translations.search as string,
