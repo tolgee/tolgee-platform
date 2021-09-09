@@ -1,7 +1,14 @@
 import { useState } from 'react';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { StateType } from 'tg.constants/translationStates';
+import {
+  usePutKey,
+  usePutTranslation,
+  usePutTranslationState,
+  usePutTag,
+  useDeleteTag,
+} from 'tg.service/TranslationHooks';
 
 export type Direction = 'DOWN';
 
@@ -34,15 +41,11 @@ type Props = {
 export const useEdit = ({ projectId, translations }: Props) => {
   const [position, setPosition] = useState<EditType | undefined>(undefined);
 
-  const updateValue = useApiMutation({
-    url: '/v2/projects/{projectId}/translations',
-    method: 'put',
-  });
-
-  const updateKey = useApiMutation({
-    url: '/v2/projects/{projectId}/keys/{id}',
-    method: 'put',
-  });
+  const putKey = usePutKey();
+  const putTranslation = usePutTranslation();
+  const putTranslationState = usePutTranslationState();
+  const putTag = usePutTag();
+  const deleteTag = useDeleteTag();
 
   const moveEditToDirection = (direction: Direction | undefined) => {
     const currentIndex =
@@ -82,7 +85,7 @@ export const useEdit = ({ projectId, translations }: Props) => {
 
   const mutateTranslationKey = async (payload: SetEditType) => {
     if (payload.value !== getEditOldValue()) {
-      await updateKey.mutateAsync({
+      await putKey.mutateAsync({
         path: { projectId, id: payload.keyId },
         content: {
           'application/json': {
@@ -98,7 +101,7 @@ export const useEdit = ({ projectId, translations }: Props) => {
 
     const newVal =
       payload.value !== getEditOldValue()
-        ? await updateValue.mutateAsync({
+        ? await putTranslation.mutateAsync({
             path: { projectId },
             content: {
               'application/json': {
@@ -113,12 +116,27 @@ export const useEdit = ({ projectId, translations }: Props) => {
     return newVal;
   };
 
+  const mutateTranslationState = (translationId: number, state: StateType) =>
+    putTranslationState.mutateAsync({
+      path: {
+        projectId,
+        translationId,
+        state,
+      },
+    });
+
   return {
     position,
     setPosition,
-    isLoading: updateKey.isLoading || updateValue.isLoading,
+    isLoading:
+      putKey.isLoading ||
+      putTranslation.isLoading ||
+      putTag.isLoading ||
+      deleteTag.isLoading ||
+      putTranslationState.isLoading,
     moveEditToDirection,
     mutateTranslation,
     mutateTranslationKey,
+    mutateTranslationState,
   };
 };

@@ -271,6 +271,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
           </Box>
         ) : (
           <>
+            {addBox}
             <Box
               display="flex"
               alignItems="center"
@@ -282,7 +283,6 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
                 <T>no_screenshots_yet</T>
               </Box>
             </Box>
-            {addBox}
           </>
         )}
       </ScreenshotDropzone>

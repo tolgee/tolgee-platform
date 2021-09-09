@@ -73,10 +73,10 @@ const useStyles = makeStyles((theme) => {
 type Props = {
   data: KeyWithTranslationsModel;
   language: LanguageModel;
-  colIndex: number;
-  onResize: (colIndex: number) => void;
+  colIndex?: number;
+  onResize?: (colIndex: number) => void;
   editEnabled: boolean;
-  width: number;
+  width?: number;
   active: boolean;
   lastFocusable: boolean;
 };
@@ -129,7 +129,7 @@ export const CellTranslation: React.FC<Props> = ({
   };
 
   const handleResize = () => {
-    onResize(colIndex);
+    onResize?.(colIndex || 0);
   };
 
   const toggleEdit = () => {

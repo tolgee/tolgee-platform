@@ -6,7 +6,10 @@ export const TranslationsView = () => {
   const project = useProject();
 
   return (
-    <TranslationsContextProvider projectId={project.id}>
+    <TranslationsContextProvider
+      projectId={project.id}
+      updateLocalStorageLanguages
+    >
       <Translations />
     </TranslationsContextProvider>
   );

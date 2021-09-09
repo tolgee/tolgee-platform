@@ -7,7 +7,7 @@ type Props = {
   name: string;
   onDelete?: React.MouseEventHandler<SVGElement>;
   onClick?: (name: string) => void;
-  selected: boolean;
+  selected?: boolean;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -38,7 +38,7 @@ export const Tag: React.FC<Props> = ({ name, onDelete, onClick, selected }) => {
   const classes = useStyles();
   return (
     <Wrapper
-      onClick={() => onClick?.(name)}
+      onClick={onClick ? () => onClick?.(name) : undefined}
       className={selected ? classes.selected : undefined}
     >
       <div className={classes.tag}>{name}</div>

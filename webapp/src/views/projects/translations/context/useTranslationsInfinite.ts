@@ -1,13 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
-import { container } from 'tsyringe';
 
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { components, operations } from 'tg.service/apiSchema.generated';
-import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { InfiniteData } from 'react-query';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-
-const projectPreferences = container.resolve(ProjectPreferencesService);
 
 const PAGE_SIZE = 60;
 
@@ -31,8 +27,9 @@ type FiltersType = Pick<
 
 type Props = {
   projectId: number;
-  translationId?: number;
+  keyName?: string;
   initialLangs: string[] | null | undefined;
+  pageSize?: number;
 };
 
 const flattenKeys = (
@@ -53,7 +50,7 @@ export const useTranslationsInfinite = (props: Props) => {
   const [search, setSearch] = useUrlSearchState('search', { defaultVal: '' });
 
   const [query, setQuery] = useState<Omit<TranslationsQueryType, 'search'>>({
-    size: PAGE_SIZE,
+    size: props.pageSize || PAGE_SIZE,
     sort: ['keyName'],
     languages: undefined,
   });
@@ -84,13 +81,13 @@ export const useTranslationsInfinite = (props: Props) => {
     query: {
       ...query,
       ...parsedFilters,
-      filterKeyId: props.translationId,
+      filterKeyName: props.keyName,
       search: search as string,
     },
     options: {
       // fetch after languages are loaded,
       // so we dont't try to fetch nonexistant languages
-      enabled,
+      enabled: enabled,
       keepPreviousData: true,
       getNextPageParam: (lastPage) => {
         if (
@@ -109,10 +106,6 @@ export const useTranslationsInfinite = (props: Props) => {
       },
       onSuccess(data) {
         const flatKeys = flattenKeys(data);
-        projectPreferences.setForProject(
-          props.projectId,
-          data.pages[0].selectedLanguages.map((l) => l.tag)
-        );
         if (data?.pages.length === 1) {
           // reset fixed translations when fetching first page
           // keep unsaved translations
@@ -211,8 +204,10 @@ export const useTranslationsInfinite = (props: Props) => {
     selectedLanguages: translations.data?.pages[0]?.selectedLanguages.map(
       (l) => l.tag
     ),
-    data: fixedTranslations,
+    data: translations.data,
+    fixedTranslations,
     totalCount: translations.data?.pages[0].page?.totalElements,
+
     refetchTranslations,
     updateQuery,
     search,

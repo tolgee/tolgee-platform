@@ -512,6 +512,8 @@ export interface components {
     CreateKeyDto: {
       /** Name of the key */
       name: string;
+      translations?: { [key: string]: string };
+      tags?: string[];
     };
     ErrorResponseBody: {
       code: string;
@@ -1485,7 +1487,7 @@ export interface operations {
          */
         filterState?: string[];
         /** Selects only keys with provided tag */
-        filterTag?: string;
+        filterTag?: string[];
         /** Cursor to get next data */
         cursor?: string;
         /** Zero-based page index (0..N) */

@@ -133,6 +133,12 @@ declare namespace DataCy {
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
         "transfer-project-apply-button" |
+        "translation-create-key-input" |
+        "translation-create-translation-input" |
+        "translation-edit-delete-button" |
+        "translation-edit-key-field" |
+        "translation-edit-translation-field" |
+        "translation-field-label" |
         "translation-state-button" |
         "translations-add-button" |
         "translations-cell-cancel-button" |
@@ -152,6 +158,7 @@ declare namespace DataCy {
         "translations-filters-subheader" |
         "translations-key-count" |
         "translations-language-select-form-control" |
+        "translations-language-select-item" |
         "translations-row" |
         "translations-row-checkbox" |
         "translations-state-indicator" |

@@ -69,6 +69,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
         data={data}
         width={columnSizes[0]}
         active={relaxedActive}
+        position="left"
       />
       <div className={classes.languages} style={{ width: columnSizes[1] }}>
         {data.keyId < 0 ? (

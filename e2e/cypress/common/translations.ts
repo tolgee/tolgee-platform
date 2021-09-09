@@ -69,7 +69,7 @@ export const visitTranslations = (projectId: number) => {
 };
 
 export const editCell = (oldValue: string, newValue: string, save = true) => {
-  cy.contains(oldValue).click();
+  cy.gcy('translations-table-cell').contains(oldValue).click();
 
   // wait for editor to appear
   cy.gcy('global-editor').should('be.visible');
@@ -87,8 +87,8 @@ export function clickDiscardChanges() {
 }
 
 export const toggleLang = (lang) => {
-  cy.get('#languages-select-translations').click();
-  cy.get('#language-select-translations-menu')
+  cy.gcy('translations-language-select-form-control').click();
+  cy.gcy('translations-language-select-item')
     .contains(lang)
     .should('be.visible')
     .click();

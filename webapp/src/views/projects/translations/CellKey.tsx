@@ -9,7 +9,7 @@ import { LimitedHeightText } from './LimitedHeightText';
 import { Tags } from './Tags/Tags';
 import { useEditableRow } from './useEditableRow';
 import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
-import { useCellStyles } from './cell/styles';
+import { PositionType, useCellStyles } from './cell/styles';
 import {
   TranslationsContext,
   useTranslationsDispatch,
@@ -94,15 +94,17 @@ const useStyles = makeStyles((theme) => {
 
 type Props = {
   data: KeyWithTranslationsModel;
-  width: number;
+  width?: number;
   editEnabled: boolean;
   active: boolean;
+  simple?: boolean;
+  position?: PositionType;
 };
 
 export const CellKey: React.FC<Props> = React.memo(
-  ({ data, width, editEnabled, active }) => {
+  ({ data, width, editEnabled, active, simple, position }) => {
     const classes = useStyles();
-    const cellClasses = useCellStyles({ position: 'left' });
+    const cellClasses = useCellStyles({ position });
     const [screenshotsOpen, setScreenshotsOpen] = useState(false);
     const dispatch = useTranslationsDispatch();
 
@@ -164,7 +166,7 @@ export const CellKey: React.FC<Props> = React.memo(
         >
           {!isEditing ? (
             <>
-              {editEnabled && (
+              {editEnabled && !simple && (
                 <Checkbox
                   className={classes.checkbox}
                   size="small"
@@ -179,29 +181,32 @@ export const CellKey: React.FC<Props> = React.memo(
                   {data.keyName}
                 </LimitedHeightText>
               </div>
-              <div className={classes.tags}>
-                <Tags
-                  keyId={data.keyId}
-                  tags={data.keyTags}
-                  deleteEnabled={editEnabled}
-                />
-                {editEnabled &&
-                  (tagEdit ? (
-                    <TagInput
-                      className={classes.tagAdd}
-                      onAdd={handleAddTag}
-                      onClose={() => setTagEdit(false)}
-                    />
-                  ) : (
-                    active && (
-                      <TagAdd
+              {!simple && (
+                <div className={classes.tags}>
+                  <Tags
+                    keyId={data.keyId}
+                    tags={data.keyTags}
+                    deleteEnabled={editEnabled}
+                  />
+                  {editEnabled &&
+                    (tagEdit ? (
+                      <TagInput
                         className={classes.tagAdd}
-                        onClick={() => setTagEdit(true)}
-                        withFullLabel={!data.keyTags?.length}
+                        onAdd={handleAddTag}
+                        onClose={() => setTagEdit(false)}
+                        autoFocus
                       />
-                    )
-                  ))}
-              </div>
+                    ) : (
+                      active && (
+                        <TagAdd
+                          className={classes.tagAdd}
+                          onClick={() => setTagEdit(true)}
+                          withFullLabel={!data.keyTags?.length}
+                        />
+                      )
+                    ))}
+                </div>
+              )}
             </>
           ) : (
             <div className={classes.editor}>
@@ -225,7 +230,7 @@ export const CellKey: React.FC<Props> = React.memo(
                 onCancel={handleClose}
                 onSave={handleSave}
                 onScreenshots={
-                  isEmpty ? undefined : () => setScreenshotsOpen(true)
+                  isEmpty || simple ? undefined : () => setScreenshotsOpen(true)
                 }
                 screenshotRef={screenshotEl}
                 screenshotsPresent={data.screenshotCount > 0}
@@ -235,7 +240,9 @@ export const CellKey: React.FC<Props> = React.memo(
                 <ControlsKey
                   onEdit={() => handleOpen('editor')}
                   onScreenshots={
-                    isEmpty ? undefined : () => setScreenshotsOpen(true)
+                    isEmpty || simple
+                      ? undefined
+                      : () => setScreenshotsOpen(true)
                   }
                   screenshotRef={screenshotEl}
                   screenshotsPresent={data.screenshotCount > 0}

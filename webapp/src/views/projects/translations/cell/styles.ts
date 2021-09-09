@@ -1,6 +1,6 @@
 import { makeStyles, Theme, colors } from '@material-ui/core';
 
-type PositionType = 'left' | 'right';
+export type PositionType = 'left' | 'right';
 
 const getCellGradientBackground = (position?: PositionType) => {
   const color = colors.grey[50];
