@@ -249,7 +249,7 @@ class TranslationsViewBuilder(
     get() {
       val query = getBaseQuery(cb.createQuery(Long::class.java))
       val file = query.roots.iterator().next() as Root<*>
-      query.select(cb.count(file))
+      query.select(cb.countDistinct(file))
       query.where(*whereConditions.toTypedArray())
       return query
     }
