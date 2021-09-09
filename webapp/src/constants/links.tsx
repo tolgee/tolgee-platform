@@ -58,6 +58,7 @@ export enum PARAMS {
   USER_ID = 'userID',
   VERIFICATION_CODE = 'verificationCode',
   ORGANIZATION_SLUG = 'slug',
+  TRANSLATION_ID = 'translationId',
 }
 
 export class LINKS {
@@ -156,6 +157,11 @@ export class LINKS {
   static PROJECT_ADD = Link.ofParent(LINKS.PROJECTS, 'add');
 
   static PROJECT_TRANSLATIONS = Link.ofParent(LINKS.PROJECT, 'translations');
+
+  static PROJECT_TRANSLATIONS_SINGLE = Link.ofParent(
+    LINKS.PROJECT_TRANSLATIONS,
+    'single'
+  );
 
   /**
    * Visible with edit permissions

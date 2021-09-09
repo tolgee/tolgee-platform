@@ -56,6 +56,7 @@ export const ProjectMenu = ({ id }) => {
             })}
             icon={<TranslationIcon />}
             text={t('project_menu_translations')}
+            matchAsPrefix
           />
         </List>
         <Divider />

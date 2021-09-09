@@ -5,7 +5,7 @@ import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { components, operations } from 'tg.service/apiSchema.generated';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 import { InfiniteData } from 'react-query';
-import { useQueryState } from 'tg.hooks/useQueryState';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 const projectPreferences = container.resolve(ProjectPreferencesService);
 
@@ -31,6 +31,7 @@ type FiltersType = Pick<
 
 type Props = {
   projectId: number;
+  translationId?: number;
   initialLangs: string[] | null | undefined;
 };
 
@@ -40,12 +41,16 @@ const flattenKeys = (
   data?.pages.filter(Boolean).flatMap((p) => p._embedded?.keys || []) || [];
 
 export const useTranslationsInfinite = (props: Props) => {
-  const [filters, setFilters] = useQueryState('filters', JSON.stringify({}));
-  const parsedFilters = (filters ? JSON.parse(filters) : {}) as FiltersType;
+  const [filters, setFilters] = useUrlSearchState('filters', {
+    defaultVal: JSON.stringify({}),
+  });
+  const parsedFilters = (
+    filters ? JSON.parse(filters as string) : {}
+  ) as FiltersType;
   // wait for initialLangs to not be null
   const [enabled, setEnabled] = useState(props.initialLangs !== null);
 
-  const [search, setSearch] = useQueryState('search', '');
+  const [search, setSearch] = useUrlSearchState('search', { defaultVal: '' });
 
   const [query, setQuery] = useState<Omit<TranslationsQueryType, 'search'>>({
     size: PAGE_SIZE,
@@ -76,7 +81,12 @@ export const useTranslationsInfinite = (props: Props) => {
     url: '/v2/projects/{projectId}/translations',
     method: 'get',
     path,
-    query: { ...query, ...parsedFilters, search },
+    query: {
+      ...query,
+      ...parsedFilters,
+      filterKeyId: props.translationId,
+      search: search as string,
+    },
     options: {
       // fetch after languages are loaded,
       // so we dont't try to fetch nonexistant languages
