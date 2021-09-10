@@ -1,3 +1,11 @@
+# [1.0.0-alpha.128](https://github.com/tolgee/server/compare/v1.0.0-alpha.127...v1.0.0-alpha.128) (2021-09-10)
+
+
+### Bug Fixes
+
+* Fix tag creation & keyMeta exception TG-279 ([23220f9](https://github.com/tolgee/server/commit/23220f9b046948858682ed8573ca57a776f97fd9))
+* **backend:** Fix translations view total count TG-278 ([b9b7be2](https://github.com/tolgee/server/commit/b9b7be262b09be5c1ade5c32a70f9e68bc93d010))
+
 # [1.0.0-alpha.127](https://github.com/tolgee/server/compare/v1.0.0-alpha.126...v1.0.0-alpha.127) (2021-09-09)
 
 
