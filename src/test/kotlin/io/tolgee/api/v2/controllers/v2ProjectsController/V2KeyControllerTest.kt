@@ -53,13 +53,16 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         translations = mapOf("en" to "EN", "de" to "DE"),
         tags = listOf("tag", "tag2")
       )
-    )
-      .andIsCreated.andPrettyPrint.andAssertThatJson {
-        node("id").isValidId
-        node("name").isEqualTo(keyName)
-      }
+    ).andIsCreated.andPrettyPrint.andAssertThatJson {
+      node("id").isValidId
+      node("name").isEqualTo(keyName)
+    }
+
     assertThat(tagService.find(project, "tag")).isNotNull
+    assertThat(tagService.find(project, "tag2")).isNotNull
+
     val key = keyService.get(project.id, keyName).orElseThrow()
+    assertThat(tagService.getTagsForKeyIds(listOf(key.id))[key.id]).hasSize(2)
     assertThat(translationService.find(key, testData.english).get().text).isEqualTo("EN")
   }
 

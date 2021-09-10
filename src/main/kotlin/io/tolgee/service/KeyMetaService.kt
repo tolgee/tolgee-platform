@@ -114,6 +114,7 @@ class KeyMetaService(
     var keyMeta = key.keyMeta
     if (keyMeta == null) {
       keyMeta = KeyMeta(key)
+      key.keyMeta = keyMeta
       keyMetaRepository.save(keyMeta)
     }
     return keyMeta
