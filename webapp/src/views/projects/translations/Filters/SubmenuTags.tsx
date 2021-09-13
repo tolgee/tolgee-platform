@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { T } from '@tolgee/react';
 import { Checkbox, ListItemText, Menu, MenuItem } from '@material-ui/core';
 import { ArrowRight } from '@material-ui/icons';
 
@@ -63,25 +64,31 @@ export const SubmenuTags: React.FC<Props> = ({
         anchorEl={menuOpen}
         onClose={() => setMenuOpen(null)}
       >
-        {item.submenu?.map((item) => {
-          return (
-            <MenuItem
-              data-cy="translations-filter-option"
-              key={item.value}
-              value={item.value!}
-              onClick={handleToggle(item.value)}
-            >
-              <Checkbox
-                size="small"
-                edge="start"
-                checked={activeFilters.includes(item.value!)}
-                tabIndex={-1}
-                disableRipple
-              />
-              <ListItemText primary={item.label} />
-            </MenuItem>
-          );
-        })}
+        {item.submenu?.length ? (
+          item.submenu?.map((item) => {
+            return (
+              <MenuItem
+                data-cy="translations-filter-option"
+                key={item.value}
+                value={item.value!}
+                onClick={handleToggle(item.value)}
+              >
+                <Checkbox
+                  size="small"
+                  edge="start"
+                  checked={activeFilters.includes(item.value!)}
+                  tabIndex={-1}
+                  disableRipple
+                />
+                <ListItemText primary={item.label} />
+              </MenuItem>
+            );
+          })
+        ) : (
+          <MenuItem className={classes.item} disabled>
+            <T>translations_filters_tags_empty</T>
+          </MenuItem>
+        )}
       </Menu>
     </>
   );
