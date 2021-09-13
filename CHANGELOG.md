@@ -1,3 +1,11 @@
+# [1.0.0-alpha.130](https://github.com/tolgee/server/compare/v1.0.0-alpha.129...v1.0.0-alpha.130) (2021-09-13)
+
+
+### Features
+
+* Add view for single key editing TG-258 ([b8a2725](https://github.com/tolgee/server/commit/b8a2725ac689820335c49f36157607638c49b1e5))
+* Add view for single key editing TG-258 ([ea245da](https://github.com/tolgee/server/commit/ea245da4ce7037fd9fdfcf65ca92a805c0e1824c))
+
 # [1.0.0-alpha.129](https://github.com/tolgee/server/compare/v1.0.0-alpha.128...v1.0.0-alpha.129) (2021-09-13)
 
 
