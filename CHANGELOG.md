@@ -1,3 +1,10 @@
+# [1.0.0-alpha.129](https://github.com/tolgee/server/compare/v1.0.0-alpha.128...v1.0.0-alpha.129) (2021-09-13)
+
+
+### Features
+
+* Translations counter and UP button TG-269 ([c6b3719](https://github.com/tolgee/server/commit/c6b3719d36f145026a77d94a92a37d975f4cb202))
+
 # [1.0.0-alpha.128](https://github.com/tolgee/server/compare/v1.0.0-alpha.127...v1.0.0-alpha.128) (2021-09-10)
 
 
