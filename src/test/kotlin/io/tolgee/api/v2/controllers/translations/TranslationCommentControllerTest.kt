@@ -8,6 +8,7 @@ import io.tolgee.dtos.request.TranslationCommentDto
 import io.tolgee.dtos.request.TranslationCommentWithLangKeyDto
 import io.tolgee.fixtures.*
 import io.tolgee.model.enums.TranslationCommentState
+import io.tolgee.model.enums.TranslationState
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.BeforeMethod
@@ -75,6 +76,7 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
       node("createdAt").isNumber.isGreaterThan(BigDecimal(1624985181827))
       node("updatedAt").isNumber.isGreaterThan(BigDecimal(1624985181827))
     }
+    assertThat(translationService.find(testData.translation.id)?.state).isEqualTo(TranslationState.REVIEWED)
   }
 
   @ProjectJWTAuthTestMethod

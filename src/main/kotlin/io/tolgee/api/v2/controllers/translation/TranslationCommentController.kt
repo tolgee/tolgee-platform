@@ -155,7 +155,11 @@ class TranslationCommentController(
       throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
     }
 
-    translation.state = TranslationState.UNTRANSLATED
+    // Translation was just created
+    if (translation.id == 0L) {
+      translation.state = TranslationState.UNTRANSLATED
+    }
+
     translationService.saveTranslation(translation)
 
     val comment = translationCommentService.create(dto, translation, authenticationFacade.userAccountEntity)
