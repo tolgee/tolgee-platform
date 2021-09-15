@@ -99,6 +99,7 @@ export const useTranslationsInfinite = (props: Props) => {
             query: {
               ...query,
               ...parsedFilters,
+              search,
               cursor: lastPage.nextCursor,
             },
           };
