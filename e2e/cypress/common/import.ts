@@ -1,5 +1,6 @@
 import { gcy } from './shared';
 import { HOST } from './constants';
+import { waitForGlobalLoading } from './loading';
 
 export const getFileIssuesDialog = () => {
   return gcy('import-file-issues-dialog');
@@ -30,6 +31,7 @@ export const findResolutionRow = (key: string) => {
 
 export const visitImport = (projectId: number) => {
   cy.visit(`${HOST}/projects/${projectId}/import`);
+  waitForGlobalLoading();
 };
 
 export const getLanguageRow = (filename: string) => {
