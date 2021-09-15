@@ -80,6 +80,7 @@ export const editCell = (oldValue: string, newValue: string, save = true) => {
   if (save) {
     getCellSaveButton().click();
   }
+  waitForGlobalLoading();
 };
 
 export function clickDiscardChanges() {
