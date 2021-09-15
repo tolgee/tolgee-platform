@@ -1,3 +1,17 @@
+# [1.0.0-alpha.131](https://github.com/tolgee/server/compare/v1.0.0-alpha.130...v1.0.0-alpha.131) (2021-09-15)
+
+
+### Bug Fixes
+
+* Cursor is returning unrelevant results when searching and going to second page TG-287 ([015a906](https://github.com/tolgee/server/commit/015a9060f1eddfa6ca04b1ab060a2b9edb86911a))
+* Fix intermittent tests TG-289 ([0da35a2](https://github.com/tolgee/server/commit/0da35a22b87eacbe0b9615bb4a208ea7082bff24))
+* Fix state UNTRANSLATED TG-282 ([c689ef8](https://github.com/tolgee/server/commit/c689ef88741b6971c1165926ac1325cb2b7e520f))
+
+
+### Features
+
+* **Filters:** tags empty message ([f2c2397](https://github.com/tolgee/server/commit/f2c2397892a707e20dbc127e522852ef84be6dcf))
+
 # [1.0.0-alpha.130](https://github.com/tolgee/server/compare/v1.0.0-alpha.129...v1.0.0-alpha.130) (2021-09-13)
 
 
