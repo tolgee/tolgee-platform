@@ -113,7 +113,7 @@ export function TranslationStatesBar(props: {
             backgroundColor: translationStates[legendItemProps.state].color,
           }}
         />
-        <T>{translationStates[legendItemProps.state].translationKey}</T>:{' '}
+        <T>{translationStates[legendItemProps.state].translationKey}</T>:&nbsp;
         {percent >= 0.01 ? (
           <T
             parameters={{

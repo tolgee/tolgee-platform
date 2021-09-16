@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Breadcrumbs, Link } from '@material-ui/core';
 import { NavigateNext } from '@material-ui/icons';
 import { Link as RouterLink } from 'react-router-dom';
 
 type Props = {
-  path: [name: string, url: string][];
+  path: [name: string | ReactNode, url: string][];
 };
 
 export const Navigation: React.FC<Props> = ({ path }) => {
