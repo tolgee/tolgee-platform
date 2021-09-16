@@ -1,3 +1,12 @@
+# [1.0.0-alpha.133](https://github.com/tolgee/server/compare/v1.0.0-alpha.132...v1.0.0-alpha.133) (2021-09-16)
+
+
+### Bug Fixes
+
+* Comments UX updates TG-292 ([7a23778](https://github.com/tolgee/server/commit/7a23778d0fac8bbd50dc89e5aacfe18e78bd9d7c))
+* **single key edit view:** URL is not changed after key edit TG-284 ([def4050](https://github.com/tolgee/server/commit/def4050ee566015094114225c695d327ccafc14e))
+* Key count toolbar is visible when few keys TG-283 ([db42e13](https://github.com/tolgee/server/commit/db42e1372bdbe6d0efff8a2875994e50eb7a3d93))
+
 # [1.0.0-alpha.132](https://github.com/tolgee/server/compare/v1.0.0-alpha.131...v1.0.0-alpha.132) (2021-09-16)
 
 
