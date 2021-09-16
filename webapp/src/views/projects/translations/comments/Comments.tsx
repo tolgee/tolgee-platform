@@ -39,6 +39,7 @@ const useStyles = makeStyles((theme) => {
     reverseScroller: {
       display: 'flex',
       flexDirection: 'column-reverse',
+      justifyContent: 'flex-end',
       overflowY: 'auto',
       overflowX: 'hidden',
       flexBasis: 100,

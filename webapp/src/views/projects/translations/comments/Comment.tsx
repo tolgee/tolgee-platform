@@ -2,7 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import { useCurrentLanguage, T } from '@tolgee/react';
 import { IconButton, makeStyles, Menu, MenuItem } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
+import { MoreHoriz } from '@material-ui/icons';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useCellStyles } from '../cell/styles';
@@ -99,7 +99,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete }) => {
           onClick={handleClick}
           data-cy="comment-menu"
         >
-          <MoreVert fontSize="small" />
+          <MoreHoriz fontSize="small" />
         </IconButton>
       )}
       <div className={classes.autor}>{data.author.name}</div>
