@@ -1,3 +1,10 @@
+# [1.0.0-alpha.132](https://github.com/tolgee/server/compare/v1.0.0-alpha.131...v1.0.0-alpha.132) (2021-09-16)
+
+
+### Bug Fixes
+
+* **server:** Update Tolgee Deps TG-290 ([137b47b](https://github.com/tolgee/server/commit/137b47b87976a88adec89deb8394029000442af9))
+
 # [1.0.0-alpha.131](https://github.com/tolgee/server/compare/v1.0.0-alpha.130...v1.0.0-alpha.131) (2021-09-15)
 
 
