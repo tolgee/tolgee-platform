@@ -22,6 +22,8 @@ import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { FieldLabel } from './FieldLabel';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { useEffect } from 'react';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 const messaging = container.resolve(MessageService);
 
@@ -85,6 +87,14 @@ export const KeyEditForm: React.FC = () => {
     (c) => c.selectedLanguages
   );
   const history = useHistory();
+
+  const [urlKey, setUrlKey] = useUrlSearchState('key');
+
+  useEffect(() => {
+    if (translation?.keyName !== undefined && urlKey !== translation.keyName) {
+      setUrlKey(translation.keyName);
+    }
+  }, [translation?.keyName]);
 
   const handleAddTag = (name: string) => {
     dispatch({

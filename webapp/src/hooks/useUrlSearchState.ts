@@ -52,7 +52,7 @@ type Options = {
 
 export const useUrlSearchState = (
   key: string,
-  options: Options
+  options?: Options
 ): [
   string | string[] | undefined,
   (value: string | string[] | undefined) => void
@@ -63,7 +63,7 @@ export const useUrlSearchState = (
 
   const getNewSearch = (value: any) => {
     const data = queryDecode(location.search);
-    const newValue = value === options.defaultVal ? undefined : value;
+    const newValue = value === options?.defaultVal ? undefined : value;
     const newSearch = queryEncode({
       ...data,
       [key]: newValue,
@@ -81,8 +81,8 @@ export const useUrlSearchState = (
     }
   };
 
-  if (!options.array) {
-    return [value === undefined ? options.defaultVal : value, setState];
+  if (!options?.array) {
+    return [value === undefined ? options?.defaultVal : value, setState];
   } else {
     return [
       Array.isArray(value) ? value : value !== undefined ? [value] : [],
