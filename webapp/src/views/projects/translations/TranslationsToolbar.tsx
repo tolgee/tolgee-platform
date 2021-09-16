@@ -54,6 +54,7 @@ type Props = {
 
 export const TranslationsToolbar: React.FC<Props> = ({ getVisibleRange }) => {
   const [index, setIndex] = useState(1);
+  const [toolbarVisible, setToolbarVisible] = useState(false);
   const classes = useStyles();
   const t = useTranslate();
   const totalCount = useContextSelector(
@@ -68,12 +69,12 @@ export const TranslationsToolbar: React.FC<Props> = ({ getVisibleRange }) => {
   const onScroll = useDebouncedCallback(
     () => {
       const [start, end] = getVisibleRange?.() || [0, 0];
-
       const fromBeginning = start;
       const toEnd = totalCount - 1 - end;
       const total = fromBeginning + toEnd || 1;
       const progress = (total - toEnd) / total;
       setIndex(Math.round(progress * (totalCount - 1) + 1));
+      setToolbarVisible(start > 0 && index > 1);
     },
     100,
     { maxWait: 200 }
@@ -91,7 +92,7 @@ export const TranslationsToolbar: React.FC<Props> = ({ getVisibleRange }) => {
     <div
       className={clsx({
         [classes.container]: true,
-        [classes.hidden]: index < 2,
+        [classes.hidden]: !toolbarVisible,
       })}
     >
       <div className={classes.index}>
