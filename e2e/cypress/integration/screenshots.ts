@@ -121,7 +121,7 @@ describe('Screenshots', () => {
             ).to.be.greaterThan(0);
           });
         cy.xpath(
-          "//*[text() = 'Screenshots']/parent::*/parent::*//div[contains(@data-cy, 'add-box')]"
+          "//*[text() = 'Screenshots']/parent::*/parent::*/parent::*//div[contains(@data-cy, 'add-box')]"
         ).should('be.visible');
       }
     );
