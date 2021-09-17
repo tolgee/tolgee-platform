@@ -1,0 +1,18 @@
+import { GoToDocsButton } from "../component/GoToDocsButton";
+
+<GoToDocsButton href="https://tolgee.io/apiReference" style={{ float: "right" }} />
+
+To read more about Tolgee REST API, please visit [API spec](https://tolgee.io/apiReference).
+
+## Exporting data
+```
+https://app.tolgee.io/api/project/export/jsonZip?ak={{{apiKey}}}
+```
+
+or with curl
+```shell-session
+curl "{{{apiUrl}}}/api/project/export/jsonZip?ak={{{apiKey}}}" \
+--output data.zip
+unzip data.zip
+rm data.zip
+```

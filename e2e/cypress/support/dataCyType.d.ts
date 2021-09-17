@@ -72,6 +72,18 @@ declare namespace DataCy {
         "import-show-data-dialog" |
         "import_apply_import_button" |
         "import_cancel_import_button" |
+        "integrate-api-key-selector-create-new-item" |
+        "integrate-api-key-selector-item" |
+        "integrate-api-key-selector-select" |
+        "integrate-api-key-selector-select-input" |
+        "integrate-choose-your-weapon-step-content" |
+        "integrate-choose-your-weapon-step-label" |
+        "integrate-go-to-docs-button" |
+        "integrate-guide" |
+        "integrate-navigation-title" |
+        "integrate-select-api-key-step-content" |
+        "integrate-select-api-key-step-label" |
+        "integrate-weapon-selector-button" |
         "invite-generate-button" |
         "invite-generate-input-code" |
         "language-delete-button" |

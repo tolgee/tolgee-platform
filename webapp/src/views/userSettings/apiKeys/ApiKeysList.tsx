@@ -14,10 +14,10 @@ import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
-type ApiKeyDTO = components['schemas']['ApiKeyDTO'];
+type ApiKeyModel = components['schemas']['ApiKeyModel'];
 
 interface ApiKeysListProps {
-  data: ApiKeyDTO[];
+  data: ApiKeyModel[];
 }
 
 const messageService = container.resolve(MessageService);
@@ -33,22 +33,22 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const Item: FunctionComponent<{ keyDTO: ApiKeyDTO }> = (props) => {
+const Item: FunctionComponent<{ keyDTO: ApiKeyModel }> = (props) => {
   const classes = useStyles();
 
   const deleteKey = useApiMutation({
-    url: '/api/apiKeys/{key}',
+    url: '/v2/api-keys/{apiKeyId}',
     method: 'delete',
     invalidatePrefix: '/api/apiKeys',
   });
 
-  const onDelete = (dto: ApiKeyDTO) => {
+  const onDelete = (dto: components['schemas']['ApiKeyModel']) => {
     confirmation({
       title: 'Delete api key',
       message: 'Do you really want to delete api key ' + dto.key + '?',
       onConfirm: () =>
         deleteKey.mutate(
-          { path: { key: dto.key! } },
+          { path: { apiKeyId: dto.id } },
           {
             onSuccess() {
               messageService.success(<T>api_key_successfully_deleted</T>);

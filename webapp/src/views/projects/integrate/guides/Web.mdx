@@ -1,0 +1,60 @@
+import { GoToDocsButton } from "../component/GoToDocsButton";
+
+<GoToDocsButton href="https://tolgee.io/docs/web/get_started/hello_world" style={{ float: "right" }} />
+
+To read more about how to use Tolgee on Web without any modern JS framework,
+please visit [docs](https://tolgee.io/docs/web/get_started/hello_world).
+
+
+
+## Add Tolgee libraries to your Web page
+You need `core` library to translate your texts and `ui` library to translate texts in the App.
+
+```html
+<script src="https://unpkg.com/@tolgee/core/dist/tolgee.umd.js"></script>
+<script src="https://unpkg.com/@tolgee/ui/dist/tolgee-ui.umd.js"></script>
+```
+
+## Setup Tolgee
+```javascript
+// index.js
+const tg = new window["@tolgee/core"].Tolgee({
+    apiUrl: "https://app.tolgee.io",
+
+    // ############################################################
+    // ## you should never leak your API key                     ##
+    // ## remove it in for production publicly accessible site   ##
+    // ############################################################
+    apiKey: "{{{apiKey}}}",
+
+    // in production mode this is where your
+    // exported translations are loaded from
+    filesUrlPrefix: "/i18n/",
+    defaultLanguage: "en",
+    inputPrefix: "{{",
+    inputSuffix: "}}",
+    watch: true,
+    ui: window["@tolgee/ui"].UI,
+});
+tg.run()
+```
+
+## Do stuff when Tolgee is loaded (optional)
+```javascript
+tg.run().then(() => {
+    document.getElementById("loading").style.display = "none";
+})
+```
+
+## Use Tolgee
+```html
+<h1>{{hello_world}}</h1>
+```
+or
+```javascript
+pg.onLangChange.subscribe(() => {
+    pg.translate("tolgee_example_title", undefined, true).then(t => {
+        document.title = t; //change the document title when language changes!
+    });
+});
+```

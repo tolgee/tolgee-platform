@@ -15,6 +15,13 @@ import { SocketIoPreview } from 'tg.views/projects/SocketIoPreview';
 import { TranslationsView } from './translations/TranslationsView';
 import { ProjectLanguagesView } from 'tg.views/projects/languages/ProjectLanguagesView';
 import { SingleKeyView } from './translations/SingleKeyView';
+import React from 'react';
+
+const IntegrateView = React.lazy(() =>
+  import('tg.views/projects/integrate/IntegrateView').then((r) => ({
+    default: r.IntegrateView,
+  }))
+);
 
 export const ProjectRouter = () => {
   const match = useRouteMatch();
@@ -63,6 +70,10 @@ export const ProjectRouter = () => {
 
           <Route exact path={LINKS.PROJECT_SOCKET_IO_PREVIEW.template}>
             <SocketIoPreview />
+          </Route>
+
+          <Route exact path={LINKS.PROJECT_INTEGRATE.template}>
+            <IntegrateView />
           </Route>
         </ProjectPage>
       </ProjectProvider>

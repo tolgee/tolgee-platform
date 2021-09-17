@@ -176,9 +176,34 @@ export const getUser = (username: string) => {
 };
 
 export const createApiKey = (body: { projectId: number; scopes: Scope[] }) =>
-  apiFetch(`apiKeys`, { method: 'POST', body }).then(
+  v2apiFetch(`api-keys`, { method: 'POST', body }).then(
     (r) => r.body
   ) as any as Promise<ApiKeyDTO>;
+
+export const getAllProjectApiKeys = (projectId: number) =>
+  // Cypress Promise implementation is so clever
+  // that you cannot resolve undefined or any other falsy value
+  // using "chaining" of then methods
+  // so we need to wrap the whole fn with another promise to actually
+  // resolve empty array
+  // thanks Cypress!
+  new Promise((resolve) =>
+    v2apiFetch(`api-keys`, {
+      method: 'GET',
+      qs: {
+        filterProjectId: projectId,
+      },
+    }).then((r) => resolve(r.body?._embedded?.apiKeys || []))
+  ) as any as Promise<components['schemas']['ApiKeyModel'][]>;
+
+export const deleteAllProjectApiKeys = (projectId: number) =>
+  getAllProjectApiKeys(projectId).then((keys) => {
+    return keys.forEach((k) =>
+      v2apiFetch(`api-keys/${k.id}`, {
+        method: 'DELETE',
+      })
+    );
+  });
 
 export const addScreenshot = (projectId: number, key: string, path: string) => {
   return cy.fixture(path).then((f) => {

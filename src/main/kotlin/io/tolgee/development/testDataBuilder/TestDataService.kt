@@ -21,7 +21,8 @@ class TestDataService(
   private val translationCommentService: TranslationCommentService,
   private val tagService: TagService,
   private val organizationService: OrganizationService,
-  private val organizationRoleService: OrganizationRoleService
+  private val organizationRoleService: OrganizationRoleService,
+  private val apiKeyService: ApiKeyService
 ) {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
@@ -45,6 +46,8 @@ class TestDataService(
 
     projectService.saveAll(builder.data.projects.map { it.self })
     permissionService.saveAll(builder.data.projects.flatMap { it.data.permissions.map { it.self } })
+    apiKeyService.saveAll(builder.data.projects.flatMap { it.data.apiKeys.map { it.self } })
+
     organizationRoleService.saveAll(builder.data.organizations.flatMap { it.data.roles.map { it.self } })
 
     val languages = builder.data.projects.flatMap { it.data.languages.map { it.self } }

@@ -103,10 +103,14 @@ export interface paths {
     put: operations["update_3"];
     delete: operations["delete_5"];
   };
+  "/v2/api-keys/{apiKeyId}": {
+    put: operations["update_4"];
+    delete: operations["delete_6"];
+  };
   "/api/project/{projectId}/keys": {
     put: operations["edit_2"];
-    post: operations["create_11"];
-    delete: operations["delete_8"];
+    post: operations["create_12"];
+    delete: operations["delete_9"];
   };
   "/api/project/{projectId}/translations": {
     put: operations["setTranslations_2"];
@@ -164,6 +168,10 @@ export interface paths {
     get: operations["getAll_8"];
     post: operations["create_9"];
   };
+  "/v2/api-keys": {
+    get: operations["allByUser"];
+    post: operations["create_10"];
+  };
   "/api/user": {
     get: operations["getInfo"];
     post: operations["updateUser"];
@@ -191,7 +199,7 @@ export interface paths {
     post: operations["editDeprecated"];
   };
   "/api/project/{projectId}/keys/create": {
-    post: operations["create_10"];
+    post: operations["create_11"];
   };
   "/api/project/{projectId}/screenshots/get": {
     post: operations["getKeyScreenshots_1"];
@@ -200,8 +208,8 @@ export interface paths {
     post: operations["uploadScreenshot_3"];
   };
   "/api/apiKeys": {
-    get: operations["allByUser"];
-    post: operations["create_14"];
+    get: operations["allByUser_1"];
+    post: operations["create_15"];
   };
   "/api/apiKeys/edit": {
     post: operations["edit_4"];
@@ -243,6 +251,9 @@ export interface paths {
   "/v2/projects/{projectId}/transfer-options": {
     get: operations["getTransferOptions"];
   };
+  "/v2/projects/{projectId}/api-keys": {
+    get: operations["allByProject"];
+  };
   "/v2/projects/with-stats": {
     get: operations["getAllWithStatistics"];
   };
@@ -276,6 +287,15 @@ export interface paths {
   "/api/organizations/{id}/projects": {
     get: operations["getAllProjects_3"];
   };
+  "/v2/api-keys/{keyId}": {
+    get: operations["get_9"];
+  };
+  "/v2/api-keys/current": {
+    get: operations["getCurrent"];
+  };
+  "/v2/api-keys/availableScopes": {
+    get: operations["getScopes"];
+  };
   "/api/public/verify_email/{userId}/{code}": {
     get: operations["verifyEmail"];
   };
@@ -290,7 +310,7 @@ export interface paths {
   };
   "/api/project/{projectId}/keys/{id}": {
     get: operations["getDeprecated"];
-    delete: operations["delete_6"];
+    delete: operations["delete_7"];
   };
   "/api/project/{projectId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
@@ -314,10 +334,10 @@ export interface paths {
     get: operations["getApiKeyScopes"];
   };
   "/api/apiKeys/project/{projectId}": {
-    get: operations["allByProject"];
+    get: operations["allByProject_1"];
   };
   "/api/apiKeys/availableScopes": {
-    get: operations["getScopes"];
+    get: operations["getScopes_1"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}": {
     delete: operations["removeTag"];
@@ -341,7 +361,7 @@ export interface paths {
     delete: operations["deleteInvitation"];
   };
   "/api/apiKeys/{key}": {
-    delete: operations["delete_10"];
+    delete: operations["delete_11"];
   };
 }
 
@@ -491,6 +511,25 @@ export interface components {
       basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       currentUserRole: "MEMBER" | "OWNER";
     };
+    V2EditApiKeyDto: {
+      scopes: string[];
+    };
+    ApiKeyModel: {
+      /** ID of the API key */
+      id: number;
+      /** Resulting user's api key */
+      key: string;
+      /** Username of user owner */
+      username?: string;
+      /** Full name of user owner */
+      userFullName?: string;
+      /** Api key's project ID */
+      projectId: number;
+      /** Api key's project name */
+      projectName: string;
+      /** Api key's permission scopes */
+      scopes: string[];
+    };
     OldEditKeyDto: {
       currentName: string;
       newName: string;
@@ -577,6 +616,10 @@ export interface components {
       filename: string;
       createdAt?: string;
     };
+    CreateApiKeyDto: {
+      projectId: number;
+      scopes: string[];
+    };
     UserUpdateRequestDTO: {
       name: string;
       email: string;
@@ -624,10 +667,6 @@ export interface components {
       id: number;
       filename: string;
       createdAt: string;
-    };
-    CreateApiKeyDTO: {
-      projectId: number;
-      scopes: string[];
     };
     ApiKeyDTO: {
       id: number;
@@ -776,6 +815,17 @@ export interface components {
     PagedModelLanguageModel: {
       _embedded?: {
         languages?: components["schemas"]["LanguageModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    Pageable: {
+      page?: number;
+      size?: number;
+      sort?: string[];
+    };
+    PagedModelApiKeyModel: {
+      _embedded?: {
+        apiKeys?: components["schemas"]["ApiKeyModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
     };
@@ -2086,6 +2136,61 @@ export interface operations {
       };
     };
   };
+  update_4: {
+    parameters: {
+      path: {
+        apiKeyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["V2EditApiKeyDto"];
+      };
+    };
+  };
+  delete_6: {
+    parameters: {
+      path: {
+        apiKeyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   edit_2: {
     parameters: {
       path: {
@@ -2114,7 +2219,7 @@ export interface operations {
       };
     };
   };
-  create_11: {
+  create_12: {
     parameters: {
       path: {
         projectId: number;
@@ -2142,7 +2247,7 @@ export interface operations {
       };
     };
   };
-  delete_8: {
+  delete_9: {
     parameters: {
       path: {
         projectId: number;
@@ -2900,6 +3005,61 @@ export interface operations {
       };
     };
   };
+  allByUser: {
+    parameters: {
+      query: {
+        pageable: components["schemas"]["Pageable"];
+        filterProjectId?: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  create_10: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateApiKeyDto"];
+      };
+    };
+  };
   getInfo: {
     responses: {
       /** OK */
@@ -3134,7 +3294,7 @@ export interface operations {
       };
     };
   };
-  create_10: {
+  create_11: {
     parameters: {
       path: {
         projectId: number;
@@ -3231,7 +3391,7 @@ export interface operations {
       };
     };
   };
-  allByUser: {
+  allByUser_1: {
     responses: {
       /** OK */
       200: {
@@ -3253,7 +3413,7 @@ export interface operations {
       };
     };
   };
-  create_14: {
+  create_15: {
     responses: {
       /** OK */
       200: {
@@ -3276,7 +3436,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["CreateApiKeyDTO"];
+        "application/json": components["schemas"]["CreateApiKeyDto"];
       };
     };
   };
@@ -3703,6 +3863,36 @@ export interface operations {
       };
     };
   };
+  allByProject: {
+    parameters: {
+      query: {
+        pageable: components["schemas"]["Pageable"];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllWithStatistics: {
     parameters: {
       query: {
@@ -4060,6 +4250,78 @@ export interface operations {
       };
     };
   };
+  get_9: {
+    parameters: {
+      path: {
+        keyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getCurrent: {
+    parameters: {};
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ApiKeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getScopes: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/json": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   verifyEmail: {
     parameters: {
       path: {
@@ -4193,7 +4455,7 @@ export interface operations {
       };
     };
   };
-  delete_6: {
+  delete_7: {
     parameters: {
       path: {
         id: number;
@@ -4405,7 +4667,7 @@ export interface operations {
       };
     };
   };
-  allByProject: {
+  allByProject_1: {
     parameters: {
       path: {
         projectId: number;
@@ -4432,7 +4694,7 @@ export interface operations {
       };
     };
   };
-  getScopes: {
+  getScopes_1: {
     responses: {
       /** OK */
       200: {
@@ -4622,7 +4884,7 @@ export interface operations {
       };
     };
   };
-  delete_10: {
+  delete_11: {
     parameters: {
       path: {
         key: string;

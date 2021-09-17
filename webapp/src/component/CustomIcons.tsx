@@ -8,6 +8,12 @@ import { ReactComponent as SettingsSvg } from '../svgs/icons/settings.svg';
 import { ReactComponent as TranslationSvg } from '../svgs/icons/translation.svg';
 import { ReactComponent as UserAddSvg } from '../svgs/icons/user-add.svg';
 import { ReactComponent as UserSettingSvg } from '../svgs/icons/user-setting.svg';
+import { ReactComponent as ReactSvg } from '../svgs/icons/react.svg';
+import { ReactComponent as AngularSvg } from '../svgs/icons/angular.svg';
+import { ReactComponent as NextSvg } from '../svgs/icons/next.svg';
+import { ReactComponent as GatsbySvg } from '../svgs/icons/gatsby.svg';
+import { ReactComponent as PhpSvg } from '../svgs/icons/php.svg';
+import { ReactComponent as JsSvg } from '../svgs/icons/js.svg';
 
 type IconProps = ComponentProps<typeof SvgIcon>;
 
@@ -43,4 +49,28 @@ export const UserAddIcon: React.FC<IconProps> = (props) => (
 );
 export const UserSettingIcon: React.FC<IconProps> = (props) => (
   <CustomIcon icon={UserSettingSvg} {...props} />
+);
+
+export const ReactIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={ReactSvg} {...props} />
+);
+
+export const AngularIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={AngularSvg} {...props} />
+);
+
+export const NextIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={NextSvg} {...props} />
+);
+
+export const GatsbyIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={GatsbySvg} {...props} />
+);
+
+export const PhpIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={PhpSvg} {...props} />
+);
+
+export const JsIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={JsSvg} {...props} />
 );

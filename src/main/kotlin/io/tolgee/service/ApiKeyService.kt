@@ -1,6 +1,5 @@
 package io.tolgee.service
 
-import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Project
@@ -8,6 +7,8 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.repository.ApiKeyRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.math.BigInteger
 import java.security.SecureRandom
@@ -22,23 +23,30 @@ class ApiKeyService @Autowired constructor(
   @set:Autowired
   lateinit var permissionService: PermissionService
 
-  fun createApiKey(userAccount: UserAccount, scopes: Set<ApiScope>, project: Project): ApiKeyDTO {
+  fun create(userAccount: UserAccount, scopes: Set<ApiScope>, project: Project): ApiKey {
     val apiKey = ApiKey(
       key = BigInteger(130, random).toString(32),
       project = project,
       userAccount = userAccount,
       scopesEnum = scopes
     )
-    apiKeyRepository.save(apiKey)
-    return ApiKeyDTO.fromEntity(apiKey)
+    return apiKeyRepository.save(apiKey)
   }
 
   fun getAllByUser(userAccountId: Long): Set<ApiKey> {
     return apiKeyRepository.getAllByUserAccountIdOrderById(userAccountId)
   }
 
+  fun getAllByUser(userAccountId: Long, filterProjectId: Long?, pageable: Pageable): Page<ApiKey> {
+    return apiKeyRepository.getAllByUserAccount(userAccountId, filterProjectId, pageable)
+  }
+
   fun getAllByProject(projectId: Long): Set<ApiKey> {
     return apiKeyRepository.getAllByProjectId(projectId)
+  }
+
+  fun getAllByProject(projectId: Long, pageable: Pageable): Page<ApiKey> {
+    return apiKeyRepository.getAllByProjectId(projectId, pageable)
   }
 
   fun getApiKey(apiKey: String): Optional<ApiKey> {
@@ -58,11 +66,15 @@ class ApiKeyService @Autowired constructor(
       ?: throw NotFoundException()
   }
 
-  fun editApiKey(apiKey: ApiKey) {
-    apiKeyRepository.save(apiKey)
+  fun editApiKey(apiKey: ApiKey): ApiKey {
+    return apiKeyRepository.save(apiKey)
   }
 
   fun deleteAllByProject(projectId: Long) {
     apiKeyRepository.deleteAllByProjectId(projectId)
+  }
+
+  fun saveAll(entities: Iterable<ApiKey>) {
+    this.apiKeyRepository.saveAll(entities)
   }
 }

@@ -1,9 +1,9 @@
 /// <reference types="cypress" />
 import { getAnyContainingAriaLabelAttribute, getInput } from './xPath';
 import { Scope } from './types';
+import { waitForGlobalLoading } from './loading';
 import Value = DataCy.Value;
 import Chainable = Cypress.Chainable;
-import { waitForGlobalLoading } from './loading';
 
 export const allScopes: Scope[] = [
   'keys.edit',
@@ -65,8 +65,13 @@ export const selectInProjectMenu = (itemName: string) => {
 };
 
 export const selectInSelect = (chainable: Chainable, renderedValue: string) => {
-  chainable.find('div').first().click();
-  getPopover().contains(renderedValue).click();
+  return chainable
+    .find('div')
+    .first()
+    .click()
+    .then(() => {
+      getPopover().contains(renderedValue).click();
+    });
 };
 
 export const toggleInMultiselect = (

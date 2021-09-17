@@ -24,6 +24,7 @@ import { AppState } from 'tg.store/index';
 import { SideMenu } from './SideMenu';
 import { SideMenuItem } from './SideMenuItem';
 import LanguageIcon from '@material-ui/icons/Language';
+import { Devices } from '@material-ui/icons';
 
 const actions = container.resolve(GlobalActions);
 
@@ -113,6 +114,13 @@ export const ProjectMenu = ({ id }) => {
             })}
             icon={<ExportIcon />}
             text={t('project_menu_export')}
+          />
+          <SideMenuItem
+            linkTo={LINKS.PROJECT_INTEGRATE.build({
+              [PARAMS.PROJECT_ID]: id,
+            })}
+            icon={<Devices />}
+            text={t('project_menu_integrate')}
           />
         </List>
         {!config.authentication && (

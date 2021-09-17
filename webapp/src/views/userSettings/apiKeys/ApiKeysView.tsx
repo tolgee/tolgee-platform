@@ -13,7 +13,12 @@ import { ApiKeysList } from './ApiKeysList';
 
 export const ApiKeysView: FunctionComponent = () => {
   const list = useApiQuery({
-    url: '/api/apiKeys',
+    url: '/v2/api-keys',
+    query: {
+      pageable: {
+        size: 1000,
+      },
+    },
     method: 'get',
   });
 
@@ -21,7 +26,7 @@ export const ApiKeysView: FunctionComponent = () => {
     <>
       {list.isSuccess && (
         <AddApiKeyFormDialog
-          editKey={list.data?.find(
+          editKey={list.data?._embedded?.apiKeys?.find(
             (key) =>
               key.id === parseInt(useRouteMatch().params[PARAMS.API_KEY_ID])
           )}
@@ -38,12 +43,12 @@ export const ApiKeysView: FunctionComponent = () => {
       >
         <>
           {list.isSuccess &&
-            (!list.data?.length ? (
+            ((list.data?.page?.totalElements || 0) < 1 ? (
               <EmptyListMessage>
                 <T>No api keys yet!</T>
               </EmptyListMessage>
             ) : (
-              <ApiKeysList data={list.data} />
+              <ApiKeysList data={list.data._embedded!.apiKeys!} />
             ))}
           <FabAddButtonLink to={LINKS.USER_API_KEYS_GENERATE.build()} />
         </>

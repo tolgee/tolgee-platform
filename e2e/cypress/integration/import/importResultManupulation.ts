@@ -73,8 +73,7 @@ describe('Import result & manipulation', () => {
     select.should('contain', 'French');
     select.should('not.contain', 'Czech');
     cy.reload();
-    getLanguageSelect(filename);
-    select.should('contain', 'French');
+    getLanguageSelect(filename).should('contain', 'French');
   });
 
   it('Clears existing language', () => {
