@@ -52,7 +52,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
   fun testGetAll() {
     val users = dbPopulator.createUsersAndOrganizations()
 
-    loginAsUser(users[1].name!!)
+    loginAsUser(users[1].name)
 
     performAuthGet("/api/organizations?size=100")
       .andPrettyPrint.andAssertThatJson.let {
@@ -69,7 +69,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
   fun testGetAllFilterOwned() {
     val users = dbPopulator.createUsersAndOrganizations()
 
-    loginAsUser(users[1].name!!)
+    loginAsUser(users[1].name)
 
     performAuthGet("/api/organizations?size=100&filterCurrentUserOwner=true")
       .andPrettyPrint.andAssertThatJson.let {
@@ -86,7 +86,7 @@ class OrganizationControllerTest : SignedInControllerTest() {
   fun testGetAllSort() {
     val users = dbPopulator.createUsersAndOrganizations()
 
-    loginAsUser(users[1].name!!)
+    loginAsUser(users[1].name)
 
     performAuthGet("/api/organizations?size=100&sort=basePermissions,desc&sort=name,desc")
       .andPrettyPrint

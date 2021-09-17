@@ -2,6 +2,7 @@ package io.tolgee.service
 
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.InvalidStateException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Permission.ProjectPermissionType
@@ -51,7 +52,11 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
   }
 
   fun checkApiKeyScopes(scopes: Set<ApiScope>, project: Project?, user: UserAccount? = null) {
-    if (!apiKeyService.getAvailableScopes(user?.id ?: activeUser.id, project!!).containsAll(scopes)) {
+    try {
+      if (!apiKeyService.getAvailableScopes(user?.id ?: activeUser.id, project!!).containsAll(scopes)) {
+        throw PermissionException()
+      }
+    } catch (e: NotFoundException) {
       throw PermissionException()
     }
   }

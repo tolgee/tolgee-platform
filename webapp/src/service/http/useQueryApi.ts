@@ -1,14 +1,14 @@
 import { useCallback } from 'react';
 import {
+  Query,
   QueryClient,
   useInfiniteQuery,
+  UseInfiniteQueryOptions,
   useMutation,
   UseMutationOptions,
   useQuery,
   useQueryClient,
   UseQueryOptions,
-  UseInfiniteQueryOptions,
-  Query,
 } from 'react-query';
 import { container } from 'tsyringe';
 
@@ -128,9 +128,5 @@ export const matchUrlPrefix = (prefix: string) => {
   };
 };
 
-export const invalidateUrlPrefix = (
-  queryClient: QueryClient,
-  prefix: string
-) => {
+export const invalidateUrlPrefix = (queryClient: QueryClient, prefix: string) =>
   queryClient.invalidateQueries(matchUrlPrefix(prefix));
-};

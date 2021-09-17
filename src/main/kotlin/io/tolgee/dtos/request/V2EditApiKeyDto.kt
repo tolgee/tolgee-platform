@@ -3,18 +3,19 @@ package io.tolgee.dtos.request
 import com.fasterxml.jackson.annotation.JsonGetter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonSetter
+import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.model.enums.ApiScope
-import java.util.stream.Collectors
 import javax.validation.constraints.NotEmpty
-import javax.validation.constraints.NotNull
 
-data class CreateApiKeyDTO(
-  @field:NotNull
-  var projectId: Long? = null,
-
+data class V2EditApiKeyDto(
   @field:NotEmpty
   @JsonIgnore
-  var scopes: Set<ApiScope>? = null
+  @Schema(
+    example = """
+    ["screenshots.upload", "screenshots.delete", "translations.edit", "screenshots.view", "translations.view", "keys.edit"]
+    """
+  )
+  var scopes: Set<ApiScope> = setOf()
 ) {
 
   @Suppress("unused")
@@ -26,6 +27,6 @@ data class CreateApiKeyDTO(
   @Suppress("unused")
   @JsonGetter("scopes")
   fun jsonGetScopes(): Set<String> {
-    return scopes!!.stream().map { obj: ApiScope -> obj.value }.collect(Collectors.toSet())
+    return scopes.map { obj: ApiScope -> obj.value }.toSet()
   }
 }

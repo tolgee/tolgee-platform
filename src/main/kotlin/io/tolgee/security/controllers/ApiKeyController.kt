@@ -3,7 +3,7 @@ package io.tolgee.security.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.CreateApiKeyDTO
+import io.tolgee.dtos.request.CreateApiKeyDto
 import io.tolgee.dtos.request.EditApiKeyDTO
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.exceptions.NotFoundException
@@ -13,6 +13,7 @@ import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
+import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.service.ApiKeyService
 import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
@@ -31,6 +32,7 @@ class ApiKeyController(
   private val authenticationFacade: AuthenticationFacade,
   private val securityService: SecurityService
 ) {
+  @AccessWithAnyProjectPermission
   @Operation(summary = "Returns all user's api keys")
   @GetMapping(path = [""])
   fun allByUser(): Set<ApiKeyDTO> {
@@ -50,11 +52,13 @@ class ApiKeyController(
 
   @PostMapping(path = [""])
   @Operation(summary = "Creates new API key with provided scopes")
-  fun create(@RequestBody @Valid createApiKeyDTO: CreateApiKeyDTO?): ApiKeyDTO {
+  fun create(@RequestBody @Valid createApiKeyDTO: CreateApiKeyDto?): ApiKeyDTO {
     val project = projectService.get(createApiKeyDTO!!.projectId!!)
       .orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }
     securityService.checkApiKeyScopes(createApiKeyDTO.scopes!!, project)
-    return apiKeyService.createApiKey(authenticationFacade.userAccountEntity, createApiKeyDTO.scopes!!, project!!)
+    return ApiKeyDTO.fromEntity(
+      apiKeyService.create(authenticationFacade.userAccountEntity, createApiKeyDTO.scopes!!, project!!)
+    )
   }
 
   @PostMapping(path = ["/edit"])

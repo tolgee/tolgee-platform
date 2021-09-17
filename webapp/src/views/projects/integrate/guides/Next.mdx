@@ -1,0 +1,91 @@
+import { GoToDocsButton } from "../component/GoToDocsButton";
+
+<GoToDocsButton href="https://tolgee.io/docs/web/using_with_react/ssr/using_with_next" style={{ float: "right" }} />
+
+To read full documentation about Tolgee for Next, visit [docs](https://tolgee.io/docs/web/using_with_react/ssr/using_with_next).
+
+## Install the packages
+
+You will need `@tolgee/react` to use `<T>` component or `useTranslate` hook. `@tolgee/ui` allows you to modify
+translations in-context.
+
+```
+npm install @tolgee/react @tolgee/ui --save
+```
+
+## Prepare `next-config.js`
+Setup your locales.
+```javascript
+/** @type {import('next').NextConfig} */
+module.exports = {
+    reactStrictMode: true,
+    i18n: {
+        locales: ['en', 'cs'],
+        localeDetection: true,
+        defaultLocale: "en"
+    },
+}
+```
+
+## Setup your environment
+Add this to your `.env.development.local`.
+```dotenv
+NEXT_PUBLIC_TOLGEE_API_KEY={{{apiKey}}}
+NEXT_PUBLIC_TOLGEE_API_URL=https://app.tolgee.io
+```
+
+## Use TolgeeProvider
+Wrap your main `App` component with Tolgee provider. To get `en.json` and `cs.json` export your data.
+
+```typescript jsx
+import '../styles/globals.css'
+import type {AppProps} from 'next/app'
+import UI from "@tolgee/ui";
+// you can obtain these files by exporting translations from Tolgee
+import enLocale from "../i18n/en.json";
+import csLocale from "../i18n/cs.json";
+import {useRouter} from "next/router";
+import {TolgeeProvider} from "@tolgee/react";
+
+function MyApp({Component, pageProps}: AppProps) {
+const {locale: activeLocale} = useRouter()
+
+    return <TolgeeProvider
+        ui={UI}
+        forceLanguage={activeLocale}
+        apiKey={process.env.NEXT_PUBLIC_TOLGEE_API_KEY}
+        apiUrl={process.env.NEXT_PUBLIC_TOLGEE_API_URL}
+        staticData={{
+            en: enLocale,
+            cs: csLocale
+        }}
+    >
+        <Component {...pageProps} />
+    </TolgeeProvider>
+}
+
+export default MyApp
+```
+
+## Use Tolgee!
+```typescript jsx
+import {T} from "@tolgee/react";
+
+...
+
+<T>translation_key</T>
+```
+
+or
+
+```typescript jsx
+import {useTranslate} from "@tolgee/react";
+
+...
+
+const t = useTranslate();
+
+...
+
+t("key_to_translate")
+```

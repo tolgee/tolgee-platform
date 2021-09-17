@@ -24,7 +24,9 @@ class ProjectApiKeyAuthRequestPerformer(
   lateinit var apiKeyService: ApiKeyService
 
   val apiKey: ApiKeyDTO by lazy {
-    apiKeyService.createApiKey(userAccountProvider.invoke(), scopes = this.scopes.toSet(), project)
+    ApiKeyDTO.fromEntity(
+      apiKeyService.create(userAccountProvider.invoke(), scopes = this.scopes.toSet(), project)
+    )
   }
 
   override fun performProjectAuthPut(url: String, content: Any?): ResultActions {

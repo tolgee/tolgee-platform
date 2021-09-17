@@ -1,0 +1,121 @@
+import { GoToDocsButton } from "../component/GoToDocsButton";
+
+<GoToDocsButton href="https://tolgee.io/docs/web/using_with_react/ssr/using_with_gatsby" style={{ float: "right" }} />
+
+To read full documentation about Tolgee for Gatsby, visit [docs](https://tolgee.io/docs/web/using_with_react/ssr/using_with_gatsby).
+
+## Install the packages
+
+You will need `@tolgee/react` to use `<T>` component or `useTranslate` hook. `@tolgee/ui` allows you to modify
+translations in-context.
+
+```
+npm install @tolgee/react @tolgee/ui --save
+```
+
+## Setup your environment
+Add this to your `.env.development.
+```dotenv
+GATSBY_TOLGEE_API_KEY={{{apiKey}}}
+GATSBY_TOLGEE_API_URL=https://app.tolgee.io
+```
+
+## Create pages for each language
+
+Add default page (English in our case)
+```typescript jsx
+// src/pages/index.js
+import * as React from 'react';
+import {TolgeeProvider} from '@tolgee/react';
+import {UI} from '@tolgee/ui';
+// you can obtain this file by exporting translations from Tolgee
+import * as translationsEn from '../i18n/en.json';
+import {HomePageInner} from "../component/homePageInner";
+
+const IndexPage = () => {
+    return (
+        <main>
+            <div>
+                {/*This is a link to Czech version of the website.*/}
+                <a href={'/cs'}>CS</a>
+            </div>
+            <TolgeeProvider
+                //to force Tolgee to stick with english
+                forceLanguage="en"
+                ui={UI}
+                apiKey={process.env.GATSBY_TOLGEE_API_KEY}
+                apiUrl={process.env.GATSBY_TOLGEE_API_URL}
+                staticData={{
+                    en: translationsEn
+                }}
+            >
+                <HomePageInner/>
+            </TolgeeProvider>
+        </main>
+    );
+};
+
+export default IndexPage;
+```
+and create other language pages
+
+```typescript jsx
+// src/pages/cs/index.js
+
+import * as React from 'react';
+import {TolgeeProvider} from '@tolgee/react';
+import * as translationsEn from '../../i18n/en.json';
+import * as translationsCs from '../../i18n/cs.json';
+import {HomePageInner} from "../../component/homePageInner";
+
+const IndexPage = () => {
+    return (
+        <main>
+            <div>
+                <a href={'/'}>EN</a>
+            </div>
+            <TolgeeProvider
+                forceLanguage="cs"
+                apiKey={process.env.GATSBY_TOLGEE_API_KEY}
+                apiUrl={process.env.GATSBY_TOLGEE_API_URL}
+                staticData={{
+                    // fallback language data as well if
+                    // you are not sure you have translated all keys
+                    en: translationsEn,
+                    cs: translationsCs,
+                }}
+            >
+                <HomePageInner />
+            </TolgeeProvider>
+        </main>
+    );
+};
+
+export default IndexPage;
+```
+
+## Use Tolgee!
+Now in `HomePageInner` component, you can use Tolgee.
+
+
+```typescript jsx
+import {T} from "@tolgee/react";
+
+...
+
+<T>translation_key</T>
+```
+
+or
+
+```typescript jsx
+import {useTranslate} from "@tolgee/react";
+
+...
+
+const t = useTranslate();
+
+...
+
+t("key_to_translate")
+```

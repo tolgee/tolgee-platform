@@ -25,7 +25,7 @@ class ApiKeyAuthenticationTest : AbstractUserAppApiTest() {
   @Test
   fun accessWithApiKey_success() {
     val base = dbPopulator.createBase(generateUniqueString())
-    val apiKey = apiKeyService.createApiKey(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
+    val apiKey = apiKeyService.create(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
     mvc.perform(MockMvcRequestBuilders.get("/uaa/en?ak=" + apiKey.key))
       .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
   }
@@ -39,7 +39,7 @@ class ApiKeyAuthenticationTest : AbstractUserAppApiTest() {
   @Test
   fun accessWithApiKey_failure_api_path() {
     val base = dbPopulator.createBase(generateUniqueString())
-    val apiKey = apiKeyService.createApiKey(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
+    val apiKey = apiKeyService.create(base.permissions.first().user!!, setOf(*ApiScope.values()), base)
     performAction(
       UserApiAppAction(
         apiKey = apiKey.key,

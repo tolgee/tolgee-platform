@@ -35,11 +35,14 @@ class DataBuilders {
       val imports = mutableListOf<ImportBuilder>()
       val keys = mutableListOf<KeyBuilder>()
       val translations = mutableListOf<TranslationBuilder>()
+      val apiKeys = mutableListOf<ApiKeyBuilder>()
     }
 
     var data = DATA()
 
     fun addPermission(ft: FT<PermissionBuilder>) = addOperation(data.permissions, ft)
+
+    fun addApiKey(ft: FT<ApiKeyBuilder>) = addOperation(data.apiKeys, ft)
 
     fun addImport(author: UserAccount? = null, ft: FT<ImportBuilder>) =
       addOperation(data.imports, ImportBuilder(this, author), ft)
@@ -246,6 +249,19 @@ class DataBuilders {
   ) : EntityDataBuilder<Permission> {
     override var self: Permission = Permission().apply {
       project = projectBuilder.self
+    }
+  }
+
+  class ApiKeyBuilder(
+    val projectBuilder: ProjectBuilder
+  ) : EntityDataBuilder<ApiKey> {
+    override var self: ApiKey = ApiKey(
+      "test_api_key", mutableSetOf()
+    ).apply {
+      project = projectBuilder.self
+      projectBuilder.self.userOwner?.let {
+        this.userAccount = it
+      }
     }
   }
 }
