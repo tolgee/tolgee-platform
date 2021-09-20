@@ -17,7 +17,7 @@ describe('Projects Dashboard', () => {
   });
 
   it('contains key count', () => {
-    gcy('dashboard-projects-list-item').contains('1 keys');
+    gcy('dashboard-projects-list-item').contains('1 key');
     gcy('dashboard-projects-list-item').contains('5 keys');
   });
 
