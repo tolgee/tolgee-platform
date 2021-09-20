@@ -4,25 +4,26 @@ import clsx from 'clsx';
 import * as Yup from 'yup';
 import { Box, Button, makeStyles, Typography } from '@material-ui/core';
 import { container } from 'tsyringe';
-import { useHistory } from 'react-router';
 
+import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useUrlSearch } from 'tg.hooks/useUrlSearch.ts';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { queryEncode } from 'tg.hooks/useUrlSearchState';
+import { LINKS } from 'tg.constants/links';
 import { MessageService } from 'tg.service/MessageService';
 import { Editor } from 'tg.component/editor/Editor';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
-import { Tag } from '../Tags/Tag';
-import { TagInput } from '../Tags/TagInput';
-import { FieldLabel } from './FieldLabel';
-import { TranslationVisual } from '../TranslationVisual';
+import { Tag } from './Tags/Tag';
+import { TagInput } from './Tags/TagInput';
+import { FieldLabel } from './KeySingle/FieldLabel';
+import { TranslationVisual } from './TranslationVisual';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { useEffect } from 'react';
+
+type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 
 const messaging = container.resolve(MessageService);
 const redirectionActions = container.resolve(RedirectionActions);
@@ -84,13 +85,20 @@ export type ValuesCreateType = {
 
 type Props = {
   languages: LanguageType[];
+  onSuccess?: (data: KeyWithDataModel) => void;
+  onCancel?: () => void;
+  autofocus?: boolean;
 };
 
-export const KeyCreateForm: React.FC<Props> = ({ languages }) => {
+export const KeyCreateForm: React.FC<Props> = ({
+  languages,
+  onSuccess,
+  onCancel,
+  autofocus,
+}) => {
   const classes = useStyles();
   const project = useProject();
   const permissions = useProjectPermissions();
-  const history = useHistory();
   const t = useTranslate();
 
   const keyName = useUrlSearch().key as string;
@@ -98,7 +106,6 @@ export const KeyCreateForm: React.FC<Props> = ({ languages }) => {
   const createKey = useApiMutation({
     url: '/v2/projects/{projectId}/keys/create',
     method: 'post',
-    invalidatePrefix: '/v2/projects/{projectId}/translations',
   });
 
   const handleSubmit = (values: ValuesCreateType) => {
@@ -110,15 +117,7 @@ export const KeyCreateForm: React.FC<Props> = ({ languages }) => {
       {
         onSuccess(data) {
           messaging.success(<T>translations_key_created</T>);
-          history.push(
-            LINKS.PROJECT_TRANSLATIONS_SINGLE.build({
-              [PARAMS.PROJECT_ID]: project.id,
-            }) +
-              queryEncode({
-                key: data.name,
-                languages: languages.map((l) => l.tag),
-              })
-          );
+          onSuccess?.(data);
         },
         onError(e) {
           parseErrorResponse(e).forEach((message) =>
@@ -175,8 +174,10 @@ export const KeyCreateForm: React.FC<Props> = ({ languages }) => {
                           onChange={(val) =>
                             form.setFieldValue(field.name, val)
                           }
+                          onSave={form.submitForm}
                           onBlur={() => form.setFieldTouched(field.name, true)}
                           minHeight="unset"
+                          autofocus={autofocus}
                         />
                       </div>
                     </div>
@@ -244,6 +245,8 @@ export const KeyCreateForm: React.FC<Props> = ({ languages }) => {
                             onChange={(val) =>
                               form.setFieldValue(field.name, val)
                             }
+                            minHeight={50}
+                            onSave={form.submitForm}
                           />
                         </div>
                         <TranslationVisual
@@ -265,19 +268,12 @@ export const KeyCreateForm: React.FC<Props> = ({ languages }) => {
               );
             })}
           </div>
-          <Box
-            display="flex"
-            alignItems="flex-end"
-            mb={2}
-            justifySelf="flex-end"
-          >
-            <Button
-              data-cy="global-form-cancel-button"
-              disabled={createKey.isLoading || !form.dirty}
-              onClick={() => form.resetForm()}
-            >
-              <T>global_form_reset</T>
-            </Button>
+          <Box display="flex" alignItems="flex-end" justifySelf="flex-end">
+            {onCancel && (
+              <Button data-cy="global-form-cancel-button" onClick={onCancel}>
+                <T>global_cancel_button</T>
+              </Button>
+            )}
             <Box ml={1}>
               <LoadingButton
                 data-cy="global-form-save-button"

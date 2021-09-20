@@ -1,3 +1,4 @@
+import { useCallback, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router';
 
 export function queryEncode(data: Record<string, any>) {
@@ -48,6 +49,8 @@ type Options = {
   defaultVal?: string | string[];
   history?: boolean;
   array?: boolean;
+  // clear parameter from url, after unmount
+  cleanup?: boolean;
 };
 
 export const useUrlSearchState = (
@@ -61,25 +64,39 @@ export const useUrlSearchState = (
   const value = queryDecode(location.search)[key];
   const { replace, push } = useHistory();
 
-  const getNewSearch = (value: any) => {
-    const data = queryDecode(location.search);
-    const newValue = value === options?.defaultVal ? undefined : value;
-    const newSearch = queryEncode({
-      ...data,
-      [key]: newValue,
-    });
+  const getNewSearch = useCallback(
+    (value: any) => {
+      const data = queryDecode(window.location.search);
+      const newValue = value === options?.defaultVal ? undefined : value;
+      const newSearch = queryEncode({
+        ...data,
+        [key]: newValue,
+      });
 
-    return newSearch;
-  };
+      return newSearch;
+    },
+    [options?.defaultVal]
+  );
 
-  const setState = (value: any) => {
-    const newSearch = getNewSearch(value);
-    if (history) {
-      push(location.pathname + newSearch);
-    } else {
-      replace(location.pathname + newSearch);
-    }
-  };
+  const setState = useCallback(
+    (value: any) => {
+      const newSearch = getNewSearch(value);
+      if (history) {
+        push(window.location.pathname + newSearch);
+      } else {
+        replace(window.location.pathname + newSearch);
+      }
+    },
+    [getNewSearch]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (options?.cleanup) {
+        setState(undefined);
+      }
+    };
+  }, [setState]);
 
   if (!options?.array) {
     return [value === undefined ? options?.defaultVal : value, setState];

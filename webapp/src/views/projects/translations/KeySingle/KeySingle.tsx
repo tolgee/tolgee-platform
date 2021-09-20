@@ -1,17 +1,21 @@
 import { makeStyles } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
+import { useQueryClient } from 'react-query';
+import { useHistory } from 'react-router';
 
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
+import { queryEncode } from 'tg.hooks/useUrlSearchState';
+import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
 import { useContextSelector } from 'use-context-selector';
 import {
   TranslationsContext,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
-import { KeyCreateForm } from './KeyCreateForm';
+import { KeyCreateForm } from '../KeyCreateForm';
 import { KeyEditForm } from './KeyEditForm';
 
 export type LanguageType = {
@@ -37,11 +41,13 @@ type Props = {
 };
 
 export const KeySingle: React.FC<Props> = ({ keyName }) => {
+  const queryClient = useQueryClient();
   const classes = useStyles();
   const project = useProject();
   const t = useTranslate();
 
   const dispatch = useTranslationsDispatch();
+  const history = useHistory();
 
   const isFetching = useContextSelector(
     TranslationsContext,
@@ -121,7 +127,32 @@ export const KeySingle: React.FC<Props> = ({ keyName }) => {
         {keyExists ? (
           <KeyEditForm />
         ) : (
-          <KeyCreateForm languages={selectedLanguagesMapped} />
+          <KeyCreateForm
+            onSuccess={(data) => {
+              // reload translations as new one was created
+              invalidateUrlPrefix(
+                queryClient,
+                '/v2/projects/{projectId}/translations'
+              );
+              history.push(
+                LINKS.PROJECT_TRANSLATIONS_SINGLE.build({
+                  [PARAMS.PROJECT_ID]: project.id,
+                }) +
+                  queryEncode({
+                    key: data.name,
+                    languages: selectedLanguages,
+                  })
+              );
+            }}
+            languages={selectedLanguagesMapped}
+            onCancel={() =>
+              history.push(
+                LINKS.PROJECT_TRANSLATIONS.build({
+                  [PARAMS.PROJECT_ID]: project.id,
+                })
+              )
+            }
+          />
         )}
       </div>
     </BaseView>

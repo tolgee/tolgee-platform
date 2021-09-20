@@ -9,6 +9,7 @@ import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
 import Chainable = Cypress.Chainable;
 import { waitForGlobalLoading } from './loading';
+import { assertMessage } from './shared';
 
 export function getCellCancelButton() {
   return cy.gcy('translations-cell-cancel-button');
@@ -18,23 +19,24 @@ export function getCellSaveButton() {
   return cy.gcy('translations-cell-save-button');
 }
 
-export function createTranslation(testKey: string, testTranslated?: string) {
+export function createTranslation(
+  testKey: string,
+  translation?: string,
+  tag?: string
+) {
   waitForGlobalLoading();
   cy.gcy('translations-add-button').click();
-  cy.get('.CodeMirror-code')
-    .should('be.visible')
-    .type(testKey, { force: true });
-  cy.xpath(getAnyContainingText('save')).click();
-  cy.contains('Key created').should('be.visible');
-
-  if (testTranslated) {
-    cy.gcy('translations-view-list').contains('en').first().click();
-    cy.get('.CodeMirror-code')
-      .should('be.visible')
-      .type(testTranslated, { force: true });
-    cy.xpath(getAnyContainingText('save')).click();
-    waitForGlobalLoading();
+  cy.gcy('translation-create-key-input').type(testKey);
+  if (tag) {
+    cy.gcy('translations-tag-input').type(tag);
+    cy.gcy('tag-autocomplete-option').contains(`Add "${tag}"`).click();
   }
+  if (translation) {
+    cy.gcy('translation-create-translation-input').type(translation);
+  }
+
+  cy.gcy('global-form-save-button').click();
+  assertMessage('Key created');
 }
 
 export function translationsBeforeEach(): Chainable<ProjectDTO> {

@@ -22,7 +22,7 @@ import {
   usePutTranslationState,
 } from '../../../../service/TranslationHooks';
 
-export type AfterCommand = 'EDIT_NEXT' | 'NEW_EMPTY_KEY';
+export type AfterCommand = 'EDIT_NEXT';
 
 type LanguagesType = components['schemas']['LanguageModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
@@ -45,12 +45,14 @@ type ActionType =
   | { type: 'UPDATE_LANGUAGES' }
   | { type: 'DELETE_TRANSLATIONS'; payload: number[] }
   | { type: 'SET_TRANSLATION_STATE'; payload: SetTranslationStatePayload }
-  | { type: 'ADD_EMPTY_KEY'; payload?: AddEmptyKeyType }
   | { type: 'ADD_TAG'; payload: AddTagPayload; onSuccess?: () => void }
   | { type: 'REMOVE_TAG'; payload: RemoveTagPayload }
-  | { type: 'UPDATE_TRANSLATION'; payload: UpdateTranslationPayolad };
+  | { type: 'UPDATE_TRANSLATION'; payload: UpdateTranslationPayolad }
+  | { type: 'INSERT_TRANSLATION'; payload: AddTranslationPayload };
 
 export type ViewType = 'LIST' | 'TABLE';
+
+type AddTranslationPayload = KeyWithTranslationsModelType;
 
 type UpdateTranslationPayolad = {
   keyId: number;
@@ -68,12 +70,9 @@ type AddTagPayload = {
   name: string;
 };
 
-type AddEmptyKeyType = {
-  prevId?: number;
-};
-
 type ChangeValueType = SetEditType & {
   after?: AfterCommand;
+  onSuccess: () => void;
 };
 
 export type FiltersType = Pick<
@@ -101,6 +100,7 @@ type ChangeScreenshotNum = {
 };
 
 export type TranslationsContextType = {
+  dataReady: boolean;
   translations?: KeyWithTranslationsModelType[];
   translationsTotal?: number;
   languages?: LanguagesType[];
@@ -205,13 +205,7 @@ export const TranslationsContextProvider: React.FC<{
         handleTranslationsReset();
         return;
       case 'SET_EDIT':
-        if (edit.position && edit.position.keyId < 0) {
-          // if selected key was empty - remove it
-          translations.setTranslations((translations) =>
-            translations?.filter((t) => t.keyId >= 0)
-          );
-          edit.setPosition(action.payload);
-        } else if (edit.position?.changed) {
+        if (edit.position?.changed) {
           edit.setPosition({ ...edit.position, mode: 'editor' });
           confirmation({
             title: <T>translations_leave_save_confirmation</T>,
@@ -245,28 +239,7 @@ export const TranslationsContextProvider: React.FC<{
           return;
         }
         try {
-          if (keyId < 0) {
-            // empty key - not created yet
-            await postKey
-              .mutateAsync({
-                path: { projectId: props.projectId },
-                content: {
-                  'application/json': {
-                    name: action.payload.value,
-                  },
-                },
-              })
-              .then((data) =>
-                translations.updateTranslationKey(keyId, {
-                  keyId: data.id,
-                  keyName: data.name,
-                  keyTags: [],
-                  screenshotCount: 0,
-                  translations: {},
-                })
-              )
-              .then(() => messaging.success(<T>translations_key_created</T>));
-          } else if (language) {
+          if (language) {
             // update translation
             await edit.mutateTranslation(action.payload).then((data) => {
               if (data) {
@@ -285,6 +258,7 @@ export const TranslationsContextProvider: React.FC<{
                 translations.updateTranslationKey(keyId, { keyName: value })
               );
           }
+          action.payload.onSuccess?.();
           doAfterCommand(action.payload.after);
         } catch (e) {
           const parsed = parseErrorResponse(e);
@@ -362,31 +336,6 @@ export const TranslationsContextProvider: React.FC<{
           }
         );
         return;
-      case 'ADD_EMPTY_KEY': {
-        const newId = (action.payload?.prevId || 0) - 1;
-        const existingEmptyKey = translations.fixedTranslations?.find(
-          (t) => t.keyId === newId
-        );
-        if (existingEmptyKey) {
-          return;
-        }
-        const newKey = {
-          keyId: newId,
-          keyName: '',
-          keyTags: [],
-          screenshotCount: 0,
-          translations: {},
-        };
-        translations.setTranslations((translations) =>
-          translations ? [newKey, ...translations] : [newKey]
-        );
-        edit.setPosition({
-          keyId: newKey.keyId,
-          keyName: newKey.keyName,
-          mode: 'editor',
-        });
-        return;
-      }
       case 'ADD_TAG':
         return putTag
           .mutateAsync({
@@ -440,6 +389,9 @@ export const TranslationsContextProvider: React.FC<{
           action.payload.lang,
           action.payload.data
         );
+      case 'INSERT_TRANSLATION':
+        translations.insertAsFirst(action.payload);
+        return;
     }
   };
 
@@ -455,24 +407,23 @@ export const TranslationsContextProvider: React.FC<{
         edit.moveEditToDirection('DOWN');
         return;
 
-      case 'NEW_EMPTY_KEY': {
-        const prevId = edit.position?.keyId;
-        dispatch({ type: 'ADD_EMPTY_KEY', payload: { prevId } });
-        return;
-      }
       default:
         edit.setPosition(undefined);
     }
   };
 
-  const dataReady = languages.data && translations.data;
+  const dataReady = Boolean(languages.data && translations.data);
 
   return (
     <DispatchContext.Provider value={dispatch}>
       <TranslationsContext.Provider
         value={{
+          dataReady,
           translations: dataReady ? translations.fixedTranslations : undefined,
-          translationsTotal: translations.totalCount,
+          translationsTotal:
+            translations.totalCount !== undefined
+              ? translations.totalCount
+              : undefined,
           languages: dataReady
             ? languages.data?._embedded?.languages
             : undefined,

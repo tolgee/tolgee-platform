@@ -515,6 +515,18 @@ export interface components {
       translations?: { [key: string]: string };
       tags?: string[];
     };
+    KeyWithDataModel: {
+      /** Id of key record */
+      id: number;
+      /** Name of key */
+      name: string;
+      /** Translations object containing values updated in this request */
+      translations: {
+        [key: string]: components["schemas"]["TranslationModel"];
+      };
+      /** Tags of key */
+      tags: components["schemas"]["TagModel"][];
+    };
     ErrorResponseBody: {
       code: string;
       params?: { [key: string]: unknown }[];
@@ -675,6 +687,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -685,7 +698,6 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -2392,7 +2404,7 @@ export interface operations {
       /** Created */
       201: {
         content: {
-          "*/*": components["schemas"]["KeyModel"];
+          "*/*": components["schemas"]["KeyWithDataModel"];
         };
       };
       /** Bad Request */
@@ -2424,7 +2436,7 @@ export interface operations {
       /** Created */
       201: {
         content: {
-          "*/*": components["schemas"]["KeyModel"];
+          "*/*": components["schemas"]["KeyWithDataModel"];
         };
       };
       /** Bad Request */
