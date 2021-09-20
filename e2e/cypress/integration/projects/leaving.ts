@@ -30,7 +30,7 @@ describe('Projects Basics', () => {
     cy.visit(`${HOST}`);
     leaveProject('Organization owned project');
     assertMessage(
-      'Cannot leave project owned by organization you are member of.'
+      'Cannot leave project owned by the organization you are member of.'
     );
   });
 
