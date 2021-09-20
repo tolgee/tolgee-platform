@@ -49,6 +49,8 @@ export const useTranslationsInfinite = (props: Props) => {
 
   const [search, setSearch] = useUrlSearchState('search', { defaultVal: '' });
 
+  const [manuallyInserted, setManuallyInserted] = useState(0);
+
   const [query, setQuery] = useState<Omit<TranslationsQueryType, 'search'>>({
     size: props.pageSize || PAGE_SIZE,
     sort: ['keyName'],
@@ -109,11 +111,8 @@ export const useTranslationsInfinite = (props: Props) => {
         const flatKeys = flattenKeys(data);
         if (data?.pages.length === 1) {
           // reset fixed translations when fetching first page
-          // keep unsaved translations
-          setFixedTranslations((data) => [
-            ...(data || []).filter((key) => key.keyId < 0),
-            ...flatKeys,
-          ]);
+          setFixedTranslations((data) => flatKeys);
+          setManuallyInserted(0);
         } else {
           // add only nonexistent keys
           const newKeys =
@@ -126,11 +125,15 @@ export const useTranslationsInfinite = (props: Props) => {
     },
   });
 
+  const insertAsFirst = (data: KeyWithTranslationsModelType) => {
+    setFixedTranslations((translations) => [data, ...(translations || [])]);
+    setManuallyInserted((num) => num + 1);
+  };
+
   const refetchTranslations = () => {
     // force refetch from first page
     translations.remove();
-    // remove unsaved translations
-    setFixedTranslations((data) => data?.filter((key) => key.keyId >= 0));
+    translations.refetch();
   };
 
   const updateSearch = (value: string) => {
@@ -194,6 +197,8 @@ export const useTranslationsInfinite = (props: Props) => {
     );
   };
 
+  const totalCount = translations.data?.pages[0].page?.totalElements;
+
   return {
     isLoading: translations.isLoading,
     isFetching: translations.isFetching,
@@ -207,7 +212,8 @@ export const useTranslationsInfinite = (props: Props) => {
     ),
     data: translations.data,
     fixedTranslations,
-    totalCount: translations.data?.pages[0].page?.totalElements,
+    totalCount:
+      totalCount !== undefined ? totalCount + manuallyInserted : undefined,
 
     refetchTranslations,
     updateQuery,
@@ -216,6 +222,6 @@ export const useTranslationsInfinite = (props: Props) => {
     updateFilters,
     updateTranslationKey,
     updateTranslation,
-    setTranslations: setFixedTranslations,
+    insertAsFirst,
   };
 };

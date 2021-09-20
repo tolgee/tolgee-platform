@@ -18,6 +18,7 @@ const useStyles = makeStyles((theme) => ({
     '.CodeMirror-lint-tooltip': {
       background: 'white',
       borderRadius: 0,
+      zIndex: theme.zIndex.tooltip,
     },
     '.CodeMirror-lint-message-error': {
       backgroundImage: 'unset',

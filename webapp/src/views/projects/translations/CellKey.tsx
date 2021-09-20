@@ -99,10 +99,11 @@ type Props = {
   active: boolean;
   simple?: boolean;
   position?: PositionType;
+  onSaveSuccess?: (value: string) => void;
 };
 
 export const CellKey: React.FC<Props> = React.memo(
-  ({ data, width, editEnabled, active, simple, position }) => {
+  ({ data, width, editEnabled, active, simple, position, onSaveSuccess }) => {
     const classes = useStyles();
     const cellClasses = useCellStyles({ position });
     const [screenshotsOpen, setScreenshotsOpen] = useState(false);
@@ -144,9 +145,8 @@ export const CellKey: React.FC<Props> = React.memo(
       keyName: data.keyName,
       defaultVal: data.keyName,
       language: undefined,
+      onSaveSuccess,
     });
-
-    const isEmpty = data.keyId < 0;
 
     return (
       <>
@@ -215,9 +215,7 @@ export const CellKey: React.FC<Props> = React.memo(
                 value={value}
                 onChange={(v) => setValue(v as string)}
                 onSave={() => handleSave()}
-                onCmdSave={() =>
-                  handleSave(isEmpty ? 'NEW_EMPTY_KEY' : 'EDIT_NEXT')
-                }
+                onCmdSave={() => handleSave('EDIT_NEXT')}
                 onCancel={handleClose}
                 autofocus={autofocus}
               />
@@ -230,7 +228,7 @@ export const CellKey: React.FC<Props> = React.memo(
                 onCancel={handleClose}
                 onSave={handleSave}
                 onScreenshots={
-                  isEmpty || simple ? undefined : () => setScreenshotsOpen(true)
+                  simple ? undefined : () => setScreenshotsOpen(true)
                 }
                 screenshotRef={screenshotEl}
                 screenshotsPresent={data.screenshotCount > 0}
@@ -240,9 +238,7 @@ export const CellKey: React.FC<Props> = React.memo(
                 <ControlsKey
                   onEdit={() => handleOpen('editor')}
                   onScreenshots={
-                    isEmpty || simple
-                      ? undefined
-                      : () => setScreenshotsOpen(true)
+                    simple ? undefined : () => setScreenshotsOpen(true)
                   }
                   screenshotRef={screenshotEl}
                   screenshotsPresent={data.screenshotCount > 0}
@@ -253,7 +249,7 @@ export const CellKey: React.FC<Props> = React.memo(
                 // hide as many components as possible in order to be performant
                 <ControlsKey
                   onScreenshots={
-                    !isEmpty && data.screenshotCount > 0
+                    data.screenshotCount > 0
                       ? () => setScreenshotsOpen(true)
                       : undefined
                   }

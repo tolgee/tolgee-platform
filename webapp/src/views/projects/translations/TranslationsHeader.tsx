@@ -4,6 +4,7 @@ import {
   IconButton,
   makeStyles,
   Typography,
+  Dialog,
 } from '@material-ui/core';
 import { ViewListRounded, AppsRounded, Add, Delete } from '@material-ui/icons';
 import SearchField from 'tg.component/common/form/fields/SearchField';
@@ -19,6 +20,8 @@ import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { Filters } from './Filters/Filters';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { KeyCreateDialog } from './KeyCreateDialog';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -66,6 +69,10 @@ export const TranslationsHeader = () => {
   const projectPermissions = useProjectPermissions();
   const search = useContextSelector(TranslationsContext, (v) => v.search);
   const languages = useContextSelector(TranslationsContext, (v) => v.languages);
+  const [newDialog, setNewDialog] = useUrlSearchState('create', {
+    defaultVal: 'false',
+  });
+
   const selectedLanguages = useContextSelector(
     TranslationsContext,
     (c) => c.selectedLanguages
@@ -75,6 +82,8 @@ export const TranslationsHeader = () => {
     TranslationsContext,
     (c) => c.translationsTotal
   );
+
+  const dataReady = useContextSelector(TranslationsContext, (c) => c.dataReady);
 
   const view = useContextSelector(TranslationsContext, (v) => v.view);
   const selection = useContextSelector(TranslationsContext, (v) => v.selection);
@@ -101,7 +110,7 @@ export const TranslationsHeader = () => {
   };
 
   const handleAddTranslation = () => {
-    dispatch({ type: 'ADD_EMPTY_KEY' });
+    setNewDialog('true');
   };
 
   return (
@@ -188,6 +197,17 @@ export const TranslationsHeader = () => {
           </Typography>
         </div>
       ) : null}
+      {dataReady && newDialog === 'true' && (
+        <Dialog
+          open={true}
+          onClose={() => setNewDialog('false')}
+          fullWidth
+          maxWidth="md"
+          keepMounted={false}
+        >
+          <KeyCreateDialog onClose={() => setNewDialog('false')} />
+        </Dialog>
+      )}
     </div>
   );
 };

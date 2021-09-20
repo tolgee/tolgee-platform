@@ -7,7 +7,6 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { CellKey } from '../CellKey';
 import { CellTranslation } from './CellTranslation';
-import { EmptyKeyPlaceholder } from '../cell/EmptyKeyPlaceholder';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -71,26 +70,22 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
         active={relaxedActive}
         position="left"
       />
-      {data.keyId < 0 ? (
-        <EmptyKeyPlaceholder colIndex={0} onResize={onResize} />
-      ) : (
-        languages.map((language, index) => (
-          <CellTranslation
-            key={language.tag}
-            data={data}
-            language={language}
-            colIndex={index}
-            onResize={onResize}
-            editEnabled={permissions.satisfiesPermission(
-              ProjectPermissionType.TRANSLATE
-            )}
-            width={columnSizes[index + 1]}
-            active={relaxedActive}
-            // render last focusable button on last item, so it's focusable
-            lastFocusable={index === languages.length - 1}
-          />
-        ))
-      )}
+      {languages.map((language, index) => (
+        <CellTranslation
+          key={language.tag}
+          data={data}
+          language={language}
+          colIndex={index}
+          onResize={onResize}
+          editEnabled={permissions.satisfiesPermission(
+            ProjectPermissionType.TRANSLATE
+          )}
+          width={columnSizes[index + 1]}
+          active={relaxedActive}
+          // render last focusable button on last item, so it's focusable
+          lastFocusable={index === languages.length - 1}
+        />
+      ))}
     </div>
   );
 });

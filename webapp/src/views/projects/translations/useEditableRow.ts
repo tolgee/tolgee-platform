@@ -13,6 +13,7 @@ type Props = {
   keyName: string;
   language: string | undefined;
   defaultVal?: string;
+  onSaveSuccess?: (val: string) => void;
 };
 
 export const useEditableRow = ({
@@ -20,6 +21,7 @@ export const useEditableRow = ({
   keyName,
   defaultVal,
   language,
+  onSaveSuccess,
 }: Props) => {
   const edit = useContextSelector(TranslationsContext, (v) => {
     // find language or keyName (in case of undefined)
@@ -63,6 +65,7 @@ export const useEditableRow = ({
         language,
         value,
         after,
+        onSuccess: () => onSaveSuccess?.(value),
       },
     });
   };
