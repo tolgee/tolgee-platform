@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.key.KeyModel
 import io.tolgee.api.v2.hateoas.key.KeyModelAssembler
+import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
+import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.CreateKeyDto
 import io.tolgee.dtos.request.EditKeyDto
@@ -34,16 +36,17 @@ import javax.validation.Valid
 class V2KeyController(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
-  private val keyModelAssembler: KeyModelAssembler
+  private val keyModelAssembler: KeyModelAssembler,
+  private val keyWithDataModelAssembler: KeyWithDataModelAssembler
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
   @Operation(summary = "Creates new key")
   @ResponseStatus(HttpStatus.CREATED)
-  fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyModel> {
+  fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyWithDataModel> {
     val key = keyService.create(projectHolder.projectEntity, dto)
-    return ResponseEntity(key.model, HttpStatus.CREATED)
+    return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
   }
 
   @PutMapping(value = ["/{id}"])

@@ -171,6 +171,9 @@ class TranslationService(
     if (translation.state == TranslationState.UNTRANSLATED && !translation.text.isNullOrEmpty()) {
       translation.state = TranslationState.TRANSLATED
     }
+    if (translation.id == 0L) {
+      key.translations.add(translation)
+    }
     saveTranslation(translation)
     return translation
   }

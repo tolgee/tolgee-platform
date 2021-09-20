@@ -56,6 +56,29 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     ).andIsCreated.andPrettyPrint.andAssertThatJson {
       node("id").isValidId
       node("name").isEqualTo(keyName)
+      node("tags") {
+        isArray.hasSize(2)
+        node("[0]") {
+          node("id").isValidId
+          node("name").isEqualTo("tag")
+        }
+        node("[1]") {
+          node("id").isValidId
+          node("name").isEqualTo("tag2")
+        }
+      }
+      node("translations") {
+        node("en") {
+          node("id").isValidId
+          node("text").isEqualTo("EN")
+          node("state").isEqualTo("TRANSLATED")
+        }
+        node("de") {
+          node("id").isValidId
+          node("text").isEqualTo("DE")
+          node("state").isEqualTo("TRANSLATED")
+        }
+      }
     }
 
     assertThat(tagService.find(project, "tag")).isNotNull
