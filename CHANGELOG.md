@@ -1,3 +1,11 @@
+# [1.0.0-alpha.135](https://github.com/tolgee/server/compare/v1.0.0-alpha.134...v1.0.0-alpha.135) (2021-09-21)
+
+
+### Features
+
+* add library testing configuration ([0a6b312](https://github.com/tolgee/server/commit/0a6b312c35710ed2d052ad585e89fd6961260e2c))
+* Add popup with new key form TG-293 ([bc67118](https://github.com/tolgee/server/commit/bc67118b6d5270e36cfe0756a07c8d20e80c499d))
+
 # [1.0.0-alpha.134](https://github.com/tolgee/server/compare/v1.0.0-alpha.133...v1.0.0-alpha.134) (2021-09-21)
 
 
