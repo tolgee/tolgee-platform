@@ -41,6 +41,8 @@ describe('With 100 translations', () => {
     cy.scrollTo('bottom');
     // it should load key 60 on bottom of the page if, heights of cells are estimated correctly
     cy.contains('Cool key 60').should('exist');
+    //wait for toolbar to show after transition
+    cy.wait(500);
     cy.gcy('translations-toolbar-to-top').should('be.visible');
     // now we scroll to the end of newly loaded data
     cy.scrollTo('bottom');
