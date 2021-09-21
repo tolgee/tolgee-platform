@@ -18,7 +18,7 @@ describe('Projects Basics', () => {
     openTransferDialog('test_project');
     gcy('project-transfer-dialog').should(
       'contain',
-      'This will transfer project to another owner.'
+      'This will transfer the project to another owner.'
     );
     gcy('transfer-project-apply-button').should('be.disabled');
   });
