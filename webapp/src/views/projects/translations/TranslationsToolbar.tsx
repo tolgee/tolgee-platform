@@ -73,8 +73,9 @@ export const TranslationsToolbar: React.FC<Props> = ({ getVisibleRange }) => {
       const toEnd = totalCount - 1 - end;
       const total = fromBeginning + toEnd || 1;
       const progress = (total - toEnd) / total;
-      setIndex(Math.round(progress * (totalCount - 1) + 1));
-      setToolbarVisible(start > 0 && index > 1);
+      const newIndex = Math.round(progress * (totalCount - 1) + 1);
+      setIndex(newIndex);
+      setToolbarVisible(start > 0 && newIndex > 1);
     },
     100,
     { maxWait: 200 }
