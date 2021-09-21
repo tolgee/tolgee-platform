@@ -1,3 +1,10 @@
+# [1.0.0-alpha.134](https://github.com/tolgee/server/compare/v1.0.0-alpha.133...v1.0.0-alpha.134) (2021-09-21)
+
+
+### Features
+
+* Return tags and translations from key creation endpoint TG-316 ([77d6e96](https://github.com/tolgee/server/commit/77d6e9611fdb19ed614c95eb9ad294eba3e71376))
+
 # [1.0.0-alpha.133](https://github.com/tolgee/server/compare/v1.0.0-alpha.132...v1.0.0-alpha.133) (2021-09-16)
 
 
