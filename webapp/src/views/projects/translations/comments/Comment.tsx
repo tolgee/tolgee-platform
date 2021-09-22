@@ -40,7 +40,12 @@ const useStyles = makeStyles((theme) => ({
   },
   text: {
     gridArea: 'text',
+    padding: 0,
+    margin: 0,
     lineHeight: 1.1,
+    fontFamily: theme.typography.fontFamily,
+    whiteSpace: 'pre-wrap',
+    wordWrap: 'break-word',
   },
   autor: {
     gridArea: 'autor',
@@ -89,9 +94,9 @@ export const Comment: React.FC<Props> = ({ data, onDelete }) => {
       className={clsx(classes.container, cellClasses.hover)}
       data-cy="comment"
     >
-      <div className={classes.text} data-cy="comment-text">
+      <pre className={classes.text} data-cy="comment-text">
         {data.text}
-      </div>
+      </pre>
       {onDelete && (
         <IconButton
           className={classes.menu}
