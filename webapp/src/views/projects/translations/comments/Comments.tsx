@@ -31,19 +31,23 @@ const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.grey[200];
   return {
     container: {
+      display: 'grid',
+      gridTemplateRows: '1fr auto',
+      flexGrow: 1,
+      flexBasis: 100,
+      overflow: 'hidden',
+    },
+    scrollerWrapper: {
+      alignSelf: 'stretch',
+      overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
-      flexGrow: 1,
-      overflow: 'hidden',
     },
     reverseScroller: {
       display: 'flex',
       flexDirection: 'column-reverse',
-      justifyContent: 'flex-end',
       overflowY: 'auto',
       overflowX: 'hidden',
-      flexBasis: 100,
-      flexGrow: 1,
       overscrollBehavior: 'contain',
     },
     loadMore: {
@@ -241,31 +245,33 @@ export const Comments: React.FC<Props> = ({
 
   return (
     <div className={classes.container}>
-      <div className={classes.reverseScroller} ref={scrollRef}>
-        {commentsList?.map((comment) => {
-          const canDelete =
-            user?.id === comment.author.id ||
-            permissions.satisfiesPermission(ProjectPermissionType.MANAGE);
-          return (
-            <Comment
-              key={comment.id}
-              data={comment}
-              onDelete={canDelete ? handleDelete : undefined}
-            />
-          );
-        })}
+      <div className={classes.scrollerWrapper}>
+        <div className={classes.reverseScroller} ref={scrollRef}>
+          {commentsList?.map((comment) => {
+            const canDelete =
+              user?.id === comment.author.id ||
+              permissions.satisfiesPermission(ProjectPermissionType.MANAGE);
+            return (
+              <Comment
+                key={comment.id}
+                data={comment}
+                onDelete={canDelete ? handleDelete : undefined}
+              />
+            );
+          })}
 
-        {comments.hasNextPage && (
-          <div className={classes.loadMore}>
-            <LoadingButton
-              onClick={() => comments.fetchNextPage()}
-              loading={comments.isFetchingNextPage}
-              data-cy="translations-comments-load-more-button"
-            >
-              <T>translations_comments_load_more</T>
-            </LoadingButton>
-          </div>
-        )}
+          {comments.hasNextPage && (
+            <div className={classes.loadMore}>
+              <LoadingButton
+                onClick={() => comments.fetchNextPage()}
+                loading={comments.isFetchingNextPage}
+                data-cy="translations-comments-load-more-button"
+              >
+                <T>translations_comments_load_more</T>
+              </LoadingButton>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className={classes.linearProgress}>
