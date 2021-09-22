@@ -1,3 +1,16 @@
+# [1.0.0-alpha.136](https://github.com/tolgee/server/compare/v1.0.0-alpha.135...v1.0.0-alpha.136) (2021-09-22)
+
+
+### Bug Fixes
+
+* Comments should be preformatted TG-299 ([2437e5a](https://github.com/tolgee/server/commit/2437e5a5391115c2df9b5159ad69a8960630be25))
+* Hiding menu jumping TG-312 ([107fe1b](https://github.com/tolgee/server/commit/107fe1b43947b694f7ed56a4822714b841030c8a))
+
+
+### Features
+
+* improve login page layout ([c40ef24](https://github.com/tolgee/server/commit/c40ef24cce7a3961a1e3bef897dd2701ddd46a67))
+
 # [1.0.0-alpha.135](https://github.com/tolgee/server/compare/v1.0.0-alpha.134...v1.0.0-alpha.135) (2021-09-21)
 
 
