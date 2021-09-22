@@ -5,11 +5,11 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { createStyles, makeStyles, Theme } from '@material-ui/core';
+import { makeStyles, Theme } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import AddIcon from '@material-ui/icons/Add';
 import { Skeleton } from '@material-ui/lab';
-import { T } from '@tolgee/react';
+import { T, useCurrentLanguage } from '@tolgee/react';
 import { container } from 'tsyringe';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
@@ -30,31 +30,38 @@ export interface ScreenshotGalleryProps {
   keyId: number;
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    addIcon: {
-      fontSize: 50,
+const useStyles = makeStyles((theme: Theme) => ({
+  addIcon: {
+    fontSize: 50,
+  },
+  addBox: {
+    overflow: 'hidden',
+    width: '100px',
+    height: '100px',
+    alignItems: 'center',
+    justifyContent: 'center',
+    display: 'flex',
+    margin: '1px',
+    cursor: 'pointer',
+    borderColor: theme.palette.grey[200],
+    color: theme.palette.grey[200],
+    border: `1px dashed ${theme.palette.grey[200]}`,
+    '&:hover': {
+      borderColor: theme.palette.primary.main,
+      color: theme.palette.primary.main,
     },
-    addBox: {
-      overflow: 'hidden',
-      width: '100px',
-      height: '100px',
-      alignItems: 'center',
-      justifyContent: 'center',
-      display: 'flex',
-      margin: '1px',
-      cursor: 'pointer',
-      borderColor: theme.palette.grey[200],
-      color: theme.palette.grey[200],
-      border: `1px dashed ${theme.palette.grey[200]}`,
-      '&:hover': {
-        borderColor: theme.palette.primary.main,
-        color: theme.palette.primary.main,
-      },
-      flex: '0 0 auto',
-    },
-  })
-);
+    flex: '0 0 auto',
+  },
+  hintText: {
+    overflow: 'hidden',
+    // Adds a hyphen where the word breaks
+    '-ms-hyphens': 'auto',
+    '-moz-hyphens': 'auto',
+    '-webkit-hyphens': 'auto',
+    hyphens: 'auto',
+    textAlign: 'justify',
+  },
+}));
 
 const messageService = container.resolve(MessageService);
 export const MAX_FILE_COUNT = 20;
@@ -67,6 +74,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const config = useConfig();
   const project = useProject();
   const dispatch = useTranslationsDispatch();
+  const lang = useCurrentLanguage();
 
   const screenshotsLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/keys/{keyId}/screenshots',
@@ -278,10 +286,10 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
               justifyContent="center"
               flexGrow={1}
               p={2}
+              className={classes.hintText}
+              lang={lang()}
             >
-              <Box>
-                <T>no_screenshots_yet</T>
-              </Box>
+              <T>no_screenshots_yet</T>
             </Box>
           </>
         )}
