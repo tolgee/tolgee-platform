@@ -1,5 +1,5 @@
-import { FunctionComponent, useEffect } from 'react';
-import { Button } from '@material-ui/core';
+import { FunctionComponent } from 'react';
+import { Button, Typography } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import { T } from '@tolgee/react';
@@ -9,23 +9,22 @@ import { container } from 'tsyringe';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useConfig } from 'tg.hooks/useConfig';
-import { MessageService } from 'tg.service/MessageService';
 import { SecurityService } from 'tg.service/SecurityService';
-import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 
 import LoadingButton from '../common/form/LoadingButton';
 import { StandardForm } from '../common/form/StandardForm';
 import { TextField } from '../common/form/fields/TextField';
-import { BaseView } from '../layout/BaseView';
 import { DashboardPage } from '../layout/DashboardPage';
+import { CompactView } from 'tg.component/layout/CompactView';
+import { Alert } from '@material-ui/lab';
+import { GlobalActions } from 'tg.store/global/GlobalActions';
 
 interface LoginProps {}
 
 const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const globalActions = container.resolve(GlobalActions);
 const securityServiceIns = container.resolve(SecurityService);
-const messageService = container.resolve(MessageService);
 // noinspection JSUnusedLocalSymbols
 export const LoginView: FunctionComponent<LoginProps> = (props) => {
   const security = useSelector((state: AppState) => state.global.security);
@@ -47,82 +46,87 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
     securityServiceIns.saveAfterLoginLink((history.location.state as any).from);
   }
 
-  useEffect(() => {
-    if (!authLoading && security.loginErrorCode) {
-      messageService.error(<T>{security.loginErrorCode}</T>);
-    }
-  }, [security.loginErrorCode, authLoading]);
-
   if (!remoteConfig.authentication || security.allowPrivate) {
     return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
   }
 
   return (
     <DashboardPage>
-      <BaseView lg={4} md={6} sm={8} xs={12}>
-        <StandardForm
-          initialValues={{ username: '', password: '' }}
-          submitButtons={
-            <Box ml={-1.5}>
-              <Box display="flex" justifyContent="space-between">
-                <Box>
-                  {security.allowRegistration && (
-                    <Button
-                      size="large"
-                      component={Link}
-                      to={LINKS.SIGN_UP.build()}
+      <CompactView
+        alerts={
+          security.loginErrorCode &&
+          !authLoading && (
+            <Alert severity="error">
+              <T>{security.loginErrorCode}</T>
+            </Alert>
+          )
+        }
+        title={<T>login_title</T>}
+        content={
+          <StandardForm
+            initialValues={{ username: '', password: '' }}
+            submitButtons={
+              <Box mt={2}>
+                <Box display="flex">
+                  <Box flexGrow={1}>
+                    {remoteConfig.authMethods?.github?.enabled && (
+                      <Button
+                        component="a"
+                        href={gitHubUrl}
+                        size="medium"
+                        endIcon={<GitHubIcon />}
+                        variant="outlined"
+                      >
+                        <T>login_github_login_button</T>
+                      </Button>
+                    )}
+                  </Box>
+                  <Box display="flex" flexGrow={0}>
+                    <LoadingButton
+                      loading={authLoading}
+                      variant="contained"
+                      color="primary"
+                      type="submit"
                     >
+                      <T>login_login_button</T>
+                    </LoadingButton>
+                  </Box>
+                </Box>
+              </Box>
+            }
+            onSubmit={(data) => globalActions.login.dispatch(data)}
+          >
+            <TextField name="username" label={<T>login_username_label</T>} />
+            <TextField
+              name="password"
+              type="password"
+              label={<T>login_password_label</T>}
+            />
+          </StandardForm>
+        }
+        footer={
+          <Box display="flex" justifyContent="space-between" flexWrap="wrap">
+            <Box>
+              {security.allowRegistration && (
+                <>
+                  <Link to={LINKS.SIGN_UP.build()}>
+                    <Typography variant="caption">
                       <T>login_sign_up</T>
-                    </Button>
-                  )}
-                </Box>
-                {remoteConfig.passwordResettable && (
-                  <Button
-                    component={Link}
-                    to={LINKS.RESET_PASSWORD_REQUEST.build()}
-                  >
-                    <T>login_reset_password_button</T>
-                  </Button>
-                )}
-              </Box>
-              <Box display="flex">
-                <Box flexGrow={1}>
-                  {remoteConfig.authMethods?.github?.enabled && (
-                    <Button
-                      component="a"
-                      href={gitHubUrl}
-                      size="large"
-                      endIcon={<GitHubIcon />}
-                    >
-                      <T>login_github_login_button</T>
-                    </Button>
-                  )}
-                </Box>
-                <Box display="flex" flexGrow={0}>
-                  <LoadingButton
-                    loading={authLoading}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                  >
-                    <T>login_login_button</T>
-                  </LoadingButton>
-                </Box>
-              </Box>
+                    </Typography>
+                  </Link>
+                </>
+              )}
             </Box>
-          }
-          onSubmit={(v) => {
-            globalActions.login.dispatch(v);
-          }}
-        >
-          <TextField name="username" label={<T>login_username_label</T>} />
-          <TextField
-            name="password"
-            type="password"
-            label={<T>login_password_label</T>}
-          />
-        </StandardForm>
-      </BaseView>
+            {remoteConfig.passwordResettable && (
+              <Link to={LINKS.RESET_PASSWORD_REQUEST.build()}>
+                <Typography variant="caption">
+                  <T>login_reset_password_button</T>
+                </Typography>
+              </Link>
+            )}
+          </Box>
+        }
+      />
     </DashboardPage>
   );
 };

@@ -1,5 +1,4 @@
-import { default as React, FunctionComponent, useCallback } from 'react';
-import { Button } from '@material-ui/core';
+import { FunctionComponent, useCallback } from 'react';
 import Box from '@material-ui/core/Box';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
@@ -14,11 +13,12 @@ import { AppState } from 'tg.store/index';
 
 import { Alert } from '../common/Alert';
 import { TextField } from '../common/form/fields/TextField';
-import { BaseFormView } from '../layout/BaseFormView';
-import { BaseView } from '../layout/BaseView';
 import { DashboardPage } from '../layout/DashboardPage';
 import { SetPasswordFields } from './SetPasswordFields';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { StandardForm } from 'tg.component/common/form/StandardForm';
+import { CompactView } from 'tg.component/layout/CompactView';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 const actions = container.resolve(SignUpActions);
 
@@ -83,43 +83,47 @@ const SignUpView: FunctionComponent = () => {
 
   const View = (props: { onSubmit: (v) => void }) => (
     <DashboardPage>
-      {state.loaded && config.needsEmailVerification ? (
-        <BaseView title={<T>sign_up_success_title</T>} lg={4} md={6} xs={12}>
-          <Alert severity="success">
-            <T>sign_up_success_needs_verification_message</T>
-          </Alert>
-        </BaseView>
-      ) : (
-        <BaseFormView
-          loading={state.loading}
-          title={<T>sign_up_title</T>}
-          lg={4}
-          md={6}
-          xs={12}
-          saveActionLoadable={state}
-          initialValues={
-            {
-              password: '',
-              passwordRepeat: '',
-              name: '',
-              email: '',
-            } as SignUpType
-          }
-          validationSchema={Validation.SIGN_UP(t)}
-          submitButtons={
-            <Box display="flex" justifyContent="flex-end">
-              <Button color="primary" type="submit">
-                <T>sign_up_submit_button</T>
-              </Button>
-            </Box>
-          }
-          onSubmit={props.onSubmit}
-        >
-          <TextField name="name" label={<T>sign_up_form_full_name</T>} />
-          <TextField name="email" label={<T>sign_up_form_email</T>} />
-          <SetPasswordFields />
-        </BaseFormView>
-      )}
+      <CompactView
+        title={<T>sign_up_title</T>}
+        backLink={LINKS.LOGIN.build()}
+        content={
+          state.loaded && config.needsEmailVerification ? (
+            <Alert severity="success">
+              <T>sign_up_success_needs_verification_message</T>
+            </Alert>
+          ) : (
+            <StandardForm
+              saveActionLoadable={state}
+              initialValues={
+                {
+                  password: '',
+                  passwordRepeat: '',
+                  name: '',
+                  email: '',
+                } as SignUpType
+              }
+              validationSchema={Validation.SIGN_UP(t)}
+              submitButtons={
+                <Box display="flex" justifyContent="flex-end">
+                  <LoadingButton
+                    color="primary"
+                    type="submit"
+                    variant="contained"
+                    loading={state.loading}
+                  >
+                    <T>sign_up_submit_button</T>
+                  </LoadingButton>
+                </Box>
+              }
+              onSubmit={props.onSubmit}
+            >
+              <TextField name="name" label={<T>sign_up_form_full_name</T>} />
+              <TextField name="email" label={<T>sign_up_form_email</T>} />
+              <SetPasswordFields />
+            </StandardForm>
+          )
+        }
+      />
     </DashboardPage>
   );
 

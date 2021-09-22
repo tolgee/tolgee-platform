@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     textField: {
       marginTop: theme.spacing(2),
-      marginBottom: theme.spacing(2),
+      minHeight: 70,
     },
   })
 );

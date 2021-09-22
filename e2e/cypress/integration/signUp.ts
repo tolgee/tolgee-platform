@@ -15,7 +15,7 @@ import {
   setRecaptchaSiteKey,
 } from '../common/apiCalls';
 import { assertMessage, selectInProjectMenu } from '../common/shared';
-import { loginWithFakeGithub } from './login.spec';
+import { loginWithFakeGithub } from '../common/login';
 
 const createProjectWithInvitation = (
   name = 'Test'

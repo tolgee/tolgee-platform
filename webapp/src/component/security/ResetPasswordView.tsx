@@ -1,5 +1,4 @@
-import { default as React, FunctionComponent, useEffect } from 'react';
-import { Button } from '@material-ui/core';
+import { FunctionComponent, useEffect } from 'react';
 import Box from '@material-ui/core/Box';
 import { T } from '@tolgee/react';
 import { useSelector } from 'react-redux';
@@ -15,8 +14,9 @@ import { AppState } from 'tg.store/index';
 import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
 import { TextField } from '../common/form/fields/TextField';
-import { BaseView } from '../layout/BaseView';
 import { DashboardPage } from '../layout/DashboardPage';
+import { CompactView } from 'tg.component/layout/CompactView';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 interface LoginProps {}
 
@@ -49,48 +49,53 @@ const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
 
   return (
     <DashboardPage>
-      <BaseView lg={6} md={8} xs={12} loading={loadable.loading}>
-        {loadable.error ||
-          (loadable.loaded && (
-            <Box mt={1}>
-              {(loadable.loaded && (
-                <Alert severity="success">
-                  <T>reset_password_success_message</T>
-                </Alert>
-              )) ||
-                (loadable.error && (
-                  <Alert severity="error">{loadable.error}</Alert>
-                ))}
-            </Box>
-          ))}
-
-        {!loadable.loaded && (
-          <StandardForm
-            initialValues={{ email: '' } as ValueType}
-            validationSchema={Validation.RESET_PASSWORD_REQUEST}
-            submitButtons={
-              <>
-                <Box display="flex">
-                  <Box flexGrow={1}></Box>
-                  <Box display="flex" flexGrow={0}>
-                    <Button color="primary" type="submit">
-                      <T>reset_password_send_request_button</T>
-                    </Button>
+      <CompactView
+        alerts={
+          loadable.error && <Alert severity="error">{loadable.error}</Alert>
+        }
+        backLink={LINKS.LOGIN.build()}
+        title={<T>login_reset_password_button</T>}
+        content={
+          loadable.loaded ? (
+            <Alert severity="success">
+              <T>reset_password_success_message</T>
+            </Alert>
+          ) : (
+            <StandardForm
+              initialValues={{ email: '' } as ValueType}
+              validationSchema={Validation.RESET_PASSWORD_REQUEST}
+              submitButtons={
+                <>
+                  <Box display="flex">
+                    <Box flexGrow={1}></Box>
+                    <Box display="flex" flexGrow={0}>
+                      <LoadingButton
+                        color="primary"
+                        type="submit"
+                        variant="contained"
+                        loading={loadable.loading}
+                      >
+                        <T>reset_password_send_request_button</T>
+                      </LoadingButton>
+                    </Box>
                   </Box>
-                </Box>
-              </>
-            }
-            // @ts-ignore
-            onSubmit={(v: ValueType) => {
-              globalActions.loadableActions.resetPasswordRequest.dispatch(
-                v.email
-              );
-            }}
-          >
-            <TextField name="email" label={<T>reset_password_email_field</T>} />
-          </StandardForm>
-        )}
-      </BaseView>
+                </>
+              }
+              // @ts-ignore
+              onSubmit={(v: ValueType) => {
+                globalActions.loadableActions.resetPasswordRequest.dispatch(
+                  v.email
+                );
+              }}
+            >
+              <TextField
+                name="email"
+                label={<T>reset_password_email_field</T>}
+              />
+            </StandardForm>
+          )
+        }
+      />
     </DashboardPage>
   );
 };
