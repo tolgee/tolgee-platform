@@ -1,5 +1,5 @@
-import { default as React, FunctionComponent, useEffect } from 'react';
-import { Button } from '@material-ui/core';
+import { FunctionComponent, useEffect } from 'react';
+import { T } from '@tolgee/react';
 import Box from '@material-ui/core/Box';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router-dom';
@@ -10,10 +10,11 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useConfig } from 'tg.hooks/useConfig';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
+import { CompactView } from 'tg.component/layout/CompactView';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { Alert } from '../common/Alert';
 import { StandardForm } from '../common/form/StandardForm';
-import { BaseView } from '../layout/BaseView';
 import { DashboardPage } from '../layout/DashboardPage';
 import { SetPasswordFields } from './SetPasswordFields';
 
@@ -60,37 +61,49 @@ const PasswordResetSetView: FunctionComponent = () => {
 
   return (
     <DashboardPage>
-      <BaseView lg={6} md={8} xs={12} loading={passwordResetSetLoading}>
-        {passwordResetSetError && (
-          <Box mt={1}>
-            <Alert severity="error">{passwordResetSetError}</Alert>
-          </Box>
-        )}
-        {passwordResetSetValidated && (
-          <StandardForm
-            initialValues={{ password: '', passwordRepeat: '' } as ValueType}
-            validationSchema={Validation.USER_PASSWORD_WITH_REPEAT}
-            submitButtons={
-              <>
-                <Box display="flex">
-                  <Box flexGrow={1}></Box>
-                  <Box display="flex" flexGrow={0}>
-                    <Button color="primary" type="submit">
-                      Save new password
-                    </Button>
+      {passwordResetSetValidated && (
+        <CompactView
+          alerts={
+            passwordResetSetError && (
+              <Alert severity="error">{passwordResetSetError}</Alert>
+            )
+          }
+          title={<T>reset_password_set_title</T>}
+          content={
+            <StandardForm
+              initialValues={{ password: '', passwordRepeat: '' } as ValueType}
+              validationSchema={Validation.USER_PASSWORD_WITH_REPEAT}
+              submitButtons={
+                <>
+                  <Box display="flex">
+                    <Box flexGrow={1}></Box>
+                    <Box display="flex" flexGrow={0}>
+                      <LoadingButton
+                        color="primary"
+                        type="submit"
+                        variant="contained"
+                        loading={passwordResetSetLoading}
+                      >
+                        Save new password
+                      </LoadingButton>
+                    </Box>
                   </Box>
-                </Box>
-              </>
-            }
-            //@ts-ignore
-            onSubmit={(v: ValueType) => {
-              globalActions.resetPasswordSet.dispatch(email, code, v.password);
-            }}
-          >
-            <SetPasswordFields />
-          </StandardForm>
-        )}
-      </BaseView>
+                </>
+              }
+              //@ts-ignore
+              onSubmit={(v: ValueType) => {
+                globalActions.resetPasswordSet.dispatch(
+                  email,
+                  code,
+                  v.password
+                );
+              }}
+            >
+              <SetPasswordFields />
+            </StandardForm>
+          }
+        />
+      )}
     </DashboardPage>
   );
 };

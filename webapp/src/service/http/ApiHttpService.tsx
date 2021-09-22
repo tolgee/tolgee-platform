@@ -25,7 +25,8 @@ const detectLoop = (url) => {
 };
 
 export class RequestOptions {
-  disableNotFoundHandling = false;
+  disableNotFoundHandling? = false;
+  disableAuthHandling? = false;
 }
 
 @singleton()
@@ -61,7 +62,7 @@ export class ApiHttpService {
 
       fetch(this.apiUrl + input, init)
         .then((r) => {
-          if (r.status == 401) {
+          if (r.status == 401 && !options.disableAuthHandling) {
             // eslint-disable-next-line no-console
             console.warn('Redirecting to login - unauthorized user');
             ApiHttpService.getResObject(r).then(() => {
@@ -80,7 +81,8 @@ export class ApiHttpService {
           }
           if (
             r.status == 403 &&
-            (init?.method === undefined || init?.method === 'get')
+            (init?.method === undefined || init?.method === 'get') &&
+            !options.disableAuthHandling
           ) {
             if (init?.method === undefined || init?.method === 'get') {
               redirectionActions.redirect.dispatch(LINKS.AFTER_LOGIN.build());
