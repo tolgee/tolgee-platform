@@ -61,7 +61,7 @@ type Props = {
   colIndex?: number;
   onResize?: (colIndex: number) => void;
   editEnabled: boolean;
-  width?: number;
+  width?: number | string;
   active: boolean;
   lastFocusable: boolean;
 };

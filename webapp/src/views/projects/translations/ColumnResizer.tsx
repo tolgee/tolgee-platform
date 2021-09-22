@@ -8,7 +8,6 @@ const useStyles = makeStyles({
     zIndex: 1,
     position: 'absolute',
     top: 0,
-    background: 'transparent',
     cursor: 'col-resize',
     display: 'flex',
     justifyContent: 'center',
@@ -26,7 +25,7 @@ const useStyles = makeStyles({
 
 type Props = {
   onResize: (change: number) => void;
-  left: number;
+  left: number | string;
   size: number;
   passResizeCallback?: (callback: () => void) => void;
 };

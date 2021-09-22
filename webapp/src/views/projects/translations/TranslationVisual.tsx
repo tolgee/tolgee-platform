@@ -38,7 +38,7 @@ type Props = {
   wrapVariants?: boolean;
   text: string | undefined;
   locale: string;
-  width?: number;
+  width?: number | string;
 };
 
 export const TranslationVisual: React.FC<Props> = ({

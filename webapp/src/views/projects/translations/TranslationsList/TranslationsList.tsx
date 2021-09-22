@@ -26,6 +26,8 @@ const useStyles = makeStyles((theme) => {
       borderRight: 0,
       background: 'white',
       flexGrow: 1,
+      flexDirection: 'column',
+      alignItems: 'stretch',
     },
   };
 });
@@ -74,6 +76,11 @@ export const TranslationsList = () => {
   const handleColumnResize = (i: number) => (size: number) => {
     setColumnSizes(resizeColumn(columnSizes, i, size, 0.25));
   };
+
+  const columnSizesPercent = useMemo(() => {
+    const columnsSum = columnSizes.reduce((a, b) => a + b, 0);
+    return columnSizes.map((size) => (size / columnsSum) * 100 + '%');
+  }, [columnSizes]);
 
   const handleResize = useCallback(
     (colIndex: number) => {
@@ -158,7 +165,7 @@ export const TranslationsList = () => {
               key={index}
               data={row}
               languages={languagesRow}
-              columnSizes={columnSizes}
+              columnSizes={columnSizesPercent}
               onResize={handleResize}
             />
           );
