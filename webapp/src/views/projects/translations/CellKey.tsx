@@ -94,7 +94,7 @@ const useStyles = makeStyles((theme) => {
 
 type Props = {
   data: KeyWithTranslationsModel;
-  width?: number;
+  width?: string | number;
   editEnabled: boolean;
   active: boolean;
   simple?: boolean;

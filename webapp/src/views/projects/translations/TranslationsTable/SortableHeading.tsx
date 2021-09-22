@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type ItemType = {
-  width: number;
+  width: number | string;
   draggable: boolean;
   item: React.ReactNode;
   id: any;

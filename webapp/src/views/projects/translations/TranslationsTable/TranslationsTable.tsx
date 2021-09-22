@@ -134,6 +134,11 @@ export const TranslationsTable = () => {
     setColumnSizes(resizeColumn(columnSizes, i, size));
   };
 
+  const columnSizesPercent = useMemo(() => {
+    const columnsSum = columnSizes.reduce((a, b) => a + b, 0);
+    return columnSizes.map((size) => (size / columnsSum) * 100 + '%');
+  }, [columnSizes]);
+
   const handleResize = useCallback(
     (colIndex: number) => {
       resizersCallbacksRef.current[colIndex]?.();
@@ -178,7 +183,7 @@ export const TranslationsTable = () => {
             const language = languages!.find((lang) => lang.tag === tag)!;
             return {
               id: tag,
-              width: columnSizes[i],
+              width: columnSizesPercent[i],
               draggable: Boolean(tag),
               item: tag ? (
                 <div className={classes.headerCell}>
@@ -234,7 +239,7 @@ export const TranslationsTable = () => {
               key={index}
               data={row}
               languages={languageCols}
-              columnSizes={columnSizes}
+              columnSizes={columnSizesPercent}
               onResize={handleResize}
             />
           );

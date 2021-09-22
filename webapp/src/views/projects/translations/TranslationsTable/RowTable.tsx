@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => {
 type Props = {
   data: KeyWithTranslationsModel;
   languages: LanguageModel[];
-  columnSizes: number[];
+  columnSizes: string[];
   onResize: (colIndex: number) => void;
 };
 
