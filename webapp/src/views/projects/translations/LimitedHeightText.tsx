@@ -105,7 +105,7 @@ export const LimitedHeightText: React.FC<Props> = ({
 
   useEffect(() => {
     detectExpandability();
-  }, [width, children, wrap, maxLines]);
+  });
 
   const gradient = expandable
     ? `linear-gradient(to top, rgba(0,0,0,0) 0%, rgba(0,0,0,0.87) ${lineHeight}, rgba(0,0,0,0.87) ${

@@ -102,175 +102,181 @@ type Props = {
   onSaveSuccess?: (value: string) => void;
 };
 
-export const CellKey: React.FC<Props> = React.memo(
-  ({ data, width, editEnabled, active, simple, position, onSaveSuccess }) => {
-    const classes = useStyles();
-    const cellClasses = useCellStyles({ position });
-    const [screenshotsOpen, setScreenshotsOpen] = useState(false);
-    const dispatch = useTranslationsDispatch();
+export const CellKey: React.FC<Props> = ({
+  data,
+  width,
+  editEnabled,
+  active,
+  simple,
+  position,
+  onSaveSuccess,
+}) => {
+  const classes = useStyles();
+  const cellClasses = useCellStyles({ position });
+  const [screenshotsOpen, setScreenshotsOpen] = useState(false);
+  const dispatch = useTranslationsDispatch();
 
-    const screenshotEl = useRef<HTMLButtonElement | null>(null);
+  const screenshotEl = useRef<HTMLButtonElement | null>(null);
 
-    const isSelected = useContextSelector(TranslationsContext, (c) =>
-      c.selection.includes(data.keyId)
-    );
+  const isSelected = useContextSelector(TranslationsContext, (c) =>
+    c.selection.includes(data.keyId)
+  );
 
-    // prevent blinking, when closing popup
-    const [screenshotsOpenDebounced] = useDebounce(screenshotsOpen, 100);
+  // prevent blinking, when closing popup
+  const [screenshotsOpenDebounced] = useDebounce(screenshotsOpen, 100);
 
-    const toggleSelect = () => {
-      dispatch({ type: 'TOGGLE_SELECT', payload: data.keyId });
-    };
+  const toggleSelect = () => {
+    dispatch({ type: 'TOGGLE_SELECT', payload: data.keyId });
+  };
 
-    const handleAddTag = (name: string) => {
-      dispatch({
-        type: 'ADD_TAG',
-        payload: { keyId: data.keyId, name },
-        onSuccess: () => setTagEdit(false),
-      });
-    };
-
-    const [tagEdit, setTagEdit] = useState(false);
-
-    const {
-      isEditing,
-      value,
-      setValue,
-      handleOpen,
-      handleClose,
-      handleSave,
-      autofocus,
-    } = useEditableRow({
-      keyId: data.keyId,
-      keyName: data.keyName,
-      defaultVal: data.keyName,
-      language: undefined,
-      onSaveSuccess,
+  const handleAddTag = (name: string) => {
+    dispatch({
+      type: 'ADD_TAG',
+      payload: { keyId: data.keyId, name },
+      onSuccess: () => setTagEdit(false),
     });
+  };
 
-    return (
-      <>
-        <div
-          className={clsx({
-            [classes.container]: true,
-            [cellClasses.cellPlain]: true,
-            [cellClasses.hover]: !isEditing,
-            [cellClasses.cellClickable]: editEnabled && !isEditing,
-            [cellClasses.cellRaised]: isEditing,
-          })}
-          style={{ width }}
-          onClick={
-            !isEditing && editEnabled ? () => handleOpen('editor') : undefined
-          }
-          data-cy="translations-table-cell"
-        >
-          {!isEditing ? (
-            <>
-              {editEnabled && !simple && (
-                <Checkbox
-                  className={classes.checkbox}
-                  size="small"
-                  checked={isSelected}
-                  onChange={toggleSelect}
-                  onClick={stopBubble()}
-                  data-cy="translations-row-checkbox"
-                />
-              )}
-              <div className={classes.key}>
-                <LimitedHeightText width={width} maxLines={3} wrap="break-all">
-                  {data.keyName}
-                </LimitedHeightText>
-              </div>
-              {!simple && (
-                <div className={classes.tags}>
-                  <Tags
-                    keyId={data.keyId}
-                    tags={data.keyTags}
-                    deleteEnabled={editEnabled}
-                  />
-                  {editEnabled &&
-                    (tagEdit ? (
-                      <TagInput
-                        className={classes.tagAdd}
-                        onAdd={handleAddTag}
-                        onClose={() => setTagEdit(false)}
-                        autoFocus
-                      />
-                    ) : (
-                      active && (
-                        <TagAdd
-                          className={classes.tagAdd}
-                          onClick={() => setTagEdit(true)}
-                          withFullLabel={!data.keyTags?.length}
-                        />
-                      )
-                    ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className={classes.editor}>
-              <Editor
-                plaintext
-                value={value}
-                onChange={(v) => setValue(v as string)}
-                onSave={() => handleSave()}
-                onCmdSave={() => handleSave('EDIT_NEXT')}
-                onCancel={handleClose}
-                autofocus={autofocus}
+  const [tagEdit, setTagEdit] = useState(false);
+
+  const {
+    isEditing,
+    value,
+    setValue,
+    handleOpen,
+    handleClose,
+    handleSave,
+    autofocus,
+  } = useEditableRow({
+    keyId: data.keyId,
+    keyName: data.keyName,
+    defaultVal: data.keyName,
+    language: undefined,
+    onSaveSuccess,
+  });
+
+  return (
+    <>
+      <div
+        className={clsx({
+          [classes.container]: true,
+          [cellClasses.cellPlain]: true,
+          [cellClasses.hover]: !isEditing,
+          [cellClasses.cellClickable]: editEnabled && !isEditing,
+          [cellClasses.cellRaised]: isEditing,
+        })}
+        style={{ width }}
+        onClick={
+          !isEditing && editEnabled ? () => handleOpen('editor') : undefined
+        }
+        data-cy="translations-table-cell"
+      >
+        {!isEditing ? (
+          <>
+            {editEnabled && !simple && (
+              <Checkbox
+                className={classes.checkbox}
+                size="small"
+                checked={isSelected}
+                onChange={toggleSelect}
+                onClick={stopBubble()}
+                data-cy="translations-row-checkbox"
               />
+            )}
+            <div className={classes.key}>
+              <LimitedHeightText width={width} maxLines={3} wrap="break-all">
+                {data.keyName}
+              </LimitedHeightText>
             </div>
-          )}
+            {!simple && (
+              <div className={classes.tags}>
+                <Tags
+                  keyId={data.keyId}
+                  tags={data.keyTags}
+                  deleteEnabled={editEnabled}
+                />
+                {editEnabled &&
+                  (tagEdit ? (
+                    <TagInput
+                      className={classes.tagAdd}
+                      onAdd={handleAddTag}
+                      onClose={() => setTagEdit(false)}
+                      autoFocus
+                    />
+                  ) : (
+                    active && (
+                      <TagAdd
+                        className={classes.tagAdd}
+                        onClick={() => setTagEdit(true)}
+                        withFullLabel={!data.keyTags?.length}
+                      />
+                    )
+                  ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className={classes.editor}>
+            <Editor
+              plaintext
+              value={value}
+              onChange={(v) => setValue(v as string)}
+              onSave={() => handleSave()}
+              onCmdSave={() => handleSave('EDIT_NEXT')}
+              onCancel={handleClose}
+              autofocus={autofocus}
+            />
+          </div>
+        )}
 
-          <div className={isEditing ? classes.controls : classes.controlsSmall}>
-            {isEditing ? (
-              <ControlsEditor
-                onCancel={handleClose}
-                onSave={handleSave}
+        <div className={isEditing ? classes.controls : classes.controlsSmall}>
+          {isEditing ? (
+            <ControlsEditor
+              onCancel={handleClose}
+              onSave={handleSave}
+              onScreenshots={
+                simple ? undefined : () => setScreenshotsOpen(true)
+              }
+              screenshotRef={screenshotEl}
+              screenshotsPresent={data.screenshotCount > 0}
+            />
+          ) : !tagEdit ? (
+            active || screenshotsOpen || screenshotsOpenDebounced ? (
+              <ControlsKey
+                onEdit={() => handleOpen('editor')}
                 onScreenshots={
                   simple ? undefined : () => setScreenshotsOpen(true)
                 }
                 screenshotRef={screenshotEl}
                 screenshotsPresent={data.screenshotCount > 0}
+                screenshotsOpen={screenshotsOpen || screenshotsOpenDebounced}
+                editEnabled={editEnabled}
               />
-            ) : !tagEdit ? (
-              active || screenshotsOpen || screenshotsOpenDebounced ? (
-                <ControlsKey
-                  onEdit={() => handleOpen('editor')}
-                  onScreenshots={
-                    simple ? undefined : () => setScreenshotsOpen(true)
-                  }
-                  screenshotRef={screenshotEl}
-                  screenshotsPresent={data.screenshotCount > 0}
-                  screenshotsOpen={screenshotsOpen || screenshotsOpenDebounced}
-                  editEnabled={editEnabled}
-                />
-              ) : (
-                // hide as many components as possible in order to be performant
-                <ControlsKey
-                  onScreenshots={
-                    data.screenshotCount > 0
-                      ? () => setScreenshotsOpen(true)
-                      : undefined
-                  }
-                  screenshotRef={screenshotEl}
-                  screenshotsPresent={data.screenshotCount > 0}
-                  editEnabled={editEnabled}
-                />
-              )
-            ) : null}
-          </div>
+            ) : (
+              // hide as many components as possible in order to be performant
+              <ControlsKey
+                onScreenshots={
+                  data.screenshotCount > 0
+                    ? () => setScreenshotsOpen(true)
+                    : undefined
+                }
+                screenshotRef={screenshotEl}
+                screenshotsPresent={data.screenshotCount > 0}
+                editEnabled={editEnabled}
+              />
+            )
+          ) : null}
         </div>
-        {screenshotsOpen && (
-          <ScreenshotsPopover
-            anchorEl={screenshotEl.current!}
-            keyId={data.keyId}
-            onClose={() => {
-              setScreenshotsOpen(false);
-            }}
-          />
-        )}
-      </>
-    );
-  }
-);
+      </div>
+      {screenshotsOpen && (
+        <ScreenshotsPopover
+          anchorEl={screenshotEl.current!}
+          keyId={data.keyId}
+          onClose={() => {
+            setScreenshotsOpen(false);
+          }}
+        />
+      )}
+    </>
+  );
+};
