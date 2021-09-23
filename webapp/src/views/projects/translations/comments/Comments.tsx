@@ -31,14 +31,15 @@ const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.grey[200];
   return {
     container: {
-      display: 'grid',
-      gridTemplateRows: '1fr auto',
+      display: 'flex',
+      flexDirection: 'column',
       flexGrow: 1,
       flexBasis: 100,
       overflow: 'hidden',
+      position: 'relative',
     },
     scrollerWrapper: {
-      alignSelf: 'stretch',
+      flexGrow: 1,
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
