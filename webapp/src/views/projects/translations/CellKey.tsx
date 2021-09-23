@@ -222,7 +222,7 @@ export const CellKey: React.FC<Props> = ({
               value={value}
               onChange={(v) => setValue(v as string)}
               onSave={() => handleSave()}
-              onCmdSave={() => handleSave('EDIT_NEXT')}
+              onMetaSave={() => handleSave('EDIT_NEXT')}
               onCancel={handleClose}
               autofocus={autofocus}
             />

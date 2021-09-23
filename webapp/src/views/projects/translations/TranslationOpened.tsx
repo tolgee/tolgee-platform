@@ -6,9 +6,12 @@ import { T } from '@tolgee/react';
 import { ControlsEditor } from './cell/ControlsEditor';
 import { Editor } from 'tg.component/editor/Editor';
 import { components } from 'tg.service/apiSchema.generated';
-import { StateType } from 'tg.constants/translationStates';
+import { StateType, translationStates } from 'tg.constants/translationStates';
 import { Comments } from './comments/Comments';
 import { EditModeType } from './context/useEdit';
+import { ShortcutsHint } from './ShortcutsHint';
+import { getMeta, getMetaName } from 'tg.fixtures/isMac';
+import { useTranslationsDispatch } from './context/TranslationsContext';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
@@ -17,32 +20,24 @@ const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.grey[200];
 
   return {
-    editor: {
+    container: {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'stretch',
-      minHeight: 350,
+      minHeight: 300,
     },
     editorContainer: {
       padding: '12px 12px 0px 12px',
       flexGrow: 1,
       display: 'flex',
       alignItems: 'stretch',
+      flexDirection: 'column',
     },
     editorControls: {
       display: 'flex',
+      position: 'relative',
+      marginTop: theme.spacing(3),
     },
-    controls: {
-      boxSizing: 'border-box',
-      gridArea: 'controls',
-      display: 'flex',
-      justifyContent: 'flex-end',
-      overflow: 'hidden',
-      minHeight: 44,
-      padding: '12px 12px 12px 12px',
-      marginTop: -16,
-    },
-
     tabsWrapper: {
       display: 'flex',
       borderBottom: `1px solid ${borderColor}`,
@@ -104,9 +99,26 @@ export const TranslationOpened: React.FC<Props> = ({
   editEnabled,
 }) => {
   const classes = useStyles();
+  const dispatch = useTranslationsDispatch();
+
+  const nextState = translationStates[state]?.next[0];
+
+  const handleStateChange = () => {
+    if (nextState) {
+      dispatch({
+        type: 'SET_TRANSLATION_STATE',
+        payload: {
+          state: nextState,
+          keyId,
+          translationId: translation!.id,
+          language: language.tag,
+        },
+      });
+    }
+  };
 
   return (
-    <div className={clsx(classes.editor, className)}>
+    <div className={clsx(classes.container, className)}>
       <div className={classes.tabsWrapper}>
         <Tabs
           indicatorColor="primary"
@@ -154,9 +166,10 @@ export const TranslationOpened: React.FC<Props> = ({
               value={value}
               onChange={onChange}
               onSave={onSave}
-              onCmdSave={onCmdSave}
+              onMetaSave={onCmdSave}
               onCancel={onCancel}
               autofocus={autofocus}
+              shortcuts={{ [`${getMeta()}-D`]: () => handleStateChange() }}
             />
           </div>
           <div className={classes.editorControls}>
@@ -165,6 +178,24 @@ export const TranslationOpened: React.FC<Props> = ({
               onSave={onSave}
               onCancel={onCancel}
               onStateChange={onStateChange}
+            />
+            <ShortcutsHint
+              items={[
+                {
+                  name: <T>{translationStates[nextState].translationKey}</T>,
+                  meta: getMetaName(),
+                  key: 'D',
+                },
+                {
+                  name: <T>translations_cell_save_and_continue</T>,
+                  meta: getMetaName(),
+                  key: 'Enter',
+                },
+                {
+                  name: <T>translations_cell_save</T>,
+                  key: 'Enter',
+                },
+              ]}
             />
           </div>
         </>

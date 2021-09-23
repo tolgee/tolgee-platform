@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/core';
 import { useTranslate } from '@tolgee/react';
 
 import icuMode from './icuMode';
+import { getMeta } from 'tg.fixtures/isMac';
 
 export type Direction = 'DOWN';
 
@@ -115,13 +116,14 @@ type Props = {
   value: string;
   onChange?: (val: string) => void;
   onSave?: (val: string) => void;
-  onCmdSave?: (val: string) => void;
+  onMetaSave?: (val: string) => void;
   onCancel?: () => void;
   background?: string;
   plaintext?: boolean;
   autofocus?: boolean;
   minHeight?: number | string;
   onBlur?: () => void;
+  shortcuts?: CodeMirror.KeyMap;
 };
 
 export const Editor: React.FC<Props> = ({
@@ -129,12 +131,13 @@ export const Editor: React.FC<Props> = ({
   onChange,
   onCancel,
   onSave,
-  onCmdSave,
+  onMetaSave,
   onBlur,
   plaintext,
   background,
   autofocus,
   minHeight = 100,
+  shortcuts,
 }) => {
   const classes = useStyles({ background, minHeight });
   const t = useTranslate();
@@ -162,8 +165,8 @@ export const Editor: React.FC<Props> = ({
       Esc: () => onCancel?.(),
       Tab: false,
       'Shift-Tab': false,
-      'Ctrl-Enter': (editor) => onCmdSave?.(editor.getValue()),
-      'Cmd-Enter': (editor) => onCmdSave?.(editor.getValue()),
+      [`${getMeta()}-Enter`]: (editor) => onMetaSave?.(editor.getValue()),
+      ...shortcuts,
     },
     gutters: ['CodeMirror-lint-markers'],
     lint: {
