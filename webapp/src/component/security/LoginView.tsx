@@ -67,9 +67,24 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
             initialValues={{ username: '', password: '' }}
             submitButtons={
               <Box mt={2}>
-                <Box display="flex">
-                  <Box flexGrow={1}>
-                    {remoteConfig.authMethods?.github?.enabled && (
+                <Box display="flex" flexDirection="column" alignItems="stretch">
+                  <LoadingButton
+                    loading={authLoading}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                  >
+                    <T>login_login_button</T>
+                  </LoadingButton>
+
+                  {remoteConfig.authMethods?.github?.enabled && (
+                    <>
+                      <Box
+                        height="1px"
+                        bgcolor="lightgray"
+                        marginY={4}
+                        marginX={-1}
+                      />
                       <Button
                         component="a"
                         href={gitHubUrl}
@@ -79,18 +94,8 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
                       >
                         <T>login_github_login_button</T>
                       </Button>
-                    )}
-                  </Box>
-                  <Box display="flex" flexGrow={0}>
-                    <LoadingButton
-                      loading={authLoading}
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                    >
-                      <T>login_login_button</T>
-                    </LoadingButton>
-                  </Box>
+                    </>
+                  )}
                 </Box>
               </Box>
             }
