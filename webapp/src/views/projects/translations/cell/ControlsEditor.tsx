@@ -7,12 +7,12 @@ import { StateType } from 'tg.constants/translationStates';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   leftPart: {
     display: 'flex',
     alignItems: 'flex-start',
     overflow: 'hidden',
-    padding: 12,
+    padding: theme.spacing(1, 1.5, 1.5, 1.5),
     '& > * + *': {
       marginLeft: 10,
     },
@@ -20,9 +20,9 @@ const useStyles = makeStyles({
   rightPart: {
     display: 'flex',
     alignItems: 'center',
-    padding: '12px 12px 12px 0px',
+    padding: theme.spacing(1, 1.5, 1.5, 0),
   },
-});
+}));
 
 type ControlsProps = {
   state?: StateType;
