@@ -1,10 +1,9 @@
+import clsx from 'clsx';
 import React from 'react';
-import { Divider, ListItem, ListItemIcon } from '@material-ui/core';
 import Drawer from '@material-ui/core/Drawer';
 import { makeStyles } from '@material-ui/core/styles';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import clsx from 'clsx';
+
+import { ToggleButton } from './ToggleButton';
 
 const drawerWidth = 240;
 
@@ -43,6 +42,10 @@ const useStyles = makeStyles((theme) => ({
     }),
     width: theme.spacing(7),
   },
+  toggleRight: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+  },
 }));
 
 interface SideMenuProps {
@@ -72,12 +75,9 @@ export const SideMenu: React.FC<SideMenuProps> = ({
         color="secondary"
       >
         {children}
-        <Divider />
-        <ListItem button onClick={onSideMenuToggle}>
-          <ListItemIcon>
-            {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </ListItemIcon>
-        </ListItem>
+        <div className={classes.toggleRight}>
+          <ToggleButton onClick={onSideMenuToggle} open={open} />
+        </div>
       </Drawer>
       <Drawer
         variant="permanent"
