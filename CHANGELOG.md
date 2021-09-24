@@ -1,3 +1,20 @@
+# [1.0.0-alpha.136](https://github.com/tolgee/server/compare/v1.0.0-alpha.135...v1.0.0-alpha.136) (2021-09-24)
+
+
+### Bug Fixes
+
+* comments layout not working in safari fix ([b5c1977](https://github.com/tolgee/server/commit/b5c19774a67a56c58fc1a8abf954e7c7a34546d7))
+* Comments should be preformatted TG-299 ([2437e5a](https://github.com/tolgee/server/commit/2437e5a5391115c2df9b5159ad69a8960630be25))
+* fit github button regardless the translation on button ([6d4d0c0](https://github.com/tolgee/server/commit/6d4d0c0ba7d06c5d8b1e6ef03cb39f62a39caef7))
+* Hiding menu jumping TG-312 ([107fe1b](https://github.com/tolgee/server/commit/107fe1b43947b694f7ed56a4822714b841030c8a))
+* Screenshot window aligning text TG-311 ([7449a06](https://github.com/tolgee/server/commit/7449a0640bcaab4914c0659970687ca83dbd63a9))
+* translations multiline crop not working on menu collapse ([5b04011](https://github.com/tolgee/server/commit/5b04011bb688f0644ac9f494e5e949c055311273))
+
+
+### Features
+
+* improve login page layout ([c40ef24](https://github.com/tolgee/server/commit/c40ef24cce7a3961a1e3bef897dd2701ddd46a67))
+
 # [1.0.0-alpha.136](https://github.com/tolgee/server/compare/v1.0.0-alpha.135...v1.0.0-alpha.136) (2021-09-23)
 
 
