@@ -10,7 +10,6 @@ import { makeStyles } from '@material-ui/core';
 import { useTranslate } from '@tolgee/react';
 
 import icuMode from './icuMode';
-import { getMeta } from 'tg.fixtures/isMac';
 
 export type Direction = 'DOWN';
 
@@ -116,7 +115,6 @@ type Props = {
   value: string;
   onChange?: (val: string) => void;
   onSave?: (val: string) => void;
-  onMetaSave?: (val: string) => void;
   onCancel?: () => void;
   background?: string;
   plaintext?: boolean;
@@ -131,7 +129,6 @@ export const Editor: React.FC<Props> = ({
   onChange,
   onCancel,
   onSave,
-  onMetaSave,
   onBlur,
   plaintext,
   background,
@@ -165,7 +162,6 @@ export const Editor: React.FC<Props> = ({
       Esc: () => onCancel?.(),
       Tab: false,
       'Shift-Tab': false,
-      [`${getMeta()}-Enter`]: (editor) => onMetaSave?.(editor.getValue()),
       ...shortcuts,
     },
     gutters: ['CodeMirror-lint-markers'],

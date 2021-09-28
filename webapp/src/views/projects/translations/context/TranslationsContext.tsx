@@ -1,7 +1,8 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useQueryClient } from 'react-query';
 import { createContext, useContext } from 'use-context-selector';
 import { T } from '@tolgee/react';
+import ReactList from 'react-list';
 
 import { components, operations } from 'tg.service/apiSchema.generated';
 import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -20,7 +21,7 @@ import {
   usePutTag,
   useDeleteTag,
   usePutTranslationState,
-} from '../../../../service/TranslationHooks';
+} from 'tg.service/TranslationHooks';
 
 export type AfterCommand = 'EDIT_NEXT';
 
@@ -48,7 +49,20 @@ type ActionType =
   | { type: 'ADD_TAG'; payload: AddTagPayload; onSuccess?: () => void }
   | { type: 'REMOVE_TAG'; payload: RemoveTagPayload }
   | { type: 'UPDATE_TRANSLATION'; payload: UpdateTranslationPayolad }
-  | { type: 'INSERT_TRANSLATION'; payload: AddTranslationPayload };
+  | { type: 'INSERT_TRANSLATION'; payload: AddTranslationPayload }
+  | { type: 'REGISTER_ELEMENT'; payload: KeyElement }
+  | { type: 'UNREGISTER_ELEMENT'; payload: KeyElement }
+  | { type: 'REGISTER_LIST'; payload: ReactList }
+  | { type: 'UNREGISTER_LIST'; payload: ReactList };
+
+type CellPosition = {
+  keyId: number;
+  language: string | undefined;
+};
+
+type KeyElement = CellPosition & {
+  ref: HTMLElement;
+};
 
 export type ViewType = 'LIST' | 'TABLE';
 
@@ -72,7 +86,7 @@ type AddTagPayload = {
 
 type ChangeValueType = SetEditType & {
   after?: AfterCommand;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 };
 
 export type FiltersType = Pick<
@@ -110,10 +124,12 @@ export type TranslationsContextType = {
   hasMoreToFetch?: boolean;
   search?: string;
   selection: number[];
-  edit?: EditType;
+  cursor?: EditType;
   selectedLanguages?: string[];
   view: ViewType;
   filters: FiltersType;
+  elementsRef: React.RefObject<Map<string, HTMLElement>>;
+  reactList: ReactList | undefined;
 };
 
 // @ts-ignore
@@ -141,6 +157,8 @@ export const TranslationsContextProvider: React.FC<{
   const [initialLangs, setInitialLangs] = useState<string[] | null | undefined>(
     null
   );
+  const elementsRef = useRef<Map<string, HTMLElement>>(new Map());
+  const [reactList, setReactList] = useState<ReactList>();
 
   const languages = useApiQuery({
     url: '/v2/projects/{projectId}/languages',
@@ -165,18 +183,10 @@ export const TranslationsContextProvider: React.FC<{
     projectId: props.projectId,
     keyName: props.keyName,
     pageSize: props.pageSize,
+    updateLocalStorageLanguages: props.updateLocalStorageLanguages,
     // when initial langs are null, fetching is postponed
     initialLangs: props.languages || initialLangs,
   });
-
-  useEffect(() => {
-    if (props.updateLocalStorageLanguages && translations.data?.pages?.[0]) {
-      projectPreferences.setForProject(
-        props.projectId,
-        translations.data?.pages?.[0]?.selectedLanguages?.map((l) => l.tag)
-      );
-    }
-  }, [translations.data?.pages?.[0]]);
 
   const edit = useEdit({
     projectId: props.projectId,
@@ -186,6 +196,28 @@ export const TranslationsContextProvider: React.FC<{
   const handleTranslationsReset = () => {
     edit.setPosition(undefined);
     setSelection([]);
+  };
+
+  const focusCell = (cell: CellPosition) => {
+    const element = elementsRef.current?.get(
+      JSON.stringify({ keyId: cell.keyId, language: cell.language })
+    );
+    element?.focus();
+  };
+
+  const setFocusPosition = (pos: EditType | undefined) => {
+    // make it async if someone is stealing focus
+    setTimeout(() => {
+      // focus cell when closing editor
+      if (pos === undefined && edit.position) {
+        const position = {
+          keyId: edit.position.keyId,
+          language: edit.position.language,
+        };
+        focusCell(position);
+      }
+      edit.setPosition(pos);
+    });
   };
 
   const postKey = usePostKey();
@@ -206,16 +238,18 @@ export const TranslationsContextProvider: React.FC<{
         return;
       case 'SET_EDIT':
         if (edit.position?.changed) {
-          edit.setPosition({ ...edit.position, mode: 'editor' });
+          setFocusPosition({ ...edit.position, mode: 'editor' });
           confirmation({
             title: <T>translations_leave_save_confirmation</T>,
             message: <T>translations_leave_save_confirmation_message_1</T>,
             cancelButtonText: <T>back_to_editing</T>,
             confirmButtonText: <T>discard_changes</T>,
-            onConfirm: () => edit.setPosition(action.payload),
+            onConfirm: () => {
+              setFocusPosition(action.payload);
+            },
           });
         } else {
-          edit.setPosition(action.payload);
+          setFocusPosition(action.payload);
         }
         return;
       case 'UPDATE_EDIT':
@@ -392,6 +426,29 @@ export const TranslationsContextProvider: React.FC<{
       case 'INSERT_TRANSLATION':
         translations.insertAsFirst(action.payload);
         return;
+      case 'REGISTER_ELEMENT':
+        return elementsRef.current.set(
+          JSON.stringify({
+            keyId: action.payload.keyId,
+            language: action.payload.language,
+          }),
+          action.payload.ref
+        );
+      case 'UNREGISTER_ELEMENT':
+        return elementsRef.current.delete(
+          JSON.stringify({
+            keyId: action.payload.keyId,
+            language: action.payload.language,
+          })
+        );
+      case 'REGISTER_LIST':
+        setReactList(action.payload);
+        return;
+      case 'UNREGISTER_LIST':
+        if (reactList === action.payload) {
+          setReactList(undefined);
+        }
+        return;
     }
   };
 
@@ -408,7 +465,7 @@ export const TranslationsContextProvider: React.FC<{
         return;
 
       default:
-        edit.setPosition(undefined);
+        setFocusPosition(undefined);
     }
   };
 
@@ -441,11 +498,13 @@ export const TranslationsContextProvider: React.FC<{
           hasMoreToFetch: translations.hasNextPage,
           search: translations.search as string,
           filters: translations.filters,
-          edit: edit.position,
+          cursor: edit.position,
           selection,
           selectedLanguages:
             translations.query?.languages || translations.selectedLanguages,
           view: view as ViewType,
+          elementsRef,
+          reactList,
         }}
       >
         {props.children}

@@ -9,8 +9,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { Comments } from './comments/Comments';
 import { EditModeType } from './context/useEdit';
-import { ShortcutsHint } from './ShortcutsHint';
-import { getMeta, getMetaName } from 'tg.fixtures/isMac';
+import { getMeta } from 'tg.fixtures/isMac';
 import { useTranslationsDispatch } from './context/TranslationsContext';
 
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -165,11 +164,13 @@ export const TranslationOpened: React.FC<Props> = ({
             <Editor
               value={value}
               onChange={onChange}
-              onSave={onSave}
-              onMetaSave={onCmdSave}
               onCancel={onCancel}
+              onSave={onSave}
               autofocus={autofocus}
-              shortcuts={{ [`${getMeta()}-D`]: () => handleStateChange() }}
+              shortcuts={{
+                [`${getMeta()}-E`]: handleStateChange,
+                [`${getMeta()}-Enter`]: onCmdSave,
+              }}
             />
           </div>
           <div className={classes.editorControls}>
@@ -178,24 +179,6 @@ export const TranslationOpened: React.FC<Props> = ({
               onSave={onSave}
               onCancel={onCancel}
               onStateChange={onStateChange}
-            />
-            <ShortcutsHint
-              items={[
-                {
-                  name: <T>{translationStates[nextState].translationKey}</T>,
-                  meta: getMetaName(),
-                  key: 'D',
-                },
-                {
-                  name: <T>translations_cell_save_and_continue</T>,
-                  meta: getMetaName(),
-                  key: 'Enter',
-                },
-                {
-                  name: <T>translations_cell_save</T>,
-                  key: 'Enter',
-                },
-              ]}
             />
           </div>
         </>

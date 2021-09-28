@@ -20,6 +20,7 @@ import { ControlsEditor } from './cell/ControlsEditor';
 import { ControlsKey } from './cell/ControlsKey';
 import { TagAdd } from './Tags/TagAdd';
 import { TagInput } from './Tags/TagInput';
+import { getMeta } from 'tg.fixtures/isMac';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -113,6 +114,7 @@ export const CellKey: React.FC<Props> = ({
 }) => {
   const classes = useStyles();
   const cellClasses = useCellStyles({ position });
+  const cellRef = useRef<HTMLDivElement>(null);
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
   const dispatch = useTranslationsDispatch();
 
@@ -153,6 +155,7 @@ export const CellKey: React.FC<Props> = ({
     defaultVal: data.keyName,
     language: undefined,
     onSaveSuccess,
+    cellRef,
   });
 
   return (
@@ -170,6 +173,8 @@ export const CellKey: React.FC<Props> = ({
           !isEditing && editEnabled ? () => handleOpen('editor') : undefined
         }
         data-cy="translations-table-cell"
+        tabIndex={0}
+        ref={cellRef}
       >
         {!isEditing ? (
           <>
@@ -221,10 +226,12 @@ export const CellKey: React.FC<Props> = ({
               plaintext
               value={value}
               onChange={(v) => setValue(v as string)}
-              onSave={() => handleSave()}
-              onMetaSave={() => handleSave('EDIT_NEXT')}
-              onCancel={handleClose}
               autofocus={autofocus}
+              onSave={() => handleSave()}
+              onCancel={handleClose}
+              shortcuts={{
+                [`${getMeta()}-Enter`]: () => handleSave('EDIT_NEXT'),
+              }}
             />
           </div>
         )}

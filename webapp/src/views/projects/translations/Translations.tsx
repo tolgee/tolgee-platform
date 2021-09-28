@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import { useTranslate } from '@tolgee/react';
 
@@ -8,6 +9,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { TranslationsTable } from './TranslationsTable/TranslationsTable';
 import { TranslationsHeader } from './TranslationsHeader';
 import { TranslationsList } from './TranslationsList/TranslationsList';
+import { useContextShortcuts } from './context/useContextShortcuts';
 
 export const Translations = () => {
   const t = useTranslate();
@@ -19,6 +21,13 @@ export const Translations = () => {
     (v) => v.isFetching
   );
   const view = useContextSelector(TranslationsContext, (v) => v.view);
+
+  const { onKey } = useContextShortcuts();
+
+  useEffect(() => {
+    document.body?.addEventListener('keydown', onKey);
+    return () => document.body?.removeEventListener('keydown', onKey);
+  }, [onKey]);
 
   return (
     <BaseView

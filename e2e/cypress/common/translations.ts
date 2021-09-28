@@ -39,6 +39,13 @@ export function createTranslation(
   assertMessage('Key created');
 }
 
+export function selectLangsInLocalstorage(projectId: number, langs: string[]) {
+  window.localStorage.setItem(
+    'selectedLanguages',
+    JSON.stringify({ [projectId]: langs })
+  );
+}
+
 export function translationsBeforeEach(): Chainable<ProjectDTO> {
   return login().then(() => {
     return createProject({
@@ -57,10 +64,7 @@ export function translationsBeforeEach(): Chainable<ProjectDTO> {
       ],
     }).then((r) => {
       const project = r.body as ProjectDTO;
-      window.localStorage.setItem(
-        'selectedLanguages',
-        `{"${project.id}":["en"]}`
-      );
+      selectLangsInLocalstorage(project.id, ['en']);
       return visitTranslations(project.id).then(() => project);
     });
   });
@@ -70,19 +74,22 @@ export const visitTranslations = (projectId: number) => {
   return cy.visit(`${HOST}/projects/${projectId}/translations`);
 };
 
-export const editCell = (oldValue: string, newValue: string, save = true) => {
+export const editCell = (oldValue: string, newValue?: string, save = true) => {
   cy.gcy('translations-table-cell').contains(oldValue).click();
 
   // wait for editor to appear
   cy.gcy('global-editor').should('be.visible');
   cy.contains(oldValue).should('be.visible');
-  // select all, delete and type new text
-  cy.focused().type('{meta}a').type('{backspace}').type(newValue);
 
-  if (save) {
-    getCellSaveButton().click();
+  if (newValue) {
+    // select all, delete and type new text
+    cy.focused().type('{meta}a').type('{backspace}').type(newValue);
+
+    if (save) {
+      getCellSaveButton().click();
+    }
+    waitForGlobalLoading();
   }
-  waitForGlobalLoading();
 };
 
 export function clickDiscardChanges() {

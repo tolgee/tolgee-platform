@@ -57,7 +57,7 @@ export const TranslationsList = () => {
   );
   const editKeyId = useContextSelector(
     TranslationsContext,
-    (v) => v.edit?.keyId
+    (v) => v.cursor?.keyId
   );
 
   useEffect(() => {
@@ -111,6 +111,20 @@ export const TranslationsList = () => {
     [languages, selectedLanguages]
   );
 
+  useEffect(() => {
+    if (reactListRef.current) {
+      dispatch({
+        type: 'REGISTER_LIST',
+        payload: reactListRef.current,
+      });
+      return () =>
+        dispatch({
+          type: 'UNREGISTER_LIST',
+          payload: reactListRef.current!,
+        });
+    }
+  }, [reactListRef.current]);
+
   if (!translations) {
     return null;
   }
@@ -162,7 +176,7 @@ export const TranslationsList = () => {
           }
           return (
             <RowList
-              key={index}
+              key={row.keyId}
               data={row}
               languages={languagesRow}
               columnSizes={columnSizesPercent}
@@ -171,11 +185,7 @@ export const TranslationsList = () => {
           );
         }}
       />
-      <TranslationsToolbar
-        getVisibleRange={reactListRef.current?.getVisibleRange.bind(
-          reactListRef.current
-        )}
-      />
+      <TranslationsToolbar width={width} />
     </div>
   );
 };

@@ -1,7 +1,8 @@
 import clsx from 'clsx';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Drawer from '@material-ui/core/Drawer';
 import { makeStyles } from '@material-ui/core/styles';
+import { useTheme } from '@material-ui/core';
 
 import { ToggleButton } from './ToggleButton';
 
@@ -59,6 +60,24 @@ export const SideMenu: React.FC<SideMenuProps> = ({
   children,
 }) => {
   const classes = useStyles({});
+  const theme = useTheme();
+
+  useEffect(() => {
+    // trigger resize to recalculate Translations smoothly
+    let loop = true;
+    const makeStep = () => {
+      window.dispatchEvent(new Event('resize'));
+      if (loop) requestAnimationFrame(makeStep);
+    };
+    const timer = setTimeout(() => {
+      loop = false;
+    }, theme.transitions.duration.enteringScreen * 2);
+    makeStep();
+    return () => {
+      clearTimeout(timer);
+      loop = false;
+    };
+  }, [open]);
 
   return (
     <>

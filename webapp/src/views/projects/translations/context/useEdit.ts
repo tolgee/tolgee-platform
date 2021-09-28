@@ -12,10 +12,9 @@ import {
 
 export type Direction = 'DOWN';
 
-type CellLocation = {
+export type CellLocation = {
   keyId: number;
-  keyName: string;
-  language?: string;
+  language?: string | undefined;
 };
 
 export type SetEditType = CellLocation & {
@@ -47,6 +46,9 @@ export const useEdit = ({ projectId, translations }: Props) => {
   const putTag = usePutTag();
   const deleteTag = useDeleteTag();
 
+  const getTranslationKeyName = (keyId: number) =>
+    translations!.find((t) => t.keyId === keyId)!.keyName;
+
   const moveEditToDirection = (direction: Direction | undefined) => {
     const currentIndex =
       translations?.findIndex((k) => k.keyId === position?.keyId) || 0;
@@ -64,7 +66,6 @@ export const useEdit = ({ projectId, translations }: Props) => {
       nextKey
         ? {
             keyId: nextKey.keyId,
-            keyName: nextKey.keyName,
             language: position?.language,
             mode: 'editor',
           }
@@ -97,7 +98,8 @@ export const useEdit = ({ projectId, translations }: Props) => {
   };
 
   const mutateTranslation = async (payload: SetEditType) => {
-    const { keyName, language, value } = payload;
+    const { language, value, keyId } = payload;
+    const keyName = getTranslationKeyName(keyId);
 
     const newVal =
       payload.value !== getEditOldValue()

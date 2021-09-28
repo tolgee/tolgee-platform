@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core';
 
@@ -77,6 +77,7 @@ export const CellTranslation: React.FC<Props> = ({
   lastFocusable,
 }) => {
   const classes = useStyles();
+  const cellRef = useRef<HTMLDivElement>(null);
   const cellClasses = useCellStyles({
     position: lastFocusable ? 'right' : undefined,
   });
@@ -99,6 +100,7 @@ export const CellTranslation: React.FC<Props> = ({
     keyName: data.keyName,
     defaultVal: translation?.text || '',
     language: language.tag,
+    cellRef,
   });
   const dispatch = useTranslationsDispatch();
 
@@ -131,6 +133,8 @@ export const CellTranslation: React.FC<Props> = ({
       onClick={
         editEnabled && !isEditing ? () => handleOpen('editor') : undefined
       }
+      tabIndex={0}
+      ref={cellRef}
     >
       {editVal ? (
         <TranslationOpened

@@ -1,9 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
+import { container } from 'tsyringe';
 
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { components, operations } from 'tg.service/apiSchema.generated';
 import { InfiniteData } from 'react-query';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
 
 const PAGE_SIZE = 60;
 
@@ -25,11 +27,14 @@ type FiltersType = Pick<
   | 'filterUntranslatedInLang'
 >;
 
+const projectPreferences = container.resolve(ProjectPreferencesService);
+
 type Props = {
   projectId: number;
   keyName?: string;
   initialLangs: string[] | null | undefined;
   pageSize?: number;
+  updateLocalStorageLanguages?: boolean;
 };
 
 const flattenKeys = (
@@ -143,10 +148,17 @@ export const useTranslationsInfinite = (props: Props) => {
 
   const updateQuery = (q: Partial<typeof query>) => {
     const newQuery = { ...query, ...q };
-    setQuery({
+    const queryWithLanguages = {
       ...newQuery,
       languages: newQuery.languages?.length ? newQuery.languages : undefined,
-    });
+    };
+    if (props.updateLocalStorageLanguages) {
+      projectPreferences.setForProject(
+        props.projectId,
+        queryWithLanguages.languages
+      );
+    }
+    setQuery(queryWithLanguages);
     refetchTranslations();
   };
 
