@@ -7,23 +7,45 @@ import { useContextSelector } from 'use-context-selector';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { TranslationsContext } from './context/TranslationsContext';
+import { TranslationsShortcuts } from './TranslationsShortcuts';
+import { useTheme } from '@material-ui/styles';
 
 const useStyles = makeStyles((theme) => ({
   container: {
-    display: 'flex',
+    zIndex: theme.zIndex.drawer,
     position: 'fixed',
-    bottom: theme.spacing(2),
-    right: theme.spacing(3),
+    display: 'flex',
+    alignItems: 'stretch',
+    justifyContent: 'space-between',
+    bottom: 0,
+    right: 0,
+    pointerEvents: 'none',
+  },
+  shortcutsContainer: {
+    flexGrow: 1,
+    margin: theme.spacing(2, 1, 2, 3),
+    flexShrink: 1,
+    flexBasis: 1,
+    position: 'relative',
+  },
+  counterContainer: {
+    display: 'flex',
     background: theme.palette.extraLightBackground.main,
     alignItems: 'stretch',
     transition: 'opacity 0.3s ease-in-out',
     borderRadius: 6,
     '-webkit-box-shadow': '2px 2px 5px rgba(0, 0, 0, 0.25)',
     'box-shadow': '2px 2px 5px rgba(0, 0, 0, 0.25)',
+    margin: theme.spacing(2, 3, 2, 0),
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
+    pointerEvents: 'all',
   },
   hidden: {
     opacity: '0',
     pointerEvents: 'none',
+    width: 0,
+    marginRight: theme.spacing(1),
   },
   divider: {
     borderRight: `1px solid ${theme.palette.divider}`,
@@ -49,11 +71,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type Props = {
-  getVisibleRange: (() => number[]) | undefined;
+  width: number;
 };
 
-export const TranslationsToolbar: React.FC<Props> = ({ getVisibleRange }) => {
+export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
   const [index, setIndex] = useState(1);
+  const theme = useTheme();
   const [toolbarVisible, setToolbarVisible] = useState(false);
   const classes = useStyles();
   const t = useTranslate();
@@ -61,6 +84,8 @@ export const TranslationsToolbar: React.FC<Props> = ({ getVisibleRange }) => {
     TranslationsContext,
     (c) => c.translationsTotal || 0
   );
+  const list = useContextSelector(TranslationsContext, (c) => c.reactList);
+  const getVisibleRange = list?.getVisibleRange.bind(list);
 
   const handleScrollUp = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -89,30 +114,39 @@ export const TranslationsToolbar: React.FC<Props> = ({ getVisibleRange }) => {
 
   const counterContent = `${index} / ${totalCount}`;
 
-  return (
+  return width ? (
     <div
-      className={clsx({
-        [classes.container]: true,
-        [classes.hidden]: !toolbarVisible,
-      })}
+      className={classes.container}
+      // @ts-ignore
+      style={{ width: width + theme.spacing(8) }}
     >
-      <div className={classes.index}>
-        <span data-cy="translations-toolbar-counter">{counterContent}</span>
-        {/* stretch content by monospace font, so it's not jumping */}
-        <div className={classes.stretcher}>{counterContent}</div>
+      <div className={classes.shortcutsContainer}>
+        <TranslationsShortcuts />
       </div>
-      <div className={classes.divider} />
-      <Tooltip title={t('translations_toolbar_to_top', undefined, true)}>
-        <IconButton
-          data-cy="translations-toolbar-to-top"
-          onClick={handleScrollUp}
-          size="small"
-          className={classes.button}
-          aria-label={t('translations_toolbar_to_top')}
-        >
-          <KeyboardArrowUp />
-        </IconButton>
-      </Tooltip>
+      <div
+        className={clsx({
+          [classes.counterContainer]: true,
+          [classes.hidden]: !toolbarVisible,
+        })}
+      >
+        <div className={classes.index}>
+          <span data-cy="translations-toolbar-counter">{counterContent}</span>
+          {/* stretch content by monospace font, so it's not jumping */}
+          <div className={classes.stretcher}>{counterContent}</div>
+        </div>
+        <div className={classes.divider} />
+        <Tooltip title={t('translations_toolbar_to_top', undefined, true)}>
+          <IconButton
+            data-cy="translations-toolbar-to-top"
+            onClick={handleScrollUp}
+            size="small"
+            className={classes.button}
+            aria-label={t('translations_toolbar_to_top')}
+          >
+            <KeyboardArrowUp />
+          </IconButton>
+        </Tooltip>
+      </div>
     </div>
-  );
+  ) : null;
 };

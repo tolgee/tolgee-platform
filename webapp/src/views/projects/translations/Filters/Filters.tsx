@@ -142,7 +142,7 @@ export const Filters = () => {
         } else if (group.type === 'states') {
           options.push(
             <SubmenuStates
-              key={i}
+              key={'states'}
               data-cy="translations-filter-option"
               item={option}
               handleToggle={handleFilterToggle}

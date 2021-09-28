@@ -174,7 +174,7 @@ export const KeyCreateForm: React.FC<Props> = ({
                           onChange={(val) =>
                             form.setFieldValue(field.name, val)
                           }
-                          onSave={form.submitForm}
+                          onSave={() => form.handleSubmit()}
                           onBlur={() => form.setFieldTouched(field.name, true)}
                           minHeight="unset"
                           autofocus={autofocus}
@@ -242,11 +242,11 @@ export const KeyCreateForm: React.FC<Props> = ({
                         >
                           <Editor
                             value={field.value || ''}
+                            onSave={() => form.handleSubmit()}
                             onChange={(val) =>
                               form.setFieldValue(field.name, val)
                             }
                             minHeight={50}
-                            onSave={form.submitForm}
                           />
                         </div>
                         <TranslationVisual

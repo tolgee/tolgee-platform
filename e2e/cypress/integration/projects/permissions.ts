@@ -22,6 +22,11 @@ import {
 } from '../../common/translations';
 import { createTag, getAddTagButton } from '../../common/tags';
 import { waitForGlobalLoading } from '../../common/loading';
+import {
+  assertAvailableCommands,
+  move,
+  selectFirst,
+} from '../../common/shortcuts';
 
 describe('Project Permissions', () => {
   beforeEach(() => {});
@@ -216,10 +221,14 @@ const validateEditPermissions = (projectName: string) => {
   selectInProjectMenu('Translations');
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
+  selectFirst();
+  assertAvailableCommands(['Move', 'Edit', 'Reviewed']);
+  move('leftarrow');
+  assertAvailableCommands(['Move', 'Edit']);
   createTranslation('cool_key');
   createTag('test_tag');
   cy.contains('test_tag').should('be.visible');
-  gcy('translations-row-checkbox').click();
+  gcy('translations-row-checkbox').first().click();
   gcy('translations-delete-button').click();
   confirmStandard();
   assertMessage('Translations deleted!');
@@ -231,6 +240,10 @@ const validateTranslatePermissions = (projectName: string) => {
   selectInProjectMenu('Translations');
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
+  selectFirst();
+  assertAvailableCommands(['Move', 'Edit', 'Reviewed']);
+  move('leftarrow');
+  assertAvailableCommands(['Move']);
   getAddTagButton().should('not.exist');
   gcy('translations-add-button').should('not.exist');
   gcy('translations-row-checkbox').should('not.exist');
@@ -247,4 +260,8 @@ const validateViewPermissions = (projectName: string) => {
   assertOtherMenuItemsVisible();
   selectInProjectMenu('Translations');
   gcy('global-plus-button').should('not.exist');
+  selectFirst();
+  assertAvailableCommands(['Move']);
+  move('leftarrow');
+  assertAvailableCommands(['Move']);
 };

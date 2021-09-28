@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useContextSelector } from 'use-context-selector';
 
 import {
@@ -14,33 +14,49 @@ type Props = {
   language: string | undefined;
   defaultVal?: string;
   onSaveSuccess?: (val: string) => void;
+  cellRef: React.RefObject<HTMLElement>;
 };
 
 export const useEditableRow = ({
   keyId,
-  keyName,
   defaultVal,
   language,
   onSaveSuccess,
+  cellRef,
 }: Props) => {
-  const edit = useContextSelector(TranslationsContext, (v) => {
+  const dispatch = useTranslationsDispatch();
+
+  const cursor = useContextSelector(TranslationsContext, (v) => {
     // find language or keyName (in case of undefined)
-    return v.edit?.keyId === keyId && v.edit.language === language
-      ? v.edit
+    return v.cursor?.keyId === keyId && v.cursor.language === language
+      ? v.cursor
       : undefined;
   });
 
+  const value = cursor?.savedValue || '';
+
   const originalValue = defaultVal || '';
 
-  const [value, setValue] = useState(originalValue);
+  const setValue = (val: string) =>
+    dispatch({ type: 'UPDATE_EDIT', payload: { savedValue: val } });
 
-  const isEditing = Boolean(edit);
+  const isEditing = Boolean(cursor);
 
-  const dispatch = useTranslationsDispatch();
+  useEffect(() => {
+    dispatch({
+      type: 'REGISTER_ELEMENT',
+      payload: { keyId, language, ref: cellRef.current! },
+    });
+    return () =>
+      dispatch({
+        type: 'UNREGISTER_ELEMENT',
+        payload: { keyId, language, ref: cellRef.current! },
+      });
+  }, [cellRef.current, keyId, language]);
 
   useEffect(() => {
     if (isEditing) {
-      setValue(edit?.savedValue || originalValue);
+      setValue(cursor?.savedValue || originalValue);
     }
   }, [isEditing, originalValue]);
 
@@ -49,7 +65,6 @@ export const useEditableRow = ({
       type: 'SET_EDIT',
       payload: {
         keyId,
-        keyName,
         language,
         mode,
       },
@@ -61,7 +76,6 @@ export const useEditableRow = ({
       type: 'CHANGE_FIELD',
       payload: {
         keyId,
-        keyName,
         language,
         value,
         after,
@@ -81,10 +95,10 @@ export const useEditableRow = ({
   useEffect(() => {
     const isChanged = originalValue !== value;
     // let context know, that something has changed
-    if (edit && Boolean(edit?.changed) !== isChanged) {
+    if (cursor && Boolean(cursor?.changed) !== isChanged) {
       dispatch({ type: 'UPDATE_EDIT', payload: { changed: isChanged } });
     }
-  }, [originalValue, edit?.changed, value]);
+  }, [originalValue, cursor?.changed, value]);
 
   const valueRef = useRef(isEditing ? value : undefined);
 
@@ -111,8 +125,8 @@ export const useEditableRow = ({
     handleModeChange,
     value,
     setValue,
-    editVal: edit,
+    editVal: isEditing ? cursor : undefined,
     isEditing,
-    autofocus: edit?.savedValue === undefined,
+    autofocus: true,
   };
 };

@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { T } from '@tolgee/react';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';
-import { stopBubble } from 'tg.fixtures/eventHandler';
+import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 
 const useStyles = makeStyles({
   state: {
@@ -32,9 +32,9 @@ export const CellStateBar: React.FC<Props> = ({ state, onResize }) => {
     <div className={classes.stateHover} data-cy="translations-state-indicator">
       <div
         className={clsx(classes.stateBorder, classes.state)}
-        onMouseDown={stopBubble(onResize)}
-        onClick={stopBubble()}
-        onMouseUp={stopBubble()}
+        onMouseDown={stopAndPrevent(onResize)}
+        onClick={stopAndPrevent()}
+        onMouseUp={stopAndPrevent()}
         style={{
           borderLeft: `4px solid ${
             translationStates[state || 'UNTRANSLATED']?.color

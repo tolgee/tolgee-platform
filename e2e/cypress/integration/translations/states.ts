@@ -7,6 +7,7 @@ import {
 } from '../../common/translations';
 import { assertTooltip, gcy, selectInProjectMenu } from '../../common/shared';
 import { deleteProject } from '../../common/apiCalls';
+import { stateColors } from '../../common/state';
 
 describe('Translation states', () => {
   let project: ProjectDTO = null;
@@ -84,9 +85,3 @@ describe('Translation states', () => {
     visitTranslations(project.id);
   };
 });
-
-const stateColors = {
-  Reviewed: 'rgb(23, 173, 24)',
-  Translated: 'rgb(255, 206, 0)',
-  'Needs review': 'rgb(232, 0, 0)',
-};

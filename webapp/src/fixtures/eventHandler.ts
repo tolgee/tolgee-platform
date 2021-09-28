@@ -6,3 +6,11 @@ export const stopBubble =
     e.stopPropagation();
     func?.(e);
   };
+
+export const stopAndPrevent =
+  <T = any>(func?: (e: MouseEvent<T>) => any): any =>
+  (e: MouseEvent<T>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    func?.(e);
+  };

@@ -2,8 +2,10 @@ import { makeStyles, Theme, colors } from '@material-ui/core';
 
 export type PositionType = 'left' | 'right';
 
-const getCellGradientBackground = (position?: PositionType) => {
-  const color = colors.grey[50];
+const getCellGradientBackground = (
+  position: PositionType | undefined,
+  color: string
+) => {
   return position
     ? `linear-gradient(${
         position === 'right' ? '-90deg' : '90deg'
@@ -11,64 +13,76 @@ const getCellGradientBackground = (position?: PositionType) => {
     : color;
 };
 
-export const useCellStyles = makeStyles<Theme, { position?: PositionType }>({
-  '@keyframes easeIn': {
-    '0%': {
-      opacity: 0,
+export const useCellStyles = makeStyles<Theme, { position?: PositionType }>(
+  (theme) => ({
+    '@keyframes easeIn': {
+      '0%': {
+        opacity: 0,
+      },
+      '100%': {
+        opacity: 1,
+      },
     },
-    '100%': {
-      opacity: 1,
+    '@keyframes easeOut': {
+      '0%': {
+        opacity: 1,
+      },
+      '100%': {
+        opacity: 0,
+      },
     },
-  },
-  '@keyframes easeOut': {
-    '0%': {
-      opacity: 1,
+    cellPlain: {
+      outline: 0,
+      '& $showOnHover': {
+        opacity: 0,
+        transition: 'opacity 0.1s ease-out',
+      },
+      '&:hover $showOnHover': {
+        opacity: 1,
+        animationName: '$easeIn',
+        animationDuration: '0.4s',
+        animationTimingFunction: 'ease-in',
+      },
+      '&:focus-within $showOnHover': {
+        opacity: 1,
+        animationName: 'none',
+      },
+      '&:focus-within': {
+        background: ({ position }) =>
+          getCellGradientBackground(
+            position,
+            theme.palette.extraLightBackground.main
+          ),
+      },
     },
-    '100%': {
-      opacity: 0,
+    cellClickable: {
+      cursor: 'pointer',
     },
-  },
-  cellPlain: {
-    '& $showOnHover': {
-      opacity: 0,
-      transition: 'opacity 0.1s ease-out',
+    state: {
+      cursor: 'col-resize',
     },
-    '&:hover $showOnHover': {
-      opacity: 1,
-      animationName: '$easeIn',
-      animationDuration: '0.4s',
-      animationTimingFunction: 'ease-in',
+    hover: {
+      background: 'transparent',
+      transition: 'background 0.1s ease-out',
+      '&:hover': {
+        background: ({ position }) =>
+          getCellGradientBackground(position, colors.grey[50]),
+        transition: 'background 0.1s ease-in',
+      },
     },
-    '&:focus-within $showOnHover': {
-      opacity: 1,
-      animationName: 'none',
+    showOnHover: {
+      '&:focus': {
+        opacity: 1,
+      },
     },
-  },
-  cellClickable: {
-    cursor: 'pointer',
-  },
-  state: {
-    cursor: 'col-resize',
-  },
-  hover: {
-    background: 'transparent',
-    transition: 'background 0.1s ease-out',
-    '&:hover': {
-      background: ({ position }) => getCellGradientBackground(position),
-      transition: 'background 0.1s ease-in',
+    cellRaised: {
+      background: 'transparent !important',
+      '-webkit-box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2) !important',
+      'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2) !important',
+      zIndex: 1,
     },
-  },
-  showOnHover: {
-    '&:focus': {
-      opacity: 1,
+    cellSelected: {
+      background: '#efefef',
     },
-  },
-  cellRaised: {
-    '-webkit-box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2)',
-    'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2)',
-    zIndex: 1,
-  },
-  cellSelected: {
-    background: '#efefef',
-  },
-});
+  })
+);

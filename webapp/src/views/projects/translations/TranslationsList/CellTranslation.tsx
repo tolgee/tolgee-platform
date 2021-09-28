@@ -11,6 +11,7 @@ import { TranslationVisual } from '../TranslationVisual';
 import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationOpened } from '../TranslationOpened';
+import { useRef } from 'react';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -92,6 +93,7 @@ export const CellTranslation: React.FC<Props> = ({
   lastFocusable,
 }) => {
   const classes = useStyles();
+  const cellRef = useRef<HTMLDivElement>(null);
   const cellClasses = useCellStyles({ position: 'right' });
   const dispatch = useTranslationsDispatch();
 
@@ -114,6 +116,7 @@ export const CellTranslation: React.FC<Props> = ({
     keyName: data.keyName,
     defaultVal: translation?.text,
     language: language.tag,
+    cellRef: cellRef,
   });
 
   const handleStateChange = (state: StateType) => {
@@ -145,14 +148,16 @@ export const CellTranslation: React.FC<Props> = ({
   return (
     <div
       className={clsx({
+        [cellClasses.cellPlain]: true,
         [classes.splitContainer]: true,
         [cellClasses.cellRaised]: isEditing,
       })}
+      tabIndex={0}
+      ref={cellRef}
     >
       <div
         className={clsx({
           [classes.container]: true,
-          [cellClasses.cellPlain]: true,
           [cellClasses.hover]: !isEditing,
           [cellClasses.cellClickable]: editEnabled,
           [cellClasses.cellSelected]: isEditing,

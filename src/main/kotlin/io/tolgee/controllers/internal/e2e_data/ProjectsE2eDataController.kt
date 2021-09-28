@@ -189,7 +189,8 @@ class ProjectsE2eDataController(
             "vaclav.novak@fake.com",
             Permission.ProjectPermissionType.TRANSLATE
           )
-        )
+        ),
+        keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
       ),
       ProjectDataItem(
         name = "Microsoft Word",
@@ -199,7 +200,8 @@ class ProjectsE2eDataController(
             "vaclav.novak@fake.com",
             Permission.ProjectPermissionType.MANAGE
           )
-        )
+        ),
+        keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
       ),
       ProjectDataItem(
         name = "Microsoft Excel",
@@ -209,7 +211,8 @@ class ProjectsE2eDataController(
             "vaclav.novak@fake.com",
             Permission.ProjectPermissionType.EDIT
           )
-        )
+        ),
+        keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
       ),
       ProjectDataItem(
         name = "Microsoft Powerpoint",
@@ -230,7 +233,8 @@ class ProjectsE2eDataController(
             "vaclav.novak@fake.com",
             Permission.ProjectPermissionType.VIEW
           )
-        )
+        ),
+        keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
       ),
       ProjectDataItem(
         name = "Vaclav's cool project",
@@ -240,7 +244,8 @@ class ProjectsE2eDataController(
             "cukrberg@facebook.com",
             Permission.ProjectPermissionType.VIEW
           )
-        )
+        ),
+        keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
       ),
       ProjectDataItem(
         name = "Vaclav's funny project",
@@ -250,7 +255,8 @@ class ProjectsE2eDataController(
             "cukrberg@facebook.com",
             Permission.ProjectPermissionType.MANAGE
           )
-        )
+        ),
+        keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
       )
     )
 
