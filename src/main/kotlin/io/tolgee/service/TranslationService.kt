@@ -10,7 +10,6 @@ import io.tolgee.dtos.response.KeyWithTranslationsResponseDto.Companion.fromQuer
 import io.tolgee.dtos.response.ViewDataResponse
 import io.tolgee.dtos.response.translations_view.ResponseParams
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.InternalException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -25,8 +24,6 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.query_builders.TranslationsViewBuilder
 import io.tolgee.service.query_builders.TranslationsViewBuilderOld
 import io.tolgee.socketio.TranslationsSocketIoModule
-import org.hibernate.envers.AuditReaderFactory
-import org.hibernate.envers.query.AuditEntity
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
@@ -234,21 +231,12 @@ class TranslationService(
         currentMap = childMap as MutableMap<String, Any?>
         continue
       }
-      throw InternalException(Message.DATA_CORRUPTED)
+      // there is already string value, so we cannot replace it by map,
+      // we have to save the key directly without nesting
+      map[translation.key] = translation.text
+      return
     }
     currentMap[path.name] = translation.text
-  }
-
-  private fun getHistory(key: Key, language: Language): MutableList<Any?>? {
-    return AuditReaderFactory.get(entityManager)
-      .createQuery()
-      .forRevisionsOfEntity(Translation::class.java, true)
-      .add(
-        AuditEntity.and(
-          AuditEntity.property("language_id").eq(language.id),
-          AuditEntity.property("key_id").eq(key.id)
-        )
-      ).resultList
   }
 
   fun deleteByIdIn(ids: Collection<Long>) {
