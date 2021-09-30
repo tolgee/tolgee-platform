@@ -175,7 +175,7 @@ class KeyService(
   @Transactional
   fun create(project: Project, dto: SetTranslationsWithKeyDto): Key {
     val key = create(project, dto.key)
-    translationService!!.setForKey(key, dto.translations)
+    translationService.setForKey(key, dto.translations)
     return key
   }
 
