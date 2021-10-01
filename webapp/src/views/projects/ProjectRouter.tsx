@@ -16,6 +16,7 @@ import { TranslationsView } from './translations/TranslationsView';
 import { ProjectLanguagesView } from 'tg.views/projects/languages/ProjectLanguagesView';
 import { SingleKeyView } from './translations/SingleKeyView';
 import React from 'react';
+import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 
 const IntegrateView = React.lazy(() =>
   import('tg.views/projects/integrate/IntegrateView').then((r) => ({
@@ -32,49 +33,51 @@ export const ProjectRouter = () => {
     <Switch>
       <ProjectProvider id={Number(projectId)}>
         <ProjectPage fullWidth={true}>
-          <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
-            <SingleKeyView />
-          </Route>
+          <React.Suspense fallback={<FullPageLoading />}>
+            <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
+              <SingleKeyView />
+            </Route>
 
-          <Route exact path={LINKS.PROJECT_TRANSLATIONS.template}>
-            <TranslationsView />
-          </Route>
+            <Route exact path={LINKS.PROJECT_TRANSLATIONS.template}>
+              <TranslationsView />
+            </Route>
 
-          <Route exact path={LINKS.PROJECT_EDIT.template}>
-            <ProjectSettingsView />
-          </Route>
+            <Route exact path={LINKS.PROJECT_EDIT.template}>
+              <ProjectSettingsView />
+            </Route>
 
-          <Route exact path={LINKS.PROJECT_LANGUAGES.template}>
-            <ProjectLanguagesView />
-          </Route>
+            <Route exact path={LINKS.PROJECT_LANGUAGES.template}>
+              <ProjectLanguagesView />
+            </Route>
 
-          <Route exact path={LINKS.PROJECT_EDIT_LANGUAGE.template}>
-            <LanguageEditView />
-          </Route>
+            <Route exact path={LINKS.PROJECT_EDIT_LANGUAGE.template}>
+              <LanguageEditView />
+            </Route>
 
-          <Route exact path={LINKS.PROJECT_INVITATION.template}>
-            <ProjectInviteView />
-          </Route>
+            <Route exact path={LINKS.PROJECT_INVITATION.template}>
+              <ProjectInviteView />
+            </Route>
 
-          <Route exact path={LINKS.PROJECT_PERMISSIONS.template}>
-            <ProjectPermissionsView />
-          </Route>
+            <Route exact path={LINKS.PROJECT_PERMISSIONS.template}>
+              <ProjectPermissionsView />
+            </Route>
 
-          <PrivateRoute exact path={LINKS.PROJECT_IMPORT.template}>
-            <ImportView />
-          </PrivateRoute>
+            <PrivateRoute exact path={LINKS.PROJECT_IMPORT.template}>
+              <ImportView />
+            </PrivateRoute>
 
-          <Route exact path={LINKS.PROJECT_EXPORT.template}>
-            <ExportView />
-          </Route>
+            <Route exact path={LINKS.PROJECT_EXPORT.template}>
+              <ExportView />
+            </Route>
 
-          <Route exact path={LINKS.PROJECT_SOCKET_IO_PREVIEW.template}>
-            <SocketIoPreview />
-          </Route>
+            <Route exact path={LINKS.PROJECT_SOCKET_IO_PREVIEW.template}>
+              <SocketIoPreview />
+            </Route>
 
-          <Route exact path={LINKS.PROJECT_INTEGRATE.template}>
-            <IntegrateView />
-          </Route>
+            <Route exact path={LINKS.PROJECT_INTEGRATE.template}>
+              <IntegrateView />
+            </Route>
+          </React.Suspense>
         </ProjectPage>
       </ProjectProvider>
     </Switch>
