@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Button, Typography } from '@material-ui/core';
+import { Button, Typography, Link as MuiLink } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import { T } from '@tolgee/react';
@@ -114,7 +114,7 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
             <Box>
               {security.allowRegistration && (
                 <>
-                  <Link to={LINKS.SIGN_UP.build()}>
+                  <Link to={LINKS.SIGN_UP.build()} component={MuiLink}>
                     <Typography variant="caption">
                       <T>login_sign_up</T>
                     </Typography>
@@ -123,7 +123,10 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
               )}
             </Box>
             {remoteConfig.passwordResettable && (
-              <Link to={LINKS.RESET_PASSWORD_REQUEST.build()}>
+              <Link
+                to={LINKS.RESET_PASSWORD_REQUEST.build()}
+                component={MuiLink}
+              >
                 <Typography variant="caption">
                   <T>login_reset_password_button</T>
                 </Typography>
