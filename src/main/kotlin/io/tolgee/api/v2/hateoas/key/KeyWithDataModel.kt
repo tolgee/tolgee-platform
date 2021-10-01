@@ -2,6 +2,7 @@ package io.tolgee.api.v2.hateoas.key
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.v2.hateoas.invitation.TagModel
+import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModel
 import io.tolgee.api.v2.hateoas.translations.TranslationModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -22,5 +23,8 @@ open class KeyWithDataModel(
   val translations: Map<String, TranslationModel>,
 
   @Schema(description = "Tags of key")
-  val tags: Set<TagModel>
+  val tags: Set<TagModel>,
+
+  @Schema(description = "Screenshots of the key")
+  val screenshots: List<ScreenshotModel>
 ) : RepresentationModel<KeyWithDataModel>(), Serializable

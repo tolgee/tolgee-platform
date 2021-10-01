@@ -17,5 +17,8 @@ data class CreateKeyDto(
 
   val translations: Map<String, String?>? = null,
 
-  val tags: List<String>? = null
+  val tags: List<String>? = null,
+
+  @Schema(description = "Ids of screenshots uploaded with /v2/image-upload endpoint")
+  val screenshotUploadedImageIds: List<Long>? = null
 )

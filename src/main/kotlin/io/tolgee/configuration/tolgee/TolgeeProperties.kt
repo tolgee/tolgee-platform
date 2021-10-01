@@ -15,6 +15,7 @@ open class TolgeeProperties(
   var sentry: SentryProperties = SentryProperties(),
   var internal: InternalProperties = InternalProperties(),
   var screenshotsUrl: String = "/screenshots",
+  var uploadedImagesUrl: String = "/uploaded-images",
   var maxUploadFileSize: Int = 2048,
   val maxScreenshotsPerKey: Int = 20,
   var fileStorage: FileStorageProperties = FileStorageProperties(),

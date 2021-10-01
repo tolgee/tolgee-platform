@@ -1,25 +1,30 @@
-package io.tolgee.api.v2.hateoas.screenshot
+package io.tolgee.api.v2.hateoas.uploadedImage
 
 import io.tolgee.api.v2.controllers.translation.V2TranslationsController
 import io.tolgee.component.TimestampValidation
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.model.Screenshot
+import io.tolgee.model.UploadedImage
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class ScreenshotModelAssembler(
+class UploadedImageModelAssembler(
   private val timestampValidation: TimestampValidation,
   private val tolgeeProperties: TolgeeProperties
-) : RepresentationModelAssemblerSupport<Screenshot, ScreenshotModel>(
-  V2TranslationsController::class.java, ScreenshotModel::class.java
+) : RepresentationModelAssemblerSupport<UploadedImage, UploadedImageModel>(
+  V2TranslationsController::class.java, UploadedImageModel::class.java
 ) {
-  override fun toModel(entity: Screenshot): ScreenshotModel {
-    var filename = entity.filename
+  override fun toModel(entity: UploadedImage): UploadedImageModel {
+    var filename = entity.filenameWithExtension
     if (tolgeeProperties.authentication.securedImageRetrieval) {
       filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
     }
-    return ScreenshotModel(id = entity.id, filename = filename, createdAt = entity.createdAt)
+    return UploadedImageModel(
+      id = entity.id,
+      requestFilename = filename,
+      filename = entity.filename,
+      createdAt = entity.createdAt!!
+    )
   }
 }

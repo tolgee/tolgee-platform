@@ -18,7 +18,7 @@ class TimestampValidation(
 ) {
   fun checkTimeStamp(
     timestamp: String,
-    maxAgeInMs: Long = tolgeeProperties.authentication.timestampMaxAge
+    maxAgeInMs: Long = tolgeeProperties.authentication.securedImageTimestampMaxAge
   ) {
     if (!isTimeStampValid(timestamp, maxAgeInMs)) {
       throw ValidationException(Message.INVALID_TIMESTAMP)
@@ -27,7 +27,7 @@ class TimestampValidation(
 
   fun isTimeStampValid(
     encryptedTimestamp: String,
-    maxAgeInMs: Long = tolgeeProperties.authentication.timestampMaxAge
+    maxAgeInMs: Long = tolgeeProperties.authentication.securedImageTimestampMaxAge
   ): Boolean {
     val timestampDecoded = decryptTimeStamp(encryptedTimestamp)
     val now = Date().time

@@ -24,7 +24,7 @@ class KeyService(
   private val screenshotService: ScreenshotService,
   private val keyMetaService: KeyMetaService,
   private val translationsSocketIoModule: TranslationsSocketIoModule,
-  private val tagService: TagService
+  private val tagService: TagService,
 ) {
   private lateinit var translationService: TranslationService
 
@@ -101,6 +101,10 @@ class KeyService(
 
     dto.tags?.forEach {
       tagService.tagKey(key, it)
+    }
+
+    dto.screenshotUploadedImageIds?.let {
+      screenshotService.saveUploadedImages(it, key)
     }
 
     return key

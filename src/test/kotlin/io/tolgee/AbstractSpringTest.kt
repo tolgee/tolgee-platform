@@ -57,6 +57,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   protected lateinit var screenshotService: ScreenshotService
 
+  @Autowired
+  protected lateinit var imageUploadService: ImageUploadService
+
   protected lateinit var initialUsername: String
 
   protected lateinit var initialPassword: String
@@ -81,6 +84,8 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired lateinit var translationCommentService: TranslationCommentService
 
   @Autowired lateinit var tagService: TagService
+
+  @Autowired lateinit var fileStorageService: FileStorageService
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

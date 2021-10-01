@@ -23,8 +23,8 @@ class AuthenticationProperties(
   var createInitialUser: Boolean = true,
   var initialUsername: String = "admin",
   var initialPassword: String? = null,
-  var securedScreenshotRetrieval: Boolean = false,
-  var timestampMaxAge: Long = 604800000, // one week
+  var securedImageRetrieval: Boolean = false,
+  var securedImageTimestampMaxAge: Long = 600000, // one week
   var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
   var ldap: LdapAuthenticationProperties = LdapAuthenticationProperties(),
   var userCanCreateProjects: Boolean = true,
