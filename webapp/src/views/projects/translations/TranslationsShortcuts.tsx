@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles, Typography } from '@material-ui/core';
+import { alpha } from '@material-ui/core/styles/colorManipulator';
 import { useDebouncedCallback } from 'use-debounce/lib';
 import { Close, Help } from '@material-ui/icons';
 import { T } from '@tolgee/react';
@@ -38,24 +39,28 @@ const useStyles = makeStyles((theme) => ({
     background: 'transparent',
     width: 50,
     textOverflow: 'clip',
+    pointerEvents: 'none',
   },
   content: {
     display: 'flex',
     alignItems: 'center',
     boxSizing: 'border-box',
-    transition: 'opacity 300ms ease-in-out, visibility 0ms',
+    transition: 'background 300ms ease-in-out, visibility 0ms',
     padding: theme.spacing(0, 1, 0, 2),
     pointerEvents: 'all',
     borderRadius: 6,
     height: 40,
     maxWidth: '100%',
-    opacity: 0.9,
-    background: theme.palette.extraLightBackground.main,
+    background: alpha(theme.palette.extraLightBackground.main, 0.9),
+    '@supports (backdrop-filter: blur()) or (-webkit-backdrop-filter: blur()) or (-moz-backdrop-filter: blur())':
+      {
+        background: alpha(theme.palette.extraLightBackground.main, 0.5),
+        '-webkit-backdrop-filter': 'blur(7px)',
+        '-moz-backdrop-filter': 'blur(7px)',
+        backdropFilter: 'blur(7px)',
+      },
     '-webkit-box-shadow': '2px 2px 5px rgba(0, 0, 0, 0.25)',
     'box-shadow': '2px 2px 5px rgba(0, 0, 0, 0.25)',
-    '&:hover': {
-      opacity: 1,
-    },
     '&:hover $icon': {
       opacity: 1,
     },
@@ -70,13 +75,16 @@ const useStyles = makeStyles((theme) => ({
     visibility: 'hidden',
   },
   contentCollapsed: {
+    '-webkit-backdrop-filter': 'none',
+    backdropFilter: 'none',
     background: 'transparent',
     '-webkit-box-shadow': 'none',
     'box-shadow': 'none',
+    pointerEvents: 'none',
   },
   items: {
     flexShrink: 1,
-    opacity: 0.7,
+    opacity: 0.5,
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
@@ -100,14 +108,14 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 20,
     cursor: 'pointer',
     marginLeft: theme.spacing(1),
-    transition: 'all 100ms ease-in-out',
+    transition: 'all 300ms ease-in-out',
     animationName: '$easeIn',
     animationDuration: '0.5s',
     animationTimingFunction: 'ease-in',
+    pointerEvents: 'all',
   },
   hoverHidden: {
-    opacity: 0,
-    transition: 'opacity 300ms ease-in-out',
+    opacity: 0.2,
   },
 }));
 
