@@ -1,3 +1,10 @@
+# [1.0.0-alpha.140](https://github.com/tolgee/server/compare/v1.0.0-alpha.139...v1.0.0-alpha.140) (2021-10-01)
+
+
+### Bug Fixes
+
+* page disappearing when lazy loading ([71d60af](https://github.com/tolgee/server/commit/71d60af04c09af940a42a85886225ee0680c917e))
+
 # [1.0.0-alpha.139](https://github.com/tolgee/server/compare/v1.0.0-alpha.138...v1.0.0-alpha.139) (2021-10-01)
 
 
