@@ -1,3 +1,10 @@
+# [1.0.0-alpha.138](https://github.com/tolgee/server/compare/v1.0.0-alpha.137...v1.0.0-alpha.138) (2021-10-01)
+
+
+### Features
+
+* Enable image pre-uploading TG-342 ([26c1d54](https://github.com/tolgee/server/commit/26c1d545548f6c96fe2eab32cb0455837f98e2e3))
+
 # [1.0.0-alpha.137](https://github.com/tolgee/server/compare/v1.0.0-alpha.136...v1.0.0-alpha.137) (2021-09-30)
 
 
