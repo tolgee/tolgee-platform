@@ -1,3 +1,16 @@
+# [1.0.0-alpha.139](https://github.com/tolgee/server/compare/v1.0.0-alpha.138...v1.0.0-alpha.139) (2021-10-01)
+
+
+### Bug Fixes
+
+* Concept of the help for keyboard shortcuts TG-297 ([cf57858](https://github.com/tolgee/server/commit/cf578585d28beab2aacc32c1fc8d4435216c2c3c))
+* Use Material Link component for links in Login view TG-328 ([2dfbf7e](https://github.com/tolgee/server/commit/2dfbf7edb52b9ced792d2dcd8037cc5d240609b6))
+
+
+### Features
+
+* Add focus manipulation to context TG-297 ([374a3cd](https://github.com/tolgee/server/commit/374a3cd14124ddea60b1a417a43d25247a4b82da))
+
 # [1.0.0-alpha.138](https://github.com/tolgee/server/compare/v1.0.0-alpha.137...v1.0.0-alpha.138) (2021-10-01)
 
 
