@@ -90,7 +90,7 @@ class ScreenshotController(
   private fun Screenshot.toDTO(): ScreenshotDTO {
     val entity = this
     var filename = entity.filename
-    if (tolgeeProperties.authentication.securedScreenshotRetrieval) {
+    if (tolgeeProperties.authentication.securedImageRetrieval) {
       filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
     }
     return ScreenshotDTO(id = entity.id!!, filename = filename, createdAt = entity.createdAt!!)

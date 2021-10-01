@@ -19,8 +19,8 @@ import java.util.*
 
 @SpringBootTest(
   properties = [
-    "tolgee.authentication.secured-screenshot-retrieval=true",
-    "tolgee.authentication.timestamp-max-age=10000"
+    "tolgee.authentication.secured-image-retrieval=true",
+    "tolgee.authentication.secured-image-timestamp-max-age=10000"
   ]
 )
 class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
@@ -46,7 +46,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
-    val rawTimestamp = Date().time - tolgeeProperties.authentication.timestampMaxAge - 500
+    val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge - 500
     val timestamp = timestampValidation.encryptTimeStamp(rawTimestamp)
 
     val result = performAuthGet("/screenshots/${screenshot.filename}?timestamp=$timestamp")
@@ -62,7 +62,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
-    val rawTimestamp = Date().time - tolgeeProperties.authentication.timestampMaxAge + 500
+    val rawTimestamp = Date().time - tolgeeProperties.authentication.securedImageTimestampMaxAge + 500
     val timestamp = timestampValidation.encryptTimeStamp(rawTimestamp)
 
     performAuthGet("/screenshots/${screenshot.filename}?timestamp=$timestamp")

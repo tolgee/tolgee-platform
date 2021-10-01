@@ -14,6 +14,7 @@ services:
     - tolgee.internal.populate=true
     - tolgee.internal.controllerEnabled=true
     - "tolgee.screenshots-url=http://localhost:8201/screenshots"
+    - "tolgee.uploaded-images-url=http://localhost:8201/uploaded-images"
     - tolgee.authentication.needs-email-verification=true
     - tolgee.authentication.registrations-allowed=true
     - tolgee.internal.fake-emails-sent=true

@@ -16,6 +16,7 @@ tolgee:
       client-id: dummy_client_id
       client-secret: dummy_client_secret
   screenshots-url: http://localhost:8201/screenshots
+  uploaded-images-url: http://localhost:8080/uploaded-images
   internal:
     populate: true
     controller-enabled: true
