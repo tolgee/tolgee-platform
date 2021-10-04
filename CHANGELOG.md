@@ -1,3 +1,10 @@
+# [1.0.0-alpha.142](https://github.com/tolgee/server/compare/v1.0.0-alpha.141...v1.0.0-alpha.142) (2021-10-04)
+
+
+### Features
+
+* **backend:** Complex Key update TG-345 ([9c34b52](https://github.com/tolgee/server/commit/9c34b52dc4b7fd1849263408966493c9b7f1a57b))
+
 # [1.0.0-alpha.141](https://github.com/tolgee/server/compare/v1.0.0-alpha.140...v1.0.0-alpha.141) (2021-10-04)
 
 
