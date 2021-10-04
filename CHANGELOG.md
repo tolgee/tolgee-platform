@@ -1,3 +1,10 @@
+# [1.0.0-alpha.141](https://github.com/tolgee/server/compare/v1.0.0-alpha.140...v1.0.0-alpha.141) (2021-10-04)
+
+
+### Features
+
+* add nice blur to shortcuts ([1eb4929](https://github.com/tolgee/server/commit/1eb4929f94fb355ea413786b1ae34b55910858dc))
+
 # [1.0.0-alpha.140](https://github.com/tolgee/server/compare/v1.0.0-alpha.139...v1.0.0-alpha.140) (2021-10-01)
 
 
