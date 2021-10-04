@@ -81,12 +81,21 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
     ).andIsForbidden
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
   @Test
-  fun `sets translations for new key forbidden`() {
+  fun `sets translations for new key with API key`() {
     performProjectAuthPost(
       "/translations",
       SetTranslationsWithKeyDto("A key", mutableMapOf("en" to "English"))
+    ).andIsOk
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @Test
+  fun `sets translations for new key forbidden with api key`() {
+    performProjectAuthPost(
+      "/translations",
+      SetTranslationsWithKeyDto("A key not existings", mutableMapOf("en" to "English"))
     ).andIsForbidden
   }
 

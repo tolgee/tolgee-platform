@@ -6,6 +6,7 @@ import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
+import io.tolgee.model.key.Tag
 
 class KeysTestData {
   lateinit var keyWithReferences: Key
@@ -79,6 +80,12 @@ class KeysTestData {
         addScreenshot {}
         addMeta {
           self {
+            tags.add(
+              Tag().apply {
+                project = projectBuilder.self
+                name = "test"
+              }
+            )
             addComment {
               self {
                 text = "What a text comment"

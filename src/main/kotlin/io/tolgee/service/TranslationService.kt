@@ -190,6 +190,7 @@ class TranslationService(
     }
   }
 
+  @Transactional
   fun setForKey(key: Key, translations: Map<String, String?>): Map<String, Translation> {
     return translations.entries.associate { (languageTag, value) ->
       if (value == null || value.isEmpty()) {

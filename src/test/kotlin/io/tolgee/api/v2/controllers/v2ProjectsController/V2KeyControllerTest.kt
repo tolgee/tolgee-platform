@@ -1,13 +1,16 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
+import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
+import io.tolgee.dtos.request.ComplexEditKeyDto
 import io.tolgee.dtos.request.CreateKeyDto
 import io.tolgee.dtos.request.EditKeyDto
 import io.tolgee.exceptions.FileStoreException
 import io.tolgee.fixtures.*
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.service.ImageUploadService
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Value
@@ -45,6 +48,16 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `creates key`() {
     performProjectAuthPost("keys", CreateKeyDto(name = "super_key"))
+      .andIsCreated.andPrettyPrint.andAssertThatJson {
+        node("id").isValidId
+        node("name").isEqualTo("super_key")
+      }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT])
+  @Test
+  fun `creates key with keys edit scope`() {
+    performProjectAuthPost("keys", CreateKeyDto(name = "super_key", translations = mapOf("en" to "", "de" to "")))
       .andIsCreated.andPrettyPrint.andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("super_key")
@@ -94,6 +107,80 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       }
       node("screenshots") {
         isArray.hasSize(3)
+        node("[1]") {
+          node("id").isNumber.isGreaterThan(BigDecimal(0))
+          node("filename").isString.endsWith(".jpg").hasSizeGreaterThan(20)
+        }
+      }
+    }
+
+    assertThat(tagService.find(project, "tag")).isNotNull
+    assertThat(tagService.find(project, "tag2")).isNotNull
+
+    val key = keyService.get(project.id, keyName).orElseThrow()
+    assertThat(tagService.getTagsForKeyIds(listOf(key.id))[key.id]).hasSize(2)
+    assertThat(translationService.find(key, testData.english).get().text).isEqualTo("EN")
+
+    val screenshots = screenshotService.findAll(key)
+    screenshots.forEach {
+      fileStorageService.readFile("screenshots/${it.filename}").isNotEmpty()
+    }
+    assertThat(screenshots).hasSize(3)
+    assertThat(imageUploadService.find(screenshotImageIds)).hasSize(0)
+
+    assertThrows<FileStoreException> {
+      screenshotImages.forEach {
+        fileStorageService.readFile(
+          "${ImageUploadService.UPLOADED_IMAGES_STORAGE_FOLDER_NAME}/${it.filenameWithExtension}"
+        )
+      }
+    }
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
+  @Test
+  fun `updates key with translations and tags and screenshots`() {
+    val keyName = "super_key"
+
+    val screenshotImages = (1..3).map { imageUploadService.store(screenshotFile, userAccount!!) }
+    val screenshotImageIds = screenshotImages.map { it.id }
+    performProjectAuthPut(
+      "keys/${testData.keyWithReferences.id}/complex-update",
+      ComplexEditKeyDto(
+        name = keyName,
+        translations = mapOf("en" to "EN", "de" to "DE"),
+        tags = listOf("tag", "tag2"),
+        screenshotUploadedImageIds = screenshotImageIds,
+        screenshotIdsToDelete = listOf(testData.keyWithReferences.screenshots.first().id)
+      )
+    ).andIsOk.andAssertThatJson {
+      node("id").isValidId
+      node("name").isEqualTo(keyName)
+      node("tags") {
+        isArray.hasSize(2)
+        node("[0]") {
+          node("id").isValidId
+          node("name").isEqualTo("tag")
+        }
+        node("[1]") {
+          node("id").isValidId
+          node("name").isEqualTo("tag2")
+        }
+      }
+      node("translations") {
+        node("en") {
+          node("id").isValidId
+          node("text").isEqualTo("EN")
+          node("state").isEqualTo("TRANSLATED")
+        }
+        node("de") {
+          node("id").isValidId
+          node("text").isEqualTo("DE")
+          node("state").isEqualTo("TRANSLATED")
+        }
+      }
+      node("screenshots") {
+        isArray.hasSize(4)
         node("[1]") {
           node("id").isNumber.isGreaterThan(BigDecimal(0))
           node("filename").isString.endsWith(".jpg").hasSizeGreaterThan(20)
