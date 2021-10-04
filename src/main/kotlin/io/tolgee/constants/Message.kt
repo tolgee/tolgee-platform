@@ -71,7 +71,8 @@ enum class Message {
   DONT_HAVE_DIRECT_PERMISSIONS,
   TAG_TOO_LOG,
   TOO_MANY_UPLOADED_IMAGES,
-  ONE_OR_MORE_IMAGES_NOT_FOUND;
+  ONE_OR_MORE_IMAGES_NOT_FOUND,
+  SCREENSHOT_NOT_OF_KEY;
 
   val code: String
     get() = name.toLowerCase()

@@ -24,12 +24,14 @@ import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
+import io.tolgee.service.SecurityService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.query_builders.CursorUtil
 import org.springdoc.api.annotations.ParameterObject
@@ -57,7 +59,9 @@ class V2TranslationsController(
   private val keyService: KeyService,
   private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
   private val translationModelAssembler: TranslationModelAssembler,
-  private val languageService: LanguageService
+  private val languageService: LanguageService,
+  private val securityService: SecurityService,
+  private val authenticationFacade: AuthenticationFacade
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @AccessWithAnyProjectPermission
@@ -96,10 +100,16 @@ class V2TranslationsController(
   }
 
   @PostMapping("")
-  @AccessWithApiKey([ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
+    // check scopes if key exists
+    keyService.get(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
+      if (authenticationFacade.isApiKeyAuthentication) {
+        securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
+      }
+    }
     val key = keyService.getOrCreateKey(projectHolder.projectEntity, PathDTO.fromFullPath(dto.key))
     val translations = translationService.setForKey(key, dto.translations)
     return getSetTranslationsResponse(key, translations)

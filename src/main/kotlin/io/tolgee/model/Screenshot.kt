@@ -30,4 +30,19 @@ data class Screenshot(
       val fileName = DigestUtils.sha256Hex(nameToHash.toByteArray())
       return "${key.project!!.id}/${key.id}/$fileName.jpg"
     }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+
+    other as Screenshot
+
+    if (id != other.id) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    return id.hashCode()
+  }
 }

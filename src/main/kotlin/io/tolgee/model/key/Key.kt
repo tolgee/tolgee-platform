@@ -32,7 +32,7 @@ data class Key(
   override var keyMeta: KeyMeta? = null
 
   @OneToMany(mappedBy = "key")
-  var screenshots: MutableList<Screenshot> = mutableListOf()
+  var screenshots: MutableSet<Screenshot> = mutableSetOf()
 
   constructor(
     name: String,
