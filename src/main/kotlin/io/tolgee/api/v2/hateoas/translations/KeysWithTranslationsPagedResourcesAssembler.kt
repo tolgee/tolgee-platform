@@ -15,7 +15,7 @@ class KeysWithTranslationsPagedResourcesAssembler(
   val keyWithTranslationsModelAssembler: KeyWithTranslationsModelAssembler,
   val languageModelAssembler: LanguageModelAssembler,
   resolver: HateoasPageableHandlerMethodArgumentResolver? = null,
-  baseUri: UriComponents? = null
+  baseUri: UriComponents? = null,
 ) : PagedResourcesAssembler<KeyWithTranslationsView>(resolver, baseUri) {
   fun toTranslationModel(
     entities: Page<KeyWithTranslationsView>,
@@ -28,7 +28,7 @@ class KeysWithTranslationsPagedResourcesAssembler(
       metadata = pageModel.metadata,
       links = pageModel.links.toList().toTypedArray(),
       selectedLanguages = selectedLanguages.map { languageModelAssembler.toModel(it) },
-      nextCursor = nextCursor
+      nextCursor = nextCursor,
     )
   }
 }

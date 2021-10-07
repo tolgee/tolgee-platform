@@ -35,7 +35,6 @@ class TranslationsViewBuilder(
   private var translationsTextFields: MutableSet<Expression<String>> = HashSet()
   private lateinit var root: Root<Key>
   private lateinit var screenshotCountExpression: Expression<Long>
-  private lateinit var commentCountExpression: Expression<Long>
   private val havingConditions: MutableSet<Predicate> = HashSet()
   private val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
 
@@ -283,7 +282,6 @@ class TranslationsViewBuilder(
     ): Page<KeyWithTranslationsView> {
       val em = applicationContext.getBean(EntityManager::class.java)
       val tagService = applicationContext.getBean(TagService::class.java)
-
       var sort = if (pageable.sort.isSorted)
         pageable.sort
       else

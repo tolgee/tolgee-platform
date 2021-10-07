@@ -9,6 +9,7 @@ import java.util.*
 open class UploadedImageModel(
   val id: Long,
   val filename: String,
+  val fileUrl: String,
   val requestFilename: String,
   val createdAt: Date
 ) : RepresentationModel<UploadedImageModel>()

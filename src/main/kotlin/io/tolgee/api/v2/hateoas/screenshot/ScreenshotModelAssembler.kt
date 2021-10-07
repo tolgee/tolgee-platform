@@ -4,14 +4,16 @@ import io.tolgee.api.v2.controllers.translation.V2TranslationsController
 import io.tolgee.component.TimestampValidation
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.Screenshot
+import org.springframework.hateoas.Link
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.*
 
 @Component
 class ScreenshotModelAssembler(
   private val timestampValidation: TimestampValidation,
-  private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties,
 ) : RepresentationModelAssemblerSupport<Screenshot, ScreenshotModel>(
   V2TranslationsController::class.java, ScreenshotModel::class.java
 ) {
@@ -20,6 +22,16 @@ class ScreenshotModelAssembler(
     if (tolgeeProperties.authentication.securedImageRetrieval) {
       filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
     }
-    return ScreenshotModel(id = entity.id, filename = filename, createdAt = entity.createdAt)
+
+    val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
+    val fileUrl = builder.replacePath(tolgeeProperties.screenshotsUrl + "/" + filename)
+      .replaceQuery("").build().toUriString()
+
+    return ScreenshotModel(
+      id = entity.id,
+      filename = filename,
+      fileUrl = fileUrl,
+      createdAt = entity.createdAt
+    ).add(Link.of(fileUrl, "file"))
   }
 }

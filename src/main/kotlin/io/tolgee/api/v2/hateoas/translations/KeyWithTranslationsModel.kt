@@ -2,6 +2,7 @@ package io.tolgee.api.v2.hateoas.translations
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.v2.hateoas.invitation.TagModel
+import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModel
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
@@ -18,6 +19,9 @@ open class KeyWithTranslationsModel(
 
   @Schema(description = "Count of screenshots provided for the key", example = "1")
   val screenshotCount: Long,
+
+  @Schema(description = "Key screenshots. Not provided when API key hasn't screenshots.view scope permission.")
+  val screenshots: List<ScreenshotModel>?,
 
   @Schema(
     description = "Translations object",
