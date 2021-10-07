@@ -27,8 +27,7 @@
     "branches": [
       "next",
       {
-        "name": "main",
-        "prerelease": "alpha"
+        "name": "main"
       }
     ]
   }

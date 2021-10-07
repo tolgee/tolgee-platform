@@ -1,4 +1,4 @@
-name: Prerelease
+name: Release
 
 on:
   workflow_run:
