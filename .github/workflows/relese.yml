@@ -76,7 +76,6 @@ jobs:
           tag_name: ${{ steps.version.outputs.VERSION }}
           release_name: Release ${{ steps.version.outputs.VERSION }}
           draft: false
-          prerelease: true
 
       - name: Upload Release Asset
         if: ${{ steps.version.outputs.VERSION != '' }}
