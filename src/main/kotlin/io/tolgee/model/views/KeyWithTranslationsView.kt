@@ -1,5 +1,6 @@
 package io.tolgee.model.views
 
+import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Tag
 
@@ -10,6 +11,7 @@ data class KeyWithTranslationsView(
   val translations: MutableMap<String, TranslationView> = mutableMapOf(),
 ) {
   lateinit var keyTags: List<Tag>
+  var screenshots: Collection<Screenshot>? = null
 
   companion object {
     fun of(queryData: Array<Any?>): KeyWithTranslationsView {

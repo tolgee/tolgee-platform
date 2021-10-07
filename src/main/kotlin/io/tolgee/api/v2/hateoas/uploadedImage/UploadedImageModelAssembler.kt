@@ -6,6 +6,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.model.UploadedImage
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.util.*
 
 @Component
@@ -20,9 +21,15 @@ class UploadedImageModelAssembler(
     if (tolgeeProperties.authentication.securedImageRetrieval) {
       filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
     }
+
+    val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
+    val fileUrl = builder.replacePath(tolgeeProperties.uploadedImagesUrl + "/" + filename)
+      .replaceQuery("").build().toUriString()
+
     return UploadedImageModel(
       id = entity.id,
       requestFilename = filename,
+      fileUrl = fileUrl,
       filename = entity.filename,
       createdAt = entity.createdAt!!
     )

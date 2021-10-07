@@ -17,6 +17,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   @Test
   fun `uploads single screenshot`() {
     performStoreImage().andPrettyPrint.andIsCreated.andAssertThatJson {
+      node("fileUrl").isString.startsWith("http://").endsWith(".jpg")
       node("requestFilename").isString.satisfies {
         val file = File(tolgeeProperties.fileStorage.fsDataPath + "/uploadedImages/" + it)
         assertThat(file).exists()
@@ -34,7 +35,7 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
   }
 
   @Test
-  fun getScreenshotFile() {
+  fun `returns file`() {
     val image = imageUploadService.store(screenshotFile, userAccount!!)
 
     val file = File("""${tolgeeProperties.fileStorage.fsDataPath}/uploadedImages/${image.filename}.jpg""")

@@ -20,6 +20,7 @@ import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
+import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -29,10 +30,7 @@ import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.KeyService
-import io.tolgee.service.LanguageService
-import io.tolgee.service.SecurityService
-import io.tolgee.service.TranslationService
+import io.tolgee.service.*
 import io.tolgee.service.query_builders.CursorUtil
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -61,7 +59,8 @@ class V2TranslationsController(
   private val translationModelAssembler: TranslationModelAssembler,
   private val languageService: LanguageService,
   private val securityService: SecurityService,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
+  private val screenshotService: ScreenshotService
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @AccessWithAnyProjectPermission
@@ -136,8 +135,23 @@ class V2TranslationsController(
     val languages: Set<Language> = languageService
       .getLanguagesForTranslationsView(params.languages, projectHolder.project.id)
     val data = translationService.getViewData(projectHolder.project.id, pageable, params, languages)
+
+    val keysWithScreenshots = getKeysWithScreenshots(data.map { it.keyId }.toList())
+    if (keysWithScreenshots != null) {
+      data.content.forEach { it.screenshots = keysWithScreenshots[it.keyId] ?: listOf() }
+    }
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
     return pagedAssembler.toTranslationModel(data, languages, cursor)
+  }
+
+  private fun getKeysWithScreenshots(keyIds: Collection<Long>): Map<Long, MutableSet<Screenshot>>? {
+    if (
+      !authenticationFacade.isApiKeyAuthentication ||
+      authenticationFacade.apiKey.scopesEnum.contains(ApiScope.SCREENSHOTS_VIEW)
+    ) {
+      return screenshotService.getKeysWithScreenshots(keyIds).map { it.id to it.screenshots }.toMap()
+    }
+    return null
   }
 
   private fun getSetTranslationsResponse(key: Key, translations: Map<String, Translation>):

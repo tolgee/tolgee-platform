@@ -80,6 +80,22 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations").andPrettyPrint.andIsOk.andAssertThatJson {
+      node("_embedded.keys[2].translations.de.commentCount").isNumber.isEqualTo(BigDecimal(5))
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns correct screenshot data`() {
+    testData.addKeysWithScreenshots()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations").andPrettyPrint.andIsOk.andAssertThatJson {
+      node("_embedded.keys") {
+        node("[0].screenshots").isArray.hasSize(0)
+        node("[3].screenshots").isArray.hasSize(2)
+        node("[3].screenshots[1].fileUrl").isString.endsWith(".jpg").startsWith("http://local")
+      }
     }
   }
 

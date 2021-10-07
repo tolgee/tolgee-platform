@@ -118,4 +118,8 @@ class ScreenshotService(
   fun getScreenshotsCountForKey(key: Key): Long {
     return screenshotRepository.countByKey(key)
   }
+
+  fun getKeysWithScreenshots(ids: Collection<Long>): List<Key> {
+    return screenshotRepository.getKeysWithScreenshots(ids)
+  }
 }
