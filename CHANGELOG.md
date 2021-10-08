@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/tolgee/server/compare/v1.0.0...v1.1.0) (2021-10-08)
+
+
+### Features
+
+* Return screenshots with translations TG-349 ([00daf8d](https://github.com/tolgee/server/commit/00daf8ddfb51004696282713a3bcb9705570881b))
+
 # 1.0.0 (2021-10-07)
 
 
