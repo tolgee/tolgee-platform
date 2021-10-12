@@ -137,7 +137,14 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     }
   }
 
-  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_EDIT])
+  @ProjectApiKeyAuthTestMethod(
+    scopes = [
+      ApiScope.KEYS_EDIT,
+      ApiScope.TRANSLATIONS_EDIT,
+      ApiScope.SCREENSHOTS_UPLOAD,
+      ApiScope.SCREENSHOTS_DELETE
+    ]
+  )
   @Test
   fun `updates key with translations and tags and screenshots`() {
     val keyName = "super_key"
