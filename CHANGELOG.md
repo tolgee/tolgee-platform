@@ -1,3 +1,11 @@
+## [1.1.1](https://github.com/tolgee/server/compare/v1.1.0...v1.1.1) (2021-10-12)
+
+
+### Bug Fixes
+
+* Uploaded images are not deleted periodically TG-353 ([c213093](https://github.com/tolgee/server/commit/c2130932a609039aba14b2a1744938f58f0a9830))
+* Wrong fileUrl is returned when absolute URL is provided TG-352 ([de90753](https://github.com/tolgee/server/commit/de90753f42d42df8372bdda70dee0ba888705f28))
+
 # [1.1.0](https://github.com/tolgee/server/compare/v1.0.0...v1.1.0) (2021-10-08)
 
 
