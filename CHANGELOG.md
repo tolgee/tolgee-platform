@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/tolgee/server/compare/v1.1.1...v1.1.2) (2021-10-12)
+
+
+### Bug Fixes
+
+* API key scopes are not checked for screenshot manipulation TG-354 ([0149507](https://github.com/tolgee/server/commit/0149507721d6ff2576b64c50beaf71e604deaa12))
+
 ## [1.1.1](https://github.com/tolgee/server/compare/v1.1.0...v1.1.1) (2021-10-12)
 
 
