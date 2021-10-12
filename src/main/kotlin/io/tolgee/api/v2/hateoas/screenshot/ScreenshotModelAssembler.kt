@@ -23,9 +23,12 @@ class ScreenshotModelAssembler(
       filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
     }
 
-    val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
-    val fileUrl = builder.replacePath(tolgeeProperties.screenshotsUrl + "/" + filename)
-      .replaceQuery("").build().toUriString()
+    var fileUrl = tolgeeProperties.screenshotsUrl + "/" + filename
+    if (!fileUrl.matches(Regex("^https?://.*$"))) {
+      val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
+      fileUrl = builder.replacePath(fileUrl)
+        .replaceQuery("").build().toUriString()
+    }
 
     return ScreenshotModel(
       id = entity.id,

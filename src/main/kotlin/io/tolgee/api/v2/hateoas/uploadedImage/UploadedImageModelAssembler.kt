@@ -22,9 +22,12 @@ class UploadedImageModelAssembler(
       filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
     }
 
-    val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
-    val fileUrl = builder.replacePath(tolgeeProperties.uploadedImagesUrl + "/" + filename)
-      .replaceQuery("").build().toUriString()
+    var fileUrl = tolgeeProperties.uploadedImagesUrl + "/" + filename
+    if (!fileUrl.matches(Regex("^https?://.*$"))) {
+      val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
+      fileUrl = builder.replacePath(fileUrl)
+        .replaceQuery("").build().toUriString()
+    }
 
     return UploadedImageModel(
       id = entity.id,

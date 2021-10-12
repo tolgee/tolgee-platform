@@ -8,14 +8,29 @@ import io.tolgee.assertions.Assertions.assertThat
 import io.tolgee.fixtures.*
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
+import org.testng.annotations.AfterClass
+import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.io.File
 import java.util.stream.Collectors
 
 class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
+  lateinit var initialImageUploadUrl: String
+
+  @BeforeClass
+  fun before() {
+    initialImageUploadUrl = tolgeeProperties.uploadedImagesUrl
+  }
+
+  @AfterClass
+  fun after() {
+    tolgeeProperties.uploadedImagesUrl = initialImageUploadUrl
+  }
+
   @Test
-  fun `uploads single screenshot`() {
+  fun `uploads single image`() {
+    tolgeeProperties.uploadedImagesUrl = "/uploaded-images"
     performStoreImage().andPrettyPrint.andIsCreated.andAssertThatJson {
       node("fileUrl").isString.startsWith("http://").endsWith(".jpg")
       node("requestFilename").isString.satisfies {
@@ -32,6 +47,15 @@ class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
       performStoreImage().andIsCreated
     }
     performStoreImage().andIsBadRequest
+  }
+
+  @Test
+  fun `returns correct fileUrl when absolute url is set`() {
+    tolgeeProperties.uploadedImagesUrl = "https://hello.com/upload"
+
+    performStoreImage().andPrettyPrint.andIsCreated.andAssertThatJson {
+      node("fileUrl").isString.startsWith("https://hello.com/upload").endsWith(".jpg")
+    }
   }
 
   @Test
