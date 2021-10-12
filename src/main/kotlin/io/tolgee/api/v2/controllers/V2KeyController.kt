@@ -55,6 +55,9 @@ class V2KeyController(
   @Operation(summary = "Creates new key")
   @ResponseStatus(HttpStatus.CREATED)
   fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyWithDataModel> {
+    if (dto.screenshotUploadedImageIds != null) {
+      projectHolder.projectEntity.checkScreenshotsUploadPermission()
+    }
     val key = keyService.create(projectHolder.projectEntity, dto)
     return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
   }
@@ -101,7 +104,7 @@ class V2KeyController(
 
     dto.screenshotIdsToDelete?.let { screenshotIds ->
       if (screenshotIds.isNotEmpty()) {
-        key.project?.checkKeysEditPermission()
+        key.project?.checkScreenshotsDeletePermission()
         editPermissionsChecked = true
       }
       val screenshots = screenshotService.findByIdIn(screenshotIds).onEach {
@@ -113,6 +116,7 @@ class V2KeyController(
     }
 
     dto.screenshotUploadedImageIds?.let {
+      key.project?.checkScreenshotsUploadPermission()
       screenshotService.saveUploadedImages(it, key)
     }
 
@@ -151,5 +155,19 @@ class V2KeyController(
       securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
     }
     securityService.checkProjectPermission(this.id, Permission.ProjectPermissionType.EDIT)
+  }
+
+  private fun Project.checkScreenshotsDeletePermission() {
+    if (authenticationFacade.isApiKeyAuthentication) {
+      securityService.checkApiKeyScopes(setOf(ApiScope.SCREENSHOTS_DELETE), authenticationFacade.apiKey)
+    }
+    securityService.checkProjectPermission(this.id, Permission.ProjectPermissionType.TRANSLATE)
+  }
+
+  private fun Project.checkScreenshotsUploadPermission() {
+    if (authenticationFacade.isApiKeyAuthentication) {
+      securityService.checkApiKeyScopes(setOf(ApiScope.SCREENSHOTS_UPLOAD), authenticationFacade.apiKey)
+    }
+    securityService.checkProjectPermission(this.id, Permission.ProjectPermissionType.TRANSLATE)
   }
 }
