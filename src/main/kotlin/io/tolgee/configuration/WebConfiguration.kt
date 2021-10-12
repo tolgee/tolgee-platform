@@ -10,6 +10,7 @@ import org.springframework.boot.web.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.CacheControl
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.util.unit.DataSize
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.servlet.config.annotation.CorsRegistry
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit
 import javax.servlet.MultipartConfigElement
 
 @Configuration
+@EnableScheduling
 class WebConfiguration(
   private val tolgeeProperties: TolgeeProperties
 ) : WebMvcConfigurer {
