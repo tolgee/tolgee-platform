@@ -11,11 +11,24 @@ import io.tolgee.fixtures.*
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.testng.annotations.AfterClass
+import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 import java.io.File
 import java.util.stream.Collectors
 
 class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
+  lateinit var initialScreenshotUrl: String
+
+  @BeforeClass
+  fun before() {
+    initialScreenshotUrl = tolgeeProperties.screenshotsUrl
+  }
+
+  @AfterClass
+  fun after() {
+    tolgeeProperties.screenshotsUrl = initialScreenshotUrl
+  }
 
   @Test
   @ProjectJWTAuthTestMethod
@@ -63,6 +76,19 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
 
     performProjectAuthGet("keys/${key2.id}/screenshots").andIsOk.andAssertThatJson {
       node("_embedded.screenshots").isArray.hasSize(1)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `returns correct fileUrl when absolute url is set`() {
+    tolgeeProperties.screenshotsUrl = "http://hello.com/screenshots"
+    val key = keyService.create(project, DeprecatedKeyDto("test"))
+    screenshotService.store(screenshotFile, key)
+
+    performProjectAuthGet("keys/${key.id}/screenshots").andIsOk.andPrettyPrint.andAssertThatJson {
+
+      node("_embedded.screenshots[0].fileUrl").isString.startsWith("http://hello.com/screenshots")
     }
   }
 
