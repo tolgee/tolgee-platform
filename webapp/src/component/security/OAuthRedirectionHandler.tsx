@@ -30,7 +30,7 @@ export const OAuthRedirectionHandler: FunctionComponent<OAuthRedirectionHandlerP
           code
         );
       }
-    }, [code, !!security.allowPrivate]);
+    }, [code, security.allowPrivate]);
 
     if (security.jwtToken) {
       return <Redirect to={LINKS.AFTER_LOGIN.build()} />;

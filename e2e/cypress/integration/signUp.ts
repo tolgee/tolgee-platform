@@ -14,7 +14,7 @@ import {
   setRecaptchaSecretKey,
   setRecaptchaSiteKey,
 } from '../common/apiCalls';
-import { assertMessage, selectInProjectMenu } from '../common/shared';
+import { assertMessage, gcy, selectInProjectMenu } from '../common/shared';
 import { loginWithFakeGithub } from '../common/login';
 
 const createProjectWithInvitation = (
@@ -183,7 +183,7 @@ const fillAndSubmitForm = () => {
   cy.xpath(getInput('email')).type(TEST_USERNAME);
   cy.xpath(getInput('password')).type('password');
   cy.xpath(getInput('passwordRepeat')).type('password');
-  cy.contains('Submit').click();
+  gcy('sign-up-submit-button').click();
 };
 
 const visit = () => cy.visit(HOST + '/sign_up');

@@ -19,6 +19,7 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { CompactView } from 'tg.component/layout/CompactView';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { Link, Typography } from '@material-ui/core';
 
 const actions = container.resolve(SignUpActions);
 
@@ -106,6 +107,7 @@ const SignUpView: FunctionComponent = () => {
               submitButtons={
                 <Box display="flex" justifyContent="flex-end">
                   <LoadingButton
+                    data-cy="sign-up-submit-button"
                     color="primary"
                     type="submit"
                     variant="contained"
@@ -120,6 +122,15 @@ const SignUpView: FunctionComponent = () => {
               <TextField name="name" label={<T>sign_up_form_full_name</T>} />
               <TextField name="email" label={<T>sign_up_form_email</T>} />
               <SetPasswordFields />
+              <Box mt={2} mb={3}>
+                <Typography variant="body2">
+                  By clicking Submit, I agree that I have read and accepted the
+                  Tolgee{' '}
+                  <Link href="https://tolgee.io/docs/terms_of_use">
+                    Terms of Use
+                  </Link>
+                </Typography>
+              </Box>
             </StandardForm>
           )
         }
