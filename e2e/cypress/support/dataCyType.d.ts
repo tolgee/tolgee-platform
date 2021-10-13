@@ -142,6 +142,7 @@ declare namespace DataCy {
         "project-transfer-confirmation-field" |
         "project-transfer-dialog" |
         "screenshot-box" |
+        "sign-up-submit-button" |
         "tag-autocomplete-input" |
         "tag-autocomplete-option" |
         "transfer-project-apply-button" |

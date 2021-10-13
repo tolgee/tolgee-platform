@@ -47,3 +47,6 @@ e2e/cypress/integration/examples/
 
 /**/.idea
 .VERSION
+
+/node_modules
+/**/.DS_Store
