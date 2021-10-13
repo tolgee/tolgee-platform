@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/tolgee/server/compare/v1.1.2...v1.2.0) (2021-10-13)
+
+
+### Features
+
+* Add terms of use check TG-348 ([5ea1962](https://github.com/tolgee/server/commit/5ea1962f9e9de41d606d46b2c4b5a40b299b31d1))
+
 ## [1.1.2](https://github.com/tolgee/server/compare/v1.1.1...v1.1.2) (2021-10-12)
 
 
