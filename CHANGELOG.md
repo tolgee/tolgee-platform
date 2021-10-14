@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/tolgee/server/compare/v1.2.0...v1.2.1) (2021-10-14)
+
+
+### Bug Fixes
+
+* API key list is not refreshed after API key delete TG-359 ([ea8ef72](https://github.com/tolgee/server/commit/ea8ef722da017b7f1febbfb68230d87e2fdfabc0))
+
 # [1.2.0](https://github.com/tolgee/server/compare/v1.1.2...v1.2.0) (2021-10-13)
 
 
