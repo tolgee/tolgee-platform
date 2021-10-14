@@ -39,7 +39,7 @@ const Item: FunctionComponent<{ keyDTO: ApiKeyModel }> = (props) => {
   const deleteKey = useApiMutation({
     url: '/v2/api-keys/{apiKeyId}',
     method: 'delete',
-    invalidatePrefix: '/api/apiKeys',
+    invalidatePrefix: '/v2/api-keys',
   });
 
   const onDelete = (dto: components['schemas']['ApiKeyModel']) => {
