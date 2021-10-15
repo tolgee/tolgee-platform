@@ -1,3 +1,11 @@
+## [1.2.2](https://github.com/tolgee/server/compare/v1.2.1...v1.2.2) (2021-10-15)
+
+
+### Bug Fixes
+
+* Remove sentry enabled from properties TG-365 ([2ddcaea](https://github.com/tolgee/server/commit/2ddcaeae2b5c984b49140b56eefc478c80352b46))
+* Unexpected error on unathorized TG-351 ([d1564fc](https://github.com/tolgee/server/commit/d1564fc62e9b310978b6cc9ef7f007864402ea37))
+
 ## [1.2.1](https://github.com/tolgee/server/compare/v1.2.0...v1.2.1) (2021-10-14)
 
 
