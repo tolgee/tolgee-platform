@@ -88,12 +88,7 @@ export const ProjectCreateView: FunctionComponent = () => {
           return (
             <Box mb={8}>
               <Grid container spacing={2}>
-                {config.authentication && (
-                  <Grid item lg={3} md={4} sm={12} xs={12}>
-                    <OwnerSelect />
-                  </Grid>
-                )}
-                <Grid item lg md sm xs>
+                <Grid item lg md sm xs={12}>
                   <TextField
                     autoFocus
                     data-cy="project-name-field"
@@ -102,6 +97,11 @@ export const ProjectCreateView: FunctionComponent = () => {
                     required={true}
                   />
                 </Grid>
+                {config.authentication && (
+                  <Grid item lg md sm xs={12}>
+                    <OwnerSelect />
+                  </Grid>
+                )}
               </Grid>
               <Box mb={2}>
                 <Typography variant="h6">
