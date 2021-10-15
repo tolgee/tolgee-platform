@@ -1,6 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
-import { IconButton, makeStyles } from '@material-ui/core';
+import { IconButton, makeStyles, Tooltip } from '@material-ui/core';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 
 const useStyles = makeStyles({
@@ -16,12 +16,18 @@ const useStyles = makeStyles({
   },
 });
 
-type Props = React.ComponentProps<typeof IconButton>;
+type Props = React.ComponentProps<typeof IconButton> & {
+  tooltip?: React.ReactNode;
+};
 
 export const ControlsButton: React.FC<Props> = React.forwardRef(
-  function ControlsButton({ children, className, onClick, ...props }, ref) {
+  function ControlsButton(
+    { children, className, onClick, tooltip, ...props },
+    ref
+  ) {
     const classes = useStyles();
-    return (
+
+    const content = (
       <IconButton
         size="small"
         className={clsx(classes.button, className)}
@@ -32,5 +38,7 @@ export const ControlsButton: React.FC<Props> = React.forwardRef(
         {children}
       </IconButton>
     );
+
+    return tooltip ? <Tooltip title={tooltip}>{content}</Tooltip> : content;
   }
 );

@@ -85,6 +85,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
             <ControlsButton
               onClick={onScreenshots}
               ref={screenshotRef}
+              tooltip={<T>translations_screenshots_tooltip</T>}
               data-cy="translations-cell-screenshots-button"
             >
               <CameraAlt
