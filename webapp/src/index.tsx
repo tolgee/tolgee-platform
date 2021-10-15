@@ -25,6 +25,7 @@ import { DispatchService } from './service/DispatchService';
 import configureStore from './store';
 import { createTheme } from '@material-ui/core';
 import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
+import { GlobalErrorModal } from 'tg.component/GlobalErrorModal';
 
 const store = configureStore();
 
@@ -191,6 +192,7 @@ ReactDOM.render(
                 <LoadingProvider>
                   <GlobalLoading />
                   <App />
+                  <GlobalErrorModal />
                 </LoadingProvider>
               </SnackbarProvider>
             </ErrorBoundary>
