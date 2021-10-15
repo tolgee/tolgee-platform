@@ -1,4 +1,3 @@
-import { Tooltip } from '@material-ui/core';
 import { useTranslate } from '@tolgee/react';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';
@@ -22,9 +21,12 @@ export const StateTransitionButtons: React.FC<Props> = ({
     <>
       {state &&
         translationStates[state]?.next.map((s, i) => (
-          <Tooltip
+          <ControlsButton
             key={i}
-            title={t(
+            data-cy="translation-state-button"
+            onClick={() => onStateChange?.(s)}
+            className={className}
+            tooltip={t(
               'translation_state_change',
               {
                 newState: t(translationStates[s]?.translationKey, {}, true),
@@ -32,14 +34,8 @@ export const StateTransitionButtons: React.FC<Props> = ({
               true
             )}
           >
-            <ControlsButton
-              data-cy="translation-state-button"
-              onClick={() => onStateChange?.(s)}
-              className={className}
-            >
-              <StateIcon state={s} fontSize="small" />
-            </ControlsButton>
-          </Tooltip>
+            <StateIcon state={s} fontSize="small" />
+          </ControlsButton>
         ))}
     </>
   );

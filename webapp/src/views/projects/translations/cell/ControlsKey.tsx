@@ -1,5 +1,6 @@
 import React from 'react';
 import { Edit, CameraAlt } from '@material-ui/icons';
+import { T } from '@tolgee/react';
 
 import { useCellStyles } from './styles';
 import { ControlsButton } from './ControlsButton';
@@ -34,6 +35,7 @@ export const ControlsKey: React.FC<ControlsProps> = ({
           onClick={onEdit}
           data-cy="translations-cell-edit-button"
           className={cellClasses.showOnHover}
+          tooltip={<T>translations_cell_edit</T>}
         >
           <Edit fontSize="small" />
         </ControlsButton>
@@ -42,6 +44,7 @@ export const ControlsKey: React.FC<ControlsProps> = ({
         <ControlsButton
           onClick={onScreenshots}
           ref={screenshotRef}
+          tooltip={<T>translations_screenshots_tooltip</T>}
           data-cy="translations-cell-screenshots-button"
           className={
             screenshotsPresent || screenshotsOpen

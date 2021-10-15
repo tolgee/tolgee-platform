@@ -2,6 +2,7 @@ import React from 'react';
 import clsx from 'clsx';
 import { Badge, makeStyles } from '@material-ui/core';
 import { Edit, Comment } from '@material-ui/icons';
+import { T } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
 import { useCellStyles } from './styles';
@@ -59,6 +60,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
           onClick={onEdit}
           data-cy="translations-cell-edit-button"
           className={cellClasses.showOnHover}
+          tooltip={<T>translations_cell_edit</T>}
         >
           <Edit fontSize="small" />
         </ControlsButton>
@@ -68,6 +70,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
           onClick={onComments}
           data-cy="translations-cell-comments-button"
           className={clsx({ [cellClasses.showOnHover]: !commentsPresent })}
+          tooltip={<T>translation_cell_comments</T>}
         >
           <Badge
             badgeContent={commentsCount}
