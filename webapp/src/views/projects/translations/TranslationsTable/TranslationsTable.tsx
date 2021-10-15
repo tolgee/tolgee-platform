@@ -12,7 +12,6 @@ import {
 import { resizeColumn, useResize } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
 import { CellLanguage } from './CellLanguage';
-import { SortableHeading } from './SortableHeading';
 import { RowTable } from './RowTable';
 import clsx from 'clsx';
 import { TranslationsToolbar } from '../TranslationsToolbar';
@@ -93,37 +92,21 @@ export const TranslationsTable = () => {
     }
   }, [editKeyId]);
 
-  const [columnsOrder, setColumnsOrder] = useState<string[]>([]);
-
-  useEffect(() => {
-    const newOrder = [
-      ...columnsOrder?.filter((tag) => selectedLanguages.includes(tag)),
-      ...selectedLanguages.filter((tag) => !columnsOrder.includes(tag)),
-    ];
-    setColumnsOrder(newOrder);
-  }, [translations, languages]);
-
-  const handleColmnsSwap = (a, b) => {
-    const arr = [...columnsOrder];
-    [arr[a], arr[b]] = [arr[b], arr[a]];
-    setColumnsOrder(arr);
-  };
-
   const languageCols = useMemo(() => {
-    if (languages && columnsOrder) {
+    if (languages && selectedLanguages) {
       return (
-        columnsOrder?.map((lang) => {
+        selectedLanguages?.map((lang) => {
           return languages.find((l) => l.tag === lang)!;
         }, [] as any[]) || []
       );
     } else {
       return [];
     }
-  }, [columnsOrder, languages]);
+  }, [selectedLanguages, languages]);
 
   const columns = useMemo(
-    () => [null, ...columnsOrder.map((tag) => tag)],
-    [columnsOrder]
+    () => [null, ...selectedLanguages.map((tag) => tag)],
+    [selectedLanguages]
   );
 
   const [columnSizes, setColumnSizes] = useState(columns.map(() => 1));
@@ -191,30 +174,28 @@ export const TranslationsTable = () => {
       data-cy="translations-view-table"
     >
       <div className={classes.headerRow}>
-        <SortableHeading
-          onSwap={handleColmnsSwap}
-          columns={columns.map((tag, i) => {
-            const language = languages!.find((lang) => lang.tag === tag)!;
-            return {
-              id: tag,
-              width: columnSizesPercent[i],
-              draggable: Boolean(tag),
-              item: tag ? (
-                <div className={classes.headerCell}>
-                  <CellLanguage
-                    colIndex={i - 1}
-                    onResize={handleResize}
-                    language={language}
-                  />
-                </div>
-              ) : (
-                <div className={clsx(classes.headerCell, classes.keyCell)}>
-                  <T>translation_grid_key_text</T>
-                </div>
-              ),
-            };
-          })}
-        />
+        {columns.map((tag, i) => {
+          const language = languages!.find((lang) => lang.tag === tag)!;
+          return tag ? (
+            <div
+              style={{ width: columnSizesPercent[i] }}
+              className={classes.headerCell}
+            >
+              <CellLanguage
+                colIndex={i - 1}
+                onResize={handleResize}
+                language={language}
+              />
+            </div>
+          ) : (
+            <div
+              style={{ width: columnSizesPercent[i] }}
+              className={clsx(classes.headerCell, classes.keyCell)}
+            >
+              <T>translation_grid_key_text</T>
+            </div>
+          );
+        })}
       </div>
       {columnSizes.slice(0, -1).map((w, i) => {
         const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
