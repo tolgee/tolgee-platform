@@ -12,7 +12,7 @@ npm install @tolgee/ngx @tolgee/ui --save
 ```
 
 ## Setup environment
-Add Tolgee properties to your `src/environments/environment.stage.ts`
+Add Tolgee properties to your `src/environments/environment.<your env>.ts`
 ```typescript
 export const environment = {
   production: false,
@@ -39,7 +39,7 @@ import { environment } from '../environments/environment';
     NgxTolgeeModule.forRoot({
       apiUrl: environment.tolgeeApiUrl,
       apiKey: environment.tolgeeApiKey,
-      ui: environment.tolgeeApiKey && UI
+      ui: environment.tolgeeApiKey ? UI : undefined
     }),
 ...,
 ],
@@ -48,6 +48,8 @@ import { environment } from '../environments/environment';
 export class AppModule {
 }
 ```
+Maybe you will also need to set `skipLibCheck` to `true` in your `compilerOptions` section of `tsconfig.json`.
+
 
 ## Use Tolgee!
 ```html
