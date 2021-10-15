@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/tolgee/server/compare/v1.2.2...v1.3.0) (2021-10-15)
+
+
+### Bug Fixes
+
+* Add tooltips to all actions in translation view TG-347 ([0ea23b2](https://github.com/tolgee/server/commit/0ea23b2d2ff4ae35c1218a70e75a847aa00b80c1))
+
+
+### Features
+
+* Upgrade tolgee-js and minor fixes ([313d6cf](https://github.com/tolgee/server/commit/313d6cf308be13b29a6420c76944420b1542cce3))
+
 ## [1.2.2](https://github.com/tolgee/server/compare/v1.2.1...v1.2.2) (2021-10-15)
 
 
