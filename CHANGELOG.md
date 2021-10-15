@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/tolgee/server/compare/v1.3.0...v1.3.1) (2021-10-15)
+
+
+### Bug Fixes
+
+* Remove table view columns sorting TG-364 ([433145a](https://github.com/tolgee/server/commit/433145a843d780fa4131b2e896024f6257ad7d80))
+
 # [1.3.0](https://github.com/tolgee/server/compare/v1.2.2...v1.3.0) (2021-10-15)
 
 
