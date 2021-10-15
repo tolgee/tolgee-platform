@@ -14,9 +14,10 @@ export class ErrorActions extends AbstractActions<ErrorState> {
     super(new ErrorState());
   }
 
-  globalError = this.createAction('ERROR', (e: GlobalError) => e).build.on(
-    (state, action) => ({ ...state, error: action.payload })
-  );
+  globalError = this.createAction(
+    'ERROR',
+    (e: GlobalError | null) => e
+  ).build.on((state, action) => ({ ...state, error: action.payload }));
 
   get prefix(): string {
     return 'ERROR';

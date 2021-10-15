@@ -1,15 +1,18 @@
 import React from 'react';
-import { connect } from 'react-redux';
-
-import { AppState } from '../store';
+import { Container, Box, Paper } from '@material-ui/core';
 
 const GlobalError = React.lazy(
   () => import(/* webpackChunkName: "global-error" */ './common/GlobalError')
 );
 
-class ErrorBoundary extends React.Component<
-  { globalError },
-  { hasError: boolean; error: any }
+export default class ErrorBoundary extends React.Component<
+  {
+    children: React.ReactNode;
+  },
+  {
+    hasError: boolean;
+    error: any;
+  }
 > {
   constructor(props) {
     super(props);
@@ -22,14 +25,20 @@ class ErrorBoundary extends React.Component<
   }
 
   render() {
-    if (this.state.hasError || this.props.globalError) {
-      return <GlobalError error={this.state.error || this.props.globalError} />;
+    const dev = process.env.NODE_ENV === 'development';
+
+    if (this.state.hasError) {
+      return (
+        <Container maxWidth={dev ? 'lg' : 'sm'}>
+          <Box mt={5}>
+            <Paper>
+              <GlobalError error={this.state.error} />
+            </Paper>
+          </Box>
+        </Container>
+      );
     }
 
     return this.props.children;
   }
 }
-
-export default connect((state: AppState) => ({
-  globalError: state.error.error,
-}))(ErrorBoundary);
