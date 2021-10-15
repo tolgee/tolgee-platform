@@ -16,7 +16,7 @@ class PublicConfigurationDTO(
   val allowRegistrations: Boolean
   val screenshotsUrl = properties.screenshotsUrl
   val maxUploadFileSize = properties.maxUploadFileSize
-  val clientSentryDsn = if (properties.sentry.enabled) properties.sentry.clientDsn else null
+  val clientSentryDsn = properties.sentry.clientDsn
   val needsEmailVerification = properties.authentication.needsEmailVerification
   val userCanCreateProjects = properties.authentication.userCanCreateProjects
   val userCanCreateOrganizations = properties.authentication.userCanCreateOrganizations
