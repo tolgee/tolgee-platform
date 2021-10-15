@@ -147,7 +147,7 @@ export const icuVariants = (
           .filter(Boolean) as VariantType[];
       }
     }
-  } catch (e) {
+  } catch (e: any) {
     variants = null;
     parseError = e.message;
   }
