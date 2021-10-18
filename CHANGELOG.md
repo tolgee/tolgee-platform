@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/tolgee/server/compare/v1.3.4...v1.3.5) (2021-10-18)
+
+
+### Bug Fixes
+
+* Translations - update confirmation behavior TG-350 ([52b5abf](https://github.com/tolgee/server/commit/52b5abfac86367c3c53a9cf7e0dbb08d9fdf1729))
+
 ## [1.3.4](https://github.com/tolgee/server/compare/v1.3.3...v1.3.4) (2021-10-18)
 
 
