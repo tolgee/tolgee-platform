@@ -1,3 +1,11 @@
+## [1.3.2](https://github.com/tolgee/server/compare/v1.3.1...v1.3.2) (2021-10-18)
+
+
+### Bug Fixes
+
+* Add parameter name to editor plural cases preview TG-295 ([23f9ae1](https://github.com/tolgee/server/commit/23f9ae1894ab4a51b10536ee93b69e8b3144639e))
+* Longer Project Owner field TG-300 ([1f14a2f](https://github.com/tolgee/server/commit/1f14a2f081ce0eff59654df11a2bc1fcff17c49b))
+
 ## [1.3.1](https://github.com/tolgee/server/compare/v1.3.0...v1.3.1) (2021-10-15)
 
 
