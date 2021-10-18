@@ -2,10 +2,13 @@ import React from 'react';
 import { T } from '@tolgee/react';
 import { Button, makeStyles } from '@material-ui/core';
 import { CameraAlt } from '@material-ui/icons';
+import { useContextSelector } from 'use-context-selector';
 
 import { StateType } from 'tg.constants/translationStates';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
+import { TranslationsContext } from '../context/TranslationsContext';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 const useStyles = makeStyles((theme) => ({
   leftPart: {
@@ -50,6 +53,11 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
   const displayScreenshots = onScreenshots;
   const displayRightPart = displayTransitionButtons || displayScreenshots;
 
+  const isLoading = useContextSelector(
+    TranslationsContext,
+    (c) => c.isEditLoading
+  );
+
   return (
     <>
       <div className={classes.leftPart}>
@@ -62,15 +70,16 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
         >
           <T>translations_cell_cancel</T>
         </Button>
-        <Button
+        <LoadingButton
           onClick={onSave}
           color="primary"
           variant="contained"
           size="small"
+          loading={isLoading}
           data-cy="translations-cell-save-button"
         >
           <T>translations_cell_save</T>
-        </Button>
+        </LoadingButton>
       </div>
 
       {displayRightPart && (

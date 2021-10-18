@@ -12,7 +12,7 @@ import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService'
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useTranslationsInfinite } from './useTranslationsInfinite';
-import { useEdit, EditType, SetEditType } from './useEdit';
+import { useEdit, EditType } from './useEdit';
 import { StateType } from 'tg.constants/translationStates';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import {
@@ -36,6 +36,7 @@ type ActionType =
   | { type: 'SET_SEARCH'; payload: string }
   | { type: 'SET_FILTERS'; payload: FiltersType }
   | { type: 'SET_EDIT'; payload: EditType | undefined }
+  | { type: 'SET_EDIT_FORCE'; payload: EditType | undefined }
   | { type: 'UPDATE_EDIT'; payload: Partial<EditType> }
   | { type: 'TOGGLE_SELECT'; payload: number }
   | { type: 'CHANGE_FIELD'; payload: ChangeValueType }
@@ -84,7 +85,7 @@ type AddTagPayload = {
   name: string;
 };
 
-type ChangeValueType = SetEditType & {
+type ChangeValueType = {
   after?: AfterCommand;
   onSuccess?: () => void;
 };
@@ -121,6 +122,7 @@ export type TranslationsContextType = {
   isLoading?: boolean;
   isFetching?: boolean;
   isFetchingMore?: boolean;
+  isEditLoading?: boolean;
   hasMoreToFetch?: boolean;
   search?: string;
   selection: number[];
@@ -240,17 +242,27 @@ export const TranslationsContextProvider: React.FC<{
         if (edit.position?.changed) {
           setFocusPosition({ ...edit.position, mode: 'editor' });
           confirmation({
-            title: <T>translations_leave_save_confirmation</T>,
-            message: <T>translations_leave_save_confirmation_message_1</T>,
+            title: <T>translations_unsaved_changes_confirmation_title</T>,
+            message: <T>translations_unsaved_changes_confirmation</T>,
             cancelButtonText: <T>back_to_editing</T>,
-            confirmButtonText: <T>discard_changes</T>,
+            confirmButtonText: <T>translations_cell_save</T>,
             onConfirm: () => {
-              setFocusPosition(action.payload);
+              dispatch({
+                type: 'CHANGE_FIELD',
+                payload: {
+                  onSuccess() {
+                    setFocusPosition(action.payload);
+                  },
+                },
+              });
             },
           });
         } else {
           setFocusPosition(action.payload);
         }
+        return;
+      case 'SET_EDIT_FORCE':
+        setFocusPosition(action.payload);
         return;
       case 'UPDATE_EDIT':
         edit.setPosition((pos) => (pos ? { ...pos, ...action.payload } : pos));
@@ -266,7 +278,10 @@ export const TranslationsContextProvider: React.FC<{
         translations.fetchNextPage();
         return;
       case 'CHANGE_FIELD': {
-        const { keyId, language, value } = action.payload;
+        if (!edit.position) {
+          return;
+        }
+        const { keyId, language, value } = edit.position;
         if (!language && !value) {
           // key can't be empty
           messaging.error(<T>global_empty_value</T>);
@@ -275,25 +290,37 @@ export const TranslationsContextProvider: React.FC<{
         try {
           if (language) {
             // update translation
-            await edit.mutateTranslation(action.payload).then((data) => {
-              if (data) {
-                return translations.updateTranslation(
-                  keyId,
-                  language,
-                  data?.translations[language]
-                );
-              }
-            });
+            await edit
+              .mutateTranslation({
+                ...action.payload,
+                value: value as string,
+                keyId,
+                language,
+              })
+              .then((data) => {
+                if (data) {
+                  return translations.updateTranslation(
+                    keyId,
+                    language,
+                    data?.translations[language]
+                  );
+                }
+              });
           } else {
             // update key
             await edit
-              .mutateTranslationKey(action.payload)
+              .mutateTranslationKey({
+                ...action.payload,
+                value: value as string,
+                keyId,
+                language,
+              })
               .then(() =>
                 translations.updateTranslationKey(keyId, { keyName: value })
               );
           }
-          action.payload.onSuccess?.();
           doAfterCommand(action.payload.after);
+          action.payload.onSuccess?.();
         } catch (e) {
           const parsed = parseErrorResponse(e);
           parsed.forEach((error) => messaging.error(<T>{error}</T>));
@@ -488,12 +515,12 @@ export const TranslationsContextProvider: React.FC<{
           isFetching:
             translations.isFetching ||
             languages.isFetching ||
-            edit.isLoading ||
             deleteKeys.isLoading ||
             putTranslationState.isLoading ||
             putTag.isLoading ||
             deleteTag.isLoading ||
             postKey.isLoading,
+          isEditLoading: edit.isLoading,
           isFetchingMore: translations.isFetchingNextPage,
           hasMoreToFetch: translations.hasNextPage,
           search: translations.search as string,

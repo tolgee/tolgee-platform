@@ -22,7 +22,7 @@ export type SetEditType = CellLocation & {
 };
 
 export type EditType = CellLocation & {
-  savedValue?: string;
+  value?: string;
   changed?: boolean;
   mode: EditModeType;
 };

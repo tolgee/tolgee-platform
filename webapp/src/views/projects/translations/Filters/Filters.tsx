@@ -188,7 +188,7 @@ export const Filters = () => {
         renderValue={(value: any) => (
           <Typography
             color={value.length === 0 ? 'textSecondary' : 'textPrimary'}
-            variant="body2"
+            variant="body1"
             className={classes.inputContent}
           >
             {value.length === 0 ? (

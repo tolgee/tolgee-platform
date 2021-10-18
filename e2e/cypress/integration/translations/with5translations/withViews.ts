@@ -1,7 +1,7 @@
 import { getAnyContainingText } from '../../../common/xPath';
 import { ProjectDTO } from '../../../../../webapp/src/service/response.types';
 import {
-  clickDiscardChanges,
+  confirmSaveChanges,
   create4Translations,
   editCell,
   forEachView,
@@ -45,12 +45,10 @@ describe('Views with 5 Translations', () => {
         cy.contains('Cool translated text 2').should('be.visible');
       });
 
-      it('will cancel key edit', () => {
+      it('will cancel key edit without confirmation', () => {
         editCell('Cool key 01', 'Cool key edited', false);
         getCellCancelButton().click();
 
-        cy.contains('Discard changes?').should('be.visible');
-        clickDiscardChanges();
         cy.contains('Cool key edited').should('not.exist');
         cy.contains('Cool key 01').should('be.visible');
       });
@@ -58,13 +56,11 @@ describe('Views with 5 Translations', () => {
       it('will ask for confirmation on changed edit', () => {
         editCell('Cool key 01', 'Cool key edited', false);
         cy.contains('Cool key 04').click();
-        cy.contains(`Discard changes?`).should('be.visible');
-        clickDiscardChanges();
-        cy.contains('Cool key 04')
-          .xpath(
-            "./ancestor::*[@data-cy='translations-table-cell']//*[@data-cy='translations-cell-save-button']"
-          )
-          .should('be.visible');
+        cy.contains(`Unsaved changes`).should('be.visible');
+        confirmSaveChanges();
+        cy.contains('Cool key edited');
+        cy.gcy('global-editor').contains('Cool key edited').should('not.exist');
+        cy.gcy('global-editor').contains('Cool key 04').should('be.visible');
       });
     }
   );

@@ -33,12 +33,12 @@ export const useEditableRow = ({
       : undefined;
   });
 
-  const value = cursor?.savedValue || '';
+  const value = cursor?.value || '';
 
   const originalValue = defaultVal || '';
 
   const setValue = (val: string) =>
-    dispatch({ type: 'UPDATE_EDIT', payload: { savedValue: val } });
+    dispatch({ type: 'UPDATE_EDIT', payload: { value: val } });
 
   const isEditing = Boolean(cursor);
 
@@ -56,7 +56,7 @@ export const useEditableRow = ({
 
   useEffect(() => {
     if (isEditing) {
-      setValue(cursor?.savedValue || originalValue);
+      setValue(cursor?.value || originalValue);
     }
   }, [isEditing, originalValue]);
 
@@ -75,17 +75,18 @@ export const useEditableRow = ({
     dispatch({
       type: 'CHANGE_FIELD',
       payload: {
-        keyId,
-        language,
-        value,
         after,
         onSuccess: () => onSaveSuccess?.(value),
       },
     });
   };
 
-  const handleClose = () => {
-    dispatch({ type: 'SET_EDIT', payload: undefined });
+  const handleClose = (force = false) => {
+    if (force) {
+      dispatch({ type: 'SET_EDIT_FORCE', payload: undefined });
+    } else {
+      dispatch({ type: 'SET_EDIT', payload: undefined });
+    }
   };
 
   const handleModeChange = (mode: EditModeType) => {
@@ -105,18 +106,6 @@ export const useEditableRow = ({
   useEffect(() => {
     valueRef.current = isEditing ? value : undefined;
   }, [value, isEditing]);
-
-  useEffect(() => {
-    return () => {
-      // on unmount store value in context, so it won't get lost
-      if (valueRef.current !== undefined) {
-        dispatch({
-          type: 'UPDATE_EDIT',
-          payload: { savedValue: valueRef.current },
-        });
-      }
-    };
-  }, [valueRef]);
 
   return {
     handleOpen,
