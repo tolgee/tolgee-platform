@@ -32,7 +32,7 @@ import {UI} from "@tolgee/ui";
     filesUrlPrefix="i18n/"
     apiUrl={process.env.REACT_APP_TOLGEE_API_URL}
     apiKey={process.env.REACT_APP_TOLGEE_API_KEY}
-    ui={process.env.REACT_APP_TOLGEE_API_KEY && UI}
+    ui={process.env.REACT_APP_TOLGEE_API_KEY ? UI : undefined}
     loadingFallback={<>Loading...</>}
 >
     <App/>
