@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/tolgee/server/compare/v1.3.3...v1.3.4) (2021-10-18)
+
+
+### Bug Fixes
+
+* Center elements on project list page TG-309 ([4fab2c7](https://github.com/tolgee/server/commit/4fab2c7a0c645946edd80645c8cc30e3a62cadb9))
+
 ## [1.3.2](https://github.com/tolgee/server/compare/v1.3.1...v1.3.2) (2021-10-18)
 
 
