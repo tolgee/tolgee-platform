@@ -26,6 +26,7 @@ const useStyles = makeStyles({
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
+    margin: '-4px 0px',
   },
 });
 
@@ -79,7 +80,7 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
         renderValue={(selected) => (
           <Typography
             color="textPrimary"
-            variant="body2"
+            variant="body1"
             className={classes.inputContent}
           >
             {(selected as string[]).join(', ')}

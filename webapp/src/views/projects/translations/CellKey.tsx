@@ -228,7 +228,7 @@ export const CellKey: React.FC<Props> = ({
               onChange={(v) => setValue(v as string)}
               autofocus={autofocus}
               onSave={() => handleSave()}
-              onCancel={handleClose}
+              onCancel={() => handleClose(true)}
               shortcuts={{
                 [`${getMeta()}-Enter`]: () => handleSave('EDIT_NEXT'),
               }}
@@ -239,7 +239,7 @@ export const CellKey: React.FC<Props> = ({
         <div className={isEditing ? classes.controls : classes.controlsSmall}>
           {isEditing ? (
             <ControlsEditor
-              onCancel={handleClose}
+              onCancel={() => handleClose(true)}
               onSave={handleSave}
               onScreenshots={
                 simple ? undefined : () => setScreenshotsOpen(true)

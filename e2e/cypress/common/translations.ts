@@ -1,4 +1,3 @@
-import { getAnyContainingText } from './xPath';
 import {
   createProject,
   deleteProject,
@@ -92,8 +91,8 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
   }
 };
 
-export function clickDiscardChanges() {
-  cy.xpath(getAnyContainingText('Discard changes', 'button')).click();
+export function confirmSaveChanges() {
+  cy.gcy('global-confirmation-confirm').contains('Save').click();
 }
 
 export const toggleLang = (lang) => {

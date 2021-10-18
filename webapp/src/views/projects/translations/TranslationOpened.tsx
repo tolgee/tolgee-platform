@@ -70,7 +70,7 @@ type Props = {
   onChange: (val: string) => void;
   onSave: () => void;
   onCmdSave: () => void;
-  onCancel: () => void;
+  onCancel: (force: boolean) => void;
   onStateChange: (state: StateType) => void;
   state: StateType;
   autofocus: boolean;
@@ -151,7 +151,7 @@ export const TranslationOpened: React.FC<Props> = ({
         </Tabs>
         <IconButton
           size="small"
-          onClick={onCancel}
+          onClick={() => onCancel(true)}
           className={classes.closeButton}
           data-cy="translations-cell-close"
         >
@@ -164,7 +164,7 @@ export const TranslationOpened: React.FC<Props> = ({
             <Editor
               value={value}
               onChange={onChange}
-              onCancel={onCancel}
+              onCancel={() => onCancel(true)}
               onSave={onSave}
               autofocus={autofocus}
               shortcuts={{
@@ -177,7 +177,7 @@ export const TranslationOpened: React.FC<Props> = ({
             <ControlsEditor
               state={state}
               onSave={onSave}
-              onCancel={onCancel}
+              onCancel={() => onCancel(true)}
               onStateChange={onStateChange}
             />
           </div>
@@ -187,7 +187,7 @@ export const TranslationOpened: React.FC<Props> = ({
           keyId={keyId}
           language={language}
           translation={translation}
-          onCancel={onCancel}
+          onCancel={() => onCancel(true)}
           editEnabled={editEnabled}
         />
       ) : null}

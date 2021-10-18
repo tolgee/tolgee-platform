@@ -10,7 +10,6 @@ import {
 } from '../../../common/shortcuts';
 import { assertHasState } from '../../../common/state';
 import {
-  clickDiscardChanges,
   create4Translations,
   selectLangsInLocalstorage,
   translationsBeforeEach,
@@ -86,7 +85,6 @@ describe('Shortcuts', () => {
     // cancel edit
     editCell('Cool translated text 2', 'Yo, new cool text', false);
     cy.focused().type('{esc}');
-    clickDiscardChanges();
     cy.focused().contains('Cool translated text 2').should('be.visible');
   });
 
