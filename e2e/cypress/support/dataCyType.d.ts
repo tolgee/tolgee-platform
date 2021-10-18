@@ -5,7 +5,6 @@ declare namespace DataCy {
         "api-keys-edit-button" |
         "api-keys-project-select-item" |
         "base-language-select" |
-        "camera-button" |
         "comment" |
         "comment-menu" |
         "comment-menu-delete" |

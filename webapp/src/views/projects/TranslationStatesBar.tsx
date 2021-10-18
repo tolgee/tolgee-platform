@@ -8,9 +8,9 @@ import { ClassNameMap } from 'notistack';
 
 type State = keyof typeof translationStates;
 
-const HEIGHT = 6;
+const HEIGHT = 8;
 const BORDER_RADIUS = HEIGHT / 2;
-const DOT_SIZE = 6;
+const DOT_SIZE = 8;
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -24,13 +24,14 @@ const useStyles = makeStyles((theme) => ({
     minWidth: 150,
     overflow: 'hidden',
     display: 'flex',
+    marginBottom: theme.spacing(0.5),
   },
   state: {
     height: '100%',
     overflow: 'hidden',
     borderRadius: BORDER_RADIUS,
     marginLeft: -BORDER_RADIUS,
-    transition: 'width 1s ease-in-out',
+    transition: 'width 0.4s ease-in-out',
   },
   loadedState: {
     width: '0 !important',
@@ -44,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
       margin: `0 ${theme.spacing(1)}px`,
       marginTop: theme.spacing(0.5),
     },
-    fontSize: 14,
+    fontSize: theme.typography.body2.fontSize,
     justifyContent: 'space-between',
   },
   legendDot: {
@@ -62,13 +63,8 @@ const STATES_ORDER = [
   'UNTRANSLATED',
 ] as State[];
 
-const STATES_LEGEND = [
-  ['NEEDS_REVIEW', 'REVIEWED'],
-  ['TRANSLATED', 'MACHINE_TRANSLATED'],
-  ['UNTRANSLATED'],
-] as State[][];
-
 export function TranslationStatesBar(props: {
+  labels: boolean;
   stats: {
     projectId: number;
     keyCount: number;
@@ -107,7 +103,7 @@ export function TranslationStatesBar(props: {
       <Box display="flex" alignItems="center" mr={2}>
         <Box
           data-cy="project-states-bar-dot"
-          mr={0.5}
+          mr={1}
           className={legendItemProps.classes.legendDot}
           style={{
             backgroundColor: translationStates[legendItemProps.state].color,
@@ -132,7 +128,7 @@ export function TranslationStatesBar(props: {
   return (
     <Box className={classes.root} data-cy="project-states-bar-root">
       <Box className={classes.bar} data-cy="project-states-bar-bar">
-        {STATES_ORDER.map((state, idx) => (
+        {STATES_ORDER.filter((state) => percents[state]).map((state, idx) => (
           <Tooltip
             key={idx}
             title={<T noWrap>{translationStates[state].translationKey}</T>}
@@ -144,33 +140,21 @@ export function TranslationStatesBar(props: {
                 [classes.loadedState]: !loaded,
               })}
               style={{
-                visibility: percents[state] < 0.01 ? 'hidden' : 'initial',
                 zIndex: 5 - idx,
-                width: `calc(${percents[state]}% + ${BORDER_RADIUS}px)`,
+                width: `calc(max(${percents[state]}%, 8px) + ${BORDER_RADIUS}px)`,
                 backgroundColor: translationStates[state].color,
               }}
             />
           </Tooltip>
         ))}
       </Box>
-      <Box className={classes.legend} data-cy="project-states-bar-legend">
-        {STATES_LEGEND.map(
-          (states, idx) =>
-            states.reduce(
-              (acc, state) => acc + props.stats.translationStateCounts[state],
-              0
-            ) > 0 && (
-              <Box key={idx}>
-                {states.map(
-                  (state, idx2) =>
-                    props.stats.translationStateCounts[state] > 0 && (
-                      <LegendItem key={idx2} classes={classes} state={state} />
-                    )
-                )}
-              </Box>
-            )
-        )}
-      </Box>
+      {props.labels && (
+        <Box className={classes.legend} data-cy="project-states-bar-legend">
+          {STATES_ORDER.filter((state) => percents[state]).map((state, i) => (
+            <LegendItem key={i} classes={classes} state={state} />
+          ))}
+        </Box>
+      )}
     </Box>
   );
 }

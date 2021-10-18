@@ -86,6 +86,12 @@ const theme = createTheme({
     caption: {
       fontSize: 12,
     },
+    body1: {
+      fontSize: 16,
+    },
+    body2: {
+      fontSize: 15,
+    },
   },
   palette: {
     primary: {
