@@ -1,3 +1,10 @@
+## [1.3.6](https://github.com/tolgee/server/compare/v1.3.5...v1.3.6) (2021-10-19)
+
+
+### Bug Fixes
+
+* Search component optimalization TG-336 ([b4a88f3](https://github.com/tolgee/server/commit/b4a88f32d0f5bc0fd58408f00ce326eabc3f2262))
+
 ## [1.3.5](https://github.com/tolgee/server/compare/v1.3.4...v1.3.5) (2021-10-18)
 
 
