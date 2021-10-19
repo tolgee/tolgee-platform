@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   contentEmpty: {
-    visibility: 'hidden',
+    opacity: 0,
   },
   contentCollapsed: {
     '-webkit-backdrop-filter': 'none',

@@ -21,6 +21,12 @@ const useStyles = makeStyles({
     height: 40,
     flexShrink: 1,
     maxWidth: '100%',
+    '& .MuiSelect-root': {
+      display: 'flex',
+      alignItems: 'center',
+      overflow: 'hidden',
+      position: 'relative',
+    },
   },
   inputContent: {
     overflow: 'hidden',
@@ -56,10 +62,15 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
 
   const menuProps = {
     variant: 'menu',
+    getContentAnchorEl: null,
     PaperProps: {
       style: {
         width: 250,
       },
+    },
+    anchorOrigin: {
+      vertical: 'bottom',
+      horizontal: 'left',
     },
     id: `language-select-${props.context}-menu`,
   } as const;
@@ -69,9 +80,9 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
       data-cy="translations-language-select-form-control"
       variant="outlined"
       size="small"
-      className={classes.input}
     >
       <Select
+        className={classes.input}
         labelId={`languages-${props.context}`}
         id={`languages-select-${props.context}`}
         multiple
