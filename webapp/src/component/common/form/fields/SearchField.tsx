@@ -1,8 +1,14 @@
 import React, { ComponentProps, useEffect, useState } from 'react';
-import { InputAdornment, TextField } from '@material-ui/core';
-import { Search } from '@material-ui/icons';
+import {
+  IconButton,
+  InputAdornment,
+  TextField,
+  useTheme,
+} from '@material-ui/core';
+import { Search, Clear } from '@material-ui/icons';
 import { T } from '@tolgee/react';
 import { useDebounce } from 'use-debounce/lib';
+import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 
 const SearchField = (
   props: {
@@ -12,6 +18,7 @@ const SearchField = (
 ) => {
   const [search, setSearch] = useState(props.initial || '');
   const [debouncedSearch] = useDebounce(search, 500);
+  const theme = useTheme();
 
   const { onSearch, ...otherProps } = props;
 
@@ -23,7 +30,6 @@ const SearchField = (
 
   return (
     <TextField
-      type="search"
       data-cy="global-search-field"
       label={<T>standard_search_label</T>}
       InputProps={{
@@ -32,9 +38,29 @@ const SearchField = (
             <Search />
           </InputAdornment>
         ),
-        style: { paddingLeft: 12 },
+        endAdornment: Boolean(search) && (
+          <InputAdornment
+            position="end"
+            style={{ marginRight: -5, marginLeft: 5 }}
+          >
+            <IconButton
+              size="small"
+              onClick={stopAndPrevent(() => setSearch(''))}
+              onMouseDown={stopAndPrevent()}
+              edge="start"
+            >
+              <Clear fontSize="small" />
+            </IconButton>
+          </InputAdornment>
+        ),
+        style: {
+          paddingLeft: 12,
+          fontSize: theme.typography.body2.fontSize,
+          height: 40,
+        },
       }}
       value={search}
+      style={{ flexBasis: 200 }}
       {...otherProps}
       onChange={(e) => setSearch(e.target.value)}
     />

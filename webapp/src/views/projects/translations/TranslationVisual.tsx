@@ -75,7 +75,7 @@ export const TranslationVisual: React.FC<Props> = ({
       .map((p) => p.name)
       .join(', ');
     return (
-      <>
+      <div>
         {allParams && (
           <Typography
             className={classes.parameter}
@@ -112,7 +112,7 @@ export const TranslationVisual: React.FC<Props> = ({
             </div>
           </LimitedHeightText>
         )}
-      </>
+      </div>
     );
   }
 };

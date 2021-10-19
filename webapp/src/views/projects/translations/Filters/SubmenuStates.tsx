@@ -1,15 +1,18 @@
 import { useState } from 'react';
-import { Checkbox, ListItemText, Menu, MenuItem } from '@material-ui/core';
+import {
+  Checkbox,
+  ListItemText,
+  Menu,
+  MenuItem,
+  makeStyles,
+} from '@material-ui/core';
 import { ArrowRight } from '@material-ui/icons';
 
-import { decodeFilter, OptionType } from './useAvailableFilters';
-import { makeStyles } from '@material-ui/core';
 import { translationStates } from 'tg.constants/translationStates';
+import { decodeFilter, OptionType } from './useAvailableFilters';
+import { CompactMenuItem } from './FiltersComponents';
 
 const useStyles = makeStyles((theme) => ({
-  item: {
-    height: 50,
-  },
   stateDot: {
     width: 8,
     height: 8,
@@ -45,10 +48,9 @@ export const SubmenuStates: React.FC<Props> = ({
 
   return (
     <>
-      <MenuItem
+      <CompactMenuItem
         onClick={handleMenuClick}
-        selected={Boolean(menuOpen)}
-        className={classes.item}
+        selected={Boolean(menuOpen || subFiltersNumber)}
       >
         <ListItemText
           primary={
@@ -56,7 +58,7 @@ export const SubmenuStates: React.FC<Props> = ({
           }
         />
         <ArrowRight />
-      </MenuItem>
+      </CompactMenuItem>
       <Menu
         anchorOrigin={{
           vertical: 'top',

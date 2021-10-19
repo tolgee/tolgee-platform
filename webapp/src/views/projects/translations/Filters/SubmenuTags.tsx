@@ -1,10 +1,15 @@
 import { useState } from 'react';
 import { T } from '@tolgee/react';
-import { Checkbox, ListItemText, Menu, MenuItem } from '@material-ui/core';
+import {
+  Checkbox,
+  ListItemText,
+  Menu,
+  MenuItem,
+  makeStyles,
+} from '@material-ui/core';
 import { ArrowRight } from '@material-ui/icons';
 
 import { OptionType } from './useAvailableFilters';
-import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   item: {
@@ -41,7 +46,7 @@ export const SubmenuTags: React.FC<Props> = ({
     <>
       <MenuItem
         onClick={handleMenuClick}
-        selected={Boolean(menuOpen)}
+        selected={Boolean(menuOpen || subFiltersNumber)}
         className={classes.item}
       >
         <ListItemText

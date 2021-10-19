@@ -4,15 +4,15 @@ import { Clear } from '@material-ui/icons';
 import {
   makeStyles,
   Select,
-  ListSubheader,
   ListItemText,
   Checkbox,
-  MenuItem,
   Typography,
   IconButton,
   Tooltip,
+  useTheme,
 } from '@material-ui/core';
 
+import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import {
   TranslationsContext,
   useTranslationsDispatch,
@@ -24,32 +24,45 @@ import {
 } from './useAvailableFilters';
 import { SubmenuStates } from './SubmenuStates';
 import { SubmenuTags } from './SubmenuTags';
+import { CompactListSubheader, CompactMenuItem } from './FiltersComponents';
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
     display: 'flex',
     alignItems: 'center',
   },
-  clearButton: {
-    marginRight: theme.spacing(2),
-    marginLeft: -theme.spacing(),
-  },
   input: {
-    maxHeight: 40,
+    height: 40,
     marginTop: 0,
     marginBottom: 0,
+    display: 'flex',
+    alignItems: 'center',
     width: 200,
     '& div:focus': {
       backgroundColor: 'transparent',
     },
     '& .MuiSelect-root': {
-      paddingRight: 5,
+      display: 'flex',
+      alignItems: 'center',
+      overflow: 'hidden',
+      position: 'relative',
     },
   },
   inputContent: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    margin: theme.spacing(-1, 0),
+    width: '100%',
+  },
+  inputText: {
     overflow: 'hidden',
+    flexShrink: 1,
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
+  },
+  clearButton: {
+    margin: theme.spacing(-1, -0.5, -1, -0.25),
   },
 }));
 
@@ -85,6 +98,7 @@ export const Filters = () => {
   });
 
   const classes = useStyles();
+  const theme = useTheme();
 
   const availableFilters = useAvailableFilters(selectedLanguages);
 
@@ -93,7 +107,7 @@ export const Filters = () => {
       .map((g) => g.options?.find((o) => o.value === value))
       .filter(Boolean)[0];
 
-  const handleClearFilters = () => {
+  const handleClearFilters = (e) => {
     dispatch({ type: 'SET_FILTERS', payload: {} });
   };
 
@@ -104,28 +118,28 @@ export const Filters = () => {
 
   const options: any[] = [];
 
-  availableFilters.forEach((group, i) => {
+  availableFilters.forEach((group, i1) => {
     if (!group.options?.length) {
       return;
     } else {
       if (group.type !== 'tags') {
         options.push(
-          <ListSubheader
-            key={`${i}.group`}
+          <CompactListSubheader
+            key={i1}
             disableSticky
             data-cy="translations-filters-subheader"
           >
             {group.name}
-          </ListSubheader>
+          </CompactListSubheader>
         );
       }
 
-      group.options.forEach((option, i) => {
+      group.options.forEach((option, i2) => {
         if (group.type === undefined) {
           options.push(
-            <MenuItem
+            <CompactMenuItem
               data-cy="translations-filter-option"
-              key={option.value}
+              key={`${i1}.${i2}`}
               value={option.value!}
               onClick={handleFilterToggle(option.value!)}
             >
@@ -137,12 +151,12 @@ export const Filters = () => {
                 disableRipple
               />
               <ListItemText primary={option.label} />
-            </MenuItem>
+            </CompactMenuItem>
           );
         } else if (group.type === 'states') {
           options.push(
             <SubmenuStates
-              key={'states'}
+              key={`${i1}.${i2}`}
               data-cy="translations-filter-option"
               item={option}
               handleToggle={handleFilterToggle}
@@ -152,8 +166,7 @@ export const Filters = () => {
         } else if (group.type === 'tags') {
           options.push(
             <SubmenuTags
-              key={i}
-              data-cy="translations-filter-option"
+              key={`${i1}.${i2}`}
               item={option}
               handleToggle={handleFilterToggle}
               activeFilters={activeFilters}
@@ -171,40 +184,50 @@ export const Filters = () => {
         variant="outlined"
         value={activeFilters}
         data-cy="translations-filter-select"
-        endAdornment={
-          Boolean(activeFilters.length) && (
-            <Tooltip title={<T noWrap>translations_filters_heading_clear</T>}>
-              <IconButton
-                size="small"
-                className={classes.clearButton}
-                onClick={handleClearFilters}
-                data-cy="translations-filter-clear-all"
-              >
-                <Clear />
-              </IconButton>
-            </Tooltip>
-          )
-        }
         renderValue={(value: any) => (
-          <Typography
-            color={value.length === 0 ? 'textSecondary' : 'textPrimary'}
-            variant="body1"
-            className={classes.inputContent}
-          >
-            {value.length === 0 ? (
-              <T>translations_filter_placeholder</T>
-            ) : value.length === 1 && findOption(value[0])?.label ? (
-              findOption(value[0])?.label
-            ) : (
-              <T parameters={{ filtersNum: String(activeFilters.length) }}>
-                translations_filters_text
-              </T>
+          <div className={classes.inputContent}>
+            <Typography
+              style={{
+                color:
+                  value.length === 0
+                    ? theme.palette.grey[500]
+                    : theme.palette.text.primary,
+              }}
+              variant="body2"
+              className={classes.inputText}
+            >
+              {value.length === 0 ? (
+                <T>translations_filter_placeholder</T>
+              ) : value.length === 1 && findOption(value[0])?.label ? (
+                findOption(value[0])?.label
+              ) : (
+                <T parameters={{ filtersNum: String(activeFilters.length) }}>
+                  translations_filters_text
+                </T>
+              )}
+            </Typography>
+            {Boolean(activeFilters.length) && (
+              <Tooltip title={<T noWrap>translations_filters_heading_clear</T>}>
+                <IconButton
+                  size="small"
+                  className={classes.clearButton}
+                  onClick={stopAndPrevent(handleClearFilters)}
+                  onMouseDown={stopAndPrevent()}
+                  data-cy="translations-filter-clear-all"
+                >
+                  <Clear fontSize="small" />
+                </IconButton>
+              </Tooltip>
             )}
-          </Typography>
+          </div>
         )}
         MenuProps={{
           variant: 'menu',
           getContentAnchorEl: null,
+          anchorOrigin: {
+            vertical: 'bottom',
+            horizontal: 'left',
+          },
         }}
         margin="dense"
         displayEmpty
