@@ -7,7 +7,6 @@ import {
   Dialog,
 } from '@material-ui/core';
 import { ViewListRounded, AppsRounded, Add, Delete } from '@material-ui/icons';
-import SearchField from 'tg.component/common/form/fields/SearchField';
 import { useContextSelector } from 'use-context-selector';
 import { T, useTranslate } from '@tolgee/react';
 
@@ -22,6 +21,7 @@ import { ProjectPermissionType } from 'tg.service/response.types';
 import { Filters } from './Filters/Filters';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { KeyCreateDialog } from './KeyCreateDialog';
+import TranslationsSearchField from './TranslationsSearchField';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -127,13 +127,12 @@ export const TranslationsHeader = () => {
               <Delete />
             </IconButton>
           )}
-          <SearchField
-            initial={search}
-            onSearch={handleSearchChange}
-            margin="dense"
-            variant="outlined"
+          <TranslationsSearchField
+            value={search || ''}
+            onSearchChange={handleSearchChange}
             className={classes.search}
             label={null}
+            variant="outlined"
             placeholder={t('standard_search_label')}
           />
           <Filters />

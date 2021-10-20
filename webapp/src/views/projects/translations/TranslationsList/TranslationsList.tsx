@@ -4,7 +4,6 @@ import ReactList from 'react-list';
 import { useContextSelector } from 'use-context-selector';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import {
   TranslationsContext,
   useTranslationsDispatch,
@@ -127,10 +126,6 @@ export const TranslationsList = () => {
 
   if (!translations) {
     return null;
-  }
-
-  if (translations.length === 0) {
-    return <EmptyListMessage />;
   }
 
   return (

@@ -125,6 +125,7 @@ export type TranslationsContextType = {
   isEditLoading?: boolean;
   hasMoreToFetch?: boolean;
   search?: string;
+  debouncedSearch: string | undefined;
   selection: number[];
   cursor?: EditType;
   selectedLanguages?: string[];
@@ -524,6 +525,7 @@ export const TranslationsContextProvider: React.FC<{
           isFetchingMore: translations.isFetchingNextPage,
           hasMoreToFetch: translations.hasNextPage,
           search: translations.search as string,
+          debouncedSearch: translations.debouncedSearch,
           filters: translations.filters,
           cursor: edit.position,
           selection,

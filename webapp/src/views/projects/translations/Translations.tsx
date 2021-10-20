@@ -1,26 +1,53 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useContextSelector } from 'use-context-selector';
-import { useTranslate } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
+import { Box, Button } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { BaseView } from 'tg.component/layout/BaseView';
-import { TranslationsContext } from './context/TranslationsContext';
+import {
+  TranslationsContext,
+  useTranslationsDispatch,
+} from './context/TranslationsContext';
 import { useProject } from 'tg.hooks/useProject';
 import { TranslationsTable } from './TranslationsTable/TranslationsTable';
 import { TranslationsHeader } from './TranslationsHeader';
 import { TranslationsList } from './TranslationsList/TranslationsList';
 import { useContextShortcuts } from './context/useContextShortcuts';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { ProjectPermissionType } from 'tg.service/response.types';
+import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 export const Translations = () => {
   const t = useTranslate();
   const project = useProject();
+  const projectPermissions = useProjectPermissions();
 
-  const isLoading = useContextSelector(TranslationsContext, (v) => v.isLoading);
+  const isLoading = useContextSelector(TranslationsContext, (c) => c.isLoading);
   const isFetching = useContextSelector(
     TranslationsContext,
-    (v) => v.isFetching
+    (c) => c.isFetching
   );
   const view = useContextSelector(TranslationsContext, (v) => v.view);
+  const translations = useContextSelector(
+    TranslationsContext,
+    (c) => c.translations
+  );
+
+  const filtersOrSearchApplied = useContextSelector(TranslationsContext, (c) =>
+    Boolean(
+      Object.values(c.filters).filter(Boolean).length || c.debouncedSearch
+    )
+  );
+
+  const memoizedFiltersOrSearchApplied = useMemo(
+    () => filtersOrSearchApplied,
+    [translations]
+  );
+
+  const dispatch = useTranslationsDispatch();
 
   const { onKey } = useContextShortcuts();
 
@@ -28,6 +55,64 @@ export const Translations = () => {
     document.body?.addEventListener('keydown', onKey);
     return () => document.body?.removeEventListener('keydown', onKey);
   }, [onKey]);
+
+  const translationsEmpty = !isLoading && translations?.length === 0;
+
+  const canAdd = projectPermissions.satisfiesPermission(
+    ProjectPermissionType.EDIT
+  );
+
+  const [_, setNewDialog] = useUrlSearchState('create', {
+    defaultVal: 'false',
+  });
+
+  const handleAddTranslation = () => {
+    setNewDialog('true');
+  };
+
+  const handleClearFilters = () => {
+    dispatch({ type: 'SET_SEARCH', payload: '' });
+    dispatch({ type: 'SET_FILTERS', payload: {} });
+  };
+
+  const renderPlaceholder = () =>
+    memoizedFiltersOrSearchApplied ? (
+      <EmptyListMessage
+        hint={
+          <Button onClick={handleClearFilters} color="primary">
+            <T>translations_nothing_found_action</T>
+          </Button>
+        }
+      >
+        <T>translations_nothing_found</T>
+      </EmptyListMessage>
+    ) : (
+      <EmptyListMessage
+        hint={
+          canAdd && (
+            <>
+              <Button onClick={handleAddTranslation} color="primary">
+                <T>translations_no_translations_action</T>
+              </Button>
+              <Box display="inline" p={1}>
+                |
+              </Box>
+              <Button
+                component={Link}
+                to={LINKS.PROJECT_INTEGRATE.build({
+                  [PARAMS.PROJECT_ID]: project.id,
+                })}
+                color="primary"
+              >
+                <T>translations_no_translations_integrate</T>
+              </Button>
+            </>
+          )
+        }
+      >
+        <T>translations_no_translations</T>
+      </EmptyListMessage>
+    );
 
   return (
     <BaseView
@@ -49,7 +134,14 @@ export const Translations = () => {
       ]}
     >
       <TranslationsHeader />
-      {view === 'TABLE' ? <TranslationsTable /> : <TranslationsList />}
+      {translations &&
+        (translationsEmpty ? (
+          renderPlaceholder()
+        ) : view === 'TABLE' ? (
+          <TranslationsTable />
+        ) : (
+          <TranslationsList />
+        ))}
     </BaseView>
   );
 };

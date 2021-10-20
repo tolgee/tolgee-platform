@@ -81,7 +81,7 @@ export const useUrlSearchState = (
   const setState = useCallback(
     (value: any) => {
       const newSearch = getNewSearch(value);
-      if (history) {
+      if (options?.history) {
         push(window.location.pathname + newSearch);
       } else {
         replace(window.location.pathname + newSearch);

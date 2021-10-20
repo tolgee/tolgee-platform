@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
+import makeStyles from '@material-ui/core/styles/makeStyles';
+
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { Button } from '@material-ui/core';
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles((t) => ({
   listWrapper: {
@@ -53,6 +57,21 @@ export const ProjectListView = () => {
           onPageChange={setPage}
           loadable={listPermitted}
           renderItem={(r) => <DashboardProjectListItem key={r.id} {...r} />}
+          emptyPlaceholder={
+            <EmptyListMessage
+              hint={
+                <Button
+                  component={Link}
+                  to={LINKS.PROJECT_ADD.build()}
+                  color="primary"
+                >
+                  <T>projects_empty_action</T>
+                </Button>
+              }
+            >
+              <T>projects_empty</T>
+            </EmptyListMessage>
+          }
         />
       </BaseView>
     </DashboardPage>

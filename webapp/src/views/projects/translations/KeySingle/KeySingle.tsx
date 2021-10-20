@@ -87,7 +87,7 @@ export const KeySingle: React.FC<Props> = ({ keyName }) => {
 
   useGlobalLoading(isFetching);
 
-  return allLanguages && selectedLanguages ? (
+  return allLanguages && selectedLanguages && translations ? (
     <BaseView
       navigation={[
         [
