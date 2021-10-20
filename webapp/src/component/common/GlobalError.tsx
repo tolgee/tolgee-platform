@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button, makeStyles, Theme } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { container } from 'tsyringe';
@@ -6,9 +6,16 @@ import { container } from 'tsyringe';
 import { GlobalError as GlobalErrorError } from 'tg.error/GlobalError';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 
-import { SadEmotionMessage } from './SadEmotionMessage';
-
+const useStyles = makeStyles((theme: Theme) => ({
+  image: {
+    filter: 'grayscale(50%) blur(0.3px)',
+    opacity: '0.7',
+    maxWidth: '100%',
+    width: 500,
+  },
+}));
 export default function GlobalError(props: { error: GlobalErrorError }) {
+  const classes = useStyles();
   const dev = process.env.NODE_ENV === 'development';
 
   return (
@@ -18,8 +25,17 @@ export default function GlobalError(props: { error: GlobalErrorError }) {
       </Box>
 
       {!dev && (
-        <Box>
-          <SadEmotionMessage>{null}</SadEmotionMessage>
+        <Box
+          display="flex"
+          justifyContent="center"
+          flexDirection="column"
+          alignItems="center"
+        >
+          <img
+            src="/images/brokenMouse.svg"
+            draggable="false"
+            className={classes.image}
+          />
         </Box>
       )}
 
@@ -36,6 +52,7 @@ export default function GlobalError(props: { error: GlobalErrorError }) {
           color="primary"
           onClick={() => {
             container.resolve(GlobalActions).logout.dispatch();
+            location.reload();
           }}
         >
           Start over!

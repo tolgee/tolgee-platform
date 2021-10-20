@@ -192,7 +192,9 @@ export const ProjectInviteView: FunctionComponent = () => {
                 </List>
               </Box>
             ) : (
-              <EmptyListMessage />
+              <EmptyListMessage>
+                <T>invite_user_nothing_found</T>
+              </EmptyListMessage>
             ))}
         </>
       )}

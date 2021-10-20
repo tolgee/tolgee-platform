@@ -6,6 +6,7 @@ import { components, operations } from 'tg.service/apiSchema.generated';
 import { InfiniteData } from 'react-query';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
+import { useDebounce } from 'use-debounce/lib';
 
 const PAGE_SIZE = 60;
 
@@ -16,6 +17,8 @@ type KeyWithTranslationsModelType =
 type TranslationsResponse =
   components['schemas']['KeysWithTranslationsPageModel'];
 type TranslationModel = components['schemas']['TranslationViewModel'];
+type KeysWithTranslationsPageModel =
+  components['schemas']['KeysWithTranslationsPageModel'];
 
 type FiltersType = Pick<
   TranslationsQueryType,
@@ -52,7 +55,17 @@ export const useTranslationsInfinite = (props: Props) => {
   // wait for initialLangs to not be null
   const [enabled, setEnabled] = useState(props.initialLangs !== null);
 
-  const [search, setSearch] = useUrlSearchState('search', { defaultVal: '' });
+  const [urlSearch, setUrlSearch] = useUrlSearchState('search', {
+    defaultVal: '',
+  });
+
+  const [search, setSearch] = useState(urlSearch);
+
+  const [debouncedSearch] = useDebounce(search, 500);
+
+  useEffect(() => {
+    setUrlSearch(debouncedSearch);
+  }, [debouncedSearch]);
 
   const [manuallyInserted, setManuallyInserted] = useState(0);
 
@@ -81,6 +94,9 @@ export const useTranslationsInfinite = (props: Props) => {
     [props.projectId]
   );
 
+  const [translationsData, setTranslationsData] =
+    useState<InfiniteData<KeysWithTranslationsPageModel>>();
+
   const translations = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/translations',
     method: 'get',
@@ -89,7 +105,7 @@ export const useTranslationsInfinite = (props: Props) => {
       ...query,
       ...parsedFilters,
       filterKeyName: props.keyName,
-      search: search as string,
+      search: debouncedSearch as string,
     },
     options: {
       // fetch after languages are loaded,
@@ -106,13 +122,14 @@ export const useTranslationsInfinite = (props: Props) => {
             query: {
               ...query,
               ...parsedFilters,
-              search,
+              search: debouncedSearch,
               cursor: lastPage.nextCursor,
             },
           };
         }
       },
       onSuccess(data) {
+        setTranslationsData(data);
         const flatKeys = flattenKeys(data);
         if (data?.pages.length === 1) {
           // reset fixed translations when fetching first page
@@ -209,7 +226,7 @@ export const useTranslationsInfinite = (props: Props) => {
     );
   };
 
-  const totalCount = translations.data?.pages[0].page?.totalElements;
+  const totalCount = translationsData?.pages[0].page?.totalElements;
 
   return {
     isLoading: translations.isLoading,
@@ -219,10 +236,10 @@ export const useTranslationsInfinite = (props: Props) => {
     query,
     filters: parsedFilters,
     fetchNextPage: translations.fetchNextPage,
-    selectedLanguages: translations.data?.pages[0]?.selectedLanguages.map(
+    selectedLanguages: translationsData?.pages[0]?.selectedLanguages.map(
       (l) => l.tag
     ),
-    data: translations.data,
+    data: translationsData,
     fixedTranslations,
     totalCount:
       totalCount !== undefined ? totalCount + manuallyInserted : undefined,
@@ -235,5 +252,6 @@ export const useTranslationsInfinite = (props: Props) => {
     updateTranslationKey,
     updateTranslation,
     insertAsFirst,
+    debouncedSearch: debouncedSearch as string | undefined,
   };
 };

@@ -4,7 +4,6 @@ import { T } from '@tolgee/react';
 import { makeStyles } from '@material-ui/core';
 import { useContextSelector } from 'use-context-selector';
 
-import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import {
   TranslationsContext,
   useTranslationsDispatch,
@@ -161,10 +160,6 @@ export const TranslationsTable = () => {
 
   if (!translations) {
     return null;
-  }
-
-  if (translations.length === 0) {
-    return <EmptyListMessage />;
   }
 
   return (

@@ -38,6 +38,7 @@ export const PaginatedHateoasList = <
     searchText?: string;
     onSearchChange?: (value: string) => void;
     onPageChange: (value: number) => void;
+    emptyPlaceholder?: React.ReactNode;
   } & OverridableListWrappers<WrapperComponent, ListComponent>
 ) => {
   const { loadable } = props;
@@ -106,7 +107,7 @@ export const PaginatedHateoasList = <
           listComponentProps={props.listComponentProps}
         />
       ) : (
-        !loadable.isLoading && <EmptyListMessage />
+        !loadable.isLoading && (props.emptyPlaceholder || <EmptyListMessage />)
       )}
     </Box>
   );

@@ -79,6 +79,7 @@ export const editCell = (oldValue: string, newValue?: string, save = true) => {
   // wait for editor to appear
   cy.gcy('global-editor').should('be.visible');
   cy.contains(oldValue).should('be.visible');
+  cy.wait(10);
 
   if (newValue) {
     // select all, delete and type new text
