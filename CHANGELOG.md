@@ -1,3 +1,10 @@
+## [1.3.7](https://github.com/tolgee/server/compare/v1.3.6...v1.3.7) (2021-10-20)
+
+
+### Bug Fixes
+
+* Missing .VERSION in released .jar ([d22dc6c](https://github.com/tolgee/server/commit/d22dc6c5d8beb424afd84f77aa7efbeb1225b053))
+
 ## [1.3.6](https://github.com/tolgee/server/compare/v1.3.5...v1.3.6) (2021-10-19)
 
 
