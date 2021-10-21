@@ -1,3 +1,10 @@
+## [1.3.8](https://github.com/tolgee/server/compare/v1.3.7...v1.3.8) (2021-10-21)
+
+
+### Bug Fixes
+
+* Blank page cosmetics & picture TG-304 ([01dcc3c](https://github.com/tolgee/server/commit/01dcc3c9e09aff4d37be06f7d075f35f8ae21244))
+
 ## [1.3.7](https://github.com/tolgee/server/compare/v1.3.6...v1.3.7) (2021-10-20)
 
 
