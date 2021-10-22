@@ -31,13 +31,7 @@ const useStyles = makeStyles((theme) => ({
     }),
   },
   toolbar: {
-    paddingRight: 24, // keep right padding when drawer closed
-  },
-  menuButton: {
-    marginRight: 36,
-  },
-  menuButtonHidden: {
-    display: 'none',
+    paddingRight: theme.spacing(2), // keep right padding when drawer closed
   },
   tolgeeLink: {
     color: 'inherit',
@@ -80,10 +74,8 @@ export function TopBar(props: TopBarProps) {
             </Link>
           </Box>
         </Box>
-        <Box display="inline" marginRight={1}>
-          <LocaleMenu />
-        </Box>
-        <UserMenu variant="expanded" />
+        <LocaleMenu />
+        <UserMenu />
       </Toolbar>
     </AppBar>
   );

@@ -48,12 +48,14 @@ export const CircledLanguageIcon: React.FC<Props> = ({
           height={Math.floor(size * 0.75) * 2}
           width={Math.floor(size * 0.75) * 2}
           flagEmoji={flag || ''}
+          draggable="false"
         />
         <FlagImage
           className={classes.iconImageBlur}
           height={Math.floor(size * 0.75) * 2}
           width={Math.floor(size * 0.75) * 2}
           flagEmoji={flag || ''}
+          draggable="false"
         />
       </Box>
     </Box>

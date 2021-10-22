@@ -1,10 +1,6 @@
-import { default as React, FunctionComponent, useState } from 'react';
-import { Button, MenuProps } from '@material-ui/core';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import withStyles from '@material-ui/core/styles/withStyles';
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import PersonIcon from '@material-ui/icons/Person';
+import { default as React, useState } from 'react';
+import { IconButton, makeStyles, Menu, MenuItem } from '@material-ui/core';
+import { AccountCircle } from '@material-ui/icons';
 import { T } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -16,13 +12,25 @@ import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 
-interface UserMenuProps {
-  variant: 'small' | 'expanded';
-}
-
 const globalActions = container.resolve(GlobalActions);
 
-export const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    border: '1px solid #d3d4d5',
+    marginTop: 5,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+  },
+  icon: {
+    width: 30,
+    height: 30,
+  },
+}));
+
+export const UserMenu: React.FC = () => {
+  const classes = useStyles();
   const userLogged = useSelector(
     (state: AppState) => state.global.security.allowPrivate
   );
@@ -47,60 +55,46 @@ export const UserMenu: FunctionComponent<UserMenuProps> = (props) => {
     return null;
   }
 
-  const StyledMenu = withStyles({
-    paper: {
-      border: '1px solid #d3d4d5',
-    },
-  })((props: MenuProps) => (
-    <Menu
-      elevation={0}
-      getContentAnchorEl={null}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'right',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      {...props}
-    />
-  ));
-
-  return (
-    <>
-      {userLogged && (
-        <div>
-          <Button
-            style={{ padding: 0 }}
-            endIcon={<KeyboardArrowDownIcon />}
-            color="inherit"
-            data-cy="global-user-menu-button"
-            aria-controls="user-menu"
-            aria-haspopup="true"
-            onClick={handleOpen}
-          >
-            {props.variant == 'expanded' ? user.name : <PersonIcon />}
-          </Button>
-          <StyledMenu
-            id="user-menu"
-            keepMounted
-            open={!!anchorEl}
-            anchorEl={anchorEl}
-            onClose={handleClose}
-          >
-            <MenuItem onClick={() => globalActions.logout.dispatch()}>
-              <T noWrap>user_menu_logout</T>
-            </MenuItem>
-            {userMenuItems.map((item, index) => (
-              //@ts-ignore
-              <MenuItem key={index} component={Link} to={item.link}>
-                <T noWrap>{item.nameTranslationKey}</T>
-              </MenuItem>
-            ))}
-          </StyledMenu>
-        </div>
-      )}
-    </>
-  );
+  return userLogged ? (
+    <div>
+      <IconButton
+        color="inherit"
+        data-cy="global-user-menu-button"
+        aria-controls="user-menu"
+        aria-haspopup="true"
+        onClick={handleOpen}
+        className={classes.iconButton}
+      >
+        <AccountCircle className={classes.icon} fontSize="large" />
+      </IconButton>
+      <Menu
+        id="user-menu"
+        keepMounted
+        open={!!anchorEl}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        elevation={0}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        classes={{ paper: classes.paper }}
+      >
+        {userMenuItems.map((item, index) => (
+          //@ts-ignore
+          <MenuItem key={index} component={Link} to={item.link}>
+            <T noWrap>{item.nameTranslationKey}</T>
+          </MenuItem>
+        ))}
+        <MenuItem onClick={() => globalActions.logout.dispatch()}>
+          <T noWrap>user_menu_logout</T>
+        </MenuItem>
+      </Menu>
+    </div>
+  ) : null;
 };
