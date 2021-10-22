@@ -1,15 +1,30 @@
 import { default as React, FunctionComponent, useState } from 'react';
-import { Button, MenuProps } from '@material-ui/core';
+import { IconButton, makeStyles } from '@material-ui/core';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import withStyles from '@material-ui/core/styles/withStyles';
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import LanguageIcon from '@material-ui/icons/Language';
 import { useCurrentLanguage, useSetLanguage } from '@tolgee/react';
+import { CircledLanguageIcon } from './languages/CircledLanguageIcon';
+
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    border: '1px solid #d3d4d5',
+    marginTop: 5,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+  },
+  circledIcon: {
+    '& > img': {
+      userDrag: 'none',
+    },
+  },
+}));
 
 export const LocaleMenu: FunctionComponent<{ className?: string }> = (
   props
 ) => {
+  const classes = useStyles();
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     // @ts-ignore
     setAnchorEl(event.currentTarget);
@@ -24,53 +39,55 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
   const setLanguage = useSetLanguage();
   const getCurrentLanguage = useCurrentLanguage();
 
-  const StyledMenu = withStyles({
-    paper: {
-      border: '1px solid #d3d4d5',
-    },
-  })((props: MenuProps) => (
-    <Menu
-      elevation={0}
-      getContentAnchorEl={null}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'right',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      {...props}
-    />
-  ));
-
   const languages = {
-    en: 'English',
-    cs: 'Česky',
+    en: {
+      name: 'English',
+      flag: '🇬🇧',
+    },
+    cs: {
+      name: 'Česky',
+      flag: '🇨🇿',
+    },
   };
+
+  const language = getCurrentLanguage();
 
   return (
     <>
       <div>
-        <Button
-          style={{ padding: 0 }}
-          endIcon={<KeyboardArrowDownIcon />}
+        <IconButton
           color="inherit"
           aria-controls="language-menu"
           aria-haspopup="true"
           onClick={handleOpen}
+          className={classes.iconButton}
         >
-          <LanguageIcon />
-        </Button>
-        <StyledMenu
+          <CircledLanguageIcon
+            flag={languages[language]?.flag}
+            size={24}
+            draggable="false"
+            className={classes.circledIcon}
+          />
+        </IconButton>
+        <Menu
           id="language-menu"
           keepMounted
           open={!!anchorEl}
           anchorEl={anchorEl}
           onClose={handleClose}
-          {...props}
+          elevation={0}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          classes={{ paper: classes.paper }}
         >
-          {Object.entries(languages).map(([abbr, name]) => (
+          {Object.entries(languages).map(([abbr, lang]) => (
             <MenuItem
               selected={getCurrentLanguage() === abbr}
               value={abbr}
@@ -80,10 +97,10 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
                 setLanguage(abbr);
               }}
             >
-              {name}
+              {lang.name}
             </MenuItem>
           ))}
-        </StyledMenu>
+        </Menu>
       </div>
     </>
   );
