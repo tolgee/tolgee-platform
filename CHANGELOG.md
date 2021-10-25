@@ -1,3 +1,10 @@
+## [1.3.9](https://github.com/tolgee/server/compare/v1.3.8...v1.3.9) (2021-10-25)
+
+
+### Bug Fixes
+
+* bar and icons on the right TG-338 ([703e776](https://github.com/tolgee/server/commit/703e776a05bb6ba6ee412f50f5d9eccdc5b59a10))
+
 ## [1.3.8](https://github.com/tolgee/server/compare/v1.3.7...v1.3.8) (2021-10-21)
 
 
