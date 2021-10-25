@@ -111,6 +111,7 @@ class DbPopulatorReal(
     project.name = projectName
     project.userOwner = userAccount
     en = createLanguage("en", project)
+    project.baseLanguage = en
     de = createLanguage("de", project)
     permissionService.grantFullAccessToProject(userAccount, project)
     projectRepository.saveAndFlush(project)
