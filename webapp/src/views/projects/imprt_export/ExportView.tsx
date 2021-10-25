@@ -58,9 +58,9 @@ export const ExportView: FunctionComponent = () => {
           }),
         ],
       ]}
-      xs={12}
-      md={10}
-      lg={8}
+      lg={7}
+      md={9}
+      containerMaxWidth="lg"
     >
       <Box mt={2}>
         <Button

@@ -46,9 +46,9 @@ export const IntegrateView: FunctionComponent = () => {
           }),
         ],
       ]}
-      xs={12}
       md={11}
-      lg={7}
+      lg={9}
+      containerMaxWidth="lg"
     >
       <Stepper activeStep={activeStep} orientation="vertical">
         <Step expanded={true}>

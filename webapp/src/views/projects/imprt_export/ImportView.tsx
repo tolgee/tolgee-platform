@@ -140,9 +140,9 @@ export const ImportView: FunctionComponent = () => {
           }),
         ],
       ]}
-      xs={12}
-      md={10}
-      lg={8}
+      lg={7}
+      md={9}
+      containerMaxWidth="lg"
     >
       <ImportConflictResolutionDialog
         row={resolveRow}

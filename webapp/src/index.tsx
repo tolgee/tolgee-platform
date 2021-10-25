@@ -83,14 +83,58 @@ const theme = createTheme({
   typography: {
     fontFamily:
       '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-    caption: {
-      fontSize: 12,
+    h1: {
+      fontSize: 42,
+      fontWeight: 300,
+    },
+    h2: {
+      fontSize: 36,
+      fontWeight: 300,
+    },
+    h3: {
+      fontSize: 28,
+      fontWeight: 400,
+    },
+    h4: {
+      fontSize: 24,
+      fontWeight: 400,
+    },
+    h5: {
+      fontSize: 20,
+      fontWeight: 400,
+    },
+    h6: {
+      fontSize: 20,
+      fontFamily: 'Righteous, Rubik, Arial',
+      fontWeight: 500,
+    },
+    subtitle1: {
+      fontSize: 18,
+      fontWeight: 400,
+    },
+    subtitle2: {
+      fontSize: 16,
+      fontWeight: 500,
     },
     body1: {
       fontSize: 16,
+      fontWeight: 400,
     },
     body2: {
       fontSize: 15,
+      fontWeight: 400,
+    },
+    button: {
+      fontSize: 14,
+      fontWeight: 500,
+    },
+    caption: {
+      fontSize: 12,
+      fontWeight: 400,
+    },
+    overline: {
+      fontWeight: 400,
+      fontSize: 10,
     },
   },
   palette: {
@@ -160,6 +204,12 @@ const theme = createTheme({
     MuiButton: {
       root: {
         borderRadius: 3,
+        padding: '6px 16px',
+        minHeight: 40,
+      },
+      sizeSmall: {
+        minHeight: 32,
+        padding: '4px 16px',
       },
     },
     MuiList: {

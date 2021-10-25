@@ -113,9 +113,9 @@ export const ProjectInviteView: FunctionComponent = () => {
           }),
         ],
       ]}
-      xs={12}
-      md={8}
-      lg={6}
+      lg={7}
+      md={9}
+      containerMaxWidth="lg"
     >
       {() => (
         <>

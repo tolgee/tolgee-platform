@@ -6,7 +6,7 @@ import {
   useTheme,
 } from '@material-ui/core';
 import { Search, Clear } from '@material-ui/icons';
-import { T } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import { useDebounce } from 'use-debounce/lib';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 
@@ -19,6 +19,7 @@ const SearchField = (
   const [search, setSearch] = useState(props.initial || '');
   const [debouncedSearch] = useDebounce(search, 500);
   const theme = useTheme();
+  const t = useTranslate();
 
   const { onSearch, ...otherProps } = props;
 
@@ -31,7 +32,7 @@ const SearchField = (
   return (
     <TextField
       data-cy="global-search-field"
-      label={<T>standard_search_label</T>}
+      placeholder={t('standard_search_label')}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
