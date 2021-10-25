@@ -58,11 +58,7 @@ export function TopBar(props: TopBarProps) {
                 <Box pr={1} display="flex" justifyItems="center">
                   <TolgeeLogo fontSize="large" />
                 </Box>
-                <Typography
-                  variant="h6"
-                  color="inherit"
-                  style={{ fontFamily: 'Righteous, Rubik, Arial' }}
-                >
+                <Typography variant="h6" color="inherit">
                   {config.appName}
                 </Typography>
                 {config.showVersion && (

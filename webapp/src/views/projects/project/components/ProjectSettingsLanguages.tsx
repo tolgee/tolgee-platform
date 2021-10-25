@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Container, ListItem, Typography } from '@material-ui/core';
+import { Box, ListItem, Typography } from '@material-ui/core';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import { T } from '@tolgee/react';
@@ -32,7 +32,7 @@ export const ProjectSettingsLanguages = () => {
   useGlobalLoading(languagesLoadable.isLoading);
 
   return (
-    <Container maxWidth="sm">
+    <>
       <PaginatedHateoasList
         loadable={languagesLoadable}
         onPageChange={setPage}
@@ -75,6 +75,6 @@ export const ProjectSettingsLanguages = () => {
           }}
         />
       </Box>
-    </Container>
+    </>
   );
 };

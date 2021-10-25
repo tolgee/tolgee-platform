@@ -61,6 +61,8 @@ export const ProjectPermissionsView: FunctionComponent = () => {
           }),
         ],
       ]}
+      lg={7}
+      md={9}
       containerMaxWidth="lg"
       loading={listLoadable.isFetching}
       hideChildrenOnLoading={false}

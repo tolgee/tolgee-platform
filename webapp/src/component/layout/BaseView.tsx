@@ -64,10 +64,7 @@ export const BaseView = (props: BaseViewProps) => {
             alignItems="center"
             justifyContent="center"
           >
-            <Container
-              maxWidth={props.containerMaxWidth || false}
-              style={{ padding: 0, margin: 0 }}
-            >
+            <Container maxWidth={false} style={{ padding: 0, margin: 0 }}>
               <Navigation path={props.navigation} />
             </Container>
           </SecondaryBar>
@@ -90,7 +87,7 @@ export const BaseView = (props: BaseViewProps) => {
                   {props.customHeader || (
                     <Box display="flex" justifyContent="space-between">
                       <Box display="flex" alignItems={'center'}>
-                        <Typography variant="h5">{props.title}</Typography>
+                        <Typography variant="h4">{props.title}</Typography>
                         {typeof props.onSearch === 'function' && (
                           <Box ml={2}>
                             <SecondaryBarSearchField

@@ -34,16 +34,14 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     margin: -5,
-    '& > *': {
-      margin: 5,
-    },
     flexWrap: 'wrap',
   },
   spaced: {
     display: 'flex',
-    '& > * + *': {
-      marginLeft: 10,
+    '& > *': {
+      margin: 5,
     },
+    flexWrap: 'wrap',
   },
   deleteButton: {
     display: 'flex',
@@ -53,13 +51,14 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 3,
   },
   search: {
-    marginTop: 0,
-    marginBottom: 0,
     minWidth: 200,
   },
   resultCount: {
     marginLeft: 1,
     marginTop: theme.spacing(),
+  },
+  toggleButton: {
+    padding: '4px 8px',
   },
 }));
 
@@ -120,7 +119,6 @@ export const TranslationsHeader = () => {
           {selection.length > 0 && (
             <IconButton
               className={classes.deleteButton}
-              size="small"
               onClick={handleDelete}
               data-cy="translations-delete-button"
             >
@@ -148,12 +146,12 @@ export const TranslationsHeader = () => {
             context="translations"
           />
 
-          <ButtonGroup size="small">
+          <ButtonGroup>
             <Button
               color={view === 'LIST' ? 'primary' : undefined}
               onClick={() => handleViewChange('LIST')}
               data-cy="translations-view-list-button"
-              size="small"
+              className={classes.toggleButton}
             >
               <ViewListRounded />
             </Button>
@@ -161,7 +159,7 @@ export const TranslationsHeader = () => {
               color={view === 'TABLE' ? 'primary' : undefined}
               onClick={() => handleViewChange('TABLE')}
               data-cy="translations-view-table-button"
-              size="small"
+              className={classes.toggleButton}
             >
               <AppsRounded />
             </Button>
@@ -173,7 +171,6 @@ export const TranslationsHeader = () => {
             <Button
               startIcon={<Add />}
               color="primary"
-              size="small"
               variant="contained"
               onClick={handleAddTranslation}
               data-cy="translations-add-button"

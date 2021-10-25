@@ -31,6 +31,10 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: theme.shape.borderRadius,
     border: `1px solid ${theme.palette.error.dark}`,
   },
+  dangerButton: {
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
+  },
 }));
 
 export const ProjectSettingsView: FunctionComponent = () => {
@@ -111,8 +115,9 @@ export const ProjectSettingsView: FunctionComponent = () => {
 
   return (
     <BaseView
-      lg={6}
-      md={8}
+      lg={7}
+      md={9}
+      containerMaxWidth="lg"
       navigation={[
         [
           project.name,
@@ -152,17 +157,22 @@ export const ProjectSettingsView: FunctionComponent = () => {
       </Box>
       <Box className={classes.dangerZone} p={2}>
         <Box display="flex" alignItems="center">
-          <Box flexGrow={1}>
+          <Box flexGrow={1} mr={1}>
             <Typography variant="body1">
               <T>this_will_delete_project_forever</T>
             </Typography>
           </Box>
-          <Button color="default" variant="outlined" onClick={handleDelete}>
+          <Button
+            color="default"
+            variant="outlined"
+            onClick={handleDelete}
+            className={classes.dangerButton}
+          >
             <T>delete_project_button</T>
           </Button>
         </Box>
         <Box display="flex" alignItems="center" mt={2}>
-          <Box flexGrow={1}>
+          <Box flexGrow={1} mr={1}>
             <Typography variant="body1">
               <T>this_will_transfer_project</T>
             </Typography>
@@ -174,6 +184,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
             onClick={() => {
               setTransferDialogOpen(true);
             }}
+            className={classes.dangerButton}
           >
             <T>transfer_project_button</T>
           </Button>
