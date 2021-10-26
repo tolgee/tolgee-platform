@@ -1,3 +1,10 @@
+## [1.3.11](https://github.com/tolgee/server/compare/v1.3.10...v1.3.11) (2021-10-26)
+
+
+### Bug Fixes
+
+* Set base language input to default value TG-368 ([91b7ec4](https://github.com/tolgee/server/commit/91b7ec4293c3ddeef83e70f6caf045492553d79f))
+
 ## [1.3.10](https://github.com/tolgee/server/compare/v1.3.9...v1.3.10) (2021-10-25)
 
 
