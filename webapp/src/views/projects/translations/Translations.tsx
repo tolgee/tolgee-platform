@@ -37,9 +37,7 @@ export const Translations = () => {
   );
 
   const filtersOrSearchApplied = useContextSelector(TranslationsContext, (c) =>
-    Boolean(
-      Object.values(c.filters).filter(Boolean).length || c.debouncedSearch
-    )
+    Boolean(Object.values(c.filters).filter(Boolean).length || c.urlSearch)
   );
 
   const memoizedFiltersOrSearchApplied = useMemo(
@@ -71,7 +69,7 @@ export const Translations = () => {
   };
 
   const handleClearFilters = () => {
-    dispatch({ type: 'SET_SEARCH', payload: '' });
+    dispatch({ type: 'SET_SEARCH_IMMEDIATE', payload: '' });
     dispatch({ type: 'SET_FILTERS', payload: {} });
   };
 

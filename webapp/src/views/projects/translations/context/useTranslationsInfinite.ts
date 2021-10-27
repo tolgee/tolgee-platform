@@ -6,7 +6,7 @@ import { components, operations } from 'tg.service/apiSchema.generated';
 import { InfiniteData } from 'react-query';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
-import { useDebounce } from 'use-debounce/lib';
+import { useDebouncedCallback } from 'use-debounce/lib';
 
 const PAGE_SIZE = 60;
 
@@ -46,7 +46,7 @@ const flattenKeys = (
   data?.pages.filter(Boolean).flatMap((p) => p._embedded?.keys || []) || [];
 
 export const useTranslationsInfinite = (props: Props) => {
-  const [filters, setFilters] = useUrlSearchState('filters', {
+  const [filters, _setFilters] = useUrlSearchState('filters', {
     defaultVal: JSON.stringify({}),
   });
   const parsedFilters = (
@@ -55,17 +55,11 @@ export const useTranslationsInfinite = (props: Props) => {
   // wait for initialLangs to not be null
   const [enabled, setEnabled] = useState(props.initialLangs !== null);
 
-  const [urlSearch, setUrlSearch] = useUrlSearchState('search', {
+  const [urlSearch, _setUrlSearch] = useUrlSearchState('search', {
     defaultVal: '',
   });
 
-  const [search, setSearch] = useState(urlSearch);
-
-  const [debouncedSearch] = useDebounce(search, 500);
-
-  useEffect(() => {
-    setUrlSearch(debouncedSearch);
-  }, [debouncedSearch]);
+  const [search, _setSearch] = useState(urlSearch);
 
   const [manuallyInserted, setManuallyInserted] = useState(0);
 
@@ -105,7 +99,7 @@ export const useTranslationsInfinite = (props: Props) => {
       ...query,
       ...parsedFilters,
       filterKeyName: props.keyName,
-      search: debouncedSearch as string,
+      search: urlSearch as string,
     },
     options: {
       // fetch after languages are loaded,
@@ -122,7 +116,7 @@ export const useTranslationsInfinite = (props: Props) => {
             query: {
               ...query,
               ...parsedFilters,
-              search: debouncedSearch,
+              search: urlSearch,
               cursor: lastPage.nextCursor,
             },
           };
@@ -133,7 +127,7 @@ export const useTranslationsInfinite = (props: Props) => {
         const flatKeys = flattenKeys(data);
         if (data?.pages.length === 1) {
           // reset fixed translations when fetching first page
-          setFixedTranslations((data) => flatKeys);
+          setFixedTranslations(flatKeys);
           setManuallyInserted(0);
         } else {
           // add only nonexistent keys
@@ -152,15 +146,32 @@ export const useTranslationsInfinite = (props: Props) => {
     setManuallyInserted((num) => num + 1);
   };
 
-  const refetchTranslations = () => {
+  const refetchTranslations = (callback?: () => any) => {
     // force refetch from first page
     translations.remove();
-    translations.refetch();
+    callback?.();
+    setTimeout(() => {
+      // make sure that we are refetching, but prevent double fetch
+      translations.refetch();
+    });
   };
 
-  const updateSearch = (value: string) => {
-    setSearch(value);
-    refetchTranslations();
+  const setUrlSearch = (value: string) => {
+    refetchTranslations(() => {
+      _setUrlSearch(value);
+      _setSearch(value);
+    });
+  };
+
+  const setUrlSearchDelayed = useDebouncedCallback((value: string) => {
+    refetchTranslations(() => {
+      _setUrlSearch(value);
+    });
+  }, 500);
+
+  const setSearch = (value: string) => {
+    _setSearch(value);
+    setUrlSearchDelayed(value);
   };
 
   const updateQuery = (q: Partial<typeof query>) => {
@@ -175,13 +186,15 @@ export const useTranslationsInfinite = (props: Props) => {
         queryWithLanguages.languages
       );
     }
-    setQuery(queryWithLanguages);
-    refetchTranslations();
+    refetchTranslations(() => {
+      setQuery(queryWithLanguages);
+    });
   };
 
-  const updateFilters = (filters: FiltersType) => {
-    setFilters(JSON.stringify(filters));
-    refetchTranslations();
+  const setFilters = (filters: FiltersType) => {
+    refetchTranslations(() => {
+      _setFilters(JSON.stringify(filters));
+    });
   };
 
   const updateTranslationKey = (
@@ -247,11 +260,12 @@ export const useTranslationsInfinite = (props: Props) => {
     refetchTranslations,
     updateQuery,
     search,
-    updateSearch,
-    updateFilters,
+    setSearch,
+    setUrlSearch,
+    setFilters,
     updateTranslationKey,
     updateTranslation,
     insertAsFirst,
-    debouncedSearch: debouncedSearch as string | undefined,
+    urlSearch: urlSearch as string | undefined,
   };
 };

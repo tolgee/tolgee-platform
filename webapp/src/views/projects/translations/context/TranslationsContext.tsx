@@ -34,6 +34,7 @@ type TranslationsQueryType =
 
 type ActionType =
   | { type: 'SET_SEARCH'; payload: string }
+  | { type: 'SET_SEARCH_IMMEDIATE'; payload: string }
   | { type: 'SET_FILTERS'; payload: FiltersType }
   | { type: 'SET_EDIT'; payload: EditType | undefined }
   | { type: 'SET_EDIT_FORCE'; payload: EditType | undefined }
@@ -125,7 +126,7 @@ export type TranslationsContextType = {
   isEditLoading?: boolean;
   hasMoreToFetch?: boolean;
   search?: string;
-  debouncedSearch: string | undefined;
+  urlSearch: string | undefined;
   selection: number[];
   cursor?: EditType;
   selectedLanguages?: string[];
@@ -232,11 +233,15 @@ export const TranslationsContextProvider: React.FC<{
   dispatchRef.current = async (action: ActionType) => {
     switch (action.type) {
       case 'SET_SEARCH':
-        translations.updateSearch(action.payload);
+        translations.setSearch(action.payload);
+        handleTranslationsReset();
+        return;
+      case 'SET_SEARCH_IMMEDIATE':
+        translations.setUrlSearch(action.payload);
         handleTranslationsReset();
         return;
       case 'SET_FILTERS':
-        translations.updateFilters(action.payload);
+        translations.setFilters(action.payload);
         handleTranslationsReset();
         return;
       case 'SET_EDIT':
@@ -525,7 +530,7 @@ export const TranslationsContextProvider: React.FC<{
           isFetchingMore: translations.isFetchingNextPage,
           hasMoreToFetch: translations.hasNextPage,
           search: translations.search as string,
-          debouncedSearch: translations.debouncedSearch,
+          urlSearch: translations.urlSearch,
           filters: translations.filters,
           cursor: edit.position,
           selection,
