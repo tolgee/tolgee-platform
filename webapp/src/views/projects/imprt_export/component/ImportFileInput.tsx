@@ -1,11 +1,12 @@
 import React, { FunctionComponent, ReactNode } from 'react';
-import { Box, Button, makeStyles, Typography } from '@material-ui/core';
+import { Box, makeStyles, Typography } from '@material-ui/core';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
 import { useConfig } from 'tg.hooks/useConfig';
 import { MessageActions } from 'tg.store/global/MessageActions';
 import { Message } from 'tg.store/global/types';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 import { ImportFileDropzone } from './ImportFileDropzone';
 
@@ -19,6 +20,7 @@ const useStyles = makeStyles((theme) => ({
 
 type ImportFileInputProps = {
   onNewFiles: (files: File[]) => void;
+  loading: boolean;
 };
 
 export type ValidationResult = {
@@ -147,7 +149,8 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
           <T>import_file_input_drop_file_text</T>
         </Typography>
         <Box mt={2} mb={2}>
-          <Button
+          <LoadingButton
+            loading={props.loading}
             onClick={() =>
               fileRef.current?.dispatchEvent(new MouseEvent('click'))
             }
@@ -155,7 +158,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
             color="primary"
           >
             <T>import_file_input_select_file_button</T>
-          </Button>
+          </LoadingButton>
         </Box>
         <Typography variant="body1">
           <T>import_file_supported_formats</T>

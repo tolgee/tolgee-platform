@@ -1,6 +1,7 @@
 import React, { ComponentProps, FunctionComponent } from 'react';
 import { Box, Button } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { useLoadingRegister } from 'tg.component/GlobalLoading';
 
 const LoadingButton: FunctionComponent<
   ComponentProps<typeof Button> & { loading?: boolean }
@@ -8,6 +9,8 @@ const LoadingButton: FunctionComponent<
   const { disabled, loading, children, ...otherProps } = props;
 
   const isDisabled = loading || disabled;
+
+  useLoadingRegister(loading);
 
   return (
     <Button disabled={isDisabled} {...otherProps}>
@@ -21,6 +24,7 @@ const LoadingButton: FunctionComponent<
           left="0"
           alignItems="center"
           justifyContent="center"
+          data-cy="global-loading"
         >
           <CircularProgress size={20} />
         </Box>

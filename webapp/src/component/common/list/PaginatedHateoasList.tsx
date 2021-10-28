@@ -107,7 +107,7 @@ export const PaginatedHateoasList = <
           listComponentProps={props.listComponentProps}
         />
       ) : (
-        !loadable.isLoading && (props.emptyPlaceholder || <EmptyListMessage />)
+        props.emptyPlaceholder || (!loadable.isLoading && <EmptyListMessage />)
       )}
     </Box>
   );

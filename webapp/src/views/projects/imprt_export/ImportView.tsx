@@ -20,6 +20,7 @@ import { ImportResult } from './component/ImportResult';
 import { useApplyImportHelper } from './hooks/useApplyImportHelper';
 import { useImportDataHelper } from './hooks/useImportDataHelper';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 const actions = container.resolve(ImportActions);
 const messageService = container.resolve(MessageService);
@@ -64,7 +65,7 @@ export const ImportView: FunctionComponent = () => {
       (selectLanguageLoadable.loading && selectLanguageLoadable.loaded) ||
       (resetExistingLanguageLoadable.loading &&
         resetExistingLanguageLoadable.loaded) ||
-      resultLoading
+      resultLoadable.loading
   );
 
   useEffect(() => {
@@ -149,7 +150,10 @@ export const ImportView: FunctionComponent = () => {
         onClose={onConflictResolutionDialogClose}
       />
       <Box mt={2}>
-        <ImportFileInput onNewFiles={dataHelper.onNewFiles} />
+        <ImportFileInput
+          onNewFiles={dataHelper.onNewFiles}
+          loading={addFilesLoadable.loading}
+        />
 
         {addFilesLoadable.data?.errors?.map((e, idx) => (
           <ImportAlertError key={idx} error={e} />
@@ -184,14 +188,15 @@ export const ImportView: FunctionComponent = () => {
             </Button>
           </Box>
           <Box>
-            <Button
+            <LoadingButton
               variant="contained"
               color="primary"
               data-cy="import_apply_import_button"
               onClick={onApply}
+              loading={applyImportHelper.loading}
             >
               <T>import_apply_button</T>
-            </Button>
+            </LoadingButton>
           </Box>
         </Box>
       )}

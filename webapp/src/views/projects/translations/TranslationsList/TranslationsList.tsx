@@ -42,9 +42,9 @@ export const TranslationsList = () => {
     (v) => v.translations
   );
   const languages = useContextSelector(TranslationsContext, (v) => v.languages);
-  const selectedLanguages = useContextSelector(
+  const translationsLanguages = useContextSelector(
     TranslationsContext,
-    (v) => v.selectedLanguages
+    (v) => v.translationsLanguages
   );
   const isFetchingMore = useContextSelector(
     TranslationsContext,
@@ -102,12 +102,12 @@ export const TranslationsList = () => {
 
   const languagesRow = useMemo(
     () =>
-      (selectedLanguages
+      (translationsLanguages
         ?.map((tag) => {
           return languages?.find((l) => l.tag === tag);
         })
         .filter(Boolean) as LanguageModel[]) || [],
-    [languages, selectedLanguages]
+    [languages, translationsLanguages]
   );
 
   useEffect(() => {
@@ -156,8 +156,7 @@ export const TranslationsList = () => {
         itemSizeEstimator={(index, cache) => {
           return (
             cache[index] ||
-            // items count
-            Math.max((selectedLanguages?.length || 0) * 68, 83) + 1
+            Math.max((translationsLanguages?.length || 0) * 68, 83) + 1
           );
         }}
         // @ts-ignore

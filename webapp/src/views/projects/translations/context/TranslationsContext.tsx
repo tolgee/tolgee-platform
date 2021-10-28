@@ -118,6 +118,7 @@ type ChangeScreenshotNum = {
 export type TranslationsContextType = {
   dataReady: boolean;
   translations?: KeyWithTranslationsModelType[];
+  translationsLanguages?: string[];
   translationsTotal?: number;
   languages?: LanguagesType[];
   isLoading?: boolean;
@@ -502,7 +503,7 @@ export const TranslationsContextProvider: React.FC<{
     }
   };
 
-  const dataReady = Boolean(languages.data && translations.data);
+  const dataReady = Boolean(languages.data && translations.fixedTranslations);
 
   return (
     <DispatchContext.Provider value={dispatch}>
@@ -510,6 +511,7 @@ export const TranslationsContextProvider: React.FC<{
         value={{
           dataReady,
           translations: dataReady ? translations.fixedTranslations : undefined,
+          translationsLanguages: translations.selectedLanguages,
           translationsTotal:
             translations.totalCount !== undefined
               ? translations.totalCount
