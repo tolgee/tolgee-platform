@@ -5,7 +5,6 @@ import { useProject } from 'tg.hooks/useProject';
 import { ImportActions } from 'tg.store/project/ImportActions';
 
 import { useImportDataHelper } from './useImportDataHelper';
-import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const actions = container.resolve(ImportActions);
 export const useApplyImportHelper = (
@@ -19,8 +18,6 @@ export const useApplyImportHelper = (
   );
   const project = useProject();
   const error = importApplyLoadable.error;
-
-  useGlobalLoading(importApplyLoadable.loading);
 
   const onApplyImport = () => {
     const unResolvedCount = dataHelper.result?._embedded?.languages?.reduce(
@@ -58,5 +55,11 @@ export const useApplyImportHelper = (
     setConflictNotResolvedDialogOpen(false);
   };
 
-  return { onDialogClose, onApplyImport, conflictNotResolvedDialogOpen, error };
+  return {
+    onDialogClose,
+    onApplyImport,
+    conflictNotResolvedDialogOpen,
+    error,
+    loading: importApplyLoadable.loading,
+  };
 };

@@ -15,6 +15,7 @@ import { OrganizationRoleType } from 'tg.service/response.types';
 
 import { BaseUserSettingsView } from '../userSettings/BaseUserSettingsView';
 import { useLeaveOrganization } from './useLeaveOrganization';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
 export const OrganizationsListView = () => {
   const t = useTranslate();
@@ -45,6 +46,9 @@ export const OrganizationsListView = () => {
     >
       <PaginatedHateoasList
         loadable={organizatationsLoadable}
+        emptyPlaceholder={
+          <EmptyListMessage loading={organizatationsLoadable.isFetching} />
+        }
         onPageChange={setPage}
         renderItem={(item) => (
           <SimpleListItem

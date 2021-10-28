@@ -15,6 +15,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { translatedPermissionType } from 'tg.fixtures/translatePermissionFile';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
 import ProjectPermissionMenu from './component/ProjectPermissionMenu';
 import RevokePermissionsButton from './component/RevokePermissionsButton';
@@ -82,6 +83,9 @@ export const ProjectPermissionsView: FunctionComponent = () => {
         loadable={listLoadable}
         onPageChange={setPage}
         onSearchChange={setSearch}
+        emptyPlaceholder={
+          <EmptyListMessage loading={listLoadable.isFetching} />
+        }
         renderItem={(u) => (
           <SimpleListItem>
             <ListItemText>

@@ -19,6 +19,7 @@ import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 export const Translations = () => {
   const t = useTranslate();
@@ -54,7 +55,7 @@ export const Translations = () => {
     return () => document.body?.removeEventListener('keydown', onKey);
   }, [onKey]);
 
-  const translationsEmpty = !isLoading && translations?.length === 0;
+  const translationsEmpty = !translations?.length;
 
   const canAdd = projectPermissions.satisfiesPermission(
     ProjectPermissionType.EDIT
@@ -73,9 +74,12 @@ export const Translations = () => {
     dispatch({ type: 'SET_FILTERS', payload: {} });
   };
 
+  useGlobalLoading(isFetching || isLoading);
+
   const renderPlaceholder = () =>
     memoizedFiltersOrSearchApplied ? (
       <EmptyListMessage
+        loading={isLoading || isFetching}
         hint={
           <Button onClick={handleClearFilters} color="primary">
             <T>translations_nothing_found_action</T>
@@ -86,6 +90,7 @@ export const Translations = () => {
       </EmptyListMessage>
     ) : (
       <EmptyListMessage
+        loading={isLoading || isFetching}
         hint={
           canAdd && (
             <>
@@ -114,8 +119,6 @@ export const Translations = () => {
 
   return (
     <BaseView
-      loading={isLoading || isFetching}
-      hideChildrenOnLoading={isLoading && !isFetching}
       navigation={[
         [
           project.name,
@@ -132,14 +135,13 @@ export const Translations = () => {
       ]}
     >
       <TranslationsHeader />
-      {translations &&
-        (translationsEmpty ? (
-          renderPlaceholder()
-        ) : view === 'TABLE' ? (
-          <TranslationsTable />
-        ) : (
-          <TranslationsList />
-        ))}
+      {translationsEmpty ? (
+        renderPlaceholder()
+      ) : view === 'TABLE' ? (
+        <TranslationsTable />
+      ) : (
+        <TranslationsList />
+      )}
     </BaseView>
   );
 };

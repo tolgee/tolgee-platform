@@ -17,8 +17,6 @@ type KeyWithTranslationsModelType =
 type TranslationsResponse =
   components['schemas']['KeysWithTranslationsPageModel'];
 type TranslationModel = components['schemas']['TranslationViewModel'];
-type KeysWithTranslationsPageModel =
-  components['schemas']['KeysWithTranslationsPageModel'];
 
 type FiltersType = Pick<
   TranslationsQueryType,
@@ -88,9 +86,6 @@ export const useTranslationsInfinite = (props: Props) => {
     [props.projectId]
   );
 
-  const [translationsData, setTranslationsData] =
-    useState<InfiniteData<KeysWithTranslationsPageModel>>();
-
   const translations = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/translations',
     method: 'get',
@@ -102,6 +97,7 @@ export const useTranslationsInfinite = (props: Props) => {
       search: urlSearch as string,
     },
     options: {
+      cacheTime: 0,
       // fetch after languages are loaded,
       // so we dont't try to fetch nonexistant languages
       enabled: enabled,
@@ -123,7 +119,6 @@ export const useTranslationsInfinite = (props: Props) => {
         }
       },
       onSuccess(data) {
-        setTranslationsData(data);
         const flatKeys = flattenKeys(data);
         if (data?.pages.length === 1) {
           // reset fixed translations when fetching first page
@@ -239,7 +234,7 @@ export const useTranslationsInfinite = (props: Props) => {
     );
   };
 
-  const totalCount = translationsData?.pages[0].page?.totalElements;
+  const totalCount = translations.data?.pages[0].page?.totalElements;
 
   return {
     isLoading: translations.isLoading,
@@ -249,10 +244,10 @@ export const useTranslationsInfinite = (props: Props) => {
     query,
     filters: parsedFilters,
     fetchNextPage: translations.fetchNextPage,
-    selectedLanguages: translationsData?.pages[0]?.selectedLanguages.map(
+    selectedLanguages: translations.data?.pages[0]?.selectedLanguages.map(
       (l) => l.tag
     ),
-    data: translationsData,
+    data: translations.data,
     fixedTranslations,
     totalCount:
       totalCount !== undefined ? totalCount + manuallyInserted : undefined,

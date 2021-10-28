@@ -9,7 +9,6 @@ const useStyles = makeStyles((theme: Theme) =>
       filter: 'grayscale(50%) blur(0.3px)',
       opacity: '0.3',
       maxWidth: '100%',
-      width: 400,
     },
     text: {
       opacity: '0.3',
@@ -41,12 +40,10 @@ export const SadEmotionMessage: React.FC<Props> = (props) => {
         src="/images/sleepingMouse.svg"
         draggable="false"
         className={classes.image}
+        width="397px"
+        height="300px"
       />
-      {props.hint && (
-        <Box p={4} pl={0} pr={0}>
-          {props.hint}
-        </Box>
-      )}
+      {props.hint && <Box py={4}>{props.hint}</Box>}
     </Box>
   );
 };

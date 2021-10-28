@@ -158,44 +158,45 @@ export const ProjectInviteView: FunctionComponent = () => {
               />
             </Box>
           )}
-          {invitations.data &&
-            (invitations.data.length ? (
-              <Box mt={4}>
-                <Typography variant="h6">
-                  <T>invite_user_active_invitation_codes</T>
-                </Typography>
-                <List>
-                  {invitations.data.map((i) => (
-                    <ListItem key={i.id}>
-                      <ListItemText>
-                        {i!.code!.substr(0, 10)}...
-                        {i!.code!.substr(i!.code!.length - 10, 10)}
-                        &nbsp;[
-                        <i>
-                          <T>invite_user_permission_label</T>:
-                          <T>{`permission_type_${
-                            projectPermissionTypes[i!.type!]
-                          }`}</T>
-                        </i>
-                        ]
-                      </ListItemText>
-                      <ListItemSecondaryAction>
-                        <Button
-                          color="secondary"
-                          onClick={() => handleCancel(i!.id!)}
-                        >
-                          <T>invite_user_invitation_cancel_button</T>
-                        </Button>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-            ) : (
-              <EmptyListMessage>
-                <T>invite_user_nothing_found</T>
-              </EmptyListMessage>
-            ))}
+          {invitations.data?.length ? (
+            <Box mt={4}>
+              <Typography variant="h6">
+                <T>invite_user_active_invitation_codes</T>
+              </Typography>
+              <List>
+                {invitations.data.map((i) => (
+                  <ListItem key={i.id}>
+                    <ListItemText>
+                      {i!.code!.substr(0, 10)}...
+                      {i!.code!.substr(i!.code!.length - 10, 10)}
+                      &nbsp;[
+                      <i>
+                        <T>invite_user_permission_label</T>:
+                        <T>{`permission_type_${
+                          projectPermissionTypes[i!.type!]
+                        }`}</T>
+                      </i>
+                      ]
+                    </ListItemText>
+                    <ListItemSecondaryAction>
+                      <Button
+                        color="secondary"
+                        onClick={() => handleCancel(i!.id!)}
+                      >
+                        <T>invite_user_invitation_cancel_button</T>
+                      </Button>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+          ) : (
+            <EmptyListMessage
+              loading={invitations.isFetching || deleteInvitation.isLoading}
+            >
+              <T>invite_user_nothing_found</T>
+            </EmptyListMessage>
+          )}
         </>
       )}
     </BaseView>

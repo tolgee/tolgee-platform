@@ -180,7 +180,7 @@ export const TranslationsHeader = () => {
           )}
         </div>
       </div>
-      {translationsTotal ? (
+      {dataReady && translationsTotal ? (
         <div className={classes.resultCount}>
           <Typography
             color="textSecondary"

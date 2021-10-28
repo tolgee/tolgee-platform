@@ -1,6 +1,7 @@
 import { FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
+import { Box } from '@material-ui/core';
 
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
@@ -40,17 +41,25 @@ export const ApiKeysView: FunctionComponent = () => {
       <BaseUserSettingsView
         title={<T>Api keys title</T>}
         loading={list.isFetching}
+        hideChildrenOnLoading={false}
       >
         <>
-          {list.isSuccess &&
-            ((list.data?.page?.totalElements || 0) < 1 ? (
-              <EmptyListMessage>
-                <T>No api keys yet!</T>
-              </EmptyListMessage>
-            ) : (
-              <ApiKeysList data={list.data._embedded!.apiKeys!} />
-            ))}
-          <FabAddButtonLink to={LINKS.USER_API_KEYS_GENERATE.build()} />
+          {!list.data?.page?.totalElements ? (
+            <EmptyListMessage loading={list.isFetching}>
+              <T>No api keys yet!</T>
+            </EmptyListMessage>
+          ) : (
+            <ApiKeysList data={list.data._embedded!.apiKeys!} />
+          )}
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="flex-end"
+            mt={2}
+            pr={2}
+          >
+            <FabAddButtonLink to={LINKS.USER_API_KEYS_GENERATE.build()} />
+          </Box>
         </>
       </BaseUserSettingsView>
       <Switch>

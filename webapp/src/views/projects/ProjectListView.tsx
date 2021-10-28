@@ -59,6 +59,7 @@ export const ProjectListView = () => {
           renderItem={(r) => <DashboardProjectListItem key={r.id} {...r} />}
           emptyPlaceholder={
             <EmptyListMessage
+              loading={listPermitted.isFetching}
               hint={
                 <Button
                   component={Link}

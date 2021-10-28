@@ -65,8 +65,9 @@ export const TranslationsTable = () => {
     TranslationsContext,
     (v) => v.translations
   );
-  const selectedLanguages =
-    useContextSelector(TranslationsContext, (v) => v.selectedLanguages) || [];
+  const translationsLanguages =
+    useContextSelector(TranslationsContext, (v) => v.translationsLanguages) ||
+    [];
 
   const languages = useContextSelector(TranslationsContext, (v) => v.languages);
   const isFetchingMore = useContextSelector(
@@ -92,20 +93,20 @@ export const TranslationsTable = () => {
   }, [editKeyId]);
 
   const languageCols = useMemo(() => {
-    if (languages && selectedLanguages) {
+    if (languages && translationsLanguages) {
       return (
-        selectedLanguages?.map((lang) => {
+        translationsLanguages?.map((lang) => {
           return languages.find((l) => l.tag === lang)!;
         }, [] as any[]) || []
       );
     } else {
       return [];
     }
-  }, [selectedLanguages, languages]);
+  }, [translationsLanguages, languages]);
 
   const columns = useMemo(
-    () => [null, ...selectedLanguages.map((tag) => tag)],
-    [selectedLanguages]
+    () => [null, ...translationsLanguages.map((tag) => tag)],
+    [translationsLanguages]
   );
 
   const [columnSizes, setColumnSizes] = useState(columns.map(() => 1));
