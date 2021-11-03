@@ -1,0 +1,12 @@
+{
+  "add-item-add-button" : "Einfügen",
+  "add-item-input-placeholder" : "Neuer Eintrag",
+  "delete-item-button" : "Löschen",
+  "menu-item-translation-methods" : "Übersetzungsmethoden",
+  "on-the-road-subtitle" : "Was zum Ausflug einzupacken",
+  "on-the-road-title" : "Auf dem Weg",
+  "send-via-email" : "Per Email abschicken",
+  "share-button" : "Teilen",
+  "this_is_a_key" : "Dies ist ein Schlüssel",
+  "this_is_a_key_with_params" : "Dies ist ein Schlüssel mit den Parametern {key} {key2}"
+}

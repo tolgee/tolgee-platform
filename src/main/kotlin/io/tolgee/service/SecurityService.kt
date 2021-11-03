@@ -27,9 +27,9 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
   lateinit var userAccountService: UserAccountService
 
   @Transactional
-  fun grantFullAccessToRepo(project: Project) {
+  fun grantFullAccessToRepo(project: Project, userId: Long = activeUser.id) {
     permissionService.grantFullAccessToProject(
-      userAccountService[activeUser.id]
+      userAccountService[userId]
         .orElseThrow { InvalidStateException() }!!,
       project
     )
