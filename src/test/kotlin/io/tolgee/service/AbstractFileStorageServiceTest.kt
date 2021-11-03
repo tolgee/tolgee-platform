@@ -14,7 +14,7 @@ abstract class AbstractFileStorageServiceTest : AbstractTestNGSpringContextTests
   lateinit var fileStorageService: FileStorageService
 
   @set:Autowired
-  lateinit var tolgeeProperties: TolgeeProperties
+  open lateinit var tolgeeProperties: TolgeeProperties
 
   val testFilePath = "/test/test_sub/text.txt"
   val testFileContent = "test"

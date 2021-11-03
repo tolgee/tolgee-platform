@@ -8,15 +8,12 @@ abstract class ErrorException : RuntimeException {
   val params: List<Serializable>?
   val code: String
 
-  constructor(message: Message, params: List<Serializable>?) {
+  constructor(message: Message, params: List<Serializable>?) : super(message.code) {
     this.params = params
     this.code = message.code
   }
 
-  constructor(message: Message) {
-    this.code = message.code
-    params = null
-  }
+  constructor(message: Message) : this(message, null)
 
   val errorResponseBody: ErrorResponseBody
     get() = ErrorResponseBody(this.code, params)

@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -94,4 +95,6 @@ interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
     """
   )
   fun getWithLanguages(projectIds: Iterable<Long>): List<Project>
+
+  fun findAllByNameAndUserOwner(name: String, userOwner: UserAccount): List<Project>
 }

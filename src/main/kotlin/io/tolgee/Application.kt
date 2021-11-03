@@ -19,7 +19,7 @@ class Application(
   populator: DbPopulatorReal,
   userAccountService: UserAccountService,
   properties: TolgeeProperties,
-  initialPasswordManager: InitialPasswordManager
+  initialPasswordManager: InitialPasswordManager,
 ) {
   companion object {
     @JvmStatic
@@ -40,7 +40,6 @@ class Application(
       userAccountService.getByUserName(initialUsername).isEmpty
     ) {
       val initialPassword = initialPasswordManager.initialPassword
-
       userAccountService.createUser(
         SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername)
       )

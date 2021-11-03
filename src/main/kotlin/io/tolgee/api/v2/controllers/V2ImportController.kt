@@ -68,7 +68,7 @@ class V2ImportController(
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val halMediaTypeConfiguration: HalMediaTypeConfiguration,
   private val projectHolder: ProjectHolder,
-  private val languageService: LanguageService
+  private val languageService: LanguageService,
 ) {
 
   @PostMapping("/with-streaming-response", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -86,7 +86,13 @@ class V2ImportController(
         responseStream.flush()
       }
       val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream) }
-      val errors = importService.addFiles(files = fileDtos, messageClient)
+      val errors = importService.addFiles(
+        files = fileDtos,
+        messageClient = messageClient,
+        project = projectHolder.projectEntity,
+        userAccount = authenticationFacade.userAccountEntity
+      )
+
       val result = getImportAddFilesResultModel(projectId, errors)
 
       val mapper = jacksonObjectMapper()
@@ -107,7 +113,11 @@ class V2ImportController(
     @RequestPart("files") files: Array<MultipartFile>,
   ): ImportAddFilesResultModel {
     val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream) }
-    val errors = importService.addFiles(files = fileDtos)
+    val errors = importService.addFiles(
+      files = fileDtos,
+      project = projectHolder.projectEntity,
+      userAccount = authenticationFacade.userAccountEntity
+    )
     return getImportAddFilesResultModel(projectId, errors)
   }
 

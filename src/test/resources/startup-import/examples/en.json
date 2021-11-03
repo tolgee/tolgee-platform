@@ -1,0 +1,12 @@
+{
+  "add-item-add-button" : "Add",
+  "add-item-input-placeholder" : "New list item",
+  "delete-item-button" : "Delete",
+  "menu-item-translation-methods" : "Translation methods",
+  "on-the-road-subtitle" : "What to pack for the trip",
+  "on-the-road-title" : "On the road",
+  "send-via-email" : "Send via e-mail",
+  "share-button" : "Share",
+  "this_is_a_key" : "This is a key",
+  "this_is_a_key_with_params" : "This is key with params {key} {key2}"
+}

@@ -77,4 +77,8 @@ class ApiKeyService @Autowired constructor(
   fun saveAll(entities: Iterable<ApiKey>) {
     this.apiKeyRepository.saveAll(entities)
   }
+
+  fun save(entity: ApiKey) {
+    this.apiKeyRepository.save(entity)
+  }
 }

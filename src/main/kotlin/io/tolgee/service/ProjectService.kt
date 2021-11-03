@@ -82,7 +82,7 @@ class ProjectService constructor(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
-  fun createProject(dto: CreateProjectDTO): Project {
+  fun createProject(dto: CreateProjectDTO, userAccount: UserAccount? = null): Project {
     val project = Project()
     project.name = dto.name
     dto.organizationId?.also {
@@ -93,8 +93,8 @@ class ProjectService constructor(
         project.slug = generateSlug(dto.name, null)
       }
     } ?: let {
-      project.userOwner = authenticationFacade.userAccountEntity
-      securityService.grantFullAccessToRepo(project)
+      project.userOwner = userAccount ?: authenticationFacade.userAccountEntity
+      securityService.grantFullAccessToRepo(project, project.userOwner!!.id)
     }
 
     entityManager.persist(project)
@@ -301,5 +301,9 @@ class ProjectService constructor(
     project.userOwner = userAccount
     permissionService.setUserDirectPermission(projectId, userId, Permission.ProjectPermissionType.MANAGE, true)
     save(project)
+  }
+
+  fun findAllByNameAndUserOwner(name: String, userOwner: UserAccount): List<Project> {
+    return projectRepository.findAllByNameAndUserOwner(name, userOwner)
   }
 }

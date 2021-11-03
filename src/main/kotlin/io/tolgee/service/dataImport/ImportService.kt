@@ -9,6 +9,8 @@ import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.ImportConflictNotResolvedException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
+import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.*
 import io.tolgee.model.dataImport.issues.ImportFileIssue
 import io.tolgee.model.dataImport.issues.ImportFileIssueParam
@@ -52,11 +54,13 @@ class ImportService(
   @Transactional
   fun addFiles(
     files: List<ImportFileDto>,
-    messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null
+    messageClient: ((ImportStreamingProgressMessageType, List<Any>?) -> Unit)? = null,
+    project: Project,
+    userAccount: UserAccount
   ): List<ErrorResponseBody> {
-    val import = find(projectHolder.project.id, authenticationFacade.userAccount.id!!)
+    val import = find(project.id, userAccount.id)
       .removeIfExpired()
-      ?: Import(authenticationFacade.userAccountEntity, projectHolder.projectEntity)
+      ?: Import(userAccount, project)
 
     val nonNullMessageClient = messageClient ?: { _, _ -> }
     val languages = findLanguages(import)
