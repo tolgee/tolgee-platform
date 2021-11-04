@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/tolgee/server/compare/v1.3.12...v1.4.0) (2021-11-04)
+
+
+### Features
+
+* Server startup import TG-381 ([811c14e](https://github.com/tolgee/server/commit/811c14ee77aadf32ac0259c521237535c2b7dff5))
+
 ## [1.3.12](https://github.com/tolgee/server/compare/v1.3.11...v1.3.12) (2021-10-28)
 
 
