@@ -36,6 +36,7 @@ export const ProjectListView = () => {
       page,
       size: 20,
       search,
+      sort: ['id,desc'],
     },
   });
 
