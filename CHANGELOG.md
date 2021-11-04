@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/tolgee/server/compare/v1.4.0...v1.4.1) (2021-11-04)
+
+
+### Bug Fixes
+
+* Empty list support loading spinner ([8b507af](https://github.com/tolgee/server/commit/8b507af86e6b82bf35ec54f7c48ce2c9ed921481))
+
 # [1.4.0](https://github.com/tolgee/server/compare/v1.3.12...v1.4.0) (2021-11-04)
 
 
