@@ -7,11 +7,10 @@ import {
   Dialog,
 } from '@material-ui/core';
 import { ViewListRounded, AppsRounded, Add, Delete } from '@material-ui/icons';
-import { useContextSelector } from 'use-context-selector';
 import { T, useTranslate } from '@tolgee/react';
 
 import {
-  TranslationsContext,
+  useTranslationsSelector,
   useTranslationsDispatch,
   ViewType,
 } from './context/TranslationsContext';
@@ -66,26 +65,20 @@ export const TranslationsHeader = () => {
   const t = useTranslate();
   const classes = useStyles();
   const projectPermissions = useProjectPermissions();
-  const search = useContextSelector(TranslationsContext, (v) => v.search);
-  const languages = useContextSelector(TranslationsContext, (v) => v.languages);
+  const search = useTranslationsSelector((v) => v.search);
+  const languages = useTranslationsSelector((v) => v.languages);
   const [newDialog, setNewDialog] = useUrlSearchState('create', {
     defaultVal: 'false',
   });
 
-  const selectedLanguages = useContextSelector(
-    TranslationsContext,
-    (c) => c.selectedLanguages
-  );
+  const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
 
-  const translationsTotal = useContextSelector(
-    TranslationsContext,
-    (c) => c.translationsTotal
-  );
+  const translationsTotal = useTranslationsSelector((c) => c.translationsTotal);
 
-  const dataReady = useContextSelector(TranslationsContext, (c) => c.dataReady);
+  const dataReady = useTranslationsSelector((c) => c.dataReady);
 
-  const view = useContextSelector(TranslationsContext, (v) => v.view);
-  const selection = useContextSelector(TranslationsContext, (v) => v.selection);
+  const view = useTranslationsSelector((v) => v.view);
+  const selection = useTranslationsSelector((v) => v.selection);
 
   const dispatch = useTranslationsDispatch();
 

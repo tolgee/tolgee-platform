@@ -1,5 +1,4 @@
 import { useCallback, useRef } from 'react';
-import { useContextSelector } from 'use-context-selector';
 
 import { translationStates } from 'tg.constants/translationStates';
 import { getEventAction } from 'tg.fixtures/shortcuts';
@@ -10,7 +9,7 @@ import {
   translationsNavigator,
 } from './tools';
 import {
-  TranslationsContext,
+  useTranslationsSelector,
   useTranslationsDispatch,
 } from './TranslationsContext';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -33,22 +32,13 @@ export const useContextShortcuts = () => {
   const onKeyRef = useRef<(e: KeyboardEvent) => void>();
   const availableActions = useRef<() => ShortcutsArrayType[]>();
   const dispatch = useTranslationsDispatch();
-  const cursor = useContextSelector(TranslationsContext, (c) => c.cursor);
-  const view = useContextSelector(TranslationsContext, (c) => c.view);
+  const cursor = useTranslationsSelector((c) => c.cursor);
+  const view = useTranslationsSelector((c) => c.view);
   const permissions = useProjectPermissions();
-  const elementsRef = useContextSelector(
-    TranslationsContext,
-    (c) => c.elementsRef
-  );
-  const fixedTranslations = useContextSelector(
-    TranslationsContext,
-    (c) => c.translations
-  );
-  const languages = useContextSelector(
-    TranslationsContext,
-    (c) => c.selectedLanguages
-  );
-  const list = useContextSelector(TranslationsContext, (c) => c.reactList);
+  const elementsRef = useTranslationsSelector((c) => c.elementsRef);
+  const fixedTranslations = useTranslationsSelector((c) => c.translations);
+  const languages = useTranslationsSelector((c) => c.selectedLanguages);
+  const list = useTranslationsSelector((c) => c.reactList);
 
   const hasCorrectTarget = (target: Element) =>
     target === document.body || root?.contains(target);

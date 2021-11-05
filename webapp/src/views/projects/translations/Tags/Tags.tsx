@@ -1,8 +1,7 @@
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { components } from 'tg.service/apiSchema.generated';
-import { useContextSelector } from 'use-context-selector';
 import {
-  TranslationsContext,
+  useTranslationsSelector,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
 import { encodeFilter, toggleFilter } from '../Filters/useAvailableFilters';
@@ -18,7 +17,7 @@ type Props = {
 
 export const Tags: React.FC<Props> = ({ tags, keyId, deleteEnabled }) => {
   const dispatch = useTranslationsDispatch();
-  const filters = useContextSelector(TranslationsContext, (c) => c.filters);
+  const filters = useTranslationsSelector((c) => c.filters);
 
   const handleTagDelete = (tagId: number) => {
     dispatch({

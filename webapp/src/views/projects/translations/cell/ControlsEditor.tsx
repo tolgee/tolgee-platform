@@ -2,12 +2,11 @@ import React from 'react';
 import { T } from '@tolgee/react';
 import { Button, makeStyles } from '@material-ui/core';
 import { CameraAlt } from '@material-ui/icons';
-import { useContextSelector } from 'use-context-selector';
 
 import { StateType } from 'tg.constants/translationStates';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
-import { TranslationsContext } from '../context/TranslationsContext';
+import { useTranslationsSelector } from '../context/TranslationsContext';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
 const useStyles = makeStyles((theme) => ({
@@ -53,10 +52,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
   const displayScreenshots = onScreenshots;
   const displayRightPart = displayTransitionButtons || displayScreenshots;
 
-  const isLoading = useContextSelector(
-    TranslationsContext,
-    (c) => c.isEditLoading
-  );
+  const isLoading = useTranslationsSelector((c) => c.isEditLoading);
 
   return (
     <>

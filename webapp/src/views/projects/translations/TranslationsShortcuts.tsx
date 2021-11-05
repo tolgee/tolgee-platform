@@ -14,8 +14,8 @@ import {
   useContextShortcuts,
 } from './context/useContextShortcuts';
 import clsx from 'clsx';
-import { useContextSelector } from 'use-context-selector';
-import { TranslationsContext } from './context/TranslationsContext';
+
+import { useTranslationsSelector } from './context/TranslationsContext';
 import { getMetaName } from 'tg.fixtures/isMac';
 import { translationStates } from 'tg.constants/translationStates';
 import { getCurrentlyFocused } from './context/tools';
@@ -127,17 +127,11 @@ export const TranslationsShortcuts = () => {
     setCollapsed(!collapsed);
   };
 
-  const cursor = useContextSelector(TranslationsContext, (c) => c.cursor);
+  const cursor = useTranslationsSelector((c) => c.cursor);
 
-  const translations = useContextSelector(
-    TranslationsContext,
-    (c) => c.translations
-  );
+  const translations = useTranslationsSelector((c) => c.translations);
 
-  const elementsRef = useContextSelector(
-    TranslationsContext,
-    (c) => c.elementsRef
-  );
+  const elementsRef = useTranslationsSelector((c) => c.elementsRef);
 
   const [availableActions, setAvailableActions] = useState<
     ShortcutsArrayType[]

@@ -1,5 +1,4 @@
 import { useEffect, useMemo } from 'react';
-import { useContextSelector } from 'use-context-selector';
 import { useTranslate, T } from '@tolgee/react';
 import { Box, Button } from '@material-ui/core';
 import { Link } from 'react-router-dom';
@@ -7,8 +6,8 @@ import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { BaseView } from 'tg.component/layout/BaseView';
 import {
-  TranslationsContext,
   useTranslationsDispatch,
+  useTranslationsSelector,
 } from './context/TranslationsContext';
 import { useProject } from 'tg.hooks/useProject';
 import { TranslationsTable } from './TranslationsTable/TranslationsTable';
@@ -26,18 +25,12 @@ export const Translations = () => {
   const project = useProject();
   const projectPermissions = useProjectPermissions();
 
-  const isLoading = useContextSelector(TranslationsContext, (c) => c.isLoading);
-  const isFetching = useContextSelector(
-    TranslationsContext,
-    (c) => c.isFetching
-  );
-  const view = useContextSelector(TranslationsContext, (v) => v.view);
-  const translations = useContextSelector(
-    TranslationsContext,
-    (c) => c.translations
-  );
+  const isLoading = useTranslationsSelector((c) => c.isLoading);
+  const isFetching = useTranslationsSelector((c) => c.isFetching);
+  const view = useTranslationsSelector((v) => v.view);
+  const translations = useTranslationsSelector((c) => c.translations);
 
-  const filtersOrSearchApplied = useContextSelector(TranslationsContext, (c) =>
+  const filtersOrSearchApplied = useTranslationsSelector((c) =>
     Boolean(Object.values(c.filters).filter(Boolean).length || c.urlSearch)
   );
 

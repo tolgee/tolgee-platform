@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { useContextSelector } from 'use-context-selector';
 
 import {
   AfterCommand,
-  TranslationsContext,
+  useTranslationsSelector,
   useTranslationsDispatch,
 } from './context/TranslationsContext';
 import { EditModeType } from './context/useEdit';
@@ -26,7 +25,7 @@ export const useEditableRow = ({
 }: Props) => {
   const dispatch = useTranslationsDispatch();
 
-  const cursor = useContextSelector(TranslationsContext, (v) => {
+  const cursor = useTranslationsSelector((v) => {
     // find language or keyName (in case of undefined)
     return v.cursor?.keyId === keyId && v.cursor.language === language
       ? v.cursor
@@ -47,11 +46,12 @@ export const useEditableRow = ({
       type: 'REGISTER_ELEMENT',
       payload: { keyId, language, ref: cellRef.current! },
     });
-    return () =>
+    return () => {
       dispatch({
         type: 'UNREGISTER_ELEMENT',
         payload: { keyId, language, ref: cellRef.current! },
       });
+    };
   }, [cellRef.current, keyId, language]);
 
   useEffect(() => {

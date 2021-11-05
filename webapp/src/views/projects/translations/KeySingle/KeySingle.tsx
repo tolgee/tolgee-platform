@@ -10,9 +10,8 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 import { queryEncode } from 'tg.hooks/useUrlSearchState';
 import { invalidateUrlPrefix } from 'tg.service/http/useQueryApi';
-import { useContextSelector } from 'use-context-selector';
 import {
-  TranslationsContext,
+  useTranslationsSelector,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
 import { KeyCreateForm } from '../KeyCreateForm';
@@ -49,22 +48,12 @@ export const KeySingle: React.FC<Props> = ({ keyName }) => {
   const dispatch = useTranslationsDispatch();
   const history = useHistory();
 
-  const isFetching = useContextSelector(
-    TranslationsContext,
-    (c) => c.isFetching
-  );
-  const translations = useContextSelector(
-    TranslationsContext,
-    (c) => c.translations
-  );
-  const selectedLanguages = useContextSelector(
-    TranslationsContext,
+  const isFetching = useTranslationsSelector((c) => c.isFetching);
+  const translations = useTranslationsSelector((c) => c.translations);
+  const selectedLanguages = useTranslationsSelector(
     (c) => c.selectedLanguages
   )!;
-  const allLanguages = useContextSelector(
-    TranslationsContext,
-    (c) => c.languages
-  )!;
+  const allLanguages = useTranslationsSelector((c) => c.languages)!;
 
   const handleLanguageChange = (languages: string[]) => {
     dispatch({
