@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import { Checkbox, makeStyles } from '@material-ui/core';
-import { useContextSelector } from 'use-context-selector';
 import clsx from 'clsx';
 
 import { Editor } from 'tg.component/editor/Editor';
@@ -11,7 +10,7 @@ import { useEditableRow } from './useEditableRow';
 import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
 import { PositionType, useCellStyles } from './cell/styles';
 import {
-  TranslationsContext,
+  useTranslationsSelector,
   useTranslationsDispatch,
 } from './context/TranslationsContext';
 import { stopBubble } from 'tg.fixtures/eventHandler';
@@ -120,7 +119,7 @@ export const CellKey: React.FC<Props> = ({
 
   const screenshotEl = useRef<HTMLButtonElement | null>(null);
 
-  const isSelected = useContextSelector(TranslationsContext, (c) =>
+  const isSelected = useTranslationsSelector((c) =>
     c.selection.includes(data.keyId)
   );
 

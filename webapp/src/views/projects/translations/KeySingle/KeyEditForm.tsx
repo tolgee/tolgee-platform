@@ -8,10 +8,9 @@ import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { MessageService } from 'tg.service/MessageService';
 
-import { useContextSelector } from 'use-context-selector';
 import { CellKey } from '../CellKey';
 import {
-  TranslationsContext,
+  useTranslationsSelector,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
 import { ScreenshotGallery } from '../Screenshots/ScreenshotGallery';
@@ -76,15 +75,9 @@ export const KeyEditForm: React.FC = () => {
   const project = useProject();
   const permissions = useProjectPermissions();
 
-  const translation = useContextSelector(
-    TranslationsContext,
-    (c) => c.translations
-  )?.[0];
-  const languages = useContextSelector(TranslationsContext, (c) => c.languages);
-  const selectedLanguages = useContextSelector(
-    TranslationsContext,
-    (c) => c.selectedLanguages
-  );
+  const translation = useTranslationsSelector((c) => c.translations)?.[0];
+  const languages = useTranslationsSelector((c) => c.languages);
+  const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
   const history = useHistory();
 
   const [_urlKey, setUrlKey] = useUrlSearchState('key');

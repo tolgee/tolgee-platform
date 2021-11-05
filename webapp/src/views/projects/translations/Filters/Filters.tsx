@@ -1,4 +1,3 @@
-import { useContextSelector } from 'use-context-selector';
 import { T } from '@tolgee/react';
 import { Clear } from '@material-ui/icons';
 import {
@@ -14,7 +13,7 @@ import {
 
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import {
-  TranslationsContext,
+  useTranslationsSelector,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
 import {
@@ -68,11 +67,8 @@ const useStyles = makeStyles((theme) => ({
 
 export const Filters = () => {
   const dispatch = useTranslationsDispatch();
-  const filtersObj = useContextSelector(TranslationsContext, (v) => v.filters);
-  const selectedLanguages = useContextSelector(
-    TranslationsContext,
-    (v) => v.selectedLanguages
-  );
+  const filtersObj = useTranslationsSelector((v) => v.filters);
+  const selectedLanguages = useTranslationsSelector((v) => v.selectedLanguages);
 
   const activeFilters: string[] = [];
   Object.entries(filtersObj).forEach(([key, value]) => {

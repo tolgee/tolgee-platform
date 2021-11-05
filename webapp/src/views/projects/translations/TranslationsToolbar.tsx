@@ -3,10 +3,9 @@ import { useEffect, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
 import { IconButton, makeStyles, Tooltip } from '@material-ui/core';
 import { KeyboardArrowUp } from '@material-ui/icons';
-import { useContextSelector } from 'use-context-selector';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { TranslationsContext } from './context/TranslationsContext';
+import { useTranslationsSelector } from './context/TranslationsContext';
 import { TranslationsShortcuts } from './TranslationsShortcuts';
 import { useTheme } from '@material-ui/styles';
 
@@ -80,11 +79,8 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
   const [toolbarVisible, setToolbarVisible] = useState(false);
   const classes = useStyles();
   const t = useTranslate();
-  const totalCount = useContextSelector(
-    TranslationsContext,
-    (c) => c.translationsTotal || 0
-  );
-  const list = useContextSelector(TranslationsContext, (c) => c.reactList);
+  const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
+  const list = useTranslationsSelector((c) => c.reactList);
   const getVisibleRange = list?.getVisibleRange.bind(list);
 
   const handleScrollUp = () => {

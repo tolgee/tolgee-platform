@@ -4,9 +4,8 @@ import { T } from '@tolgee/react';
 import { components } from 'tg.service/apiSchema.generated';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { useContextSelector } from 'use-context-selector';
 import {
-  TranslationsContext,
+  useTranslationsSelector,
   useTranslationsDispatch,
 } from './context/TranslationsContext';
 import { KeyCreateForm } from './KeyCreateForm';
@@ -37,9 +36,8 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
   const classes = useStyles();
   const dispatch = useTranslationsDispatch();
 
-  const languages = useContextSelector(TranslationsContext, (c) => c.languages);
-  const selectedLanguagesDefault = useContextSelector(
-    TranslationsContext,
+  const languages = useTranslationsSelector((c) => c.languages);
+  const selectedLanguagesDefault = useTranslationsSelector(
     (c) => c.selectedLanguages
   );
 

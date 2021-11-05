@@ -2,10 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactList from 'react-list';
 import { T } from '@tolgee/react';
 import { makeStyles } from '@material-ui/core';
-import { useContextSelector } from 'use-context-selector';
 
 import {
-  TranslationsContext,
+  useTranslationsSelector,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
 import { resizeColumn, useResize } from '../useResize';
@@ -61,27 +60,14 @@ export const TranslationsTable = () => {
   const classes = useStyles();
 
   const dispatch = useTranslationsDispatch();
-  const translations = useContextSelector(
-    TranslationsContext,
-    (v) => v.translations
-  );
+  const translations = useTranslationsSelector((v) => v.translations);
   const translationsLanguages =
-    useContextSelector(TranslationsContext, (v) => v.translationsLanguages) ||
-    [];
+    useTranslationsSelector((v) => v.translationsLanguages) || [];
 
-  const languages = useContextSelector(TranslationsContext, (v) => v.languages);
-  const isFetchingMore = useContextSelector(
-    TranslationsContext,
-    (v) => v.isFetchingMore
-  );
-  const hasMoreToFetch = useContextSelector(
-    TranslationsContext,
-    (v) => v.hasMoreToFetch
-  );
-  const editKeyId = useContextSelector(
-    TranslationsContext,
-    (v) => v.cursor?.keyId
-  );
+  const languages = useTranslationsSelector((v) => v.languages);
+  const isFetchingMore = useTranslationsSelector((v) => v.isFetchingMore);
+  const hasMoreToFetch = useTranslationsSelector((v) => v.hasMoreToFetch);
+  const editKeyId = useTranslationsSelector((v) => v.cursor?.keyId);
 
   useEffect(() => {
     // scroll to currently edited item
@@ -151,11 +137,12 @@ export const TranslationsTable = () => {
         type: 'REGISTER_LIST',
         payload: reactListRef.current,
       });
-      return () =>
+      return () => {
         dispatch({
           type: 'UNREGISTER_LIST',
           payload: reactListRef.current!,
         });
+      };
     }
   }, [reactListRef.current]);
 

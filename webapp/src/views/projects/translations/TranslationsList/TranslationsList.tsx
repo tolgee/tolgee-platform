@@ -1,11 +1,10 @@
 import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { makeStyles } from '@material-ui/core';
 import ReactList from 'react-list';
-import { useContextSelector } from 'use-context-selector';
 
 import { components } from 'tg.service/apiSchema.generated';
 import {
-  TranslationsContext,
+  useTranslationsSelector,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
 import { useResize, resizeColumn } from '../useResize';
@@ -37,27 +36,14 @@ export const TranslationsList = () => {
   const resizersCallbacksRef = useRef<(() => void)[]>([]);
   const reactListRef = useRef<ReactList>(null);
   const dispatch = useTranslationsDispatch();
-  const translations = useContextSelector(
-    TranslationsContext,
-    (v) => v.translations
-  );
-  const languages = useContextSelector(TranslationsContext, (v) => v.languages);
-  const translationsLanguages = useContextSelector(
-    TranslationsContext,
+  const translations = useTranslationsSelector((v) => v.translations);
+  const languages = useTranslationsSelector((v) => v.languages);
+  const translationsLanguages = useTranslationsSelector(
     (v) => v.translationsLanguages
   );
-  const isFetchingMore = useContextSelector(
-    TranslationsContext,
-    (v) => v.isFetchingMore
-  );
-  const hasMoreToFetch = useContextSelector(
-    TranslationsContext,
-    (v) => v.hasMoreToFetch
-  );
-  const editKeyId = useContextSelector(
-    TranslationsContext,
-    (v) => v.cursor?.keyId
-  );
+  const isFetchingMore = useTranslationsSelector((v) => v.isFetchingMore);
+  const hasMoreToFetch = useTranslationsSelector((v) => v.hasMoreToFetch);
+  const editKeyId = useTranslationsSelector((v) => v.cursor?.keyId);
 
   useEffect(() => {
     // scroll to currently edited item
@@ -116,11 +102,12 @@ export const TranslationsList = () => {
         type: 'REGISTER_LIST',
         payload: reactListRef.current,
       });
-      return () =>
+      return () => {
         dispatch({
           type: 'UNREGISTER_LIST',
           payload: reactListRef.current!,
         });
+      };
     }
   }, [reactListRef.current]);
 

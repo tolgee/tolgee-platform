@@ -1,11 +1,10 @@
 import { useTranslate } from '@tolgee/react';
-import { useContextSelector } from 'use-context-selector';
 
 import { useProject } from 'tg.hooks/useProject';
 import { translationStates } from 'tg.constants/translationStates';
 import {
   FiltersType,
-  TranslationsContext,
+  useTranslationsSelector,
 } from '../context/TranslationsContext';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
@@ -26,7 +25,7 @@ export type OptionType = {
 export const useAvailableFilters = (
   selectedLanguages?: string[]
 ): GroupType[] => {
-  const languages = useContextSelector(TranslationsContext, (v) => v.languages);
+  const languages = useTranslationsSelector((v) => v.languages);
   const project = useProject();
   const t = useTranslate();
 
