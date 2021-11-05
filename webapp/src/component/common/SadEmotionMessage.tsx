@@ -6,7 +6,7 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     image: {
-      filter: 'grayscale(50%) blur(0.3px)',
+      filter: 'grayscale(50%)',
       opacity: '0.3',
       maxWidth: '100%',
     },
