@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/tolgee/server/compare/v1.4.1...v1.4.2) (2021-11-05)
+
+
+### Bug Fixes
+
+* UX fixes TG-375 ([1143ef9](https://github.com/tolgee/server/commit/1143ef95335c8188b6c023b6a6074e094e600842))
+
 ## [1.4.1](https://github.com/tolgee/server/compare/v1.4.0...v1.4.1) (2021-11-04)
 
 
