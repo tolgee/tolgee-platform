@@ -8,7 +8,7 @@ import { GlobalActions } from 'tg.store/global/GlobalActions';
 
 const useStyles = makeStyles((theme: Theme) => ({
   image: {
-    filter: 'grayscale(50%) blur(0.3px)',
+    filter: 'grayscale(50%)',
     opacity: '0.7',
     maxWidth: '100%',
     width: 500,
