@@ -236,6 +236,21 @@ export const useTranslationsInfinite = (props: Props) => {
 
   const totalCount = translations.data?.pages[0].page?.totalElements;
 
+  const selectedLanguages = useMemo(() => {
+    const langs = translations.data?.pages[0]?.selectedLanguages.map(
+      (l) => l.tag
+    );
+
+    if (query.languages) {
+      // sort selected languages
+      langs?.sort(
+        (l1, l2) => query.languages!.indexOf(l1) - query.languages!.indexOf(l2)
+      );
+    }
+
+    return langs;
+  }, [translations.data]);
+
   return {
     isLoading: translations.isLoading,
     isFetching: translations.isFetching,
@@ -244,14 +259,11 @@ export const useTranslationsInfinite = (props: Props) => {
     query,
     filters: parsedFilters,
     fetchNextPage: translations.fetchNextPage,
-    selectedLanguages: translations.data?.pages[0]?.selectedLanguages.map(
-      (l) => l.tag
-    ),
+    selectedLanguages,
     data: translations.data,
     fixedTranslations,
     totalCount:
       totalCount !== undefined ? totalCount + manuallyInserted : undefined,
-
     refetchTranslations,
     updateQuery,
     search,
