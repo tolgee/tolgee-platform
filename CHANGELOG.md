@@ -1,3 +1,11 @@
+## [1.4.3](https://github.com/tolgee/server/compare/v1.4.2...v1.4.3) (2021-11-08)
+
+
+### Bug Fixes
+
+* Fix empty list mouse blur ([f239f96](https://github.com/tolgee/server/commit/f239f96f2b84aa6eae869b1f6335b6936dd2107f))
+* Translations order based on selection not as returned from API ([5320924](https://github.com/tolgee/server/commit/53209240236698fe21afaed8c8bfdb3f4a20915c))
+
 ## [1.4.2](https://github.com/tolgee/server/compare/v1.4.1...v1.4.2) (2021-11-05)
 
 
