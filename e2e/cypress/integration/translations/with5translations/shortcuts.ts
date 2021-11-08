@@ -85,6 +85,7 @@ describe('Shortcuts', () => {
     // cancel edit
     editCell('Cool translated text 2', 'Yo, new cool text', false);
     cy.focused().type('{esc}');
+    cy.wait(100);
     cy.focused().contains('Cool translated text 2').should('be.visible');
   });
 
