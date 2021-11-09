@@ -5,7 +5,7 @@ type DispatchType<ActionType, DispatchReturn> = (
   action: ActionType
 ) => DispatchReturn;
 
-type SelectorType<StateType> = (state: StateType) => any;
+type SelectorType<StateType, ReturnType> = (state: StateType) => ReturnType;
 
 export const createProvider = <
   StateType,
@@ -44,8 +44,11 @@ export const createProvider = <
   };
 
   const useDispatch = () => React.useContext(DispatchContext);
-  const useStateContext = (selector: SelectorType<StateType>) =>
-    useContextSelector(StateContext, selector);
+  const useStateContext = function <SelectorReturn>(
+    selector: SelectorType<StateType, SelectorReturn>
+  ) {
+    return useContextSelector(StateContext, selector);
+  };
 
   return [Provider, useDispatch, useStateContext] as const;
 };

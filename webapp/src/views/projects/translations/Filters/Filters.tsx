@@ -82,7 +82,7 @@ export const Filters = () => {
         );
       }
     } else {
-      (value as string[]).forEach((filterVal) => {
+      (value as unknown as string[]).forEach((filterVal) => {
         activeFilters.push(
           JSON.stringify({
             filter: key,
