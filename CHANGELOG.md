@@ -1,3 +1,10 @@
+## [1.4.4](https://github.com/tolgee/server/compare/v1.4.3...v1.4.4) (2021-11-11)
+
+
+### Bug Fixes
+
+* context selector type ([2b97d34](https://github.com/tolgee/server/commit/2b97d34b64541bdeccf77e4928523e490856ad51))
+
 ## [1.4.3](https://github.com/tolgee/server/compare/v1.4.2...v1.4.3) (2021-11-08)
 
 
