@@ -1,19 +1,23 @@
-import {
-  AngularIcon,
-  GatsbyIcon,
-  JsIcon,
-  NextIcon,
-  PhpIcon,
-  ReactIcon,
-} from 'tg.component/CustomIcons';
 import { default as React } from 'react';
 import { Guide } from 'tg.views/projects/integrate/types';
 import { Code, Settings } from '@material-ui/icons';
 
+const getTechnologyImgComponent = (imgName: string) => {
+  return function TechnologyImage(props) {
+    return (
+      <img
+        src={`/images/technologies/${imgName}.svg`}
+        alt={imgName}
+        {...props}
+      />
+    );
+  };
+};
+
 export const guides = [
   {
     name: 'React (CRA)',
-    icon: ReactIcon,
+    icon: getTechnologyImgComponent('react'),
     guide: React.lazy(
       // @ts-ignore
       () => import('!babel-loader!@mdx-js/loader!./guides/React.mdx')
@@ -21,7 +25,7 @@ export const guides = [
   },
   {
     name: 'Angular',
-    icon: AngularIcon,
+    icon: getTechnologyImgComponent('angular'),
     guide: React.lazy(
       // @ts-ignore
       () => import('!babel-loader!@mdx-js/loader!./guides/Angular.mdx')
@@ -29,7 +33,7 @@ export const guides = [
   },
   {
     name: 'Next.js',
-    icon: NextIcon,
+    icon: getTechnologyImgComponent('next'),
     guide: React.lazy(
       // @ts-ignore
       () => import('!babel-loader!@mdx-js/loader!./guides/Next.mdx')
@@ -37,7 +41,7 @@ export const guides = [
   },
   {
     name: 'Gatsby',
-    icon: GatsbyIcon,
+    icon: getTechnologyImgComponent('gatsby'),
     guide: React.lazy(
       // @ts-ignore
       () => import('!babel-loader!@mdx-js/loader!./guides/Gatsby.mdx')
@@ -45,7 +49,7 @@ export const guides = [
   },
   {
     name: 'Php',
-    icon: PhpIcon,
+    icon: getTechnologyImgComponent('php'),
     guide: React.lazy(
       // @ts-ignore
       () => import('!babel-loader!@mdx-js/loader!./guides/Php.mdx')
@@ -61,7 +65,7 @@ export const guides = [
   },
   {
     name: 'JS (NPM)',
-    icon: JsIcon,
+    icon: getTechnologyImgComponent('js'),
     guide: React.lazy(
       // @ts-ignore
       () => import('!babel-loader!@mdx-js/loader!./guides/Js.mdx')
@@ -73,6 +77,14 @@ export const guides = [
     guide: React.lazy(
       // @ts-ignore
       () => import('!babel-loader!@mdx-js/loader!./guides/Rest.mdx')
+    ),
+  },
+  {
+    name: 'Svelte',
+    icon: getTechnologyImgComponent('svelte'),
+    guide: React.lazy(
+      // @ts-ignore
+      () => import('!babel-loader!@mdx-js/loader!./guides/Svelte.mdx')
     ),
   },
 ] as Guide[];

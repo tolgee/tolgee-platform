@@ -17,16 +17,25 @@ const useStyles = makeStyles((t) => ({
     cursor: 'pointer',
     '& > span': {
       flexDirection: 'column',
+      flexGrow: 1,
+      height: '100%',
     },
   },
   weaponName: {
     textAlign: 'center',
   },
   weaponIconWrapper: {
-    width: 50,
+    marginBottom: 10,
+    width: '100%',
+    maxHeight: '60px',
+    maxWidth: '60px',
+    flexGrow: 1,
     lineHeight: 'initial',
   },
   weaponIcon: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
     fontSize: '50px',
   },
 }));

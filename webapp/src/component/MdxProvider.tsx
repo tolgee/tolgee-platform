@@ -8,6 +8,7 @@ import clsx from 'clsx';
 (typeof global !== 'undefined' ? global : window).Prism = Prism;
 require('prismjs/components/prism-php');
 require('prismjs/components/prism-shell-session');
+require('prism-svelte');
 
 const useStyles = makeStyles((t) => ({
   code: {
