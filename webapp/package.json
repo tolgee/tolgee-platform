@@ -23,6 +23,7 @@
     "notistack": "^1.0.10",
     "openapi-typescript": "^4.0.2",
     "prism-react-renderer": "1.2.1",
+    "prism-svelte": "0.4.7",
     "react": "^17.0.1",
     "react-codemirror2": "^7.2.1",
     "react-dnd": "^14.0.2",

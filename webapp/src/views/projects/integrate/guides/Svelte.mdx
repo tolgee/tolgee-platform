@@ -1,0 +1,63 @@
+import { GoToDocsButton } from "../component/GoToDocsButton";
+
+<GoToDocsButton href="https://tolgee.io/docs/web/using_with_svelte/installation" style={{ float: "right" }} />
+
+To read full documentation about Tolgee for Svelte, visit [docs](https://tolgee.io/docs/web/using_with_svelte/installation).
+
+## Install the packages
+
+You will need `@tolgee/svelte` to use `<T>` component or `getTranslate` function. `@tolgee/ui` allows you to modify
+translations in-context.
+
+```
+npm i @tolgee/svelte @tolgee/ui
+```
+
+## Setup your environment (with SvelteKit)
+Add this to your `.env.development.local`.
+```dotenv
+VITE_TOLGEE_API_URL=https://app.tolgee.io
+VITE_TOLGEE_API_KEY={{{apiKey}}}
+```
+
+## Use TolgeeProvider
+Wrap your main `App` component with Tolgee provider.
+```svelte
+<script>
+  import { TolgeeProvider } from "@tolgee/svelte";
+  import UI from "@tolgee/ui";
+
+  const tolgeeConfig = {
+    preloadFallback: true,
+    apiUrl: import.meta.env.VITE_TOLGEE_API_URL,
+    ui: import.meta.env.VITE_TOLGEE_API_KEY ? UI : undefined,
+    apiKey: import.meta.env.VITE_TOLGEE_API_KEY
+  };
+</script>
+
+<TolgeeProvider config={tolgeeConfig}>
+  <div slot="loading-fallback">Loading...</div>
+  <your application code>
+</TolgeeProvider>
+```
+
+## Use Tolgee!
+```svelte
+<script>
+  import { T, getTranslate } from "@tolgee/svelte";
+
+  const t = getTranslate();
+</script>
+
+<T keyName="key">This is default</T>
+
+<!-- OR -->
+
+{$t({ key: "this_is_a_key", parameters: { key: "value", key2: "value2" } })}
+```
+Now you are able to translate texts with Alt + Clicking them!
+
+
+## Prepare for production
+To prepare your App for production, choose a suitable option described
+[here](https://tolgee.io/docs/web/using_with_svelte/preparing_for_production).
