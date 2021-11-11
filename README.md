@@ -4,7 +4,8 @@
 [![github release](https://img.shields.io/github/v/release/tolgee/server?label=GitHub%20Release)](https://github.com/tolgee/server/releases/tag/v1.2.1)
 ![licence](https://img.shields.io/github/license/tolgee/server)
 [![twitter](https://img.shields.io/twitter/follow/Tolgee_i18n?style=social)](https://twitter.com/Tolgee_i18n)
-[![github stars](https://img.shields.io/github/stars/tolgee/tolgee-js?style=social)](https://github.com/tolgee/tolgee-js)
+[![github stars](https://img.shields.io/github/stars/tolgee/tolgee-js?style=social&label=Tolgee%20JS)](https://github.com/tolgee/tolgee-js)
+[![github stars](https://img.shields.io/github/stars/tolgee/server?style=social&label=Tolgee%20Server)](https://github.com/tolgee/server)
 
 # Tolgee Localization Platform
 

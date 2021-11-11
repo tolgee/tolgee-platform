@@ -4,11 +4,9 @@ updates:
   directory: "/"
   schedule:
     interval: monthly
-  open-pull-requests-limit: 20
-  target-branch: develop
+  target-branch: main
 - package-ecosystem: npm
   directory: "/webapp/"
   schedule:
     interval: monthly
-  open-pull-requests-limit: 20
-  target-branch: develop
+  target-branch: main
