@@ -192,7 +192,7 @@ dependencies {
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.37'
     compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
     implementation('org.reflections:reflections:0.9.12')
-    implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.27.0'
+    implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.28.0'
     testImplementation('org.mockito.kotlin:mockito-kotlin:3.2.0')
     testCompile("io.findify:s3mock_2.13:0.2.6")
     implementation group: 'com.ibm.icu', name: 'icu4j', version: '69.1'
