@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/tolgee/server/compare/v1.4.4...v1.5.0) (2021-11-14)
+
+
+### Features
+
+* Svelte integration TG-380 ([6c44f72](https://github.com/tolgee/server/commit/6c44f721a97015b676e8bb1c7c5b5557c822f67c))
+
 ## [1.4.4](https://github.com/tolgee/server/compare/v1.4.3...v1.4.4) (2021-11-11)
 
 
