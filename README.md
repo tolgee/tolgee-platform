@@ -1,3 +1,4 @@
+# Tolgee Localization Platform
 ![example workflow](https://github.com/tolgee/server/actions/workflows/test.yml/badge.svg)
 ![kotlin](https://img.shields.io/github/languages/top/tolgee/server)
 [![docker](https://img.shields.io/docker/v/tolgee/tolgee/latest?label=DockerHub)](https://hub.docker.com/repository/docker/tolgee/tolgee)
@@ -6,8 +7,6 @@
 [![twitter](https://img.shields.io/twitter/follow/Tolgee_i18n?style=social)](https://twitter.com/Tolgee_i18n)
 [![github stars](https://img.shields.io/github/stars/tolgee/tolgee-js?style=social&label=Tolgee%20JS)](https://github.com/tolgee/tolgee-js)
 [![github stars](https://img.shields.io/github/stars/tolgee/server?style=social&label=Tolgee%20Server)](https://github.com/tolgee/server)
-
-# Tolgee Localization Platform
 
 [<img src="https://raw.githubusercontent.com/tolgee/documentation/main/tolgee_logo_text.svg" alt="Tolgee" width="200" />](https://tolgee.io)
 
@@ -25,6 +24,7 @@
 ![Screenshot 2021-10-15 at 8 35 06](https://user-images.githubusercontent.com/18496315/137442797-b76fae44-4508-446f-b93c-d7762cef12e9.png)
 
 For more detailed documentation about Tolgee, visit [tolgee.io](https://tolgee.io).
+
 
 ## Running with docker
 
@@ -50,4 +50,4 @@ For more information about configuration, visit
 
 ![integrate-server-loop](https://user-images.githubusercontent.com/18496315/137451291-1d59a8f5-ec2c-499c-960e-b4b811ce9858.gif)
 
-
+Let us know what you think! #feedbackwanted ❤️
