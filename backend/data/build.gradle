@@ -70,8 +70,10 @@ allOpen {
     annotation("javax.persistence.Entity")
     annotation("javax.persistence.MappedSuperclass")
     annotation("javax.persistence.Embeddable")
+    annotation("org.springframework.stereotype.Component")
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.stereotype.Service")
+    annotation("org.springframework.beans.factory.annotation.Configurable")
 }
 
 def liveDbPostgres = [

@@ -10,6 +10,7 @@ import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.InitialPasswordManager
+import io.tolgee.service.*
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -36,7 +37,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   protected lateinit var userAccountService: UserAccountService
 
   @Autowired
-  protected lateinit var apiKeyService: io.tolgee.service.ApiKeyService
+  protected lateinit var apiKeyService: ApiKeyService
 
   @Autowired
   protected lateinit var permissionService: PermissionService

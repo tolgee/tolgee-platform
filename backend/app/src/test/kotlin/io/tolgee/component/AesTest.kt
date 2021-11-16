@@ -19,7 +19,11 @@ class AesTest : AbstractTestNGSpringContextTests() {
 
   @Test
   fun encrypt() {
-    assertThat(Base64.getEncoder().encode(aes.encrypt("hello".toByteArray(charset("UTF-8")))))
+    assertThat(
+      Base64.getEncoder()
+        .encode(aes.encrypt("hello".toByteArray(charset("UTF-8"))))
+        .toString(charset("UTF-8"))
+    )
       .isEqualTo("17u71OZauaAoEf+e0vc6Kg==")
   }
 
