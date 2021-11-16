@@ -1,0 +1,8 @@
+include ':server-app'
+project(':server-app').projectDir = new File('backend/app')
+
+include ':data'
+project(':data').projectDir = new File('backend/data')
+
+include ':billing'
+project(':billing').projectDir = new File('../billing')

@@ -1,0 +1,178 @@
+/*
+ * Copyright (c) 2020. Tolgee
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    ext {
+        kotlinVersion = findProperty("kotlinVersion") ?: '1.5.10'
+        springBootVersion = findProperty("springBootVersion") ?: '2.4.5'
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
+        classpath group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    }
+}
+
+plugins {
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot' version "$springBootVersion"
+    id 'java'
+    id 'org.liquibase.gradle' version '2.0.4'
+    id 'org.jetbrains.kotlin.jvm' version "${kotlinVersion}"
+    id "org.jetbrains.kotlin.plugin.jpa" version "${kotlinVersion}"
+    //id "org.jetbrains.kotlin.kapt" version "${kotlinVersion}"
+}
+
+group = 'io.tolgee'
+
+if (System.getenv().containsKey("VERSION")) {
+    project.version = System.getenv().get("VERSION")
+} else {
+    project.version = 'local'
+}
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: "org.jetbrains.kotlin.plugin.jpa"
+apply plugin: "kotlin-allopen"
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 11
+
+allOpen {
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
+    annotation("org.springframework.stereotype.Service")
+    annotation("org.springframework.stereotype.Component")
+    annotation("org.springframework.transaction.annotation.Transactional")
+    annotation("org.springframework.beans.factory.annotation.Configurable")
+}
+
+compileKotlin {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+def JJWT_VERSION = "0.11.2"
+def SPRING_DOC_VERSION = findProperty("springDocVersion") ?: "1.5.10"
+def NETTY_SOCKET_IO_VERSION = "1.7.19"
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation "org.springframework.boot:spring-boot-starter-hateoas"
+    //kapt "org.springframework.boot:spring-boot-configuration-processor"
+    implementation "org.springframework.boot:spring-boot-configuration-processor"
+    implementation 'io.sentry:sentry-spring-boot-starter:5.0.1'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testCompile('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testCompile("org.assertj:assertj-core:3.19.0")
+    testCompile("org.springframework.security:spring-security-test")
+    implementation("org.springframework.ldap:spring-ldap-core")
+    implementation("org.springframework.security:spring-security-ldap")
+    implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
+    runtime "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
+            "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
+    implementation 'com.github.javafaker:javafaker:1.0.2'
+    testCompile group: 'org.testng', name: 'testng', version: '7.4.0'
+    implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-data-rest', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-hateoas', version: "${SPRING_DOC_VERSION}"
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
+    liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
+    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4'
+    implementation 'commons-codec:commons-codec:1.15'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.37'
+    compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
+    implementation('org.reflections:reflections:0.9.12')
+    implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.28.0'
+    testImplementation('org.mockito.kotlin:mockito-kotlin:3.2.0')
+    testCompile("io.findify:s3mock_2.13:0.2.6")
+    implementation group: 'com.ibm.icu', name: 'icu4j', version: '69.1'
+    implementation("com.corundumstudio.socketio:netty-socketio:$NETTY_SOCKET_IO_VERSION")
+    implementation("org.redisson:redisson-spring-boot-starter:3.16.1")
+    testImplementation("io.socket:socket.io-client:1.0.1")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.0.3")
+    implementation(project(':billing'))
+    implementation(project(':data'))
+
+}
+
+test {
+    useTestNG()
+    maxHeapSize = "2048m"
+}
+
+springBoot {
+    buildInfo {
+        properties {
+            version = project.version
+        }
+    }
+}
+
+bootJar {
+    archiveFileName = "tolgee-${project.version}.jar"
+    manifest {
+        attributes('Implementation-Version': project.version)
+    }
+    onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+}
+
+def unpackTarget = "build/dependency"
+
+task unpack(type: Copy) {
+    from(zipTree(project.tasks.findByName("bootJar").outputs.files.singleFile))
+    into(unpackTarget)
+    if (System.getenv("SKIP_SERVER_BUILD") != "true") {
+        dependsOn "bootJar"
+    }
+}
+
+task addVersionFile(type: Task) {
+    mustRunAfter unpack
+    doLast {
+        def file = new File("${project.buildDir}/dependency/BOOT-INF/classes/.VERSION")
+        file.write(project.version.toString())
+    }
+}
+
+project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("bootBuildInfo").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+
+sourceSets {
+    main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
+    test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+}

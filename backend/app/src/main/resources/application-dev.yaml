@@ -1,0 +1,73 @@
+spring:
+  datasource:
+    username: sa
+    password: sa
+    url: jdbc:h2:${user.home}/.tolgee/db.h2
+  h2.console.enabled: true
+  liquibase:
+    change-log: classpath:db/changelog/schema.xml
+  jpa:
+    show-sql: true
+tolgee:
+  internal:
+    populate: true
+    show-version: true
+  screenshots-url: http://localhost:8080/screenshots
+  uploaded-images-url: http://localhost:8080/uploaded-images
+  authentication:
+    enabled: true
+    #   jwt-secret-file: /<user home>/.tolgee/jwt.secret
+    jwt-secret: ldkajsldkjsaldkasjldk ajldkj aslkajsldas dsalk jdslk djaslkdj salkd jalskd jalsk
+    jwt-expiration: 604800000
+    #    native-enabled: true
+    registrations-allowed: true
+    initial-username: "admin"
+    initial-password: "admin"
+    needs-email-verification: true
+    github:
+      client-id: 8769ede1de0543ef9fe9
+      client-secret: 017627b66d2a1dd119b13340266db4abcc7ee6b0
+      authorization-url: "https://github.com/login/oauth/access_token"
+      user-url: "https://api.github.com/user"
+  #    ldap: ##experimental feature
+  #      base-dn:
+  #      enabled:
+  #      port:
+  #      principal-password:
+  #      security-principal:
+  #      urls:
+  #      user-dn-pattern:
+  smtp:
+    from: Tolgee <no-reply@tolgee.io>
+    host: email-smtp.eu-central-1.amazonaws.com
+    username: AKIA2LJQBN6TVTOOEAH2
+    password: BDxUBkKRWXrAMSolpTgeu/JECiSz2IOk1myuNar67CBG
+    auth: true
+    port: 465
+    ssl-enabled: true
+  socket-io:
+    enabled: true
+    host: localhost
+    external-url: http://localhost:9090
+  app-name: Tolgee Local
+  cache:
+    enabled: true
+    use-redis: false
+    default-ttl: 1200000
+    caffeine-max-size: 10000
+  recaptcha:
+    site-key: 6LeJ_PMbAAAAAO_c8dl-W9cXW5oIcEI4p9M6s5sH
+    secret-key: 6LeJ_PMbAAAAAGDmAE7HhXvAr-GZLK2e-S0mdsgU
+  import:
+    dir: ${user.home}/tolgee-import/
+logging:
+  level:
+    org.springframework.orm.jpa: DEBUG
+    org.springframework.transaction: DEBUG
+server:
+  compression:
+    enabled: true
+    mime-types: "text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json"
+    min-response-size: 1024
+sentry:
+  dsn: ${tolgee.sentry.server-dsn:}
