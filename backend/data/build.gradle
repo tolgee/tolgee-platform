@@ -188,3 +188,4 @@ dependencyManagement {
 }
 
 tasks.findByName("jar").enabled(true)
+tasks.findByName("bootJar").enabled(false)
