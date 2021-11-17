@@ -1,21 +1,5 @@
-package io.tolgee.controllers;
+package io.tolgee.testing
 
-import io.tolgee.model.UserAccount;
+import io.tolgee.model.UserAccount
 
-public class DefaultAuthenticationResult {
-    private String token;
-    private UserAccount entity;
-
-    public DefaultAuthenticationResult(String token, UserAccount entity) {
-        this.token = token;
-        this.entity = entity;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public UserAccount getEntity() {
-        return entity;
-    }
-}
+class DefaultAuthenticationResult(val token: String, val entity: UserAccount)

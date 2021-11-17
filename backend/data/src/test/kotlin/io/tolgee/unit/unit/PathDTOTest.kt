@@ -1,68 +1,66 @@
-package io.tolgee.unit;
+package io.tolgee.unit.unit
 
-import io.tolgee.dtos.PathDTO;
-import org.testng.annotations.Test;
+import io.tolgee.dtos.PathDTO
+import org.assertj.core.api.Assertions
+import org.testng.annotations.Test
+import java.util.*
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+class PathDTOTest {
+  private val testList = LinkedList(
+    listOf(*testFullPath.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
+  )
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+  private fun getTestList(): LinkedList<String> {
+    return LinkedList(testList)
+  }
 
-public class PathDTOTest {
+  @Test
+  fun testFromFullPath() {
+    val pathDTO = PathDTO.fromFullPath("item1.item2.item1.item1.last")
+    assertBasicPath(pathDTO)
+  }
 
-    private static final String testFullPath = "item1.item2.item1.item1.last";
-    private LinkedList<String> testList = new LinkedList<>(Arrays.asList(testFullPath.split("\\.", 0)));
+  @Test
+  fun testFromFullPathList() {
+    val pathDTO = PathDTO.fromFullPath(testList)
+    assertBasicPath(pathDTO)
+  }
 
-    public LinkedList<String> getTestList() {
-        return new LinkedList<>(testList);
-    }
+  @Test
+  fun testFromNamePath() {
+    val testList = getTestList()
+    val name = testList.removeLast()
+    val pathDTO = PathDTO.fromPathAndName(java.lang.String.join(".", testList), name)
+    Assertions.assertThat(pathDTO.name).isEqualTo(name)
+    Assertions.assertThat(pathDTO.fullPath).isEqualTo(getTestList())
+  }
 
-    @Test
-    void testFromFullPath() {
-        PathDTO pathDTO = PathDTO.fromFullPath("item1.item2.item1.item1.last");
-        assertBasicPath(pathDTO);
-    }
+  @Test
+  fun testFromNamePathList() {
+    val testList = getTestList()
+    val name = testList.removeLast()
+    val pathDTO = PathDTO.fromPathAndName(testList, name)
+    Assertions.assertThat(pathDTO.name).isEqualTo(name)
+    Assertions.assertThat(pathDTO.fullPath).isEqualTo(getTestList())
+  }
 
-    @Test
-    void testFromFullPathList() {
-        PathDTO pathDTO = PathDTO.fromFullPath(testList);
-        assertBasicPath(pathDTO);
-    }
+  @Test
+  fun escaping() {
+    val fullPath = "aaa.aaa\\.aaaa.a"
+    val testList = PathDTO.fromFullPath(fullPath).fullPath
+    Assertions.assertThat(testList).isEqualTo(listOf("aaa", "aaa.aaaa", "a"))
+    Assertions.assertThat(PathDTO.fromFullPath(testList).fullPathString).isEqualTo(fullPath)
+  }
 
-    @Test
-    void testFromNamePath() {
-        LinkedList<String> testList = getTestList();
-        String name = testList.removeLast();
-        PathDTO pathDTO = PathDTO.fromPathAndName(String.join(".", testList), name);
-        assertThat(pathDTO.getName()).isEqualTo(name);
-        assertThat(pathDTO.getFullPath()).isEqualTo(getTestList());
-    }
+  private fun assertBasicPath(pathDTO: PathDTO) {
+    Assertions.assertThat(pathDTO.fullPath).isEqualTo(testList)
+    val testList = getTestList()
+    val last = testList.removeLast()
+    Assertions.assertThat(pathDTO.path).isEqualTo(testList)
+    Assertions.assertThat(pathDTO.name).isEqualTo(last)
+  }
 
-    @Test
-    void testFromNamePathList() {
-        LinkedList<String> testList = getTestList();
-        String name = testList.removeLast();
-        PathDTO pathDTO = PathDTO.fromPathAndName(testList, name);
-        assertThat(pathDTO.getName()).isEqualTo(name);
-        assertThat(pathDTO.getFullPath()).isEqualTo(getTestList());
-    }
-
-    @Test
-    void escaping() {
-        String fullPath = "aaa.aaa\\.aaaa.a";
-        var testList = PathDTO.fromFullPath(fullPath).getFullPath();
-        assertThat(testList).isEqualTo(List.of("aaa","aaa.aaaa", "a"));
-        assertThat(PathDTO.fromFullPath(testList).getFullPathString()).isEqualTo(fullPath);
-    }
-
-    void assertBasicPath(PathDTO pathDTO) {
-        assertThat(pathDTO.getFullPath()).isEqualTo(testList);
-        LinkedList<String> testList = getTestList();
-        String last = testList.removeLast();
-        assertThat(pathDTO.getPath()).isEqualTo(testList);
-        assertThat(pathDTO.getName()).isEqualTo(last);
-    }
-
+  companion object {
+    private const val testFullPath = "item1.item2.item1.item1.last"
+  }
 }

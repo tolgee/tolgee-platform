@@ -1,26 +1,25 @@
-package io.tolgee;
+package io.tolgee.testing
 
-import io.tolgee.repository.LanguageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
-import org.springframework.test.context.transaction.TestTransaction;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityManager;
+import io.tolgee.repository.LanguageRepository
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
+import org.springframework.test.context.transaction.TestTransaction
+import org.springframework.transaction.annotation.Transactional
+import javax.persistence.EntityManager
 
 @Transactional
-public abstract class AbstractTransactionalTest extends AbstractTransactionalTestNGSpringContextTests {
+abstract class AbstractTransactionalTest : AbstractTransactionalTestNGSpringContextTests() {
     @Autowired
-    protected EntityManager entityManager;
+    lateinit protected var entityManager: EntityManager
 
     @Autowired
-    protected LanguageRepository languageRepository;
+    lateinit protected var languageRepository: LanguageRepository
 
-    protected void commitTransaction() {
-        TestTransaction.flagForCommit();
-        entityManager.flush();
-        TestTransaction.end();
-        TestTransaction.start();
-        entityManager.clear();
+    protected fun commitTransaction() {
+        TestTransaction.flagForCommit()
+        entityManager.flush()
+        TestTransaction.end()
+        TestTransaction.start()
+        entityManager.clear()
     }
 }

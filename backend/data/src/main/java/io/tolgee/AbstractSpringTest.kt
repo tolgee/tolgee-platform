@@ -12,6 +12,7 @@ import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.*
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.testing.AbstractTransactionalTest
 import org.springframework.beans.factory.annotation.Autowired
 
 abstract class AbstractSpringTest : AbstractTransactionalTest() {

@@ -9,6 +9,7 @@ import io.tolgee.ITest
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.fixtures.RequestPerformer
 import io.tolgee.security.payload.LoginRequest
+import io.tolgee.testing.DefaultAuthenticationResult
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
@@ -46,7 +47,7 @@ abstract class AbstractControllerTest :
       .response.contentAsString
     val userAccount = userAccountService.getByUserName(userName).orElseThrow { NotFoundException() }
     return DefaultAuthenticationResult(
-      mapper.readValue(response, HashMap::class.java)["accessToken"] as String?, userAccount
+      mapper.readValue(response, HashMap::class.java)["accessToken"] as String, userAccount
     )
   }
 

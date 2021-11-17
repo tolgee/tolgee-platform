@@ -1,23 +1,19 @@
-package io.tolgee.unit;
+package io.tolgee.unit.unit
 
-import io.tolgee.helpers.TextHelper;
-import org.testng.annotations.Test;
+import io.tolgee.helpers.TextHelper
+import org.assertj.core.api.Assertions
+import org.testng.annotations.Test
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+class TextHelperTest {
+  @Test
+  fun splitOnNonEscapedDelimiter() {
+    val str = "this.is.escaped\\.delimiter.aaa.once\\.more.and.multiple\\\\\\.and.\\\\\\\\.text"
+    val split = TextHelper.splitOnNonEscapedDelimiter(str, '.')
+    Assertions.assertThat(split).isEqualTo(
+      listOf("this", "is", "escaped.delimiter", "aaa", "once.more", "and", "multiple\\.and", "\\\\", "text"))
+  }
 
-import static io.tolgee.testing.assertions.Assertions.assertThat;
-
-public class TextHelperTest {
-
-    private static final String testFullPath = "item1.item2.item1.item1.last";
-    private final LinkedList<String> testList = new LinkedList<>(Arrays.asList(testFullPath.split("\\.", 0)));
-
-    @Test
-    void splitOnNonEscapedDelimiter() {
-        var str = "this.is.escaped\\.delimiter.aaa.once\\.more.and.multiple\\\\\\.and.\\\\\\\\.text";
-        var split = TextHelper.splitOnNonEscapedDelimiter(str, '.');
-        assertThat(split).isEqualTo(List.of("this", "is", "escaped.delimiter", "aaa", "once.more", "and", "multiple\\.and", "\\\\", "text"));
-    }
+  companion object {
+    private const val testFullPath = "item1.item2.item1.item1.last"
+  }
 }

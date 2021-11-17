@@ -149,23 +149,25 @@ dependencies {
     liquibaseRuntime 'org.postgresql:postgresql'
     liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.1')
     liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:$LIQUIBASE_HIBERNATE_VERSION")
+    liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
     liquibaseRuntime sourceSets.main.output
+    liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.hibernate:hibernate-jpamodelgen'
-    testCompile group: 'org.testng', name: 'testng', version: '7.4.0'
+    implementation group: 'org.testng', name: 'testng', version: '7.4.0'
     kapt "org.hibernate:hibernate-jpamodelgen"
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4'
-    compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
+    implementation group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
     testImplementation('org.mockito.kotlin:mockito-kotlin:3.2.0')
     implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
     implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.28.0'
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
     implementation 'commons-codec:commons-codec:1.15'
-    compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.37'
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.37'
     implementation group: 'com.ibm.icu', name: 'icu4j', version: '69.1'
     implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
-    runtime "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
+    implementation "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
             "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
 }
 

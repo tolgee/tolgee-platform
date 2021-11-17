@@ -1,20 +1,16 @@
 package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
-import org.springframework.beans.factory.annotation.Autowired
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
 import org.testng.annotations.Test
 import java.util.*
-import javax.persistence.EntityManager
 
 @SpringBootTest
 @Transactional
 class TranslationServiceTest : AbstractSpringTest() {
-  @Autowired
-  lateinit var entityManager: EntityManager
 
   @Transactional
   @Test
@@ -32,6 +28,7 @@ class TranslationServiceTest : AbstractSpringTest() {
     keyService.create(project, SetTranslationsWithKeyDto("folder.folder.translation", mapOf("en" to "Ha")))
 
     val viewData = translationService.getTranslations(HashSet(Arrays.asList("en", "de")), project.id)
+    @Suppress("UNCHECKED_CAST")
     assertThat(viewData["en"] as Map<String, *>).containsKey("folder.folder.translation")
   }
 }
