@@ -5,7 +5,7 @@
 package io.tolgee.service.recaptchaValidation
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.service.security.ReCaptchaValidationService
 import io.tolgee.service.security.ReCaptchaValidationService.Companion
 import org.mockito.kotlin.*

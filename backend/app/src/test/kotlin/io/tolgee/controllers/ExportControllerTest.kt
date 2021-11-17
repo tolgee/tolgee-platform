@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Language

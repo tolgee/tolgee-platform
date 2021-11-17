@@ -1,6 +1,6 @@
 package io.tolgee.service
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.exceptions.NotFoundException

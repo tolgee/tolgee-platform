@@ -2,8 +2,8 @@ package io.tolgee.fixtures
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.assertions.MvcResultAssert
+import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.MvcResultAssert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.assertj.core.api.BigDecimalAssert

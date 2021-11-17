@@ -1,7 +1,7 @@
 package io.tolgee.util
 
-import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.assertions.Assertions.assertThatThrownBy
+import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
 import io.tolgee.exceptions.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

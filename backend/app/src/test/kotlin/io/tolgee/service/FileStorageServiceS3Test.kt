@@ -7,8 +7,8 @@ package io.tolgee.service
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import io.findify.s3mock.S3Mock
-import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.assertions.Assertions.assertThatExceptionOfType
+import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThatExceptionOfType
 import io.tolgee.service.FileStorageServiceS3Test.Companion.BUCKET_NAME
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

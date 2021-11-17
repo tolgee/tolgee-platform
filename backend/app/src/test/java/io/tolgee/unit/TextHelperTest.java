@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import static io.tolgee.assertions.Assertions.assertThat;
+import static io.tolgee.testing.assertions.Assertions.assertThat;
 
 public class TextHelperTest {
 

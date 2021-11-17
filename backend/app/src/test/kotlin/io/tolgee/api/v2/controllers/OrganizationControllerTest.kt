@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.assertions.Assertions.assertThat
-import io.tolgee.assertions.Assertions.assertThatThrownBy
+import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.dtos.request.OrganizationDto
 import io.tolgee.dtos.request.OrganizationInviteUserDto

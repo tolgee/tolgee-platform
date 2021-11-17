@@ -1,7 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType

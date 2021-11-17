@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
 import io.tolgee.dtos.request.CreateApiKeyDto

@@ -1,6 +1,6 @@
 package io.tolgee.cache
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cache.caffeine.CaffeineCacheManager
 import org.testng.annotations.Test

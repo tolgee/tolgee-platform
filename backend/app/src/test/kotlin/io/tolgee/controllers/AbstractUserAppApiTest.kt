@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.assertions.UserApiAppAction
+import io.tolgee.testing.assertions.UserApiAppAction
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.enums.ApiScope

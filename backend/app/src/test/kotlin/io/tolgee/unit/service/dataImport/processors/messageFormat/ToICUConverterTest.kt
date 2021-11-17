@@ -1,7 +1,7 @@
 package io.tolgee.unit.service.dataImport.processors.messageFormat
 
 import com.ibm.icu.util.ULocale
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile

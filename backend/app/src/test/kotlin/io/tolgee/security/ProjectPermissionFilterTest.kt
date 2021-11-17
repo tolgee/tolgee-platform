@@ -1,6 +1,6 @@
 package io.tolgee.security
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.security.project_auth.ProjectHolder

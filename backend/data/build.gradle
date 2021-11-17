@@ -132,6 +132,7 @@ def SPRING_DOC_VERSION = findProperty("springDocVersion") ?: "1.5.10"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation "org.springframework.boot:spring-boot-starter-validation"
     implementation("org.springframework.data:spring-data-envers")
@@ -139,10 +140,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'
-    testCompile('org.springframework.boot:spring-boot-starter-test') {
+    implementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
-    testCompile("org.assertj:assertj-core:3.19.0")
+    implementation("org.assertj:assertj-core:3.19.0")
     implementation("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime 'org.postgresql:postgresql'
@@ -158,6 +159,7 @@ dependencies {
     compile group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
     testImplementation('org.mockito.kotlin:mockito-kotlin:3.2.0')
     implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
+    implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.28.0'
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
     implementation 'commons-codec:commons-codec:1.15'
     compile group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.37'

@@ -2,8 +2,8 @@ package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.type.TypeFactory
 import io.tolgee.ITest
-import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.CreateApiKeyDto
 import io.tolgee.dtos.request.EditApiKeyDTO
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO

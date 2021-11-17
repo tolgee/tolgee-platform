@@ -5,7 +5,7 @@
 package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.exceptions.FileStoreException
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME

@@ -1,7 +1,7 @@
 package io.tolgee.controllers
 
-import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
-import io.tolgee.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.fixtures.AuthRequestPerformer
 import io.tolgee.fixtures.ProjectApiKeyAuthRequestPerformer

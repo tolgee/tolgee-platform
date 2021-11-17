@@ -1,7 +1,7 @@
 package io.tolgee.repository.dataImport
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.model.dataImport.Import
 import io.tolgee.project.dataImport.ImportRepository
 import org.springframework.beans.factory.annotation.Autowired

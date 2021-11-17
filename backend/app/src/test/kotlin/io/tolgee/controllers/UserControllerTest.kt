@@ -51,7 +51,7 @@ class UserControllerTest : SignedInControllerTest(), ITest {
     )
     var mvcResult = performAuthPost("/api/user", requestDTO)
       .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
-    val standardValidation = io.tolgee.assertions.Assertions.assertThat(mvcResult).error().isStandardValidation
+    val standardValidation = io.tolgee.testing.assertions.Assertions.assertThat(mvcResult).error().isStandardValidation
     standardValidation.onField("password")
     standardValidation.onField("name")
 
@@ -63,7 +63,7 @@ class UserControllerTest : SignedInControllerTest(), ITest {
     dbPopulator.createUserIfNotExists(requestDTO.email!!)
     mvcResult = performAuthPost("/api/user", requestDTO)
       .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
-    io.tolgee.assertions.Assertions.assertThat(mvcResult)
+    io.tolgee.testing.assertions.Assertions.assertThat(mvcResult)
       .error().isCustomValidation.hasMessage("username_already_exists")
   }
 

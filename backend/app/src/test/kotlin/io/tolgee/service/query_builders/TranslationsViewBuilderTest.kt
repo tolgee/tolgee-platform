@@ -1,7 +1,7 @@
 package io.tolgee.service.query_builders
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.GetTranslationsParams
 import org.springframework.boot.test.context.SpringBootTest

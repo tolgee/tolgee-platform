@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers.v2ImportController
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessage
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType

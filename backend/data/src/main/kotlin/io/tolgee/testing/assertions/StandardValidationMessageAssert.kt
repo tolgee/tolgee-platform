@@ -1,4 +1,4 @@
-package io.tolgee.assertions
+package io.tolgee.testing.assertions
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.assertj.core.api.AbstractAssert

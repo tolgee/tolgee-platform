@@ -1,7 +1,7 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.constants.Message
 import io.tolgee.controllers.AbstractControllerTest
 import io.tolgee.controllers.PublicController

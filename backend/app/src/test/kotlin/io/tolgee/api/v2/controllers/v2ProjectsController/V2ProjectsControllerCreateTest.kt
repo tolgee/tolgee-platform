@@ -1,11 +1,11 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
-import io.tolgee.assertions.Assertions.assertThat
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.dtos.request.CreateProjectDTO
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.fixtures.*
-import io.tolgee.helpers.JsonHelper
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
@@ -101,7 +101,7 @@ class V2ProjectsControllerCreateTest : SignedInControllerTest() {
     mvc.perform(
       LoggedRequestFactory.loggedPost("/v2/projects")
         .contentType(MediaType.APPLICATION_JSON).content(
-          JsonHelper.asJsonString(request)
+          jacksonObjectMapper().writeValueAsString(request)
         )
     )
       .andExpect(MockMvcResultMatchers.status().isOk)

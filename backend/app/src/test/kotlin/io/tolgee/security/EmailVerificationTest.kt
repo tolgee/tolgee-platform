@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.verify
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.AbstractControllerTest
 import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.exceptions.NotFoundException

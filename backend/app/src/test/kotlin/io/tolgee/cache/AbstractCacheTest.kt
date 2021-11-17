@@ -1,7 +1,7 @@
 package io.tolgee.cache
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.assertions.Assertions
+import io.tolgee.testing.assertions.Assertions
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount

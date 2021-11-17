@@ -1,4 +1,4 @@
-package io.tolgee.assertions;
+package io.tolgee.testing.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import org.springframework.test.web.servlet.MvcResult;

@@ -1,6 +1,6 @@
 package io.tolgee.unit.service.dataImport.processors.po
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile

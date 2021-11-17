@@ -1,7 +1,7 @@
 package io.tolgee.security
 
-import io.tolgee.assertions.Assertions
-import io.tolgee.assertions.UserApiAppAction
+import io.tolgee.testing.assertions.Assertions
+import io.tolgee.testing.assertions.UserApiAppAction
 import io.tolgee.controllers.AbstractUserAppApiTest
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.generateUniqueString

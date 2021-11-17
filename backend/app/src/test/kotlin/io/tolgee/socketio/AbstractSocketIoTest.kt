@@ -4,7 +4,7 @@ import com.corundumstudio.socketio.SocketIOServer
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.tolgee.AbstractSpringTest
-import io.tolgee.assertions.Assertions
+import io.tolgee.testing.assertions.Assertions
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.WaitNotSatisfiedException
 import io.tolgee.fixtures.isValidId

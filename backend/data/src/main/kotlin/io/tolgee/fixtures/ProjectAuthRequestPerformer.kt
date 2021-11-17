@@ -17,7 +17,7 @@ abstract class ProjectAuthRequestPerformer(
 
   val project: Project by lazy {
     projectSupplier?.invoke()
-      ?: dbPopulator.createBase(generateUniqueString(), username = userAccountProvider.invoke().username!!)
+      ?: dbPopulator.createBase(generateUniqueString(), username = userAccountProvider.invoke().username)
   }
 
   var projectSupplier: (() -> Project)? = null

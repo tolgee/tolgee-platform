@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.response.InvitationDTO
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo

@@ -1,7 +1,7 @@
 package io.tolgee.controllers
 
 import io.tolgee.ITest
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.DeprecatedEditKeyDTO
 import io.tolgee.dtos.request.GetKeyTranslationsReqDto

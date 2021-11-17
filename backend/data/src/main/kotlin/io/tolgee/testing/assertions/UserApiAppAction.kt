@@ -1,6 +1,6 @@
-package io.tolgee.assertions
+package io.tolgee.testing.assertions
 
-import io.tolgee.helpers.JsonHelper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -30,6 +30,6 @@ class UserApiAppAction(
     }
 
   private fun withContent(builder: MockHttpServletRequestBuilder): RequestBuilder {
-    return builder.contentType(MediaType.APPLICATION_JSON).content(JsonHelper.asJsonString(body))
+    return builder.contentType(MediaType.APPLICATION_JSON).content(jacksonObjectMapper().writeValueAsString(body))
   }
 }

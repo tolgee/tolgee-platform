@@ -4,7 +4,7 @@
 
 package io.tolgee.initial_user_creation
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.service.UserAccountService
 import org.springframework.beans.factory.annotation.Autowired

@@ -4,8 +4,8 @@
 
 package io.tolgee.api.v2.controllers.v2ImageUploadController
 
-import io.tolgee.annotations.ProjectJWTAuthTestMethod
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.component.TimestampValidation
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsCreated

@@ -4,7 +4,7 @@
 
 package io.tolgee.controllers.screenshot
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.GetScreenshotsByKeyDTO
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.dtos.response.ScreenshotDTO

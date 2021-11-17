@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers.translations
 
-import io.tolgee.annotations.ProjectJWTAuthTestMethod
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
 import io.tolgee.dtos.request.TranslationCommentDto

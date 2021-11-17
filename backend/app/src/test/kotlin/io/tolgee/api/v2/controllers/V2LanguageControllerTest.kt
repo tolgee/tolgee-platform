@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.ITest
-import io.tolgee.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.exceptions.NotFoundException

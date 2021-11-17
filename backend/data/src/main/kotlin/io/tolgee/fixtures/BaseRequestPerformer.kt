@@ -1,6 +1,6 @@
 package io.tolgee.fixtures
 
-import io.tolgee.helpers.JsonHelper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.http.MediaType
@@ -42,6 +42,6 @@ open class BaseRequestPerformer : RequestPerformer {
   }
 
   protected fun MockHttpServletRequestBuilder.withJsonContent(content: Any?): MockHttpServletRequestBuilder {
-    return this.contentType(MediaType.APPLICATION_JSON).content(JsonHelper.asJsonString(content))
+    return this.contentType(MediaType.APPLICATION_JSON).content(jacksonObjectMapper().writeValueAsString(content))
   }
 }

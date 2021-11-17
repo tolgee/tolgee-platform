@@ -4,7 +4,7 @@
 
 package io.tolgee.api.v2.controllers.v2ImageUploadController
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.fixtures.*
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header

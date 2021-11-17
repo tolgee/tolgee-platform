@@ -1,6 +1,6 @@
 package io.tolgee.repository
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Organization

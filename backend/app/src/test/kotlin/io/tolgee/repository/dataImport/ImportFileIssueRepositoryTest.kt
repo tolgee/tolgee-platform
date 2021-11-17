@@ -1,7 +1,7 @@
 package io.tolgee.repository.dataImport
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository

@@ -1,7 +1,7 @@
-package io.tolgee.assertions
+package io.tolgee.testing.assertions
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.fixtures.mapResponseTo
 import org.assertj.core.api.AbstractAssert
 import org.springframework.test.web.servlet.MvcResult

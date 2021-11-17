@@ -4,7 +4,7 @@
 
 package io.tolgee.service
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test

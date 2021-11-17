@@ -4,7 +4,7 @@
 
 package io.tolgee
 
-import io.tolgee.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.configuration.tolgee.ImportProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.mockito.kotlin.whenever
