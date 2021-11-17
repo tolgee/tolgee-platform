@@ -52,3 +52,4 @@ e2e/cypress/integration/examples/
 /**/.DS_Store
 server.ipr
 server.iws
+**/derby.log
