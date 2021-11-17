@@ -198,7 +198,7 @@ dependencies {
      * MISC
      */
     implementation "commons-codec:commons-codec:${findProperty("commonsCodecVersion")}"
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.37'
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: findProperty("amazonAwsSdkVersion")
     implementation group: 'com.ibm.icu', name: 'icu4j', version: findProperty("icu4jVersion")
     implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
     implementation "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
