@@ -1,13 +1,13 @@
 package io.tolgee.controllers
 
-import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
-import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.fixtures.AuthRequestPerformer
 import io.tolgee.fixtures.ProjectApiKeyAuthRequestPerformer
 import io.tolgee.fixtures.ProjectAuthRequestPerformer
 import io.tolgee.fixtures.ProjectJwtAuthRequestPerformer
 import io.tolgee.model.Project
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.mock.web.MockMultipartFile

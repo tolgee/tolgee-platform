@@ -1,8 +1,8 @@
 package io.tolgee.service.dataImport
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.development.testDataBuilder.data.ImportTestData
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test

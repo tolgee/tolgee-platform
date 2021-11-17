@@ -1,13 +1,13 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
-import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ProjectLeavingTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.Test

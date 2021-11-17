@@ -1,13 +1,13 @@
 package io.tolgee.unit.service.dataImport.processors.messageFormat
 
 import com.ibm.icu.util.ULocale
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.messageFormat.SupportedFormat
 import io.tolgee.service.dataImport.processors.messageFormat.ToICUConverter
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.mockito.kotlin.mock
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test

@@ -4,7 +4,6 @@ import com.corundumstudio.socketio.SocketIOServer
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.tolgee.AbstractSpringTest
-import io.tolgee.testing.assertions.Assertions
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.fixtures.WaitNotSatisfiedException
 import io.tolgee.fixtures.isValidId
@@ -13,6 +12,7 @@ import io.tolgee.model.Project
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import io.tolgee.testing.assertions.Assertions
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired

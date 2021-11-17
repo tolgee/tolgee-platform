@@ -1,10 +1,10 @@
 package io.tolgee.repository.dataImport
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest

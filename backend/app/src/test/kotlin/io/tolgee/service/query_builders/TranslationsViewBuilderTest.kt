@@ -1,9 +1,9 @@
 package io.tolgee.service.query_builders
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.GetTranslationsParams
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort

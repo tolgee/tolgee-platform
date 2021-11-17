@@ -4,9 +4,9 @@
 
 package io.tolgee
 
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.configuration.tolgee.ImportProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value

@@ -1,17 +1,23 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
-import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
-import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
 import io.tolgee.dtos.request.ComplexEditKeyDto
 import io.tolgee.dtos.request.CreateKeyDto
 import io.tolgee.dtos.request.EditKeyDto
 import io.tolgee.exceptions.FileStoreException
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.node
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.service.ImageUploadService
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc

@@ -1,7 +1,6 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.constants.Message
 import io.tolgee.controllers.AbstractControllerTest
 import io.tolgee.controllers.PublicController
@@ -9,6 +8,7 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.security.third_party.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.security.third_party.GithubOAuthDelegate.GithubUserResponse
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq

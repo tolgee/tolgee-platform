@@ -1,8 +1,6 @@
 package io.tolgee.controllers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
@@ -13,6 +11,8 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest

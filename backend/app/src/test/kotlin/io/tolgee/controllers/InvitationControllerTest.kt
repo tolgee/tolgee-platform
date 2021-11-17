@@ -1,10 +1,10 @@
 package io.tolgee.controllers
 
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.response.InvitationDTO
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Permission
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test

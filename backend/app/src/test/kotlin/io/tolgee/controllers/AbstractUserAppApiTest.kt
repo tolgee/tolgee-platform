@@ -1,9 +1,9 @@
 package io.tolgee.controllers
 
-import io.tolgee.testing.assertions.UserApiAppAction
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.testing.assertions.UserApiAppAction
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 

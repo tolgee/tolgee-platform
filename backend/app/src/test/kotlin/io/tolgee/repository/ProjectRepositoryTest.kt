@@ -1,12 +1,12 @@
 package io.tolgee.repository
 
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

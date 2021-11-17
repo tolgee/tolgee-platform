@@ -1,7 +1,7 @@
 package io.tolgee.security
 
-import io.tolgee.testing.assertions.Assertions
 import io.tolgee.controllers.AbstractControllerTest
+import io.tolgee.testing.assertions.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders

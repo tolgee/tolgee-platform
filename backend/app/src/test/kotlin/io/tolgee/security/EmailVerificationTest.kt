@@ -4,12 +4,12 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.verify
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.AbstractControllerTest
 import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.repository.EmailVerificationRepository
 import io.tolgee.service.EmailVerificationService
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -34,7 +34,7 @@ import org.testng.annotations.Test
   ]
 )
 @AutoConfigureMockMvc
-open class EmailVerificationTest : AbstractControllerTest() {
+class EmailVerificationTest : AbstractControllerTest() {
 
   @set:Autowired
   lateinit var mailSender: MailSender

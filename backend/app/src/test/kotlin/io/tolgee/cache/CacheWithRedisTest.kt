@@ -1,7 +1,7 @@
 package io.tolgee.cache
 
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.fixtures.DockerContainerRunner
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.redisson.spring.cache.RedissonSpringCacheManager
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContextInitializer

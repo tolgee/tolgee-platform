@@ -10,7 +10,8 @@ class TextHelperTest {
     val str = "this.is.escaped\\.delimiter.aaa.once\\.more.and.multiple\\\\\\.and.\\\\\\\\.text"
     val split = TextHelper.splitOnNonEscapedDelimiter(str, '.')
     Assertions.assertThat(split).isEqualTo(
-      listOf("this", "is", "escaped.delimiter", "aaa", "once.more", "and", "multiple\\.and", "\\\\", "text"))
+      listOf("this", "is", "escaped.delimiter", "aaa", "once.more", "and", "multiple\\.and", "\\\\", "text")
+    )
   }
 
   companion object {

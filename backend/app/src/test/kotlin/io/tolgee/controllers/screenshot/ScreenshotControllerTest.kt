@@ -4,12 +4,12 @@
 
 package io.tolgee.controllers.screenshot
 
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.GetScreenshotsByKeyDTO
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.fixtures.LoggedRequestFactory.addToken
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header

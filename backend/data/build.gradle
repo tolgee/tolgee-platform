@@ -125,12 +125,20 @@ compileKotlin {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-def JJWT_VERSION = "0.11.2"
+/**
+ * Versions from properties
+ */
+def JJWT_VERSION = findProperty("jjwtVersion")
+def SPRING_DOC_VERSION = findProperty("springDocVersion")
+
+
 def LIQUIBASE_VERSION = "4.4.2"
 def LIQUIBASE_HIBERNATE_VERSION = "4.4.2"
-def SPRING_DOC_VERSION = findProperty("springDocVersion") ?: "1.5.10"
 
 dependencies {
+    /**
+     * SPRING
+     */
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
@@ -138,12 +146,22 @@ dependencies {
     implementation("org.springframework.data:spring-data-envers")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    runtimeOnly 'org.postgresql:postgresql'
-    runtimeOnly 'com.h2database:h2'
     implementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
-    implementation("org.assertj:assertj-core:3.19.0")
+
+    /**
+     * DB
+     */
+    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'com.h2database:h2'
+    implementation 'org.hibernate:hibernate-jpamodelgen'
+    kapt "org.hibernate:hibernate-jpamodelgen"
+
+
+    /**
+     * Liquibase
+     */
     implementation("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime 'org.postgresql:postgresql'
@@ -152,23 +170,40 @@ dependencies {
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
     liquibaseRuntime sourceSets.main.output
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.hibernate:hibernate-jpamodelgen'
-    implementation group: 'org.testng', name: 'testng', version: '7.4.0'
-    kapt "org.hibernate:hibernate-jpamodelgen"
+
+    /**
+     * Testing
+     */
+    implementation("org.assertj:assertj-core:${findProperty("assertJVerison")}")
+    implementation group: 'org.testng', name: 'testng', version: findProperty("testNgVersion")
+    implementation group: 'com.ninja-squad', name: 'springmockk', version: findProperty("springMockkVersion")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:${findProperty("mockitoVersion")}")
+    implementation "net.javacrumbs.json-unit:json-unit-assertj:${findProperty("jsonUnitAssertJVersion")}"
+
+    /**
+     * Kotlin
+     */
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
-    implementation 'com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4'
-    implementation group: 'com.ninja-squad', name: 'springmockk', version: '3.0.1'
-    testImplementation('org.mockito.kotlin:mockito-kotlin:3.2.0')
+
+
+    /**
+     * SPRING DOC
+     */
     implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
-    implementation 'net.javacrumbs.json-unit:json-unit-assertj:2.28.0'
     implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
-    implementation 'commons-codec:commons-codec:1.15'
+
+
+    /**
+     * MISC
+     */
+    implementation "commons-codec:commons-codec:${findProperty("commonsCodecVersion")}"
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.37'
-    implementation group: 'com.ibm.icu', name: 'icu4j', version: '69.1'
+    implementation group: 'com.ibm.icu', name: 'icu4j', version: findProperty("icu4jVersion")
     implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
     implementation "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
             "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${findProperty("jacksonModuleKotlinVersion")}"
 }
 
 test {

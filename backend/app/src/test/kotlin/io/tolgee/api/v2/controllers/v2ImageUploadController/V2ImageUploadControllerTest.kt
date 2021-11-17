@@ -4,8 +4,13 @@
 
 package io.tolgee.api.v2.controllers.v2ImageUploadController
 
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.assertions.Assertions.assertThat
-import io.tolgee.fixtures.*
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.testng.annotations.AfterClass

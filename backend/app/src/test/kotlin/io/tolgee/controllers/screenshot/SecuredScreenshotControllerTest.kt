@@ -4,12 +4,12 @@
 
 package io.tolgee.controllers.screenshot
 
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.component.TimestampValidation
 import io.tolgee.dtos.request.GetScreenshotsByKeyDTO
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status

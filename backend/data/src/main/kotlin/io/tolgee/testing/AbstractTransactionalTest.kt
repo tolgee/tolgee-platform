@@ -9,17 +9,17 @@ import javax.persistence.EntityManager
 
 @Transactional
 abstract class AbstractTransactionalTest : AbstractTransactionalTestNGSpringContextTests() {
-    @Autowired
-    lateinit protected var entityManager: EntityManager
+  @Autowired
+  protected lateinit var entityManager: EntityManager
 
-    @Autowired
-    lateinit protected var languageRepository: LanguageRepository
+  @Autowired
+  protected lateinit var languageRepository: LanguageRepository
 
-    protected fun commitTransaction() {
-        TestTransaction.flagForCommit()
-        entityManager.flush()
-        TestTransaction.end()
-        TestTransaction.start()
-        entityManager.clear()
-    }
+  protected fun commitTransaction() {
+    TestTransaction.flagForCommit()
+    entityManager.flush()
+    TestTransaction.end()
+    TestTransaction.start()
+    entityManager.clear()
+  }
 }

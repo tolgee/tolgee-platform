@@ -1,7 +1,6 @@
 package io.tolgee.controllers
 
 import io.tolgee.ITest
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.DeprecatedEditKeyDTO
 import io.tolgee.dtos.request.GetKeyTranslationsReqDto
@@ -11,6 +10,7 @@ import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions

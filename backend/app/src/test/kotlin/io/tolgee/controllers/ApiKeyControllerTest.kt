@@ -2,8 +2,6 @@ package io.tolgee.controllers
 
 import com.fasterxml.jackson.databind.type.TypeFactory
 import io.tolgee.ITest
-import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.dtos.request.CreateApiKeyDto
 import io.tolgee.dtos.request.EditApiKeyDTO
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
@@ -12,6 +10,8 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest

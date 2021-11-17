@@ -1,11 +1,11 @@
 package io.tolgee.security
 
-import io.tolgee.testing.assertions.Assertions
-import io.tolgee.testing.assertions.UserApiAppAction
 import io.tolgee.controllers.AbstractUserAppApiTest
 import io.tolgee.dtos.request.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.testing.assertions.Assertions
+import io.tolgee.testing.assertions.UserApiAppAction
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus

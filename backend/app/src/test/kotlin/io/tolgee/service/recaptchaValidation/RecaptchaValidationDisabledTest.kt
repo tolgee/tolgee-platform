@@ -5,10 +5,14 @@
 package io.tolgee.service.recaptchaValidation
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.service.security.ReCaptchaValidationService
 import io.tolgee.service.security.ReCaptchaValidationService.Companion
-import org.mockito.kotlin.*
+import io.tolgee.testing.assertions.Assertions.assertThat
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean

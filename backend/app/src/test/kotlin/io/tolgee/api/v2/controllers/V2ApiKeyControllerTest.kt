@@ -1,12 +1,18 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
 import io.tolgee.dtos.request.CreateApiKeyDto
 import io.tolgee.dtos.request.V2EditApiKeyDto
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.isValidId
+import io.tolgee.fixtures.node
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.BeforeMethod

@@ -1,10 +1,10 @@
 package io.tolgee.controllers
 
-import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Language
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import org.assertj.core.api.Assertions
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers

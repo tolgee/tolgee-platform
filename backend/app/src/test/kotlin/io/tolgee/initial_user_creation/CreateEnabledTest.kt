@@ -4,9 +4,9 @@
 
 package io.tolgee.initial_user_creation
 
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.service.UserAccountService
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest

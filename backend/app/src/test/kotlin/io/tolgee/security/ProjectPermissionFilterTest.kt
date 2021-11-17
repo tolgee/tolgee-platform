@@ -1,9 +1,9 @@
 package io.tolgee.security
 
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers

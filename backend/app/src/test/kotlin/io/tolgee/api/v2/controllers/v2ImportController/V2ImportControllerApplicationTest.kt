@@ -1,9 +1,9 @@
 package io.tolgee.api.v2.controllers.v2ImportController
 
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.testng.annotations.Test
 
 class V2ImportControllerApplicationTest : SignedInControllerTest() {

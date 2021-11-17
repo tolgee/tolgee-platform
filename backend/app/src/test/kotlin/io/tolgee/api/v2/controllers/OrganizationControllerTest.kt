@@ -1,17 +1,23 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.testing.assertions.Assertions.assertThat
-import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
 import io.tolgee.controllers.SignedInControllerTest
 import io.tolgee.dtos.request.OrganizationDto
 import io.tolgee.dtos.request.OrganizationInviteUserDto
 import io.tolgee.dtos.request.SetOrganizationRoleDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.fixtures.*
+import io.tolgee.fixtures.andAssertError
+import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsBadRequest
+import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsForbidden
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest

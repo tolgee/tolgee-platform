@@ -2,8 +2,8 @@ package io.tolgee.controllers.internal
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.controllers.AbstractControllerTest
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.MvcResult
