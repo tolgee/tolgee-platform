@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/tolgee/server/compare/v1.6.0...v1.7.0) (2021-11-18)
+
+
+### Features
+
+* Gatsby docs and server integration guides to use gatsby-plugin-intl TG-404 ([24d60fb](https://github.com/tolgee/server/commit/24d60fb06fea0246d8c5981d811250a598f6ddf4))
+
 # [1.6.0](https://github.com/tolgee/server/compare/v1.5.0...v1.6.0) (2021-11-18)
 
 
