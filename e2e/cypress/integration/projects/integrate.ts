@@ -171,7 +171,7 @@ describe('Integrate view', () => {
       },
       {
         weapon: 'Gatsby',
-        textsToContain: ['@tolgee/react', 'Create pages for each language'],
+        textsToContain: ['@tolgee/react', 'gatsby-plugin-react-intl'],
       },
       {
         weapon: 'Php',
