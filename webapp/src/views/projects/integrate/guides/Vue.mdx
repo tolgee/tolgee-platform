@@ -1,0 +1,90 @@
+import { GoToDocsButton } from '../component/GoToDocsButton';
+
+<GoToDocsButton
+  href="https://tolgee.io/docs/web/using_with_vue/installation"
+  style={{ float: 'right' }}
+/>
+
+To read full documentation about Tolgee for React, visit [docs](https://tolgee.io/docs/web/using_with_vue/installation).
+
+## Install the packages
+
+You will need `@tolgee/vue` to use `<T>` component or `TolgeeMixin` with `$t` function. `@tolgee/ui` allows you to modify
+translations in-context.
+
+```
+npm install @tolgee/vue @tolgee/ui --save
+```
+
+## Setup your environment
+
+Add this to your `.env.development.local`.
+
+```dotenv
+VUE_APP_TOLGEE_API_URL=https://app.tolgee.io
+VUE_APP_TOLGEE_API_KEY={{{apiKey}}}
+```
+
+## Use TolgeeProvider
+
+Wrap your whole app with Tolgee provider.
+
+```html
+<template>
+  <TolgeeProvider :config="config"> ... </TolgeeProvider>
+</template>
+
+<script>
+  import { TolgeeProvider } from '@tolgee/vue';
+
+  export default {
+    components: { TolgeeProvider },
+    data() {
+      return {
+        config: {
+          apiUrl: process.env.VUE_APP_TOLGEE_API_URL,
+          apiKey: process.env.VUE_APP_TOLGEE_API_KEY,
+          ui: process.env.VUE_APP_TOLGEE_API_KEY
+            ? require('@tolgee/ui').UI
+            : undefined,
+        },
+      };
+    },
+  };
+</script>
+```
+
+## Use Tolgee!
+
+```html
+<template>
+  <T keyName="translation_key" />
+</template>
+
+<script>
+  import {T} from "@tolgee/vue";
+
+  ...
+</script>
+```
+
+or
+
+```html
+<template>
+  <div :title="$t('translation_key')">Hello</div>
+</template>
+
+<script>
+  import { TolgeeMixin } from '@tolgee/vue';
+
+  export default {
+    mixins: [TolgeeMixin],
+  };
+</script>
+```
+
+## Prepare for production
+
+To prepare your App for production, choose a suitable option described
+[here](https://tolgee.io/docs/web/using_with_vue/preparing_for_production).
