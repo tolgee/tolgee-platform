@@ -41,6 +41,11 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(2),
     fontSize: 11,
   },
+  logoTitle: {
+    fontSize: 20,
+    fontWeight: 500,
+    fontFamily: 'Righteous, Rubik, Arial',
+  },
 }));
 
 interface TopBarProps {}
@@ -58,7 +63,11 @@ export function TopBar(props: TopBarProps) {
                 <Box pr={1} display="flex" justifyItems="center">
                   <TolgeeLogo fontSize="large" />
                 </Box>
-                <Typography variant="h6" color="inherit">
+                <Typography
+                  variant="h5"
+                  color="inherit"
+                  className={classes.logoTitle}
+                >
                   {config.appName}
                 </Typography>
                 {config.showVersion && (
