@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/tolgee/server/compare/v1.5.0...v1.6.0) (2021-11-18)
+
+
+### Features
+
+* add integration guide for vue ([29fabaf](https://github.com/tolgee/server/commit/29fabafc9d6f66632ac33f767836ab95ce39795c))
+
 # [1.5.0](https://github.com/tolgee/server/compare/v1.4.4...v1.5.0) (2021-11-14)
 
 
