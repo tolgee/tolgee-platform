@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/tolgee/server/compare/v1.7.0...v1.7.1) (2021-11-18)
+
+
+### Bug Fixes
+
+* Fix H6 font-family TG-411 ([107598e](https://github.com/tolgee/server/commit/107598e34e8de1a7f3dc99402f50b2f1f7e6fe75))
+
 # [1.7.0](https://github.com/tolgee/server/compare/v1.6.0...v1.7.0) (2021-11-18)
 
 
