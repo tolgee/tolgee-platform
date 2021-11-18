@@ -104,8 +104,7 @@ const theme = createTheme({
       fontWeight: 400,
     },
     h6: {
-      fontSize: 20,
-      fontFamily: 'Righteous, Rubik, Arial',
+      fontSize: 18,
       fontWeight: 500,
     },
     subtitle1: {
