@@ -32,6 +32,14 @@ export const guides = [
     ),
   },
   {
+    name: 'Vue',
+    icon: getTechnologyImgComponent('vue'),
+    guide: React.lazy(
+      // @ts-ignore
+      () => import('!babel-loader!@mdx-js/loader!./guides/Vue.mdx')
+    ),
+  },
+  {
     name: 'Next.js',
     icon: getTechnologyImgComponent('next'),
     guide: React.lazy(

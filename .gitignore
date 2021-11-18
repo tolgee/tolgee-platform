@@ -50,3 +50,5 @@ e2e/cypress/integration/examples/
 
 /node_modules
 /**/.DS_Store
+
+src/main/resources/application-js-e2e.properties

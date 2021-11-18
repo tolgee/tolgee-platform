@@ -35,7 +35,7 @@ tolgee:
     default-ttl: 120000
     caffeine-max-size: 1000
   recaptcha:
-    site-key: 6LeJ_PMbAAAAAO_c8dl-W9cXW5oIcEI4p9M6s5sH
+    site-key: 6LfKxj0dAAAAADqxAswMZMMa7laV-sbl97_WioDn
     secret-key: dummy_secret_key
 server:
   port: 8201
