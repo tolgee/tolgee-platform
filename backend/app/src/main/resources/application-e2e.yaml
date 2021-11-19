@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:25432/postgres
+    username: postgres
+    password: postgres
+  liquibase:
+    change-log: classpath:db/changelog/schema.xml
+    drop-first: true
+tolgee:
+  authentication:
+    enabled: true
+    needs-email-verification: true
+    registrations-allowed: true
+    initial-password: "admin"
+    github:
+      client-id: dummy_client_id
+      client-secret: dummy_client_secret
+  screenshots-url: http://localhost:8201/screenshots
+  uploaded-images-url: http://localhost:8080/uploaded-images
+  internal:
+    populate: true
+    controller-enabled: true
+    fake-github-login: true
+  smtp:
+    host: localhost
+    port: 21025
+    ssl-enabled: false
+    auth: false
+    tls-enabled: false
+    tls-required: false
+    from: Tolgee <no-reply@tolgee.io>
+  cache:
+    enabled: true
+    use-redis: false
+    default-ttl: 120000
+    caffeine-max-size: 1000000
+  recaptcha:
+    site-key: 6LfKxj0dAAAAADqxAswMZMMa7laV-sbl97_WioDn
+    secret-key: dummy_secret_key
+server:
+  port: 8201
+  error:
+    include-exception: true
+    include-stacktrace: always

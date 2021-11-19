@@ -1,8 +1,8 @@
 build
 *.iml
-src/main/resources/application-dev.properties
-src/main/resources/application-dev.yaml
-src/main/resources/application-postgres.yaml
+**/application-dev.properties
+**/application-dev.yaml
+**/application-postgres.yaml
 
 bin
 server.iml
@@ -50,5 +50,8 @@ e2e/cypress/integration/examples/
 
 /node_modules
 /**/.DS_Store
+server.ipr
+server.iws
+**/derby.log
 
 src/main/resources/application-js-e2e.properties
