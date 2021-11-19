@@ -1,8 +1,30 @@
-docker {
-    dockerfile file('docker/app/Dockerfile')
-    name "tolgee/tolgee"
-    copySpec.from(tasks.unpack.outputs, 'docker/app').into("dependency")
-    buildArgs(['DEPENDENCY': "dependency"])
+ext {
+    dockerPath = buildDir.absolutePath + "/docker"
+}
+
+task docker {
+    doLast {
+        copy {
+            from(tasks.unpack.outputs, 'docker/app')
+            into(dockerPath)
+        }
+
+        copy {
+            from("${projectDir.absolutePath}/docker/app")
+            into(dockerPath)
+        }
+
+        exec {
+            workingDir dockerPath
+            commandLine "docker", "build", ".", "-t", "tolgee/tolgee"
+            environment.put("DOCKER_BUILDKIT", "0")
+        }
+    }
+    dependsOn("unpack", "copyDist", "copyDockerIgnore", "addVersionFile")
+}
+
+task cleanDocker{
+    delete(dockerPath)
 }
 
 if (tasks.findByName("wrapper") == null) {
@@ -14,5 +36,3 @@ task copyDockerIgnore(type: Copy) {
     from "docker/app/.dockerignore"
     into "build/docker"
 }
-
-project.tasks.findByName("docker").dependsOn(unpack, copyDist, copyDockerIgnore, addVersionFile)

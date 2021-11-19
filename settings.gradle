@@ -1,0 +1,33 @@
+pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'io.spring.dependency-management') {
+                useModule("io.spring.gradle:dependency-management-plugin:$springDependencyManagementVersion")
+            }
+
+            if (requested.id.id == 'org.springframework.boot') {
+                useModule("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+            }
+
+            if (requested.id.id == 'kotlin-allopen') {
+                useModule("org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion")
+            }
+        }
+    }
+}
+
+include ':server-app'
+project(':server-app').projectDir = new File('backend/app')
+
+include ':data'
+project(':data').projectDir = new File('backend/data')
+
+include ':billing-app'
+project(':billing-app').projectDir = new File('../billing/app')
+
+include ':billing-integration-tests'
+project(':billing-integration-tests').projectDir = new File('../billing/integration-tests')
+
+include ':testing'
+project(':testing').projectDir = new File('backend/testing')
+

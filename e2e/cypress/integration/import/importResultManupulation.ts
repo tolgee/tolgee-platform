@@ -64,6 +64,9 @@ describe('Import result & manipulation', () => {
     selectInSelect(select, 'French');
     select.should('contain', 'French');
     select.should('not.contain', 'Czech');
+    // wait for the changing request is finished, this could be done properly,
+    // but for now waiting should be enough
+    cy.wait(200);
   });
 
   it('Changes language', () => {

@@ -1,12 +1,12 @@
 import { ProjectDTO } from '../../../../../webapp/src/service/response.types';
 
 import {
+  assertAvailableCommands,
+  editCell,
+  IS_MAC,
   move,
   selectFirst,
   shortcut,
-  editCell,
-  assertAvailableCommands,
-  IS_MAC,
 } from '../../../common/shortcuts';
 import { assertHasState } from '../../../common/state';
 import {
@@ -68,26 +68,34 @@ describe('Shortcuts', () => {
     assertHasState('Studený přeložený text 1', 'Needs review');
   });
 
-  it('will keep focus after edit', () => {
-    // edit with changes
-    selectFirst();
-    editCell('Cool translated text 1', 'Yo, new cool text', true);
-    cy.focused().contains('Yo, new cool text').should('be.visible');
+  it(
+    'will keep focus after edit',
+    {
+      retries: {
+        runMode: 4,
+      },
+    },
+    () => {
+      // edit with changes
+      selectFirst();
+      editCell('Cool translated text 1', 'Yo, new cool text', true);
+      cy.focused().contains('Yo, new cool text').should('be.visible');
 
-    move('downarrow');
+      move('downarrow');
 
-    // edit without chages
-    editCell('Studený přeložený text 1', 'Studený přeložený text 1', true);
-    cy.focused().contains('Studený přeložený text 1').should('be.visible');
+      // edit without chages
+      editCell('Studený přeložený text 1', 'Studený přeložený text 1', true);
+      cy.focused().contains('Studený přeložený text 1').should('be.visible');
 
-    move('downarrow');
+      move('downarrow');
 
-    // cancel edit
-    editCell('Cool translated text 2', 'Yo, new cool text', false);
-    cy.focused().type('{esc}');
-    cy.wait(100);
-    cy.focused().contains('Cool translated text 2').should('be.visible');
-  });
+      // cancel edit
+      editCell('Cool translated text 2', 'Yo, new cool text', false);
+      cy.focused().type('{esc}');
+      cy.wait(100);
+      cy.focused().contains('Cool translated text 2').should('be.visible');
+    }
+  );
 
   it('will show correct context hint', () => {
     assertAvailableCommands(['Move']);
