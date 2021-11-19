@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="../src/platforms/android/androidauthenticationview.qml" datatype="plaintext" source-language="en" target-language="es-MX">
+    <body>
+      <trans-unit id="vpn.main.back" xml:space="preserve">
+        <source>Back</source>
+      </trans-unit>
+      <trans-unit xml:space="preserve">
+        <target>Autenticación</target>
+      </trans-unit>
+      <trans-unit xml:space="preserve">
+        <target>Missing key again</target>
+      </trans-unit>
+      <trans-unit id="vpn.main.back2" xml:space="preserve">
+        <source>Missing target again</source>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

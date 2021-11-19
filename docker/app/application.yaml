@@ -3,6 +3,11 @@ tolgee:
     fs-data-path: /data
   authentication:
     enabled: false
+  cache:
+    enabled: true
+    use-redis: false
+    default-ttl: 1200000
+    caffeine-max-size: 10000
 spring:
   data:
     redis:
