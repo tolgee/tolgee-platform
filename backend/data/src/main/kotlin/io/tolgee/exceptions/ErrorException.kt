@@ -14,6 +14,11 @@ abstract class ErrorException : RuntimeException {
 
   constructor(message: io.tolgee.constants.Message) : this(message, null)
 
+  constructor(code: String, params: List<Serializable>? = null) {
+    this.code = code
+    this.params = params
+  }
+
   val errorResponseBody: ErrorResponseBody
     get() = ErrorResponseBody(this.code, params)
   abstract val httpStatus: HttpStatus?

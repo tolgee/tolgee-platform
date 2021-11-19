@@ -21,7 +21,7 @@ class ApiKeyService @Autowired constructor(
 ) {
 
   @set:Autowired
-  lateinit var permissionService: io.tolgee.service.PermissionService
+  lateinit var permissionService: PermissionService
 
   fun create(userAccount: UserAccount, scopes: Set<ApiScope>, project: Project): ApiKey {
     val apiKey = ApiKey(

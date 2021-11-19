@@ -6,6 +6,9 @@ buildscript {
     repositories {
         mavenCentral()
     }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+    }
 }
 
 if (System.getenv().containsKey("VERSION")) {

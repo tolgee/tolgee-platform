@@ -4,6 +4,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.DisabledAuthenticationFilter
 import io.tolgee.security.InternalDenyFilter
 import io.tolgee.security.JwtTokenFilter
+import io.tolgee.security.RateLimitsFilter
 import io.tolgee.security.api_key_auth.ApiKeyAuthFilter
 import io.tolgee.security.project_auth.ProjectPermissionFilter
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,13 +25,15 @@ class WebSecurityConfig @Autowired constructor(
   private val apiKeyAuthFilter: ApiKeyAuthFilter,
   private val internalDenyFilter: InternalDenyFilter,
   private val projectPermissionFilter: ProjectPermissionFilter,
-  private val disabledAuthenticationFilter: DisabledAuthenticationFilter
+  private val disabledAuthenticationFilter: DisabledAuthenticationFilter,
+  private val rateLimitsFilter: RateLimitsFilter
 ) : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity) {
     if (configuration.authentication.enabled) {
       http
         .csrf().disable().cors().and().headers().frameOptions().sameOrigin().and()
         .addFilterBefore(internalDenyFilter, UsernamePasswordAuthenticationFilter::class.java)
+        .addFilterBefore(rateLimitsFilter, InternalDenyFilter::class.java)
         .addFilterBefore(disabledAuthenticationFilter, InternalDenyFilter::class.java)
         // if jwt token is provided in header, this filter will authorize user, so the request is not gonna reach the ldap auth
         .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter::class.java)

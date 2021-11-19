@@ -1,8 +1,7 @@
-package io.tolgee.cache
+package io.tolgee.security.rateLimits
 
 import io.tolgee.fixtures.RedisRunner
-import io.tolgee.testing.assertions.Assertions.assertThat
-import org.redisson.spring.cache.RedissonSpringCacheManager
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
@@ -10,15 +9,16 @@ import org.springframework.test.context.ContextConfiguration
 import org.testng.annotations.AfterClass
 import org.testng.annotations.Test
 
+@AutoConfigureMockMvc
 @SpringBootTest(
   properties = [
-    "spring.redis.port=56379",
-    "tolgee.cache.use-redis=true",
     "tolgee.cache.enabled=true",
+    "tolgee.cache.use-redis=true",
+    "spring.redis.port=56379",
   ]
 )
-@ContextConfiguration(initializers = [CacheWithRedisTest.Companion.Initializer::class])
-class CacheWithRedisTest : AbstractCacheTest() {
+@ContextConfiguration(initializers = [RedisRateLimitsTest.Companion.Initializer::class])
+class RedisRateLimitsTest : AbstractRateLimitsTest() {
   companion object {
     val redisRunner = RedisRunner()
 
@@ -35,7 +35,7 @@ class CacheWithRedisTest : AbstractCacheTest() {
   }
 
   @Test
-  fun `it has proper cache manager`() {
-    assertThat(cacheManager).isInstanceOf(RedissonSpringCacheManager::class.java)
+  override fun `it doesn't allow more then set in configuration`() {
+    super.`it doesn't allow more then set in configuration`()
   }
 }

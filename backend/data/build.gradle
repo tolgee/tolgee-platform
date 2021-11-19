@@ -6,27 +6,17 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    ext {
-        kotlinVersion = findProperty("kotlinVersion") ?: '1.5.10'
-        springBootVersion = findProperty("springBootVersion") ?: '2.4.5'
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
-        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
-        classpath group: 'commons-io', name: 'commons-io', version: '2.11.0'
-    }
 }
 
 plugins {
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.springframework.boot' version "$springBootVersion"
+    id 'io.spring.dependency-management'
+    id 'org.springframework.boot'
     id 'java'
     id 'org.liquibase.gradle' version '2.0.4'
-    id 'org.jetbrains.kotlin.jvm' version "${kotlinVersion}"
+    id 'org.jetbrains.kotlin.jvm'
     id "org.jetbrains.kotlin.plugin.jpa" version "${kotlinVersion}"
-    id "org.jetbrains.kotlin.kapt" version "${kotlinVersion}"
+    id "org.jetbrains.kotlin.kapt"
+    id "kotlin-allopen"
 }
 
 group = 'io.tolgee'
@@ -52,6 +42,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: "org.jetbrains.kotlin.plugin.jpa"
 apply plugin: "kotlin-allopen"
+apply plugin: "kotlin-kapt"
 
 repositories {
     mavenCentral()
@@ -132,8 +123,8 @@ def JJWT_VERSION = findProperty("jjwtVersion")
 def SPRING_DOC_VERSION = findProperty("springDocVersion")
 
 
-def LIQUIBASE_VERSION = "4.4.2"
-def LIQUIBASE_HIBERNATE_VERSION = "4.4.2"
+def LIQUIBASE_VERSION = "4.6.1"
+def LIQUIBASE_HIBERNATE_VERSION = "4.6.1"
 
 dependencies {
     /**
@@ -149,6 +140,8 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
+    kapt "org.springframework.boot:spring-boot-configuration-processor"
+    implementation "org.springframework.boot:spring-boot-configuration-processor"
 
     /**
      * DB
@@ -218,12 +211,6 @@ project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SE
 sourceSets {
     main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
     test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
-}
-
-dependencyManagement {
-    imports {
-        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
-    }
 }
 
 tasks.findByName("jar").enabled(true)

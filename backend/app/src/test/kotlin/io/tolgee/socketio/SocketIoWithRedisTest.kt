@@ -3,7 +3,7 @@ package io.tolgee.socketio
 import com.corundumstudio.socketio.SocketIOServer
 import com.corundumstudio.socketio.store.RedissonStoreFactory
 import com.corundumstudio.socketio.store.StoreFactory
-import io.tolgee.fixtures.DockerContainerRunner
+import io.tolgee.fixtures.RedisRunner
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
@@ -28,12 +28,7 @@ class SocketIoWithRedisTest : AbstractSocketIoTest() {
   companion object {
     const val SECONDARY_SOCKET_SERVER_PORT = 19091
 
-    val redisRunner = DockerContainerRunner(
-      image = "redis:6",
-      expose = mapOf("56379" to "6379"),
-      name = "server-integration-test-redis",
-      waitForLog = "Ready to accept connections"
-    )
+    val redisRunner = RedisRunner()
 
     class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
 

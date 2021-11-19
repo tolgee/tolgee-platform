@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 class SecurityService @Autowired constructor(private val authenticationFacade: AuthenticationFacade) {
 
   @set:Autowired
-  lateinit var apiKeyService: io.tolgee.service.ApiKeyService
+  lateinit var apiKeyService: ApiKeyService
 
   @set:Autowired
   lateinit var permissionService: PermissionService

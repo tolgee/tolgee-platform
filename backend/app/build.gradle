@@ -6,26 +6,16 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    ext {
-        kotlinVersion = findProperty("kotlinVersion") ?: '1.5.10'
-        springBootVersion = findProperty("springBootVersion") ?: '2.4.5'
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
-        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-noarg:${kotlinVersion}")
-        classpath group: 'commons-io', name: 'commons-io', version: '2.11.0'
-    }
 }
 
 plugins {
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
     id 'org.springframework.boot' version "$springBootVersion"
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version "${kotlinVersion}"
+    id 'org.jetbrains.kotlin.jvm'
     id "org.jetbrains.kotlin.plugin.jpa" version "${kotlinVersion}"
-    id "org.jetbrains.kotlin.kapt" version "${kotlinVersion}"
+    id "org.jetbrains.kotlin.kapt"
+    id "kotlin-allopen"
 }
 
 group = 'io.tolgee'
@@ -146,7 +136,7 @@ dependencies {
      * KOTLIN
      */
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
-
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
 
     /**
      * Conditional billing module

@@ -8,7 +8,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   datasource:
-    url: jdbc:h2:./build/test_data/testdb.h2db;AUTO_SERVER=TRUE;
+    url: jdbc:h2:mem:testdb
   liquibase:
     drop-first: true
     change-log: classpath:db/changelog/schema.xml

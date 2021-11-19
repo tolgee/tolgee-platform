@@ -1304,4 +1304,17 @@
     <changeSet author="jenik (generated)" id="1633085681853-14">
         <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="uploaded_image" constraintName="FKelfpas8y8t5pq40m57ttdcnf" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1637177424360-3">
+        <addColumn tableName="organization">
+            <column name="third_party_billing_id" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1637177424360-4">
+        <addColumn tableName="organization_aud">
+            <column name="third_party_billing_id" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1637177424360-5">
+        <addUniqueConstraint columnNames="third_party_billing_id" constraintName="organization_third_party_billing_id_unique" tableName="organization"/>
+    </changeSet>
 </databaseChangeLog>
