@@ -1,0 +1,217 @@
+/*
+ * Copyright (c) 2020. Tolgee
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'io.spring.dependency-management'
+    id 'org.springframework.boot'
+    id 'java'
+    id 'org.liquibase.gradle' version '2.0.4'
+    id 'org.jetbrains.kotlin.jvm'
+    id "org.jetbrains.kotlin.plugin.jpa" version "${kotlinVersion}"
+    id "org.jetbrains.kotlin.kapt"
+    id "kotlin-allopen"
+}
+
+group = 'io.tolgee'
+
+if (System.getenv().containsKey("VERSION")) {
+    project.version = System.getenv().get("VERSION")
+} else {
+    project.version = 'local'
+}
+
+configurations {
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
+    ktlint
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: "org.jetbrains.kotlin.plugin.jpa"
+apply plugin: "kotlin-allopen"
+apply plugin: "kotlin-kapt"
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+sourceCompatibility = 11
+
+idea {
+    module {
+        generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
+    }
+}
+
+allOpen {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+    annotation("javax.persistence.Embeddable")
+    annotation("org.springframework.stereotype.Component")
+    annotation("org.springframework.transaction.annotation.Transactional")
+    annotation("org.springframework.stereotype.Service")
+    annotation("org.springframework.beans.factory.annotation.Configurable")
+}
+
+def liveDbPostgres = [
+        url         : 'jdbc:postgresql://localhost:5432/postgres',
+        referenceUrl: 'hibernate:spring:io.tolgee' +
+                '?dialect=org.hibernate.dialect.PostgreSQL95Dialect' +
+                '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
+                '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
+        username    : 'postgres',
+        password    : 'postgres',
+        driver      : "org.postgresql.Driver"
+]
+
+def liveDbH2 = [
+        url         : "jdbc:h2:${project.projectDir}/build/tmp_db_schema_updates/db.h2;DATABASE_TO_LOWER=TRUE",
+        referenceUrl: 'hibernate:spring:io.tolgee' +
+                '?dialect=org.hibernate.dialect.H2Dialect' +
+                '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
+                '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
+        driver      : 'org.h2.Driver'
+]
+
+def liveDb = liveDbPostgres
+
+liquibase {
+    activities {
+        //noinspection GroovyAssignabilityCheck
+        main {
+            changeLogFile 'src/main/resources/db/changelog/schema.xml'
+            url liveDb.url
+            referenceUrl liveDb.referenceUrl
+            if (liveDb.username) {
+                username liveDb.username
+            }
+            if (liveDb.password) {
+                password liveDb.password
+            }
+
+            driver liveDb.driver
+        }
+    }
+}
+
+diff.dependsOn compileKotlin
+diffChangeLog.dependsOn compileKotlin
+
+compileKotlin {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+/**
+ * Versions from properties
+ */
+def JJWT_VERSION = findProperty("jjwtVersion")
+def SPRING_DOC_VERSION = findProperty("springDocVersion")
+
+
+def LIQUIBASE_VERSION = "4.6.1"
+def LIQUIBASE_HIBERNATE_VERSION = "4.6.1"
+
+dependencies {
+    /**
+     * SPRING
+     */
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation "org.springframework.boot:spring-boot-starter-validation"
+    implementation("org.springframework.data:spring-data-envers")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    kapt "org.springframework.boot:spring-boot-configuration-processor"
+    implementation "org.springframework.boot:spring-boot-configuration-processor"
+
+    /**
+     * DB
+     */
+    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'com.h2database:h2'
+    implementation 'org.hibernate:hibernate-jpamodelgen'
+    kapt "org.hibernate:hibernate-jpamodelgen"
+
+
+    /**
+     * Liquibase
+     */
+    implementation("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
+    liquibaseRuntime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
+    liquibaseRuntime 'org.postgresql:postgresql'
+    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.1')
+    liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:$LIQUIBASE_HIBERNATE_VERSION")
+    liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
+    liquibaseRuntime sourceSets.main.output
+    liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    /**
+     * Testing
+     */
+    implementation("org.assertj:assertj-core:${findProperty("assertJVerison")}")
+    implementation group: 'org.testng', name: 'testng', version: findProperty("testNgVersion")
+    implementation group: 'com.ninja-squad', name: 'springmockk', version: findProperty("springMockkVersion")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:${findProperty("mockitoVersion")}")
+    implementation "net.javacrumbs.json-unit:json-unit-assertj:${findProperty("jsonUnitAssertJVersion")}"
+
+    /**
+     * Kotlin
+     */
+    implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
+    liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
+
+
+    /**
+     * SPRING DOC
+     */
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-kotlin', version: "${SPRING_DOC_VERSION}"
+    implementation "org.springdoc:springdoc-openapi-webmvc-core:${SPRING_DOC_VERSION}"
+
+
+    /**
+     * MISC
+     */
+    implementation "commons-codec:commons-codec:${findProperty("commonsCodecVersion")}"
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: findProperty("amazonAwsSdkVersion")
+    implementation group: 'com.ibm.icu', name: 'icu4j', version: findProperty("icu4jVersion")
+    implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
+    implementation "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
+            "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${findProperty("jacksonModuleKotlinVersion")}"
+}
+
+test {
+    useTestNG()
+    maxHeapSize = "2048m"
+}
+
+project.tasks.findByName("compileKotlin").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("compileJava").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+project.tasks.findByName("bootJarMainClassName").onlyIf { System.getenv("SKIP_SERVER_BUILD") != "true" }
+
+sourceSets {
+    main.kotlin.srcDirs = ['src/main/kotlin', 'src/main/java']
+    test.kotlin.srcDirs = ['src/test/kotlin', 'src/test/java']
+}
+
+tasks.findByName("jar").enabled(true)
+tasks.findByName("bootJar").enabled(false)
