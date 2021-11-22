@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/tolgee/server/compare/v1.7.1...v1.8.0) (2021-11-22)
+
+
+### Features
+
+* Server modularization and rate limits TG-407 ([85b0ab1](https://github.com/tolgee/server/commit/85b0ab1025c261e9dde2809391069e937796e220))
+
 ## [1.7.1](https://github.com/tolgee/server/compare/v1.7.0...v1.7.1) (2021-11-18)
 
 
