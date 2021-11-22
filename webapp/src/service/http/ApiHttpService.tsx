@@ -114,6 +114,7 @@ export class ApiHttpService {
           errorActions.globalError.dispatch(
             new GlobalError('Error while loading resource', input.toString(), e)
           );
+          reject(e);
         });
     });
   }
