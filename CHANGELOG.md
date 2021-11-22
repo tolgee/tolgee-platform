@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/tolgee/server/compare/v1.8.1...v1.8.2) (2021-11-22)
+
+
+### Bug Fixes
+
+* Fix intermittent tests TG-414 ([e182679](https://github.com/tolgee/server/commit/e182679fc4dc7efdbfd164c215b1b387ab17d1c5))
+
 ## [1.8.1](https://github.com/tolgee/server/compare/v1.8.0...v1.8.1) (2021-11-22)
 
 
