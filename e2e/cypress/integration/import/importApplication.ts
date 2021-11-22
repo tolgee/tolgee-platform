@@ -21,19 +21,27 @@ describe('Import application', () => {
     });
   });
 
-  it('Applies import', () => {
-    gcy('import_apply_import_button').click();
-    cy.gcy('import-result-row').should('not.exist');
-    selectInProjectMenu('Translations');
-    toggleInMultiselect(gcy('translations-language-select-form-control'), [
-      'French',
-      'English',
-    ]);
-    cy.gcy('translations-table-cell')
-      .contains('What a text')
-      .should('be.visible');
-    cy.gcy('translations-table-cell')
-      .contains('What a french text')
-      .should('be.visible');
-  });
+  it(
+    'Applies import',
+    {
+      retries: {
+        runMode: 4,
+      },
+    },
+    () => {
+      gcy('import_apply_import_button').click();
+      cy.gcy('import-result-row').should('not.exist');
+      selectInProjectMenu('Translations');
+      toggleInMultiselect(gcy('translations-language-select-form-control'), [
+        'French',
+        'English',
+      ]);
+      cy.gcy('translations-table-cell')
+        .contains('What a text')
+        .should('be.visible');
+      cy.gcy('translations-table-cell')
+        .contains('What a french text')
+        .should('be.visible');
+    }
+  );
 });
