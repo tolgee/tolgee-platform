@@ -16,7 +16,7 @@ export const useConfig =
     const actions = container.resolve(GlobalActions);
 
     if (loadable.error) {
-      throw new GlobalError(loadable.error.code);
+      throw new GlobalError(loadable.error.message);
     }
 
     useEffect(() => {
