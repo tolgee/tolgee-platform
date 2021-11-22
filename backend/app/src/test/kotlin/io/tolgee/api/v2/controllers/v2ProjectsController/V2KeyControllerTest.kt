@@ -31,10 +31,8 @@ import java.math.BigDecimal
 @AutoConfigureMockMvc
 class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   companion object {
-    const val LONGER_NAME = "FrWvKivzSEqhTeyJwLvlHJnMRWsqwwto0Vxfxd45OMQXkWLnmMB2SSW" +
-      "v0azV5BOb8uPf1XgvZOLtbLJuAHnzgG1lmiGMVY4FKrL8p1wQlZQg" +
-      "0BGLDG0bRD4WSVneChpPTbwN5bUWLa8ItXSXwP9nbE0GJi6ezwkS" +
-      "McWs3Mcr7W6l20DLGQIfAVALAuPXICRxshLbq57GV"
+    val MAX_OK_NAME = (1..2000).joinToString("") { "a" }
+    val LONGER_NAME = (1..2001).joinToString("") { "a" }
   }
 
   @Value("classpath:screenshot.png")
@@ -57,6 +55,16 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
       .andIsCreated.andPrettyPrint.andAssertThatJson {
         node("id").isValidId
         node("name").isEqualTo("super_key")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `creates key with size 2000`() {
+    performProjectAuthPost("keys", CreateKeyDto(name = MAX_OK_NAME))
+      .andIsCreated.andPrettyPrint.andAssertThatJson {
+        node("id").isValidId
+        node("name").isEqualTo(MAX_OK_NAME)
       }
   }
 
@@ -237,7 +245,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthPost("keys", CreateKeyDto(name = LONGER_NAME))
       .andIsBadRequest.andPrettyPrint.andAssertThatJson {
         node("STANDARD_VALIDATION") {
-          node("name").isEqualTo("length must be between 1 and 200")
+          node("name").isEqualTo("length must be between 1 and 2000")
         }
       }
   }

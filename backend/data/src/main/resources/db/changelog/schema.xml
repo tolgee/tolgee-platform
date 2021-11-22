@@ -1317,4 +1317,10 @@
     <changeSet author="jenik (generated)" id="1637177424360-5">
         <addUniqueConstraint columnNames="third_party_billing_id" constraintName="organization_third_party_billing_id_unique" tableName="organization"/>
     </changeSet>
+    <changeSet author="jenik" id="1637177424380-0">
+        <modifyDataType
+                columnName="name"
+                newDataType="varchar(2000)"
+                tableName="key"/>
+    </changeSet>
 </databaseChangeLog>

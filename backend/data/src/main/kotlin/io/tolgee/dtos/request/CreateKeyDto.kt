@@ -12,7 +12,7 @@ data class CreateKeyDto(
    */
   @Schema(description = "Name of the key")
   @field:NotBlank
-  @field:Length(max = 200, min = 1)
+  @field:Length(max = 2000, min = 1)
   val name: String = "",
 
   val translations: Map<String, String?>? = null,
