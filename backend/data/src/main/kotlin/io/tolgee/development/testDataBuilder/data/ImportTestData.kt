@@ -151,7 +151,7 @@ class ImportTestData {
             self { name = "what a beautiful key" }
           }.self
           addImportKey {
-            self { name = "another nice key" }
+            self { name = (1..2000).joinToString("") { "a" } }
           }.self
           addImportKey {
             self { name = "extraordinary key" }

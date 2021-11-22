@@ -5,6 +5,6 @@ import javax.validation.constraints.NotBlank
 
 data class EditKeyDto(
   @field:NotBlank
-  @field:Length(max = 200)
+  @field:Length(max = 2000)
   var name: String = ""
 )
