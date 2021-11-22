@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/tolgee/server/compare/v1.8.0...v1.8.1) (2021-11-22)
+
+
+### Bug Fixes
+
+* Infinite request loop when backend returns 500 or empty response TG-410 ([7e6475a](https://github.com/tolgee/server/commit/7e6475abfa926d9c3cb70bb6c64e71a1b6a8a5cd))
+
 # [1.8.0](https://github.com/tolgee/server/compare/v1.7.1...v1.8.0) (2021-11-22)
 
 
