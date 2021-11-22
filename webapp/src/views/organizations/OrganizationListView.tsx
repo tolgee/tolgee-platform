@@ -24,7 +24,7 @@ export const OrganizationsListView = () => {
 
   const [page, setPage] = useState(0);
 
-  const organizatationsLoadable = useApiQuery({
+  const organizationsLoadable = useApiQuery({
     url: '/v2/organizations',
     method: 'get',
     query: {
@@ -42,13 +42,13 @@ export const OrganizationsListView = () => {
       windowTitle={t('organizations_title')}
       title={t('organizations_title')}
       containerMaxWidth="lg"
-      loading={organizatationsLoadable.isFetching}
+      loading={organizationsLoadable.isFetching}
       hideChildrenOnLoading={false}
     >
       <PaginatedHateoasList
-        loadable={organizatationsLoadable}
+        loadable={organizationsLoadable}
         emptyPlaceholder={
-          <EmptyListMessage loading={organizatationsLoadable.isFetching} />
+          <EmptyListMessage loading={organizationsLoadable.isFetching} />
         }
         onPageChange={setPage}
         renderItem={(item) => (
