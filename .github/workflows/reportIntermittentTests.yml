@@ -31,15 +31,21 @@ jobs:
       - name: Build backend
         run: ./gradlew bootJar
 
-      - name: Tar build
-        run: tar -czf ~/backend.tgz ./build
+      - name: Tar App build
+        run: tar -czf ~/backend-app.tgz ./backend/app/build
+
+      - name: Tar Data build
+        run: tar -czf ~/backend-data.tgz ./backend/data/build
+
+      - name: Tar Testing build
+        run: tar -czf ~/backend-testing.tgz ./backend/testing/build
 
       - uses: actions/upload-artifact@v2
         if: always()
         with:
           name: backend
           path: |
-            ~/backend.tgz
+            ~/backend-app.tgz
 
   e2e:
     needs: [ frontend-build, backend-build, e2e-install-deps ]
@@ -83,7 +89,7 @@ jobs:
           path: ~/
 
       - name: Untar it
-        run: tar -xzf ~/backend.tgz ./build
+        run: tar -xzf ~/backend-app.tgz ./backend/app/build
 
       - name: Download frontend build result
         uses: actions/download-artifact@v2
