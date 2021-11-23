@@ -1,3 +1,10 @@
+## [1.8.3](https://github.com/tolgee/server/compare/v1.8.2...v1.8.3) (2021-11-23)
+
+
+### Bug Fixes
+
+* Screenshot filters won't reduce total keys count TG-384 ([0aa0bd2](https://github.com/tolgee/server/commit/0aa0bd2073f3b52a4d6abad02da3d83d87b3bcf5))
+
 ## [1.8.2](https://github.com/tolgee/server/compare/v1.8.1...v1.8.2) (2021-11-22)
 
 
