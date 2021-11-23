@@ -129,10 +129,11 @@ class V2TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projec
   @ProjectJWTAuthTestMethod
   @Test
   fun `filters by hasScreenshot`() {
+    testData.generateLotOfData()
     testData.addKeysWithScreenshots()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations?filterHasScreenshot=true")
+    performProjectAuthGet("/translations?languages=en&filterHasScreenshot=true")
       .andPrettyPrint.andIsOk.andAssertThatJson {
         node("_embedded.keys[0].screenshotCount").isEqualTo(2)
         node("page.totalElements").isEqualTo(2)

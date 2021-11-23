@@ -37,8 +37,10 @@ class TranslationsViewBuilder(
   private lateinit var screenshotCountExpression: Expression<Long>
   private val havingConditions: MutableSet<Predicate> = HashSet()
   private val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
+  lateinit var query: CriteriaQuery<*>
 
   private fun <T> getBaseQuery(query: CriteriaQuery<T>): CriteriaQuery<T> {
+    this.query = query
     root = query.from(Key::class.java)
     keyIdExpression = root.get(Key_.id)
     selection[KeyWithTranslationsView::keyId.name] = keyIdExpression
@@ -48,7 +50,6 @@ class TranslationsViewBuilder(
     fullTextFields.add(root.get(Key_.name))
     addLeftJoinedColumns()
     applyGlobalFilters()
-    query.having(*havingConditions.toTypedArray())
     return query
   }
 
@@ -107,9 +108,18 @@ class TranslationsViewBuilder(
     return this.lessThanOrEqualTo(expression, value as String?)
   }
 
+  private fun addScreenshotCounts() {
+    val screenshotSubquery = query.subquery(Long::class.java)
+    val screenshotRoot = screenshotSubquery.from(Screenshot::class.java)
+    val screenshotCount = cb.count(screenshotRoot.get(Screenshot_.id))
+    screenshotSubquery.select(screenshotCount)
+    val screenshotsJoin: Join<Screenshot, Key> = screenshotRoot.join(Screenshot_.key)
+    screenshotSubquery.where(cb.equal(root.get(Key_.id), screenshotsJoin.get(Key_.id)))
+    screenshotCountExpression = screenshotSubquery.selection
+  }
+
   private fun addLeftJoinedColumns() {
-    val screenshotsJoin = root.join(Key_.screenshots, JoinType.LEFT)
-    screenshotCountExpression = cb.count(screenshotsJoin)
+    addScreenshotCounts()
     selection[KeyWithTranslationsView::screenshotCount.name] = screenshotCountExpression
     val project = root.join(Key_.project)
     for (language in languages) {
@@ -192,10 +202,10 @@ class TranslationsViewBuilder(
         whereConditions.add(cb.or(*predicates))
       }
       if (params.filterHasScreenshot) {
-        havingConditions.add(cb.gt(screenshotCountExpression, 0))
+        whereConditions.add(cb.gt(screenshotCountExpression, 0))
       }
       if (params.filterHasNoScreenshot) {
-        havingConditions.add(cb.lt(screenshotCountExpression, 1))
+        whereConditions.add(cb.lt(screenshotCountExpression, 1))
       }
       if (!params.search.isNullOrEmpty()) {
         val fullTextRestrictions: MutableSet<Predicate> = HashSet()
