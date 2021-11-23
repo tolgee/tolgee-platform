@@ -1,6 +1,5 @@
 import { default as React, useState } from 'react';
 import { IconButton, makeStyles, Menu, MenuItem } from '@material-ui/core';
-import { AccountCircle } from '@material-ui/icons';
 import { T } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -11,6 +10,7 @@ import { useUser } from 'tg.hooks/useUser';
 import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
+import { UserAvatar } from 'tg.component/common/UserAvatar';
 
 const globalActions = container.resolve(GlobalActions);
 
@@ -27,6 +27,9 @@ const useStyles = makeStyles((theme) => ({
     width: 30,
     height: 30,
   },
+  menuTitle: {
+    opacity: '0.7 !important',
+  },
 }));
 
 export const UserMenu: React.FC = () => {
@@ -35,7 +38,7 @@ export const UserMenu: React.FC = () => {
     (state: AppState) => state.global.security.allowPrivate
   );
 
-  const authentication = useConfig().authentication;
+  const { authentication } = useConfig();
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     //@ts-ignore
@@ -65,7 +68,7 @@ export const UserMenu: React.FC = () => {
         onClick={handleOpen}
         className={classes.iconButton}
       >
-        <AccountCircle className={classes.icon} fontSize="large" />
+        <UserAvatar fullName={user.name} userName={user.username} />
       </IconButton>
       <Menu
         id="user-menu"
@@ -85,6 +88,9 @@ export const UserMenu: React.FC = () => {
         }}
         classes={{ paper: classes.paper }}
       >
+        <MenuItem divider disabled className={classes.menuTitle}>
+          {user.name}
+        </MenuItem>
         {userMenuItems.map((item, index) => (
           //@ts-ignore
           <MenuItem key={index} component={Link} to={item.link}>
