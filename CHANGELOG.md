@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/tolgee/server/compare/v1.8.3...v1.9.0) (2021-11-24)
+
+
+### Features
+
+* Nicer user avatar TG-392 ([5712de0](https://github.com/tolgee/server/commit/5712de03f29f030b0e87054db98e67a93dea2322))
+
 ## [1.8.3](https://github.com/tolgee/server/compare/v1.8.2...v1.8.3) (2021-11-23)
 
 
