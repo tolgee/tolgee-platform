@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/tolgee/server/compare/v1.9.0...v1.9.1) (2021-11-24)
+
+
+### Bug Fixes
+
+* Fix imported keys too long TG-373 ([5f7ecaf](https://github.com/tolgee/server/commit/5f7ecaf820f2b3de465871f7b12788221b6e12ea))
+
 # [1.9.0](https://github.com/tolgee/server/compare/v1.8.3...v1.9.0) (2021-11-24)
 
 
