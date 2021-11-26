@@ -45,8 +45,16 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
       flag: '🇬🇧',
     },
     cs: {
-      name: 'Česky',
+      name: 'česky',
       flag: '🇨🇿',
+    },
+    fr: {
+      name: 'Français',
+      flag: '🇫🇷',
+    },
+    es: {
+      name: 'español',
+      flag: '🇪🇸',
     },
   };
 
