@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/tolgee/server/compare/v1.9.1...v1.10.0) (2021-11-26)
+
+
+### Features
+
+* Enable French and Spanish TG-426 ([33eab56](https://github.com/tolgee/server/commit/33eab56e603892ab518e7a3aee97ed95fc34ad70))
+
 ## [1.9.1](https://github.com/tolgee/server/compare/v1.9.0...v1.9.1) (2021-11-24)
 
 
