@@ -158,7 +158,7 @@ dependencies {
     implementation("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime 'org.postgresql:postgresql'
-    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.1')
+    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.2')
     liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:$LIQUIBASE_HIBERNATE_VERSION")
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
     liquibaseRuntime sourceSets.main.output
