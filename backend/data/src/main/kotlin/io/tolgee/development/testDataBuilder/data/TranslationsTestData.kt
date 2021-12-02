@@ -304,7 +304,7 @@ class TranslationsTestData {
           self {
             key = this@addKey.self
             language = germanLanguage
-            text = "d"
+            text = "f"
           }
         }
       }
@@ -314,7 +314,7 @@ class TranslationsTestData {
           self {
             key = this@addKey.self
             language = germanLanguage
-            text = "d"
+            text = "f"
           }
         }
       }
@@ -334,7 +334,7 @@ class TranslationsTestData {
           self {
             key = this@addKey.self
             language = germanLanguage
-            text = "a"
+            text = "b"
           }
         }
       }
@@ -344,7 +344,7 @@ class TranslationsTestData {
           self {
             key = this@addKey.self
             language = germanLanguage
-            text = "a"
+            text = "b"
           }
         }
       }

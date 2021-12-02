@@ -8,15 +8,22 @@ tolgee:
     use-redis: false
     default-ttl: 1200000
     caffeine-max-size: 10000
+  postgres-autostart:
+    enabled: true
+    mode: EMBEDDED
 spring:
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 100
+        order_inserts: true
+        order_updates: true
+        dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
   data:
     redis:
       repositories:
         enabled: false
-  datasource:
-    url: jdbc:h2:${tolgee.file-storage.fs-data-path}/db.h2
-    username: sa
-    password: password
   liquibase:
     change-log: classpath:db/changelog/schema.xml
 server:

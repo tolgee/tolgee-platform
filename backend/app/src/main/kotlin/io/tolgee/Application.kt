@@ -7,6 +7,7 @@ import io.tolgee.dtos.request.SignUpDto
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.UserAccountService
 import org.redisson.spring.starter.RedissonAutoConfiguration
+import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
@@ -22,11 +23,25 @@ class Application(
   initialPasswordManager: InitialPasswordManager,
 ) {
   companion object {
+    private val log = LoggerFactory.getLogger(Application::class.java)
+
     @JvmStatic
     fun main(args: Array<String>) {
       val app = SpringApplication(Application::class.java)
       app.setBanner(Banner())
-      app.run(*args)
+      try {
+        app.run(*args)
+      } catch (e: Exception) {
+        preventNonNullExitCodeOnSilentExitException(e)
+      }
+    }
+
+    private fun preventNonNullExitCodeOnSilentExitException(e: Exception) {
+      if (e.toString().contains("SilentExitException")) {
+        log.info("Ignoring Silent Exit Exception...")
+        return
+      }
+      throw e
     }
   }
 

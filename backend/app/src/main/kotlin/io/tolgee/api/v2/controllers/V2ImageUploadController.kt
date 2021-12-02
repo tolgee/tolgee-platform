@@ -40,7 +40,7 @@ class V2ImageUploadController(
   private val authenticationFacade: AuthenticationFacade
 ) {
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-  @Operation(summary = "Uploads an image for lateer use")
+  @Operation(summary = "Uploads an image for later use")
   @AccessWithApiKey
   @ResponseStatus(HttpStatus.CREATED)
   fun upload(

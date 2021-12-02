@@ -1323,4 +1323,68 @@
                 newDataType="varchar(2000)"
                 tableName="key"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1638968082095-1">
+        <createTable tableName="mt_credit_bucket">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="mt_credit_bucketPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="credits" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="refilled" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="organization_id" type="BIGINT"/>
+            <column name="user_account_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638968082095-2">
+        <createTable tableName="mt_service_config">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="mt_service_configPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="primary_service" type="VARCHAR(255)"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="target_language_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638968082095-3">
+        <createTable tableName="mt_service_config_enabled_services">
+            <column name="mt_service_config_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled_services" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638968082095-5">
+        <addForeignKeyConstraint baseColumnNames="target_language_id" baseTableName="mt_service_config" constraintName="FK6dcse6i27cymn9au7m51etb43" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638968082095-6">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="mt_service_config" constraintName="FK7cklk7byifpo0jj5q58dwn6rt" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638968082095-7">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="mt_credit_bucket" constraintName="FKlgwarx2xdphg9imptapjv2p6j" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638968082095-8">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="mt_credit_bucket" constraintName="FKsx03b0rw40yo8jtqkklir7h04" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638968082095-9">
+        <addForeignKeyConstraint baseColumnNames="mt_service_config_id" baseTableName="mt_service_config_enabled_services" constraintName="FKvo4mgub2uvhr99nqjm2gwy57" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="mt_service_config" validate="true"/>
+    </changeSet>
+    <changeSet id="1638968082096-0" author="jenik">
+        <sql dbms="postgresql">
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
+            CREATE INDEX translation_text_gin_trgm_index ON translation USING GIN (text gin_trgm_ops);
+        </sql>
+    </changeSet>
 </databaseChangeLog>

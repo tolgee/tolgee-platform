@@ -48,7 +48,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
 
-    performAuthGet("/v2/projects/with-stats")
+    performAuthGet("/v2/projects/with-stats?sort=id")
       .andIsOk.andAssertThatJson.node("_embedded.projects").let {
         it.isArray.hasSize(2)
         it.node("[0].userOwner.username").isEqualTo("test_username")
@@ -107,7 +107,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     loginAsUser(usersAndOrganizations[1].name)
 
-    performAuthGet("/v2/projects/${repo.id}/users").andPrettyPrint.andAssertThatJson
+    performAuthGet("/v2/projects/${repo.id}/users?sort=id").andPrettyPrint.andAssertThatJson
       .node("_embedded.users").let {
         it.isArray.hasSize(3)
         it.node("[0].organizationRole").isEqualTo("MEMBER")

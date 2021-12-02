@@ -1,14 +1,6 @@
 version: '3'
 
 services:
-  db:
-    image: postgres:11
-    #volumes:
-    #  - db-data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_PASSWORD=postgres
-  #    ports:
-  #      - "5432:5432"
   app:
     image: tolgee/tolgee
     ports:
@@ -20,5 +12,3 @@ services:
       - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=*:8091,server=y,suspend=n
     depends_on:
       - "db"
-#volumes:
-#  db-data:

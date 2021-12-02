@@ -148,12 +148,15 @@ class V2TranslationsController(
   ): KeysWithTranslationsPageModel {
     val languages: Set<Language> = languageService
       .getLanguagesForTranslationsView(params.languages, projectHolder.project.id)
+
     val data = translationService.getViewData(projectHolder.project.id, pageable, params, languages)
 
     val keysWithScreenshots = getKeysWithScreenshots(data.map { it.keyId }.toList())
+
     if (keysWithScreenshots != null) {
       data.content.forEach { it.screenshots = keysWithScreenshots[it.keyId] ?: listOf() }
     }
+
     val cursor = if (data.content.isNotEmpty()) CursorUtil.getCursor(data.content.last(), data.sort) else null
     return pagedAssembler.toTranslationModel(data, languages, cursor)
   }

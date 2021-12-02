@@ -23,11 +23,13 @@ include ':data'
 project(':data').projectDir = new File('backend/data')
 
 include ':billing-app'
-project(':billing-app').projectDir = new File('../billing/app')
+project(':billing-app').projectDir = new File('../billing_/app')
 
 include ':billing-integration-tests'
-project(':billing-integration-tests').projectDir = new File('../billing/integration-tests')
+project(':billing-integration-tests').projectDir = new File('../billing_/integration-tests')
 
 include ':testing'
 project(':testing').projectDir = new File('backend/testing')
 
+include ':misc'
+project(':misc').projectDir = new File('backend/misc')

@@ -1,0 +1,108 @@
+package io.tolgee.service.machineTranslation
+
+import io.tolgee.component.CurrentDateProvider
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
+import io.tolgee.exceptions.OutOfCreditsException
+import io.tolgee.model.MtCreditBucket
+import io.tolgee.model.Organization
+import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
+import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
+import org.apache.commons.lang3.time.DateUtils
+import org.springframework.stereotype.Service
+import java.util.*
+import javax.transaction.Transactional
+
+@Service
+class MtCreditBucketService(
+  private val machineTranslationCreditBucketRepository: MachineTranslationCreditBucketRepository,
+  private val machineTranslationProperties: MachineTranslationProperties,
+  private val currentDateProvider: CurrentDateProvider
+) {
+
+  @Transactional
+  fun consumeCredits(project: Project, amount: Int) {
+    if (machineTranslationProperties.freeCreditsAmount > -1) {
+      val bucket = findOrCreateBucket(project)
+      consumeCredits(bucket, amount)
+    }
+  }
+
+  @Transactional
+  fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
+    refillIfItsTime(bucket)
+    if (getCreditBalance(bucket) - amount < 0) {
+      throw OutOfCreditsException()
+    }
+    bucket.credits -= amount
+    save(bucket)
+  }
+
+  fun save(bucket: MtCreditBucket) {
+    machineTranslationCreditBucketRepository.save(bucket)
+  }
+
+  fun saveAll(buckets: Iterable<MtCreditBucket>) {
+    machineTranslationCreditBucketRepository.saveAll(buckets)
+  }
+
+  fun getCreditBalance(project: Project): Long {
+    return getCreditBalance(findOrCreateBucket(project))
+  }
+
+  fun getCreditBalance(bucket: MtCreditBucket): Long {
+    refillIfItsTime(bucket)
+    return bucket.credits
+  }
+
+  fun getCreditBalance(userAccount: UserAccount): Long {
+    return getCreditBalance(findOrCreateBucket(userAccount))
+  }
+
+  fun getCreditBalance(organization: Organization): Long {
+    return getCreditBalance(findOrCreateBucket(organization))
+  }
+
+  private fun MtCreditBucket.getNextRefillDate(): Date {
+    return DateUtils.addMonths(this.refilled, 1)
+  }
+
+  fun refillBucket(bucket: MtCreditBucket) {
+    bucket.credits = getRefillAmount()
+    bucket.refilled = currentDateProvider.getDate()
+  }
+
+  private fun getRefillAmount(): Long {
+    return machineTranslationProperties.freeCreditsAmount
+  }
+
+  fun refillIfItsTime(bucket: MtCreditBucket) {
+    if (bucket.getNextRefillDate() <= currentDateProvider.getDate()) {
+      refillBucket(bucket)
+    }
+  }
+
+  private fun findOrCreateBucket(userAccount: UserAccount): MtCreditBucket {
+    return machineTranslationCreditBucketRepository.findByUserAccount(userAccount)
+      ?: MtCreditBucket(userAccount = userAccount).apply {
+        credits = getRefillAmount()
+        save(this)
+      }
+  }
+
+  private fun findOrCreateBucket(organization: Organization): MtCreditBucket {
+    return machineTranslationCreditBucketRepository.findByOrganization(organization)
+      ?: MtCreditBucket(organization = organization).apply {
+        credits = getRefillAmount()
+        save(this)
+      }
+  }
+
+  private fun findOrCreateBucket(project: Project): MtCreditBucket {
+    return project.userOwner?.let { userAccount ->
+      findOrCreateBucket(userAccount)
+    } ?: project.organizationOwner?.let { organization ->
+      findOrCreateBucket(organization)
+    } ?: throw RuntimeException("Project has no owner")
+  }
+}

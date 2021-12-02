@@ -1,5 +1,9 @@
 spring:
-  datasource:
-    url: jdbc:h2:./build/tmp_db_schema_updates/db.h2;DATABASE_TO_LOWER=TRUE
   liquibase:
+    drop-first: true
     change-log: classpath:db/changelog/schema.xml
+tolgee:
+  postgres-autostart:
+    port: 55432
+  internal:
+    stop-right-after-start: true

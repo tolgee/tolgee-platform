@@ -1,4 +1,8 @@
-FROM openjdk:14-jdk-alpine
+FROM tolgee/base:jdk-14-postgres-13
+
+#############
+### Tolgee  #
+#############
 
 EXPOSE 8080
 
@@ -9,4 +13,9 @@ COPY META-INF /app/META-INF
 COPY BOOT-INF/classes /app
 COPY application.yaml /app/application.yaml
 
-ENTRYPOINT ["java","-cp","app:app/lib/*","io.tolgee.Application"]
+#################
+### Let's go   ##
+#################
+
+ENV spring_profiles_active docker
+CMD ["ash", "-c", "java -cp app:app/lib/* io.tolgee.Application"]

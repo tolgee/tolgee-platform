@@ -134,4 +134,15 @@ class ExceptionHandlers {
     }
     throw ex
   }
+
+  @ExceptionHandler(Throwable::class)
+  fun handleOtherExceptions(ex: QueryException): ResponseEntity<ErrorResponseBody> {
+    return ResponseEntity(
+      ErrorResponseBody(
+        "unexpected_error_occurred",
+        listOf(ex::class.java.name)
+      ),
+      HttpStatus.INTERNAL_SERVER_ERROR
+    )
+  }
 }

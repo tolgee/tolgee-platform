@@ -121,6 +121,12 @@ dependencies {
      * DATA MODULE
      */
     implementation(project(':data'))
+
+
+    /**
+     * MISC
+     */
+    implementation(project(':misc'))
 }
 
 test {

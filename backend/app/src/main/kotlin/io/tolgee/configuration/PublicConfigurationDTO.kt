@@ -2,12 +2,14 @@ package io.tolgee.configuration
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.MtServiceType
 import io.tolgee.util.VersionProvider
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class PublicConfigurationDTO(
   @Schema(hidden = true)
-  properties: TolgeeProperties
+  properties: TolgeeProperties,
+  val machineTranslationServices: MtServicesDTO
 ) {
 
   val authentication: Boolean = properties.authentication.enabled
@@ -36,6 +38,16 @@ class PublicConfigurationDTO(
   data class GithubPublicConfigDTO(val clientId: String?) {
     val enabled: Boolean = clientId != null && clientId.isNotEmpty()
   }
+
+  data class MtServicesDTO(
+    val defaultPrimaryService: MtServiceType?,
+    val services: Map<MtServiceType, MtServiceDTO>
+  )
+
+  data class MtServiceDTO(
+    val enabled: Boolean,
+    val defaultEnabledForProject: Boolean
+  )
 
   data class SocketIo(val enabled: Boolean, val port: Int, val serverUrl: String?, val allowedTransports: List<String>)
 

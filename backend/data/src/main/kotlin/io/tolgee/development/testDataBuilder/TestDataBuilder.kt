@@ -8,6 +8,7 @@ class TestDataBuilder {
     val userAccounts = mutableListOf<DataBuilders.UserAccountBuilder>()
     val projects = mutableListOf<DataBuilders.ProjectBuilder>()
     val organizations = mutableListOf<DataBuilders.OrganizationBuilder>()
+    val mtCreditBuckets = mutableListOf<DataBuilders.MtCreditBucketBuilder>()
   }
 
   val data = DATA()

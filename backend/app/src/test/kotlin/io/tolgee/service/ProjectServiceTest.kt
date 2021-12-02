@@ -5,6 +5,7 @@
 package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
 import io.tolgee.development.testDataBuilder.data.TagsTestData
 import io.tolgee.fixtures.generateUniqueString
@@ -118,6 +119,14 @@ class ProjectServiceTest : AbstractSpringTest() {
     println(time)
     assertThat(time).isLessThan(10000)
     assertThat(tagService.find(testData.existingTag.id)).isNull()
+  }
+
+  @Test
+  fun `deletes project with MT Settings`() {
+    val testData = MtSettingsTestData()
+    testDataService.saveTestData(testData.root)
+    entityManager.flush()
+    projectService.deleteProject(testData.projectBuilder.self.id)
   }
 
   @Test

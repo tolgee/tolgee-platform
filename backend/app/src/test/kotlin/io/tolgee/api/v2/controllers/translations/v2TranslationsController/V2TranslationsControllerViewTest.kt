@@ -35,7 +35,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     testData.generateLotOfData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations").andPrettyPrint.andIsOk.andAssertThatJson {
+    performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
       node("page.totalElements").isNumber.isGreaterThan(BigDecimal(100))
       node("page.size").isEqualTo(20)
       node("selectedLanguages") {
@@ -84,7 +84,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     testData.generateCommentTestData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations").andPrettyPrint.andIsOk.andAssertThatJson {
+    performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
       node("_embedded.keys[2].translations.de.commentCount").isNumber.isEqualTo(BigDecimal(5))
     }
   }
@@ -95,7 +95,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     testData.addKeysWithScreenshots()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations").andPrettyPrint.andIsOk.andAssertThatJson {
+    performProjectAuthGet("/translations?sort=id").andPrettyPrint.andIsOk.andAssertThatJson {
       node("_embedded.keys") {
         node("[0].screenshots").isArray.hasSize(0)
         node("[3].screenshots").isArray.hasSize(2)
@@ -118,8 +118,9 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
 
     performProjectAuthGet("/translations?sort=translations.de.text&size=4&sort=keyName&cursor=$cursor")
       .andPrettyPrint.andIsOk.andAssertThatJson {
-        node("_embedded.keys[0].keyName").isEqualTo("f")
-        node("_embedded.keys[3].keyName").isEqualTo("c")
+        commitTransaction()
+        node("_embedded.keys[0].keyName").isEqualTo("c")
+        node("_embedded.keys[3].keyName").isEqualTo("A key")
       }
   }
 
@@ -149,9 +150,9 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     testData.generateLotOfData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations?sort=translations.de.text,asc")
+    performProjectAuthGet("/translations?sort=translations.en.text,asc&size=1000")
       .andPrettyPrint.andIsOk.andAssertThatJson {
-        node("_embedded.keys[0].keyName").isEqualTo("Z key")
+        node("_embedded.keys[0].keyName").isEqualTo("A key")
       }
   }
 
@@ -177,15 +178,16 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     testData.generateLotOfData()
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
-    performProjectAuthGet("/translations?languages=en&languages=de").andPrettyPrint.andIsOk.andAssertThatJson {
-      node("_embedded.keys[10].translations").isObject
-        .containsKey("de").containsKey("en")
-      node("selectedLanguages") {
-        isArray.hasSize(2)
-        node("[0].tag").isEqualTo("de")
-        node("[1].tag").isEqualTo("en")
+    performProjectAuthGet("/translations?languages=en&languages=de")
+      .andPrettyPrint.andIsOk.andAssertThatJson {
+        node("_embedded.keys[10].translations").isObject
+          .containsKey("de").containsKey("en")
+        node("selectedLanguages") {
+          isArray.hasSize(2)
+          node("[0].tag").isEqualTo("en")
+          node("[1].tag").isEqualTo("de")
+        }
       }
-    }
   }
 
   @ProjectApiKeyAuthTestMethod

@@ -13,6 +13,8 @@ import io.tolgee.service.TranslationCommentService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.machineTranslation.MtCreditBucketService
+import io.tolgee.service.machineTranslation.MtServiceConfigService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
@@ -33,10 +35,16 @@ class TestDataService(
   private val tagService: TagService,
   private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
-  private val apiKeyService: io.tolgee.service.ApiKeyService
+  private val apiKeyService: io.tolgee.service.ApiKeyService,
+  private val projectTranslationServiceCommentService: MtServiceConfigService,
+  private val mtCreditBucketService: MtCreditBucketService
 ) {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
+    // Sometimes creating data randomly fails,
+    // because objects with same ID are already in the session
+    entityManager.clear()
+
     userAccountService.saveAll(
       builder.data.userAccounts.map {
         it.self.password = userAccountService.encodePassword(it.rawPassword)
@@ -55,6 +63,7 @@ class TestDataService(
       }
     )
 
+    mtCreditBucketService.saveAll(builder.data.mtCreditBuckets.map { it.self })
     projectService.saveAll(builder.data.projects.map { it.self })
     permissionService.saveAll(builder.data.projects.flatMap { it.data.permissions.map { it.self } })
     apiKeyService.saveAll(builder.data.projects.flatMap { it.data.apiKeys.map { it.self } })
@@ -63,6 +72,12 @@ class TestDataService(
 
     val languages = builder.data.projects.flatMap { it.data.languages.map { it.self } }
     languageService.saveAll(languages)
+
+    projectTranslationServiceCommentService.saveAll(
+      builder.data.projects.flatMap {
+        it.data.translationServiceConfigs.map { it.self }
+      }
+    )
 
     val keyBuilders = builder.data.projects.flatMap { it.data.keys.map { it } }
     keyService.saveAll(keyBuilders.map { it.self })

@@ -95,7 +95,7 @@ jobs:
         with:
           name: backend_test_reports
           path: |
-            ./build/reports/**/*
+            ./**/build/reports/**/*
 
   e2e:
     needs: [ frontend-build, backend-build, e2e-install-deps ]
