@@ -139,6 +139,17 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
 
     /**
+     * Google translation API
+     */
+    implementation platform("com.google.cloud:libraries-bom:${findProperty("googleCloudVersion")}")
+    implementation 'com.google.cloud:google-cloud-translate'
+
+    /**
+     * Aws translate
+     */
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-translate', version: findProperty("amazonAwsSdkVersion")
+
+    /**
      * Conditional billing module
      */
     if (rootProject.project(":billing-app").projectDir.exists()) {

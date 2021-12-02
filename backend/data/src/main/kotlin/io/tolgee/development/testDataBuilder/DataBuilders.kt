@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder
 
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Language
+import io.tolgee.model.MtServiceConfig
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
@@ -47,6 +48,8 @@ class DataBuilders {
       val keys = mutableListOf<KeyBuilder>()
       val translations = mutableListOf<TranslationBuilder>()
       val apiKeys = mutableListOf<ApiKeyBuilder>()
+      val translationServiceConfigs = mutableListOf<ProjectTranslationServiceConfigBuilder>()
+
     }
 
     var data = DATA()
@@ -64,6 +67,9 @@ class DataBuilders {
     fun addKey(ft: FT<KeyBuilder>) = addOperation(data.keys, ft).also { it.self { project = this@ProjectBuilder.self } }
 
     fun addTranslation(ft: FT<TranslationBuilder>) = addOperation(data.translations, ft)
+
+    fun addProjectTranslationServiceConfig(ft: FT<ProjectTranslationServiceConfigBuilder>) =
+      addOperation(data.translationServiceConfigs, ft)
   }
 
   class ImportBuilder(
@@ -274,5 +280,16 @@ class DataBuilders {
         this.userAccount = it
       }
     }
+  }
+
+  class ProjectTranslationServiceConfigBuilder(
+    val projectBuilder: ProjectBuilder
+  ) : BaseEntityDataBuilder<MtServiceConfig>() {
+
+
+    override var self: MtServiceConfig = MtServiceConfig()
+      .apply {
+        project = projectBuilder.self
+      }
   }
 }

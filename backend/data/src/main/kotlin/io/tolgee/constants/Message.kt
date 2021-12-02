@@ -75,8 +75,11 @@ enum class Message {
   TOO_MANY_UPLOADED_IMAGES,
   ONE_OR_MORE_IMAGES_NOT_FOUND,
   SCREENSHOT_NOT_OF_KEY,
-  TOO_MANY_REQUESTS;
+  TOO_MANY_REQUESTS,
+  TRANSLATION_NOT_FOUND,
+  OUT_OF_CREDITS,
+  KEY_NOT_FOUND;
 
-  val code: String
+    val code: String
     get() = name.lowercase(Locale.getDefault())
 }

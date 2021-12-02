@@ -4,6 +4,7 @@
 
 package io.tolgee.configuration.tolgee
 
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
@@ -25,5 +26,6 @@ open class TolgeeProperties(
   var maxTranslationTextLength: Long = 10000,
   var cache: CacheProperties = CacheProperties(),
   var recaptcha: ReCaptchaProperties = ReCaptchaProperties(),
+  var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),
   open var import: ImportProperties = ImportProperties()
 )

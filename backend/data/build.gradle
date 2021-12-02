@@ -104,6 +104,17 @@ liquibase {
             }
 
             driver liveDb.driver
+            excludeObjects "table:batch_job_execution_context," +
+                    "batch_step_execution_seq," +
+                    "batch_job_seq," +
+                    "batch_job_execution_seq," +
+                    "batch_step_execution_context," +
+                    "batch_step_execution," +
+                    "batch_job_instance," +
+                    "table:batch_job_execution," +
+                    "table:batch_job_execution_params," +
+                    "hibernate_sequence," +
+                    "revision_sequence_generator"
         }
     }
 }
@@ -191,12 +202,25 @@ dependencies {
      * MISC
      */
     implementation "commons-codec:commons-codec:${findProperty("commonsCodecVersion")}"
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: findProperty("amazonAwsSdkVersion")
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
     implementation group: 'com.ibm.icu', name: 'icu4j', version: findProperty("icu4jVersion")
     implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
     implementation "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
             "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${findProperty("jacksonModuleKotlinVersion")}"
+
+    /**
+     * Google translation API
+     */
+    implementation platform("com.google.cloud:libraries-bom:${findProperty("googleCloudVersion")}")
+    implementation 'com.google.cloud:google-cloud-translate'
+
+    /**
+     * AWS
+     */
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: findProperty("amazonAwsSdkVersion")
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-translate', version: findProperty("amazonAwsSdkVersion")
+
 }
 
 test {

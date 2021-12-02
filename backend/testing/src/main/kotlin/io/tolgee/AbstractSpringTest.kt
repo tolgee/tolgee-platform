@@ -3,6 +3,8 @@ package io.tolgee
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.repository.KeyRepository
@@ -101,6 +103,10 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired lateinit var tagService: TagService
 
   @Autowired lateinit var fileStorageService: FileStorageService
+
+  @Autowired lateinit var awsMachineTranslationProperties: AwsMachineTranslationProperties
+
+  @Autowired lateinit var googleMachineTranslationProperties: GoogleMachineTranslationProperties
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

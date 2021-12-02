@@ -13,6 +13,7 @@ import io.tolgee.service.TranslationCommentService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.machineTranslation.MtServiceConfigService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
@@ -33,7 +34,8 @@ class TestDataService(
   private val tagService: TagService,
   private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
-  private val apiKeyService: io.tolgee.service.ApiKeyService
+  private val apiKeyService: io.tolgee.service.ApiKeyService,
+  private val projectTranslationServiceCommentService: MtServiceConfigService
 ) {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
@@ -63,6 +65,11 @@ class TestDataService(
 
     val languages = builder.data.projects.flatMap { it.data.languages.map { it.self } }
     languageService.saveAll(languages)
+
+    projectTranslationServiceCommentService.saveAll(
+      builder.data.projects.flatMap {
+        it.data.translationServiceConfigs.map { it.self }
+      })
 
     val keyBuilders = builder.data.projects.flatMap { it.data.keys.map { it } }
     keyService.saveAll(keyBuilders.map { it.self })

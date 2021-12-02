@@ -39,6 +39,7 @@ open class BaseTestData(
           name = "English"
           tag = "en"
           originalName = "English"
+          this@addProject.self.baseLanguage = this
         }
       }.self
     }

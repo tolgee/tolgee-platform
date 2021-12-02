@@ -88,10 +88,9 @@ class RateLimitsFilter(
             }
           }
         }
-
-      filterChain.doFilter(request, response)
     } catch (e: Exception) {
       resolver.resolveException(request, response, null, e)
     }
+    filterChain.doFilter(request, response)
   }
 }

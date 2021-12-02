@@ -6,6 +6,8 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.api.v2.hateoas.key.LanguageConfigItemModelAssembler
+import io.tolgee.api.v2.hateoas.machineTranslation.LanguageConfigItemModel
 import io.tolgee.api.v2.hateoas.project.ProjectModel
 import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.api.v2.hateoas.project.ProjectTransferOptionModel
@@ -17,6 +19,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.CreateProjectDTO
 import io.tolgee.dtos.request.EditProjectDTO
 import io.tolgee.dtos.request.ProjectInviteUserDto
+import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
@@ -37,6 +40,7 @@ import io.tolgee.service.PermissionService
 import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.machineTranslation.MtServiceConfigService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -74,6 +78,8 @@ class V2ProjectsController(
   private val projectWithStatsModelAssembler: ProjectWithStatsModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val arrayWithStatsResourcesAssembler: PagedResourcesAssembler<ProjectWithStatsView>,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  private val languageConfigItemModelAssembler: LanguageConfigItemModelAssembler,
   private val userAccountService: UserAccountService,
   private val permissionService: PermissionService,
   private val authenticationFacade: AuthenticationFacade,
@@ -81,7 +87,8 @@ class V2ProjectsController(
   private val securityService: SecurityService,
   private val invitationService: InvitationService,
   private val organizationService: OrganizationService,
-  private val organizationRoleService: OrganizationRoleService
+  private val organizationRoleService: OrganizationRoleService,
+  private val projectMachineTranslationServiceConfigService: MtServiceConfigService
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -271,5 +278,21 @@ class V2ProjectsController(
   fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): String {
     val project = projectService.get(projectHolder.project.id).orElseThrow { NotFoundException() }!!
     return invitationService.create(project, invitation.type!!)
+  }
+
+  @GetMapping("/{projectId}/machine-translation-service-settings")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  fun getMachineTranslationSettings(): CollectionModel<LanguageConfigItemModel> {
+    val data = projectMachineTranslationServiceConfigService.getProjectSettings(projectHolder.projectEntity)
+    return languageConfigItemModelAssembler.toCollectionModel(data)
+  }
+
+  @PutMapping("/{projectId}/machine-translation-service-settings")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  fun setMachineTranslationSettings(
+    @RequestBody dto: SetMachineTranslationSettingsDto
+  ): CollectionModel<LanguageConfigItemModel> {
+    projectMachineTranslationServiceConfigService.setProjectSettings(projectHolder.projectEntity, dto)
+    return getMachineTranslationSettings()
   }
 }

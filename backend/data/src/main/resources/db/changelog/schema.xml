@@ -1323,4 +1323,62 @@
                 newDataType="varchar(2000)"
                 tableName="key"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1638287113153-3">
+        <createTable tableName="machine_translation_credit_bucket">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="machine_translation_credit_bucketPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="credits" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="refilled" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="organization_id" type="BIGINT"/>
+            <column name="user_account_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638287113153-4">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="machine_translation_credit_bucket" constraintName="FK64mcmf9f04g7cew03vdvilcwd" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638287113153-5">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="machine_translation_credit_bucket" constraintName="FKoinnealj65dph41r745kha1ql" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638793396232-1">
+        <createTable tableName="project_translation_service_config">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="project_translation_service_configPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="primary_service" type="VARCHAR(255)"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="target_language_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638793396232-2">
+        <createTable tableName="project_translation_service_config_enabled_services">
+            <column name="project_translation_service_config_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled_services" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638793396232-3">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="project_translation_service_config" constraintName="FK3q9g0g2yu704r2tvp6o0106nq" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638793396232-4">
+        <addForeignKeyConstraint baseColumnNames="project_translation_service_config_id" baseTableName="project_translation_service_config_enabled_services" constraintName="FKg4ljsn4x1roqwqppve30mpsay" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project_translation_service_config" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1638793396232-5">
+        <addForeignKeyConstraint baseColumnNames="target_language_id" baseTableName="project_translation_service_config" constraintName="FKi84c2qsx6fg5u1oio1uku627f" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

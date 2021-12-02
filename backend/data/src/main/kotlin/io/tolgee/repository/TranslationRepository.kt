@@ -1,9 +1,13 @@
 package io.tolgee.repository
 
 import io.tolgee.model.Language
+import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.SimpleTranslationView
+import io.tolgee.model.views.TranslationMemoryItemView
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -22,7 +26,7 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
       "join fetch Key k on t.key = k " +
       "where k = :key and k.project = :project and t.language in :languages"
   )
-  fun getTranslations(key: Key, project: io.tolgee.model.Project, languages: Collection<Language>): Set<Translation>
+  fun getTranslations(key: Key, project: Project, languages: Collection<Language>): Set<Translation>
   fun findOneByKeyAndLanguage(key: Key, language: Language): Optional<Translation>
   fun findOneByKeyIdAndLanguageId(key: Long, language: Long): Translation?
 
@@ -41,4 +45,29 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
   fun selectIdsByProject(projectId: Long): List<Long>
 
   fun deleteByIdIn(ids: Collection<Long>)
+
+  @Query(
+    """
+      select target.text as targetTranslationText, baseTranslation.text as baseTranslationText, targetKey.name as keyName, 
+      (length(target.text) - length(baseTranslation.text)) as lengthDiff
+      from Translation input 
+      join input.key inputKey
+      join inputKey.project inputProject
+      join Translation baseTranslation on
+        baseTranslation.language = input.language and
+        lower(baseTranslation.text) like lower(concat('%', input.text, '%')) and
+        baseTranslation.id <> input.id
+      join baseTranslation.key targetKey
+      join Translation target on 
+            target.key = targetKey and 
+            target.language = :targetLanguage and
+            target.text <> '' and
+            target.text is not null
+      where input = :baseTranslation
+      order by lengthDiff
+      """
+  )
+  fun getTranslateMemorySuggestions(
+    baseTranslation: Translation, targetLanguage: Language, pageable: Pageable
+  ): Page<TranslationMemoryItemView>
 }
