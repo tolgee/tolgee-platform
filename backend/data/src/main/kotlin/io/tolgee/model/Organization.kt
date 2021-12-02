@@ -18,7 +18,8 @@ import javax.validation.constraints.Size
 @Entity
 @Table(
   uniqueConstraints = [
-    UniqueConstraint(columnNames = ["address_part"], name = "organization_address_part_unique")
+    UniqueConstraint(columnNames = ["address_part"], name = "organization_address_part_unique"),
+    UniqueConstraint(columnNames = ["third_party_billing_id"], name = "organization_third_party_billing_id_unique")
   ]
 )
 @Audited
@@ -51,4 +52,7 @@ class Organization(
 
   @OneToMany(mappedBy = "organizationOwner")
   var projects: MutableList<Project> = mutableListOf()
+
+  @Column(name = "third_party_billing_id")
+  var thirdPartyBillingId: String? = null
 }

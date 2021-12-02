@@ -11,6 +11,10 @@ buildscript {
     }
 }
 
+project.ext {
+    dbSchemaContainerName = 'tolgee_postgres_dbschema'
+}
+
 if (System.getenv().containsKey("VERSION")) {
     project.version = System.getenv().get("VERSION")
 } else {
@@ -81,6 +85,25 @@ project(':server-app').afterEvaluate {
     }
     task bootJar {
         dependsOn project(':server-app').tasks.findByName("bootJar")
+    }
+
+    task startDbChangelogContainer(type: Exec) {
+        commandLine "docker", "start", dbSchemaContainerName
+        mustRunAfter project(':server-app').tasks.findByName("bootRun")
+    }
+
+    task diffChangeLog {
+        project(':data').tasks.findByName("diffChangeLog").mustRunAfter(startDbChangelogContainer)
+
+        finalizedBy = [
+                project(':server-app').tasks.findByName("bootRun"),
+                startDbChangelogContainer,
+                project(':data').tasks.findByName("diffChangeLog")
+        ]
+        doFirst {
+            project(':server-app').bootRun.systemProperty('spring.profiles.active', 'dbschema')
+            project(':server-app').bootRun.systemProperty('tolgee.postgres-autostart.container-name', dbSchemaContainerName)
+        }
     }
 }
 

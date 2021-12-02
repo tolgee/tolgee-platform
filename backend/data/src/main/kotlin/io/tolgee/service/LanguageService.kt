@@ -6,23 +6,27 @@ import io.tolgee.model.Language
 import io.tolgee.model.Language.Companion.fromRequestDTO
 import io.tolgee.model.Project
 import io.tolgee.repository.LanguageRepository
+import io.tolgee.service.machineTranslation.MtServiceConfigService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
-import java.util.stream.Collectors
 import javax.persistence.EntityManager
 
 @Service
 class LanguageService(
   private val languageRepository: LanguageRepository,
   private val entityManager: EntityManager,
-  private val projectService: ProjectService
+  private val projectService: ProjectService,
 ) {
   private var translationService: TranslationService? = null
+
+  @Autowired
+  lateinit var mtServiceConfigService: MtServiceConfigService
 
   @Transactional
   fun createLanguage(dto: LanguageDto?, project: Project): Language {
@@ -37,6 +41,7 @@ class LanguageService(
   fun deleteLanguage(id: Long) {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
     translationService!!.deleteAllByLanguage(language.id)
+    mtServiceConfigService.deleteAllByTargetLanguageId(language.id)
     languageRepository.delete(language)
   }
 
@@ -49,7 +54,10 @@ class LanguageService(
   }
 
   fun getImplicitLanguages(projectId: Long): Set<Language> {
-    val data = getPaged(projectId = projectId, PageRequest.of(0, 2))
+    val data = getPaged(
+      projectId = projectId,
+      PageRequest.of(0, 2, Sort.by(Sort.Order(Sort.Direction.ASC, "id")))
+    )
     return data.content.toSet()
   }
 
@@ -70,12 +78,15 @@ class LanguageService(
     return languageRepository.findByTagAndProjectId(tag, projectId)
   }
 
-  fun findByTags(tag: Collection<String>?, projectId: Long?): Set<Language> {
-    val languages = languageRepository.findAllByTagInAndProjectId(tag, projectId)
-    if (!languages.stream().map(Language::tag).collect(Collectors.toSet()).containsAll(tag!!)) {
+  fun findByTags(tags: Collection<String>, projectId: Long): Set<Language> {
+    val languages = languageRepository.findAllByTagInAndProjectId(tags, projectId)
+    if (languages.size < tags.size) {
       throw NotFoundException(io.tolgee.constants.Message.LANGUAGE_NOT_FOUND)
     }
-    return languages.toSet()
+    val sortedByTagsParam = languages.sortedBy { language ->
+      tags.indexOfFirst { tag -> language.tag == tag }
+    }
+    return sortedByTagsParam.toSet()
   }
 
   fun getLanguagesForTranslationsView(languages: Set<String>?, projectId: Long): Set<Language> {

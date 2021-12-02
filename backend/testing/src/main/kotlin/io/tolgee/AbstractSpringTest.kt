@@ -3,6 +3,9 @@ package io.tolgee
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.repository.KeyRepository
@@ -26,6 +29,7 @@ import io.tolgee.service.TranslationCommentService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -88,19 +92,38 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   protected lateinit var organizationRoleService: OrganizationRoleService
 
-  @Autowired lateinit var organizationRoleRepository: OrganizationRoleRepository
+  @Autowired
+  lateinit var organizationRoleRepository: OrganizationRoleRepository
 
-  @Autowired lateinit var projectRepository: ProjectRepository
+  @Autowired
+  lateinit var projectRepository: ProjectRepository
 
-  @Autowired lateinit var importService: ImportService
+  @Autowired
+  lateinit var importService: ImportService
 
-  @Autowired lateinit var testDataService: TestDataService
+  @Autowired
+  lateinit var testDataService: TestDataService
 
-  @Autowired lateinit var translationCommentService: TranslationCommentService
+  @Autowired
+  lateinit var translationCommentService: TranslationCommentService
 
-  @Autowired lateinit var tagService: TagService
+  @Autowired
+  lateinit var tagService: TagService
 
-  @Autowired lateinit var fileStorageService: FileStorageService
+  @Autowired
+  lateinit var fileStorageService: FileStorageService
+
+  @Autowired
+  lateinit var machineTranslationProperties: MachineTranslationProperties
+
+  @Autowired
+  lateinit var awsMachineTranslationProperties: AwsMachineTranslationProperties
+
+  @Autowired
+  lateinit var googleMachineTranslationProperties: GoogleMachineTranslationProperties
+
+  @Autowired
+  lateinit var mtServiceConfigService: MtServiceConfigService
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

@@ -8,17 +8,8 @@ services:
       - 8091:8091
     environment:
       - spring.profiles.active=e2e
-      - spring.datasource.url=jdbc:postgresql://postgres:5432/postgres
       - tolgee.smtp.host=fakesmtp
       - tolgee.smtp.port=1025
-  postgres:
-    image: postgres:13
-    volumes:
-      - e2e-db-data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "25432:5432"
   fakesmtp:
     image: reachfive/fake-smtp-server:0.8.1
     ports:

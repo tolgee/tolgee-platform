@@ -82,7 +82,7 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
 
   fun generateVeryLotOfData() {
     projectBuilder.apply {
-      (1..2000).forEach { keyNum ->
+      (1..1000).forEach { keyNum ->
         addKey {
           self {
             name = "test key from lot of $keyNum"

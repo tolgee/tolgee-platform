@@ -2,8 +2,6 @@ package io.tolgee.repository
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.DbPopulatorReal
-import io.tolgee.model.Permission
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,21 +36,6 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
     val org = user.organizationRoles[0].organization
     val returned = userAccountRepository.getAllInOrganization(org!!.id!!, PageRequest.of(0, 20), "")
     assertThat(returned.content).hasSize(3)
-  }
-
-  @Test
-  fun getAllInProject() {
-    val franta = dbPopulatorReal.createUserIfNotExists("franta")
-    val usersAndOrganizations = dbPopulatorReal.createUsersAndOrganizations()
-    val repo = usersAndOrganizations[0].organizationRoles[0].organization!!.projects[0]
-
-    permissionService.grantFullAccessToProject(franta, repo)
-
-    val returned = userAccountRepository.getAllInProject(repo.id, PageRequest.of(0, 20))
-    assertThat(returned.content).hasSize(3)
-    assertThat(returned.content[0].directPermissions).isEqualTo(Permission.ProjectPermissionType.MANAGE)
-    assertThat(returned.content[1].organizationRole).isEqualTo(OrganizationRoleType.MEMBER)
-    assertThat(returned.content[2].organizationRole).isEqualTo(OrganizationRoleType.OWNER)
   }
 
   @Test

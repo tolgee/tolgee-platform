@@ -10,6 +10,7 @@ import org.assertj.core.api.BigDecimalAssert
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.math.BigDecimal
+import java.nio.charset.StandardCharsets
 
 val ResultActions.andIsOk: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isOk) }
@@ -33,7 +34,7 @@ val ResultActions.andAssertThatJson
   get() = assertThatJson(this.andReturn().response.contentAsString)
 
 fun ResultActions.andAssertThatJson(jsonAssert: JsonAssert.ConfigurableJsonAssert.() -> Unit): ResultActions {
-  jsonAssert(assertThatJson(this.andReturn().response.contentAsString))
+  jsonAssert(assertThatJson(this.andGetContentAsString))
   return this
 }
 
@@ -52,7 +53,7 @@ fun ResultActions.tryPrettyPrinting(fn: ResultActions.() -> ResultActions): Resu
 }
 
 val ResultActions.andGetContentAsString
-  get() = this.andReturn().response.contentAsString
+  get() = this.andReturn().response.getContentAsString(StandardCharsets.UTF_8)
 
 val ResultActions.andAssertError
   get() = assertThat(this.andReturn()).error()

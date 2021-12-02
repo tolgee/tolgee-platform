@@ -1,10 +1,5 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:25432/postgres
-    username: postgres
-    password: postgres
   liquibase:
-    change-log: classpath:db/changelog/schema.xml
     drop-first: true
 tolgee:
   authentication:

@@ -1,18 +1,28 @@
 spring:
   jpa:
     show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 100
+        order_inserts: true
+        order_updates: true
+        dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
+        integration:
+          envers:
+            enabled: false
   data:
     redis:
       repositories:
         enabled: false
   main:
     allow-bean-definition-overriding: true
-  datasource:
-    url: jdbc:h2:mem:testdb
   liquibase:
     drop-first: true
     change-log: classpath:db/changelog/schema.xml
 tolgee:
+  postgres-autostart:
+    enabled: true
   data-path: ./build/test_data
   authentication:
     native-enabled: true

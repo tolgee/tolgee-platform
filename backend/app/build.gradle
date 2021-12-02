@@ -123,7 +123,6 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
-    implementation 'com.github.javafaker:javafaker:1.0.2'
     implementation "commons-codec:commons-codec:${findProperty("commonsCodecVersion")}"
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: findProperty("amazonAwsSdkVersion")
     implementation group: 'com.ibm.icu', name: 'icu4j', version: findProperty("icu4jVersion")
@@ -137,6 +136,17 @@ dependencies {
      */
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
+
+    /**
+     * Google translation API
+     */
+    implementation platform("com.google.cloud:libraries-bom:${findProperty("googleCloudVersion")}")
+    implementation 'com.google.cloud:google-cloud-translate'
+
+    /**
+     * Aws translate
+     */
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-translate', version: findProperty("amazonAwsSdkVersion")
 
     /**
      * Conditional billing module
@@ -154,6 +164,11 @@ dependencies {
      * TESTING MODULE
      */
     testImplementation(project(':testing'))
+
+    /**
+     * MISC MODULE
+     */
+    implementation(project(':misc'))
 }
 
 test {

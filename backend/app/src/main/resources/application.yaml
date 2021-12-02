@@ -3,10 +3,6 @@ spring:
     redis:
       repositories:
         enabled: false
-  datasource:
-    url: jdbc:h2:${user.home}/.tolgee/db.h2;AUTO_SERVER=TRUE
-  #    username: sa
-  #    password: sa
   liquibase:
     change-log: classpath:db/changelog/schema.xml
   jpa:
@@ -16,9 +12,12 @@ spring:
           batch_size: 100
         order_inserts: true
         order_updates: true
+        dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
 tolgee:
   authentication:
     enabled: false
+  postgres-autostart:
+    enabled: true
   #    jwt-secret-file: /<user home>/.tolgee/jwt.secret
   #    jwt-secret: some long string
   #    jwt-expiration: 604800000

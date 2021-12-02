@@ -2,6 +2,8 @@ package io.tolgee.development.testDataBuilder
 
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Language
+import io.tolgee.model.MtCreditBucket
+import io.tolgee.model.MtServiceConfig
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
@@ -47,6 +49,7 @@ class DataBuilders {
       val keys = mutableListOf<KeyBuilder>()
       val translations = mutableListOf<TranslationBuilder>()
       val apiKeys = mutableListOf<ApiKeyBuilder>()
+      val translationServiceConfigs = mutableListOf<MtServiceConfigBuilder>()
     }
 
     var data = DATA()
@@ -64,6 +67,9 @@ class DataBuilders {
     fun addKey(ft: FT<KeyBuilder>) = addOperation(data.keys, ft).also { it.self { project = this@ProjectBuilder.self } }
 
     fun addTranslation(ft: FT<TranslationBuilder>) = addOperation(data.translations, ft)
+
+    fun addMtServiceConfig(ft: FT<MtServiceConfigBuilder>) =
+      addOperation(data.translationServiceConfigs, ft)
   }
 
   class ImportBuilder(
@@ -179,6 +185,14 @@ class DataBuilders {
 
     fun addRole(ft: FT<OrganizationRoleBuilder>) = addOperation(data.roles, ft)
 
+    fun addMtCreditBucket(ft: FT<MtCreditBucketBuilder>): MtCreditBucketBuilder {
+      val builder = MtCreditBucketBuilder()
+      testDataBuilder.data.mtCreditBuckets.add(builder)
+      builder.self.organization = this@OrganizationBuilder.self
+      ft(builder)
+      return builder
+    }
+
     override var self: Organization = Organization()
   }
 
@@ -253,6 +267,14 @@ class DataBuilders {
   ) : EntityDataBuilder<UserAccount> {
     var rawPassword = "admin"
     override var self: UserAccount = UserAccount()
+
+    fun addMtCreditBucket(ft: FT<MtCreditBucketBuilder>): MtCreditBucketBuilder {
+      val builder = MtCreditBucketBuilder()
+      testDataBuilder.data.mtCreditBuckets.add(builder)
+      builder.self.userAccount = this.self
+      ft(builder)
+      return builder
+    }
   }
 
   class PermissionBuilder(
@@ -274,5 +296,18 @@ class DataBuilders {
         this.userAccount = it
       }
     }
+  }
+
+  class MtServiceConfigBuilder(
+    val projectBuilder: ProjectBuilder
+  ) : BaseEntityDataBuilder<MtServiceConfig>() {
+    override var self: MtServiceConfig = MtServiceConfig()
+      .apply {
+        project = projectBuilder.self
+      }
+  }
+
+  class MtCreditBucketBuilder() : BaseEntityDataBuilder<MtCreditBucket>() {
+    override var self: MtCreditBucket = MtCreditBucket()
   }
 }

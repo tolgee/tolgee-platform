@@ -25,6 +25,7 @@ import io.tolgee.model.views.ProjectView
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
@@ -46,12 +47,12 @@ class ProjectService constructor(
   private val entityManager: EntityManager,
   private val securityService: SecurityService,
   private val permissionService: PermissionService,
-  private val apiKeyService: io.tolgee.service.ApiKeyService,
+  private val apiKeyService: ApiKeyService,
   private val screenshotService: ScreenshotService,
   private val organizationRoleService: OrganizationRoleService,
   private val authenticationFacade: AuthenticationFacade,
   private val slugGenerator: SlugGenerator,
-  private val userAccountService: UserAccountService
+  private val userAccountService: UserAccountService,
 ) {
   @set:Autowired
   lateinit var keyService: KeyService
@@ -67,6 +68,9 @@ class ProjectService constructor(
 
   @set:Autowired
   lateinit var importService: ImportService
+
+  @set:Autowired
+  lateinit var mtServiceConfigService: MtServiceConfigService
 
   @Transactional
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")
@@ -225,6 +229,7 @@ class ProjectService constructor(
     keyService.deleteAllByProject(project.id)
     apiKeyService.deleteAllByProject(project.id)
     languageService.deleteAllByProject(project.id)
+    mtServiceConfigService.deleteAllByProjectId(project.id)
     projectRepository.delete(project)
   }
 

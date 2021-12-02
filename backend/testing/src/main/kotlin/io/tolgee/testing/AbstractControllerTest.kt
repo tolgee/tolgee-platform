@@ -89,7 +89,7 @@ abstract class AbstractControllerTest :
     elementType: Class<E>?
   ): C {
     return try {
-      mapper!!.readValue(
+      mapper.readValue(
         result.response.contentAsString,
         TypeFactory.defaultInstance().constructCollectionType(collectionType, elementType)
       )

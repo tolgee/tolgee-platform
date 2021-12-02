@@ -23,9 +23,11 @@ class KeyMeta(
 ) : StandardAuditModel() {
 
   @OneToMany(mappedBy = "keyMeta")
+  @OrderBy("id")
   var comments = mutableListOf<KeyComment>()
 
   @OneToMany(mappedBy = "keyMeta")
+  @OrderBy("id")
   var codeReferences = mutableListOf<KeyCodeReference>()
 
   @ManyToMany
