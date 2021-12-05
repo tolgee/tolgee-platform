@@ -104,6 +104,17 @@ liquibase {
             }
 
             driver liveDb.driver
+            excludeObjects "table:batch_job_execution_context," +
+                    "batch_step_execution_seq," +
+                    "batch_job_seq," +
+                    "batch_job_execution_seq," +
+                    "batch_step_execution_context," +
+                    "batch_step_execution," +
+                    "batch_job_instance," +
+                    "table:batch_job_execution," +
+                    "table:batch_job_execution_params," +
+                    "hibernate_sequence," +
+                    "revision_sequence_generator"
         }
     }
 }
@@ -137,6 +148,7 @@ dependencies {
     implementation("org.springframework.data:spring-data-envers")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
