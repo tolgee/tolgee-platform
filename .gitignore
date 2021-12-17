@@ -54,4 +54,4 @@ server.ipr
 server.iws
 **/derby.log
 
-src/main/resources/application-js-e2e.properties
+backend/app/src/main/resources/application-js-e2e.properties
