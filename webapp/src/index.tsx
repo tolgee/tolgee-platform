@@ -234,7 +234,7 @@ ReactDOM.render(
   <React.Suspense fallback={<FullPageLoading />}>
     <TolgeeProvider
       apiUrl={process.env.REACT_APP_TOLGEE_API_URL}
-      //apiKey={process.env.REACT_APP_TOLGEE_API_KEY}
+      apiKey={process.env.REACT_APP_TOLGEE_API_KEY}
       ui={process.env.REACT_APP_TOLGEE_API_KEY ? UI : undefined}
       staticData={{
         en: () => import('./i18n/en.json'),
@@ -244,6 +244,7 @@ ReactDOM.render(
       }}
       loadingFallback={<FullPageLoading />}
       availableLanguages={['en', 'cs', 'es', 'fr']}
+      wrapperMode="invisible"
     >
       <ThemeProvider theme={theme}>
         <CssBaseline />
