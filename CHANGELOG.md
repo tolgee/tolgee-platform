@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/tolgee/server/compare/v1.10.0...v1.11.0) (2021-12-18)
+
+
+### Features
+
+* update to tolgee 3 ([b707fdb](https://github.com/tolgee/server/commit/b707fdb7f6559803c78ad530fd573700f58b15eb))
+
 # [1.10.0](https://github.com/tolgee/server/compare/v1.9.1...v1.10.0) (2021-11-26)
 
 
