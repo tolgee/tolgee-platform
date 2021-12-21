@@ -18,6 +18,7 @@ const useStyles = makeStyles((theme) => ({
     ...theme.mixins.toolbar,
   },
   drawerPaper: {
+    overflowX: 'hidden',
     whiteSpace: 'nowrap',
     width: drawerWidth,
     transition: theme.transitions.create('width', {
@@ -36,7 +37,6 @@ const useStyles = makeStyles((theme) => ({
     visibility: 'hidden',
   },
   drawerPaperClose: {
-    overflowX: 'hidden',
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
