@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/tolgee/server/compare/v1.11.0...v1.11.1) (2021-12-21)
+
+
+### Bug Fixes
+
+* Fix webapp menu TG-457 ([3a61801](https://github.com/tolgee/server/commit/3a61801eca9591bbf1050dddace04e3a1da39215))
+
 # [1.11.0](https://github.com/tolgee/server/compare/v1.10.0...v1.11.0) (2021-12-18)
 
 
