@@ -12,7 +12,7 @@ plugins {
     id 'io.spring.dependency-management'
     id 'org.springframework.boot'
     id 'java'
-    id 'org.liquibase.gradle' version '2.0.4'
+    id 'org.liquibase.gradle' version '2.1.1'
     id 'org.jetbrains.kotlin.jvm'
     id "org.jetbrains.kotlin.plugin.jpa" version "${kotlinVersion}"
     id "org.jetbrains.kotlin.kapt"
