@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/tolgee/server/compare/v1.11.1...v2.0.0) (2022-01-07)
+
+
+### Features
+
+* Machine translations & Translation memory TG-431 ([3eb78b6](https://github.com/tolgee/server/commit/3eb78b6d527ef7de922df8946658a78bd041c793))
+
+
+### BREAKING CHANGES
+
+* Dropped support of H2 db
+
 ## [1.11.1](https://github.com/tolgee/server/compare/v1.11.0...v1.11.1) (2021-12-21)
 
 
