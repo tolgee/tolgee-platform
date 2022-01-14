@@ -1,27 +1,22 @@
 package io.tolgee.model
 
-import org.hibernate.annotations.GenericGenerator
-import org.hibernate.annotations.Parameter
 import org.hibernate.envers.Audited
 import org.springframework.data.util.ProxyUtils
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.MappedSuperclass
+import javax.persistence.SequenceGenerator
 
 @MappedSuperclass
 @Audited
 abstract class StandardAuditModel : AuditModel() {
   @Id
-  @GenericGenerator(
+  @SequenceGenerator(
     name = "sequenceGenerator",
-    strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator",
-    parameters = [
-      Parameter(name = "sequence_name", value = "hibernate_sequence"),
-      Parameter(name = "optimizer", value = "pooled"),
-      Parameter(name = "initial_value", value = "1000000000"),
-      Parameter(name = "increment_size", value = "100")
-    ]
+    sequenceName = "hibernate_sequence",
+    initialValue = 1000000000,
+    allocationSize = 100
   )
   @GeneratedValue(
     strategy = GenerationType.SEQUENCE,

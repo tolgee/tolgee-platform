@@ -2,7 +2,7 @@ package io.tolgee.service.query_builders
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
-import io.tolgee.dtos.request.GetTranslationsParams
+import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
@@ -53,7 +53,9 @@ class TranslationsViewBuilderTest : AbstractSpringTest() {
       projectId = testData.project.id,
       languages = setOf(testData.englishLanguage),
       PageRequest.of(0, 10),
-      params = GetTranslationsParams(search = "A tr")
+      params = GetTranslationsParams().apply {
+        search = "A tr"
+      }
     )
     assertThat(result.content.first().translations["en"]?.text).isEqualTo("A translation")
     assertThat(result.totalElements).isEqualTo(1)

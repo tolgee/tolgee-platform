@@ -4,8 +4,8 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
-import io.tolgee.dtos.request.SignUpDto
-import io.tolgee.dtos.request.UserUpdateRequestDTO
+import io.tolgee.dtos.request.UserUpdateRequestDto
+import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
@@ -135,7 +135,7 @@ class UserAccountService(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
-  fun update(userAccount: UserAccount, dto: UserUpdateRequestDTO): UserAccount {
+  fun update(userAccount: UserAccount, dto: UserUpdateRequestDto): UserAccount {
     if (userAccount.username != dto.email) {
       getByUserName(dto.email).ifPresent { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
       if (tolgeeProperties.authentication.needsEmailVerification) {

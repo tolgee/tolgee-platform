@@ -1,8 +1,8 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
-import io.tolgee.dtos.request.CreateApiKeyDto
-import io.tolgee.dtos.request.V2EditApiKeyDto
+import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
+import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden

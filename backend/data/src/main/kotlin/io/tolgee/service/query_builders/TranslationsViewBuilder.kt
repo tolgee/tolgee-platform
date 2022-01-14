@@ -1,7 +1,7 @@
 package io.tolgee.service.query_builders
 
-import io.tolgee.dtos.request.FilterByState
-import io.tolgee.dtos.request.GetTranslationsParams
+import io.tolgee.dtos.request.translation.TranslationFilterByState
+import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.CursorValue
 import io.tolgee.model.*
 import io.tolgee.model.enums.TranslationState
@@ -23,9 +23,9 @@ class TranslationsViewBuilder(
   private val cb: CriteriaBuilder,
   private val projectId: Long,
   private val languages: Set<Language>,
-  private val params: GetTranslationsParams,
+  private val params: TranslationFilters,
   private val sort: Sort,
-  private val cursor: Map<String, CursorValue>?,
+  private val cursor: Map<String, CursorValue>? = null,
 ) {
   private var selection: LinkedHashMap<String, Selection<*>> = LinkedHashMap()
   private var fullTextFields: MutableSet<Expression<String>> = HashSet()
@@ -35,7 +35,6 @@ class TranslationsViewBuilder(
   private var translationsTextFields: MutableSet<Expression<String>> = HashSet()
   private lateinit var root: Root<Key>
   private lateinit var screenshotCountExpression: Expression<Long>
-  private val havingConditions: MutableSet<Predicate> = HashSet()
   private val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
   lateinit var query: CriteriaQuery<*>
 
@@ -187,7 +186,7 @@ class TranslationsViewBuilder(
     if (params.filterKeyName != null) {
       whereConditions.add(cb.equal(keyNameExpression, params.filterKeyName))
     } else if (params.filterKeyId != null) {
-      whereConditions.add(cb.equal(keyIdExpression, params.filterKeyId))
+      whereConditions.add(keyIdExpression.`in`(params.filterKeyId))
     } else {
       if (params.filterUntranslatedAny) {
         val predicates = translationsTextFields
@@ -207,13 +206,14 @@ class TranslationsViewBuilder(
       if (params.filterHasNoScreenshot) {
         whereConditions.add(cb.lt(screenshotCountExpression, 1))
       }
-      if (!params.search.isNullOrEmpty()) {
+      val search = params.search
+      if (!search.isNullOrEmpty()) {
         val fullTextRestrictions: MutableSet<Predicate> = HashSet()
         for (fullTextField in fullTextFields) {
           fullTextRestrictions.add(
             cb.like(
               cb.upper(fullTextField),
-              "%" + params.search.uppercase(Locale.getDefault()) + "%"
+              "%" + search.uppercase(Locale.getDefault()) + "%"
             )
           )
         }
@@ -263,9 +263,17 @@ class TranslationsViewBuilder(
       return query
     }
 
+  private val keyIdsQuery: CriteriaQuery<Long>
+    get() {
+      val query = getBaseQuery(cb.createQuery(Long::class.java))
+      query.select(keyIdExpression)
+      query.where(*whereConditions.toTypedArray())
+      return query
+    }
+
   private val filterByStateMap: Map<String, List<TranslationState>>? by lazy {
     params.filterState
-      ?.let { filterStateStrings -> filterStateStrings.map { FilterByState.valueOf(it) } }
+      ?.let { filterStateStrings -> filterStateStrings.map { TranslationFilterByState.valueOf(it) } }
       ?.let { filterByState ->
         val filterByStateMap = mutableMapOf<String, MutableList<TranslationState>>()
 
@@ -288,7 +296,8 @@ class TranslationsViewBuilder(
       projectId: Long,
       languages: Set<Language>,
       pageable: Pageable,
-      params: GetTranslationsParams = GetTranslationsParams()
+      params: TranslationFilters = TranslationFilters(),
+      cursor: String? = null
     ): Page<KeyWithTranslationsView> {
       val em = applicationContext.getBean(EntityManager::class.java)
       val tagService = applicationContext.getBean(TagService::class.java)
@@ -305,19 +314,20 @@ class TranslationsViewBuilder(
         languages = languages,
         params = params,
         sort = sort,
-        cursor = params.cursor?.let { CursorUtil.parseCursor(it) }
+        cursor = cursor?.let { CursorUtil.parseCursor(it) }
       )
       val count = em.createQuery(translationsViewBuilder.countQuery).singleResult
+
       translationsViewBuilder = TranslationsViewBuilder(
         cb = em.criteriaBuilder,
         projectId = projectId,
         languages = languages,
         params = params,
         sort = sort,
-        cursor = params.cursor?.let { CursorUtil.parseCursor(it) }
+        cursor = cursor?.let { CursorUtil.parseCursor(it) }
       )
       val query = em.createQuery(translationsViewBuilder.dataQuery).setMaxResults(pageable.pageSize)
-      if (params.cursor == null) {
+      if (cursor == null) {
         query.firstResult = pageable.offset.toInt()
       }
       val views = query.resultList.map { KeyWithTranslationsView.of(it) }
@@ -326,6 +336,24 @@ class TranslationsViewBuilder(
         views.forEach { it.keyTags = tagMap[it.keyId] ?: listOf() }
       }
       return PageImpl(views, pageable, count)
+    }
+
+    fun getSelectAllKeys(
+      applicationContext: ApplicationContext,
+      projectId: Long,
+      languages: Set<Language>,
+      params: TranslationFilters = TranslationFilters(),
+    ): MutableList<Long> {
+      val em = applicationContext.getBean(EntityManager::class.java)
+
+      var translationsViewBuilder = TranslationsViewBuilder(
+        cb = em.criteriaBuilder,
+        projectId = projectId,
+        languages = languages,
+        params = params,
+        sort = Sort.by(Sort.Order.asc(KeyWithTranslationsView::keyId.name))
+      )
+      return em.createQuery(translationsViewBuilder.keyIdsQuery).resultList
     }
   }
 }

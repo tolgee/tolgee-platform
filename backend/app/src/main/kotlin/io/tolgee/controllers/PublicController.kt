@@ -6,9 +6,9 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.DbPopulatorReal
-import io.tolgee.dtos.request.ResetPassword
-import io.tolgee.dtos.request.ResetPasswordRequest
-import io.tolgee.dtos.request.SignUpDto
+import io.tolgee.dtos.request.auth.ResetPassword
+import io.tolgee.dtos.request.auth.ResetPasswordRequest
+import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException

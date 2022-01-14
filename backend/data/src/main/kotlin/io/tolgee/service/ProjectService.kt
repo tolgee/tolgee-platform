@@ -3,8 +3,8 @@ package io.tolgee.service
 import io.tolgee.constants.Caches
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.query_results.ProjectStatistics
-import io.tolgee.dtos.request.CreateProjectDTO
-import io.tolgee.dtos.request.EditProjectDTO
+import io.tolgee.dtos.request.project.CreateProjectDTO
+import io.tolgee.dtos.request.project.EditProjectDTO
 import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.BadRequestException
@@ -45,9 +45,6 @@ import javax.persistence.criteria.SetJoin
 class ProjectService constructor(
   private val projectRepository: ProjectRepository,
   private val entityManager: EntityManager,
-  private val securityService: SecurityService,
-  private val permissionService: PermissionService,
-  private val apiKeyService: ApiKeyService,
   private val screenshotService: ScreenshotService,
   private val organizationRoleService: OrganizationRoleService,
   private val authenticationFacade: AuthenticationFacade,
@@ -71,6 +68,15 @@ class ProjectService constructor(
 
   @set:Autowired
   lateinit var mtServiceConfigService: MtServiceConfigService
+
+  @set:Autowired
+  lateinit var securityService: SecurityService
+
+  @set:Autowired
+  lateinit var permissionService: PermissionService
+
+  @set:Autowired
+  lateinit var apiKeyService: ApiKeyService
 
   @Transactional
   @Cacheable(cacheNames = [Caches.PROJECTS], key = "#id")

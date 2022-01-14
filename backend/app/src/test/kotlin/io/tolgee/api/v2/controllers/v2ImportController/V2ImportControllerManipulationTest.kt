@@ -38,7 +38,7 @@ class V2ImportControllerManipulationTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
-    loginAsUser(user.username!!)
+    loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/result/languages/${testData.importEnglish.id}" +
       "/translations/${testData.translationWithConflict.id}/resolve/set-override"
     performAuthPut(path, null).andIsOk

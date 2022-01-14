@@ -5,7 +5,7 @@
 package io.tolgee.controllers.screenshot
 
 import io.tolgee.component.TimestampValidation
-import io.tolgee.dtos.request.GetScreenshotsByKeyDTO
+import io.tolgee.dtos.request.screenshot.GetScreenshotsByKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.fixtures.generateUniqueString
@@ -94,7 +94,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
     screenshotService.store(screenshotFile, key)
     val result: List<ScreenshotDTO> = performAuthPost(
       "/api/project/${project.id}/screenshots/get",
-      GetScreenshotsByKeyDTO(key.name!!)
+      GetScreenshotsByKeyDto(key.name!!)
     ).andExpect(status().isOk)
       .andReturn().parseResponseTo()
     timestampValidation.checkTimeStamp(result[0].filename.split("timestamp=")[1])
