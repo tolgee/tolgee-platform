@@ -24,6 +24,8 @@ const getExampleValue = (paramName: string, func: string | null) => {
     case 'date':
     case 'time':
       return new Date();
+    case 'tag':
+      return (content) => `<${paramName}>${content}</${paramName}>`;
     default:
       return `{${paramName}}`;
   }
@@ -151,6 +153,7 @@ export const icuVariants = (
     variants = null;
     parseError = e.message;
   }
+
   return {
     parameters,
     variants: variants?.length ? variants : null,

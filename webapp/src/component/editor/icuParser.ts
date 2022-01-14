@@ -52,6 +52,15 @@ const flatTree = (root: MessageFormatElement): ParameterType[] => {
           options: [],
         },
       ];
+    case TYPE.tag:
+      return [
+        {
+          name: root.value,
+          function: TYPE[root.type],
+          options: [],
+        },
+        ...root.children.flatMap(flatTree),
+      ];
     default:
       return [];
   }
