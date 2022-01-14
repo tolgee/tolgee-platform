@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.tolgee.api.v2.hateoas.invitation.TagModel
 import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
 import io.tolgee.controllers.IController
-import io.tolgee.dtos.request.TagKeyDto
+import io.tolgee.dtos.request.key.TagKeyDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission

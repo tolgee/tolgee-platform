@@ -2,9 +2,9 @@ package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
-import io.tolgee.dtos.request.ComplexEditKeyDto
-import io.tolgee.dtos.request.CreateKeyDto
-import io.tolgee.dtos.request.EditKeyDto
+import io.tolgee.dtos.request.key.ComplexEditKeyDto
+import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.exceptions.FileStoreException
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest

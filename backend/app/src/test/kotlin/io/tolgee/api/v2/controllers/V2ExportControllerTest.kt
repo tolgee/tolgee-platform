@@ -1,0 +1,123 @@
+package io.tolgee.api.v2.controllers
+
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.TranslationsTestData
+import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.fixtures.andGetContentAsString
+import io.tolgee.fixtures.andIsOk
+import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assertions.Assertions.assertThat
+import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.web.servlet.MvcResult
+import org.springframework.transaction.annotation.Transactional
+import org.testng.annotations.AfterMethod
+import org.testng.annotations.Test
+import java.io.ByteArrayInputStream
+import java.util.zip.ZipInputStream
+import kotlin.system.measureTimeMillis
+
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+  lateinit var testData: TranslationsTestData
+
+  @AfterMethod(alwaysRun = true)
+  fun after() {
+    commitTransaction()
+    // cleanup
+    projectService.deleteProject(project.id)
+    userAccountService.delete(testData.user)
+    commitTransaction()
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `it exports to json without scoping`() {
+    initBaseData()
+    val parsed = performExport()
+
+    assertThatJson(parsed["/en.json"]!!) {
+      node("Z key").isEqualTo("A translation")
+    }
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `it exports to json with scoping`() {
+    testData = TranslationsTestData()
+    testData.generateScopedData()
+    testDataService.saveTestData(testData.root)
+    prepareUserAndProject(testData)
+    commitTransaction()
+
+    val parsed = performExport("splitByScope=true&splitByScopeDepth=2")
+
+    assertThatJson(parsed["hello/i/en.json"]!!) {
+      node("am.scoped").isEqualTo("yupee!")
+    }
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `it filters by keyId in`() {
+    testData = TranslationsTestData()
+    testData.generateLotOfData(5000)
+    testDataService.saveTestData(testData.root)
+    prepareUserAndProject(testData)
+    commitTransaction()
+
+    val time = measureTimeMillis {
+      val selectAllResult = performProjectAuthGet("translations/select-all").andIsOk.andGetContentAsString
+      val keyIds = jacksonObjectMapper().readValue<Map<String, List<Long>>>(selectAllResult)["ids"]?.take(4000)
+      val parsed = performExportPost(ExportParams(filterKeyId = keyIds))
+      assertThatJson(parsed["/en.json"]!!) {
+        isObject.hasSize(3999)
+      }
+    }
+
+    assertThat(time).isLessThan(2000)
+  }
+
+  private fun performExport(query: String = ""): Map<String, String> {
+    val mvcResult = performProjectAuthGet("export?$query")
+      .andIsOk
+      .andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
+    return parseZip(mvcResult.response.contentAsByteArray)
+  }
+
+  private fun performExportPost(body: ExportParams): Map<String, String> {
+    val mvcResult = performProjectAuthPost("export", body)
+      .andIsOk
+      .andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
+    return parseZip(mvcResult.response.contentAsByteArray)
+  }
+
+  private fun parseZip(responseContent: ByteArray): Map<String, String> {
+    val byteArrayInputStream = ByteArrayInputStream(responseContent)
+    val zipInputStream = ZipInputStream(byteArrayInputStream)
+
+    return zipInputStream.use {
+      generateSequence {
+        it.nextEntry
+      }.filterNot { it.isDirectory }
+        .map { it.name to zipInputStream.bufferedReader().readText() }.toMap()
+    }
+  }
+
+  private fun initBaseData() {
+    testData = TranslationsTestData()
+    testDataService.saveTestData(testData.root)
+    prepareUserAndProject(testData)
+    commitTransaction()
+  }
+
+  private fun prepareUserAndProject(testData: TranslationsTestData) {
+    userAccount = testData.user
+    projectSupplier = { testData.project }
+  }
+}

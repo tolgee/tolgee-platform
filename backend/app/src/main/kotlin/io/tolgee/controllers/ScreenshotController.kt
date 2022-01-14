@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.component.TimestampValidation
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.PathDTO
-import io.tolgee.dtos.request.GetScreenshotsByKeyDTO
+import io.tolgee.dtos.request.screenshot.GetScreenshotsByKeyDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.exceptions.NotFoundException
@@ -74,7 +74,7 @@ class ScreenshotController(
   @AccessWithAnyProjectPermission
   fun getKeyScreenshots(
     @PathVariable("projectId") projectId: Long,
-    @RequestBody @Valid dto: GetScreenshotsByKeyDTO
+    @RequestBody @Valid dto: GetScreenshotsByKeyDto
   ): List<ScreenshotDTO> {
     val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(dto.key)).orElseThrow { NotFoundException() }
     return screenshotService.findAll(keyEntity).map { it.toDTO() }

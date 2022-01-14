@@ -1,8 +1,8 @@
 package io.tolgee.api.v2.controllers
 
-import io.tolgee.dtos.request.OrganizationDto
-import io.tolgee.dtos.request.OrganizationInviteUserDto
-import io.tolgee.dtos.request.SetOrganizationRoleDto
+import io.tolgee.dtos.request.organization.OrganizationDto
+import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
+import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson

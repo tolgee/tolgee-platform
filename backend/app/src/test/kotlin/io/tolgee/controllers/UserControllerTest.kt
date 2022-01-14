@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.dtos.request.UserUpdateRequestDTO
+import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
 import org.assertj.core.api.Assertions
@@ -28,7 +28,7 @@ class UserControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun updateUser() {
-    val requestDTO = UserUpdateRequestDTO(
+    val requestDTO = UserUpdateRequestDto(
       email = "ben@ben.aa",
       password = "super new password",
       name = "Ben's new name"
@@ -44,7 +44,7 @@ class UserControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun updateUserValidation() {
-    var requestDTO = UserUpdateRequestDTO(
+    var requestDTO = UserUpdateRequestDto(
       email = "ben@ben.aa",
       password = "",
       name = ""
@@ -55,7 +55,7 @@ class UserControllerTest : AuthorizedControllerTest() {
     standardValidation.onField("password")
     standardValidation.onField("name")
 
-    requestDTO = UserUpdateRequestDTO(
+    requestDTO = UserUpdateRequestDto(
       email = "ben@ben.aa",
       password = "aksjhd  dasdsa",
       name = "a"
@@ -73,7 +73,7 @@ class UserControllerTest : AuthorizedControllerTest() {
     tolgeeProperties.authentication.needsEmailVerification = true
 
     dbPopulator.createUserIfNotExists("ben@ben.aa")
-    val requestDTO = UserUpdateRequestDTO(
+    val requestDTO = UserUpdateRequestDto(
       email = "ben@ben.aaa",
       name = "Ben Ben"
     )

@@ -7,9 +7,9 @@ import io.tolgee.api.v2.hateoas.key.KeyModelAssembler
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
 import io.tolgee.controllers.IController
-import io.tolgee.dtos.request.ComplexEditKeyDto
-import io.tolgee.dtos.request.CreateKeyDto
-import io.tolgee.dtos.request.EditKeyDto
+import io.tolgee.dtos.request.key.ComplexEditKeyDto
+import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission

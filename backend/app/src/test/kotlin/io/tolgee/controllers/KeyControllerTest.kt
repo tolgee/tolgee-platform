@@ -1,10 +1,10 @@
 package io.tolgee.controllers
 
 import io.tolgee.dtos.PathDTO
-import io.tolgee.dtos.request.DeprecatedEditKeyDTO
-import io.tolgee.dtos.request.GetKeyTranslationsReqDto
-import io.tolgee.dtos.request.OldEditKeyDto
-import io.tolgee.dtos.request.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.key.DeprecatedEditKeyDTO
+import io.tolgee.dtos.request.key.OldEditKeyDto
+import io.tolgee.dtos.request.translation.GetKeyTranslationsReqDto
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo

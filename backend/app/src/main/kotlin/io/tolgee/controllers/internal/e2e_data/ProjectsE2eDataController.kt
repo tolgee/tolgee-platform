@@ -2,8 +2,8 @@ package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.dtos.request.LanguageDto
-import io.tolgee.dtos.request.SetTranslationsWithKeyDto
-import io.tolgee.dtos.request.SignUpDto
+import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project

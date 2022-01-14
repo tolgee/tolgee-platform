@@ -11,11 +11,13 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
 import java.math.BigDecimal
+import kotlin.system.measureTimeMillis
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -224,5 +226,19 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations/en,de").andPrettyPrint.andIsOk
+  }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @Test
+  fun `returns select all keys`() {
+    testData.generateLotOfData(2000)
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    val time = measureTimeMillis {
+      performProjectAuthGet("/translations/select-all").andAssertThatJson {
+        node("ids").isArray.hasSize(2002)
+      }
+    }
+    assertThat(time).isLessThan(1000)
   }
 }

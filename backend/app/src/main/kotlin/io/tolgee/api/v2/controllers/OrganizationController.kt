@@ -15,10 +15,10 @@ import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleMode
 import io.tolgee.api.v2.hateoas.project.ProjectModel
 import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.dtos.request.OrganizationDto
-import io.tolgee.dtos.request.OrganizationInviteUserDto
-import io.tolgee.dtos.request.OrganizationRequestParamsDto
-import io.tolgee.dtos.request.SetOrganizationRoleDto
+import io.tolgee.dtos.request.organization.OrganizationDto
+import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
+import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
+import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException

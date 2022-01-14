@@ -1,6 +1,6 @@
 package io.tolgee.service
 
-import io.tolgee.dtos.request.SetOrganizationRoleDto
+import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException

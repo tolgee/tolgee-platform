@@ -1,7 +1,7 @@
 package io.tolgee.security
 
 import io.tolgee.controllers.AbstractUserAppApiTest
-import io.tolgee.dtos.request.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.testing.assertions.Assertions

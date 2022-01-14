@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.verify
-import io.tolgee.dtos.request.SignUpDto
+import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.repository.EmailVerificationRepository
 import io.tolgee.service.EmailVerificationService

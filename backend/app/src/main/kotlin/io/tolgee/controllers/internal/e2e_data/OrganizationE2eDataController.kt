@@ -2,7 +2,7 @@ package io.tolgee.controllers.internal.e2e_data
 
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.DbPopulatorReal
-import io.tolgee.dtos.request.OrganizationDto
+import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.security.InternalController
 import io.tolgee.service.OrganizationRoleService

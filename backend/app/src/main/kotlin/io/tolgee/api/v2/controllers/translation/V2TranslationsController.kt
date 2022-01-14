@@ -17,8 +17,10 @@ import io.tolgee.api.v2.hateoas.translations.TranslationModel
 import io.tolgee.api.v2.hateoas.translations.TranslationModelAssembler
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.PathDTO
-import io.tolgee.dtos.request.GetTranslationsParams
-import io.tolgee.dtos.request.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.translation.GetTranslationsParams
+import io.tolgee.dtos.request.translation.SelectAllResponse
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
@@ -117,12 +119,7 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    // check scopes if key exists
-    keyService.get(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
-      if (authenticationFacade.isApiKeyAuthentication) {
-        securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
-      }
-    }
+    checkScopesIfKeyExists(dto)
     val key = keyService.getOrCreateKey(projectHolder.projectEntity, PathDTO.fromFullPath(dto.key))
     val translations = translationService.setForKey(key, dto.translations)
     return getSetTranslationsResponse(key, translations)
@@ -161,6 +158,27 @@ class V2TranslationsController(
     return pagedAssembler.toTranslationModel(data, languages, cursor)
   }
 
+  @GetMapping(value = ["select-all"])
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @Operation(summary = "Get select all keys")
+  fun getSelectAllKeyIds(
+    @ParameterObject params: TranslationFilters,
+    @ParameterObject pageable: Pageable
+  ): SelectAllResponse {
+    val languages: Set<Language> = languageService
+      .getLanguagesForTranslationsView(params.languages, projectHolder.project.id)
+
+    return SelectAllResponse(
+      translationService.getSelectAllKeys(
+        projectId = projectHolder.project.id,
+        pageable = pageable,
+        params = params,
+        languages = languages
+      )
+    )
+  }
+
   private fun getKeysWithScreenshots(keyIds: Collection<Long>): Map<Long, MutableSet<Screenshot>>? {
     if (
       !authenticationFacade.isApiKeyAuthentication ||
@@ -180,6 +198,14 @@ class V2TranslationsController(
         languageTag to TranslationModel(translation.id, translation.text, translation.state)
       }
     )
+  }
+
+  private fun checkScopesIfKeyExists(dto: SetTranslationsWithKeyDto) {
+    keyService.get(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
+      if (authenticationFacade.isApiKeyAuthentication) {
+        securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
+      }
+    }
   }
 
   private fun Translation.checkFromProject() {

@@ -11,8 +11,8 @@ import io.tolgee.api.v2.hateoas.translations.TranslationModelAssembler
 import io.tolgee.api.v2.hateoas.translations.comments.TranslationCommentModel
 import io.tolgee.api.v2.hateoas.translations.comments.TranslationCommentModelAssembler
 import io.tolgee.api.v2.hateoas.translations.comments.TranslationWithCommentModel
-import io.tolgee.dtos.request.TranslationCommentDto
-import io.tolgee.dtos.request.TranslationCommentWithLangKeyDto
+import io.tolgee.dtos.request.translation.comment.TranslationCommentDto
+import io.tolgee.dtos.request.translation.comment.TranslationCommentWithLangKeyDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException

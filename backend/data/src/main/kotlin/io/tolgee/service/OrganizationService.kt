@@ -1,7 +1,7 @@
 package io.tolgee.service
 
-import io.tolgee.dtos.request.OrganizationDto
-import io.tolgee.dtos.request.OrganizationRequestParamsDto
+import io.tolgee.dtos.request.organization.OrganizationDto
+import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Organization

@@ -207,9 +207,9 @@ class TranslationsTestData {
     }
   }
 
-  fun generateLotOfData() {
+  fun generateLotOfData(count: Long = 99) {
     root.data.projects[0].apply {
-      (1..99).forEach {
+      (1..count).forEach {
         val padNum = it.toString().padStart(2, '0')
         addKey {
           self { name = "key $padNum" }
@@ -414,4 +414,46 @@ class TranslationsTestData {
       }
     }
   }
+
+  fun generateScopedData() {
+    projectBuilder.run {
+      addKey {
+        self {
+          name = "hello.i.am.scoped"
+          addTranslation {
+            self {
+              text = "yupee!"
+              language = englishLanguage
+              key = this@addKey.self
+            }
+          }
+        }
+      }
+    }
+  }
+
+  fun addTranslationWithHtml() {
+    projectBuilder.run {
+      addKey {
+        self.name = "html_key"
+        addTranslation {
+          self {
+            key = this@addKey.self
+            language = germanLanguage
+            text = "Sweat jesus, this is invalid < HTML!"
+          }
+        }
+        addTranslation {
+          self {
+            key = this@addKey.self
+            language = englishLanguage
+            text = "<p>Sweat jesus, this is HTML!</p>"
+          }
+        }
+      }
+    }
+  }
+
+  val projectTranslations: List<Translation>
+    get() = projectBuilder.data.translations.map { it.self }
 }

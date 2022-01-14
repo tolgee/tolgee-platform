@@ -1,7 +1,7 @@
 package io.tolgee.service
 
-import io.tolgee.dtos.request.ITranslationCommentDto
-import io.tolgee.dtos.request.TranslationCommentDto
+import io.tolgee.dtos.request.translation.comment.ITranslationCommentDto
+import io.tolgee.dtos.request.translation.comment.TranslationCommentDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationCommentState
@@ -76,6 +76,10 @@ class TranslationCommentService(
 
   fun createAll(entities: Collection<TranslationComment>) {
     translationCommentRepository.saveAll(entities)
+  }
+
+  fun deleteByTranslationIdIn(translationIds: Collection<Long>) {
+    translationCommentRepository.deleteAllByTranslationIdIn(translationIds)
   }
 
   fun update(
