@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/tolgee/server/compare/v2.0.0...v2.0.1) (2022-01-17)
+
+
+### Bug Fixes
+
+* Examples with html tags not working TG-465 ([d3ff03c](https://github.com/tolgee/server/commit/d3ff03c47e8b3a0a2731ef63d242b4c24127fbea))
+
 # [2.0.0](https://github.com/tolgee/server/compare/v1.11.1...v2.0.0) (2022-01-07)
 
 
