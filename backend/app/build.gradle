@@ -119,7 +119,7 @@ dependencies {
     /**
      * MISC
      */
-    implementation 'io.sentry:sentry-spring-boot-starter:5.0.1'
+    implementation 'io.sentry:sentry-spring-boot-starter:5.5.3'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
