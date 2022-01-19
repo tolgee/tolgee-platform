@@ -23,7 +23,7 @@ class ProjectModelAssembler(
   override fun toModel(view: ProjectView): ProjectModel {
     val link = linkTo<V2ProjectsController> { get(view.id) }.withSelfRel()
     val baseLanguage = view.baseLanguage ?: let {
-      projectService.autoSetBaseLanguage(view.id)
+      projectService.getOrCreateBaseLanguage(view.id)
     }
     return ProjectModel(
       id = view.id,
