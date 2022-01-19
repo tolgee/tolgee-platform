@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/tolgee/server/compare/v2.0.1...v2.1.0) (2022-01-19)
+
+
+### Features
+
+* New Exports Backend TG-461 ([9da99e6](https://github.com/tolgee/server/commit/9da99e62484657bc5f7b7f42116010d258bc5f13))
+
 ## [2.0.1](https://github.com/tolgee/server/compare/v2.0.0...v2.0.1) (2022-01-17)
 
 
