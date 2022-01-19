@@ -17,7 +17,9 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.lang3.time.DateUtils
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -90,25 +92,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it suggests from TM`() {
-    testDataService.saveTestData(testData.root)
-    performAuthPost(
-      "/v2/projects/${project.id}/suggest/translation-memory",
-      SuggestRequestDto(keyId = testData.thisIsBeautifulKey.id, targetLanguageId = testData.germanLanguage.id)
-    ).andIsOk.andPrettyPrint.andAssertThatJson {
-      node("_embedded.translationMemoryItems") {
-        node("[0]") {
-          node("targetText").isEqualTo("Das ist schön")
-          node("baseText").isEqualTo("This is beautiful")
-        }
-      }
-      node("page.totalElements").isEqualTo(1)
-    }
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun `it suggests from TM a`() {
+  fun `it suggests from TM with keyId`() {
     performAuthPost(
       "/v2/projects/${project.id}/suggest/translation-memory",
       SuggestRequestDto(keyId = testData.thisIsBeautifulKey.id, targetLanguageId = testData.germanLanguage.id)
@@ -122,6 +106,25 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         }
       }
       node("page.totalElements").isEqualTo(1)
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it suggests from TM with baseText`() {
+    performAuthPost(
+      "/v2/projects/${project.id}/suggest/translation-memory",
+      SuggestRequestDto(baseText = "This is beautiful", targetLanguageId = testData.germanLanguage.id)
+    ).andIsOk.andPrettyPrint.andAssertThatJson {
+      node("_embedded.translationMemoryItems") {
+        node("[0]") {
+          node("targetText").isEqualTo("Das ist schön")
+          node("baseText").isEqualTo("This is beautiful")
+          node("keyName").isEqualTo("key 2")
+          node("similarity").isEqualTo("1.0")
+        }
+      }
+      node("page.totalElements").isEqualTo(3)
     }
   }
 
@@ -141,7 +144,9 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it suggests machine translations`() {
+  fun `it suggests machine translations with keyId`() {
+    mockCurrentDate { Date() }
+
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
       SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
@@ -156,7 +161,24 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `it suggests machine translations with baseText`() {
+    mockCurrentDate { Date() }
+
+    performAuthPost(
+      "/v2/projects/${project.id}/suggest/machine-translations",
+      SuggestRequestDto(baseText = "Yupee", targetLanguageId = testData.germanLanguage.id)
+    ).andIsOk.andPrettyPrint.andAssertThatJson {
+      node("machineTranslations") {
+        node("GOOGLE").isEqualTo("Translated with Google")
+      }
+    }
+    verify(googleTranslate).translate(eq("Yupee"), any(), any())
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `it suggests using just enabled services (AWS)`() {
+    mockCurrentDate { Date() }
     testData.enableAWS()
     testDataService.saveTestData(testData.root)
     performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
@@ -173,6 +195,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it suggests using just enabled services (Google, AWS)`() {
+    mockCurrentDate { Date() }
     machineTranslationProperties.freeCreditsAmount = 2000
     testData.enableBoth()
     testDataService.saveTestData(testData.root)

@@ -6,7 +6,6 @@ import io.tolgee.api.v2.hateoas.invitation.TranslationMemoryItemModelAssembler
 import io.tolgee.api.v2.hateoas.machineTranslation.SuggestResultModel
 import io.tolgee.api.v2.hateoas.translationMemory.TranslationMemoryItemModel
 import io.tolgee.constants.Message
-import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.request.SuggestRequestDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -55,29 +54,30 @@ class TranslationSuggestionController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
   fun suggestMachineTranslations(@RequestBody @Valid dto: SuggestRequestDto): SuggestResultModel {
-    val key = keyService.get(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
-    key.checkInProject()
-
-    val language = languageService.findById(dto.targetLanguageId)
+    val targetLanguage = languageService.findById(dto.targetLanguageId)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-
-    var resultMap: Map<MtServiceType, String?>? = null
 
     val balanceBefore = mtCreditBucketService.getCreditBalance(projectHolder.projectEntity)
 
     try {
-      resultMap = mtService.getMachineTranslations(projectHolder.projectEntity, key, language)
+      val resultMap = dto.baseText?.ifBlank { null }?.let {
+        mtService.getMachineTranslations(projectHolder.projectEntity, it, targetLanguage)
+      } ?: let {
+        val key = keyService.get(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
+        key.checkInProject()
+        mtService.getMachineTranslations(projectHolder.projectEntity, key, targetLanguage)
+      }
+
+      val balanceAfter = mtCreditBucketService.getCreditBalance(projectHolder.projectEntity)
+
+      return SuggestResultModel(
+        machineTranslations = resultMap,
+        translationCreditsBalanceBefore = balanceBefore,
+        translationCreditsBalanceAfter = balanceAfter,
+      )
     } catch (e: OutOfCreditsException) {
       throw BadRequestException(Message.OUT_OF_CREDITS, listOf(balanceBefore))
     }
-
-    val balanceAfter = mtCreditBucketService.getCreditBalance(projectHolder.projectEntity)
-
-    return SuggestResultModel(
-      machineTranslations = resultMap,
-      translationCreditsBalanceBefore = balanceBefore,
-      translationCreditsBalanceAfter = balanceAfter,
-    )
   }
 
   @PostMapping("/translation-memory")
@@ -91,12 +91,15 @@ class TranslationSuggestionController(
     @RequestBody @Valid dto: SuggestRequestDto,
     @ParameterObject pageable: Pageable
   ): PagedModel<TranslationMemoryItemModel> {
-    val key = keyService.get(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
-    key.checkInProject()
-    val language = languageService.findById(dto.targetLanguageId)
+    val targetLanguage = languageService.findById(dto.targetLanguageId)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
 
-    val data = translationMemoryService.suggest(key, language, pageable)
+    val data = dto.baseText?.let { baseText -> translationMemoryService.suggest(baseText, targetLanguage, pageable) }
+      ?: let {
+        val key = keyService.get(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
+        key.checkInProject()
+        translationMemoryService.suggest(key, targetLanguage, pageable)
+      }
     return arraytranslationMemoryItemModelAssembler.toModel(data, translationMemoryItemModelAssembler)
   }
 

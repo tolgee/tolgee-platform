@@ -20,17 +20,30 @@ class MtService(
   private val projectService: ProjectService,
   private val mtServiceConfigService: MtServiceConfigService
 ) {
-  fun getMachineTranslations(project: Project, key: Key, language: Language):
+  fun getMachineTranslations(project: Project, key: Key, targetLanguage: Language):
     Map<MtServiceType, String?>? {
-
-    // set baseLanguage when not provided
-    val baseLanguage = project.baseLanguage ?: projectService.autoSetBaseLanguage(project.id)!!
-
+    val baseLanguage = projectService.getOrCreateBaseLanguage(project.id)!!
     val baseTranslationText = translationService.find(key, baseLanguage).orElse(null)?.text
       ?: return null
+    return getMachineTranslations(project, baseTranslationText, baseLanguage, targetLanguage)
+  }
 
-    val enabledServices = mtServiceConfigService.getEnabledServices(language.id)
+  fun getMachineTranslations(
+    project: Project,
+    baseTranslationText: String,
+    targetLanguage: Language
+  ): Map<MtServiceType, String?>? {
+    val baseLanguage = projectService.getOrCreateBaseLanguage(project.id)!!
+    return getMachineTranslations(project, baseTranslationText, baseLanguage, targetLanguage)
+  }
 
+  fun getMachineTranslations(
+    project: Project,
+    baseTranslationText: String,
+    baseLanguage: Language,
+    targetLanguage: Language
+  ): Map<MtServiceType, String?>? {
+    val enabledServices = mtServiceConfigService.getEnabledServices(targetLanguage.id)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
     val price = machineTranslationManager.calculatePriceAll(
       text = prepared.text,
@@ -42,7 +55,7 @@ class MtService(
     )
 
     return machineTranslationManager
-      .translateUsingAll(prepared.text, baseLanguage.tag, language.tag, enabledServices)
+      .translateUsingAll(prepared.text, baseLanguage.tag, targetLanguage.tag, enabledServices)
       .map { (serviceName, translated) ->
         var result = translated
         prepared.params.forEach { (placeholder, text) ->

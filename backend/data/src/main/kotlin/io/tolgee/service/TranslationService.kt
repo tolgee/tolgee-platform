@@ -293,7 +293,7 @@ class TranslationService(
   }
 
   fun findBaseTranslation(key: Key): Translation? {
-    projectService.autoSetBaseLanguage(key.project!!.id)?.let {
+    projectService.getOrCreateBaseLanguage(key.project!!.id)?.let {
       return find(key, it).orElse(null)
     }
     return null
@@ -306,12 +306,28 @@ class TranslationService(
   ): Page<TranslationMemoryItemView> {
     val baseTranslation = findBaseTranslation(key) ?: return Page.empty()
 
-    if ((baseTranslation.text?.length ?: 0) < 3) {
+    val baseTranslationText = baseTranslation.text ?: return Page.empty(pageable)
+
+    return getTranslationMemorySuggestions(baseTranslationText, key, targetLanguage, pageable)
+  }
+
+  fun getTranslationMemorySuggestions(
+    baseTranslationText: String,
+    key: Key?,
+    targetLanguage: Language,
+    pageable: Pageable
+  ): Page<TranslationMemoryItemView> {
+    val baseLanguage = projectService.getOrCreateBaseLanguage(targetLanguage.project!!.id)
+      ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
+
+    if ((baseTranslationText.length) < 3) {
       return Page.empty(pageable)
     }
 
     return translationRepository.getTranslateMemorySuggestions(
-      baseTranslation = baseTranslation,
+      baseTranslationText = baseTranslationText,
+      key = key,
+      baseLanguage = baseLanguage,
       targetLanguage = targetLanguage,
       pageable = pageable
     )

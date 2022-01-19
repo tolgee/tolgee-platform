@@ -114,7 +114,7 @@ class ProjectService constructor(
 
     entityManager.persist(project)
     val createdLanguages = dto.languages!!.map { languageService.createLanguage(it, project) }
-    project.baseLanguage = getBaseLanguage(dto, createdLanguages)
+    project.baseLanguage = getOrCreateBaseLanguage(dto, createdLanguages)
 
     return project
   }
@@ -244,7 +244,7 @@ class ProjectService constructor(
    * It saves updated project and returns project's new baseLanguage
    */
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
-  fun autoSetBaseLanguage(projectId: Long): Language? {
+  fun getOrCreateBaseLanguage(projectId: Long): Language? {
     return this.get(projectId).orElse(null)?.let { project ->
       project.baseLanguage ?: project.languages.toList().firstOrNull()?.let {
         project.baseLanguage = it
@@ -292,7 +292,7 @@ class ProjectService constructor(
     return this.projectRepository.findById(project.id).orElseThrow { NotFoundException() }
   }
 
-  private fun getBaseLanguage(dto: CreateProjectDTO, createdLanguages: List<Language>): Language {
+  private fun getOrCreateBaseLanguage(dto: CreateProjectDTO, createdLanguages: List<Language>): Language {
     if (dto.baseLanguageTag != null) {
       return createdLanguages.find { it.tag == dto.baseLanguageTag }
         ?: throw BadRequestException(io.tolgee.constants.Message.LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND)

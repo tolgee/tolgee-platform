@@ -8,4 +8,5 @@ open class AwsMachineTranslationProperties(
   override var defaultPrimary: Boolean = false,
   var accessKey: String? = null,
   var secretKey: String? = null,
+  var region: String? = "eu-central-1"
 ) : MachineTranslationServiceProperties
