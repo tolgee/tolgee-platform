@@ -3,8 +3,8 @@ package io.tolgee.security.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.CreateApiKeyDto
-import io.tolgee.dtos.request.EditApiKeyDTO
+import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
+import io.tolgee.dtos.request.apiKey.EditApiKeyDTO
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException

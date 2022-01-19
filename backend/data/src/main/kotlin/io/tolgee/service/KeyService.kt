@@ -1,11 +1,11 @@
 package io.tolgee.service
 
 import io.tolgee.dtos.PathDTO
-import io.tolgee.dtos.request.CreateKeyDto
-import io.tolgee.dtos.request.DeprecatedEditKeyDTO
-import io.tolgee.dtos.request.EditKeyDto
-import io.tolgee.dtos.request.OldEditKeyDto
-import io.tolgee.dtos.request.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.dtos.request.key.DeprecatedEditKeyDTO
+import io.tolgee.dtos.request.key.EditKeyDto
+import io.tolgee.dtos.request.key.OldEditKeyDto
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.exceptions.BadRequestException
@@ -153,6 +153,7 @@ class KeyService(
     return save(key)
   }
 
+  @Transactional
   fun delete(id: Long) {
     val key = get(id).orElseThrow { NotFoundException() }
     translationService.deleteAllByKey(id)
@@ -162,6 +163,7 @@ class KeyService(
     translationsSocketIoModule.onKeyDeleted(key)
   }
 
+  @Transactional
   fun deleteMultiple(ids: Collection<Long>) {
     translationService.deleteAllByKeys(ids)
     keyMetaService.deleteAllByKeyIdIn(ids)

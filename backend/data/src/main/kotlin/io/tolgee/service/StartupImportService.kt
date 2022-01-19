@@ -2,8 +2,8 @@ package io.tolgee.service
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.dataImport.ImportFileDto
-import io.tolgee.dtos.request.CreateProjectDTO
 import io.tolgee.dtos.request.LanguageDto
+import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.model.ApiKey
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.service.dataImport.ImportService

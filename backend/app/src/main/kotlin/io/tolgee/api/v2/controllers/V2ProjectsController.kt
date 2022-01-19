@@ -16,10 +16,10 @@ import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.dtos.request.CreateProjectDTO
-import io.tolgee.dtos.request.EditProjectDTO
-import io.tolgee.dtos.request.ProjectInviteUserDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
+import io.tolgee.dtos.request.project.CreateProjectDTO
+import io.tolgee.dtos.request.project.EditProjectDTO
+import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException

@@ -8,7 +8,7 @@ object TextHelper {
   fun splitOnNonEscapedDelimiter(string: String, delimiter: Char): List<String> {
     val result = ArrayList<String>()
     var actual = StringBuilder()
-    for (i in 0 until string.length) {
+    for (i in string.indices) {
       val character = string[i]
       if (character == delimiter && !isCharEscaped(i, string)) {
         result.add(removeEscapes(actual.toString()))

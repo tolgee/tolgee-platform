@@ -4,7 +4,7 @@
 
 package io.tolgee.controllers.screenshot
 
-import io.tolgee.dtos.request.GetScreenshotsByKeyDTO
+import io.tolgee.dtos.request.screenshot.GetScreenshotsByKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.fixtures.LoggedRequestFactory.addToken
@@ -58,7 +58,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
     var result: List<ScreenshotDTO> = performAuthPost(
       "/api/project/${project.id}/screenshots/get",
-      GetScreenshotsByKeyDTO(key.name!!)
+      GetScreenshotsByKeyDto(key.name!!)
     ).andExpect(status().isOk)
       .andReturn().parseResponseTo()
 
@@ -69,7 +69,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
     result = performAuthPost(
       "/api/project/${project.id}/screenshots/get",
-      GetScreenshotsByKeyDTO(key2.name!!)
+      GetScreenshotsByKeyDto(key2.name!!)
     ).andExpect(status().isOk)
       .andReturn().parseResponseTo()
 

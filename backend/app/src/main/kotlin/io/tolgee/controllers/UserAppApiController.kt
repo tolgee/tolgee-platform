@@ -3,8 +3,8 @@ package io.tolgee.controllers
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
-import io.tolgee.dtos.request.GetKeyTranslationsReqDto
-import io.tolgee.dtos.request.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.translation.GetKeyTranslationsReqDto
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.AuthenticationFacade

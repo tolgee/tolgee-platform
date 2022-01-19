@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers
 
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TagsTestData
-import io.tolgee.dtos.request.TagKeyDto
+import io.tolgee.dtos.request.key.TagKeyDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint

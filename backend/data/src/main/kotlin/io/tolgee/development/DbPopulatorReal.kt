@@ -2,7 +2,7 @@ package io.tolgee.development
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.LanguageDto
-import io.tolgee.dtos.request.SignUpDto
+import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.ApiKey
 import io.tolgee.model.Language
@@ -44,8 +44,8 @@ class DbPopulatorReal(
   private val slugGenerator: SlugGenerator,
   private val organizationRoleService: OrganizationRoleService
 ) {
-  private var de: Language? = null
-  private var en: Language? = null
+  private lateinit var de: Language
+  private lateinit var en: Language
 
   @Transactional
   fun autoPopulate() {
@@ -212,8 +212,8 @@ class DbPopulatorReal(
     project: Project,
     english: String,
     deutsch: String,
-    en: Language?,
-    de: Language?
+    en: Language,
+    de: Language
   ) {
     val key = Key()
     key.name = "sampleApp." + english.replace(" ", "_")

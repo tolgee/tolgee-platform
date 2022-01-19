@@ -8,8 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.apiKey.ApiKeyModel
 import io.tolgee.api.v2.hateoas.apiKey.ApiKeyModelAssembler
 import io.tolgee.constants.Message
-import io.tolgee.dtos.request.CreateApiKeyDto
-import io.tolgee.dtos.request.V2EditApiKeyDto
+import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
+import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.ApiKey

@@ -3,13 +3,14 @@ package io.tolgee
 import io.tolgee.configuration.Banner
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.development.DbPopulatorReal
-import io.tolgee.dtos.request.SignUpDto
+import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.UserAccountService
 import org.redisson.spring.starter.RedissonAutoConfiguration
 import org.slf4j.LoggerFactory
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 
@@ -28,6 +29,7 @@ class Application(
     @JvmStatic
     fun main(args: Array<String>) {
       val app = SpringApplication(Application::class.java)
+      app.applicationStartup = BufferingApplicationStartup(10000)
       app.setBanner(Banner())
       try {
         app.run(*args)

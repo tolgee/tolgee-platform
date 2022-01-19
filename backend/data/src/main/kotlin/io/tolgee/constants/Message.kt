@@ -80,7 +80,8 @@ enum class Message {
   OUT_OF_CREDITS,
   KEY_NOT_FOUND,
   ORGANIZATION_NOT_FOUND,
-  BASE_LANGUAGE_NOT_FOUND;
+  BASE_LANGUAGE_NOT_FOUND,
+  CANNOT_FIND_BASE_LANGUAGE;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())

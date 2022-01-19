@@ -4,7 +4,8 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.query_results.KeyWithTranslationsDto
-import io.tolgee.dtos.request.GetTranslationsParams
+import io.tolgee.dtos.request.translation.GetTranslationsParams
+import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto.Companion.fromQueryResult
 import io.tolgee.dtos.response.ViewDataResponse
@@ -16,7 +17,6 @@ import io.tolgee.model.Project
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
-import io.tolgee.model.translation.Translation.Companion.builder
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
@@ -43,7 +43,8 @@ class TranslationService(
   private val importService: ImportService,
   private val translationsSocketIoModule: ITranslationsSocketIoModule,
   private val applicationContext: ApplicationContext,
-  private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties,
+  private val translationCommentService: TranslationCommentService
 ) {
   @Autowired
   private lateinit var languageService: LanguageService
@@ -99,7 +100,9 @@ class TranslationService(
   }
 
   fun getOrCreate(key: Key, language: Language): Translation {
-    return find(key, language).orElseGet { builder().language(language).key(key).build() }
+    return find(key, language).orElseGet {
+      Translation(language = language, key = key)
+    }
   }
 
   fun getOrCreate(keyId: Long, languageId: Long): Translation {
@@ -147,14 +150,22 @@ class TranslationService(
     )
   }
 
-  @Suppress("UNCHECKED_CAST")
   fun getViewData(
     projectId: Long,
     pageable: Pageable,
     params: GetTranslationsParams,
     languages: Set<Language>
   ): Page<KeyWithTranslationsView> {
-    return TranslationsViewBuilder.getData(applicationContext, projectId, languages, pageable, params)
+    return TranslationsViewBuilder.getData(applicationContext, projectId, languages, pageable, params, params.cursor)
+  }
+
+  fun getSelectAllKeys(
+    projectId: Long,
+    pageable: Pageable,
+    params: TranslationFilters,
+    languages: Set<Language>
+  ): List<Long> {
+    return TranslationsViewBuilder.getSelectAllKeys(applicationContext, projectId, languages, params)
   }
 
   fun setTranslation(key: Key, languageTag: String?, text: String?): Translation {
@@ -207,6 +218,7 @@ class TranslationService(
     translationRepository.findOneByKeyAndLanguage(key, language)
       .ifPresent { entity: Translation ->
         translationsSocketIoModule.onTranslationsDeleted(listOf(entity))
+        translationCommentService.deleteByTranslationIdIn(listOf(entity.id))
         translationRepository.delete(entity)
       }
   }
@@ -248,6 +260,7 @@ class TranslationService(
 
   fun deleteAllByProject(projectId: Long) {
     val ids = translationRepository.selectIdsByProject(projectId)
+    translationCommentService.deleteByTranslationIdIn(ids)
     deleteByIdIn(ids)
     entityManager.flush()
   }
@@ -261,7 +274,9 @@ class TranslationService(
   fun deleteAllByKeys(ids: Collection<Long>) {
     val translations = translationRepository.getAllByKeyIdIn(ids)
     translationsSocketIoModule.onTranslationsDeleted(translations)
-    deleteByIdIn(translations.map { it.id })
+    val translationIds = translations.map { it.id }
+    translationCommentService.deleteByTranslationIdIn(translationIds)
+    deleteByIdIn(translationIds)
   }
 
   fun deleteAllByKey(id: Long) {

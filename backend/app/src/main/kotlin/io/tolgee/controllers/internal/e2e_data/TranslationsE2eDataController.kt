@@ -3,7 +3,7 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
-import io.tolgee.dtos.request.SetTranslationsWithKeyDto
+import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.security.InternalController

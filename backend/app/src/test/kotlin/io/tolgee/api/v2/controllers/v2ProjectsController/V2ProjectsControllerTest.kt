@@ -2,7 +2,7 @@ package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
-import io.tolgee.dtos.request.ProjectInviteUserDto
+import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsBadRequest

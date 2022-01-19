@@ -1,6 +1,6 @@
 package io.tolgee.controllers
 
-import io.tolgee.dtos.request.SignUpDto
+import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.fixtures.andAssertResponse
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.testing.AbstractControllerTest
