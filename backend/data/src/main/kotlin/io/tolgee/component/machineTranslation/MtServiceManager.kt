@@ -1,5 +1,6 @@
 package io.tolgee.component.machineTranslation
 
+import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.MtServiceType
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.ApplicationContext
@@ -14,7 +15,8 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class MtServiceManager(
-  val applicationContext: ApplicationContext
+  val applicationContext: ApplicationContext,
+  val internalProperties: InternalProperties
 ) {
   private val providers by lazy {
     MtServiceType.values().associateWith { applicationContext.getBean(it.providerClass) }
@@ -33,7 +35,11 @@ class MtServiceManager(
     services: List<MtServiceType>
   ): Map<MtServiceType, String?> {
     return services.getProviders().map { service ->
-      service.key to service.value.translate(text, sourceLanguageTag, targetLanguageTag)
+      service.key to let {
+        if (!internalProperties.fakeMtProviders)
+          service.value.translate(text, sourceLanguageTag, targetLanguageTag)
+        else "$text translated with ${service.key.name} from $sourceLanguageTag to $targetLanguageTag"
+      }
     }.toMap()
   }
 
