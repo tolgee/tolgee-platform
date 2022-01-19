@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/tolgee/server/compare/v2.1.0...v2.1.1) (2022-01-19)
+
+
+### Bug Fixes
+
+* **machine translations:** minor fixes TG-471 ([b0388f1](https://github.com/tolgee/server/commit/b0388f1a5c3f9df79a356be6bce5429a73d30c57))
+
 # [2.1.0](https://github.com/tolgee/server/compare/v2.0.1...v2.1.0) (2022-01-19)
 
 
