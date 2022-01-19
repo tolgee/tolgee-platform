@@ -56,7 +56,7 @@ class ExportService(
   }
 
   private fun getProjectBaseLanguage(projectId: Long): Language {
-    return projectService.autoSetBaseLanguage(projectId)
+    return projectService.getOrCreateBaseLanguage(projectId)
       ?: throw NotFoundException(Message.CANNOT_FIND_BASE_LANGUAGE)
   }
 }

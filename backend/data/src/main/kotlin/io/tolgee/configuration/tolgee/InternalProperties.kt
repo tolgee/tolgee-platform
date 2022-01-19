@@ -8,6 +8,7 @@ class InternalProperties {
   var controllerEnabled = false
   var fakeGithubLogin = false
   var showVersion: Boolean = false
+  var fakeMtProviders: Boolean = false
 
   /**
    * Stops server right after it's started.
