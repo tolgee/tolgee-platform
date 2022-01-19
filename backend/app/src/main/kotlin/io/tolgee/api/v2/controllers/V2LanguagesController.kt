@@ -117,7 +117,7 @@ class V2LanguagesController(
     securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
 
     // if base language is missing, select first language
-    val baseLanguage = projectService.autoSetBaseLanguage(projectHolder.project.id)
+    val baseLanguage = projectService.getOrCreateBaseLanguage(projectHolder.project.id)
     if (baseLanguage!!.id == languageId) {
       throw BadRequestException(Message.CANNOT_DELETE_BASE_LANGUAGE)
     }

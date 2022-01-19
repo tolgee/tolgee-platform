@@ -33,7 +33,8 @@ class MtServicesConfiguration(
 
   @Bean
   fun getAwsTranslationService(): AmazonTranslate? {
-    if (googleMachineTranslationProperties.apiKey != null) {
+
+    if (awsMachineTranslationProperties.accessKey != null) {
       return AmazonTranslateClient.builder().withCredentials(
         AWSStaticCredentialsProvider(
           BasicAWSCredentials(
@@ -41,7 +42,7 @@ class MtServicesConfiguration(
             awsMachineTranslationProperties.secretKey
           )
         )
-      ).build()
+      ).withRegion(awsMachineTranslationProperties.region).build()
     }
     return null
   }

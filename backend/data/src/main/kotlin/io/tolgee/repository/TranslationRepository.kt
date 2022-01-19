@@ -46,29 +46,31 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
 
   fun deleteByIdIn(ids: Collection<Long>)
 
+  /**
+   * inputKey param is optional. When provided, target translation for given won't be returned,
+   * because it's the base translation
+   */
   @Query(
     """
-      select target.text as targetTranslationText, baseTranslation.text as baseTranslationText, targetKey.name as keyName, 
-      similarity(baseTranslation.text, input.text) as similarity
-      from Translation input 
-      join input.key inputKey
-      join inputKey.project inputProject
-      join Translation baseTranslation on
-        baseTranslation.language = input.language and
-        similarity(baseTranslation.text, input.text) > 0.5 and
-        baseTranslation.id <> input.id
-      join baseTranslation.key targetKey
+      select target.text as targetTranslationText, baseTranslation.text as baseTranslationText, key.name as keyName, 
+      similarity(baseTranslation.text, :baseTranslationText) as similarity
+      from Translation baseTranslation
+      join baseTranslation.key key
       join Translation target on 
-            target.key = targetKey and 
+            target.key = key and 
             target.language = :targetLanguage and
             target.text <> '' and
             target.text is not null
-      where input = :baseTranslation
+      where baseTranslation.language = :baseLanguage and
+        similarity(baseTranslation.text, :baseTranslationText) > 0.5 and
+        (:key is null or key <> :key)
       order by similarity desc
       """
   )
   fun getTranslateMemorySuggestions(
-    baseTranslation: Translation,
+    baseTranslationText: String,
+    key: Key? = null,
+    baseLanguage: Language,
     targetLanguage: Language,
     pageable: Pageable
   ): Page<TranslationMemoryItemView>

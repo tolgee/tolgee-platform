@@ -79,7 +79,8 @@ enum class Message {
   TRANSLATION_NOT_FOUND,
   OUT_OF_CREDITS,
   KEY_NOT_FOUND,
-  ORGANIZATION_NOT_FOUND;
+  ORGANIZATION_NOT_FOUND,
+  BASE_LANGUAGE_NOT_FOUND;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())
