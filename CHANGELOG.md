@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/tolgee/server/compare/v2.1.1...v2.1.2) (2022-01-20)
+
+
+### Bug Fixes
+
+* Fix apiUrl in integration guides TG-474 ([57e3cb7](https://github.com/tolgee/server/commit/57e3cb78162786b62f44fe615cc48942188947f2))
+
 ## [2.1.1](https://github.com/tolgee/server/compare/v2.1.0...v2.1.1) (2022-01-19)
 
 
