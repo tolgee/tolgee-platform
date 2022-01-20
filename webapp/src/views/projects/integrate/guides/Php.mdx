@@ -1,4 +1,4 @@
-import { GoToDocsButton } from "../component/GoToDocsButton";
+import {GoToDocsButton} from "../component/GoToDocsButton";
 
 <GoToDocsButton href="https://tolgee.io/docs/web/using_with_php" style={{ float: "right" }} />
 
@@ -20,7 +20,7 @@ use Tolgee\Core\TolgeeConfig;
 
 $config = new TolgeeConfig();
 $config->apiKey = "{{{apiKey}}}"
-$config->apiUrl = "https://app.tolgee.io"
+$config->apiUrl = "{{{apiUrl}}}"
 $config->mode = Modes::DEVELOPMENT;
 
 $tolgee = new Tolgee($config);

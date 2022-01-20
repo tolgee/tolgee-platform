@@ -90,7 +90,8 @@ export const IntegrateView: FunctionComponent = () => {
                         ?.replace('{{{apiKey}}}', selectedApiKey?.key || '')
                         .replace(
                           '{{{apiUrl}}}',
-                          process.env.REACT_APP_API_URL || window.location.host
+                          process.env.REACT_APP_API_URL ||
+                            window.location.origin
                         )
                     }
                   >
