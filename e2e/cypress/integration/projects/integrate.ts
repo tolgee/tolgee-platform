@@ -190,7 +190,7 @@ describe('Integrate view', () => {
       },
       {
         weapon: 'Rest',
-        textsToContain: ['https://app.tolgee.io/api/project/export/jsonZip'],
+        textsToContain: ['http', '/api/project/export/jsonZip'],
       },
     ];
 
