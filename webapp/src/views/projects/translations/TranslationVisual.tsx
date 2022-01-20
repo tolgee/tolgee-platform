@@ -71,7 +71,7 @@ export const TranslationVisual: React.FC<Props> = ({
     );
   } else {
     const allParams = parameters
-      .filter((p) => p.function !== 'argument')
+      .filter((p) => !['argument', 'tag'].includes(p.function || ''))
       .map((p) => p.name)
       .join(', ');
     return (
