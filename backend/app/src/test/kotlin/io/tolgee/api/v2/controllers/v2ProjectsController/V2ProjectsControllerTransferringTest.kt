@@ -26,7 +26,7 @@ class V2ProjectsControllerTransferringTest : ProjectAuthControllerTest("/v2/proj
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
     performProjectAuthPut("/transfer-to-user/${testData.user2.id}", null).andIsOk
-    assertThat(projectService.get(project.id).orElse(null)!!.userOwner!!.id)
+    assertThat(projectService.get(project.id).userOwner!!.id)
       .isEqualTo(testData.user2.id)
     assertThat(permissionService.getProjectPermissionType(project.id, testData.user2.id))
       .isEqualTo(Permission.ProjectPermissionType.MANAGE)
@@ -40,7 +40,7 @@ class V2ProjectsControllerTransferringTest : ProjectAuthControllerTest("/v2/proj
     userAccount = testData.user
     projectSupplier = { testData.organizationOwnedProject }
     performProjectAuthPut("/transfer-to-user/${testData.user2.id}", null).andIsOk
-    assertThat(projectService.get(project.id).orElse(null)!!.userOwner!!.id)
+    assertThat(projectService.get(project.id).userOwner!!.id)
       .isEqualTo(testData.user2.id)
     assertThat(permissionService.getProjectPermissionType(project.id, testData.user2.id))
       .isEqualTo(Permission.ProjectPermissionType.MANAGE)
@@ -54,7 +54,7 @@ class V2ProjectsControllerTransferringTest : ProjectAuthControllerTest("/v2/proj
     userAccount = testData.user
     projectSupplier = { testData.projectBuilder.self }
     performProjectAuthPut("/transfer-to-organization/${testData.organization.id}", null).andIsOk
-    assertThat(projectService.get(project.id).orElse(null)!!.organizationOwner!!.id)
+    assertThat(projectService.get(project.id).organizationOwner!!.id)
       .isEqualTo(testData.organization.id)
   }
 

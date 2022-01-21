@@ -168,7 +168,7 @@ class TranslationCommentController(
       translation.state = TranslationState.UNTRANSLATED
     }
 
-    translationService.saveTranslation(translation)
+    translationService.save(translation)
 
     val comment = translationCommentService.create(dto, translation, authenticationFacade.userAccountEntity)
     return ResponseEntity(

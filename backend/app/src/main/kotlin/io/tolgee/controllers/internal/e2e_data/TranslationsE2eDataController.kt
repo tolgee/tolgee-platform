@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.security.InternalController
 import io.tolgee.service.KeyService
@@ -32,9 +31,7 @@ class TranslationsE2eDataController(
   @GetMapping(value = ["/generate/{projectId}/{number}"])
   @Transactional
   fun generateKeys(@PathVariable projectId: Long, @PathVariable number: Long) {
-    val project = projectService.get(projectId).orElseThrow {
-      NotFoundException()
-    }
+    val project = projectService.get(projectId)
     (0..99).forEach { num ->
       val paddedNum = num.toString().padStart(2, '0')
       keyService.create(

@@ -56,7 +56,6 @@ class V2ApiKeyController(
   @Operation(summary = "Creates new API key with provided scopes")
   fun create(@RequestBody @Valid dto: CreateApiKeyDto): ApiKeyModel {
     val project = projectService.get(dto.projectId)
-      .orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }
     securityService.checkApiKeyScopes(dto.scopes, project)
     return apiKeyService.create(authenticationFacade.userAccountEntity, dto.scopes, project!!).let {
       apiKeyModelAssembler.toModel(it)
