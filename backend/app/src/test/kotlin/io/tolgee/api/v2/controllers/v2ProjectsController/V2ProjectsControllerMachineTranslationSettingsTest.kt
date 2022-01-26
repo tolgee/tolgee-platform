@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.dtos.request.MachineTranslationLanguagePropsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
@@ -74,6 +75,23 @@ class V2ProjectsControllerMachineTranslationSettingsTest : ProjectAuthController
         }
       }
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it removes service from the configuration`() {
+    performAuthPut(
+      "/v2/projects/${project.id}/machine-translation-service-settings",
+      SetMachineTranslationSettingsDto(
+        listOf(
+          MachineTranslationLanguagePropsDto(
+            targetLanguageId = testData.spanishLanguage.id,
+            primaryService = MtServiceType.GOOGLE,
+            enabledServices = setOf(MtServiceType.AWS)
+          )
+        )
+      )
+    ).andIsOk
   }
 
   @Test

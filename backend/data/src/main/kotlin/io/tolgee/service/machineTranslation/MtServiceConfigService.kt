@@ -72,7 +72,7 @@ class MtServiceConfigService(
       entity.primaryService = languageSetting.primaryService
       entity.enabledServices = languageSetting.enabledServices.filter {
         services[it]?.second?.isEnabled ?: false
-      }.toSet()
+      }.toMutableSet()
       save(entity)
     }
 
@@ -87,7 +87,8 @@ class MtServiceConfigService(
     return getStoredConfigs(project.id).sortedBy { it.targetLanguage == null }.toMutableList().also { configs ->
       if (configs.find { it.targetLanguage == null } == null) {
         val defaultConfig = MtServiceConfig().apply {
-          enabledServices = services.filter { it.value.first.defaultEnabled && it.value.second.isEnabled }.keys
+          enabledServices = services.filter { it.value.first.defaultEnabled && it.value.second.isEnabled }
+            .keys.toMutableSet()
           this.project = project
           primaryService = services.entries.find { it.value.first.defaultPrimary }?.key
         }
