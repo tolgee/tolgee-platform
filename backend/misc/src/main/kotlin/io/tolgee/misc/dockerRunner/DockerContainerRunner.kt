@@ -70,7 +70,7 @@ class DockerContainerRunner(
   private fun waitForContainerLoggedOutput(startTime: Long, times: Int) {
     waitFor(timeout) {
       val since = System.currentTimeMillis() - startTime
-      val sinceString = String.format("%.03f", since.toFloat() / 1000)
+      val sinceString = String.format(Locale.US, "%.03f", since.toFloat() / 1000)
       val output = "docker logs --since=${sinceString}s $containerName".runCommand()
       return@waitFor output.containsTimes(waitForLog) >= times
     }
