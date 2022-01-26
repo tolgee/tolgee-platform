@@ -35,6 +35,17 @@ class MtServiceConfigService(
     return getEnabledServicesByDefaultConfig()
   }
 
+  fun getPrimaryServices(languagesIds: List<Long>): Map<Long, MtServiceType?> {
+    val configs = getStoredConfigs(languagesIds)
+    return languagesIds.associateWith { languageId ->
+      val primaryServiceByLangConfig = configs.find { config ->
+        config?.targetLanguage?.id == languageId
+      }?.primaryService
+
+      (primaryServiceByLangConfig ?: getPrimaryServiceByDefaultConfig())
+    }
+  }
+
   fun getPrimaryService(languageId: Long): MtServiceType? {
     getPrimaryServiceBySoredConfig(languageId)?.let {
       return it
@@ -50,7 +61,7 @@ class MtServiceConfigService(
   }
 
   private fun getPrimaryServiceByDefaultConfig(): MtServiceType? {
-    return services.filter { it.value.first.defaultPrimary }.keys.first()
+    return services.filter { it.value.first.defaultPrimary }.keys.firstOrNull()
   }
 
   private fun getEnabledServicesByStoredConfig(languageId: Long): List<MtServiceType>? {
@@ -140,6 +151,13 @@ class MtServiceConfigService(
   private fun getStoredConfig(languageId: Long): MtServiceConfig? {
     val entities = mtServiceConfigRepository.findAllByTargetLanguageId(languageId)
     return entities.find { it.targetLanguage != null } ?: entities.find { it.targetLanguage == null }
+  }
+
+  private fun getStoredConfigs(languageIds: List<Long>): List<MtServiceConfig?> {
+    val entities = mtServiceConfigRepository.findAllByTargetLanguageIdIn(languageIds)
+    return languageIds.map { languageId ->
+      entities.find { it.targetLanguage?.id == languageId } ?: entities.find { it.targetLanguage == null }
+    }
   }
 
   private fun getStoredConfigs(projectId: Long): List<MtServiceConfig> {

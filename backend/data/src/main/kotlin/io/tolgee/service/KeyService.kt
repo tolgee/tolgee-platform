@@ -157,7 +157,7 @@ class KeyService(
       return key
     }
     if (findOptional(key.project!!.id, newName).isPresent) {
-      throw ValidationException(io.tolgee.constants.Message.KEY_EXISTS)
+      throw ValidationException(Message.KEY_EXISTS)
     }
     key.name = newName
     translationsSocketIoModule.onKeyModified(key, oldName)
