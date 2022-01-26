@@ -121,7 +121,7 @@ class SuggestionTestData : BaseTestData() {
     projectBuilder.addMtServiceConfig {
       self {
         this.targetLanguage = germanLanguage
-        this.enabledServices = setOf(MtServiceType.AWS)
+        this.enabledServices = mutableSetOf(MtServiceType.AWS)
         this.primaryService = MtServiceType.AWS
       }
     }
@@ -131,7 +131,7 @@ class SuggestionTestData : BaseTestData() {
     projectBuilder.addMtServiceConfig {
       self {
         this.targetLanguage = germanLanguage
-        this.enabledServices = setOf(MtServiceType.GOOGLE, MtServiceType.AWS)
+        this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS)
         this.primaryService = MtServiceType.AWS
       }
     }

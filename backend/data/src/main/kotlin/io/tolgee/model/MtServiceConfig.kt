@@ -23,5 +23,5 @@ class MtServiceConfig : StandardAuditModel() {
 
   @Enumerated(EnumType.STRING)
   @ElementCollection(targetClass = MtServiceType::class)
-  var enabledServices: Set<MtServiceType> = setOf()
+  var enabledServices: MutableSet<MtServiceType> = mutableSetOf()
 }
