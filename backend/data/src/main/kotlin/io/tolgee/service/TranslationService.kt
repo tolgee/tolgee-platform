@@ -79,7 +79,7 @@ class TranslationService(
 
   fun getKeyTranslationsResult(projectId: Long, path: PathDTO?, languageTags: Set<String>?): Map<String, String?> {
     val project = projectService.get(projectId)
-    val key = keyService.get(projectId, path!!).orElse(null)
+    val key = keyService.findOptional(projectId, path!!).orElse(null)
     val languages: Set<Language> = if (languageTags == null) {
       languageService.getImplicitLanguages(projectId)
     } else {
@@ -111,7 +111,7 @@ class TranslationService(
   fun getOrCreate(keyId: Long, languageId: Long): Translation {
     return translationRepository.findOneByKeyIdAndLanguageId(keyId, languageId)
       ?: let {
-        val key = keyService.get(keyId).orElseThrow { NotFoundException() }
+        val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
         val language = languageService.findById(languageId).orElseThrow { NotFoundException() }
         Translation().apply {
           this.key = key
