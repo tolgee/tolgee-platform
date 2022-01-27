@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder
 
 import io.tolgee.model.ApiKey
+import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.Language
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.MtServiceConfig
@@ -50,6 +51,7 @@ class DataBuilders {
       val translations = mutableListOf<TranslationBuilder>()
       val apiKeys = mutableListOf<ApiKeyBuilder>()
       val translationServiceConfigs = mutableListOf<MtServiceConfigBuilder>()
+      var autoTranslationConfigBuilder: AutoTranslationConfigBuilder? = null
     }
 
     var data = DATA()
@@ -70,6 +72,10 @@ class DataBuilders {
 
     fun addMtServiceConfig(ft: FT<MtServiceConfigBuilder>) =
       addOperation(data.translationServiceConfigs, ft)
+
+    fun addAutoTranslationConfig(ft: FT<AutoTranslationConfigBuilder>) {
+      data.autoTranslationConfigBuilder = AutoTranslationConfigBuilder(this).also { ft(it) }
+    }
   }
 
   class ImportBuilder(
@@ -309,5 +315,11 @@ class DataBuilders {
 
   class MtCreditBucketBuilder : BaseEntityDataBuilder<MtCreditBucket>() {
     override var self: MtCreditBucket = MtCreditBucket()
+  }
+
+  class AutoTranslationConfigBuilder(
+    val projectBuilder: ProjectBuilder
+  ) : BaseEntityDataBuilder<AutoTranslationConfig>() {
+    override var self: AutoTranslationConfig = AutoTranslationConfig().apply { project = projectBuilder.self }
   }
 }

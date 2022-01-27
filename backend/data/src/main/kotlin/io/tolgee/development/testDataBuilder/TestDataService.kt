@@ -1,5 +1,6 @@
 package io.tolgee.development.testDataBuilder
 
+import io.tolgee.service.AutoTranslationService
 import io.tolgee.service.KeyMetaService
 import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
@@ -37,7 +38,8 @@ class TestDataService(
   private val organizationRoleService: OrganizationRoleService,
   private val apiKeyService: io.tolgee.service.ApiKeyService,
   private val projectTranslationServiceCommentService: MtServiceConfigService,
-  private val mtCreditBucketService: MtCreditBucketService
+  private val mtCreditBucketService: MtCreditBucketService,
+  private val autoTranslateService: AutoTranslationService
 ) {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
@@ -65,9 +67,13 @@ class TestDataService(
 
     mtCreditBucketService.saveAll(builder.data.mtCreditBuckets.map { it.self })
     projectService.saveAll(builder.data.projects.map { it.self })
+
+    builder.data.projects.map { it.data.autoTranslationConfigBuilder }.filterNotNull().forEach {
+      autoTranslateService.saveConfig(it.self)
+    }
+
     permissionService.saveAll(builder.data.projects.flatMap { it.data.permissions.map { it.self } })
     apiKeyService.saveAll(builder.data.projects.flatMap { it.data.apiKeys.map { it.self } })
-
     organizationRoleService.saveAll(builder.data.organizations.flatMap { it.data.roles.map { it.self } })
 
     val languages = builder.data.projects.flatMap { it.data.languages.map { it.self } }
