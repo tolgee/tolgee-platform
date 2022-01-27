@@ -1,7 +1,6 @@
 package io.tolgee.security.project_auth
 
 import io.tolgee.dtos.cacheable.ProjectDto
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.service.ProjectService
 import org.springframework.stereotype.Component
@@ -13,7 +12,7 @@ class ProjectHolder(
   private val projectService: ProjectService
 ) {
   val projectEntity: Project by lazy {
-    projectService.get(project.id).orElseThrow { NotFoundException() }
+    projectService.get(project.id)
   }
 
   lateinit var project: ProjectDto

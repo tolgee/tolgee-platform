@@ -37,11 +37,22 @@ class MtServiceConfigService(
     return getEnabledServicesByDefaultConfig()
   }
 
+  fun getPrimaryService(languageId: Long): MtServiceType? {
+    getPrimaryServiceBySoredConfig(languageId)?.let {
+      return it
+    }
+    return getPrimaryServiceByDefaultConfig()
+  }
+
   private fun getEnabledServicesByDefaultConfig(): MutableList<MtServiceType> {
     return services.asSequence()
       .sortedByDescending { it.value.first.defaultPrimary }
       .filter { it.value.first.defaultEnabled && it.value.second.isEnabled }.map { it.key }
       .toMutableList()
+  }
+
+  private fun getPrimaryServiceByDefaultConfig(): MtServiceType? {
+    return services.filter { it.value.first.defaultPrimary }.keys.first()
   }
 
   private fun getEnabledServicesByStoredConfig(languageId: Long): List<MtServiceType>? {
@@ -56,6 +67,10 @@ class MtServiceConfigService(
       return services
     }
     return null
+  }
+
+  private fun getPrimaryServiceBySoredConfig(languageId: Long): MtServiceType? {
+    return getStoredConfig(languageId)?.primaryService
   }
 
   @Transactional

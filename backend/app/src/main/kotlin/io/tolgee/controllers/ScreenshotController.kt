@@ -62,7 +62,7 @@ class ScreenshotController(
       throw ValidationException(io.tolgee.constants.Message.FILE_NOT_IMAGE)
     }
 
-    projectService.get(projectId).orElseThrow { NotFoundException() }
+    projectService.get(projectId)
     securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.TRANSLATE)
     val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
     val screenShotEntity = screenshotService.store(screenshot, keyEntity)

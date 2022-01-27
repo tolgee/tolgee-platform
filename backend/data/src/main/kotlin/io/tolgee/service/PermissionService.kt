@@ -179,7 +179,6 @@ class PermissionService(
     val permission = data.directPermissions?.let { findById(it.id) } ?: let {
       val userAccount = userAccountService[userId].get()
       val project = projectService.get(data.project.id)
-        .orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }
       Permission(user = userAccount, project = project, type = newPermissionType)
     }
 

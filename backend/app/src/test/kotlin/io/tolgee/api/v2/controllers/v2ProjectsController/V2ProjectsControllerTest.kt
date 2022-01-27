@@ -255,8 +255,8 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun deleteProject() {
     val base = dbPopulator.createBase(generateUniqueString())
     performAuthDelete("/v2/projects/${base.id}", null).andIsOk
-    val project = projectService.get(base.id)
-    Assertions.assertThat(project).isEmpty
+    val project = projectService.find(base.id)
+    Assertions.assertThat(project).isNull()
   }
 
   @Test
