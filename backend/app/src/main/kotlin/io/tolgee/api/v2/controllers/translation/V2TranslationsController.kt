@@ -106,7 +106,7 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translations for existing key")
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    val key = keyService.get(
+    val key = keyService.findOptional(
       projectHolder.project.id,
       PathDTO.fromFullPath(dto.key)
     ).orElseThrow { NotFoundException() }
@@ -201,7 +201,7 @@ class V2TranslationsController(
   }
 
   private fun checkScopesIfKeyExists(dto: SetTranslationsWithKeyDto) {
-    keyService.get(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
+    keyService.findOptional(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
       if (authenticationFacade.isApiKeyAuthentication) {
         securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
       }

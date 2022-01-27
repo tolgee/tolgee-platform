@@ -16,6 +16,7 @@ import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.dtos.request.AutoTranslationSettingsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.dtos.request.project.EditProjectDTO
@@ -33,6 +34,7 @@ import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.service.AutoTranslationService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
@@ -88,7 +90,8 @@ class V2ProjectsController(
   private val invitationService: InvitationService,
   private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
-  private val mtServiceConfigService: MtServiceConfigService
+  private val mtServiceConfigService: MtServiceConfigService,
+  private val autoTranslateService: AutoTranslationService
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -296,5 +299,26 @@ class V2ProjectsController(
   ): CollectionModel<LanguageConfigItemModel> {
     mtServiceConfigService.setProjectSettings(projectHolder.projectEntity, dto)
     return getMachineTranslationSettings()
+  }
+
+  @PutMapping("/{projectId}/auto-translation-settings")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  @Operation(summary = "Sets auto translation settings for project")
+  fun setAutoTranslationSettings(
+    @RequestBody dto: AutoTranslationSettingsDto
+  ): AutoTranslationSettingsDto {
+    autoTranslateService.saveConfig(projectHolder.projectEntity, dto)
+    return dto
+  }
+
+  @GetMapping("/{projectId}/auto-translation-settings")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  @Operation(summary = "Returns auto translation settings for project")
+  fun getAutoTranslationSettings(): AutoTranslationSettingsDto {
+    val config = autoTranslateService.getConfig(projectHolder.projectEntity)
+    return AutoTranslationSettingsDto(
+      usingTranslationMemory = config.usingTm,
+      usingPrimaryMachineTranslationService = config.usingPrimaryMtService
+    )
   }
 }

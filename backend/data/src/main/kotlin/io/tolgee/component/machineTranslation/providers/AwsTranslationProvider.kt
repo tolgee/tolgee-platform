@@ -6,6 +6,10 @@ import com.amazonaws.services.translate.model.TranslateTextResult
 import io.tolgee.component.machineTranslation.LanguageTagConvertor
 import io.tolgee.component.machineTranslation.MtValueProvider
 import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -43,7 +47,9 @@ class AwsTranslationProvider(
       return null
     }
 
-    return texts.map { translate(it, sourceLanguageTag, targetLanguageTag)!! }
+    return runBlocking(Dispatchers.IO) {
+      texts.map { async { translate(it, sourceLanguageTag, targetLanguageTag)!! } }.awaitAll()
+    }
   }
 
   private val translateService by lazy {

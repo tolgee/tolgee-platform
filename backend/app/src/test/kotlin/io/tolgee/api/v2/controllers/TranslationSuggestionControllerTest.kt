@@ -38,24 +38,24 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Autowired
   @MockBean
+  lateinit var currentDateProvider: CurrentDateProvider
+
+  @Autowired
+  @MockBean
   lateinit var googleTranslate: Translate
 
   @Autowired
   @MockBean
   lateinit var amazonTranslate: AmazonTranslate
 
-  @Autowired
-  @MockBean
-  lateinit var currentDateProvider: CurrentDateProvider
-
   @BeforeMethod
   fun setup() {
     initTestData()
-    initProperties()
-    initMocks()
+    initMachineTranslationProperties(1000)
+    initMachineTranslationMocks()
   }
 
-  private fun initMocks() {
+  private fun initMachineTranslationMocks() {
     val googleTranslationMock = mock() as Translation
     val awsTranslateTextResult = mock() as TranslateTextResult
 
@@ -79,15 +79,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user
-  }
-
-  private fun initProperties() {
-    machineTranslationProperties.freeCreditsAmount = 1000
-    awsMachineTranslationProperties.accessKey = "dummy"
-    awsMachineTranslationProperties.defaultEnabled = false
-    awsMachineTranslationProperties.secretKey = "dummy"
-    googleMachineTranslationProperties.apiKey = "dummy"
-    googleMachineTranslationProperties.defaultEnabled = true
   }
 
   @Test
