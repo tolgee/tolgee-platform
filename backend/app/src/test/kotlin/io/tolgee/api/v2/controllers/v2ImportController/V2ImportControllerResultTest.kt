@@ -32,7 +32,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet("/v2/projects/${testData.project.id}/import/result")
       .andPrettyPrint.andAssertThatJson.node("_embedded.languages").let { languages ->
@@ -56,7 +56,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
       DateUtils.addHours(Date(), 2)
     }
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet("/v2/projects/${testData.project.id}/import/result")
       .andIsNotFound
@@ -67,7 +67,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
@@ -87,7 +87,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet("/v2/projects/${testData.project.id}/import/result?page=0&size=2")
       .andPrettyPrint.andAssertThatJson.node("_embedded.languages").isArray.isNotEmpty.hasSize(2)
@@ -98,7 +98,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
@@ -123,7 +123,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
@@ -155,7 +155,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
@@ -169,7 +169,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
@@ -202,7 +202,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     }
 
     testDataService.saveTestData(testData.root)
-    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet(
       "/v2/projects/${testData.project.id}" +
@@ -222,14 +222,14 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   fun `import is isolated`() {
     val testData = ImportTestData()
     testDataService.saveTestData(testData.root)
-    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet("/v2/projects/${testData.project.id}/import/result").andIsOk
 
     val testData2 = ImportTestData()
     testData2.userAccount.username = "user2"
     testDataService.saveTestData(testData2.root)
-    loginAsUser(testData2.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData2.root.data.userAccounts[0].self.username)
 
     performAuthGet("/v2/projects/${testData2.project.id}/import/result").andIsOk
       .andPrettyPrint.andAssertThatJson.node("_embedded.languages").let {
@@ -239,7 +239,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
 
     performAuthDelete("/v2/projects/${testData2.project.id}/import", null).andIsOk
 
-    loginAsUser(testData.root.data.userAccounts[0].self.username!!)
+    loginAsUser(testData.root.data.userAccounts[0].self.username)
 
     performAuthGet("/v2/projects/${testData.project.id}/import/result").andIsOk
       .andPrettyPrint.andAssertThatJson.node("_embedded.languages").let {
@@ -258,7 +258,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
     val fileId = testData.importBuilder.data.importFiles[0].self.id
-    loginAsUser(user.username!!)
+    loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/result/files/$fileId/issues"
     performAuthGet(path).andIsOk.andPrettyPrint.andAssertThatJson {
       node("page.totalElements").isEqualTo(204)

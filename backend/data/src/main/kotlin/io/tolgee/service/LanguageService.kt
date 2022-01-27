@@ -8,6 +8,7 @@ import io.tolgee.model.Project
 import io.tolgee.repository.LanguageRepository
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -23,9 +24,12 @@ class LanguageService(
   private val entityManager: EntityManager,
   private val projectService: ProjectService,
 ) {
-  private var translationService: TranslationService? = null
+  @set:Autowired
+  @set:Lazy
+  lateinit var translationService: TranslationService
 
-  @Autowired
+  @set:Autowired
+  @set:Lazy
   lateinit var mtServiceConfigService: MtServiceConfigService
 
   @Transactional
@@ -101,11 +105,6 @@ class LanguageService(
 
   fun deleteAllByProject(projectId: Long?) {
     languageRepository.deleteAllByProjectId(projectId)
-  }
-
-  @Autowired
-  fun setTranslationService(translationService: TranslationService?) {
-    this.translationService = translationService
   }
 
   fun saveAll(languages: Iterable<Language>): MutableList<Language>? {

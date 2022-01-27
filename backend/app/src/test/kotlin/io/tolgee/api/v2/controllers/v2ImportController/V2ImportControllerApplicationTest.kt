@@ -15,10 +15,10 @@ class V2ImportControllerApplicationTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
-    loginAsUser(user.username!!)
+    loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/apply"
     performAuthPut(path, null).andIsOk
-    this.importService.find(projectId, user.id!!).let {
+    this.importService.find(projectId, user.id).let {
       assertThat(it).isNull()
     }
   }
@@ -29,10 +29,10 @@ class V2ImportControllerApplicationTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
-    loginAsUser(user.username!!)
+    loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/apply?forceMode=OVERRIDE"
     performAuthPut(path, null).andIsOk
-    this.importService.find(projectId, user.id!!).let {
+    this.importService.find(projectId, user.id).let {
       assertThat(it).isNull()
     }
   }
@@ -43,7 +43,7 @@ class V2ImportControllerApplicationTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
     val user = testData.root.data.userAccounts[0].self
     val projectId = testData.project.id
-    loginAsUser(user.username!!)
+    loginAsUser(user.username)
     val path = "/v2/projects/$projectId/import/apply?forceMode=KEEP"
     performAuthPut(path, null).andIsOk
   }

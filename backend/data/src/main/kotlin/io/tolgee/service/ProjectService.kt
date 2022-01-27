@@ -30,6 +30,7 @@ import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -52,30 +53,39 @@ class ProjectService constructor(
   private val userAccountService: UserAccountService,
 ) {
   @set:Autowired
+  @set:Lazy
   lateinit var keyService: KeyService
 
   @set:Autowired
+  @set:Lazy
   lateinit var organizationService: OrganizationService
 
   @set:Autowired
+  @set:Lazy
   lateinit var languageService: LanguageService
 
   @set:Autowired
+  @set:Lazy
   lateinit var translationService: TranslationService
 
   @set:Autowired
+  @set:Lazy
   lateinit var importService: ImportService
 
   @set:Autowired
+  @set:Lazy
   lateinit var mtServiceConfigService: MtServiceConfigService
 
   @set:Autowired
+  @set:Lazy
   lateinit var securityService: SecurityService
 
   @set:Autowired
+  @set:Lazy
   lateinit var permissionService: PermissionService
 
   @set:Autowired
+  @set:Lazy
   lateinit var apiKeyService: ApiKeyService
 
   @Transactional

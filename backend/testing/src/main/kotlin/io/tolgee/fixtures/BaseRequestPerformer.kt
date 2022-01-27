@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 @Component
 @Scope("prototype")
-open class BaseRequestPerformer : RequestPerformer {
+class BaseRequestPerformer : RequestPerformer {
 
   @field:Autowired
   lateinit var mvc: MockMvc

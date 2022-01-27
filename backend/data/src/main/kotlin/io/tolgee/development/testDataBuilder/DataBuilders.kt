@@ -256,7 +256,7 @@ class DataBuilders {
     override var self: TranslationComment = TranslationComment(
       translation = translationBuilder.self,
     ).also { comment ->
-      translationBuilder.self.key?.project?.userOwner?.let {
+      translationBuilder.self.key.project?.userOwner?.let {
         comment.author = it
       }
     }
@@ -307,7 +307,7 @@ class DataBuilders {
       }
   }
 
-  class MtCreditBucketBuilder() : BaseEntityDataBuilder<MtCreditBucket>() {
+  class MtCreditBucketBuilder : BaseEntityDataBuilder<MtCreditBucket>() {
     override var self: MtCreditBucket = MtCreditBucket()
   }
 }

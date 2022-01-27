@@ -94,7 +94,7 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
     screenshotService.store(screenshotFile, key)
     val result: List<ScreenshotDTO> = performAuthPost(
       "/api/project/${project.id}/screenshots/get",
-      GetScreenshotsByKeyDto(key.name!!)
+      GetScreenshotsByKeyDto(key.name)
     ).andExpect(status().isOk)
       .andReturn().parseResponseTo()
     timestampValidation.checkTimeStamp(result[0].filename.split("timestamp=")[1])

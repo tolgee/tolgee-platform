@@ -33,7 +33,7 @@ class InvitationControllerTest : AuthorizedControllerTest() {
     val invitation = invitationService.create(project, Permission.ProjectPermissionType.EDIT)
 
     val newUser = dbPopulator.createUserIfNotExists(generateUniqueString(), "pwd")
-    loginAsUser(newUser.username!!)
+    loginAsUser(newUser.username)
     performAuthGet("/api/invitation/accept/$invitation").andExpect(status().isOk).andReturn()
 
     assertThat(invitationService.getForProject(project)).hasSize(0)

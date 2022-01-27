@@ -2,6 +2,7 @@ package io.tolgee.configuration
 
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.rateLimis.RateLimit
+import io.tolgee.security.rateLimis.RateLimitLifeCyclePoint
 import io.tolgee.security.rateLimis.RateLimitsManager
 import org.springframework.context.annotation.Configuration
 
@@ -38,6 +39,7 @@ class RateLimitsConfiguration(rateLimitsManager: RateLimitsManager) {
         },
         bucketSizeProvider = { 400 },
         timeToRefillInMs = 60000,
+        lifeCyclePoint = RateLimitLifeCyclePoint.AFTER_AUTHORIZATION
       ),
 
       /**

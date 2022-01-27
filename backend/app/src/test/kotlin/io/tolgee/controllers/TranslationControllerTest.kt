@@ -22,7 +22,7 @@ import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class TranslationControllerTest() :
+class TranslationControllerTest :
   ProjectAuthControllerTest() {
 
   @Test

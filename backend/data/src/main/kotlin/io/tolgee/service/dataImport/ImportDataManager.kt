@@ -127,7 +127,7 @@ class ImportDataManager(
       if (language != null && existingTranslations[language.id] == null) {
         existingTranslations[language.id] = mutableMapOf<String, Translation>().apply {
           translationService.getAllByLanguageId(language.id)
-            .forEach { translation -> put(translation.key!!.name, translation) }
+            .forEach { translation -> put(translation.key.name, translation) }
         }
       }
     }

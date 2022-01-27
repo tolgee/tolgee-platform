@@ -20,4 +20,4 @@ class KeysWithTranslationsPageModel(
     example = "eyJrZXlJZCI6eyJkaXJlY3Rpb24iOiJBU0MiLCJ2YWx1ZSI6IjEwMDAwMDAxMjAifX0="
   )
   val nextCursor: String?
-) : PagedModel<KeyWithTranslationsModel>(content, metadata, *links)
+) : PagedModel<KeyWithTranslationsModel>(content, metadata, links.toList())

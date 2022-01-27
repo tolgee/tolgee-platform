@@ -11,7 +11,6 @@ VOLUME /data
 COPY BOOT-INF/lib /app/lib
 COPY META-INF /app/META-INF
 COPY BOOT-INF/classes /app
-COPY application.yaml /app/application.yaml
 
 #################
 ### Let's go   ##

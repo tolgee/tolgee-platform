@@ -24,7 +24,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   @Test
   fun testFindAllPermitted() {
     val users = dbPopulator.createUsersAndOrganizations()
-    dbPopulator.createBase("Test", users[3].username!!)
+    dbPopulator.createBase("Test", users[3].username)
     val projects = projectService.findAllPermitted(users[3])
     assertThat(projects).hasSize(10)
   }
@@ -51,7 +51,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   fun testFindMultiple() {
     val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("helga") // create some data
     val repo = dbPopulator.createBase("Hello world")
-    repo.userOwner = userAccountService.get(repo.userOwner!!.id!!).get()
+    repo.userOwner = userAccountService.get(repo.userOwner!!.id).get()
     val organization = usersWithOrganizations[0].organizationRoles[0].organization
     organizationRoleService.grantRoleToUser(repo.userOwner!!, organization!!, OrganizationRoleType.MEMBER)
 
@@ -71,7 +71,7 @@ class ProjectServiceTest : AbstractSpringTest() {
   fun testFindMultiplePermissions() {
     val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("agnes") // create some data
     val repo = dbPopulator.createBase("Hello world")
-    repo.userOwner = userAccountService.get(repo.userOwner!!.id!!).get()
+    repo.userOwner = userAccountService.get(repo.userOwner!!.id).get()
     val organization = usersWithOrganizations[0].organizationRoles[0].organization
     organizationRoleService.grantRoleToUser(repo.userOwner!!, organization!!, OrganizationRoleType.MEMBER)
 

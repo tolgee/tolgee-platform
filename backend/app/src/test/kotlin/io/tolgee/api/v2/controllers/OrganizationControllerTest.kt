@@ -103,7 +103,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
   @Test
   fun testGetAllUsers() {
     val users = dbPopulator.createUsersAndOrganizations()
-    loginAsUser(users[0].username!!)
+    loginAsUser(users[0].username)
     val organizationId = users[1].organizationRoles[0].organization!!.id
     performAuthGet("/v2/organizations/$organizationId/users").andIsOk
       .also { println(it.andReturn().response.contentAsString) }
@@ -267,15 +267,15 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
     val organization2 = this.organizationService.create(dummyDto2, userAccount!!)
     this.organizationService.create(dummyDto, userAccount!!).let {
       performAuthDelete("/v2/organizations/${it.id}", null)
-      assertThat(organizationService.get(it.id!!)).isNull()
-      assertThat(organizationService.get(organization2.id!!)).isNotNull
+      assertThat(organizationService.get(it.id)).isNull()
+      assertThat(organizationService.get(organization2.id)).isNotNull
     }
   }
 
   @Test
   fun testLeaveOrganization() {
     this.organizationService.create(dummyDto, userAccount!!).let {
-      organizationRepository.findAllPermitted(userAccount!!.id!!, PageRequest.of(0, 20)).content.let {
+      organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {
         assertThat(it).isNotEmpty
       }
 
@@ -283,7 +283,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
 
       performAuthPut("/v2/organizations/${it.id}/leave", null)
 
-      organizationRepository.findAllPermitted(userAccount!!.id!!, PageRequest.of(0, 20)).content.let {
+      organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {
         assertThat(it).isEmpty()
       }
     }
@@ -292,7 +292,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
   @Test
   fun testLeaveOrganizationNoOtherOwner() {
     this.organizationService.create(dummyDto, userAccount!!).let {
-      organizationRepository.findAllPermitted(userAccount!!.id!!, PageRequest.of(0, 20)).content.let {
+      organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {
         assertThat(it).isNotEmpty
       }
 
@@ -314,7 +314,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
         ).let { createdMemberRole ->
           organizationRoleRepository.save(createdMemberRole)
           performAuthPut(
-            "/v2/organizations/${organization.id!!}/users/${createdUser.id}/set-role",
+            "/v2/organizations/${organization.id}/users/${createdUser.id}/set-role",
             SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
           ).andIsOk
           createdMemberRole.let { assertThat(it.type).isEqualTo(OrganizationRoleType.MEMBER) }
@@ -334,7 +334,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
         ).let { createdMemberRole ->
           organizationRoleRepository.save(createdMemberRole)
           performAuthDelete(
-            "/v2/organizations/${organization.id!!}/users/${createdUser.id}",
+            "/v2/organizations/${organization.id}/users/${createdUser.id}",
             SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
           ).andIsOk
           organizationRoleRepository.findByIdOrNull(createdMemberRole.id!!).let {
@@ -348,7 +348,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
   @Test
   fun testGetAllProjects() {
     val users = dbPopulator.createUsersAndOrganizations()
-    loginAsUser(users[1].username!!)
+    loginAsUser(users[1].username)
     users[1].organizationRoles[0].organization.let { organization ->
       performAuthGet("/v2/organizations/${organization!!.slug}/projects")
         .andIsOk.andAssertThatJson.let {
@@ -365,7 +365,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
   @Test
   fun testGetAllProjectsWithId() {
     val users = dbPopulator.createUsersAndOrganizations()
-    loginAsUser(users[1].username!!)
+    loginAsUser(users[1].username)
     users[1].organizationRoles[0].organization.let { organization ->
       performAuthGet("/v2/organizations/${organization!!.id}/projects")
         .andIsOk.andAssertThatJson.let {
@@ -399,7 +399,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
   @Test
   fun testInviteUser() {
     val helloUser = dbPopulator.createUserIfNotExists("hellouser")
-    loginAsUser(helloUser.username!!)
+    loginAsUser(helloUser.username)
 
     this.organizationService.create(dummyDto, helloUser).let { organization ->
       val body = OrganizationInviteUserDto(roleType = OrganizationRoleType.MEMBER)
@@ -419,11 +419,11 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
     this.organizationService.create(dummyDto, helloUser).let { organization ->
       val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
       val invitedUser = dbPopulator.createUserIfNotExists("invitedUser")
-      loginAsUser(invitedUser.username!!)
+      loginAsUser(invitedUser.username)
       performAuthGet("/api/invitation/accept/${invitation.code}").andIsOk
       assertThatThrownBy { invitationService.getInvitation(invitation.code) }
         .isInstanceOf(BadRequestException::class.java)
-      organizationRoleService.isUserMemberOrOwner(invitedUser.id!!, organization.id!!).let {
+      organizationRoleService.isUserMemberOrOwner(invitedUser.id, organization.id).let {
         assertThat(it).isTrue
       }
     }
@@ -448,7 +448,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
 
     this.organizationService.create(dummyDto, helloUser).let { organization ->
       val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
-      loginAsUser(helloUser.username!!)
+      loginAsUser(helloUser.username)
       performAuthDelete("/api/invitation/${invitation.id!!}", null).andIsOk
       assertThatThrownBy { invitationService.getInvitation(invitation.code) }
         .isInstanceOf(BadRequestException::class.java)

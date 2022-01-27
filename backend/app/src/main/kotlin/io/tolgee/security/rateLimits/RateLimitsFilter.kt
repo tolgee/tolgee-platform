@@ -30,6 +30,11 @@ class RateLimitsFilter(
   private val rateLimitsParamsProxy: RateLimitParamsProxy,
   private val lifeCyclePoint: RateLimitLifeCyclePoint
 ) : OncePerRequestFilter() {
+
+  init {
+    setBeanName("RateLimitsFilter${lifeCyclePoint.name}")
+  }
+
   val logger: Logger = LoggerFactory.getLogger(RateLimitsFilter::class.java)
 
   override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
@@ -49,7 +54,6 @@ class RateLimitsFilter(
                 UsageEntry.deserialize(it)
               }
 
-              // the proxy is here just for mocking in integration tests
               val bucketSize = rateLimitsParamsProxy.getBucketSize(rateLimit.keyPrefix, rateLimit.bucketSizeProvider())
               val timeToRefill = rateLimitsParamsProxy.getTimeToRefill(rateLimit.keyPrefix, rateLimit.timeToRefillInMs)
 

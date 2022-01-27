@@ -26,10 +26,10 @@ class StoredDataImporterTest : AbstractSpringTest() {
     importTestData.setAllResolved()
     testDataService.saveTestData(importTestData.root)
     storedDataImporter.doImport()
-    translationService.find(importTestData.translationWithConflict.conflict!!.id!!)!!.let {
+    translationService.find(importTestData.translationWithConflict.conflict!!.id)!!.let {
       assertThat(it.text).isEqualTo(importTestData.translationWithConflict.text)
     }
-    val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id!!)!!
+    val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
     val keptTranslation = importTestData.root.data.projects[0].data.translations[1].self
     assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
     assertThat(keptTranslation.text).isEqualTo("What a text")
@@ -69,9 +69,9 @@ class StoredDataImporterTest : AbstractSpringTest() {
     storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import, ForceMode.OVERRIDE)
     testDataService.saveTestData(importTestData.root)
     storedDataImporter.doImport()
-    val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id!!)!!
+    val overriddenTranslation = translationService.find(importTestData.translationWithConflict.conflict!!.id)!!
     val forceOverriddenTranslationId = importTestData.root.data.projects[0].data.translations[1].self.id
-    val forceOverriddenTranslation = translationService.find(forceOverriddenTranslationId!!)!!
+    val forceOverriddenTranslation = translationService.find(forceOverriddenTranslationId)!!
     assertThat(overriddenTranslation.text).isEqualTo(importTestData.translationWithConflict.text)
     assertThat(forceOverriddenTranslation.text).isEqualTo("Imported text")
   }

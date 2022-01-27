@@ -64,7 +64,7 @@ class UserControllerTest : AuthorizedControllerTest() {
       password = "aksjhd  dasdsa",
       name = "a"
     )
-    dbPopulator.createUserIfNotExists(requestDTO.email!!)
+    dbPopulator.createUserIfNotExists(requestDTO.email)
     mvcResult = performAuthPost("/api/user", requestDTO)
       .andExpect(MockMvcResultMatchers.status().isBadRequest).andReturn()
     io.tolgee.testing.assertions.Assertions.assertThat(mvcResult)

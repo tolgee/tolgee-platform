@@ -56,12 +56,12 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
     _userAccount = userAccountService.findOptional(userName).orElseGet {
       dbPopulator.createUserIfNotExists("admin")
     }
-    init(jwtTokenProvider.generateToken(_userAccount!!.id!!).toString())
+    init(jwtTokenProvider.generateToken(_userAccount!!.id).toString())
   }
 
   fun loginAsUser(userAccount: UserAccount) {
     _userAccount = userAccount
-    init(jwtTokenProvider.generateToken(_userAccount!!.id!!).toString())
+    init(jwtTokenProvider.generateToken(_userAccount!!.id).toString())
   }
 
   fun logout() {
