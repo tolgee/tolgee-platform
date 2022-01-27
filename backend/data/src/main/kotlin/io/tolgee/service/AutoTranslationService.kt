@@ -9,6 +9,8 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.repository.AutoTranslationConfigRepository
 import io.tolgee.service.machineTranslation.MtService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,32 +20,47 @@ class AutoTranslationService(
   private val translationMemoryService: TranslationMemoryService,
   private val mtService: MtService
 ) {
+  val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
   fun autoTranslate(key: Key) {
     val config = getConfig(key.project)
     if (config.usingPrimaryMtService || config.usingTm) {
       if (config.usingTm) {
-        val untranslated = getUntranslatedTranslations(key)
-        untranslated.forEach { translation ->
-          val tmValue = translationMemoryService.getAutoTranslatedValue(key, translation.language)
-          tmValue?.targetTranslationText
-            .let { targetText -> if (targetText.isNullOrEmpty()) null else targetText }
-            ?.let {
-              translation.setValueAndState(it)
-            }
-        }
+        autoTranslateUsingTm(key)
       }
       if (config.usingPrimaryMtService) {
-        val untranslated = getUntranslatedTranslations(key)
-        val languages = untranslated.map { it.language }
-        mtService.getPrimaryMachineTranslation(key, languages)
-          .zip(untranslated)
-          .asSequence()
-          .forEach { (translatedValue, translation) ->
-            translatedValue?.let {
-              translation.setValueAndState(it)
-            }
-          }
+        autoTranslateUsingMachineTranslation(key)
       }
+    }
+  }
+
+  private fun autoTranslateUsingMachineTranslation(key: Key) {
+    val untranslated = getUntranslatedTranslations(key)
+    val languages = untranslated.map { it.language }
+
+    try {
+      mtService.getPrimaryMachineTranslations(key, languages)
+        .zip(untranslated)
+        .asSequence()
+        .forEach { (translatedValue, translation) ->
+          translatedValue?.let {
+            translation.setValueAndState(it)
+          }
+        }
+    } catch (e: OutOfCreditsException) {
+      logger.error(e.toString())
+    }
+  }
+
+  private fun autoTranslateUsingTm(key: Key) {
+    val untranslated = getUntranslatedTranslations(key)
+    untranslated.forEach { translation ->
+      val tmValue = translationMemoryService.getAutoTranslatedValue(key, translation.language)
+      tmValue?.targetTranslationText
+        .let { targetText -> if (targetText.isNullOrEmpty()) null else targetText }
+        ?.let {
+          translation.setValueAndState(it)
+        }
     }
   }
 
@@ -67,7 +84,7 @@ class AutoTranslationService(
   fun saveConfig(project: Project, dto: AutoTranslationSettingsDto) {
     val config = getConfig(project)
     config.usingTm = dto.usingTranslationMemory
-    config.usingPrimaryMtService = dto.usingPrimaryMachineTranslationService
+    config.usingPrimaryMtService = dto.usingMachineTranslation
     saveConfig(config)
   }
 
@@ -82,22 +99,6 @@ class AutoTranslationService(
     .filter { projectLanguage ->
       key.translations.find { it.language.id == projectLanguage.id } == null
     }
-
-  private fun Translation.getAutoTranslatedText(): String? {
-    val config = getConfig(this.key.project)
-    if (config.usingTm) {
-      translationMemoryService.getAutoTranslatedValue(this.key, this.language)
-        ?.targetTranslationText?.let { return it }
-    }
-    if (config.usingPrimaryMtService) {
-      try {
-        return mtService.getPrimaryMachineTranslation(this.key, this.language)
-      } catch (e: OutOfCreditsException) {
-        return null
-      }
-    }
-    return null
-  }
 
   /**
    * Returns existing translations with null or empty value

@@ -7,7 +7,9 @@ import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.AutoTranslateTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsCreated
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Language
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
@@ -27,9 +29,10 @@ import kotlin.system.measureTimeMillis
 class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineTranslationTest {
 
   companion object {
-    private const val INITIAL_BUCKET_CREDITS = 10000L
+    private const val INITIAL_BUCKET_CREDITS = 150000L
     private const val TRANSLATED_WITH_GOOGLE_RESPONSE = "Translated with Google"
     private const val CREATE_KEY_NAME = "super_key"
+    private const val THIS_IS_BEAUTIFUL_DE = "Es ist schön."
   }
 
   lateinit var testData: AutoTranslateTestData
@@ -55,18 +58,7 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
   @ProjectJWTAuthTestMethod
   @Test
   fun `auto translates new key`() {
-    performCreateKey(
-      mapOf(
-        "en" to "Hello",
-        "de" to "Hallo"
-      )
-    )
-
-    val esTranslation = keyService.get(testData.project.id, CREATE_KEY_NAME)
-      .getLangTranslation(testData.spanishLanguage).text
-
-    assertThat(esTranslation).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
-
+    testUsingMtWorks()
     val expectedCost = "Hello".length * 100
     assertThat(mtCreditBucketService.getCreditBalance(testData.project))
       .isEqualTo(INITIAL_BUCKET_CREDITS - expectedCost)
@@ -102,23 +94,14 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
   @ProjectJWTAuthTestMethod
   @Test
   fun `auto translates using TM`() {
-    performCreateKey(
-      mapOf(
-        "en" to "This is beautiful",
-      )
-    )
-
-    val deTranslation = keyService.get(testData.project.id, CREATE_KEY_NAME)
-      .getLangTranslation(testData.germanLanguage).text
-
-    assertThat(deTranslation).isEqualTo("Es ist schön.")
+    testUsingTmWorks()
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `it translates in parallel`() {
     testData.generateManyLanguages()
-    initMachineTranslationMocks(1000)
+    initMachineTranslationMocks(500)
     testDataService.saveTestData(testData.root)
 
     val time = measureTimeMillis {
@@ -129,12 +112,139 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
       )
     }
 
-    assertThat(time).isLessThan(5000)
+    assertThat(time).isLessThan(2000)
 
     val translations = keyService.get(testData.project.id, CREATE_KEY_NAME).translations.toList()
     assertThat(translations).hasSize(9)
     assertThat(translations[4].text).isEqualTo("Translated with Amazon")
     assertThat(translations[5].text).isEqualTo("Translated with Google")
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `config test tm enabled`() {
+    performSetConfig(true, false)
+    testUsingTmWorks()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `config test mt disabled`() {
+    performSetConfig(true, false)
+    testUsingMtDoesNotWork()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `config test mt enabled`() {
+    performSetConfig(false, true)
+    testUsingMtWorks()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `config test tm disabled`() {
+    performSetConfig(false, true)
+    testUsingTmDoesNotWork()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `doesn't fail when out of credits`() {
+    initMachineTranslationProperties(0)
+    performCreateHalloKeyWithEnAndDeTranslations()
+    assertThat(
+      keyService
+        .get(testData.project.id, CREATE_KEY_NAME)
+        .translations
+        .find { it.language == testData.spanishLanguage }
+    )
+      .isNull()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `doesn't consume credits when not enough for all`() {
+    testData.generateLanguagesWithDifferentPrimaryServices()
+    testDataService.saveTestData(testData.root)
+    initMachineTranslationProperties(700)
+    performCreateHalloKeyWithEnAndDeTranslations()
+    assertThat(
+      keyService
+        .get(testData.project.id, CREATE_KEY_NAME)
+        .translations
+        .find { it.language == testData.spanishLanguage }
+    )
+      .isNull()
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `it returns autoTranslateConfig`() {
+    performProjectAuthGet("auto-translation-settings").andIsOk.andAssertThatJson {
+      node("usingTranslationMemory").isEqualTo(true)
+      node("usingMachineTranslation").isEqualTo(true)
+    }
+  }
+
+  private fun testUsingMtWorks() {
+    performCreateHalloKeyWithEnAndDeTranslations()
+    val esTranslation = getCreatedEsTranslation()
+    assertThat(esTranslation).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
+  }
+
+  private fun testUsingMtDoesNotWork() {
+    performCreateHalloKeyWithEnAndDeTranslations()
+    val esTranslation = keyService.get(testData.project.id, CREATE_KEY_NAME)
+      .translations
+      .find { it.language == testData.spanishLanguage }
+
+    assertThat(esTranslation).isNull()
+  }
+
+  private fun getCreatedEsTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME)
+    .getLangTranslation(testData.spanishLanguage).text
+
+  private fun performCreateHalloKeyWithEnAndDeTranslations() {
+    performCreateKey(
+      mapOf(
+        "en" to "Hello",
+        "de" to "Hallo"
+      )
+    )
+  }
+
+  private fun testUsingTmWorks() {
+    createAnotherThisIsBeautifulKey()
+    val deTranslation = getCreatedDeTranslation()
+    assertThat(deTranslation).isEqualTo(THIS_IS_BEAUTIFUL_DE)
+  }
+
+  private fun testUsingTmDoesNotWork() {
+    createAnotherThisIsBeautifulKey()
+    val deTranslation = getCreatedDeTranslation()
+    assertThat(deTranslation).isNotEqualTo(THIS_IS_BEAUTIFUL_DE)
+  }
+
+  private fun getCreatedDeTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME)
+    .getLangTranslation(testData.germanLanguage).text
+
+  private fun createAnotherThisIsBeautifulKey() {
+    performCreateKey(
+      mapOf(
+        "en" to "This is beautiful",
+      )
+    )
+  }
+
+  private fun performSetConfig(usingTm: Boolean, usingMt: Boolean) {
+    performProjectAuthPut(
+      "auto-translation-settings",
+      mapOf(
+        "usingTranslationMemory" to usingTm,
+        "usingMachineTranslation" to usingMt
+      )
+    ).andIsOk
   }
 
   private fun performCreateKey(translations: Map<String, String>) {
