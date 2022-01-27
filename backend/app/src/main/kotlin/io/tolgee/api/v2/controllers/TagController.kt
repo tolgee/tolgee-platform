@@ -55,7 +55,7 @@ class TagController(
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
   fun tagKey(@PathVariable keyId: Long, @Valid @RequestBody tagKeyDto: TagKeyDto): TagModel {
-    val key = keyService.get(keyId).orElseThrow { NotFoundException() }
+    val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     key.checkInProject()
     return tagService.tagKey(key, tagKeyDto.name.trim()).model
   }
@@ -65,7 +65,7 @@ class TagController(
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
   fun removeTag(@PathVariable keyId: Long, @PathVariable tagId: Long) {
-    val key = keyService.get(keyId).orElseThrow { NotFoundException() }
+    val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     val tag = tagService.find(tagId) ?: throw NotFoundException()
     tag.checkInProject()
     key.checkInProject()
