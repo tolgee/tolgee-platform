@@ -129,7 +129,7 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
       )
     }
 
-    assertThat(time).isLessThan(2000)
+    assertThat(time).isLessThan(5000)
 
     val translations = keyService.get(testData.project.id, CREATE_KEY_NAME).translations.toList()
     assertThat(translations).hasSize(9)
