@@ -38,14 +38,6 @@ class AwsTranslationProvider(
     return result.translatedText
   }
 
-  override fun translate(texts: List<String>, sourceLanguageTag: String, targetLanguageTag: String): List<String>? {
-    if (targetLanguageTag.suitableTag.isNullOrEmpty() || sourceLanguageTag.suitableTag.isNullOrEmpty()) {
-      return null
-    }
-
-    return texts.map { translate(it, sourceLanguageTag, targetLanguageTag)!! }
-  }
-
   private val translateService by lazy {
     amazonTranslate ?: throw IllegalStateException("AmazonTranslate is not injected")
   }

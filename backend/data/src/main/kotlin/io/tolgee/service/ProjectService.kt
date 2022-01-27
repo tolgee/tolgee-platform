@@ -34,6 +34,7 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
@@ -99,8 +100,12 @@ class ProjectService constructor(
     }
   }
 
-  fun get(id: Long): Optional<Project> {
-    return projectRepository.findById(id)
+  fun get(id: Long): Project {
+    return projectRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+  }
+
+  fun find(id: Long): Project? {
+    return projectRepository.findByIdOrNull(id)
   }
 
   @Transactional
@@ -244,7 +249,7 @@ class ProjectService constructor(
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
-    val project = get(id).orElseThrow { NotFoundException() }!!
+    val project = get(id)
     importService.getAllByProject(id).forEach {
       importService.deleteImport(it)
     }
@@ -265,7 +270,7 @@ class ProjectService constructor(
    */
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
   fun getOrCreateBaseLanguage(projectId: Long): Language? {
-    return this.get(projectId).orElse(null)?.let { project ->
+    return this.get(projectId).let { project ->
       project.baseLanguage ?: project.languages.toList().firstOrNull()?.let {
         project.baseLanguage = it
         projectRepository.save(project)
@@ -334,7 +339,7 @@ class ProjectService constructor(
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
   fun transferToOrganization(projectId: Long, organizationId: Long) {
-    val project = get(projectId).orElseThrow { NotFoundException() }
+    val project = get(projectId)
     project.userOwner = null
     val organization = organizationService.find(organizationId) ?: throw NotFoundException()
     project.organizationOwner = organization
@@ -343,7 +348,7 @@ class ProjectService constructor(
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
   fun transferToUser(projectId: Long, userId: Long) {
-    val project = get(projectId).orElseThrow { NotFoundException() }
+    val project = get(projectId)
     val userAccount = userAccountService[userId].orElseThrow { NotFoundException() }
     project.organizationOwner = null
     project.userOwner = userAccount

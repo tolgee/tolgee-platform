@@ -12,5 +12,4 @@ interface MtValueProvider {
    * Calculates credit price of the provider
    */
   fun calculatePrice(text: String): Int
-  fun translate(texts: List<String>, sourceLanguageTag: String, targetLanguageTag: String): List<String>?
 }

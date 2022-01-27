@@ -11,6 +11,8 @@ import { TolgeeLogo } from '../common/icons/TolgeeLogo';
 import { UserMenu } from '../security/UserMenu';
 import { useConfig } from 'tg.hooks/useConfig';
 
+export const TOP_BAR_HEIGHT = 52;
+
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({

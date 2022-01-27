@@ -106,11 +106,21 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translations for existing key")
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    val key = keyService.get(
+    val key = keyService.findOptional(
       projectHolder.project.id,
       PathDTO.fromFullPath(dto.key)
     ).orElseThrow { NotFoundException() }
-    val translations = translationService.setForKey(key, dto.translations)
+
+    val modifiedTranslations = translationService.setForKey(key, dto.translations)
+
+    val translations = dto.languagesToReturn
+      ?.let { languagesToReturn ->
+        key.translations
+          .filter { languagesToReturn.contains(it.language.tag) }
+          .associateBy { it.language.tag }
+      }
+      ?: modifiedTranslations
+
     return getSetTranslationsResponse(key, translations)
   }
 
@@ -179,6 +189,19 @@ class V2TranslationsController(
     )
   }
 
+  @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @Operation(summary = """Removes "auto translated" indication""")
+  fun dismissAutoTranslatedState(
+    @PathVariable translationId: Long
+  ): TranslationModel {
+    val translation = translationService.get(translationId)
+    translation.checkFromProject()
+    translationService.dismissAutoTranslated(translation)
+    return translationModelAssembler.toModel(translation)
+  }
+
   private fun getKeysWithScreenshots(keyIds: Collection<Long>): Map<Long, MutableSet<Screenshot>>? {
     if (
       !authenticationFacade.isApiKeyAuthentication ||
@@ -195,13 +218,13 @@ class V2TranslationsController(
       keyId = key.id,
       keyName = key.name,
       translations = translations.entries.associate { (languageTag, translation) ->
-        languageTag to TranslationModel(translation.id, translation.text, translation.state)
+        languageTag to translationModelAssembler.toModel(translation)
       }
     )
   }
 
   private fun checkScopesIfKeyExists(dto: SetTranslationsWithKeyDto) {
-    keyService.get(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
+    keyService.findOptional(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
       if (authenticationFacade.isApiKeyAuthentication) {
         securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
       }
@@ -209,7 +232,7 @@ class V2TranslationsController(
   }
 
   private fun Translation.checkFromProject() {
-    if (this.key.project?.id != projectHolder.project.id) {
+    if (this.key.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
     }
   }

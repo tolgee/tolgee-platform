@@ -1,4 +1,5 @@
-import { makeStyles, Theme, colors } from '@material-ui/core';
+import { colors, makeStyles, Theme } from '@material-ui/core';
+import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar';
 
 export type PositionType = 'left' | 'right';
 
@@ -40,6 +41,8 @@ export const useCellStyles = makeStyles<Theme, { position?: PositionType }>(
     '@keyframes highlightIn': opacityAnimation(0.5, 1),
 
     cellPlain: {
+      scrollMarginTop: `${TOP_BAR_HEIGHT}px`,
+      position: 'relative',
       outline: 0,
       '&:hover $showOnHover': showWithAnimation('easeIn'),
       '&:focus-within $showOnHover': showNoAnimation(),
@@ -86,7 +89,6 @@ export const useCellStyles = makeStyles<Theme, { position?: PositionType }>(
       background: 'transparent !important',
       '-webkit-box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2) !important',
       'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2) !important',
-      zIndex: 1,
     },
     cellSelected: {
       background: '#efefef',

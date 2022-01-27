@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { StateType } from 'tg.constants/translationStates';
 import { useEditableRow } from '../useEditableRow';
 import { TranslationVisual } from '../TranslationVisual';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
@@ -11,6 +10,8 @@ import { useCellStyles } from '../cell/styles';
 import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationOpened } from '../TranslationOpened';
+import { AutoTranslationIndicator } from '../cell/AutoTranslationIndicator';
+import { StateType } from 'tg.constants/translationStates';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -29,8 +30,12 @@ const useStyles = makeStyles((theme) => {
       flexDirection: 'column',
       flexGrow: 1,
     },
+    autoIndicator: {
+      height: 0,
+      position: 'relative',
+    },
     editorContainer: {
-      padding: '12px 12px 0px 12px',
+      padding: theme.spacing(1.5, 1.5, 0, 1.5),
       flexGrow: 1,
     },
     editorControls: {
@@ -38,7 +43,9 @@ const useStyles = makeStyles((theme) => {
     },
     translation: {
       flexGrow: 1,
-      margin: '12px 12px 8px 12px',
+      margin: theme.spacing(1.5, 1.5, 1, 1.5),
+    },
+    translationContent: {
       overflow: 'hidden',
       position: 'relative',
     },
@@ -62,8 +69,10 @@ type Props = {
   onResize?: (colIndex: number) => void;
   editEnabled: boolean;
   width?: number | string;
+  cellPosition: string;
   active: boolean;
   lastFocusable: boolean;
+  containerRef: React.RefObject<HTMLDivElement>;
 };
 
 export const CellTranslation: React.FC<Props> = ({
@@ -73,8 +82,10 @@ export const CellTranslation: React.FC<Props> = ({
   onResize,
   editEnabled,
   width,
+  cellPosition,
   active,
   lastFocusable,
+  containerRef,
 }) => {
   const classes = useStyles();
   const cellRef = useRef<HTMLDivElement>(null);
@@ -127,6 +138,7 @@ export const CellTranslation: React.FC<Props> = ({
         [cellClasses.cellPlain]: true,
         [cellClasses.hover]: !isEditing,
         [cellClasses.cellClickable]: editEnabled && !isEditing,
+        [cellClasses.scrollMargins]: true,
         [cellClasses.cellRaised]: isEditing,
       })}
       style={{ width }}
@@ -153,20 +165,28 @@ export const CellTranslation: React.FC<Props> = ({
           mode={editVal.mode}
           onModeChange={handleModeChange}
           editEnabled={editEnabled}
+          cellRef={containerRef}
+          cellPosition={cellPosition}
         />
       ) : (
         <>
-          <div
-            className={classes.translation}
-            data-cy="translations-table-cell"
-          >
-            <TranslationVisual
-              width={width}
-              text={isEditing ? value : translation?.text}
-              locale={language.tag}
-              limitLines={!isEditing}
+          <div className={classes.translation}>
+            <div data-cy="translations-table-cell">
+              <TranslationVisual
+                width={width}
+                text={isEditing ? value : translation?.text}
+                locale={language.tag}
+                limitLines={!isEditing}
+              />
+            </div>
+
+            <AutoTranslationIndicator
+              keyData={data}
+              lang={language.tag}
+              className={classes.autoIndicator}
             />
           </div>
+
           <div className={classes.controls}>
             {active ? (
               <ControlsTranslation

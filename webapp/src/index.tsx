@@ -26,6 +26,8 @@ import configureStore from './store';
 import { createTheme } from '@material-ui/core';
 import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
 import { GlobalErrorModal } from 'tg.component/GlobalErrorModal';
+import { BottomPanelProvider } from 'tg.component/bottomPanel/BottomPanelContext';
+import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar';
 
 const store = configureStore();
 
@@ -164,7 +166,7 @@ const theme = createTheme({
   },
   mixins: {
     toolbar: {
-      minHeight: 52,
+      minHeight: TOP_BAR_HEIGHT,
     },
   },
   overrides: {
@@ -255,9 +257,11 @@ ReactDOM.render(
             <ErrorBoundary>
               <SnackbarProvider data-cy="global-snackbars">
                 <LoadingProvider>
-                  <GlobalLoading />
-                  <App />
-                  <GlobalErrorModal />
+                  <BottomPanelProvider>
+                    <GlobalLoading />
+                    <App />
+                    <GlobalErrorModal />
+                  </BottomPanelProvider>
                 </LoadingProvider>
               </SnackbarProvider>
             </ErrorBoundary>

@@ -31,7 +31,7 @@ export function createTranslation(
     cy.gcy('tag-autocomplete-option').contains(`Add "${tag}"`).click();
   }
   if (translation) {
-    cy.gcy('translation-create-translation-input').type(translation);
+    cy.gcy('translation-create-translation-input').first().type(translation);
   }
 
   cy.gcy('global-form-save-button').click();

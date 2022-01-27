@@ -260,7 +260,7 @@ jobs:
         working-directory: ./webapp
 
   e2e-code-checks:
-    name: E2E Eslint 🪲
+    name: E2E Static Check 🪲
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

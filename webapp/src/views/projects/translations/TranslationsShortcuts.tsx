@@ -11,14 +11,14 @@ import { useHideShortcuts } from 'tg.hooks/useHideShortcuts';
 import {
   KEY_MAP,
   ShortcutsArrayType,
-  useContextShortcuts,
-} from './context/useContextShortcuts';
+  useTranslationsShortcuts,
+} from './context/shortcuts/useTranslationsShortcuts';
 import clsx from 'clsx';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
 import { getMetaName } from 'tg.fixtures/isMac';
 import { translationStates } from 'tg.constants/translationStates';
-import { getCurrentlyFocused } from './context/tools';
+import { getCurrentlyFocused } from './context/shortcuts/tools';
 
 const useStyles = makeStyles((theme) => ({
   '@keyframes easeIn': {
@@ -105,7 +105,6 @@ const useStyles = makeStyles((theme) => ({
   },
   icon: {
     opacity: 0.5,
-    fontSize: 20,
     cursor: 'pointer',
     marginLeft: theme.spacing(1),
     transition: 'all 300ms ease-in-out',
@@ -127,7 +126,9 @@ export const TranslationsShortcuts = () => {
     setCollapsed(!collapsed);
   };
 
-  const cursor = useTranslationsSelector((c) => c.cursor);
+  const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
+  const cursorLanguage = useTranslationsSelector((c) => c.cursor?.language);
+  const cursorMode = useTranslationsSelector((c) => c.cursor?.mode);
 
   const translations = useTranslationsSelector((c) => c.translations);
 
@@ -136,7 +137,7 @@ export const TranslationsShortcuts = () => {
   const [availableActions, setAvailableActions] = useState<
     ShortcutsArrayType[]
   >([]);
-  const { getAvailableActions } = useContextShortcuts();
+  const { getAvailableActions } = useTranslationsShortcuts();
 
   const onFocusChange = useDebouncedCallback(
     () => {
@@ -161,7 +162,7 @@ export const TranslationsShortcuts = () => {
       const state = translations?.find((t) => t.keyId === keyId)?.translations[
         language
       ]?.state;
-      return state && translationStates[state]?.next[0];
+      return (state && translationStates[state]?.next) || 'TRANSLATED';
     }
   };
 
@@ -186,8 +187,8 @@ export const TranslationsShortcuts = () => {
     }
   };
 
-  const cursorNextState =
-    cursor?.language && getCellNextState(cursor.keyId, cursor.language);
+  const cursorKeyIdNextState =
+    cursorKeyId && getCellNextState(cursorKeyId, cursorLanguage);
 
   const getEditorShortcuts = () => [
     {
@@ -199,15 +200,15 @@ export const TranslationsShortcuts = () => {
       formula: formatShortcut(`${getMetaName()} + Enter`),
     },
     {
-      name: cursorNextState && translationStates[cursorNextState] && (
-        <T>{translationStates[cursorNextState].translationKey}</T>
+      name: cursorKeyIdNextState && translationStates[cursorKeyIdNextState] && (
+        <T>{translationStates[cursorKeyIdNextState].translationKey}</T>
       ),
       formula: formatShortcut(`${getMetaName()} + E`),
     },
   ];
 
   const editorIsActive =
-    cursor?.mode === 'editor' &&
+    cursorMode === 'editor' &&
     document.activeElement?.className === 'CodeMirror-code';
 
   const items = (

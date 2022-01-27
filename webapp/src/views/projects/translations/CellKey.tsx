@@ -133,8 +133,7 @@ export const CellKey: React.FC<Props> = ({
   const handleAddTag = (name: string) => {
     dispatch({
       type: 'ADD_TAG',
-      payload: { keyId: data.keyId, name },
-      onSuccess: () => setTagEdit(false),
+      payload: { keyId: data.keyId, name, onSuccess: () => setTagEdit(false) },
     });
   };
 
@@ -166,6 +165,7 @@ export const CellKey: React.FC<Props> = ({
           [cellClasses.hover]: !isEditing,
           [cellClasses.cellClickable]: editEnabled && !isEditing,
           [cellClasses.cellRaised]: isEditing,
+          [cellClasses.scrollMargins]: true,
         })}
         style={{ width }}
         onClick={

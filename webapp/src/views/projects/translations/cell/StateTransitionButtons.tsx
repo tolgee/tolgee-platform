@@ -1,11 +1,14 @@
 import { useTranslate } from '@tolgee/react';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';
+import { components } from 'tg.service/apiSchema.generated';
 import { ControlsButton } from './ControlsButton';
 import { StateIcon } from './StateIcon';
 
+type State = components['schemas']['TranslationViewModel']['state'];
+
 type Props = {
-  state: StateType | undefined;
+  state: State | undefined;
   onStateChange?: (s: StateType) => void;
   className?: string;
 };
@@ -17,26 +20,23 @@ export const StateTransitionButtons: React.FC<Props> = ({
 }) => {
   const t = useTranslate();
 
+  const nextState: StateType =
+    (state && translationStates[state]?.next) || 'TRANSLATED';
+
   return (
     <>
-      {state &&
-        translationStates[state]?.next.map((s, i) => (
-          <ControlsButton
-            key={i}
-            data-cy="translation-state-button"
-            onClick={() => onStateChange?.(s)}
-            className={className}
-            tooltip={t(
-              'translation_state_change',
-              {
-                newState: t(translationStates[s]?.translationKey, {}, true),
-              },
-              true
-            )}
-          >
-            <StateIcon state={s} fontSize="small" />
-          </ControlsButton>
-        ))}
+      {state !== 'UNTRANSLATED' && (
+        <ControlsButton
+          data-cy="translation-state-button"
+          onClick={() => onStateChange?.(nextState)}
+          className={className}
+          tooltip={t('translation_state_change', {
+            newState: t(translationStates[nextState]?.translationKey || ''),
+          })}
+        >
+          <StateIcon state={state} fontSize="small" />
+        </ControlsButton>
+      )}
     </>
   );
 };

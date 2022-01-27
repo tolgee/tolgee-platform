@@ -25,14 +25,14 @@ describe('Projects Dashboard', () => {
       .findDcy('project-states-bar-bar')
       .should('be.visible')
       .findDcy('project-states-bar-state-progress')
-      .should('have.length', 5)
+      .should('have.length', 3)
       //wait for animation
       .wait(500)
       .should('be.visible');
     getNthStateInProject(project2, 0).trigger('mouseover');
-    assertTooltip('Needs review');
+    assertTooltip('Reviewed');
     getNthStateInProject(project2, 0).trigger('mouseout');
-    getNthStateInProject(project2, 2).trigger('mouseover');
+    getNthStateInProject(project2, 1).trigger('mouseover');
     assertTooltip('Translated');
   });
 

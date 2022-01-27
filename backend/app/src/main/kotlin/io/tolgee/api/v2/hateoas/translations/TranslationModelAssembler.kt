@@ -10,6 +10,12 @@ class TranslationModelAssembler : RepresentationModelAssemblerSupport<Translatio
   V2TranslationsController::class.java, TranslationModel::class.java
 ) {
   override fun toModel(entity: Translation): TranslationModel {
-    return TranslationModel(id = entity.id, text = entity.text, state = entity.state)
+    return TranslationModel(
+      id = entity.id,
+      text = entity.text,
+      state = entity.state,
+      auto = entity.auto,
+      mtProvider = entity.mtProvider
+    )
   }
 }

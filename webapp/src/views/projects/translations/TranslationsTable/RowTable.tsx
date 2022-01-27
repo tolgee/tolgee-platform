@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core';
 import { useDebounce } from 'use-debounce';
 
@@ -19,12 +19,13 @@ const useStyles = makeStyles((theme) => {
       display: 'flex',
       border: `1px solid ${borderColor}`,
       borderWidth: '1px 0px 0px 0px',
-    },
-    languages: {
-      display: 'flex',
-      flexDirection: 'column',
       position: 'relative',
-      alignItems: 'stretch',
+    },
+    fakeContainer: {
+      display: 'block',
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
     },
   };
 });
@@ -52,6 +53,10 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
 
   const relaxedActive = active || activeDebounced;
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const colSizesNum = columnSizes.map((val) => Number(val.replace('%', '')));
+
   return (
     <div
       onMouseEnter={() => setHover(true)}
@@ -70,22 +75,44 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
         active={relaxedActive}
         position="left"
       />
-      {languages.map((language, index) => (
-        <CellTranslation
-          key={language.tag}
-          data={data}
-          language={language}
-          colIndex={index}
-          onResize={onResize}
-          editEnabled={permissions.satisfiesPermission(
-            ProjectPermissionType.TRANSLATE
-          )}
-          width={columnSizes[index + 1]}
-          active={relaxedActive}
-          // render last focusable button on last item, so it's focusable
-          lastFocusable={index === languages.length - 1}
-        />
-      ))}
+      {languages.map((language, index) => {
+        const allWidth = 100 - colSizesNum[0];
+
+        const prevWidth = colSizesNum
+          .slice(1, index + 1)
+          .reduce((prev, cur) => prev + cur, 0);
+
+        const cellWidth = Number(colSizesNum[index + 1]);
+
+        // calculate arrow position for popup
+        const cellPosition = `${
+          ((prevWidth + cellWidth / 2) / allWidth) * 100
+        }%`;
+
+        return (
+          <CellTranslation
+            key={language.tag}
+            data={data}
+            language={language}
+            colIndex={index}
+            onResize={onResize}
+            editEnabled={permissions.satisfiesPermission(
+              ProjectPermissionType.TRANSLATE
+            )}
+            width={columnSizes[index + 1]}
+            cellPosition={cellPosition}
+            active={relaxedActive}
+            // render last focusable button on last item, so it's focusable
+            lastFocusable={index === languages.length - 1}
+            containerRef={containerRef}
+          />
+        );
+      })}
+      <div
+        className={classes.fakeContainer}
+        ref={containerRef}
+        style={{ left: columnSizes[0] }}
+      />
     </div>
   );
 });

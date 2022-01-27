@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core';
 
@@ -11,7 +12,7 @@ import { TranslationVisual } from '../TranslationVisual';
 import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationOpened } from '../TranslationOpened';
-import { useRef } from 'react';
+import { AutoTranslationIndicator } from '../cell/AutoTranslationIndicator';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
@@ -33,8 +34,8 @@ const useStyles = makeStyles((theme) => {
       gridTemplateColumns: '40px 60px 1fr',
       gridTemplateRows: '1fr auto',
       gridTemplateAreas: `
-        "flag     language translation"
-        "controls controls controls   "
+        "flag     language translation  "
+        "controls controls controls     "
       `,
     },
     flag: {
@@ -55,8 +56,15 @@ const useStyles = makeStyles((theme) => {
     translation: {
       gridArea: 'translation',
       margin: '12px 12px 8px 0px',
+    },
+    translationContent: {
       overflow: 'hidden',
       position: 'relative',
+    },
+    autoIndicator: {
+      position: 'relative',
+      height: 0,
+      justifySelf: 'start',
     },
     controls: {
       boxSizing: 'border-box',
@@ -150,6 +158,7 @@ export const CellTranslation: React.FC<Props> = ({
       className={clsx({
         [cellClasses.cellPlain]: true,
         [classes.splitContainer]: true,
+        [cellClasses.scrollMargins]: true,
         [cellClasses.cellRaised]: isEditing,
       })}
       tabIndex={0}
@@ -179,11 +188,18 @@ export const CellTranslation: React.FC<Props> = ({
         </div>
 
         <div className={classes.translation}>
-          <TranslationVisual
-            width={width}
-            text={isEditing ? value : translation?.text}
-            locale={language.tag}
-            limitLines={!isEditing}
+          <div className={classes.translationContent}>
+            <TranslationVisual
+              width={width}
+              text={isEditing ? value : translation?.text}
+              locale={language.tag}
+              limitLines={!isEditing}
+            />
+          </div>
+          <AutoTranslationIndicator
+            keyData={data}
+            lang={language.tag}
+            className={classes.autoIndicator}
           />
         </div>
 
@@ -229,6 +245,7 @@ export const CellTranslation: React.FC<Props> = ({
           mode={editVal.mode}
           onModeChange={handleModeChange}
           editEnabled={editEnabled}
+          cellRef={cellRef}
         />
       )}
     </div>

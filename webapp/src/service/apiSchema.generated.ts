@@ -56,6 +56,10 @@ export interface paths {
   "/v2/projects/{projectId}/import/apply": {
     put: operations["applyImport"];
   };
+  "/v2/projects/{projectId}/auto-translation-settings": {
+    get: operations["getAutoTranslationSettings"];
+    put: operations["setAutoTranslationSettings"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/set-state/{state}": {
     put: operations["setTranslationState"];
   };
@@ -66,6 +70,9 @@ export interface paths {
     get: operations["get_1"];
     put: operations["update"];
     delete: operations["delete_2"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
+    put: operations["dismissAutoTranslatedState"];
   };
   "/v2/projects/{projectId}/translations": {
     get: operations["getTranslations"];
@@ -552,12 +559,11 @@ export interface components {
       /** Translation text */
       text?: string;
       /** State of translation */
-      state:
-        | "UNTRANSLATED"
-        | "MACHINE_TRANSLATED"
-        | "TRANSLATED"
-        | "REVIEWED"
-        | "NEEDS_REVIEW";
+      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
+      /** Was translated using Translation Memory or Machine translation service? */
+      auto: boolean;
+      /** Which machine translation service was used to auto translate this */
+      mtProvider?: "GOOGLE" | "AWS";
     };
     EditKeyDto: {
       name: string;
@@ -570,6 +576,12 @@ export interface components {
     };
     ProjectInviteUserDto: {
       type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+    };
+    AutoTranslationSettingsDto: {
+      /** If true, new keys will be automatically translated using translation memory when 100% match is found */
+      usingTranslationMemory: boolean;
+      /** If true, new keys will be automatically translated using primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
+      usingMachineTranslation: boolean;
     };
     TranslationCommentModel: {
       /** Id of translation comment record */
@@ -593,6 +605,12 @@ export interface components {
       key: string;
       /** Object mapping language tag to translation */
       translations: { [key: string]: string };
+      /**
+       * List of languages to return translations for.
+       *
+       * If not provided, only modified translation will be provided.
+       */
+      languagesToReturn?: string[];
     };
     SetTranslationsResponseModel: {
       /** Id of key record */
@@ -773,20 +791,7 @@ export interface components {
       filterKeyIdNot?: number[];
       filterTag?: string;
       filterKeyPrefix?: string;
-      filterState?: (
-        | "UNTRANSLATED"
-        | "MACHINE_TRANSLATED"
-        | "TRANSLATED"
-        | "REVIEWED"
-        | "NEEDS_REVIEW"
-      )[];
-      filterStateNot?: (
-        | "UNTRANSLATED"
-        | "MACHINE_TRANSLATED"
-        | "TRANSLATED"
-        | "REVIEWED"
-        | "NEEDS_REVIEW"
-      )[];
+      filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED")[];
       zip: boolean;
     };
     UploadedImageModel: {
@@ -973,16 +978,17 @@ export interface components {
       /** Translation text */
       text?: string;
       /** State of translation */
-      state:
-        | "UNTRANSLATED"
-        | "MACHINE_TRANSLATED"
-        | "TRANSLATED"
-        | "REVIEWED"
-        | "NEEDS_REVIEW";
+      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
+      /** Was translated using Translation Memory or Machine translation service? */
+      auto: boolean;
+      /** Which machine translation service was used to auto translate this */
+      mtProvider?: "GOOGLE" | "AWS";
       /** Count of translation comments */
       commentCount: number;
       /** Count of unresolved translation comments */
       unresolvedCommentCount: number;
+      /** Was translation memory used to translate this? */
+      fromTranslationMemory: boolean;
     };
     CollectionModelProjectTransferOptionModel: {
       _embedded?: {
@@ -1701,16 +1707,70 @@ export interface operations {
       };
     };
   };
+  getAutoTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["AutoTranslationSettingsDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setAutoTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["AutoTranslationSettingsDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AutoTranslationSettingsDto"];
+      };
+    };
+  };
   setTranslationState: {
     parameters: {
       path: {
         translationId: number;
-        state:
-          | "UNTRANSLATED"
-          | "MACHINE_TRANSLATED"
-          | "TRANSLATED"
-          | "REVIEWED"
-          | "NEEDS_REVIEW";
+        state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
         projectId: number;
       };
     };
@@ -1836,6 +1896,34 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  dismissAutoTranslatedState: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
@@ -3501,22 +3589,8 @@ export interface operations {
         filterTag?: string;
         /** Filter keys with prefix */
         filterKeyPrefix?: string;
-        /** Filter translations with state */
-        filterState?: (
-          | "UNTRANSLATED"
-          | "MACHINE_TRANSLATED"
-          | "TRANSLATED"
-          | "REVIEWED"
-          | "NEEDS_REVIEW"
-        )[];
-        /** Filter translations with state different from */
-        filterStateNot?: (
-          | "UNTRANSLATED"
-          | "MACHINE_TRANSLATED"
-          | "TRANSLATED"
-          | "REVIEWED"
-          | "NEEDS_REVIEW"
-        )[];
+        /** Filter translations with state. By default, everything except untranslated is exported. */
+        filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED")[];
         /**
          * If false, it doesn't return zip of files, but it returns single file.
          *

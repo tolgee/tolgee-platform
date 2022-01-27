@@ -5,6 +5,7 @@ import com.amazonaws.services.translate.model.TranslateTextResult
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Caches
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
@@ -12,6 +13,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -25,12 +27,18 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.cache.Cache
+import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
 import java.util.*
 import kotlin.system.measureTimeMillis
 
 class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
+
+  @Autowired
+  @MockBean
+  lateinit var currentDateProvider: CurrentDateProvider
 
   @Autowired
   @MockBean
@@ -42,18 +50,23 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Autowired
   @MockBean
-  lateinit var currentDateProvider: CurrentDateProvider
+  lateinit var cacheManager: CacheManager
+  lateinit var cacheMock: Cache
 
   @BeforeEach
   fun setup() {
     initTestData()
-    initProperties()
-    initMocks()
+    initMachineTranslationProperties(1000)
+    initMachineTranslationMocks()
+    mockCurrentDate { Date() }
+    cacheMock = mock()
+    val rateLimitsCacheMock = mock<Cache>()
+    whenever(cacheManager.getCache(eq(Caches.RATE_LIMITS))).thenReturn(rateLimitsCacheMock)
+    whenever(cacheManager.getCache(eq(Caches.MACHINE_TRANSLATIONS))).thenReturn(cacheMock)
   }
 
-  private fun initMocks() {
+  private fun initMachineTranslationMocks() {
     mockCurrentDate { Date() }
-
     val googleTranslationMock = mock() as Translation
     val awsTranslateTextResult = mock() as TranslateTextResult
 
@@ -77,15 +90,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     testDataService.saveTestData(testData.root)
     projectSupplier = { testData.projectBuilder.self }
     userAccount = testData.user
-  }
-
-  private fun initProperties() {
-    machineTranslationProperties.freeCreditsAmount = 1000
-    awsMachineTranslationProperties.accessKey = "dummy"
-    awsMachineTranslationProperties.defaultEnabled = false
-    awsMachineTranslationProperties.secretKey = "dummy"
-    googleMachineTranslationProperties.apiKey = "dummy"
-    googleMachineTranslationProperties.defaultEnabled = true
   }
 
   @Test
@@ -203,6 +207,48 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `it respects default config`() {
+    machineTranslationProperties.freeCreditsAmount = 2000
+    testData.addDefaultConfig()
+    testDataService.saveTestData(testData.root)
+
+    performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
+      node("machineTranslations").isEqualTo(
+        """
+        {
+          "AWS": "Translated with Amazon"
+        }
+        """
+      )
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `primary service is first (AWS)`() {
+    machineTranslationProperties.freeCreditsAmount = -1
+    testData.enableBoth()
+    testDataService.saveTestData(testData.root)
+
+    (0..20).forEach {
+      verifyServiceFirst("AWS")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `primary service is first (GOOGLE)`() {
+    machineTranslationProperties.freeCreditsAmount = -1
+    testData.enableBothGooglePrimary()
+    testDataService.saveTestData(testData.root)
+
+    (0..20).forEach {
+      verifyServiceFirst("GOOGLE")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `it consumes and refills bucket`() {
     val expectedCreditTaken = "Beautiful".length * 100
     testMtCreditConsumption(expectedCreditTaken)
@@ -212,6 +258,15 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
     mockCurrentDate { DateUtils.addMonths(Date(), 2) }
     testMtCreditConsumption(expectedCreditTaken)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it doesn't consume when cached`() {
+    val valueWrapperMock = mock<Cache.ValueWrapper>()
+    whenever(cacheMock.get(any())).thenReturn(valueWrapperMock)
+    whenever(valueWrapperMock.get()).thenReturn("Yeey! Cached!")
+    performMtRequestAndExpectAfterBalance(1000)
   }
 
   private fun testMtCreditConsumption(expectedCreditTaken: Int) {
@@ -238,5 +293,11 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       "/v2/projects/${project.id}/suggest/machine-translations",
       SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
     )
+  }
+
+  private fun verifyServiceFirst(service: String) {
+    val result = performMtRequest().andIsOk.andReturn().mapResponseTo<Map<String, Any>>()
+    val services = (result["machineTranslations"] as Map<String, String>).keys.toList()
+    assertThat(services[0]).isEqualTo(service)
   }
 }

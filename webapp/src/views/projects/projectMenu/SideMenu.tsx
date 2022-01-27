@@ -5,6 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useTheme } from '@material-ui/core';
 
 import { ToggleButton } from './ToggleButton';
+import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 
 const drawerWidth = 240;
 
@@ -18,6 +19,9 @@ const useStyles = makeStyles((theme) => ({
     ...theme.mixins.toolbar,
   },
   drawerPaper: {
+    // @ts-ignore
+    paddingBottom: ({ paddingBottom }) => paddingBottom,
+    overflowY: 'auto',
     overflowX: 'hidden',
     whiteSpace: 'nowrap',
     width: drawerWidth,
@@ -59,7 +63,8 @@ export const SideMenu: React.FC<SideMenuProps> = ({
   open,
   children,
 }) => {
-  const classes = useStyles({});
+  const { height } = useBottomPanel();
+  const classes = useStyles({ paddingBottom: height + 70 });
   const theme = useTheme();
 
   useEffect(() => {

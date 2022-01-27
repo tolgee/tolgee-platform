@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.ApiKey
+import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.Language
 import io.tolgee.model.MtServiceConfig
 import io.tolgee.model.Organization
@@ -40,6 +41,7 @@ class ProjectBuilder(
     val translations = mutableListOf<TranslationBuilder>()
     val apiKeys = mutableListOf<ApiKeyBuilder>()
     val translationServiceConfigs = mutableListOf<MtServiceConfigBuilder>()
+    var autoTranslationConfigBuilder: AutoTranslationConfigBuilder? = null
     var avatarFile: ClassPathResource? = null
   }
 
@@ -64,5 +66,9 @@ class ProjectBuilder(
 
   fun setAvatar(filePath: String) {
     data.avatarFile = ClassPathResource(filePath, this.javaClass.classLoader)
+  }
+
+  fun addAutoTranslationConfig(ft: FT<AutoTranslationConfig>) {
+    data.autoTranslationConfigBuilder = AutoTranslationConfigBuilder(this@ProjectBuilder).also { ft(it.self) }
   }
 }

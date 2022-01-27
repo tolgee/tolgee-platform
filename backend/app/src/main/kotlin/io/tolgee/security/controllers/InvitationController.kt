@@ -40,7 +40,7 @@ class InvitationController @Autowired constructor(
   @GetMapping("/list/{projectId}")
   @Operation(summary = "Prints all invitations to project")
   fun getProjectInvitations(@PathVariable("projectId") id: Long): Set<InvitationDTO> {
-    val repository = projectService.get(id).orElseThrow { NotFoundException() }!!
+    val repository = projectService.get(id)
     securityService.checkProjectPermission(id, Permission.ProjectPermissionType.MANAGE)
     return invitationService.getForProject(repository).stream().map { invitation: Invitation? ->
       InvitationDTO.fromEntity(invitation)

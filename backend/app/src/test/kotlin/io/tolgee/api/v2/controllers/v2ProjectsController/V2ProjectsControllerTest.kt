@@ -56,22 +56,18 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         it.node("[1].stats.translationStateCounts").isEqualTo(
           """
         {
-          "UNTRANSLATED" : 4,
-          "MACHINE_TRANSLATED" : 1,
-          "TRANSLATED" : 2,
-          "REVIEWED" : 1,
-          "NEEDS_REVIEW" : 2
+          "UNTRANSLATED": 4,
+          "TRANSLATED": 5,
+          "REVIEWED": 1
         }
       """
         )
         it.node("[0].stats.translationStateCounts").isEqualTo(
           """
-       {
-          "UNTRANSLATED" : 1,
-          "MACHINE_TRANSLATED" : 0,
-          "TRANSLATED" : 0,
-          "REVIEWED" : 0,
-          "NEEDS_REVIEW" : 0
+        {
+          "UNTRANSLATED": 1,
+          "TRANSLATED": 0,
+          "REVIEWED": 0
         }
       """
         )
@@ -255,8 +251,8 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun deleteProject() {
     val base = dbPopulator.createBase(generateUniqueString())
     performAuthDelete("/v2/projects/${base.id}", null).andIsOk
-    val project = projectService.get(base.id)
-    Assertions.assertThat(project).isEmpty
+    val project = projectService.find(base.id)
+    Assertions.assertThat(project).isNull()
   }
 
   @Test

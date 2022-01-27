@@ -39,7 +39,7 @@ describe('Translation states', () => {
       .trigger('mouseover')
       .findDcy('translation-state-button')
       .click();
-    assertHasState('Cool translated text 2', 'Needs review');
+    assertHasState('Cool translated text 2', 'Translated');
   });
 
   const setStateToReviewed = (translationText: string) => {

@@ -63,9 +63,9 @@ class TranslationSuggestionController(
       val resultMap = dto.baseText?.ifBlank { null }?.let {
         mtService.getMachineTranslations(projectHolder.projectEntity, it, targetLanguage)
       } ?: let {
-        val key = keyService.get(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
+        val key = keyService.findOptional(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
         key.checkInProject()
-        mtService.getMachineTranslations(projectHolder.projectEntity, key, targetLanguage)
+        mtService.getMachineTranslations(key, targetLanguage)
       }
 
       val balanceAfter = mtCreditBucketService.getCreditBalance(projectHolder.projectEntity)
@@ -96,7 +96,7 @@ class TranslationSuggestionController(
 
     val data = dto.baseText?.let { baseText -> translationMemoryService.suggest(baseText, targetLanguage, pageable) }
       ?: let {
-        val key = keyService.get(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
+        val key = keyService.findOptional(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
         key.checkInProject()
         translationMemoryService.suggest(key, targetLanguage, pageable)
       }

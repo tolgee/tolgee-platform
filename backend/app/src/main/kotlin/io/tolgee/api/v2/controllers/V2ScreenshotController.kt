@@ -64,7 +64,7 @@ class V2ScreenshotController(
     if (!contentTypes.contains(screenshot.contentType!!)) {
       throw ValidationException(io.tolgee.constants.Message.FILE_NOT_IMAGE)
     }
-    val keyEntity = keyService.get(keyId).orElseThrow { NotFoundException() }
+    val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     keyEntity.checkInProject()
     val screenShotEntity = screenshotService.store(screenshot, keyEntity)
     return ResponseEntity(screenShotEntity.model, HttpStatus.CREATED)
@@ -75,7 +75,7 @@ class V2ScreenshotController(
   @AccessWithAnyProjectPermission
   @AccessWithApiKey([ApiScope.SCREENSHOTS_VIEW])
   fun getKeyScreenshots(@PathVariable keyId: Long): CollectionModel<ScreenshotModel> {
-    val keyEntity = keyService.get(keyId).orElseThrow { NotFoundException() }
+    val keyEntity = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     keyEntity.checkInProject()
     return screenshotModelAssembler.toCollectionModel(screenshotService.findAll(keyEntity))
   }

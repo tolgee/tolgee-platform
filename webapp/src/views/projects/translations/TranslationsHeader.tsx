@@ -12,15 +12,16 @@ import { T, useTranslate } from '@tolgee/react';
 import {
   useTranslationsSelector,
   useTranslationsDispatch,
-  ViewType,
 } from './context/TranslationsContext';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { Filters } from './Filters/Filters';
+import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { KeyCreateDialog } from './KeyCreateDialog';
 import TranslationsSearchField from './TranslationsSearchField';
+import { ViewMode } from './context/types';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -59,6 +60,9 @@ const useStyles = makeStyles((theme) => ({
   toggleButton: {
     padding: '4px 8px',
   },
+  modal: {
+    transition: 'margin-bottom 0.2s',
+  },
 }));
 
 export const TranslationsHeader = () => {
@@ -93,17 +97,19 @@ export const TranslationsHeader = () => {
     });
   };
 
-  const handleViewChange = (val: ViewType) => {
+  const handleViewChange = (val: ViewMode) => {
     dispatch({ type: 'CHANGE_VIEW', payload: val });
   };
 
   const handleDelete = () => {
-    dispatch({ type: 'DELETE_TRANSLATIONS', payload: selection });
+    dispatch({ type: 'DELETE_TRANSLATIONS' });
   };
 
   const handleAddTranslation = () => {
     setNewDialog('true');
   };
+
+  const { height: bottomPanelHeight } = useBottomPanel();
 
   return (
     <div className={classes.container}>
@@ -133,9 +139,7 @@ export const TranslationsHeader = () => {
           <LanguagesMenu
             onChange={handleLanguageChange}
             value={selectedLanguages || []}
-            languages={
-              languages?.map((l) => ({ label: l.name, value: l.tag })) || []
-            }
+            languages={languages || []}
             context="translations"
           />
 
@@ -193,6 +197,8 @@ export const TranslationsHeader = () => {
           fullWidth
           maxWidth="md"
           keepMounted={false}
+          className={classes.modal}
+          style={{ marginBottom: bottomPanelHeight }}
         >
           <KeyCreateDialog onClose={() => setNewDialog('false')} />
         </Dialog>

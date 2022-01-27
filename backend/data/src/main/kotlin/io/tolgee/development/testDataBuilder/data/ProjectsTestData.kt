@@ -56,7 +56,8 @@ class ProjectsTestData : BaseTestData() {
           addTranslation {
             key = this@keyBuilder.self
             text = "Translated"
-            state = TranslationState.MACHINE_TRANSLATED
+            state = TranslationState.TRANSLATED
+            auto = true
             language = project2English
           }
         }
@@ -76,13 +77,11 @@ class ProjectsTestData : BaseTestData() {
           addTranslation {
             key = this@keyBuilder.self
             text = "Needs review in de"
-            state = TranslationState.NEEDS_REVIEW
             language = project2Deutsch
           }
           addTranslation {
             key = this@keyBuilder.self
             text = "Needs review"
-            state = TranslationState.NEEDS_REVIEW
             language = project2English
           }
         }

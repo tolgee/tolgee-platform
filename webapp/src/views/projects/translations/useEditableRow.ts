@@ -1,11 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 
 import {
-  AfterCommand,
   useTranslationsSelector,
   useTranslationsDispatch,
 } from './context/TranslationsContext';
-import { EditModeType } from './context/useEdit';
+import { AfterCommand, EditMode } from './context/types';
 
 type Props = {
   keyId: number;
@@ -60,7 +59,7 @@ export const useEditableRow = ({
     }
   }, [isEditing, originalValue]);
 
-  const handleOpen = (mode: EditModeType) => {
+  const handleOpen = (mode: EditMode) => {
     dispatch({
       type: 'SET_EDIT',
       payload: {
@@ -89,7 +88,7 @@ export const useEditableRow = ({
     }
   };
 
-  const handleModeChange = (mode: EditModeType) => {
+  const handleModeChange = (mode: EditMode) => {
     dispatch({ type: 'UPDATE_EDIT', payload: { mode: mode } });
   };
 

@@ -12,7 +12,6 @@ import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
 import org.hibernate.QueryException
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -31,8 +30,7 @@ import javax.persistence.EntityNotFoundException
 
 @RestControllerAdvice
 class ExceptionHandlers {
-
-  val logger: Logger = LoggerFactory.getLogger(this::class.java)
+  private val logger = LoggerFactory.getLogger(this::class.java)
 
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationExceptions(

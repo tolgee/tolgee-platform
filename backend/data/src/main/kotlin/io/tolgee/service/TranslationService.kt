@@ -10,6 +10,7 @@ import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto.Companion.fromQueryResult
 import io.tolgee.dtos.response.ViewDataResponse
 import io.tolgee.dtos.response.translations_view.ResponseParams
+import io.tolgee.events.OnTranslationsSet
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
@@ -27,6 +28,7 @@ import io.tolgee.service.query_builders.TranslationsViewBuilderOld
 import io.tolgee.socketio.ITranslationsSocketIoModule
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -45,7 +47,8 @@ class TranslationService(
   private val translationsSocketIoModule: ITranslationsSocketIoModule,
   private val applicationContext: ApplicationContext,
   private val tolgeeProperties: TolgeeProperties,
-  private val translationCommentService: TranslationCommentService
+  private val translationCommentService: TranslationCommentService,
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
   @set:Autowired
   @set:Lazy
@@ -79,8 +82,8 @@ class TranslationService(
   }
 
   fun getKeyTranslationsResult(projectId: Long, path: PathDTO?, languageTags: Set<String>?): Map<String, String?> {
-    val project = projectService.get(projectId).orElseThrow { NotFoundException() }!!
-    val key = keyService.get(projectId, path!!).orElse(null)
+    val project = projectService.get(projectId)
+    val key = keyService.findOptional(projectId, path!!).orElse(null)
     val languages: Set<Language> = if (languageTags == null) {
       languageService.getImplicitLanguages(projectId)
     } else {
@@ -112,7 +115,7 @@ class TranslationService(
   fun getOrCreate(keyId: Long, languageId: Long): Translation {
     return translationRepository.findOneByKeyIdAndLanguageId(keyId, languageId)
       ?: let {
-        val key = keyService.get(keyId).orElseThrow { NotFoundException() }
+        val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
         val language = languageService.findById(languageId).orElseThrow { NotFoundException() }
         Translation().apply {
           this.key = key
@@ -129,6 +132,10 @@ class TranslationService(
     return this.translationRepository.findById(id).orElse(null)
   }
 
+  fun get(id: Long): Translation {
+    return this.find(id) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+  }
+
   @Suppress("UNCHECKED_CAST")
   @Deprecated(
     replaceWith = ReplaceWith("getViewData"),
@@ -141,7 +148,7 @@ class TranslationService(
     offset: Int,
     search: String?
   ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-    val project = projectService.get(projectId!!).orElseThrow { NotFoundException() }!!
+    val project = projectService.get(projectId!!)
     val languages: Set<Language> = languageService.getLanguagesForTranslationsView(languageTags, projectId)
     val (count, data1) = TranslationsViewBuilderOld.getData(entityManager, project, languages, search, limit, offset)
     return ViewDataResponse(
@@ -173,7 +180,7 @@ class TranslationService(
   }
 
   fun setTranslation(key: Key, languageTag: String?, text: String?): Translation {
-    val language = languageService.findByTag(languageTag!!, key.project!!)
+    val language = languageService.findByTag(languageTag!!, key.project)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
     return setTranslation(key, language, text)
   }
@@ -187,11 +194,11 @@ class TranslationService(
     if (translation.id == 0L) {
       key.translations.add(translation)
     }
-    saveTranslation(translation)
-    return translation
+    dismissAutoTranslated(translation)
+    return save(translation)
   }
 
-  fun saveTranslation(translation: Translation): Translation {
+  fun save(translation: Translation): Translation {
     val translationTextLength = translation.text?.length ?: 0
     if (translationTextLength > tolgeeProperties.maxTranslationTextLength) {
       throw BadRequestException(Message.TRANSLATION_TEXT_TOO_LONG, listOf(tolgeeProperties.maxTranslationTextLength))
@@ -208,16 +215,28 @@ class TranslationService(
 
   @Transactional
   fun setForKey(key: Key, translations: Map<String, String?>): Map<String, Translation> {
+    val languages = languageService.findByTags(translations.keys, key.project.id)
+    val oldTranslations = getKeyTranslations(languages, key.project, key).associate { it.language.tag to it.text }
+
     return translations.entries.associate { (languageTag, value) ->
       if (value == null || value.isEmpty()) {
         return@associate languageTag to setUntranslatedStateIfExists(key, languageTag)
       }
       languageTag to setTranslation(key, languageTag, value)
-    }.filterValues { it != null }.mapValues { it.value as Translation }
+    }.filterValues { it != null }.mapValues { it.value as Translation }.also {
+      applicationEventPublisher.publishEvent(
+        OnTranslationsSet(
+          source = this,
+          key = key,
+          oldValues = oldTranslations,
+          translations = it.values.toList()
+        )
+      )
+    }
   }
 
   fun deleteIfExists(key: Key, languageTag: String) {
-    val language = languageService.findByTag(languageTag, key.project!!)
+    val language = languageService.findByTag(languageTag, key.project)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
     translationRepository.findOneByKeyAndLanguage(key, language)
       .ifPresent { entity: Translation ->
@@ -228,13 +247,13 @@ class TranslationService(
   }
 
   fun setUntranslatedStateIfExists(key: Key, languageTag: String): Translation? {
-    val language = languageService.findByTag(languageTag, key.project!!)
+    val language = languageService.findByTag(languageTag, key.project)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
     return translationRepository.findOneByKeyAndLanguage(key, language).orElse(null)
       ?.let { entity: Translation ->
         entity.state = TranslationState.UNTRANSLATED
         entity.text = null
-        saveTranslation(entity)
+        save(entity)
         entity
       }
   }
@@ -288,19 +307,36 @@ class TranslationService(
   }
 
   fun saveAll(entities: Iterable<Translation>) {
-    entities.map { saveTranslation(it) }
+    entities.map { save(it) }
   }
 
   fun setState(translation: Translation, state: TranslationState): Translation {
     translation.state = state
-    return this.saveTranslation(translation)
+    return this.save(translation)
   }
 
   fun findBaseTranslation(key: Key): Translation? {
-    projectService.getOrCreateBaseLanguage(key.project!!.id)?.let {
+    projectService.getOrCreateBaseLanguage(key.project.id)?.let {
       return find(key, it).orElse(null)
     }
     return null
+  }
+
+  fun getTranslationMemoryValue(
+    key: Key,
+    targetLanguage: Language,
+  ): TranslationMemoryItemView? {
+    val baseLanguage = projectService.getOrCreateBaseLanguage(targetLanguage.project!!.id)
+      ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
+
+    val baseTranslationText = findBaseTranslation(key)?.text ?: return null
+
+    return translationRepository.getTranslationMemoryValue(
+      baseTranslationText,
+      key,
+      baseLanguage,
+      targetLanguage
+    ).firstOrNull()
   }
 
   fun getTranslationMemorySuggestions(
@@ -335,5 +371,12 @@ class TranslationService(
       targetLanguage = targetLanguage,
       pageable = pageable
     )
+  }
+
+  @Transactional
+  fun dismissAutoTranslated(translation: Translation) {
+    translation.auto = false
+    translation.mtProvider = null
+    save(translation)
   }
 }
