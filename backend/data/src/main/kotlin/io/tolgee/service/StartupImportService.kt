@@ -31,7 +31,7 @@ class StartupImportService(
 
         if (fileDtos != null) {
           val userAccount = userAccountService
-            .getByUserName(properties.authentication.initialUsername)
+            .findOptional(properties.authentication.initialUsername)
             .orElseGet { null }
 
           if (userAccount != null) {

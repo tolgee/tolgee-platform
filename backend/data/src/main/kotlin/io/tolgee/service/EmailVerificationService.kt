@@ -5,6 +5,9 @@
 package io.tolgee.service
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.dtos.cacheable.UserAccountDto
+import io.tolgee.events.user.OnUserEmailVerifiedFirst
+import io.tolgee.events.user.OnUserUpdated
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -12,6 +15,7 @@ import io.tolgee.model.EmailVerification
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.EmailVerificationRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.mail.MailSender
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.stereotype.Service
@@ -23,6 +27,7 @@ class EmailVerificationService(
   private val tolgeeProperties: TolgeeProperties,
   private val emailVerificationRepository: EmailVerificationRepository,
   private val mailSender: MailSender,
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
   @Autowired
   lateinit var userAccountService: UserAccountService
@@ -67,16 +72,35 @@ class EmailVerificationService(
 
   fun verify(userId: Long, code: String) {
     val user = userAccountService.get(userId).orElseThrow { NotFoundException() }
-    if (user!!.emailVerification == null || user.emailVerification?.code != code) {
+    val old = UserAccountDto.fromEntity(user)
+    val emailVerification = user?.emailVerification
+
+    if (emailVerification == null || emailVerification.code != code) {
       throw NotFoundException()
     }
 
-    user.emailVerification?.newEmail?.let {
-      user.username = user.emailVerification?.newEmail!!
+    val newEmail = user.emailVerification?.newEmail
+    setNewEmailIfChanged(newEmail, user)
+
+    userAccountService.saveAndFlush(user)
+    emailVerificationRepository.delete(emailVerification)
+
+    val isFirstEmailVerification = newEmail == null
+    val isEmailChange = newEmail != null
+
+    if (isFirstEmailVerification) {
+      applicationEventPublisher.publishEvent(OnUserEmailVerifiedFirst(this, user))
     }
 
-    userAccountService.save(user)
-    emailVerificationRepository.delete(user.emailVerification!!)
+    if (isEmailChange) {
+      applicationEventPublisher.publishEvent(OnUserUpdated(this, old, UserAccountDto.fromEntity(user)))
+    }
+  }
+
+  private fun setNewEmailIfChanged(newEmail: String?, user: UserAccount) {
+    newEmail?.let {
+      user.username = newEmail
+    }
   }
 
   private fun sendMail(

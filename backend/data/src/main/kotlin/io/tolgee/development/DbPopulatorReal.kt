@@ -56,7 +56,7 @@ class DbPopulatorReal(
   }
 
   fun createUserIfNotExists(username: String, password: String? = null, name: String? = null): UserAccount {
-    return userAccountService.getByUserName(username).orElseGet {
+    return userAccountService.findOptional(username).orElseGet {
       val signUpDto = SignUpDto(
         name = name ?: username, email = username,
         password = password

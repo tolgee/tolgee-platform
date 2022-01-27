@@ -59,7 +59,8 @@ class PublicController(
   private val invitationService: InvitationService,
   private val emailVerificationService: EmailVerificationService,
   private val dbPopulatorReal: DbPopulatorReal,
-  private val reCaptchaValidationService: ReCaptchaValidationService
+  private val reCaptchaValidationService: ReCaptchaValidationService,
+  private val tolgeeProperties: TolgeeProperties
 ) {
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
@@ -91,7 +92,7 @@ class PublicController(
   @Operation(summary = "Reset password request")
   @PostMapping("/reset_password_request")
   fun resetPasswordRequest(@RequestBody @Valid request: ResetPasswordRequest) {
-    val userAccount = userAccountService.getByUserName(request.email).orElse(null) ?: return
+    val userAccount = userAccountService.findOptional(request.email).orElse(null) ?: return
     val code = RandomStringUtils.randomAlphabetic(50)
     userAccountService.setResetPasswordCode(userAccount, code)
     val message = SimpleMailMessage()
@@ -136,13 +137,13 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   )
   fun signUp(@RequestBody @Valid dto: SignUpDto): JwtAuthenticationResponse? {
     var invitation: Invitation? = null
-    if (dto.invitationCode == null || dto.invitationCode == null) {
+    if (dto.invitationCode == null) {
       properties.authentication.checkAllowedRegistrations()
     } else {
       invitation = invitationService.getInvitation(dto.invitationCode) // it throws an exception
     }
 
-    userAccountService.getByUserName(dto.email).ifPresent {
+    userAccountService.findOptional(dto.email).ifPresent {
       throw BadRequestException(io.tolgee.constants.Message.USERNAME_ALREADY_EXISTS)
     }
 
@@ -155,7 +156,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
       invitationService.accept(invitation.code, user)
     }
 
-    if (!properties.authentication.needsEmailVerification) {
+    if (!tolgeeProperties.authentication.needsEmailVerification) {
       return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
     }
 
@@ -176,7 +177,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   @PostMapping(value = ["/validate_email"], consumes = [MediaType.APPLICATION_JSON_VALUE])
   @Operation(summary = "Validates if email is not in use")
   fun validateEmail(@RequestBody email: TextNode): Boolean {
-    return userAccountService.getByUserName(email.asText()).isEmpty
+    return userAccountService.findOptional(email.asText()).isEmpty
   }
 
   @GetMapping("/authorize_oauth/{serviceType}/{code}")
@@ -194,7 +195,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   }
 
   private fun doNativeAuth(loginRequest: LoginRequest): String {
-    val userAccount = userAccountService.getByUserName(loginRequest.username).orElseThrow {
+    val userAccount = userAccountService.findOptional(loginRequest.username).orElseThrow {
       AuthenticationException(io.tolgee.constants.Message.BAD_CREDENTIALS)
     }
     val bCryptPasswordEncoder = BCryptPasswordEncoder()
@@ -215,7 +216,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
         )
       )
       val userPrincipal = authentication.principal as LdapUserDetailsImpl
-      val userAccountEntity = userAccountService.getByUserName(userPrincipal.username).orElseGet {
+      val userAccountEntity = userAccountService.findOptional(userPrincipal.username).orElseGet {
         val userAccount = UserAccount()
         userAccount.username = userPrincipal.username
         userAccountService.createUser(userAccount)
@@ -228,7 +229,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   }
 
   private fun validateEmailCode(code: String, email: String): UserAccount {
-    val userAccount = userAccountService.getByUserName(email).orElseThrow({ NotFoundException() })
+    val userAccount = userAccountService.findOptional(email).orElseThrow({ NotFoundException() })
       ?: throw BadRequestException(io.tolgee.constants.Message.BAD_CREDENTIALS)
     val resetCodeValid = userAccountService.isResetCodeValid(userAccount, code)
     if (!resetCodeValid) {

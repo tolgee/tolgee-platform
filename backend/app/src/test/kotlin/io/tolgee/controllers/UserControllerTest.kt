@@ -1,5 +1,6 @@
 package io.tolgee.controllers
 
+import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
@@ -26,6 +27,9 @@ class UserControllerTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var javaMailSender: JavaMailSender
 
+  @Autowired
+  lateinit var authenticationProperties: AuthenticationProperties
+
   @Test
   fun updateUser() {
     val requestDTO = UserUpdateRequestDto(
@@ -34,7 +38,7 @@ class UserControllerTest : AuthorizedControllerTest() {
       name = "Ben's new name"
     )
     performAuthPost("/api/user", requestDTO).andExpect(MockMvcResultMatchers.status().isOk)
-    val fromDb = userAccountService.getByUserName(requestDTO.email)
+    val fromDb = userAccountService.findOptional(requestDTO.email)
     Assertions.assertThat(fromDb).isNotEmpty
     val bCryptPasswordEncoder = BCryptPasswordEncoder()
     Assertions.assertThat(bCryptPasswordEncoder.matches(requestDTO.password, fromDb.get().password))

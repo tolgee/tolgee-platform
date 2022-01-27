@@ -1,5 +1,6 @@
 package io.tolgee
 
+import io.sentry.Sentry
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -11,6 +12,8 @@ import io.tolgee.exceptions.ErrorException
 import io.tolgee.exceptions.ErrorResponseBody
 import io.tolgee.exceptions.NotFoundException
 import org.hibernate.QueryException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -28,6 +31,9 @@ import javax.persistence.EntityNotFoundException
 
 @RestControllerAdvice
 class ExceptionHandlers {
+
+  val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
   @ExceptionHandler(MethodArgumentNotValidException::class)
   fun handleValidationExceptions(
     ex: MethodArgumentNotValidException
@@ -136,7 +142,9 @@ class ExceptionHandlers {
   }
 
   @ExceptionHandler(Throwable::class)
-  fun handleOtherExceptions(ex: QueryException): ResponseEntity<ErrorResponseBody> {
+  fun handleOtherExceptions(ex: Throwable): ResponseEntity<ErrorResponseBody> {
+    Sentry.captureException(ex)
+    logger.error(ex.stackTraceToString())
     return ResponseEntity(
       ErrorResponseBody(
         "unexpected_error_occurred",

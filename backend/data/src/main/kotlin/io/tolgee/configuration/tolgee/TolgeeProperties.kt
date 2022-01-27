@@ -28,5 +28,6 @@ open class TolgeeProperties(
   var recaptcha: ReCaptchaProperties = ReCaptchaProperties(),
   var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),
   var postgresAutostart: PostgresAutostartProperties = PostgresAutostartProperties(),
+  var sendInBlueProperties: SendInBlueProperties = SendInBlueProperties(),
   open var import: ImportProperties = ImportProperties()
 )

@@ -42,7 +42,7 @@ class ProjectLeavingE2eDataController(
       }
     }
     listOf(data.user, data.userWithOrganizationRole, data.user3, data.project1nonOwner).forEach { user ->
-      userAccountService.getByUserName(user.username).orElse(null)?.let {
+      userAccountService.findOptional(user.username).orElse(null)?.let {
         projectService.findAllPermitted(it).forEach { repo ->
           projectService.deleteProject(repo.id!!)
         }

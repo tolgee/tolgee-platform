@@ -39,13 +39,13 @@ class OrganizationE2eDataController(
     data.forEach {
       val organization = organizationService.get(it.dto.slug!!)
       it.members.forEach { memberUserName ->
-        userAccountService.getByUserName(memberUserName).orElseThrow { NotFoundException() }.let { user ->
+        userAccountService.findOptional(memberUserName).orElseThrow { NotFoundException() }.let { user ->
           organizationRoleService.grantMemberRoleToUser(user, organization!!)
         }
       }
 
       it.otherOwners.forEach { memberUserName ->
-        userAccountService.getByUserName(memberUserName).orElseThrow { NotFoundException() }.let { user ->
+        userAccountService.findOptional(memberUserName).orElseThrow { NotFoundException() }.let { user ->
           organizationRoleService.grantOwnerRoleToUser(user, organization!!)
         }
       }

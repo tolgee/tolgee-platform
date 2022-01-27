@@ -41,7 +41,7 @@ class CreateEnabledTest : AbstractTestNGSpringContextTests() {
 
   @Test
   fun passwordStoredInDb() {
-    val johny = userAccountService.getByUserName("johny").orElseGet(null)
+    val johny = userAccountService.findOptional("johny").orElseGet(null)
     val bCryptPasswordEncoder = BCryptPasswordEncoder()
     assertThat(bCryptPasswordEncoder.matches(passwordFile.readText(), johny.password)).isTrue
   }

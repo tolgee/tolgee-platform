@@ -24,7 +24,7 @@ class AuthenticationPropertiesTest : AbstractTestNGSpringContextTests() {
   @Test
   fun testCreateInitialUserDisabled() {
     assertThat(tolgeeProperties.authentication.createInitialUser).isEqualTo(false)
-    assertThat(userAccountService.getByUserName(tolgeeProperties.authentication.initialUsername)).isEmpty
+    assertThat(userAccountService.findOptional(tolgeeProperties.authentication.initialUsername)).isEmpty
   }
 
   @Test

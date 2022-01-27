@@ -198,6 +198,8 @@ dependencies {
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${findProperty("jacksonModuleKotlinVersion")}"
     implementation 'com.github.javafaker:javafaker:1.0.2'
     implementation 'jaxen:jaxen:1.2.0'
+    compile "com.sendinblue:sib-api-v3-sdk:5.3.0"
+    implementation "io.sentry:sentry-spring-boot-starter:${findProperty("sentryVersion")}"
 
     /**
      * Google translation API
