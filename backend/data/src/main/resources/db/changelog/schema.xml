@@ -1387,4 +1387,27 @@
             CREATE INDEX translation_text_gin_trgm_index ON translation USING GIN (text gin_trgm_ops);
         </sql>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1642790310256-1">
+        <createTable tableName="auto_translation_config">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="auto_translation_configPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="using_primary_mt_service" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="using_tm" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1642790310256-2">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="auto_translation_config" constraintName="FKt6nkgxegunln8tv83446kfkli" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

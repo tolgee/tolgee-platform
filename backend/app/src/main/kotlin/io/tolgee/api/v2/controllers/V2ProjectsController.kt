@@ -88,7 +88,7 @@ class V2ProjectsController(
   private val invitationService: InvitationService,
   private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
-  private val projectMachineTranslationServiceConfigService: MtServiceConfigService
+  private val mtServiceConfigService: MtServiceConfigService
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -276,7 +276,7 @@ class V2ProjectsController(
   @Operation(summary = "Generates user invitation link for project")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
   fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): String {
-    val project = projectService.get(projectHolder.project.id).orElseThrow { NotFoundException() }!!
+    val project = projectService.get(projectHolder.project.id)
     return invitationService.create(project, invitation.type!!)
   }
 
@@ -284,7 +284,7 @@ class V2ProjectsController(
   @Operation(summary = "Returns machine translation settings for project")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
   fun getMachineTranslationSettings(): CollectionModel<LanguageConfigItemModel> {
-    val data = projectMachineTranslationServiceConfigService.getProjectSettings(projectHolder.projectEntity)
+    val data = mtServiceConfigService.getProjectSettings(projectHolder.projectEntity)
     return languageConfigItemModelAssembler.toCollectionModel(data)
   }
 
@@ -294,7 +294,7 @@ class V2ProjectsController(
   fun setMachineTranslationSettings(
     @RequestBody dto: SetMachineTranslationSettingsDto
   ): CollectionModel<LanguageConfigItemModel> {
-    projectMachineTranslationServiceConfigService.setProjectSettings(projectHolder.projectEntity, dto)
+    mtServiceConfigService.setProjectSettings(projectHolder.projectEntity, dto)
     return getMachineTranslationSettings()
   }
 }

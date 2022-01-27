@@ -2,7 +2,6 @@ package io.tolgee.socketio
 
 import com.corundumstudio.socketio.HandshakeData
 import io.tolgee.exceptions.AuthenticationException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.JwtTokenProviderImpl
@@ -32,7 +31,7 @@ class SocketIoProjectProvider(
         val userAccount = jwtTokenProvider.getUser(jwtToken)
         val projectId = projectIdString.toLong()
         securityService.checkAnyProjectPermission(projectId = projectId, userAccount.id)
-        return projectService.get(projectId).orElseThrow { NotFoundException() }
+        return projectService.get(projectId)
       }
     } ?: let { throw AuthenticationException(io.tolgee.constants.Message.GENERAL_JWT_ERROR) }
   }

@@ -11,6 +11,14 @@ import org.springframework.stereotype.Service
 class TranslationMemoryService(
   private val translationsService: TranslationService,
 ) {
+
+  fun getAutoTranslatedValue(
+    key: Key,
+    targetLanguage: Language
+  ): TranslationMemoryItemView? {
+    return translationsService.getTranslationMemoryValue(key, targetLanguage)
+  }
+
   fun suggest(
     key: Key,
     targetLanguage: Language,

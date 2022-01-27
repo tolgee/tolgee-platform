@@ -44,6 +44,28 @@ class MtServiceManager(
   }
 
   /**
+   * Translates a text using All services
+   */
+  fun translate(
+    text: String,
+    sourceLanguageTag: String,
+    targetLanguageTag: String,
+    service: MtServiceType
+  ): String? {
+    val provider = service.getProvider()
+    return if (!internalProperties.fakeMtProviders)
+      provider.translate(text, sourceLanguageTag, targetLanguageTag)
+    else "$text translated with ${service.name} from $sourceLanguageTag to $targetLanguageTag"
+  }
+
+  /**
+   * Returns sum price of all translations
+   */
+  fun calculatePrice(text: String, service: MtServiceType): Int {
+    return service.getProvider().calculatePrice(text)
+  }
+
+  /**
    * Returns sum price of all translations
    */
   fun calculatePriceAll(text: String, services: List<MtServiceType>): Int {
@@ -52,6 +74,10 @@ class MtServiceManager(
 
   private fun List<MtServiceType>.getProviders():
     Map<MtServiceType, MtValueProvider> {
-    return this.associateWith { applicationContext.getBean(it.providerClass) }
+    return this.associateWith { it.getProvider() }
+  }
+
+  private fun MtServiceType.getProvider(): MtValueProvider {
+    return applicationContext.getBean(this.providerClass)
   }
 }
