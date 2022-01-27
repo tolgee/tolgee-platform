@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers.v2ProjectsController
+package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
