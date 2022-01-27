@@ -135,7 +135,7 @@ dependencies {
      * KOTLIN
      */
     implementation group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
 
     /**
      * Google translation API

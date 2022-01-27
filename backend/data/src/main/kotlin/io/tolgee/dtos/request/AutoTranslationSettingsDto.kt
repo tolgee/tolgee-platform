@@ -7,12 +7,12 @@ data class AutoTranslationSettingsDto(
     description = "If true, new keys will be automatically translated using translation memory" +
       " when 100% match is found"
   )
-  val usingTranslationMemory: Boolean,
+  var usingTranslationMemory: Boolean = false,
   @Schema(
     description = "If true, new keys will be automatically translated " +
       "using primary machine translation service." +
       "" +
-      "When \"usingTm\" is enabled, it tries to translate it with translation memory first."
+      "When \"usingTranslationMemory\" is enabled, it tries to translate it with translation memory first."
   )
-  val usingPrimaryMachineTranslationService: Boolean
+  var usingMachineTranslation: Boolean = false
 )

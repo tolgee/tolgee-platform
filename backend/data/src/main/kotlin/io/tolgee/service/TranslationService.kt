@@ -28,8 +28,8 @@ import io.tolgee.service.query_builders.TranslationsViewBuilderOld
 import io.tolgee.socketio.ITranslationsSocketIoModule
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
-import org.springframework.context.annotation.Lazy
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service

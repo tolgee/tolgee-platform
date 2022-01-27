@@ -37,41 +37,33 @@ class MtService(
     return getMachineTranslations(project, baseTranslationText, baseLanguage, targetLanguage)
   }
 
-  fun getPrimaryMachineTranslation(key: Key, targetLanguage: Language):
-    String? {
-    return getPrimaryMachineTranslation(key, targetLanguage)
-  }
-
-  fun getPrimaryMachineTranslation(key: Key, targetLanguages: List<Language>):
+  fun getPrimaryMachineTranslations(key: Key, targetLanguages: List<Language>):
     List<String?> {
     val baseLanguage = projectService.getOrCreateBaseLanguage(key.project.id)!!
     val baseTranslationText = translationService.find(key, baseLanguage).orElse(null)?.text
       ?: return targetLanguages.map { null }
-    return getPrimaryMachineTranslation(key.project, baseTranslationText, baseLanguage, targetLanguages)
+    return getPrimaryMachineTranslations(key.project, baseTranslationText, baseLanguage, targetLanguages)
   }
 
-  private fun getPrimaryMachineTranslation(
+  private fun getPrimaryMachineTranslations(
     project: Project,
     baseTranslationText: String,
     baseLanguage: Language,
     targetLanguages: List<Language>
   ): List<String?> {
+    val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguages.map { it.id })
+    val prepared = TextHelper.replaceIcuParams(baseTranslationText)
+
     return targetLanguages
       .asSequence()
       .mapIndexed { idx, lang -> idx to lang }
-      .groupBy { mtServiceConfigService.getPrimaryService(it.second.id) }
+      .groupBy { primaryServices[it.second.id] }
+      .also {
+        val price = calculatePrice(it, prepared)
+        publishOnBeforeEvent(prepared, project, price)
+      }
       .map { (service, languageIdxPairs) ->
-        val prepared = TextHelper.replaceIcuParams(baseTranslationText)
         service?.let {
-          val price = machineTranslationManager.calculatePrice(
-            text = prepared.text,
-            service
-          )
-
-          applicationEventPublisher.publishEvent(
-            OnBeforeMachineTranslationEvent(this, prepared.text, project, price)
-          )
-
           val translated = machineTranslationManager.translate(
             prepared.text,
             baseLanguage.tag,
@@ -89,6 +81,21 @@ class MtService(
       .toList()
   }
 
+  private fun calculatePrice(
+    it: Map<MtServiceType?, List<Pair<Int, Language>>>,
+    prepared: TextHelper.ReplaceIcuResult
+  ) =
+    it.entries.sumOf { (service, languageIdxPairs) ->
+      service?.let { serviceNotNull ->
+        languageIdxPairs.sumOf {
+          machineTranslationManager.calculatePrice(
+            text = prepared.text,
+            serviceNotNull
+          )
+        }
+      } ?: 0
+    }
+
   fun getMachineTranslations(
     project: Project,
     baseTranslationText: String,
@@ -102,9 +109,7 @@ class MtService(
       services = enabledServices
     )
 
-    applicationEventPublisher.publishEvent(
-      OnBeforeMachineTranslationEvent(this, prepared.text, project, price)
-    )
+    publishOnBeforeEvent(prepared, project, price)
 
     return machineTranslationManager
       .translateUsingAll(prepared.text, baseLanguage.tag, targetLanguage.tag, enabledServices)
@@ -113,6 +118,12 @@ class MtService(
         result = replaceParams(prepared.params, result)
         serviceName to result
       }.toMap()
+  }
+
+  private fun publishOnBeforeEvent(prepared: TextHelper.ReplaceIcuResult, project: Project, price: Int) {
+    applicationEventPublisher.publishEvent(
+      OnBeforeMachineTranslationEvent(this, prepared.text, project, price)
+    )
   }
 
   private fun replaceParams(params: Map<String, String>, translated: String?): String? {
