@@ -24,4 +24,16 @@ interface MtServiceConfigRepository : JpaRepository<MtServiceConfig, Long> {
   fun deleteAllByTargetLanguageId(targetLanguageId: Long)
 
   fun deleteAllByProjectId(projectId: Long)
+
+  @Query(
+    """
+    select ptsc from MtServiceConfig ptsc
+    join Language l on l = ptsc.targetLanguage
+        and (
+            l.id in :languageIds 
+            or (ptsc.targetLanguage.id is null and ptsc.project.id = l.id)
+            )
+  """
+  )
+  fun findAllByTargetLanguageIdIn(languageIds: List<Long>): List<MtServiceConfig>
 }
