@@ -1,11 +1,9 @@
 package io.tolgee.controllers
 
 import io.swagger.v3.oas.annotations.Hidden
-import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.translation.GetKeyTranslationsReqDto
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
@@ -93,7 +91,7 @@ class UserAppApiController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto) {
     val apiKey = authenticationFacade.apiKey
-    val project = projectService.get(apiKey.project.id).orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }!!
+    val project = projectService.get(apiKey.project.id)
     val key = keyService.getOrCreateKey(project, PathDTO.fromFullPath(dto.key))
     translationService.setForKey(key, dto.translations)
   }

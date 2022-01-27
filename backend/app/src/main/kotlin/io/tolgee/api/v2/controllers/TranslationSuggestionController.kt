@@ -65,7 +65,7 @@ class TranslationSuggestionController(
       } ?: let {
         val key = keyService.get(dto.keyId).orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
         key.checkInProject()
-        mtService.getMachineTranslations(projectHolder.projectEntity, key, targetLanguage)
+        mtService.getMachineTranslations(key, targetLanguage)
       }
 
       val balanceAfter = mtCreditBucketService.getCreditBalance(projectHolder.projectEntity)

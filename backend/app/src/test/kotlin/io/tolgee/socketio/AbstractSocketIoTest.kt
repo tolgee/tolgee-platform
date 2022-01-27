@@ -176,7 +176,7 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
     assertNotified(
       "translation_modified",
       {
-        translationService.saveTranslation(translation.also { it.text = "modified text" })
+        translationService.save(translation.also { it.text = "modified text" })
       },
       {
         assertThatJson(it.toString()).apply {
@@ -209,7 +209,7 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
     assertNotified(
       "translation_created",
       {
-        translationService.saveTranslation(
+        translationService.save(
           Translation().apply {
             text = "created translation"
             this.key = this@AbstractSocketIoTest.key

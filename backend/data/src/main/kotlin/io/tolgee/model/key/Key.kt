@@ -21,7 +21,7 @@ import javax.validation.constraints.Size
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name"], name = "key_project_id_name")])
 @Audited
-data class Key(
+class Key(
   @field:NotBlank
   @field:Size(max = 2000)
   @field:Column(length = 2000)
@@ -29,7 +29,7 @@ data class Key(
 ) : StandardAuditModel(), WithKeyMeta {
   @field:NotNull
   @ManyToOne(optional = false)
-  var project: Project? = null
+  lateinit var project: Project
 
   @OneToMany(mappedBy = "key")
   var translations: MutableSet<Translation> = HashSet()
