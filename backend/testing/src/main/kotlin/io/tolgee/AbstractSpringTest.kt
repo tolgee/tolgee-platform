@@ -8,12 +8,14 @@ import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslatio
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.development.testDataBuilder.TestDataService
+import io.tolgee.repository.EmailVerificationRepository
 import io.tolgee.repository.KeyRepository
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.ApiKeyService
+import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.FileStorageService
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
@@ -124,6 +126,12 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var mtServiceConfigService: MtServiceConfigService
+
+  @set:Autowired
+  lateinit var emailVerificationService: EmailVerificationService
+
+  @set:Autowired
+  lateinit var emailVerificationRepository: EmailVerificationRepository
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

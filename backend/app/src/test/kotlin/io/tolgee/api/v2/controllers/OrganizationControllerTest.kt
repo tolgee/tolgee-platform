@@ -35,7 +35,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
   @BeforeMethod
   fun setup() {
     resetDto()
-    this.userAccount = userAccountService.getByUserName(username = userAccount!!.username).get()
+    this.userAccount = userAccountService.findOptional(username = userAccount!!.username).get()
   }
 
   private fun resetDto() {

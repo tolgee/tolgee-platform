@@ -7,6 +7,9 @@ import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.events.user.OnUserCreated
+import io.tolgee.events.user.OnUserUpdated
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
@@ -14,6 +17,7 @@ import io.tolgee.repository.UserAccountRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -24,13 +28,20 @@ import java.util.*
 @Service
 class UserAccountService(
   private val userAccountRepository: UserAccountRepository,
-  private val tolgeeProperties: TolgeeProperties,
+  private val applicationEventPublisher: ApplicationEventPublisher,
+  private val tolgeeProperties: TolgeeProperties
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
 
-  fun getByUserName(username: String?): Optional<UserAccount> {
+  fun findOptional(username: String?): Optional<UserAccount> {
     return userAccountRepository.findByUsername(username)
+  }
+
+  fun get(username: String): UserAccount {
+    return userAccountRepository
+      .findByUsername(username)
+      .orElseThrow { NotFoundException(Message.USER_NOT_FOUND) }
   }
 
   operator fun get(id: Long): Optional<UserAccount> {
@@ -46,7 +57,8 @@ class UserAccountService(
 
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun createUser(userAccount: UserAccount): UserAccount {
-    userAccountRepository.save(userAccount)
+    userAccountRepository.saveAndFlush(userAccount)
+    applicationEventPublisher.publishEvent(OnUserCreated(this, userAccount))
     return userAccount
   }
 
@@ -136,23 +148,42 @@ class UserAccountService(
   @Transactional
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun update(userAccount: UserAccount, dto: UserUpdateRequestDto): UserAccount {
+    val old = UserAccountDto.fromEntity(userAccount)
+    updateUserEmail(userAccount, dto)
+    updatePassword(dto, userAccount)
+    userAccount.name = dto.name
+    publishUserInfoUpdatedEvent(old, userAccount)
+    return userAccountRepository.save(userAccount)
+  }
+
+  private fun updatePassword(dto: UserUpdateRequestDto, userAccount: UserAccount) {
+    dto.password?.let {
+      if (!it.isEmpty()) {
+        userAccount.password = encodePassword(it)
+      }
+    }
+  }
+
+  private fun updateUserEmail(
+    userAccount: UserAccount,
+    dto: UserUpdateRequestDto
+  ) {
     if (userAccount.username != dto.email) {
-      getByUserName(dto.email).ifPresent { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
+      findOptional(dto.email).ifPresent { throw ValidationException(Message.USERNAME_ALREADY_EXISTS) }
       if (tolgeeProperties.authentication.needsEmailVerification) {
         emailVerificationService.createForUser(userAccount, dto.callbackUrl, dto.email)
       } else {
         userAccount.username = dto.email
       }
     }
+  }
 
-    dto.password?.let {
-      if (!it.isEmpty()) {
-        userAccount.password = encodePassword(it)
-      }
-    }
-
-    userAccount.name = dto.name
-    return userAccountRepository.save(userAccount)
+  private fun publishUserInfoUpdatedEvent(
+    old: UserAccountDto,
+    userAccount: UserAccount
+  ) {
+    val event = OnUserUpdated(this, old, UserAccountDto.fromEntity(userAccount))
+    applicationEventPublisher.publishEvent(event)
   }
 
   fun saveAll(userAccounts: Collection<UserAccount>): MutableList<UserAccount> =
@@ -161,6 +192,11 @@ class UserAccountService(
   @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
   fun save(user: UserAccount): UserAccount {
     return userAccountRepository.save(user)
+  }
+
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#result.id")
+  fun saveAndFlush(user: UserAccount): UserAccount {
+    return userAccountRepository.saveAndFlush(user)
   }
 
   val isAnyUserAccount: Boolean

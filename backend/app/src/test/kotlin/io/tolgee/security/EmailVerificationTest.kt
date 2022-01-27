@@ -6,8 +6,6 @@ import io.mockk.mockkConstructor
 import io.mockk.verify
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.repository.EmailVerificationRepository
-import io.tolgee.service.EmailVerificationService
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,12 +36,6 @@ class EmailVerificationTest : AbstractControllerTest() {
 
   @set:Autowired
   lateinit var mailSender: MailSender
-
-  @set:Autowired
-  lateinit var emailVerificationService: EmailVerificationService
-
-  @set:Autowired
-  lateinit var emailVerificationRepository: EmailVerificationRepository
 
   @BeforeMethod
   fun setup() {
@@ -88,7 +80,7 @@ class EmailVerificationTest : AbstractControllerTest() {
     mvc.perform(get("/api/public/verify_email/${createUser.id}/${emailVerification!!.code}"))
       .andExpect(status().isOk).andReturn()
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isEmpty
-    assertThat(userAccountService.getByUserName(createUser.username).get().username).isEqualTo("this.is@new.email")
+    assertThat(userAccountService.findOptional(createUser.username).get().username).isEqualTo("this.is@new.email")
   }
 
   @Test
@@ -127,7 +119,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   fun signUpSavesVerification() {
     perform()
 
-    val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
+    val user = userAccountService.findOptional(signUpDto.email).orElseThrow { NotFoundException() }
 
     verify { mailSender.send(any()) }
 
@@ -148,7 +140,7 @@ class EmailVerificationTest : AbstractControllerTest() {
 
     perform()
 
-    val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
+    val user = userAccountService.findOptional(signUpDto.email).orElseThrow { NotFoundException() }
 
     verify {
       anyConstructed<SimpleMailMessage>().text = match {
@@ -193,7 +185,7 @@ class EmailVerificationTest : AbstractControllerTest() {
       )
         .andReturn()
 
-      val user = userAccountService.getByUserName(signUpDto.email).orElseThrow { NotFoundException() }
+      val user = userAccountService.findOptional(signUpDto.email).orElseThrow { NotFoundException() }
 
       verify {
         anyConstructed<SimpleMailMessage>().text = match {
@@ -207,10 +199,10 @@ class EmailVerificationTest : AbstractControllerTest() {
 }
 
 @Configuration
-open class MockBeanMailSender {
+class MockBeanMailSender {
   @Bean
   @Primary
-  open fun mailSender(): JavaMailSender {
+  fun mailSender(): JavaMailSender {
     return mockk()
   }
 }

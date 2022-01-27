@@ -43,7 +43,7 @@ abstract class AbstractControllerTest :
   protected fun login(userName: String?, password: String?): DefaultAuthenticationResult {
     val response = doAuthentication(userName, password)
       .response.contentAsString
-    val userAccount = userAccountService.getByUserName(userName).orElseThrow { NotFoundException() }
+    val userAccount = userAccountService.findOptional(userName).orElseThrow { NotFoundException() }
     return DefaultAuthenticationResult(
       mapper.readValue(response, HashMap::class.java)["accessToken"] as String, userAccount
     )

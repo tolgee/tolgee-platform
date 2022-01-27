@@ -54,7 +54,7 @@ class Application(
 
     val initialUsername = properties.authentication.initialUsername
     if (properties.authentication.createInitialUser && !userAccountService.isAnyUserAccount &&
-      userAccountService.getByUserName(initialUsername).isEmpty
+      userAccountService.findOptional(initialUsername).isEmpty
     ) {
       val initialPassword = initialPasswordManager.initialPassword
       userAccountService.createUser(
