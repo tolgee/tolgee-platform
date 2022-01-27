@@ -209,7 +209,7 @@ class V2TranslationsController(
   }
 
   private fun Translation.checkFromProject() {
-    if (this.key?.project?.id != projectHolder.project.id) {
+    if (this.key.project?.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
     }
   }

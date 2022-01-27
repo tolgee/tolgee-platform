@@ -27,7 +27,7 @@ def getE2eTestsToRun() {
     def remainingChunks = Integer.parseInt(totalJobs)
     def chunks = []
     while (remainingChunks > 0) {
-        def toIndex = Math.ceil(list.size().toFloat() / remainingChunks.toFloat()).toInteger();
+        def toIndex = Math.ceil(list.size().toFloat() / remainingChunks.toFloat()).toInteger()
         chunks.add(list.subList(0, toIndex))
         list = list.subList(toIndex, list.size())
         remainingChunks--
@@ -114,7 +114,7 @@ task runDockerE2e(type: Exec, group: "e2e") {
 }
 
 task runDockerE2eDev(type: Exec, group: "e2e") {
-    commandLine "docker-compose", "up", "-d", "postgres", "fakesmtp"
+    commandLine "docker-compose", "up", "-d", "fakesmtp"
     workingDir E2E_DIR
 }
 

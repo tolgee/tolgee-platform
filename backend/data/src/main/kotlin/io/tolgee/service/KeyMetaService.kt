@@ -12,6 +12,7 @@ import io.tolgee.repository.KeyCommentRepository
 import io.tolgee.repository.KeyMetaRepository
 import org.hibernate.annotations.QueryHints.PASS_DISTINCT_THROUGH
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import javax.persistence.EntityManager
 
@@ -23,6 +24,7 @@ class KeyMetaService(
   private val entityManager: EntityManager,
 ) {
   @set:Autowired
+  @set:Lazy
   lateinit var tagService: TagService
 
   fun saveAll(entities: Iterable<KeyMeta>): MutableList<KeyMeta> = keyMetaRepository.saveAll(entities)

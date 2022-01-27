@@ -192,7 +192,7 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
     assertNotified(
       "translation_deleted",
       {
-        translationService.deleteIfExists(translation.key!!, "en")
+        translationService.deleteIfExists(translation.key, "en")
       },
       {
         assertThatJson(it.toString()).apply {

@@ -22,7 +22,7 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
   fun getAllInOrganizationHasMemberRole() {
     val usersAndOrganizations = dbPopulatorReal.createUsersAndOrganizations()
     val org = usersAndOrganizations[1].organizationRoles[0].organization
-    val returned = userAccountRepository.getAllInOrganization(org!!.id!!, PageRequest.of(0, 20), "")
+    val returned = userAccountRepository.getAllInOrganization(org!!.id, PageRequest.of(0, 20), "")
     assertThat(returned.content).hasSize(2)
     assertThat(returned.content[0]).isInstanceOf(UserAccountWithOrganizationRoleView::class.java)
   }
@@ -34,7 +34,7 @@ class UserAccountRepositoryTest : AbstractSpringTest() {
     entityManager.refresh(user)
 
     val org = user.organizationRoles[0].organization
-    val returned = userAccountRepository.getAllInOrganization(org!!.id!!, PageRequest.of(0, 20), "")
+    val returned = userAccountRepository.getAllInOrganization(org!!.id, PageRequest.of(0, 20), "")
     assertThat(returned.content).hasSize(3)
   }
 

@@ -155,11 +155,11 @@ class TranslationCommentController(
     @RequestBody @Valid dto: TranslationCommentWithLangKeyDto
   ): ResponseEntity<TranslationWithCommentModel> {
     val translation = translationService.getOrCreate(dto.keyId, dto.languageId)
-    if (translation.key?.project?.id != projectHolder.project.id) {
+    if (translation.key.project?.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.KEY_NOT_FROM_PROJECT)
     }
 
-    if (translation.language?.project?.id != projectHolder.project.id) {
+    if (translation.language.project?.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.LANGUAGE_NOT_FROM_PROJECT)
     }
 
@@ -196,13 +196,13 @@ class TranslationCommentController(
   }
 
   private fun TranslationComment.checkFromProject() {
-    if (this.translation.key?.project?.id != projectHolder.project.id) {
+    if (this.translation.key.project?.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
     }
   }
 
   private fun Translation.checkFromProject() {
-    if (this.key?.project?.id != projectHolder.project.id) {
+    if (this.key.project?.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
     }
   }

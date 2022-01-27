@@ -123,8 +123,8 @@ def JJWT_VERSION = findProperty("jjwtVersion")
 def SPRING_DOC_VERSION = findProperty("springDocVersion")
 
 
-def LIQUIBASE_VERSION = "4.6.1"
-def LIQUIBASE_HIBERNATE_VERSION = "4.6.1"
+def LIQUIBASE_VERSION = "4.7.1"
+def LIQUIBASE_HIBERNATE_VERSION = "4.7.1"
 
 dependencies {
     /**
@@ -157,7 +157,7 @@ dependencies {
     implementation("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime("org.liquibase:liquibase-core:$LIQUIBASE_VERSION")
     liquibaseRuntime 'org.postgresql:postgresql'
-    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.1')
+    liquibaseRuntime('org.liquibase:liquibase-groovy-dsl:3.0.2')
     liquibaseRuntime("org.liquibase.ext:liquibase-hibernate5:$LIQUIBASE_HIBERNATE_VERSION")
     liquibaseRuntime group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlinVersion
     liquibaseRuntime sourceSets.main.output

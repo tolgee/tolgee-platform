@@ -15,6 +15,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.PermissionRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -25,11 +26,14 @@ class PermissionService(
   private val userAccountService: UserAccountService,
 ) {
   @set:Autowired
+  @set:Lazy
   lateinit var organizationService: OrganizationService
 
   @set:Autowired
+  @set:Lazy
   lateinit var cachedPermissionService: CachedPermissionService
 
+  @set:Lazy
   @set:Autowired
   lateinit var projectService: ProjectService
 

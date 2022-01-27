@@ -273,7 +273,7 @@ class TranslationsViewBuilder(
 
   private val filterByStateMap: Map<String, List<TranslationState>>? by lazy {
     params.filterState
-      ?.let { filterStateStrings -> filterStateStrings.map { TranslationFilterByState.valueOf(it) } }
+      ?.let { filterStateStrings -> TranslationFilterByState.parseList(filterStateStrings) }
       ?.let { filterByState ->
         val filterByStateMap = mutableMapOf<String, MutableList<TranslationState>>()
 

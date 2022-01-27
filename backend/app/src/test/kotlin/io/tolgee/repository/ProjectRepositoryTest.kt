@@ -47,8 +47,8 @@ class ProjectRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
   @Test
   fun testPermittedProjects() {
     val users = dbPopulatorReal.createUsersAndOrganizations()
-    dbPopulatorReal.createBase("No org repo", users[3].username!!)
-    val result = projectRepository.findAllPermitted(users[3].id!!)
+    dbPopulatorReal.createBase("No org repo", users[3].username)
+    val result = projectRepository.findAllPermitted(users[3].id)
     assertThat(result).hasSize(10)
     assertThat(result[9][2]).isNull()
     assertThat(result[9][0]).isInstanceOf(Project::class.java)
@@ -61,23 +61,23 @@ class ProjectRepositoryTest : AbstractTransactionalTestNGSpringContextTests() {
   @Test
   fun testPermittedProjectsJustNoOrg() {
     val base = dbPopulatorReal.createBase("No org repo", generateUniqueString())
-    val result = projectRepository.findAllPermitted(base.userOwner!!.id!!)
+    val result = projectRepository.findAllPermitted(base.userOwner!!.id)
     assertThat(result).hasSize(1)
   }
 
   @Test
   fun testPermittedJustOrg() {
     val users = dbPopulatorReal.createUsersAndOrganizations()
-    dbPopulatorReal.createBase("No org repo", users[1].username!!)
-    val result = projectRepository.findAllPermitted(users[3].id!!)
+    dbPopulatorReal.createBase("No org repo", users[1].username)
+    val result = projectRepository.findAllPermitted(users[3].id)
     assertThat(result).hasSize(9)
   }
 
   @Test
   fun findAllPermittedPaged() {
     val users = dbPopulatorReal.createUsersAndOrganizations()
-    dbPopulatorReal.createBase("No org repo", users[3].username!!)
-    val result = projectRepository.findAllPermitted(users[3].id!!, PageRequest.of(0, 20))
+    dbPopulatorReal.createBase("No org repo", users[3].username)
+    val result = projectRepository.findAllPermitted(users[3].id, PageRequest.of(0, 20))
     assertThat(result).hasSize(10)
     assertThat(result.content[0].organizationOwnerName).isNotNull
     assertThat(result.content[8].organizationOwnerSlug).isNotNull

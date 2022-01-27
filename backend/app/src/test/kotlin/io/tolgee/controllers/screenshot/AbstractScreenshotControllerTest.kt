@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testng.annotations.AfterClass
 import java.io.File
 
-abstract class AbstractScreenshotControllerTest() : AuthorizedControllerTest() {
+abstract class AbstractScreenshotControllerTest : AuthorizedControllerTest() {
   @Value("classpath:screenshot.png")
   lateinit var screenshotFile: Resource
 

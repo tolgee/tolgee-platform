@@ -16,6 +16,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.repository.EmailVerificationRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.annotation.Lazy
 import org.springframework.mail.MailSender
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.stereotype.Service
@@ -29,6 +30,7 @@ class EmailVerificationService(
   private val mailSender: MailSender,
   private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
+  @Lazy
   @Autowired
   lateinit var userAccountService: UserAccountService
 

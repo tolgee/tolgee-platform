@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.ResultActions
 import org.testng.annotations.AfterClass
 import java.io.File
 
-abstract class AbstractV2ScreenshotControllerTest() : ProjectAuthControllerTest("/v2/projects/") {
+abstract class AbstractV2ScreenshotControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Value("classpath:screenshot.png")
   lateinit var screenshotFile: Resource
 

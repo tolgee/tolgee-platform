@@ -27,6 +27,7 @@ import io.tolgee.service.query_builders.TranslationsViewBuilderOld
 import io.tolgee.socketio.ITranslationsSocketIoModule
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -46,14 +47,17 @@ class TranslationService(
   private val tolgeeProperties: TolgeeProperties,
   private val translationCommentService: TranslationCommentService
 ) {
-  @Autowired
-  private lateinit var languageService: LanguageService
+  @set:Autowired
+  @set:Lazy
+  lateinit var languageService: LanguageService
 
-  @Autowired
-  private lateinit var keyService: KeyService
+  @set:Autowired
+  @set:Lazy
+  lateinit var keyService: KeyService
 
-  @Autowired
-  private lateinit var projectService: ProjectService
+  @set:Autowired
+  @set:Lazy
+  lateinit var projectService: ProjectService
 
   @Transactional
   @Suppress("UNCHECKED_CAST")
@@ -84,7 +88,7 @@ class TranslationService(
     }
     val translations = getKeyTranslations(languages, project, key)
     val translationsMap = translations.stream()
-      .collect(Collectors.toMap({ v: Translation -> v.language!!.tag }, Translation::text))
+      .collect(Collectors.toMap({ v: Translation -> v.language.tag }, Translation::text))
     for (language in languages) {
       if (translationsMap.keys.stream().filter { l: String? -> l == language.tag }.findAny().isEmpty) {
         translationsMap[language.tag] = ""

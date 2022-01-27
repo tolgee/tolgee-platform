@@ -97,7 +97,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   fun doesNotVerifyWithWrongUser() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser)
-    mvc.perform(get("/api/public/verify_email/${createUser.id!! + 1L}/${emailVerification!!.code}"))
+    mvc.perform(get("/api/public/verify_email/${createUser.id + 1L}/${emailVerification!!.code}"))
       .andExpect(status().isNotFound).andReturn()
 
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isPresent
@@ -131,7 +131,7 @@ class EmailVerificationTest : AbstractControllerTest() {
       }
     }
 
-    assertThat(userAccountService[user.id!!]).isNotNull
+    assertThat(userAccountService[user.id]).isNotNull
   }
 
   @Test
@@ -148,7 +148,7 @@ class EmailVerificationTest : AbstractControllerTest() {
       }
     }
 
-    assertThat(userAccountService[user.id!!]).isNotNull
+    assertThat(userAccountService[user.id]).isNotNull
   }
 
   @Test
@@ -193,7 +193,7 @@ class EmailVerificationTest : AbstractControllerTest() {
         }
       }
 
-      assertThat(userAccountService[user.id!!]).isNotNull
+      assertThat(userAccountService[user.id]).isNotNull
     }
   }
 }

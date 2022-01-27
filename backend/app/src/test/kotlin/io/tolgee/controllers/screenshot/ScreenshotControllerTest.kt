@@ -58,7 +58,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
     var result: List<ScreenshotDTO> = performAuthPost(
       "/api/project/${project.id}/screenshots/get",
-      GetScreenshotsByKeyDto(key.name!!)
+      GetScreenshotsByKeyDto(key.name)
     ).andExpect(status().isOk)
       .andReturn().parseResponseTo()
 
@@ -69,7 +69,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
     result = performAuthPost(
       "/api/project/${project.id}/screenshots/get",
-      GetScreenshotsByKeyDto(key2.name!!)
+      GetScreenshotsByKeyDto(key2.name)
     ).andExpect(status().isOk)
       .andReturn().parseResponseTo()
 

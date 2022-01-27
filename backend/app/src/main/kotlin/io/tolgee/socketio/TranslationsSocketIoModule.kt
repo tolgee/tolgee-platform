@@ -62,15 +62,15 @@ class TranslationsSocketIoModule(
 
   override fun onTranslationsChange(translations: Collection<Translation>, event: TranslationEvent) {
     translations.map { translation ->
-      translation.key?.project?.getRoomName()?.let { roomName ->
+      translation.key.project?.getRoomName()?.let { roomName ->
         namespace.getRoomOperations(roomName).sendEvent(
           event.eventName,
           TranslationSocketModel(
             id = translation.id,
             text = translation.text,
             state = translation.state,
-            languageTag = translation.language?.tag ?: "",
-            key = keyModelAssembler.toModel(translation.key!!)
+            languageTag = translation.language.tag,
+            key = keyModelAssembler.toModel(translation.key)
           )
         )
       }

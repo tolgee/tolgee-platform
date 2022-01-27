@@ -120,3 +120,7 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     main = "com.pinterest.ktlint.Main"
     args "-F", "**/*.kt", "!**/data/PluralData.kt"
 }
+
+subprojects {
+    task allDeps(type: DependencyReportTask) {}
+}

@@ -10,6 +10,7 @@ import io.tolgee.repository.machineTranslation.MtServiceConfigRepository
 import io.tolgee.service.LanguageService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -19,6 +20,7 @@ class MtServiceConfigService(
   private val mtServiceConfigRepository: MtServiceConfigRepository,
 ) {
   @set:Autowired
+  @set:Lazy
   lateinit var languageService: LanguageService
 
   /**

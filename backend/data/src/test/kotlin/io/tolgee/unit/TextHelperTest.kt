@@ -20,7 +20,7 @@ class TextHelperTest {
     assertThat(result.text)
       .isEqualTo("Hello! I am standard text!")
     assertThat(result.params.size).isEqualTo(0)
-    assertThat(result.isComplex).isFalse()
+    assertThat(result.isComplex).isFalse
   }
 
   @Test
