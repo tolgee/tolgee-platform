@@ -53,23 +53,28 @@ class V2ProjectsControllerMachineTranslationSettingsTest : ProjectAuthController
       SetMachineTranslationSettingsDto(
         listOf(
           MachineTranslationLanguagePropsDto(
+            targetLanguageId = null,
+            primaryService = MtServiceType.GOOGLE,
+            enabledServices = setOf(MtServiceType.AWS, MtServiceType.GOOGLE)
+          ),
+          MachineTranslationLanguagePropsDto(
             targetLanguageId = testData.englishLanguage.id,
             primaryService = MtServiceType.GOOGLE,
             enabledServices = setOf(MtServiceType.AWS, MtServiceType.GOOGLE)
           )
         )
       )
-    ).andPrettyPrint.andAssertThatJson {
+    ).andIsOk.andAssertThatJson {
       node("_embedded.languageConfigs") {
         node("[0]") {
-          node("targetLanguageId").isNull()
+          node("targetLanguageId").isValidId
+          node("targetLanguageTag").isEqualTo("en")
+          node("targetLanguageName").isEqualTo("English")
           node("primaryService").isEqualTo("GOOGLE")
           node("enabledServices").isArray.isEqualTo("""[ "GOOGLE", "AWS" ]""")
         }
         node("[1]") {
-          node("targetLanguageId").isValidId
-          node("targetLanguageTag").isEqualTo("en")
-          node("targetLanguageName").isEqualTo("English")
+          node("targetLanguageId").isNull()
           node("primaryService").isEqualTo("GOOGLE")
           node("enabledServices").isArray.isEqualTo("""[ "GOOGLE", "AWS" ]""")
         }

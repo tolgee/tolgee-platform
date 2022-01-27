@@ -7,6 +7,7 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -74,4 +75,29 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     targetLanguage: Language,
     pageable: Pageable
   ): Page<TranslationMemoryItemView>
+
+  @Query(
+    """
+      select target.text as targetTranslationText, baseTranslation.text as baseTranslationText, key.name as keyName, 
+      similarity(baseTranslation.text, :baseTranslationText) as similarity
+      from Translation baseTranslation
+      join baseTranslation.key key
+      join Translation target on 
+            target.key = key and 
+            target.language = :targetLanguage and
+            target.text <> '' and
+            target.text is not null
+      where baseTranslation.language = :baseLanguage and
+        similarity(baseTranslation.text, :baseTranslationText) = 1 and
+        key <> :key
+      order by similarity desc
+      """
+  )
+  fun getTranslationMemoryValue(
+    baseTranslationText: String,
+    key: Key,
+    baseLanguage: Language,
+    targetLanguage: Language,
+    pageable: Pageable = PageRequest.of(0, 1)
+  ): List<TranslationMemoryItemView>
 }

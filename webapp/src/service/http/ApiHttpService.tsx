@@ -62,7 +62,7 @@ export class ApiHttpService {
       }
 
       fetch(this.apiUrl + input, init)
-        .then((r) => {
+        .then(async (r) => {
           if (r.status == 401 && !options.disableAuthHandling) {
             // eslint-disable-next-line no-console
             console.warn('Redirecting to login - unauthorized user');
@@ -75,10 +75,11 @@ export class ApiHttpService {
             return;
           }
           if (r.status >= 500) {
-            errorActions.globalError.dispatch(
-              new GlobalError('Server responded with error status.')
-            );
-            throw new Error('Error status code from server');
+            const data = await ApiHttpService.getResObject(r);
+            const message =
+              '500: ' + (data?.message || 'Error status code from server');
+            errorActions.globalError.dispatch(new GlobalError(message));
+            throw new Error(message);
           }
           if (
             r.status == 403 &&

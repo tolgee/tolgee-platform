@@ -3,6 +3,7 @@ package io.tolgee.model
 import io.tolgee.model.key.Key
 import org.hibernate.envers.Audited
 import java.util.*
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
@@ -65,6 +66,9 @@ class Project(
 
   @OneToOne(fetch = FetchType.LAZY)
   var baseLanguage: Language? = null
+
+  @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "project")
+  var autoTranslationConfig: AutoTranslationConfig? = null
 
   override var avatarHash: String? = null
 

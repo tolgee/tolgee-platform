@@ -91,7 +91,7 @@ describe('Translations Base', () => {
       },
       {
         state: ['Translated'],
-        toMissAfter: ['state test key 4'],
+        toMissAfter: ['key with screenshot'],
         toSeeAfter: ['Z key'],
       },
       {
@@ -101,7 +101,7 @@ describe('Translations Base', () => {
       },
       {
         state: ['Translated', 'Reviewed'],
-        toMissAfter: ['state test key 4', 'key with screenshot'],
+        toMissAfter: ['key with screenshot'],
         toSeeAfter: ['state test key 2', 'Z key'],
       },
     ].forEach((test) => {

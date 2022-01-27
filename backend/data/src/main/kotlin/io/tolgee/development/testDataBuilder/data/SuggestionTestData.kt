@@ -62,7 +62,6 @@ class SuggestionTestData : BaseTestData() {
           text = "This is beautiful even more"
         }
         addTranslation {
-
           language = germanLanguage
           key = this@keyBuilder.self
           text = "Das ist sehr schön"
@@ -112,9 +111,25 @@ class SuggestionTestData : BaseTestData() {
     }
   }
 
+  fun enableBothGooglePrimary() {
+    projectBuilder.addMtServiceConfig {
+      this.targetLanguage = germanLanguage
+      this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS)
+      this.primaryService = MtServiceType.GOOGLE
+    }
+  }
+
+  fun addDefaultConfig() {
+    projectBuilder.addMtServiceConfig {
+      this.targetLanguage = null
+      this.enabledServices = mutableSetOf(MtServiceType.AWS)
+      this.primaryService = MtServiceType.AWS
+    }
+  }
+
   fun generateLotOfData() {
     projectBuilder.apply {
-      (0..10000).forEach {
+      (0..1000).forEach {
         addKey {
           name = UUID.randomUUID().toString()
         }.build keyBuilder@{

@@ -102,6 +102,8 @@ declare namespace DataCy {
         "invite-generate-input-code" |
         "language-delete-button" |
         "language-modify-form" |
+        "languages-auto-machine-translation" |
+        "languages-auto-translation-memory" |
         "languages-create-autocomplete-field" |
         "languages-create-autocomplete-suggested-option" |
         "languages-create-cancel-prepared-button" |
@@ -145,8 +147,9 @@ declare namespace DataCy {
         "project-owner-select-item" |
         "project-settings" |
         "project-settings-button" |
+        "project-settings-languages" |
         "project-settings-languages-list-edit-button" |
-        "project-settings-languages-list-item" |
+        "project-settings-languages-list-name" |
         "project-settings-transfer-button" |
         "project-states-bar-bar" |
         "project-states-bar-dot" |
@@ -169,7 +172,11 @@ declare namespace DataCy {
         "translation-edit-translation-field" |
         "translation-field-label" |
         "translation-state-button" |
+        "translation-tools-machine-translation-item" |
+        "translation-tools-translation-memory-item" |
         "translations-add-button" |
+        "translations-auto-translated-clear-button" |
+        "translations-auto-translated-indicator" |
         "translations-cell-cancel-button" |
         "translations-cell-close" |
         "translations-cell-comments-button" |

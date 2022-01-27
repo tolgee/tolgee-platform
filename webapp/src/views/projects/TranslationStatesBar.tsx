@@ -1,10 +1,10 @@
-import { translationStates } from 'tg.constants/translationStates';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import { Box, Tooltip } from '@material-ui/core';
-import { T } from '@tolgee/react';
-import clsx from 'clsx';
 import { useEffect, useState } from 'react';
+import clsx from 'clsx';
+import { Box, makeStyles, Tooltip } from '@material-ui/core';
+import { T } from '@tolgee/react';
 import { ClassNameMap } from 'notistack';
+
+import { translationStates } from 'tg.constants/translationStates';
 
 type State = keyof typeof translationStates;
 
@@ -55,13 +55,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const STATES_ORDER = [
-  'NEEDS_REVIEW',
-  'REVIEWED',
-  'TRANSLATED',
-  'MACHINE_TRANSLATED',
-  'UNTRANSLATED',
-] as State[];
+const STATES_ORDER = ['REVIEWED', 'TRANSLATED', 'UNTRANSLATED'] as State[];
 
 export function TranslationStatesBar(props: {
   labels: boolean;
@@ -125,13 +119,17 @@ export function TranslationStatesBar(props: {
     );
   };
 
+  const visibleStates = STATES_ORDER.filter((state) => percents[state]).filter(
+    (state) => translationStates[state]
+  );
+
   return (
     <Box className={classes.root} data-cy="project-states-bar-root">
       <Box className={classes.bar} data-cy="project-states-bar-bar">
-        {STATES_ORDER.filter((state) => percents[state]).map((state, idx) => (
+        {visibleStates.map((state, idx) => (
           <Tooltip
             key={idx}
-            title={<T noWrap>{translationStates[state].translationKey}</T>}
+            title={<T>{translationStates[state].translationKey}</T>}
           >
             <Box
               data-cy="project-states-bar-state-progress"
@@ -150,7 +148,7 @@ export function TranslationStatesBar(props: {
       </Box>
       {props.labels && (
         <Box className={classes.legend} data-cy="project-states-bar-legend">
-          {STATES_ORDER.filter((state) => percents[state]).map((state, i) => (
+          {visibleStates.map((state, i) => (
             <LegendItem key={i} classes={classes} state={state} />
           ))}
         </Box>

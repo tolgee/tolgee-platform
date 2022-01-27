@@ -57,9 +57,16 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
             node("id").isValidId
             node("text").isEqualTo("Z translation")
             node("state").isEqualTo("REVIEWED")
+            node("auto").isEqualTo(true)
+            node("mtProvider").isEqualTo("GOOGLE")
+            node("fromTranslationMemory").isEqualTo(false)
             node("commentCount").isEqualTo(1)
           }
           node("translations").isObject.doesNotContainKey("en")
+        }
+        node("[1]") {
+          node("translations.en.auto").isEqualTo(true)
+          node("translations.en.fromTranslationMemory").isEqualTo(true)
         }
         node("[19]") {
           node("keyName").isEqualTo("key 18")
@@ -69,6 +76,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
             node("text").isEqualTo("I am key 18's german translation.")
             node("state").isEqualTo("TRANSLATED")
             node("commentCount").isEqualTo(0)
+            node("auto").isEqualTo(false)
           }
           node("translations.en") {
             node("id").isValidId
@@ -238,7 +246,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
         node("ids").isArray.hasSize(2002)
       }
     }
-    assertThat(time).isLessThan(1000)
+    assertThat(time).isLessThan(3000)
   }
 
   @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])

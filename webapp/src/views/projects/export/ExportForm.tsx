@@ -28,7 +28,6 @@ const sortStates = (arr: StateType[]) =>
 const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
   'TRANSLATED',
   'REVIEWED',
-  'NEEDS_REVIEW',
 ]);
 
 const EXPORT_DEFAULT_FORMAT: typeof FORMATS[number] = 'JSON';

@@ -24,5 +24,14 @@ data class SetTranslationsWithKeyDto(
     description = "Object mapping language tag to translation",
     example = "{\"en\": \"What a translated value!\", \"cs\": \"Jaká to přeložená hodnota!\"}"
   )
-  val translations: Map<String, String?> = mapOf()
+  val translations: Map<String, String?> = mapOf(),
+
+  @Schema(
+    description = """List of languages to return translations for. 
+
+If not provided, only modified translation will be provided.
+    """,
+    example = """["en", "de", "fr"]"""
+  )
+  val languagesToReturn: Set<String>? = null
 )

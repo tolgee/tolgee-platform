@@ -131,7 +131,7 @@ describe('Language creation in new project', () => {
     gcy('project-settings-button').click();
     selectInProjectMenu('Languages');
     languagesToAdd.forEach((l) =>
-      gcy('global-paginated-list').contains(l).should('be.visible')
+      gcy('project-settings-languages').contains(l).should('be.visible')
     );
   });
 });

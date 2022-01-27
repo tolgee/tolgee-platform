@@ -168,7 +168,7 @@ class TranslationCommentController(
       translation.state = TranslationState.UNTRANSLATED
     }
 
-    translationService.saveTranslation(translation)
+    translationService.save(translation)
 
     val comment = translationCommentService.create(dto, translation, authenticationFacade.userAccountEntity)
     return ResponseEntity(
@@ -202,7 +202,7 @@ class TranslationCommentController(
   }
 
   private fun Translation.checkFromProject() {
-    if (this.key.project?.id != projectHolder.project.id) {
+    if (this.key.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
     }
   }

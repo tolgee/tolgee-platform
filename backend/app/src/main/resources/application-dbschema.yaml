@@ -2,8 +2,12 @@ spring:
   liquibase:
     drop-first: true
     change-log: classpath:db/changelog/schema.xml
+  datasource:
+    url: jdbc:postgresql://localhost:55432/postgres
+    username: postgres
+    password: postgres
 tolgee:
   postgres-autostart:
-    port: 55432
+    enabled: false
   internal:
     stop-right-after-start: true

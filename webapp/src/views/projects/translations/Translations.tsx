@@ -13,7 +13,7 @@ import { useProject } from 'tg.hooks/useProject';
 import { TranslationsTable } from './TranslationsTable/TranslationsTable';
 import { TranslationsHeader } from './TranslationsHeader';
 import { TranslationsList } from './TranslationsList/TranslationsList';
-import { useContextShortcuts } from './context/useContextShortcuts';
+import { useTranslationsShortcuts } from './context/shortcuts/useTranslationsShortcuts';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
@@ -41,7 +41,7 @@ export const Translations = () => {
 
   const dispatch = useTranslationsDispatch();
 
-  const { onKey } = useContextShortcuts();
+  const { onKey } = useTranslationsShortcuts();
 
   useEffect(() => {
     document.body?.addEventListener('keydown', onKey);

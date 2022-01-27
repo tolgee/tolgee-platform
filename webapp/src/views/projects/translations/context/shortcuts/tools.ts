@@ -1,5 +1,5 @@
 import { components } from 'tg.service/apiSchema.generated';
-import { ViewType } from './TranslationsContext';
+import { CellPosition, ViewMode } from '../types';
 
 type KeyWithTranslationsModelType =
   components['schemas']['KeyWithTranslationsModel'];
@@ -13,14 +13,9 @@ export const ARROWS = [
   'ArrowRight',
 ] as const;
 
-export type Position = {
-  keyId: number;
-  language: string | undefined;
-};
-
 export const getCurrentlyFocused = (
   elements: Map<string, HTMLElement> | undefined | null
-): Position | undefined => {
+): CellPosition | undefined => {
   if (elements) {
     for (const [key, el] of elements.entries()) {
       if (el.contains(document.activeElement)) {
@@ -35,7 +30,7 @@ export const translationsNavigator = (
   fixedTranslations: KeyWithTranslationsModelType[] | undefined,
   languages: string[] | undefined,
   elements: Map<string, HTMLElement> | undefined | null,
-  view: ViewType,
+  view: ViewMode,
   visibleRange: number[] | undefined
 ) => {
   const getNextLocation = (
@@ -174,4 +169,11 @@ export const translationsNavigator = (
   return {
     getNextLocation,
   };
+};
+
+export const serializeElPosition = (position: CellPosition) => {
+  return JSON.stringify({
+    keyId: position.keyId,
+    language: position.language,
+  });
 };

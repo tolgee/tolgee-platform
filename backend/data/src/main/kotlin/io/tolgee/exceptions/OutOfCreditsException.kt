@@ -1,3 +1,3 @@
 package io.tolgee.exceptions
 
-class OutOfCreditsException : Exception()
+class OutOfCreditsException : RuntimeException()

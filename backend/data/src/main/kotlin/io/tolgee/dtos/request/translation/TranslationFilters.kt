@@ -14,8 +14,7 @@ When used with multiple languages, it is applied with logical AND.
     examples = [
       ExampleObject("en,TRANSLATED"),
       ExampleObject("en-US,UNTRANSLATED"),
-      ExampleObject("de,NEEDS_REVIEW"),
-      ExampleObject("fr,MACHINE_TRANSLATED"),
+      ExampleObject("fr,REVIEWED"),
     ]
   )
   open val filterState: List<String>? = null

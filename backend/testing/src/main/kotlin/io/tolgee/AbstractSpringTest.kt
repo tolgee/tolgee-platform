@@ -2,7 +2,9 @@ package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.component.fileStorage.FileStorage
+import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.configuration.tolgee.AuthenticationProperties
+import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
@@ -31,6 +33,8 @@ import io.tolgee.service.TranslationCommentService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.machineTranslation.MtCreditBucketService
+import io.tolgee.service.machineTranslation.MtService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.TestInstance
@@ -132,6 +136,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var googleMachineTranslationProperties: GoogleMachineTranslationProperties
 
   @Autowired
+  lateinit var internalProperties: InternalProperties
+
+  @Autowired
   lateinit var mtServiceConfigService: MtServiceConfigService
 
   @set:Autowired
@@ -144,8 +151,27 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var applicationContext: ApplicationContext
 
   @Autowired
+  lateinit var mtCreditBucketService: MtCreditBucketService
+
+  @Autowired
+  lateinit var mtService: MtService
+
+  @Autowired
+  lateinit var mtServiceManager: MtServiceManager
+
+  @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {
     initialUsername = authenticationProperties.initialUsername
     initialPassword = initialPasswordManager.initialPassword
+  }
+
+  protected fun initMachineTranslationProperties(freeCreditsAmount: Long) {
+    machineTranslationProperties.freeCreditsAmount = freeCreditsAmount
+    awsMachineTranslationProperties.accessKey = "dummy"
+    awsMachineTranslationProperties.defaultEnabled = false
+    awsMachineTranslationProperties.secretKey = "dummy"
+    googleMachineTranslationProperties.apiKey = "dummy"
+    googleMachineTranslationProperties.defaultEnabled = true
+    internalProperties.fakeMtProviders = false
   }
 }

@@ -11,7 +11,11 @@ import { container } from 'tsyringe';
 import FormControl from '@material-ui/core/FormControl';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 
+import { components } from 'tg.service/apiSchema.generated';
 import { MessageService } from 'tg.service/MessageService';
+import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
+
+type LanguageModel = components['schemas']['LanguageModel'];
 
 const useStyles = makeStyles({
   input: {
@@ -36,13 +40,9 @@ const useStyles = makeStyles({
   },
 });
 
-type Language = {
-  value: string;
-  label: string;
-};
 export interface LanguagesMenuProps {
   onChange: (value: string[]) => void;
-  languages: Language[];
+  languages: LanguageModel[];
   value: string[];
   context: string;
 }
@@ -51,13 +51,15 @@ const messaging = container.resolve(MessageService);
 
 export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
   const classes = useStyles();
+  const baseLang = props.languages.find((l) => l.base)?.tag;
 
   const langsChange = (e) => {
     if (e.target.value < 1) {
       messaging.error(<T>set_at_least_one_language_error</T>);
       return;
     }
-    props.onChange(e.target.value);
+    const langs = putBaseLangFirst(e.target.value, baseLang) || [];
+    props.onChange(langs);
   };
 
   const menuProps = {
@@ -102,15 +104,15 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
       >
         {props.languages.map((lang) => (
           <MenuItem
-            key={lang.value}
-            value={lang.value}
+            key={lang.tag}
+            value={lang.tag}
             data-cy="translations-language-select-item"
           >
             <Checkbox
-              checked={props.value.indexOf(lang.value) > -1}
+              checked={props.value.indexOf(lang.tag) > -1}
               size="small"
             />
-            <ListItemText primary={lang.label} />
+            <ListItemText primary={lang.name} />
           </MenuItem>
         ))}
       </Select>

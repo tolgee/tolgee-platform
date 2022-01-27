@@ -1,12 +1,14 @@
 import { useState, useMemo, useEffect } from 'react';
+import { InfiniteData } from 'react-query';
 import { container } from 'tsyringe';
+import { useDebouncedCallback } from 'use-debounce';
 
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
 import { components, operations } from 'tg.service/apiSchema.generated';
-import { InfiniteData } from 'react-query';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
-import { useDebouncedCallback } from 'use-debounce/lib';
+import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
+import { ChangeScreenshotNum, UpdateTranslation } from '../types';
 
 const PAGE_SIZE = 60;
 
@@ -36,6 +38,7 @@ type Props = {
   initialLangs: string[] | null | undefined;
   pageSize?: number;
   updateLocalStorageLanguages?: boolean;
+  baseLang: string | undefined;
 };
 
 const flattenKeys = (
@@ -43,13 +46,14 @@ const flattenKeys = (
 ): KeyWithTranslationsModelType[] =>
   data?.pages.filter(Boolean).flatMap((p) => p._embedded?.keys || []) || [];
 
-export const useTranslationsInfinite = (props: Props) => {
+export const useTranslationsService = (props: Props) => {
   const [filters, _setFilters] = useUrlSearchState('filters', {
     defaultVal: JSON.stringify({}),
   });
-  const parsedFilters = (
-    filters ? JSON.parse(filters as string) : {}
-  ) as FiltersType;
+  const parsedFilters = useMemo(
+    () => (filters ? JSON.parse(filters as string) : {}) as FiltersType,
+    [filters]
+  );
   // wait for initialLangs to not be null
   const [enabled, setEnabled] = useState(props.initialLangs !== null);
 
@@ -125,12 +129,14 @@ export const useTranslationsInfinite = (props: Props) => {
           setFixedTranslations(flatKeys);
           setManuallyInserted(0);
         } else {
-          // add only nonexistent keys
-          const newKeys =
-            flatKeys.filter(
-              (k) => !fixedTranslations?.find((ft) => ft.keyId === k.keyId)
-            ) || [];
-          setFixedTranslations([...(fixedTranslations || []), ...newKeys]);
+          setFixedTranslations((fixedTranslations) => {
+            // add only nonexistent keys
+            const newKeys =
+              flatKeys.filter(
+                (k) => !fixedTranslations?.find((ft) => ft.keyId === k.keyId)
+              ) || [];
+            return [...(fixedTranslations || []), ...newKeys];
+          });
         }
       },
     },
@@ -196,7 +202,7 @@ export const useTranslationsInfinite = (props: Props) => {
     keyId: number,
     value: Partial<KeyWithTranslationsModelType>
   ) => {
-    setFixedTranslations(
+    setFixedTranslations((fixedTranslations) =>
       fixedTranslations?.map((k) => {
         if (k.keyId === keyId) {
           return { ...k, ...value };
@@ -207,12 +213,15 @@ export const useTranslationsInfinite = (props: Props) => {
     );
   };
 
-  const updateTranslation = (
+  const updateScreenshotCount = (data: ChangeScreenshotNum) =>
+    updateTranslationKey(data.keyId, { screenshotCount: data.screenshotCount });
+
+  const changeTranslation = (
     keyId: number,
     language: string,
     value: Partial<TranslationModel> | undefined
   ) => {
-    setFixedTranslations(
+    setFixedTranslations((fixedTranslations) =>
       fixedTranslations?.map((k) => {
         if (k.keyId === keyId) {
           return {
@@ -234,9 +243,12 @@ export const useTranslationsInfinite = (props: Props) => {
     );
   };
 
+  const updateTranslation = (data: UpdateTranslation) =>
+    changeTranslation(data.keyId, data.lang, data.data);
+
   const totalCount = translations.data?.pages[0].page?.totalElements;
 
-  const selectedLanguages = useMemo(() => {
+  const selectedLangs = useMemo(() => {
     const langs = translations.data?.pages[0]?.selectedLanguages.map(
       (l) => l.tag
     );
@@ -251,6 +263,15 @@ export const useTranslationsInfinite = (props: Props) => {
     return langs;
   }, [translations.data]);
 
+  // memoize so we keep the same reference when possible
+  const [selectedLanguages, translationsLanguages] = useMemo(
+    () => [
+      putBaseLangFirst(query?.languages || selectedLangs, props.baseLang),
+      putBaseLangFirst(selectedLangs, props.baseLang),
+    ],
+    [query?.languages, selectedLangs, props.baseLang]
+  );
+
   return {
     isLoading: translations.isLoading,
     isFetching: translations.isFetching,
@@ -260,11 +281,13 @@ export const useTranslationsInfinite = (props: Props) => {
     filters: parsedFilters,
     fetchNextPage: translations.fetchNextPage,
     selectedLanguages,
+    translationsLanguages,
     data: translations.data,
     fixedTranslations,
     totalCount:
       totalCount !== undefined ? totalCount + manuallyInserted : undefined,
     refetchTranslations,
+    changeTranslation,
     updateQuery,
     search,
     setSearch,
@@ -274,5 +297,6 @@ export const useTranslationsInfinite = (props: Props) => {
     updateTranslation,
     insertAsFirst,
     urlSearch: urlSearch as string | undefined,
+    updateScreenshotCount,
   };
 };

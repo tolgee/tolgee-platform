@@ -5,15 +5,16 @@ import { getEventAction } from 'tg.fixtures/shortcuts';
 import {
   ARROWS,
   getCurrentlyFocused,
-  Position,
+  serializeElPosition,
   translationsNavigator,
 } from './tools';
 import {
   useTranslationsSelector,
   useTranslationsDispatch,
-} from './TranslationsContext';
+} from '../TranslationsContext';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { CellPosition } from '../types';
 
 export const KEY_MAP = {
   MOVE: ARROWS,
@@ -27,12 +28,13 @@ export type ShortcutsArrayType = [
   shortcut: string[] | ReadonlyArray<string>
 ];
 
-export const useContextShortcuts = () => {
+export const useTranslationsShortcuts = () => {
   const root = document.getElementById('root');
   const onKeyRef = useRef<(e: KeyboardEvent) => void>();
   const availableActions = useRef<() => ShortcutsArrayType[]>();
   const dispatch = useTranslationsDispatch();
-  const cursor = useTranslationsSelector((c) => c.cursor);
+  const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
+  const cursorLanguage = useTranslationsSelector((c) => c.cursor?.language);
   const view = useTranslationsSelector((c) => c.view);
   const permissions = useProjectPermissions();
   const elementsRef = useTranslationsSelector((c) => c.elementsRef);
@@ -48,7 +50,8 @@ export const useContextShortcuts = () => {
     ProjectPermissionType.TRANSLATE
   );
 
-  const isTranslation = (position: Position | undefined) => position?.language;
+  const isTranslation = (position: CellPosition | undefined) =>
+    position?.language;
 
   const getMoveHandler = () => {
     return (e: KeyboardEvent) => {
@@ -62,12 +65,7 @@ export const useContextShortcuts = () => {
       );
       const nextLocation = navigator.getNextLocation(e.key as any);
       if (nextLocation) {
-        const el = elementsRef.current?.get(
-          JSON.stringify({
-            keyId: nextLocation.keyId,
-            language: nextLocation.language,
-          })
-        );
+        const el = elementsRef.current?.get(serializeElPosition(nextLocation));
         if (el !== document.activeElement) {
           el?.focus();
           el?.scrollIntoView({
@@ -115,7 +113,8 @@ export const useContextShortcuts = () => {
       )?.translations[focused.language];
 
       const newState =
-        translation?.state && translationStates[translation.state].next[0];
+        (translation?.state && translationStates[translation.state]?.next) ||
+        'TRANSLATED';
 
       if (translation && newState) {
         return (e: KeyboardEvent) => {
@@ -161,11 +160,11 @@ export const useContextShortcuts = () => {
     }
 
     // if editor is open, don't apply shortcuts
-    if (cursor) {
+    if (cursorKeyId) {
       const current = getCurrentlyFocused(elementsRef.current);
       if (
-        current?.keyId === cursor.keyId &&
-        current?.language === cursor.language
+        current?.keyId === cursorKeyId &&
+        current?.language === cursorLanguage
       ) {
         return false;
       }
@@ -211,10 +210,7 @@ export const useContextShortcuts = () => {
     [availableActions]
   );
 
-  const onKey = useCallback(
-    (e: KeyboardEvent) => onKeyRef.current?.(e),
-    [onKeyRef]
-  );
+  const onKey = useCallback((e: KeyboardEvent) => onKeyRef.current?.(e), []);
 
   return { getAvailableActions, onKey };
 };

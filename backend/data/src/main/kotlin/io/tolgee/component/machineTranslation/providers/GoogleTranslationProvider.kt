@@ -33,18 +33,6 @@ class GoogleTranslationProvider(
     ).translatedText
   }
 
-  override fun translate(texts: List<String>, sourceLanguageTag: String, targetLanguageTag: String): List<String>? {
-    if (targetLanguageTag.suitableTag.isNullOrEmpty() || sourceLanguageTag.suitableTag.isNullOrEmpty()) {
-      return null
-    }
-
-    return translateService.translate(
-      texts,
-      Translate.TranslateOption.targetLanguage(targetLanguageTag.suitableTag),
-      Translate.TranslateOption.sourceLanguage(sourceLanguageTag.suitableTag)
-    ).map { it.translatedText }
-  }
-
   private val translateService by lazy {
     translate ?: throw IllegalStateException("Google Translate is not injected")
   }

@@ -34,11 +34,20 @@ tolgee:
     native-enabled: true
     registrationsAllowed: true
     create-initial-user: false
+  internal:
+    fake-mt-providers: true
   socket-io:
     port: 19090
     enabled: false
   cache:
     caffeine-max-size: 1000
+  machine-translation:
+    free-credits-amount: -1
+    google:
+      api-key: aaa
+    aws:
+      accessKey: aaa
+      secretKey: aaa
 #logging:
 #  level:
 #    org.springframework.orm.jpa: DEBUG

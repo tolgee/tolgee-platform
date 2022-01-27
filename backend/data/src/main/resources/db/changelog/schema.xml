@@ -1417,4 +1417,55 @@
             <column name="avatar_hash" type="varchar(100)"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik" id="1638969083095-0">
+        <sql dbms="postgresql">
+            UPDATE translation set state = 1 where state = 2 or state = 4;
+            UPDATE translation set state = 2 where state = 3;
+        </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1647280727641-1">
+        <createTable tableName="auto_translation_config">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="auto_translation_configPK"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="using_primary_mt_service" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="using_tm" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1647280727641-2">
+        <addColumn tableName="translation">
+            <column defaultValueBoolean="false" name="auto" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1647280727641-3">
+        <addColumn tableName="translation_aud">
+            <column name="auto" type="boolean"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1647280727641-4">
+        <addColumn tableName="translation">
+            <column name="mt_provider" type="int4"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1647280727641-5">
+        <addColumn tableName="translation_aud">
+            <column name="mt_provider" type="int4"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1647280727641-6">
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="auto_translation_config" constraintName="FKt6nkgxegunln8tv83446kfkli" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.controllers.v2ProjectsController
+package io.tolgee.api.v2.controllers.v2KeyController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.KeysTestData
@@ -112,6 +112,8 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("id").isValidId
           node("text").isEqualTo("EN")
           node("state").isEqualTo("TRANSLATED")
+          node("auto").isEqualTo(false)
+          node("mtProvider").isEqualTo(null)
         }
         node("de") {
           node("id").isValidId
@@ -131,7 +133,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     assertThat(tagService.find(project, "tag")).isNotNull
     assertThat(tagService.find(project, "tag2")).isNotNull
 
-    val key = keyService.get(project.id, keyName).orElseThrow()
+    val key = keyService.findOptional(project.id, keyName).orElseThrow()
     assertThat(tagService.getTagsForKeyIds(listOf(key.id))[key.id]).hasSize(2)
     assertThat(translationService.find(key, testData.english).get().text).isEqualTo("EN")
 
@@ -212,7 +214,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     assertThat(tagService.find(project, "tag")).isNotNull
     assertThat(tagService.find(project, "tag2")).isNotNull
 
-    val key = keyService.get(project.id, keyName).orElseThrow()
+    val key = keyService.findOptional(project.id, keyName).orElseThrow()
     assertThat(tagService.getTagsForKeyIds(listOf(key.id))[key.id]).hasSize(2)
     assertThat(translationService.find(key, testData.english).get().text).isEqualTo("EN")
 
@@ -291,21 +293,21 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun `deletes single key`() {
     performProjectAuthDelete("keys/${testData.firstKey.id}", null).andIsOk
-    assertThat(keyService.get(testData.firstKey.id)).isEmpty
+    assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `deletes single key with references`() {
     performProjectAuthDelete("keys/${testData.keyWithReferences.id}", null).andIsOk
-    assertThat(keyService.get(testData.keyWithReferences.id)).isEmpty
+    assertThat(keyService.findOptional(testData.keyWithReferences.id)).isEmpty
   }
 
   @ProjectJWTAuthTestMethod
   @Test
   fun `deletes multiple keys with references`() {
     performProjectAuthDelete("keys/${testData.keyWithReferences.id},${testData.keyWithReferences.id}", null).andIsOk
-    assertThat(keyService.get(testData.keyWithReferences.id)).isEmpty
+    assertThat(keyService.findOptional(testData.keyWithReferences.id)).isEmpty
   }
 
   @ProjectJWTAuthTestMethod
@@ -323,8 +325,8 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `deletes multiple keys`() {
     projectSupplier = { testData.project }
     performProjectAuthDelete("keys/${testData.firstKey.id},${testData.secondKey.id}", null).andIsOk
-    assertThat(keyService.get(testData.firstKey.id)).isEmpty
-    assertThat(keyService.get(testData.secondKey.id)).isEmpty
+    assertThat(keyService.findOptional(testData.firstKey.id)).isEmpty
+    assertThat(keyService.findOptional(testData.secondKey.id)).isEmpty
   }
 
   @ProjectJWTAuthTestMethod

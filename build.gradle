@@ -87,22 +87,31 @@ project(':server-app').afterEvaluate {
         dependsOn project(':server-app').tasks.findByName("bootJar")
     }
 
-    task startDbChangelogContainer(type: Exec) {
-        commandLine "docker", "start", dbSchemaContainerName
-        mustRunAfter project(':server-app').tasks.findByName("bootRun")
+    task startDbChangelogContainer {
+        doLast {
+            exec {
+                commandLine "docker", "run", "-e", "POSTGRES_PASSWORD=postgres", "-d", "-p55432:5432", "--name", dbSchemaContainerName, "postgres:13"
+            }
+            Thread.sleep(5000)
+        }
+    }
+
+    task stopDbChangelogContainer(type: Exec) {
+        commandLine "docker", "rm", "--force", dbSchemaContainerName
+        mustRunAfter project(':data').tasks.findByName("diffChangeLog")
     }
 
     task diffChangeLog {
-        project(':data').tasks.findByName("diffChangeLog").mustRunAfter(startDbChangelogContainer)
-
+        project(':data').tasks.findByName("diffChangeLog").mustRunAfter(project(':server-app').tasks.findByName("bootRun"))
+        project(':server-app').tasks.findByName("bootRun").mustRunAfter(startDbChangelogContainer)
         finalizedBy = [
-                project(':server-app').tasks.findByName("bootRun"),
                 startDbChangelogContainer,
-                project(':data').tasks.findByName("diffChangeLog")
+                project(':server-app').tasks.findByName("bootRun"),
+                project(':data').tasks.findByName("diffChangeLog"),
+                stopDbChangelogContainer
         ]
         doFirst {
             project(':server-app').bootRun.systemProperty('spring.profiles.active', 'dbschema')
-            project(':server-app').bootRun.systemProperty('tolgee.postgres-autostart.container-name', dbSchemaContainerName)
         }
     }
 }

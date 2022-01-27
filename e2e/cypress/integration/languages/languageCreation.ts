@@ -22,8 +22,8 @@ describe('Language creation', () => {
   it('adds language', () => {
     prepareCzechLanguage();
     gcy('languages-create-submit-button').click();
-    gcy('global-paginated-list').should('contain', 'Czech');
-    gcy('global-paginated-list').should('contain', 'čeština');
+    gcy('project-settings-languages').should('contain', 'Czech');
+    gcy('project-settings-languages').should('contain', 'čeština');
     assertMessage('Language created');
   });
 

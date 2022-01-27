@@ -3,7 +3,7 @@ import { assertTooltip } from './shared';
 export const stateColors = {
   Reviewed: 'rgb(23, 173, 24)',
   Translated: 'rgb(255, 206, 0)',
-  'Needs review': 'rgb(232, 0, 0)',
+  'Machine translated': 'rgb(57, 225, 250)',
 };
 
 export const getCell = (translationText: string) => {

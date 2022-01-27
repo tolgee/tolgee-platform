@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { T } from '@tolgee/react';
 import { Button, makeStyles } from '@material-ui/core';
 import { CameraAlt } from '@material-ui/icons';
 
+import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { components } from 'tg.service/apiSchema.generated';
 import { StateType } from 'tg.constants/translationStates';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
 import { useTranslationsSelector } from '../context/TranslationsContext';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
+
+type State = components['schemas']['TranslationViewModel']['state'];
 
 const useStyles = makeStyles((theme) => ({
   leftPart: {
@@ -27,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type ControlsProps = {
-  state?: StateType;
+  state?: State;
   onSave?: () => void;
   onCancel?: () => void;
   onScreenshots?: () => void;
@@ -52,7 +55,14 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
   const displayScreenshots = onScreenshots;
   const displayRightPart = displayTransitionButtons || displayScreenshots;
 
-  const isLoading = useTranslationsSelector((c) => c.isEditLoading);
+  const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
+
+  const [isLoading, setIsLoading] = useState(isEditLoading);
+  useEffect(() => {
+    if (isEditLoading && !isLoading) {
+      setIsLoading(true);
+    }
+  }, [isEditLoading]);
 
   return (
     <>

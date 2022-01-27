@@ -80,7 +80,7 @@ class V2KeyController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @Transactional
   fun complexEdit(@PathVariable id: Long, @RequestBody @Valid dto: ComplexEditKeyDto): KeyWithDataModel {
-    val key = keyService.get(id).orElseThrow { NotFoundException() }
+    val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
     var editPermissionsChecked = false
 
@@ -139,7 +139,7 @@ class V2KeyController(
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
   fun edit(@PathVariable id: Long, @RequestBody @Valid dto: EditKeyDto): KeyModel {
-    val key = keyService.get(id).orElseThrow { NotFoundException() }
+    val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
     return keyService.edit(id, dto).model
   }
@@ -150,7 +150,7 @@ class V2KeyController(
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
   fun delete(@PathVariable ids: Set<Long>) {
-    keyService.get(ids).forEach { it.checkInProject() }
+    keyService.findOptional(ids).forEach { it.checkInProject() }
     keyService.deleteMultiple(ids)
   }
 

@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.DeprecatedEditKeyDTO
@@ -15,6 +16,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.repository.KeyRepository
 import io.tolgee.socketio.ITranslationsSocketIoModule
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -45,7 +47,7 @@ class KeyService(
 
   @Transactional
   fun getOrCreateKeyNoPersist(project: Project, keyName: String): Key {
-    return get(project.id, keyName)
+    return findOptional(project.id, keyName)
       .orElseGet {
         Key(name = keyName, project = project)
       }
@@ -55,19 +57,28 @@ class KeyService(
     return keyRepository.getAllByProjectId(projectId)
   }
 
-  fun get(projectId: Long, name: String): Optional<Key> {
+  fun get(projectId: Long, name: String): Key {
+    return keyRepository.getByNameAndProjectId(name, projectId).orElse(null)
+      ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+  }
+
+  fun findOptional(projectId: Long, name: String): Optional<Key> {
     return keyRepository.getByNameAndProjectId(name, projectId)
   }
 
-  fun get(projectId: Long, pathDTO: PathDTO): Optional<Key> {
+  fun findOptional(projectId: Long, pathDTO: PathDTO): Optional<Key> {
     return keyRepository.getByNameAndProjectId(pathDTO.fullPathString, projectId)
   }
 
-  fun get(id: Long): Optional<Key> {
+  fun get(id: Long): Key {
+    return keyRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+  }
+
+  fun findOptional(id: Long): Optional<Key> {
     return keyRepository.findById(id)
   }
 
-  fun get(ids: Set<Long>): List<Key> {
+  fun findOptional(ids: Set<Long>): List<Key> {
     return keyRepository.findAllById(ids)
   }
 
@@ -83,7 +94,7 @@ class KeyService(
 
   @Deprecated("Use other create method")
   fun create(project: Project, dto: DeprecatedKeyDto): Key {
-    if (this.get(project.id, dto.pathDto).isPresent) {
+    if (this.findOptional(project.id, dto.pathDto).isPresent) {
       throw ValidationException(io.tolgee.constants.Message.KEY_EXISTS)
     }
     val key = Key(name = dto.fullPathString, project = project)
@@ -92,7 +103,7 @@ class KeyService(
 
   @Transactional
   fun create(project: Project, dto: CreateKeyDto): Key {
-    if (this.get(project.id, dto.name).isPresent) {
+    if (this.findOptional(project.id, dto.name).isPresent) {
       throw BadRequestException(io.tolgee.constants.Message.KEY_EXISTS)
     }
 
@@ -119,10 +130,10 @@ class KeyService(
     if (dto.newFullPathString == dto.oldFullPathString) {
       return
     }
-    if (get(project.id, dto.newPathDto).isPresent) {
+    if (findOptional(project.id, dto.newPathDto).isPresent) {
       throw ValidationException(io.tolgee.constants.Message.KEY_EXISTS)
     }
-    val key = get(project.id, dto.oldPathDto).orElseThrow { NotFoundException() }
+    val key = findOptional(project.id, dto.oldPathDto).orElseThrow { NotFoundException() }
     val oldName = key.name
     key.name = dto.newFullPathString
     translationsSocketIoModule.onKeyModified(key, oldName)
@@ -130,12 +141,12 @@ class KeyService(
   }
 
   fun edit(projectId: Long, dto: OldEditKeyDto): Key {
-    val key = get(projectId, dto.oldPathDto).orElseThrow { NotFoundException() }
+    val key = findOptional(projectId, dto.oldPathDto).orElseThrow { NotFoundException() }
     return edit(key, dto.newName)
   }
 
   fun edit(keyId: Long, dto: EditKeyDto): Key {
-    val key = get(keyId).orElseThrow { NotFoundException() }
+    val key = findOptional(keyId).orElseThrow { NotFoundException() }
     return edit(key, dto.name)
   }
 
@@ -145,8 +156,8 @@ class KeyService(
     if (key.name == newName) {
       return key
     }
-    if (get(key.project!!.id, newName).isPresent) {
-      throw ValidationException(io.tolgee.constants.Message.KEY_EXISTS)
+    if (findOptional(key.project!!.id, newName).isPresent) {
+      throw ValidationException(Message.KEY_EXISTS)
     }
     key.name = newName
     translationsSocketIoModule.onKeyModified(key, oldName)
@@ -155,7 +166,7 @@ class KeyService(
 
   @Transactional
   fun delete(id: Long) {
-    val key = get(id).orElseThrow { NotFoundException() }
+    val key = findOptional(id).orElseThrow { NotFoundException() }
     translationService.deleteAllByKey(id)
     keyMetaService.deleteAllByKeyId(id)
     screenshotService.deleteAllByKeyId(id)
@@ -190,7 +201,7 @@ class KeyService(
 
   @Transactional
   fun create(project: Project, name: String): Key {
-    if (this.get(project.id, name).isPresent) {
+    if (this.findOptional(project.id, name).isPresent) {
       throw BadRequestException(io.tolgee.constants.Message.KEY_EXISTS)
     }
     val key = Key(name = name, project = project)

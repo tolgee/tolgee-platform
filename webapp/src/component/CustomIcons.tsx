@@ -8,6 +8,8 @@ import { ReactComponent as SettingsSvg } from '../svgs/icons/settings.svg';
 import { ReactComponent as TranslationSvg } from '../svgs/icons/translation.svg';
 import { ReactComponent as UserAddSvg } from '../svgs/icons/user-add.svg';
 import { ReactComponent as UserSettingSvg } from '../svgs/icons/user-setting.svg';
+import { ReactComponent as TranslationMemorySvg } from '../svgs/icons/translationMemory.svg';
+import { ReactComponent as MachineTranslationSvg } from '../svgs/icons/machineTranslation.svg';
 
 type IconProps = ComponentProps<typeof SvgIcon>;
 
@@ -43,4 +45,10 @@ export const UserAddIcon: React.FC<IconProps> = (props) => (
 );
 export const UserSettingIcon: React.FC<IconProps> = (props) => (
   <CustomIcon icon={UserSettingSvg} {...props} />
+);
+export const TranslationMemoryIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={TranslationMemorySvg} {...props} />
+);
+export const MachineTranslationIcon: React.FC<IconProps> = (props) => (
+  <CustomIcon icon={MachineTranslationSvg} {...props} />
 );
