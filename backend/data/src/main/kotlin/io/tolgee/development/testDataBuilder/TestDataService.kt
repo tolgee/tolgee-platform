@@ -5,6 +5,7 @@ import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.service.ApiKeyService
+import io.tolgee.service.AutoTranslationService
 import io.tolgee.service.KeyMetaService
 import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
@@ -42,7 +43,8 @@ class TestDataService(
   private val organizationRoleService: OrganizationRoleService,
   private val apiKeyService: ApiKeyService,
   private val mtServiceConfigService: MtServiceConfigService,
-  private val mtCreditBucketService: MtCreditBucketService
+  private val mtCreditBucketService: MtCreditBucketService,
+  private val autoTranslateService: AutoTranslationService
 ) {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
@@ -93,6 +95,13 @@ class TestDataService(
     saveKeyData(builder)
     saveTranslationData(builder)
     saveImportData(builder)
+    saveAutoTranslationConfigs(builder)
+  }
+
+  private fun saveAutoTranslationConfigs(builder: TestDataBuilder) {
+    builder.data.projects.map { it.data.autoTranslationConfigBuilder }.filterNotNull().forEach {
+      autoTranslateService.saveConfig(it.self)
+    }
   }
 
   private fun saveImportData(builder: TestDataBuilder) {

@@ -64,7 +64,7 @@ class ScreenshotController(
 
     projectService.get(projectId)
     securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.TRANSLATE)
-    val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
+    val keyEntity = keyService.findOptional(projectId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
     val screenShotEntity = screenshotService.store(screenshot, keyEntity)
     return screenShotEntity.toDTO()
   }
@@ -76,7 +76,7 @@ class ScreenshotController(
     @PathVariable("projectId") projectId: Long,
     @RequestBody @Valid dto: GetScreenshotsByKeyDto
   ): List<ScreenshotDTO> {
-    val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(dto.key)).orElseThrow { NotFoundException() }
+    val keyEntity = keyService.get(projectId, dto.key)
     return screenshotService.findAll(keyEntity).map { it.toDTO() }
   }
 

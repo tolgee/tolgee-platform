@@ -31,6 +31,7 @@ import io.tolgee.service.TranslationCommentService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.testing.AbstractTransactionalTest
 import org.junit.jupiter.api.TestInstance
@@ -144,8 +145,20 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var applicationContext: ApplicationContext
 
   @Autowired
+  lateinit var mtCreditBucketService: MtCreditBucketService
+
+  @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {
     initialUsername = authenticationProperties.initialUsername
     initialPassword = initialPasswordManager.initialPassword
+  }
+
+  protected fun initMachineTranslationProperties(freeCreditsAmount: Long) {
+    machineTranslationProperties.freeCreditsAmount = freeCreditsAmount
+    awsMachineTranslationProperties.accessKey = "dummy"
+    awsMachineTranslationProperties.defaultEnabled = false
+    awsMachineTranslationProperties.secretKey = "dummy"
+    googleMachineTranslationProperties.apiKey = "dummy"
+    googleMachineTranslationProperties.defaultEnabled = true
   }
 }

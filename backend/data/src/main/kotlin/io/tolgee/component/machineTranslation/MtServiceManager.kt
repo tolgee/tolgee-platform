@@ -59,6 +59,21 @@ class MtServiceManager(
   }
 
   /**
+   * Translates a text using All services
+   */
+  fun translate(
+    text: String,
+    sourceLanguageTag: String,
+    targetLanguageTags: List<String>,
+    service: MtServiceType
+  ): List<String?> {
+    val provider = service.getProvider()
+    return if (!internalProperties.fakeMtProviders)
+      provider.translate(text, sourceLanguageTag, targetLanguageTags)
+    else targetLanguageTags.map { "$text translated with ${service.name} from $sourceLanguageTag to $it" }
+  }
+
+  /**
    * Returns sum price of all translations
    */
   fun calculatePrice(text: String, service: MtServiceType): Int {

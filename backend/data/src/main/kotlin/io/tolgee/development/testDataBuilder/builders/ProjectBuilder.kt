@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder.builders
 
 import io.tolgee.development.testDataBuilder.FT
 import io.tolgee.model.ApiKey
+import io.tolgee.model.AutoTranslationConfig
 import io.tolgee.model.Language
 import io.tolgee.model.MtServiceConfig
 import io.tolgee.model.Organization
@@ -39,6 +40,7 @@ class ProjectBuilder(
     val translations = mutableListOf<TranslationBuilder>()
     val apiKeys = mutableListOf<ApiKeyBuilder>()
     val translationServiceConfigs = mutableListOf<MtServiceConfigBuilder>()
+    var autoTranslationConfigBuilder: AutoTranslationConfigBuilder? = null
   }
 
   var data = DATA()
@@ -59,4 +61,8 @@ class ProjectBuilder(
 
   fun addMtServiceConfig(ft: FT<MtServiceConfig>) =
     addOperation(data.translationServiceConfigs, ft)
+
+  fun addAutoTranslationConfig(ft: FT<AutoTranslationConfig>) {
+    data.autoTranslationConfigBuilder = AutoTranslationConfigBuilder(this@ProjectBuilder).also { ft(it.self) }
+  }
 }
