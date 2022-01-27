@@ -1,3 +1,11 @@
+## [2.1.3](https://github.com/tolgee/server/compare/v2.1.2...v2.1.3) (2022-01-27)
+
+
+### Bug Fixes
+
+* Fix MT configuration change TG-490 ([2d5e25a](https://github.com/tolgee/server/commit/2d5e25a7e41507420f69d92d7ff1b34f87912fbc))
+* Remove tags from parameters TG-473 ([185fcb8](https://github.com/tolgee/server/commit/185fcb829cb8d215b506310934a544878bd751c7))
+
 ## [2.1.2](https://github.com/tolgee/server/compare/v2.1.1...v2.1.2) (2022-01-20)
 
 
