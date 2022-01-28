@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/tolgee/server/compare/v2.1.3...v2.2.0) (2022-01-28)
+
+
+### Features
+
+* Connect to SendInBlueApi TG-477 & fix Sentry logging ([588649f](https://github.com/tolgee/server/commit/588649f1399076416b2364304116b62e41ac1af7))
+
 ## [2.1.3](https://github.com/tolgee/server/compare/v2.1.2...v2.1.3) (2022-01-27)
 
 
