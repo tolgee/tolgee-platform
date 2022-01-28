@@ -44,7 +44,7 @@ class ExportController @Autowired constructor(
   @Operation(summary = "Exports data as ZIP of jsons")
   fun doExportJsonZip(@PathVariable("projectId") projectId: Long?): ResponseEntity<StreamingResponseBody> {
     securityService.checkProjectPermission(projectHolder.project.id, Permission.ProjectPermissionType.VIEW)
-    val languages = languageService.findAll(projectHolder.project.id)
+    val languages = languageService.findAllInProject(projectHolder.project.id)
     return ResponseEntity
       .ok()
       .header(

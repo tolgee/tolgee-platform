@@ -62,7 +62,7 @@ class LanguageService(
   }
 
   @Transactional
-  fun findAll(projectId: Long): Set<Language> {
+  fun findAllInProject(projectId: Long): Set<Language> {
     return languageRepository.findAllByProjectId(projectId).toSet()
   }
 

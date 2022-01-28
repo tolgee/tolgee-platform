@@ -47,8 +47,8 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
     val projects = projectService.findAllByNameAndUserOwner("examples", user)
     assertThat(projects).isNotEmpty
     assertThat(projects[0].name).isEqualTo("examples")
-    val languages = languageService.findAll(projects[0].id)
-    assertThat(languageService.findAll(projects[0].id)).hasSize(4)
+    val languages = languageService.findAllInProject(projects[0].id)
+    assertThat(languageService.findAllInProject(projects[0].id)).hasSize(4)
     languages.forEach {
       assertThat(translationService.getAllByLanguageId(it.id)).hasSize(10)
     }

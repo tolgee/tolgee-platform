@@ -102,7 +102,7 @@ class UserAppApiController(
   fun getLanguages(): Set<String> {
     val apiKey = authenticationFacade.apiKey
     securityService.checkApiKeyScopes(setOf(ApiScope.TRANSLATIONS_EDIT), apiKey)
-    return languageService.findAll(apiKey.project.id).map { obj -> obj.tag }.toSet()
+    return languageService.findAllInProject(apiKey.project.id).map { obj -> obj.tag }.toSet()
   }
 
   @AccessWithApiKey

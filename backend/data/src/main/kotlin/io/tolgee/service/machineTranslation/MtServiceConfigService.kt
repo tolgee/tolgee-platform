@@ -2,8 +2,10 @@ package io.tolgee.service.machineTranslation
 
 import io.tolgee.constants.Message
 import io.tolgee.constants.MtServiceType
+import io.tolgee.dtos.request.MachineTranslationLanguagePropsDto
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.model.Language
 import io.tolgee.model.MtServiceConfig
 import io.tolgee.model.Project
 import io.tolgee.repository.machineTranslation.MtServiceConfigRepository
@@ -85,14 +87,13 @@ class MtServiceConfigService(
   @Transactional
   fun setProjectSettings(project: Project, dto: SetMachineTranslationSettingsDto) {
     val storedConfigs = getStoredConfigs(project.id)
-    val allLanguages = languageService.findAll(project.id)
+    val allLanguages = languageService.findAllInProject(project.id)
 
     dto.settings.forEach { languageSetting ->
       val entity = storedConfigs.find { it.targetLanguage?.id == languageSetting.targetLanguageId }
         ?: MtServiceConfig().apply {
           this.project = project
-          this.targetLanguage = allLanguages.find { languageSetting.targetLanguageId == it.id }
-            ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+          this.targetLanguage = findSuitableTargetLanguage(languageSetting, allLanguages)
         }
 
       entity.primaryService = languageSetting.primaryService
@@ -108,6 +109,14 @@ class MtServiceConfigService(
 
     delete(toDelete)
   }
+
+  private fun findSuitableTargetLanguage(
+    languageSetting: MachineTranslationLanguagePropsDto,
+    allLanguages: Set<Language>
+  ) = if (languageSetting.targetLanguageId == null)
+    null
+  else allLanguages.find { languageSetting.targetLanguageId == it.id }
+    ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
 
   fun getProjectSettings(project: Project): List<MtServiceConfig> {
     return getStoredConfigs(project.id).sortedBy { it.targetLanguage == null }.toMutableList().also { configs ->
