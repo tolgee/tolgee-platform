@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/tolgee/server/compare/v2.2.0...v2.2.1) (2022-01-29)
+
+
+### Bug Fixes
+
+* Update Spring and other deps & cleanup TG-492 ([e97afa4](https://github.com/tolgee/server/commit/e97afa4dec4a5e628a43d5d5d33d5bbc448b12f2))
+
 # [2.2.0](https://github.com/tolgee/server/compare/v2.1.3...v2.2.0) (2022-01-28)
 
 
