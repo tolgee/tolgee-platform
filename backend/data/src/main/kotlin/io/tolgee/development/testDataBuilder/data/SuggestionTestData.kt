@@ -137,6 +137,16 @@ class SuggestionTestData : BaseTestData() {
     }
   }
 
+  fun addDefaultConfig() {
+    projectBuilder.addMtServiceConfig {
+      self {
+        this.targetLanguage = null
+        this.enabledServices = mutableSetOf(MtServiceType.AWS)
+        this.primaryService = MtServiceType.AWS
+      }
+    }
+  }
+
   fun generateLotOfData() {
     projectBuilder.apply {
       (0..10000).forEach {

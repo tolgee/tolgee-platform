@@ -13,7 +13,7 @@ interface MtServiceConfigRepository : JpaRepository<MtServiceConfig, Long> {
     join Language l on l.id = :languageId 
         and (
             ptsc.targetLanguage.id = :languageId 
-            or (ptsc.targetLanguage.id is null and ptsc.project.id = l.id)
+            or (ptsc.targetLanguage.id is null and ptsc.project.id = l.project.id)
             )
   """
   )
