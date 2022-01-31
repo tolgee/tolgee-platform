@@ -12,6 +12,7 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -221,6 +222,32 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `primary service is first (AWS)`() {
+    mockCurrentDate { Date() }
+    machineTranslationProperties.freeCreditsAmount = -1
+    testData.enableBoth()
+    testDataService.saveTestData(testData.root)
+
+    (0..20).forEach {
+      verifyServiceFirst("AWS")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `primary service is first (GOOGLE)`() {
+    machineTranslationProperties.freeCreditsAmount = -1
+    testData.enableBothGooglePrimary()
+    testDataService.saveTestData(testData.root)
+    mockCurrentDate { Date() }
+
+    (0..20).forEach {
+      verifyServiceFirst("GOOGLE")
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `it consumes and refills bucket`() {
     mockCurrentDate { Date() }
 
@@ -258,5 +285,11 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       "/v2/projects/${project.id}/suggest/machine-translations",
       SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
     )
+  }
+
+  private fun verifyServiceFirst(service: String) {
+    val result = performMtRequest().andIsOk.andReturn().mapResponseTo<Map<String, Any>>()
+    val services = (result["machineTranslations"] as Map<String, String>).keys.toList()
+    assertThat(services[0]).isEqualTo(service)
   }
 }

@@ -137,6 +137,16 @@ class SuggestionTestData : BaseTestData() {
     }
   }
 
+  fun enableBothGooglePrimary() {
+    projectBuilder.addMtServiceConfig {
+      self {
+        this.targetLanguage = germanLanguage
+        this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS)
+        this.primaryService = MtServiceType.GOOGLE
+      }
+    }
+  }
+
   fun addDefaultConfig() {
     projectBuilder.addMtServiceConfig {
       self {
