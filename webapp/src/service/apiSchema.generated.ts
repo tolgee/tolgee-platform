@@ -15,8 +15,15 @@ export interface paths {
   "/v2/projects/{projectId}/users/{userId}/revoke-access": {
     put: operations["revokePermission"];
   };
+  "/v2/projects/{projectId}/machine-translation-service-settings": {
+    get: operations["getMachineTranslationSettings"];
+    put: operations["setMachineTranslationSettings"];
+  };
   "/v2/projects/{projectId}/keys/{keyId}/tags": {
     put: operations["tagKey"];
+  };
+  "/v2/projects/{projectId}/keys/{id}/complex-update": {
+    put: operations["complexEdit"];
   };
   "/v2/projects/{projectId}/keys/{id}": {
     put: operations["edit"];
@@ -105,12 +112,12 @@ export interface paths {
   };
   "/v2/api-keys/{apiKeyId}": {
     put: operations["update_4"];
-    delete: operations["delete_6"];
+    delete: operations["delete_7"];
   };
   "/api/project/{projectId}/keys": {
     put: operations["edit_2"];
     post: operations["create_12"];
-    delete: operations["delete_9"];
+    delete: operations["delete_10"];
   };
   "/api/project/{projectId}/translations": {
     put: operations["setTranslations_2"];
@@ -152,9 +159,19 @@ export interface paths {
   "/v2/projects/{projectId}/translations/create-comment": {
     post: operations["create_6"];
   };
+  "/v2/projects/{projectId}/suggest/translation-memory": {
+    post: operations["suggestTranslationMemory"];
+  };
+  "/v2/projects/{projectId}/suggest/machine-translations": {
+    post: operations["suggestMachineTranslations"];
+  };
   "/v2/projects/{projectId}/languages": {
     get: operations["getAll_5"];
     post: operations["createLanguage"];
+  };
+  "/v2/projects/{projectId}/export": {
+    get: operations["export"];
+    post: operations["exportPost"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
     get: operations["getKeyScreenshots_3"];
@@ -167,6 +184,9 @@ export interface paths {
   "/api/organizations": {
     get: operations["getAll_8"];
     post: operations["create_9"];
+  };
+  "/v2/image-upload": {
+    post: operations["upload"];
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
@@ -232,6 +252,9 @@ export interface paths {
   "/v2/projects/{projectId}/tags": {
     get: operations["getAll_1"];
   };
+  "/v2/projects/{projectId}/machine-translation-credit-balance": {
+    get: operations["getProjectCredits"];
+  };
   "/v2/projects/{projectId}/import/result": {
     get: operations["getImportResult"];
   };
@@ -247,6 +270,9 @@ export interface paths {
   };
   "/v2/projects/{projectId}/translations/{languages}": {
     get: operations["getAllTranslations"];
+  };
+  "/v2/projects/{projectId}/translations/select-all": {
+    get: operations["getSelectAllKeyIds"];
   };
   "/v2/projects/{projectId}/transfer-options": {
     get: operations["getTransferOptions"];
@@ -269,6 +295,9 @@ export interface paths {
   "/api/organizations/{slug}": {
     get: operations["get_6"];
   };
+  "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
+    get: operations["getOrganizationCredits"];
+  };
   "/v2/organizations/{organizationId}/invitations": {
     get: operations["getInvitations"];
   };
@@ -286,6 +315,9 @@ export interface paths {
   };
   "/api/organizations/{id}/projects": {
     get: operations["getAllProjects_3"];
+  };
+  "/v2/machine-translation-credit-balance": {
+    get: operations["getUserCredits"];
   };
   "/v2/api-keys/{keyId}": {
     get: operations["get_9"];
@@ -310,7 +342,7 @@ export interface paths {
   };
   "/api/project/{projectId}/keys/{id}": {
     get: operations["getDeprecated"];
-    delete: operations["delete_7"];
+    delete: operations["delete_8"];
   };
   "/api/project/{projectId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
@@ -354,6 +386,9 @@ export interface paths {
   "/api/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser_1"];
   };
+  "/v2/image-upload/{ids}": {
+    delete: operations["delete_6"];
+  };
   "/api/project/{projectId}/screenshots/{ids}": {
     delete: operations["deleteScreenshots_3"];
   };
@@ -361,7 +396,7 @@ export interface paths {
     delete: operations["deleteInvitation"];
   };
   "/api/apiKeys/{key}": {
-    delete: operations["delete_11"];
+    delete: operations["delete_12"];
   };
 }
 
@@ -410,6 +445,34 @@ export interface components {
       username: string;
       name?: string;
     };
+    MachineTranslationLanguagePropsDto: {
+      /** The language to apply those rules. If null, then this settings are default. */
+      targetLanguageId?: number;
+      /** This service will be used for automated translation */
+      primaryService?: "GOOGLE" | "AWS";
+      /** List of enabled services */
+      enabledServices: ("GOOGLE" | "AWS")[];
+    };
+    SetMachineTranslationSettingsDto: {
+      settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
+    };
+    CollectionModelLanguageConfigItemModel: {
+      _embedded?: {
+        languageConfigs?: components["schemas"]["LanguageConfigItemModel"][];
+      };
+    };
+    LanguageConfigItemModel: {
+      /** When null, its a default configuration applied to not configured languages */
+      targetLanguageId?: number;
+      /** When null, its a default configuration applied to not configured languages */
+      targetLanguageTag?: string;
+      /** When null, its a default configuration applied to not configured languages */
+      targetLanguageName?: string;
+      /** Service used for automated translating */
+      primaryService?: "GOOGLE" | "AWS";
+      /** Services to be used for suggesting */
+      enabledServices: ("GOOGLE" | "AWS")[];
+    };
     TagKeyDto: {
       name: string;
     };
@@ -417,18 +480,45 @@ export interface components {
       id: number;
       name: string;
     };
-    EditKeyDto: {
+    ComplexEditKeyDto: {
+      /** Name of the key */
       name: string;
+      /** Translations to update */
+      translations?: { [key: string]: string };
+      /** Tags of the key. If not provided tags won't be modified */
+      tags?: string[];
+      /** IDs of screenshots to delete */
+      screenshotIdsToDelete?: number[];
+      /** Ids of screenshots uploaded with /v2/image-upload endpoint */
+      screenshotUploadedImageIds?: number[];
     };
-    KeyModel: {
+    KeyWithDataModel: {
       /** Id of key record */
       id: number;
       /** Name of key */
       name: string;
+      /** Translations object containing values updated in this request */
+      translations: {
+        [key: string]: components["schemas"]["TranslationModel"];
+      };
+      /** Tags of key */
+      tags: components["schemas"]["TagModel"][];
+      /** Screenshots of the key */
+      screenshots: components["schemas"]["ScreenshotModel"][];
     };
-    ProjectInviteUserDto: {
-      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+    /** Screenshots of the key */
+    ScreenshotModel: {
+      id: number;
+      /**
+       * File name, which may be downloaded from the screenshot path.
+       *
+       * When images are secured. Encrypted timestamp is appended to the filename.
+       */
+      filename: string;
+      fileUrl: string;
+      createdAt?: string;
     };
+    /** Translations object containing values updated in this request */
     TranslationModel: {
       /** Id of translation record */
       id: number;
@@ -441,6 +531,18 @@ export interface components {
         | "TRANSLATED"
         | "REVIEWED"
         | "NEEDS_REVIEW";
+    };
+    EditKeyDto: {
+      name: string;
+    };
+    KeyModel: {
+      /** Id of key record */
+      id: number;
+      /** Name of key */
+      name: string;
+    };
+    ProjectInviteUserDto: {
+      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     TranslationCommentModel: {
       /** Id of translation comment record */
@@ -553,18 +655,8 @@ export interface components {
       name: string;
       translations?: { [key: string]: string };
       tags?: string[];
-    };
-    KeyWithDataModel: {
-      /** Id of key record */
-      id: number;
-      /** Name of key */
-      name: string;
-      /** Translations object containing values updated in this request */
-      translations: {
-        [key: string]: components["schemas"]["TranslationModel"];
-      };
-      /** Tags of key */
-      tags: components["schemas"]["TagModel"][];
+      /** Ids of screenshots uploaded with /v2/image-upload endpoint */
+      screenshotUploadedImageIds?: number[];
     };
     ErrorResponseBody: {
       code: string;
@@ -611,16 +703,68 @@ export interface components {
       translation: components["schemas"]["TranslationModel"];
       comment: components["schemas"]["TranslationCommentModel"];
     };
-    ScreenshotModel: {
+    SuggestRequestDto: {
+      /** Key Id to get results for. Use when key is stored already. */
+      keyId: number;
+      targetLanguageId: number;
+      /** Text value of base translation. Useful, when base translation is not stored yet. */
+      baseText?: string;
+    };
+    PagedModelTranslationMemoryItemModel: {
+      _embedded?: {
+        translationMemoryItems?: components["schemas"]["TranslationMemoryItemModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    TranslationMemoryItemModel: {
+      targetText: string;
+      baseText: string;
+      keyName: string;
+      similarity: number;
+    };
+    SuggestResultModel: {
+      /** Results provided by enabled services */
+      machineTranslations?: { [key: string]: string };
+      translationCreditsBalanceBefore: number;
+      translationCreditsBalanceAfter: number;
+    };
+    ExportParams: {
+      languages?: string[];
+      format: "JSON" | "XLIFF";
+      splitByScope: boolean;
+      splitByScopeDelimiter: string;
+      splitByScopeDepth: number;
+      filterKeyId?: number[];
+      filterKeyIdNot?: number[];
+      filterTag?: string;
+      filterKeyPrefix?: string;
+      filterState?: (
+        | "UNTRANSLATED"
+        | "MACHINE_TRANSLATED"
+        | "TRANSLATED"
+        | "REVIEWED"
+        | "NEEDS_REVIEW"
+      )[];
+      filterStateNot?: (
+        | "UNTRANSLATED"
+        | "MACHINE_TRANSLATED"
+        | "TRANSLATED"
+        | "REVIEWED"
+        | "NEEDS_REVIEW"
+      )[];
+    };
+    UploadedImageModel: {
       id: number;
       filename: string;
-      createdAt?: string;
+      fileUrl: string;
+      requestFilename: string;
+      createdAt: string;
     };
     CreateApiKeyDto: {
       projectId: number;
       scopes: string[];
     };
-    UserUpdateRequestDTO: {
+    UserUpdateRequestDto: {
       name: string;
       email: string;
       password?: string;
@@ -660,7 +804,7 @@ export interface components {
       oldFullPathString: string;
       newFullPathString: string;
     };
-    GetScreenshotsByKeyDTO: {
+    GetScreenshotsByKeyDto: {
       key: string;
     };
     ScreenshotDTO: {
@@ -708,6 +852,9 @@ export interface components {
         tags?: components["schemas"]["TagModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
+    };
+    CreditBalanceModel: {
+      creditBalance: number;
     };
     ImportTranslationModel: {
       id: number;
@@ -761,6 +908,9 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    SelectAllResponse: {
+      ids: number[];
+    };
     KeyWithTranslationsModel: {
       /** Id of key record */
       keyId: number;
@@ -770,6 +920,8 @@ export interface components {
       keyTags: components["schemas"]["TagModel"][];
       /** Count of screenshots provided for the key */
       screenshotCount: number;
+      /** Key screenshots. Not provided when API key hasn't screenshots.view scope permission. */
+      screenshots?: components["schemas"]["ScreenshotModel"][];
       /** Translations object */
       translations: {
         [key: string]: components["schemas"]["TranslationViewModel"];
@@ -907,7 +1059,16 @@ export interface components {
       clientId?: string;
       enabled: boolean;
     };
+    MtServiceDTO: {
+      enabled: boolean;
+      defaultEnabledForProject: boolean;
+    };
+    MtServicesDTO: {
+      defaultPrimaryService?: "GOOGLE" | "AWS";
+      services: { [key: string]: components["schemas"]["MtServiceDTO"] };
+    };
     PublicConfigurationDTO: {
+      machineTranslationServices: components["schemas"]["MtServicesDTO"];
       authentication: boolean;
       authMethods?: components["schemas"]["AuthMethodsDTO"];
       passwordResettable: boolean;
@@ -924,6 +1085,7 @@ export interface components {
       showVersion: boolean;
       maxTranslationTextLength: number;
       recaptchaSiteKey?: string;
+      openReplayApiKey?: string;
     };
     SocketIo: {
       enabled: boolean;
@@ -1093,6 +1255,65 @@ export interface operations {
       };
     };
   };
+  getMachineTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelLanguageConfigItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setMachineTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelLanguageConfigItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetMachineTranslationSettingsDto"];
+      };
+    };
+  };
   tagKey: {
     parameters: {
       path: {
@@ -1123,6 +1344,39 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["TagKeyDto"];
+      };
+    };
+  };
+  complexEdit: {
+    parameters: {
+      path: {
+        id: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["KeyWithDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplexEditKeyDto"];
       };
     };
   };
@@ -1516,6 +1770,16 @@ export interface operations {
   getTranslations: {
     parameters: {
       query: {
+        /** Cursor to get next data */
+        cursor?: string;
+        /**
+         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
+         *
+         * When used with multiple states for same language it is applied with logical OR.
+         *
+         * When used with multiple languages, it is applied with logical AND.
+         */
+        filterState?: string[];
         /**
          * Languages to be contained in response.
          *
@@ -1527,7 +1791,7 @@ export interface operations {
         /** Selects only one key with provided name */
         filterKeyName?: string;
         /** Selects only one key with provided id */
-        filterKeyId?: number;
+        filterKeyId?: number[];
         /** Selects only keys, where translation is missing in any language */
         filterUntranslatedAny?: boolean;
         /** Selects only keys, where translation is provided in any language */
@@ -1540,18 +1804,8 @@ export interface operations {
         filterHasScreenshot?: boolean;
         /** Selects only keys without screenshots */
         filterHasNoScreenshot?: boolean;
-        /**
-         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
-         *
-         * When used with multiple states for same language it is applied with logical OR.
-         *
-         * When used with multiple languages, it is applied with logical AND.
-         */
-        filterState?: string[];
         /** Selects only keys with provided tag */
         filterTag?: string[];
-        /** Cursor to get next data */
-        cursor?: string;
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
@@ -2168,7 +2422,7 @@ export interface operations {
       };
     };
   };
-  delete_6: {
+  delete_7: {
     parameters: {
       path: {
         apiKeyId: number;
@@ -2247,7 +2501,7 @@ export interface operations {
       };
     };
   };
-  delete_9: {
+  delete_10: {
     parameters: {
       path: {
         projectId: number;
@@ -2755,6 +3009,78 @@ export interface operations {
       };
     };
   };
+  suggestTranslationMemory: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelTranslationMemoryItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SuggestRequestDto"];
+      };
+    };
+  };
+  suggestMachineTranslations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SuggestResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SuggestRequestDto"];
+      };
+    };
+  };
   getAll_5: {
     parameters: {
       path: {
@@ -2819,6 +3145,115 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["LanguageDto"];
+      };
+    };
+  };
+  export: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+      query: {
+        /**
+         * Languages to be contained in export.
+         *
+         * If null, all languages are exported
+         */
+        languages?: string[];
+        /** Format to export to */
+        format?: "JSON" | "XLIFF";
+        /** When true translations are split to directories by scopes */
+        splitByScope?: boolean;
+        /**
+         * Scope delimiter.
+         *
+         * e.g. For key "home.header.title" scopes would result in "home" -> "header", when splitByScopeDepth is greater than 1.
+         */
+        splitByScopeDelimiter?: string;
+        /**
+         * Maximum depth of scoping.
+         *
+         * e.g. For key "home.header.title" and depth 1, resulting scope is  "home".
+         *
+         * For depth 2, resulting scopes are  "home" -> "header".
+         */
+        splitByScopeDepth?: number;
+        /** Filter key IDs to be contained in export */
+        filterKeyId?: number[];
+        /** Filter key IDs not to be contained in export */
+        filterKeyIdNot?: number[];
+        /** Filter keys tagged by */
+        filterTag?: string;
+        /** Filter keys with prefix */
+        filterKeyPrefix?: string;
+        /** Filter translations with state */
+        filterState?: (
+          | "UNTRANSLATED"
+          | "MACHINE_TRANSLATED"
+          | "TRANSLATED"
+          | "REVIEWED"
+          | "NEEDS_REVIEW"
+        )[];
+        /** Filter translations with state different from */
+        filterStateNot?: (
+          | "UNTRANSLATED"
+          | "MACHINE_TRANSLATED"
+          | "TRANSLATED"
+          | "REVIEWED"
+          | "NEEDS_REVIEW"
+        )[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  exportPost: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ExportParams"];
       };
     };
   };
@@ -3005,6 +3440,36 @@ export interface operations {
       };
     };
   };
+  upload: {
+    parameters: {};
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["UploadedImageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          image: string;
+        };
+      };
+    };
+  };
   allByUser: {
     parameters: {
       query: {
@@ -3101,7 +3566,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["UserUpdateRequestDTO"];
+        "application/json": components["schemas"]["UserUpdateRequestDto"];
       };
     };
   };
@@ -3350,7 +3815,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        "application/json": components["schemas"]["GetScreenshotsByKeyDTO"];
+        "application/json": components["schemas"]["GetScreenshotsByKeyDto"];
       };
     };
   };
@@ -3643,6 +4108,33 @@ export interface operations {
       };
     };
   };
+  getProjectCredits: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CreditBalanceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getImportResult: {
     parameters: {
       path: {
@@ -3817,6 +4309,75 @@ export interface operations {
       200: {
         content: {
           "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getSelectAllKeyIds: {
+    parameters: {
+      query: {
+        /**
+         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
+         *
+         * When used with multiple states for same language it is applied with logical OR.
+         *
+         * When used with multiple languages, it is applied with logical AND.
+         */
+        filterState?: string[];
+        /**
+         * Languages to be contained in response.
+         *
+         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
+         */
+        languages?: string[];
+        /** String to search in key name or translation text */
+        search?: string;
+        /** Selects only one key with provided name */
+        filterKeyName?: string;
+        /** Selects only one key with provided id */
+        filterKeyId?: number[];
+        /** Selects only keys, where translation is missing in any language */
+        filterUntranslatedAny?: boolean;
+        /** Selects only keys, where translation is provided in any language */
+        filterTranslatedAny?: boolean;
+        /** Selects only keys, where translation is missing in specified language */
+        filterUntranslatedInLang?: string;
+        /** Selects only keys, where translation is provided in specified language */
+        filterTranslatedInLang?: string;
+        /** Selects only keys with screenshots */
+        filterHasScreenshot?: boolean;
+        /** Selects only keys without screenshots */
+        filterHasNoScreenshot?: boolean;
+        /** Selects only keys with provided tag */
+        filterTag?: string[];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SelectAllResponse"];
         };
       };
       /** Bad Request */
@@ -4052,6 +4613,33 @@ export interface operations {
       };
     };
   };
+  getOrganizationCredits: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CreditBalanceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getInvitations: {
     parameters: {
       path: {
@@ -4234,6 +4822,28 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getUserCredits: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CreditBalanceModel"];
         };
       };
       /** Bad Request */
@@ -4455,7 +5065,7 @@ export interface operations {
       };
     };
   };
-  delete_7: {
+  delete_8: {
     parameters: {
       path: {
         id: number;
@@ -4837,6 +5447,29 @@ export interface operations {
       };
     };
   };
+  delete_6: {
+    parameters: {
+      path: {
+        ids: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   deleteScreenshots_3: {
     parameters: {
       path: {
@@ -4884,7 +5517,7 @@ export interface operations {
       };
     };
   };
-  delete_11: {
+  delete_12: {
     parameters: {
       path: {
         key: string;
