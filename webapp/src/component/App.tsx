@@ -79,6 +79,24 @@ const MandatoryDataProvider = (props: any) => {
     }
   }, [config?.clientSentryDsn]);
 
+  useEffect(() => {
+    const openReplayApiKey = config?.openReplayApiKey;
+    if (openReplayApiKey && !window.openReplayTracker) {
+      import('@openreplay/tracker').then(({ default: Tracker }) => {
+        window.openReplayTracker = new Tracker({
+          projectKey: openReplayApiKey,
+        });
+        window.openReplayTracker.start();
+      });
+    }
+  }, [config?.clientSentryDsn]);
+
+  useEffect(() => {
+    if (userData && window.openReplayTracker) {
+      window.openReplayTracker.setUserID(userData.username);
+    }
+  }, [userData, window.openReplayTracker]);
+
   const allowPrivate = useSelector(
     (state: AppState) => state.global.security.allowPrivate
   );

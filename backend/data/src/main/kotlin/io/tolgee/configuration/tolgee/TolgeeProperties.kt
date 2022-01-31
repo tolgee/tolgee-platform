@@ -14,6 +14,7 @@ open class TolgeeProperties(
   var authentication: AuthenticationProperties = AuthenticationProperties(),
   var smtp: SmtpProperties = SmtpProperties(),
   var sentry: SentryProperties = SentryProperties(),
+  var openReplayApiKey: String? = null,
   var internal: InternalProperties = InternalProperties(),
   var screenshotsUrl: String = "/screenshots",
   var uploadedImagesUrl: String = "/uploaded-images",
