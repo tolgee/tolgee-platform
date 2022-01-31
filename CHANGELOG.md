@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/tolgee/server/compare/v2.2.1...v2.3.0) (2022-01-31)
+
+
+### Features
+
+* Setup open-replay TG-466 ([ad50ec4](https://github.com/tolgee/server/commit/ad50ec45c4a37d4d6c19af36c617da2d8197dc9d))
+
 ## [2.2.1](https://github.com/tolgee/server/compare/v2.2.0...v2.2.1) (2022-01-29)
 
 
