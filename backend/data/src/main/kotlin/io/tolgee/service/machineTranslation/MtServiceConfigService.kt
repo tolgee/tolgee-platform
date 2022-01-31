@@ -40,19 +40,10 @@ class MtServiceConfigService(
   fun getPrimaryServices(languagesIds: List<Long>): Map<Long, MtServiceType?> {
     val configs = getStoredConfigs(languagesIds)
     return languagesIds.associateWith { languageId ->
-      val primaryServiceByLangConfig = configs.find { config ->
+      configs.find { config ->
         config?.targetLanguage?.id == languageId
-      }?.primaryService
-
-      (primaryServiceByLangConfig ?: getPrimaryServiceByDefaultConfig())
+      }?.let { return@associateWith it.primaryService } ?: getPrimaryServiceByDefaultConfig()
     }
-  }
-
-  fun getPrimaryService(languageId: Long): MtServiceType? {
-    getPrimaryServiceBySoredConfig(languageId)?.let {
-      return it
-    }
-    return getPrimaryServiceByDefaultConfig()
   }
 
   private fun getEnabledServicesByDefaultConfig(): MutableList<MtServiceType> {
@@ -68,20 +59,15 @@ class MtServiceConfigService(
 
   private fun getEnabledServicesByStoredConfig(languageId: Long): List<MtServiceType>? {
     getStoredConfig(languageId)?.let { storedConfig ->
-      val services = storedConfig.enabledServices.toList()
-      // return just enabled services
-      services.filter {
-        this.services[it]?.second?.isEnabled ?: false
-      }
+      return storedConfig.enabledServices.toList()
+        // return just enabled services
+        .filter {
+          this.services[it]?.second?.isEnabled ?: false
+        }
         // primary first!
         .sortedByDescending { storedConfig.primaryService == it }
-      return services
     }
     return null
-  }
-
-  private fun getPrimaryServiceBySoredConfig(languageId: Long): MtServiceType? {
-    return getStoredConfig(languageId)?.primaryService
   }
 
   @Transactional
