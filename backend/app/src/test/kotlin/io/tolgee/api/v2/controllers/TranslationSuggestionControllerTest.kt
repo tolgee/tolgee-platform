@@ -202,6 +202,25 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
+  fun `it respects default config`() {
+    mockCurrentDate { Date() }
+    machineTranslationProperties.freeCreditsAmount = 2000
+    testData.addDefaultConfig()
+    testDataService.saveTestData(testData.root)
+
+    performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
+      node("machineTranslations").isEqualTo(
+        """
+        {
+          "AWS": "Translated with Amazon"
+        }
+        """
+      )
+    }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
   fun `it consumes and refills bucket`() {
     mockCurrentDate { Date() }
 
