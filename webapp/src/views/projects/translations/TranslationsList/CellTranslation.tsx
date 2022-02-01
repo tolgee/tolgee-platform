@@ -150,6 +150,7 @@ export const CellTranslation: React.FC<Props> = ({
       className={clsx({
         [cellClasses.cellPlain]: true,
         [classes.splitContainer]: true,
+        [cellClasses.scrollMargins]: true,
         [cellClasses.cellRaised]: isEditing,
       })}
       tabIndex={0}
@@ -227,6 +228,7 @@ export const CellTranslation: React.FC<Props> = ({
           mode={editVal.mode}
           onModeChange={handleModeChange}
           editEnabled={editEnabled}
+          cellRef={cellRef}
         />
       )}
     </div>

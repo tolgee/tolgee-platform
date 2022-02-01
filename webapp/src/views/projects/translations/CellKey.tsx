@@ -166,6 +166,7 @@ export const CellKey: React.FC<Props> = ({
           [cellClasses.hover]: !isEditing,
           [cellClasses.cellClickable]: editEnabled && !isEditing,
           [cellClasses.cellRaised]: isEditing,
+          [cellClasses.scrollMargins]: true,
         })}
         style={{ width }}
         onClick={

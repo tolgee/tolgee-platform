@@ -5,6 +5,7 @@ import {
 } from '../../common/apiCalls';
 import {
   setLanguageData,
+  visitLanguageSettings,
   visitProjectLanguages,
   visitProjectSettings,
 } from '../../common/languages';
@@ -24,7 +25,7 @@ describe('Language modification', () => {
   });
 
   it('modifies language', () => {
-    editLanguage('English | English (en)');
+    visitLanguageSettings('English');
     setLanguageData({
       name: 'Modified',
       originalName: 'Modified Original',
@@ -32,14 +33,15 @@ describe('Language modification', () => {
       flagEmoji: '🇦🇿',
     });
     gcy('global-form-save-button').click();
-    getLanguageListItem('Modified | Modified Original (tg)')
+    gcy('project-settings-languages-list-name')
+      .contains('English (en)')
       .should('be.visible')
       .find('img')
       .should('have.attr', 'alt', '🇦🇿');
   });
 
   it('cannot delete base language', () => {
-    editLanguage('English | English (en)');
+    visitLanguageSettings('English');
     gcy('language-delete-button').click();
     assertMessage('Cannot delete base language');
   });
@@ -53,16 +55,3 @@ describe('Language modification', () => {
     gcy('base-language-select').find('img').should('have.attr', 'alt', '🇩🇪');
   });
 });
-
-const editLanguage = (name: string) => {
-  getLanguageListItem(name)
-    .findDcy('project-settings-languages-list-edit-button')
-    .click();
-};
-
-const getLanguageListItem = (name: string) => {
-  return gcy('global-paginated-list')
-    .contains(name)
-    .closestDcy('project-settings-languages-list-item')
-    .parent();
-};

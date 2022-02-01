@@ -2,6 +2,7 @@ import { makeStyles } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router';
+import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
@@ -14,7 +15,7 @@ import {
   useTranslationsSelector,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
-import { KeyCreateForm } from '../KeyCreateForm';
+import { KeyCreateForm } from '../KeyCreateForm/KeyCreateForm';
 import { KeyEditForm } from './KeyEditForm';
 
 export type LanguageType = {
@@ -66,11 +67,10 @@ export const KeySingle: React.FC<Props> = ({ keyName }) => {
 
   const selectedLanguagesMapped = selectedLanguages?.map((l) => {
     const language = allLanguages?.find(({ tag }) => tag === l);
-    return {
-      name: language?.name || l,
-      tag: l,
-    };
+    return language!;
   });
+
+  const { height: bottomPanelHeight } = useBottomPanel();
 
   const keyExists = translation && keyName;
 
@@ -101,13 +101,13 @@ export const KeySingle: React.FC<Props> = ({ keyName }) => {
         ],
       ]}
     >
-      <div className={classes.container}>
+      <div
+        className={classes.container}
+        style={{ marginBottom: bottomPanelHeight + 20 }}
+      >
         <div className={classes.languagesMenu}>
           <LanguagesMenu
-            languages={allLanguages.map(({ tag, name }) => ({
-              value: tag,
-              label: name,
-            }))}
+            languages={allLanguages}
             onChange={handleLanguageChange}
             value={selectedLanguages}
             context="languages"

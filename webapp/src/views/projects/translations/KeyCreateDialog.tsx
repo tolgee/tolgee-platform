@@ -8,7 +8,7 @@ import {
   useTranslationsSelector,
   useTranslationsDispatch,
 } from './context/TranslationsContext';
-import { KeyCreateForm } from './KeyCreateForm';
+import { KeyCreateForm } from './KeyCreateForm/KeyCreateForm';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 
@@ -60,10 +60,7 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
 
   const selectedLanguagesMapped = selectedLanguages!.map((l) => {
     const language = languages?.find(({ tag }) => tag === l);
-    return {
-      name: language?.name || l,
-      tag: l,
-    };
+    return language!;
   });
 
   const handleOnSuccess = (data: KeyWithDataModel) => {
@@ -94,12 +91,7 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
         <div className={classes.title}>
           <T>translation_single_create_title</T>
           <LanguagesMenu
-            languages={
-              languages?.map(({ tag, name }) => ({
-                value: tag,
-                label: name,
-              })) || []
-            }
+            languages={languages || []}
             value={selectedLanguages}
             onChange={handleLanguageChange}
             context="translations-dialog"

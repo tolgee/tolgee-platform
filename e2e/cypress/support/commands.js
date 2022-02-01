@@ -37,6 +37,14 @@ Cypress.Commands.add('findDcy', { prevSubject: true }, (subject, dataCy) => {
 });
 
 Cypress.Commands.add(
+  'nextUntilDcy',
+  { prevSubject: true },
+  (subject, dataCy) => {
+    return subject.nextUntil('[data-cy="' + dataCy + '"]');
+  }
+);
+
+Cypress.Commands.add(
   'findInputByName',
   { prevSubject: true },
   (subject, name) => {

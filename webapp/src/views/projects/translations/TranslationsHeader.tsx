@@ -18,6 +18,7 @@ import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { Filters } from './Filters/Filters';
+import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { KeyCreateDialog } from './KeyCreateDialog';
 import TranslationsSearchField from './TranslationsSearchField';
@@ -58,6 +59,9 @@ const useStyles = makeStyles((theme) => ({
   },
   toggleButton: {
     padding: '4px 8px',
+  },
+  modal: {
+    transition: 'margin-bottom 0.2s',
   },
 }));
 
@@ -105,6 +109,8 @@ export const TranslationsHeader = () => {
     setNewDialog('true');
   };
 
+  const { height: bottomPanelHeight } = useBottomPanel();
+
   return (
     <div className={classes.container}>
       <div className={classes.controls}>
@@ -133,9 +139,7 @@ export const TranslationsHeader = () => {
           <LanguagesMenu
             onChange={handleLanguageChange}
             value={selectedLanguages || []}
-            languages={
-              languages?.map((l) => ({ label: l.name, value: l.tag })) || []
-            }
+            languages={languages || []}
             context="translations"
           />
 
@@ -193,6 +197,8 @@ export const TranslationsHeader = () => {
           fullWidth
           maxWidth="md"
           keepMounted={false}
+          className={classes.modal}
+          style={{ marginBottom: bottomPanelHeight }}
         >
           <KeyCreateDialog onClose={() => setNewDialog('false')} />
         </Dialog>

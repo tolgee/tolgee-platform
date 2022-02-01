@@ -9,6 +9,8 @@ declare namespace Cypress {
 
     findDcy(dataCy: Value): Chainable;
 
+    nextUntilDcy(dataCy: Value): Chainable;
+
     findInputByName(name: string): Chainable;
   }
 }

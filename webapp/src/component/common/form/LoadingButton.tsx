@@ -6,7 +6,7 @@ import { useLoadingRegister } from 'tg.component/GlobalLoading';
 const LoadingButton: FunctionComponent<
   ComponentProps<typeof Button> & { loading?: boolean }
 > = (props) => {
-  const { disabled, loading, children, ...otherProps } = props;
+  const { disabled, children, loading, ...otherProps } = props;
 
   const isDisabled = loading || disabled;
 
@@ -14,7 +14,7 @@ const LoadingButton: FunctionComponent<
 
   return (
     <Button disabled={isDisabled} {...otherProps}>
-      {props.loading && (
+      {loading && (
         <Box
           display="flex"
           position="absolute"

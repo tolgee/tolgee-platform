@@ -11,6 +11,7 @@ export const SingleKeyView = () => {
   return (
     <TranslationsContextProvider
       projectId={project.id}
+      baseLang={project.baseLanguage?.tag}
       keyName={keyName}
       languages={languages}
       pageSize={1}

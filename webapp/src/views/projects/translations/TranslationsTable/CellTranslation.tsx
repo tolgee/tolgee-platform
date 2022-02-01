@@ -62,8 +62,10 @@ type Props = {
   onResize?: (colIndex: number) => void;
   editEnabled: boolean;
   width?: number | string;
+  cellPosition: string;
   active: boolean;
   lastFocusable: boolean;
+  containerRef: React.RefObject<HTMLDivElement>;
 };
 
 export const CellTranslation: React.FC<Props> = ({
@@ -73,8 +75,10 @@ export const CellTranslation: React.FC<Props> = ({
   onResize,
   editEnabled,
   width,
+  cellPosition,
   active,
   lastFocusable,
+  containerRef,
 }) => {
   const classes = useStyles();
   const cellRef = useRef<HTMLDivElement>(null);
@@ -127,6 +131,7 @@ export const CellTranslation: React.FC<Props> = ({
         [cellClasses.cellPlain]: true,
         [cellClasses.hover]: !isEditing,
         [cellClasses.cellClickable]: editEnabled && !isEditing,
+        [cellClasses.scrollMargins]: true,
         [cellClasses.cellRaised]: isEditing,
       })}
       style={{ width }}
@@ -153,6 +158,8 @@ export const CellTranslation: React.FC<Props> = ({
           mode={editVal.mode}
           onModeChange={handleModeChange}
           editEnabled={editEnabled}
+          cellRef={containerRef}
+          cellPosition={cellPosition}
         />
       ) : (
         <>

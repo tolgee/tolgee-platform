@@ -16,6 +16,7 @@ tolgee:
     populate: true
     controller-enabled: true
     fake-github-login: true
+    fake-mt-providers: true
   smtp:
     host: localhost
     port: 21025
@@ -32,6 +33,13 @@ tolgee:
   recaptcha:
     site-key: 6Le0X08dAAAAALfQQk1NeWd-kXqvzLVk8HqoZpRw
     secret-key: dummy_secret_key
+  machine-translation:
+    free-credits-amount: 100000000
+    google:
+      api-key: mock
+    aws:
+      accessKey: mock
+      secretKey: mock
 server:
   port: 8201
   error:

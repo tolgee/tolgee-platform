@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useQueryClient } from 'react-query';
 import { T } from '@tolgee/react';
 import ReactList from 'react-list';
@@ -22,6 +22,7 @@ import {
   useDeleteTag,
   usePutTranslationState,
 } from 'tg.service/TranslationHooks';
+import { CellPosition, putBaseLangFirst, serializeElPosition } from './tools';
 
 export type AfterCommand = 'EDIT_NEXT';
 
@@ -54,16 +55,17 @@ type ActionType =
   | { type: 'INSERT_TRANSLATION'; payload: AddTranslationPayload }
   | { type: 'REGISTER_ELEMENT'; payload: KeyElement }
   | { type: 'UNREGISTER_ELEMENT'; payload: KeyElement }
+  | { type: 'SCROLL_TO_ELEMENT'; payload: ScrollToElement }
+  | { type: 'FOCUS_ELEMENT'; payload: CellPosition }
   | { type: 'REGISTER_LIST'; payload: ReactList }
   | { type: 'UNREGISTER_LIST'; payload: ReactList };
 
-type CellPosition = {
-  keyId: number;
-  language: string | undefined;
-};
-
 type KeyElement = CellPosition & {
   ref: HTMLElement;
+};
+
+type ScrollToElement = CellPosition & {
+  options?: ScrollIntoViewOptions;
 };
 
 export type ViewType = 'LIST' | 'TABLE';
@@ -147,6 +149,7 @@ export const [
 ] = createProvider(
   (props: {
     projectId: number;
+    baseLang: string | undefined;
     keyName?: string;
     languages?: string[];
     updateLocalStorageLanguages?: boolean;
@@ -158,6 +161,7 @@ export const [
     const [initialLangs, setInitialLangs] = useState<
       string[] | null | undefined
     >(null);
+
     const elementsRef = useRef<Map<string, HTMLElement>>(new Map());
     const [reactList, setReactList] = useState<ReactList>();
 
@@ -168,11 +172,12 @@ export const [
       query: { size: 1000, sort: ['tag'] },
       options: {
         onSuccess(data) {
-          const languages = projectPreferences
-            .getForProject(props.projectId)
-            ?.filter((l) =>
-              data._embedded?.languages?.find((lang) => lang.tag === l)
-            );
+          const requiredLanguages =
+            props.languages ||
+            projectPreferences.getForProject(props.projectId);
+          const languages = requiredLanguages?.filter((l) =>
+            data._embedded?.languages?.find((lang) => lang.tag === l)
+          );
           // manually set initial langs
           setInitialLangs(languages.length ? languages : undefined);
         },
@@ -186,7 +191,7 @@ export const [
       pageSize: props.pageSize,
       updateLocalStorageLanguages: props.updateLocalStorageLanguages,
       // when initial langs are null, fetching is postponed
-      initialLangs: props.languages || initialLangs,
+      initialLangs: initialLangs,
     });
 
     const edit = useEdit({
@@ -200,9 +205,7 @@ export const [
     };
 
     const focusCell = (cell: CellPosition) => {
-      const element = elementsRef.current?.get(
-        JSON.stringify({ keyId: cell.keyId, language: cell.language })
-      );
+      const element = elementsRef.current?.get(serializeElPosition(cell));
       element?.focus();
     };
 
@@ -460,19 +463,23 @@ export const [
           return;
         case 'REGISTER_ELEMENT':
           return elementsRef.current.set(
-            JSON.stringify({
-              keyId: action.payload.keyId,
-              language: action.payload.language,
-            }),
+            serializeElPosition(action.payload),
             action.payload.ref
           );
         case 'UNREGISTER_ELEMENT':
           return elementsRef.current.delete(
-            JSON.stringify({
-              keyId: action.payload.keyId,
-              language: action.payload.language,
-            })
+            serializeElPosition(action.payload)
           );
+        case 'SCROLL_TO_ELEMENT': {
+          const el = elementsRef.current.get(
+            serializeElPosition(action.payload)
+          );
+          el?.scrollIntoView(action.payload.options);
+          return;
+        }
+        case 'FOCUS_ELEMENT':
+          elementsRef.current.get(serializeElPosition(action.payload))?.focus();
+          return;
         case 'REGISTER_LIST':
           setReactList(action.payload);
           return;
@@ -495,12 +502,51 @@ export const [
       }
     };
 
+    useEffect(() => {
+      // scroll to currently edited item
+      if (edit.position?.keyId) {
+        const { keyId, language } = edit.position;
+        setTimeout(() =>
+          dispatch({
+            type: 'SCROLL_TO_ELEMENT',
+            payload: {
+              keyId,
+              language,
+              options: {
+                behavior: 'smooth',
+                block: 'nearest',
+              },
+            },
+          })
+        );
+      }
+    }, [edit.position?.keyId, edit.position?.language]);
+
+    // memoize so we keep the same reference when possible
+    const [selectedLanguages, translationsLanguages] = useMemo(
+      () => [
+        putBaseLangFirst(
+          translations.query?.languages || translations.selectedLanguages,
+          props.baseLang
+        ),
+        putBaseLangFirst(translations.selectedLanguages, props.baseLang),
+      ],
+      [
+        translations.query?.languages,
+        translations.selectedLanguages,
+        props.baseLang,
+      ]
+    );
+
     const dataReady = Boolean(languages.data && translations.fixedTranslations);
 
     const state = {
       dataReady,
+      // changes immediately when user clicks
+      selectedLanguages,
       translations: dataReady ? translations.fixedTranslations : undefined,
-      translationsLanguages: translations.selectedLanguages,
+      // changes after translations are loaded
+      translationsLanguages,
       translationsTotal:
         translations.totalCount !== undefined
           ? translations.totalCount
@@ -523,8 +569,6 @@ export const [
       filters: translations.filters,
       cursor: edit.position,
       selection,
-      selectedLanguages:
-        translations.query?.languages || translations.selectedLanguages,
       view: view as ViewType,
       elementsRef,
       reactList,

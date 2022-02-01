@@ -6,6 +6,7 @@ import {
   ARROWS,
   getCurrentlyFocused,
   Position,
+  serializeElPosition,
   translationsNavigator,
 } from './tools';
 import {
@@ -32,7 +33,8 @@ export const useContextShortcuts = () => {
   const onKeyRef = useRef<(e: KeyboardEvent) => void>();
   const availableActions = useRef<() => ShortcutsArrayType[]>();
   const dispatch = useTranslationsDispatch();
-  const cursor = useTranslationsSelector((c) => c.cursor);
+  const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
+  const cursorLanguage = useTranslationsSelector((c) => c.cursor?.language);
   const view = useTranslationsSelector((c) => c.view);
   const permissions = useProjectPermissions();
   const elementsRef = useTranslationsSelector((c) => c.elementsRef);
@@ -62,12 +64,7 @@ export const useContextShortcuts = () => {
       );
       const nextLocation = navigator.getNextLocation(e.key as any);
       if (nextLocation) {
-        const el = elementsRef.current?.get(
-          JSON.stringify({
-            keyId: nextLocation.keyId,
-            language: nextLocation.language,
-          })
-        );
+        const el = elementsRef.current?.get(serializeElPosition(nextLocation));
         if (el !== document.activeElement) {
           el?.focus();
           el?.scrollIntoView({
@@ -161,11 +158,11 @@ export const useContextShortcuts = () => {
     }
 
     // if editor is open, don't apply shortcuts
-    if (cursor) {
+    if (cursorKeyId) {
       const current = getCurrentlyFocused(elementsRef.current);
       if (
-        current?.keyId === cursor.keyId &&
-        current?.language === cursor.language
+        current?.keyId === cursorKeyId &&
+        current?.language === cursorLanguage
       ) {
         return false;
       }
@@ -211,10 +208,7 @@ export const useContextShortcuts = () => {
     [availableActions]
   );
 
-  const onKey = useCallback(
-    (e: KeyboardEvent) => onKeyRef.current?.(e),
-    [onKeyRef]
-  );
+  const onKey = useCallback((e: KeyboardEvent) => onKeyRef.current?.(e), []);
 
   return { getAvailableActions, onKey };
 };

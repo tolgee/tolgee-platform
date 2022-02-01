@@ -52,6 +52,10 @@ export interface paths {
   "/v2/projects/{projectId}/import/apply": {
     put: operations["applyImport"];
   };
+  "/v2/projects/{projectId}/auto-translation-settings": {
+    get: operations["getAutoTranslationSettings"];
+    put: operations["setAutoTranslationSettings"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/set-state/{state}": {
     put: operations["setTranslationState"];
   };
@@ -544,6 +548,12 @@ export interface components {
     ProjectInviteUserDto: {
       type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
+    AutoTranslationSettingsDto: {
+      /** If true, new keys will be automatically translated using translation memory when 100% match is found */
+      usingTranslationMemory: boolean;
+      /** If true, new keys will be automatically translated using primary machine translation service.When "usingTranslationMemory" is enabled, it tries to translate it with translation memory first. */
+      usingMachineTranslation: boolean;
+    };
     TranslationCommentModel: {
       /** Id of translation comment record */
       id: number;
@@ -873,7 +883,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -884,6 +893,7 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1314,6 +1324,65 @@ export interface operations {
       };
     };
   };
+  getMachineTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelLanguageConfigItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setMachineTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelLanguageConfigItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetMachineTranslationSettingsDto"];
+      };
+    };
+  };
   tagKey: {
     parameters: {
       path: {
@@ -1615,6 +1684,65 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+  };
+  getAutoTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["AutoTranslationSettingsDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setAutoTranslationSettings: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["AutoTranslationSettingsDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AutoTranslationSettingsDto"];
       };
     };
   };
@@ -4394,6 +4522,75 @@ export interface operations {
       };
     };
   };
+  getSelectAllKeyIds: {
+    parameters: {
+      query: {
+        /**
+         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
+         *
+         * When used with multiple states for same language it is applied with logical OR.
+         *
+         * When used with multiple languages, it is applied with logical AND.
+         */
+        filterState?: string[];
+        /**
+         * Languages to be contained in response.
+         *
+         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
+         */
+        languages?: string[];
+        /** String to search in key name or translation text */
+        search?: string;
+        /** Selects only one key with provided name */
+        filterKeyName?: string;
+        /** Selects only one key with provided id */
+        filterKeyId?: number[];
+        /** Selects only keys, where translation is missing in any language */
+        filterUntranslatedAny?: boolean;
+        /** Selects only keys, where translation is provided in any language */
+        filterTranslatedAny?: boolean;
+        /** Selects only keys, where translation is missing in specified language */
+        filterUntranslatedInLang?: string;
+        /** Selects only keys, where translation is provided in specified language */
+        filterTranslatedInLang?: string;
+        /** Selects only keys with screenshots */
+        filterHasScreenshot?: boolean;
+        /** Selects only keys without screenshots */
+        filterHasNoScreenshot?: boolean;
+        /** Selects only keys with provided tag */
+        filterTag?: string[];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SelectAllResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getTransferOptions: {
     parameters: {
       query: {
@@ -4822,6 +5019,28 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getUserCredits: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CreditBalanceModel"];
         };
       };
       /** Bad Request */

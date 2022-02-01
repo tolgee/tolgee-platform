@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => {
     container: {
       display: 'flex',
       position: 'relative',
-      margin: '10px 0px 100px 0px',
+      margin: '10px 0px 250px 0px',
       borderLeft: 0,
       borderRight: 0,
       background: 'white',
@@ -43,16 +43,6 @@ export const TranslationsList = () => {
   );
   const isFetchingMore = useTranslationsSelector((v) => v.isFetchingMore);
   const hasMoreToFetch = useTranslationsSelector((v) => v.hasMoreToFetch);
-  const editKeyId = useTranslationsSelector((v) => v.cursor?.keyId);
-
-  useEffect(() => {
-    // scroll to currently edited item
-    if (editKeyId) {
-      reactListRef.current?.scrollAround(
-        translations!.findIndex((t) => t.keyId === editKeyId)
-      );
-    }
-  }, [editKeyId]);
 
   const [columnSizes, setColumnSizes] = useState([1, 3]);
 
