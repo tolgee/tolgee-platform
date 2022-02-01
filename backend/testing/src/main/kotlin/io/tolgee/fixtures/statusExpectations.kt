@@ -34,7 +34,10 @@ val ResultActions.andAssertThatJson
   get() = assertThatJson(this.andReturn().response.contentAsString)
 
 fun ResultActions.andAssertThatJson(jsonAssert: JsonAssert.ConfigurableJsonAssert.() -> Unit): ResultActions {
-  jsonAssert(assertThatJson(this.andGetContentAsString))
+  tryPrettyPrinting {
+    jsonAssert(assertThatJson(this.andGetContentAsString))
+    return@tryPrettyPrinting this
+  }
   return this
 }
 

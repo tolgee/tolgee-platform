@@ -110,7 +110,17 @@ class V2TranslationsController(
       projectHolder.project.id,
       PathDTO.fromFullPath(dto.key)
     ).orElseThrow { NotFoundException() }
-    val translations = translationService.setForKey(key, dto.translations)
+
+    val modifiedTranslations = translationService.setForKey(key, dto.translations)
+
+    val translations = dto.languagesToReturn
+      ?.let { languagesToReturn ->
+        key.translations
+          .filter { languagesToReturn.contains(it.language.tag) }
+          .associateBy { it.language.tag }
+      }
+      ?: modifiedTranslations
+
     return getSetTranslationsResponse(key, translations)
   }
 
