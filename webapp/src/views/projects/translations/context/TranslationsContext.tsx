@@ -299,18 +299,20 @@ export const [
             if (language) {
               // update translation
               await edit
-                .mutateTranslation({
-                  ...action.payload,
-                  value: value as string,
-                  keyId,
-                  language,
-                })
+                .mutateTranslation(
+                  {
+                    ...action.payload,
+                    value: value as string,
+                    keyId,
+                    language,
+                  },
+                  selectedLanguages
+                )
                 .then((data) => {
                   if (data) {
-                    return translations.updateTranslation(
-                      keyId,
-                      language,
-                      data?.translations[language]
+                    return Object.entries(data.translations).map(
+                      ([lang, translation]) =>
+                        translations.updateTranslation(keyId, lang, translation)
                     );
                   }
                 });

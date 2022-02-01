@@ -126,12 +126,14 @@ export const useTranslationsInfinite = (props: Props) => {
           setFixedTranslations(flatKeys);
           setManuallyInserted(0);
         } else {
-          // add only nonexistent keys
-          const newKeys =
-            flatKeys.filter(
-              (k) => !fixedTranslations?.find((ft) => ft.keyId === k.keyId)
-            ) || [];
-          setFixedTranslations([...(fixedTranslations || []), ...newKeys]);
+          setFixedTranslations((fixedTranslations) => {
+            // add only nonexistent keys
+            const newKeys =
+              flatKeys.filter(
+                (k) => !fixedTranslations?.find((ft) => ft.keyId === k.keyId)
+              ) || [];
+            return [...(fixedTranslations || []), ...newKeys];
+          });
         }
       },
     },
@@ -197,7 +199,7 @@ export const useTranslationsInfinite = (props: Props) => {
     keyId: number,
     value: Partial<KeyWithTranslationsModelType>
   ) => {
-    setFixedTranslations(
+    setFixedTranslations((fixedTranslations) =>
       fixedTranslations?.map((k) => {
         if (k.keyId === keyId) {
           return { ...k, ...value };
@@ -213,7 +215,7 @@ export const useTranslationsInfinite = (props: Props) => {
     language: string,
     value: Partial<TranslationModel> | undefined
   ) => {
-    setFixedTranslations(
+    setFixedTranslations((fixedTranslations) =>
       fixedTranslations?.map((k) => {
         if (k.keyId === keyId) {
           return {

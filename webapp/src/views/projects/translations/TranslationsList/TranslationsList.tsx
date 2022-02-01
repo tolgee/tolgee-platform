@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => {
     container: {
       display: 'flex',
       position: 'relative',
-      margin: '10px 0px 250px 0px',
+      margin: '10px 0px 100px 0px',
       borderLeft: 0,
       borderRight: 0,
       background: 'white',
@@ -43,6 +43,7 @@ export const TranslationsList = () => {
   );
   const isFetchingMore = useTranslationsSelector((v) => v.isFetchingMore);
   const hasMoreToFetch = useTranslationsSelector((v) => v.hasMoreToFetch);
+  const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
 
   const [columnSizes, setColumnSizes] = useState([1, 3]);
 
@@ -108,6 +109,7 @@ export const TranslationsList = () => {
   return (
     <div
       className={classes.container}
+      style={{ marginBottom: cursorKeyId ? 500 : undefined }}
       ref={tableRef}
       data-cy="translations-view-list"
     >

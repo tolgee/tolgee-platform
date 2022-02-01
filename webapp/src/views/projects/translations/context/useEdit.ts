@@ -97,7 +97,10 @@ export const useEdit = ({ projectId, translations }: Props) => {
     }
   };
 
-  const mutateTranslation = async (payload: SetEditType) => {
+  const mutateTranslation = async (
+    payload: SetEditType,
+    languagesToReturn?: string[]
+  ) => {
     const { language, value, keyId } = payload;
     const keyName = getTranslationKeyName(keyId);
 
@@ -111,6 +114,7 @@ export const useEdit = ({ projectId, translations }: Props) => {
                 translations: {
                   [language!]: value,
                 },
+                languagesToReturn,
               },
             },
           })

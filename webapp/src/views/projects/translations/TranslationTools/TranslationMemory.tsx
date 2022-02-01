@@ -27,19 +27,23 @@ const useStyles = makeStyles((theme) => ({
       "similarity source"
     `,
     fontSize: 14,
-    color: theme.palette.text.secondary,
     cursor: 'pointer',
+    color: theme.palette.text.primary,
+    transition: 'all 0.1s ease-in-out',
+    transitionProperty: 'background color',
     '&:hover': {
       background: theme.palette.extraLightBackground.main,
+      color: theme.palette.primary.main,
     },
   },
   target: {
     gridArea: 'target',
-    color: theme.palette.primary.main,
+    fontSize: 15,
   },
   base: {
     gridArea: 'base',
-    color: theme.palette.text.primary,
+    fontStyle: 'italic',
+    color: theme.palette.text.secondary,
     fontSize: 13,
   },
   similarity: {
@@ -56,6 +60,7 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    color: theme.palette.text.secondary,
   },
 }));
 
@@ -111,7 +116,10 @@ export const TranslationMemory: React.FC<Props> = ({ data, operationsRef }) => {
       ) : (
         <TabMessage
           type="placeholder"
-          message={t('translation_tools_nothing_found')}
+          message={t({
+            key: 'translation_tools_nothing_found',
+            defaultValue: 'Nothing found',
+          })}
         />
       )}
     </div>
