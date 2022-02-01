@@ -15,17 +15,19 @@ const useStyles = makeStyles((theme) => ({
     display: 'grid',
     gap: theme.spacing(0, 1),
     gridTemplateColumns: '20px 1fr',
-    color: theme.palette.primary.main,
     cursor: 'pointer',
+    transition: 'all 0.1s ease-in-out',
+    transitionProperty: 'background color',
     '&:hover': {
       background: theme.palette.extraLightBackground.main,
+      color: theme.palette.primary.main,
     },
   },
   source: {
     marginTop: 3,
   },
   value: {
-    fontSize: 14,
+    fontSize: 15,
     alignSelf: 'center',
   },
 }));

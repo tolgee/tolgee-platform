@@ -87,6 +87,8 @@ declare namespace DataCy {
         "invite-generate-input-code" |
         "language-delete-button" |
         "language-modify-form" |
+        "languages-auto-machine-translation" |
+        "languages-auto-translation-memory" |
         "languages-create-autocomplete-field" |
         "languages-create-autocomplete-suggested-option" |
         "languages-create-cancel-prepared-button" |
@@ -130,7 +132,6 @@ declare namespace DataCy {
         "project-settings-button" |
         "project-settings-languages" |
         "project-settings-languages-list-edit-button" |
-        "project-settings-languages-list-item" |
         "project-settings-languages-list-name" |
         "project-settings-transfer-button" |
         "project-states-bar-bar" |

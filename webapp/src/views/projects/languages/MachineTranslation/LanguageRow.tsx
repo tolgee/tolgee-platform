@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
   lang: LanguageModel | null;
   providers: string[];
-  disabled: boolean;
+  disabled?: boolean;
 };
 
 export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
@@ -43,9 +43,15 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
   const getProviderName = (provider) => {
     switch (provider) {
       case 'default':
-        return t('project_languages_default_provider_short');
+        return t({
+          key: 'project_languages_default_provider_short',
+          defaultValue: 'Default',
+        });
       case 'none':
-        return t('project_languages_primary_none');
+        return t({
+          key: 'project_languages_primary_none',
+          defaultValue: 'None',
+        });
       case 'GOOGLE':
         return 'Google';
       default:
@@ -61,7 +67,10 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
         {lang ? (
           <LanguageItem language={lang} />
         ) : (
-          t('project_languages_default_providers')
+          t({
+            key: 'project_languages_default_providers',
+            defaultValue: 'Default providers',
+          })
         )}
       </div>
       {providers.map((provider) => (

@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
   tab: {
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing(0.5),
+    gap: theme.spacing(1),
     padding: theme.spacing(0.5, 1),
     background: theme.palette.extraLightBackground.main,
     borderBottom: `1px solid ${theme.palette.extraLightDivider.main}`,
@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    fontSize: 13,
+    fontSize: 14,
   },
   content: {},
 }));

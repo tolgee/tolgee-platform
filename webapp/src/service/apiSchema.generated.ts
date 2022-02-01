@@ -576,6 +576,12 @@ export interface components {
       key: string;
       /** Object mapping language tag to translation */
       translations: { [key: string]: string };
+      /**
+       * List of languages to return translations for.
+       *
+       * If not provided, only modified translation will be provided.
+       */
+      languagesToReturn?: string[];
     };
     SetTranslationsResponseModel: {
       /** Id of key record */
@@ -883,6 +889,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -893,7 +900,6 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;

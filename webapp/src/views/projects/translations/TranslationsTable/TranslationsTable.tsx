@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => {
   return {
     container: {
       position: 'relative',
-      margin: '10px 0px 250px 0px',
+      margin: '10px 0px 100px 0px',
       borderLeft: 0,
       borderRight: 0,
       background: 'white',
@@ -67,6 +67,7 @@ export const TranslationsTable = () => {
   const languages = useTranslationsSelector((v) => v.languages);
   const isFetchingMore = useTranslationsSelector((v) => v.isFetchingMore);
   const hasMoreToFetch = useTranslationsSelector((v) => v.hasMoreToFetch);
+  const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
 
   const languageCols = useMemo(() => {
     if (languages && translationsLanguages) {
@@ -143,6 +144,7 @@ export const TranslationsTable = () => {
   return (
     <div
       className={classes.container}
+      style={{ marginBottom: cursorKeyId ? 500 : undefined }}
       ref={tableRef}
       data-cy="translations-view-table"
     >

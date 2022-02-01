@@ -14,7 +14,7 @@ import { MachineTranslation } from './MachineTranslation/MachineTranslation';
 import { LanguageItem } from './LanguageItem';
 import { useTableStyles } from './tableStyles';
 import clsx from 'clsx';
-import { MTNewKeys } from './MTNewKeys/MTNewKeys';
+import { AutoTranslations } from './AutoTranslations/AutoTranslations';
 
 export const ProjectSettingsLanguages = () => {
   const tableClasses = useTableStyles();
@@ -104,7 +104,7 @@ export const ProjectSettingsLanguages = () => {
           <T>machine_translation_new_keys_title</T>
         </Typography>
       </Box>
-      <MTNewKeys />
+      <AutoTranslations />
     </Box>
   );
 };

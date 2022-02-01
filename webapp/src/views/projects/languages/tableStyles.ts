@@ -10,11 +10,14 @@ export const useTableStyles = makeStyles((theme) => ({
     position: 'relative',
   },
   topRow: {
-    background: theme.palette.lightBackground.main,
+    display: 'flex',
+    background: theme.palette.extraLightBackground.main,
     alignSelf: 'stretch',
     fontSize: 13,
     minWidth: 60,
+    height: 24,
     padding: theme.spacing(0, 1),
+    alignItems: 'center',
   },
   firstCell: {
     paddingLeft: theme.spacing(2),

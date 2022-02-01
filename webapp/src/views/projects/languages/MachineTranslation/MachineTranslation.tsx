@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Box, makeStyles, Tooltip } from '@material-ui/core';
-import { Formik } from 'formik';
+import { useEffect, useRef, useState } from 'react';
+import { Box, makeStyles, Tooltip, Typography } from '@material-ui/core';
+import { Formik, FormikProps } from 'formik';
 import clsx from 'clsx';
 import { useTranslate } from '@tolgee/react';
 
-import { useApiQuery, useApiMutation } from 'tg.service/http/useQueryApi';
+import {
+  useApiQuery,
+  useApiMutation,
+  matchUrlPrefix,
+} from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { useConfig } from 'tg.hooks/useConfig';
@@ -13,15 +17,13 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useTableStyles } from '../tableStyles';
 import { ExpandLess, ExpandMore, Help } from '@material-ui/icons';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
+import { useQueryClient } from 'react-query';
 
 type SetMachineTranslationSettingsDto =
   components['schemas']['SetMachineTranslationSettingsDto'];
 
 type MachineTranslationLanguagePropsDto =
   components['schemas']['MachineTranslationLanguagePropsDto'];
-
-type CollectionModelLanguageConfigItemModel =
-  components['schemas']['CollectionModelLanguageConfigItemModel'];
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -34,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   helpIcon: {
-    fontSize: 14,
+    fontSize: 15,
   },
   toggle: {
     display: 'flex',
@@ -47,6 +49,9 @@ const useStyles = makeStyles((theme) => ({
       background: theme.palette.lightBackground.main,
     },
   },
+  hint: {
+    color: theme.palette.text.secondary,
+  },
   loading: {
     position: 'absolute',
     top: 0,
@@ -56,34 +61,38 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const MachineTranslation = () => {
+  const queryClient = useQueryClient();
   const config = useConfig();
   const classes = useStyles();
   const tableClasses = useTableStyles();
   const t = useTranslate();
   const project = useProject();
-  const formInstance = useRef(0);
-
+  const formRef = useRef<FormikProps<any>>();
   const [expanded, setExpanded] = useState(false);
+  const [formInstance, setFormInstance] = useState(0);
 
   const languages = useApiQuery({
     url: '/v2/projects/{projectId}/languages',
     method: 'get',
     path: { projectId: project.id },
     query: { size: 1000 },
+    options: {
+      onSuccess() {
+        setFormInstance((i) => i + 1);
+      },
+    },
   });
-
-  const [newSettingsData, setNewSettingsData] =
-    useState<CollectionModelLanguageConfigItemModel>();
 
   const settings = useApiQuery({
     url: '/v2/projects/{projectId}/machine-translation-service-settings',
     method: 'get',
     path: { projectId: project.id },
-    options: {
-      onSuccess(data) {
-        setNewSettingsData(data);
-      },
-    },
+  });
+
+  const creditBalance = useApiQuery({
+    url: '/v2/projects/{projectId}/machine-translation-credit-balance',
+    method: 'get',
+    path: { projectId: project.id },
   });
 
   const updateSettings = useApiMutation({
@@ -91,19 +100,33 @@ export const MachineTranslation = () => {
     method: 'put',
   });
 
-  const applyUpdate = (data: SetMachineTranslationSettingsDto) =>
-    updateSettings
+  const lastUpdateRef = useRef<Promise<any>>();
+  const applyUpdate = (data: SetMachineTranslationSettingsDto) => {
+    const promise = updateSettings
       .mutateAsync({
         path: { projectId: project.id },
         content: { 'application/json': data },
       })
       .then((data) => {
-        setNewSettingsData(data);
+        if (lastUpdateRef.current === promise) {
+          queryClient.setQueriesData(
+            matchUrlPrefix(
+              '/v2/projects/{projectId}/machine-translation-service-settings'
+            ),
+            {
+              _version: Math.random(), // force new instance
+              ...data,
+            }
+          );
+        }
+      })
+      .catch(() => {
+        setFormInstance((i) => i + 1);
       });
+    lastUpdateRef.current = promise;
+  };
 
-  const settingsData = newSettingsData || settings.data;
-
-  const baseSetting = settingsData?._embedded?.languageConfigs?.find(
+  const baseSetting = settings.data?._embedded?.languageConfigs?.find(
     (item) => item.targetLanguageId === null
   );
 
@@ -121,7 +144,7 @@ export const MachineTranslation = () => {
   > = {};
 
   languages.data?._embedded?.languages?.forEach((lang) => {
-    const config = settingsData?._embedded?.languageConfigs?.find(
+    const config = settings.data?._embedded?.languageConfigs?.find(
       (langSettings) => langSettings.targetLanguageId === lang.id
     );
 
@@ -139,16 +162,12 @@ export const MachineTranslation = () => {
     languages: langDefaults,
   };
 
-  const isFetching = settings.isFetching || languages.isFetching;
+  const isFetching =
+    settings.isFetching || languages.isFetching || creditBalance.isFetching;
 
   useGlobalLoading(isFetching);
 
   const isUpdating = updateSettings.isLoading;
-
-  useMemo(() => {
-    // resetting form when data changes
-    return (formInstance.current += 1);
-  }, [settingsData, languages.data]);
 
   const formatLangSettings = (
     lang: string | null,
@@ -171,18 +190,22 @@ export const MachineTranslation = () => {
   };
 
   useEffect(() => {
-    if (Number(settingsData?._embedded?.languageConfigs?.length) > 1) {
+    formRef.current?.resetForm();
+  }, [settings.data]);
+
+  useEffect(() => {
+    if (Number(settings.data?._embedded?.languageConfigs?.length) > 1) {
       setExpanded(true);
     }
-  }, [settingsData]);
+  }, [settings.data]);
 
   return (
     <>
-      {settingsData && languages.data && (
+      {settings.data && languages.data && creditBalance.data && (
         <div className={classes.container}>
           <div className={tableClasses.table} style={{ gridTemplateColumns }}>
             <Formik
-              key={formInstance.current}
+              key={formInstance}
               initialValues={initialValues}
               enableReinitialize={true}
               onSubmit={() => {}}
@@ -208,48 +231,61 @@ export const MachineTranslation = () => {
               }}
               validateOnChange
             >
-              <>
-                <div className={tableClasses.topRow} />
-                {providers.map((provider) => (
-                  <div
-                    key={provider}
-                    className={clsx(tableClasses.topRow, tableClasses.centered)}
-                  >
-                    {provider}
-                  </div>
-                ))}
-                <div
-                  className={clsx(tableClasses.topRow, tableClasses.centered)}
-                >
-                  <Tooltip title={t('project_languages_primary_provider_hint')}>
-                    <Box className={classes.primaryProvider}>
-                      <div>{t('project_languages_primary_provider')}</div>
-                      <Help className={classes.helpIcon} />
-                    </Box>
-                  </Tooltip>
-                </div>
-                <LanguageRow
-                  lang={null}
-                  disabled={isUpdating || isFetching}
-                  providers={providers}
-                />
-
-                {expanded && (
+              {(form) => {
+                formRef.current = form;
+                return (
                   <>
-                    <div className={tableClasses.divider} />
-                    {languages.data?._embedded?.languages
-                      ?.filter(({ base }) => !base)
-                      .map((lang) => (
-                        <LanguageRow
-                          key={lang.id}
-                          lang={lang}
-                          disabled={isUpdating || isFetching}
-                          providers={providers}
-                        />
-                      ))}
+                    <div className={tableClasses.topRow} />
+                    {providers.map((provider) => (
+                      <div
+                        key={provider}
+                        className={clsx(
+                          tableClasses.topRow,
+                          tableClasses.centered
+                        )}
+                      >
+                        {provider}
+                      </div>
+                    ))}
+                    <div
+                      className={clsx(
+                        tableClasses.topRow,
+                        tableClasses.centered
+                      )}
+                    >
+                      <Tooltip
+                        title={t('project_languages_primary_provider_hint')}
+                      >
+                        <Box className={classes.primaryProvider}>
+                          <div>
+                            {t({
+                              key: 'project_languages_primary_provider',
+                              defaultValue: 'Primary',
+                            })}
+                          </div>
+                          <Help className={classes.helpIcon} />
+                        </Box>
+                      </Tooltip>
+                    </div>
+                    <LanguageRow lang={null} providers={providers} />
+
+                    {expanded && (
+                      <>
+                        <div className={tableClasses.divider} />
+                        {languages.data?._embedded?.languages
+                          ?.filter(({ base }) => !base)
+                          .map((lang) => (
+                            <LanguageRow
+                              key={lang.id}
+                              lang={lang}
+                              providers={providers}
+                            />
+                          ))}
+                      </>
+                    )}
                   </>
-                )}
-              </>
+                );
+              }}
             </Formik>
             <div
               className={classes.toggle}
@@ -262,6 +298,18 @@ export const MachineTranslation = () => {
               <SmoothProgress loading={isUpdating} />
             </div>
           </div>
+          <Box my={1} display="flex" flexDirection="column">
+            {creditBalance.data && (
+              <Typography variant="body1">
+                {t('project_languages_credit_balance', {
+                  balance: String(creditBalance.data.creditBalance / 100),
+                })}
+              </Typography>
+            )}
+            <Typography variant="caption" className={classes.hint}>
+              {t('project_languages_credit_balance_hint')}
+            </Typography>
+          </Box>
         </div>
       )}
     </>

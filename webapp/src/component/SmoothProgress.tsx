@@ -31,6 +31,9 @@ export const SmoothProgress: React.FC<Props> = ({ loading, className }) => {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
     setStateLoading(Boolean(loading));
+    if (loading === true) {
+      setProgress(0);
+    }
   }, [loading]);
 
   useEffect(() => {
