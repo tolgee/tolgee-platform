@@ -79,8 +79,11 @@ class MtServiceConfigService(
       val entity = storedConfigs.find { it.targetLanguage?.id == languageSetting.targetLanguageId }
         ?: MtServiceConfig().apply {
           this.project = project
-          this.targetLanguage = allLanguages.find { languageSetting.targetLanguageId == it.id }
-            ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+          this.targetLanguage = languageSetting.targetLanguageId
+            ?.let {
+              allLanguages.find { languageSetting.targetLanguageId == it.id }
+                ?: throw NotFoundException(Message.LANGUAGE_NOT_FOUND)
+            }
         }
 
       entity.primaryService = languageSetting.primaryService
