@@ -50,7 +50,7 @@ class MtCreditsController(
   @Operation(summary = "Returns machine translation credit balance for organization")
   fun getOrganizationCredits(@PathVariable organizationId: Long): CreditBalanceModel {
     organizationRoleService.checkUserIsMemberOrOwner(organizationId)
-    organizationService.get(organizationId)?.let { o ->
+    organizationService.find(organizationId)?.let { o ->
       return CreditBalanceModel(mtCreditBucketService.getCreditBalance(o))
     } ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
   }

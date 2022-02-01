@@ -15,7 +15,7 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
 
   @Query(
     """select o.id as id, o.name as name, o.description as description, o.slug as slug,
-        o.basePermissions as basePermissions, r.type as currentUserRole 
+        o.basePermissions as basePermissions, r.type as currentUserRole, o.avatarHash as avatarHash
         from Organization o 
         join OrganizationRole r on r.user.id = :userId 
         and r.organization = o and (r.type = :roleType or :roleType is null)

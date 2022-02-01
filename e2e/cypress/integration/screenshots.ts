@@ -4,7 +4,7 @@ import {
   deleteProject,
   login,
   setTranslations,
-} from '../common/apiCalls';
+} from '../common/apiCalls/common';
 import { HOST } from '../common/constants';
 import 'cypress-file-upload';
 import { getPopover } from '../common/shared';

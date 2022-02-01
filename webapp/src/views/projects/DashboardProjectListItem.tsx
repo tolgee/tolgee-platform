@@ -20,13 +20,16 @@ import { useConfig } from 'tg.hooks/useConfig';
 import { TranslationIcon } from 'tg.component/CustomIcons';
 import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
 import { stopBubble } from 'tg.fixtures/eventHandler';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
 const useStyles = makeStyles((theme) => ({
   container: {
     display: 'grid',
-    gridTemplateColumns: '2fr 100px 5fr 1.5fr 70px',
+    gridTemplateColumns: `${
+      theme.spacing(2) + 50
+    }px 150px 100px 5fr 1.5fr 70px`,
     gridTemplateAreas: `
-      "title keyCount stats languages  controls"
+      "image title keyCount stats languages  controls"
     `,
     padding: theme.spacing(3, 2.5),
     cursor: 'pointer',
@@ -54,6 +57,14 @@ const useStyles = makeStyles((theme) => ({
         "languages languages"
         "stats     stats"
       `,
+    },
+  },
+  image: {
+    gridArea: 'image',
+    overflow: 'hidden',
+    marginRight: theme.spacing(2),
+    [theme.breakpoints.down('xs')]: {
+      marginRight: 0,
     },
   },
   title: {
@@ -132,6 +143,17 @@ const DashboardProjectListItem = (
         )
       }
     >
+      <div className={classes.image}>
+        <AvatarImg
+          owner={{
+            name: p.name,
+            avatar: p.avatar,
+            type: 'PROJECT',
+            id: p.id,
+          }}
+          size={50}
+        />
+      </div>
       <div className={classes.title}>
         <Typography variant="h3" className={classes.projectName}>
           {p.name}

@@ -28,12 +28,12 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
 
   @BeforeAll
   fun before() {
-    initialScreenshotUrl = tolgeeProperties.screenshotsUrl
+    initialScreenshotUrl = tolgeeProperties.fileStorageUrl
   }
 
   @AfterAll
   fun after() {
-    tolgeeProperties.screenshotsUrl = initialScreenshotUrl
+    tolgeeProperties.fileStorageUrl = initialScreenshotUrl
   }
 
   @Test
@@ -88,7 +88,7 @@ class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   @Test
   @ProjectJWTAuthTestMethod
   fun `returns correct fileUrl when absolute url is set`() {
-    tolgeeProperties.screenshotsUrl = "http://hello.com/screenshots"
+    tolgeeProperties.fileStorageUrl = "http://hello.com"
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     screenshotService.store(screenshotFile, key)
 

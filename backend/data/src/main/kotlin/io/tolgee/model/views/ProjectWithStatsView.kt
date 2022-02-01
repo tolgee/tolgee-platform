@@ -15,6 +15,7 @@ class ProjectWithStatsView(
   override val name: String = projectView.name
   override val description: String? = projectView.description
   override val slug: String? = projectView.slug
+  override val avatarHash: String? = projectView.avatarHash
   override val userOwner: UserAccount? = projectView.userOwner
   override val baseLanguage: Language? = projectView.baseLanguage
   override val organizationOwnerName: String? = projectView.organizationOwnerName

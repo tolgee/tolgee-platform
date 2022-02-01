@@ -1,8 +1,3 @@
-import {
-  getAnyContainingText,
-  getClosestContainingText,
-} from '../../common/xPath';
-import { deleteProject } from '../../common/apiCalls';
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import {
   deleteLanguage,
@@ -16,6 +11,11 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
+import { deleteProject } from '../../common/apiCalls/common';
+import {
+  getAnyContainingText,
+  getClosestContainingText,
+} from '../../common/xPath';
 
 describe('Translations Base', () => {
   let project: ProjectDTO = null;

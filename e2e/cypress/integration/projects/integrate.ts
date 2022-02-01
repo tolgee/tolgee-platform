@@ -1,13 +1,13 @@
+import { HOST } from '../../common/constants';
+import 'cypress-file-upload';
+import { gcy, selectInSelect } from '../../common/shared';
+import { ApiKeyDTO } from '../../../../webapp/src/service/response.types';
 import {
   createApiKey,
   createTestProject,
   deleteAllProjectApiKeys,
   login,
-} from '../../common/apiCalls';
-import { HOST } from '../../common/constants';
-import 'cypress-file-upload';
-import { gcy, selectInSelect } from '../../common/shared';
-import { ApiKeyDTO } from '../../../../webapp/src/service/response.types';
+} from '../../common/apiCalls/common';
 
 describe('Integrate view', () => {
   let projectId: number;
@@ -102,13 +102,13 @@ describe('Integrate view', () => {
     });
 
     it('can create new API key when some API keys exist', () => {
-      createApiKeysAndSelectOne(projectId).then((created) => {
+      createApiKeysAndSelectOne(projectId).then(() => {
         cy.intercept('POST', '/v2/api-keys').as('create');
         createNewApiKey();
         cy.wait('@create').then((i) => {
           const created = i.response.body;
           gcy('integrate-api-key-selector-select').contains(created.key);
-          getApiKeySelectValue().then((selected) => {
+          getApiKeySelectValue().then(() => {
             cy.wrap(created).its('id').should('eq', created.id);
           });
         });

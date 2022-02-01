@@ -1,17 +1,14 @@
-import {
-  cleanOrganizationData,
-  createOrganizationData,
-  login,
-} from '../../common/apiCalls';
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import { clickGlobalSave, gcy, goToPage } from '../../common/shared';
+import { organizationTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Organization List', () => {
   beforeEach(() => {
     login();
-    cleanOrganizationData();
-    createOrganizationData();
+    organizationTestData.clean();
+    organizationTestData.generate();
     visit();
   });
 
@@ -131,7 +128,7 @@ describe('Organization List', () => {
   });
 
   after(() => {
-    cleanOrganizationData();
+    organizationTestData.clean();
   });
 
   const visit = () => {

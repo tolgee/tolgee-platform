@@ -1,8 +1,3 @@
-import {
-  cleanImportData,
-  generateBaseImportData,
-  login,
-} from '../../common/apiCalls';
 import 'cypress-file-upload';
 import { gcy } from '../../common/shared';
 import {
@@ -10,12 +5,14 @@ import {
   getLanguageRow,
   visitImport,
 } from '../../common/import';
+import { importTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Import Adding files', () => {
   beforeEach(() => {
-    cleanImportData();
+    importTestData.clean();
 
-    generateBaseImportData().then((project) => {
+    importTestData.generateBase().then((project) => {
       login('franta');
       visitImport(project.body.id);
     });
@@ -133,6 +130,6 @@ describe('Import Adding files', () => {
   });
 
   after(() => {
-    cleanImportData();
+    importTestData.clean();
   });
 });

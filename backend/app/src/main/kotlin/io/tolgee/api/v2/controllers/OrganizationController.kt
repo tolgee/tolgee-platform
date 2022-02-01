@@ -28,6 +28,7 @@ import io.tolgee.model.views.OrganizationView
 import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
@@ -40,6 +41,7 @@ import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -51,7 +53,9 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 import javax.validation.Valid
 
 @RestController
@@ -73,7 +77,8 @@ class OrganizationController(
   private val projectService: ProjectService,
   private val projectModelAssembler: ProjectModelAssembler,
   private val invitationService: InvitationService,
-  private val organizationInvitationModelAssembler: OrganizationInvitationModelAssembler
+  private val organizationInvitationModelAssembler: OrganizationInvitationModelAssembler,
+  private val imageUploadService: ImageUploadService
 ) {
 
   @PostMapping
@@ -95,21 +100,17 @@ class OrganizationController(
   @GetMapping("/{id:[0-9]+}")
   @Operation(summary = "Returns organization by ID")
   fun get(@PathVariable("id") id: Long): OrganizationModel? {
-    organizationService.get(id)?.let {
-      val roleType = organizationRoleService.getTypeOrThrow(id)
-      return OrganizationView.of(it, roleType).toModel()
-    }
-      ?: throw NotFoundException()
+    val organization = organizationService.get(id)
+    val roleType = organizationRoleService.getType(id)
+    return OrganizationView.of(organization, roleType).toModel()
   }
 
   @GetMapping("/{slug:.*[a-z].*}")
   @Operation(summary = "Returns organization by address part")
   fun get(@PathVariable("slug") slug: String): OrganizationModel {
-    organizationService.get(slug)?.let {
-      val roleType = organizationRoleService.getTypeOrThrow(it.id)
-      return OrganizationView.of(it, roleType).toModel()
-    }
-      ?: throw NotFoundException()
+    val organization = organizationService.get(slug)
+    val roleType = organizationRoleService.getType(organization.id)
+    return OrganizationView.of(organization, roleType).toModel()
   }
 
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -151,7 +152,7 @@ class OrganizationController(
   @PutMapping("/{id:[0-9]+}/leave")
   @Operation(summary = "Removes current user from organization")
   fun leaveOrganization(@PathVariable("id") id: Long) {
-    organizationService.get(id)?.let {
+    organizationService.find(id)?.let {
       if (!organizationService.isThereAnotherOwner(id)) {
         throw ValidationException(io.tolgee.constants.Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
       }
@@ -188,7 +189,7 @@ class OrganizationController(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?
   ): PagedModel<ProjectModel> {
-    return organizationService.get(id)?.let {
+    return organizationService.find(id)?.let {
       organizationRoleService.checkUserIsMemberOrOwner(it.id)
       projectService.findAllInOrganization(it.id, pageable, search).let { projects ->
         pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
@@ -203,7 +204,7 @@ class OrganizationController(
     @ParameterObject pageable: Pageable,
     @RequestParam("search") search: String?
   ): PagedModel<ProjectModel> {
-    return organizationService.get(slug)?.let {
+    return organizationService.find(slug)?.let {
       organizationRoleService.checkUserIsMemberOrOwner(it.id)
       projectService.findAllInOrganization(it.id, pageable, search).let { projects ->
         pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
@@ -219,7 +220,7 @@ class OrganizationController(
   ): OrganizationInvitationModel {
     organizationRoleService.checkUserIsOwner(id)
 
-    return organizationService.get(id)?.let { organization ->
+    return organizationService.find(id)?.let { organization ->
       invitationService.create(organization, invitation.roleType).let {
         organizationInvitationModelAssembler.toModel(it)
       }
@@ -230,11 +231,39 @@ class OrganizationController(
   @Operation(summary = "Returns all invitations to organization")
   fun getInvitations(@PathVariable("organizationId") id: Long):
     CollectionModel<OrganizationInvitationModel> {
-    val organization = organizationService.get(id) ?: throw NotFoundException()
+    val organization = organizationService.find(id) ?: throw NotFoundException()
     organizationRoleService.checkUserIsOwner(id)
     return invitationService.getForOrganization(organization).let {
       organizationInvitationModelAssembler.toCollectionModel(it)
     }
+  }
+
+  @PutMapping("/{id:[0-9]+}/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+  @Operation(summary = "Uploads organizations avatar")
+  @ResponseStatus(HttpStatus.OK)
+  fun uploadAvatar(
+    @RequestParam("avatar") avatar: MultipartFile,
+    @PathVariable id: Long
+  ): OrganizationModel {
+    organizationRoleService.checkUserIsOwner(id)
+    imageUploadService.validateIsImage(avatar)
+    val organization = organizationService.get(id)
+    val roleType = organizationRoleService.getType(organization.id)
+    organizationService.setAvatar(organization, avatar.inputStream)
+    return organizationModelAssembler.toModel(OrganizationView.of(organization, roleType))
+  }
+
+  @DeleteMapping("/{id:[0-9]+}/avatar")
+  @Operation(summary = "Deletes organization avatar")
+  @ResponseStatus(HttpStatus.OK)
+  fun removeAvatar(
+    @PathVariable id: Long
+  ): OrganizationModel {
+    organizationRoleService.checkUserIsOwner(id)
+    val organization = organizationService.get(id)
+    val roleType = organizationRoleService.getType(organization.id)
+    organizationService.removeAvatar(organization)
+    return organizationModelAssembler.toModel(OrganizationView.of(organization, roleType))
   }
 
   private fun OrganizationView.toModel(): OrganizationModel {

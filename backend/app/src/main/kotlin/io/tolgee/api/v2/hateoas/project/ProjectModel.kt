@@ -3,6 +3,7 @@ package io.tolgee.api.v2.hateoas.project
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.v2.hateoas.organization.LanguageModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModel
+import io.tolgee.dtos.Avatar
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.hateoas.RepresentationModel
@@ -15,6 +16,7 @@ open class ProjectModel(
   val name: String,
   val description: String?,
   val slug: String?,
+  val avatar: Avatar?,
   val userOwner: UserAccountModel?,
   val baseLanguage: LanguageModel?,
   val organizationOwnerName: String?,

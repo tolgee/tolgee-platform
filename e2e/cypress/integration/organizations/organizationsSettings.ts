@@ -1,8 +1,3 @@
-import {
-  cleanOrganizationData,
-  createOrganizationData,
-  login,
-} from '../../common/apiCalls';
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import {
@@ -11,12 +6,14 @@ import {
   confirmHardMode,
   gcy,
 } from '../../common/shared';
+import { login } from '../../common/apiCalls/common';
+import { organizationTestData } from '../../common/apiCalls/testData/testData';
 
 describe('Organization Settings', () => {
   beforeEach(() => {
     login();
-    cleanOrganizationData();
-    createOrganizationData();
+    organizationTestData.clean();
+    organizationTestData.generate();
     visitProfile();
   });
 
@@ -85,7 +82,7 @@ describe('Organization Settings', () => {
   });
 
   after(() => {
-    cleanOrganizationData();
+    organizationTestData.clean();
   });
 
   const visitProfile = () => {

@@ -4,6 +4,7 @@ import io.tolgee.development.testDataBuilder.builders.ImportBuilder
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
+import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
 import io.tolgee.service.ApiKeyService
 import io.tolgee.service.KeyMetaService
 import io.tolgee.service.KeyService
@@ -68,6 +69,15 @@ class TestDataService(
 
   private fun saveOrganizationDependants(builder: TestDataBuilder) {
     saveOrganizationRoles(builder)
+    saveOrganizationAvatars(builder)
+  }
+
+  private fun saveOrganizationAvatars(builder: TestDataBuilder) {
+    builder.data.organizations.forEach { organizationBuilder ->
+      organizationBuilder.data.avatarFile?.let { file ->
+        organizationService.setAvatar(organizationBuilder.self, file.inputStream)
+      }
+    }
   }
 
   private fun saveOrganizationRoles(builder: TestDataBuilder) {
@@ -93,6 +103,15 @@ class TestDataService(
     saveKeyData(builder)
     saveTranslationData(builder)
     saveImportData(builder)
+    saveProjectAvatars(builder)
+  }
+
+  private fun saveProjectAvatars(builder: TestDataBuilder) {
+    builder.data.projects.forEach { projectBuilder ->
+      projectBuilder.data.avatarFile?.let { file ->
+        projectService.setAvatar(projectBuilder.self, file.inputStream)
+      }
+    }
   }
 
   private fun saveImportData(builder: TestDataBuilder) {
@@ -199,12 +218,22 @@ class TestDataService(
   }
 
   private fun saveAllUsers(builder: TestDataBuilder) {
+    val userAccountBuilders = builder.data.userAccounts
     userAccountService.saveAll(
-      builder.data.userAccounts.map {
+      userAccountBuilders.map {
         it.self.password = userAccountService.encodePassword(it.rawPassword)
         it.self
       }
     )
+    saveUserAvatars(userAccountBuilders)
+  }
+
+  private fun saveUserAvatars(userAccountBuilders: MutableList<UserAccountBuilder>) {
+    userAccountBuilders.forEach {
+      it.data.avatarFile?.let { file ->
+        userAccountService.setAvatar(it.self, file.inputStream)
+      }
+    }
   }
 
   private fun clearEntityManager() {

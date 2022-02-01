@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.InputStream
 
 @Service
 @Transactional
@@ -26,6 +28,7 @@ class OrganizationService(
   private val slugGenerator: SlugGenerator,
   private val organizationRoleService: OrganizationRoleService,
   private val invitationService: InvitationService,
+  private val avatarService: AvatarService
 ) {
 
   @set:Autowired
@@ -83,16 +86,24 @@ class OrganizationService(
     return findPermittedPaged(pageable, requestParamsDto.filterCurrentUserOwner, search, exceptOrganizationId)
   }
 
-  fun get(id: Long): Organization? {
+  fun get(id: Long): Organization {
+    return organizationRepository.findByIdOrNull(id) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+  }
+
+  fun find(id: Long): Organization? {
     return organizationRepository.findByIdOrNull(id)
   }
 
-  fun get(slug: String): Organization? {
+  fun get(slug: String): Organization {
+    return organizationRepository.getOneBySlug(slug) ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+  }
+
+  fun find(slug: String): Organization? {
     return organizationRepository.getOneBySlug(slug)
   }
 
   fun edit(id: Long, editDto: OrganizationDto): OrganizationView {
-    val organization = this.get(id) ?: throw NotFoundException()
+    val organization = this.find(id) ?: throw NotFoundException()
 
     if (editDto.slug == null) {
       editDto.slug = organization.slug
@@ -112,7 +123,7 @@ class OrganizationService(
 
   @Transactional
   fun delete(id: Long) {
-    val organization = this.get(id) ?: throw NotFoundException()
+    val organization = this.find(id) ?: throw NotFoundException()
 
     projectService.findAllInOrganization(id).forEach {
       projectService.deleteProject(it.id)
@@ -125,6 +136,17 @@ class OrganizationService(
     organizationRoleService.deleteAllInOrganization(organization)
 
     this.organizationRepository.delete(organization)
+    avatarService.unlinkAvatarFiles(organization)
+  }
+
+  @Transactional
+  fun removeAvatar(organization: Organization) {
+    avatarService.removeAvatar(organization)
+  }
+
+  @Transactional
+  fun setAvatar(organization: Organization, avatar: InputStream) {
+    avatarService.setAvatar(organization, avatar)
   }
 
   /**

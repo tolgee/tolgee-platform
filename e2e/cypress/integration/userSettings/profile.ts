@@ -6,7 +6,7 @@ import {
   enableEmailVerification,
   getParsedEmailVerification,
   login,
-} from '../../common/apiCalls';
+} from '../../common/apiCalls/common';
 import { HOST } from '../../common/constants';
 import { assertMessage, gcy } from '../../common/shared';
 

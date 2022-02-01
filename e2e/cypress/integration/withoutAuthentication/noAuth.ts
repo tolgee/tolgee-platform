@@ -5,7 +5,7 @@ import {
   disableAuthentication,
   enableAuthentication,
   login,
-} from '../../common/apiCalls';
+} from '../../common/apiCalls/common';
 import { gcy } from '../../common/shared';
 
 describe('Test no authentication mode', () => {

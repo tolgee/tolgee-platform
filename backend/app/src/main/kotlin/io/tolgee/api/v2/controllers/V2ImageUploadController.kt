@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.uploadedImage.UploadedImageModel
 import io.tolgee.api.v2.hateoas.uploadedImage.UploadedImageModelAssembler
-import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UploadedImage
 import io.tolgee.security.AuthenticationFacade
@@ -46,10 +45,7 @@ class V2ImageUploadController(
   fun upload(
     @RequestParam("image") image: MultipartFile,
   ): ResponseEntity<UploadedImageModel> {
-    val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
-    if (!contentTypes.contains(image.contentType!!)) {
-      throw ValidationException(io.tolgee.constants.Message.FILE_NOT_IMAGE)
-    }
+    imageUploadService.validateIsImage(image)
     val imageEntity = imageUploadService.store(image, authenticationFacade.userAccountEntity)
     return ResponseEntity(imageEntity.model, HttpStatus.CREATED)
   }

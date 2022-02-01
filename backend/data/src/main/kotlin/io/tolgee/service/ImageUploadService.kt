@@ -2,29 +2,22 @@ package io.tolgee.service
 
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.fileStorage.FileStorage
+import io.tolgee.constants.Message
+import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UploadedImage
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.UploadedImageRepository
+import io.tolgee.util.ImageConverter
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.InputStreamSource
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.awt.Dimension
-import java.awt.Graphics2D
-import java.awt.image.BufferedImage
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
+import org.springframework.web.multipart.MultipartFile
 import java.time.temporal.ChronoUnit
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
-import javax.imageio.IIOImage
-import javax.imageio.ImageIO
-import javax.imageio.ImageWriteParam
-import javax.imageio.ImageWriter
-import kotlin.math.floor
-import kotlin.math.sqrt
 import kotlin.streams.asSequence
 
 @Service
@@ -42,13 +35,13 @@ class ImageUploadService(
   @Transactional
   fun store(image: InputStreamSource, userAccount: UserAccount): UploadedImage {
     if (uploadedImageRepository.countAllByUserAccount(userAccount) > 100L) {
-      throw BadRequestException(io.tolgee.constants.Message.TOO_MANY_UPLOADED_IMAGES)
+      throw BadRequestException(Message.TOO_MANY_UPLOADED_IMAGES)
     }
 
     val uploadedImageEntity = UploadedImage(generateFilename(), userAccount)
 
     save(uploadedImageEntity)
-    val processedImage = prepareImage(image.inputStream)
+    val processedImage = ImageConverter(image.inputStream).prepareImage()
     fileStorage.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
     return uploadedImageEntity
   }
@@ -73,43 +66,6 @@ class ImageUploadService(
     }
   }
 
-  fun prepareImage(imageStream: InputStream, compressionQuality: Float = 0.5f): ByteArrayOutputStream {
-    val image = ImageIO.read(imageStream)
-    val writer = ImageIO.getImageWritersByFormatName("jpg").next() as ImageWriter
-    val targetDimension = getTargetDimension(image)
-    val resizedImage = BufferedImage(targetDimension.width, targetDimension.height, BufferedImage.TYPE_INT_RGB)
-    val graphics2D: Graphics2D = resizedImage.createGraphics()
-    graphics2D.drawImage(image, 0, 0, targetDimension.width, targetDimension.height, null)
-    graphics2D.dispose()
-    val outputStream = ByteArrayOutputStream()
-
-    val imageOutputStream = ImageIO.createImageOutputStream(outputStream)
-
-    val param = writer.defaultWriteParam
-    param.compressionMode = ImageWriteParam.MODE_EXPLICIT
-    param.compressionQuality = compressionQuality
-
-    writer.output = imageOutputStream
-    writer.write(null, IIOImage(resizedImage, null, null), param)
-
-    outputStream.close()
-    imageOutputStream.close()
-    writer.dispose()
-    return outputStream
-  }
-
-  private fun getTargetDimension(image: BufferedImage): Dimension {
-    val imagePxs = image.height * image.width
-    val maxPxs = 3000000
-    val newHeight = floor(sqrt(maxPxs.toDouble() * image.height / image.width)).toInt()
-    val newWidth = floor(sqrt(maxPxs.toDouble() * image.width / image.height)).toInt()
-
-    if (imagePxs > maxPxs) {
-      return Dimension(newWidth, newHeight)
-    }
-    return Dimension(image.width, image.height)
-  }
-
   private fun generateFilename(): String {
     val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
     return ThreadLocalRandom.current()
@@ -121,6 +77,13 @@ class ImageUploadService(
 
   fun save(image: UploadedImage): UploadedImage {
     return uploadedImageRepository.save(image)
+  }
+
+  fun validateIsImage(image: MultipartFile) {
+    val contentTypes = listOf("image/png", "image/jpeg", "image/gif")
+    if (!contentTypes.contains(image.contentType!!)) {
+      throw ValidationException(Message.FILE_NOT_IMAGE)
+    }
   }
 
   val UploadedImage.filePath

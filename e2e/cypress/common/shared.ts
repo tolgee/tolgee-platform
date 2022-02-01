@@ -24,6 +24,15 @@ export const getPopover = () => {
 
 export const gcy = (dataCy: Value, options?: Parameters<typeof cy.get>[1]) =>
   cy.get('[data-cy="' + dataCy + '"]', options);
+
+export const gcyChain = (...dataCy: Value[]) => {
+  let xPath = '.';
+  dataCy.forEach((dc) => {
+    xPath += '//*[@data-cy="' + dc + '"]';
+  });
+  return cy.xpath(xPath);
+};
+
 export const goToPage = (page: number) =>
   gcy('global-list-pagination').within(() =>
     cy.xpath(".//button[text() = '" + page + "']").click()

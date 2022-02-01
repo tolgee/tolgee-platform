@@ -170,6 +170,8 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
               },
             })
             .catch((e) => {
+              // eslint-disable-next-line no-console
+              console.error(e);
               errorHappened = true;
             })
         )

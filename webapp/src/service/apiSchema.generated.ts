@@ -4,6 +4,10 @@
  */
 
 export interface paths {
+  "/v2/user/avatar": {
+    put: operations["uploadAvatar"];
+    delete: operations["removeAvatar"];
+  };
   "/v2/projects/{projectId}": {
     get: operations["get"];
     put: operations["editProject"];
@@ -82,6 +86,10 @@ export interface paths {
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_1"];
   };
+  "/v2/projects/{id}/avatar": {
+    put: operations["uploadAvatar_1"];
+    delete: operations["removeAvatar_1"];
+  };
   "/v2/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole"];
   };
@@ -99,6 +107,14 @@ export interface paths {
   };
   "/api/organizations/{id}/invite": {
     put: operations["inviteUser_2"];
+  };
+  "/v2/organizations/{id}/avatar": {
+    put: operations["uploadAvatar_2"];
+    delete: operations["removeAvatar_2"];
+  };
+  "/api/organizations/{id}/avatar": {
+    put: operations["uploadAvatar_3"];
+    delete: operations["removeAvatar_3"];
   };
   "/v2/organizations/{id}": {
     get: operations["get_7"];
@@ -122,6 +138,10 @@ export interface paths {
   "/api/project/{projectId}/translations": {
     put: operations["setTranslations_2"];
     post: operations["createOrUpdateTranslations_2"];
+  };
+  "/v2/user": {
+    get: operations["getInfo"];
+    post: operations["updateUser"];
   };
   "/v2/slug/generate-project": {
     post: operations["generateProjectSlug"];
@@ -193,8 +213,8 @@ export interface paths {
     post: operations["create_10"];
   };
   "/api/user": {
-    get: operations["getInfo"];
-    post: operations["updateUser"];
+    get: operations["getInfo_1"];
+    post: operations["updateUser_1"];
   };
   "/api/public/validate_email": {
     post: operations["validateEmail"];
@@ -402,6 +422,17 @@ export interface paths {
 
 export interface components {
   schemas: {
+    Avatar: {
+      large: string;
+      thumbnail: string;
+    };
+    UserAccountModel: {
+      id: number;
+      username: string;
+      name?: string;
+      emailAwaitingVerification?: string;
+      avatar?: components["schemas"]["Avatar"];
+    };
     EditProjectDTO: {
       name: string;
       slug?: string;
@@ -425,6 +456,7 @@ export interface components {
       name: string;
       description?: string;
       slug?: string;
+      avatar?: components["schemas"]["Avatar"];
       userOwner?: components["schemas"]["UserAccountModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
       organizationOwnerName?: string;
@@ -439,11 +471,6 @@ export interface components {
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       /** Actual current user's permissions on this project. You can not sort data by this column! */
       computedPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-    };
-    UserAccountModel: {
-      id: number;
-      username: string;
-      name?: string;
     };
     MachineTranslationLanguagePropsDto: {
       /** The language to apply those rules. If null, then this settings are default. */
@@ -599,12 +626,6 @@ export interface components {
       type: "MEMBER" | "OWNER";
       createdAt: string;
     };
-    OrganizationDto: {
-      name: string;
-      description?: string;
-      slug?: string;
-      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-    };
     OrganizationModel: {
       id: number;
       name: string;
@@ -612,6 +633,13 @@ export interface components {
       description?: string;
       basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       currentUserRole: "MEMBER" | "OWNER";
+      avatar?: components["schemas"]["Avatar"];
+    };
+    OrganizationDto: {
+      name: string;
+      description?: string;
+      slug?: string;
+      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     V2EditApiKeyDto: {
       scopes: string[];
@@ -635,6 +663,13 @@ export interface components {
     OldEditKeyDto: {
       currentName: string;
       newName: string;
+    };
+    UserUpdateRequestDto: {
+      name: string;
+      email: string;
+      password?: string;
+      /** Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
+      callbackUrl?: string;
     };
     GenerateSlugDto: {
       name: string;
@@ -763,13 +798,6 @@ export interface components {
     CreateApiKeyDto: {
       projectId: number;
       scopes: string[];
-    };
-    UserUpdateRequestDto: {
-      name: string;
-      email: string;
-      password?: string;
-      /** Callback url for link sent in e-mail. This may be omitted, when server has set frontEndUrl in properties. */
-      callbackUrl?: string;
     };
     TextNode: { [key: string]: unknown };
     SignUpDto: {
@@ -998,6 +1026,7 @@ export interface components {
       name: string;
       description?: string;
       slug?: string;
+      avatar?: components["schemas"]["Avatar"];
       userOwner?: components["schemas"]["UserAccountModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
       organizationOwnerName?: string;
@@ -1124,6 +1153,57 @@ export interface components {
 }
 
 export interface operations {
+  uploadAvatar: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          avatar: string;
+        };
+      };
+    };
+  };
+  removeAvatar: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   get: {
     parameters: {
       path: {
@@ -2058,6 +2138,67 @@ export interface operations {
       };
     };
   };
+  uploadAvatar_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          avatar: string;
+        };
+      };
+    };
+  };
+  removeAvatar_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ProjectModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   setUserRole: {
     parameters: {
       path: {
@@ -2223,6 +2364,128 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["OrganizationInviteUserDto"];
+      };
+    };
+  };
+  uploadAvatar_2: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          avatar: string;
+        };
+      };
+    };
+  };
+  removeAvatar_2: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  uploadAvatar_3: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          avatar: string;
+        };
+      };
+    };
+  };
+  removeAvatar_3: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
       };
     };
   };
@@ -2582,6 +2845,55 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
+      };
+    };
+  };
+  getInfo: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  updateUser: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserAccountModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UserUpdateRequestDto"];
       };
     };
   };
@@ -3525,7 +3837,7 @@ export interface operations {
       };
     };
   };
-  getInfo: {
+  getInfo_1: {
     responses: {
       /** OK */
       200: {
@@ -3547,7 +3859,7 @@ export interface operations {
       };
     };
   };
-  updateUser: {
+  updateUser_1: {
     responses: {
       /** OK */
       200: unknown;

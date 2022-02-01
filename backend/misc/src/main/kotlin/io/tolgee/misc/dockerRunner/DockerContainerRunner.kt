@@ -47,6 +47,7 @@ class DockerContainerRunner(
     try {
       startExistingContainer()
     } catch (e: CommandRunFailedException) {
+      e.printStackTrace()
       startNewContainer()
     }
   }

@@ -1,10 +1,7 @@
-import { API_URL, PASSWORD, USERNAME } from './constants';
-import { ArgumentTypes, Scope } from './types';
-import {
-  ApiKeyDTO,
-  ProjectDTO,
-} from '../../../webapp/src/service/response.types';
-import { components } from '../../../webapp/src/service/apiSchema.generated';
+import { API_URL, PASSWORD, USERNAME } from '../constants';
+import { ArgumentTypes, Scope } from '../types';
+import { ApiKeyDTO } from '../../../../webapp/src/service/response.types';
+import { components } from '../../../../webapp/src/service/apiSchema.generated';
 import bcrypt = require('bcryptjs');
 import Chainable = Cypress.Chainable;
 
@@ -42,7 +39,7 @@ const apiFetch = (
   });
 };
 
-const internalFetch = (
+export const internalFetch = (
   input: string,
   init?: ArgumentTypes<typeof cy.request>[0]
 ) => {
@@ -115,14 +112,6 @@ export const setTranslations = (
     body: { key, translations },
     method: 'POST',
   });
-
-export const generateExampleKeys = (
-  projectId: number,
-  numberOfExamples: number
-) =>
-  internalFetch(
-    `e2e-data/translations/generate/${projectId}/${numberOfExamples}`
-  );
 
 export const deleteProject = (id: number) => {
   return v2apiFetch(`projects/${id}`, { method: 'DELETE' });
@@ -252,72 +241,6 @@ export const getParsedResetPasswordEmail = () =>
       text: r[0].text,
     };
   });
-
-export const cleanOrganizationData = () =>
-  internalFetch('e2e-data/organizations/clean');
-export const createOrganizationData = () =>
-  internalFetch('e2e-data/organizations/create');
-
-export const cleanLanguagesData = () =>
-  internalFetch('e2e-data/languages/clean');
-export const generateLanguagesData = () =>
-  internalFetch('e2e-data/languages/generate');
-
-export const generateCommentsData = () =>
-  internalFetch('e2e-data/translation-comments/generate');
-export const cleanCommentsData = () =>
-  internalFetch('e2e-data/translation-comments/clean');
-
-export const generateSingleData = () =>
-  internalFetch('e2e-data/translation-single/generate');
-export const cleanSingleData = () =>
-  internalFetch('e2e-data/translation-single/clean');
-
-export const cleanImportData = () => internalFetch('e2e-data/import/clean');
-export const generateImportData = () =>
-  internalFetch('e2e-data/import/generate');
-export const generateApplicableImportData = () =>
-  internalFetch('e2e-data/import/generate-applicable');
-export const generateAllSelectedImportData = () =>
-  internalFetch('e2e-data/import/generate-all-selected');
-export const generateLotOfImportData = () =>
-  internalFetch('e2e-data/import/generate-lot-of-data');
-export const generateBaseImportData = () =>
-  internalFetch('e2e-data/import/generate-base');
-export const generateManyLanguagesImportData = () =>
-  internalFetch('e2e-data/import/generate-many-languages');
-export const generateWithLongTextImportData = () =>
-  internalFetch('e2e-data/import/generate-with-long-text');
-
-export const cleanProjectsDashboardData = () =>
-  internalFetch('e2e-data/projects-list-dashboard/clean');
-export const createProjectsDashboardData = () =>
-  internalFetch('e2e-data/projects-list-dashboard/generate');
-
-export const cleanProjectsData = () => internalFetch('e2e-data/projects/clean');
-export const createProjectsData = () =>
-  internalFetch('e2e-data/projects/create');
-
-export const cleanTranslationFiltersData = () =>
-  internalFetch('e2e-data/translations/cleanup-for-filters');
-export const createTranslationFiltersData = () =>
-  internalFetch('e2e-data/translations/generate-for-filters').then(
-    (r) => r.body as ProjectDTO
-  );
-
-export const createProjectLeavingData = () =>
-  internalFetch('e2e-data/project-leaving/generate');
-export const cleanProjectLeavingData = () =>
-  internalFetch('e2e-data/project-leaving/clean').then(
-    (r) => r.body as ProjectDTO
-  );
-
-export const createProjectTransferringData = () =>
-  internalFetch('e2e-data/project-transferring/generate');
-export const cleanProjectTransferringData = () =>
-  internalFetch('e2e-data/project-transferring/clean').then(
-    (r) => r.body as ProjectDTO
-  );
 
 export const enableEmailVerification = () =>
   setProperty('authentication.needsEmailVerification', true);

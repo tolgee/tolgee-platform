@@ -1,8 +1,3 @@
-import {
-  cleanImportData,
-  generateApplicableImportData,
-  login,
-} from '../../common/apiCalls';
 import 'cypress-file-upload';
 import {
   gcy,
@@ -10,12 +5,14 @@ import {
   toggleInMultiselect,
 } from '../../common/shared';
 import { visitImport } from '../../common/import';
+import { importTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Import application', () => {
   beforeEach(() => {
-    cleanImportData();
+    importTestData.clean();
 
-    generateApplicableImportData().then((importData) => {
+    importTestData.generateApplicable().then((importData) => {
       login('franta');
       visitImport(importData.body.project.id);
     });

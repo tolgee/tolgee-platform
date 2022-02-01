@@ -1,16 +1,13 @@
-import {
-  cleanProjectsData,
-  createProjectsData,
-  login,
-} from '../../common/apiCalls';
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import { assertMessage, gcy } from '../../common/shared';
+import { projectTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Projects Basics', () => {
   beforeEach(() => {
-    cleanProjectsData();
-    createProjectsData();
+    projectTestData.clean();
+    projectTestData.generate();
     login('cukrberg@facebook.com', 'admin');
     cy.visit(`${HOST}`);
   });
@@ -48,6 +45,6 @@ describe('Projects Basics', () => {
   };
 
   after(() => {
-    cleanProjectsData();
+    projectTestData.clean();
   });
 });

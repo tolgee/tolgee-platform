@@ -26,7 +26,7 @@ class OrganizationE2eDataController(
   private val dbPopulatorReal: DbPopulatorReal,
   private val organizationRoleService: OrganizationRoleService
 ) {
-  @GetMapping(value = ["/create"])
+  @GetMapping(value = ["/generate"])
   @Transactional
   fun createOrganizations() {
     data.forEach {
@@ -37,7 +37,7 @@ class OrganizationE2eDataController(
     }
 
     data.forEach {
-      val organization = organizationService.get(it.dto.slug!!)
+      val organization = organizationService.find(it.dto.slug!!)
       it.members.forEach { memberUserName ->
         userAccountService.findOptional(memberUserName).orElseThrow { NotFoundException() }.let { user ->
           organizationRoleService.grantMemberRoleToUser(user, organization!!)
@@ -55,11 +55,11 @@ class OrganizationE2eDataController(
   @GetMapping(value = ["/clean"])
   @Transactional
   fun cleanupOrganizations() {
-    organizationService.get("what-a-nice-organization")?.let {
+    organizationService.find("what-a-nice-organization")?.let {
       organizationService.delete(it.id)
     }
     data.forEach {
-      organizationService.get(it.dto.slug!!)?.let { organization ->
+      organizationService.find(it.dto.slug!!)?.let { organization ->
         organizationService.delete(organization.id)
       }
     }

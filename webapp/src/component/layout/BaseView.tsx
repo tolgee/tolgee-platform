@@ -2,7 +2,7 @@ import { ReactNode, useEffect } from 'react';
 import { Add } from '@material-ui/icons';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
-import { Box, Button, Container, Typography, Grid } from '@material-ui/core';
+import { Box, Button, Container, Grid, Typography } from '@material-ui/core';
 
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
 import { useConfig } from 'tg.hooks/useConfig';
@@ -27,6 +27,7 @@ export interface BaseViewProps {
   customHeader?: ReactNode;
   hideChildrenOnLoading?: boolean;
   containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
+  'data-cy'?: string;
 }
 
 export const BaseView = (props: BaseViewProps) => {
@@ -56,7 +57,7 @@ export const BaseView = (props: BaseViewProps) => {
         flexGrow: 1,
       }}
     >
-      <Box minHeight="100%">
+      <Box minHeight="100%" data-cy={props['data-cy']}>
         {props.navigation && (
           <SecondaryBar
             height={49}

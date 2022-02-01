@@ -32,7 +32,7 @@ import javax.validation.constraints.NotBlank
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Long = 0L,
+  override var id: Long = 0L,
 
   @field:NotBlank
   var username: String = "",
@@ -42,7 +42,7 @@ data class UserAccount(
   var name: String = "",
   @Enumerated(EnumType.STRING)
   var role: Role? = Role.USER
-) : AuditModel() {
+) : AuditModel(), ModelWithAvatar {
 
   @OneToMany(mappedBy = "user")
   var permissions: MutableSet<Permission>? = null
@@ -61,6 +61,8 @@ data class UserAccount(
 
   @OneToMany(mappedBy = "user")
   var organizationRoles: MutableList<OrganizationRole> = mutableListOf()
+
+  override var avatarHash: String? = null
 
   constructor(
     id: Long?,

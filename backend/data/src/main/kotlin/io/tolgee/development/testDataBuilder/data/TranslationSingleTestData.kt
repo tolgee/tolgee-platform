@@ -24,12 +24,10 @@ class TranslationSingleTestData {
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     user = addUserAccount {
-
       username = "franta"
     }.self
 
     pepa = addUserAccount {
-
       username = "pepa"
     }.self
 
@@ -52,36 +50,31 @@ class TranslationSingleTestData {
       }
 
       addPermission {
-
         user = this@TranslationSingleTestData.pepa
         type = Permission.ProjectPermissionType.EDIT
       }
 
       addPermission {
-
         user = jindra.self
         type = Permission.ProjectPermissionType.TRANSLATE
       }
 
       addPermission {
-
         user = vojta.self
         type = Permission.ProjectPermissionType.VIEW
       }
 
       englishLanguage = addLanguage {
-
         name = "English"
         tag = "en"
         originalName = "English"
       }.self
 
       addLanguage {
-
         name = "Czech"
         tag = "cs"
         originalName = "Čeština"
-      }.self
+      }
 
       val keyBuilder = addKey {
         name = "A key"

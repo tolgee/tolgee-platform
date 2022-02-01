@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { Button } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
 import { Redirect, useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
@@ -15,6 +15,7 @@ import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { OrganizationFields } from './components/OrganizationFields';
+import { OrganizationProfileAvatar } from './OrganizationProfileAvatar';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
@@ -102,30 +103,33 @@ export const OrganizationProfileView: FunctionComponent = () => {
       loading={organization.isFetching || deleteOrganization.isLoading}
       hideChildrenOnLoading={false}
     >
-      <StandardForm
-        initialValues={initialValues!}
-        saveActionLoadable={editOrganization}
-        onSubmit={onSubmit}
-        onCancel={() => setCancelled(true)}
-        validationSchema={Validation.ORGANIZATION_CREATE_OR_EDIT(
-          t,
-          initialValues?.slug
-        )}
-        customActions={
-          <Button
-            data-cy="organization-delete-button"
-            color="secondary"
-            variant="outlined"
-            onClick={handleDelete}
-          >
-            <T>organization_delete_button</T>
-          </Button>
-        }
-      >
-        <>
-          <OrganizationFields />
-        </>
-      </StandardForm>
+      <Box data-cy="organization-profile">
+        <StandardForm
+          initialValues={initialValues!}
+          saveActionLoadable={editOrganization}
+          onSubmit={onSubmit}
+          onCancel={() => setCancelled(true)}
+          validationSchema={Validation.ORGANIZATION_CREATE_OR_EDIT(
+            t,
+            initialValues?.slug
+          )}
+          customActions={
+            <Button
+              data-cy="organization-delete-button"
+              color="secondary"
+              variant="outlined"
+              onClick={handleDelete}
+            >
+              <T>organization_delete_button</T>
+            </Button>
+          }
+        >
+          <>
+            <OrganizationProfileAvatar />
+            <OrganizationFields />
+          </>
+        </StandardForm>
+      </Box>
     </BaseOrganizationSettingsView>
   );
 };

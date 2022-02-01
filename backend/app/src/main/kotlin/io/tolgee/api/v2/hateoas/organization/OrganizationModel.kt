@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.hateoas.organization
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.dtos.Avatar
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import org.springframework.hateoas.RepresentationModel
@@ -20,5 +21,8 @@ open class OrganizationModel(
   val description: String?,
   val basePermissions: Permission.ProjectPermissionType,
 
-  val currentUserRole: OrganizationRoleType
+  val currentUserRole: OrganizationRoleType,
+
+  @Schema(example = "Links to avatar images")
+  var avatar: Avatar?
 ) : RepresentationModel<OrganizationModel>()

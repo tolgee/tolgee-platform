@@ -11,6 +11,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
+import org.springframework.core.io.ClassPathResource
 
 class ProjectBuilder(
   userOwner: UserAccount? = null,
@@ -39,6 +40,7 @@ class ProjectBuilder(
     val translations = mutableListOf<TranslationBuilder>()
     val apiKeys = mutableListOf<ApiKeyBuilder>()
     val translationServiceConfigs = mutableListOf<MtServiceConfigBuilder>()
+    var avatarFile: ClassPathResource? = null
   }
 
   var data = DATA()
@@ -59,4 +61,8 @@ class ProjectBuilder(
 
   fun addMtServiceConfig(ft: FT<MtServiceConfig>) =
     addOperation(data.translationServiceConfigs, ft)
+
+  fun setAvatar(filePath: String) {
+    data.avatarFile = ClassPathResource(filePath, this.javaClass.classLoader)
+  }
 }

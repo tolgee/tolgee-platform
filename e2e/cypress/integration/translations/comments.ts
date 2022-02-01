@@ -1,20 +1,17 @@
 import {
-  cleanCommentsData,
-  generateCommentsData,
-  login,
-} from '../../common/apiCalls';
-import {
   commentsButton,
   createComment,
   deleteComment,
 } from '../../common/comments';
 import { enterProject } from '../../common/projects';
 import { waitForGlobalLoading } from '../../common/loading';
+import { commentsTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Translation comments', () => {
   beforeEach(() => {
-    cleanCommentsData();
-    generateCommentsData();
+    commentsTestData.clean();
+    commentsTestData.generate();
     waitForGlobalLoading();
   });
 

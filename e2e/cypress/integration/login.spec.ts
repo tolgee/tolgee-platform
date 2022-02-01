@@ -6,7 +6,7 @@ import {
   deleteAllEmails,
   getParsedResetPasswordEmail,
   login,
-} from '../common/apiCalls';
+} from '../common/apiCalls/common';
 import { assertMessage, getPopover } from '../common/shared';
 import { loginWithFakeGithub } from '../common/login';
 

@@ -10,7 +10,7 @@ import { useUser } from 'tg.hooks/useUser';
 import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
-import { UserAvatar } from 'tg.component/common/UserAvatar';
+import { UserAvatar } from '../common/avatar/UserAvatar';
 
 const globalActions = container.resolve(GlobalActions);
 
@@ -68,7 +68,7 @@ export const UserMenu: React.FC = () => {
         onClick={handleOpen}
         className={classes.iconButton}
       >
-        <UserAvatar fullName={user.name} userName={user.username} />
+        <UserAvatar />
       </IconButton>
       <Menu
         id="user-menu"

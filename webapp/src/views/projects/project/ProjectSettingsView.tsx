@@ -21,6 +21,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { ProjectTransferModal } from 'tg.views/projects/project/components/ProjectTransferModal';
+import { ProjectProfileAvatar } from './ProjectProfileAvatar';
 
 const messageService = container.resolve(MessageService);
 
@@ -133,66 +134,69 @@ export const ProjectSettingsView: FunctionComponent = () => {
         ],
       ]}
     >
-      <StandardForm
-        loading={deleteLoadable.isLoading}
-        saveActionLoadable={updateLoadable}
-        validationSchema={Validation.PROJECT_SETTINGS}
-        onSubmit={handleEdit}
-        onCancel={() => setCancelled(true)}
-        initialValues={initialValues}
-      >
-        <TextField
-          label={<T>project_settings_name_label</T>}
-          name="name"
-          required={true}
-        />
-        <ProjectLanguagesProvider>
-          <LanguageSelect />
-        </ProjectLanguagesProvider>
-      </StandardForm>
-      <Box mt={2} mb={1}>
-        <Typography variant={'h5'}>
-          <T>project_settings_danger_zone_title</T>
-        </Typography>
-      </Box>
-      <Box className={classes.dangerZone} p={2}>
-        <Box display="flex" alignItems="center">
-          <Box flexGrow={1} mr={1}>
-            <Typography variant="body1">
-              <T>this_will_delete_project_forever</T>
-            </Typography>
-          </Box>
-          <Button
-            color="default"
-            variant="outlined"
-            onClick={handleDelete}
-            className={classes.dangerButton}
-          >
-            <T>delete_project_button</T>
-          </Button>
-        </Box>
-        <Box display="flex" alignItems="center" mt={2}>
-          <Box flexGrow={1} mr={1}>
-            <Typography variant="body1">
-              <T>this_will_transfer_project</T>
-            </Typography>
-          </Box>
-          <Button
-            data-cy="project-settings-transfer-button"
-            color="default"
-            variant="outlined"
-            onClick={() => {
-              setTransferDialogOpen(true);
-            }}
-            className={classes.dangerButton}
-          >
-            <T>transfer_project_button</T>
-          </Button>
-
-          <ProjectTransferModal
-            open={transferDialogOpen}
-            onClose={() => setTransferDialogOpen(false)}
+      <Box data-cy="project-settings">
+        <ProjectProfileAvatar />
+        <StandardForm
+          loading={deleteLoadable.isLoading}
+          saveActionLoadable={updateLoadable}
+          validationSchema={Validation.PROJECT_SETTINGS}
+          onSubmit={handleEdit}
+          onCancel={() => setCancelled(true)}
+          initialValues={initialValues}
+        >
+          <TextField
+            label={<T>project_settings_name_label</T>}
+            name="name"
+            required={true}
           />
+          <ProjectLanguagesProvider>
+            <LanguageSelect />
+          </ProjectLanguagesProvider>
+        </StandardForm>
+        <Box mt={2} mb={1}>
+          <Typography variant={'h5'}>
+            <T>project_settings_danger_zone_title</T>
+          </Typography>
+        </Box>
+        <Box className={classes.dangerZone} p={2}>
+          <Box display="flex" alignItems="center">
+            <Box flexGrow={1} mr={1}>
+              <Typography variant="body1">
+                <T>this_will_delete_project_forever</T>
+              </Typography>
+            </Box>
+            <Button
+              color="default"
+              variant="outlined"
+              onClick={handleDelete}
+              className={classes.dangerButton}
+            >
+              <T>delete_project_button</T>
+            </Button>
+          </Box>
+          <Box display="flex" alignItems="center" mt={2}>
+            <Box flexGrow={1} mr={1}>
+              <Typography variant="body1">
+                <T>this_will_transfer_project</T>
+              </Typography>
+            </Box>
+            <Button
+              data-cy="project-settings-transfer-button"
+              color="default"
+              variant="outlined"
+              onClick={() => {
+                setTransferDialogOpen(true);
+              }}
+              className={classes.dangerButton}
+            >
+              <T>transfer_project_button</T>
+            </Button>
+
+            <ProjectTransferModal
+              open={transferDialogOpen}
+              onClose={() => setTransferDialogOpen(false)}
+            />
+          </Box>
         </Box>
       </Box>
     </BaseView>

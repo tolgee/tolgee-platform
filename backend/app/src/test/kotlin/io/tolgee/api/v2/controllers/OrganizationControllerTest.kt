@@ -164,7 +164,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
       it.node("slug").isEqualTo("test-org")
       it.node("_links.self.href").isEqualTo("http://localhost/v2/organizations/test-org")
       it.node("id").isNumber.satisfies {
-        organizationService.get(it.toLong()) is Organization
+        organizationService.find(it.toLong()) is Organization
       }
     }
   }
@@ -267,8 +267,8 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
     val organization2 = this.organizationService.create(dummyDto2, userAccount!!)
     this.organizationService.create(dummyDto, userAccount!!).let {
       performAuthDelete("/v2/organizations/${it.id}", null)
-      assertThat(organizationService.get(it.id)).isNull()
-      assertThat(organizationService.get(organization2.id)).isNotNull
+      assertThat(organizationService.find(it.id)).isNull()
+      assertThat(organizationService.find(organization2.id)).isNotNull
     }
   }
 

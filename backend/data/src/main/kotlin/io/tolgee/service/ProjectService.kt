@@ -1,6 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.constants.Caches
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.query_results.ProjectStatistics
 import io.tolgee.dtos.request.project.CreateProjectDTO
@@ -35,6 +36,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.InputStream
 import java.util.*
 import javax.persistence.EntityManager
 import javax.persistence.criteria.Expression
@@ -51,6 +53,7 @@ class ProjectService constructor(
   private val authenticationFacade: AuthenticationFacade,
   private val slugGenerator: SlugGenerator,
   private val userAccountService: UserAccountService,
+  private val avatarService: AvatarService
 ) {
   @set:Autowired
   @set:Lazy
@@ -101,8 +104,14 @@ class ProjectService constructor(
   }
 
   @Transactional
-  fun getView(id: Long): ProjectView? {
+  fun findView(id: Long): ProjectView? {
     return projectRepository.findViewById(authenticationFacade.userAccount.id, id)
+  }
+
+  @Transactional
+  fun getView(id: Long): ProjectView {
+    return projectRepository.findViewById(authenticationFacade.userAccount.id, id)
+      ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
   }
 
   @Transactional
@@ -112,7 +121,7 @@ class ProjectService constructor(
     project.name = dto.name
     dto.organizationId?.also {
       organizationRoleService.checkUserIsOwner(it)
-      project.organizationOwner = organizationService.get(it) ?: throw NotFoundException()
+      project.organizationOwner = organizationService.find(it) ?: throw NotFoundException()
 
       if (dto.slug == null) {
         project.slug = generateSlug(dto.name, null)
@@ -246,6 +255,7 @@ class ProjectService constructor(
     apiKeyService.deleteAllByProject(project.id)
     languageService.deleteAllByProject(project.id)
     mtServiceConfigService.deleteAllByProjectId(project.id)
+    avatarService.unlinkAvatarFiles(project)
     projectRepository.delete(project)
   }
 
@@ -269,6 +279,18 @@ class ProjectService constructor(
     projectRepository.findAllByName(name).forEach {
       this.deleteProject(it.id)
     }
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
+  fun removeAvatar(project: Project) {
+    avatarService.removeAvatar(project)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#project.id")
+  fun setAvatar(project: Project, avatar: InputStream) {
+    avatarService.setAvatar(project, avatar)
   }
 
   fun validateSlugUniqueness(slug: String): Boolean {
@@ -314,7 +336,7 @@ class ProjectService constructor(
   fun transferToOrganization(projectId: Long, organizationId: Long) {
     val project = get(projectId).orElseThrow { NotFoundException() }
     project.userOwner = null
-    val organization = organizationService.get(organizationId) ?: throw NotFoundException()
+    val organization = organizationService.find(organizationId) ?: throw NotFoundException()
     project.organizationOwner = organization
     save(project)
   }

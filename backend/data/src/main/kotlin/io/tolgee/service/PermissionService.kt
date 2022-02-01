@@ -57,10 +57,10 @@ class PermissionService(
     val projectPermission = findOneDtoByProjectIdAndUserId(projectId, userAccountId)
 
     val organizationRole = project.organizationOwnerId
-      ?.let { organizationRoleService.getType(userAccountId, it) }
+      ?.let { organizationRoleService.findType(userAccountId, it) }
 
     val organizationBasePermissionType = project.organizationOwnerId?.let {
-      organizationService.get(it)?.basePermissions ?: throw NotFoundException()
+      organizationService.find(it)?.basePermissions ?: throw NotFoundException()
     }
 
     val computed = computeProjectPermissionType(

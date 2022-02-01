@@ -10,15 +10,14 @@ import {
 } from '../../common/xPath';
 import { HOST } from '../../common/constants';
 import {
-  cleanProjectsData,
   createApiKey,
   createProject,
-  createProjectsData,
   deleteProject,
   login,
-} from '../../common/apiCalls';
+} from '../../common/apiCalls/common';
 import { Scope } from '../../common/types';
 import { ApiKeyDTO } from '../../../../webapp/src/service/response.types';
+import { projectTestData } from '../../common/apiCalls/testData/testData';
 
 describe('Api keys', () => {
   let project;
@@ -75,8 +74,8 @@ describe('Api keys', () => {
   });
 
   it('will create API Key for user with lower permissions', () => {
-    cleanProjectsData();
-    createProjectsData();
+    projectTestData.clean();
+    projectTestData.generate();
     login('cukrberg@facebook.com', 'admin');
     visit();
     clickAdd();

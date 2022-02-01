@@ -1,8 +1,3 @@
-import {
-  cleanImportData,
-  generateLotOfImportData,
-  login,
-} from '../../common/apiCalls';
 import 'cypress-file-upload';
 import { contextGoToPage, gcy } from '../../common/shared';
 import {
@@ -14,11 +9,13 @@ import {
   getShowDataDialog,
   visitImport,
 } from '../../common/import';
+import { importTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Import with lot of data', () => {
   beforeEach(() => {
-    cleanImportData();
-    generateLotOfImportData().then((importData) => {
+    importTestData.clean();
+    importTestData.generateLotOfData().then((importData) => {
       login('franta');
       visitImport(importData.body.project.id);
     });
@@ -99,6 +96,6 @@ describe('Import with lot of data', () => {
   });
 
   after(() => {
-    cleanImportData();
+    importTestData.clean();
   });
 });

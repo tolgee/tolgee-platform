@@ -59,17 +59,17 @@ class OrganizationRoleService(
     return false
   }
 
-  fun getTypeOrThrow(userId: Long, organizationId: Long): OrganizationRoleType {
+  fun getType(userId: Long, organizationId: Long): OrganizationRoleType {
     organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
       ?.let { return it.type!! }
     throw PermissionException()
   }
 
-  fun getTypeOrThrow(organizationId: Long): OrganizationRoleType {
-    return getTypeOrThrow(authenticationFacade.userAccount.id, organizationId)
+  fun getType(organizationId: Long): OrganizationRoleType {
+    return getType(authenticationFacade.userAccount.id, organizationId)
   }
 
-  fun getType(userId: Long, organizationId: Long): OrganizationRoleType? {
+  fun findType(userId: Long, organizationId: Long): OrganizationRoleType? {
     organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)
       ?.let { return it.type }
     return null
