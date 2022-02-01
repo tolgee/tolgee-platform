@@ -8,7 +8,7 @@ import { ProjectPage } from './ProjectPage';
 import { ExportView } from './imprt_export/ExportView';
 import { ImportView } from './imprt_export/ImportView';
 import { ProjectInviteView } from './invitations/ProjectInviteView';
-import { LanguageEditView } from './languages/LanguageEditView';
+import { LanguageEditView } from './languages/LanguageEdit/LanguageEditView';
 import { ProjectPermissionsView } from './permissions/ProjectPermissionsVIew';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { SocketIoPreview } from 'tg.views/projects/SocketIoPreview';

@@ -47,9 +47,10 @@ export const useTranslationsInfinite = (props: Props) => {
   const [filters, _setFilters] = useUrlSearchState('filters', {
     defaultVal: JSON.stringify({}),
   });
-  const parsedFilters = (
-    filters ? JSON.parse(filters as string) : {}
-  ) as FiltersType;
+  const parsedFilters = useMemo(
+    () => (filters ? JSON.parse(filters as string) : {}) as FiltersType,
+    [filters]
+  );
   // wait for initialLangs to not be null
   const [enabled, setEnabled] = useState(props.initialLangs !== null);
 

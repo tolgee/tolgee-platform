@@ -1,4 +1,6 @@
 import { makeStyles, Theme, colors } from '@material-ui/core';
+import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar';
+import { TOOLS_HEIGHT } from '../TranslationTools/ToolsPopup';
 
 export type PositionType = 'left' | 'right';
 
@@ -31,7 +33,13 @@ export const useCellStyles = makeStyles<Theme, { position?: PositionType }>(
         opacity: 0,
       },
     },
+    scrollMargins: {
+      scrollMarginTop: `${TOP_BAR_HEIGHT}px`,
+      scrollMarginBottom: `${TOOLS_HEIGHT + 80}px`,
+    },
     cellPlain: {
+      scrollMarginTop: `${TOP_BAR_HEIGHT}px`,
+      position: 'relative',
       outline: 0,
       '& $showOnHover': {
         opacity: 0,
@@ -79,7 +87,6 @@ export const useCellStyles = makeStyles<Theme, { position?: PositionType }>(
       background: 'transparent !important',
       '-webkit-box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2) !important',
       'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2) !important',
-      zIndex: 1,
     },
     cellSelected: {
       background: '#efefef',

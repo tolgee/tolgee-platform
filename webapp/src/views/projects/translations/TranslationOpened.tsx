@@ -11,6 +11,9 @@ import { Comments } from './comments/Comments';
 import { EditModeType } from './context/useEdit';
 import { getMeta } from 'tg.fixtures/isMac';
 import { useTranslationsDispatch } from './context/TranslationsContext';
+import { ToolsPopup } from './TranslationTools/ToolsPopup';
+import { useTranslationTools } from './TranslationTools/useTranslationTools';
+import { useProject } from 'tg.hooks/useProject';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
@@ -78,6 +81,8 @@ type Props = {
   mode: EditModeType;
   onModeChange: (mode: EditModeType) => void;
   editEnabled: boolean;
+  cellRef: React.RefObject<HTMLDivElement>;
+  cellPosition?: string;
 };
 
 export const TranslationOpened: React.FC<Props> = ({
@@ -96,7 +101,10 @@ export const TranslationOpened: React.FC<Props> = ({
   mode,
   onModeChange,
   editEnabled,
+  cellRef,
+  cellPosition,
 }) => {
+  const project = useProject();
   const classes = useStyles();
   const dispatch = useTranslationsDispatch();
 
@@ -115,6 +123,21 @@ export const TranslationOpened: React.FC<Props> = ({
       });
     }
   };
+
+  const data = useTranslationTools({
+    projectId: project.id,
+    keyId,
+    targetLanguageId: language.id,
+    enabled: !language.base,
+    onValueUpdate: (value) => {
+      dispatch({
+        type: 'UPDATE_EDIT',
+        payload: {
+          value,
+        },
+      });
+    },
+  });
 
   return (
     <div className={clsx(classes.container, className)}>
@@ -181,6 +204,13 @@ export const TranslationOpened: React.FC<Props> = ({
               onStateChange={onStateChange}
             />
           </div>
+          {!language.base && (
+            <ToolsPopup
+              anchorEl={cellRef.current || undefined}
+              cellPosition={cellPosition}
+              data={data}
+            />
+          )}
         </>
       ) : mode === 'comments' ? (
         <Comments

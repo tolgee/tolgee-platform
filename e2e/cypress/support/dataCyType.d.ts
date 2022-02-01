@@ -154,6 +154,8 @@ declare namespace DataCy {
         "translation-edit-translation-field" |
         "translation-field-label" |
         "translation-state-button" |
+        "translation-tools-machine-translation-item" |
+        "translation-tools-translation-memory-item" |
         "translations-add-button" |
         "translations-cell-cancel-button" |
         "translations-cell-close" |

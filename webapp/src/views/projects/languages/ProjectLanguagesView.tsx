@@ -1,6 +1,6 @@
 import { BaseView } from 'tg.component/layout/BaseView';
 import { useTranslate } from '@tolgee/react';
-import { ProjectSettingsLanguages } from 'tg.views/projects/project/components/ProjectSettingsLanguages';
+import { ProjectSettingsLanguages } from 'tg.views/projects/languages/ProjectSettingsLanguages';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
 

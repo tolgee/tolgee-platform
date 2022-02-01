@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { T } from '@tolgee/react';
 import { Button, makeStyles } from '@material-ui/core';
 import { CameraAlt } from '@material-ui/icons';
@@ -52,7 +52,14 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
   const displayScreenshots = onScreenshots;
   const displayRightPart = displayTransitionButtons || displayScreenshots;
 
-  const isLoading = useTranslationsSelector((c) => c.isEditLoading);
+  const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
+
+  const [isLoading, setIsLoading] = useState(isEditLoading);
+  useEffect(() => {
+    if (isEditLoading && !isLoading) {
+      setIsLoading(true);
+    }
+  }, [isEditLoading]);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import CodeMirror from 'codemirror';
 import { Controlled as CodeMirrorReact } from 'react-codemirror2';
 import { parse } from '@formatjs/icu-messageformat-parser';
@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/core';
 import { useTranslate } from '@tolgee/react';
 
 import icuMode from './icuMode';
+import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 
 export type Direction = 'DOWN';
 
@@ -29,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
       background: 'transparent',
     },
   },
-  editor: {
+  wrapper: {
     display: 'flex',
     flexGrow: 1,
     alignItems: 'stretch',
@@ -121,7 +122,10 @@ type Props = {
   autofocus?: boolean;
   minHeight?: number | string;
   onBlur?: () => void;
+  onFocus?: () => void;
   shortcuts?: CodeMirror.KeyMap;
+  scrollMargins?: Parameters<typeof useScrollMargins>[0];
+  autoScrollIntoView?: boolean;
 };
 
 export const Editor: React.FC<Props> = ({
@@ -130,12 +134,16 @@ export const Editor: React.FC<Props> = ({
   onCancel,
   onSave,
   onBlur,
+  onFocus,
   plaintext,
   background,
   autofocus,
   minHeight = 100,
   shortcuts,
+  scrollMargins,
+  autoScrollIntoView,
 }) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const classes = useStyles({ background, minHeight });
   const t = useTranslate();
 
@@ -174,8 +182,15 @@ export const Editor: React.FC<Props> = ({
     spellcheck: !plaintext,
   };
 
+  const wrapperScrollMargins = useScrollMargins(scrollMargins);
+
   return (
-    <div data-cy="global-editor" className={classes.editor}>
+    <div
+      data-cy="global-editor"
+      className={classes.wrapper}
+      style={scrollMargins ? wrapperScrollMargins : undefined}
+      ref={wrapperRef}
+    >
       <CodeMirrorReact
         value={value}
         // @ts-ignore
@@ -185,6 +200,16 @@ export const Editor: React.FC<Props> = ({
           handleChange(value);
         }}
         onBlur={() => onBlur?.()}
+        onFocus={(e) => {
+          onFocus?.();
+          if (autoScrollIntoView) {
+            wrapperRef.current?.scrollIntoView({
+              behavior: 'smooth',
+              block: 'nearest',
+              inline: 'nearest',
+            });
+          }
+        }}
       />
     </div>
   );

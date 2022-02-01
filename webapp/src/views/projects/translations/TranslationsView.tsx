@@ -8,6 +8,7 @@ export const TranslationsView = () => {
   return (
     <TranslationsContextProvider
       projectId={project.id}
+      baseLang={project.baseLanguage?.tag}
       updateLocalStorageLanguages
     >
       <Translations />

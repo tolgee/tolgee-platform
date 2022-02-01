@@ -40,12 +40,7 @@ export const selectInAutocomplete = (containedText: string) => {
 };
 
 export const visitLanguageSettings = (langName: string) => {
-  gcy('global-list-items')
-    .contains(langName)
-    .closest('li')
-    .within(() => {
-      gcy('project-settings-languages-list-edit-button').click();
-    });
+  cy.get(`[aria-label="Settings ${langName}"]`).click();
 };
 
 export const deleteLanguage = () => {

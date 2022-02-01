@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => {
   return {
     container: {
       position: 'relative',
-      margin: '10px 0px 100px 0px',
+      margin: '10px 0px 250px 0px',
       borderLeft: 0,
       borderRight: 0,
       background: 'white',
@@ -67,16 +67,6 @@ export const TranslationsTable = () => {
   const languages = useTranslationsSelector((v) => v.languages);
   const isFetchingMore = useTranslationsSelector((v) => v.isFetchingMore);
   const hasMoreToFetch = useTranslationsSelector((v) => v.hasMoreToFetch);
-  const editKeyId = useTranslationsSelector((v) => v.cursor?.keyId);
-
-  useEffect(() => {
-    // scroll to currently edited item
-    if (editKeyId) {
-      reactListRef.current?.scrollAround(
-        translations!.findIndex((t) => t.keyId === editKeyId)
-      );
-    }
-  }, [editKeyId]);
 
   const languageCols = useMemo(() => {
     if (languages && translationsLanguages) {
@@ -161,6 +151,7 @@ export const TranslationsTable = () => {
           const language = languages!.find((lang) => lang.tag === tag)!;
           return tag ? (
             <div
+              key={i}
               style={{ width: columnSizesPercent[i] }}
               className={classes.headerCell}
             >
@@ -172,6 +163,7 @@ export const TranslationsTable = () => {
             </div>
           ) : (
             <div
+              key={i}
               style={{ width: columnSizesPercent[i] }}
               className={clsx(classes.headerCell, classes.keyCell)}
             >

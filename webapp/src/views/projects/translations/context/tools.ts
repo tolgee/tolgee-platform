@@ -175,3 +175,25 @@ export const translationsNavigator = (
     getNextLocation,
   };
 };
+
+export const putBaseLangFirst = (
+  languages: string[] | undefined,
+  base: string | undefined
+) => {
+  if (base && languages?.includes(base)) {
+    return [base, ...languages.filter((val) => val !== base)];
+  }
+  return languages;
+};
+
+export interface CellPosition {
+  keyId: number;
+  language: string | undefined;
+}
+
+export const serializeElPosition = (position: CellPosition) => {
+  return JSON.stringify({
+    keyId: position.keyId,
+    language: position.language,
+  });
+};

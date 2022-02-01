@@ -105,7 +105,6 @@ const useStyles = makeStyles((theme) => ({
   },
   icon: {
     opacity: 0.5,
-    fontSize: 20,
     cursor: 'pointer',
     marginLeft: theme.spacing(1),
     transition: 'all 300ms ease-in-out',
@@ -127,7 +126,9 @@ export const TranslationsShortcuts = () => {
     setCollapsed(!collapsed);
   };
 
-  const cursor = useTranslationsSelector((c) => c.cursor);
+  const cursorKeyId = useTranslationsSelector((c) => c.cursor?.keyId);
+  const cursorLanguage = useTranslationsSelector((c) => c.cursor?.language);
+  const cursorMode = useTranslationsSelector((c) => c.cursor?.mode);
 
   const translations = useTranslationsSelector((c) => c.translations);
 
@@ -186,8 +187,8 @@ export const TranslationsShortcuts = () => {
     }
   };
 
-  const cursorNextState =
-    cursor?.language && getCellNextState(cursor.keyId, cursor.language);
+  const cursorKeyIdNextState =
+    cursorKeyId && getCellNextState(cursorKeyId, cursorLanguage);
 
   const getEditorShortcuts = () => [
     {
@@ -199,15 +200,15 @@ export const TranslationsShortcuts = () => {
       formula: formatShortcut(`${getMetaName()} + Enter`),
     },
     {
-      name: cursorNextState && translationStates[cursorNextState] && (
-        <T>{translationStates[cursorNextState].translationKey}</T>
+      name: cursorKeyIdNextState && translationStates[cursorKeyIdNextState] && (
+        <T>{translationStates[cursorKeyIdNextState].translationKey}</T>
       ),
       formula: formatShortcut(`${getMetaName()} + E`),
     },
   ];
 
   const editorIsActive =
-    cursor?.mode === 'editor' &&
+    cursorMode === 'editor' &&
     document.activeElement?.className === 'CodeMirror-code';
 
   const items = (
