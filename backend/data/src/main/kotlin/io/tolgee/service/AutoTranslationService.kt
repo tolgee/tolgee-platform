@@ -94,6 +94,7 @@ class AutoTranslationService(
 
   fun getConfig(project: Project) =
     autoTranslationConfigRepository.findOneByProject(project) ?: AutoTranslationConfig()
+      .also { it.project = project }
 
   private fun getLanguagesWithNoTranslation(key: Key) = key.project.languages
     .filter { projectLanguage ->
