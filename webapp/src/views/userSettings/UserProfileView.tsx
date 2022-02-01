@@ -13,8 +13,8 @@ import { useConfig } from 'tg.hooks/useConfig';
 import { MessageService } from 'tg.service/MessageService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { UserUpdateDTO } from 'tg.service/request.types';
-
 import { BaseUserSettingsView } from './BaseUserSettingsView';
+import { UserProfileAvatar } from './UserProfileAvatar';
 
 const messagesService = container.resolve(MessageService);
 
@@ -59,7 +59,8 @@ export const UserProfileView: FunctionComponent = () => {
     const emailChanged = newEmail !== initialEmail;
 
     return (
-      <>
+      <Box data-cy="user-profile">
+        <UserProfileAvatar />
         <TextField name="name" label={<T>User settings - Full name</T>} />
         <TextField name="email" label={<T>User settings - E-mail</T>} />
         {userLoadable?.data?.emailAwaitingVerification && (
@@ -82,7 +83,7 @@ export const UserProfileView: FunctionComponent = () => {
           </Typography>
         )}
         <SetPasswordFields />
-      </>
+      </Box>
     );
   };
 

@@ -26,10 +26,10 @@ import javax.validation.constraints.Size
 @EntityListeners(Project.Companion.ProjectListener::class)
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
 @Audited
-data class Project(
+class Project(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Long = 0L,
+  override var id: Long = 0L,
 
   @field:NotBlank
   @field:Size(min = 3, max = 50)
@@ -42,7 +42,7 @@ data class Project(
   @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   var slug: String? = null,
-) : AuditModel() {
+) : AuditModel(), ModelWithAvatar {
 
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
@@ -65,6 +65,8 @@ data class Project(
 
   @OneToOne(fetch = FetchType.LAZY)
   var baseLanguage: Language? = null
+
+  override var avatarHash: String? = null
 
   constructor(name: String, description: String? = null, slug: String?, userOwner: UserAccount?) :
     this(id = 0L, name, description, slug) {

@@ -1,10 +1,11 @@
-import { deleteProject, generateExampleKeys } from '../../common/apiCalls';
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import {
   translationsBeforeEach,
   visitTranslations,
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
+import { generateExampleKeys } from '../../common/apiCalls/testData/testData';
+import { deleteProject } from '../../common/apiCalls/common';
 
 describe('With 100 translations', () => {
   let project: ProjectDTO = null;

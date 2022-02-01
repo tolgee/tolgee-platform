@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository
 interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
   companion object {
     const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
-        r.slug as slug, 
+        r.slug as slug, r.avatarHash as avatarHash,
         ua as userOwner, o.name as organizationOwnerName, o.slug as organizationOwnerSlug, 
         bl as baseLanguage,
         o.basePermissions as organizationBasePermissions, role.type as organizationRole, p.type as directPermissions

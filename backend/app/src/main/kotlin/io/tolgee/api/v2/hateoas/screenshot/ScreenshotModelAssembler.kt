@@ -3,6 +3,7 @@ package io.tolgee.api.v2.hateoas.screenshot
 import io.tolgee.api.v2.controllers.translation.V2TranslationsController
 import io.tolgee.component.TimestampValidation
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.FileStoragePath
 import io.tolgee.model.Screenshot
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
@@ -23,7 +24,7 @@ class ScreenshotModelAssembler(
       filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
     }
 
-    var fileUrl = tolgeeProperties.screenshotsUrl + "/" + filename
+    var fileUrl = "${tolgeeProperties.fileStorageUrl}/${FileStoragePath.SCREENSHOTS}/$filename"
     if (!fileUrl.matches(Regex("^https?://.*$"))) {
       val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
       fileUrl = builder.replacePath(fileUrl)

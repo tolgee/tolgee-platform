@@ -1,9 +1,3 @@
-import {
-  cleanImportData,
-  generateImportData,
-  generateWithLongTextImportData,
-  login,
-} from '../../common/apiCalls';
 import 'cypress-file-upload';
 import { gcy } from '../../common/shared';
 import {
@@ -11,12 +5,14 @@ import {
   getLanguageRow,
   visitImport,
 } from '../../common/import';
+import { importTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Import Resolving', () => {
   describe('with basic data', () => {
     beforeEach(() => {
-      cleanImportData();
-      generateImportData().then((importData) => {
+      importTestData.clean();
+      importTestData.generateBasic().then((importData) => {
         login('franta');
         visitImport(importData.body.project.id);
       });
@@ -90,8 +86,8 @@ describe('Import Resolving', () => {
 
   describe('with long text', () => {
     beforeEach(() => {
-      cleanImportData();
-      generateWithLongTextImportData().then((importData) => {
+      importTestData.clean();
+      importTestData.generateWithLongText().then((importData) => {
         login('franta');
         visitImport(importData.body.project.id);
       });
@@ -134,6 +130,6 @@ describe('Import Resolving', () => {
   });
 
   after(() => {
-    cleanImportData();
+    importTestData.clean();
   });
 });

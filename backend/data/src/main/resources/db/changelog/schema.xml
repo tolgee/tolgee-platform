@@ -1387,4 +1387,34 @@
             CREATE INDEX translation_text_gin_trgm_index ON translation USING GIN (text gin_trgm_ops);
         </sql>
     </changeSet>
+    <changeSet author="jenik" id="1638968083095-1">
+        <addColumn tableName="user_account">
+            <column name="avatar_hash" type="varchar(100)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik" id="1638968083095-2">
+        <addColumn tableName="user_account_aud">
+            <column name="avatar_hash" type="varchar(100)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik" id="1638968083095-3">
+        <addColumn tableName="organization">
+            <column name="avatar_hash" type="varchar(100)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik" id="1638968083095-4">
+        <addColumn tableName="organization_aud">
+            <column name="avatar_hash" type="varchar(100)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik" id="1638968083095-5">
+        <addColumn tableName="project">
+            <column name="avatar_hash" type="varchar(100)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik" id="1638968083095-6">
+        <addColumn tableName="project_aud">
+            <column name="avatar_hash" type="varchar(100)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -13,7 +13,7 @@ import {
   setProperty,
   setRecaptchaSecretKey,
   setRecaptchaSiteKey,
-} from '../common/apiCalls';
+} from '../common/apiCalls/common';
 import { assertMessage, gcy, selectInProjectMenu } from '../common/shared';
 import { loginWithFakeGithub } from '../common/login';
 

@@ -23,19 +23,25 @@ import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.InputStream
 import java.util.*
 
 @Service
 class UserAccountService(
   private val userAccountRepository: UserAccountRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
-  private val tolgeeProperties: TolgeeProperties
+  private val tolgeeProperties: TolgeeProperties,
+  private val avatarService: AvatarService
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
 
   fun findOptional(username: String?): Optional<UserAccount> {
     return userAccountRepository.findByUsername(username)
+  }
+
+  fun find(username: String): UserAccount? {
+    return userAccountRepository.findByUsername(username).orElse(null)
   }
 
   fun get(username: String): UserAccount {
@@ -121,6 +127,18 @@ class UserAccountService(
   fun removeResetCode(userAccount: UserAccount): UserAccount {
     userAccount.resetPasswordCode = null
     return userAccountRepository.save(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
+  fun removeAvatar(userAccount: UserAccount) {
+    avatarService.removeAvatar(userAccount)
+  }
+
+  @Transactional
+  @CacheEvict(cacheNames = [Caches.USER_ACCOUNTS], key = "#userAccount.id")
+  fun setAvatar(userAccount: UserAccount, avatar: InputStream) {
+    avatarService.setAvatar(userAccount, avatar)
   }
 
   fun getAllInOrganization(

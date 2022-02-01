@@ -1,9 +1,4 @@
 import {
-  cleanLanguagesData,
-  generateLanguagesData,
-  login,
-} from '../../common/apiCalls';
-import {
   getCustomNameInput,
   selectInAutocomplete,
   setLanguageData,
@@ -11,12 +6,14 @@ import {
   visitProjectLanguages,
 } from '../../common/languages';
 import { assertMessage, gcy, getInputByName } from '../../common/shared';
+import { languagesTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Language creation', () => {
   beforeEach(() => {
-    cleanLanguagesData();
+    languagesTestData.clean();
 
-    generateLanguagesData().then((languageData) => {
+    languagesTestData.generate().then((languageData) => {
       login('franta');
       visitProjectLanguages(languageData.body.id);
     });
@@ -86,7 +83,7 @@ describe('Language creation', () => {
   });
 
   after(() => {
-    cleanLanguagesData();
+    languagesTestData.clean();
   });
 });
 

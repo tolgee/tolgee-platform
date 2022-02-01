@@ -1,19 +1,17 @@
-import {
-  cleanTranslationFiltersData,
-  createTranslationFiltersData,
-  login,
-} from '../../common/apiCalls';
 import { ProjectDTO } from '../../../../webapp/src/service/response.types';
 import { visitTranslations } from '../../common/translations';
 import { gcy, getPopover, selectInSelect } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
+import { translationsTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Translations Base', () => {
   let project: ProjectDTO = null;
 
   before(() => {
-    cleanTranslationFiltersData();
-    createTranslationFiltersData()
+    translationsTestData.cleanupForFilters();
+    translationsTestData
+      .generateForFilters()
       .then((p) => {
         project = p;
       })
@@ -33,7 +31,7 @@ describe('Translations Base', () => {
   });
 
   after(() => {
-    cleanTranslationFiltersData();
+    translationsTestData.cleanupForFilters();
   });
 
   it(`filters work correctly`, () => {

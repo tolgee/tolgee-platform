@@ -6,8 +6,8 @@ import {
   visitTranslations,
 } from '../../common/translations';
 import { assertTooltip, gcy, selectInProjectMenu } from '../../common/shared';
-import { deleteProject } from '../../common/apiCalls';
 import { stateColors } from '../../common/state';
+import { deleteProject } from '../../common/apiCalls/common';
 
 describe('Translation states', () => {
   let project: ProjectDTO = null;

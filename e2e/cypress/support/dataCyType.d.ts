@@ -4,6 +4,12 @@ declare namespace DataCy {
         "api-keys-create-edit-dialog" |
         "api-keys-edit-button" |
         "api-keys-project-select-item" |
+        "auto-avatar-img" |
+        "avatar-image" |
+        "avatar-menu-open-button" |
+        "avatar-remove-button" |
+        "avatar-upload-button" |
+        "avatar-upload-file-input" |
         "base-language-select" |
         "comment" |
         "comment-menu" |
@@ -107,6 +113,7 @@ declare namespace DataCy {
         "organization-members-leave-button" |
         "organization-members-remove-user-button" |
         "organization-name-field" |
+        "organization-profile" |
         "organization-role-menu" |
         "organization-role-menu-button" |
         "organization-role-select-item" |
@@ -127,6 +134,7 @@ declare namespace DataCy {
         "project-name-field" |
         "project-owner-select" |
         "project-owner-select-item" |
+        "project-settings" |
         "project-settings-button" |
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-item" |
@@ -189,5 +197,6 @@ declare namespace DataCy {
         "translations-view-table" |
         "translations-view-table-button" |
         "user-account-side-menu" |
-        "user-organizations-settings-subtitle-link"
+        "user-organizations-settings-subtitle-link" |
+        "user-profile"
 }

@@ -1,22 +1,19 @@
 import {
-  cleanLanguagesData,
-  generateLanguagesData,
-  login,
-} from '../../common/apiCalls';
-import {
   setLanguageData,
   visitProjectLanguages,
   visitProjectSettings,
 } from '../../common/languages';
 import { assertMessage, gcy, selectInSelect } from '../../common/shared';
+import { languagesTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Language modification', () => {
   let projectId: number;
 
   beforeEach(() => {
-    cleanLanguagesData();
+    languagesTestData.clean();
 
-    generateLanguagesData().then((languageData) => {
+    languagesTestData.generate().then((languageData) => {
       projectId = languageData.body.id;
       login('franta');
       visitProjectLanguages(projectId);

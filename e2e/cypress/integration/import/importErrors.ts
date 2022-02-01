@@ -1,23 +1,18 @@
-import {
-  cleanImportData,
-  generateAllSelectedImportData,
-  generateBaseImportData,
-  generateManyLanguagesImportData,
-  login,
-} from '../../common/apiCalls';
 import 'cypress-file-upload';
 import { assertMessage, gcy } from '../../common/shared';
 import { visitImport } from '../../common/import';
 import { expectGlobalLoading } from '../../common/loading';
+import { importTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Import errors', () => {
   beforeEach(() => {
-    cleanImportData();
+    importTestData.clean();
   });
 
   describe('All selected', () => {
     beforeEach(() => {
-      generateAllSelectedImportData().then((importData) => {
+      importTestData.generateAllSelected().then((importData) => {
         login('franta');
         visitImport(importData.body.project.id);
       });
@@ -39,7 +34,7 @@ describe('Import errors', () => {
   });
 
   it('does not add too many languages', () => {
-    generateManyLanguagesImportData().then((importData) => {
+    importTestData.generateWithManyLanguages().then((importData) => {
       login('franta');
       visitImport(importData.body.project.id);
     });
@@ -55,7 +50,7 @@ describe('Import errors', () => {
 
   describe('file error message', () => {
     beforeEach(() => {
-      generateBaseImportData().then((res) => {
+      importTestData.generateBase().then((res) => {
         login('franta');
         visitImport(res.body.id);
       });
@@ -96,6 +91,6 @@ describe('Import errors', () => {
   });
 
   after(() => {
-    cleanImportData();
+    importTestData.clean();
   });
 });

@@ -25,7 +25,7 @@ import javax.validation.constraints.Size
 @Audited
 class Organization(
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-  open var id: Long = 0,
+  override var id: Long = 0,
 
   @field:NotBlank @field:Size(min = 3, max = 50)
   open var name: String? = null,
@@ -39,7 +39,7 @@ class Organization(
 
   @Enumerated(EnumType.STRING)
   open var basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
-) {
+) : ModelWithAvatar {
   constructor(
     name: String?,
     description: String? = null,
@@ -55,4 +55,6 @@ class Organization(
 
   @Column(name = "third_party_billing_id")
   var thirdPartyBillingId: String? = null
+
+  override var avatarHash: String? = null
 }

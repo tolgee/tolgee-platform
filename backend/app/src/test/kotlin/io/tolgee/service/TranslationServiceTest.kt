@@ -15,7 +15,7 @@ class TranslationServiceTest : AbstractSpringTest() {
   @Transactional
   @Test
   fun getTranslations() {
-    val (id) = dbPopulator.populate("App")
+    val id = dbPopulator.populate("App").id
     val data = translationService.getTranslations(HashSet(Arrays.asList("en", "de")), id)
     assertThat(data["en"]).isInstanceOf(MutableMap::class.java)
   }

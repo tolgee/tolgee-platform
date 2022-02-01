@@ -1,8 +1,3 @@
-import {
-  cleanProjectsData,
-  createProjectsData,
-  login,
-} from '../../common/apiCalls';
 import 'cypress-file-upload';
 import {
   assertMessage,
@@ -27,6 +22,8 @@ import {
   move,
   selectFirst,
 } from '../../common/shortcuts';
+import { projectTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Project Permissions', () => {
   beforeEach(() => {});
@@ -37,8 +34,8 @@ describe('Project Permissions', () => {
 
   describe("Cukrberg's permissions", () => {
     before(() => {
-      cleanProjectsData();
-      createProjectsData();
+      projectTestData.clean();
+      projectTestData.generate();
     });
 
     beforeEach(() => {
@@ -60,8 +57,8 @@ describe('Project Permissions', () => {
 
   describe("Vaclav's permissions", () => {
     before(() => {
-      cleanProjectsData();
-      createProjectsData();
+      projectTestData.clean();
+      projectTestData.generate();
     });
 
     beforeEach(() => {
@@ -80,8 +77,8 @@ describe('Project Permissions', () => {
   describe('Permission settings', () => {
     describe('Not modifying', () => {
       before(() => {
-        cleanProjectsData();
-        createProjectsData();
+        projectTestData.clean();
+        projectTestData.generate();
       });
 
       beforeEach(() => {
@@ -136,8 +133,8 @@ describe('Project Permissions', () => {
 
     describe('Modifying', () => {
       beforeEach(() => {
-        cleanProjectsData();
-        createProjectsData();
+        projectTestData.clean();
+        projectTestData.generate();
         login('cukrberg@facebook.com', 'admin');
       });
 

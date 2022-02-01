@@ -5,6 +5,7 @@ import io.tolgee.api.v2.controllers.V2ProjectsController
 import io.tolgee.api.v2.hateoas.organization.LanguageModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
 import io.tolgee.model.views.ProjectWithStatsView
+import io.tolgee.service.AvatarService
 import io.tolgee.service.PermissionService
 import io.tolgee.service.ProjectService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
@@ -16,7 +17,8 @@ class ProjectWithStatsModelAssembler(
   private val userAccountModelAssembler: UserAccountModelAssembler,
   private val permissionService: PermissionService,
   private val projectService: ProjectService,
-  private val languageModelAssembler: LanguageModelAssembler
+  private val languageModelAssembler: LanguageModelAssembler,
+  private val avatarService: AvatarService
 ) : RepresentationModelAssemblerSupport<ProjectWithStatsView, ProjectWithStatsModel>(
   V2ProjectsController::class.java, ProjectWithStatsModel::class.java
 ) {
@@ -30,6 +32,7 @@ class ProjectWithStatsModelAssembler(
       name = view.name,
       description = view.description,
       slug = view.slug,
+      avatar = avatarService.getAvatarLinks(view.avatarHash),
       organizationOwnerSlug = view.organizationOwnerSlug,
       organizationOwnerName = view.organizationOwnerName,
       organizationOwnerBasePermissions = view.organizationBasePermissions,

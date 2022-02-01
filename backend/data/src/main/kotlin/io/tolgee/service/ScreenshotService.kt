@@ -14,6 +14,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.repository.ScreenshotRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
+import io.tolgee.util.ImageConverter
 import org.springframework.core.io.InputStreamSource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -38,7 +39,7 @@ class ScreenshotService(
         listOf(tolgeeProperties.maxScreenshotsPerKey)
       )
     }
-    val image = imageUploadService.prepareImage(screenshotImage.inputStream)
+    val image = ImageConverter(screenshotImage.inputStream).prepareImage()
     return storeProcessed(image.toByteArray(), key)
   }
 

@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import { getAnyContainingText } from '../../common/xPath';
 import { HOST } from '../../common/constants';
-import { createTestProject, login } from '../../common/apiCalls';
+import { createTestProject, login } from '../../common/apiCalls/common';
 import { getPopover } from '../../common/shared';
 
 describe('User settings', () => {

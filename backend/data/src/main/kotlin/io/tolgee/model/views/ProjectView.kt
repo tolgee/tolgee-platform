@@ -10,6 +10,7 @@ interface ProjectView {
   val name: String
   val description: String?
   val slug: String?
+  val avatarHash: String?
   val userOwner: UserAccount?
   val baseLanguage: Language?
   val organizationOwnerName: String?

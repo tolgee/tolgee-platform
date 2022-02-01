@@ -2,6 +2,7 @@ package io.tolgee.configuration
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
 import io.tolgee.util.VersionProvider
 
@@ -16,7 +17,7 @@ class PublicConfigurationDTO(
   var authMethods: AuthMethodsDTO? = null
   val passwordResettable: Boolean
   val allowRegistrations: Boolean
-  val screenshotsUrl = properties.screenshotsUrl
+  val screenshotsUrl = properties.fileStorageUrl + "/" + FileStoragePath.SCREENSHOTS
   val maxUploadFileSize = properties.maxUploadFileSize
   val clientSentryDsn = properties.sentry.clientDsn
   val needsEmailVerification = properties.authentication.needsEmailVerification

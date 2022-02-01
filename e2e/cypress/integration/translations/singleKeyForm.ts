@@ -1,9 +1,4 @@
 import {
-  cleanSingleData,
-  generateSingleData,
-  login,
-} from '../../common/apiCalls';
-import {
   editCell,
   toggleLang,
   visitTranslations,
@@ -11,20 +6,22 @@ import {
 import { visitSingleKey } from '../../common/singleKey';
 import { assertMessage, confirmStandard } from '../../common/shared';
 import { waitForGlobalLoading } from '../../common/loading';
+import { translationSingleTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Single key form', () => {
   let projectId: number;
 
   beforeEach(() => {
-    cleanSingleData();
-    generateSingleData().then((data) => {
+    translationSingleTestData.clean();
+    translationSingleTestData.generate().then((data) => {
       projectId = data.body.id;
     });
   });
 
   afterEach(() => {
     waitForGlobalLoading();
-    cleanSingleData();
+    translationSingleTestData.clean();
   });
 
   it('will create translation with EDIT permissions', () => {

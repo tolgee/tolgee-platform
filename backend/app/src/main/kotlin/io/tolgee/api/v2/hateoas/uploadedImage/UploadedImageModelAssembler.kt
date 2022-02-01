@@ -3,6 +3,7 @@ package io.tolgee.api.v2.hateoas.uploadedImage
 import io.tolgee.api.v2.controllers.translation.V2TranslationsController
 import io.tolgee.component.TimestampValidation
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.FileStoragePath
 import io.tolgee.model.UploadedImage
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
@@ -22,7 +23,7 @@ class UploadedImageModelAssembler(
       filename = filename + "?timestamp=" + timestampValidation.encryptTimeStamp(Date().time)
     }
 
-    var fileUrl = tolgeeProperties.uploadedImagesUrl + "/" + filename
+    var fileUrl = "${tolgeeProperties.fileStorageUrl}/${FileStoragePath.UPLOADED_IMAGES}/$filename"
     if (!fileUrl.matches(Regex("^https?://.*$"))) {
       val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
       fileUrl = builder.replacePath(fileUrl)

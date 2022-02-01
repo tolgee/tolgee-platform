@@ -1,16 +1,13 @@
-import {
-  cleanProjectTransferringData,
-  createProjectTransferringData,
-  login,
-} from '../../common/apiCalls';
 import 'cypress-file-upload';
 import { enterProjectSettings, visitList } from '../../common/projects';
 import { assertMessage, gcy } from '../../common/shared';
+import { projectTransferringTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Projects Basics', () => {
   beforeEach(() => {
-    cleanProjectTransferringData();
-    createProjectTransferringData();
+    projectTransferringTestData.clean();
+    projectTransferringTestData.generate();
   });
 
   it('shows proper dialog content', () => {
@@ -49,7 +46,7 @@ describe('Projects Basics', () => {
   });
 
   after(() => {
-    cleanProjectTransferringData();
+    projectTransferringTestData.clean();
   });
 });
 

@@ -43,7 +43,7 @@ class ProjectsE2eDataController(
   private val keyService: KeyService,
   private val languageService: LanguageService,
 ) {
-  @GetMapping(value = ["/create"])
+  @GetMapping(value = ["/generate"])
   @Transactional
   fun createProjects() {
     val createdUsers = mutableMapOf<String, UserAccount>()
@@ -86,7 +86,7 @@ class ProjectsE2eDataController(
         createdUsers[projectData.userOwner]!! else null
 
       val organizationOwner = if (projectData.organizationOwner != null)
-        organizationService.get(projectData.organizationOwner) else null
+        organizationService.find(projectData.organizationOwner) else null
 
       val project = projectRepository.save(
         Project(

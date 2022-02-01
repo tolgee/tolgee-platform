@@ -11,6 +11,7 @@ interface OrganizationView {
   val slug: String
   val basePermissions: Permission.ProjectPermissionType
   val currentUserRole: OrganizationRoleType
+  val avatarHash: String?
 
   companion object {
     fun of(entity: Organization, currentUserRole: OrganizationRoleType): OrganizationView {
@@ -21,6 +22,7 @@ interface OrganizationView {
         override val slug = entity.slug!!
         override val basePermissions = entity.basePermissions
         override val currentUserRole = currentUserRole
+        override val avatarHash = entity.avatarHash
       }
     }
   }

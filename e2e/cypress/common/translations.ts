@@ -3,12 +3,12 @@ import {
   deleteProject,
   login,
   setTranslations,
-} from './apiCalls';
+} from './apiCalls/common';
 import { HOST } from './constants';
 import { ProjectDTO } from '../../../webapp/src/service/response.types';
-import Chainable = Cypress.Chainable;
 import { waitForGlobalLoading } from './loading';
 import { assertMessage } from './shared';
+import Chainable = Cypress.Chainable;
 
 export function getCellCancelButton() {
   return cy.gcy('translations-cell-cancel-button');

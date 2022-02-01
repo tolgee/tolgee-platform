@@ -1,8 +1,3 @@
-import {
-  cleanLanguagesData,
-  generateLanguagesData,
-  login,
-} from '../../common/apiCalls';
 import { HOST } from '../../common/constants';
 import {
   gcy,
@@ -16,11 +11,13 @@ import {
   setLanguageData,
   typeToAutocomplete,
 } from '../../common/languages';
+import { languagesTestData } from '../../common/apiCalls/testData/testData';
+import { login } from '../../common/apiCalls/common';
 
 describe('Language creation in new project', () => {
   beforeEach(() => {
-    cleanLanguagesData();
-    generateLanguagesData().then(() => {
+    languagesTestData.clean();
+    languagesTestData.generate().then(() => {
       login('franta');
       cy.visit(`${HOST}/projects/add`);
     });
