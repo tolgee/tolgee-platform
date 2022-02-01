@@ -51,6 +51,21 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
 
   @ProjectJWTAuthTestMethod
   @Test
+  fun `returns selected languages after set`() {
+    performProjectAuthPut(
+      "/translations",
+      SetTranslationsWithKeyDto(
+        "A key", mutableMapOf("en" to "English"), setOf("en", "de")
+      )
+    ).andIsOk
+      .andAssertThatJson {
+        node("translations.en.text").isEqualTo("English")
+        node("translations.de.text").isEqualTo("Z translation")
+      }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
   fun `validated translation length`() {
     val text = "a".repeat(10001)
     performProjectAuthPut(
