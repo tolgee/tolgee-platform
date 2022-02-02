@@ -8,6 +8,7 @@ import org.testng.annotations.Test
 @SpringBootTest(
   properties = [
     "tolgee.cache.enabled=true",
+    "tolgee.internal.fake-mt-providers=false",
   ]
 )
 class CacheWithoutRedisTest : AbstractCacheTest() {

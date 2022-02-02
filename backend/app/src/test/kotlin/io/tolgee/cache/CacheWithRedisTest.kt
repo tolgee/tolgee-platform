@@ -15,6 +15,8 @@ import org.testng.annotations.Test
     "spring.redis.port=56379",
     "tolgee.cache.use-redis=true",
     "tolgee.cache.enabled=true",
+    "tolgee.internal.fake-mt-providers=false",
+    "tolgee.machine-translation.free-credits-amount=10000000"
   ]
 )
 @ContextConfiguration(initializers = [CacheWithRedisTest.Companion.Initializer::class])
