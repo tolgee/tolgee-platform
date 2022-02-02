@@ -2,6 +2,7 @@ package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.machineTranslation.MtServiceManager
 import io.tolgee.constants.MtServiceType
+import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
@@ -54,31 +55,39 @@ class MtService(
     val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguages.map { it.id })
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
 
-    return targetLanguages
+    val serviceIndexedLanguagesMap = targetLanguages
       .asSequence()
       .mapIndexed { idx, lang -> idx to lang }
       .groupBy { primaryServices[it.second.id] }
-      .also {
-        val price = calculatePrice(it, prepared)
-        publishOnBeforeEvent(prepared, project, price)
-      }
-      .map { (service, languageIdxPairs) ->
-        service?.let {
-          val translated = machineTranslationManager.translate(
-            prepared.text,
-            baseLanguage.tag,
-            languageIdxPairs.map { it.second.tag },
-            service
-          )
 
-          val withReplacedParams = translated.map { replaceParams(prepared.params, it) }
-          languageIdxPairs.map { it.first }.zip(withReplacedParams)
-        } ?: languageIdxPairs.map { it.first to null }
-      }
+    val price = calculatePrice(serviceIndexedLanguagesMap, prepared)
+    publishOnBeforeEvent(prepared, project, price)
+
+    val translationResults = serviceIndexedLanguagesMap.map { (service, languageIdxPairs) ->
+      service?.let {
+        val translated = machineTranslationManager.translate(
+          prepared.text,
+          baseLanguage.tag,
+          languageIdxPairs.map { it.second.tag },
+          service
+        )
+
+        val withReplacedParams = translated.map {
+          it.translatedText = it.translatedText?.replaceParams(prepared.params)
+          it
+        }
+        languageIdxPairs.map { it.first }.zip(withReplacedParams)
+      } ?: languageIdxPairs.map { it.first to null }
+    }
       .flatten()
       .sortedBy { it.first }
       .map { it.second }
-      .toList()
+
+    val actualPrice = translationResults.sumOf { it?.actualPrice ?: 0 }
+
+    publishOnAfterEvent(prepared, project, price, actualPrice)
+
+    return translationResults.map { it?.translatedText }
   }
 
   private fun calculatePrice(
@@ -104,20 +113,23 @@ class MtService(
   ): Map<MtServiceType, String?>? {
     val enabledServices = mtServiceConfigService.getEnabledServices(targetLanguage.id)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
-    val price = machineTranslationManager.calculatePriceAll(
+    val expectedPrice = machineTranslationManager.calculatePriceAll(
       text = prepared.text,
       services = enabledServices
     )
 
-    publishOnBeforeEvent(prepared, project, price)
+    publishOnBeforeEvent(prepared, project, expectedPrice)
 
-    return machineTranslationManager
+    val results = machineTranslationManager
       .translateUsingAll(prepared.text, baseLanguage.tag, targetLanguage.tag, enabledServices)
-      .map { (serviceName, translated) ->
-        var result = translated
-        result = replaceParams(prepared.params, result)
-        serviceName to result
-      }.toMap()
+
+    val actualPrice = results.entries.sumOf { it.value.actualPrice }
+
+    publishOnAfterEvent(prepared, project, expectedPrice, actualPrice)
+
+    return results.map { (serviceName, translated) ->
+      serviceName to translated.translatedText?.replaceParams(prepared.params)
+    }.toMap()
   }
 
   private fun publishOnBeforeEvent(prepared: TextHelper.ReplaceIcuResult, project: Project, price: Int) {
@@ -126,11 +138,22 @@ class MtService(
     )
   }
 
-  private fun replaceParams(params: Map<String, String>, translated: String?): String? {
-    var result = translated
+  private fun publishOnAfterEvent(
+    prepared: TextHelper.ReplaceIcuResult,
+    project: Project,
+    expectedPrice: Int,
+    actualPrice: Int
+  ) {
+    applicationEventPublisher.publishEvent(
+      OnAfterMachineTranslationEvent(this, prepared.text, project, expectedPrice, actualPrice)
+    )
+  }
+
+  private fun String.replaceParams(params: Map<String, String>): String {
+    var replaced = this
     params.forEach { (placeholder, text) ->
-      result = result?.replace(placeholder, text)
+      replaced = replaced.replace(placeholder, text)
     }
-    return result
+    return replaced
   }
 }

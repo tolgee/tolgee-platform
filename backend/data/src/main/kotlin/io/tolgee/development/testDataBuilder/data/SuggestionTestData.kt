@@ -114,27 +114,23 @@ class SuggestionTestData : BaseTestData() {
 
   fun enableBothGooglePrimary() {
     projectBuilder.addMtServiceConfig {
-      self {
         this.targetLanguage = germanLanguage
         this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS)
         this.primaryService = MtServiceType.GOOGLE
-      }
     }
   }
 
   fun addDefaultConfig() {
     projectBuilder.addMtServiceConfig {
-      self {
         this.targetLanguage = null
         this.enabledServices = mutableSetOf(MtServiceType.AWS)
         this.primaryService = MtServiceType.AWS
-      }
     }
   }
 
   fun generateLotOfData() {
     projectBuilder.apply {
-      (0..10000).forEach {
+      (0..1000).forEach {
         addKey {
           name = UUID.randomUUID().toString()
         }.build keyBuilder@{

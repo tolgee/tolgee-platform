@@ -5,6 +5,7 @@ import com.amazonaws.services.translate.model.TranslateTextResult
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.constants.Caches
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
 import io.tolgee.dtos.request.SuggestRequestDto
@@ -26,6 +27,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.cache.Cache
+import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
 import java.util.*
 import kotlin.system.measureTimeMillis
@@ -45,11 +48,20 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @MockBean
   lateinit var amazonTranslate: AmazonTranslate
 
+  @Autowired
+  @MockBean
+  lateinit var cacheManager: CacheManager
+  lateinit var cacheMock: Cache
+
   @BeforeEach
   fun setup() {
     initTestData()
     initMachineTranslationProperties(1000)
     initMachineTranslationMocks()
+    cacheMock = mock()
+    val rateLimitsCacheMock = mock<Cache>()
+    whenever(cacheManager.getCache(eq(Caches.RATE_LIMITS))).thenReturn(rateLimitsCacheMock)
+    whenever(cacheManager.getCache(eq(Caches.MACHINE_TRANSLATIONS))).thenReturn(cacheMock)
   }
 
   private fun initMachineTranslationMocks() {
@@ -255,6 +267,17 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
     mockCurrentDate { DateUtils.addMonths(Date(), 2) }
     testMtCreditConsumption(expectedCreditTaken)
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `it doesn't consume when cached`() {
+    mockCurrentDate { Date() }
+
+    val valueWrapperMock = mock<Cache.ValueWrapper>()
+    whenever(cacheMock.get(any())).thenReturn(valueWrapperMock)
+    whenever(valueWrapperMock.get()).thenReturn("Yeey! Cached!")
+    performMtRequestAndExpectAfterBalance(1000)
   }
 
   private fun testMtCreditConsumption(expectedCreditTaken: Int) {

@@ -1,9 +1,17 @@
 package io.tolgee.component.machineTranslation
 
 import io.tolgee.configuration.tolgee.InternalProperties
+import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -15,9 +23,15 @@ import org.springframework.stereotype.Component
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class MtServiceManager(
-  val applicationContext: ApplicationContext,
-  val internalProperties: InternalProperties
+  private val applicationContext: ApplicationContext,
+  private val internalProperties: InternalProperties,
+  private val cacheManager: CacheManager
 ) {
+
+  @set:Autowired
+  @set:Lazy
+  lateinit var mtServiceManagerCachingProxy: MtServiceManagerCachingProxy
+
   private val providers by lazy {
     MtServiceType.values().associateWith { applicationContext.getBean(it.providerClass) }
   }
@@ -33,14 +47,12 @@ class MtServiceManager(
     sourceLanguageTag: String,
     targetLanguageTag: String,
     services: List<MtServiceType>
-  ): Map<MtServiceType, String?> {
-    return services.getProviders().map { service ->
-      service.key to let {
-        if (!internalProperties.fakeMtProviders)
-          service.value.translate(text, sourceLanguageTag, targetLanguageTag)
-        else "$text translated with ${service.key.name} from $sourceLanguageTag to $targetLanguageTag"
-      }
-    }.toMap()
+  ): Map<MtServiceType, TranslateResult> {
+    return runBlocking(Dispatchers.IO) {
+      services.map { service ->
+        async { service to translate(text, sourceLanguageTag, targetLanguageTag, service) }
+      }.awaitAll().toMap()
+    }
   }
 
   /**
@@ -50,13 +62,61 @@ class MtServiceManager(
     text: String,
     sourceLanguageTag: String,
     targetLanguageTag: String,
-    service: MtServiceType
-  ): String? {
-    val provider = service.getProvider()
-    return if (!internalProperties.fakeMtProviders)
-      provider.translate(text, sourceLanguageTag, targetLanguageTag)
-    else "$text translated with ${service.name} from $sourceLanguageTag to $targetLanguageTag"
+    serviceType: MtServiceType
+  ): TranslateResult {
+    val params = getParams(text, sourceLanguageTag, targetLanguageTag, serviceType)
+
+    if (internalProperties.fakeMtProviders) {
+      return getFaked(params)
+    }
+
+    return params.findInCache()?.let {
+      TranslateResult(it, 0)
+    } ?: let {
+      val price = calculatePrice(params.text, params.serviceType)
+      val result = TranslateResult(
+        params.serviceType.getProvider()
+          .translate(params.text, params.sourceLanguageTag, params.targetLanguageTag),
+        price
+      )
+      result.translatedText?.let { params.cacheResult(it) }
+      return result
+    }
   }
+
+  private fun getParams(
+    text: String,
+    sourceLanguageTag: String,
+    targetLanguageTag: String,
+    serviceType: MtServiceType
+  ) = TranslationParams(
+    text = text,
+    sourceLanguageTag = sourceLanguageTag,
+    targetLanguageTag = targetLanguageTag,
+    serviceType = serviceType
+  )
+
+  private fun getFaked(
+    params: TranslationParams
+  ): TranslateResult {
+    return TranslateResult(
+      "$params.text translated with ${params.serviceType.name} " +
+        "from $params.sourceLanguageTag to $params.targetLanguageTag",
+      calculatePrice(params.text, params.serviceType)
+    )
+  }
+
+  private fun TranslationParams.findInCache(): String? {
+    return getCache()?.let { cache ->
+      cache.get(this.cacheKey)?.get() as? String
+    }
+  }
+
+  private fun TranslationParams.cacheResult(result: String) {
+    getCache()?.put(this.cacheKey, result)
+  }
+
+  private fun getCache() = cacheManager.getCache(Caches.MACHINE_TRANSLATIONS)
 
   /**
    * Translates a text using All services
@@ -66,11 +126,30 @@ class MtServiceManager(
     sourceLanguageTag: String,
     targetLanguageTags: List<String>,
     service: MtServiceType
-  ): List<String?> {
-    val provider = service.getProvider()
+  ): List<TranslateResult> {
     return if (!internalProperties.fakeMtProviders)
-      provider.translate(text, sourceLanguageTag, targetLanguageTags)
-    else targetLanguageTags.map { "$text translated with ${service.name} from $sourceLanguageTag to $it" }
+      translateToMultipleTargets(
+        serviceType = service,
+        text = text,
+        sourceLanguageTag = sourceLanguageTag,
+        targetLanguageTags = targetLanguageTags
+      )
+    else targetLanguageTags.map { getFaked(getParams(text, sourceLanguageTag, it, service)) }
+  }
+
+  fun translateToMultipleTargets(
+    serviceType: MtServiceType,
+    text: String,
+    sourceLanguageTag: String,
+    targetLanguageTags: List<String>
+  ): List<TranslateResult> {
+    return runBlocking(Dispatchers.IO) {
+      targetLanguageTags.map { targetLanguageTag ->
+        async {
+          translate(text, sourceLanguageTag, targetLanguageTag, serviceType)
+        }
+      }.awaitAll()
+    }
   }
 
   /**
@@ -87,12 +166,12 @@ class MtServiceManager(
     return services.getProviders().values.sumOf { it.calculatePrice(text) }
   }
 
-  private fun List<MtServiceType>.getProviders():
+  fun List<MtServiceType>.getProviders():
     Map<MtServiceType, MtValueProvider> {
     return this.associateWith { it.getProvider() }
   }
 
-  private fun MtServiceType.getProvider(): MtValueProvider {
+  fun MtServiceType.getProvider(): MtValueProvider {
     return applicationContext.getBean(this.providerClass)
   }
 }

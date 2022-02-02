@@ -104,27 +104,19 @@ class AutoTranslateTestData : BaseTestData() {
   fun generateLanguagesWithDifferentPrimaryServices() {
     projectBuilder.apply {
       addLanguage {
-        self {
-          name = "Google translated Lang"
-          tag = "fr"
-        }
+        name = "Google translated Lang"
+        tag = "fr"
         addMtServiceConfig {
-          self {
-            this.targetLanguage = this@addLanguage.self
-            this.primaryService = MtServiceType.GOOGLE
-          }
+          this.targetLanguage = this@addLanguage
+          this.primaryService = MtServiceType.GOOGLE
         }
       }
       addLanguage {
-        self {
-          name = "AWS translated Lang"
-          tag = "ar"
-        }
+        name = "AWS translated Lang"
+        tag = "ar"
         addMtServiceConfig {
-          self {
-            this.targetLanguage = this@addLanguage.self
-            this.primaryService = MtServiceType.AWS
-          }
+          this.targetLanguage = this@addLanguage
+          this.primaryService = MtServiceType.AWS
         }
       }
     }
