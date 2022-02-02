@@ -159,7 +159,7 @@ class SuggestionTestData : BaseTestData() {
 
   fun generateLotOfData() {
     projectBuilder.apply {
-      (0..10000).forEach {
+      (0..1000).forEach {
         addKey {
           self {
             name = UUID.randomUUID().toString()
