@@ -1,6 +1,7 @@
 package io.tolgee.model
 
 import org.hibernate.envers.Audited
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
@@ -61,6 +62,9 @@ data class UserAccount(
 
   @OneToMany(mappedBy = "user")
   var organizationRoles: MutableList<OrganizationRole> = mutableListOf()
+
+  @OneToOne(mappedBy = "userAccount", cascade = [CascadeType.REMOVE])
+  var mtCreditBucket: MtCreditBucket? = null
 
   constructor(
     id: Long?,
