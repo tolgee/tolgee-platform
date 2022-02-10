@@ -44,8 +44,17 @@ const Item: FunctionComponent<{ keyDTO: ApiKeyModel }> = (props) => {
 
   const onDelete = (dto: components['schemas']['ApiKeyModel']) => {
     confirmation({
-      title: 'Delete api key',
-      message: 'Do you really want to delete api key ' + dto.key + '?',
+      title: <T keyName="delete_api_key">Delete api key</T>,
+      message: (
+        <span data-openreplay-masked="">
+          <T
+            keyName="really_delete_api_key_message"
+            parameters={{ key: dto.key }}
+            //eslint-disable-next-line react/no-children-prop
+            children="Do you really want to delete api key {key}?"
+          />
+        </span>
+      ),
       onConfirm: () =>
         deleteKey.mutate(
           { path: { apiKeyId: dto.id } },
@@ -64,7 +73,8 @@ const Item: FunctionComponent<{ keyDTO: ApiKeyModel }> = (props) => {
         <Grid item>
           <Box mr={2}>
             <b>
-              <T>Api key list label - Api Key</T> {props.keyDTO.key}
+              <T>Api key list label - Api Key</T>{' '}
+              <span data-openreplay-masked="">{props.keyDTO.key}</span>
             </b>
           </Box>
         </Grid>

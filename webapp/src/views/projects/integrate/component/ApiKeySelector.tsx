@@ -69,7 +69,11 @@ export const ApiKeySelector: FC<{
               'data-cy': 'integrate-api-key-selector-select-input',
             }}
             renderValue={(id) => {
-              return <>{findKey(id as number)?.key}</>;
+              return (
+                <span data-openreplay-masked="">
+                  {findKey(id as number)?.key}
+                </span>
+              );
             }}
             onChange={(e) => onSelect(e.target.value as number)}
           >
@@ -80,7 +84,7 @@ export const ApiKeySelector: FC<{
                 data-cy="integrate-api-key-selector-item"
               >
                 <Box className={classes.itemWrapper}>
-                  <Box>{k.key}</Box>
+                  <Box data-openreplay-masked="">{k.key}</Box>
                   <Box className={classes.scopes}>{k.scopes.join(', ')}</Box>
                 </Box>
               </MenuItem>

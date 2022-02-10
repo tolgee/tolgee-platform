@@ -11,6 +11,7 @@ import { MdxProvider } from 'tg.component/MdxProvider';
 import { useIntegrateState } from 'tg.views/projects/integrate/useIntegrateState';
 import { useProject } from 'tg.hooks/useProject';
 
+export const API_KEY_PLACEHOLDER = '{{{apiKey}}}';
 export const IntegrateView: FunctionComponent = () => {
   const project = useProject();
 
@@ -85,15 +86,18 @@ export const IntegrateView: FunctionComponent = () => {
               {selectedWeapon && selectedApiKey && (
                 <Box data-cy="integrate-guide">
                   <MdxProvider
-                    modifyCode={(code) =>
-                      code
-                        ?.replace('{{{apiKey}}}', selectedApiKey?.key || '')
+                    modifyValue={(code) => {
+                      return code
+                        ?.replace(
+                          API_KEY_PLACEHOLDER,
+                          selectedApiKey?.key || ''
+                        )
                         .replace(
                           '{{{apiUrl}}}',
                           process.env.REACT_APP_API_URL ||
                             window.location.origin
-                        )
-                    }
+                        );
+                    }}
                   >
                     {React.createElement(selectedWeapon.guide)}
                   </MdxProvider>

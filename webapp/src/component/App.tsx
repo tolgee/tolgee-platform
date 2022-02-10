@@ -21,6 +21,7 @@ import { FullPageLoading } from './common/FullPageLoading';
 import { PrivateRoute } from './common/PrivateRoute';
 import SnackBar from './common/SnackBar';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+import type API from '@openreplay/tracker';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/LoginRouter')
@@ -70,6 +71,9 @@ const Redirection = () => {
 const MandatoryDataProvider = (props: any) => {
   const config = useConfig();
   const userData = useUser();
+  const [openReplayTracker, setOpenReplayTracker] = useState(
+    undefined as undefined | API
+  );
 
   useEffect(() => {
     if (config?.clientSentryDsn) {
@@ -85,17 +89,22 @@ const MandatoryDataProvider = (props: any) => {
       import('@openreplay/tracker').then(({ default: Tracker }) => {
         window.openReplayTracker = new Tracker({
           projectKey: openReplayApiKey,
+          __DISABLE_SECURE_MODE: true,
         });
         window.openReplayTracker.start();
       });
     }
-  }, [config?.clientSentryDsn]);
+    setOpenReplayTracker(window.openReplayTracker);
+  }, [config?.clientSentryDsn, config?.openReplayApiKey]);
 
   useEffect(() => {
-    if (userData && window.openReplayTracker) {
-      window.openReplayTracker.setUserID(userData.username);
+    if (userData && openReplayTracker) {
+      openReplayTracker.setUserID(userData.username);
+      setTimeout(() => {
+        openReplayTracker?.setUserID(userData.username);
+      }, 2000);
     }
-  }, [userData, window.openReplayTracker]);
+  }, [userData, openReplayTracker]);
 
   const allowPrivate = useSelector(
     (state: AppState) => state.global.security.allowPrivate
