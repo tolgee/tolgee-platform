@@ -4,6 +4,7 @@ import { MDXProvider } from '@mdx-js/react';
 import Highlight, { defaultProps, Prism } from 'prism-react-renderer';
 import theme from 'prism-react-renderer/themes/github';
 import clsx from 'clsx';
+import { API_KEY_PLACEHOLDER } from 'tg.views/projects/integrate/IntegrateView';
 
 (typeof global !== 'undefined' ? global : window).Prism = Prism;
 require('prismjs/components/prism-php');
@@ -43,9 +44,12 @@ const useStyles = makeStyles((t) => ({
 }));
 
 export const MdxProvider: FC<{
-  modifyCode?: (code: string) => string;
+  modifyValue?: (code: string) => string;
 }> = (props) => {
   const classes = useStyles();
+
+  const modifyValue = (code: string) =>
+    props.modifyValue ? props.modifyValue(code) : code;
 
   return (
     <MDXProvider
@@ -96,7 +100,7 @@ export const MdxProvider: FC<{
             <Highlight
               {...defaultProps}
               theme={theme}
-              code={props.modifyCode ? props.modifyCode(children) : children}
+              code={children}
               language={language}
             >
               {({ className, style, tokens, getLineProps, getTokenProps }) => (
@@ -108,9 +112,21 @@ export const MdxProvider: FC<{
                 >
                   {tokens.map((line, i) => (
                     <div key={i} {...getLineProps({ line, key: i })}>
-                      {line.map((token, key) => (
-                        <span key={key} {...getTokenProps({ token, key })} />
-                      ))}
+                      {line.map((token, key) => {
+                        const tokenProps = getTokenProps({ token, key });
+                        const splitByApiKey = tokenProps.children
+                          .split(API_KEY_PLACEHOLDER)
+                          .map(modifyValue);
+                        tokenProps.children = insertBetweenAll(
+                          splitByApiKey,
+                          <span data-openreplay-masked="">
+                            {modifyValue(API_KEY_PLACEHOLDER)}
+                          </span>
+                        ).map((it, idx) => (
+                          <React.Fragment key={idx}>{it}</React.Fragment>
+                        ));
+                        return <span key={key} {...tokenProps} />;
+                      })}
                     </div>
                   ))}
                 </pre>
@@ -124,3 +140,10 @@ export const MdxProvider: FC<{
     </MDXProvider>
   );
 };
+
+const insertBetweenAll = (arr, thing) =>
+  arr.flatMap((value, index, array) =>
+    array.length - 1 !== index // check for the last item
+      ? [value, thing]
+      : value
+  );
