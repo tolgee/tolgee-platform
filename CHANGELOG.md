@@ -1,3 +1,10 @@
+## [2.3.1](https://github.com/tolgee/server/compare/v2.3.0...v2.3.1) (2022-02-10)
+
+
+### Bug Fixes
+
+* Fix data-cy webpack plugin ([409be12](https://github.com/tolgee/server/commit/409be1237985b47450f1fd810c5c5980a452e3cc))
+
 # [2.3.0](https://github.com/tolgee/server/compare/v2.2.1...v2.3.0) (2022-01-31)
 
 
