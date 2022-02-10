@@ -1,4 +1,4 @@
-import { Divider } from '@material-ui/core';
+import { Box, Divider } from '@material-ui/core';
 import List from '@material-ui/core/List';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import { useTranslate } from '@tolgee/react';
@@ -25,6 +25,7 @@ import { SideMenu } from './SideMenu';
 import { SideMenuItem } from './SideMenuItem';
 import LanguageIcon from '@material-ui/icons/Language';
 import { Devices } from '@material-ui/icons';
+import { AdditionalMenuItems } from './AdditionalMenuItems';
 
 const actions = container.resolve(GlobalActions);
 
@@ -41,7 +42,12 @@ export const ProjectMenu = ({ id }) => {
       onSideMenuToggle={() => actions.toggleSideMenu.dispatch()}
       open={open}
     >
-      <div data-cy="project-menu-items">
+      <Box
+        display="flex"
+        flexDirection="column"
+        flexGrow={1}
+        data-cy="project-menu-items"
+      >
         <List>
           <SideMenuItem
             linkTo={LINKS.PROJECTS.build({ [PARAMS.PROJECT_ID]: id })}
@@ -135,7 +141,8 @@ export const ProjectMenu = ({ id }) => {
             </List>
           </>
         )}
-      </div>
+        <AdditionalMenuItems text={t('give_feedback_button')} />
+      </Box>
     </SideMenu>
   );
 };

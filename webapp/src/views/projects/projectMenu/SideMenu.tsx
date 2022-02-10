@@ -31,6 +31,7 @@ const useStyles = makeStyles((theme) => ({
     top: theme.mixins.toolbar.minHeight,
     bottom: 0,
     overscrollBehavior: 'contain',
+    height: 'calc(100vh - 52px)',
   },
   drawerFake: {
     position: 'relative',
