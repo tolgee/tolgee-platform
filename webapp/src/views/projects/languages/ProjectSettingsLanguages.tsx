@@ -3,6 +3,7 @@ import { Box, Typography } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { Link } from 'react-router-dom';
+import clsx from 'clsx';
 
 import { SettingsIconButton } from 'tg.component/common/buttons/SettingsIconButton';
 import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
@@ -13,7 +14,6 @@ import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { MachineTranslation } from './MachineTranslation/MachineTranslation';
 import { LanguageItem } from './LanguageItem';
 import { useTableStyles } from './tableStyles';
-import clsx from 'clsx';
 import { AutoTranslations } from './AutoTranslations/AutoTranslations';
 
 export const ProjectSettingsLanguages = () => {
@@ -30,8 +30,6 @@ export const ProjectSettingsLanguages = () => {
       size: 1000,
     },
   });
-
-  const gridTemplateColumns = '1fr auto auto';
 
   useGlobalLoading(languagesLoadable.isLoading);
 
@@ -53,7 +51,7 @@ export const ProjectSettingsLanguages = () => {
       </Box>
       <div
         className={tableClasses.table}
-        style={{ gridTemplateColumns }}
+        style={{ gridTemplateColumns: '1fr auto auto' }}
         data-cy="project-settings-languages"
       >
         <div className={tableClasses.topRow} />

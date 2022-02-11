@@ -27,7 +27,7 @@ describe('Translation memory', () => {
     deleteProject(project.id);
   });
 
-  it("won't trigger auto translation when not enabled", () => {
+  it("doesn't trigger auto translation when not enabled", () => {
     visit();
     waitForGlobalLoading();
     createTranslation('mykey', 'Cool translated text 1');
@@ -41,7 +41,7 @@ describe('Translation memory', () => {
       .should('have.length', 1);
   });
 
-  it('will translate with machine translations', () => {
+  it('translate with machine translations', () => {
     enableSettings({ translationMemory: true, machineTranslation: true });
     visit();
     waitForGlobalLoading();
@@ -60,7 +60,7 @@ describe('Translation memory', () => {
     );
   });
 
-  it('will translate with translation memory', () => {
+  it('translate with translation memory', () => {
     enableSettings({ translationMemory: true, machineTranslation: true });
     visit();
     waitForGlobalLoading();

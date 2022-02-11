@@ -199,48 +199,46 @@ export const FormBody: React.FC<Props> = ({
             </FastField>
           )}
         />
-        {languages.map((lang) => {
-          return (
-            <FastField key={lang.tag} name={`translations.${lang.tag}`}>
-              {({ field, form, meta }) => (
-                <div key={lang.tag}>
-                  <FieldLabel>{lang.name}</FieldLabel>
-                  <div className={clsx(classes.field, classes.split)}>
-                    <div
-                      className={classes.editorWrapper}
-                      data-cy="translation-create-translation-input"
-                    >
-                      <Editor
-                        value={field.value || ''}
-                        onSave={() => form.handleSubmit()}
-                        onChange={(val) => {
-                          form.setFieldValue(field.name, val);
-                        }}
-                        onBlur={() => onBlur(lang.tag)}
-                        onFocus={() => onFocus(lang.tag)}
-                        minHeight={50}
-                        scrollMargins={{ bottom: 150 }}
-                        autoScrollIntoView
-                      />
-                    </div>
-                    <TranslationVisual
-                      text={field.value}
-                      locale={lang.tag}
-                      width={0}
+        {languages.map((lang) => (
+          <FastField key={lang.tag} name={`translations.${lang.tag}`}>
+            {({ field, form, meta }) => (
+              <div key={lang.tag}>
+                <FieldLabel>{lang.name}</FieldLabel>
+                <div className={clsx(classes.field, classes.split)}>
+                  <div
+                    className={classes.editorWrapper}
+                    data-cy="translation-create-translation-input"
+                  >
+                    <Editor
+                      value={field.value || ''}
+                      onSave={() => form.handleSubmit()}
+                      onChange={(val) => {
+                        form.setFieldValue(field.name, val);
+                      }}
+                      onBlur={() => onBlur(lang.tag)}
+                      onFocus={() => onFocus(lang.tag)}
+                      minHeight={50}
+                      scrollMargins={{ bottom: 150 }}
+                      autoScrollIntoView
                     />
                   </div>
-                  <Typography
-                    color="error"
-                    variant="caption"
-                    className={classes.error}
-                  >
-                    {meta.touched && meta.error}
-                  </Typography>
+                  <TranslationVisual
+                    text={field.value}
+                    locale={lang.tag}
+                    width={0}
+                  />
                 </div>
-              )}
-            </FastField>
-          );
-        })}
+                <Typography
+                  color="error"
+                  variant="caption"
+                  className={classes.error}
+                >
+                  {meta.touched && meta.error}
+                </Typography>
+              </div>
+            )}
+          </FastField>
+        ))}
       </div>
       <Box display="flex" alignItems="flex-end" justifySelf="flex-end">
         {onCancel && (

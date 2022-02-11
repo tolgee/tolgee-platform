@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { useQueryClient } from 'react-query';
+import { Formik, FormikProps } from 'formik';
 import {
   makeStyles,
   Checkbox,
@@ -6,21 +8,11 @@ import {
   Typography,
 } from '@material-ui/core';
 import { useTranslate } from '@tolgee/react';
-import { Formik, FormikProps } from 'formik';
 
-import {
-  useApiQuery,
-  useApiMutation,
-  matchUrlPrefix,
-} from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
-import { components } from 'tg.service/apiSchema.generated';
-import { useQueryClient } from 'react-query';
-
-type AutoTranslationSettingsDto =
-  components['schemas']['AutoTranslationSettingsDto'];
+import { useAutoTranslateSettings } from './useAutoTranslateSettings';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -47,49 +39,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const AutoTranslations = () => {
-  const queryClient = useQueryClient();
   const classes = useStyles();
-  const project = useProject();
   const t = useTranslate();
   const [formInstance, setFormInstance] = useState(0);
   const formRef = useRef<FormikProps<any>>();
 
-  const settings = useApiQuery({
-    url: '/v2/projects/{projectId}/auto-translation-settings',
-    method: 'get',
-    path: { projectId: project.id },
+  const { settings, updateSettings, applyUpdate } = useAutoTranslateSettings({
+    onReset: () => setFormInstance((i) => i + 1),
   });
-
-  const updateSettings = useApiMutation({
-    url: '/v2/projects/{projectId}/auto-translation-settings',
-    method: 'put',
-  });
-
-  const lastUpdateRef = useRef<Promise<any>>();
-  const applyUpdate = (data: AutoTranslationSettingsDto) => {
-    const promise = updateSettings
-      .mutateAsync({
-        path: { projectId: project.id },
-        content: { 'application/json': data },
-      })
-      .then((data) => {
-        if (promise === lastUpdateRef.current) {
-          queryClient.setQueriesData(
-            matchUrlPrefix(
-              '/v2/projects/{projectId}/auto-translation-settings'
-            ),
-            {
-              version: Math.random(), // force data change
-              ...data,
-            }
-          );
-        }
-      })
-      .catch(() => {
-        setFormInstance((i) => i + 1);
-      });
-    lastUpdateRef.current = promise;
-  };
 
   useEffect(() => {
     formRef.current?.resetForm();
