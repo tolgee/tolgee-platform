@@ -1,3 +1,10 @@
+## [2.3.2](https://github.com/tolgee/server/compare/v2.3.1...v2.3.2) (2022-02-11)
+
+
+### Bug Fixes
+
+* Sanitize api keys for OpenReplay, fix user identification ([76126af](https://github.com/tolgee/server/commit/76126afa0b248664cb9154b61e93e217975ca7f6))
+
 ## [2.3.1](https://github.com/tolgee/server/compare/v2.3.0...v2.3.1) (2022-02-10)
 
 
