@@ -1,3 +1,10 @@
+## [2.3.3](https://github.com/tolgee/server/compare/v2.3.2...v2.3.3) (2022-02-12)
+
+
+### Bug Fixes
+
+* update tolgee lib ([0d09b19](https://github.com/tolgee/server/commit/0d09b197ef607f02bb14caddb7e972675599cdc9))
+
 ## [2.3.2](https://github.com/tolgee/server/compare/v2.3.1...v2.3.2) (2022-02-11)
 
 
