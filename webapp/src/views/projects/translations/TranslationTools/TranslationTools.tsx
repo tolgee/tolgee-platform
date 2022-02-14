@@ -10,7 +10,7 @@ import {
 import { ToolsTab } from './ToolsTab';
 import { useTranslationTools } from './useTranslationTools';
 import { TranslationMemory } from './TranslationMemory';
-import { TranslationMachine } from './TranslationMachine';
+import { MachineTranslation } from './MachineTranslation';
 
 const HORIZONTAL_BRAKEPOINT = 500;
 
@@ -78,7 +78,7 @@ const TranslationTools = React.memo(function TranslationTools({
           }
           data={data.machine}
         >
-          <TranslationMachine
+          <MachineTranslation
             data={data.machine?.data}
             operationsRef={data.operationsRef}
           />

@@ -5,16 +5,16 @@ import { getEventAction } from 'tg.fixtures/shortcuts';
 import {
   ARROWS,
   getCurrentlyFocused,
-  Position,
   serializeElPosition,
   translationsNavigator,
 } from './tools';
 import {
   useTranslationsSelector,
   useTranslationsDispatch,
-} from './TranslationsContext';
+} from '../TranslationsContext';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { CellPosition } from '../types';
 
 export const KEY_MAP = {
   MOVE: ARROWS,
@@ -28,7 +28,7 @@ export type ShortcutsArrayType = [
   shortcut: string[] | ReadonlyArray<string>
 ];
 
-export const useContextShortcuts = () => {
+export const useTranslationsShortcuts = () => {
   const root = document.getElementById('root');
   const onKeyRef = useRef<(e: KeyboardEvent) => void>();
   const availableActions = useRef<() => ShortcutsArrayType[]>();
@@ -50,7 +50,8 @@ export const useContextShortcuts = () => {
     ProjectPermissionType.TRANSLATE
   );
 
-  const isTranslation = (position: Position | undefined) => position?.language;
+  const isTranslation = (position: CellPosition | undefined) =>
+    position?.language;
 
   const getMoveHandler = () => {
     return (e: KeyboardEvent) => {

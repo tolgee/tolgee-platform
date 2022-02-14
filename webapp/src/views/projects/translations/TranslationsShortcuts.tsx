@@ -11,14 +11,14 @@ import { useHideShortcuts } from 'tg.hooks/useHideShortcuts';
 import {
   KEY_MAP,
   ShortcutsArrayType,
-  useContextShortcuts,
-} from './context/useContextShortcuts';
+  useTranslationsShortcuts,
+} from './context/shortcuts/useTranslationsShortcuts';
 import clsx from 'clsx';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
 import { getMetaName } from 'tg.fixtures/isMac';
 import { translationStates } from 'tg.constants/translationStates';
-import { getCurrentlyFocused } from './context/tools';
+import { getCurrentlyFocused } from './context/shortcuts/tools';
 
 const useStyles = makeStyles((theme) => ({
   '@keyframes easeIn': {
@@ -137,7 +137,7 @@ export const TranslationsShortcuts = () => {
   const [availableActions, setAvailableActions] = useState<
     ShortcutsArrayType[]
   >([]);
-  const { getAvailableActions } = useContextShortcuts();
+  const { getAvailableActions } = useTranslationsShortcuts();
 
   const onFocusChange = useDebouncedCallback(
     () => {
