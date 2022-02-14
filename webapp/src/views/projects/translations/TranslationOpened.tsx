@@ -8,12 +8,12 @@ import { Editor } from 'tg.component/editor/Editor';
 import { components } from 'tg.service/apiSchema.generated';
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { Comments } from './comments/Comments';
-import { EditModeType } from './context/useEdit';
 import { getMeta } from 'tg.fixtures/isMac';
 import { useTranslationsDispatch } from './context/TranslationsContext';
 import { ToolsPopup } from './TranslationTools/ToolsPopup';
 import { useTranslationTools } from './TranslationTools/useTranslationTools';
 import { useProject } from 'tg.hooks/useProject';
+import { EditMode } from './context/types';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
@@ -78,8 +78,8 @@ type Props = {
   state: StateType;
   autofocus: boolean;
   className?: string;
-  mode: EditModeType;
-  onModeChange: (mode: EditModeType) => void;
+  mode: EditMode;
+  onModeChange: (mode: EditMode) => void;
   editEnabled: boolean;
   cellRef: React.RefObject<HTMLDivElement>;
   cellPosition?: string;

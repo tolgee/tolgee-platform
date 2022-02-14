@@ -13,7 +13,7 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { MessageService } from 'tg.service/MessageService';
-import { putBaseLangFirst } from 'tg.views/projects/translations/context/tools';
+import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 

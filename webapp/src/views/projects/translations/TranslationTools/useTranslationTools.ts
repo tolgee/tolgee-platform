@@ -21,8 +21,12 @@ export const useTranslationTools = ({
   const memory = useApiQuery({
     url: '/v2/projects/{projectId}/suggest/translation-memory',
     method: 'post',
-    // @ts-ignore
-    query: { keyId, targetLanguageId, baseText },
+    query: {
+      // @ts-ignore add keyId to url to reset data when key changes
+      keyId,
+      targetLanguageId,
+      baseText,
+    },
     path: { projectId },
     content: { 'application/json': { keyId, targetLanguageId, baseText } },
     options: {
@@ -34,8 +38,10 @@ export const useTranslationTools = ({
     url: '/v2/projects/{projectId}/suggest/machine-translations',
     method: 'post',
     path: { projectId },
-    // @ts-ignore
-    query: { keyId, targetLanguageId, baseText },
+    // @ts-ignore add keyId to url to reset data when key changes
+    query: {
+      keyId,
+    },
     content: {
       'application/json': { keyId: keyId, targetLanguageId, baseText },
     },

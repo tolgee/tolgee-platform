@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { useQueryClient } from 'react-query';
 import { Formik, FormikProps } from 'formik';
 import {
   makeStyles,
@@ -9,7 +8,6 @@ import {
 } from '@material-ui/core';
 import { useTranslate } from '@tolgee/react';
 
-import { useProject } from 'tg.hooks/useProject';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useAutoTranslateSettings } from './useAutoTranslateSettings';

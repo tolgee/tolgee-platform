@@ -2,11 +2,9 @@ import { useTranslate } from '@tolgee/react';
 
 import { useProject } from 'tg.hooks/useProject';
 import { translationStates } from 'tg.constants/translationStates';
-import {
-  FiltersType,
-  useTranslationsSelector,
-} from '../context/TranslationsContext';
+import { useTranslationsSelector } from '../context/TranslationsContext';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { Filters } from '../context/types';
 
 export const NON_EXCLUSIVE_FILTERS = ['filterState', 'filterTag'];
 
@@ -132,7 +130,7 @@ const findGroup = (availableFilters: GroupType[], value: string) =>
   availableFilters.find((g) => g.options?.find((o) => o.value === value));
 
 export const toggleFilter = (
-  filtersObj: FiltersType,
+  filtersObj: Filters,
   availableFilters: GroupType[],
   rawValue: string
 ) => {

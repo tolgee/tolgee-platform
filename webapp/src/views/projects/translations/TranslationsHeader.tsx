@@ -12,7 +12,6 @@ import { T, useTranslate } from '@tolgee/react';
 import {
   useTranslationsSelector,
   useTranslationsDispatch,
-  ViewType,
 } from './context/TranslationsContext';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -22,6 +21,7 @@ import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { KeyCreateDialog } from './KeyCreateDialog';
 import TranslationsSearchField from './TranslationsSearchField';
+import { ViewMode } from './context/types';
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -97,12 +97,12 @@ export const TranslationsHeader = () => {
     });
   };
 
-  const handleViewChange = (val: ViewType) => {
+  const handleViewChange = (val: ViewMode) => {
     dispatch({ type: 'CHANGE_VIEW', payload: val });
   };
 
   const handleDelete = () => {
-    dispatch({ type: 'DELETE_TRANSLATIONS', payload: selection });
+    dispatch({ type: 'DELETE_TRANSLATIONS' });
   };
 
   const handleAddTranslation = () => {
