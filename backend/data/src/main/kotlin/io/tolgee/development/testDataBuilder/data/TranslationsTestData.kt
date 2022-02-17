@@ -1,7 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
-import io.tolgee.development.testDataBuilder.DataBuilders
-import io.tolgee.development.testDataBuilder.TestDataBuilder
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -17,7 +17,7 @@ class TranslationsTestData {
   lateinit var germanLanguage: Language
   var user: UserAccount
   lateinit var aKey: Key
-  lateinit var projectBuilder: DataBuilders.ProjectBuilder
+  lateinit var projectBuilder: ProjectBuilder
   lateinit var aKeyGermanTranslation: Translation
 
   val root: TestDataBuilder = TestDataBuilder().apply {

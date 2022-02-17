@@ -1,7 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
-import io.tolgee.development.testDataBuilder.DataBuilders
-import io.tolgee.development.testDataBuilder.TestDataBuilder
+import io.tolgee.development.testDataBuilder.builders.ImportBuilder
+import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
@@ -13,7 +13,7 @@ import io.tolgee.model.translation.Translation
 
 class ImportTestData {
   lateinit var conflict: Translation
-  lateinit var importBuilder: DataBuilders.ImportBuilder
+  lateinit var importBuilder: ImportBuilder
   lateinit var import: Import
   lateinit var english: Language
   lateinit var german: Language
@@ -183,7 +183,7 @@ class ImportTestData {
     }
   }
 
-  operator fun invoke(ft: DataBuilders.ImportBuilder.() -> Unit): TestDataBuilder {
+  operator fun invoke(ft: ImportBuilder.() -> Unit): TestDataBuilder {
     ft(importBuilder)
     return root
   }
