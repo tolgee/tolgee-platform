@@ -4,6 +4,7 @@
 
 package io.tolgee.service
 
+import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
@@ -20,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ScreenshotService(
   private val screenshotRepository: ScreenshotRepository,
-  private val fileStorageService: FileStorageService,
+  private val fileStorage: FileStorage,
   private val tolgeeProperties: TolgeeProperties,
   private val imageUploadService: ImageUploadService,
   private val authenticationFacade: AuthenticationFacade
@@ -45,7 +46,7 @@ class ScreenshotService(
     val screenshotEntity = Screenshot(key = key)
     key.screenshots.add(screenshotEntity)
     screenshotRepository.save(screenshotEntity)
-    fileStorageService.storeFile(screenshotEntity.getFilePath(), image)
+    fileStorage.storeFile(screenshotEntity.getFilePath(), image)
     return screenshotEntity
   }
 
@@ -59,7 +60,7 @@ class ScreenshotService(
       if (authenticationFacade.userAccount.id != uploadedImageEntity.userAccount.id) {
         throw PermissionException()
       }
-      val data = fileStorageService
+      val data = fileStorage
         .readFile(
           UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + uploadedImageEntity.filenameWithExtension
         )
@@ -103,7 +104,7 @@ class ScreenshotService(
   }
 
   private fun deleteFile(screenshot: Screenshot) {
-    fileStorageService.deleteFile(screenshot.getFilePath())
+    fileStorage.deleteFile(screenshot.getFilePath())
   }
 
   private fun Screenshot.getFilePath(): String {

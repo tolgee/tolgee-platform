@@ -2,7 +2,7 @@
  * Copyright (c) 2020. Tolgee
  */
 
-package io.tolgee.service
+package io.tolgee.component.fileStorage
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,7 +11,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 abstract class AbstractFileStorageServiceTest : AbstractTestNGSpringContextTests() {
 
   @set:Autowired
-  lateinit var fileStorageService: FileStorageService
+  lateinit var fileStorage: FileStorage
 
   @set:Autowired
   open lateinit var tolgeeProperties: TolgeeProperties

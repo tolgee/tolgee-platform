@@ -4,15 +4,15 @@
 
 package io.tolgee.security
 
+import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.service.FileStorageService
 import org.springframework.stereotype.Component
 import kotlin.random.Random
 
 @Component
 class InitialPasswordManager(
   private val tolgeeProperties: TolgeeProperties,
-  private val fileStorageService: FileStorageService,
+  private val fileStorage: FileStorage,
 ) {
   private lateinit var cachedInitialPassword: String
 
@@ -28,13 +28,13 @@ class InitialPasswordManager(
       }
 
       val filename = "initial.pwd"
-      if (fileStorageService.fileExists(filename)) {
-        cachedInitialPassword = fileStorageService.readFile(filename).toString(charset("UTF-8"))
+      if (fileStorage.fileExists(filename)) {
+        cachedInitialPassword = fileStorage.readFile(filename).toString(charset("UTF-8"))
         return cachedInitialPassword
       }
 
       val password = generatePassword()
-      fileStorageService.storeFile(filename, password.toByteArray(charset("UTF-8")))
+      fileStorage.storeFile(filename, password.toByteArray(charset("UTF-8")))
       cachedInitialPassword = password
       return cachedInitialPassword
     }

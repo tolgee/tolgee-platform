@@ -2,7 +2,7 @@
  * Copyright (c) 2020. Tolgee
  */
 
-package io.tolgee.service
+package io.tolgee.component.fileStorage
 
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.boot.test.context.SpringBootTest
@@ -11,7 +11,7 @@ import org.testng.annotations.Test
 import java.io.File
 
 @SpringBootTest
-class FileStorageServiceFsTest : AbstractFileStorageServiceTest() {
+class FileStorageFsTest : AbstractFileStorageServiceTest() {
 
   lateinit var file: File
 
@@ -24,20 +24,20 @@ class FileStorageServiceFsTest : AbstractFileStorageServiceTest() {
 
   @Test
   fun testReadFile() {
-    val content = fileStorageService.readFile(testFilePath).toString(charset("UTF-8"))
+    val content = fileStorage.readFile(testFilePath).toString(charset("UTF-8"))
     assertThat(content).isEqualTo(testFileContent)
   }
 
   @Test
   fun testDeleteFile() {
-    fileStorageService.deleteFile(testFilePath)
+    fileStorage.deleteFile(testFilePath)
     assertThat(file).doesNotExist()
   }
 
   @Test
   fun testStoreFile() {
     val filePath = "aaa/aaaa/aaa.txt"
-    fileStorageService.storeFile("aaa/aaaa/aaa.txt", "hello".toByteArray(charset("UTF-8")))
+    fileStorage.storeFile("aaa/aaaa/aaa.txt", "hello".toByteArray(charset("UTF-8")))
     val file = File("${tolgeeProperties.fileStorage.fsDataPath}/$filePath")
     assertThat(file).exists()
     assertThat(file).hasContent("hello")
@@ -45,7 +45,7 @@ class FileStorageServiceFsTest : AbstractFileStorageServiceTest() {
 
   @Test
   fun testFileExists() {
-    assertThat(fileStorageService.fileExists(testFilePath)).isTrue
-    assertThat(fileStorageService.fileExists("not_existing")).isFalse
+    assertThat(fileStorage.fileExists(testFilePath)).isTrue
+    assertThat(fileStorage.fileExists("not_existing")).isFalse
   }
 }
