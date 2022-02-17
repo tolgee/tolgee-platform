@@ -25,73 +25,60 @@ class TranslationCommentsTestData {
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     user = addUserAccount {
-      self {
-        username = "franta"
-      }
+
+      username = "franta"
     }.self
     pepa = addUserAccount {
-      self {
-        username = "pepa"
-      }
+
+      username = "pepa"
     }.self
 
     project = addProject {
-      self {
-        name = "Franta's project"
-        userOwner = user
+      name = "Franta's project"
+      userOwner = user
+    }.build {
+      addPermission {
+
+        user = this@TranslationCommentsTestData.user
+        type = Permission.ProjectPermissionType.MANAGE
       }
 
       addPermission {
-        self {
-          project = this@addProject.self
-          user = this@TranslationCommentsTestData.user
-          type = Permission.ProjectPermissionType.MANAGE
-        }
-      }
 
-      addPermission {
-        self {
-          project = this@addProject.self
-          user = this@TranslationCommentsTestData.pepa
-          type = Permission.ProjectPermissionType.EDIT
-        }
+        user = this@TranslationCommentsTestData.pepa
+        type = Permission.ProjectPermissionType.EDIT
       }
 
       englishLanguage = addLanguage {
-        self {
-          name = "English"
-          tag = "en"
-          originalName = "English"
-        }
+
+        name = "English"
+        tag = "en"
+        originalName = "English"
       }.self
 
-      aKey = addKey {
-        self.name = "A key"
-        translation = addTranslation {
-          self {
-            key = this@addKey.self
-            language = englishLanguage
-            text = "Z translation"
-            state = TranslationState.REVIEWED
-          }
+      addKey {
+        name = "A key"
+        this@TranslationCommentsTestData.aKey = this
+      }.build {
+        addTranslation {
+          language = englishLanguage
+          text = "Z translation"
+          state = TranslationState.REVIEWED
+          this@TranslationCommentsTestData.translation = this
+        }.build {
           firstComment = addComment {
-            self {
-              text = "First comment"
-            }
+            text = "First comment"
           }.self
-
           secondComment = addComment {
-            self {
-              text = "Second comment"
-            }
+            text = "Second comment"
           }.self
-        }.self
-      }.self
+        }
+      }
 
-      bKey = addKey {
-        self.name = "B key"
-      }.self
-
+      addKey {
+        name = "B key"
+        this@TranslationCommentsTestData.bKey = this
+      }
       projectBuilder = this
     }.self
   }
@@ -99,69 +86,56 @@ class TranslationCommentsTestData {
   fun addE2eTestData() {
     this.root.apply {
       val jindra = addUserAccount {
-        self {
-          username = "jindra"
-        }
+
+        username = "jindra"
       }
       val vojta = addUserAccount {
-        self {
-          username = "vojta"
-        }
+
+        username = "vojta"
       }
       projectBuilder.apply {
         addPermission {
-          self {
-            project = projectBuilder.self
-            user = jindra.self
-            type = Permission.ProjectPermissionType.TRANSLATE
-          }
+
+          project = projectBuilder.self
+          user = jindra.self
+          type = Permission.ProjectPermissionType.TRANSLATE
         }
         addPermission {
-          self {
-            project = projectBuilder.self
-            user = vojta.self
-            type = Permission.ProjectPermissionType.VIEW
-          }
+
+          project = projectBuilder.self
+          user = vojta.self
+          type = Permission.ProjectPermissionType.VIEW
         }
         addKey {
-          self.name = "C key"
+          name = "C key"
+        }.build {
           addTranslation {
-            self {
-              key = this@addKey.self
-              language = englishLanguage
-              text = "Bla translation"
-              state = TranslationState.REVIEWED
-            }
+            language = englishLanguage
+            text = "Bla translation"
+            state = TranslationState.REVIEWED
+          }.build {
             firstComment = addComment {
-              self {
-                text = "First comment"
-                author = jindra.self
-              }
+              text = "First comment"
+              author = jindra.self
             }.self
-
             secondComment = addComment {
-              self {
-                text = "Second comment"
-              }
+              text = "Second comment"
             }.self
           }.self
         }.self
 
         addKey {
-          self.name = "D key"
+          name = "D key"
+        }.build {
           addTranslation {
-            self {
-              key = this@addKey.self
-              language = englishLanguage
-              text = "Bla translation"
-              state = TranslationState.REVIEWED
-            }
+            language = englishLanguage
+            text = "Bla translation"
+            state = TranslationState.REVIEWED
+          }.build {
             (1..50).forEach {
               addComment {
-                self {
-                  text = "comment $it"
-                  author = jindra.self
-                }
+                text = "comment $it"
+                author = jindra.self
               }
             }
           }.self

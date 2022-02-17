@@ -10,7 +10,7 @@ import io.tolgee.model.key.Tag
 
 class KeysTestData {
   lateinit var keyWithReferences: Key
-  var project: Project
+  lateinit var project: Project
   var project2: Project
   var user: UserAccount
   lateinit var firstKey: Key
@@ -20,86 +20,71 @@ class KeysTestData {
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     user = addUserAccount {
-      self {
-        username = "Peter"
-      }
+      username = "Peter"
     }.self
 
     project2 = addProject {
-      self {
-        name = "Other project"
-        userOwner = user
-      }
+      name = "Other project"
+      userOwner = user
+    }.build {
       addPermission {
-        self {
-          project = this@addProject.self
-          user = this@KeysTestData.user
-          type = Permission.ProjectPermissionType.MANAGE
-        }
+        user = this@KeysTestData.user
+        type = Permission.ProjectPermissionType.MANAGE
       }
     }.self
 
-    project = addProject {
-      self {
-        name = "Peter's project"
-        userOwner = user
-      }
-
+    addProject {
+      name = "Peter's project"
+      userOwner = user
+      project = this
+    }.build {
       english = addLanguage {
-        self {
-          name = "English"
-          tag = "en"
-        }
+
+        name = "English"
+        tag = "en"
       }.self
 
       german = addLanguage {
-        self {
-          name = "German"
-          tag = "de"
-        }
+
+        name = "German"
+        tag = "de"
       }.self
 
       addPermission {
-        self {
-          project = this@addProject.self
-          user = this@KeysTestData.user
-          type = Permission.ProjectPermissionType.MANAGE
-        }
+
+        user = this@KeysTestData.user
+        type = Permission.ProjectPermissionType.MANAGE
       }
 
       firstKey = addKey {
-        self.name = "first_key"
+        name = "first_key"
       }.self
 
       secondKey = addKey {
-        self.name = "second_key"
+        name = "second_key"
       }.self
 
-      keyWithReferences = addKey {
-        self.name = "key_with_referecnces"
+      addKey {
+        name = "key_with_referecnces"
+        this@KeysTestData.keyWithReferences = this
+      }.build {
         addScreenshot {}
         addMeta {
-          self {
-            tags.add(
-              Tag().apply {
-                project = projectBuilder.self
-                name = "test"
-              }
-            )
-            addComment {
-              self {
-                text = "What a text comment"
-              }
+          tags.add(
+            Tag().apply {
+              project = projectBuilder.self
+              name = "test"
             }
-            addCodeReference {
-              self {
-                line = 20
-                path = "./code/exist.extension"
-              }
-            }
+          )
+          addComment {
+            text = "What a text comment"
+          }
+          addCodeReference {
+            line = 20
+            path = "./code/exist.extension"
           }
         }
-      }.self
-    }.self
+      }
+    }
   }
 }

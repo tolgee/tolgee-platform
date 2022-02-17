@@ -2,20 +2,20 @@ package io.tolgee.development.testDataBuilder
 
 import kotlin.reflect.full.createType
 
-abstract class BaseEntityDataBuilder<Entity> : EntityDataBuilder<Entity> {
-  protected inline fun <reified Builder : EntityDataBuilder<*>> addOperation(
+abstract class BaseEntityDataBuilder<Entity, Builder> : EntityDataBuilder<Entity, Builder> {
+  protected inline fun <reified AddedEntity, reified Builder : EntityDataBuilder<AddedEntity, *>> addOperation(
     collection: MutableCollection<Builder>,
     instance: Builder,
-    ft: Builder.() -> Unit
+    ft: AddedEntity.() -> Unit
   ): Builder {
     collection.add(instance)
-    ft(instance)
+    ft(instance.self)
     return instance
   }
 
-  protected inline fun <reified Builder : EntityDataBuilder<*>> addOperation(
+  protected inline fun <reified AddedEntity, reified Builder : EntityDataBuilder<AddedEntity, *>> addOperation(
     collection: MutableCollection<Builder>,
-    ft: Builder.() -> Unit
+    ft: AddedEntity.() -> Unit
   ): Builder {
     val instance = Builder::class.constructors.find { it.parameters[0].type == this::class.createType() }!!.call(this)
     addOperation(collection, instance, ft)

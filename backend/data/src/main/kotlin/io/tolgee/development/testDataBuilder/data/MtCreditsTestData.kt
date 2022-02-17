@@ -11,37 +11,28 @@ class MtCreditsTestData : BaseTestData() {
 
   init {
     root.addOrganization {
-      self {
-        name = "Org"
-        organization = this
-        basePermissions = Permission.ProjectPermissionType.TRANSLATE
-      }
+      name = "Org"
+      organization = this
+      basePermissions = Permission.ProjectPermissionType.TRANSLATE
+    }.apply {
       addRole {
-        self {
-          this.user = this@MtCreditsTestData.user
-          this.type = OrganizationRoleType.MEMBER
-        }
+        this.user = this@MtCreditsTestData.user
+        this.type = OrganizationRoleType.MEMBER
       }
       addMtCreditBucket {
-        self {
-          credits = 12000
-        }
+        credits = 12000
       }
     }
 
     root.addProject {
-      self {
-        name = "Organization project"
-        organizationOwner = organization
-        userOwner = null
-        organizationProject = this
-      }
+      name = "Organization project"
+      organizationOwner = organization
+      userOwner = null
+      organizationProject = this
     }
 
     root.data.userAccounts[0].addMtCreditBucket {
-      self {
-        credits = 15000
-      }
+      credits = 15000
     }
   }
 }

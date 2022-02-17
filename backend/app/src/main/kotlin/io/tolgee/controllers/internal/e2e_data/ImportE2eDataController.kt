@@ -95,9 +95,8 @@ class ImportE2eDataController(
     val file = data.importBuilder.data.importFiles[0]
     (0..90).forEach {
       file.addImportLanguage {
-        self {
-          name = "lng $it"
-        }
+
+        name = "lng $it"
       }
     }
     testDataService.saveTestData(data.root)
@@ -109,21 +108,17 @@ class ImportE2eDataController(
   fun generateBaseData(): Project {
     val data = testDataService.saveTestData {
       addUserAccount {
-        self {
-          username = "franta"
-          name = "Frantisek Dobrota"
-        }
+        username = "franta"
+        name = "Frantisek Dobrota"
+      }.apply {
         addProject {
-          self {
-            userOwner = this@addUserAccount.self
-            name = "Repo"
-          }
+          userOwner = this@apply.self
+          name = "Repo"
+        }.build buildProject@{
           addPermission {
-            self {
-              type = Permission.ProjectPermissionType.MANAGE
-              user = this@addUserAccount.self
-              project = this@addProject.self
-            }
+            type = Permission.ProjectPermissionType.MANAGE
+            user = this@apply.self
+            project = this@buildProject.self
           }
         }
       }

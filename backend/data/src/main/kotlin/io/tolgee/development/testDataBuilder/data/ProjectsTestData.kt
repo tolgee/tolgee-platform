@@ -13,100 +13,77 @@ class ProjectsTestData : BaseTestData() {
   init {
     root.apply {
       projectBuilder.addKey {
-        self {
-          name = "Untranslated key"
-        }
+        name = "Untranslated key"
       }
       addProject(user) {
+        project2 = this
+        name = "Project 2"
+      }.build {
         addPermission {
-          self {
-            user = this@ProjectsTestData.user
-            type = Permission.ProjectPermissionType.MANAGE
-          }
+          user = this@ProjectsTestData.user
+          type = Permission.ProjectPermissionType.MANAGE
         }
-        project2 = self
-        self.name = "Project 2"
         project2English = addLanguage {
-          self {
-            name = "English"
-            tag = "en"
-          }
+
+          name = "English"
+          tag = "en"
         }.self
         project2Deutsch = addLanguage {
-          self {
-            name = "Deutsch"
-            tag = "de"
-          }
+
+          name = "Deutsch"
+          tag = "de"
         }.self
         addKey {
-          self {
-            name = "Untranslated"
+          name = "Untranslated"
+        }
+        addKey {
+          name = "Translated to both"
+        }.build keyBuilder@{
+          addTranslation {
+            key = this@keyBuilder.self
+            text = "Translated"
+            language = project2English
+          }
+          addTranslation {
+            key = this@keyBuilder.self
+            text = "Translated in de"
+            language = project2Deutsch
           }
         }
         addKey {
-          self {
-            name = "Translated to both"
-          }
+          name = "Machine translated to en"
+        }.build keyBuilder@{
           addTranslation {
-            self {
-              key = this@addKey.self
-              text = "Translated"
-              language = project2English
-            }
-          }
-          addTranslation {
-            self {
-              key = this@addKey.self
-              text = "Translated in de"
-              language = project2Deutsch
-            }
+            key = this@keyBuilder.self
+            text = "Translated"
+            state = TranslationState.MACHINE_TRANSLATED
+            language = project2English
           }
         }
         addKey {
-          self {
-            name = "Machine translated to en"
-          }
+          name = "Reviewed in de"
+        }.build keyBuilder@{
           addTranslation {
-            self {
-              key = this@addKey.self
-              text = "Translated"
-              state = TranslationState.MACHINE_TRANSLATED
-              language = project2English
-            }
+            key = this@keyBuilder.self
+            text = "Reviewed"
+            state = TranslationState.REVIEWED
+            language = project2Deutsch
           }
         }
         addKey {
-          self {
-            name = "Reviewed in de"
+          name = "Needs review in both"
+        }.build keyBuilder@{
+          addTranslation {
+            key = this@keyBuilder.self
+            text = "Needs review in de"
+            state = TranslationState.NEEDS_REVIEW
+            language = project2Deutsch
           }
           addTranslation {
-            self {
-              key = this@addKey.self
-              text = "Reviewed"
-              state = TranslationState.REVIEWED
-              language = project2Deutsch
-            }
-          }
-        }
-        addKey {
-          self {
-            name = "Needs review in both"
-          }
-          addTranslation {
-            self {
-              key = this@addKey.self
-              text = "Needs review in de"
-              state = TranslationState.NEEDS_REVIEW
-              language = project2Deutsch
-            }
-          }
-          addTranslation {
-            self {
-              key = this@addKey.self
-              text = "Needs review"
-              state = TranslationState.NEEDS_REVIEW
-              language = project2English
-            }
+            key = this@keyBuilder.self
+            text = "Needs review"
+            state = TranslationState.NEEDS_REVIEW
+            language = project2English
           }
         }
       }

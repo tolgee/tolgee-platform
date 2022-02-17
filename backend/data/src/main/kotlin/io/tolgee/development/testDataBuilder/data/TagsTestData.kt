@@ -13,15 +13,13 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
   init {
     projectBuilder.apply {
       addKey {
-        noTagKey = self {
-          name = "no tag key"
-        }
+        name = "no tag key"
+        noTagKey = this
       }
       addKey {
-        self {
-          name = "test key"
-          existingTagKey = this
-        }
+        name = "test key"
+        existingTagKey = this
+      }.build {
         addMeta {
           self {
             tags.add(
@@ -48,21 +46,18 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
         }
       }
       addKey {
-        self {
-          name = "existing tag key 2"
-          existingTagKey2 = this
-        }
+        name = "existing tag key 2"
+        existingTagKey2 = this
+      }.build {
         addMeta {
-          self {
-            tags.add(existingTag2)
-          }
+
+          tags.add(existingTag2)
         }
       }
       (1..20).forEach { keyNum ->
         addKey {
-          self {
-            name = "test key $keyNum"
-          }
+          name = "test key $keyNum"
+        }.build {
           addMeta {
             self {
               (1..20).forEach { tagNum ->
@@ -84,9 +79,8 @@ class TagsTestData : BaseTestData("tagsTestUser", "tagsTestProject") {
     projectBuilder.apply {
       (1..1000).forEach { keyNum ->
         addKey {
-          self {
-            name = "test key from lot of $keyNum"
-          }
+          name = "test key from lot of $keyNum"
+        }.build {
           addMeta {
             self {
               (1..2).forEach { tagNum ->

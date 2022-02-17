@@ -15,74 +15,55 @@ class ApiKeysTestData : BaseTestData() {
   init {
     this.root.apply {
       addUserAccount {
-        self {
-          name = "Franta Dobrota"
-          username = "franta"
-          frantisekDobrota = this
-        }
+        name = "Franta Dobrota"
+        username = "franta"
+        frantisekDobrota = this
       }
 
       addProject {
-        self {
-          userOwner = frantisekDobrota
-          name = "Frantisek's project"
-          frantasProject = this
-        }
-
+        userOwner = frantisekDobrota
+        name = "Frantisek's project"
+        frantasProject = this
+      }.build {
         (0..100).forEach {
           addApiKey {
-            self {
-              key = "test_api_key_franta_$it"
-              scopesEnum = ApiScope.values().toMutableSet()
-              userAccount = frantisekDobrota
-            }
+            key = "test_api_key_franta_$it"
+            scopesEnum = ApiScope.values().toMutableSet()
+            userAccount = frantisekDobrota
           }
         }
 
         addPermission {
-          self {
-            user = frantisekDobrota
-            type = Permission.ProjectPermissionType.MANAGE
-            project = this@addProject.self
-          }
+          user = frantisekDobrota
+          type = Permission.ProjectPermissionType.MANAGE
         }
 
         addPermission {
-          self {
-            user = this@ApiKeysTestData.user
-            type = Permission.ProjectPermissionType.MANAGE
-            project = this@addProject.self
-          }
+          user = this@ApiKeysTestData.user
+          type = Permission.ProjectPermissionType.MANAGE
         }
       }
     }
+
     this.projectBuilder.apply {
       addApiKey {
-        self {
-          key = "test_api_key_yep"
-          scopesEnum = ApiScope.values().toMutableSet()
-        }
+        key = "test_api_key_yep"
+        scopesEnum = ApiScope.values().toMutableSet()
       }
       addPermission {
-        self {
-          user = frantisekDobrota
-          type = Permission.ProjectPermissionType.TRANSLATE
-        }
+        user = frantisekDobrota
+        type = Permission.ProjectPermissionType.TRANSLATE
       }
       addApiKey {
-        self {
-          key = "test_api_key_1"
-          scopesEnum = mutableSetOf(ApiScope.TRANSLATIONS_VIEW)
-          userAccount = frantisekDobrota
-          frantasKey = this
-        }
+        key = "test_api_key_1"
+        scopesEnum = mutableSetOf(ApiScope.TRANSLATIONS_VIEW)
+        userAccount = frantisekDobrota
+        frantasKey = this
       }
       addApiKey {
-        self {
-          key = "test_api_key_2"
-          scopesEnum = ApiScope.values().toMutableSet()
-          usersKey = this
-        }
+        key = "test_api_key_2"
+        scopesEnum = ApiScope.values().toMutableSet()
+        usersKey = this
       }
     }
   }

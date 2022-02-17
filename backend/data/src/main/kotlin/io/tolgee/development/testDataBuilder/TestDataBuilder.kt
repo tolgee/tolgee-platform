@@ -1,6 +1,7 @@
 package io.tolgee.development.testDataBuilder
 
 import io.tolgee.model.Organization
+import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 
 class TestDataBuilder {
@@ -13,28 +14,28 @@ class TestDataBuilder {
 
   val data = DATA()
 
-  fun addUserAccount(ft: DataBuilders.UserAccountBuilder.() -> Unit): DataBuilders.UserAccountBuilder {
+  fun addUserAccount(ft: UserAccount.() -> Unit): DataBuilders.UserAccountBuilder {
     val builder = DataBuilders.UserAccountBuilder(this)
     data.userAccounts.add(builder)
-    ft(builder)
+    ft(builder.self)
     return builder
   }
 
   fun addProject(
     userOwner: UserAccount? = null,
     organizationOwner: Organization? = null,
-    ft: DataBuilders.ProjectBuilder.() -> Unit
+    ft: Project.() -> Unit
   ): DataBuilders.ProjectBuilder {
-    val project = DataBuilders.ProjectBuilder(userOwner, organizationOwner, testDataBuilder = this)
-    data.projects.add(project)
-    ft(project)
-    return project
+    val projectBuilder = DataBuilders.ProjectBuilder(userOwner, organizationOwner, testDataBuilder = this)
+    data.projects.add(projectBuilder)
+    ft(projectBuilder.self)
+    return projectBuilder
   }
 
-  fun addOrganization(ft: DataBuilders.OrganizationBuilder.() -> Unit): DataBuilders.OrganizationBuilder {
-    val entity = DataBuilders.OrganizationBuilder(testDataBuilder = this)
-    data.organizations.add(entity)
-    ft(entity)
-    return entity
+  fun addOrganization(ft: Organization.() -> Unit): DataBuilders.OrganizationBuilder {
+    val builder = DataBuilders.OrganizationBuilder(testDataBuilder = this)
+    data.organizations.add(builder)
+    ft(builder.self)
+    return builder
   }
 }
