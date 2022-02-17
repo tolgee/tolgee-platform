@@ -1,6 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.UploadedImage
 import io.tolgee.model.UserAccount
@@ -29,7 +30,7 @@ import kotlin.streams.asSequence
 @Service
 class ImageUploadService(
   val uploadedImageRepository: UploadedImageRepository,
-  val fileStorageService: FileStorageService,
+  val fileStorage: FileStorage,
   val dateProvider: CurrentDateProvider
 ) {
   val logger = LoggerFactory.getLogger(ImageUploadService::class.java)
@@ -48,13 +49,13 @@ class ImageUploadService(
 
     save(uploadedImageEntity)
     val processedImage = prepareImage(image.inputStream)
-    fileStorageService.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
+    fileStorage.storeFile(uploadedImageEntity.filePath, processedImage.toByteArray())
     return uploadedImageEntity
   }
 
   @Transactional
   fun delete(uploadedImage: UploadedImage) {
-    fileStorageService.deleteFile(uploadedImage.filePath)
+    fileStorage.deleteFile(uploadedImage.filePath)
     uploadedImageRepository.delete(uploadedImage)
   }
 

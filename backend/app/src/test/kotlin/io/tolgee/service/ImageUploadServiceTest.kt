@@ -49,7 +49,7 @@ class ImageUploadServiceTest : AbstractSpringTest() {
     val after = imageUploadService.find(listOf(storedNewer.id, storedOlder.id))
     assertThat(after).hasSize(1)
     assertThrows<FileStoreException> {
-      fileStorageService.readFile(
+      fileStorage.readFile(
         UPLOADED_IMAGES_STORAGE_FOLDER_NAME + "/" + storedOlder.filenameWithExtension
       )
     }

@@ -5,9 +5,9 @@
 package io.tolgee.controllers
 
 import io.tolgee.component.TimestampValidation
+import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
-import io.tolgee.service.FileStorageService
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.service.ScreenshotService.Companion.SCREENSHOTS_STORAGE_FOLDER_NAME
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse
 @RequestMapping(value = [""])
 class ImageStorageController(
   private val tolgeeProperties: TolgeeProperties,
-  private val fileStorageService: FileStorageService,
+  private val fileStorage: FileStorage,
   private val timestampValidation: TimestampValidation
 ) {
   @GetMapping(value = ["/screenshots/**"])
@@ -75,6 +75,6 @@ class ImageStorageController(
     // since there is a "." character in the URL, we have to parse like this
     val name = request.requestURI.split(request.contextPath + "/$urlPathPrefix/")[1]
 
-    return fileStorageService.readFile("$storageFolderName/$name")
+    return fileStorage.readFile("$storageFolderName/$name")
   }
 }

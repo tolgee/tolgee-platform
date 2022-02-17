@@ -137,14 +137,14 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     val screenshots = screenshotService.findAll(key)
     screenshots.forEach {
-      fileStorageService.readFile("screenshots/${it.filename}").isNotEmpty()
+      fileStorage.readFile("screenshots/${it.filename}").isNotEmpty()
     }
     assertThat(screenshots).hasSize(3)
     assertThat(imageUploadService.find(screenshotImageIds)).hasSize(0)
 
     assertThrows<FileStoreException> {
       screenshotImages.forEach {
-        fileStorageService.readFile(
+        fileStorage.readFile(
           "${ImageUploadService.UPLOADED_IMAGES_STORAGE_FOLDER_NAME}/${it.filenameWithExtension}"
         )
       }
@@ -218,14 +218,14 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     val screenshots = screenshotService.findAll(key)
     screenshots.forEach {
-      fileStorageService.readFile("screenshots/${it.filename}").isNotEmpty()
+      fileStorage.readFile("screenshots/${it.filename}").isNotEmpty()
     }
     assertThat(screenshots).hasSize(3)
     assertThat(imageUploadService.find(screenshotImageIds)).hasSize(0)
 
     assertThrows<FileStoreException> {
       screenshotImages.forEach {
-        fileStorageService.readFile(
+        fileStorage.readFile(
           "${ImageUploadService.UPLOADED_IMAGES_STORAGE_FOLDER_NAME}/${it.filenameWithExtension}"
         )
       }

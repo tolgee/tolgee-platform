@@ -15,12 +15,12 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class StorageConfiguration(properties: TolgeeProperties) {
+class S3Configuration(private val properties: TolgeeProperties) {
 
   private val s3config = properties.fileStorage.s3
 
   @Bean
-  fun getS3(): AmazonS3? {
+  fun s3(): AmazonS3? {
     if (s3config.enabled) {
       val credentials: AWSCredentials = BasicAWSCredentials(
         s3config.accessKey,

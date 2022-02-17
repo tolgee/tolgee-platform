@@ -1,6 +1,7 @@
 package io.tolgee
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
@@ -16,7 +17,6 @@ import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.ApiKeyService
 import io.tolgee.service.EmailVerificationService
-import io.tolgee.service.FileStorageService
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.KeyService
@@ -113,7 +113,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var tagService: TagService
 
   @Autowired
-  lateinit var fileStorageService: FileStorageService
+  lateinit var fileStorage: FileStorage
 
   @Autowired
   lateinit var machineTranslationProperties: MachineTranslationProperties

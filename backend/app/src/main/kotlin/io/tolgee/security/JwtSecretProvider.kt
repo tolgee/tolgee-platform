@@ -6,14 +6,14 @@ package io.tolgee.security
 
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
+import io.tolgee.component.fileStorage.FileStorage
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.service.FileStorageService
 import org.springframework.stereotype.Component
 
 @Component
 class JwtSecretProvider(
   private val tolgeeProperties: TolgeeProperties,
-  private val fileStorageService: FileStorageService
+  private val fileStorage: FileStorage
 ) {
   private lateinit var cachedSecret: ByteArray
 
@@ -29,14 +29,14 @@ class JwtSecretProvider(
 
       val fileName = "jwt.secret"
 
-      if (!fileStorageService.fileExists(fileName)) {
+      if (!fileStorage.fileExists(fileName)) {
         val generated = Keys.secretKeyFor(SignatureAlgorithm.HS512).encoded
-        fileStorageService.storeFile(fileName, generated)
+        fileStorage.storeFile(fileName, generated)
         cachedSecret = generated
         return generated
       }
 
-      cachedSecret = fileStorageService.readFile(fileName)
+      cachedSecret = fileStorage.readFile(fileName)
       return cachedSecret
     }
 }
