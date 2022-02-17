@@ -109,17 +109,13 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
     testData = BaseTestData()
     testData.projectBuilder.apply {
       addKey {
-        self {
-          name = "key"
-          key = this
-        }
+        name = "key"
+        key = this
+      }.build {
         addTranslation {
-          self {
-            language = testData.englishLanguage
-            text = "translation"
-            translation = this
-            key = this@addKey.self
-          }
+          language = testData.englishLanguage
+          text = "translation"
+          translation = this
         }
       }
     }

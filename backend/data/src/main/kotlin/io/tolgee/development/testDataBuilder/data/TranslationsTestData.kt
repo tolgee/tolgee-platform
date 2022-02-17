@@ -12,7 +12,7 @@ import io.tolgee.model.key.Tag
 import io.tolgee.model.translation.Translation
 
 class TranslationsTestData {
-  var project: Project
+  lateinit var project: Project
   lateinit var englishLanguage: Language
   lateinit var germanLanguage: Language
   var user: UserAccount
@@ -22,79 +22,66 @@ class TranslationsTestData {
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     user = addUserAccount {
-      self {
-        username = "franta"
-      }
+      username = "franta"
     }.self
-    project = addProject {
-      self {
-        name = "Franta's project"
-        userOwner = user
-      }
-
+    addProject {
+      name = "Franta's project"
+      userOwner = user
+      project = this
+    }.build project@{
       addPermission {
-        self {
-          project = this@addProject.self
-          user = this@TranslationsTestData.user
-          type = Permission.ProjectPermissionType.MANAGE
-        }
+        user = this@TranslationsTestData.user
+        type = Permission.ProjectPermissionType.MANAGE
       }
-
       englishLanguage = addLanguage {
-        self {
-          name = "English"
-          tag = "en"
-          originalName = "English"
-        }
+        name = "English"
+        tag = "en"
+        originalName = "English"
       }.self
       germanLanguage = addLanguage {
-        self {
-          name = "German"
-          tag = "de"
-          originalName = "Deutsch"
-        }
-      }.self
-
-      aKey = addKey {
-        self.name = "A key"
-        aKeyGermanTranslation = addTranslation {
-          self {
-            key = this@addKey.self
-            language = germanLanguage
-            text = "Z translation"
-            state = TranslationState.REVIEWED
-          }
-          addMeta {
-            self {
-              tags.add(
-                Tag().apply {
-                  this.project = this@addProject.self
-                  name = "Cool tag"
-                }
-              )
-            }
-          }
-          addComment {
-            self {
-              text = "Comment"
-            }
-          }
-        }.self
+        name = "German"
+        tag = "de"
+        originalName = "Deutsch"
       }.self
 
       addKey {
-        self.name = "Z key"
+        name = "A key"
+        aKey = this
+      }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = englishLanguage
-            text = "A translation"
+          language = germanLanguage
+          text = "Z translation"
+          state = TranslationState.REVIEWED
+          aKeyGermanTranslation = this
+        }.build {
+          addMeta {
+            tags.add(
+              Tag().apply {
+                this.project = this@project.self
+                name = "Cool tag"
+              }
+            )
           }
+          addComment {
+            text = "Comment"
+          }
+        }
+      }
+
+      val zKeyBuilder = addKey {
+        name = "Z key"
+      }
+      zKeyBuilder.build {
+        addTranslation {
+          key = zKeyBuilder.self
+          language = englishLanguage
+          text = "A translation"
+        }.build {
           addMeta {
             self {
               tags.add(
                 Tag().apply {
-                  this.project = this@addProject.self
+                  this.project = this@project.self
                   name = "Lame tag"
                 }
               )
@@ -109,74 +96,58 @@ class TranslationsTestData {
   fun addTranslationsWithStates() {
     projectBuilder.apply {
       addKey {
-        self { name = "state test key" }
+        name = "state test key"
+      }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = germanLanguage
-            text = "a"
-            state = TranslationState.REVIEWED
-          }
+          language = germanLanguage
+          text = "a"
+          state = TranslationState.REVIEWED
         }
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = englishLanguage
-            text = "aa"
-            state = TranslationState.REVIEWED
-          }
+          language = englishLanguage
+          text = "aa"
+          state = TranslationState.REVIEWED
         }
       }
       addKey {
-        self { name = "state test key 2" }
+        name = "state test key 2"
+      }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = germanLanguage
-            text = "a"
-            state = TranslationState.TRANSLATED
-          }
+          language = germanLanguage
+          text = "a"
+          state = TranslationState.TRANSLATED
         }
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = englishLanguage
-            text = "aa"
-            state = TranslationState.REVIEWED
-          }
+          language = englishLanguage
+          text = "aa"
+          state = TranslationState.REVIEWED
         }
       }
       addKey {
-        self { name = "state test key 3" }
+        name = "state test key 3"
+      }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = englishLanguage
-            text = "aa"
-            state = TranslationState.REVIEWED
-          }
+          language = englishLanguage
+          text = "aa"
+          state = TranslationState.REVIEWED
         }
       }
       addKey {
-        self { name = "state test key 4" }
+        name = "state test key 4"
+      }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = englishLanguage
-            text = "aa"
-            state = TranslationState.NEEDS_REVIEW
-          }
+          language = englishLanguage
+          text = "aa"
+          state = TranslationState.NEEDS_REVIEW
         }
       }
       addKey {
-        self { name = "state test key 5" }
+        name = "state test key 5"
+      }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = englishLanguage
-            text = "aa"
-            state = TranslationState.MACHINE_TRANSLATED
-          }
+          language = englishLanguage
+          text = "aa"
+          state = TranslationState.MACHINE_TRANSLATED
         }
       }
     }
@@ -184,24 +155,20 @@ class TranslationsTestData {
 
   fun addKeyWithDot() {
     projectBuilder.addKey {
-      self {
-        name = "key.with.dots"
-      }
+      name = "key.with.dots"
     }
   }
 
   fun addKeysWithScreenshots() {
     projectBuilder.addKey {
-      self {
-        name = "key with screenshot"
-      }
+      name = "key with screenshot"
+    }.build {
       addScreenshot {}
       addScreenshot {}
     }
     projectBuilder.addKey {
-      self {
-        name = "key with screenshot 2"
-      }
+      name = "key with screenshot 2"
+    }.build {
       addScreenshot {}
       addScreenshot {}
     }
@@ -211,21 +178,14 @@ class TranslationsTestData {
     root.data.projects[0].apply {
       (1..count).forEach {
         val padNum = it.toString().padStart(2, '0')
-        addKey {
-          self { name = "key $padNum" }
+        addKey { name = "key $padNum" }.build {
           addTranslation {
-            self {
-              key = this@addKey.self
-              language = germanLanguage
-              text = "I am key $padNum's german translation."
-            }
+            language = germanLanguage
+            text = "I am key $padNum's german translation."
           }
           addTranslation {
-            self {
-              key = this@addKey.self
-              language = englishLanguage
-              text = "I am key $padNum's english translation."
-            }
+            language = englishLanguage
+            text = "I am key $padNum's english translation."
           }
         }
       }
@@ -235,42 +195,39 @@ class TranslationsTestData {
   fun addFewKeysWithTags() {
     root.data.projects[0].apply {
       addKey {
-        self {
-          name = "Key with tag"
-          addMeta {
-            self.tags.add(
-              Tag().apply {
-                name = "Cool tag"
-                project = root.data.projects[0].self
-              }
-            )
-          }
+        name = "Key with tag"
+      }.build {
+        addMeta {
+          tags.add(
+            Tag().apply {
+              name = "Cool tag"
+              project = root.data.projects[0].self
+            }
+          )
         }
       }
       addKey {
-        self {
-          name = "Another key with tag"
-          addMeta {
-            self.tags.add(
-              Tag().apply {
-                name = "Another cool tag"
-                project = root.data.projects[0].self
-              }
-            )
-          }
+        name = "Another key with tag"
+      }.build {
+        addMeta {
+          tags.add(
+            Tag().apply {
+              name = "Another cool tag"
+              project = root.data.projects[0].self
+            }
+          )
         }
       }
       addKey {
-        self {
-          name = "Key with tag 2"
-          addMeta {
-            self.tags.add(
-              Tag().apply {
-                name = "Cool tag"
-                project = root.data.projects[0].self
-              }
-            )
-          }
+        name = "Key with tag 2"
+      }.build {
+        addMeta {
+          tags.add(
+            Tag().apply {
+              name = "Cool tag"
+              project = root.data.projects[0].self
+            }
+          )
         }
       }
     }
@@ -279,83 +236,59 @@ class TranslationsTestData {
   fun generateCursorSearchData() {
     root.data.projects[0].apply {
       addKey {
-        self { name = "Hello" }
+        name = "Hello"
       }
       addKey {
-        self { name = "Hello 2" }
+        name = "Hello 2"
       }
       addKey {
-        self { name = "Hello 3" }
+        name = "Hello 3"
       }
       addKey {
-        self { name = "Hi" }
+        name = "Hi"
       }
       addKey {
-        self { name = "Hi 2" }
+        name = "Hi 2"
       }
     }
   }
 
   fun generateCursorTestData() {
     root.data.projects[0].apply {
-      addKey {
-        self { name = "a" }
+      addKey { name = "a" }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = germanLanguage
-            text = "f"
-          }
+          language = germanLanguage
+          text = "f"
         }
       }
-      addKey {
-        self { name = "b" }
+      addKey { name = "b" }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = germanLanguage
-            text = "f"
-          }
+          language = germanLanguage
+          text = "f"
         }
       }
-      addKey {
-        self { name = "c" }
+      addKey { name = "c" }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = germanLanguage
-            text = "d"
-          }
+          language = germanLanguage
+          text = "d"
         }
       }
-      addKey {
-        self { name = "d" }
+      addKey { name = "d" }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = germanLanguage
-            text = "b"
-          }
+          language = germanLanguage
+          text = "b"
         }
       }
-      addKey {
-        self { name = "e" }
+      addKey { name = "e" }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = germanLanguage
-            text = "b"
-          }
+          language = germanLanguage
+          text = "b"
         }
       }
-      addKey {
-        self { name = "f" }
+      addKey { name = "f" }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = germanLanguage
-            text = "a"
-          }
+          language = germanLanguage
+          text = "a"
         }
       }
     }
@@ -363,36 +296,28 @@ class TranslationsTestData {
 
   fun generateCommentTestData() {
     root.data.projects[0].apply {
-      addKey {
-        self { name = "ee" }
+      addKey { name = "ee" }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = germanLanguage
-            text = "d"
-            (1..5).forEach {
-              addComment {
-                self {
-                  text = "Comment $it"
-                }
-              }
+          language = germanLanguage
+          text = "d"
+        }.build {
+          (1..5).forEach {
+            addComment {
+              text = "Comment $it"
             }
           }
         }
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = englishLanguage
-            text = "d"
+          language = englishLanguage
+          text = "d"
+        }
+          .build {
             (1..3).forEach {
               addComment {
-                self {
-                  text = "Comment $it"
-                }
+                text = "Comment $it"
               }
             }
           }
-        }
       }
     }
   }
@@ -400,16 +325,12 @@ class TranslationsTestData {
   fun addUntranslated() {
     return projectBuilder.run {
       addKey {
-        self {
-          name = "lala"
-        }
+        name = "lala"
+      }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            text = null
-            language = englishLanguage
-            state = TranslationState.UNTRANSLATED
-          }
+          text = null
+          language = englishLanguage
+          state = TranslationState.UNTRANSLATED
         }.self
       }
     }
@@ -418,15 +339,11 @@ class TranslationsTestData {
   fun generateScopedData() {
     projectBuilder.run {
       addKey {
-        self {
-          name = "hello.i.am.scoped"
-          addTranslation {
-            self {
-              text = "yupee!"
-              language = englishLanguage
-              key = this@addKey.self
-            }
-          }
+        name = "hello.i.am.scoped"
+      }.build {
+        addTranslation {
+          text = "yupee!"
+          language = englishLanguage
         }
       }
     }
@@ -435,20 +352,15 @@ class TranslationsTestData {
   fun addTranslationWithHtml() {
     projectBuilder.run {
       addKey {
-        self.name = "html_key"
+        name = "html_key"
+      }.build {
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = germanLanguage
-            text = "Sweat jesus, this is invalid < HTML!"
-          }
+          language = germanLanguage
+          text = "Sweat jesus, this is invalid < HTML!"
         }
         addTranslation {
-          self {
-            key = this@addKey.self
-            language = englishLanguage
-            text = "<p>Sweat jesus, this is HTML!</p>"
-          }
+          language = englishLanguage
+          text = "<p>Sweat jesus, this is HTML!</p>"
         }
       }
     }

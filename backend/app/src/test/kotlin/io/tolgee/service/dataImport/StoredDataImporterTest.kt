@@ -46,12 +46,11 @@ class StoredDataImporterTest : AbstractSpringTest() {
   @Test
   fun `it checks for conflicts again`() {
     importTestData.setAllResolved()
+    val projectBuilder = importTestData.root.data.projects[0]
     importTestData.root.data.projects[0].addTranslation {
-      self {
-        language = projectBuilder.data.languages[0].self
-        key = projectBuilder.data.keys[4].self
-        text = "Old translation text"
-      }
+      language = projectBuilder.data.languages[0].self
+      key = projectBuilder.data.keys[4].self
+      text = "Old translation text"
     }
 
     importTestData.importBuilder.data.importFiles[0].data.importTranslations[4].self {

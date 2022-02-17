@@ -28,38 +28,36 @@ class LanguageE2eDataController(
   @Transactional
   fun generateBaseData(): Project {
     val data = testDataService.saveTestData {
-      addUserAccount {
-        self {
-          username = "franta"
-          name = "Frantisek Dobrota"
+      val userAccountBuilder = addUserAccount {
+        username = "franta"
+        name = "Frantisek Dobrota"
+      }
+      val userAccount = userAccountBuilder.self
+      userAccountBuilder.build {
+        val projectBuilder = addProject {
+          userOwner = userAccount
+          name = "Project"
         }
-        addProject {
-          self {
-            userOwner = this@addUserAccount.self
-            name = "Project"
-          }
+
+        projectBuilder.build {
           addPermission {
-            self {
-              type = Permission.ProjectPermissionType.MANAGE
-              user = this@addUserAccount.self
-              project = this@addProject.self
-            }
+            type = Permission.ProjectPermissionType.MANAGE
+            user = userAccount
+            project = projectBuilder.self
           }
           addLanguage {
-            self {
-              name = "English"
-              tag = "en"
-              flagEmoji = "\uD83C\uDDEC\uD83C\uDDE7"
-              originalName = "English"
-            }
+
+            name = "English"
+            tag = "en"
+            flagEmoji = "\uD83C\uDDEC\uD83C\uDDE7"
+            originalName = "English"
           }
           addLanguage {
-            self {
-              name = "German"
-              tag = "de"
-              flagEmoji = "\uD83C\uDDE9\uD83C\uDDEA"
-              originalName = "Deutsch"
-            }
+
+            name = "German"
+            tag = "de"
+            flagEmoji = "\uD83C\uDDE9\uD83C\uDDEA"
+            originalName = "Deutsch"
           }
         }
       }

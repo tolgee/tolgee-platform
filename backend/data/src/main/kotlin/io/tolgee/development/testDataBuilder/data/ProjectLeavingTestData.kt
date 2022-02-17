@@ -17,69 +17,51 @@ class ProjectLeavingTestData : BaseTestData() {
   init {
     root.apply {
       addUserAccount {
-        self {
-          username = "pepik"
-          name = "Josef Kajetan"
-          userWithOrganizationRole = this
-        }
+        username = "pepik"
+        name = "Josef Kajetan"
+        userWithOrganizationRole = this
       }
       addUserAccount {
-        self {
-          username = "filip"
-          name = "Filip Malecek"
-          user3 = this
-        }
+        username = "filip"
+        name = "Filip Malecek"
+        user3 = this
       }
       addUserAccount {
-        self {
-          username = "vobtah"
-          name = "Petr Vobtahlo"
-          project1nonOwner = this
-        }
+        username = "vobtah"
+        name = "Petr Vobtahlo"
+        project1nonOwner = this
         projectBuilder.addPermission {
-          self {
-            user = this@addUserAccount.self
-            type = Permission.ProjectPermissionType.VIEW
-          }
-        }
-      }
-      projectBuilder.addPermission {
-        self {
-          user = userWithOrganizationRole
+          user = this@addUserAccount
           type = Permission.ProjectPermissionType.VIEW
         }
       }
-
-      addOrganization {
-        self {
-          name = "Not owned organization"
-          notOwnedOrganization = this
-          slug = "not-owned-organization"
-        }
+      projectBuilder.addPermission {
+        user = userWithOrganizationRole
+        type = Permission.ProjectPermissionType.VIEW
       }
 
       addOrganization {
-        self {
-          name = "Owned organization"
-          organization = this
-          slug = "owned-organization"
-        }
+        name = "Not owned organization"
+        notOwnedOrganization = this
+        slug = "not-owned-organization"
+      }
+
+      addOrganization {
+        name = "Owned organization"
+        organization = this
+        slug = "owned-organization"
+      }.apply {
         addRole {
-          self {
-            type = OrganizationRoleType.OWNER
-            user = this@ProjectLeavingTestData.userWithOrganizationRole
-          }
+          type = OrganizationRoleType.OWNER
+          user = this@ProjectLeavingTestData.userWithOrganizationRole
         }
-        addProject(organizationOwner = this@addOrganization.self) {
-          self {
-            name = "Organization owned project"
-            organizationOwnedProject = this
-          }
+        addProject(organizationOwner = this@apply.self) {
+          name = "Organization owned project"
+          organizationOwnedProject = this
+        }.build {
           addPermission {
-            self {
-              user = this@ProjectLeavingTestData.userWithOrganizationRole
-              type = Permission.ProjectPermissionType.VIEW
-            }
+            user = this@ProjectLeavingTestData.userWithOrganizationRole
+            type = Permission.ProjectPermissionType.VIEW
           }
         }
       }

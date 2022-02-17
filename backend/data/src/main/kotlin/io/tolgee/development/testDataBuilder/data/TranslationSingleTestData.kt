@@ -24,109 +24,87 @@ class TranslationSingleTestData {
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     user = addUserAccount {
-      self {
-        username = "franta"
-      }
+
+      username = "franta"
     }.self
 
     pepa = addUserAccount {
-      self {
-        username = "pepa"
-      }
+
+      username = "pepa"
     }.self
 
     val jindra = addUserAccount {
-      self {
-        username = "jindra"
-      }
+
+      username = "jindra"
     }
 
     val vojta = addUserAccount {
-      self {
-        username = "vojta"
-      }
+      username = "vojta"
     }
 
     project = addProject {
-      self {
-        name = "Franta's project"
-        userOwner = user
+      name = "Franta's project"
+      userOwner = user
+    }.build {
+      addPermission {
+        user = this@TranslationSingleTestData.user
+        type = Permission.ProjectPermissionType.MANAGE
       }
 
       addPermission {
-        self {
-          project = this@addProject.self
-          user = this@TranslationSingleTestData.user
-          type = Permission.ProjectPermissionType.MANAGE
-        }
+
+        user = this@TranslationSingleTestData.pepa
+        type = Permission.ProjectPermissionType.EDIT
       }
 
       addPermission {
-        self {
-          project = this@addProject.self
-          user = this@TranslationSingleTestData.pepa
-          type = Permission.ProjectPermissionType.EDIT
-        }
+
+        user = jindra.self
+        type = Permission.ProjectPermissionType.TRANSLATE
       }
 
       addPermission {
-        self {
-          project = this@addProject.self
-          user = jindra.self
-          type = Permission.ProjectPermissionType.TRANSLATE
-        }
-      }
 
-      addPermission {
-        self {
-          project = this@addProject.self
-          user = vojta.self
-          type = Permission.ProjectPermissionType.VIEW
-        }
+        user = vojta.self
+        type = Permission.ProjectPermissionType.VIEW
       }
 
       englishLanguage = addLanguage {
-        self {
-          name = "English"
-          tag = "en"
-          originalName = "English"
-        }
+
+        name = "English"
+        tag = "en"
+        originalName = "English"
       }.self
 
       addLanguage {
-        self {
-          name = "Czech"
-          tag = "cs"
-          originalName = "Čeština"
-        }
+
+        name = "Czech"
+        tag = "cs"
+        originalName = "Čeština"
       }.self
 
-      aKey = addKey {
-        self.name = "A key"
+      val keyBuilder = addKey {
+        name = "A key"
+        aKey = this
+      }
 
+      keyBuilder.apply {
         translation = addTranslation {
-          self {
-            key = this@addKey.self
-            language = englishLanguage
-            text = "Z translation"
-            state = TranslationState.REVIEWED
-          }
-
+          key = aKey
+          language = englishLanguage
+          text = "Z translation"
+          state = TranslationState.REVIEWED
+        }.build {
           firstComment = addComment {
-            self {
-              text = "First comment"
-              author = this@TranslationSingleTestData.user
-            }
+            text = "First comment"
+            author = this@TranslationSingleTestData.user
           }.self
-
           secondComment = addComment {
-            self {
-              text = "Second comment"
-              author = this@TranslationSingleTestData.pepa
-            }
+            text = "Second comment"
+            author = this@TranslationSingleTestData.pepa
           }.self
         }.self
-      }.self
+      }
 
       projectBuilder = this
     }.self

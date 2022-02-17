@@ -10,35 +10,27 @@ class MtSettingsTestData : BaseTestData() {
   init {
     projectBuilder.apply {
       germanLanguage = addLanguage {
-        self {
-          name = "German"
-          tag = "de"
-          originalName = "Deutsch"
-        }
+        name = "German"
+        tag = "de"
+        originalName = "Deutsch"
       }.self
       spanishLanguage = addLanguage {
-        self {
-          name = "Sp"
-          tag = "es"
-          originalName = "Spanish"
-        }
+        name = "Sp"
+        tag = "es"
+        originalName = "Spanish"
       }.self
     }
 
     projectBuilder.addMtServiceConfig {
-      self {
-        targetLanguage = germanLanguage
-        enabledServices = mutableSetOf(MtServiceType.AWS)
-        primaryService = MtServiceType.AWS
-      }
+      targetLanguage = germanLanguage
+      enabledServices = mutableSetOf(MtServiceType.AWS)
+      primaryService = MtServiceType.AWS
     }
 
     projectBuilder.addMtServiceConfig {
-      self {
-        targetLanguage = spanishLanguage
-        enabledServices = mutableSetOf(MtServiceType.AWS, MtServiceType.GOOGLE)
-        primaryService = MtServiceType.AWS
-      }
+      targetLanguage = spanishLanguage
+      enabledServices = mutableSetOf(MtServiceType.AWS, MtServiceType.GOOGLE)
+      primaryService = MtServiceType.AWS
     }
   }
 }

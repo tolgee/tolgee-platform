@@ -12,36 +12,34 @@ open class BaseTestData(
 ) {
   var projectBuilder: DataBuilders.ProjectBuilder
   lateinit var englishLanguage: Language
-  var user: UserAccount
+  lateinit var user: UserAccount
 
   val root: TestDataBuilder = TestDataBuilder().apply {
-    user = addUserAccount {
-      self {
-        username = userName
-      }
-    }.self
+    addUserAccount {
+      username = userName
+      user = this
+    }
+
     projectBuilder = addProject {
-      self {
-        name = projectName
-        userOwner = user
-      }
-
+      name = projectName
+      userOwner = user
+    }.build buildProject@{
       addPermission {
-        self {
-          project = this@addProject.self
-          user = this@BaseTestData.user
-          type = Permission.ProjectPermissionType.MANAGE
-        }
+        project = this@buildProject.self
+        user = this@BaseTestData.user
+        type = Permission.ProjectPermissionType.MANAGE
       }
 
-      englishLanguage = addLanguage {
-        self {
-          name = "English"
-          tag = "en"
-          originalName = "English"
-          this@addProject.self.baseLanguage = this
-        }
-      }.self
+      addLanguage {
+        name = "English"
+        tag = "en"
+        originalName = "English"
+        englishLanguage = this
+      }
+
+      this.self {
+        baseLanguage = englishLanguage
+      }
     }
   }
 }

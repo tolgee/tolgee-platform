@@ -16,102 +16,80 @@ class SuggestionTestData : BaseTestData() {
   init {
     projectBuilder.apply {
       germanLanguage = addLanguage {
-        self {
-          name = "German"
-          tag = "de"
-          originalName = "Deutsch"
-        }
+        name = "German"
+        tag = "de"
+        originalName = "Deutsch"
       }.self
 
       addKey {
-        self {
-          name = "key 1"
+        name = "key 1"
+      }.build keyBuilder@{
+        addTranslation {
+          language = englishLanguage
+          key = this@keyBuilder.self
+          text = "Beautiful"
         }
         addTranslation {
-          self {
-            language = englishLanguage
-            key = this@addKey.self
-            text = "Beautiful"
-          }
-        }
-        addTranslation {
-          self {
-            language = germanLanguage
-            key = this@addKey.self
-            text = "Wunderschönen"
-          }
+
+          language = germanLanguage
+          key = this@keyBuilder.self
+          text = "Wunderschönen"
         }
       }
       addKey {
-        self {
-          name = "key 2"
-          thisIsBeautifulKey = this
+        name = "key 2"
+        thisIsBeautifulKey = this
+      }.build keyBuilder@{
+        addTranslation {
+          language = englishLanguage
+          key = this@keyBuilder.self
+          text = "This is beautiful"
         }
         addTranslation {
-          self {
-            language = englishLanguage
-            key = this@addKey.self
-            text = "This is beautiful"
-          }
-        }
-        addTranslation {
-          self {
-            language = germanLanguage
-            key = this@addKey.self
-            text = "Das ist schön"
-          }
+
+          language = germanLanguage
+          key = this@keyBuilder.self
+          text = "Das ist schön"
         }
       }
       addKey {
-        self {
-          name = "key 5"
-          thisIsBeautifulKey = this
+        name = "key 5"
+        thisIsBeautifulKey = this
+      }.build keyBuilder@{
+        addTranslation {
+          language = englishLanguage
+          key = this@keyBuilder.self
+          text = "This is beautiful even more"
         }
         addTranslation {
-          self {
-            language = englishLanguage
-            key = this@addKey.self
-            text = "This is beautiful even more"
-          }
-        }
-        addTranslation {
-          self {
-            language = germanLanguage
-            key = this@addKey.self
-            text = "Das ist sehr schön"
-          }
+
+          language = germanLanguage
+          key = this@keyBuilder.self
+          text = "Das ist sehr schön"
         }
       }
       addKey {
-        self {
-          name = "key 3"
+        name = "key 3"
+      }.build keyBuilder@{
+        addTranslation {
+          language = englishLanguage
+          key = this@keyBuilder.self
+          text = "This is different"
         }
         addTranslation {
-          self {
-            language = englishLanguage
-            key = this@addKey.self
-            text = "This is different"
-          }
-        }
-        addTranslation {
-          self {
-            language = germanLanguage
-            key = this@addKey.self
-            text = "Das ist anders"
-          }
+          language = germanLanguage
+          key = this@keyBuilder.self
+          text = "Das ist anders"
         }
       }
       addKey {
-        self {
-          name = "key 4"
-          beautifulKey = this
-        }
+        name = "key 4"
+        beautifulKey = this
+      }.build keyBuilder@{
         addTranslation {
-          self {
-            language = englishLanguage
-            key = this@addKey.self
-            text = "Beautiful"
-          }
+          language = englishLanguage
+          key = this@keyBuilder.self
+          text = "Beautiful"
         }
       }
     }
@@ -119,21 +97,18 @@ class SuggestionTestData : BaseTestData() {
 
   fun enableAWS() {
     projectBuilder.addMtServiceConfig {
-      self {
-        this.targetLanguage = germanLanguage
-        this.enabledServices = mutableSetOf(MtServiceType.AWS)
-        this.primaryService = MtServiceType.AWS
-      }
+      this.targetLanguage = germanLanguage
+      this.enabledServices = mutableSetOf(MtServiceType.AWS)
+      this.primaryService = MtServiceType.AWS
     }
   }
 
   fun enableBoth() {
     projectBuilder.addMtServiceConfig {
-      self {
-        this.targetLanguage = germanLanguage
-        this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS)
-        this.primaryService = MtServiceType.AWS
-      }
+
+      this.targetLanguage = germanLanguage
+      this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS)
+      this.primaryService = MtServiceType.AWS
     }
   }
 
@@ -141,24 +116,18 @@ class SuggestionTestData : BaseTestData() {
     projectBuilder.apply {
       (0..10000).forEach {
         addKey {
-          self {
-            name = UUID.randomUUID().toString()
+          name = UUID.randomUUID().toString()
+        }.build keyBuilder@{
+          addTranslation {
+            key = this@keyBuilder.self
+            language = englishLanguage
+            text = "Beautiful " + fakerEn.funnyName().name() + " " + fakerEn.funnyName().name()
           }
 
           addTranslation {
-            self {
-              key = this@addKey.self
-              language = englishLanguage
-              text = "Beautiful " + fakerEn.funnyName().name() + " " + fakerEn.funnyName().name()
-            }
-          }
-
-          addTranslation {
-            self {
-              key = this@addKey.self
-              language = germanLanguage
-              text = "Wunderschönen " + fakerDe.funnyName().name() + " " + fakerDe.funnyName().name()
-            }
+            key = this@keyBuilder.self
+            language = germanLanguage
+            text = "Wunderschönen " + fakerDe.funnyName().name() + " " + fakerDe.funnyName().name()
           }
         }
       }

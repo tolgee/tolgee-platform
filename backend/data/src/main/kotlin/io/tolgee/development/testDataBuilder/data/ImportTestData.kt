@@ -27,180 +27,140 @@ class ImportTestData {
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     userAccount = addUserAccount {
-      self {
-        username = "franta"
-        name = "Frantisek Dobrota"
-      }
+      username = "franta"
+      name = "Frantisek Dobrota"
     }.self
-    project = addProject {
-      self { name = "test" }
+    project = addProject { name = "test" }.build project@{
       addPermission {
-        self {
-          project = this@addProject.self
-          user = this@ImportTestData.userAccount
-          type = Permission.ProjectPermissionType.MANAGE
-        }
+        project = this@project.self
+        user = this@ImportTestData.userAccount
+        type = Permission.ProjectPermissionType.MANAGE
       }
 
       val key = addKey {
-        self { name = "what a key" }
+        name = "what a key"
       }.self
       addKey {
-        self { name = "what a nice key" }
+        name = "what a nice key"
       }.self
       addKey {
-        self { name = "what a beautiful key" }
+        name = "what a beautiful key"
       }.self
       addKey {
-        self { name = "another nice key" }
+        name = "another nice key"
       }.self
       addKey {
-        self { name = "extraordinary key" }
+        name = "extraordinary key"
       }.self
       addKey {
-        self { name = "this is another key" }
+        name = "this is another key"
       }.self
       english = addLanguage {
-        self {
-          name = "English"
-          tag = "en"
-        }
+        name = "English"
+        tag = "en"
       }.self
       german = addLanguage {
-        self {
-          name = "German"
-          tag = "de"
-        }
+        name = "German"
+        tag = "de"
       }.self
       czech = addLanguage {
-        self {
-          name = "Czech"
-          tag = "cs"
-        }
+        name = "Czech"
+        tag = "cs"
       }.self
       french = addLanguage {
-        self {
-          name = "French"
-          tag = "fr"
-        }
+        name = "French"
+        tag = "fr"
       }.self
       conflict = addTranslation {
-        self {
-          this.language = english
-          this.key = key
-        }
+        this.language = english
+        this.key = key
       }.self
       addTranslation {
-        self {
-          this.language = english
-          this.key = projectBuilder.data.keys[1].self
-        }
+        this.language = english
+        this.key = this@project.data.keys[1].self
       }.self
       addTranslation {
-        self {
-          this.language = english
-          this.key = projectBuilder.data.keys[2].self
-        }
+        this.language = english
+        this.key = this@project.data.keys[2].self
       }.self
       addTranslation {
-        self {
-          this.language = english
-          this.key = projectBuilder.data.keys[3].self
-        }
+        this.language = english
+        this.key = this@project.data.keys[3].self
       }.self
       addTranslation {
-        self {
-          this.language = french
-          this.key = projectBuilder.data.keys[0].self
-          this.text = "What a french text"
-        }
+        this.language = french
+        this.key = this@project.data.keys[0].self
+        this.text = "What a french text"
       }.self
       addTranslation {
-        self {
-          this.language = french
-          this.key = projectBuilder.data.keys[1].self
-          this.text = "What a french text 2"
-        }
+        this.language = french
+        this.key = this@project.data.keys[1].self
+        this.text = "What a french text 2"
       }.self
-      importBuilder = addImport {
+      importBuilder = addImport {}.build {
         addImportFile {
-          self {
-            name = "multilang.json"
-          }
+          name = "multilang.json"
+        }.build {
           importEnglish = addImportLanguage {
-            self.name = "en"
-            self.existingLanguage = english
+            name = "en"
+            existingLanguage = english
           }.self
           importFrench = addImportLanguage {
-            self.name = "fr"
+            name = "fr"
           }.self
           addImportLanguage {
-            self.name = "de"
-            self.existingLanguage = german
-          }.self
+            name = "de"
+            existingLanguage = german
+          }
 
           val addedKey = addImportKey {
-            self {
-              name = "what a key"
-            }
+            name = "what a key"
           }
           addImportKey {
-            self { name = "what a nice key" }
-          }.self
+            name = "what a nice key"
+          }
           addImportKey {
-            self { name = "what a beautiful key" }
-          }.self
+            name = "what a beautiful key"
+          }
           addImportKey {
-            self { name = (1..2000).joinToString("") { "a" } }
-          }.self
+            name = (1..2000).joinToString("") { "a" }
+          }
           addImportKey {
-            self { name = "extraordinary key" }
-          }.self
+            name = "extraordinary key"
+          }
           addImportKey {
-            self { name = "this is another key" }
-          }.self
+            name = "this is another key"
+          }
 
           translationWithConflict = addImportTranslation {
-            self {
-              this.language = importEnglish
-              this.key = addedKey.self
-              this.conflict = this@ImportTestData.conflict
-              this.text = "Overridden"
-            }
+            this.language = importEnglish
+            this.key = addedKey.self
+            this.conflict = this@ImportTestData.conflict
+            this.text = "Overridden"
           }.self
           addImportTranslation {
-            self {
-              this.language = importEnglish
-              this.key = data.importKeys[1].self
-              this.conflict = projectBuilder.data.translations[1].self
-              this.text = "Imported text"
-            }
+            this.language = importEnglish
+            this.key = data.importKeys[1].self
+            this.conflict = projectBuilder.data.translations[1].self
+            this.text = "Imported text"
           }
           addImportTranslation {
-            self {
-              this.language = importEnglish
-              this.key = data.importKeys[2].self
-              this.conflict = projectBuilder.data.translations[2].self
-            }
+            this.language = importEnglish
+            this.key = data.importKeys[2].self
+            this.conflict = projectBuilder.data.translations[2].self
           }
           addImportTranslation {
-            self {
-              this.language = importEnglish
-              this.key = data.importKeys[3].self
-              this.conflict = projectBuilder.data.translations[3].self
-            }
+            this.language = importEnglish
+            this.key = data.importKeys[3].self
+            this.conflict = projectBuilder.data.translations[3].self
           }
           addImportTranslation {
-            self {
-              this.language = importEnglish
-              this.key = data.importKeys[4].self
-            }
+            this.language = importEnglish
+            this.key = data.importKeys[4].self
           }
           addImportTranslation {
-            self {
-              this.language = importEnglish
-              this.key = data.importKeys[5].self
-            }
+            this.language = importEnglish
+            this.key = data.importKeys[5].self
           }
         }
       }
@@ -211,18 +171,14 @@ class ImportTestData {
   fun addFrenchTranslations() {
     this.importBuilder.data.importFiles[0].apply {
       addImportTranslation {
-        self {
-          this.language = importFrench
-          this.key = data.importKeys[0].self
-          this.text = "French text"
-        }
+        this.language = importFrench
+        this.key = data.importKeys[0].self
+        this.text = "French text"
       }
       addImportTranslation {
-        self {
-          this.language = importFrench
-          this.key = data.importKeys[2].self
-          this.text = "French text"
-        }
+        this.language = importFrench
+        this.key = data.importKeys[2].self
+        this.text = "French text"
       }
     }
   }
@@ -271,35 +227,28 @@ class ImportTestData {
     val projectBuilder = this.root.data.projects[0]
     val import = projectBuilder.data.imports[0]
     import.addImportFile {
-      self { name = "another.json" }
+      name = "another.json"
+    }.build {
       val fr = addImportLanguage {
-        self {
-          name = "fr"
-          existingLanguage = french
-        }
+        name = "fr"
+        existingLanguage = french
       }.self
       (1..300).forEach { num ->
         projectBuilder.addKey {
-          val key = self {
-            name = "this_is_key_$num"
-          }
+          name = "this_is_key_$num"
+        }.build keyBuilder@{
           projectBuilder.addTranslation {
-            val translation = self {
-              this.key = key
-              this.language = english
-              this.text = "I am translation $num"
-            }
+            this.key = this@keyBuilder.self
+            this.language = english
+            this.text = "I am translation $num"
+          }.build buildTranslation@{
             addImportKey {
-              self {
-                this.name = key.name
-              }
+              name = this@keyBuilder.self.name
               addImportTranslation {
-                self {
-                  language = fr
-                  this.key = this@addImportKey.self
-                  text = "I am import translation $num"
-                  conflict = translation
-                }
+                language = fr
+                this.key = this@addImportKey
+                text = "I am import translation $num"
+                conflict = this@buildTranslation.self
               }
             }
           }
@@ -310,56 +259,50 @@ class ImportTestData {
 
   fun addKeyMetadata() {
     root.data.projects[0].data.keys[2].addMeta {
-      self {
-        addComment(userAccount) {
-          text = "Hello I am first comment (I exist)"
-          fromImport = true
-        }
-        addCodeReference(userAccount) {
-          path = "./code/exist.extension"
-          line = 10
-          fromImport = true
-        }
+      addComment(userAccount) {
+        text = "Hello I am first comment (I exist)"
+        fromImport = true
+      }
+      addCodeReference(userAccount) {
+        path = "./code/exist.extension"
+        line = 10
+        fromImport = true
       }
     }
 
     root.data.projects[0].data.imports[0].data.importFiles[0].data.importKeys[2].addMeta {
-      self {
-        addComment(userAccount) {
-          text = "Hello I am first comment (I exist)"
-          fromImport = true
-        }
-        addComment(userAccount) {
-          text = "Hello I am second comment (I dont exist)"
-          fromImport = true
-        }
-        addComment(userAccount) {
-          text = "One more"
-          fromImport = true
-        }
-        addCodeReference(userAccount) {
-          path = "./code/exist.extension"
-          line = 10
-          fromImport = true
-        }
-        addCodeReference(userAccount) {
-          path = "./code/notExist.extendison"
-          fromImport = false
-        }
+      addComment(userAccount) {
+        text = "Hello I am first comment (I exist)"
+        fromImport = true
+      }
+      addComment(userAccount) {
+        text = "Hello I am second comment (I dont exist)"
+        fromImport = true
+      }
+      addComment(userAccount) {
+        text = "One more"
+        fromImport = true
+      }
+      addCodeReference(userAccount) {
+        path = "./code/exist.extension"
+        line = 10
+        fromImport = true
+      }
+      addCodeReference(userAccount) {
+        path = "./code/notExist.extendison"
+        fromImport = false
       }
     }
 
     root.data.projects[0].data.imports[0].data.importFiles[0].data.importKeys[3].addMeta {
-      self {
-        addComment(userAccount) {
-          text = "Hello!"
-          fromImport = true
-        }
-        addCodeReference(userAccount) {
-          path = "./code/exist.extension"
-          line = 10
-          fromImport = true
-        }
+      addComment(userAccount) {
+        text = "Hello!"
+        fromImport = true
+      }
+      addCodeReference(userAccount) {
+        path = "./code/exist.extension"
+        line = 10
+        fromImport = true
       }
     }
   }

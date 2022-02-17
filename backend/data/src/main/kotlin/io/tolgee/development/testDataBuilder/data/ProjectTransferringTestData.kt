@@ -17,69 +17,53 @@ class ProjectTransferringTestData : BaseTestData() {
   init {
     root.apply {
       addUserAccount {
-        self {
-          username = "pepik"
-          name = "Josef Kajetan"
-          user2 = this
-        }
+        username = "pepik"
+        name = "Josef Kajetan"
+        user2 = this
       }
       addUserAccount {
-        self {
-          username = "filip"
-          name = "Filip Malecek"
-          user3 = this
-        }
+        username = "filip"
+        name = "Filip Malecek"
+        user3 = this
       }
       addUserAccount {
-        self {
-          username = "vobtah"
-          name = "Petr Vobtahlo"
-          vobtahlo = this
-        }
+        username = "vobtah"
+        name = "Petr Vobtahlo"
+        vobtahlo = this
+
         projectBuilder.addPermission {
-          self {
-            user = this@addUserAccount.self
-            type = Permission.ProjectPermissionType.VIEW
-          }
-        }
-      }
-      projectBuilder.addPermission {
-        self {
-          user = user2
+          user = this@addUserAccount
           type = Permission.ProjectPermissionType.VIEW
         }
       }
-
-      addOrganization {
-        self {
-          name = "Not owned organization"
-          notOwnedOrganization = this
-          slug = "not-owned-organization"
-        }
+      projectBuilder.addPermission {
+        user = user2
+        type = Permission.ProjectPermissionType.VIEW
       }
 
       addOrganization {
-        self {
-          name = "Owned organization"
-          organization = this
-          slug = "owned-organization"
-        }
+        name = "Not owned organization"
+        notOwnedOrganization = this
+        slug = "not-owned-organization"
+      }
+
+      addOrganization {
+        name = "Owned organization"
+        organization = this
+        slug = "owned-organization"
+      }.apply {
         addRole {
-          self {
-            type = OrganizationRoleType.OWNER
-            user = this@ProjectTransferringTestData.user
-          }
+          type = OrganizationRoleType.OWNER
+          user = this@ProjectTransferringTestData.user
         }
-        addProject(organizationOwner = this@addOrganization.self) {
-          self {
-            name = "Organization owned project"
-            organizationOwnedProject = this
-          }
+        addProject(organizationOwner = this@apply.self) {
+          name = "Organization owned project"
+          organizationOwnedProject = this
+        }.build {
           addPermission {
-            self {
-              user = this@ProjectTransferringTestData.user2
-              type = Permission.ProjectPermissionType.VIEW
-            }
+
+            user = this@ProjectTransferringTestData.user2
+            type = Permission.ProjectPermissionType.VIEW
           }
         }
       }
