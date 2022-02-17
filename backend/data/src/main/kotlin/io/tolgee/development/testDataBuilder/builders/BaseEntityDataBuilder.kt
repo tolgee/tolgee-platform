@@ -1,5 +1,6 @@
-package io.tolgee.development.testDataBuilder
+package io.tolgee.development.testDataBuilder.builders
 
+import io.tolgee.development.testDataBuilder.EntityDataBuilder
 import kotlin.reflect.full.createType
 
 abstract class BaseEntityDataBuilder<Entity, Builder> : EntityDataBuilder<Entity, Builder> {

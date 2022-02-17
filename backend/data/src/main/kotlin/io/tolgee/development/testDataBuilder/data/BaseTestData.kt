@@ -1,7 +1,7 @@
 package io.tolgee.development.testDataBuilder.data
 
-import io.tolgee.development.testDataBuilder.DataBuilders
-import io.tolgee.development.testDataBuilder.TestDataBuilder
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
+import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
@@ -10,7 +10,7 @@ open class BaseTestData(
   userName: String = "test_username",
   projectName: String = "test_project"
 ) {
-  var projectBuilder: DataBuilders.ProjectBuilder
+  var projectBuilder: ProjectBuilder
   lateinit var englishLanguage: Language
   lateinit var user: UserAccount
 
