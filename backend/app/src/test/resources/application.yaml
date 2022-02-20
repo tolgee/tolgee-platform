@@ -20,6 +20,7 @@ spring:
         enabled: false
   main:
     allow-bean-definition-overriding: true
+    lazy-initialization: true
   liquibase:
     drop-first: true
     change-log: classpath:db/changelog/schema.xml
