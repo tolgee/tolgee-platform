@@ -20,7 +20,6 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
         // populate to create the user if not created
         dbPopulator.createUserIfNotExists(tolgeeProperties.authentication.initialUsername)
         loginAsUser(tolgeeProperties.authentication.initialUsername)
-        // commitTransaction()
       }
       return _userAccount
     }

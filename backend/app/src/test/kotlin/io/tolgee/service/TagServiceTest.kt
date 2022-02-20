@@ -6,13 +6,16 @@ package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.TagsTestData
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
 
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@ContextRecreatingTest
 class TagServiceTest : AbstractSpringTest() {
-
   @Test
   fun `deletes just unused tags on batch delete`() {
     val tagsTestData = TagsTestData()

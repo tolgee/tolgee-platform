@@ -93,10 +93,16 @@ jobs:
         env:
           SKIP_SERVER_BUILD: true
 
+      - name: Get report name
+        id: reportName
+        run: |
+          reportName=${{ matrix.command }}
+          echo "::set-output name=reportName::${reportName//\:/_}"
+
       - uses: actions/upload-artifact@v2
         if: always()
         with:
-          name: backend_test_reports_${{ matrix.command }}
+          name: backend_test_reports_${{ steps.version.outputs.reportName }}
           path: |
             ./**/build/reports/**/*
 
