@@ -110,6 +110,7 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
     tolgeeProperties.authentication.needsEmailVerification = true
     val user = dbPopulator.createUserIfNotExists(username = testMail, name = testName)
     userAccountService.update(user, updateRequestDto)
+    Thread.sleep(100)
     verify(contactsApi).updateContact(eq(testMail), any())
     Mockito.clearInvocations(contactsApi)
     acceptEmailVerification(user)
@@ -123,6 +124,7 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   }
 
   private fun verifyEmailSentOnUpdate() {
+    Thread.sleep(100)
     verify(contactsApi).updateContact(eq(testMail), updateContactArgumentCaptor.capture())
     val attributes = updateContactArgumentCaptor.value.attributes as Map<String, String>
     assertThat(attributes["NAME"] as String).isEqualTo(updateRequestDto.name)
@@ -131,6 +133,7 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
   }
 
   private fun verifyCreateContactCalled() {
+    Thread.sleep(100)
     verify(contactsApi).createContact(createContactArgumentCaptor.capture())
     assertThat(createContactArgumentCaptor.value.email).isEqualTo(testMail)
     val attributes = createContactArgumentCaptor.value.attributes as Map<String, String>

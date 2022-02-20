@@ -120,7 +120,6 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
 
     performProjectAuthGet("/translations?sort=translations.de.text&size=4&sort=keyName&cursor=$cursor")
       .andPrettyPrint.andIsOk.andAssertThatJson {
-        // commitTransaction()
         node("_embedded.keys[0].keyName").isEqualTo("c")
         node("_embedded.keys[3].keyName").isEqualTo("A key")
       }

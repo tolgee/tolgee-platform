@@ -43,7 +43,6 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
     dispatchCallback: () -> Unit,
     assertCallback: ((value: JSONObject) -> Unit)? = null
   ) {
-    // commitTransaction()
     val notified = sockets.associateWith { false }.toMutableMap()
     sockets.forEach { socket ->
       socket.on(eventName) { data ->
