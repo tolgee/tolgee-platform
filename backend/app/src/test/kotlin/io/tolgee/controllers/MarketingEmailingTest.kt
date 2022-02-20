@@ -8,6 +8,9 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 import org.mockito.kotlin.any
@@ -21,17 +24,13 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import org.testng.annotations.AfterMethod
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import sibApi.ContactsApi
 import sibModel.CreateContact
 import sibModel.UpdateContact
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class MarketingEmailingTest :
-  AuthorizedControllerTest() {
+class MarketingEmailingTest : AuthorizedControllerTest() {
 
   @Autowired
   lateinit var sendInBlueProperties: SendInBlueProperties
@@ -55,7 +54,7 @@ class MarketingEmailingTest :
     email = "newemail@test.com"
   )
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     Mockito.clearInvocations(contactsApi)
     Mockito.clearInvocations(javaMailSender)
@@ -64,7 +63,7 @@ class MarketingEmailingTest :
     updateContactArgumentCaptor = ArgumentCaptor.forClass(UpdateContact::class.java)
   }
 
-  @AfterMethod
+  @AfterEach
   fun cleanUp() {
     sendInBlueProperties.listId = null
     tolgeeProperties.authentication.needsEmailVerification = false

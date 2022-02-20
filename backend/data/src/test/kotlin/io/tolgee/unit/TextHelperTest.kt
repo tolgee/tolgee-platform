@@ -2,7 +2,7 @@ package io.tolgee.unit
 
 import io.tolgee.helpers.TextHelper
 import org.assertj.core.api.Assertions.assertThat
-import org.testng.annotations.Test
+import org.junit.jupiter.api.Test
 
 class TextHelperTest {
   @Test

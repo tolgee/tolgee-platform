@@ -1,10 +1,12 @@
 package io.tolgee.cache
 
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.cache.caffeine.CaffeineCacheManager
-import org.testng.annotations.Test
 
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.cache.enabled=true",

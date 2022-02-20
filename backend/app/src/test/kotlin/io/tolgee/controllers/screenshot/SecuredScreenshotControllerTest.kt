@@ -9,20 +9,24 @@ import io.tolgee.dtos.request.screenshot.GetScreenshotsByKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.fixtures.generateUniqueString
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testng.annotations.Test
 import java.io.File
 import java.util.*
 
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.authentication.secured-image-retrieval=true",
     "tolgee.authentication.secured-image-timestamp-max-age=10000"
   ]
 )
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
   @set:Autowired
   lateinit var timestampValidation: TimestampValidation

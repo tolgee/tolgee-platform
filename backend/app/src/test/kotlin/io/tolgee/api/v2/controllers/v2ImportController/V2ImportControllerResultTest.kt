@@ -8,11 +8,11 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.AuthorizedControllerTest
 import org.apache.commons.lang3.time.DateUtils
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.util.*
 
 class V2ImportControllerResultTest : AuthorizedControllerTest() {
@@ -20,7 +20,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var currentDateProvider: CurrentDateProvider
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     whenever(currentDateProvider.getDate()).then {
       Date()

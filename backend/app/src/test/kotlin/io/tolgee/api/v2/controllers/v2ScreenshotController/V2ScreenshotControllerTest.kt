@@ -12,24 +12,26 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testng.annotations.AfterClass
-import org.testng.annotations.BeforeClass
-import org.testng.annotations.Test
 import java.io.File
 import java.util.stream.Collectors
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class V2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
   lateinit var initialScreenshotUrl: String
 
-  @BeforeClass
+  @BeforeAll
   fun before() {
     initialScreenshotUrl = tolgeeProperties.screenshotsUrl
   }
 
-  @AfterClass
+  @AfterAll
   fun after() {
     tolgeeProperties.screenshotsUrl = initialScreenshotUrl
   }

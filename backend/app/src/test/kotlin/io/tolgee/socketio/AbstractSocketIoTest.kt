@@ -15,12 +15,14 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.testing.assertions.Assertions
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.json.JSONObject
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
-import org.testng.annotations.AfterClass
-import org.testng.annotations.BeforeClass
-import org.testng.annotations.Test
 import java.net.URI
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractSocketIoTest : AbstractSpringTest() {
   protected lateinit var sockets: List<Socket>
   lateinit var project: Project
@@ -41,7 +43,7 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
     dispatchCallback: () -> Unit,
     assertCallback: ((value: JSONObject) -> Unit)? = null
   ) {
-    commitTransaction()
+    // commitTransaction()
     val notified = sockets.associateWith { false }.toMutableMap()
     sockets.forEach { socket ->
       socket.on(eventName) { data ->
@@ -68,13 +70,13 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
   fun beforePrepareSockets() {
   }
 
-  @BeforeClass
+  @BeforeAll
   fun beforeClass() {
     prepareTestData()
     prepareSockets()
   }
 
-  @AfterClass
+  @AfterAll
   fun afterClass() {
     socketIOServer.stop()
     sockets.forEach { it.disconnect() }

@@ -18,13 +18,13 @@ import io.tolgee.service.ImageUploadService
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.Resource
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.math.BigDecimal
 
 @SpringBootTest
@@ -40,7 +40,7 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: KeysTestData
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     testData = KeysTestData()
     testDataService.saveTestData(testData.root)

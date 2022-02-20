@@ -16,23 +16,19 @@ import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.lang3.time.DateUtils
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.web.servlet.ResultActions
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.util.*
 import kotlin.system.measureTimeMillis
 
-@SpringBootTest
-@AutoConfigureMockMvc
 class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: SuggestionTestData
 
@@ -48,7 +44,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @MockBean
   lateinit var currentDateProvider: CurrentDateProvider
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     initTestData()
     initProperties()

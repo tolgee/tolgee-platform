@@ -8,14 +8,13 @@ import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.security.third_party.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.security.third_party.GithubOAuthDelegate.GithubUserResponse
 import io.tolgee.testing.AbstractControllerTest
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
@@ -26,12 +25,8 @@ import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.client.RestTemplate
-import org.testng.annotations.BeforeClass
-import org.testng.annotations.Test
 import java.util.*
 
-@SpringBootTest
-@AutoConfigureMockMvc
 class AuthTest : AbstractControllerTest() {
   @Autowired
   private val publicController: PublicController? = null
@@ -41,7 +36,7 @@ class AuthTest : AbstractControllerTest() {
   private val restTemplate: RestTemplate? = null
   private var authMvc: MockMvc? = null
 
-  @BeforeClass
+  @BeforeAll
   fun setup() {
     dbPopulator.createBase(generateUniqueString())
     authMvc = MockMvcBuilders.standaloneSetup(publicController).setControllerAdvice(ExceptionHandlers()).build()
@@ -51,14 +46,14 @@ class AuthTest : AbstractControllerTest() {
   fun generatesTokenForValidUser() {
     val response = doAuthentication(initialUsername, initialPassword)
     val result: HashMap<String, Any> = response.mapResponseTo()
-    Assertions.assertThat(result["accessToken"]).isNotNull
-    Assertions.assertThat(result["tokenType"]).isEqualTo("Bearer")
+    assertThat(result["accessToken"]).isNotNull
+    assertThat(result["tokenType"]).isEqualTo("Bearer")
   }
 
   @Test
   fun doesNotGenerateTokenForInvalidUser() {
     val mvcResult = doAuthentication("bena", "benaspassword")
-    Assertions.assertThat(mvcResult.response.status).isEqualTo(401)
+    assertThat(mvcResult.response.status).isEqualTo(401)
   }
 
   @Test
@@ -73,7 +68,7 @@ class AuthTest : AbstractControllerTest() {
         .contentType(MediaType.APPLICATION_JSON)
     )
       .andReturn()
-    Assertions.assertThat(mvcResult.response.status).isEqualTo(200)
+    assertThat(mvcResult.response.status).isEqualTo(200)
   }
 
   @Test
@@ -87,8 +82,8 @@ class AuthTest : AbstractControllerTest() {
       emailResponse = ResponseEntity(emailResponse, HttpStatus.OK)
     )
     val response = mvcResult.response
-    Assertions.assertThat(response.status).isEqualTo(401)
-    Assertions.assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_NO_EMAIL.code)
+    assertThat(response.status).isEqualTo(401)
+    assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_NO_EMAIL.code)
   }
 
   @Test
@@ -103,8 +98,8 @@ class AuthTest : AbstractControllerTest() {
       emailResponse = ResponseEntity(emailResponse, HttpStatus.OK)
     )
     var response = mvcResult.response
-    Assertions.assertThat(response.status).isEqualTo(401)
-    Assertions.assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR.code)
+    assertThat(response.status).isEqualTo(401)
+    assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR.code)
     tokenResponse = HashMap()
     tokenResponse["error"] = null
     mvcResult = authorizeGithubUser(
@@ -113,8 +108,8 @@ class AuthTest : AbstractControllerTest() {
       emailResponse = ResponseEntity(emailResponse, HttpStatus.OK)
     )
     response = mvcResult.response
-    Assertions.assertThat(response.status).isEqualTo(401)
-    Assertions.assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE.code)
+    assertThat(response.status).isEqualTo(401)
+    assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE.code)
   }
 
   @Test
@@ -163,8 +158,8 @@ class AuthTest : AbstractControllerTest() {
       emailResponse = ResponseEntity(emailResponse, HttpStatus.OK)
     ).response.contentAsString
     val result = ObjectMapper().readValue(response, HashMap::class.java)
-    Assertions.assertThat(result["accessToken"]).isNotNull
-    Assertions.assertThat(result["tokenType"]).isEqualTo("Bearer")
+    assertThat(result["accessToken"]).isNotNull
+    assertThat(result["tokenType"]).isEqualTo("Bearer")
   }
 
   private val tokenResponse: Map<String, String?>

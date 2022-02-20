@@ -4,17 +4,17 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 
 @SpringBootTest
 class TranslationsViewBuilderTest : AbstractSpringTest() {
 
   lateinit var testData: TranslationsTestData
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
     testData.generateLotOfData()

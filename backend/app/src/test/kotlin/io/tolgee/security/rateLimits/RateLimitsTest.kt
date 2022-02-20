@@ -1,10 +1,12 @@
 package io.tolgee.security.rateLimits
 
+import io.tolgee.testing.ContextRecreatingTest
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.Test
 
 @AutoConfigureMockMvc
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.cache.enabled=true",

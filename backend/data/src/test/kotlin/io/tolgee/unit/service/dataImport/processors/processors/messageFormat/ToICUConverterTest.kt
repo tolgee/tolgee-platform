@@ -8,9 +8,9 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.messageFormat.SupportedFormat
 import io.tolgee.service.dataImport.processors.messageFormat.ToICUConverter
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.io.File
 
 class ToICUConverterTest {
@@ -19,7 +19,7 @@ class ToICUConverterTest {
   private lateinit var importFile: ImportFile
   private lateinit var importFileDto: ImportFileDto
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     importMock = mock()
     importFile = ImportFile("exmample.po", importMock)

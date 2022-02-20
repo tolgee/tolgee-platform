@@ -3,10 +3,10 @@ package io.tolgee.repository.dataImport
 import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
-import org.testng.annotations.Test
 
 @SpringBootTest
 class ImportLanguageRepositoryTest : AbstractSpringTest() {

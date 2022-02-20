@@ -1,15 +1,17 @@
 package io.tolgee.cache
 
 import io.tolgee.fixtures.RedisRunner
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Test
 import org.redisson.spring.cache.RedissonSpringCacheManager
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ContextConfiguration
-import org.testng.annotations.AfterClass
-import org.testng.annotations.Test
 
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "spring.redis.port=56379",
@@ -29,7 +31,7 @@ class CacheWithRedisTest : AbstractCacheTest() {
     }
   }
 
-  @AfterClass(alwaysRun = true)
+  @AfterAll
   fun cleanup() {
     redisRunner.stop()
   }

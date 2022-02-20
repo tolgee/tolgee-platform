@@ -6,12 +6,8 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.testing.AuthorizedControllerTest
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc
-import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.Test
+import org.junit.jupiter.api.Test
 
-@SpringBootTest
-@AutoConfigureWebMvc
 class SlugControllerTest : AuthorizedControllerTest() {
 
   @Test

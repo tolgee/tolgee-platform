@@ -8,9 +8,9 @@ import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.xliff.Xliff12FileProcessor
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.io.File
 import javax.xml.stream.XMLEventReader
 import javax.xml.stream.XMLInputFactory
@@ -23,7 +23,7 @@ class Xliff12FileProcessorTest {
   private val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
   private lateinit var xmlStreamReader: XMLEventReader
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     importMock = mock()
     importFile = ImportFile("exmample.xliff", importMock)

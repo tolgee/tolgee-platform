@@ -6,16 +6,16 @@ import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
 import io.tolgee.testing.assertions.Assertions.assertThat
 import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.data.domain.Sort
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.util.*
 
 class CursorUtilUnitTest {
 
   lateinit var cursor: String
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     val item = KeyWithTranslationsView(
       keyId = 1,

@@ -18,12 +18,12 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,7 +32,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
   lateinit var dummyDto: OrganizationDto
   lateinit var dummyDto2: OrganizationDto
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     resetDto()
     this.userAccount = userAccountService.findOptional(username = userAccount!!.username).get()

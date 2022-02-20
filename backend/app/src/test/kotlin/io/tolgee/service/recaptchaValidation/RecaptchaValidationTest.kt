@@ -7,7 +7,10 @@ package io.tolgee.service.recaptchaValidation
 import io.tolgee.AbstractSpringTest
 import io.tolgee.service.security.ReCaptchaValidationService
 import io.tolgee.service.security.ReCaptchaValidationService.Companion
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -20,10 +23,9 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestTemplate
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.util.*
 
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.recaptcha.secretKey=dummy_key",
@@ -38,7 +40,7 @@ class RecaptchaValidationTest : AbstractSpringTest() {
   @MockBean
   lateinit var restTemplate: RestTemplate
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     Mockito.reset(restTemplate)
     whenever(

@@ -11,12 +11,12 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -28,7 +28,7 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
 
   lateinit var createForLanguagesDto: CreateProjectDTO
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     createForLanguagesDto = CreateProjectDTO(
       name = "What a project",

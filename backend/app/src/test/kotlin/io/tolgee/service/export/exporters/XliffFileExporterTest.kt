@@ -3,7 +3,7 @@ package io.tolgee.service.export.exporters
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.testng.annotations.Test
+import org.junit.jupiter.api.Test
 import org.w3c.dom.Attr
 import org.w3c.dom.Document
 import org.w3c.dom.Element

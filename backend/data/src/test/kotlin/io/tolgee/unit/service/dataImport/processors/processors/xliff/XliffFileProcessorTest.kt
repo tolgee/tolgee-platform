@@ -6,9 +6,9 @@ import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.xliff.XliffFileProcessor
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.io.File
 
 class XliffFileProcessorTest {
@@ -17,7 +17,7 @@ class XliffFileProcessorTest {
   private lateinit var importFileDto: ImportFileDto
   private lateinit var fileProcessorContext: FileProcessorContext
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     importMock = mock()
     importFile = ImportFile("exmample.xliff", importMock)

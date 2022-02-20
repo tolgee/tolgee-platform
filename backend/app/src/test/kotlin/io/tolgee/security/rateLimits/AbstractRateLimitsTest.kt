@@ -6,6 +6,7 @@ import io.tolgee.fixtures.node
 import io.tolgee.testing.AuthorizedControllerTest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.AfterEach
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
@@ -14,7 +15,6 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testng.annotations.AfterMethod
 import kotlin.system.measureTimeMillis
 
 abstract class AbstractRateLimitsTest : AuthorizedControllerTest() {
@@ -22,7 +22,7 @@ abstract class AbstractRateLimitsTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var cacheManager: CacheManager
 
-  @AfterMethod
+  @AfterEach
   fun clearCaches() {
     cacheManager.cacheNames.stream().forEach { cacheName: String ->
       @Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")

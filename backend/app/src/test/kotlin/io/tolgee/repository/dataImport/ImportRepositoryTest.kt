@@ -3,9 +3,9 @@ package io.tolgee.repository.dataImport
 import io.tolgee.AbstractSpringTest
 import io.tolgee.model.dataImport.Import
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.Test
 
 @SpringBootTest
 class ImportRepositoryTest : AbstractSpringTest() {

@@ -8,18 +8,16 @@ import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
 import org.springframework.transaction.annotation.Transactional
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import javax.persistence.EntityManager
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
+
+open class DbPopulatorTest {
   @Autowired
   lateinit var populator: DbPopulatorReal
 
@@ -30,7 +28,7 @@ class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
   lateinit var projectRepository: ProjectRepository
 
   @Autowired
-  lateinit var apiKeyService: io.tolgee.service.ApiKeyService
+  lateinit var apiKeyService: ApiKeyService
 
   @Autowired
   lateinit var entityManager: EntityManager
@@ -40,7 +38,7 @@ class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
 
   lateinit var userAccount: UserAccount
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     populator.autoPopulate()
     userAccount = userAccountRepository.findByUsername(tolgeeProperties.authentication.initialUsername)
@@ -49,13 +47,13 @@ class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
 
   @Test
   @Transactional
-  fun createsUser() {
+  open fun createsUser() {
     Assertions.assertThat(userAccount.name).isEqualTo(tolgeeProperties.authentication.initialUsername)
   }
 
   @Test
   @Transactional
-  fun createsProject() {
+  open fun createsProject() {
     entityManager.refresh(userAccount)
     val found = projectRepository.findAll().asSequence()
       .flatMap { it!!.permissions.map { it.user } }
@@ -65,7 +63,7 @@ class DbPopulatorTest : AbstractTransactionalTestNGSpringContextTests() {
 
   @Test
   @Transactional
-  fun createsApiKey() {
+  open fun createsApiKey() {
     val key = apiKeyService.getAllByUser(userAccount.id).stream().findFirst()
     Assertions.assertThat(key).isPresent
     Assertions.assertThat(key.get().key).isEqualTo("this_is_dummy_api_key")

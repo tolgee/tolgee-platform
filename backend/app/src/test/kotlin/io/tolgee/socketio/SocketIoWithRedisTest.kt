@@ -4,6 +4,9 @@ import com.corundumstudio.socketio.SocketIOServer
 import com.corundumstudio.socketio.store.RedissonStoreFactory
 import com.corundumstudio.socketio.store.StoreFactory
 import io.tolgee.fixtures.RedisRunner
+import io.tolgee.testing.ContextRecreatingTest
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
@@ -13,9 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ContextConfiguration
-import org.testng.annotations.AfterClass
-import org.testng.annotations.Test
 
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "spring.redis.port=56379",
@@ -41,7 +43,7 @@ class SocketIoWithRedisTest : AbstractSocketIoTest() {
   @Autowired
   lateinit var redissonClient: RedissonClient
 
-  @AfterClass(alwaysRun = true)
+  @AfterAll
   fun cleanup() {
     redisRunner.stop()
   }

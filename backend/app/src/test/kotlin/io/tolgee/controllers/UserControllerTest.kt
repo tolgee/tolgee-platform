@@ -4,7 +4,9 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.ContextRecreatingTest
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,8 +16,8 @@ import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import org.testng.annotations.Test
 
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.front-end-url=https://fake.frontend.url"

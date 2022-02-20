@@ -1,18 +1,14 @@
-package io.tolgee.util
+package io.tolgee.unit.util
 
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
-import org.testng.annotations.Test
+import io.tolgee.util.SlugGenerator
+import org.junit.jupiter.api.Test
 
-@SpringBootTest
-class SlugGeneratorTest : AbstractTestNGSpringContextTests() {
+class SlugGeneratorTest {
 
-  @field:Autowired
-  lateinit var slugGenerator: SlugGenerator
+  private val slugGenerator: SlugGenerator = SlugGenerator()
 
   @Test
   fun testGenerateEmpty() {

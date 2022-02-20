@@ -20,6 +20,8 @@ import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.ImportFileProcessor
 import io.tolgee.service.dataImport.processors.ProcessorFactory
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
@@ -27,8 +29,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.ApplicationContext
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.util.*
 
 class CoreImportFileProcessorUnitTest {
@@ -49,7 +49,7 @@ class CoreImportFileProcessorUnitTest {
   private lateinit var authenticationFacadeMock: AuthenticationFacade
   private lateinit var keyMetaService: KeyMetaService
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     applicationContextMock = mock()
     importMock = mock()

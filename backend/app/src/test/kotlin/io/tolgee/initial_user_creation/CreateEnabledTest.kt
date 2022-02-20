@@ -7,15 +7,17 @@ package io.tolgee.initial_user_creation
 import io.tolgee.Application
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.service.UserAccountService
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
-import org.testng.annotations.AfterClass
-import org.testng.annotations.Test
 import java.io.File
 
+@ContextRecreatingTest
 @SpringBootTest(
   classes = [Application::class],
   properties = [
@@ -24,7 +26,8 @@ import java.io.File
     "tolgee.authentication.initialUsername=johny"
   ]
 )
-class CreateEnabledTest : AbstractTestNGSpringContextTests() {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class CreateEnabledTest {
   @set:Autowired
   lateinit var tolgeeProperties: TolgeeProperties
 
@@ -46,7 +49,7 @@ class CreateEnabledTest : AbstractTestNGSpringContextTests() {
     assertThat(bCryptPasswordEncoder.matches(passwordFile.readText(), johny.password)).isTrue
   }
 
-  @AfterClass
+  @AfterAll
   fun cleanUp() {
     passwordFile.delete()
   }
