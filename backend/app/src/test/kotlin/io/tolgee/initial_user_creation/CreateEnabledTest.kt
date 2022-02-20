@@ -4,11 +4,11 @@
 
 package io.tolgee.initial_user_creation
 
+import io.tolgee.Application
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.service.UserAccountService
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
@@ -16,8 +16,8 @@ import org.testng.annotations.AfterClass
 import org.testng.annotations.Test
 import java.io.File
 
-@AutoConfigureMockMvc
 @SpringBootTest(
+  classes = [Application::class],
   properties = [
     "tolgee.file-storage.fs-data-path=./build/create-enabled-test-data/",
     "tolgee.authentication.create-initial-user=true",

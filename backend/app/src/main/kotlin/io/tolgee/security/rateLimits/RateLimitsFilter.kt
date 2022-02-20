@@ -1,13 +1,12 @@
-package io.tolgee.security
+package io.tolgee.security.rateLimits
 
 import io.tolgee.component.lockingProvider.LockingProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.security.rateLimis.RateLimit
 import io.tolgee.security.rateLimis.RateLimitLifeCyclePoint
-import io.tolgee.security.rateLimis.RateLimitsManager
 import io.tolgee.security.rateLimis.UsageEntry
-import io.tolgee.security.rateLimits.RateLimitParamsProxy
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -23,12 +22,12 @@ import javax.servlet.http.HttpServletResponse
 class RateLimitsFilter(
   private val cacheManager: CacheManager,
   private val lockingProvider: LockingProvider,
-  private val rateLimitsManager: RateLimitsManager,
   @param:Qualifier("handlerExceptionResolver")
   private val resolver: HandlerExceptionResolver,
   private val applicationContext: ApplicationContext,
   private val rateLimitsParamsProxy: RateLimitParamsProxy,
-  private val lifeCyclePoint: RateLimitLifeCyclePoint
+  private val lifeCyclePoint: RateLimitLifeCyclePoint,
+  private val rateLimits: List<RateLimit>
 ) : OncePerRequestFilter() {
 
   init {
@@ -39,7 +38,7 @@ class RateLimitsFilter(
 
   override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
     try {
-      rateLimitsManager.rateLimits.asSequence()
+      rateLimits.asSequence()
         .filter { it.lifeCyclePoint == lifeCyclePoint && it.condition(request, applicationContext) }
         .forEach { rateLimit ->
           val cache = cacheManager.getCache(Caches.RATE_LIMITS) ?: throw Exception("No such cache")

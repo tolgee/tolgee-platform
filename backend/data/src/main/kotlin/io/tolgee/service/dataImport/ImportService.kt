@@ -20,10 +20,10 @@ import io.tolgee.model.dataImport.issues.ImportFileIssueParam
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
-import io.tolgee.project.dataImport.ImportRepository
 import io.tolgee.repository.dataImport.ImportFileRepository
 import io.tolgee.repository.dataImport.ImportKeyRepository
 import io.tolgee.repository.dataImport.ImportLanguageRepository
+import io.tolgee.repository.dataImport.ImportRepository
 import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository

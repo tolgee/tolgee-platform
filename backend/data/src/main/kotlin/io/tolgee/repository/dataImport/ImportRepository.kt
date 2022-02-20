@@ -1,4 +1,4 @@
-package io.tolgee.project.dataImport
+package io.tolgee.repository.dataImport
 
 import io.tolgee.model.dataImport.Import
 import org.springframework.data.jpa.repository.JpaRepository
