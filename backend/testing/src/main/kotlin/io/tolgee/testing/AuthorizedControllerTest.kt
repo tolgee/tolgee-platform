@@ -5,16 +5,12 @@ import io.tolgee.fixtures.LoggedRequestFactory.init
 import io.tolgee.fixtures.SignedInRequestPerformer
 import io.tolgee.model.UserAccount
 import io.tolgee.security.JwtTokenProvider
+import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
-import org.testng.annotations.AfterMethod
 
-@SpringBootTest
-@AutoConfigureMockMvc
 abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestPerformer {
   private var _userAccount: UserAccount? = null
 
@@ -24,7 +20,7 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
         // populate to create the user if not created
         dbPopulator.createUserIfNotExists(tolgeeProperties.authentication.initialUsername)
         loginAsUser(tolgeeProperties.authentication.initialUsername)
-        commitTransaction()
+        // commitTransaction()
       }
       return _userAccount
     }
@@ -41,7 +37,7 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
   @Autowired
   lateinit var jwtTokenProvider: JwtTokenProvider
 
-  @AfterMethod
+  @AfterEach
   fun afterEach() {
     logout()
   }

@@ -6,12 +6,12 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.testing.assertions.Assertions
 import io.tolgee.testing.assertions.UserApiAppAction
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import org.testng.annotations.Test
 
 @AutoConfigureMockMvc
 class ApiKeyAuthenticationTest : AbstractUserAppApiTest() {

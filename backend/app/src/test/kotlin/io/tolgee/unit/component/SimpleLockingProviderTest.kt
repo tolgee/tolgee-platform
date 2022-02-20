@@ -7,7 +7,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import org.testng.annotations.Test
+import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 import kotlin.system.measureTimeMillis
 

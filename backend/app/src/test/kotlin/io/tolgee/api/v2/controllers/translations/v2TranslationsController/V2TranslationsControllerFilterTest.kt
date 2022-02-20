@@ -9,10 +9,10 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.math.BigDecimal
 
 @SpringBootTest
@@ -21,7 +21,7 @@ class V2TranslationsControllerFilterTest : ProjectAuthControllerTest("/v2/projec
 
   lateinit var testData: TranslationsTestData
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
     this.projectSupplier = { testData.project }

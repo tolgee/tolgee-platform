@@ -6,9 +6,8 @@ package io.tolgee.component.fileStorage
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 
-abstract class AbstractFileStorageServiceTest : AbstractTestNGSpringContextTests() {
+abstract class AbstractFileStorageServiceTest {
 
   @set:Autowired
   lateinit var fileStorage: FileStorage

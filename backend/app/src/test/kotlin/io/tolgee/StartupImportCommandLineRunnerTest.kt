@@ -7,16 +7,14 @@ package io.tolgee
 import io.tolgee.configuration.tolgee.ImportProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.core.io.Resource
-import org.testng.annotations.BeforeClass
-import org.testng.annotations.Test
 
-@SpringBootTest
 @Suppress("LateinitVarOverridesLateinitVar")
 class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
 
@@ -30,7 +28,7 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
   @Autowired
   lateinit var startupImportCommandLineRunner: StartupImportCommandLineRunner
 
-  @BeforeClass
+  @BeforeAll
   fun setup() {
     whenever(tolgeeProperties.import).thenReturn(
       ImportProperties().apply {

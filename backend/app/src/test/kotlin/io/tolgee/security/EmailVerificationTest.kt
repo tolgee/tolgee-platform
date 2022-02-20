@@ -7,7 +7,10 @@ import io.mockk.verify
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.testing.AbstractControllerTest
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -22,9 +25,8 @@ import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.authentication.needs-email-verification=true",
@@ -37,12 +39,12 @@ class EmailVerificationTest : AbstractControllerTest() {
   @set:Autowired
   lateinit var mailSender: MailSender
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     every { mailSender.send(any()) } returns Unit
   }
 
-  @BeforeMethod
+  @BeforeEach
   fun setupConstructor() {
     mockkConstructor(SimpleMailMessage::class)
   }
@@ -162,6 +164,7 @@ class EmailVerificationTest : AbstractControllerTest() {
     ]
   )
   @AutoConfigureMockMvc
+  @ContextRecreatingTest
   class EmailVerificationNoFrontendUrlTest : AbstractControllerTest() {
 
     val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", "testtest", null)

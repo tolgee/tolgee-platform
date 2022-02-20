@@ -3,10 +3,10 @@ package io.tolgee.controllers
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.enums.ApiScope
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import org.testng.annotations.Test
 
 @AutoConfigureMockMvc
 class UserAppApiControllerTest : AbstractUserAppApiTest() {

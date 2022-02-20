@@ -8,14 +8,17 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import io.findify.s3mock.S3Mock
 import io.tolgee.component.fileStorage.FileStorageS3Test.Companion.BUCKET_NAME
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.Assertions.assertThatExceptionOfType
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.AfterClass
-import org.testng.annotations.BeforeClass
-import org.testng.annotations.Test
 
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.file-storage.s3.enabled=true",
@@ -26,6 +29,7 @@ import org.testng.annotations.Test
     "tolgee.file-storage.s3.bucket-name=$BUCKET_NAME",
   ]
 )
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class FileStorageS3Test : AbstractFileStorageServiceTest() {
   companion object {
     const val BUCKET_NAME = "testbucket"
@@ -36,14 +40,14 @@ class FileStorageS3Test : AbstractFileStorageServiceTest() {
 
   lateinit var s3Mock: S3Mock
 
-  @BeforeClass
+  @BeforeAll
   fun setup() {
     s3Mock = S3Mock.Builder().withPort(29090).withInMemoryBackend().build()
     s3Mock.start()
     s3.createBucket(BUCKET_NAME)
   }
 
-  @AfterClass
+  @AfterAll
   fun tearDown() {
     s3Mock.stop()
   }

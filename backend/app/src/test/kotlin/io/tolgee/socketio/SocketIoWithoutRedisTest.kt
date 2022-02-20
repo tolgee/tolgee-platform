@@ -1,14 +1,18 @@
 package io.tolgee.socketio
 
+import io.tolgee.testing.ContextRecreatingTest
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.Test
 
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.socket-io.use-redis=false",
     "tolgee.socket-io.enabled=true"
   ]
 )
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SocketIoWithoutRedisTest : AbstractSocketIoTest() {
 
   @Test

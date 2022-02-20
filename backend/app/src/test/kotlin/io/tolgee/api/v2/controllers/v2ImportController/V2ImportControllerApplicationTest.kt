@@ -4,7 +4,7 @@ import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.testng.annotations.Test
+import org.junit.jupiter.api.Test
 
 class V2ImportControllerApplicationTest : AuthorizedControllerTest() {
   @Test

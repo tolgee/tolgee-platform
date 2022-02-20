@@ -9,15 +9,19 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testng.annotations.Test
 import java.io.File
 import java.util.*
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.authentication.secured-image-retrieval=true",

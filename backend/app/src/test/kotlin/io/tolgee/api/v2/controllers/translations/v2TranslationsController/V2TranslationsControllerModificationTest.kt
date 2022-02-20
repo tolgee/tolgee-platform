@@ -13,10 +13,10 @@ import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -24,7 +24,7 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
 
   lateinit var testData: TranslationsTestData
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
     this.projectSupplier = { testData.project }

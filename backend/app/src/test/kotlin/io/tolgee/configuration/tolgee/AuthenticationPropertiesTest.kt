@@ -1,20 +1,21 @@
 package io.tolgee.configuration.tolgee
 
 import io.tolgee.service.UserAccountService
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
-import org.testng.annotations.Test
 
 @AutoConfigureMockMvc
+@ContextRecreatingTest
 @SpringBootTest(
   properties = [
     "tolgee.authentication.jwtSecret=test_jwt_secret"
   ]
 )
-class AuthenticationPropertiesTest : AbstractTestNGSpringContextTests() {
+class AuthenticationPropertiesTest {
   @set:Autowired
   lateinit var tolgeeProperties: TolgeeProperties
 

@@ -6,23 +6,11 @@ import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
-import org.testng.annotations.Test
 
-// @EntityScan("io.tolgee.model")
-// @EnableAutoConfiguration(exclude = [RedissonAutoConfiguration::class])
-// @SpringBootTest(
-//  classes = [
-//    ImportFileIssueRepository::class,
-//    PostgresAutoStartConfiguration::class,
-//    PostgresRunnerFactory::class,
-//    PostgresAutostartProperties::class,
-//    PostgresDockerRunner::class,
-//    TestDataService::class
-//  ]
-// )
 @SpringBootTest(classes = [Application::class])
 class ImportFileIssueRepositoryTest : AbstractSpringTest() {
 

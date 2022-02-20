@@ -5,9 +5,9 @@
 package io.tolgee.component.fileStorage
 
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.io.File
 
 @SpringBootTest
@@ -15,7 +15,7 @@ class FileStorageFsTest : AbstractFileStorageServiceTest() {
 
   lateinit var file: File
 
-  @BeforeMethod
+  @BeforeEach
   fun beforeMethod() {
     file = File(tolgeeProperties.fileStorage.fsDataPath + testFilePath)
     file.parentFile.mkdirs()

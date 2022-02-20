@@ -106,10 +106,11 @@ dependencies {
      */
     testImplementation("org.assertj:assertj-core:${findProperty("assertJVerison")}")
     testImplementation("org.springframework.security:spring-security-test")
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
     runtime "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
             "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
-    testImplementation group: 'org.testng', name: 'testng', version: findProperty("testNgVersion")
     implementation group: 'com.ninja-squad', name: 'springmockk', version: findProperty("springMockkVersion")
     implementation "net.javacrumbs.json-unit:json-unit-assertj:${findProperty("jsonUnitAssertJVersion")}"
     testImplementation("org.mockito.kotlin:mockito-kotlin:${findProperty("mockitoVersion")}")
@@ -120,9 +121,6 @@ dependencies {
      * MISC
      */
     implementation "io.sentry:sentry-spring-boot-starter:${findProperty("sentryVersion")}"
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-    }
     implementation "commons-codec:commons-codec:${findProperty("commonsCodecVersion")}"
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: findProperty("amazonAwsSdkVersion")
     implementation group: 'com.ibm.icu', name: 'icu4j', version: findProperty("icu4jVersion")
@@ -172,8 +170,22 @@ dependencies {
 }
 
 test {
-    useTestNG()
+    useJUnitPlatform()
     maxHeapSize = "2048m"
+    //maxParallelForks = (int) (Runtime.runtime.availableProcessors() / 2 + 1)
+}
+
+task runContextRecreatingTests(type: Test, group: 'verification') {
+    useJUnitPlatform {
+        includeTags "contextRecreating"
+    }
+}
+
+task runStandardTests(type: Test, group: 'verification') {
+    useJUnitPlatform {
+        excludeTags "contextRecreating"
+        //maxParallelForks = (int) (Runtime.runtime.availableProcessors() / 2 + 1)
+    }
 }
 
 springBoot {

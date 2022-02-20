@@ -33,8 +33,15 @@ import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.testing.AbstractTransactionalTest
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.ApplicationContext
+import org.springframework.transaction.annotation.Transactional
 
+@Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SpringBootTest
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
   @Autowired
   protected lateinit var dbPopulator: DbPopulatorReal
@@ -132,6 +139,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @set:Autowired
   lateinit var emailVerificationRepository: EmailVerificationRepository
+
+  @set:Autowired
+  lateinit var applicationContext: ApplicationContext
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

@@ -11,24 +11,26 @@ import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
-import org.testng.annotations.AfterClass
-import org.testng.annotations.BeforeClass
-import org.testng.annotations.Test
 import java.io.File
 import java.util.stream.Collectors
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class V2ImageUploadControllerTest : AbstractV2ImageUploadControllerTest() {
 
   lateinit var initialImageUploadUrl: String
 
-  @BeforeClass
+  @BeforeAll
   fun before() {
     initialImageUploadUrl = tolgeeProperties.uploadedImagesUrl
   }
 
-  @AfterClass
+  @AfterAll
   fun after() {
     tolgeeProperties.uploadedImagesUrl = initialImageUploadUrl
   }

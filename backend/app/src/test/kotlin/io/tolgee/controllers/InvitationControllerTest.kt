@@ -6,13 +6,13 @@ import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Permission
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 
 class InvitationControllerTest : AuthorizedControllerTest() {
 
-  @BeforeMethod
+  @BeforeEach
   fun login() {
     loginAsUser(initialUsername)
   }

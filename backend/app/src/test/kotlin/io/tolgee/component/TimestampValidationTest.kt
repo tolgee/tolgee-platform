@@ -5,16 +5,17 @@
 package io.tolgee.component
 
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
-import org.testng.Assert.expectThrows
-import org.testng.annotations.Test
 import java.util.*
 
 @SpringBootTest(properties = ["tolgee.authentication.jwtSecret=this_is_dummy_jwt_secret"])
-class TimestampValidationTest : AbstractTestNGSpringContextTests() {
+@ContextRecreatingTest
+class TimestampValidationTest {
 
   @set:Autowired
   lateinit var timestampValidation: TimestampValidation
@@ -22,9 +23,9 @@ class TimestampValidationTest : AbstractTestNGSpringContextTests() {
   @Test
   fun testCheckTimeStamp() {
     val encrypted = timestampValidation.encryptTimeStamp(Date().time - 10000)
-    expectThrows(ValidationException::class.java) {
+    assertThatThrownBy {
       timestampValidation.checkTimeStamp(encrypted, 9500)
-    }
+    }.isInstanceOf(ValidationException::class.java)
     timestampValidation.checkTimeStamp(encrypted, 10500)
   }
 

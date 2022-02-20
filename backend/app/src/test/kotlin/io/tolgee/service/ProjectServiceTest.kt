@@ -12,13 +12,12 @@ import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.transaction.annotation.Transactional
-import org.testng.annotations.Test
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+
 class ProjectServiceTest : AbstractSpringTest() {
 
   @Test

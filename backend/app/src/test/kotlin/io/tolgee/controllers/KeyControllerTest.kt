@@ -11,13 +11,13 @@ import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.model.Project
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -28,7 +28,7 @@ class KeyControllerTest : AuthorizedControllerTest() {
 
   private lateinit var project: Project
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     this.project = dbPopulator.createBase(generateUniqueString())
   }

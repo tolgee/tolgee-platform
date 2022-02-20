@@ -87,7 +87,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+//        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     kapt "org.springframework.boot:spring-boot-configuration-processor"
     implementation "org.springframework.boot:spring-boot-configuration-processor"
@@ -96,7 +96,6 @@ dependencies {
      * Testing
      */
     implementation("org.assertj:assertj-core:${findProperty("assertJVerison")}")
-    implementation group: 'org.testng', name: 'testng', version: findProperty("testNgVersion")
     implementation group: 'com.ninja-squad', name: 'springmockk', version: findProperty("springMockkVersion")
     testImplementation("org.mockito.kotlin:mockito-kotlin:${findProperty("mockitoVersion")}")
     implementation "net.javacrumbs.json-unit:json-unit-assertj:${findProperty("jsonUnitAssertJVersion")}"
@@ -130,7 +129,7 @@ dependencies {
 }
 
 test {
-    useTestNG()
+    useJUnitPlatform()
     maxHeapSize = "2048m"
 }
 

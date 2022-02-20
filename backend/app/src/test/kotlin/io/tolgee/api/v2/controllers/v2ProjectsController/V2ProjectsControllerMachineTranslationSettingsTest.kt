@@ -11,10 +11,10 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -22,7 +22,7 @@ class V2ProjectsControllerMachineTranslationSettingsTest : ProjectAuthController
 
   lateinit var testData: MtSettingsTestData
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     mockProperties()
     initTestData()

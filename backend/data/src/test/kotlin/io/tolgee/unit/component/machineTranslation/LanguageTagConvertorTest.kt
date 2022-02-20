@@ -2,7 +2,7 @@ package io.tolgee.unit.component.machineTranslation
 
 import io.tolgee.component.machineTranslation.LanguageTagConvertor
 import org.assertj.core.api.Assertions.assertThat
-import org.testng.annotations.Test
+import org.junit.jupiter.api.Test
 
 class LanguageTagConvertorTest {
 

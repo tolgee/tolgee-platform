@@ -12,10 +12,10 @@ import io.tolgee.model.enums.ApiScope
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.math.BigDecimal
 import kotlin.system.measureTimeMillis
 
@@ -25,7 +25,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
 
   lateinit var testData: TranslationsTestData
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     testData = TranslationsTestData()
     this.projectSupplier = { testData.project }
@@ -120,7 +120,7 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
 
     performProjectAuthGet("/translations?sort=translations.de.text&size=4&sort=keyName&cursor=$cursor")
       .andPrettyPrint.andIsOk.andAssertThatJson {
-        commitTransaction()
+        // commitTransaction()
         node("_embedded.keys[0].keyName").isEqualTo("c")
         node("_embedded.keys[3].keyName").isEqualTo("A key")
       }

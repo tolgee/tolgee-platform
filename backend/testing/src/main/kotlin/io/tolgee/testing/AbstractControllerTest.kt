@@ -10,7 +10,7 @@ import io.tolgee.fixtures.RequestPerformer
 import io.tolgee.security.payload.LoginRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import java.io.UnsupportedEncodingException
 
-@SpringBootTest
+@AutoConfigureMockMvc
 abstract class AbstractControllerTest :
   AbstractSpringTest(), RequestPerformer {
 

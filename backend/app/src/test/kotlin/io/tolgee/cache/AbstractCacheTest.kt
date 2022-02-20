@@ -8,15 +8,17 @@ import io.tolgee.repository.PermissionRepository
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
 import io.tolgee.testing.assertions.Assertions
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.mockito.Mockito
 import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.cache.CacheManager
-import org.testng.annotations.Test
 import java.util.*
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class AbstractCacheTest : AbstractSpringTest() {
   @Autowired
   lateinit var cacheManager: CacheManager
@@ -25,6 +27,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
   @MockBean
   lateinit var userAccountRepository: UserAccountRepository
 
+  @Suppress("LateinitVarOverridesLateinitVar")
   @Autowired
   @MockBean
   override lateinit var projectRepository: ProjectRepository

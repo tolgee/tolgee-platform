@@ -9,19 +9,17 @@ import io.tolgee.component.CurrentDateProvider
 import io.tolgee.exceptions.FileStoreException
 import io.tolgee.service.ImageUploadService.Companion.UPLOADED_IMAGES_STORAGE_FOLDER_NAME
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.core.io.Resource
-import org.testng.annotations.Test
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-@SpringBootTest
 class ImageUploadServiceTest : AbstractSpringTest() {
   @Value("classpath:screenshot.png")
   lateinit var screenshotFile: Resource
@@ -34,7 +32,7 @@ class ImageUploadServiceTest : AbstractSpringTest() {
   fun testCleanOldImages() {
     val user = dbPopulator.createUserIfNotExists("user")
     val storedOlder = imageUploadService.store(screenshotFile, user)
-    Thread.sleep(5000)
+    Thread.sleep(500)
     val storedNewer = imageUploadService.store(screenshotFile, user)
 
     whenever(dateProvider.getDate())
@@ -42,7 +40,7 @@ class ImageUploadServiceTest : AbstractSpringTest() {
         Date.from(
           Instant.now()
             .plus(2, ChronoUnit.HOURS)
-            .minus(2, ChronoUnit.SECONDS)
+            .minus(250, ChronoUnit.MILLIS)
         )
       )
     imageUploadService.cleanOldImages()

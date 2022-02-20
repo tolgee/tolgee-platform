@@ -9,15 +9,11 @@ import io.tolgee.model.Project
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.TestInfo
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
-import org.testng.annotations.BeforeMethod
-import java.lang.reflect.Method
 
-@SpringBootTest
-@AutoConfigureMockMvc
 abstract class ProjectAuthControllerTest(
   val projectUrlPrefix: String = "/api/project/"
 ) : AuthorizedControllerTest(), AuthRequestPerformer {
@@ -51,12 +47,13 @@ abstract class ProjectAuthControllerTest(
       _projectAuthRequestPerformer = value
     }
 
-  @BeforeMethod
-  fun beforeEach(method: Method) {
+  @BeforeEach
+  fun beforeEach(testInfo: TestInfo) {
+    val method = testInfo.testMethod.orElseGet(null) ?: throw IllegalStateException("No method resolved...")
     with(method.getAnnotation(ProjectApiKeyAuthTestMethod::class.java)) {
       if (this != null) {
         this@ProjectAuthControllerTest.projectAuthRequestPerformer =
-          applicationContext!!.getBean(
+          applicationContext.getBean(
             ProjectApiKeyAuthRequestPerformer::class.java,
             { userAccount },
             this.scopes,
@@ -68,7 +65,7 @@ abstract class ProjectAuthControllerTest(
     with(method.getAnnotation(ProjectJWTAuthTestMethod::class.java)) {
       if (this != null) {
         this@ProjectAuthControllerTest.projectAuthRequestPerformer =
-          applicationContext!!.getBean(ProjectJwtAuthRequestPerformer::class.java, { userAccount }, projectUrlPrefix)
+          applicationContext.getBean(ProjectJwtAuthRequestPerformer::class.java, { userAccount }, projectUrlPrefix)
       }
     }
   }

@@ -15,10 +15,10 @@ import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 import java.math.BigDecimal
 
 @SpringBootTest
@@ -27,7 +27,7 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
 
   lateinit var testData: TranslationCommentsTestData
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     testData = TranslationCommentsTestData()
     testDataService.saveTestData(testData.root)

@@ -4,10 +4,10 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
-import org.testng.annotations.Test
 
 @SpringBootTest
 class UserAccountRepositoryTest : AbstractSpringTest() {

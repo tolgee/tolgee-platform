@@ -11,19 +11,15 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.key.Key
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc
-import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
-@SpringBootTest
-@AutoConfigureWebMvc
 class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: TagsTestData
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     testData = TagsTestData()
     projectSupplier = { testData.projectBuilder.self }

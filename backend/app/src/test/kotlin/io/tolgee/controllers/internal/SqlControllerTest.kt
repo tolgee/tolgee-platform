@@ -3,15 +3,17 @@ package io.tolgee.controllers.internal
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.testing.AbstractControllerTest
+import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testng.annotations.Test
 
 @AutoConfigureMockMvc
+@ContextRecreatingTest
 @SpringBootTest(properties = ["tolgee.internal.controllerEnabled=true"])
 class SqlControllerTest : AbstractControllerTest() {
 

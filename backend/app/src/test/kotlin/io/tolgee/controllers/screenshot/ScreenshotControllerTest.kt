@@ -8,16 +8,19 @@ import io.tolgee.dtos.request.screenshot.GetScreenshotsByKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.dtos.response.ScreenshotDTO
 import io.tolgee.fixtures.LoggedRequestFactory.addToken
+import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.testng.annotations.Test
 import java.io.File
 import java.util.stream.Collectors
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
@@ -104,7 +107,7 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
     val idsToDelete = list.stream().limit(10).map { it.id.toString() }.collect(Collectors.joining(","))
 
-    performAuthDelete("/api/project/screenshots/$idsToDelete", null).andExpect(status().isOk)
+    performAuthDelete("/api/project/screenshots/$idsToDelete", null).andIsOk
 
     val rest = screenshotService.findAll(key)
     assertThat(rest).isEqualTo(list.stream().skip(10).collect(Collectors.toList()))

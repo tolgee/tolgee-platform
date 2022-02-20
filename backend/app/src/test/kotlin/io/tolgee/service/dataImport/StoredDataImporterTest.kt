@@ -5,16 +5,16 @@ import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
-import org.testng.annotations.BeforeMethod
-import org.testng.annotations.Test
 
 @SpringBootTest
 class StoredDataImporterTest : AbstractSpringTest() {
   lateinit var storedDataImporter: StoredDataImporter
   lateinit var importTestData: ImportTestData
 
-  @BeforeMethod
+  @BeforeEach
   fun setup() {
     importTestData = ImportTestData()
     storedDataImporter = StoredDataImporter(applicationContext!!, importTestData.import)
