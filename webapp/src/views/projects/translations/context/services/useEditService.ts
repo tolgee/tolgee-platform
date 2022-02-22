@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { container } from 'tsyringe';
 import { useTranslate } from '@tolgee/react';
 
@@ -37,6 +37,20 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
   const putTag = usePutTag();
   const deleteTag = useDeleteTag();
   const t = useTranslate();
+
+  useEffect(() => {
+    // field is also focused, which breaks the scrolling
+    // so we need to make it async
+    setTimeout(() => {
+      if (position) {
+        viewRefs.scrollToElement({
+          keyId: position.keyId,
+          language: position.language,
+          options: { block: 'center', behavior: 'smooth' },
+        });
+      }
+    });
+  }, [position?.keyId, position?.language]);
 
   const updatePosition = (newPos: Partial<Edit>) =>
     setPosition((pos) => (pos ? { ...pos, ...newPos } : pos));
@@ -180,9 +194,8 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
         );
 
         if (result) {
-          return Object.entries(result.translations).forEach(
-            ([lang, translation]) =>
-              translations.changeTranslation(keyId, lang, translation)
+          Object.entries(result.translations).forEach(([lang, translation]) =>
+            translations.changeTranslation(keyId, lang, translation)
           );
         }
       } else {
