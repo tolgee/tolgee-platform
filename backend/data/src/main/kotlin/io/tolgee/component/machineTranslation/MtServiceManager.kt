@@ -100,8 +100,8 @@ class MtServiceManager(
     params: TranslationParams
   ): TranslateResult {
     return TranslateResult(
-      "$params.text translated with ${params.serviceType.name} " +
-        "from $params.sourceLanguageTag to $params.targetLanguageTag",
+      "${params.text} translated with ${params.serviceType.name} " +
+        "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}",
       calculatePrice(params.text, params.serviceType)
     )
   }
