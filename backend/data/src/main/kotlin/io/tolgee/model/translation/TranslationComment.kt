@@ -18,7 +18,7 @@ class TranslationComment(
   @Column(columnDefinition = "text")
   var text: String = "",
 
-  var state: TranslationCommentState = TranslationCommentState.RESOLUTION_NOT_NEEDED,
+  var state: TranslationCommentState = TranslationCommentState.NEEDS_RESOLUTION,
 
   @ManyToOne
   var translation: Translation

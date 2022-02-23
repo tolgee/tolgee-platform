@@ -10,6 +10,12 @@ class TranslationViewModelAssembler : RepresentationModelAssemblerSupport<Transl
   V2TranslationsController::class.java, TranslationViewModel::class.java
 ) {
   override fun toModel(view: TranslationView): TranslationViewModel {
-    return TranslationViewModel(id = view.id, text = view.text, state = view.state, commentCount = view.commentCount)
+    return TranslationViewModel(
+      id = view.id,
+      text = view.text,
+      state = view.state,
+      commentCount = view.commentCount,
+      unresolvedCommentCount = view.unresolvedCommentCount
+    )
   }
 }

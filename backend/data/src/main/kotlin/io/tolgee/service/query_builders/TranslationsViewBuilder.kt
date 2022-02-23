@@ -4,11 +4,13 @@ import io.tolgee.dtos.request.translation.TranslationFilterByState
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.CursorValue
 import io.tolgee.model.*
+import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Tag_
+import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
 import io.tolgee.model.views.TranslationView
@@ -145,6 +147,23 @@ class TranslationsViewBuilder(
       selection[
         KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::commentCount.name
       ] = commentsExpression
+
+      val unresolvedCommentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
+      unresolvedCommentsJoin.on(
+        cb.and(
+          cb.equal(
+            unresolvedCommentsJoin.get(TranslationComment_.translation),
+            translation
+          ),
+          cb.equal(unresolvedCommentsJoin.get(TranslationComment_.state), TranslationCommentState.NEEDS_RESOLUTION)
+        )
+      )
+      val unresolvedCommentsExpression = cb.countDistinct(unresolvedCommentsJoin)
+      selection[
+        KeyWithTranslationsView::translations.name + "." +
+          language.tag + "." +
+          TranslationView::unresolvedCommentCount.name
+      ] = unresolvedCommentsExpression
 
       fullTextFields.add(translationTextField)
       translationsTextFields.add(translationTextField)
@@ -346,7 +365,7 @@ class TranslationsViewBuilder(
     ): MutableList<Long> {
       val em = applicationContext.getBean(EntityManager::class.java)
 
-      var translationsViewBuilder = TranslationsViewBuilder(
+      val translationsViewBuilder = TranslationsViewBuilder(
         cb = em.criteriaBuilder,
         projectId = projectId,
         languages = languages,
