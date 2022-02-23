@@ -240,4 +240,15 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
     }
     assertThat(time).isLessThan(1000)
   }
+
+  @ProjectApiKeyAuthTestMethod(scopes = [ApiScope.TRANSLATIONS_VIEW])
+  @Test
+  fun `returns unresolved comment count`() {
+    testData.addCommentStatesData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations?search=commented_key").andAssertThatJson {
+      node("""_embedded.keys[0].translations.de.unresolvedCommentCount""").isEqualTo(2)
+    }
+  }
 }

@@ -43,7 +43,7 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
       node("_embedded.translationComments[0]") {
         node("id").isValidId
         node("text").isEqualTo("First comment")
-        node("state").isEqualTo("RESOLUTION_NOT_NEEDED")
+        node("state").isEqualTo("NEEDS_RESOLUTION")
         node("author.username").isEqualTo("franta")
         node("createdAt").isNumber.isGreaterThan(BigDecimal(1624985181827))
         node("updatedAt").isNumber.isGreaterThan(BigDecimal(1624985181827))
@@ -58,7 +58,7 @@ class TranslationCommentControllerTest : ProjectAuthControllerTest("/v2/projects
       .andAssertThatJson {
         node("id").isValidId
         node("text").isEqualTo("First comment")
-        node("state").isEqualTo("RESOLUTION_NOT_NEEDED")
+        node("state").isEqualTo("NEEDS_RESOLUTION")
         node("author.username").isEqualTo("franta")
         node("createdAt").isNumber.isGreaterThan(BigDecimal(1624985181827))
         node("updatedAt").isNumber.isGreaterThan(BigDecimal(1624985181827))

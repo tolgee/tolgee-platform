@@ -6,5 +6,6 @@ data class TranslationView(
   val id: Long,
   val text: String?,
   val state: TranslationState,
-  val commentCount: Long
+  val commentCount: Long,
+  val unresolvedCommentCount: Long
 )

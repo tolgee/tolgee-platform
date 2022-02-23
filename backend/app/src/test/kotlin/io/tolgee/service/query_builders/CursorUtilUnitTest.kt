@@ -26,7 +26,8 @@ class CursorUtilUnitTest {
           1,
           "Super key translated \uD83C\uDF8C",
           TranslationState.TRANSLATED,
-          0
+          0,
+          1
         )
       )
     )

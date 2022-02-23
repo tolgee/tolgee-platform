@@ -18,6 +18,8 @@ open class TranslationViewModel(
   val state: TranslationState,
 
   @Schema(description = "Count of translation comments")
-  val commentCount: Long
+  val commentCount: Long,
 
+  @Schema(description = "Count of unresolved translation comments")
+  val unresolvedCommentCount: Long
 ) : RepresentationModel<TranslationViewModel>()

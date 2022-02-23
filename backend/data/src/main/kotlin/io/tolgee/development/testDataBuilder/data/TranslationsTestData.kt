@@ -6,6 +6,7 @@ import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.TranslationCommentState
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import io.tolgee.model.key.Tag
@@ -361,6 +362,36 @@ class TranslationsTestData {
         addTranslation {
           language = englishLanguage
           text = "<p>Sweat jesus, this is HTML!</p>"
+        }
+      }
+    }
+  }
+
+  fun addCommentStatesData() {
+    projectBuilder.run {
+      addKey {
+        name = "commented_key"
+      }.build {
+        addTranslation {
+          language = germanLanguage
+          text = "Nice"
+        }.build {
+          addComment {
+            text = "aaaa"
+            state = TranslationCommentState.RESOLVED
+          }
+          addComment {
+            text = "aaaa"
+            state = TranslationCommentState.RESOLVED
+          }
+          addComment {
+            text = "aaaa"
+            state = TranslationCommentState.NEEDS_RESOLUTION
+          }
+          addComment {
+            text = "aaaa"
+            state = TranslationCommentState.NEEDS_RESOLUTION
+          }
         }
       }
     }
