@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/tolgee/server/compare/v2.3.3...v2.4.0) (2022-02-23)
+
+
+### Features
+
+* Add number of unresolved tags to translations endpoint ([7d99456](https://github.com/tolgee/server/commit/7d99456fb6080f44aa4fcaa25f95481141c3cffd))
+
 ## [2.3.3](https://github.com/tolgee/server/compare/v2.3.2...v2.3.3) (2022-02-12)
 
 
