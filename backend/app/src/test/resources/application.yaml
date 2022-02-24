@@ -34,8 +34,6 @@ tolgee:
     native-enabled: true
     registrationsAllowed: true
     create-initial-user: false
-  internal:
-    populate: false
   socket-io:
     port: 19090
     enabled: false

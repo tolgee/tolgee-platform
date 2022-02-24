@@ -8,6 +8,8 @@ declare namespace DataCy {
         "comment" |
         "comment-menu" |
         "comment-menu-delete" |
+        "comment-menu-needs-resolution" |
+        "comment-resolve" |
         "comment-text" |
         "create-project-language-add-button" |
         "dashboard-projects-list-item" |

@@ -9,14 +9,17 @@ import { useCellStyles } from './styles';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   badge: {
     fontSize: 10,
     height: 'unset',
     padding: '3px 3px',
     display: 'flex',
   },
-});
+  badgeDot: {
+    background: theme.palette.grey[800],
+  },
+}));
 
 type ControlsProps = {
   state?: StateType;
@@ -25,6 +28,7 @@ type ControlsProps = {
   onStateChange?: (state: StateType) => void;
   onComments?: () => void;
   commentsCount: number | undefined;
+  unresolvedCommentCount: number | undefined;
   // render last focusable button
   lastFocusable?: boolean;
 };
@@ -36,6 +40,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   onStateChange,
   onComments,
   commentsCount,
+  unresolvedCommentCount,
   lastFocusable,
 }) => {
   const classes = useStyles();
@@ -45,6 +50,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const displayEdit = editEnabled && onEdit;
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || lastFocusable || commentsPresent;
+  const onlyResolved = commentsPresent && !unresolvedCommentCount;
 
   return (
     <>
@@ -72,13 +78,19 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
           className={clsx({ [cellClasses.showOnHover]: !commentsPresent })}
           tooltip={<T>translation_cell_comments</T>}
         >
-          <Badge
-            badgeContent={commentsCount}
-            color="primary"
-            classes={{ badge: classes.badge }}
-          >
-            <Comment fontSize="small" />
-          </Badge>
+          {onlyResolved ? (
+            <Badge variant="dot" classes={{ badge: classes.badgeDot }}>
+              <Comment fontSize="small" />
+            </Badge>
+          ) : (
+            <Badge
+              badgeContent={unresolvedCommentCount}
+              color="primary"
+              classes={{ badge: classes.badge }}
+            >
+              <Comment fontSize="small" />
+            </Badge>
+          )}
         </ControlsButton>
       )}
     </>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQueryClient } from 'react-query';
 import { container } from 'tsyringe';
 import { T } from '@tolgee/react';
@@ -24,6 +24,8 @@ import { Comment } from './Comment';
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
+type PagedModelTranslationCommentModel =
+  components['schemas']['PagedModelTranslationCommentModel'];
 
 const messaging = container.resolve(MessageService);
 
@@ -112,7 +114,7 @@ export const Comments: React.FC<Props> = ({
     projectId: project.id,
     translationId: translation?.id as number,
   };
-  const query = { sort: ['updatedAt,desc', 'id,desc'], size: 30, page: 0 };
+  const query = { sort: ['createdAt,desc', 'id,desc'], size: 30, page: 0 };
 
   const comments = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/translations/{translationId}/comments',
@@ -150,20 +152,33 @@ export const Comments: React.FC<Props> = ({
     method: 'delete',
   });
 
-  useEffect(() => {
-    if (comments.isSuccess) {
-      const commentCount = comments.data?.pages?.[0]?.page?.totalElements;
-      // update total comments count in translations list
-      dispatch({
-        type: 'UPDATE_TRANSLATION',
-        payload: {
-          keyId,
-          lang: language.tag,
-          data: { commentCount },
-        },
+  const resolveComment = useApiMutation({
+    url: '/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}/set-state/{state}',
+    method: 'put',
+  });
+
+  const keyData = useApiMutation({
+    url: '/v2/projects/{projectId}/translations',
+    method: 'get',
+  });
+
+  const refreshKeyData = (keyId: number) => {
+    keyData
+      .mutateAsync({
+        path: { projectId: project.id },
+        query: { filterKeyId: [keyId], languages: [language.tag] },
+      })
+      .then((data) => {
+        const translationData =
+          data._embedded?.keys?.[0].translations[language.tag];
+        if (translationData) {
+          dispatch({
+            type: 'UPDATE_TRANSLATION',
+            payload: { keyId, lang: language.tag, data: translationData },
+          });
+        }
       });
-    }
-  }, [comments.data?.pages?.[0]]);
+  };
 
   const commentsList = comments.data?.pages
     ?.flatMap((p) => p._embedded?.translationComments)
@@ -192,56 +207,105 @@ export const Comments: React.FC<Props> = ({
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
     });
-    addComment.mutate(
-      {
-        path: { projectId: project.id },
-        content: {
-          'application/json': {
-            keyId,
-            languageId: language.id,
-            text: value,
-            state: 'RESOLUTION_NOT_NEEDED',
+    addComment
+      .mutateAsync(
+        {
+          path: { projectId: project.id },
+          content: {
+            'application/json': {
+              keyId,
+              languageId: language.id,
+              text: value,
+              state: 'NEEDS_RESOLUTION',
+            },
           },
         },
-      },
-      {
-        onSuccess(data) {
-          setValue('');
-          // keep just first page and refetch it
-          queryClient.setQueriesData(
-            '/v2/projects/{projectId}/translations/{translationId}/comments',
-            (data: any) => ({
-              pages: data?.pages?.slice(0, 1),
-              pageParams: data?.pageParams?.slice(0, 1),
-            })
-          );
-          comments.refetch();
-          dispatch({
-            type: 'UPDATE_TRANSLATION',
-            payload: {
-              keyId,
-              lang: language.tag,
-              data: data.translation,
-            },
-          });
-        },
-        onError(e) {
-          const parsed = parseErrorResponse(e);
-          parsed.forEach((error) => messaging.error(<T>{error}</T>));
-        },
-      }
-    );
+        {
+          onSuccess() {
+            setValue('');
+            // keep just first page and refetch it
+            queryClient.setQueriesData(
+              '/v2/projects/{projectId}/translations/{translationId}/comments',
+              (data: any) => ({
+                pages: data?.pages?.slice(0, 1),
+                pageParams: data?.pageParams?.slice(0, 1),
+              })
+            );
+            comments.refetch();
+          },
+        }
+      )
+      .then(() => {
+        refreshKeyData(keyId);
+      })
+      .catch((e) => {
+        const parsed = parseErrorResponse(e);
+        parsed.forEach((error) => messaging.error(<T>{error}</T>));
+      });
   };
 
   const handleDelete = (commentId: number) => {
-    deleteComment.mutate(
-      { path: { projectId: project.id, commentId } },
-      {
-        onSuccess() {
-          comments.refetch();
+    deleteComment
+      .mutateAsync(
+        { path: { projectId: project.id, commentId } },
+        {
+          onSuccess() {
+            comments.refetch();
+          },
+        }
+      )
+      .then(() => {
+        refreshKeyData(keyId);
+      });
+  };
+
+  const changeState = (
+    commentId: number,
+    state: TranslationCommentModel['state']
+  ) => {
+    resolveComment
+      .mutateAsync(
+        {
+          path: {
+            projectId: project.id,
+            commentId,
+            state,
+          },
         },
-      }
-    );
+        {
+          onSuccess() {
+            // update comment state
+            queryClient.setQueriesData(
+              '/v2/projects/{projectId}/translations/{translationId}/comments',
+              (data: any) => ({
+                ...data,
+                pages: data?.pages?.map(
+                  (
+                    page: PagedModelTranslationCommentModel
+                  ): PagedModelTranslationCommentModel => ({
+                    ...page,
+                    _embedded: {
+                      ...page._embedded,
+                      translationComments:
+                        page._embedded?.translationComments?.map((comment) =>
+                          comment.id === commentId
+                            ? {
+                                ...comment,
+                                state,
+                              }
+                            : comment
+                        ),
+                    },
+                  })
+                ),
+              })
+            );
+          },
+        }
+      )
+      .then(() => {
+        refreshKeyData(keyId);
+      });
   };
 
   return (
@@ -252,11 +316,15 @@ export const Comments: React.FC<Props> = ({
             const canDelete =
               user?.id === comment.author.id ||
               permissions.satisfiesPermission(ProjectPermissionType.MANAGE);
+            const canChangeState =
+              user?.id === comment.author.id ||
+              permissions.satisfiesPermission(ProjectPermissionType.TRANSLATE);
             return (
               <Comment
                 key={comment.id}
                 data={comment}
                 onDelete={canDelete ? handleDelete : undefined}
+                onChangeState={canChangeState ? changeState : undefined}
               />
             );
           })}

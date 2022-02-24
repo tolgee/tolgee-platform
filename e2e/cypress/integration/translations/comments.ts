@@ -7,6 +7,8 @@ import {
   commentsButton,
   createComment,
   deleteComment,
+  resolveComment,
+  unresolveComment,
 } from '../../common/comments';
 import { enterProject } from '../../common/projects';
 import { waitForGlobalLoading } from '../../common/loading';
@@ -59,7 +61,19 @@ describe('Translation comments', () => {
   it('jindra can delete only his comments (translate)', () => {
     logInAs('jindra');
     userCanDeleteComment(2, 'en', 'First comment');
-    userCantDeleteComment(2, 'en', 'Second comment');
+    userCantOpenMenu(2, 'en', 'Second comment');
+  });
+
+  it('jindra can resolve comment (translate)', () => {
+    logInAs('jindra');
+    userCanResolveComment(2, 'en', 'First comment');
+    userCanResolveComment(2, 'en', 'Second comment');
+  });
+
+  it('jindra can unresolve comment (translate)', () => {
+    logInAs('jindra');
+    userCanResolveComment(2, 'en', 'First comment');
+    userCanUnresolveComment(2, 'en', 'First comment');
   });
 
   it('vojta is not able to add comment (view)', () => {
@@ -76,14 +90,36 @@ describe('Translation comments', () => {
 
   it('vojta cant delete any comments (view)', () => {
     logInAs('vojta');
-    userCantDeleteComment(2, 'en', 'First comment');
-    userCantDeleteComment(2, 'en', 'Second comment');
+    userCantOpenMenu(2, 'en', 'First comment');
+    userCantOpenMenu(2, 'en', 'Second comment');
+  });
+
+  it('vojta cant resolve any comments (view)', () => {
+    logInAs('vojta');
+    userCantResolveComment(2, 'en', 'First comment');
+    userCantResolveComment(2, 'en', 'Second comment');
   });
 });
 
 function logInAs(user: string) {
   login(user, 'admin');
   enterProject("Franta's project");
+}
+
+function userCanResolveComment(index: number, lang: string, comment: string) {
+  commentsButton(index, lang).click();
+  resolveComment(comment);
+  cy.gcy('translations-cell-close').click();
+}
+
+function userCantResolveComment(index: number, lang: string, comment: string) {
+  commentsButton(index, lang).click();
+  cy.gcy('comment-text')
+    .contains(comment)
+    .closestDcy('comment')
+    .findDcy('comment-resolve')
+    .should('not.exist');
+  cy.gcy('translations-cell-close').click();
 }
 
 function userCanDeleteComment(index: number, lang: string, comment: string) {
@@ -93,7 +129,13 @@ function userCanDeleteComment(index: number, lang: string, comment: string) {
   cy.gcy('translations-cell-close').click();
 }
 
-function userCantDeleteComment(index: number, lang: string, comment: string) {
+function userCanUnresolveComment(index: number, lang: string, comment: string) {
+  commentsButton(index, lang).click();
+  unresolveComment(comment);
+  cy.gcy('translations-cell-close').click();
+}
+
+function userCantOpenMenu(index: number, lang: string, comment: string) {
   commentsButton(index, lang).click();
   cy.gcy('comment-text')
     .contains(comment)
