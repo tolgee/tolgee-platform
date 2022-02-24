@@ -1,5 +1,6 @@
 package io.tolgee.security.rateLimits
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.lockingProvider.LockingProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
@@ -14,7 +15,6 @@ import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.servlet.HandlerExceptionResolver
-import java.util.*
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -27,7 +27,8 @@ class RateLimitsFilter(
   private val applicationContext: ApplicationContext,
   private val rateLimitsParamsProxy: RateLimitParamsProxy,
   private val lifeCyclePoint: RateLimitLifeCyclePoint,
-  private val rateLimits: List<RateLimit>
+  private val rateLimits: List<RateLimit>,
+  private val currentDateProvider: CurrentDateProvider
 ) : OncePerRequestFilter() {
 
   init {
@@ -57,10 +58,11 @@ class RateLimitsFilter(
               val timeToRefill = rateLimitsParamsProxy.getTimeToRefill(rateLimit.keyPrefix, rateLimit.timeToRefillInMs)
 
               // first request, create new UsageEntry
+              val time = currentDateProvider.getDate()
               if (current == null) {
-                current = UsageEntry(Date(), bucketSize)
-              } else if (Date().time - current.time.time > timeToRefill) {
-                current = UsageEntry(Date(), bucketSize)
+                current = UsageEntry(time, bucketSize)
+              } else if (time.time - current.time.time > timeToRefill) {
+                current = UsageEntry(time, bucketSize)
               }
 
               if (current.availableTokens < 1) {
@@ -80,7 +82,7 @@ class RateLimitsFilter(
 
               logger.debug(
                 "Accesses: " + key + " - " +
-                  (Date().time - current.time.time).toDouble() / 1000 +
+                  (time.time - current.time.time).toDouble() / 1000 +
                   "s unitil refill, tokens: " +
                   current.availableTokens
               )

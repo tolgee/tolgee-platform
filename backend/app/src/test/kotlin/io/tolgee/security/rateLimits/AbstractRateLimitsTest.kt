@@ -1,5 +1,6 @@
 package io.tolgee.security.rateLimits
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.node
@@ -15,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.*
 import kotlin.system.measureTimeMillis
 
 abstract class AbstractRateLimitsTest : AuthorizedControllerTest() {
@@ -34,25 +36,31 @@ abstract class AbstractRateLimitsTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var rateLimitParamsProxy: RateLimitParamsProxy
 
+  @MockBean
+  @Autowired
+  lateinit var currentDateProvider: CurrentDateProvider
+
   /**
    * Utility method helping to test the rate limits
    */
   protected fun testEndpoint(
-    threads: Int,
-    repeat: Int,
     keyPrefix: String,
-    timeToRefill: Int,
     expectedStatus: Int = 200,
     performAction: () -> ResultActions
   ) {
+    val oneHour = 60 * 60 * 1000
+    val threads = 10
+    val repeat = 10
     val bucketSize = threads * repeat + 1
+    val startDate = Date()
+    whenever(currentDateProvider.getDate()).thenReturn(startDate)
     // all other limits have to pass, so we have to set larger values
     whenever(rateLimitParamsProxy.getBucketSize(any(), any())).thenReturn(bucketSize + 20000)
-    whenever(rateLimitParamsProxy.getTimeToRefill(any(), any())).thenReturn(timeToRefill + 20000)
+    whenever(rateLimitParamsProxy.getTimeToRefill(any(), any())).thenReturn(oneHour + 20000)
 
     // mock values for provided key prefix
     whenever(rateLimitParamsProxy.getBucketSize(eq(keyPrefix), any())).thenReturn(bucketSize)
-    whenever(rateLimitParamsProxy.getTimeToRefill(eq(keyPrefix), any())).thenReturn(timeToRefill)
+    whenever(rateLimitParamsProxy.getTimeToRefill(eq(keyPrefix), any())).thenReturn(oneHour)
 
     // init the bucket before time measurement, so we can subtract it afterwards
     performAction().andExpect { status().`is`(expectedStatus) }
@@ -70,11 +78,12 @@ abstract class AbstractRateLimitsTest : AuthorizedControllerTest() {
     performAction().andIsBadRequest.andAssertThatJson {
       node("params[0]") {
         node("bucketSize").isEqualTo(bucketSize)
-        node("timeToRefill").isEqualTo(1000)
+        node("timeToRefill").isEqualTo(oneHour)
         node("keyPrefix").isEqualTo(keyPrefix)
       }
     }
-    Thread.sleep(1000 - executionTime)
+
+    whenever(currentDateProvider.getDate()).thenReturn(Date(startDate.time + oneHour + 1))
     performAction().andExpect { status().`is`(expectedStatus) }
   }
 }

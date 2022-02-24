@@ -1,5 +1,6 @@
 package io.tolgee.security.rateLimits
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.lockingProvider.LockingProvider
 import io.tolgee.security.rateLimis.RateLimit
 import io.tolgee.security.rateLimis.RateLimitLifeCyclePoint
@@ -17,7 +18,8 @@ class RateLimitsFilterFactory(
   private val rateLimitParamsProxy: RateLimitParamsProxy,
   @param:Qualifier("handlerExceptionResolver")
   private val resolver: HandlerExceptionResolver,
-  private val rateLimits: List<RateLimit>
+  private val rateLimits: List<RateLimit>,
+  private val currentDateProvider: CurrentDateProvider
 ) {
   fun create(rateLimitLifeCyclePoint: RateLimitLifeCyclePoint): RateLimitsFilter {
     return RateLimitsFilter(
@@ -27,7 +29,8 @@ class RateLimitsFilterFactory(
       applicationContext = applicationContext,
       rateLimitsParamsProxy = rateLimitParamsProxy,
       lifeCyclePoint = rateLimitLifeCyclePoint,
-      rateLimits = rateLimits
+      rateLimits = rateLimits,
+      currentDateProvider = currentDateProvider
     )
   }
 }
