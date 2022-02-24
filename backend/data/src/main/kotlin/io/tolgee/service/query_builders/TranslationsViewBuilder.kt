@@ -10,6 +10,7 @@ import io.tolgee.model.key.Key
 import io.tolgee.model.key.KeyMeta_
 import io.tolgee.model.key.Key_
 import io.tolgee.model.key.Tag_
+import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.TranslationComment_
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.KeyWithTranslationsView
@@ -39,6 +40,7 @@ class TranslationsViewBuilder(
   private lateinit var screenshotCountExpression: Expression<Long>
   private val groupByExpressions: MutableSet<Expression<*>> = mutableSetOf()
   lateinit var query: CriteriaQuery<*>
+  var isKeyIdsQuery = false
 
   private fun <T> getBaseQuery(query: CriteriaQuery<T>): CriteriaQuery<T> {
     this.query = query
@@ -136,11 +138,15 @@ class TranslationsViewBuilder(
         translationId
       groupByExpressions.add(translationId)
       val translationTextField = translation.get(Translation_.text)
+
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::text.name] =
         translationTextField
       val translationStateField = translation.get(Translation_.state)
+
       selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::state.name] =
         translationStateField
+
+      addNotFilteringTranslationFields(language, translation)
 
       val commentsJoin = translation.join(Translation_.comments, JoinType.LEFT)
       val commentsExpression = cb.countDistinct(commentsJoin)
@@ -168,6 +174,23 @@ class TranslationsViewBuilder(
       fullTextFields.add(translationTextField)
       translationsTextFields.add(translationTextField)
       applyTranslationFilters(language, translationTextField, translationStateField)
+    }
+  }
+
+  private fun addNotFilteringTranslationFields(
+    language: Language,
+    translation: SetJoin<Key, Translation>
+  ) {
+    if (!isKeyIdsQuery) {
+      selection[KeyWithTranslationsView::translations.name + "." + language.tag + "." + TranslationView::auto.name] =
+        translation.get(Translation_.auto)
+
+      selection[
+        KeyWithTranslationsView::translations.name + "." +
+          language.tag + "." +
+          TranslationView::mtProvider.name
+      ] =
+        translation.get(Translation_.mtProvider)
     }
   }
 
@@ -284,6 +307,7 @@ class TranslationsViewBuilder(
 
   private val keyIdsQuery: CriteriaQuery<Long>
     get() {
+      isKeyIdsQuery = true
       val query = getBaseQuery(cb.createQuery(Long::class.java))
       query.select(keyIdExpression)
       query.where(*whereConditions.toTypedArray())

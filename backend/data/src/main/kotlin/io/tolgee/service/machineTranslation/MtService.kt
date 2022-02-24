@@ -1,6 +1,7 @@
 package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.machineTranslation.MtServiceManager
+import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.constants.MtServiceType
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
@@ -39,7 +40,7 @@ class MtService(
   }
 
   fun getPrimaryMachineTranslations(key: Key, targetLanguages: List<Language>):
-    List<String?> {
+    List<TranslateResult?> {
     val baseLanguage = projectService.getOrCreateBaseLanguage(key.project.id)!!
     val baseTranslationText = translationService.find(key, baseLanguage).orElse(null)?.text
       ?: return targetLanguages.map { null }
@@ -51,7 +52,7 @@ class MtService(
     baseTranslationText: String,
     baseLanguage: Language,
     targetLanguages: List<Language>
-  ): List<String?> {
+  ): List<TranslateResult?> {
     val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguages.map { it.id })
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
 
@@ -65,16 +66,16 @@ class MtService(
 
     val translationResults = serviceIndexedLanguagesMap.map { (service, languageIdxPairs) ->
       service?.let {
-        val translated = machineTranslationManager.translate(
+        val translateResults = machineTranslationManager.translate(
           prepared.text,
           baseLanguage.tag,
           languageIdxPairs.map { it.second.tag },
           service
         )
 
-        val withReplacedParams = translated.map {
-          it.translatedText = it.translatedText?.replaceParams(prepared.params)
-          it
+        val withReplacedParams = translateResults.map { translateResult ->
+          translateResult.translatedText = translateResult.translatedText?.replaceParams(prepared.params)
+          translateResult
         }
         languageIdxPairs.map { it.first }.zip(withReplacedParams)
       } ?: languageIdxPairs.map { it.first to null }
@@ -87,7 +88,7 @@ class MtService(
 
     publishOnAfterEvent(prepared, project, price, actualPrice)
 
-    return translationResults.map { it?.translatedText }
+    return translationResults
   }
 
   private fun calculatePrice(

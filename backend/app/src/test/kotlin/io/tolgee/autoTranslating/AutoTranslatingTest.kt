@@ -3,6 +3,7 @@ package io.tolgee.autoTranslating
 import com.amazonaws.services.translate.AmazonTranslate
 import com.google.cloud.translate.Translate
 import io.tolgee.MachineTranslationTest
+import io.tolgee.constants.MtServiceType
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.AutoTranslateTestData
 import io.tolgee.dtos.request.key.CreateKeyDto
@@ -74,9 +75,12 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
 
     assertThat(esTranslation.text).isEqualTo("i am translated")
     assertThat(esTranslation.state).isEqualTo(TranslationState.TRANSLATED)
+    assertThat(esTranslation.auto).isEqualTo(false)
 
     assertThat(deTranslation.text).isEqualTo(TRANSLATED_WITH_GOOGLE_RESPONSE)
-    assertThat(deTranslation.state).isEqualTo(TranslationState.MACHINE_TRANSLATED)
+    assertThat(deTranslation.state).isEqualTo(TranslationState.TRANSLATED)
+    assertThat(deTranslation.auto).isEqualTo(true)
+    assertThat(deTranslation.mtProvider).isEqualTo(MtServiceType.GOOGLE)
   }
 
   @ProjectJWTAuthTestMethod

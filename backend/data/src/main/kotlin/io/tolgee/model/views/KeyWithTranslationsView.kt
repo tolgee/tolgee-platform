@@ -1,5 +1,6 @@
 package io.tolgee.model.views
 
+import io.tolgee.constants.MtServiceType
 import io.tolgee.model.Screenshot
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Tag
@@ -22,7 +23,7 @@ data class KeyWithTranslationsView(
         screenshotCount = data.removeFirst() as Long
       )
 
-      (0 until data.size step 6).forEach { i ->
+      (0 until data.size step 8).forEach { i ->
         val language = data[i] as String?
 
         val id = data[i + 1] as Long?
@@ -31,8 +32,10 @@ data class KeyWithTranslationsView(
             id = id,
             text = data[i + 2] as String?,
             state = (data[i + 3] ?: TranslationState.TRANSLATED) as TranslationState,
-            commentCount = (data[i + 4]) as Long,
-            unresolvedCommentCount = (data[i + 5]) as Long
+            auto = data[i + 4] as Boolean,
+            mtProvider = data[i + 5] as MtServiceType?,
+            commentCount = (data[i + 6]) as Long,
+            unresolvedCommentCount = (data[i + 7]) as Long
           )
         }
       }

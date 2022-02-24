@@ -1408,6 +1408,44 @@
         </createTable>
     </changeSet>
     <changeSet author="jenik (generated)" id="1642790310256-2">
-        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="auto_translation_config" constraintName="FKt6nkgxegunln8tv83446kfkli" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="auto_translation_config"
+                                 constraintName="FKt6nkgxegunln8tv83446kfkli" deferrable="false"
+                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project"
+                                 validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1645709525638-1">
+        <addColumn tableName="translation">
+            <column name="auto" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1645709525638-2">
+        <addColumn tableName="translation_aud">
+            <column name="auto" type="boolean" defaultValue="false" />
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1645709525638-3">
+        <addColumn tableName="translation">
+            <column name="mt_provider" type="int4"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1645709525638-4">
+        <addColumn tableName="translation_aud">
+            <column name="mt_provider" type="int4"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1645709525638-5">
+        <addColumn tableName="translation">
+            <column name="translated_by_id" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1645709525638-6">
+        <addColumn tableName="translation_aud">
+            <column name="translated_by_id" type="int8"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1645709525638-7">
+        <addForeignKeyConstraint baseColumnNames="translated_by_id" baseTableName="translation" constraintName="FK3xjccqrp9y1gux55iavoprs6i" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
 </databaseChangeLog>

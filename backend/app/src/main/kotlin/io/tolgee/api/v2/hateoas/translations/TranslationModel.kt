@@ -15,5 +15,8 @@ open class TranslationModel(
   val text: String?,
 
   @Schema(description = "State of translation")
-  val state: TranslationState
+  val state: TranslationState,
+
+  @Schema(description = "Was translated using Translation Memory or Machine translation service?")
+  val auto: Boolean
 ) : RepresentationModel<TranslationModel>()

@@ -56,7 +56,8 @@ class ProjectsTestData : BaseTestData() {
           addTranslation {
             key = this@keyBuilder.self
             text = "Translated"
-            state = TranslationState.MACHINE_TRANSLATED
+            state = TranslationState.TRANSLATED
+            auto = true
             language = project2English
           }
         }

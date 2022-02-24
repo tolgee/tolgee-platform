@@ -57,8 +57,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           """
         {
           "UNTRANSLATED" : 4,
-          "MACHINE_TRANSLATED" : 1,
-          "TRANSLATED" : 2,
+          "TRANSLATED" : 3,
           "REVIEWED" : 1,
           "NEEDS_REVIEW" : 2
         }
@@ -68,7 +67,6 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           """
        {
           "UNTRANSLATED" : 1,
-          "MACHINE_TRANSLATED" : 0,
           "TRANSLATED" : 0,
           "REVIEWED" : 0,
           "NEEDS_REVIEW" : 0

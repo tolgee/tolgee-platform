@@ -14,6 +14,8 @@ class TranslationViewModelAssembler : RepresentationModelAssemblerSupport<Transl
       id = view.id,
       text = view.text,
       state = view.state,
+      auto = view.auto,
+      mtProvider = view.mtProvider,
       commentCount = view.commentCount,
       unresolvedCommentCount = view.unresolvedCommentCount
     )

@@ -77,7 +77,8 @@ class MtServiceManager(
       val result = TranslateResult(
         params.serviceType.getProvider()
           .translate(params.text, params.sourceLanguageTag, params.targetLanguageTag),
-        price
+        price,
+        params.serviceType
       )
       result.translatedText?.let { params.cacheResult(it) }
       return result
@@ -102,7 +103,8 @@ class MtServiceManager(
     return TranslateResult(
       "${params.text} translated with ${params.serviceType.name} " +
         "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}",
-      calculatePrice(params.text, params.serviceType)
+      calculatePrice(params.text, params.serviceType),
+      params.serviceType
     )
   }
 

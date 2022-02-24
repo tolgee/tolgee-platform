@@ -27,7 +27,7 @@ class TranslationsSocketIoModule(
   }
 
   override fun onKeyModified(key: Key, oldName: String) {
-    key.project?.getRoomName()?.let { roomName ->
+    key.project.getRoomName().let { roomName ->
       namespace.getRoomOperations(roomName).sendEvent(
         TranslationEvent.KEY_MODIFIED.eventName,
         KeyModifiedModel(key.id, key.name, oldName)
@@ -40,7 +40,7 @@ class TranslationsSocketIoModule(
   }
 
   override fun onKeyChange(key: Key, event: TranslationEvent) {
-    key.project?.getRoomName()?.let { roomName ->
+    key.project.getRoomName().let { roomName ->
       namespace.getRoomOperations(roomName).sendEvent(
         event.eventName,
         keyModelAssembler.toModel(key)
@@ -62,7 +62,7 @@ class TranslationsSocketIoModule(
 
   override fun onTranslationsChange(translations: Collection<Translation>, event: TranslationEvent) {
     translations.map { translation ->
-      translation.key.project?.getRoomName()?.let { roomName ->
+      translation.key.project.getRoomName().let { roomName ->
         namespace.getRoomOperations(roomName).sendEvent(
           event.eventName,
           TranslationSocketModel(
@@ -70,7 +70,9 @@ class TranslationsSocketIoModule(
             text = translation.text,
             state = translation.state,
             languageTag = translation.language.tag,
-            key = keyModelAssembler.toModel(translation.key)
+            key = keyModelAssembler.toModel(translation.key),
+            auto = translation.auto,
+            mtProvider = translation.mtProvider
           )
         )
       }

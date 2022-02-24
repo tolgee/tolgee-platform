@@ -1,5 +1,6 @@
 package io.tolgee.service
 
+import io.tolgee.constants.MtServiceType
 import io.tolgee.dtos.request.AutoTranslationSettingsDto
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.AutoTranslationConfig
@@ -42,9 +43,11 @@ class AutoTranslationService(
       mtService.getPrimaryMachineTranslations(key, languages)
         .zip(untranslated)
         .asSequence()
-        .forEach { (translatedValue, translation) ->
-          translatedValue?.let {
-            translation.setValueAndState(it)
+        .forEach { (translateResult, translation) ->
+          translateResult?.let {
+            it.translatedText?.let { text ->
+              translation.setValueAndState(text, it.usedService)
+            }
           }
         }
     } catch (e: OutOfCreditsException) {
@@ -59,14 +62,16 @@ class AutoTranslationService(
       tmValue?.targetTranslationText
         .let { targetText -> if (targetText.isNullOrEmpty()) null else targetText }
         ?.let {
-          translation.setValueAndState(it)
+          translation.setValueAndState(it, null)
         }
     }
   }
 
-  private fun Translation.setValueAndState(it: String) {
-    this.state = TranslationState.MACHINE_TRANSLATED
-    this.text = it
+  private fun Translation.setValueAndState(text: String, usedService: MtServiceType?) {
+    this.state = TranslationState.TRANSLATED
+    this.auto = true
+    this.text = text
+    this.mtProvider = usedService
     this.key.translations.add(this)
     translationService.save(this)
   }

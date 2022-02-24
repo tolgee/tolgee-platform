@@ -1,5 +1,6 @@
 package io.tolgee.model.translation
 
+import io.tolgee.constants.MtServiceType
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.enums.TranslationState
@@ -39,6 +40,18 @@ class Translation(
   @Enumerated
   @ColumnDefault(value = "2")
   var state: TranslationState = TranslationState.TRANSLATED
+
+  /**
+   * Was translated automatically?
+   */
+  @ColumnDefault("false")
+  var auto: Boolean = false
+
+  /**
+   * Which machine translation provider was used to translate this value?
+   */
+  @Enumerated
+  var mtProvider: MtServiceType? = null
 
   @OneToMany(mappedBy = "translation")
   var comments: MutableList<TranslationComment> = mutableListOf()
