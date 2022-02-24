@@ -173,4 +173,18 @@ class V2TranslationsControllerModificationTest : ProjectAuthControllerTest("/v2/
       node("translations.en.state").isEqualTo("TRANSLATED")
     }
   }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `removes the auto translated state`() {
+    testDataService.saveTestData(testData.root)
+    val translation = testData.aKeyGermanTranslation
+    performProjectAuthPut(
+      "/translations/${translation.id}/dismiss-auto-translated-state",
+      null
+    ).andIsOk
+    val updatedTranslation = translationService.get(translation.id)
+    assertThat(updatedTranslation.auto).isEqualTo(false)
+    assertThat(updatedTranslation.mtProvider).isEqualTo(null)
+  }
 }

@@ -189,6 +189,19 @@ class V2TranslationsController(
     )
   }
 
+  @PutMapping(value = ["/{translationId:[0-9]+}/dismiss-auto-translated-state"])
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
+  @Operation(summary = """Removes "auto translated" indication""")
+  fun dismissAutoTranslatedState(
+    @PathVariable translationId: Long
+  ): TranslationModel {
+    val translation = translationService.get(translationId)
+    translation.checkFromProject()
+    translationService.dismissAutoTranslated(translation)
+    return translationModelAssembler.toModel(translation)
+  }
+
   private fun getKeysWithScreenshots(keyIds: Collection<Long>): Map<Long, MutableSet<Screenshot>>? {
     if (
       !authenticationFacade.isApiKeyAuthentication ||
@@ -205,7 +218,7 @@ class V2TranslationsController(
       keyId = key.id,
       keyName = key.name,
       translations = translations.entries.associate { (languageTag, translation) ->
-        languageTag to TranslationModel(translation.id, translation.text, translation.state)
+        languageTag to TranslationModel(translation.id, translation.text, translation.state, translation.auto)
       }
     )
   }
@@ -219,7 +232,7 @@ class V2TranslationsController(
   }
 
   private fun Translation.checkFromProject() {
-    if (this.key.project?.id != projectHolder.project.id) {
+    if (this.key.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
     }
   }

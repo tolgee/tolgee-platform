@@ -48,7 +48,7 @@ class TranslationService(
   private val applicationContext: ApplicationContext,
   private val tolgeeProperties: TolgeeProperties,
   private val translationCommentService: TranslationCommentService,
-  private val applicationEventPublisher: ApplicationEventPublisher
+  private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
   @set:Autowired
   @set:Lazy
@@ -130,6 +130,10 @@ class TranslationService(
 
   fun find(id: Long): Translation? {
     return this.translationRepository.findById(id).orElse(null)
+  }
+
+  fun get(id: Long): Translation {
+    return this.find(id) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -367,5 +371,12 @@ class TranslationService(
       targetLanguage = targetLanguage,
       pageable = pageable
     )
+  }
+
+  @Transactional
+  fun dismissAutoTranslated(translation: Translation) {
+    translation.auto = false
+    translation.mtProvider = null
+    save(translation)
   }
 }

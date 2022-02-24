@@ -23,11 +23,13 @@ class CursorUtilUnitTest {
       screenshotCount = 1,
       translations = mutableMapOf(
         "en" to TranslationView(
-          1,
-          "Super key translated \uD83C\uDF8C",
-          TranslationState.TRANSLATED,
-          0,
-          1
+          id = 1,
+          text = "Super key translated \uD83C\uDF8C",
+          state = TranslationState.TRANSLATED,
+          auto = false,
+          mtProvider = null,
+          commentCount = 0,
+          unresolvedCommentCount = 1
         )
       )
     )
