@@ -13,7 +13,6 @@ tolgee:
   screenshots-url: http://localhost:8201/screenshots
   uploaded-images-url: http://localhost:8080/uploaded-images
   internal:
-    populate: true
     controller-enabled: true
     fake-github-login: true
   smtp:
