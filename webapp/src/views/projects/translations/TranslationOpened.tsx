@@ -129,7 +129,7 @@ export const TranslationOpened: React.FC<Props> = ({
         >
           {editEnabled && (
             <Tab
-              label={<T noWrap>translations_cell_tab_edit</T>}
+              label={<T>translations_cell_tab_edit</T>}
               value="editor"
               className={classes.tab}
               data-cy="translations-cell-tab-edit"
@@ -137,10 +137,7 @@ export const TranslationOpened: React.FC<Props> = ({
           )}
           <Tab
             label={
-              <T
-                noWrap
-                parameters={{ count: String(translation?.commentCount || 0) }}
-              >
+              <T parameters={{ count: String(translation?.commentCount || 0) }}>
                 translations_cell_tab_comments
               </T>
             }
