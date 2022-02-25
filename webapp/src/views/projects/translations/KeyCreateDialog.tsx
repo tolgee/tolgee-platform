@@ -73,7 +73,11 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
     } = {};
 
     Object.entries(data.translations).forEach(([key, value]) => {
-      translations[key] = { ...value, commentCount: 0 };
+      translations[key] = {
+        ...value,
+        commentCount: 0,
+        unresolvedCommentCount: 0,
+      };
     });
 
     dispatch({

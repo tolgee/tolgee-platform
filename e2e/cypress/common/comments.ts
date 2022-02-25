@@ -31,3 +31,32 @@ export function deleteComment(text: string) {
   waitForGlobalLoading();
   cy.contains(text).should('not.exist');
 }
+
+export function unresolveComment(text: string) {
+  cy.gcy('comment-text')
+    .contains(text)
+    .closestDcy('comment')
+    .findDcy('comment-menu')
+    .click();
+  cy.gcy('comment-menu-needs-resolution').click();
+  waitForGlobalLoading();
+  cy.gcy('comment-text')
+    .contains(text)
+    .closestDcy('comment')
+    .findDcy('comment-resolve')
+    .should('exist');
+}
+
+export function resolveComment(text: string) {
+  cy.gcy('comment-text')
+    .contains(text)
+    .closestDcy('comment')
+    .findDcy('comment-resolve')
+    .click();
+  waitForGlobalLoading();
+  cy.gcy('comment-text')
+    .contains(text)
+    .closestDcy('comment')
+    .findDcy('comment-resolve')
+    .should('not.exist');
+}

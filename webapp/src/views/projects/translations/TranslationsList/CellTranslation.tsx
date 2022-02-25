@@ -196,6 +196,7 @@ export const CellTranslation: React.FC<Props> = ({
                 onEdit={() => handleOpen('editor')}
                 onComments={() => handleOpen('comments')}
                 commentsCount={translation?.commentCount}
+                unresolvedCommentCount={translation?.unresolvedCommentCount}
                 editEnabled={editEnabled}
                 state={state}
                 onStateChange={handleStateChange}
@@ -205,6 +206,7 @@ export const CellTranslation: React.FC<Props> = ({
               <ControlsTranslation
                 lastFocusable={lastFocusable}
                 commentsCount={translation?.commentCount}
+                unresolvedCommentCount={translation?.unresolvedCommentCount}
               />
             ))}
         </div>

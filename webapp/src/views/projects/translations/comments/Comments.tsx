@@ -1,31 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useQueryClient } from 'react-query';
-import { container } from 'tsyringe';
+import React from 'react';
 import { T } from '@tolgee/react';
 import { makeStyles, TextField, IconButton } from '@material-ui/core';
 import { Send } from '@material-ui/icons';
 
-import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
-import { useProject } from 'tg.hooks/useProject';
-import {
-  useApiInfiniteQuery,
-  useApiMutation,
-} from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
-import { MessageService } from 'tg.service/MessageService';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useUser } from 'tg.hooks/useUser';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
-import { useTranslationsDispatch } from '../context/TranslationsContext';
 import { Comment } from './Comment';
+import { useComments } from './useComments';
 
-type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
-
-const messaging = container.resolve(MessageService);
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.grey[200];
@@ -62,9 +50,15 @@ const useStyles = makeStyles((theme) => {
       alignItems: 'flex-end',
       borderTop: `1px solid ${borderColor}`,
     },
+    progressWrapper: {
+      height: 0,
+      position: 'relative',
+    },
     linearProgress: {
-      marginTop: -4,
-      height: 4,
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
     },
     input: {
       flexGrow: 1,
@@ -98,151 +92,28 @@ export const Comments: React.FC<Props> = ({
   onCancel,
   editEnabled,
 }) => {
-  const project = useProject();
   const classes = useStyles();
-  const queryClient = useQueryClient();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const dispatch = useTranslationsDispatch();
-  const user = useUser();
   const permissions = useProjectPermissions();
+  const user = useUser();
 
-  const [value, setValue] = useState('');
-
-  const path = {
-    projectId: project.id,
-    translationId: translation?.id as number,
-  };
-  const query = { sort: ['updatedAt,desc', 'id,desc'], size: 30, page: 0 };
-
-  const comments = useApiInfiniteQuery({
-    url: '/v2/projects/{projectId}/translations/{translationId}/comments',
-    method: 'get',
-    path,
-    query,
-    options: {
-      enabled: Boolean(translation?.id),
-      getNextPageParam: (lastPage) => {
-        if (
-          lastPage.page &&
-          lastPage.page.number! < lastPage.page.totalPages! - 1
-        ) {
-          return {
-            path,
-            query: {
-              ...query,
-              page: lastPage.page!.number! + 1,
-            },
-          };
-        } else {
-          return null;
-        }
-      },
-    },
+  const {
+    commentsList,
+    comments,
+    scrollRef,
+    handleAddComment,
+    handleDelete,
+    handleKeyDown,
+    changeState,
+    isLoading,
+    isAddingComment,
+    inputValue,
+    setInputValue,
+  } = useComments({
+    keyId,
+    language,
+    translation,
+    onCancel,
   });
-
-  const addComment = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/create-comment',
-    method: 'post',
-  });
-
-  const deleteComment = useApiMutation({
-    url: '/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}',
-    method: 'delete',
-  });
-
-  useEffect(() => {
-    if (comments.isSuccess) {
-      const commentCount = comments.data?.pages?.[0]?.page?.totalElements;
-      // update total comments count in translations list
-      dispatch({
-        type: 'UPDATE_TRANSLATION',
-        payload: {
-          keyId,
-          lang: language.tag,
-          data: { commentCount },
-        },
-      });
-    }
-  }, [comments.data?.pages?.[0]]);
-
-  const commentsList = comments.data?.pages
-    ?.flatMap((p) => p._embedded?.translationComments)
-    .filter(Boolean) as TranslationCommentModel[] | undefined;
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
-      if (e.key === 'Enter') {
-        handleAddComment();
-        e.preventDefault();
-      } else if (e.key === 'Escape') {
-        onCancel();
-        e.preventDefault();
-      }
-    }
-  };
-
-  const handleAddComment = () => {
-    if (addComment.isLoading) {
-      return;
-    }
-    if (!value) {
-      messaging.error(<T>global_empty_value</T>);
-      return;
-    }
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-    });
-    addComment.mutate(
-      {
-        path: { projectId: project.id },
-        content: {
-          'application/json': {
-            keyId,
-            languageId: language.id,
-            text: value,
-            state: 'RESOLUTION_NOT_NEEDED',
-          },
-        },
-      },
-      {
-        onSuccess(data) {
-          setValue('');
-          // keep just first page and refetch it
-          queryClient.setQueriesData(
-            '/v2/projects/{projectId}/translations/{translationId}/comments',
-            (data: any) => ({
-              pages: data?.pages?.slice(0, 1),
-              pageParams: data?.pageParams?.slice(0, 1),
-            })
-          );
-          comments.refetch();
-          dispatch({
-            type: 'UPDATE_TRANSLATION',
-            payload: {
-              keyId,
-              lang: language.tag,
-              data: data.translation,
-            },
-          });
-        },
-        onError(e) {
-          const parsed = parseErrorResponse(e);
-          parsed.forEach((error) => messaging.error(<T>{error}</T>));
-        },
-      }
-    );
-  };
-
-  const handleDelete = (commentId: number) => {
-    deleteComment.mutate(
-      { path: { projectId: project.id, commentId } },
-      {
-        onSuccess() {
-          comments.refetch();
-        },
-      }
-    );
-  };
 
   return (
     <div className={classes.container}>
@@ -252,11 +123,15 @@ export const Comments: React.FC<Props> = ({
             const canDelete =
               user?.id === comment.author.id ||
               permissions.satisfiesPermission(ProjectPermissionType.MANAGE);
+            const canChangeState =
+              user?.id === comment.author.id ||
+              permissions.satisfiesPermission(ProjectPermissionType.TRANSLATE);
             return (
               <Comment
                 key={comment.id}
                 data={comment}
                 onDelete={canDelete ? handleDelete : undefined}
+                onChangeState={canChangeState ? changeState : undefined}
               />
             );
           })}
@@ -275,13 +150,10 @@ export const Comments: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className={classes.linearProgress}>
+      <div className={classes.progressWrapper}>
         <SmoothProgress
-          loading={
-            addComment.isLoading ||
-            deleteComment.isLoading ||
-            (comments.isFetching && !comments.isFetchingNextPage)
-          }
+          className={classes.linearProgress}
+          loading={isLoading}
         />
       </div>
 
@@ -290,8 +162,8 @@ export const Comments: React.FC<Props> = ({
           <TextField
             className={classes.input}
             multiline
-            value={value}
-            onChange={(e) => setValue(e.currentTarget.value)}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.currentTarget.value)}
             onKeyDown={handleKeyDown}
             variant="standard"
             data-cy="translations-comments-input"
@@ -300,7 +172,7 @@ export const Comments: React.FC<Props> = ({
           <IconButton
             color="primary"
             onClick={handleAddComment}
-            disabled={addComment.isLoading}
+            disabled={isAddingComment}
           >
             <Send />
           </IconButton>

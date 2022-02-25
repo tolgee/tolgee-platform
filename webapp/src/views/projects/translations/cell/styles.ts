@@ -13,40 +13,38 @@ const getCellGradientBackground = (
     : color;
 };
 
+const opacityAnimation = (start: number, end: number) => ({
+  '0%': {
+    opacity: start,
+  },
+  '100%': {
+    opacity: end,
+  },
+});
+
+const showWithAnimation = (name: string) => ({
+  opacity: 1,
+  animationName: '$' + name,
+  animationDuration: '0.4s',
+  animationTimingFunction: 'ease-in',
+});
+
+const showNoAnimation = () => ({
+  opacity: 1,
+  animationName: 'none',
+});
+
 export const useCellStyles = makeStyles<Theme, { position?: PositionType }>(
   (theme) => ({
-    '@keyframes easeIn': {
-      '0%': {
-        opacity: 0,
-      },
-      '100%': {
-        opacity: 1,
-      },
-    },
-    '@keyframes easeOut': {
-      '0%': {
-        opacity: 1,
-      },
-      '100%': {
-        opacity: 0,
-      },
-    },
+    '@keyframes easeIn': opacityAnimation(0, 1),
+    '@keyframes highlightIn': opacityAnimation(0.5, 1),
+
     cellPlain: {
       outline: 0,
-      '& $showOnHover': {
-        opacity: 0,
-        transition: 'opacity 0.1s ease-out',
-      },
-      '&:hover $showOnHover': {
-        opacity: 1,
-        animationName: '$easeIn',
-        animationDuration: '0.4s',
-        animationTimingFunction: 'ease-in',
-      },
-      '&:focus-within $showOnHover': {
-        opacity: 1,
-        animationName: 'none',
-      },
+      '&:hover $showOnHover': showWithAnimation('easeIn'),
+      '&:focus-within $showOnHover': showNoAnimation(),
+      '&:hover $highlightOnHover': showWithAnimation('highlightIn'),
+      '&:focus-within $highlightOnHover': showNoAnimation(),
       '&:focus-within': {
         background: ({ position }) =>
           getCellGradientBackground(
@@ -71,6 +69,15 @@ export const useCellStyles = makeStyles<Theme, { position?: PositionType }>(
       },
     },
     showOnHover: {
+      opacity: 0,
+      transition: 'opacity 0.1s ease-out',
+      '&:focus': {
+        opacity: 1,
+      },
+    },
+    highlightOnHover: {
+      opacity: 0.5,
+      transition: 'opacity 0.1s ease-out',
       '&:focus': {
         opacity: 1,
       },

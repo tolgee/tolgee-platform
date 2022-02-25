@@ -176,11 +176,13 @@ export const CellTranslation: React.FC<Props> = ({
                 onStateChange={handleStateChange}
                 onComments={() => handleOpen('comments')}
                 commentsCount={translation?.commentCount}
+                unresolvedCommentCount={translation?.unresolvedCommentCount}
               />
             ) : (
               // hide as many components as possible in order to be performant
               <ControlsTranslation
                 commentsCount={translation?.commentCount}
+                unresolvedCommentCount={translation?.unresolvedCommentCount}
                 lastFocusable={lastFocusable}
               />
             )}

@@ -1,6 +1,5 @@
 import { makeStyles } from '@material-ui/core';
 import { useUser } from 'tg.hooks/useUser';
-import React, { FC } from 'react';
 import { AvatarImg } from './AvatarImg';
 
 const SIZE = 24;
@@ -26,7 +25,7 @@ const useStyle = makeStyles((theme) => ({
   },
 }));
 
-export const UserAvatar: FC = () => {
+export const UserAvatar: React.FC = () => {
   const classes = useStyle();
 
   const user = useUser();

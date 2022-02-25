@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { Badge, makeStyles } from '@material-ui/core';
-import { Edit, Comment } from '@material-ui/icons';
+import { Edit, Comment, Check } from '@material-ui/icons';
 import { T } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
@@ -9,14 +9,30 @@ import { useCellStyles } from './styles';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   badge: {
     fontSize: 10,
+
     height: 'unset',
     padding: '3px 3px',
     display: 'flex',
   },
-});
+  badgeResolved: {
+    background: theme.palette.grey[600],
+    padding: 0,
+    height: 16,
+    width: 18,
+    display: 'flex',
+    minWidth: 'unset',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkIcon: {
+    color: theme.palette.grey[100],
+    fontSize: 14,
+    margin: -5,
+  },
+}));
 
 type ControlsProps = {
   state?: StateType;
@@ -25,6 +41,7 @@ type ControlsProps = {
   onStateChange?: (state: StateType) => void;
   onComments?: () => void;
   commentsCount: number | undefined;
+  unresolvedCommentCount: number | undefined;
   // render last focusable button
   lastFocusable?: boolean;
 };
@@ -36,6 +53,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   onStateChange,
   onComments,
   commentsCount,
+  unresolvedCommentCount,
   lastFocusable,
 }) => {
   const classes = useStyles();
@@ -45,6 +63,7 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   const displayEdit = editEnabled && onEdit;
   const commentsPresent = Boolean(commentsCount);
   const displayComments = onComments || lastFocusable || commentsPresent;
+  const onlyResolved = commentsPresent && !unresolvedCommentCount;
 
   return (
     <>
@@ -69,16 +88,32 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
         <ControlsButton
           onClick={onComments}
           data-cy="translations-cell-comments-button"
-          className={clsx({ [cellClasses.showOnHover]: !commentsPresent })}
+          className={clsx({
+            [cellClasses.showOnHover]: !commentsPresent,
+            [cellClasses.highlightOnHover]: onlyResolved,
+          })}
           tooltip={<T>translation_cell_comments</T>}
         >
-          <Badge
-            badgeContent={commentsCount}
-            color="primary"
-            classes={{ badge: classes.badge }}
-          >
-            <Comment fontSize="small" />
-          </Badge>
+          {onlyResolved ? (
+            <Badge
+              badgeContent={
+                <Check fontSize="small" className={classes.checkIcon} />
+              }
+              classes={{
+                badge: classes.badgeResolved,
+              }}
+            >
+              <Comment fontSize="small" />
+            </Badge>
+          ) : (
+            <Badge
+              badgeContent={unresolvedCommentCount}
+              color="primary"
+              classes={{ badge: classes.badge }}
+            >
+              <Comment fontSize="small" />
+            </Badge>
+          )}
         </ControlsButton>
       )}
     </>

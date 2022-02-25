@@ -980,6 +980,8 @@ export interface components {
         | "NEEDS_REVIEW";
       /** Count of translation comments */
       commentCount: number;
+      /** Count of unresolved translation comments */
+      unresolvedCommentCount: number;
     };
     CollectionModelProjectTransferOptionModel: {
       _embedded?: {

@@ -1,59 +1,82 @@
 import React from 'react';
 import clsx from 'clsx';
-import { useCurrentLanguage, T } from '@tolgee/react';
-import { IconButton, makeStyles, Menu, MenuItem } from '@material-ui/core';
-import { MoreHoriz } from '@material-ui/icons';
+import { useCurrentLanguage, T, useTranslate } from '@tolgee/react';
+import { makeStyles, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { MoreVert, Check } from '@material-ui/icons';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { useCellStyles } from '../cell/styles';
 import { confirmation } from 'tg.hooks/confirmation';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { SmallActionButton } from './SmallActionButton';
 
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
 
 const useStyles = makeStyles((theme) => ({
-  menu: {
-    gridArea: 'menu',
-    height: 26,
-    width: 26,
-    margin: '-7px -6px -3px 0px',
-    opacity: 0,
-    transition: 'opacity 0.1s ease-out',
-  },
   container: {
     display: 'grid',
     gridTemplateAreas: `
-      "text     text   menu"
-      "autor    time   time"
+      "avatar  text   time            menu"
+      "avatar  text   resolveAction   menu"
     `,
-    gridTemplateColumns: '1fr 1fr auto',
+    gridTemplateColumns: 'auto 1fr auto 26px',
     padding: '7px 12px 7px 12px',
     background: 'transparent',
     transition: 'background 0.1s ease-out',
     '&:hover': {
-      background: theme.palette.grey[100],
+      background: theme.palette.grey[200],
       transition: 'background 0.1s ease-in',
     },
-    '&:hover $menu': {
+    '&:hover $hoverVisible': {
       opacity: 1,
       transition: 'opacity 0.5s ease-in',
     },
+  },
+  unresolved: {
+    background: theme.palette.grey[100],
+  },
+  hoverVisible: {
+    opacity: 0,
+    transition: 'opacity 0.1s ease-out',
+  },
+  avatar: {
+    gridArea: 'avatar',
+    margin: theme.spacing(0.5, 1, 0.5, 0),
+    alignSelf: 'start',
+  },
+  menu: {
+    gridArea: 'menu',
+    display: 'flex',
+    margin: theme.spacing(0.5, -1, 0, 0.5),
+  },
+  actionItem: {
+    height: 26,
+    width: 26,
+  },
+  resolveButton: {
+    gridArea: 'resolveAction',
+    display: 'flex',
+    justifySelf: 'end',
+    alignSelf: 'start',
+    margin: -4,
+    marginTop: -2,
   },
   text: {
     gridArea: 'text',
     padding: 0,
     margin: 0,
+    marginTop: 7,
+    marginBottom: 4,
     lineHeight: 1.1,
     fontFamily: theme.typography.fontFamily,
     whiteSpace: 'pre-wrap',
     wordWrap: 'break-word',
   },
-  autor: {
-    gridArea: 'autor',
-    fontSize: '11px',
+  textUnresolved: {
+    fontWeight: 600,
   },
   time: {
-    display: 'flex',
     gridArea: 'time',
+    display: 'flex',
     fontSize: '11px',
     justifyContent: 'flex-end',
   },
@@ -62,15 +85,20 @@ const useStyles = makeStyles((theme) => ({
 type Props = {
   data: TranslationCommentModel;
   onDelete: ((commentId: number) => void) | undefined;
+  onChangeState:
+    | ((commentId: number, state: TranslationCommentModel['state']) => void)
+    | undefined;
 };
 
-export const Comment: React.FC<Props> = ({ data, onDelete }) => {
+export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const classes = useStyles();
-  const cellClasses = useCellStyles({});
   const lang = useCurrentLanguage();
-  const date = new Date(data.updatedAt);
+  const date = new Date(data.createdAt);
   const isToday = date.toLocaleDateString() === new Date().toLocaleDateString();
+  const t = useTranslate();
+
+  const unresolveVisible = data.state === 'RESOLVED' && onChangeState;
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -89,25 +117,35 @@ export const Comment: React.FC<Props> = ({ data, onDelete }) => {
     });
   };
 
+  const handleResolve = () => {
+    onChangeState?.(data.id, 'RESOLVED');
+  };
+
+  const handleUnresolved = () => {
+    handleClose();
+    onChangeState?.(data.id, 'NEEDS_RESOLUTION');
+  };
+
   return (
     <div
-      className={clsx(classes.container, cellClasses.hover)}
+      className={clsx(classes.container, {
+        [classes.unresolved]: data.state !== 'RESOLVED',
+      })}
       data-cy="comment"
     >
-      <pre className={classes.text} data-cy="comment-text">
+      <Tooltip title={data.author.name || data.author.username}>
+        <div className={classes.avatar}>
+          <AvatarImg owner={{ ...data.author, type: 'USER' }} size={24} />
+        </div>
+      </Tooltip>
+      <pre
+        className={clsx(classes.text, {
+          [classes.textUnresolved]: data.state !== 'RESOLVED',
+        })}
+        data-cy="comment-text"
+      >
         {data.text}
       </pre>
-      {onDelete && (
-        <IconButton
-          className={classes.menu}
-          size="small"
-          onClick={handleClick}
-          data-cy="comment-menu"
-        >
-          <MoreHoriz fontSize="small" />
-        </IconButton>
-      )}
-      <div className={classes.autor}>{data.author.name}</div>
       <div className={classes.time}>
         {!isToday && date.toLocaleDateString(lang()) + ' '}
         {date.toLocaleTimeString(lang(), {
@@ -115,6 +153,34 @@ export const Comment: React.FC<Props> = ({ data, onDelete }) => {
           minute: 'numeric',
         })}
       </div>
+      <div className={clsx(classes.menu, classes.hoverVisible)}>
+        {(onDelete || unresolveVisible) && (
+          <SmallActionButton
+            className={classes.actionItem}
+            onClick={handleClick}
+            data-cy="comment-menu"
+          >
+            <MoreVert fontSize="small" />
+          </SmallActionButton>
+        )}
+      </div>
+      {data.state !== 'RESOLVED' && onChangeState && (
+        <Tooltip
+          title={t({
+            key: 'translations_comments_resolve',
+            defaultValue: 'Resolve',
+          })}
+        >
+          <div className={clsx(classes.resolveButton, classes.hoverVisible)}>
+            <SmallActionButton
+              onClick={handleResolve}
+              data-cy="comment-resolve"
+            >
+              <Check fontSize="small" color="primary" />
+            </SmallActionButton>
+          </div>
+        </Tooltip>
+      )}
       {anchorEl && (
         <Menu
           id="simple-menu"
@@ -123,9 +189,22 @@ export const Comment: React.FC<Props> = ({ data, onDelete }) => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
-          <MenuItem onClick={handleDelete} data-cy="comment-menu-delete">
-            <T noWrap>translations_comments_delete_button</T>
-          </MenuItem>
+          {unresolveVisible && (
+            <MenuItem
+              onClick={handleUnresolved}
+              data-cy="comment-menu-needs-resolution"
+            >
+              {t({
+                key: 'translations_comments_needs_resolution',
+                defaultValue: 'Not resolved',
+              })}
+            </MenuItem>
+          )}
+          {onDelete && (
+            <MenuItem onClick={handleDelete} data-cy="comment-menu-delete">
+              {t('translations_comments_delete_button')}
+            </MenuItem>
+          )}
         </Menu>
       )}
     </div>
