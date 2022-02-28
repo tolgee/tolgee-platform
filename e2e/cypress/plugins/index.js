@@ -13,12 +13,17 @@
 // the project's config changing)
 
 const dotenvPlugin = require('cypress-dotenv');
+const { isFileExist } = require('cy-verify-downloads');
 const path = require('path');
 
 /**
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on, config) => {
+  on('task', {
+    isFileExist,
+  });
+
   return dotenvPlugin(config, {
     path: path.resolve(__dirname, '../../.test.docker.env'),
   });

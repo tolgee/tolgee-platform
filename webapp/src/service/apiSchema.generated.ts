@@ -787,6 +787,7 @@ export interface components {
         | "REVIEWED"
         | "NEEDS_REVIEW"
       )[];
+      zip: boolean;
     };
     UploadedImageModel: {
       id: number;
@@ -901,7 +902,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -912,6 +912,7 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -3516,6 +3517,12 @@ export interface operations {
           | "REVIEWED"
           | "NEEDS_REVIEW"
         )[];
+        /**
+         * If false, it doesn't return zip of files, but it returns single file.
+         *
+         * This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response.
+         */
+        zip?: boolean;
       };
     };
     responses: {

@@ -12,7 +12,6 @@ import { GlobalActions } from './global/GlobalActions';
 import { MessageActions } from './global/MessageActions';
 import { RedirectionActions } from './global/RedirectionActions';
 import { SignUpActions } from './global/SignUpActions';
-import { ExportActions } from './project/ExportActions';
 import { ImportActions } from './project/ImportActions';
 import { TranslationActions } from './project/TranslationActions';
 import { ProjectInvitationActions } from './project/invitations/ProjectInvitationActions';
@@ -36,7 +35,6 @@ const appReducer = (appState, action) =>
     projectInvitation: implicitReducer.create(
       container.resolve(ProjectInvitationActions)
     ),
-    export: implicitReducer.create(container.resolve(ExportActions)),
     import: implicitReducer.create(container.resolve(ImportActions)),
   })(appState, action);
 
