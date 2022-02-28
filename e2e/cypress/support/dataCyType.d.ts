@@ -21,6 +21,13 @@ declare namespace DataCy {
         "dashboard-projects-list-item" |
         "dropzone" |
         "dropzone-inner" |
+        "export-format-selector" |
+        "export-format-selector-item" |
+        "export-language-selector" |
+        "export-language-selector-item" |
+        "export-state-selector" |
+        "export-state-selector-item" |
+        "export-submit-button" |
         "global-base-view-content" |
         "global-base-view-title" |
         "global-confirmation-cancel" |

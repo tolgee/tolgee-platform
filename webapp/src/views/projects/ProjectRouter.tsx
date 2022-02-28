@@ -5,8 +5,8 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { ProjectProvider } from 'tg.hooks/ProjectProvider';
 
 import { ProjectPage } from './ProjectPage';
-import { ExportView } from './imprt_export/ExportView';
-import { ImportView } from './imprt_export/ImportView';
+import { ExportView } from './export/ExportView';
+import { ImportView } from './import/ImportView';
 import { ProjectInviteView } from './invitations/ProjectInviteView';
 import { LanguageEditView } from './languages/LanguageEditView';
 import { ProjectPermissionsView } from './permissions/ProjectPermissionsVIew';

@@ -27,6 +27,7 @@ const detectLoop = (url) => {
 export class RequestOptions {
   disableNotFoundHandling? = false;
   disableAuthHandling? = false;
+  asBlob? = false;
 }
 
 @singleton()
@@ -199,7 +200,11 @@ export class ApiHttpService {
       .join('&');
   }
 
-  static async getResObject(r: Response) {
+  static async getResObject(r: Response, o?: RequestOptions) {
+    if (o?.asBlob) {
+      return r.blob();
+    }
+
     const textBody = await r.text();
     try {
       return JSON.parse(textBody);
