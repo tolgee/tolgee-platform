@@ -43,3 +43,5 @@ Cypress.Commands.add(
     return subject.find('input[name="' + name + '"]');
   }
 );
+
+require('cy-verify-downloads').addCustomCommand();

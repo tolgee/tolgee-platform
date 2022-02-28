@@ -67,7 +67,10 @@ export const useUrlSearchState = (
   const getNewSearch = useCallback(
     (value: any) => {
       const data = queryDecode(window.location.search);
-      const newValue = value === options?.defaultVal ? undefined : value;
+      const newValue =
+        JSON.stringify(value) === JSON.stringify(options?.defaultVal)
+          ? undefined
+          : value;
       const newSearch = queryEncode({
         ...data,
         [key]: newValue,

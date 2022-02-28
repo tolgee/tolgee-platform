@@ -15,6 +15,7 @@
     "@typescript-eslint/eslint-plugin": "^4.28.0",
     "@typescript-eslint/parser": "^4.28.0",
     "bcryptjs": "^2.4.3",
+    "cy-verify-downloads": "^0.0.7",
     "cypress": "^7.1.0",
     "cypress-dotenv": "^1.2.2",
     "cypress-file-upload": "^5.0.7",

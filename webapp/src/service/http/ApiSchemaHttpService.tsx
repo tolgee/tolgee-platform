@@ -26,7 +26,8 @@ export class ApiSchemaHttpService extends ApiHttpService {
   ) {
     return async (request: RequestParamsType<Url, Method>) => {
       const response = await ApiHttpService.getResObject(
-        await this.schemaRequestRaw(url, method, options)(request)
+        await this.schemaRequestRaw(url, method, options)(request),
+        options
       );
       return response as Promise<ResponseContent<Url, Method>>;
     };
