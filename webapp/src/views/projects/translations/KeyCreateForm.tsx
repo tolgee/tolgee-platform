@@ -1,6 +1,5 @@
 import { T, useTranslate } from '@tolgee/react';
 import { FastField, FieldArray, FieldProps, Formik, Field } from 'formik';
-import clsx from 'clsx';
 import * as Yup from 'yup';
 import { Box, Button, makeStyles, Typography } from '@material-ui/core';
 import { container } from 'tsyringe';
@@ -19,7 +18,6 @@ import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 import { Tag } from './Tags/Tag';
 import { TagInput } from './Tags/TagInput';
 import { FieldLabel } from './KeySingle/FieldLabel';
-import { TranslationVisual } from './TranslationVisual';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { useEffect } from 'react';
 
@@ -34,20 +32,23 @@ const useStyles = makeStyles((theme) => ({
     rowGap: theme.spacing(2),
     marginBottom: theme.spacing(2),
   },
-  split: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    alignItems: 'start',
-  },
   field: {
     background: theme.palette.grey[100],
-    border: `1px solid ${theme.palette.divider}`,
+    border: `1px solid ${theme.palette.grey[400]}`,
+    overflow: 'hidden',
+    borderRadius: 4,
+    '&:hover': {
+      border: `1px solid ${theme.palette.common.black}`,
+    },
     '&:focus-within': {
-      '-webkit-box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2)',
-      'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2)',
+      borderColor: theme.palette.primary.main,
+      borderWidth: 2,
     },
     '& > *': {
-      padding: theme.spacing(),
+      padding: 10,
+    },
+    '&:focus-within > *': {
+      padding: 9,
     },
   },
   editorWrapper: {
@@ -235,7 +236,7 @@ export const KeyCreateForm: React.FC<Props> = ({
                   {({ field, form, meta }) => (
                     <div key={lang.tag}>
                       <FieldLabel>{lang.name}</FieldLabel>
-                      <div className={clsx(classes.field, classes.split)}>
+                      <div className={classes.field}>
                         <div
                           className={classes.editorWrapper}
                           data-cy="translation-create-translation-input"
@@ -249,19 +250,7 @@ export const KeyCreateForm: React.FC<Props> = ({
                             minHeight={50}
                           />
                         </div>
-                        <TranslationVisual
-                          text={field.value}
-                          locale={lang.tag}
-                          width={0}
-                        />
                       </div>
-                      <Typography
-                        color="error"
-                        variant="caption"
-                        className={classes.error}
-                      >
-                        {meta.touched && meta.error}
-                      </Typography>
                     </div>
                   )}
                 </FastField>
