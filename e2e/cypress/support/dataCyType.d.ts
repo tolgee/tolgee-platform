@@ -158,6 +158,8 @@ declare namespace DataCy {
         "translation-tools-machine-translation-item" |
         "translation-tools-translation-memory-item" |
         "translations-add-button" |
+        "translations-auto-translated-clear-button" |
+        "translations-auto-translated-indicator" |
         "translations-cell-cancel-button" |
         "translations-cell-close" |
         "translations-cell-comments-button" |
