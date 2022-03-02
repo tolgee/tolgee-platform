@@ -1,3 +1,15 @@
+# [2.5.0](https://github.com/tolgee/server/compare/v2.4.0...v2.5.0) (2022-03-02)
+
+
+### Bug Fixes
+
+* Remove db startup population internal option ([c108306](https://github.com/tolgee/server/commit/c1083062a934acff2129c61dca20f6e5b9716c0a))
+
+
+### Features
+
+* Avatars ([6c10f48](https://github.com/tolgee/server/commit/6c10f48d73ab2493c3bbb349e6895cc8754ed3df))
+
 # [2.4.0](https://github.com/tolgee/server/compare/v2.3.3...v2.4.0) (2022-02-23)
 
 
