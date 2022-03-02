@@ -1,6 +1,8 @@
 package io.tolgee.security.rateLimits
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.lockingProvider.LockingProvider
+import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.security.rateLimis.RateLimit
 import io.tolgee.security.rateLimis.RateLimitLifeCyclePoint
 import org.springframework.beans.factory.annotation.Qualifier
@@ -17,7 +19,9 @@ class RateLimitsFilterFactory(
   private val rateLimitParamsProxy: RateLimitParamsProxy,
   @param:Qualifier("handlerExceptionResolver")
   private val resolver: HandlerExceptionResolver,
-  private val rateLimits: List<RateLimit>
+  private val rateLimits: List<RateLimit>,
+  private val currentDateProvider: CurrentDateProvider,
+  private val rateLimitProperties: RateLimitProperties
 ) {
   fun create(rateLimitLifeCyclePoint: RateLimitLifeCyclePoint): RateLimitsFilter {
     return RateLimitsFilter(
@@ -27,7 +31,9 @@ class RateLimitsFilterFactory(
       applicationContext = applicationContext,
       rateLimitsParamsProxy = rateLimitParamsProxy,
       lifeCyclePoint = rateLimitLifeCyclePoint,
-      rateLimits = rateLimits
+      rateLimits = rateLimits,
+      currentDateProvider = currentDateProvider,
+      rateLimitProperties = rateLimitProperties
     )
   }
 }

@@ -29,5 +29,6 @@ open class TolgeeProperties(
   var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),
   var postgresAutostart: PostgresAutostartProperties = PostgresAutostartProperties(),
   var sendInBlueProperties: SendInBlueProperties = SendInBlueProperties(),
-  open var import: ImportProperties = ImportProperties()
+  open var import: ImportProperties = ImportProperties(),
+  var rateLimitProperties: RateLimitProperties = RateLimitProperties()
 )

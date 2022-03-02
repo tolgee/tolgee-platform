@@ -39,6 +39,6 @@ class TagServiceTest : AbstractSpringTest() {
     tagService.deleteAllByKeyIdIn(ids)
     entityManager.flush()
     val time = System.currentTimeMillis() - start
-    assertThat(time).isLessThan(10000)
+    assertThat(time).isLessThan(20000)
   }
 }

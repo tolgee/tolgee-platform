@@ -1,5 +1,6 @@
 package io.tolgee.security.rateLimits
 
+import io.tolgee.component.CurrentDateProvider
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.node
@@ -15,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.cache.CacheManager
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.*
 import kotlin.system.measureTimeMillis
 
 abstract class AbstractRateLimitsTest : AuthorizedControllerTest() {
@@ -34,29 +36,69 @@ abstract class AbstractRateLimitsTest : AuthorizedControllerTest() {
   @Autowired
   lateinit var rateLimitParamsProxy: RateLimitParamsProxy
 
+  @MockBean
+  @Autowired
+  lateinit var currentDateProvider: CurrentDateProvider
+
+  private val oneHour = 60 * 60 * 1000
+  private val threads = 10
+  private val repeat = 10
+  private val bucketSize = threads * repeat
+
   /**
    * Utility method helping to test the rate limits
    */
-  protected fun testEndpoint(
-    threads: Int,
-    repeat: Int,
+  protected fun testRateLimit(
     keyPrefix: String,
-    timeToRefill: Int,
     expectedStatus: Int = 200,
     performAction: () -> ResultActions
   ) {
-    val bucketSize = threads * repeat + 1
-    // all other limits have to pass, so we have to set larger values
-    whenever(rateLimitParamsProxy.getBucketSize(any(), any())).thenReturn(bucketSize + 20000)
-    whenever(rateLimitParamsProxy.getTimeToRefill(any(), any())).thenReturn(timeToRefill + 20000)
-
-    // mock values for provided key prefix
-    whenever(rateLimitParamsProxy.getBucketSize(eq(keyPrefix), any())).thenReturn(bucketSize)
-    whenever(rateLimitParamsProxy.getTimeToRefill(eq(keyPrefix), any())).thenReturn(timeToRefill)
-
-    // init the bucket before time measurement, so we can subtract it afterwards
+    val startDate = initMocks(bucketSize, keyPrefix)
+    emptyBucketByRunningManyConcurrentRequests(performAction, expectedStatus)
+    checkThrowOutOfCredits(performAction, keyPrefix)
+    checkItRefillsBucket(startDate, performAction, expectedStatus)
     performAction().andExpect { status().`is`(expectedStatus) }
-    val executionTime = measureTimeMillis {
+  }
+
+  /**
+   * Utility method helping to test the rate limits
+   */
+  protected fun testRateLimitDisabled(
+    keyPrefix: String,
+    expectedStatus: Int = 200,
+    performAction: () -> ResultActions
+  ) {
+    initMocks(bucketSize, keyPrefix)
+    emptyBucketByRunningManyConcurrentRequests(performAction, expectedStatus)
+  }
+
+  private fun checkItRefillsBucket(
+    startDate: Date,
+    performAction: () -> ResultActions,
+    expectedStatus: Int
+  ) {
+    whenever(currentDateProvider.getDate()).thenReturn(Date(startDate.time + oneHour + 1))
+    performAction().andExpect { status().`is`(expectedStatus) }
+  }
+
+  private fun checkThrowOutOfCredits(
+    performAction: () -> ResultActions,
+    keyPrefix: String
+  ) {
+    performAction().andIsBadRequest.andAssertThatJson {
+      node("params[0]") {
+        node("bucketSize").isEqualTo(bucketSize)
+        node("timeToRefill").isEqualTo(oneHour)
+        node("keyPrefix").isEqualTo(keyPrefix)
+      }
+    }
+  }
+
+  private fun emptyBucketByRunningManyConcurrentRequests(
+    performAction: () -> ResultActions,
+    expectedStatus: Int
+  ) {
+    measureTimeMillis {
       runBlocking {
         repeat(threads) {
           launch {
@@ -67,14 +109,18 @@ abstract class AbstractRateLimitsTest : AuthorizedControllerTest() {
         }
       }
     }
-    performAction().andIsBadRequest.andAssertThatJson {
-      node("params[0]") {
-        node("bucketSize").isEqualTo(bucketSize)
-        node("timeToRefill").isEqualTo(1000)
-        node("keyPrefix").isEqualTo(keyPrefix)
-      }
-    }
-    Thread.sleep(1000 - executionTime)
-    performAction().andExpect { status().`is`(expectedStatus) }
+  }
+
+  private fun initMocks(bucketSize: Int, keyPrefix: String): Date {
+    val startDate = Date()
+    whenever(currentDateProvider.getDate()).thenReturn(startDate)
+    // all other limits have to pass, so we have to set larger values
+    whenever(rateLimitParamsProxy.getBucketSize(any(), any())).thenReturn(bucketSize + 20000)
+    whenever(rateLimitParamsProxy.getTimeToRefill(any(), any())).thenReturn(oneHour + 20000)
+
+    // mock values for provided key prefix
+    whenever(rateLimitParamsProxy.getBucketSize(eq(keyPrefix), any())).thenReturn(bucketSize)
+    whenever(rateLimitParamsProxy.getTimeToRefill(eq(keyPrefix), any())).thenReturn(oneHour)
+    return startDate
   }
 }

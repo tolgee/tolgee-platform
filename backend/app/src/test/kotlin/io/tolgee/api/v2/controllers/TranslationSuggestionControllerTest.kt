@@ -52,6 +52,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   }
 
   private fun initMocks() {
+    mockCurrentDate { Date() }
+
     val googleTranslationMock = mock() as Translation
     val awsTranslateTextResult = mock() as TranslateTextResult
 
@@ -141,8 +143,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it suggests machine translations with keyId`() {
-    mockCurrentDate { Date() }
-
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
       SuggestRequestDto(keyId = testData.beautifulKey.id, targetLanguageId = testData.germanLanguage.id)
@@ -158,8 +158,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it suggests machine translations with baseText`() {
-    mockCurrentDate { Date() }
-
     performAuthPost(
       "/v2/projects/${project.id}/suggest/machine-translations",
       SuggestRequestDto(baseText = "Yupee", targetLanguageId = testData.germanLanguage.id)
@@ -174,7 +172,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it suggests using just enabled services (AWS)`() {
-    mockCurrentDate { Date() }
     testData.enableAWS()
     testDataService.saveTestData(testData.root)
     performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
@@ -191,7 +188,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it suggests using just enabled services (Google, AWS)`() {
-    mockCurrentDate { Date() }
     machineTranslationProperties.freeCreditsAmount = 2000
     testData.enableBoth()
     testDataService.saveTestData(testData.root)
@@ -208,8 +204,6 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @Test
   @ProjectJWTAuthTestMethod
   fun `it consumes and refills bucket`() {
-    mockCurrentDate { Date() }
-
     val expectedCreditTaken = "Beautiful".length * 100
     testMtCreditConsumption(expectedCreditTaken)
 

@@ -40,6 +40,6 @@ class RedisRateLimitsTest : AbstractRateLimitsTest() {
 
   @Test
   fun `ip request limit works`() {
-    testEndpoint(10, 2, "ip", 1000) { performGet("/api/public/configuration") }
+    testRateLimit("ip") { performGet("/api/public/configuration") }
   }
 }
