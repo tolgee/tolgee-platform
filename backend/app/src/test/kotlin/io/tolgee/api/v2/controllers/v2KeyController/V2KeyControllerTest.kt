@@ -112,6 +112,8 @@ class V2KeyControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("id").isValidId
           node("text").isEqualTo("EN")
           node("state").isEqualTo("TRANSLATED")
+          node("auto").isEqualTo(false)
+          node("mtProvider").isEqualTo(null)
         }
         node("de") {
           node("id").isValidId
