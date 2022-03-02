@@ -14,7 +14,8 @@ class TranslationModelAssembler : RepresentationModelAssemblerSupport<Translatio
       id = entity.id,
       text = entity.text,
       state = entity.state,
-      auto = entity.auto
+      auto = entity.auto,
+      mtProvider = entity.mtProvider
     )
   }
 }

@@ -218,7 +218,7 @@ class V2TranslationsController(
       keyId = key.id,
       keyName = key.name,
       translations = translations.entries.associate { (languageTag, translation) ->
-        languageTag to TranslationModel(translation.id, translation.text, translation.state, translation.auto)
+        languageTag to translationModelAssembler.toModel(translation)
       }
     )
   }

@@ -71,7 +71,11 @@ class MtServiceManager(
     }
 
     return params.findInCache()?.let {
-      TranslateResult(it, 0)
+      TranslateResult(
+        translatedText = it,
+        actualPrice = 0,
+        usedService = serviceType
+      )
     } ?: let {
       val price = calculatePrice(params.text, params.serviceType)
       val result = TranslateResult(
