@@ -9,7 +9,7 @@ import {
 } from '../../common/translations';
 import { waitForGlobalLoading } from '../../common/loading';
 import { HOST } from '../../common/constants';
-import { assertHasState } from '../../common/state';
+import { getCell } from '../../common/state';
 
 describe('Translation memory', () => {
   let project: ProjectDTO = null;
@@ -54,10 +54,9 @@ describe('Translation memory', () => {
     cy.gcy('translations-table-cell')
       .contains('mytranslation translated with GOOGLE from en to cs')
       .should('be.visible');
-    assertHasState(
-      'mytranslation translated with GOOGLE from en to cs',
-      'Machine translated'
-    );
+    getAutoTranslatedIndicator(
+      'mytranslation translated with GOOGLE from en to cs'
+    ).should('be.visible');
   });
 
   it('translate with translation memory', () => {
@@ -73,7 +72,14 @@ describe('Translation memory', () => {
     cy.gcy('translations-table-cell')
       .filter(':contains("Studený přeložený text 1")')
       .should('have.length', 2);
-    assertHasState('Studený přeložený text 1', 'Machine translated');
+    getAutoTranslatedIndicator('Studený přeložený text 1')
+      .should('be.visible')
+      .findDcy('translations-auto-translated-clear-button')
+      .invoke('show')
+      .click();
+    // auto translated indicator is clearable
+    waitForGlobalLoading();
+    getAutoTranslatedIndicator('Studený přeložený text 1').should('not.exist');
   });
 
   const enableSettings = ({ translationMemory, machineTranslation }) => {
@@ -86,6 +92,12 @@ describe('Translation memory', () => {
       cy.gcy('languages-auto-machine-translation').click();
     }
     waitForGlobalLoading();
+  };
+
+  const getAutoTranslatedIndicator = (translationText: string) => {
+    return getCell(translationText).findDcy(
+      'translations-auto-translated-indicator'
+    );
   };
 
   const visit = () => {

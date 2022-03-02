@@ -67,6 +67,9 @@ export interface paths {
     put: operations["update"];
     delete: operations["delete_2"];
   };
+  "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
+    put: operations["dismissAutoTranslatedState"];
+  };
   "/v2/projects/{projectId}/translations": {
     get: operations["getTranslations"];
     put: operations["setTranslations"];
@@ -529,12 +532,9 @@ export interface components {
       /** Translation text */
       text?: string;
       /** State of translation */
-      state:
-        | "UNTRANSLATED"
-        | "MACHINE_TRANSLATED"
-        | "TRANSLATED"
-        | "REVIEWED"
-        | "NEEDS_REVIEW";
+      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "NEEDS_REVIEW";
+      /** Was translated using Translation Memory or Machine translation service? */
+      auto: boolean;
     };
     EditKeyDto: {
       name: string;
@@ -756,14 +756,12 @@ export interface components {
       filterKeyPrefix?: string;
       filterState?: (
         | "UNTRANSLATED"
-        | "MACHINE_TRANSLATED"
         | "TRANSLATED"
         | "REVIEWED"
         | "NEEDS_REVIEW"
       )[];
       filterStateNot?: (
         | "UNTRANSLATED"
-        | "MACHINE_TRANSLATED"
         | "TRANSLATED"
         | "REVIEWED"
         | "NEEDS_REVIEW"
@@ -889,6 +887,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -899,7 +898,6 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -960,14 +958,17 @@ export interface components {
       /** Translation text */
       text?: string;
       /** State of translation */
-      state:
-        | "UNTRANSLATED"
-        | "MACHINE_TRANSLATED"
-        | "TRANSLATED"
-        | "REVIEWED"
-        | "NEEDS_REVIEW";
+      state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "NEEDS_REVIEW";
+      /** Was translated using Translation Memory or Machine translation service? */
+      auto: boolean;
+      /** Which machine translation service was used to auto translate this */
+      mtProvider?: "GOOGLE" | "AWS";
       /** Count of translation comments */
       commentCount: number;
+      /** Count of unresolved translation comments */
+      unresolvedCommentCount: number;
+      /** Was translation memory used to translate this? */
+      fromTranslationMemory: boolean;
     };
     CollectionModelProjectTransferOptionModel: {
       _embedded?: {
@@ -1697,12 +1698,7 @@ export interface operations {
     parameters: {
       path: {
         translationId: number;
-        state:
-          | "UNTRANSLATED"
-          | "MACHINE_TRANSLATED"
-          | "TRANSLATED"
-          | "REVIEWED"
-          | "NEEDS_REVIEW";
+        state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED" | "NEEDS_REVIEW";
         projectId: number;
       };
     };
@@ -1828,6 +1824,34 @@ export interface operations {
     responses: {
       /** OK */
       200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  dismissAutoTranslatedState: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationModel"];
+        };
+      };
       /** Bad Request */
       400: {
         content: {
@@ -3264,7 +3288,6 @@ export interface operations {
         /** Filter translations with state */
         filterState?: (
           | "UNTRANSLATED"
-          | "MACHINE_TRANSLATED"
           | "TRANSLATED"
           | "REVIEWED"
           | "NEEDS_REVIEW"
@@ -3272,7 +3295,6 @@ export interface operations {
         /** Filter translations with state different from */
         filterStateNot?: (
           | "UNTRANSLATED"
-          | "MACHINE_TRANSLATED"
           | "TRANSLATED"
           | "REVIEWED"
           | "NEEDS_REVIEW"

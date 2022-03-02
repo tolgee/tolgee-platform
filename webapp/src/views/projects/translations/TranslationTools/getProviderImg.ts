@@ -1,4 +1,4 @@
-export const getProviderImg = (provider: string) => {
+export const getProviderImg = (provider: string | undefined) => {
   switch (provider) {
     case 'GOOGLE':
       return '/images/providers/google-translate.svg';

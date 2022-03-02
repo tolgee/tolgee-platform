@@ -29,7 +29,7 @@ describe('Projects Dashboard', () => {
       .findDcy('project-states-bar-bar')
       .should('be.visible')
       .findDcy('project-states-bar-state-progress')
-      .should('have.length', 5)
+      .should('have.length', 4)
       //wait for animation
       .wait(500)
       .should('be.visible');
