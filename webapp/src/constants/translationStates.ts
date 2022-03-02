@@ -1,6 +1,5 @@
 export type StateType =
   | 'UNTRANSLATED'
-  | 'MACHINE_TRANSLATED'
   | 'TRANSLATED'
   | 'REVIEWED'
   | 'NEEDS_REVIEW';
@@ -15,11 +14,6 @@ export const translationStates: StateStruct = {
     translationKey: 'translation_state_untranslated',
     color: '#C4C4C4',
     next: [],
-  },
-  MACHINE_TRANSLATED: {
-    translationKey: 'translation_state_machine_translated',
-    color: '#39E1FA',
-    next: ['REVIEWED', 'NEEDS_REVIEW'],
   },
   TRANSLATED: {
     translationKey: 'translation_state_translated',
