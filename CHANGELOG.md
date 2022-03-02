@@ -1,3 +1,10 @@
+# [2.6.0](https://github.com/tolgee/server/compare/v2.5.0...v2.6.0) (2022-03-02)
+
+
+### Features
+
+* Rate Limits disabling using externalized prop ([c70fc10](https://github.com/tolgee/server/commit/c70fc103b1ef5c6e24140e039ff28f95445bf6c8))
+
 # [2.5.0](https://github.com/tolgee/server/compare/v2.4.0...v2.5.0) (2022-03-02)
 
 
