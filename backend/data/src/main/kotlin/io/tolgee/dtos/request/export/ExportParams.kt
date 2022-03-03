@@ -68,5 +68,13 @@ For depth 2, resulting scopes are  "home" -> "header".
   @field:Parameter(
     description = """Filter translations with state different from""",
   )
-  var filterStateNot: List<TranslationState>? = null
+  var filterStateNot: List<TranslationState>? = null,
+
+  @field:Parameter(
+    description = """If false, it doesn't return zip of files, but it returns single file.
+      
+This is possible only when single language is exported. Otherwise it returns "400 - Bad Request" response. 
+    """
+  )
+  var zip: Boolean = true
 )

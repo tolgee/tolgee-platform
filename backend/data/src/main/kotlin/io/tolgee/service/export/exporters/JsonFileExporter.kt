@@ -1,5 +1,6 @@
 package io.tolgee.service.export.exporters
 
+import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.translation.Translation
@@ -10,7 +11,7 @@ class JsonFileExporter(
   override val translations: List<Translation>,
   override val exportParams: ExportParams
 ) : FileExporter {
-  override val fileExtension: String = "json"
+  override val fileExtension: String = ExportFormat.JSON.extension
 
   val result = mutableMapOf<String, JSONObject>()
 

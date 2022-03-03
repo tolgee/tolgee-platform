@@ -81,7 +81,9 @@ enum class Message {
   KEY_NOT_FOUND,
   ORGANIZATION_NOT_FOUND,
   CANNOT_FIND_BASE_LANGUAGE,
-  BASE_LANGUAGE_NOT_FOUND;
+  BASE_LANGUAGE_NOT_FOUND,
+  NO_EXPORTED_RESULT,
+  MULTIPLE_FILES_MUST_BE_ZIPPED;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())

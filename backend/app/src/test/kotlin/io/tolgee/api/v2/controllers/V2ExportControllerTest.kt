@@ -5,8 +5,10 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsOk
+import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -44,6 +46,33 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     assertThatJson(parsed["/en.json"]!!) {
       node("Z key").isEqualTo("A translation")
     }
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `it exports to single json`() {
+    initBaseData()
+    val response = performProjectAuthGet("export?languages=en&zip=false")
+    response.andPrettyPrint.andAssertThatJson {
+      node("Z key").isEqualTo("A translation")
+    }
+    assertThat(response.andReturn().response.getHeaderValue("content-type"))
+      .isEqualTo("application/json")
+    assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
+      .isEqualTo("""attachment; filename="en.json"""")
+  }
+
+  @Test
+  @Transactional
+  @ProjectJWTAuthTestMethod
+  fun `it exports to single xlifff`() {
+    initBaseData()
+    val response = performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
+    assertThat(response.andReturn().response.getHeaderValue("content-type"))
+      .isEqualTo("application/x-xliff+xml")
+    assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
+      .isEqualTo("""attachment; filename="en.xlf"""")
   }
 
   @Test
