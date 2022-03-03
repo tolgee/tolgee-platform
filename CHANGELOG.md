@@ -1,3 +1,10 @@
+## [2.7.1](https://github.com/tolgee/server/compare/v2.7.0...v2.7.1) (2022-03-03)
+
+
+### Bug Fixes
+
+* Allow single file export ([37e0c45](https://github.com/tolgee/server/commit/37e0c4544680b6d6542b2bfcda1cf2571615cbd9))
+
 # [2.6.0](https://github.com/tolgee/server/compare/v2.5.0...v2.6.0) (2022-03-02)
 
 
