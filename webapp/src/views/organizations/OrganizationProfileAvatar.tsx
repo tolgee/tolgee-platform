@@ -30,6 +30,7 @@ export const OrganizationProfileAvatar = () => {
         id: organization.id,
         name: organization.name,
       }}
+      autoAvatarType="INITIALS"
       onUpload={(blob: Blob) =>
         uploadLoadable.mutateAsync({
           path: {
