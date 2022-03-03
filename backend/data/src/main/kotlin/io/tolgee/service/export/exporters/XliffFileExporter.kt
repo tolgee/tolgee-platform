@@ -1,5 +1,6 @@
 package io.tolgee.service.export.exporters
 
+import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
@@ -20,7 +21,7 @@ class XliffFileExporter(
   baseTranslationsProvider: () -> List<Translation>,
   val baseLanguage: Language
 ) : FileExporter {
-  override val fileExtension: String = "xlf"
+  override val fileExtension: String = ExportFormat.XLIFF.extension
 
   val result = mutableMapOf<String, ResultItem>()
   private val baseTranslations: Map<String, Translation>
