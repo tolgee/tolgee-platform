@@ -151,6 +151,7 @@ const DashboardProjectListItem = (
             type: 'PROJECT',
             id: p.id,
           }}
+          autoAvatarType="INITIALS"
           size={50}
         />
       </div>

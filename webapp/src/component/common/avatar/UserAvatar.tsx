@@ -10,7 +10,6 @@ const useStyle = makeStyles((theme) => ({
     display: 'flex',
     width: SIZE,
     height: SIZE,
-    borderRadius: '50%',
     color: 'black',
     alignItems: 'center',
     justifyContent: 'center',
@@ -41,6 +40,8 @@ export const UserAvatar: FC = () => {
             name: user.name,
             type: 'USER',
           }}
+          circle={true}
+          autoAvatarType="IDENTICON"
           size={SIZE}
         />
       )}
