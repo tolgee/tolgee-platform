@@ -1,3 +1,10 @@
+## [2.7.2](https://github.com/tolgee/server/compare/v2.7.1...v2.7.2) (2022-03-04)
+
+
+### Bug Fixes
+
+* Project and Organization avatar -> initials ([e01c41b](https://github.com/tolgee/server/commit/e01c41bba62bf7c9f499c53ed6b78fb3fd4b9606))
+
 ## [2.7.1](https://github.com/tolgee/server/compare/v2.7.0...v2.7.1) (2022-03-03)
 
 
