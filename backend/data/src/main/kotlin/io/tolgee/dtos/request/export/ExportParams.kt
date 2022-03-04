@@ -61,14 +61,14 @@ For depth 2, resulting scopes are  "home" -> "header".
   var filterKeyPrefix: String? = null,
 
   @field:Parameter(
-    description = """Filter translations with state""",
+    description = """Filter translations with state. By default, everything except untranslated is exported.""",
   )
-  var filterState: List<TranslationState>? = null,
-
-  @field:Parameter(
-    description = """Filter translations with state different from""",
-  )
-  var filterStateNot: List<TranslationState>? = null,
+  var filterState: List<TranslationState>? = listOf(
+    TranslationState.TRANSLATED,
+    TranslationState.REVIEWED,
+    TranslationState.MACHINE_TRANSLATED,
+    TranslationState.NEEDS_REVIEW,
+  ),
 
   @field:Parameter(
     description = """If false, it doesn't return zip of files, but it returns single file.
@@ -77,4 +77,7 @@ This is possible only when single language is exported. Otherwise it returns "40
     """
   )
   var zip: Boolean = true
-)
+) {
+  val shouldContainUntranslated: Boolean
+    get() = this.filterState?.contains(TranslationState.UNTRANSLATED) != false
+}

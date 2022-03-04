@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
-import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsOk
@@ -54,6 +53,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `it exports to single json`() {
     initBaseData()
     val response = performProjectAuthGet("export?languages=en&zip=false")
+      .andDo { obj: MvcResult -> obj.asyncResult }
     response.andPrettyPrint.andAssertThatJson {
       node("Z key").isEqualTo("A translation")
     }
@@ -69,6 +69,8 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   fun `it exports to single xlifff`() {
     initBaseData()
     val response = performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
+      .andDo { obj: MvcResult -> obj.asyncResult }
+
     assertThat(response.andReturn().response.getHeaderValue("content-type"))
       .isEqualTo("application/x-xliff+xml")
     assertThat(response.andReturn().response.getHeaderValue("content-disposition"))
@@ -97,17 +99,19 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @ProjectJWTAuthTestMethod
   fun `it filters by keyId in`() {
     testData = TranslationsTestData()
-    testData.generateLotOfData(5000)
+    testData.generateLotOfData(1000)
     testDataService.saveTestData(testData.root)
     prepareUserAndProject(testData)
     commitTransaction()
 
     val time = measureTimeMillis {
-      val selectAllResult = performProjectAuthGet("translations/select-all").andIsOk.andGetContentAsString
-      val keyIds = jacksonObjectMapper().readValue<Map<String, List<Long>>>(selectAllResult)["ids"]?.take(4000)
-      val parsed = performExportPost(ExportParams(filterKeyId = keyIds))
+      val selectAllResult = performProjectAuthGet("translations/select-all")
+        .andIsOk
+        .andGetContentAsString
+      val keyIds = jacksonObjectMapper().readValue<Map<String, List<Long>>>(selectAllResult)["ids"]?.take(500)
+      val parsed = performExportPost(mapOf("filterKeyId" to keyIds))
       assertThatJson(parsed["/en.json"]!!) {
-        isObject.hasSize(3999)
+        isObject.hasSize(499)
       }
     }
 
@@ -121,7 +125,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     return parseZip(mvcResult.response.contentAsByteArray)
   }
 
-  private fun performExportPost(body: ExportParams): Map<String, String> {
+  private fun performExportPost(body: Any): Map<String, String> {
     val mvcResult = performProjectAuthPost("export", body)
       .andIsOk
       .andDo { obj: MvcResult -> obj.asyncResult }.andReturn()
