@@ -1,7 +1,10 @@
 package io.tolgee.service.export.exporters
 
-import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.export.ExportParams
+import io.tolgee.model.Language
+import io.tolgee.model.enums.TranslationState
+import io.tolgee.service.export.dataProvider.ExportKeyView
+import io.tolgee.service.export.dataProvider.ExportTranslationView
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.w3c.dom.Attr
@@ -20,16 +23,16 @@ class XliffFileExporterTest {
 
   @Test
   fun `exports translations`() {
-    val testData = TranslationsTestData()
-    val translations = testData.projectTranslations
+    val translations = getBaseTranslations()
+
     val params = ExportParams()
-    val baseProvider = { translations.filter { it.language === testData.englishLanguage } }
+    val baseProvider = { translations.filter { it.languageTag == "en" } }
 
     val files = XliffFileExporter(
-      testData.projectTranslations,
+      translations,
       exportParams = params,
       baseTranslationsProvider = baseProvider,
-      baseLanguage = testData.englishLanguage
+      baseLanguage = Language().apply { tag = "en" }
     ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -46,19 +49,30 @@ class XliffFileExporterTest {
     assertThat(transUnit.selectNodes("./target")[0].text).isEqualTo("A translation")
   }
 
+  private fun getBaseTranslations(): List<ExportTranslationView> {
+    val zKey = ExportKeyView(1, "Z key")
+    val aTranslation = ExportTranslationView(1, "A translation", TranslationState.TRANSLATED, zKey, "en")
+    zKey.translations["en"] = aTranslation
+
+    val aKey = ExportKeyView(1, "A key")
+    val zTranslation = ExportTranslationView(1, "Z translation", TranslationState.TRANSLATED, aKey, "de")
+    aKey.translations["de"] = zTranslation
+
+    return listOf(aTranslation, zTranslation)
+  }
+
   @Test
   fun `works with HTML`() {
-    val testData = TranslationsTestData()
-    testData.addTranslationWithHtml()
-    val translations = testData.projectTranslations
+    val translations = getHtmlTranslations()
+
     val params = ExportParams()
-    val baseProvider = { translations.filter { it.language === testData.englishLanguage } }
+    val baseProvider = { translations.filter { it.languageTag == "en" } }
 
     val files = XliffFileExporter(
-      testData.projectTranslations,
+      translations,
       exportParams = params,
       baseTranslationsProvider = baseProvider,
-      baseLanguage = testData.englishLanguage
+      baseLanguage = Language().apply { tag = "en" }
     ).produceFiles()
 
     assertThat(files).hasSize(2)
@@ -68,6 +82,28 @@ class XliffFileExporterTest {
     assertThat(valid.text).isEqualTo("Sweat jesus, this is HTML!")
     val invalid = document.selectNodes("//trans-unit[@id = 'html_key']/target")[0]
     assertThat(invalid.text).isEqualTo("Sweat jesus, this is invalid < HTML!")
+  }
+
+  private fun getHtmlTranslations(): List<ExportTranslationView> {
+    val key = ExportKeyView(1, "html_key")
+    val validHtmlTranslation = ExportTranslationView(
+      1,
+      "<p>Sweat jesus, this is HTML!</p>",
+      TranslationState.TRANSLATED,
+      key,
+      "en"
+    )
+    val invalidHtmlTranslation = ExportTranslationView(
+      1,
+      "Sweat jesus, this is invalid < HTML!",
+      TranslationState.TRANSLATED,
+      key,
+      "de"
+    )
+    key.translations["en"] = validHtmlTranslation
+    key.translations["de"] = invalidHtmlTranslation
+    val translations = listOf(validHtmlTranslation, invalidHtmlTranslation)
+    return translations
   }
 
   private fun assertHasTransUnitAndReturn(text: String, sourceLanguage: String, targetLanguage: String): Element {

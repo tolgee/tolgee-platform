@@ -1,16 +1,17 @@
 import { Field } from 'formik';
 import {
+  Checkbox,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  ListItemText,
   MenuItem,
   Select,
-  Checkbox,
-  ListItemText,
-  FormControl,
-  InputLabel,
-  FormHelperText,
 } from '@material-ui/core';
 import { useTranslate } from '@tolgee/react';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';
+import { exportableStates } from './ExportForm';
 
 type Props = {
   className: string;
@@ -36,14 +37,16 @@ export const StateSelector: React.FC<Props> = ({ className }) => {
               MenuProps={{ getContentAnchorEl: null }}
               multiple
             >
-              {Object.entries(translationStates).map(([value, meta]) => (
+              {exportableStates.map((state) => (
                 <MenuItem
-                  key={value}
-                  value={value}
+                  key={state}
+                  value={state}
                   data-cy="export-state-selector-item"
                 >
-                  <Checkbox checked={field.value.includes(value)} />
-                  <ListItemText primary={t(meta.translationKey)} />
+                  <Checkbox checked={field.value.includes(state)} />
+                  <ListItemText
+                    primary={t(translationStates[state].translationKey)}
+                  />
                 </MenuItem>
               ))}
             </Select>
