@@ -2,20 +2,20 @@ package io.tolgee.service.export
 
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.export.ExportParams
-import io.tolgee.dtos.request.export.ExportParamsNull
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
-import io.tolgee.model.translation.Translation
-import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.ProjectService
+import io.tolgee.service.export.dataProvider.ExportDataProvider
+import io.tolgee.service.export.dataProvider.ExportTranslationView
 import org.springframework.stereotype.Service
 import java.io.InputStream
+import javax.persistence.EntityManager
 
 @Service
 class ExportService(
-  private val translationRepository: TranslationRepository,
   private val fileExporterFactory: FileExporterFactory,
-  private val projectService: ProjectService
+  private val projectService: ProjectService,
+  private val entityManager: EntityManager
 ) {
   fun export(projectId: Long, exportParams: ExportParams): Map<String, InputStream> {
     val data = getDataForExport(projectId, exportParams)
@@ -41,18 +41,18 @@ class ExportService(
     exportParams: ExportParams,
     projectId: Long,
     baseLanguage: Language
-  ): () -> List<Translation> {
+  ): () -> List<ExportTranslationView> {
     return {
-      getDataForExport(projectId, exportParams.copy(languages = setOf(baseLanguage.tag)))
+      getDataForExport(projectId, exportParams.copy(languages = setOf(baseLanguage.tag), filterState = null))
     }
   }
 
-  private fun getDataForExport(projectId: Long, exportParams: ExportParams): List<Translation> {
-    return translationRepository.getDataForExport(
-      projectId = projectId,
-      params = exportParams,
-      pnn = ExportParamsNull(exportParams)
-    )
+  private fun getDataForExport(projectId: Long, exportParams: ExportParams): List<ExportTranslationView> {
+    return ExportDataProvider(
+      entityManager = entityManager,
+      exportParams = exportParams,
+      projectId = projectId
+    ).getData()
   }
 
   private fun getProjectBaseLanguage(projectId: Long): Language {

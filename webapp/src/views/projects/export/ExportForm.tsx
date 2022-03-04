@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Formik, FormikErrors } from 'formik';
 import { container } from 'tsyringe';
 import { useTranslate } from '@tolgee/react';
-import { CircularProgress, Box, makeStyles } from '@material-ui/core';
+import { Box, CircularProgress, makeStyles } from '@material-ui/core';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -17,13 +17,15 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 const messaging = container.resolve(MessageService);
 
-const allStates = Object.keys(translationStates);
+export const exportableStates = Object.keys(translationStates);
+exportableStates.splice(exportableStates.indexOf('MACHINE_TRANSLATED'), 1);
 
 const sortStates = (arr: StateType[]) =>
-  [...arr].sort((a, b) => allStates.indexOf(a) - allStates.indexOf(b));
+  [...arr].sort(
+    (a, b) => exportableStates.indexOf(a) - exportableStates.indexOf(b)
+  );
 
 const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
-  'MACHINE_TRANSLATED',
   'TRANSLATED',
   'REVIEWED',
   'NEEDS_REVIEW',

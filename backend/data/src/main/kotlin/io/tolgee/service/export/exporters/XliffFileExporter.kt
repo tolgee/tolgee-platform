@@ -4,7 +4,7 @@ import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
-import io.tolgee.model.translation.Translation
+import io.tolgee.service.export.dataProvider.ExportTranslationView
 import org.dom4j.Document
 import org.dom4j.DocumentException
 import org.dom4j.DocumentHelper
@@ -16,15 +16,15 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
 class XliffFileExporter(
-  override val translations: List<Translation>,
+  override val translations: List<ExportTranslationView>,
   override val exportParams: ExportParams,
-  baseTranslationsProvider: () -> List<Translation>,
+  baseTranslationsProvider: () -> List<ExportTranslationView>,
   val baseLanguage: Language
 ) : FileExporter {
   override val fileExtension: String = ExportFormat.XLIFF.extension
 
   val result = mutableMapOf<String, ResultItem>()
-  private val baseTranslations: Map<String, Translation>
+  private val baseTranslations: Map<String, ExportTranslationView>
 
   init {
     this.baseTranslations = baseTranslationsProvider().associateBy { it.key.name }
@@ -49,7 +49,11 @@ class XliffFileExporter(
     }
   }
 
-  private fun addToFileElement(fileBodyElement: Element, pathItems: MutableList<String>, translation: Translation) {
+  private fun addToFileElement(
+    fileBodyElement: Element,
+    pathItems: MutableList<String>,
+    translation: ExportTranslationView
+  ) {
     val transUnitElement = fileBodyElement.addElement("trans-unit")
       .addAttribute("id", pathItems.joinToString(exportParams.splitByScopeDelimiter.toString()))
       .addAttribute("datatype", "html")
@@ -62,7 +66,7 @@ class XliffFileExporter(
     }
   }
 
-  private fun getResultItem(path: List<String>, translation: Translation): ResultItem {
+  private fun getResultItem(path: List<String>, translation: ExportTranslationView): ResultItem {
     val absolutePath = translation.getFileAbsolutePath(path)
     return result[absolutePath] ?: let {
       val resultItem = createBaseDocumentStructure(translation)
@@ -71,7 +75,7 @@ class XliffFileExporter(
     }
   }
 
-  private fun createBaseDocumentStructure(translation: Translation): ResultItem {
+  private fun createBaseDocumentStructure(translation: ExportTranslationView): ResultItem {
     val document = DocumentHelper.createDocument()
     document.xmlEncoding = "UTF-8"
     val fileBodyElement = document.addElement("xliff")
@@ -80,7 +84,7 @@ class XliffFileExporter(
       .addElement("file")
       .addAttribute("datatype", "plaintext")
       .addAttribute("source-language", baseLanguage.tag)
-      .addAttribute("target-language", translation.language.tag)
+      .addAttribute("target-language", translation.languageTag)
       .addElement("body")
     return ResultItem(document, fileBodyElement)
   }
