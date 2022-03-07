@@ -1,33 +1,24 @@
-export type StateType =
-  | 'UNTRANSLATED'
-  | 'TRANSLATED'
-  | 'REVIEWED'
-  | 'NEEDS_REVIEW';
+export type StateType = 'UNTRANSLATED' | 'TRANSLATED' | 'REVIEWED';
 
 type StateStruct = Record<
   StateType,
-  { translationKey: string; color: string; next: StateType[] }
+  { translationKey: string; color: string; next: StateType | null }
 >;
 
 export const translationStates: StateStruct = {
   UNTRANSLATED: {
     translationKey: 'translation_state_untranslated',
     color: '#C4C4C4',
-    next: [],
+    next: null,
   },
   TRANSLATED: {
     translationKey: 'translation_state_translated',
     color: '#FFCE00',
-    next: ['REVIEWED'],
+    next: 'REVIEWED',
   },
   REVIEWED: {
     translationKey: 'translation_state_reviewed',
     color: '#17AD18',
-    next: ['NEEDS_REVIEW'],
-  },
-  NEEDS_REVIEW: {
-    translationKey: 'translation_state_needs_review',
-    color: '#E80000',
-    next: ['REVIEWED'],
+    next: 'TRANSLATED',
   },
 };

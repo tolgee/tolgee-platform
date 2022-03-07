@@ -17,6 +17,7 @@ import { EditMode } from './context/types';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
+type State = components['schemas']['TranslationViewModel']['state'];
 
 const useStyles = makeStyles((theme) => {
   const borderColor = theme.palette.grey[200];
@@ -75,7 +76,7 @@ type Props = {
   onCmdSave: () => void;
   onCancel: (force: boolean) => void;
   onStateChange: (state: StateType) => void;
-  state: StateType;
+  state: State;
   autofocus: boolean;
   className?: string;
   mode: EditMode;
@@ -108,7 +109,7 @@ export const TranslationOpened: React.FC<Props> = ({
   const classes = useStyles();
   const dispatch = useTranslationsDispatch();
 
-  const nextState = translationStates[state]?.next[0];
+  const nextState = translationStates[state]?.next;
 
   const handleStateChange = () => {
     if (nextState) {

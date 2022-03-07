@@ -113,7 +113,8 @@ export const useTranslationsShortcuts = () => {
       )?.translations[focused.language];
 
       const newState =
-        translation?.state && translationStates[translation.state].next[0];
+        (translation?.state && translationStates[translation.state]?.next) ||
+        'TRANSLATED';
 
       if (translation && newState) {
         return (e: KeyboardEvent) => {

@@ -2,8 +2,11 @@ import { makeStyles, Tooltip } from '@material-ui/core';
 import clsx from 'clsx';
 import { T } from '@tolgee/react';
 
-import { StateType, translationStates } from 'tg.constants/translationStates';
+import { translationStates } from 'tg.constants/translationStates';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
+import { components } from 'tg.service/apiSchema.generated';
+
+type State = components['schemas']['TranslationViewModel']['state'];
 
 const useStyles = makeStyles({
   state: {
@@ -21,7 +24,7 @@ const useStyles = makeStyles({
 });
 
 type Props = {
-  state?: StateType;
+  state?: State;
   onResize: React.MouseEventHandler<HTMLDivElement>;
 };
 
@@ -37,15 +40,16 @@ export const CellStateBar: React.FC<Props> = ({ state, onResize }) => {
         onMouseUp={stopAndPrevent()}
         style={{
           borderLeft: `4px solid ${
-            translationStates[state || 'UNTRANSLATED']?.color
+            translationStates[state || 'UNTRANSLATED']?.color ||
+            translationStates['UNTRANSLATED'].color
           }`,
         }}
       />
     </div>
   );
 
-  return state ? (
-    <Tooltip title={<T noWrap>{translationStates[state]?.translationKey}</T>}>
+  return state && translationStates[state] ? (
+    <Tooltip title={<T noWrap>{translationStates[state].translationKey}</T>}>
       {getContent()}
     </Tooltip>
   ) : (
