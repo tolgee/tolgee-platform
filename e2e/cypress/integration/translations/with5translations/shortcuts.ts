@@ -65,7 +65,7 @@ describe('Shortcuts', () => {
     shortcut([action, 'e']);
     assertHasState('Studený přeložený text 1', 'Reviewed');
     shortcut([action, 'e']);
-    assertHasState('Studený přeložený text 1', 'Needs review');
+    assertHasState('Studený přeložený text 1', 'Translated');
   });
 
   it(

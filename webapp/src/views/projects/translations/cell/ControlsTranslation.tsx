@@ -5,9 +5,12 @@ import { Edit, Comment } from '@material-ui/icons';
 import { T } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
+import { components } from 'tg.service/apiSchema.generated';
 import { useCellStyles } from './styles';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
+
+type State = components['schemas']['TranslationViewModel']['state'];
 
 const useStyles = makeStyles({
   badge: {
@@ -19,7 +22,7 @@ const useStyles = makeStyles({
 });
 
 type ControlsProps = {
-  state?: StateType;
+  state?: State;
   editEnabled?: boolean;
   onEdit?: () => void;
   onStateChange?: (state: StateType) => void;
