@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { StateType } from 'tg.constants/translationStates';
 import { useEditableRow } from '../useEditableRow';
 import { TranslationVisual } from '../TranslationVisual';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
@@ -12,6 +11,7 @@ import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationOpened } from '../TranslationOpened';
 import { AutoTranslationIndicator } from '../cell/AutoTranslationIndicator';
+import { StateType } from 'tg.constants/translationStates';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =

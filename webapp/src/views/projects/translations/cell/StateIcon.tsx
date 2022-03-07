@@ -1,15 +1,16 @@
-import { CheckCircleOutlined, ErrorOutlined } from '@material-ui/icons';
+import { CheckCircleOutlined, CheckCircle } from '@material-ui/icons';
+import { components } from 'tg.service/apiSchema.generated';
 
-import { StateType } from 'tg.constants/translationStates';
+type State = components['schemas']['TranslationViewModel']['state'];
 
 type StateButtonProps = React.ComponentProps<typeof CheckCircleOutlined> & {
-  state: StateType;
+  state: State | undefined;
 };
 
 export const StateIcon = ({ state, ...props }: StateButtonProps) => {
   switch (state) {
-    case 'NEEDS_REVIEW':
-      return <ErrorOutlined {...props} />;
+    case 'REVIEWED':
+      return <CheckCircle {...props} />;
     default:
       return <CheckCircleOutlined {...props} />;
   }
