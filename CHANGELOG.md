@@ -1,3 +1,10 @@
+## [2.8.1](https://github.com/tolgee/server/compare/v2.8.0...v2.8.1) (2022-03-08)
+
+
+### Bug Fixes
+
+* Display correctly comments in state "RESOLUTION_NOT_NEEDED" ([425b8d0](https://github.com/tolgee/server/commit/425b8d01773589b1e125516068ff89a486435b95))
+
 # [2.8.0](https://github.com/tolgee/server/compare/v2.7.2...v2.8.0) (2022-03-08)
 
 
