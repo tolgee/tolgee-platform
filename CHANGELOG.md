@@ -1,3 +1,15 @@
+# [2.8.0](https://github.com/tolgee/server/compare/v2.7.2...v2.8.0) (2022-03-08)
+
+
+### Bug Fixes
+
+* Comments avatar ([fd1166a](https://github.com/tolgee/server/commit/fd1166a30699e70bd09343d9fac8c8393c942c07))
+
+
+### Features
+
+* Add comments resolution ([8b0a2c3](https://github.com/tolgee/server/commit/8b0a2c346dffa663c79da0b975510f46ceb36a22))
+
 ## [2.7.2](https://github.com/tolgee/server/compare/v2.7.1...v2.7.2) (2022-03-04)
 
 
