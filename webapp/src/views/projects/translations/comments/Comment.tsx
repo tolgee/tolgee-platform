@@ -98,7 +98,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
   const isToday = date.toLocaleDateString() === new Date().toLocaleDateString();
   const t = useTranslate();
 
-  const unresolveVisible = data.state === 'RESOLVED' && onChangeState;
+  const unresolveVisible = data.state !== 'NEEDS_RESOLUTION' && onChangeState;
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -129,7 +129,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
   return (
     <div
       className={clsx(classes.container, {
-        [classes.unresolved]: data.state !== 'RESOLVED',
+        [classes.unresolved]: data.state === 'NEEDS_RESOLUTION',
       })}
       data-cy="comment"
     >
@@ -145,7 +145,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
       </Tooltip>
       <pre
         className={clsx(classes.text, {
-          [classes.textUnresolved]: data.state !== 'RESOLVED',
+          [classes.textUnresolved]: data.state === 'NEEDS_RESOLUTION',
         })}
         data-cy="comment-text"
       >
@@ -169,7 +169,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
           </SmallActionButton>
         )}
       </div>
-      {data.state !== 'RESOLVED' && onChangeState && (
+      {data.state === 'NEEDS_RESOLUTION' && onChangeState && (
         <Tooltip
           title={t({
             key: 'translations_comments_resolve',
