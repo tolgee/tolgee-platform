@@ -135,7 +135,12 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
     >
       <Tooltip title={data.author.name || data.author.username}>
         <div className={classes.avatar}>
-          <AvatarImg owner={{ ...data.author, type: 'USER' }} size={24} />
+          <AvatarImg
+            owner={{ ...data.author, type: 'USER' }}
+            size={24}
+            autoAvatarType="IDENTICON"
+            circle
+          />
         </div>
       </Tooltip>
       <pre
