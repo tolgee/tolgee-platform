@@ -65,4 +65,27 @@ class ProjectBuilder(
   fun setAvatar(filePath: String) {
     data.avatarFile = ClassPathResource(filePath, this.javaClass.classLoader)
   }
+
+  fun addEnglish(): LanguageBuilder {
+    return addLanguage {
+      name = "English"
+      tag = "en"
+    }
+  }
+
+  fun addGerman(): LanguageBuilder {
+    return addLanguage {
+      name = "German"
+      originalName = "Deutsch"
+      tag = "de"
+    }
+  }
+
+  fun addCzech(): LanguageBuilder {
+    return addLanguage {
+      name = "Czech"
+      originalName = "Čeština"
+      tag = "cs"
+    }
+  }
 }

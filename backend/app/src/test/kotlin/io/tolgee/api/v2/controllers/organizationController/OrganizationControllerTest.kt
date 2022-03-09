@@ -1,9 +1,7 @@
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.organizationController
 
 import io.tolgee.dtos.request.organization.OrganizationDto
-import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
-import io.tolgee.exceptions.BadRequestException
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -17,7 +15,6 @@ import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
-import io.tolgee.testing.assertions.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -376,82 +373,6 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
             projectsNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
           }
         }
-    }
-  }
-
-  @Test
-  fun testGetAllInvitations() {
-    val helloUser = dbPopulator.createUserIfNotExists("hellouser")
-
-    this.organizationService.create(dummyDto, helloUser).let { organization ->
-      val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
-      loginAsUser("hellouser")
-      performAuthGet("/v2/organizations/${organization.id}/invitations")
-        .andIsOk.andAssertThatJson.let {
-          it.node("_embedded.organizationInvitations").let { projectsNode ->
-            projectsNode.isArray.hasSize(1)
-            projectsNode.node("[0].id").isEqualTo(invitation.id)
-          }
-        }
-    }
-  }
-
-  @Test
-  fun testInviteUser() {
-    val helloUser = dbPopulator.createUserIfNotExists("hellouser")
-    loginAsUser(helloUser.username)
-
-    this.organizationService.create(dummyDto, helloUser).let { organization ->
-      val body = OrganizationInviteUserDto(roleType = OrganizationRoleType.MEMBER)
-      performAuthPut("/v2/organizations/${organization.id}/invite", body).andPrettyPrint.andAssertThatJson.let {
-        it.node("code").isString.hasSize(50).satisfies {
-          invitationService.getInvitation(it) // it throws on not found
-        }
-        it.node("type").isEqualTo("MEMBER")
-      }
-    }
-  }
-
-  @Test
-  fun testAcceptInvitation() {
-    val helloUser = dbPopulator.createUserIfNotExists("hellouser")
-
-    this.organizationService.create(dummyDto, helloUser).let { organization ->
-      val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
-      val invitedUser = dbPopulator.createUserIfNotExists("invitedUser")
-      loginAsUser(invitedUser.username)
-      performAuthGet("/api/invitation/accept/${invitation.code}").andIsOk
-      assertThatThrownBy { invitationService.getInvitation(invitation.code) }
-        .isInstanceOf(BadRequestException::class.java)
-      organizationRoleService.isUserMemberOrOwner(invitedUser.id, organization.id).let {
-        assertThat(it).isTrue
-      }
-    }
-  }
-
-  @Test
-  fun `it prevents accepting invitation again`() {
-    val helloUser = dbPopulator.createUserIfNotExists("hellouser")
-
-    this.organizationService.create(dummyDto, helloUser).let { organization ->
-      val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
-      val invitedUser = dbPopulator.createUserIfNotExists("invitedUser")
-      this.organizationRoleService.grantMemberRoleToUser(invitedUser, organization)
-      loginAsUser(invitedUser.username)
-      performAuthGet("/api/invitation/accept/${invitation.code}").andIsBadRequest
-    }
-  }
-
-  @Test
-  fun testDeleteInvitation() {
-    val helloUser = dbPopulator.createUserIfNotExists("hellouser")
-
-    this.organizationService.create(dummyDto, helloUser).let { organization ->
-      val invitation = invitationService.create(organization, OrganizationRoleType.MEMBER)
-      loginAsUser(helloUser.username)
-      performAuthDelete("/api/invitation/${invitation.id!!}", null).andIsOk
-      assertThatThrownBy { invitationService.getInvitation(invitation.code) }
-        .isInstanceOf(BadRequestException::class.java)
     }
   }
 }

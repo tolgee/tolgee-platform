@@ -32,7 +32,7 @@ class TranslationsE2eDataController(
   @GetMapping(value = ["/generate/{projectId}/{number}"])
   @Transactional
   fun generateKeys(@PathVariable projectId: Long, @PathVariable number: Long) {
-    val project = projectService.get(projectId).orElseThrow {
+    val project = projectService.find(projectId).orElseThrow {
       NotFoundException()
     }
     (0..99).forEach { num ->

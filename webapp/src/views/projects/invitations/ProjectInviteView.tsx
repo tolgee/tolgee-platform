@@ -19,7 +19,6 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { ProjectInvitationActions } from 'tg.store/project/invitations/ProjectInvitationActions';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 
@@ -28,8 +27,6 @@ const messaging = container.resolve(MessageService);
 type FormType = {
   type: string;
 };
-
-const actions = container.resolve(ProjectInvitationActions);
 
 export const ProjectInviteView: FunctionComponent = () => {
   const match = useRouteMatch();
@@ -74,10 +71,9 @@ export const ProjectInviteView: FunctionComponent = () => {
         },
       },
       {
-        onSuccess: (code) => {
-          actions.setCode.dispatch(code);
+        onSuccess: (inv) => {
           invitations.refetch();
-          setCode(code);
+          setCode(inv.code);
         },
       }
     );
@@ -88,7 +84,6 @@ export const ProjectInviteView: FunctionComponent = () => {
       { path: { invitationId } },
       {
         onSuccess: () => {
-          actions.setCode.dispatch('');
           invitations.refetch();
         },
       }

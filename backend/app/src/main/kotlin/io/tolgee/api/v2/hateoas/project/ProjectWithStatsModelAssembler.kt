@@ -41,8 +41,8 @@ class ProjectWithStatsModelAssembler(
       userOwner = view.userOwner?.let { userAccountModelAssembler.toModel(it) },
       directPermissions = view.directPermissions,
       computedPermissions = permissionService.computeProjectPermissionType(
-        view.organizationRole, view.organizationBasePermissions, view.directPermissions
-      ),
+        view.organizationRole, view.organizationBasePermissions, view.directPermissions, null
+      ).type,
       stats = view.stats,
       languages = view.languages.map { languageModelAssembler.toModel(it) }
     ).add(link).also { model ->

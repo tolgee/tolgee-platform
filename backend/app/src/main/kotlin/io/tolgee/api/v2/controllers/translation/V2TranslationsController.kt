@@ -22,7 +22,6 @@ import io.tolgee.dtos.request.translation.SelectAllResponse
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
@@ -106,10 +105,9 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translations for existing key")
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    val key = keyService.get(
-      projectHolder.project.id,
-      PathDTO.fromFullPath(dto.key)
-    ).orElseThrow { NotFoundException() }
+    val key = keyService.get(projectHolder.project.id, dto.key)
+    securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)
+
     val translations = translationService.setForKey(key, dto.translations)
     return getSetTranslationsResponse(key, translations)
   }
@@ -119,7 +117,7 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    checkScopesIfKeyExists(dto)
+    checkEditScopeIfKeyExists(dto)
     val key = keyService.getOrCreateKey(projectHolder.projectEntity, PathDTO.fromFullPath(dto.key))
     val translations = translationService.setForKey(key, dto.translations)
     return getSetTranslationsResponse(key, translations)
@@ -130,8 +128,9 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translation state")
   fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {
-    val translation = translationService.find(translationId) ?: throw NotFoundException()
+    val translation = translationService.get(translationId)
     translation.checkFromProject()
+    securityService.checkLanguageTranslatePermission(translation)
     return translationModelAssembler.toModel(translationService.setState(translation, state))
   }
 
@@ -184,7 +183,7 @@ class V2TranslationsController(
       !authenticationFacade.isApiKeyAuthentication ||
       authenticationFacade.apiKey.scopesEnum.contains(ApiScope.SCREENSHOTS_VIEW)
     ) {
-      return screenshotService.getKeysWithScreenshots(keyIds).map { it.id to it.screenshots }.toMap()
+      return screenshotService.getKeysWithScreenshots(keyIds).associate { it.id to it.screenshots }
     }
     return null
   }
@@ -200,8 +199,8 @@ class V2TranslationsController(
     )
   }
 
-  private fun checkScopesIfKeyExists(dto: SetTranslationsWithKeyDto) {
-    keyService.get(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
+  private fun checkEditScopeIfKeyExists(dto: SetTranslationsWithKeyDto) {
+    keyService.find(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
       if (authenticationFacade.isApiKeyAuthentication) {
         securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
       }
@@ -209,7 +208,7 @@ class V2TranslationsController(
   }
 
   private fun Translation.checkFromProject() {
-    if (this.key.project?.id != projectHolder.project.id) {
+    if (this.key.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
     }
   }

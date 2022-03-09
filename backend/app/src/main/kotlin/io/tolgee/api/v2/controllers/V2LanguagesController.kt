@@ -69,7 +69,7 @@ class V2LanguagesController(
     @PathVariable("projectId") projectId: Long,
     @RequestBody @Valid dto: LanguageDto
   ): LanguageModel {
-    val project = projectService.get(projectId).orElseThrow { NotFoundException() }
+    val project = projectService.find(projectId).orElseThrow { NotFoundException() }
     securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.MANAGE)
     languageValidator.validateCreate(dto, project)
     val language = languageService.createLanguage(dto, project!!)

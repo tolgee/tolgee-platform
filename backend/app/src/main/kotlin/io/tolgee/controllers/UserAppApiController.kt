@@ -93,7 +93,7 @@ class UserAppApiController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto) {
     val apiKey = authenticationFacade.apiKey
-    val project = projectService.get(apiKey.project.id).orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }!!
+    val project = projectService.find(apiKey.project.id).orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }!!
     val key = keyService.getOrCreateKey(project, PathDTO.fromFullPath(dto.key))
     translationService.setForKey(key, dto.translations)
   }

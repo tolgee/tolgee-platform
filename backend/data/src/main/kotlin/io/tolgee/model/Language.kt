@@ -51,7 +51,7 @@ class Language : StandardAuditModel() {
   var translations: MutableSet<Translation>? = null
 
   @ManyToOne
-  var project: Project? = null
+  lateinit var project: Project
 
   @Column(nullable = false)
   @field:NotEmpty

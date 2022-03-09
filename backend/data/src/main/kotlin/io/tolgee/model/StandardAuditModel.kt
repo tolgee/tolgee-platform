@@ -33,6 +33,11 @@ abstract class StandardAuditModel : AuditModel() {
 
     other as StandardAuditModel
 
+    // entity is not stored yet, so ID can be null for different entities
+    if (this.id == 0L && other.id == 0L) {
+      return false
+    }
+
     return this.id == other.id
   }
 

@@ -81,16 +81,16 @@ class KeyController(
   @Operation(summary = "Returns key with specified id")
   @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
   fun getDeprecated(@PathVariable("id") id: Long?): DeprecatedKeyDto {
-    val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-    securityService.checkAnyProjectPermission(key.project!!.id)
+    val key = keyService.find(id!!).orElseThrow { NotFoundException() }
+    securityService.checkAnyProjectPermission(key.project.id)
     return DeprecatedKeyDto(key.name)
   }
 
   @DeleteMapping(value = ["/{id}"])
   @Operation(summary = "Deletes key with specified id")
   fun delete(@PathVariable id: Long?) {
-    val key = keyService.get(id!!).orElseThrow { NotFoundException() }
-    securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
+    val key = keyService.find(id!!).orElseThrow { NotFoundException() }
+    securityService.checkProjectPermission(key.project.id, Permission.ProjectPermissionType.EDIT)
     keyService.delete(id)
   }
 
@@ -99,7 +99,7 @@ class KeyController(
   @Operation(summary = "Deletes multiple keys by their IDs")
   fun delete(@RequestBody ids: Set<Long>?) {
     for (key in keyService.get(ids!!)) {
-      securityService.checkProjectPermission(key.project!!.id, Permission.ProjectPermissionType.EDIT)
+      securityService.checkProjectPermission(key.project.id, Permission.ProjectPermissionType.EDIT)
     }
     keyService.deleteMultiple(ids)
   }
