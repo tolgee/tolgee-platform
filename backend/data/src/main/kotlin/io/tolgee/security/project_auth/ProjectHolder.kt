@@ -13,7 +13,7 @@ class ProjectHolder(
   private val projectService: ProjectService
 ) {
   val projectEntity: Project by lazy {
-    projectService.get(project.id).orElseThrow { NotFoundException() }
+    projectService.find(project.id).orElseThrow { NotFoundException() }
   }
 
   lateinit var project: ProjectDto

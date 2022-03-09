@@ -15,6 +15,7 @@ import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleMode
 import io.tolgee.api.v2.hateoas.project.ProjectModel
 import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
@@ -215,16 +216,23 @@ class OrganizationController(
   @PutMapping("/{id:[0-9]+}/invite")
   @Operation(summary = "Generates user invitation link for organization")
   fun inviteUser(
-    @RequestBody @Valid invitation: OrganizationInviteUserDto,
+    @RequestBody @Valid dto: OrganizationInviteUserDto,
     @PathVariable("id") id: Long
   ): OrganizationInvitationModel {
     organizationRoleService.checkUserIsOwner(id)
 
-    return organizationService.find(id)?.let { organization ->
-      invitationService.create(organization, invitation.roleType).let {
-        organizationInvitationModelAssembler.toModel(it)
-      }
-    } ?: throw NotFoundException()
+    val organization = organizationService.get(id)
+
+    val invitation = invitationService.create(
+      CreateOrganizationInvitationParams(
+        organization = organization,
+        type = dto.roleType,
+        email = dto.email,
+        name = dto.name
+      )
+    )
+
+    return organizationInvitationModelAssembler.toModel(invitation)
   }
 
   @GetMapping("/{organizationId}/invitations")

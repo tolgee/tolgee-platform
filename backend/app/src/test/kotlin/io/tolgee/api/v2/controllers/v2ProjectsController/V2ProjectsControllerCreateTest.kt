@@ -66,7 +66,7 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
     val request = CreateProjectDTO("aaa", listOf(languageDTO), organizationId = organization.id)
     performAuthPost("/v2/projects", request).andIsOk.andAssertThatJson {
       node("id").asNumber().satisfies {
-        projectService.get(it.toLong()).get().let {
+        projectService.find(it.toLong()).get().let {
           assertThat(it.organizationOwner?.id).isEqualTo(organization.id)
         }
       }
@@ -113,7 +113,7 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
       .andReturn()
     val projectDto = projectService.findAllPermitted(userAccount!!).find { it.name == "aaa" }
     assertThat(projectDto).isNotNull
-    val project = projectService.get(projectDto!!.id!!).get()
+    val project = projectService.find(projectDto!!.id!!).get()
     assertThat(project.languages).isNotEmpty
     val language = project.languages.stream().findFirst().orElse(null)
     assertThat(language).isNotNull
@@ -142,7 +142,7 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
   fun `sets proper baseLanguage on create when provided`() {
     performAuthPost("/v2/projects", createForLanguagesDto).andPrettyPrint.andIsOk.andAssertThatJson {
       node("id").asNumber().satisfies {
-        assertThat(projectService.get(it.toLong()).orElse(null)!!.baseLanguage!!.tag)!!.isEqualTo("cs")
+        assertThat(projectService.find(it.toLong()).orElse(null)!!.baseLanguage!!.tag)!!.isEqualTo("cs")
       }
     }
   }
@@ -152,7 +152,7 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
     performAuthPost("/v2/projects", createForLanguagesDto.copy(baseLanguageTag = null))
       .andIsOk.andAssertThatJson {
         node("id").asNumber().satisfies {
-          assertThat(projectService.get(it.toLong()).orElse(null)!!.baseLanguage!!.tag)!!
+          assertThat(projectService.find(it.toLong()).orElse(null)!!.baseLanguage!!.tag)!!
             .isEqualTo("en")
         }
       }

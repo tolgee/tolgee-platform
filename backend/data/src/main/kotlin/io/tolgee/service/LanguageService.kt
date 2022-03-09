@@ -23,6 +23,7 @@ class LanguageService(
   private val languageRepository: LanguageRepository,
   private val entityManager: EntityManager,
   private val projectService: ProjectService,
+  private val permissionService: PermissionService
 ) {
   @set:Autowired
   @set:Lazy
@@ -44,8 +45,9 @@ class LanguageService(
   @Transactional
   fun deleteLanguage(id: Long) {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
-    translationService!!.deleteAllByLanguage(language.id)
+    translationService.deleteAllByLanguage(language.id)
     mtServiceConfigService.deleteAllByTargetLanguageId(language.id)
+    permissionService.onLanguageDeleted(language)
     languageRepository.delete(language)
   }
 
@@ -113,5 +115,9 @@ class LanguageService(
 
   fun getPaged(projectId: Long, pageable: Pageable): Page<Language> {
     return this.languageRepository.findAllByProjectId(projectId, pageable)
+  }
+
+  fun findByIdIn(ids: Iterable<Long>): List<Language> {
+    return languageRepository.findAllById(ids)
   }
 }

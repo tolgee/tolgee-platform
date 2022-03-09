@@ -32,7 +32,7 @@ class SocketIoProjectProvider(
         val userAccount = jwtTokenProvider.getUser(jwtToken)
         val projectId = projectIdString.toLong()
         securityService.checkAnyProjectPermission(projectId = projectId, userAccount.id)
-        return projectService.get(projectId).orElseThrow { NotFoundException() }
+        return projectService.find(projectId).orElseThrow { NotFoundException() }
       }
     } ?: let { throw AuthenticationException(io.tolgee.constants.Message.GENERAL_JWT_ERROR) }
   }

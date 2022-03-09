@@ -220,7 +220,7 @@ export const addScreenshot = (projectId: number, key: string, path: string) => {
 export const getParsedEmailVerification = () =>
   getAllEmails().then((r) => {
     return {
-      verifyEmailLink: r[0].text.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
+      verifyEmailLink: r[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1'),
       fromAddress: r[0].from.value[0].address,
       toAddress: r[0].to.value[0].address,
       text: r[0].text,

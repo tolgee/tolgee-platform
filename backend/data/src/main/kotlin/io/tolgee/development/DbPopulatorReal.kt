@@ -191,7 +191,7 @@ class DbPopulatorReal(
   }
 
   private fun createApiKey(project: Project) {
-    val (_, user) = project.permissions.stream().findAny().orElseThrow { NotFoundException() }
+    val user = project.permissions.stream().findAny().orElseThrow { NotFoundException() }.user
     if (apiKeyRepository.findByKey(API_KEY).isEmpty) {
       val apiKey = ApiKey(
         project = project,

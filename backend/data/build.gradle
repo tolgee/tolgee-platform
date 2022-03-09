@@ -211,6 +211,10 @@ dependencies {
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: findProperty("amazonAwsSdkVersion")
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-translate', version: findProperty("amazonAwsSdkVersion")
 
+    /**
+     * MISC MODULE
+     */
+    implementation(project(':misc'))
 }
 
 test {

@@ -16,7 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 @EntityScan("io.tolgee.model")
 @ConfigurationPropertiesScan
 @EnableJpaRepositories("io.tolgee.repository")
-class Application() {
+class Application {
   companion object {
     private val log = LoggerFactory.getLogger(Application::class.java)
 

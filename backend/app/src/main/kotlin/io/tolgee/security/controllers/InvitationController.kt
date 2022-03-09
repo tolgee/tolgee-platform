@@ -2,12 +2,12 @@ package io.tolgee.security.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.api.v2.controllers.V2InvitationController
 import io.tolgee.dtos.response.InvitationDTO
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.service.InvitationService
-import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,7 +27,7 @@ class InvitationController @Autowired constructor(
   private val invitationService: InvitationService,
   private val securityService: SecurityService,
   private val projectService: ProjectService,
-  private val organizationRoleService: OrganizationRoleService
+  private val v2InvitationController: V2InvitationController
 ) {
   @GetMapping("/accept/{code}")
   @Operation(summary = "Accepts invitation to project")
@@ -40,7 +40,7 @@ class InvitationController @Autowired constructor(
   @GetMapping("/list/{projectId}")
   @Operation(summary = "Prints all invitations to project")
   fun getProjectInvitations(@PathVariable("projectId") id: Long): Set<InvitationDTO> {
-    val repository = projectService.get(id).orElseThrow { NotFoundException() }!!
+    val repository = projectService.find(id).orElseThrow { NotFoundException() }!!
     securityService.checkProjectPermission(id, Permission.ProjectPermissionType.MANAGE)
     return invitationService.getForProject(repository).stream().map { invitation: Invitation? ->
       InvitationDTO.fromEntity(invitation)
@@ -50,21 +50,6 @@ class InvitationController @Autowired constructor(
   @DeleteMapping("/{invitationId}")
   @Operation(summary = "Deletes invitation by ID")
   fun deleteInvitation(@PathVariable("invitationId") id: Long): ResponseEntity<Void> {
-    val invitation = invitationService.findById(id).orElseThrow {
-      NotFoundException()
-    }
-    invitation.permission?.let {
-      securityService.checkProjectPermission(
-        invitation.permission!!.project.id,
-        Permission.ProjectPermissionType.MANAGE
-      )
-    }
-
-    invitation.organizationRole?.let {
-      organizationRoleService.checkUserIsOwner(invitation.organizationRole!!.organization!!.id)
-    }
-
-    invitationService.delete(invitation)
-    return ResponseEntity(HttpStatus.OK)
+    return v2InvitationController.deleteInvitation(id)
   }
 }

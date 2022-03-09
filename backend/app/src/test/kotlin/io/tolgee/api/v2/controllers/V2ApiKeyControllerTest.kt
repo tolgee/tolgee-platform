@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers
 
 import io.tolgee.development.testDataBuilder.data.ApiKeysTestData
+import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
 import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
 import io.tolgee.fixtures.andAssertThatJson
@@ -209,5 +210,21 @@ class V2ApiKeyControllerTest : AuthorizedControllerTest() {
   @Test
   fun `deletes when manage`() {
     performAuthDelete("/v2/api-keys/${testData.frantasKey.id}", null).andIsOk
+  }
+
+  @Test
+  fun `returns correct permitted languages for current`() {
+    val testData = LanguagePermissionsTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.bothLangsExplicitUser
+    performAuthGet("/v2/api-keys/current?ak=${testData.bothLangsExplicitUserApiKey.key}")
+      .andPrettyPrint.andAssertThatJson {
+        node("id").isValidId
+        node("permittedLanguages")
+          .isArray
+          .hasSize(2)
+          .contains("en")
+          .contains("de")
+      }
   }
 }

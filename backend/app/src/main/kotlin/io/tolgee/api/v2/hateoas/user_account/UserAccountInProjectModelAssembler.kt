@@ -21,8 +21,8 @@ class UserAccountInProjectModelAssembler(
       view.organizationBasePermissions,
       view.directPermissions,
       permissionService.computeProjectPermissionType(
-        view.organizationRole, view.organizationBasePermissions, view.directPermissions
-      )!!
+        view.organizationRole, view.organizationBasePermissions, view.directPermissions, null
+      ).type!!
     )
   }
 }

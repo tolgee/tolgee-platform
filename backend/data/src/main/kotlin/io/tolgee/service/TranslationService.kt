@@ -79,8 +79,8 @@ class TranslationService(
   }
 
   fun getKeyTranslationsResult(projectId: Long, path: PathDTO?, languageTags: Set<String>?): Map<String, String?> {
-    val project = projectService.get(projectId).orElseThrow { NotFoundException() }!!
-    val key = keyService.get(projectId, path!!).orElse(null)
+    val project = projectService.find(projectId).orElseThrow { NotFoundException() }!!
+    val key = keyService.find(projectId, path!!).orElse(null)
     val languages: Set<Language> = if (languageTags == null) {
       languageService.getImplicitLanguages(projectId)
     } else {
@@ -112,7 +112,7 @@ class TranslationService(
   fun getOrCreate(keyId: Long, languageId: Long): Translation {
     return translationRepository.findOneByKeyIdAndLanguageId(keyId, languageId)
       ?: let {
-        val key = keyService.get(keyId).orElseThrow { NotFoundException() }
+        val key = keyService.find(keyId).orElseThrow { NotFoundException() }
         val language = languageService.findById(languageId).orElseThrow { NotFoundException() }
         Translation().apply {
           this.key = key
@@ -123,6 +123,10 @@ class TranslationService(
 
   fun find(key: Key, language: Language): Optional<Translation> {
     return translationRepository.findOneByKeyAndLanguage(key, language)
+  }
+
+  fun get(id: Long): Translation {
+    return this.find(id) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
   }
 
   fun find(id: Long): Translation? {
@@ -141,7 +145,7 @@ class TranslationService(
     offset: Int,
     search: String?
   ): ViewDataResponse<LinkedHashSet<KeyWithTranslationsResponseDto>, ResponseParams> {
-    val project = projectService.get(projectId!!).orElseThrow { NotFoundException() }!!
+    val project = projectService.find(projectId!!).orElseThrow { NotFoundException() }!!
     val languages: Set<Language> = languageService.getLanguagesForTranslationsView(languageTags, projectId)
     val (count, data1) = TranslationsViewBuilderOld.getData(entityManager, project, languages, search, limit, offset)
     return ViewDataResponse(

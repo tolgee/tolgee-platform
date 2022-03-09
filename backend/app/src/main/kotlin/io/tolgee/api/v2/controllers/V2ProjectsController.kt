@@ -6,6 +6,8 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.api.v2.hateoas.invitation.ProjectInvitationModel
+import io.tolgee.api.v2.hateoas.invitation.ProjectInvitationModelAssembler
 import io.tolgee.api.v2.hateoas.key.LanguageConfigItemModelAssembler
 import io.tolgee.api.v2.hateoas.machineTranslation.LanguageConfigItemModel
 import io.tolgee.api.v2.hateoas.project.ProjectModel
@@ -16,6 +18,8 @@ import io.tolgee.api.v2.hateoas.project.ProjectWithStatsModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountInProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
+import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.dtos.request.SetMachineTranslationSettingsDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.dtos.request.project.EditProjectDTO
@@ -23,6 +27,8 @@ import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.Language
+import io.tolgee.model.Permission
 import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectView
@@ -35,6 +41,7 @@ import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
+import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.PermissionService
@@ -94,7 +101,9 @@ class V2ProjectsController(
   private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
   private val projectMachineTranslationServiceConfigService: MtServiceConfigService,
-  private val imageUploadService: ImageUploadService
+  private val imageUploadService: ImageUploadService,
+  private val languageService: LanguageService,
+  private val projectInvitationModelAssembler: ProjectInvitationModelAssembler
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -175,11 +184,38 @@ class V2ProjectsController(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("userId") userId: Long,
     @PathVariable("permissionType") permissionType: ProjectPermissionType,
+    @RequestParam languages: MutableSet<Long>?
   ) {
+    checkNotCurrentUser(userId)
+    val languageEntities = getLanguagesAndCheckFromProject(languages, projectId)
+    permissionService.setUserDirectPermission(
+      projectId = projectId,
+      userId = userId,
+      newPermissionType = permissionType,
+      languages = languageEntities.toSet()
+    )
+  }
+
+  private fun checkNotCurrentUser(userId: Long) {
     if (userId == authenticationFacade.userAccount.id) {
-      throw BadRequestException(io.tolgee.constants.Message.CANNOT_SET_YOUR_OWN_PERMISSIONS)
+      throw BadRequestException(Message.CANNOT_SET_YOUR_OWN_PERMISSIONS)
     }
-    permissionService.setUserDirectPermission(projectId, userId, permissionType)
+  }
+
+  private fun getLanguagesAndCheckFromProject(
+    languages: Set<Long>?,
+    projectId: Long
+  ): List<Language> {
+    languages?.let {
+      val languageEntities = languageService.findByIdIn(languages)
+      languageEntities.forEach {
+        if (it.project.id != projectId) {
+          throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
+        }
+      }
+      return languageEntities
+    }
+    return listOf()
   }
 
   @PutMapping("/{projectId}/users/{userId}/revoke-access")
@@ -190,7 +226,7 @@ class V2ProjectsController(
     @PathVariable("userId") userId: Long
   ) {
     if (userId == authenticationFacade.userAccount.id) {
-      throw BadRequestException(io.tolgee.constants.Message.CAN_NOT_REVOKE_OWN_PERMISSIONS)
+      throw BadRequestException(Message.CAN_NOT_REVOKE_OWN_PERMISSIONS)
     }
     permissionService.revoke(projectId, userId)
   }
@@ -245,15 +281,15 @@ class V2ProjectsController(
   fun leaveProject(@PathVariable projectId: Long) {
     val project = projectHolder.projectEntity
     if (project.userOwner?.id == authenticationFacade.userAccount.id) {
-      throw BadRequestException(io.tolgee.constants.Message.CANNOT_LEAVE_OWNING_PROJECT)
+      throw BadRequestException(Message.CANNOT_LEAVE_OWNING_PROJECT)
     }
     val permissionData = permissionService.getProjectPermissionData(project.id, authenticationFacade.userAccount.id)
     if (permissionData.organizationRole != null) {
-      throw BadRequestException(io.tolgee.constants.Message.CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE)
+      throw BadRequestException(Message.CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE)
     }
 
     val directPermissions = permissionData.directPermissions
-      ?: throw BadRequestException(io.tolgee.constants.Message.DONT_HAVE_DIRECT_PERMISSIONS)
+      ?: throw BadRequestException(Message.DONT_HAVE_DIRECT_PERMISSIONS)
 
     val permissionEntity = permissionService.findById(directPermissions.id)
       ?: throw NotFoundException()
@@ -302,9 +338,26 @@ class V2ProjectsController(
   @PutMapping("/{projectId}/invite")
   @Operation(summary = "Generates user invitation link for project")
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
-  fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): String {
-    val project = projectService.get(projectHolder.project.id).orElseThrow { NotFoundException() }!!
-    return invitationService.create(project, invitation.type!!)
+  fun inviteUser(@RequestBody @Valid invitation: ProjectInviteUserDto): ProjectInvitationModel {
+    val languages = getLanguagesAndCheckFromProject(invitation.languages, projectHolder.project.id)
+    val params = CreateProjectInvitationParams(
+      project = projectHolder.projectEntity,
+      type = invitation.type!!,
+      languages = languages,
+      email = invitation.email,
+      name = invitation.name
+    )
+    return projectInvitationModelAssembler.toModel(invitationService.create(params))
+  }
+
+  @GetMapping("{projectId:[0-9]+}/invitations")
+  @Operation(summary = "Returns all invitations to project")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  fun getProjectInvitations(@PathVariable("projectId") id: Long): CollectionModel<ProjectInvitationModel> {
+    val project = projectService.get(id)
+    securityService.checkProjectPermission(id, ProjectPermissionType.MANAGE)
+    val invitations = invitationService.getForProject(project)
+    return projectInvitationModelAssembler.toCollectionModel(invitations)
   }
 
   @GetMapping("/{projectId}/machine-translation-service-settings")

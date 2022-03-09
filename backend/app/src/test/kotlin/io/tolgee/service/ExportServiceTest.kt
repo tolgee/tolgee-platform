@@ -92,7 +92,7 @@ class ExportServiceTest : AbstractSpringTest() {
 
     assertThat(result).hasSize(1)
 
-    val key = keyService.get(result[0].key.id).get()
+    val key = keyService.find(result[0].key.id).get()
     assertThat(key.keyMeta?.tags?.toList()?.first()?.name).isEqualTo(tag)
   }
 

@@ -9,13 +9,14 @@ import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
+import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OneToOne
 
 @Suppress("LeakingThis")
 @Entity
 @Audited
-data class Permission(
+class Permission(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   var id: Long = 0L,
@@ -29,6 +30,15 @@ data class Permission(
   @Enumerated(EnumType.STRING)
   var type: ProjectPermissionType = ProjectPermissionType.VIEW
 ) : AuditModel() {
+
+  /**
+   * Languages for translate permission.
+   * When specified, user is restricted to edit/review specific language translations.
+   *
+   * This field makes no sense for any other permission type.
+   */
+  @ManyToMany(fetch = FetchType.EAGER)
+  var languages: MutableSet<Language> = mutableSetOf()
 
   constructor(
     id: Long = 0L,

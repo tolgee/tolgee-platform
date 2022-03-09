@@ -10,6 +10,7 @@ import io.tolgee.dtos.response.ProjectDTO
 import io.tolgee.dtos.response.ProjectDTO.Companion.fromEntityAndPermission
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.fixtures.toNullable
 import io.tolgee.model.Language
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
@@ -53,7 +54,7 @@ class ProjectService constructor(
   private val authenticationFacade: AuthenticationFacade,
   private val slugGenerator: SlugGenerator,
   private val userAccountService: UserAccountService,
-  private val avatarService: AvatarService
+  private val avatarService: AvatarService,
 ) {
   @set:Autowired
   @set:Lazy
@@ -99,8 +100,12 @@ class ProjectService constructor(
     }
   }
 
-  fun get(id: Long): Optional<Project> {
+  fun find(id: Long): Optional<Project> {
     return projectRepository.findById(id)
+  }
+
+  fun get(id: Long): Project {
+    return find(id).toNullable() ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
   }
 
   @Transactional
@@ -176,13 +181,13 @@ class ProjectService constructor(
         val permissionType = permissionService.computeProjectPermissionType(
           organizationRole?.type,
           organization?.basePermissions,
-          permission?.type
-        )
+          permission?.type,
+          permission?.languages?.map { it.id }?.toSet()
+        ).type
           ?: throw IllegalStateException(
             "Project project should not" +
               " return project with no permission for provided user"
           )
-
         fromEntityAndPermission(project, permissionType)
       }.toList()
   }
@@ -244,7 +249,7 @@ class ProjectService constructor(
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
-    val project = get(id).orElseThrow { NotFoundException() }!!
+    val project = find(id).orElseThrow { NotFoundException() }!!
     importService.getAllByProject(id).forEach {
       importService.deleteImport(it)
     }
@@ -265,7 +270,7 @@ class ProjectService constructor(
    */
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
   fun getOrCreateBaseLanguage(projectId: Long): Language? {
-    return this.get(projectId).orElse(null)?.let { project ->
+    return this.find(projectId).orElse(null)?.let { project ->
       project.baseLanguage ?: project.languages.toList().firstOrNull()?.let {
         project.baseLanguage = it
         projectRepository.save(project)
@@ -315,7 +320,9 @@ class ProjectService constructor(
     projectRepository.saveAll(projects)
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
-  fun save(project: Project): Project = projectRepository.save(project)
+  fun save(project: Project): Project {
+    return projectRepository.save(project)
+  }
 
   fun refresh(project: Project): Project {
     if (project.id == 0L) {
@@ -327,14 +334,14 @@ class ProjectService constructor(
   private fun getOrCreateBaseLanguage(dto: CreateProjectDTO, createdLanguages: List<Language>): Language {
     if (dto.baseLanguageTag != null) {
       return createdLanguages.find { it.tag == dto.baseLanguageTag }
-        ?: throw BadRequestException(io.tolgee.constants.Message.LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND)
+        ?: throw BadRequestException(Message.LANGUAGE_WITH_BASE_LANGUAGE_TAG_NOT_FOUND)
     }
     return createdLanguages[0]
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
   fun transferToOrganization(projectId: Long, organizationId: Long) {
-    val project = get(projectId).orElseThrow { NotFoundException() }
+    val project = find(projectId).orElseThrow { NotFoundException() }
     project.userOwner = null
     val organization = organizationService.find(organizationId) ?: throw NotFoundException()
     project.organizationOwner = organization
@@ -342,13 +349,14 @@ class ProjectService constructor(
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
+  @Transactional
   fun transferToUser(projectId: Long, userId: Long) {
-    val project = get(projectId).orElseThrow { NotFoundException() }
+    val project = find(projectId).orElseThrow { NotFoundException() }
     val userAccount = userAccountService[userId].orElseThrow { NotFoundException() }
     project.organizationOwner = null
     project.userOwner = userAccount
-    permissionService.setUserDirectPermission(projectId, userId, Permission.ProjectPermissionType.MANAGE, true)
     save(project)
+    permissionService.onProjectTransferredToUser(project, userAccount)
   }
 
   fun findAllByNameAndUserOwner(name: String, userOwner: UserAccount): List<Project> {

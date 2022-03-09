@@ -74,7 +74,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   protected lateinit var invitationService: InvitationService
 
   @Autowired
-  protected lateinit var tolgeeProperties: TolgeeProperties
+  lateinit var tolgeeProperties: TolgeeProperties
 
   @Autowired
   lateinit var mapper: ObjectMapper

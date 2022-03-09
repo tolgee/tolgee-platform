@@ -59,7 +59,7 @@ class ApiKeyController(
   @PostMapping(path = [""])
   @Operation(summary = "Creates new API key with provided scopes")
   fun create(@RequestBody @Valid createApiKeyDTO: CreateApiKeyDto?): ApiKeyDTO {
-    val project = projectService.get(createApiKeyDTO!!.projectId)
+    val project = projectService.find(createApiKeyDTO!!.projectId)
       .orElseThrow { NotFoundException(Message.PROJECT_NOT_FOUND) }
     securityService.checkApiKeyScopes(createApiKeyDTO.scopes, project)
     return ApiKeyDTO.fromEntity(
