@@ -182,7 +182,10 @@ export const ExportForm = () => {
       {({ isSubmitting, handleSubmit, isValid }) => (
         <form onSubmit={handleSubmit} className={classes.container}>
           <StateSelector className={classes.states} />
-          <LanguageSelector className={classes.langs} languages={allLangs} />
+          <LanguageSelector
+            className={classes.langs}
+            languages={languagesLoadable.data?._embedded?.languages}
+          />
           <FormatSelector className={classes.format} />
           <div className={classes.submit}>
             <LoadingButton
