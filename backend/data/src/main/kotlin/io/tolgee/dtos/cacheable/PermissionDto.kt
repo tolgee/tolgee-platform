@@ -8,15 +8,6 @@ data class PermissionDto(
   val userId: Long?,
   val invitationId: Long?,
   val type: Permission.ProjectPermissionType,
-  val projectId: Long
-) : Serializable {
-  companion object {
-    fun fromEntity(entity: Permission) = PermissionDto(
-      userId = entity.user?.id,
-      invitationId = entity.invitation?.id,
-      id = entity.id,
-      type = entity.type,
-      projectId = entity.project.id
-    )
-  }
-}
+  val projectId: Long,
+  val languageIds: MutableSet<Long>? = null
+) : Serializable

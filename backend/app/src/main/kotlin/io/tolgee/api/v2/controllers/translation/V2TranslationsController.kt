@@ -25,7 +25,6 @@ import io.tolgee.dtos.request.translation.SelectAllResponse
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
@@ -113,10 +112,8 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translations for existing key")
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    val key = keyService.findOptional(
-      projectHolder.project.id,
-      PathDTO.fromFullPath(dto.key)
-    ).orElseThrow { NotFoundException() }
+    val key = keyService.get(projectHolder.project.id, dto.key)
+    securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)
 
     val modifiedTranslations = translationService.setForKey(key, dto.translations)
 
@@ -136,7 +133,7 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    checkScopesIfKeyExists(dto)
+    checkEditScopeIfKeyExists(dto)
     val key = keyService.getOrCreateKey(projectHolder.projectEntity, PathDTO.fromFullPath(dto.key))
     val translations = translationService.setForKey(key, dto.translations)
     return getSetTranslationsResponse(key, translations)
@@ -147,8 +144,9 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translation state")
   fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {
-    val translation = translationService.find(translationId) ?: throw NotFoundException()
+    val translation = translationService.get(translationId)
     translation.checkFromProject()
+    securityService.checkLanguageTranslatePermission(translation)
     return translationModelAssembler.toModel(translationService.setState(translation, state))
   }
 
@@ -246,7 +244,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     )
   }
 
-  private fun checkScopesIfKeyExists(dto: SetTranslationsWithKeyDto) {
+  private fun checkEditScopeIfKeyExists(dto: SetTranslationsWithKeyDto) {
     keyService.findOptional(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
       if (authenticationFacade.isApiKeyAuthentication) {
         securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)

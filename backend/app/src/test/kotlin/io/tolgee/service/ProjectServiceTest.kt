@@ -116,7 +116,7 @@ class ProjectServiceTest : AbstractSpringTest() {
     entityManager.clear()
     val time = System.currentTimeMillis() - start
     println(time)
-    assertThat(time).isLessThan(10000)
+    assertThat(time).isLessThan(20000)
     assertThat(tagService.find(testData.existingTag.id)).isNull()
   }
 

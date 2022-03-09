@@ -3,8 +3,11 @@
 package io.tolgee.service
 
 import io.tolgee.constants.Caches
+import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.PermissionDto
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
+import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.Project
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CachedPermissionService(
@@ -47,9 +51,27 @@ class CachedPermissionService(
     cacheNames = [Caches.PROJECT_PERMISSIONS],
     key = "{#result.user?.id, #result.project?.id}"
   )
-  fun createForInvitation(invitation: Invitation, project: Project, type: ProjectPermissionType): Permission {
-    return Permission(invitation = invitation, project = project, type = type).let {
-      permissionRepository.save(it)
+  fun createForInvitation(
+    invitation: Invitation,
+    project: Project,
+    type: ProjectPermissionType,
+    languages: Collection<Language>?
+  ): Permission {
+    validateTranslatePermissionLanguages(languages, type)
+    return Permission(invitation = invitation, project = project, type = type).let { permission ->
+      languages?.let {
+        permission.languages = languages.toMutableSet()
+      }
+      permissionRepository.save(permission)
+    }
+  }
+
+  private fun validateTranslatePermissionLanguages(
+    languages: Collection<Language>?,
+    type: ProjectPermissionType
+  ) {
+    if (!languages.isNullOrEmpty() && type != ProjectPermissionType.TRANSLATE) {
+      throw BadRequestException(Message.ONLY_TRANSLATE_PERMISSION_ACCEPTS_LANGUAGES)
     }
   }
 
@@ -61,9 +83,17 @@ class CachedPermissionService(
     cacheNames = [Caches.PROJECT_PERMISSIONS],
     key = "{#userId, #projectId}",
   )
+  @Transactional
   fun findOneDtoByProjectIdAndUserId(projectId: Long, userId: Long): PermissionDto? {
-    return permissionRepository.findOneByProjectIdAndUserId(projectId, userId)?.let {
-      return PermissionDto.fromEntity(it)
+    return permissionRepository.findOneByProjectIdAndUserId(projectId, userId)?.let { permission ->
+      PermissionDto(
+        userId = permission.user?.id,
+        invitationId = permission.invitation?.id,
+        id = permission.id,
+        type = permission.type,
+        projectId = permission.project.id,
+        languageIds = permission.languages.map { it.id }.toMutableSet()
+      )
     }
   }
 

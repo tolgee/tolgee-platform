@@ -6,6 +6,7 @@ import io.tolgee.api.v2.hateoas.key.KeyModel
 import io.tolgee.api.v2.hateoas.key.KeyModelAssembler
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
+import io.tolgee.constants.Message
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
@@ -82,54 +83,21 @@ class V2KeyController(
   fun complexEdit(@PathVariable id: Long, @RequestBody @Valid dto: ComplexEditKeyDto): KeyWithDataModel {
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
-    var editPermissionsChecked = false
 
     dto.translations?.let {
+      securityService.checkLanguageTagPermissions(it.keys, projectHolder.project.id)
       translationService.setForKey(key, translations = it)
     }
 
-    dto.tags?.also { dtoTags ->
-      // check whether there is a change
-      if (key.keyMeta?.tags?.map { it.name }?.containsAll(dtoTags) != true &&
-        dtoTags.containsAll(key.keyMeta?.tags?.map { it.name } ?: listOf()) &&
-        !editPermissionsChecked
-      ) {
-        key.project?.checkKeysEditPermission()
-        editPermissionsChecked = true
-      }
-      // if provided, remove deleted tags
-      key.keyMeta?.tags?.forEach { oldTag ->
-        // delete all other tags
-        if (dtoTags.find { oldTag.name == it } == null) {
-          tagService.remove(key, oldTag)
-        }
-      }
-    }?.forEach { tagName ->
-      tagService.tagKey(key, tagName)
+    dto.tags?.let { dtoTags ->
+      updateTags(key, dtoTags)
     }
 
     if (key.name != dto.name) {
-      key.project?.checkKeysEditPermission()
-      editPermissionsChecked = true
+      key.project.checkKeysEditPermission()
     }
 
-    dto.screenshotIdsToDelete?.let { screenshotIds ->
-      if (screenshotIds.isNotEmpty()) {
-        key.project?.checkScreenshotsDeletePermission()
-        editPermissionsChecked = true
-      }
-      val screenshots = screenshotService.findByIdIn(screenshotIds).onEach {
-        if (it.key.id != key.id) {
-          throw BadRequestException(io.tolgee.constants.Message.SCREENSHOT_NOT_OF_KEY)
-        }
-      }
-      screenshotService.delete(screenshots)
-    }
-
-    dto.screenshotUploadedImageIds?.let {
-      key.project?.checkScreenshotsUploadPermission()
-      screenshotService.saveUploadedImages(it, key)
-    }
+    updateScreenshots(dto, key)
 
     return keyWithDataModelAssembler.toModel(keyService.edit(key, dto.name))
   }
@@ -180,5 +148,43 @@ class V2KeyController(
       securityService.checkApiKeyScopes(setOf(ApiScope.SCREENSHOTS_UPLOAD), authenticationFacade.apiKey)
     }
     securityService.checkProjectPermission(this.id, Permission.ProjectPermissionType.TRANSLATE)
+  }
+
+  private fun updateScreenshots(dto: ComplexEditKeyDto, key: Key) {
+    dto.screenshotIdsToDelete?.let { screenshotIds ->
+      deleteScreenshots(screenshotIds, key)
+    }
+
+    dto.screenshotUploadedImageIds?.let {
+      key.project.checkScreenshotsUploadPermission()
+      screenshotService.saveUploadedImages(it, key)
+    }
+  }
+
+  private fun deleteScreenshots(
+    screenshotIds: List<Long>,
+    key: Key
+  ) {
+    if (screenshotIds.isNotEmpty()) {
+      key.project.checkScreenshotsDeletePermission()
+    }
+    val screenshots = screenshotService.findByIdIn(screenshotIds).onEach {
+      if (it.key.id != key.id) {
+        throw BadRequestException(Message.SCREENSHOT_NOT_OF_KEY)
+      }
+    }
+    screenshotService.delete(screenshots)
+  }
+
+  private fun updateTags(key: Key, dtoTags: List<String>) {
+    val existingTagsContainAllNewTags = key.keyMeta?.tags?.map { it.name }?.containsAll(dtoTags) ?: false
+    val newTagsContainAllExistingTags = dtoTags.containsAll(key.keyMeta?.tags?.map { it.name } ?: listOf())
+
+    val areTagsModified = !existingTagsContainAllNewTags || !newTagsContainAllExistingTags
+
+    if (areTagsModified) {
+      key.project.checkKeysEditPermission()
+      tagService.updateTags(key, dtoTags)
+    }
   }
 }

@@ -98,8 +98,12 @@ declare namespace DataCy {
         "integrate-select-api-key-step-content" |
         "integrate-select-api-key-step-label" |
         "integrate-weapon-selector-button" |
+        "invitation-dialog-input-field" |
+        "invitation-dialog-invite-button" |
+        "invitation-dialog-role-button" |
+        "invitation-dialog-type-email-button" |
+        "invitation-dialog-type-link-button" |
         "invite-generate-button" |
-        "invite-generate-input-code" |
         "language-delete-button" |
         "language-modify-form" |
         "languages-auto-machine-translation" |
@@ -118,10 +122,10 @@ declare namespace DataCy {
         "organization-delete-button" |
         "organization-description-field" |
         "organization-invitation-cancel-button" |
-        "organization-invitation-generate-button" |
-        "organization-invitation-role-select" |
-        "organization-invitations-generated-field" |
-        "organization-members-leave-button" |
+        "organization-invitation-copy-button" |
+        "organization-invitation-item" |
+        "organization-member-item" |
+        "organization-member-leave-button" |
         "organization-members-remove-user-button" |
         "organization-name-field" |
         "organization-profile" |
@@ -130,17 +134,18 @@ declare namespace DataCy {
         "organization-role-select-item" |
         "organization-settings-button" |
         "organization-side-menu" |
-        "organizations-user-email" |
-        "organizations-user-name" |
         "permission-select-item" |
+        "permissions-language-menu-button" |
+        "permissions-languages-menu" |
         "permissions-menu" |
         "permissions-menu-button" |
-        "permissions-revoke-button" |
         "project-leave-button" |
         "project-list-languages" |
         "project-list-languages-item" |
         "project-list-more-button" |
         "project-list-owner" |
+        "project-member-item" |
+        "project-member-revoke-button" |
         "project-menu-items" |
         "project-name-field" |
         "project-owner-select" |

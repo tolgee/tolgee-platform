@@ -1,6 +1,7 @@
 package io.tolgee.controllers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
@@ -173,6 +174,22 @@ class TranslationControllerTest :
     )
 
     assertThat(fromService).isEqualTo(updatedTranslationsMap)
+  }
+
+  @Test
+  fun `denies access for user without the language permission`() {
+    val testData = LanguagePermissionsTestData()
+    testDataService.saveTestData(testData.root)
+    loginAsUser(testData.enOnlyUser.username)
+    performAuthPut(
+      "/api/project/${testData.project.id}/translations",
+      mapOf(
+        "key" to "key",
+        "translations" to mapOf(
+          "de" to "de"
+        )
+      )
+    ).andIsForbidden
   }
 
   private fun performGetDataForView(projectId: Long, queryString: String): ResultActions {

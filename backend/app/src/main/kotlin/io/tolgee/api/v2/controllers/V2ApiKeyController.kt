@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.apiKey.ApiKeyModel
 import io.tolgee.api.v2.hateoas.apiKey.ApiKeyModelAssembler
+import io.tolgee.api.v2.hateoas.apiKey.ApiKeyWithLanguagesModel
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.apiKey.CreateApiKeyDto
 import io.tolgee.dtos.request.apiKey.V2EditApiKeyDto
@@ -19,6 +20,8 @@ import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
+import io.tolgee.service.LanguageService
+import io.tolgee.service.PermissionService
 import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import org.springframework.data.domain.Pageable
@@ -49,7 +52,9 @@ class V2ApiKeyController(
   private val apiKeyModelAssembler: ApiKeyModelAssembler,
   private val projectHolder: ProjectHolder,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val pagedResourcesAssembler: PagedResourcesAssembler<ApiKey>
+  private val pagedResourcesAssembler: PagedResourcesAssembler<ApiKey>,
+  private val permissionService: PermissionService,
+  private val languageService: LanguageService
 ) {
 
   @PostMapping(path = ["/api-keys"])
@@ -83,9 +88,28 @@ class V2ApiKeyController(
   @GetMapping(path = ["/api-keys/current"])
   @Operation(summary = "Returns current API key info")
   @AccessWithApiKey
-  fun getCurrent(): ApiKeyModel {
+  fun getCurrent(): ApiKeyWithLanguagesModel {
     val apiKey = authenticationFacade.apiKey
-    return apiKeyModelAssembler.toModel(apiKey)
+
+    return ApiKeyWithLanguagesModel(
+      id = apiKey.id,
+      key = apiKey.key,
+      username = apiKey.userAccount.username,
+      userFullName = apiKey.userAccount.name,
+      projectId = apiKey.project.id,
+      projectName = apiKey.project.name,
+      scopes = apiKey.scopesEnum.map { it.value }.toSet(),
+      permittedLanguageIds = getProjectPermittedLanguages()?.toList()
+    )
+  }
+
+  private fun getProjectPermittedLanguages(): Set<Long>? {
+    val data = permissionService.getProjectPermissionData(projectHolder.project.id, authenticationFacade.userAccount.id)
+    val languageIds = data.computedPermissions.languageIds
+    if (languageIds.isNullOrEmpty()) {
+      return null
+    }
+    return languageIds
   }
 
   @GetMapping(path = ["/projects/{projectId:[0-9]+}/api-keys"])

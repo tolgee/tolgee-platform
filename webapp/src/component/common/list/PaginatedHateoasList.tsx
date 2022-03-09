@@ -37,7 +37,7 @@ export const PaginatedHateoasList = <
     sortBy?: string[];
     searchText?: string;
     onSearchChange?: (value: string) => void;
-    onPageChange: (value: number) => void;
+    onPageChange?: (value: number) => void;
     emptyPlaceholder?: React.ReactNode;
   } & OverridableListWrappers<WrapperComponent, ListComponent>
 ) => {
@@ -52,7 +52,7 @@ export const PaginatedHateoasList = <
   const page = (paginationData?.number || 0) + 1;
   const pageCount = paginationData?.totalPages || 1;
 
-  const handlePageChange = (page) => props.onPageChange(page - 1);
+  const handlePageChange = (page) => props.onPageChange?.(page - 1);
 
   useEffect(() => {
     if (page > pageCount) {

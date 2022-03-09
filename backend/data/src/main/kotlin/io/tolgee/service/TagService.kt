@@ -9,6 +9,7 @@ import io.tolgee.repository.TagRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TagService(
@@ -50,6 +51,18 @@ class TagService(
       if (tag.keyMetas.size < 1) {
         tagRepository.delete(tag)
       }
+    }
+  }
+
+  @Transactional
+  fun updateTags(key: Key, newTags: List<String>) {
+    key.keyMeta?.tags?.forEach { oldTag ->
+      if (newTags.find { oldTag.name == it } == null) {
+        this.remove(key, oldTag)
+      }
+    }
+    newTags.forEach { tagName ->
+      this.tagKey(key, tagName)
     }
   }
 

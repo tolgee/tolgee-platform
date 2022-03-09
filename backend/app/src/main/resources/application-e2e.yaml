@@ -2,6 +2,7 @@ spring:
   liquibase:
     drop-first: true
 tolgee:
+  frontend-url: http://localhost:8081
   authentication:
     enabled: true
     needs-email-verification: true

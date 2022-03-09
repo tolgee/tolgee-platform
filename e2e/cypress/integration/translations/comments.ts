@@ -73,6 +73,24 @@ describe('Translation comments', () => {
     userCanUnresolveComment(2, 'en', 'First comment');
   });
 
+  it('jindra is not able to add comment (translate cs)', () => {
+    logInAs('jindra');
+    commentsButton(0, 'cs').click();
+    cy.gcy('translations-comments-input').should('not.exist');
+  });
+
+  it('jindra can resolve comment (translate cs)', () => {
+    logInAs('jindra');
+    userCanResolveComment(0, 'cs', 'First comment');
+    userCanUnresolveComment(0, 'cs', 'First comment');
+  });
+
+  it('jindra is not able to get to edit mode (translate cs)', () => {
+    logInAs('jindra');
+    commentsButton(0, 'cs').click();
+    cy.gcy('translations-cell-tab-edit').should('not.exist');
+  });
+
   it('vojta is not able to add comment (view)', () => {
     logInAs('vojta');
     commentsButton(0, 'en').click();

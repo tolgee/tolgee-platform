@@ -105,10 +105,6 @@ export const KeyEditForm: React.FC = () => {
     ProjectPermissionType.EDIT
   );
 
-  const translateEnabled = permissions.satisfiesPermission(
-    ProjectPermissionType.TRANSLATE
-  );
-
   const handleRemoveKey = () => {
     confirmation({
       title: <T>translation_single_delete_title</T>,
@@ -195,7 +191,7 @@ export const KeyEditForm: React.FC = () => {
                 data={translation!}
                 language={language}
                 active={true}
-                editEnabled={translateEnabled}
+                editEnabled={permissions.canEditLanguage(language.id)}
                 lastFocusable={false}
               />
             </div>

@@ -33,6 +33,10 @@ export const projectsDashboardData = generateTestDataObject(
 
 export const projectTestData = generateTestDataObject('projects');
 
+export const languagePermissionsData = generateTestDataObject(
+  'language-permissions'
+);
+
 export const generateExampleKeys = (
   projectId: number,
   numberOfExamples: number

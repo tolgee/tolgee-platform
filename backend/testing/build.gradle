@@ -97,7 +97,7 @@ dependencies {
      */
     implementation("org.assertj:assertj-core:${findProperty("assertJVerison")}")
     implementation group: 'com.ninja-squad', name: 'springmockk', version: findProperty("springMockkVersion")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:${findProperty("mockitoVersion")}")
+    implementation("org.mockito.kotlin:mockito-kotlin:${findProperty("mockitoVersion")}")
     implementation "net.javacrumbs.json-unit:json-unit-assertj:${findProperty("jsonUnitAssertJVersion")}"
 
     /**

@@ -9,13 +9,17 @@ import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.model.translation.Translation
 import io.tolgee.security.AuthenticationFacade
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class SecurityService @Autowired constructor(private val authenticationFacade: AuthenticationFacade) {
+class SecurityService @Autowired constructor(
+  private val authenticationFacade: AuthenticationFacade,
+  private val languageService: LanguageService
+) {
 
   @set:Autowired
   lateinit var apiKeyService: ApiKeyService
@@ -49,6 +53,27 @@ class SecurityService @Autowired constructor(private val authenticationFacade: A
       throw PermissionException()
     }
     return usersPermission
+  }
+
+  fun checkLanguageTranslatePermission(projectId: Long, languageIds: Collection<Long>) {
+    val usersPermission = permissionService.getProjectPermissionData(projectId, authenticationFacade.userAccount.id)
+    val permittedLanguages = usersPermission.computedPermissions.languageIds
+    if (usersPermission.computedPermissions.allLanguagesPermitted) {
+      return
+    }
+    if (permittedLanguages?.containsAll(languageIds) != true) {
+      throw PermissionException()
+    }
+  }
+
+  fun checkLanguageTranslatePermission(translation: Translation) {
+    val language = translation.language
+    checkLanguageTranslatePermission(language.project.id, listOf(language.id))
+  }
+
+  fun checkLanguageTagPermissions(tags: Set<String>, projectId: Long) {
+    val languages = languageService.findByTags(tags, projectId)
+    this.checkLanguageTranslatePermission(projectId, languages.map { it.id })
   }
 
   fun checkApiKeyScopes(scopes: Set<ApiScope>, project: Project?, user: UserAccount? = null) {

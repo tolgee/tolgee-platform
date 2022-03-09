@@ -15,8 +15,10 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -59,6 +61,8 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
     Mockito.clearInvocations(contactsApi)
     Mockito.clearInvocations(javaMailSender)
     tolgeeProperties.frontEndUrl = "https://aaa"
+    tolgeeProperties.smtp.from = "aa@aa.com"
+    whenever(javaMailSender.createMimeMessage()).thenReturn(mock())
     createContactArgumentCaptor = ArgumentCaptor.forClass(CreateContact::class.java)
     updateContactArgumentCaptor = ArgumentCaptor.forClass(UpdateContact::class.java)
   }

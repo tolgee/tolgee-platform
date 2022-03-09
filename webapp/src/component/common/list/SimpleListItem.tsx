@@ -8,6 +8,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     container: {
       borderBottom: `1px solid ${theme.palette.grey.A100}`,
+      flexWrap: 'wrap',
       '&:last-child': {
         borderBottom: `none`,
       },

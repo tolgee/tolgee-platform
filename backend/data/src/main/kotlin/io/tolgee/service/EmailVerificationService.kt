@@ -4,6 +4,7 @@
 
 package io.tolgee.service
 
+import io.tolgee.component.TolgeeEmailSender
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.events.user.OnUserEmailVerifiedFirst
@@ -17,8 +18,6 @@ import io.tolgee.repository.EmailVerificationRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
-import org.springframework.mail.MailSender
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.random.Random
@@ -27,7 +26,7 @@ import kotlin.random.Random
 class EmailVerificationService(
   private val tolgeeProperties: TolgeeProperties,
   private val emailVerificationRepository: EmailVerificationRepository,
-  private val mailSender: MailSender,
+  private val tolgeeEmailSender: TolgeeEmailSender,
   private val applicationEventPublisher: ApplicationEventPublisher,
 ) {
   @Lazy
@@ -53,11 +52,10 @@ class EmailVerificationService(
       userAccount.emailVerification = emailVerification
 
       if (newEmail != null) {
-        sendMail(userAccount.id, newEmail, resultCallbackUrl, code, false)
+        tolgeeEmailSender.sendEmailVerification(userAccount.id, newEmail, resultCallbackUrl, code, false)
       } else {
-        sendMail(userAccount.id, userAccount.username, resultCallbackUrl, code)
+        tolgeeEmailSender.sendEmailVerification(userAccount.id, userAccount.username, resultCallbackUrl, code)
       }
-
       return emailVerification
     }
     return null
@@ -103,31 +101,6 @@ class EmailVerificationService(
     newEmail?.let {
       user.username = newEmail
     }
-  }
-
-  private fun sendMail(
-    userId: Long,
-    email: String,
-    resultCallbackUrl: String?,
-    code: String,
-    isSignUp: Boolean = true
-  ) {
-    val message = SimpleMailMessage()
-    message.setTo(email)
-    message.subject = "Tolgee e-mail verification"
-    val url = "$resultCallbackUrl/$userId/$code"
-    message.text = """
-                    Hello!
-                    ${if (isSignUp) "Welcome to Tolgee!" else ""}
-                    
-                    To verify your e-mail click on this link: 
-                    $url
-                    
-                    Regards,
-                    Tolgee
-    """.trimIndent()
-    message.from = tolgeeProperties.smtp.from
-    mailSender.send(message)
   }
 
   private fun generateCode(): String {

@@ -229,7 +229,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
   }
 
   private fun validateEmailCode(code: String, email: String): UserAccount {
-    val userAccount = userAccountService.findOptional(email).orElseThrow({ NotFoundException() })
+    val userAccount = userAccountService.findOptional(email).orElseThrow { NotFoundException() }
       ?: throw BadRequestException(io.tolgee.constants.Message.BAD_CREDENTIALS)
     val resetCodeValid = userAccountService.isResetCodeValid(userAccount, code)
     if (!resetCodeValid) {

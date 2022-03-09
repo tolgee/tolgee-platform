@@ -58,8 +58,8 @@ class KeyService(
   }
 
   fun get(projectId: Long, name: String): Key {
-    return keyRepository.getByNameAndProjectId(name, projectId).orElse(null)
-      ?: throw NotFoundException(Message.KEY_NOT_FOUND)
+    return keyRepository.getByNameAndProjectId(name, projectId)
+      .orElseThrow { NotFoundException(Message.KEY_NOT_FOUND) }
   }
 
   fun findOptional(projectId: Long, name: String): Optional<Key> {

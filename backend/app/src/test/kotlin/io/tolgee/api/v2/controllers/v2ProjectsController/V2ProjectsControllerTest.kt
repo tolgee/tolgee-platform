@@ -1,17 +1,17 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
-import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.fixtures.andAssertThatJson
-import io.tolgee.fixtures.andGetContentAsString
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Permission
-import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
+import io.tolgee.model.Project
+import io.tolgee.model.UserAccount
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -39,6 +39,25 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
       it.node("[2].userOwner").isEqualTo("null")
       it.node("[2].organizationOwnerName").isEqualTo("cool")
       it.node("[2].organizationOwnerSlug").isEqualTo("cool")
+    }
+  }
+
+  @Test
+  fun `get all has language permissions`() {
+    val baseTestData = BaseTestData()
+    baseTestData.root.apply {
+      data.projects[0].data.permissions[0].self.languages = mutableSetOf(baseTestData.englishLanguage)
+    }
+    testDataService.saveTestData(baseTestData.root)
+
+    userAccount = baseTestData.user
+
+    performAuthGet("/v2/projects").andPrettyPrint.andAssertThatJson.node("_embedded.projects").let {
+      it.isArray.hasSize(1)
+      it.node("[0].computedPermissions.permittedLanguageIds")
+        .isArray
+        .hasSize(1)
+        .containsAll(listOf(baseTestData.englishLanguage.id))
     }
   }
 
@@ -75,12 +94,36 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
   }
 
   @Test
+  fun `with-stats returns permitted languages`() {
+    val testData = ProjectsTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.userWithTranslatePermission
+
+    performAuthGet("/v2/projects/with-stats?sort=id")
+      .andIsOk.andAssertThatJson.node("_embedded.projects").let {
+        it.isArray.hasSize(1)
+        it.node("[0].computedPermissions.permittedLanguageIds").isArray.hasSize(2).containsAll(
+          mutableListOf(
+            testData.project2English.id,
+            testData.project2Deutsch.id
+          )
+        )
+      }
+  }
+
+  @Test
   fun get() {
     val base = dbPopulator.createBase("one")
+
+    val permission = base.permissions.first()
+    permission.languages = mutableSetOf(base.languages.first())
+
+    permissionService.saveAll(listOf(permission))
 
     performAuthGet("/v2/projects/${base.id}").andPrettyPrint.andAssertThatJson.let {
       it.node("userOwner.name").isEqualTo("admin")
       it.node("directPermissions").isEqualTo("MANAGE")
+      it.node("computedPermissions.permittedLanguageIds").isArray.hasSize(1).contains(base.languages.first().id)
     }
   }
 
@@ -97,55 +140,97 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
   @Test
   fun getAllUsers() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-    val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
-    val user = dbPopulator.createUserIfNotExists("jirina")
-    permissionService.grantFullAccessToProject(user, repo)
+    val directPermissionProject = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
+
+    val directPermissionUser = dbPopulator.createUserIfNotExists("jirina")
+    permissionService.create(
+      Permission().apply {
+        user = directPermissionUser
+        project = directPermissionProject
+        type = Permission.ProjectPermissionType.TRANSLATE
+        languages = project.languages.toMutableSet()
+      }
+    )
 
     loginAsUser(usersAndOrganizations[1].name)
 
-    performAuthGet("/v2/projects/${repo.id}/users?sort=id").andPrettyPrint.andAssertThatJson
+    performAuthGet("/v2/projects/${directPermissionProject.id}/users?sort=id")
+      .andIsOk.andPrettyPrint.andAssertThatJson
       .node("_embedded.users").let {
         it.isArray.hasSize(3)
         it.node("[0].organizationRole").isEqualTo("MEMBER")
         it.node("[1].organizationRole").isEqualTo("OWNER")
-        it.node("[2].directPermissions").isEqualTo("MANAGE")
+        it.node("[2].directPermissions").isEqualTo("TRANSLATE")
+        it.node("[2].computedPermissions.permittedLanguageIds")
+          .isArray
+          .hasSize(2)
+          .containsAll(directPermissionProject.languages.map { it.id })
       }
   }
 
   @Test
   fun setUsersPermissions() {
-    val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-    val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
-    val user = dbPopulator.createUserIfNotExists("jirina")
+    withPermissionsTestData { project, user ->
+      performAuthPut("/v2/projects/${project.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
-    permissionService.create(Permission(user = user, project = repo, type = Permission.ProjectPermissionType.VIEW))
+      permissionService.getProjectPermissionType(project.id, user)
+        .let { assertThat(it).isEqualTo(Permission.ProjectPermissionType.EDIT) }
+    }
+  }
 
-    loginAsUser(usersAndOrganizations[1].name)
+  @Test
+  fun `sets user's permissions with languages`() {
+    withPermissionsTestData { project, user ->
+      val languages = project.languages.toList()
+      val lng1 = languages[0]
+      val lng2 = languages[1]
 
-    performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
+      performAuthPut(
+        "/v2/projects/${project.id}/users/${user.id}" +
+          "/set-permissions/TRANSLATE?" +
+          "languages=${lng1.id}&" +
+          "languages=${lng2.id}",
+        null
+      ).andIsOk
 
-    permissionService.getProjectPermissionType(repo.id, user)
-      .let { assertThat(it).isEqualTo(Permission.ProjectPermissionType.EDIT) }
+      permissionService.getProjectPermissionData(project.id, user.id)
+        .let {
+          assertThat(it.computedPermissions.type).isEqualTo(Permission.ProjectPermissionType.TRANSLATE)
+          assertThat(it.computedPermissions.languageIds).contains(lng1.id)
+          assertThat(it.computedPermissions.languageIds).contains(lng2.id)
+        }
+    }
   }
 
   @Test
   fun setUsersPermissionsDeletesPermission() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-    val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
+    val project = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
     val user = dbPopulator.createUserIfNotExists("jirina")
 
-    organizationRoleService.grantMemberRoleToUser(user, repo.organizationOwner!!)
-    permissionService.create(Permission(user = user, project = repo, type = Permission.ProjectPermissionType.VIEW))
-
-    repo.organizationOwner!!.basePermissions = Permission.ProjectPermissionType.EDIT
-    organizationRepository.save(repo.organizationOwner!!)
+    organizationRoleService.grantMemberRoleToUser(user, project.organizationOwner!!)
+    permissionService.create(Permission(user = user, project = project, type = Permission.ProjectPermissionType.VIEW))
+    project.organizationOwner!!.basePermissions = Permission.ProjectPermissionType.EDIT
+    organizationRepository.save(project.organizationOwner!!)
 
     loginAsUser(usersAndOrganizations[1].name)
 
-    performAuthPut("/v2/projects/${repo.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
+    performAuthPut("/v2/projects/${project.id}/users/${user.id}/set-permissions/EDIT", null).andIsOk
 
-    permissionService.getProjectPermissionData(repo.id, user.id)
+    permissionService.getProjectPermissionData(project.id, user.id)
       .let { assertThat(it.directPermissions).isEqualTo(null) }
+  }
+
+  fun withPermissionsTestData(fn: (project: Project, user: UserAccount) -> Unit) {
+    val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
+    val project = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
+    val user = dbPopulator.createUserIfNotExists("jirina")
+    organizationRoleService.grantMemberRoleToUser(user, project.organizationOwner!!)
+
+    permissionService.create(Permission(user = user, project = project, type = Permission.ProjectPermissionType.VIEW))
+
+    loginAsUser(usersAndOrganizations[1].name)
+    fn(project, user)
   }
 
   @Test
@@ -253,13 +338,5 @@ open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/")
     performAuthDelete("/v2/projects/${base.id}", null).andIsOk
     val project = projectService.find(base.id)
     Assertions.assertThat(project).isNull()
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
-  fun inviteUserToProject() {
-    val key = performProjectAuthPut("/invite", ProjectInviteUserDto(Permission.ProjectPermissionType.MANAGE))
-      .andIsOk.andGetContentAsString
-    assertThat(key).hasSize(50)
   }
 }
