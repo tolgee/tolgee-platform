@@ -1,3 +1,16 @@
+# [2.9.0](https://github.com/tolgee/server/compare/v2.8.1...v2.9.0) (2022-03-09)
+
+
+### Bug Fixes
+
+* **Export:** language full names ([98aac99](https://github.com/tolgee/server/commit/98aac998d0e9fe3ebe4679e41325886f4d1b99df))
+* Export Untranslated values ([92dab44](https://github.com/tolgee/server/commit/92dab4463c26434451beb8adee41c920cade7598))
+
+
+### Features
+
+* Configurable export ([8f956f2](https://github.com/tolgee/server/commit/8f956f207f5aa83d259e770b84ccf6912be520fc))
+
 ## [2.8.1](https://github.com/tolgee/server/compare/v2.8.0...v2.8.1) (2022-03-08)
 
 
