@@ -22,14 +22,14 @@ describe('Projects Basics', () => {
   });
 
   it('exports one language to json', () => {
-    exportToggleLanguage('cs');
+    exportToggleLanguage('Česky');
 
     cy.gcy('export-submit-button').click();
     cy.verifyDownload('en.json');
   });
 
   it('exports one language to xliff', () => {
-    exportToggleLanguage('cs');
+    exportToggleLanguage('Česky');
 
     exportSelectFormat('XLIFF');
 

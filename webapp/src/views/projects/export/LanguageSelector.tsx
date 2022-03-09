@@ -11,9 +11,12 @@ import {
 import { useTranslate } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
+import { components } from 'tg.service/apiSchema.generated';
+
+type LanguageModel = components['schemas']['LanguageModel'];
 
 type Props = {
-  languages: string[];
+  languages: LanguageModel[] | undefined;
   className: string;
 };
 
@@ -33,14 +36,14 @@ export const LanguageSelector: React.FC<Props> = ({ languages, className }) => {
               MenuProps={{ getContentAnchorEl: null }}
               multiple
             >
-              {languages.map((lang) => (
+              {languages?.map((lang) => (
                 <MenuItem
-                  key={lang}
-                  value={lang}
+                  key={lang.id}
+                  value={lang.tag}
                   data-cy="export-language-selector-item"
                 >
-                  <Checkbox checked={field.value.includes(lang)} />
-                  <ListItemText primary={lang} />
+                  <Checkbox checked={field.value.includes(lang.tag)} />
+                  <ListItemText primary={lang.name} />
                 </MenuItem>
               ))}
             </Select>
