@@ -23,7 +23,7 @@ const ProjectListItem = (r: components['schemas']['ProjectModel']) => {
           label={r.organizationOwnerName || r.userOwner?.name}
         />
       </ListItemText>
-      {r.computedPermissions === ProjectPermissionType.MANAGE && (
+      {r.computedPermissions.type === ProjectPermissionType.MANAGE && (
         <ListItemSecondaryAction>
           <Button
             data-cy="project-settings-button"

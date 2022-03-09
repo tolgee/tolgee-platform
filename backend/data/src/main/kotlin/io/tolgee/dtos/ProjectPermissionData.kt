@@ -10,5 +10,5 @@ data class ProjectPermissionData(
   val directPermissions: PermissionDto?,
   val organizationRole: OrganizationRoleType?,
   val organizationBasePermissions: Permission.ProjectPermissionType?,
-  val computedPermissions: Permission.ProjectPermissionType?
+  val computedPermissions: ComputedPermissionDto
 )

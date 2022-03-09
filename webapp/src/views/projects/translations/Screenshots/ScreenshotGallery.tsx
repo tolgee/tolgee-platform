@@ -9,7 +9,7 @@ import { makeStyles, Theme } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import AddIcon from '@material-ui/icons/Add';
 import { Skeleton } from '@material-ui/lab';
-import { T, useCurrentLanguage } from '@tolgee/react';
+import { T, useCurrentLanguage, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';
@@ -75,6 +75,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const project = useProject();
   const dispatch = useTranslationsDispatch();
   const lang = useCurrentLanguage();
+  const t = useTranslate();
 
   const screenshotsLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/keys/{keyId}/screenshots',
@@ -94,6 +95,10 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     method: 'delete',
   });
 
+  const canEdit = projectPermissions.satisfiesPermission(
+    ProjectPermissionType.EDIT
+  );
+
   const onDelete = (id: number) => {
     deleteLoadable.mutate(
       {
@@ -107,9 +112,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
     );
   };
 
-  const addBox = projectPermissions.satisfiesPermission(
-    ProjectPermissionType.EDIT
-  ) && (
+  const addBox = canEdit && (
     <Box
       key="add"
       className={`${classes.addBox}`}
@@ -291,7 +294,8 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
               className={classes.hintText}
               lang={lang()}
             >
-              <T>no_screenshots_yet</T>
+              {t('no_screenshots_yet')}{' '}
+              {canEdit && t('add_screenshots_message')}
             </Box>
           </>
         )}

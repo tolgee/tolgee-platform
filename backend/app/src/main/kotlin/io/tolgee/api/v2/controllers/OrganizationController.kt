@@ -16,6 +16,7 @@ import io.tolgee.api.v2.hateoas.project.ProjectModel
 import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
+import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
@@ -27,7 +28,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
-import io.tolgee.model.views.ProjectView
+import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
@@ -69,7 +70,7 @@ import javax.validation.Valid
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class OrganizationController(
   private val organizationService: OrganizationService,
-  private val pagedProjectResourcesAssembler: PagedResourcesAssembler<ProjectView>,
+  private val pagedProjectResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
   private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
   private val arrayUserResourcesAssembler: PagedResourcesAssembler<UserAccountWithOrganizationRoleView>,
   private val organizationModelAssembler: OrganizationModelAssembler,
@@ -222,16 +223,23 @@ class OrganizationController(
   @PutMapping("/{id:[0-9]+}/invite")
   @Operation(summary = "Generates user invitation link for organization")
   fun inviteUser(
-    @RequestBody @Valid invitation: OrganizationInviteUserDto,
+    @RequestBody @Valid dto: OrganizationInviteUserDto,
     @PathVariable("id") id: Long
   ): OrganizationInvitationModel {
     organizationRoleService.checkUserIsOwner(id)
 
-    return organizationService.find(id)?.let { organization ->
-      invitationService.create(organization, invitation.roleType).let {
-        organizationInvitationModelAssembler.toModel(it)
-      }
-    } ?: throw NotFoundException()
+    val organization = organizationService.get(id)
+
+    val invitation = invitationService.create(
+      CreateOrganizationInvitationParams(
+        organization = organization,
+        type = dto.roleType,
+        email = dto.email,
+        name = dto.name
+      )
+    )
+
+    return organizationInvitationModelAssembler.toModel(invitation)
   }
 
   @GetMapping("/{organizationId}/invitations")

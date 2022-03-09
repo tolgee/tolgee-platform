@@ -10,5 +10,7 @@ open class OrganizationInvitationModel(
   val id: Long,
   val code: String,
   val type: OrganizationRoleType,
-  val createdAt: Date
+  val createdAt: Date,
+  val invitedUserName: String?,
+  val invitedUserEmail: String?
 ) : RepresentationModel<OrganizationInvitationModel>()

@@ -57,7 +57,7 @@ class TranslationController @Autowired constructor(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Deprecated(message = "Use put method to /api/project/{projectId}/translations or /api/project/translations")
   @Hidden
-  fun setTranslationsPost(@RequestBody @Valid dto: SetTranslationsWithKeyDto?) {
+  fun setTranslationsPost(@RequestBody @Valid dto: SetTranslationsWithKeyDto) {
     setTranslations(dto)
   }
 
@@ -70,7 +70,7 @@ class TranslationController @Autowired constructor(
       projectHolder.project.id,
       PathDTO.fromFullPath(dto!!.key)
     ).orElseThrow { NotFoundException() }
-
+    securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)
     translationService.setForKey(key, dto.translations)
   }
 

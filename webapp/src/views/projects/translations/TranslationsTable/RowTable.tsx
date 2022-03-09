@@ -96,9 +96,7 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
             language={language}
             colIndex={index}
             onResize={onResize}
-            editEnabled={permissions.satisfiesPermission(
-              ProjectPermissionType.TRANSLATE
-            )}
+            editEnabled={permissions.canEditLanguage(language.id)}
             width={columnSizes[index + 1]}
             cellPosition={cellPosition}
             active={relaxedActive}

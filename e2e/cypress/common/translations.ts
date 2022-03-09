@@ -18,6 +18,10 @@ export function getCellSaveButton() {
   return cy.gcy('translations-cell-save-button');
 }
 
+export const getCell = (value: string) => {
+  return cy.gcy('translations-table-cell').contains(value);
+};
+
 export function createTranslation(
   testKey: string,
   translation?: string,
@@ -74,7 +78,7 @@ export const visitTranslations = (projectId: number) => {
 };
 
 export const editCell = (oldValue: string, newValue?: string, save = true) => {
-  cy.gcy('translations-table-cell').contains(oldValue).click();
+  getCell(oldValue).click();
 
   // wait for editor to appear
   cy.gcy('global-editor').should('be.visible');

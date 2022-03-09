@@ -1,53 +1,53 @@
 package io.tolgee.security
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkConstructor
-import io.mockk.verify
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.NotFoundException
+import io.tolgee.fixtures.JavaMailSenderMocked
 import io.tolgee.testing.AbstractControllerTest
-import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentCaptor
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
-import org.springframework.mail.MailSender
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
+import javax.mail.internet.MimeMessage
 
-@ContextRecreatingTest
-@SpringBootTest(
-  properties = [
-    "tolgee.authentication.needs-email-verification=true",
-    "tolgee.front-end-url=dummy_frontend_url"
-  ]
-)
-@AutoConfigureMockMvc
-open class EmailVerificationTest : AbstractControllerTest() {
+open class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
 
-  @set:Autowired
-  lateinit var mailSender: MailSender
+  override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
+
+  @Autowired
+  @MockBean
+  override lateinit var javaMailSender: JavaMailSender
+
+  @Autowired
+  override lateinit var tolgeeProperties: TolgeeProperties
 
   @BeforeEach
   fun setup() {
-    every { mailSender.send(any()) } returns Unit
+    resetProperties()
+    tolgeeProperties.authentication.needsEmailVerification = true
   }
 
-  @BeforeEach
-  fun setupConstructor() {
-    mockkConstructor(SimpleMailMessage::class)
+  @AfterEach
+  fun cleanup() {
+    resetProperties()
+  }
+
+  private fun resetProperties() {
+    tolgeeProperties.authentication.needsEmailVerification = false
+    tolgeeProperties.frontEndUrl = "dummy_frontend_url"
+    tolgeeProperties.smtp.from = "aaa@aaa.aa"
   }
 
   @Test
@@ -123,37 +123,30 @@ open class EmailVerificationTest : AbstractControllerTest() {
   @Test
   fun signUpSavesVerification() {
     perform()
-
     val user = userAccountService.findOptional(signUpDto.email).orElseThrow { NotFoundException() }
+    verify(javaMailSender).send(messageArgumentCaptor.capture())
 
-    verify { mailSender.send(any()) }
+    assertThat(messageArgumentCaptor.value.subject).isEqualTo("Tolgee e-mail verification")
 
-    verify { anyConstructed<SimpleMailMessage>().subject = "Tolgee e-mail verification" }
-
-    verify {
-      anyConstructed<SimpleMailMessage>().text = match {
-        it.contains("dummy_frontend_url/login/verify_email/${user.id}/")
-      }
-    }
+    assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
 
     assertThat(userAccountService[user.id]).isNotNull
   }
 
   @Test
-  fun signUpFrontendUrlIsPrimary() {
+  fun `uses frontend url over provided callback url`() {
     signUpDto.callbackUrl = "dummyCallbackUrl"
-
     perform()
-
     val user = userAccountService.findOptional(signUpDto.email).orElseThrow { NotFoundException() }
 
-    verify {
-      anyConstructed<SimpleMailMessage>().text = match {
-        it.contains("dummy_frontend_url/login/verify_email/${user.id}/")
-      }
-    }
+    assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
 
     assertThat(userAccountService[user.id]).isNotNull
+  }
+
+  private fun getMessageContent(): String {
+    verify(javaMailSender).send(messageArgumentCaptor.capture())
+    return messageArgumentCaptor.value.tolgeeStandardMessageContent
   }
 
   @Test
@@ -161,55 +154,14 @@ open class EmailVerificationTest : AbstractControllerTest() {
     assertThat(perform().response.contentAsString).isEqualTo("")
   }
 
-  @SpringBootTest(
-    properties = [
-      "tolgee.authentication.needs-email-verification=true",
-    ]
-  )
+  @Test
+  fun `uses callback url when no frontendUrl provided`() {
+    signUpDto.callbackUrl = "dummyCallbackUrl"
+    tolgeeProperties.frontEndUrl = null
+    perform()
 
-  @AutoConfigureMockMvc
-  @ContextRecreatingTest
-  class EmailVerificationNoFrontendUrlTest : AbstractControllerTest() {
+    val user = userAccountService.findOptional(signUpDto.email).orElseThrow { NotFoundException() }
 
-    val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", "testtest", null)
-
-    @set:Autowired
-    lateinit var mailSender: MailSender
-
-    @Test
-    fun usesCallbackUrlIs() {
-      mockkConstructor(SimpleMailMessage::class)
-
-      every { mailSender.send(any()) } returns Unit
-
-      signUpDto.callbackUrl = "dummyCallbackUrl"
-
-      mvc.perform(
-        post("/api/public/sign_up")
-          .content(mapper.writeValueAsString(signUpDto))
-          .accept(MediaType.ALL)
-          .contentType(MediaType.APPLICATION_JSON)
-      )
-        .andReturn()
-
-      val user = userAccountService.findOptional(signUpDto.email).orElseThrow { NotFoundException() }
-
-      verify {
-        anyConstructed<SimpleMailMessage>().text = match {
-          it.contains("dummyCallbackUrl/login/verify_email/${user.id}/")
-        }
-      }
-
-      assertThat(userAccountService[user.id]).isNotNull
-    }
-  }
-}
-
-@Configuration
-class MockBeanMailSender {
-  @Bean
-  @Primary
-  fun mailSender(): JavaMailSender {
-    return mockk()
+    assertThat(getMessageContent()).contains("dummyCallbackUrl/login/verify_email/${user.id}/")
   }
 }

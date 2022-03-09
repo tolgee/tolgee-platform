@@ -130,12 +130,12 @@ class TranslationService(
     return translationRepository.findOneByKeyAndLanguage(key, language)
   }
 
-  fun find(id: Long): Translation? {
-    return this.translationRepository.findById(id).orElse(null)
-  }
-
   fun get(id: Long): Translation {
     return this.find(id) ?: throw NotFoundException(Message.TRANSLATION_NOT_FOUND)
+  }
+
+  fun find(id: Long): Translation? {
+    return this.translationRepository.findById(id).orElse(null)
   }
 
   @Suppress("UNCHECKED_CAST")

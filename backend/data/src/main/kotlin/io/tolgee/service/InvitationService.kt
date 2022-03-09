@@ -1,12 +1,17 @@
 package io.tolgee.service
 
+import io.tolgee.component.TolgeeEmailSender
+import io.tolgee.constants.Message
+import io.tolgee.dtos.misc.CreateInvitationParams
+import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
+import io.tolgee.dtos.misc.CreateProjectInvitationParams
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
 import io.tolgee.model.Organization
-import io.tolgee.model.Permission.ProjectPermissionType
+import io.tolgee.model.OrganizationRole
+import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.InvitationRepository
 import io.tolgee.security.AuthenticationFacade
 import org.apache.commons.lang3.RandomStringUtils
@@ -22,23 +27,50 @@ class InvitationService @Autowired constructor(
   private val invitationRepository: InvitationRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
-  private val permissionService: PermissionService
+  private val permissionService: PermissionService,
+  private val tolgeeEmailSender: TolgeeEmailSender
 ) {
   @Transactional
-  fun create(project: Project, type: ProjectPermissionType): String {
-    val code = RandomStringUtils.randomAlphabetic(50)
-    val invitation = Invitation(null, code)
-    invitation.permission = permissionService.createForInvitation(invitation, project, type)
-    invitationRepository.save(invitation)
-    return code
+  fun create(params: CreateProjectInvitationParams): Invitation {
+    checkEmailNotAlreadyInvited(params)
+
+    val invitation = getInvitationInstance(params)
+
+    invitation.permission = permissionService.createForInvitation(
+      invitation = invitation,
+      project = params.project,
+      type = params.type,
+      languages = params.languages
+    )
+
+    tolgeeEmailSender.sendInvitation(invitation)
+
+    return invitationRepository.save(invitation)
   }
 
   @Transactional
-  fun create(organization: Organization, type: OrganizationRoleType): Invitation {
-    val code = RandomStringUtils.randomAlphabetic(50)
-    val invitation = Invitation(null, code)
-    invitation.organizationRole = organizationRoleService.createForInvitation(invitation, type, organization)
+  fun create(params: CreateOrganizationInvitationParams): Invitation {
+    checkEmailNotAlreadyInvited(params)
+
+    val invitation = getInvitationInstance(params)
+
+    invitation.organizationRole = organizationRoleService.createForInvitation(
+      invitation = invitation,
+      type = params.type,
+      organization = params.organization
+    )
     invitationRepository.save(invitation)
+
+    tolgeeEmailSender.sendInvitation(invitation)
+
+    return invitation
+  }
+
+  private fun getInvitationInstance(params: CreateInvitationParams): Invitation {
+    val code = RandomStringUtils.randomAlphabetic(50)
+    val invitation = Invitation(code = code)
+    invitation.email = params.email
+    invitation.name = params.name
     return invitation
   }
 
@@ -58,22 +90,14 @@ class InvitationService @Autowired constructor(
     val permission = invitation.permission
     val organizationRole = invitation.organizationRole
 
-    if (!(permission == null).xor(organizationRole == null)) {
-      throw IllegalStateException("Exactly of permission and organizationRole may be set")
-    }
+    validateProjectXorOrganization(permission, organizationRole)
 
     permission?.let {
-      if (permissionService.findOneByProjectIdAndUserId(permission.project.id, userAccount.id) != null) {
-        throw BadRequestException(io.tolgee.constants.Message.USER_ALREADY_HAS_PERMISSIONS)
-      }
-      permissionService.acceptInvitation(permission, userAccount)
+      acceptProjectInvitation(permission, userAccount)
     }
 
     organizationRole?.let {
-      if (organizationRoleService.isUserMemberOrOwner(userAccount.id, it.organization!!.id)) {
-        throw BadRequestException(io.tolgee.constants.Message.USER_ALREADY_HAS_ROLE)
-      }
-      organizationRoleService.acceptInvitation(organizationRole, userAccount)
+      acceptOrganizationInvitation(userAccount, organizationRole)
     }
 
     // avoid cascade delete
@@ -82,9 +106,39 @@ class InvitationService @Autowired constructor(
     invitationRepository.delete(invitation)
   }
 
+  private fun validateProjectXorOrganization(
+    permission: Permission?,
+    organizationRole: OrganizationRole?
+  ) {
+    if (!(permission == null).xor(organizationRole == null)) {
+      throw IllegalStateException("Exactly of permission and organizationRole may be set")
+    }
+  }
+
+  private fun acceptOrganizationInvitation(
+    userAccount: UserAccount,
+    organizationRole: OrganizationRole
+  ) {
+    if (organizationRoleService.isUserMemberOrOwner(userAccount.id, organizationRole.organization!!.id)) {
+      throw BadRequestException(Message.USER_ALREADY_HAS_ROLE)
+    }
+    organizationRoleService.acceptInvitation(organizationRole, userAccount)
+  }
+
+  private fun acceptProjectInvitation(
+    permission: Permission,
+    userAccount: UserAccount
+  ): Permission {
+    if (permissionService.findOneByProjectIdAndUserId(permission.project.id, userAccount.id) != null) {
+      throw BadRequestException(Message.USER_ALREADY_HAS_PERMISSIONS)
+    }
+    return permissionService.acceptInvitation(permission, userAccount)
+  }
+
   fun getInvitation(code: String?): Invitation {
-    return invitationRepository.findOneByCode(code).orElseThrow { // this exception is important for sign up service! Do not remove!!
-      BadRequestException(io.tolgee.constants.Message.INVITATION_CODE_DOES_NOT_EXIST_OR_EXPIRED)
+    return invitationRepository.findOneByCode(code).orElseThrow {
+      // this exception is important for sign up service! Do not remove!!
+      BadRequestException(Message.INVITATION_CODE_DOES_NOT_EXIST_OR_EXPIRED)
     }!!
   }
 
@@ -110,5 +164,27 @@ class InvitationService @Autowired constructor(
 
   fun getForOrganization(organization: Organization): List<Invitation> {
     return invitationRepository.getAllByOrganizationRoleOrganizationOrderByCreatedAt(organization)
+  }
+
+  private fun checkEmailNotAlreadyInvited(params: CreateProjectInvitationParams) {
+    val email = params.email
+    if (!email.isNullOrEmpty() && userOrInvitationWithEmailExists(params.email, params.project)) {
+      throw BadRequestException(Message.EMAIL_ALREADY_INVITED_OR_MEMBER)
+    }
+  }
+
+  private fun checkEmailNotAlreadyInvited(params: CreateOrganizationInvitationParams) {
+    val email = params.email
+    if (!email.isNullOrEmpty() && userOrInvitationWithEmailExists(params.email, params.organization)) {
+      throw BadRequestException(Message.EMAIL_ALREADY_INVITED_OR_MEMBER)
+    }
+  }
+
+  fun userOrInvitationWithEmailExists(email: String, project: Project): Boolean {
+    return invitationRepository.countByUserOrInvitationWithEmailAndProject(email, project) > 0
+  }
+
+  fun userOrInvitationWithEmailExists(email: String, organization: Organization): Boolean {
+    return invitationRepository.countByUserOrInvitationWithEmailAndOrganization(email, organization) > 0
   }
 }

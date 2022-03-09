@@ -70,11 +70,11 @@ abstract class ProjectAuthControllerTest(
     }
   }
 
-  fun performProjectAuthPut(url: String, content: Any?): ResultActions {
+  fun performProjectAuthPut(url: String, content: Any? = null): ResultActions {
     return projectAuthRequestPerformer.performProjectAuthPut(url, content)
   }
 
-  fun performProjectAuthPost(url: String, content: Any?): ResultActions {
+  fun performProjectAuthPost(url: String, content: Any? = null): ResultActions {
     return projectAuthRequestPerformer.performProjectAuthPost(url, content)
   }
 
@@ -82,7 +82,7 @@ abstract class ProjectAuthControllerTest(
     return projectAuthRequestPerformer.performProjectAuthGet(url)
   }
 
-  fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
+  fun performProjectAuthDelete(url: String, content: Any? = null): ResultActions {
     return projectAuthRequestPerformer.performProjectAuthDelete(url, content)
   }
 

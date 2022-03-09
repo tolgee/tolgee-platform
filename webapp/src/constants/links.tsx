@@ -196,8 +196,6 @@ export class LINKS {
     'language/' + p(PARAMS.LANGUAGE_ID)
   );
 
-  static PROJECT_INVITATION = Link.ofParent(LINKS.PROJECT_MANAGE, 'invite');
-
   static PROJECT_PERMISSIONS = Link.ofParent(
     LINKS.PROJECT_MANAGE,
     'permissions'

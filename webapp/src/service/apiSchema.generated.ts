@@ -304,6 +304,9 @@ export interface paths {
   "/v2/projects/{projectId}/transfer-options": {
     get: operations["getTransferOptions"];
   };
+  "/v2/projects/{projectId}/invitations": {
+    get: operations["getProjectInvitations"];
+  };
   "/v2/projects/{projectId}/api-keys": {
     get: operations["allByProject"];
   };
@@ -346,6 +349,9 @@ export interface paths {
   "/v2/machine-translation-credit-balance": {
     get: operations["getUserCredits"];
   };
+  "/v2/invitations/{code}/accept": {
+    get: operations["acceptInvitation"];
+  };
   "/v2/api-keys/{keyId}": {
     get: operations["get_9"];
   };
@@ -384,10 +390,10 @@ export interface paths {
     get: operations["getViewData"];
   };
   "/api/invitation/list/{projectId}": {
-    get: operations["getProjectInvitations"];
+    get: operations["getProjectInvitations_1"];
   };
   "/api/invitation/accept/{code}": {
-    get: operations["acceptInvitation"];
+    get: operations["acceptInvitation_1"];
   };
   "/api/apiKeys/scopes": {
     get: operations["getApiKeyScopes"];
@@ -413,6 +419,9 @@ export interface paths {
   "/api/organizations/{organizationId}/users/{userId}": {
     delete: operations["removeUser_1"];
   };
+  "/v2/invitations/{invitationId}": {
+    delete: operations["deleteInvitation"];
+  };
   "/v2/image-upload/{ids}": {
     delete: operations["delete_6"];
   };
@@ -420,7 +429,7 @@ export interface paths {
     delete: operations["deleteScreenshots_3"];
   };
   "/api/invitation/{invitationId}": {
-    delete: operations["deleteInvitation"];
+    delete: operations["deleteInvitation_1"];
   };
   "/api/apiKeys/{key}": {
     delete: operations["delete_12"];
@@ -476,8 +485,13 @@ export interface components {
       organizationRole?: "MEMBER" | "OWNER";
       /** Current user's direct permission */
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      /** Actual current user's permissions on this project. You can not sort data by this column! */
-      computedPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      computedPermissions: components["schemas"]["UserPermissionModel"];
+    };
+    UserPermissionModel: {
+      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
+      permittedLanguageIds?: number[];
+      /** The type of permission. */
+      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
     };
     MachineTranslationLanguagePropsDto: {
       /** The language to apply those rules. If null, then this settings are default. */
@@ -576,6 +590,25 @@ export interface components {
     };
     ProjectInviteUserDto: {
       type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      /**
+       * IDs of languages to allow user to translate to with TRANSLATE permission.
+       *
+       * Only applicable when type is TRANSLATE, otherwise 400 - Bad Request is returned.
+       */
+      languages?: number[];
+      /** Email to send invitation to */
+      email?: string;
+      /** Name of invited user */
+      name?: string;
+    };
+    ProjectInvitationModel: {
+      id: number;
+      code: string;
+      type: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      permittedLanguageIds?: number[];
+      createdAt: string;
+      invitedUserName?: string;
+      invitedUserEmail?: string;
     };
     AutoTranslationSettingsDto: {
       /** If true, new keys will be automatically translated using translation memory when 100% match is found */
@@ -637,12 +670,18 @@ export interface components {
     };
     OrganizationInviteUserDto: {
       roleType: "MEMBER" | "OWNER";
+      /** Name of invited user */
+      name?: string;
+      /** Email to send invitation to */
+      email?: string;
     };
     OrganizationInvitationModel: {
       id: number;
       code: string;
       type: "MEMBER" | "OWNER";
       createdAt: string;
+      invitedUserName?: string;
+      invitedUserEmail?: string;
     };
     OrganizationModel: {
       id: number;
@@ -878,8 +917,7 @@ export interface components {
       organizationRole?: "MEMBER" | "OWNER";
       organizationBasePermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      /** Actual user's permissions on selected project. You can not sort data by this column! */
-      computedPermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      computedPermissions: components["schemas"]["UserPermissionModel"];
     };
     PagedModelTagModel: {
       _embedded?: {
@@ -1007,6 +1045,11 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    CollectionModelProjectInvitationModel: {
+      _embedded?: {
+        invitations?: components["schemas"]["ProjectInvitationModel"][];
+      };
+    };
     Pageable: {
       page?: number;
       size?: number;
@@ -1048,8 +1091,7 @@ export interface components {
       organizationRole?: "MEMBER" | "OWNER";
       /** Current user's direct permission */
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      /** Actual current user's permissions on this project. You can not sort data by this column! */
-      computedPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      computedPermissions: components["schemas"]["UserPermissionModel"];
       stats: components["schemas"]["ProjectStatistics"];
       languages: components["schemas"]["LanguageModel"][];
     };
@@ -1083,6 +1125,21 @@ export interface components {
         organizations?: components["schemas"]["OrganizationModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
+    };
+    ApiKeyWithLanguagesModel: {
+      id: number;
+      key: string;
+      username?: string;
+      userFullName?: string;
+      projectId: number;
+      projectName: string;
+      scopes: string[];
+      /**
+       * Languages for which user has translate permission.
+       *
+       * If null, all languages are permitted.
+       */
+      permittedLanguageIds?: number[];
     };
     UserResponseDTO: {
       id?: number;
@@ -1302,6 +1359,9 @@ export interface operations {
         userId: number;
         permissionType: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       };
+      query: {
+        languages?: number[];
+      };
     };
     responses: {
       /** OK */
@@ -1512,7 +1572,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": string;
+          "*/*": components["schemas"]["ProjectInvitationModel"];
         };
       };
       /** Bad Request */
@@ -4819,6 +4879,33 @@ export interface operations {
       };
     };
   };
+  getProjectInvitations: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelProjectInvitationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   allByProject: {
     parameters: {
       query: {
@@ -5255,6 +5342,29 @@ export interface operations {
       };
     };
   };
+  acceptInvitation: {
+    parameters: {
+      path: {
+        code: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   get_9: {
     parameters: {
       path: {
@@ -5288,7 +5398,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["ApiKeyModel"];
+          "*/*": components["schemas"]["ApiKeyWithLanguagesModel"];
         };
       };
       /** Bad Request */
@@ -5599,7 +5709,7 @@ export interface operations {
       };
     };
   };
-  getProjectInvitations: {
+  getProjectInvitations_1: {
     parameters: {
       path: {
         projectId: number;
@@ -5626,7 +5736,7 @@ export interface operations {
       };
     };
   };
-  acceptInvitation: {
+  acceptInvitation_1: {
     parameters: {
       path: {
         code: string;
@@ -5842,6 +5952,29 @@ export interface operations {
       };
     };
   };
+  deleteInvitation: {
+    parameters: {
+      path: {
+        invitationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   delete_6: {
     parameters: {
       path: {
@@ -5889,7 +6022,7 @@ export interface operations {
       };
     };
   };
-  deleteInvitation: {
+  deleteInvitation_1: {
     parameters: {
       path: {
         invitationId: number;

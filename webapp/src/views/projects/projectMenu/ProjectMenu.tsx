@@ -1,6 +1,6 @@
 import { Divider } from '@material-ui/core';
 import List from '@material-ui/core/List';
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import { Devices, PersonOutline, VpnKey } from '@material-ui/icons';
 import { useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { container } from 'tsyringe';
@@ -11,8 +11,6 @@ import {
   ProjectsIcon,
   SettingsIcon,
   TranslationIcon,
-  UserAddIcon,
-  UserSettingIcon,
 } from 'tg.component/CustomIcons';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useConfig } from 'tg.hooks/useConfig';
@@ -24,7 +22,6 @@ import { AppState } from 'tg.store/index';
 import { SideMenu } from './SideMenu';
 import { SideMenuItem } from './SideMenuItem';
 import LanguageIcon from '@material-ui/icons/Language';
-import { Devices } from '@material-ui/icons';
 
 const actions = container.resolve(GlobalActions);
 
@@ -62,7 +59,8 @@ export const ProjectMenu = ({ id }) => {
         </List>
         <Divider />
         <List>
-          {projectDTO.computedPermissions === ProjectPermissionType.MANAGE && (
+          {projectDTO.computedPermissions.type ===
+            ProjectPermissionType.MANAGE && (
             <>
               <SideMenuItem
                 linkTo={LINKS.PROJECT_EDIT.build({
@@ -83,18 +81,11 @@ export const ProjectMenu = ({ id }) => {
               {config.authentication && (
                 <>
                   <SideMenuItem
-                    linkTo={LINKS.PROJECT_INVITATION.build({
-                      [PARAMS.PROJECT_ID]: id,
-                    })}
-                    icon={<UserAddIcon />}
-                    text={t('project_menu_invite_user')}
-                  />
-                  <SideMenuItem
                     linkTo={LINKS.PROJECT_PERMISSIONS.build({
                       [PARAMS.PROJECT_ID]: id,
                     })}
-                    icon={<UserSettingIcon />}
-                    text={t('project_menu_permissions')}
+                    icon={<PersonOutline />}
+                    text={t('project_menu_members')}
                   />
                 </>
               )}
@@ -129,7 +120,7 @@ export const ProjectMenu = ({ id }) => {
             <List>
               <SideMenuItem
                 linkTo={LINKS.USER_API_KEYS.build()}
-                icon={<VpnKeyIcon />}
+                icon={<VpnKey />}
                 text={t('project_menu_api_keys')}
               />
             </List>

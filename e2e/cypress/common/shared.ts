@@ -62,7 +62,7 @@ export const confirmStandard = () => {
 };
 
 export const assertMessage = (message: string) => {
-  gcy('global-snackbars').should('contain', message);
+  return gcy('global-snackbars').should('contain', message);
 };
 
 export const assertTooltip = (message: string) => {

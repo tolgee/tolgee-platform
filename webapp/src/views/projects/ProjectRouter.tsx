@@ -7,9 +7,8 @@ import { ProjectProvider } from 'tg.hooks/ProjectProvider';
 import { ProjectPage } from './ProjectPage';
 import { ExportView } from './export/ExportView';
 import { ImportView } from './import/ImportView';
-import { ProjectInviteView } from './invitations/ProjectInviteView';
 import { LanguageEditView } from './languages/LanguageEdit/LanguageEditView';
-import { ProjectPermissionsView } from './permissions/ProjectPermissionsVIew';
+import { ProjectMembersView } from './members/ProjectMembersView';
 import { ProjectSettingsView } from './project/ProjectSettingsView';
 import { SocketIoPreview } from 'tg.views/projects/SocketIoPreview';
 import { TranslationsView } from './translations/TranslationsView';
@@ -54,12 +53,8 @@ export const ProjectRouter = () => {
               <LanguageEditView />
             </Route>
 
-            <Route exact path={LINKS.PROJECT_INVITATION.template}>
-              <ProjectInviteView />
-            </Route>
-
             <Route exact path={LINKS.PROJECT_PERMISSIONS.template}>
-              <ProjectPermissionsView />
+              <ProjectMembersView />
             </Route>
 
             <PrivateRoute exact path={LINKS.PROJECT_IMPORT.template}>

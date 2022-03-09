@@ -3,6 +3,7 @@ package io.tolgee.controllers.internal.e2e_data
 import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
+import io.tolgee.fixtures.toNullable
 import io.tolgee.security.InternalController
 import io.tolgee.service.ProjectService
 import io.tolgee.service.UserAccountService
@@ -39,6 +40,9 @@ class ProjectListDashboardE2eDataController(
       projectService.findAllPermitted(it).forEach { repo ->
         projectService.deleteProject(repo.id!!)
       }
+      userAccountService.delete(it)
+    }
+    userAccountService.findOptional(ProjectsTestData().userWithTranslatePermission.username).toNullable()?.let {
       userAccountService.delete(it)
     }
   }
