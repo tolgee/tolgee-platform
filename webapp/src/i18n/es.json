@@ -241,6 +241,7 @@
   "project_dashboard_translations_percent" : "{percent, number, :: %}",
   "project_deleted_message" : "¡Proyecto eliminado!",
   "project_integrate_title" : "Integrar",
+  "project_languages_default_provider_short" : null,
   "project_leave_button" : "Salir del proyecto",
   "project_list_keys_count" : "{keysCount, plural, \n=1 {1 llave}\nother {# llaves}\n}",
   "project_list_more_button" : "Más",
