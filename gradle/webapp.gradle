@@ -52,7 +52,7 @@ task updateStaticTranslations() {
     doLast {
         copy {
             def zipFile = file("$buildDir/translations.zip")
-            def outputDir = file("$webappPath/public/i18n")
+            def outputDir = file("$webappPath/src/i18n")
 
             from zipTree(zipFile)
             into outputDir
