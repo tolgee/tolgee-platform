@@ -1,3 +1,10 @@
+## [2.9.1](https://github.com/tolgee/server/compare/v2.9.0...v2.9.1) (2022-03-10)
+
+
+### Bug Fixes
+
+* Svelte guide default value ([67bd9be](https://github.com/tolgee/server/commit/67bd9be3bf31b2fd05e826038cd706067d764d79))
+
 # [2.9.0](https://github.com/tolgee/server/compare/v2.8.1...v2.9.0) (2022-03-09)
 
 
