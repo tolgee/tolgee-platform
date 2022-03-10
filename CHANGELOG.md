@@ -1,3 +1,11 @@
+## [2.9.2](https://github.com/tolgee/server/compare/v2.9.1...v2.9.2) (2022-03-10)
+
+
+### Bug Fixes
+
+* Fix path in translation updating task ([dc33caf](https://github.com/tolgee/server/commit/dc33caff5c8a7b1cf2ef82ee0210b5826d55471c))
+* Fix path in translation updating task ([b6342ad](https://github.com/tolgee/server/commit/b6342adc147252bbec9561343b01720e41e5e32d))
+
 ## [2.9.1](https://github.com/tolgee/server/compare/v2.9.0...v2.9.1) (2022-03-10)
 
 
