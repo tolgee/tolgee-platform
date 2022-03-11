@@ -17,7 +17,7 @@ class JsonFileExporter(
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
-    return result.asSequence().map { (fileName, json) -> fileName to json.toString().byteInputStream() }.toMap()
+    return result.asSequence().map { (fileName, json) -> fileName to json.toString(2).byteInputStream() }.toMap()
   }
 
   private fun prepare() {
