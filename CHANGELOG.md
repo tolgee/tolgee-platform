@@ -1,3 +1,10 @@
+## [2.9.3](https://github.com/tolgee/server/compare/v2.9.2...v2.9.3) (2022-03-12)
+
+
+### Bug Fixes
+
+* Exported JSON formatting ([fc1ad8e](https://github.com/tolgee/server/commit/fc1ad8e7b471e8cea894769f0629becb5d9b3663))
+
 ## [2.9.2](https://github.com/tolgee/server/compare/v2.9.1...v2.9.2) (2022-03-10)
 
 
