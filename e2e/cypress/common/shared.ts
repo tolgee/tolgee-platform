@@ -70,7 +70,7 @@ export const assertTooltip = (message: string) => {
 };
 
 export const selectInProjectMenu = (itemName: string) => {
-  gcy('project-menu-items').contains(itemName).click();
+  gcy('project-menu-items').get(`[aria-label="${itemName}"]`).click();
 };
 
 export const selectInSelect = (chainable: Chainable, renderedValue: string) => {

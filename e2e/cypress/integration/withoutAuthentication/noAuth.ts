@@ -23,7 +23,9 @@ describe('Test no authentication mode', () => {
     cy.reload();
     gcy('project-list-more-button').click();
     gcy('project-settings-button').click();
-    gcy('project-menu-items').should('contain', 'API keys');
+    gcy('project-menu-items')
+      .get(`[aria-label="API keys"]`)
+      .should('be.visible');
   });
 
   it('Has no user menu', () => {

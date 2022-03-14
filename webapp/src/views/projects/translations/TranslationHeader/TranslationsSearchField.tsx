@@ -1,4 +1,4 @@
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
 import {
   IconButton,
   InputAdornment,
@@ -13,6 +13,7 @@ const TranslationsSearchField = (
   props: ComponentProps<typeof TextField> & {
     value: string;
     onSearchChange: (value: string) => void;
+    style?: React.CSSProperties;
   }
 ) => {
   const theme = useTheme();
@@ -48,6 +49,7 @@ const TranslationsSearchField = (
           paddingLeft: 12,
           fontSize: theme.typography.body2.fontSize,
           height: 40,
+          ...props.style,
         },
       }}
       value={value}

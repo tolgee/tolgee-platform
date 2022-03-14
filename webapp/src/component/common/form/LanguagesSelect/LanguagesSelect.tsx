@@ -1,19 +1,10 @@
 import { FunctionComponent } from 'react';
-import {
-  Checkbox,
-  ListItemText,
-  MenuItem,
-  Select,
-  Typography,
-} from '@material-ui/core';
-import { T } from '@tolgee/react';
-import { container } from 'tsyringe';
+import { Select, Typography } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { MessageService } from 'tg.service/MessageService';
-import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
+import { getLanguagesContent } from './getLanguagesContent';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
@@ -40,27 +31,15 @@ const useStyles = makeStyles({
   },
 });
 
-export interface LanguagesMenuProps {
+export type Props = {
   onChange: (value: string[]) => void;
   languages: LanguageModel[];
   value: string[];
   context: string;
-}
+};
 
-const messaging = container.resolve(MessageService);
-
-export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
+export const LanguagesSelect: FunctionComponent<Props> = (props) => {
   const classes = useStyles();
-  const baseLang = props.languages.find((l) => l.base)?.tag;
-
-  const langsChange = (e) => {
-    if (e.target.value < 1) {
-      messaging.error(<T>set_at_least_one_language_error</T>);
-      return;
-    }
-    const langs = putBaseLangFirst(e.target.value, baseLang) || [];
-    props.onChange(langs);
-  };
 
   const menuProps = {
     variant: 'menu',
@@ -89,7 +68,6 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
         id={`languages-select-${props.context}`}
         multiple
         value={props.value}
-        onChange={(e) => langsChange(e)}
         renderValue={(selected) => (
           <Typography
             color="textPrimary"
@@ -102,19 +80,11 @@ export const LanguagesMenu: FunctionComponent<LanguagesMenuProps> = (props) => {
         MenuProps={menuProps}
         margin="dense"
       >
-        {props.languages.map((lang) => (
-          <MenuItem
-            key={lang.tag}
-            value={lang.tag}
-            data-cy="translations-language-select-item"
-          >
-            <Checkbox
-              checked={props.value.indexOf(lang.tag) > -1}
-              size="small"
-            />
-            <ListItemText primary={lang.name} />
-          </MenuItem>
-        ))}
+        {getLanguagesContent({
+          onChange: props.onChange,
+          languages: props.languages,
+          value: props.value,
+        })}
       </Select>
     </FormControl>
   );

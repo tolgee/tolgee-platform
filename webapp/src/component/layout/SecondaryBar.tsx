@@ -6,10 +6,11 @@ export const SecondaryBar: FunctionComponent<React.ComponentProps<typeof Box>> =
   (props) => (
     <Box
       style={{
-        backgroundColor: grey[50],
         borderBottom: `1px solid ${grey[200]}`,
       }}
-      p={4}
+      m={3}
+      mb={0}
+      mt={0}
       pb={2}
       pt={2}
       {...props}

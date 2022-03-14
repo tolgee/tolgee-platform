@@ -2,19 +2,19 @@ import { FunctionComponent } from 'react';
 import { Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { TopBar } from './TopBar';
+import { TopBar } from './TopBar/TopBar';
 
 const useStyles = makeStyles((theme) => ({
   appBarSpacer: theme.mixins.toolbar,
 }));
 
-interface DashboardPageProps {
-  projectName?: string;
-  fullWidth?: boolean;
-}
+type Props = {
+  topBarAutoHide?: boolean;
+};
 
-export const DashboardPage: FunctionComponent<DashboardPageProps> = ({
+export const DashboardPage: FunctionComponent<Props> = ({
   children,
+  topBarAutoHide,
 }) => {
   const classes = useStyles({});
 
@@ -25,12 +25,11 @@ export const DashboardPage: FunctionComponent<DashboardPageProps> = ({
       flexDirection="column"
       flexGrow={1}
     >
-      <TopBar />
+      <TopBar autoHide={topBarAutoHide} />
       <div className={classes.appBarSpacer} />
       <Box
         component="main"
         position="relative"
-        overflow="hidden"
         display="flex"
         flexGrow="1"
         justifyContent="stretch"

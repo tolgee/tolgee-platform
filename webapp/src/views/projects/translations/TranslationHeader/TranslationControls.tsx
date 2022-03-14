@@ -1,40 +1,49 @@
-import {
-  Button,
-  ButtonGroup,
-  IconButton,
-  makeStyles,
-  Typography,
-  Dialog,
-} from '@material-ui/core';
 import { ViewListRounded, AppsRounded, Add, Delete } from '@material-ui/icons';
+import { Button, ButtonGroup, IconButton, makeStyles } from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
+
+import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
+import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
+import { ProjectPermissionType } from 'tg.service/response.types';
+import TranslationsSearchField from './TranslationsSearchField';
 
 import {
   useTranslationsSelector,
   useTranslationsDispatch,
-} from './context/TranslationsContext';
-import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
-import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
-import { ProjectPermissionType } from 'tg.service/response.types';
-import { Filters } from './Filters/Filters';
-import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
-import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
-import { KeyCreateDialog } from './KeyCreateDialog';
-import TranslationsSearchField from './TranslationsSearchField';
-import { ViewMode } from './context/types';
+} from '../context/TranslationsContext';
+import { Filters } from '../Filters/Filters';
+import { ViewMode } from '../context/types';
+import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 
 const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'flex',
-    alignItems: 'stretch',
-    flexDirection: 'column',
-  },
   controls: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    margin: -5,
     flexWrap: 'wrap',
+    margin: '-12px -5px -10px -5px',
+    marginLeft: -theme.spacing(2),
+    marginRight: -theme.spacing(2),
+    padding: theme.spacing(0, 1.5),
+    position: 'sticky',
+    top: 50,
+    zIndex: theme.zIndex.appBar + 1,
+    background: theme.palette.background.default,
+    transition: 'all 0.20s ease-in-out',
+    paddingBottom: 3,
+    paddingTop: 8,
+  },
+  shadow: {
+    background: theme.palette.background.default,
+    height: 1,
+    position: 'sticky',
+    zIndex: theme.zIndex.appBar,
+    marginLeft: -theme.spacing(1),
+    marginRight: -theme.spacing(1),
+    '-webkit-box-shadow': '0px -1px 7px 0px #000000',
+    'box-shadow': '0px -1px 7px 0px #000000',
+    top: 110,
+    transition: 'all 0.25s',
   },
   spaced: {
     display: 'flex',
@@ -53,10 +62,6 @@ const useStyles = makeStyles((theme) => ({
   search: {
     minWidth: 200,
   },
-  resultCount: {
-    marginLeft: 1,
-    marginTop: theme.spacing(),
-  },
   toggleButton: {
     padding: '4px 8px',
   },
@@ -65,26 +70,21 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const TranslationsHeader = () => {
-  const t = useTranslate();
+type Props = {
+  onDialogOpen: () => void;
+};
+
+export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const classes = useStyles();
   const projectPermissions = useProjectPermissions();
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
-  const [newDialog, setNewDialog] = useUrlSearchState('create', {
-    defaultVal: 'false',
-  });
-
-  const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
-
-  const translationsTotal = useTranslationsSelector((c) => c.translationsTotal);
-
-  const dataReady = useTranslationsSelector((c) => c.dataReady);
-
-  const view = useTranslationsSelector((v) => v.view);
-  const selection = useTranslationsSelector((v) => v.selection);
+  const t = useTranslate();
 
   const dispatch = useTranslationsDispatch();
+  const selection = useTranslationsSelector((v) => v.selection);
+  const view = useTranslationsSelector((v) => v.view);
+  const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
 
   const handleSearchChange = (value: string) => {
     dispatch({ type: 'SET_SEARCH', payload: value });
@@ -106,14 +106,19 @@ export const TranslationsHeader = () => {
   };
 
   const handleAddTranslation = () => {
-    setNewDialog('true');
+    onDialogOpen();
   };
 
-  const { height: bottomPanelHeight } = useBottomPanel();
+  const trigger = useTopBarHidden();
 
   return (
-    <div className={classes.container}>
-      <div className={classes.controls}>
+    <>
+      <div
+        className={classes.controls}
+        style={{
+          transform: trigger ? 'translate(0px, -55px)' : 'translate(0px, 0px)',
+        }}
+      >
         <div className={classes.spaced}>
           {selection.length > 0 && (
             <IconButton
@@ -136,7 +141,7 @@ export const TranslationsHeader = () => {
         </div>
 
         <div className={classes.spaced}>
-          <LanguagesMenu
+          <LanguagesSelect
             onChange={handleLanguageChange}
             value={selectedLanguages || []}
             languages={languages || []}
@@ -177,32 +182,12 @@ export const TranslationsHeader = () => {
           )}
         </div>
       </div>
-      {dataReady && translationsTotal ? (
-        <div className={classes.resultCount}>
-          <Typography
-            color="textSecondary"
-            variant="body2"
-            data-cy="translations-key-count"
-          >
-            <T parameters={{ count: String(translationsTotal) }}>
-              translations_results_count
-            </T>
-          </Typography>
-        </div>
-      ) : null}
-      {dataReady && newDialog === 'true' && (
-        <Dialog
-          open={true}
-          onClose={() => setNewDialog('false')}
-          fullWidth
-          maxWidth="md"
-          keepMounted={false}
-          className={classes.modal}
-          style={{ marginBottom: bottomPanelHeight }}
-        >
-          <KeyCreateDialog onClose={() => setNewDialog('false')} />
-        </Dialog>
-      )}
-    </div>
+      <div
+        className={classes.shadow}
+        style={{
+          transform: trigger ? 'translate(0px, -55px)' : 'translate(0px, 0px)',
+        }}
+      />
+    </>
   );
 };

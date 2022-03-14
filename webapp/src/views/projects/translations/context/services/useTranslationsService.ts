@@ -151,6 +151,7 @@ export const useTranslationsService = (props: Props) => {
     // force refetch from first page
     translations.remove();
     callback?.();
+    window?.scrollTo(0, 0);
     setTimeout(() => {
       // make sure that we are refetching, but prevent double fetch
       translations.refetch();

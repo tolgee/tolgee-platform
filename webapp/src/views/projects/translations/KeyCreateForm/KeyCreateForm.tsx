@@ -7,7 +7,7 @@ import { container } from 'tsyringe';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import { useUrlSearch } from 'tg.hooks/useUrlSearch.ts';
+import { useUrlSearch } from 'tg.hooks/useUrlSearch';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { LINKS } from 'tg.constants/links';
 import { ProjectPermissionType } from 'tg.service/response.types';

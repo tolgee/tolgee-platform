@@ -61,8 +61,8 @@ const TranslationTools = React.memo(function TranslationTools({
   const gridTemplateColumns = isVertical ? '1fr' : '1fr '.repeat(numberOfItems);
 
   return (
-    <div className={classes.container}>
-      <div className={classes.grid} style={{ width, gridTemplateColumns }}>
+    <div className={classes.container} style={{ width }}>
+      <div className={classes.grid} style={{ gridTemplateColumns }}>
         <ToolsTab
           title={t(
             'translation_tools_translation_memory',

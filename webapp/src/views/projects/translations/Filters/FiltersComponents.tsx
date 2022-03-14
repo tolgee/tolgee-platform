@@ -13,10 +13,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const CompactMenuItem: React.FC<React.ComponentProps<typeof MenuItem>> =
-  (props) => {
+  React.forwardRef(function CompactMenuItem(props, ref) {
     const classes = useStyles();
-    return <MenuItem className={classes.compactItem} {...props} />;
-  };
+    return <MenuItem ref={ref} className={classes.compactItem} {...props} />;
+  });
 
 export const CompactListSubheader: React.FC<
   React.ComponentProps<typeof ListSubheader>

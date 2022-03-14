@@ -11,7 +11,7 @@ import {
 } from './context/TranslationsContext';
 import { useProject } from 'tg.hooks/useProject';
 import { TranslationsTable } from './TranslationsTable/TranslationsTable';
-import { TranslationsHeader } from './TranslationsHeader';
+import { TranslationsHeader } from './TranslationHeader/TranslationsHeader';
 import { TranslationsList } from './TranslationsList/TranslationsList';
 import { useTranslationsShortcuts } from './context/shortcuts/useTranslationsShortcuts';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
