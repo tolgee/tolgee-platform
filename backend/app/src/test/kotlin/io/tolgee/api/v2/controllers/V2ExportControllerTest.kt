@@ -66,7 +66,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `it exports to single xlifff`() {
+  fun `it exports to single xliff`() {
     initBaseData()
     val response = performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
       .andDo { obj: MvcResult -> obj.asyncResult }

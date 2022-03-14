@@ -12,9 +12,21 @@ interface FileExporter {
   fun produceFiles(): Map<String, InputStream>
 
   fun getRealScopeDepth(path: List<String>): Int {
-    return if (exportParams.splitByScope && exportParams.splitByScopeDepth > 0 && path.size > 1)
-      exportParams.splitByScopeDepth
-    else 0
+    val shouldSplitToFiles = exportParams.splitByScope && exportParams.splitByScopeDepth > 0
+    val isPathLongEnough = path.size > exportParams.splitByScopeDepth
+
+    if (shouldSplitToFiles) {
+      if (isPathLongEnough) {
+        return exportParams.splitByScopeDepth
+      }
+
+      // we always need to keep some keyName for the file
+      if (path.size > 1) {
+        return path.size - 1
+      }
+    }
+
+    return 0
   }
 
   fun ExportTranslationView.getFileAbsolutePath(path: List<String>): String {
