@@ -350,23 +350,6 @@ class TranslationsTestData {
     }
   }
 
-  fun addTranslationWithHtml() {
-    projectBuilder.run {
-      addKey {
-        name = "html_key"
-      }.build {
-        addTranslation {
-          language = germanLanguage
-          text = "Sweat jesus, this is invalid < HTML!"
-        }
-        addTranslation {
-          language = englishLanguage
-          text = "<p>Sweat jesus, this is HTML!</p>"
-        }
-      }
-    }
-  }
-
   fun addCommentStatesData() {
     projectBuilder.run {
       addKey {
@@ -396,7 +379,4 @@ class TranslationsTestData {
       }
     }
   }
-
-  val projectTranslations: List<Translation>
-    get() = projectBuilder.data.translations.map { it.self }
 }

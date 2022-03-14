@@ -79,6 +79,7 @@ class ExportDataProvider(
     filterState()
 
     query.where(*whereConditions.toTypedArray())
+    query.orderBy(cb.asc(key.get(Key_.name)))
   }
 
   private fun filterProjectId() {

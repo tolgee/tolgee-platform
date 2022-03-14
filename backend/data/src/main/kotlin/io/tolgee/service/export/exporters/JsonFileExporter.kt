@@ -23,30 +23,60 @@ class JsonFileExporter(
   private fun prepare() {
     translations.forEach { translation ->
       val path = TextHelper.splitOnNonEscapedDelimiter(translation.key.name, exportParams.splitByScopeDelimiter)
-      val jsonObject = getJsonObject(path, translation)
-      val pathItems = path.asSequence().drop(getRealScopeDepth(path)).toMutableList()
-      addToJsonObject(jsonObject, pathItems, translation)
+      val fileJsonObject = getFileJsonObject(path, translation)
+      val pathItems = path.asSequence().drop(getRealScopeDepth(path)).toList()
+      addToJsonObject(fileJsonObject, pathItems.toMutableList(), translation)
     }
   }
 
-  private fun getJsonObject(path: List<String>, translation: ExportTranslationView): JSONObject {
+  private fun getFileJsonObject(path: List<String>, translation: ExportTranslationView): JSONObject {
     val absolutePath = translation.getFileAbsolutePath(path)
     return result[absolutePath] ?: let {
       JSONObject().also { result[absolutePath] = it }
     }
   }
 
-  private fun addToJsonObject(content: JSONObject, pathItems: MutableList<String>, translation: ExportTranslationView) {
-    val pathItem = pathItems.removeFirst()
-    if (pathItems.size > 0) {
-      val jsonObject = JSONObject()
-      content.put(pathItem, jsonObject)
-      addToJsonObject(jsonObject, pathItems, translation)
+  private fun addToJsonObject(content: JSONObject, pathItems: List<String>, translation: ExportTranslationView) {
+    val pathItemsMutable = pathItems.toMutableList()
+    val pathItem = pathItemsMutable.removeFirst()
+    if (pathItemsMutable.size > 0) {
+      val jsonObject = content.opt(pathItem) ?: JSONObject().also {
+        content.put(pathItem, it)
+      }
+
+      if (jsonObject !is JSONObject) {
+        handleExistingStringScopeCollision(pathItems, content, translation)
+        return
+      }
+
+      addToJsonObject(jsonObject, pathItemsMutable, translation)
       return
     }
 
+    content.putTranslationText(pathItem, translation)
+  }
+
+  private fun handleExistingStringScopeCollision(
+    pathItems: List<String>,
+    content: JSONObject,
+    translation: ExportTranslationView
+  ) {
+    val last2joined = pathItems.takeLast(2).joinToString(exportParams.splitByScopeDelimiter + "")
+    val joinedPathItems = pathItems.dropLast(2) + last2joined
+    addToJsonObject(content, joinedPathItems, translation)
+  }
+
+  private fun JSONObject.putTranslationText(
+    key: String,
+    translation: ExportTranslationView,
+  ) {
     val value = getValueOrJsonNull(translation)
-    content.put(pathItem, value)
+
+    if (this.opt(key) != null) {
+      throw StringScopeCollisionException()
+    }
+
+    this.put(key, value)
   }
 
   /**

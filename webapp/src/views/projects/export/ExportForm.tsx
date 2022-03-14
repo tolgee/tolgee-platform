@@ -149,7 +149,7 @@ export const ExportForm = () => {
                 filterState: values.states,
                 languages: values.languages,
                 splitByScope: false,
-                splitByScopeDelimiter: '',
+                splitByScopeDelimiter: '.',
                 splitByScopeDepth: 0,
                 zip: values.languages.length > 1,
               },

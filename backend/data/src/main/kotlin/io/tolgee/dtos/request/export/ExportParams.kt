@@ -38,7 +38,7 @@ e.g. For key "home.header.title" and depth 1, resulting scope is  "home".
 For depth 2, resulting scopes are  "home" -> "header".
     """,
   )
-  val splitByScopeDepth: Int = 1,
+  var splitByScopeDepth: Int = 1,
 
   @field:Parameter(
     description = """Filter key IDs to be contained in export""",
