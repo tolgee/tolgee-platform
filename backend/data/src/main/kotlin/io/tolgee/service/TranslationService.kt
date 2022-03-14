@@ -194,8 +194,8 @@ class TranslationService(
     if (translation.id == 0L) {
       key.translations.add(translation)
     }
-    save(translation)
-    return translation
+    dismissAutoTranslated(translation)
+    return save(translation)
   }
 
   fun save(translation: Translation): Translation {
