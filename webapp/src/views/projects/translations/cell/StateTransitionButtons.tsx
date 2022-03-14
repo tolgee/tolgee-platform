@@ -25,20 +25,18 @@ export const StateTransitionButtons: React.FC<Props> = ({
 
   return (
     <>
-      <ControlsButton
-        data-cy="translation-state-button"
-        onClick={() => onStateChange?.(nextState)}
-        className={className}
-        tooltip={t(
-          'translation_state_change',
-          {
+      {state !== 'UNTRANSLATED' && (
+        <ControlsButton
+          data-cy="translation-state-button"
+          onClick={() => onStateChange?.(nextState)}
+          className={className}
+          tooltip={t('translation_state_change', {
             newState: t(translationStates[nextState]?.translationKey || ''),
-          },
-          true
-        )}
-      >
-        <StateIcon state={state} fontSize="small" />
-      </ControlsButton>
+          })}
+        >
+          <StateIcon state={state} fontSize="small" />
+        </ControlsButton>
+      )}
     </>
   );
 };
