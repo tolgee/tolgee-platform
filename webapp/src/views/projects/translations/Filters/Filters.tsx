@@ -3,8 +3,6 @@ import { Clear } from '@material-ui/icons';
 import {
   makeStyles,
   Select,
-  ListItemText,
-  Checkbox,
   Typography,
   IconButton,
   Tooltip,
@@ -16,14 +14,9 @@ import {
   useTranslationsSelector,
   useTranslationsDispatch,
 } from '../context/TranslationsContext';
-import {
-  NON_EXCLUSIVE_FILTERS,
-  toggleFilter,
-  useAvailableFilters,
-} from './useAvailableFilters';
-import { SubmenuStates } from './SubmenuStates';
-import { SubmenuTags } from './SubmenuTags';
-import { CompactListSubheader, CompactMenuItem } from './FiltersComponents';
+import { useAvailableFilters } from './useAvailableFilters';
+import { useActiveFilters } from './useActiveFilters';
+import { useFiltersContent } from './useFiltersContent';
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -67,31 +60,9 @@ const useStyles = makeStyles((theme) => ({
 
 export const Filters = () => {
   const dispatch = useTranslationsDispatch();
-  const filtersObj = useTranslationsSelector((v) => v.filters);
   const selectedLanguages = useTranslationsSelector((v) => v.selectedLanguages);
 
-  const activeFilters: string[] = [];
-  Object.entries(filtersObj).forEach(([key, value]) => {
-    if (!NON_EXCLUSIVE_FILTERS.includes(key)) {
-      if (value) {
-        activeFilters.push(
-          JSON.stringify({
-            filter: key,
-            value: value,
-          })
-        );
-      }
-    } else {
-      (value as unknown as string[]).forEach((filterVal) => {
-        activeFilters.push(
-          JSON.stringify({
-            filter: key,
-            value: filterVal,
-          })
-        );
-      });
-    }
-  });
+  const activeFilters = useActiveFilters();
 
   const classes = useStyles();
   const theme = useTheme();
@@ -103,75 +74,11 @@ export const Filters = () => {
       .map((g) => g.options?.find((o) => o.value === value))
       .filter(Boolean)[0];
 
+  const filtersContent = useFiltersContent();
+
   const handleClearFilters = (e) => {
     dispatch({ type: 'SET_FILTERS', payload: {} });
   };
-
-  const handleFilterToggle = (rawValue: string) => () => {
-    const newFilters = toggleFilter(filtersObj, availableFilters, rawValue);
-    dispatch({ type: 'SET_FILTERS', payload: newFilters });
-  };
-
-  const options: any[] = [];
-
-  availableFilters.forEach((group, i1) => {
-    if (!group.options?.length) {
-      return;
-    } else {
-      if (group.type !== 'tags') {
-        options.push(
-          <CompactListSubheader
-            key={i1}
-            disableSticky
-            data-cy="translations-filters-subheader"
-          >
-            {group.name}
-          </CompactListSubheader>
-        );
-      }
-
-      group.options.forEach((option, i2) => {
-        if (group.type === undefined) {
-          options.push(
-            <CompactMenuItem
-              data-cy="translations-filter-option"
-              key={`${i1}.${i2}`}
-              value={option.value!}
-              onClick={handleFilterToggle(option.value!)}
-            >
-              <Checkbox
-                size="small"
-                edge="start"
-                checked={activeFilters.includes(option.value!)}
-                tabIndex={-1}
-                disableRipple
-              />
-              <ListItemText primary={option.label} />
-            </CompactMenuItem>
-          );
-        } else if (group.type === 'states') {
-          options.push(
-            <SubmenuStates
-              key={`${i1}.${i2}`}
-              data-cy="translations-filter-option"
-              item={option}
-              handleToggle={handleFilterToggle}
-              activeFilters={activeFilters}
-            />
-          );
-        } else if (group.type === 'tags') {
-          options.push(
-            <SubmenuTags
-              key={`${i1}.${i2}`}
-              item={option}
-              handleToggle={handleFilterToggle}
-              activeFilters={activeFilters}
-            />
-          );
-        }
-      });
-    }
-  });
 
   return (
     <div className={classes.wrapper}>
@@ -229,7 +136,7 @@ export const Filters = () => {
         displayEmpty
         multiple
       >
-        {options}
+        {filtersContent}
       </Select>
     </div>
   );

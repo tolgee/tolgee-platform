@@ -23,7 +23,6 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
   passwordResetSetError = null;
   passwordResetSetSucceed = false;
   confirmationDialog: ConfirmationDialogProps | null = null;
-  sideMenuOpen = true;
   loading = false;
 }
 
@@ -172,14 +171,6 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
       this.securityService.resetPasswordRequest
     ),
   };
-
-  readonly toggleSideMenu = this.createAction('TOGGLE_SIDEMENU').build.on(
-    (state: GlobalState) =>
-      ({
-        ...state,
-        sideMenuOpen: !state.sideMenuOpen,
-      } as GlobalState)
-  );
 
   get prefix(): string {
     return 'GLOBAL';

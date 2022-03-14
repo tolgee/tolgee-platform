@@ -4,7 +4,7 @@ import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router';
 import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 
-import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
+import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -106,7 +106,7 @@ export const KeySingle: React.FC<Props> = ({ keyName }) => {
         style={{ marginBottom: bottomPanelHeight + 20 }}
       >
         <div className={classes.languagesMenu}>
-          <LanguagesMenu
+          <LanguagesSelect
             languages={allLanguages}
             onChange={handleLanguageChange}
             value={selectedLanguages}

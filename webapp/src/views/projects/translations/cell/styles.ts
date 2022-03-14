@@ -1,5 +1,5 @@
 import { colors, makeStyles, Theme } from '@material-ui/core';
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar';
+import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
 
 export type PositionType = 'left' | 'right';
 

@@ -2,13 +2,13 @@ import { DialogTitle, makeStyles } from '@material-ui/core';
 import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { LanguagesMenu } from 'tg.component/common/form/LanguagesMenu';
+import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import {
   useTranslationsSelector,
   useTranslationsDispatch,
-} from './context/TranslationsContext';
-import { KeyCreateForm } from './KeyCreateForm/KeyCreateForm';
+} from '../context/TranslationsContext';
+import { KeyCreateForm } from '../KeyCreateForm/KeyCreateForm';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 
@@ -95,7 +95,7 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
       <DialogTitle>
         <div className={classes.title}>
           <T>translation_single_create_title</T>
-          <LanguagesMenu
+          <LanguagesSelect
             languages={languages || []}
             value={selectedLanguages}
             onChange={handleLanguageChange}

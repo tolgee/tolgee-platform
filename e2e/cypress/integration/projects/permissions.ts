@@ -190,13 +190,15 @@ const OTHER_PROJECT_ITEMS = ['Projects', 'Export'];
 
 const assertManageMenuItemsNotVisible = () => {
   MANAGE_PROJECT_ITEMS.forEach((item) => {
-    gcy('project-menu-items').should('not.contain', item);
+    gcy('project-menu-items').get(`[aria-label="${item}"]`).should('not.exist');
   });
 };
 
 const assertOtherMenuItemsVisible = () => {
   OTHER_PROJECT_ITEMS.forEach((item) => {
-    gcy('project-menu-items').should('contain', item);
+    gcy('project-menu-items')
+      .get(`[aria-label="${item}"]`)
+      .should('be.visible');
   });
 };
 
@@ -207,7 +209,9 @@ const validateManagePermissions = (projectName: string) => {
   assertMessage('Project settings successfully saved');
   enterProject(projectName);
   MANAGE_PROJECT_ITEMS.forEach((item) => {
-    gcy('project-menu-items').should('contain', item);
+    gcy('project-menu-items')
+      .get(`[aria-label="${item}"]`)
+      .should('be.visible');
   });
   assertOtherMenuItemsVisible();
 };
@@ -251,8 +255,8 @@ const validateTranslatePermissions = (projectName: string) => {
 const validateViewPermissions = (projectName: string) => {
   visitList();
   enterProject(projectName);
-  gcy('project-menu-items').should('contain', 'Projects');
-  gcy('project-menu-items').should('contain', 'Export');
+  gcy('project-menu-items').get(`[aria-label="Projects"]`).should('be.visible');
+  gcy('project-menu-items').get(`[aria-label="Export"]`).should('be.visible');
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
   selectInProjectMenu('Translations');

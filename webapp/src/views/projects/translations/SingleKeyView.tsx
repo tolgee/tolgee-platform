@@ -1,5 +1,5 @@
 import { useProject } from 'tg.hooks/useProject';
-import { useUrlSearch, useUrlSearchArray } from 'tg.hooks/useUrlSearch.ts';
+import { useUrlSearch, useUrlSearchArray } from 'tg.hooks/useUrlSearch';
 import { TranslationsContextProvider } from './context/TranslationsContext';
 import { KeySingle } from './KeySingle/KeySingle';
 

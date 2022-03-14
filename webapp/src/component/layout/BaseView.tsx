@@ -121,7 +121,7 @@ export const BaseView = (props: BaseViewProps) => {
             </Container>
           </SecondaryBar>
         )}
-        <Box pl={4} pr={4} pt={2} pb={2}>
+        <Box pl={3} pr={3} pt={2} pb={2}>
           <Container
             maxWidth={props.containerMaxWidth || false}
             style={{ padding: 0 }}

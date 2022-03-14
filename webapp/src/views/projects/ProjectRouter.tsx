@@ -28,10 +28,14 @@ export const ProjectRouter = () => {
 
   const projectId = match.params[PARAMS.PROJECT_ID];
 
+  const matchedTranslations = useRouteMatch(
+    LINKS.PROJECT_TRANSLATIONS.template
+  );
+
   return (
     <Switch>
       <ProjectProvider id={Number(projectId)}>
-        <ProjectPage fullWidth={true}>
+        <ProjectPage topBarAutoHide={matchedTranslations?.isExact}>
           <React.Suspense fallback={<FullPageLoading />}>
             <Route exact path={LINKS.PROJECT_TRANSLATIONS_SINGLE.template}>
               <SingleKeyView />

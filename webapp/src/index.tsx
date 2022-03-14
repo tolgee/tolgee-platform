@@ -26,7 +26,8 @@ import { createTheme } from '@material-ui/core';
 import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
 import { GlobalErrorModal } from 'tg.component/GlobalErrorModal';
 import { BottomPanelProvider } from 'tg.component/bottomPanel/BottomPanelContext';
-import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar';
+import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
+import { TopBarProvider } from 'tg.component/layout/TopBar/TopBarContext';
 
 const store = configureStore();
 
@@ -255,9 +256,11 @@ ReactDOM.render(
               <SnackbarProvider data-cy="global-snackbars">
                 <LoadingProvider>
                   <BottomPanelProvider>
-                    <GlobalLoading />
-                    <App />
-                    <GlobalErrorModal />
+                    <TopBarProvider>
+                      <GlobalLoading />
+                      <App />
+                      <GlobalErrorModal />
+                    </TopBarProvider>
                   </BottomPanelProvider>
                 </LoadingProvider>
               </SnackbarProvider>
