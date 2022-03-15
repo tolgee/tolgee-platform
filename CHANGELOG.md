@@ -1,3 +1,15 @@
+# [2.10.0](https://github.com/tolgee/server/compare/v2.9.3...v2.10.0) (2022-03-15)
+
+
+### Bug Fixes
+
+* Export order, structuring, collisions, scoping bugs ([295eaba](https://github.com/tolgee/server/commit/295eaba33ae0e25da2fd508f6f3b3da42d0bd606))
+
+
+### Features
+
+* Machine Translations, Translation Memory, Auto Translation - Frontend and Improvements ([8058deb](https://github.com/tolgee/server/commit/8058deb8e122f700bd08a0644ed858b3ee5a5644))
+
 ## [2.9.3](https://github.com/tolgee/server/compare/v2.9.2...v2.9.3) (2022-03-12)
 
 
