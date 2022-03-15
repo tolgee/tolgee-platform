@@ -1,3 +1,15 @@
+# [2.11.0](https://github.com/tolgee/server/compare/v2.10.0...v2.11.0) (2022-03-15)
+
+
+### Bug Fixes
+
+* Migrate also Translation audit table because of removed states ([423d228](https://github.com/tolgee/server/commit/423d228ea9e4b5747ba57a6321a5dab65511a0f4))
+
+
+### Features
+
+* Add loading to tranlsation tools and improve layout when mt is disabled ([1cd239b](https://github.com/tolgee/server/commit/1cd239b2ebe2f3039f1ccb50bac62a9d9365e5a4))
+
 # [2.10.0](https://github.com/tolgee/server/compare/v2.9.3...v2.10.0) (2022-03-15)
 
 
