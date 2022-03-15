@@ -14,8 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.core.io.Resource
+import org.springframework.transaction.annotation.Transactional
 
 @Suppress("LateinitVarOverridesLateinitVar")
+@Transactional
 class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
 
   @Value("classpath:startup-import")

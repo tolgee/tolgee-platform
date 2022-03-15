@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.transaction.annotation.Transactional
 
 @ContextRecreatingTest
 @SpringBootTest(
@@ -34,7 +35,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
   ]
 )
 @AutoConfigureMockMvc
-class EmailVerificationTest : AbstractControllerTest() {
+open class EmailVerificationTest : AbstractControllerTest() {
 
   @set:Autowired
   lateinit var mailSender: MailSender
@@ -76,6 +77,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
+  @Transactional
   fun verifiesNewEmail() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser, newEmail = "this.is@new.email")
@@ -96,6 +98,7 @@ class EmailVerificationTest : AbstractControllerTest() {
   }
 
   @Test
+  @Transactional
   fun doesNotVerifyWithWrongUser() {
     val createUser = dbPopulator.createUserIfNotExists(initialUsername)
     val emailVerification = emailVerificationService.createForUser(createUser)
@@ -163,6 +166,7 @@ class EmailVerificationTest : AbstractControllerTest() {
       "tolgee.authentication.needs-email-verification=true",
     ]
   )
+
   @AutoConfigureMockMvc
   @ContextRecreatingTest
   class EmailVerificationNoFrontendUrlTest : AbstractControllerTest() {

@@ -54,6 +54,7 @@ allOpen {
     annotation("org.springframework.stereotype.Service")
     annotation("org.springframework.transaction.annotation.Transactional")
     annotation("org.springframework.beans.factory.annotation.Configurable")
+    annotation("org.springframework.boot.test.context.SpringBootTest")
 }
 
 compileKotlin {

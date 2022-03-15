@@ -95,6 +95,7 @@ open class TranslationHistoryProvider(
       }.setFirstResult(pageable.offset.toInt())
       .setMaxResults(pageable.pageSize)
     q.addTranslateIdRestriction()
+    q.addOrder(AuditEntity.revisionNumber().desc())
     return q
   }
 

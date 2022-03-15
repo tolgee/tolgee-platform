@@ -13,8 +13,10 @@ import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 
+@Transactional
 class TagsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
   lateinit var testData: TagsTestData

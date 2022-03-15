@@ -1,14 +1,12 @@
 package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.data.domain.Pageable
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
@@ -37,22 +35,5 @@ class TranslationServiceTest : AbstractSpringTest() {
     val viewData = translationService.getTranslations(HashSet(Arrays.asList("en", "de")), project.id)
     @Suppress("UNCHECKED_CAST")
     assertThat(viewData["en"] as Map<String, *>).containsKey("folder.folder.translation")
-  }
-
-  @Test
-  fun `returns history`() {
-    val testData = TranslationsTestData()
-    authenticationFacade.userAccountEntity
-    testDataService.saveTestData(testData.root)
-    commitTransaction()
-    val testTranslation = testData.aKeyGermanTranslation
-    testTranslation.text = "Oh yes"
-    translationService.save(testTranslation)
-    commitTransaction()
-    translationCommentService.deleteByTranslationIdIn(listOf(testTranslation.id))
-    translationService.deleteByIdIn(listOf(testTranslation.id))
-    commitTransaction()
-    val history = translationService.getHistory(testTranslation.id, Pageable.ofSize(10))
-    history
   }
 }

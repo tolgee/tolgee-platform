@@ -25,8 +25,10 @@ import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.RequestBuilder
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.transaction.annotation.Transactional
 import javax.servlet.DispatcherType
 
+@Transactional
 class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   @Value("classpath:import/zipOfJsons.zip")
   lateinit var zipOfJsons: Resource

@@ -9,7 +9,7 @@ import io.tolgee.security.third_party.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.security.third_party.GithubOAuthDelegate.GithubUserResponse
 import io.tolgee.testing.AbstractControllerTest
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -24,9 +24,11 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
+@Transactional
 class AuthTest : AbstractControllerTest() {
   @Autowired
   private val publicController: PublicController? = null
@@ -36,7 +38,7 @@ class AuthTest : AbstractControllerTest() {
   private val restTemplate: RestTemplate? = null
   private var authMvc: MockMvc? = null
 
-  @BeforeAll
+  @BeforeEach
   fun setup() {
     dbPopulator.createBase(generateUniqueString())
     authMvc = MockMvcBuilders.standaloneSetup(publicController).setControllerAdvice(ExceptionHandlers()).build()

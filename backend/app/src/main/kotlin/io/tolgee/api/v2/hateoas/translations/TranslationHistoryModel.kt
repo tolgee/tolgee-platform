@@ -9,7 +9,7 @@ import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
 @Suppress("unused")
-@Relation(collectionRelation = "translations", itemRelation = "translation")
+@Relation(collectionRelation = "revisions", itemRelation = "revision")
 open class TranslationHistoryModel(
   @Schema(description = "Translation text")
   val text: String?,
