@@ -143,6 +143,8 @@ export const MachineTranslation = () => {
     }
   }, [settings.data]);
 
+  const languagesCount = languages.data?._embedded?.languages?.length || 0;
+
   return (
     <>
       {settings.data && languages.data && creditBalance.data && (
@@ -167,29 +169,31 @@ export const MachineTranslation = () => {
                 );
               }}
             </Formik>
-            <div
-              className={classes.toggle}
-              role="button"
-              onClick={() => setExpanded((expanded) => !expanded)}
-            >
-              {expanded ? <ExpandLess /> : <ExpandMore />}
-            </div>
+            {languagesCount > 1 && (
+              <div
+                className={classes.toggle}
+                role="button"
+                onClick={() => setExpanded((expanded) => !expanded)}
+              >
+                {expanded ? <ExpandLess /> : <ExpandMore />}
+              </div>
+            )}
             <div className={classes.loading}>
               <SmoothProgress loading={isUpdating} />
             </div>
           </div>
-          <Box my={1} display="flex" flexDirection="column">
-            {creditBalance.data && (
+          {creditBalance.data.creditBalance !== -1 && (
+            <Box my={1} display="flex" flexDirection="column">
               <Typography variant="body1">
                 {t('project_languages_credit_balance', {
                   balance: String(creditBalance.data.creditBalance / 100),
                 })}
               </Typography>
-            )}
-            <Typography variant="caption" className={classes.hint}>
-              {t('project_languages_credit_balance_hint')}
-            </Typography>
-          </Box>
+              <Typography variant="caption" className={classes.hint}>
+                {t('project_languages_credit_balance_hint')}
+              </Typography>
+            </Box>
+          )}
         </div>
       )}
     </>

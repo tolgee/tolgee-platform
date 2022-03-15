@@ -36,7 +36,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const AutoTranslations = () => {
+type Props = {
+  mtEnabled: boolean;
+};
+
+export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
   const classes = useStyles();
   const t = useTranslate();
   const [formInstance, setFormInstance] = useState(0);
@@ -98,6 +102,7 @@ export const AutoTranslations = () => {
                 checked={form.values.usingMachineTranslation}
                 onChange={form.handleChange}
                 control={<Checkbox />}
+                disabled={!mtEnabled}
               />
             </div>
           );

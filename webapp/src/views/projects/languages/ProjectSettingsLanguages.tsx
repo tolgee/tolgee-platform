@@ -15,12 +15,14 @@ import { MachineTranslation } from './MachineTranslation/MachineTranslation';
 import { LanguageItem } from './LanguageItem';
 import { useTableStyles } from './tableStyles';
 import { AutoTranslations } from './AutoTranslations/AutoTranslations';
+import { useConfig } from 'tg.hooks/useConfig';
 
 export const ProjectSettingsLanguages = () => {
   const tableClasses = useTableStyles();
   const queryClient = useQueryClient();
   const project = useProject();
   const t = useTranslate();
+  const config = useConfig();
 
   const languagesLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/languages',
@@ -30,6 +32,10 @@ export const ProjectSettingsLanguages = () => {
       size: 1000,
     },
   });
+
+  const mtEnabled = Object.values(
+    config?.machineTranslationServices.services
+  ).some(({ enabled }) => enabled);
 
   useGlobalLoading(languagesLoadable.isLoading);
 
@@ -90,19 +96,24 @@ export const ProjectSettingsLanguages = () => {
           </React.Fragment>
         ))}
       </div>
-      <Box mt={4} mb={2}>
-        <Typography variant="h5">
-          <T>machine_translation_title</T>
-        </Typography>
-      </Box>
-      <MachineTranslation />
+
+      {mtEnabled && (
+        <>
+          <Box mt={4} mb={2}>
+            <Typography variant="h5">
+              <T>machine_translation_title</T>
+            </Typography>
+          </Box>
+          <MachineTranslation />
+        </>
+      )}
 
       <Box mt={4} mb={0}>
         <Typography variant="h5">
           <T>machine_translation_new_keys_title</T>
         </Typography>
       </Box>
-      <AutoTranslations />
+      <AutoTranslations mtEnabled={mtEnabled} />
     </Box>
   );
 };

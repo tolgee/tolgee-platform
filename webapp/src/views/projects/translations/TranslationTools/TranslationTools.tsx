@@ -11,6 +11,8 @@ import { ToolsTab } from './ToolsTab';
 import { useTranslationTools } from './useTranslationTools';
 import { TranslationMemory } from './TranslationMemory';
 import { MachineTranslation } from './MachineTranslation';
+import { SmoothProgress } from 'tg.component/SmoothProgress';
+import { useConfig } from 'tg.hooks/useConfig';
 
 const HORIZONTAL_BRAKEPOINT = 500;
 
@@ -22,12 +24,16 @@ const useStyles = makeStyles((theme) => ({
     display: 'grid',
     gridAutoFlow: 'dense',
   },
-  loading: {
+  loadingWrapper: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    background: theme.palette.lightDivider.main,
+    borderRadius: '4px 4px 0px 0px',
+    overflow: 'hidden',
+  },
+  loading: {
+    background: theme.palette.grey[400],
   },
 }));
 
@@ -42,10 +48,17 @@ const TranslationTools = React.memo(function TranslationTools({
 }: Props) {
   const classes = useStyles();
   const t = useTranslate();
+  const config = useConfig();
 
   const isVertical = width === undefined || width < HORIZONTAL_BRAKEPOINT;
 
-  const gridTemplateColumns = isVertical ? '1fr' : '1fr 1fr';
+  const mtEnabled = Object.values(
+    config?.machineTranslationServices.services
+  ).some(({ enabled }) => enabled);
+
+  const numberOfItems = mtEnabled ? 2 : 1;
+
+  const gridTemplateColumns = isVertical ? '1fr' : '1fr '.repeat(numberOfItems);
 
   return (
     <div className={classes.container}>
@@ -67,22 +80,27 @@ const TranslationTools = React.memo(function TranslationTools({
           />
         </ToolsTab>
 
-        <ToolsTab
-          title={t({
-            key: 'translation_tools_machine_translation',
-            defaultValue: 'Machine translation',
-          })}
-          icon={<MachineTranslationIcon fontSize="small" color="inherit" />}
-          badgeNumber={
-            Object.keys(data.machine?.data?.machineTranslations || {}).length
-          }
-          data={data.machine}
-        >
-          <MachineTranslation
-            data={data.machine?.data}
-            operationsRef={data.operationsRef}
-          />
-        </ToolsTab>
+        {mtEnabled && (
+          <ToolsTab
+            title={t({
+              key: 'translation_tools_machine_translation',
+              defaultValue: 'Machine translation',
+            })}
+            icon={<MachineTranslationIcon fontSize="small" color="inherit" />}
+            badgeNumber={
+              Object.keys(data.machine?.data?.machineTranslations || {}).length
+            }
+            data={data.machine}
+          >
+            <MachineTranslation
+              data={data.machine?.data}
+              operationsRef={data.operationsRef}
+            />
+          </ToolsTab>
+        )}
+      </div>
+      <div className={classes.loadingWrapper}>
+        <SmoothProgress loading={data.isFetching} className={classes.loading} />
       </div>
     </div>
   );
