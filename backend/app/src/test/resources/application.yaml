@@ -8,9 +8,6 @@ spring:
         order_inserts: true
         order_updates: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
-        integration:
-          envers:
-            enabled: false
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher

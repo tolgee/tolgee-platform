@@ -4,6 +4,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.query_results.KeyWithTranslationsDto
+import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
@@ -23,6 +24,7 @@ import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.query_builders.TranslationHistoryProvider
 import io.tolgee.service.query_builders.TranslationsViewBuilder
 import io.tolgee.service.query_builders.TranslationsViewBuilderOld
 import io.tolgee.socketio.ITranslationsSocketIoModule
@@ -31,6 +33,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -172,7 +175,6 @@ class TranslationService(
 
   fun getSelectAllKeys(
     projectId: Long,
-    pageable: Pageable,
     params: TranslationFilters,
     languages: Set<Language>
   ): List<Long> {
@@ -233,6 +235,11 @@ class TranslationService(
         )
       )
     }
+  }
+
+  @Transactional
+  fun getHistory(translationId: Long, pageable: Pageable): PageImpl<TranslationHistoryView> {
+    return TranslationHistoryProvider(applicationContext, translationId, pageable).getHistory()
   }
 
   fun deleteIfExists(key: Key, languageTag: String) {
