@@ -41,9 +41,7 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
-import org.springframework.transaction.annotation.Transactional
 
-@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 abstract class AbstractSpringTest : AbstractTransactionalTest() {
@@ -78,7 +76,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   protected lateinit var invitationService: InvitationService
 
   @Autowired
-  protected lateinit var tolgeeProperties: TolgeeProperties
+  protected open lateinit var tolgeeProperties: TolgeeProperties
 
   @Autowired
   lateinit var mapper: ObjectMapper
@@ -109,7 +107,7 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var organizationRoleRepository: OrganizationRoleRepository
 
   @Autowired
-  lateinit var projectRepository: ProjectRepository
+  open lateinit var projectRepository: ProjectRepository
 
   @Autowired
   lateinit var importService: ImportService

@@ -20,7 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+open class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun getAll() {
     dbPopulator.createBase("one", "kim")

@@ -249,6 +249,7 @@ class TestDataService(
     entityManager.clear()
   }
 
+  @Transactional
   fun saveTestData(ft: TestDataBuilder.() -> Unit): TestDataBuilder {
     val builder = TestDataBuilder()
     ft(builder)

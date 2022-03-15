@@ -20,9 +20,11 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.transaction.annotation.Transactional
 import java.net.URI
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Transactional
 abstract class AbstractSocketIoTest : AbstractSpringTest() {
   protected lateinit var sockets: List<Socket>
   lateinit var project: Project
@@ -77,8 +79,8 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
 
   @AfterAll
   fun afterClass() {
-    socketIOServer.stop()
     sockets.forEach { it.disconnect() }
+    socketIOServer.stop()
   }
 
   fun prepareSockets() {

@@ -24,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -109,8 +110,8 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
       .also { println(it.andReturn().response.contentAsString) }
       .andAssertThatJson.node("_embedded.usersInOrganization").also {
         it.isArray.hasSize(2)
-        it.node("[0].organizationRole").isEqualTo("OWNER")
-        it.node("[1].organizationRole").isEqualTo("MEMBER")
+        it.node("[0].organizationRole").isEqualTo("MEMBER")
+        it.node("[1].organizationRole").isEqualTo("OWNER")
       }
   }
 
@@ -304,6 +305,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
+  @Transactional
   fun testSetUserRole() {
     this.organizationService.create(dummyDto, userAccount!!).let { organization ->
       dbPopulator.createUserIfNotExists("superuser").let { createdUser ->

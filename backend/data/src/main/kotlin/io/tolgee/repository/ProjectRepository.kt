@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 @Repository
-interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
+interface ProjectRepository : JpaRepository<Project, Long> {
   companion object {
     const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
         r.slug as slug, r.avatarHash as avatarHash,
@@ -34,15 +34,16 @@ interface ProjectRepository : JpaRepository<io.tolgee.model.Project, Long> {
         left join fetch Organization o on r.organizationOwner = o
         left join fetch OrganizationRole role on role.organization = o and role.user.id = :userAccountId
         where p is not null or (role is not null)
+        order by r.name
         """
   )
   fun findAllPermitted(userAccountId: Long): List<Array<Any>>
 
   @Query(
     """$BASE_VIEW_QUERY 
-                and (:search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
-                or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
-                or lower(ua.name) like lower(concat('%', cast(:search as text),'%')))
+        and (:search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
+        or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
+        or lower(ua.name) like lower(concat('%', cast(:search as text),'%')))
     """
   )
   fun findAllPermitted(

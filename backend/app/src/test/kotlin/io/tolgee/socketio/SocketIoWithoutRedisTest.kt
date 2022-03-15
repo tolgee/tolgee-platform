@@ -1,5 +1,6 @@
 package io.tolgee.socketio
 
+import io.tolgee.CleanDbBeforeClass
 import io.tolgee.testing.ContextRecreatingTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
   ]
 )
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@CleanDbBeforeClass
 class SocketIoWithoutRedisTest : AbstractSocketIoTest() {
 
   @Test

@@ -14,7 +14,6 @@ import io.tolgee.testing.assertions.Assertions.assertThat
 import net.javacrumbs.jsonunit.assertj.assertThatJson
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MvcResult
 import org.springframework.transaction.annotation.Transactional
 import java.io.ByteArrayInputStream
@@ -22,7 +21,6 @@ import java.util.zip.ZipInputStream
 import kotlin.system.measureTimeMillis
 
 @ContextRecreatingTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
 

@@ -1,6 +1,8 @@
 package io.tolgee.configuration.tolgee
 
+import io.tolgee.CleanDbBeforeClass
 import io.tolgee.service.UserAccountService
+import io.tolgee.testing.AbstractTransactionalTest
 import io.tolgee.testing.ContextRecreatingTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -15,7 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest
     "tolgee.authentication.jwtSecret=test_jwt_secret"
   ]
 )
-class AuthenticationPropertiesTest {
+@CleanDbBeforeClass
+class AuthenticationPropertiesTest : AbstractTransactionalTest() {
   @set:Autowired
   lateinit var tolgeeProperties: TolgeeProperties
 

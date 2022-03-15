@@ -96,7 +96,6 @@ class V2ProjectsController(
   private val invitationService: InvitationService,
   private val organizationService: OrganizationService,
   private val organizationRoleService: OrganizationRoleService,
-  private val projectMachineTranslationServiceConfigService: MtServiceConfigService,
   private val imageUploadService: ImageUploadService,
   private val mtServiceConfigService: MtServiceConfigService,
   private val autoTranslateService: AutoTranslationService

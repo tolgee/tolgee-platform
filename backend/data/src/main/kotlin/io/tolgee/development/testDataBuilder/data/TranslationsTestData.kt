@@ -17,15 +17,16 @@ class TranslationsTestData {
   lateinit var project: Project
   lateinit var englishLanguage: Language
   lateinit var germanLanguage: Language
-  var user: UserAccount
+  lateinit var user: UserAccount
   lateinit var aKey: Key
   lateinit var projectBuilder: ProjectBuilder
   lateinit var aKeyGermanTranslation: Translation
 
   val root: TestDataBuilder = TestDataBuilder().apply {
-    user = addUserAccount {
+    addUserAccount {
       username = "franta"
-    }.self
+      user = this
+    }
     addProject {
       name = "Franta's project"
       userOwner = user

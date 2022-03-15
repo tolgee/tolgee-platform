@@ -17,9 +17,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
   private val languageDTO = LanguageDto(
     "English",

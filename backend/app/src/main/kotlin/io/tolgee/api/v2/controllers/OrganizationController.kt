@@ -36,7 +36,9 @@ import io.tolgee.service.ProjectService
 import io.tolgee.service.UserAccountService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.CollectionModel
 import org.springframework.hateoas.MediaTypes
 import org.springframework.hateoas.PagedModel
@@ -141,7 +143,7 @@ class OrganizationController(
   @Operation(summary = "Returns all users in organization")
   fun getAllUsers(
     @PathVariable("id") id: Long,
-    @ParameterObject pageable: Pageable,
+    @ParameterObject @SortDefault(sort = ["name"], direction = Sort.Direction.ASC) pageable: Pageable,
     @RequestParam("search") search: String?
   ): PagedModel<UserAccountWithOrganizationRoleModel> {
     organizationRoleService.checkUserIsMemberOrOwner(id)

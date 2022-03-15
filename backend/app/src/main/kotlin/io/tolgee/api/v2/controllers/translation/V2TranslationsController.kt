@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
 import io.tolgee.api.v2.hateoas.translations.SetTranslationsResponseModel
+import io.tolgee.api.v2.hateoas.translations.TranslationHistoryModel
+import io.tolgee.api.v2.hateoas.translations.TranslationHistoryModelAssembler
 import io.tolgee.api.v2.hateoas.translations.TranslationModel
 import io.tolgee.api.v2.hateoas.translations.TranslationModelAssembler
 import io.tolgee.controllers.IController
@@ -45,7 +47,6 @@ import io.tolgee.service.query_builders.CursorUtil
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
-import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -77,6 +78,7 @@ class V2TranslationsController(
   private val keyService: KeyService,
   private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
   private val historyPagedAssembler: PagedResourcesAssembler<TranslationHistoryView>,
+  private val translationHistoryModelAssembler: TranslationHistoryModelAssembler,
   private val translationModelAssembler: TranslationModelAssembler,
   private val languageService: LanguageService,
   private val securityService: SecurityService,
@@ -216,9 +218,11 @@ Sorting is not supported for supported. It is automatically sorted from newest t
   fun getTranslationHistory(
     @PathVariable translationId: Long,
     @ParameterObject pageable: Pageable
-  ): PagedModel<EntityModel<TranslationHistoryView>> {
+  ): PagedModel<TranslationHistoryModel> {
+    val translation = translationService.get(translationId)
+    translation.checkFromProject()
     val translations = translationService.getHistory(translationId, pageable)
-    return historyPagedAssembler.toModel(translations)
+    return historyPagedAssembler.toModel(translations, translationHistoryModelAssembler)
   }
 
   private fun getKeysWithScreenshots(keyIds: Collection<Long>): Map<Long, MutableSet<Screenshot>>? {
@@ -226,7 +230,7 @@ Sorting is not supported for supported. It is automatically sorted from newest t
       !authenticationFacade.isApiKeyAuthentication ||
       authenticationFacade.apiKey.scopesEnum.contains(ApiScope.SCREENSHOTS_VIEW)
     ) {
-      return screenshotService.getKeysWithScreenshots(keyIds).map { it.id to it.screenshots }.toMap()
+      return screenshotService.getKeysWithScreenshots(keyIds).associate { it.id to it.screenshots }
     }
     return null
   }

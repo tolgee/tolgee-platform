@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
@@ -51,9 +52,9 @@ class ProjectRepositoryTest {
     dbPopulatorReal.createBase("No org repo", users[3].username)
     val result = projectRepository.findAllPermitted(users[3].id)
     assertThat(result).hasSize(10)
-    assertThat(result[9][2]).isNull()
-    assertThat(result[9][0]).isInstanceOf(Project::class.java)
-    assertThat(result[9][1]).isInstanceOf(Permission::class.java)
+    assertThat(result[0][2]).isNull()
+    assertThat(result[0][0]).isInstanceOf(Project::class.java)
+    assertThat(result[0][1]).isInstanceOf(Permission::class.java)
     assertThat(result[8][1]).isNull()
     assertThat(result[8][0]).isInstanceOf(Project::class.java)
     assertThat(result[8][3]).isInstanceOf(OrganizationRole::class.java)
@@ -78,7 +79,7 @@ class ProjectRepositoryTest {
   fun findAllPermittedPaged() {
     val users = dbPopulatorReal.createUsersAndOrganizations()
     dbPopulatorReal.createBase("No org repo", users[3].username)
-    val result = projectRepository.findAllPermitted(users[3].id, PageRequest.of(0, 20))
+    val result = projectRepository.findAllPermitted(users[3].id, PageRequest.of(0, 20, Sort.by(Sort.Order.asc("id"))))
     assertThat(result).hasSize(10)
     assertThat(result.content[0].organizationOwnerName).isNotNull
     assertThat(result.content[8].organizationOwnerSlug).isNotNull

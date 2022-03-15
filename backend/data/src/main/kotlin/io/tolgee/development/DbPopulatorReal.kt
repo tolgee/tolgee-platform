@@ -74,6 +74,7 @@ class DbPopulatorReal(
     }
   }
 
+  @Transactional
   fun createUsersAndOrganizations(username: String = "user", userCount: Int = 4): List<UserAccount> {
     val users = (1..userCount).map {
       createUserIfNotExists("$username $it")

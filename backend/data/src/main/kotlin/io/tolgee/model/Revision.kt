@@ -30,7 +30,7 @@ class Revision : Serializable {
   private val timestamp: Long = 0
 
   /**
-   * We don't want an foreign key, since user could be deleted
+   * We don't want a foreign key, since user could have been deleted
    */
   var authorId: Long? = null
 }

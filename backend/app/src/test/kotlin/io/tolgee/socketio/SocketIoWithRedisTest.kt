@@ -3,6 +3,7 @@ package io.tolgee.socketio
 import com.corundumstudio.socketio.SocketIOServer
 import com.corundumstudio.socketio.store.RedissonStoreFactory
 import com.corundumstudio.socketio.store.StoreFactory
+import io.tolgee.CleanDbBeforeClass
 import io.tolgee.fixtures.RedisRunner
 import io.tolgee.testing.ContextRecreatingTest
 import org.junit.jupiter.api.AfterAll
@@ -25,6 +26,7 @@ import org.springframework.test.context.ContextConfiguration
     "tolgee.socket-io.use-redis=true"
   ]
 )
+@CleanDbBeforeClass
 @ContextConfiguration(initializers = [SocketIoWithRedisTest.Companion.Initializer::class])
 class SocketIoWithRedisTest : AbstractSocketIoTest() {
   companion object {

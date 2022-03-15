@@ -6,6 +6,7 @@ import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.repository.UserAccountRepository
+import io.tolgee.testing.AbstractTransactionalTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -13,11 +14,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 @SpringBootTest
+class DbPopulatorTest : AbstractTransactionalTest() {
 
-open class DbPopulatorTest {
   @Autowired
   lateinit var populator: DbPopulatorReal
 
@@ -29,9 +29,6 @@ open class DbPopulatorTest {
 
   @Autowired
   lateinit var apiKeyService: ApiKeyService
-
-  @Autowired
-  lateinit var entityManager: EntityManager
 
   @Autowired
   lateinit var tolgeeProperties: TolgeeProperties
@@ -47,13 +44,13 @@ open class DbPopulatorTest {
 
   @Test
   @Transactional
-  open fun createsUser() {
+  fun createsUser() {
     Assertions.assertThat(userAccount.name).isEqualTo(tolgeeProperties.authentication.initialUsername)
   }
 
   @Test
   @Transactional
-  open fun createsProject() {
+  fun createsProject() {
     entityManager.refresh(userAccount)
     val found = projectRepository.findAll().asSequence()
       .flatMap { it!!.permissions.map { it.user } }
@@ -63,7 +60,7 @@ open class DbPopulatorTest {
 
   @Test
   @Transactional
-  open fun createsApiKey() {
+  fun createsApiKey() {
     val key = apiKeyService.getAllByUser(userAccount.id).stream().findFirst()
     Assertions.assertThat(key).isPresent
     Assertions.assertThat(key.get().key).isEqualTo("this_is_dummy_api_key")
