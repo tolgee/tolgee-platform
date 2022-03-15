@@ -1468,4 +1468,10 @@
     <changeSet author="jenik (generated)" id="1647280727641-6">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="auto_translation_config" constraintName="FKt6nkgxegunln8tv83446kfkli" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
+    <changeSet author="jenik" id="1638969083096-0">
+        <sql dbms="postgresql">
+            UPDATE translation_aud set state = 1 where state = 2 or state = 4;
+            UPDATE translation_aud set state = 2 where state = 3;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
