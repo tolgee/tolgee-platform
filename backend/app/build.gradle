@@ -89,7 +89,7 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation("org.springframework.ldap:spring-ldap-core")
     implementation("org.springframework.security:spring-security-ldap")
-
+    implementation("org.springframework.data:spring-data-envers")
 
     /**
      * SPRING DOC

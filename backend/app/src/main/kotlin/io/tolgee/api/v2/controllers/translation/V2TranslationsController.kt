@@ -17,6 +17,7 @@ import io.tolgee.api.v2.hateoas.translations.TranslationModel
 import io.tolgee.api.v2.hateoas.translations.TranslationModelAssembler
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.PathDTO
+import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.SelectAllResponse
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
@@ -43,6 +44,9 @@ import io.tolgee.service.TranslationService
 import io.tolgee.service.query_builders.CursorUtil
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.EntityModel
+import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -72,6 +76,7 @@ class V2TranslationsController(
   private val translationService: TranslationService,
   private val keyService: KeyService,
   private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
+  private val historyPagedAssembler: PagedResourcesAssembler<TranslationHistoryView>,
   private val translationModelAssembler: TranslationModelAssembler,
   private val languageService: LanguageService,
   private val securityService: SecurityService,
@@ -174,7 +179,6 @@ class V2TranslationsController(
   @Operation(summary = "Get select all keys")
   fun getSelectAllKeyIds(
     @ParameterObject params: TranslationFilters,
-    @ParameterObject pageable: Pageable
   ): SelectAllResponse {
     val languages: Set<Language> = languageService
       .getLanguagesForTranslationsView(params.languages, projectHolder.project.id)
@@ -182,7 +186,6 @@ class V2TranslationsController(
     return SelectAllResponse(
       translationService.getSelectAllKeys(
         projectId = projectHolder.project.id,
-        pageable = pageable,
         params = params,
         languages = languages
       )
@@ -200,6 +203,22 @@ class V2TranslationsController(
     translation.checkFromProject()
     translationService.dismissAutoTranslated(translation)
     return translationModelAssembler.toModel(translation)
+  }
+
+  @GetMapping(value = ["/{translationId:[0-9]+}/history"])
+  @AccessWithApiKey([ApiScope.TRANSLATIONS_VIEW])
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
+  @Operation(
+    summary = """Returns history of specific translation. 
+
+Sorting is not supported for supported. It is automatically sorted from newest to oldest."""
+  )
+  fun getTranslationHistory(
+    @PathVariable translationId: Long,
+    @ParameterObject pageable: Pageable
+  ): PagedModel<EntityModel<TranslationHistoryView>> {
+    val translations = translationService.getHistory(translationId, pageable)
+    return historyPagedAssembler.toModel(translations)
   }
 
   private fun getKeysWithScreenshots(keyIds: Collection<Long>): Map<Long, MutableSet<Screenshot>>? {

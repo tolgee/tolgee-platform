@@ -217,6 +217,10 @@ class UserAccountService(
     return userAccountRepository.saveAndFlush(user)
   }
 
+  fun getAllByIds(ids: Set<Long>): MutableList<UserAccount> {
+    return userAccountRepository.findAllById(ids)
+  }
+
   val isAnyUserAccount: Boolean
     get() = userAccountRepository.count() > 0
 }
