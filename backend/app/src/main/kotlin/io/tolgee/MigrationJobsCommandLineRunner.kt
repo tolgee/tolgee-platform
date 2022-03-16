@@ -1,23 +1,27 @@
 package io.tolgee
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.service.StartupImportService
+import org.springframework.batch.core.Job
+import org.springframework.batch.core.JobParameters
+import org.springframework.batch.core.launch.JobLauncher
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.ApplicationListener
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.stereotype.Component
 
 @Component
-class StartupImportCommandLineRunner(
+class MigrationJobsCommandLineRunner(
   val tolgeeProperties: TolgeeProperties,
-  val startupImportService: StartupImportService
+  @Qualifier("translationStatsJob")
+  val translationStatsJob: Job,
+  val jobLauncher: JobLauncher
 ) :
   CommandLineRunner, ApplicationListener<ContextClosedEvent> {
   override fun run(vararg args: String) {
-    startupImportService.importFiles()
+    jobLauncher.run(translationStatsJob, JobParameters())
   }
 
   override fun onApplicationEvent(event: ContextClosedEvent) {
-    // we don't need to do anything on context close
   }
 }
