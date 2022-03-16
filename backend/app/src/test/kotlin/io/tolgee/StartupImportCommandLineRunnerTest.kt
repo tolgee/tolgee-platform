@@ -28,7 +28,7 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
   override lateinit var tolgeeProperties: TolgeeProperties
 
   @Autowired
-  lateinit var startupImportCommandLineRunner: StartupImportCommandLineRunner
+  lateinit var startupImportCommandLineRunner: MigrationJobsCommandLineRunner
 
   @BeforeAll
   fun setup() {

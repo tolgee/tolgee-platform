@@ -91,6 +91,7 @@ dependencies {
     implementation("org.springframework.ldap:spring-ldap-core")
     implementation("org.springframework.security:spring-security-ldap")
     implementation("org.springframework.data:spring-data-envers")
+    implementation "org.springframework.boot:spring-boot-starter-batch"
 
     /**
      * SPRING DOC

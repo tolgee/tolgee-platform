@@ -67,6 +67,10 @@ class Translation(
   @OneToMany(mappedBy = "translation")
   var comments: MutableList<TranslationComment> = mutableListOf()
 
+  var wordCount: Int? = null
+
+  var characterCount: Int? = null
+
   constructor(text: String? = null, key: Key, language: Language) : this(text) {
     this.key = key
     this.language = language

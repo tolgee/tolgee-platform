@@ -19,6 +19,9 @@ spring:
         types:
           print:
             banner: false
+  batch:
+    job:
+      enabled: false
 #  main:
 #    lazy-initialization: true
 tolgee:
