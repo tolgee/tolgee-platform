@@ -74,6 +74,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
       googleTranslate.translate(
         any() as String,
         any() as Translate.TranslateOption,
+        any() as Translate.TranslateOption,
         any() as Translate.TranslateOption
       )
     ).thenReturn(googleTranslationMock)
@@ -170,7 +171,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         node("GOOGLE").isEqualTo("Translated with Google")
       }
     }
-    verify(googleTranslate).translate(eq("Yupee"), any(), any())
+    verify(googleTranslate).translate(eq("Yupee"), any(), any(), any())
   }
 
   @Test

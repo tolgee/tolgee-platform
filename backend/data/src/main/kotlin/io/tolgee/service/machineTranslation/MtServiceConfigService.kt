@@ -37,12 +37,10 @@ class MtServiceConfigService(
     return getEnabledServicesByDefaultConfig()
   }
 
-  fun getPrimaryServices(languagesIds: List<Long>): Map<Long, MtServiceType?> {
-    val configs = getStoredConfigs(languagesIds)
+  fun getPrimaryServices(languagesIds: List<Long>, project: Project): Map<Long, MtServiceType?> {
+    val configs = getStoredConfigs(languagesIds, project)
     return languagesIds.associateWith { languageId ->
-      configs.find { config ->
-        config?.targetLanguage?.id == languageId
-      }?.let { return@associateWith it.primaryService } ?: getPrimaryServiceByDefaultConfig()
+      configs[languageId]?.let { return@associateWith it.primaryService } ?: getPrimaryServiceByDefaultConfig()
     }
   }
 
@@ -145,9 +143,9 @@ class MtServiceConfigService(
     return entities.find { it.targetLanguage != null } ?: entities.find { it.targetLanguage == null }
   }
 
-  private fun getStoredConfigs(languageIds: List<Long>): List<MtServiceConfig?> {
-    val entities = mtServiceConfigRepository.findAllByTargetLanguageIdIn(languageIds)
-    return languageIds.map { languageId ->
+  private fun getStoredConfigs(languageIds: List<Long>, project: Project): Map<Long, MtServiceConfig?> {
+    val entities = mtServiceConfigRepository.findAllByTargetLanguageIdIn(languageIds, project)
+    return languageIds.associateWith { languageId ->
       entities.find { it.targetLanguage?.id == languageId } ?: entities.find { it.targetLanguage == null }
     }
   }

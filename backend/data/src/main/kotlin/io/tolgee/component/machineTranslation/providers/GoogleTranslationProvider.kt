@@ -29,7 +29,8 @@ class GoogleTranslationProvider(
     return translateService.translate(
       text,
       Translate.TranslateOption.targetLanguage(targetLanguageTag.suitableTag),
-      Translate.TranslateOption.sourceLanguage(sourceLanguageTag.suitableTag)
+      Translate.TranslateOption.sourceLanguage(sourceLanguageTag.suitableTag),
+      Translate.TranslateOption.format("text")
     ).translatedText
   }
 
