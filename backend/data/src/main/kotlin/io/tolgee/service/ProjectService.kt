@@ -24,6 +24,7 @@ import io.tolgee.model.key.Key_
 import io.tolgee.model.translation.Translation
 import io.tolgee.model.translation.Translation_
 import io.tolgee.model.views.ProjectView
+import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.dataImport.ImportService
@@ -34,6 +35,7 @@ import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -109,14 +111,14 @@ class ProjectService constructor(
   }
 
   @Transactional
-  fun findView(id: Long): ProjectView? {
-    return projectRepository.findViewById(authenticationFacade.userAccount.id, id)
-  }
-
-  @Transactional
-  fun getView(id: Long): ProjectView {
-    return projectRepository.findViewById(authenticationFacade.userAccount.id, id)
+  fun getView(id: Long): ProjectWithLanguagesView {
+    val perms = permissionService.getProjectPermissionData(id, authenticationFacade.userAccount.id)
+    val withoutPermittedLanguages = projectRepository.findViewById(authenticationFacade.userAccount.id, id)
       ?: throw NotFoundException(Message.PROJECT_NOT_FOUND)
+    return ProjectWithLanguagesView.fromProjectView(
+      withoutPermittedLanguages,
+      perms.directPermissions?.languageIds?.toList()
+    )
   }
 
   @Transactional
@@ -196,11 +198,23 @@ class ProjectService constructor(
     return this.projectRepository.findAllByOrganizationOwnerId(organizationId)
   }
 
-  fun findAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<ProjectView> {
-    return this.projectRepository
-      .findAllPermittedInOrganization(
-        authenticationFacade.userAccount.id, organizationId, pageable, search
-      )
+  fun findAllInOrganization(organizationId: Long, pageable: Pageable, search: String?): Page<ProjectWithLanguagesView> {
+    val withoutPermittedLanguages = this.projectRepository.findAllPermittedInOrganization(
+      authenticationFacade.userAccount.id, organizationId, pageable, search
+    )
+    return addPermittedLanguagesToProjects(withoutPermittedLanguages)
+  }
+
+  fun addPermittedLanguagesToProjects(projectsPage: Page<ProjectView>): Page<ProjectWithLanguagesView> {
+    val projectLanguageMap = permissionService.getPermittedTranslateLanguagesForProjectIds(
+      projectsPage.content.map { it.id },
+      authenticationFacade.userAccount.id
+    )
+    val newContent = projectsPage.content.map {
+      ProjectWithLanguagesView.fromProjectView(it, projectLanguageMap[it.id])
+    }
+
+    return PageImpl(newContent, projectsPage.pageable, projectsPage.totalElements)
   }
 
   fun getProjectsStatistics(projectIds: Iterable<Long>): List<ProjectStatistics> {
@@ -311,8 +325,13 @@ class ProjectService constructor(
     }
   }
 
-  fun findPermittedPaged(pageable: Pageable, search: String?): Page<ProjectView> {
-    return projectRepository.findAllPermitted(authenticationFacade.userAccount.id, pageable, search)
+  fun findPermittedPaged(pageable: Pageable, search: String?): Page<ProjectWithLanguagesView> {
+    val withoutPermittedLanguages = projectRepository.findAllPermitted(
+      authenticationFacade.userAccount.id,
+      pageable,
+      search
+    )
+    return addPermittedLanguagesToProjects(withoutPermittedLanguages)
   }
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], allEntries = true)

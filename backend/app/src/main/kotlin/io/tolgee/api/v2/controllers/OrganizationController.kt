@@ -26,7 +26,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
-import io.tolgee.model.views.ProjectView
+import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
@@ -66,7 +66,7 @@ import javax.validation.Valid
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class OrganizationController(
   private val organizationService: OrganizationService,
-  private val pagedProjectResourcesAssembler: PagedResourcesAssembler<ProjectView>,
+  private val pagedProjectResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
   private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
   private val arrayUserResourcesAssembler: PagedResourcesAssembler<UserAccountWithOrganizationRoleView>,
   private val organizationModelAssembler: OrganizationModelAssembler,

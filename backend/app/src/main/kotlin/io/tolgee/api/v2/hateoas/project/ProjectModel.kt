@@ -29,5 +29,11 @@ open class ProjectModel(
     description = "Actual current user's permissions on this project. You can not sort data by this column!",
     example = "EDIT"
   )
-  val computedPermissions: Permission.ProjectPermissionType?
+  val computedPermissions: Permission.ProjectPermissionType?,
+  @Schema(
+    description = "List of languages current user has TRANSLATE permission to. " +
+      "If null, all languages edition is permitted.",
+    example = "[200001, 200004]"
+  )
+  val permittedLanguageIds: List<Long>?
 ) : RepresentationModel<ProjectModel>()

@@ -31,9 +31,9 @@ import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.UserAccount
-import io.tolgee.model.views.ProjectView
+import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.ProjectWithStatsView
-import io.tolgee.model.views.UserAccountInProjectView
+import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
@@ -82,9 +82,9 @@ class V2ProjectsController(
   private val projectService: ProjectService,
   private val projectHolder: ProjectHolder,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val arrayResourcesAssembler: PagedResourcesAssembler<ProjectView>,
+  private val arrayResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
-  private val userArrayResourcesAssembler: PagedResourcesAssembler<UserAccountInProjectView>,
+  private val userArrayResourcesAssembler: PagedResourcesAssembler<UserAccountInProjectWithLanguagesView>,
   private val userAccountInProjectModelAssembler: UserAccountInProjectModelAssembler,
   private val projectModelAssembler: ProjectModelAssembler,
   private val projectWithStatsModelAssembler: ProjectWithStatsModelAssembler,
@@ -136,9 +136,9 @@ class V2ProjectsController(
   @AccessWithApiKey
   @Operation(summary = "Returns project by id")
   fun get(@PathVariable("projectId") projectId: Long): ProjectModel {
-    return projectService.findView(projectId)?.let {
+    return projectService.getView(projectId)?.let {
       projectModelAssembler.toModel(it)
-    } ?: throw NotFoundException()
+    }
   }
 
   @GetMapping("/{projectId}/users")
@@ -149,7 +149,7 @@ class V2ProjectsController(
     @ParameterObject pageable: Pageable,
     @RequestParam("search", required = false) search: String?
   ): PagedModel<UserAccountInProjectModel> {
-    return userAccountService.getAllInProject(projectId, pageable, search).let { users ->
+    return userAccountService.getAllInProjectWithPermittedLanguages(projectId, pageable, search).let { users ->
       userArrayResourcesAssembler.toModel(users, userAccountInProjectModelAssembler)
     }
   }
@@ -241,7 +241,7 @@ class V2ProjectsController(
       throw PermissionException()
     }
     val project = projectService.createProject(dto)
-    return projectModelAssembler.toModel(projectService.findView(project.id)!!)
+    return projectModelAssembler.toModel(projectService.getView(project.id))
   }
 
   @Operation(summary = "Modifies project")
@@ -249,7 +249,7 @@ class V2ProjectsController(
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
   fun editProject(@RequestBody @Valid dto: EditProjectDTO): ProjectModel {
     val project = projectService.editProject(projectHolder.project.id, dto)
-    return projectModelAssembler.toModel(projectService.findView(project.id)!!)
+    return projectModelAssembler.toModel(projectService.getView(project.id))
   }
 
   @DeleteMapping(value = ["/{projectId}"])

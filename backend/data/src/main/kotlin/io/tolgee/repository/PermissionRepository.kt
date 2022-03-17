@@ -29,4 +29,23 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
   """
   )
   fun findAllByPermittedLanguage(language: Language): List<Permission>
+
+  @Query(
+    """
+      select p.user.id, l.id from Permission p
+      join p.languages l
+      where p.user.id in :userIds
+    """
+  )
+  fun getUserPermittedLanguageIds(userIds: List<Long>): List<Array<Long>>
+
+  @Query(
+    """
+      select p.project.id, l.id from Permission p
+      join p.languages l
+      where p.project.id in :projectIds
+      and p.user.id = :userId
+    """
+  )
+  fun getProjectPermittedLanguageIds(projectIds: List<Long>, userId: Long): List<Array<Long>>
 }

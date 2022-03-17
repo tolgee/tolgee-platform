@@ -81,6 +81,30 @@ class PermissionService(
     )
   }
 
+  fun getPermittedTranslateLanguagesForUserIds(userIds: List<Long>): Map<Long, List<Long>> {
+    val data = permissionRepository.getUserPermittedLanguageIds(userIds)
+    val result = mutableMapOf<Long, MutableList<Long>>()
+    data.forEach {
+      val languageIds = result.computeIfAbsent(it[0]) {
+        mutableListOf()
+      }
+      languageIds.add(it[1])
+    }
+    return result
+  }
+
+  fun getPermittedTranslateLanguagesForProjectIds(projectIds: List<Long>, userId: Long): Map<Long, List<Long>> {
+    val data = permissionRepository.getProjectPermittedLanguageIds(projectIds, userId)
+    val result = mutableMapOf<Long, MutableList<Long>>()
+    data.forEach {
+      val languageIds = result.computeIfAbsent(it[0]) {
+        mutableListOf()
+      }
+      languageIds.add(it[1])
+    }
+    return result
+  }
+
   fun getProjectPermissionData(projectId: Long, userAccountId: Long): ProjectPermissionData {
     val project = projectService.findDto(projectId) ?: throw NotFoundException()
     return getProjectPermissionData(project, userAccountId)

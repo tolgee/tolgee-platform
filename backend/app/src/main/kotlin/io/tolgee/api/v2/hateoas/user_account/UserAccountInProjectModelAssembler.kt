@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.user_account
 
-import io.tolgee.model.views.UserAccountInProjectView
+import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.security.controllers.UserController
 import io.tolgee.service.PermissionService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component
 @Component
 class UserAccountInProjectModelAssembler(
   val permissionService: PermissionService
-) : RepresentationModelAssemblerSupport<UserAccountInProjectView, UserAccountInProjectModel>(
+) : RepresentationModelAssemblerSupport<UserAccountInProjectWithLanguagesView, UserAccountInProjectModel>(
   UserController::class.java, UserAccountInProjectModel::class.java
 ) {
-  override fun toModel(view: UserAccountInProjectView): UserAccountInProjectModel {
+  override fun toModel(view: UserAccountInProjectWithLanguagesView): UserAccountInProjectModel {
     return UserAccountInProjectModel(
       view.id,
       view.username,
@@ -22,7 +22,8 @@ class UserAccountInProjectModelAssembler(
       view.directPermissions,
       permissionService.computeProjectPermissionType(
         view.organizationRole, view.organizationBasePermissions, view.directPermissions, null
-      ).type!!
+      ).type!!,
+      view.permittedLanguageIds
     )
   }
 }

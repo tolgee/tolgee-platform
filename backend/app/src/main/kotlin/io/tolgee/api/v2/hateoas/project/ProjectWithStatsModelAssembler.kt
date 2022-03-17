@@ -44,7 +44,8 @@ class ProjectWithStatsModelAssembler(
         view.organizationRole, view.organizationBasePermissions, view.directPermissions, null
       ).type,
       stats = view.stats,
-      languages = view.languages.map { languageModelAssembler.toModel(it) }
+      languages = view.languages.map { languageModelAssembler.toModel(it) },
+      permittedLanguageIds = view.permittedLanguageIds
     ).add(link).also { model ->
       view.organizationOwnerSlug?.let {
         model.add(linkTo<OrganizationController> { get(it) }.withRel("organizationOwner"))

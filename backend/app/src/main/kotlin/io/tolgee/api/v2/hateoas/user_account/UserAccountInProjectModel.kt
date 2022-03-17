@@ -19,5 +19,6 @@ data class UserAccountInProjectModel(
     description = "Actual user's permissions on selected project. You can not sort data by this column!",
     example = "EDIT"
   )
-  val computedPermissions: Permission.ProjectPermissionType
+  val computedPermissions: Permission.ProjectPermissionType,
+  val permittedLanguageIds: List<Long>?
 ) : RepresentationModel<UserAccountInProjectModel>(), UserAccountInProjectView
