@@ -1,3 +1,11 @@
+# [2.12.0](https://github.com/tolgee/server/compare/v2.11.0...v2.12.0) (2022-03-17)
+
+
+### Features
+
+* Translation history - Backend ([c7c4312](https://github.com/tolgee/server/commit/c7c43129866b543aa93e0f52ea905b62747cf0e8))
+* Translation history - Closes [#913](https://github.com/tolgee/server/issues/913) ([cedd6c3](https://github.com/tolgee/server/commit/cedd6c30d71540b834dd9259b4772723d746a779))
+
 # [2.11.0](https://github.com/tolgee/server/compare/v2.10.0...v2.11.0) (2022-03-15)
 
 
