@@ -480,6 +480,8 @@ export interface components {
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       /** Actual current user's permissions on this project. You can not sort data by this column! */
       computedPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
+      permittedLanguageIds?: number[];
     };
     MachineTranslationLanguagePropsDto: {
       /** The language to apply those rules. If null, then this settings are default. */
@@ -815,7 +817,6 @@ export interface components {
         | "NEEDS_REVIEW"
       )[];
       zip: boolean;
-      shouldContainUntranslated: boolean;
     };
     UploadedImageModel: {
       id: number;
@@ -903,6 +904,7 @@ export interface components {
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       /** Actual user's permissions on selected project. You can not sort data by this column! */
       computedPermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      permittedLanguageIds?: number[];
     };
     PagedModelTagModel: {
       _embedded?: {
@@ -930,6 +932,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -940,7 +943,6 @@ export interface components {
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1077,6 +1079,8 @@ export interface components {
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       /** Actual current user's permissions on this project. You can not sort data by this column! */
       computedPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
+      permittedLanguageIds?: number[];
       stats: components["schemas"]["ProjectStatistics"];
       languages: components["schemas"]["LanguageModel"][];
     };

@@ -1,6 +1,5 @@
 package io.tolgee.api.v2.hateoas.invitation
 
-import io.tolgee.api.v2.hateoas.organization.LanguageModel
 import io.tolgee.model.Permission
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
@@ -11,7 +10,7 @@ open class ProjectInvitationModel(
   val id: Long,
   val code: String,
   val type: Permission.ProjectPermissionType,
-  val languages: List<LanguageModel>?,
+  val languages: List<Long>?,
   val createdAt: Date,
   val invitedUserName: String?,
   val invitedUserEmail: String?

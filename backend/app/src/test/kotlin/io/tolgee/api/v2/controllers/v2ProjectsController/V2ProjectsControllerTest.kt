@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.development.testDataBuilder.data.ProjectsTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -42,6 +43,22 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  fun `get all has language permissions`() {
+    val baseTestData = BaseTestData()
+    baseTestData.root.apply {
+      data.projects[0].data.permissions[0].self.languages = mutableSetOf(baseTestData.englishLanguage)
+    }
+    testDataService.saveTestData(baseTestData.root)
+
+    userAccount = baseTestData.user
+
+    performAuthGet("/v2/projects").andPrettyPrint.andAssertThatJson.node("_embedded.projects").let {
+      it.isArray.hasSize(1)
+      it.node("[0].permittedLanguageIds").isArray.hasSize(1).containsAll(listOf(baseTestData.englishLanguage.id))
+    }
+  }
+
+  @Test
   fun getAllWithStats() {
     val testData = ProjectsTestData()
     testDataService.saveTestData(testData.root)
@@ -78,12 +95,36 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   }
 
   @Test
+  fun `with-stats returns permitted languages`() {
+    val testData = ProjectsTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.userWithTranslatePermission
+
+    performAuthGet("/v2/projects/with-stats?sort=id")
+      .andIsOk.andAssertThatJson.node("_embedded.projects").let {
+        it.isArray.hasSize(1)
+        it.node("[0].permittedLanguageIds").isArray.hasSize(2).containsAll(
+          mutableListOf(
+            testData.project2English.id,
+            testData.project2Deutsch.id
+          )
+        )
+      }
+  }
+
+  @Test
   fun get() {
     val base = dbPopulator.createBase("one")
+
+    val permission = base.permissions.first()
+    permission.languages = mutableSetOf(base.languages.first())
+
+    permissionService.saveAll(listOf(permission))
 
     performAuthGet("/v2/projects/${base.id}").andPrettyPrint.andAssertThatJson.let {
       it.node("userOwner.name").isEqualTo("admin")
       it.node("directPermissions").isEqualTo("MANAGE")
+      it.node("permittedLanguageIds").isArray.hasSize(1).contains(base.languages.first().id)
     }
   }
 
@@ -100,18 +141,31 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   fun getAllUsers() {
     val usersAndOrganizations = dbPopulator.createUsersAndOrganizations()
-    val repo = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
-    val user = dbPopulator.createUserIfNotExists("jirina")
-    permissionService.grantFullAccessToProject(user, repo)
+    val directPermissionProject = usersAndOrganizations[1].organizationRoles[0].organization!!.projects[0]
+
+    val directPermissionUser = dbPopulator.createUserIfNotExists("jirina")
+    permissionService.create(
+      Permission().apply {
+        user = directPermissionUser
+        project = directPermissionProject
+        type = Permission.ProjectPermissionType.TRANSLATE
+        languages = project.languages.toMutableSet()
+      }
+    )
 
     loginAsUser(usersAndOrganizations[1].name)
 
-    performAuthGet("/v2/projects/${repo.id}/users?sort=id").andPrettyPrint.andAssertThatJson
+    performAuthGet("/v2/projects/${directPermissionProject.id}/users?sort=id")
+      .andIsOk.andPrettyPrint.andAssertThatJson
       .node("_embedded.users").let {
         it.isArray.hasSize(3)
         it.node("[0].organizationRole").isEqualTo("MEMBER")
         it.node("[1].organizationRole").isEqualTo("OWNER")
-        it.node("[2].directPermissions").isEqualTo("MANAGE")
+        it.node("[2].directPermissions").isEqualTo("TRANSLATE")
+        it.node("[2].permittedLanguageIds")
+          .isArray
+          .hasSize(2)
+          .containsAll(directPermissionProject.languages.map { it.id })
       }
   }
 

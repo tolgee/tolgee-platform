@@ -4,7 +4,7 @@ import io.tolgee.api.v2.controllers.OrganizationController
 import io.tolgee.api.v2.controllers.V2ProjectsController
 import io.tolgee.api.v2.hateoas.organization.LanguageModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
-import io.tolgee.model.views.ProjectView
+import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.service.AvatarService
 import io.tolgee.service.PermissionService
 import io.tolgee.service.ProjectService
@@ -19,10 +19,10 @@ class ProjectModelAssembler(
   private val projectService: ProjectService,
   private val languageModelAssembler: LanguageModelAssembler,
   private val avatarService: AvatarService
-) : RepresentationModelAssemblerSupport<ProjectView, ProjectModel>(
+) : RepresentationModelAssemblerSupport<ProjectWithLanguagesView, ProjectModel>(
   V2ProjectsController::class.java, ProjectModel::class.java
 ) {
-  override fun toModel(view: ProjectView): ProjectModel {
+  override fun toModel(view: ProjectWithLanguagesView): ProjectModel {
     val link = linkTo<V2ProjectsController> { get(view.id) }.withSelfRel()
     val baseLanguage = view.baseLanguage ?: let {
       projectService.getOrCreateBaseLanguage(view.id)
@@ -42,7 +42,8 @@ class ProjectModelAssembler(
       directPermissions = view.directPermissions,
       computedPermissions = permissionService.computeProjectPermissionType(
         view.organizationRole, view.organizationBasePermissions, view.directPermissions, null
-      ).type
+      ).type,
+      permittedLanguageIds = view.permittedLanguageIds
     ).add(link).also { model ->
       view.organizationOwnerSlug?.let {
         model.add(linkTo<OrganizationController> { get(it) }.withRel("organizationOwner"))
