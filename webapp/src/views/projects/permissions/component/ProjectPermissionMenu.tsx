@@ -40,6 +40,7 @@ const ProjectPermissionMenu = (props: {
                   permissionType,
                   projectId: project.id,
                 },
+                query: {},
               },
               {
                 onSuccess() {

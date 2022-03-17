@@ -12,12 +12,14 @@ import io.tolgee.events.user.OnUserUpdated
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.UserAccountInProjectView
+import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.repository.UserAccountRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -31,10 +33,14 @@ class UserAccountService(
   private val userAccountRepository: UserAccountRepository,
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val tolgeeProperties: TolgeeProperties,
-  private val avatarService: AvatarService
+  private val avatarService: AvatarService,
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
+
+  @Autowired
+  @Lazy
+  lateinit var permissionService: PermissionService
 
   fun findOptional(username: String?): Optional<UserAccount> {
     return userAccountRepository.findByUsername(username)
@@ -156,6 +162,27 @@ class UserAccountService(
     exceptUserId: Long? = null
   ): Page<UserAccountInProjectView> {
     return userAccountRepository.getAllInProject(projectId, pageable, search = search, exceptUserId)
+  }
+
+  fun getAllInProjectWithPermittedLanguages(
+    projectId: Long,
+    pageable: Pageable,
+    search: String?,
+    exceptUserId: Long? = null
+  ): Page<UserAccountInProjectWithLanguagesView> {
+    val users = getAllInProject(projectId, pageable, search, exceptUserId)
+    val permittedLanguageMap = permissionService.getPermittedTranslateLanguagesForUserIds(users.content.map { it.id })
+    return users.map {
+      UserAccountInProjectWithLanguagesView(
+        id = it.id,
+        name = it.name,
+        username = it.username,
+        organizationRole = it.organizationRole,
+        organizationBasePermissions = it.organizationBasePermissions,
+        directPermissions = it.directPermissions,
+        permittedLanguageIds = permittedLanguageMap[it.id]
+      )
+    }
   }
 
   fun encodePassword(rawPassword: String): String {

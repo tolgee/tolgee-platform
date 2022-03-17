@@ -1,5 +1,6 @@
 package io.tolgee.dtos.request.export
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Parameter
 import io.tolgee.model.enums.TranslationState
 
@@ -78,6 +79,7 @@ This is possible only when single language is exported. Otherwise it returns "40
   )
   var zip: Boolean = true
 ) {
+  @get:Hidden
   val shouldContainUntranslated: Boolean
     get() = this.filterState?.contains(TranslationState.UNTRANSLATED) != false
 }

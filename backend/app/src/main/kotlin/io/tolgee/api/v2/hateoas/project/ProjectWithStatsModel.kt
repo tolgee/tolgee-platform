@@ -31,6 +31,13 @@ open class ProjectWithStatsModel(
     example = "EDIT"
   )
   val computedPermissions: Permission.ProjectPermissionType?,
+
+  @Schema(
+    description = "List of languages current user has TRANSLATE permission to. " +
+      "If null, all languages edition is permitted.",
+    example = "[200001, 200004]"
+  )
+  val permittedLanguageIds: List<Long>?,
   val stats: ProjectStatistics,
   val languages: List<LanguageModel>
 ) : RepresentationModel<ProjectWithStatsModel>()
