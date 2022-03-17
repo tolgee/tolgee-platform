@@ -21,6 +21,7 @@ interface MachineTranslationTest {
       googleTranslate.translate(
         any() as String,
         any() as Translate.TranslateOption,
+        any() as Translate.TranslateOption,
         any() as Translate.TranslateOption
       )
     ).thenReturn(googleTranslationMock)

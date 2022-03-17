@@ -1,6 +1,7 @@
 package io.tolgee.repository.machineTranslation
 
 import io.tolgee.model.MtServiceConfig
+import io.tolgee.model.Project
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
@@ -28,12 +29,9 @@ interface MtServiceConfigRepository : JpaRepository<MtServiceConfig, Long> {
   @Query(
     """
     select ptsc from MtServiceConfig ptsc
-    join Language l on l = ptsc.targetLanguage
-        and (
-            l.id in :languageIds 
-            or (ptsc.targetLanguage.id is null and ptsc.project.id = l.id)
-            )
+    where ptsc.targetLanguage.id in :languageIds 
+        or (ptsc.targetLanguage.id is null and ptsc.project = :project)
   """
   )
-  fun findAllByTargetLanguageIdIn(languageIds: List<Long>): List<MtServiceConfig>
+  fun findAllByTargetLanguageIdIn(languageIds: List<Long>, project: Project): List<MtServiceConfig>
 }

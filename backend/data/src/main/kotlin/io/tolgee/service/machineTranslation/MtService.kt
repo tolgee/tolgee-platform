@@ -53,7 +53,7 @@ class MtService(
     baseLanguage: Language,
     targetLanguages: List<Language>
   ): List<TranslateResult?> {
-    val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguages.map { it.id })
+    val primaryServices = mtServiceConfigService.getPrimaryServices(targetLanguages.map { it.id }, project)
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
 
     val serviceIndexedLanguagesMap = targetLanguages
