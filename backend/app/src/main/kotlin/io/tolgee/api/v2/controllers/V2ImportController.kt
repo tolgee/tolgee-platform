@@ -38,6 +38,7 @@ import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.hateoas.mediatype.hal.HalMediaTypeConfiguration
@@ -195,7 +196,7 @@ class V2ImportController(
     @RequestParam("onlyUnresolved", defaultValue = "false") onlyUnresolved: Boolean = false,
     @Schema(description = "String to search in translation text or key")
     @RequestParam("search") search: String? = null,
-    @ParameterObject pageable: Pageable
+    @ParameterObject @SortDefault("keyName") pageable: Pageable
   ): PagedModel<ImportTranslationModel> {
     checkImportLanguageInProject(languageId)
     val translations = importService.getTranslationsView(languageId, pageable, onlyConflicts, onlyUnresolved, search)

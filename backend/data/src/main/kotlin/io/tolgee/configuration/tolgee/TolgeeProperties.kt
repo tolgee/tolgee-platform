@@ -23,7 +23,7 @@ open class TolgeeProperties(
   var frontEndUrl: String? = null,
   var socketIo: SocketIoProperties = SocketIoProperties(),
   var appName: String = "Tolgee",
-  var maxTranslationTextLength: Long = 10000,
+  open var maxTranslationTextLength: Long = 10000,
   var cache: CacheProperties = CacheProperties(),
   var recaptcha: ReCaptchaProperties = ReCaptchaProperties(),
   var machineTranslation: MachineTranslationProperties = MachineTranslationProperties(),

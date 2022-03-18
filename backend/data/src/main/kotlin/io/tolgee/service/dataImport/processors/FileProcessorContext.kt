@@ -6,12 +6,15 @@ import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportKey
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
+import io.tolgee.model.dataImport.issues.paramTypes.FileIssueParamType
 import io.tolgee.model.key.KeyMeta
 
 data class FileProcessorContext(
   val file: ImportFileDto,
   val fileEntity: ImportFile,
   val messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit,
+  val maxTranslationTextLength: Long = 200L
 ) {
   var languages: MutableMap<String, ImportLanguage> = mutableMapOf()
   var translations: MutableMap<String, MutableList<ImportTranslation>> = mutableMapOf()
@@ -20,6 +23,13 @@ data class FileProcessorContext(
   lateinit var languageNameGuesses: List<String>
 
   fun addTranslation(keyName: String, languageName: String, value: Any?) {
+    val stringValue = value as? String
+
+    if (stringValue != null && stringValue.length > maxTranslationTextLength) {
+      fileEntity.addIssue(FileIssueType.TRANSLATION_TOO_LONG, mapOf(FileIssueParamType.KEY_NAME to keyName))
+      return
+    }
+
     val language = languages[languageName] ?: ImportLanguage(languageName, fileEntity).also {
       languages[languageName] = it
     }
@@ -28,7 +38,7 @@ data class FileProcessorContext(
       translations[keyName] = mutableListOf()
     }
 
-    val entity = ImportTranslation(value as? String?, language)
+    val entity = ImportTranslation(stringValue, language)
 
     translations[keyName]!!.add(entity)
   }
