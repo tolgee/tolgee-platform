@@ -1,11 +1,13 @@
 package io.tolgee.api.v2.controllers
 
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
+import io.tolgee.fixtures.andHasErrorMessage
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
@@ -14,6 +16,7 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -28,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class OrganizationControllerTest : AuthorizedControllerTest() {
+open class OrganizationControllerTest : AuthorizedControllerTest() {
 
   lateinit var dummyDto: OrganizationDto
   lateinit var dummyDto2: OrganizationDto
@@ -306,43 +309,35 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
 
   @Test
   @Transactional
-  fun testSetUserRole() {
-    this.organizationService.create(dummyDto, userAccount!!).let { organization ->
-      dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
-        OrganizationRole(
-          user = createdUser,
-          organization = organization,
-          type = OrganizationRoleType.OWNER
-        ).let { createdMemberRole ->
-          organizationRoleRepository.save(createdMemberRole)
-          performAuthPut(
-            "/v2/organizations/${organization.id}/users/${createdUser.id}/set-role",
-            SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
-          ).andIsOk
-          createdMemberRole.let { assertThat(it.type).isEqualTo(OrganizationRoleType.MEMBER) }
-        }
-      }
+  open fun testSetUserRole() {
+    withOwnerInOrganization { organization, owner, role ->
+      performAuthPut(
+        "/v2/organizations/${organization.id}/users/${owner.id}/set-role",
+        SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
+      ).andIsOk
+      role.let { assertThat(it.type).isEqualTo(OrganizationRoleType.MEMBER) }
+    }
+  }
+
+  @Test
+  @Transactional
+  open fun `cannot set own permission`() {
+    withOwnerInOrganization { organization, owner, role ->
+      loginAsUser(owner)
+      performAuthPut(
+        "/v2/organizations/${organization.id}/users/${owner.id}/set-role",
+        SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
+      ).andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_YOUR_OWN_ROLE)
     }
   }
 
   @Test
   fun testRemoveUser() {
-    this.organizationService.create(dummyDto, userAccount!!).let { organization ->
-      dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
-        OrganizationRole(
-          user = createdUser,
-          organization = organization,
-          type = OrganizationRoleType.OWNER
-        ).let { createdMemberRole ->
-          organizationRoleRepository.save(createdMemberRole)
-          performAuthDelete(
-            "/v2/organizations/${organization.id}/users/${createdUser.id}",
-            SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
-          ).andIsOk
-          organizationRoleRepository.findByIdOrNull(createdMemberRole.id!!).let {
-            assertThat(it).isNull()
-          }
-        }
+    withOwnerInOrganization { organization, owner, role ->
+      organizationRoleRepository.save(role)
+      performAuthDelete("/v2/organizations/${organization.id}/users/${owner.id}", null).andIsOk
+      organizationRoleRepository.findByIdOrNull(role.id!!).let {
+        assertThat(it).isNull()
       }
     }
   }
@@ -454,6 +449,23 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
       performAuthDelete("/api/invitation/${invitation.id!!}", null).andIsOk
       assertThatThrownBy { invitationService.getInvitation(invitation.code) }
         .isInstanceOf(BadRequestException::class.java)
+    }
+  }
+
+  private fun withOwnerInOrganization(
+    fn: (organization: Organization, owner: UserAccount, ownerRole: OrganizationRole) -> Unit
+  ) {
+    this.organizationService.create(dummyDto, userAccount!!).let { organization ->
+      dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
+        OrganizationRole(
+          user = createdUser,
+          organization = organization,
+          type = OrganizationRoleType.OWNER
+        ).let { createdOwnerRole ->
+          organizationRoleRepository.save(createdOwnerRole)
+          fn(organization, createdUser, createdOwnerRole)
+        }
+      }
     }
   }
 }
