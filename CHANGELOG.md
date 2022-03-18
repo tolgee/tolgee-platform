@@ -1,3 +1,10 @@
+## [2.12.1](https://github.com/tolgee/server/compare/v2.12.0...v2.12.1) (2022-03-18)
+
+
+### Bug Fixes
+
+* Default primary service was not respected, Google Translate was returning HTML entities ([9871d44](https://github.com/tolgee/server/commit/9871d441738467a0d6225e42197ecb56467d6d72))
+
 # [2.12.0](https://github.com/tolgee/server/compare/v2.11.0...v2.12.0) (2022-03-17)
 
 
