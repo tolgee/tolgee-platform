@@ -1,3 +1,10 @@
+## [2.12.2](https://github.com/tolgee/server/compare/v2.12.1...v2.12.2) (2022-03-18)
+
+
+### Bug Fixes
+
+* Import issues ([e01effe](https://github.com/tolgee/server/commit/e01effe691e10ae9e7e06aa9c5bdfa6eb20d63d5))
+
 ## [2.12.1](https://github.com/tolgee/server/compare/v2.12.0...v2.12.1) (2022-03-18)
 
 
