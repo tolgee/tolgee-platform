@@ -15,11 +15,13 @@ import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleMode
 import io.tolgee.api.v2.hateoas.project.ProjectModel
 import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.dtos.request.organization.OrganizationRequestParamsDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
+import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.model.UserAccount
@@ -170,6 +172,9 @@ class OrganizationController(
     @PathVariable("userId") userId: Long,
     @RequestBody dto: SetOrganizationRoleDto
   ) {
+    if (authenticationFacade.userAccount.id == userId) {
+      throw BadRequestException(Message.CANNOT_SET_YOUR_OWN_ROLE)
+    }
     organizationRoleService.checkUserIsOwner(organizationId)
     organizationRoleService.setMemberRole(organizationId, userId, dto)
   }

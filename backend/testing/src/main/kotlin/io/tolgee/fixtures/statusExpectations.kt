@@ -2,6 +2,7 @@ package io.tolgee.fixtures
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.tolgee.constants.Message
 import io.tolgee.testing.assertions.Assertions.assertThat
 import io.tolgee.testing.assertions.MvcResultAssert
 import net.javacrumbs.jsonunit.assertj.JsonAssert
@@ -23,6 +24,14 @@ val ResultActions.andIsCreated: ResultActions
 
 val ResultActions.andIsBadRequest: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isBadRequest) }
+
+fun ResultActions.andHasErrorMessage(message: Message): ResultActions {
+  return this.tryPrettyPrinting {
+    this.andAssertThatJson {
+      node("code").isEqualTo(message.code)
+    }
+  }
+}
 
 val ResultActions.andIsForbidden: ResultActions
   get() = this.tryPrettyPrinting { this.andExpect(status().isForbidden) }
