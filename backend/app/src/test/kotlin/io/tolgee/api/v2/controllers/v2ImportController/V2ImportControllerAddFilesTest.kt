@@ -13,10 +13,12 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.model.Project
+import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import net.javacrumbs.jsonunit.assertj.JsonAssert
 import net.javacrumbs.jsonunit.assertj.assertThatJson
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
@@ -47,6 +49,14 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
   @Value("classpath:import/xliff/example.xliff")
   lateinit var xliffFile: Resource
+
+  @Value("classpath:import/tooLongTranslation.json")
+  lateinit var tooLongTranslation: Resource
+
+  @AfterEach
+  fun resetProps() {
+    tolgeeProperties.maxTranslationTextLength = 10000
+  }
 
   @Test
   fun `it parses zip file and saves issues`() {
@@ -134,6 +144,22 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
         node("result._embedded.languages").isArray.hasSize(3)
       }
     validateSavedJsonImportData(project)
+  }
+
+  @Test
+  fun `it adds a file with long translation text and stores issues`() {
+    val project = dbPopulator.createBase(generateUniqueString())
+    commitTransaction()
+    tolgeeProperties.maxTranslationTextLength = 20
+
+    performStreamingImport(projectId = project.id, mapOf(Pair("tooLongTranslation.json", tooLongTranslation))).andIsOk
+
+    importService.find(project.id, project.userOwner?.id!!)?.let {
+      assertThat(it.files).hasSize(1)
+      assertThat(it.files[0].issues).hasSize(1)
+      assertThat(it.files[0].issues[0].type).isEqualTo(FileIssueType.TRANSLATION_TOO_LONG)
+      assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("too_long")
+    }
   }
 
   private fun validateSavedJsonImportData(project: Project) {

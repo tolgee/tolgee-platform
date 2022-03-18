@@ -1,5 +1,6 @@
 package io.tolgee.service.dataImport
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIVE
@@ -30,6 +31,7 @@ class CoreImportFilesProcessor(
   private val keyMetaService: KeyMetaService by lazy { applicationContext.getBean(KeyMetaService::class.java) }
   private val languageService: LanguageService by lazy { applicationContext.getBean(LanguageService::class.java) }
   private val processorFactory: ProcessorFactory by lazy { applicationContext.getBean(ProcessorFactory::class.java) }
+  private val tolgeeProperties: TolgeeProperties by lazy { applicationContext.getBean(TolgeeProperties::class.java) }
 
   private val authenticationFacade: AuthenticationFacade by lazy {
     applicationContext.getBean(AuthenticationFacade::class.java)
@@ -70,7 +72,12 @@ class CoreImportFilesProcessor(
     }
 
     val savedFileEntity = file.saveFileEntity()
-    val fileProcessorContext = FileProcessorContext(file, savedFileEntity, messageClient)
+    val fileProcessorContext = FileProcessorContext(
+      file,
+      savedFileEntity,
+      messageClient,
+      tolgeeProperties.maxTranslationTextLength
+    )
     val processor = processorFactory.getProcessor(file, fileProcessorContext)
     processor.process()
     processor.context.processResult()

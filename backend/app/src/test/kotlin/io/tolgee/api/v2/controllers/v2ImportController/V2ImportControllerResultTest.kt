@@ -106,7 +106,7 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
     ).andIsOk
       .andPrettyPrint.andAssertThatJson.node("_embedded.translations").let { translations ->
         translations.isArray.isNotEmpty.hasSize(4)
-        translations.node("[0]").let {
+        translations.node("[2]").let {
           it.node("id").isNotNull
           it.node("text").isEqualTo("Overridden")
           it.node("keyName").isEqualTo("what a key")

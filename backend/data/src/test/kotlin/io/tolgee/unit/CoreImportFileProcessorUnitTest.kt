@@ -1,5 +1,6 @@
 package io.tolgee.unit
 
+import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.Language
@@ -47,7 +48,8 @@ class CoreImportFileProcessorUnitTest {
   private lateinit var existingLanguage: Language
   private lateinit var existingTranslation: Translation
   private lateinit var authenticationFacadeMock: AuthenticationFacade
-  private lateinit var keyMetaService: KeyMetaService
+  private lateinit var keyMetaServiceMock: KeyMetaService
+  private lateinit var tolgeePropertiesMock: TolgeeProperties
 
   @BeforeEach
   fun setup() {
@@ -59,19 +61,24 @@ class CoreImportFileProcessorUnitTest {
     translationServiceMock = mock()
     typeProcessorMock = mock()
     authenticationFacadeMock = mock()
-    keyMetaService = mock()
+    keyMetaServiceMock = mock()
+    tolgeePropertiesMock = mock()
 
     importFile = ImportFile("lgn.json", importMock)
     importFileDto = ImportFileDto("lng.json", "".toByteArray().inputStream())
     existingLanguage = Language().also { it.name = "lng" }
     existingTranslation = Translation("helllo").also { it.key = Key(name = "colliding key") }
     processor = CoreImportFilesProcessor(applicationContextMock, importMock)
+
     whenever(applicationContextMock.getBean(ProcessorFactory::class.java)).thenReturn(processorFactoryMock)
     whenever(applicationContextMock.getBean(ImportService::class.java)).thenReturn(importServiceMock)
     whenever(applicationContextMock.getBean(LanguageService::class.java)).thenReturn(languageServiceMock)
     whenever(applicationContextMock.getBean(TranslationService::class.java)).thenReturn(translationServiceMock)
     whenever(applicationContextMock.getBean(AuthenticationFacade::class.java)).thenReturn(authenticationFacadeMock)
-    whenever(applicationContextMock.getBean(KeyMetaService::class.java)).thenReturn(keyMetaService)
+    whenever(applicationContextMock.getBean(KeyMetaService::class.java)).thenReturn(keyMetaServiceMock)
+    whenever(applicationContextMock.getBean(TolgeeProperties::class.java)).thenReturn(tolgeePropertiesMock)
+    whenever(tolgeePropertiesMock.maxTranslationTextLength).then { 10000L }
+
     whenever(processorFactoryMock.getProcessor(eq(importFileDto), any())).thenReturn(typeProcessorMock)
     fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
     fileProcessorContext.languages = mutableMapOf("lng" to ImportLanguage("lng", importFile))
@@ -129,12 +136,12 @@ class CoreImportFileProcessorUnitTest {
     whenever(translationServiceMock.getAllByLanguageId(any())).thenReturn(listOf())
 
     processor.processFiles(listOf(importFileDto), messageClient = mock())
-    verify(keyMetaService).save(
+    verify(keyMetaServiceMock).save(
       argThat {
         this.comments.any { it.text == "test comment" }
       }
     )
-    verify(keyMetaService).save(
+    verify(keyMetaServiceMock).save(
       argThat {
         this.codeReferences.any { it.path == "hello.php" }
       }

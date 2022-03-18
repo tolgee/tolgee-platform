@@ -24,7 +24,6 @@ import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.Permission
 import io.tolgee.model.Permission.ProjectPermissionType
 import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectView
@@ -330,7 +329,7 @@ class V2ProjectsController(
   }
 
   @PutMapping("/{projectId}/auto-translation-settings")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
   @Operation(summary = "Sets auto translation settings for project")
   fun setAutoTranslationSettings(
     @RequestBody dto: AutoTranslationSettingsDto
@@ -340,7 +339,7 @@ class V2ProjectsController(
   }
 
   @GetMapping("/{projectId}/auto-translation-settings")
-  @AccessWithProjectPermission(Permission.ProjectPermissionType.MANAGE)
+  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
   @Operation(summary = "Returns auto translation settings for project")
   fun getAutoTranslationSettings(): AutoTranslationSettingsDto {
     val config = autoTranslateService.getConfig(projectHolder.projectEntity)

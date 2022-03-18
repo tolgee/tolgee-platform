@@ -65,9 +65,9 @@ describe('Import with lot of data', () => {
       getShowDataDialog().should('be.visible');
       assertInResultDialog('this_is_key_1');
       assertInResultDialog('I am import translation 1');
-      assertInResultDialog('this_is_key_50');
+      assertInResultDialog('this_is_key_143');
       contextGoToPage(getShowDataDialog(), 6);
-      assertInResultDialog('this_is_key_300');
+      assertInResultDialog('this_is_key_99');
     }
   );
 
@@ -92,7 +92,7 @@ describe('Import with lot of data', () => {
     assertInResolutionDialog('I am translation 1');
     assertInResolutionDialog('I am import translation 1');
     contextGoToPage(getResolutionDialog(), 6);
-    assertInResolutionDialog('I am import translation 300');
+    assertInResolutionDialog('I am import translation 99');
   });
 
   after(() => {
