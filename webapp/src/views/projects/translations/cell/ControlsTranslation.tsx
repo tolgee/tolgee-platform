@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
   },
   badgeResolved: {
-    background: theme.palette.grey[600],
+    background: theme.palette.lightBackground.main,
     padding: 0,
     height: 16,
     width: 18,
@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
   },
   checkIcon: {
-    color: theme.palette.grey[100],
+    color: theme.palette.lightBackground.contrastText,
     fontSize: 14,
     margin: -5,
   },

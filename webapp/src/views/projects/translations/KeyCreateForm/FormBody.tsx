@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   editorWrapper: {
-    background: 'white',
+    background: theme.palette.background.default,
     alignSelf: 'stretch',
     display: 'flex',
     alignItems: 'stretch',

@@ -5,7 +5,7 @@ import makeStyles from '@material-ui/core/styles/makeStyles';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    backgroundColor: theme.palette.common.white,
+    backgroundColor: theme.palette.extraLightBackground.main,
     transition: 'width 0.1s ease-in-out',
     width: 250,
   },

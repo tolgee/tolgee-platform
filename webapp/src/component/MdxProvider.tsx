@@ -21,8 +21,8 @@ const useStyles = makeStyles((t) => ({
   },
   inlineCode: {
     borderRadius: t.shape.borderRadius,
-    backgroundColor: 'rgb(246, 248, 250)',
-    color: 'rgb(57, 58, 52)',
+    backgroundColor: t.palette.extraLightBackground.main,
+    color: t.palette.text.secondary,
     padding: '4px 4px',
     fontFamily:
       'ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace',

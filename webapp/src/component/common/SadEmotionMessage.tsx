@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme: Theme) =>
       maxWidth: '100%',
     },
     text: {
-      opacity: '0.3',
+      opacity: '0.4',
       paddingTop: theme.spacing(4),
     },
   })

@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: '100%',
   },
   preview: {
-    background: 'white',
+    background: theme.palette.background.default,
     border: `1px solid ${theme.palette.text.secondary}`,
     color: theme.palette.text.secondary,
   },

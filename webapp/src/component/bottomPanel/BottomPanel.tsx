@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
   },
   popperContent: {
     display: 'flex',
-    background: 'white',
+    background: theme.palette.background.default,
     boxShadow: theme.shadows[10],
   },
 }));

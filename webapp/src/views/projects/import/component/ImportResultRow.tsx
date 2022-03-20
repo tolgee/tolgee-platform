@@ -25,7 +25,7 @@ import { ImportRowLanguageMenu } from './ImportRowLanguageMenu';
 const useStyles = makeStyles((theme) => ({
   root: {
     '&:hover': {
-      backgroundColor: theme.palette.grey['50'],
+      backgroundColor: theme.palette.lightBackground.main,
     },
     '&:hover $helperIcon': {
       opacity: 1,
@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
   helperIcon: {
     fontSize: 20,
     opacity: 0,
-    color: theme.palette.grey['500'],
+    color: theme.palette.lightBackground.main,
   },
   warningIcon: {
     color: theme.palette.warning.main,

@@ -34,8 +34,9 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(3, 2.5),
     cursor: 'pointer',
     overflow: 'hidden',
+    backgroundColor: theme.palette.background.default,
     '&:hover': {
-      backgroundColor: theme.palette.grey['50'],
+      backgroundColor: theme.palette.extraLightBackground.main,
       '& $translationsIconButton': {
         opacity: 1,
       },

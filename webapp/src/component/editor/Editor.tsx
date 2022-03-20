@@ -48,13 +48,14 @@ const useStyles = makeStyles((theme) => ({
       minHeight: (props) => props.minHeight,
       height: '100%',
       marginLeft: -5,
-      // @ts-ignore
-      background: (props) => props.background,
+      background: theme.palette.extraLightBackground.main,
+      color: theme.palette.extraLightBackground.contrastText,
     },
     '& .CodeMirror-lines': {
       padding: '0px !important',
     },
     '& .CodeMirror-line': {
+      color: theme.palette.text,
       padding: '0px !important',
       fontFamily:
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important',
@@ -80,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
       color: '#002bff',
     },
     '& .cm-string': {
-      color: '#000000',
+      color: theme.palette.extraLightBackground.contrastText,
     },
     '& .cm-bracket': {
       color: '#002bff',

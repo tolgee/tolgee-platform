@@ -49,11 +49,7 @@ export const useCellStyles = makeStyles<Theme, { position?: PositionType }>(
       '&:hover $highlightOnHover': showWithAnimation('highlightIn'),
       '&:focus-within $highlightOnHover': showNoAnimation(),
       '&:focus-within': {
-        background: ({ position }) =>
-          getCellGradientBackground(
-            position,
-            theme.palette.extraLightBackground.main
-          ),
+        background: theme.palette.extraLightBackground.main,
       },
     },
     cellClickable: {
@@ -66,8 +62,7 @@ export const useCellStyles = makeStyles<Theme, { position?: PositionType }>(
       background: 'transparent',
       transition: 'background 0.1s ease-out',
       '&:hover': {
-        background: ({ position }) =>
-          getCellGradientBackground(position, colors.grey[50]),
+        background: theme.palette.extraLightBackground.main,
         transition: 'background 0.1s ease-in',
       },
     },
@@ -91,7 +86,7 @@ export const useCellStyles = makeStyles<Theme, { position?: PositionType }>(
       'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.2) !important',
     },
     cellSelected: {
-      background: '#efefef',
+      background: theme.palette.lightBackground.main,
     },
   })
 );

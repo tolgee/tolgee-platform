@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
   popperContent: {
     display: 'flex',
     height: TOOLS_HEIGHT,
-    background: 'white',
+    background: theme.palette.background.default,
     boxShadow: theme.shadows[3],
     borderRadius: theme.shape.borderRadius,
   },

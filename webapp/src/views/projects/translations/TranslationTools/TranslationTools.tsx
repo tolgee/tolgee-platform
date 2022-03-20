@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
   },
   loading: {
-    background: theme.palette.grey[400],
+    background: theme.palette.lightBackground.main,
   },
 }));
 

@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => {
       margin: '10px 0px 100px 0px',
       borderLeft: 0,
       borderRight: 0,
-      background: 'white',
+      background: theme.palette.background.default,
       flexGrow: 1,
       flexDirection: 'column',
       alignItems: 'stretch',

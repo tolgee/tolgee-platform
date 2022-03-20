@@ -35,13 +35,13 @@ const useStyles = makeStyles((theme: Theme) =>
       filter: `drop-shadow(1px 1px 0px ${green[200]}) drop-shadow(-1px 1px 0px ${green[200]})
          drop-shadow(1px -1px 0px ${green[200]}) drop-shadow(-1px -1px 0px ${green[200]})`,
       fontSize: 100,
-      color: theme.palette.common.white,
+      color: theme.palette.background.default,
     },
     invalidIcon: {
       filter: `drop-shadow(1px 1px 0px ${red[200]}) drop-shadow(-1px 1px 0px ${red[200]})
          drop-shadow(1px -1px 0px ${red[200]}) drop-shadow(-1px -1px 0px ${red[200]})`,
       fontSize: 100,
-      color: theme.palette.common.white,
+      color: theme.palette.background.default,
     },
   })
 );
