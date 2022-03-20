@@ -1,9 +1,6 @@
 name: Test
 
-on:
-  push:
-    branches-ignore:
-
+on: [ push, pull_request ]
 jobs:
   backend-build:
     name: Build backend 🏗️
@@ -55,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        command: [ "server-app:runContextRecreatingTests", "server-app:runStandardTests", "data:test"]
+        command: [ "server-app:runContextRecreatingTests", "server-app:runStandardTests", "data:test" ]
     steps:
       - uses: actions/checkout@v2
 
