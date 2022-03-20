@@ -166,7 +166,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     importService.find(project.id, project.userOwner?.id!!)!!.let { importEntity ->
       entityManager.refresh(importEntity)
       assertThat(importEntity.files.size).isEqualTo(3)
-      assertThat(importEntity.files.map { it.name }).containsAll(listOf("en.json", "cs.json", "fr.json"))
+      assertThat(importEntity.files.map { it.name }).containsAll(listOf("en.json", "cs.json", "fr.json", "de.json"))
       val keys = importService.findKeys(importEntity)
       keys.forEach { key ->
         assertThat(keys.filter { it.name == key.name })

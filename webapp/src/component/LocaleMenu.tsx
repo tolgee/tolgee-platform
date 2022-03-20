@@ -56,6 +56,10 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
       name: 'español',
       flag: '🇪🇸',
     },
+    de: {
+      name: 'Deutsch',
+      flag: '🇩🇪',
+    },
   };
 
   const language = getCurrentLanguage();

@@ -119,7 +119,7 @@ export const ProjectTransferModal: FC<{
       <DialogContent>
         <Box minWidth={500} mb={2}>
           <Alert color="warning" icon={<Warning />}>
-            <T>tranfer_project_dialog_warning</T>
+            <T>transfer_project_dialog_warning</T>
           </Alert>
           <Autocomplete
             id="transfer-project-owner-select"
