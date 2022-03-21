@@ -55,6 +55,13 @@ export const OrganizationMembersView: FunctionComponent = () => {
           title={<T>organization_members_view_title</T>}
           onSearchChange={setSearch}
           onPageChange={setPage}
+          emptyPlaceholder={
+            <Box m={4} display="flex" justifyContent="center">
+              <Typography color="textSecondary">
+                {t('global_nothing_found')}
+              </Typography>
+            </Box>
+          }
           renderItem={(user) => (
             <MemberItem user={user} organizationId={organization!.id} />
           )}
