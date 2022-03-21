@@ -35,7 +35,7 @@ const useStyles = makeStyles<Theme>((theme) =>
 );
 
 const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & { children?: React.ReactElement },
+  props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -81,7 +81,7 @@ export const ImportShowDataDialog: FunctionComponent<{
         {!!props.row && (
           <SimplePaginatedHateoasList
             wrapperComponent={Box}
-            wrapperComponentProps={{ m: 2 }}
+            wrapperComponentProps={{ sx: { m: 2 } }}
             actions={actions}
             loadableName="translations"
             searchText={search}

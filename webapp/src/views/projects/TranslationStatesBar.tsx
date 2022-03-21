@@ -58,6 +58,14 @@ const useStyles = makeStyles<Theme>((theme) => ({
 
 const STATES_ORDER = ['REVIEWED', 'TRANSLATED', 'UNTRANSLATED'] as State[];
 
+type ClassNameMapKeys =
+  | 'legendDot'
+  | 'bar'
+  | 'loadedState'
+  | 'legend'
+  | 'root'
+  | 'state';
+
 export function TranslationStatesBar(props: {
   labels: boolean;
   stats: {
@@ -69,7 +77,7 @@ export function TranslationStatesBar(props: {
     };
   };
 }) {
-  const classes = useStyles();
+  const classes = useStyles() as ClassNameMap<ClassNameMapKeys>;
   const translationsCount = props.stats.languageCount * props.stats.keyCount;
   const [loaded, setLoaded] = useState(false);
   const percents = Object.entries(props.stats.translationStateCounts).reduce(
@@ -85,9 +93,7 @@ export function TranslationStatesBar(props: {
   }, []);
 
   const LegendItem = (legendItemProps: {
-    classes: ClassNameMap<
-      'legendDot' | 'bar' | 'loadedState' | 'legend' | 'root' | 'state'
-    >;
+    classes: ClassNameMap<ClassNameMapKeys>;
     state: State;
   }) => {
     const percent =
@@ -128,29 +134,30 @@ export function TranslationStatesBar(props: {
     <Box className={classes.root} data-cy="project-states-bar-root">
       <Box className={classes.bar} data-cy="project-states-bar-bar">
         {visibleStates.map((state, idx) => (
-          <Tooltip
-            key={idx}
-            title={<T>{translationStates[state].translationKey}</T>}
-          >
-            <Box
-              data-cy="project-states-bar-state-progress"
-              className={clsx({
-                [classes.state]: true,
-                [classes.loadedState]: !loaded,
-              })}
-              style={{
-                zIndex: 5 - idx,
-                width: `calc(max(${percents[state]}%, 8px) + ${BORDER_RADIUS}px)`,
-                backgroundColor: translationStates[state].color,
-              }}
-            />
-          </Tooltip>
+          <div key={idx}>
+            <Tooltip title={<T>{translationStates[state].translationKey}</T>}>
+              <Box
+                data-cy="project-states-bar-state-progress"
+                className={clsx({
+                  [classes.state]: true,
+                  [classes.loadedState]: !loaded,
+                })}
+                style={{
+                  zIndex: 5 - idx,
+                  width: `calc(max(${percents[state]}%, 8px) + ${BORDER_RADIUS}px)`,
+                  backgroundColor: translationStates[state].color,
+                }}
+              />
+            </Tooltip>
+          </div>
         ))}
       </Box>
       {props.labels && (
         <Box className={classes.legend} data-cy="project-states-bar-legend">
           {visibleStates.map((state, i) => (
-            <LegendItem key={i} classes={classes} state={state} />
+            <div key={i}>
+              <LegendItem classes={classes} state={state} />
+            </div>
           ))}
         </Box>
       )}

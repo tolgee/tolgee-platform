@@ -1,4 +1,4 @@
-import { Button, ButtonProps, Link, Theme } from '@mui/material';
+import { Button, ButtonProps, Link, LinkProps, Theme } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import { T } from '@tolgee/react';
 
@@ -11,7 +11,7 @@ const useStyles = makeStyles<Theme>((t) => ({
   },
 }));
 
-export const GoToDocsButton = (props: ButtonProps & { href: string }) => {
+export const GoToDocsButton = (props: ButtonProps & LinkProps) => {
   const classes = useStyles();
 
   return (

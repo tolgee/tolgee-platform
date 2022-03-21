@@ -59,7 +59,6 @@ export const ProjectListItemMenu: FC<{
         }}
         id="project-item-menu"
         anchorEl={anchorEl}
-        getContentAnchorEl={null}
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEl(null)}
         onClick={stopBubble()}

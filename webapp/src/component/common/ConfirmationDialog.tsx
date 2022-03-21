@@ -16,8 +16,8 @@ export class ConfirmationDialogProps {
   cancelButtonText?: ReactNode = (<T>confirmation_dialog_cancel</T>);
   title?: ReactNode = (<T>confirmation_dialog_title</T>);
   hardModeText?: string | null = null;
-  confirmButtonColor?: PropTypes.Color = 'primary';
-  cancelButtonColor?: PropTypes.Color = 'default';
+  confirmButtonColor?: PropTypes.Color;
+  cancelButtonColor?: PropTypes.Color;
 
   onCancel?: () => void = () => {};
 
@@ -80,13 +80,13 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
               props.onCancel && props.onCancel();
             }}
             type="button"
-            color={props.cancelButtonColor}
+            color={props.cancelButtonColor ?? 'primary'}
           >
             {props.cancelButtonText}
           </Button>
           <Button
             data-cy="global-confirmation-confirm"
-            color={props.confirmButtonColor}
+            color={props.confirmButtonColor ?? 'default'}
             autoFocus
             disabled={!!disabled}
             type="submit"

@@ -140,16 +140,20 @@ export const LimitedHeightText: React.FC<Props> = ({
           style={{
             pointerEvents: 'none',
           }}
-          modifiers={{
-            offset: { offset: '0, -100%p' },
-            computeStyle: {
-              gpuAcceleration: false,
+          modifiers={[
+            {
+              data: {
+                offset: { offset: '0, -100%p' },
+                computeStyle: {
+                  gpuAcceleration: false,
+                },
+                preventOverflow: {
+                  enabled: true,
+                  padding: 0,
+                },
+              }
             },
-            preventOverflow: {
-              enabled: true,
-              padding: 0,
-            },
-          }}
+          ]}
         >
           <div
             lang={lang}

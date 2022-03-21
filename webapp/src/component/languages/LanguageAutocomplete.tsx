@@ -54,7 +54,7 @@ export const LanguageAutocomplete: FC<{
       onChange={(_, value) => {
         props.onSelect(value as AutocompleteOption);
       }}
-      renderOption={(option) => (
+      renderOption={(_, option) => (
         <span data-cy="languages-create-autocomplete-suggested-option">
           {option.customRenderOption ||
             `${option.englishName} - ${option.originalName} - ${

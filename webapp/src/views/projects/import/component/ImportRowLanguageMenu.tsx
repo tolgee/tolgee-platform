@@ -7,6 +7,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Theme,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
@@ -77,7 +78,7 @@ export const ImportRowLanguageMenu: FunctionComponent<{
     });
   };
 
-  const onChange = (changeEvent: ChangeEvent<any>) => {
+  const onChange = (changeEvent: SelectChangeEvent<any>) => {
     const value = changeEvent.target.value;
     if (value == NEW_LANGUAGE_VALUE) {
       state.addNewLanguageDialogOpen = true;

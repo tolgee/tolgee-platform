@@ -1,7 +1,14 @@
 import React, { FunctionComponent } from 'react';
-import { Box, FormControlLabel, Grid, Switch, Typography } from '@mui/material';
+import {
+  Box,
+  FormControlLabel,
+  Grid,
+  Switch,
+  Typography,
+  Theme,
+} from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
-import { CheckCircle, Warning, Theme } from '@mui/icons-material';
+import { CheckCircle, Warning } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 import { container } from 'tsyringe';

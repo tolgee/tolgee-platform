@@ -4,6 +4,7 @@ import {
   ListItemText,
   MenuItem,
   Select,
+  Theme,
   Typography,
 } from '@mui/material';
 import { T } from '@tolgee/react';

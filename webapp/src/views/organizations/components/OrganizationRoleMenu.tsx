@@ -80,7 +80,6 @@ export const OrganizationRoleMenu: FunctionComponent<{
         elevation={1}
         id="simple-menu"
         anchorEl={anchorEl}
-        getContentAnchorEl={null}
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleClose}

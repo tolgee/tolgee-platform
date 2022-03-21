@@ -134,7 +134,7 @@ export const ProjectTransferModal: FC<{
                 value as components['schemas']['ProjectTransferOptionModel']
               );
             }}
-            renderOption={(option) => (
+            renderOption={(_, option) => (
               <span data-cy="project-transfer-autocomplete-suggested-option">
                 {option.name} (
                 {option.type === 'ORGANIZATION' ? (

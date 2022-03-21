@@ -86,7 +86,6 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
           anchorEl={anchorEl}
           onClose={handleClose}
           elevation={0}
-          getContentAnchorEl={null}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'right',

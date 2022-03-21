@@ -20,7 +20,7 @@ type ListDataType = {
 const UserOrganizationSettingsSubtitleLink = (
   props: UserOrganizationSettingsSubtitleLinkProps
 ) => {
-  const anchorEl = useRef<HTMLDivElement>(null);
+  const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClose = () => {

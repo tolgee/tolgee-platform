@@ -1,5 +1,5 @@
 import { FunctionComponent, ReactNode } from 'react';
-import { Button, ButtonProps } from '@mui/material';
+import { Button, ButtonProps, Theme } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import Box from '@mui/material/Box';
 import clsx from 'clsx';

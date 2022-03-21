@@ -220,7 +220,6 @@ export const Filters = () => {
         )}
         MenuProps={{
           variant: 'menu',
-          getContentAnchorEl: null,
           anchorOrigin: {
             vertical: 'bottom',
             horizontal: 'left',

@@ -122,7 +122,7 @@ export const TagInput: React.FC<Props> = ({
         }}
         getOptionLabel={() => ''}
         isOptionEqualToValue={() => true}
-        renderOption={(option) => {
+        renderOption={(_, option) => {
           return (
             <span data-cy="tag-autocomplete-option" className={classes.option}>
               {option.translation ? (
