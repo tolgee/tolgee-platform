@@ -92,7 +92,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   const projectPermission = user.computedPermissions;
 
   return (
-    <div className={classes.listItem}>
+    <div className={classes.listItem} data-cy="project-member-item">
       <div className={classes.itemText}>
         {user.name} ({user.username}){' '}
         {user.organizationRole && (

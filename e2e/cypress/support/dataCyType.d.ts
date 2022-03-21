@@ -137,12 +137,13 @@ declare namespace DataCy {
         "permissions-languages-menu" |
         "permissions-menu" |
         "permissions-menu-button" |
-        "permissions-revoke-button" |
         "project-leave-button" |
         "project-list-languages" |
         "project-list-languages-item" |
         "project-list-more-button" |
         "project-list-owner" |
+        "project-member-item" |
+        "project-member-revoke-button" |
         "project-menu-items" |
         "project-name-field" |
         "project-owner-select" |

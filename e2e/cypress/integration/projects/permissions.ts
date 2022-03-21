@@ -88,10 +88,10 @@ describe('Project Permissions', () => {
       it('Can search in permissions', () => {
         visitList();
         enterProjectSettings('Facebook itself');
-        selectInProjectMenu('Permissions');
+        selectInProjectMenu('Members');
         gcy('global-list-search').find('input').type('Doe');
         gcy('global-paginated-list').within(() => {
-          gcy('global-list-item')
+          gcy('project-member-item')
             .should('have.length', 1)
             .should('contain', 'John Doe');
         });
@@ -101,7 +101,7 @@ describe('Project Permissions', () => {
         visitList();
         login('gates@microsoft.com', 'admin');
         enterProjectSettings('Microsoft Word');
-        selectInProjectMenu('Permissions');
+        selectInProjectMenu('Members');
         goToPage(2);
         cy.contains('owner@zzzcool9.com (owner@zzzcool9.com)').should(
           'be.visible'
@@ -111,20 +111,20 @@ describe('Project Permissions', () => {
       it('Has enabled proper options for each user', () => {
         visitList();
         enterProjectSettings('Facebook itself');
-        selectInProjectMenu('Permissions');
+        selectInProjectMenu('Members');
         gcy('global-paginated-list').within(() => {
-          gcy('global-list-item')
+          gcy('project-member-item')
             .contains('John Doe')
-            .closest('li')
+            .closestDcy('project-member-item')
             .within(() => {
-              gcy('permissions-revoke-button').should('be.disabled');
+              gcy('project-member-revoke-button').should('be.disabled');
               gcy('permissions-menu-button').should('be.enabled');
             });
-          gcy('global-list-item')
+          gcy('project-member-item')
             .contains('Cukrberg')
-            .closest('li')
+            .closestDcy('project-member-item')
             .within(() => {
-              gcy('permissions-revoke-button').should('be.disabled');
+              gcy('project-member-revoke-button').should('be.disabled');
               gcy('permissions-menu-button').should('be.disabled');
             });
         });
@@ -141,11 +141,11 @@ describe('Project Permissions', () => {
       it('Can modify permissions', () => {
         visitList();
         enterProjectSettings('Facebook itself');
-        selectInProjectMenu('Permissions');
+        selectInProjectMenu('Members');
         gcy('global-paginated-list').within(() => {
-          gcy('global-list-item')
+          gcy('project-member-item')
             .contains('Vaclav Novak')
-            .closest('li')
+            .closestDcy('project-member-item')
             .within(() => {
               gcy('permissions-menu-button')
                 .should('be.visible')
@@ -163,14 +163,14 @@ describe('Project Permissions', () => {
       it('Can revoke permissions', () => {
         visitList();
         enterProjectSettings('Facebook itself');
-        selectInProjectMenu('Permissions');
+        selectInProjectMenu('Members');
 
         gcy('global-paginated-list').within(() => {
-          gcy('global-list-item')
+          gcy('project-member-item')
             .contains('Vaclav Novak')
-            .closest('li')
+            .closestDcy('project-member-item')
             .within(() => {
-              gcy('permissions-revoke-button')
+              gcy('project-member-revoke-button')
                 .should('be.visible')
                 // clicks the button even if detached from dom
                 .click({ force: true });
@@ -185,7 +185,7 @@ describe('Project Permissions', () => {
   });
 });
 
-const MANAGE_PROJECT_ITEMS = ['Permissions'];
+const MANAGE_PROJECT_ITEMS = ['Members'];
 const OTHER_PROJECT_ITEMS = ['Projects', 'Export'];
 
 const assertManageMenuItemsNotVisible = () => {
