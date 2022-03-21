@@ -63,7 +63,7 @@ const RevokePermissionsButton = (props: {
   return (
     <Wrapper>
       <Button
-        data-cy="permissions-revoke-button"
+        data-cy="project-member-revoke-button"
         disabled={isDisabled}
         size="small"
         variant="outlined"
