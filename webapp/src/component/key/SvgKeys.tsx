@@ -1,9 +1,9 @@
 import {
-  ArrowUpward,
-  ArrowDownward,
   ArrowBack,
+  ArrowDownward,
   ArrowForward,
-} from '@material-ui/icons';
+  ArrowUpward,
+} from '@mui/icons-material';
 
 interface CommandIconProps {
   children: React.ReactNode;

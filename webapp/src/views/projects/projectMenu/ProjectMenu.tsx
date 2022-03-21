@@ -1,6 +1,6 @@
-import { Divider } from '@material-ui/core';
-import List from '@material-ui/core/List';
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import { Divider } from '@mui/material';
+import List from '@mui/material/List';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import { useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { container } from 'tsyringe';
@@ -23,8 +23,8 @@ import { AppState } from 'tg.store/index';
 
 import { SideMenu } from './SideMenu';
 import { SideMenuItem } from './SideMenuItem';
-import LanguageIcon from '@material-ui/icons/Language';
-import { Devices } from '@material-ui/icons';
+import LanguageIcon from '@mui/icons-material/Language';
+import { Devices } from '@mui/icons-material';
 
 const actions = container.resolve(GlobalActions);
 

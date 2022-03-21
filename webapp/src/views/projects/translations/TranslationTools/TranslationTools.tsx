@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@mui/styles/makeStyles';
+import { Theme } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import {
@@ -16,7 +17,7 @@ import { useConfig } from 'tg.hooks/useConfig';
 
 const HORIZONTAL_BRAKEPOINT = 500;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     overflow: 'auto',
   },

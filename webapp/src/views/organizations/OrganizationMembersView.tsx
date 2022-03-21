@@ -1,7 +1,7 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, Button, Grid, Theme, Typography } from '@material-ui/core';
-import createStyles from '@material-ui/core/styles/createStyles';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { Box, Button, Grid, Theme, Typography } from '@mui/material';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import { T } from '@tolgee/react';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
@@ -15,7 +15,7 @@ import { OrganizationRoleMenu } from './components/OrganizationRoleMenu';
 import { useLeaveOrganization } from './useLeaveOrganization';
 import { useOrganization } from './useOrganization';
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles<Theme>((theme) =>
   createStyles({
     container: {
       borderBottom: `1px solid ${theme.palette.grey.A100}`,

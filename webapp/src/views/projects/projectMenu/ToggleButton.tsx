@@ -1,5 +1,6 @@
-import { IconButton, makeStyles } from '@material-ui/core';
-import { ChevronLeft } from '@material-ui/icons';
+import { IconButton, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { ChevronLeft } from '@mui/icons-material';
 import clsx from 'clsx';
 
 type Props = {
@@ -7,7 +8,7 @@ type Props = {
   onClick: () => void;
 };
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles<Theme>((theme) => {
   const enter = {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
@@ -73,7 +74,7 @@ export const ToggleButton: React.FC<Props> = ({ open, onClick }) => {
       TouchRippleProps={{
         className: open ? classes.ripppleOpen : classes.rippleClosed,
       }}
-    >
+      size="large">
       <ChevronLeft className={open ? classes.iconOpen : classes.iconClosed} />
     </IconButton>
   );

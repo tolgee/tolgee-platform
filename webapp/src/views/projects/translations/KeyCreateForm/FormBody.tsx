@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Button, makeStyles, Typography } from '@material-ui/core';
+import { Box, Button, Typography, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { useTranslate, T } from '@tolgee/react';
 import { FastField, FieldArray, FieldProps, useFormikContext } from 'formik';
 
@@ -15,7 +16,7 @@ import { useProject } from 'tg.hooks/useProject';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     display: 'grid',
     rowGap: theme.spacing(2),

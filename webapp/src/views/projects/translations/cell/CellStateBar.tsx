@@ -1,4 +1,5 @@
-import { makeStyles, Tooltip } from '@material-ui/core';
+import { Tooltip, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import { T } from '@tolgee/react';
 
@@ -8,7 +9,7 @@ import { components } from 'tg.service/apiSchema.generated';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 
-const useStyles = makeStyles({
+const useStyles = makeStyles<Theme>({
   state: {
     cursor: 'col-resize',
   },

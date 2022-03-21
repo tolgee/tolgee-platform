@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
-import { Button, Typography, Link as MuiLink } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import GitHubIcon from '@material-ui/icons/GitHub';
+import { Button, Typography, Link as MuiLink } from '@mui/material';
+import Box from '@mui/material/Box';
+import GitHubIcon from '@mui/icons-material/GitHub';
 import { T } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Link, Redirect, useHistory } from 'react-router-dom';
@@ -17,7 +17,7 @@ import { StandardForm } from '../common/form/StandardForm';
 import { TextField } from '../common/form/fields/TextField';
 import { DashboardPage } from '../layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
-import { Alert } from '@material-ui/lab';
+import { Alert } from '@mui/material';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 
 interface LoginProps {}

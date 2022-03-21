@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Box, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
+import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';

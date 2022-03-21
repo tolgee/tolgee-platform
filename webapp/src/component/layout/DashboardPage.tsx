@@ -1,10 +1,10 @@
 import { FunctionComponent } from 'react';
-import { Box } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
 import { TopBar } from './TopBar';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   appBarSpacer: theme.mixins.toolbar,
 }));
 

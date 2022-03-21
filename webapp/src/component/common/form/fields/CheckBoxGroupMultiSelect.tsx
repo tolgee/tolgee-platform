@@ -8,8 +8,9 @@ import {
   FormHelperText,
   FormLabel,
   Theme,
-} from '@material-ui/core';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+} from '@mui/material';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import { useField } from 'formik';
 
 interface CheckBoxGroupMultiSelectProps {
@@ -24,7 +25,7 @@ interface CheckBoxGroupMultiSelectProps {
 type Props = CheckBoxGroupMultiSelectProps & FormControlProps;
 
 export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
-  const useStyles = makeStyles((theme: Theme) =>
+  const useStyles = makeStyles<Theme>((theme) =>
     createStyles({
       root: {
         marginTop: theme.spacing(props.mt !== undefined ? props.mt : 2),

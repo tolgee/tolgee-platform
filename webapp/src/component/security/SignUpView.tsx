@@ -1,5 +1,5 @@
 import { FunctionComponent, useCallback } from 'react';
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
@@ -19,7 +19,7 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { CompactView } from 'tg.component/layout/CompactView';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { Link, Typography } from '@material-ui/core';
+import { Link, Typography } from '@mui/material';
 
 const actions = container.resolve(SignUpActions);
 

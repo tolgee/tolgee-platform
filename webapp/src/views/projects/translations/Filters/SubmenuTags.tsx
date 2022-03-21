@@ -1,17 +1,12 @@
 import { useState } from 'react';
 import { T } from '@tolgee/react';
-import {
-  Checkbox,
-  ListItemText,
-  Menu,
-  MenuItem,
-  makeStyles,
-} from '@material-ui/core';
-import { ArrowRight } from '@material-ui/icons';
+import { Checkbox, ListItemText, Menu, MenuItem, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { ArrowRight } from '@mui/icons-material';
 
 import { OptionType } from './useAvailableFilters';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   item: {
     height: 50,
   },

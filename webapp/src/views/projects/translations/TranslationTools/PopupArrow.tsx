@@ -1,9 +1,10 @@
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@mui/styles/makeStyles';
+import { Theme } from '@mui/material';
 
 const SIZE = 12;
 const PADDING = 10;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   wrapper: {
     top: -(SIZE + PADDING),
     padding: PADDING,

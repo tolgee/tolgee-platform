@@ -1,5 +1,6 @@
 import { default as React, FC } from 'react';
-import { Link, makeStyles, Typography } from '@material-ui/core';
+import { Link, Typography, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { MDXProvider } from '@mdx-js/react';
 import Highlight, { defaultProps, Prism } from 'prism-react-renderer';
 import theme from 'prism-react-renderer/themes/github';
@@ -11,7 +12,7 @@ require('prismjs/components/prism-php');
 require('prismjs/components/prism-shell-session');
 require('prism-svelte');
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles<Theme>((t) => ({
   code: {
     borderRadius: t.shape.borderRadius,
     minWidth: 700,

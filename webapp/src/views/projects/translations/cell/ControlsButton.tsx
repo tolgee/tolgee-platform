@@ -1,9 +1,10 @@
 import React from 'react';
 import clsx from 'clsx';
-import { IconButton, makeStyles, Tooltip } from '@material-ui/core';
+import { IconButton, Tooltip, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles<Theme>({
   button: {
     display: 'flex',
     cursor: 'pointer',

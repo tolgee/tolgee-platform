@@ -1,5 +1,5 @@
 import { createRef, FunctionComponent } from 'react';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 
 import { BoxLoading } from './BoxLoading';
 

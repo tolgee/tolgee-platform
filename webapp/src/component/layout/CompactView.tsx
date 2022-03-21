@@ -1,8 +1,9 @@
-import { makeStyles, Typography, Paper, IconButton } from '@material-ui/core';
-import { ArrowBack } from '@material-ui/icons';
+import { Typography, Paper, IconButton, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { ArrowBack } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   '@global': {
     body: {
       backgroundColor: theme.palette.extraLightBackground.main,
@@ -12,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     flexGrow: 1,
     alignItems: 'center',
-    margin: `${theme.spacing(1)}px auto`,
+    margin: `${theme.spacing(1)} auto`,
     maxWidth: 430,
   },
   alerts: {
@@ -66,7 +67,7 @@ export const CompactView: React.FC<Props> = ({
       <Paper className={classes.paper}>
         <div className={classes.verticalSpace}>
           {backLink && (
-            <IconButton to={backLink} component={Link}>
+            <IconButton to={backLink} component={Link} size="large">
               <ArrowBack />
             </IconButton>
           )}

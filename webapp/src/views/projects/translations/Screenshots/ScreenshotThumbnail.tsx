@@ -1,13 +1,8 @@
 import { FunctionComponent, useState } from 'react';
-import {
-  Box,
-  createStyles,
-  IconButton,
-  makeStyles,
-  Theme,
-  Tooltip,
-} from '@material-ui/core';
-import ClearIcon from '@material-ui/icons/Clear';
+import { Box, IconButton, Theme, Tooltip } from '@mui/material';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import ClearIcon from '@mui/icons-material/Clear';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 
@@ -23,7 +18,7 @@ export interface ScreenshotThumbnailProps {
   onDelete: (id: number) => void;
 }
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles<Theme>((theme) =>
   createStyles({
     screenshot: {
       width: '100%',
@@ -119,6 +114,7 @@ export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
               <IconButton
                 className={clsx(classes.deleteIconButton, { hover })}
                 onClick={onDeleteClick}
+                size="large"
               >
                 <ClearIcon className={classes.deleteIcon} />
               </IconButton>

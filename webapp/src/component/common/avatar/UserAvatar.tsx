@@ -1,10 +1,10 @@
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@mui/styles/makeStyles';
 import { useUser } from 'tg.hooks/useUser';
 import { AvatarImg } from './AvatarImg';
 
 const SIZE = 24;
 
-const useStyle = makeStyles((theme) => ({
+const useStyle = makeStyles<Theme>((theme) => ({
   root: {
     display: 'flex',
     width: SIZE,

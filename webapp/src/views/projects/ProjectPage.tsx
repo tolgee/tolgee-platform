@@ -1,12 +1,13 @@
 import { FunctionComponent } from 'react';
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@mui/styles/makeStyles';
+import { Theme } from '@mui/material';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useProject } from 'tg.hooks/useProject';
 
 import { ProjectMenu } from './projectMenu/ProjectMenu';
 
-const useStyle = makeStyles({
+const useStyle = makeStyles<Theme>({
   content: {
     flexGrow: 1,
     overflowX: 'hidden',

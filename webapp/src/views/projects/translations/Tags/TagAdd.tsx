@@ -1,12 +1,13 @@
-import { makeStyles } from '@material-ui/core';
-import { Add } from '@material-ui/icons';
+import makeStyles from '@mui/styles/makeStyles';
+import { Theme } from '@mui/material';
+import { Add } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 
 import { useCellStyles } from '../cell/styles';
 import { Wrapper } from './Wrapper';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles<Theme>({
   addIcon: {
     fontSize: 16,
     padding: 2,

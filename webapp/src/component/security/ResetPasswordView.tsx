@@ -1,5 +1,5 @@
 import { FunctionComponent, useEffect } from 'react';
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 import { T } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';

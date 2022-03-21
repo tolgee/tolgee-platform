@@ -7,7 +7,7 @@ import {
   ListItemText,
   MenuItem,
   Select,
-} from '@material-ui/core';
+} from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';

@@ -1,11 +1,12 @@
 import React from 'react';
-import { makeStyles, Typography } from '@material-ui/core';
+import { Typography, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { useTranslate } from '@tolgee/react';
 
 import { TabMessage } from './TabMessage';
 import { UseQueryResult } from 'react-query';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     display: 'flex',
     flexDirection: 'column',

@@ -8,15 +8,15 @@ import {
   Divider,
   TextField,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { FC, useState } from 'react';
 import { T } from '@tolgee/react';
-import { Alert, Autocomplete } from '@material-ui/lab';
+import { Alert, Autocomplete } from '@mui/material';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { useDebounce } from 'use-debounce/lib';
-import { Warning } from '@material-ui/icons';
+import { Warning } from '@mui/icons-material';
 import { container } from 'tsyringe';
 import { MessageService } from 'tg.service/MessageService';
 
@@ -187,7 +187,7 @@ export const ProjectTransferModal: FC<{
       <DialogActions>
         <Box pr={2} pb={1} display="flex">
           <Box mr={1}>
-            <Button color="default" onClick={() => props.onClose()}>
+            <Button onClick={() => props.onClose()}>
               <T>confirmation_dialog_cancel</T>
             </Button>
           </Box>

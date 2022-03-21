@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from 'react';
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { container } from 'tsyringe';
 
 import { useProject } from 'tg.hooks/useProject';

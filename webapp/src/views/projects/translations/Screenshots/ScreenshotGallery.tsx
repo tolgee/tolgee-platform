@@ -5,10 +5,11 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { makeStyles, Theme } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import AddIcon from '@material-ui/icons/Add';
-import { Skeleton } from '@material-ui/lab';
+import { Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import Box from '@mui/material/Box';
+import AddIcon from '@mui/icons-material/Add';
+import { Skeleton } from '@mui/material';
 import { T, useCurrentLanguage } from '@tolgee/react';
 import { container } from 'tsyringe';
 
@@ -30,7 +31,7 @@ export interface ScreenshotGalleryProps {
   keyId: number;
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   addIcon: {
     fontSize: 50,
   },
@@ -249,7 +250,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   useGlobalLoading(uploadLoadable.isLoading || deleteLoadable.isLoading);
 
   const loadingSkeleton = uploadLoadable.isLoading ? (
-    <Skeleton variant="rect" width={100} height={100} />
+    <Skeleton variant="rectangular" width={100} height={100} />
   ) : null;
 
   return (

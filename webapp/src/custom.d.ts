@@ -1,14 +1,13 @@
 import API from '@openreplay/tracker';
-import { PaletteColor } from '@material-ui/core/styles/createPalette';
-import '@material-ui/core/styles';
-import { PaletteColorOptions } from '@material-ui/core';
+import { PaletteColor } from '@mui/material/styles';
+import { PaletteColorOptions } from '@mui/material';
 
 declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
   export default content;
 }
 
-declare module '@material-ui/core/styles/createPalette' {
+declare module '@mui/material/styles/createPalette' {
   interface Palette {
     lightDivider: PaletteColor;
     extraLightDivider: PaletteColor;

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, RefObject } from 'react';
-import { makeStyles, Popper } from '@material-ui/core';
+import { Popper, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 import { useTimer } from './useTimer';
 
@@ -29,7 +30,7 @@ function getDefaultBackground() {
   return bg;
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   '@keyframes fadeIn': {
     from: { opacity: 0 },
     to: { opacity: 1 },

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles, Typography } from '@material-ui/core';
-import { alpha } from '@material-ui/core/styles/colorManipulator';
+import { Typography, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { alpha } from '@mui/material/styles';
 import { useDebouncedCallback } from 'use-debounce/lib';
-import { Close, Help } from '@material-ui/icons';
+import { Close, Help } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 import { stopBubble } from 'tg.fixtures/eventHandler';
@@ -20,7 +21,7 @@ import { getMetaName } from 'tg.fixtures/isMac';
 import { translationStates } from 'tg.constants/translationStates';
 import { getCurrentlyFocused } from './context/shortcuts/tools';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   '@keyframes easeIn': {
     '0%': {
       opacity: 0,

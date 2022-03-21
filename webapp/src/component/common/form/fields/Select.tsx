@@ -6,8 +6,9 @@ import {
   InputLabel,
   Select as MUISelect,
   Theme,
-} from '@material-ui/core';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+} from '@mui/material';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import { useField } from 'formik';
 
 interface PGSelectProps {
@@ -18,7 +19,7 @@ interface PGSelectProps {
 
 type Props = PGSelectProps & FormControlProps;
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles<Theme>((theme) =>
   createStyles({
     select: {
       marginTop: theme.spacing(2),
@@ -51,6 +52,7 @@ export const Select: FunctionComponent<Props> = (props) => {
         name={field.name}
         labelId={'select_' + field.name + '_label'}
         value={field.value}
+        label={props.label}
         onChange={(e) => helpers.setValue(e.target.value)}
         renderValue={
           typeof renderValue === 'function'

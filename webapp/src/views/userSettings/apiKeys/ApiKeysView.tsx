@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';

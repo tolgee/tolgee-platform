@@ -5,7 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   MenuItem,
-} from '@material-ui/core';
+} from '@mui/material';
 import { T } from '@tolgee/react';
 import { FormikProps } from 'formik';
 import { container } from 'tsyringe';

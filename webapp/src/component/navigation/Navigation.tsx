@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
-import { Breadcrumbs, Link } from '@material-ui/core';
-import { NavigateNext } from '@material-ui/icons';
+import { Breadcrumbs, Link } from '@mui/material';
+import { NavigateNext } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
 
 type Props = {

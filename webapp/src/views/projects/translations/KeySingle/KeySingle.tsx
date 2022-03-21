@@ -1,4 +1,5 @@
-import { makeStyles } from '@material-ui/core';
+import { Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { T, useTranslate } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router';
@@ -23,7 +24,7 @@ export type LanguageType = {
   name: string;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     display: 'grid',
     rowGap: theme.spacing(2),

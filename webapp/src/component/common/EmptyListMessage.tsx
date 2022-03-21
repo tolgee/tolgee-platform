@@ -1,5 +1,6 @@
 import { default as React, FunctionComponent } from 'react';
-import { Box, Fade, CircularProgress, makeStyles } from '@material-ui/core';
+import { Box, Fade, CircularProgress, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { T } from '@tolgee/react';
 
 import { SadEmotionMessage } from './SadEmotionMessage';

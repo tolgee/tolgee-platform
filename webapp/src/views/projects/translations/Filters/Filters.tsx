@@ -1,7 +1,6 @@
 import { T } from '@tolgee/react';
-import { Clear } from '@material-ui/icons';
+import { Clear } from '@mui/icons-material';
 import {
-  makeStyles,
   Select,
   ListItemText,
   Checkbox,
@@ -9,7 +8,10 @@ import {
   IconButton,
   Tooltip,
   useTheme,
-} from '@material-ui/core';
+  Theme,
+} from '@mui/material';
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import {
@@ -25,7 +27,7 @@ import { SubmenuStates } from './SubmenuStates';
 import { SubmenuTags } from './SubmenuTags';
 import { CompactListSubheader, CompactMenuItem } from './FiltersComponents';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   wrapper: {
     display: 'flex',
     alignItems: 'center',
@@ -51,7 +53,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    margin: theme.spacing(-1, 0),
     width: '100%',
   },
   inputText: {

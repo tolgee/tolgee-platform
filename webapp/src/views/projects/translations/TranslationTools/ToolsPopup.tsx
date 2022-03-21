@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles, Popper } from '@material-ui/core';
+import { Popper, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import TranslationTools, {
   Props as TranslationToolsProps,
 } from './TranslationTools';
@@ -7,7 +8,7 @@ import { PopupArrow } from './PopupArrow';
 
 export const TOOLS_HEIGHT = 200;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   popper: {
     position: 'relative',
     marginTop: 5,
@@ -40,16 +41,7 @@ export const ToolsPopup: React.FC<Props> = ({
   });
 
   return width !== undefined ? (
-    <Popper
-      open={true}
-      anchorEl={anchorEl}
-      placement="bottom-end"
-      modifiers={{
-        flip: {
-          enabled: false,
-        },
-      }}
-    >
+    <Popper open={true} anchorEl={anchorEl} placement="bottom-end">
       <div className={classes.popper}>
         <PopupArrow position={cellPosition || '75%'} />
         <div className={classes.popperContent}>

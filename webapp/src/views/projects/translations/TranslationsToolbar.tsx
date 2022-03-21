@@ -1,15 +1,16 @@
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { IconButton, makeStyles, Tooltip } from '@material-ui/core';
-import { KeyboardArrowUp } from '@material-ui/icons';
+import { IconButton, Tooltip, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { KeyboardArrowUp } from '@mui/icons-material';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
 import { TranslationsShortcuts } from './TranslationsShortcuts';
-import { useTheme } from '@material-ui/styles';
+import { useTheme } from '@mui/styles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     zIndex: theme.zIndex.drawer,
     position: 'fixed',

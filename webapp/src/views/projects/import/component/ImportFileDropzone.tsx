@@ -1,7 +1,9 @@
 import React, { FunctionComponent, useState } from 'react';
-import { Box, createStyles, makeStyles, Theme } from '@material-ui/core';
-import { green, red } from '@material-ui/core/colors';
-import { Backup, HighlightOff } from '@material-ui/icons';
+import { Box, Theme } from '@mui/material';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import { green, red } from '@mui/material/colors';
+import { Backup, HighlightOff } from '@mui/icons-material';
 import clsx from 'clsx';
 
 import { FileUploadFixtures } from 'tg.fixtures/FileUploadFixtures';
@@ -12,7 +14,7 @@ export interface ScreenshotDropzoneProps {
   onNewFiles: (files: File[]) => void;
 }
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles<Theme>((theme) =>
   createStyles({
     dropZoneValidation: {
       pointerEvents: 'none',

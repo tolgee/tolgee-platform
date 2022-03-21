@@ -3,8 +3,9 @@ import {
   TextField as MUITextField,
   TextFieldProps,
   Theme,
-} from '@material-ui/core';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+} from '@mui/material';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import { useField } from 'formik';
 
 interface PGTextFieldProps {
@@ -14,7 +15,7 @@ interface PGTextFieldProps {
 
 type Props = PGTextFieldProps & TextFieldProps;
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles<Theme>((theme) =>
   createStyles({
     textField: {
       marginTop: theme.spacing(2),

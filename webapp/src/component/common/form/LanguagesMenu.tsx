@@ -5,11 +5,11 @@ import {
   MenuItem,
   Select,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
-import FormControl from '@material-ui/core/FormControl';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import FormControl from '@mui/material/FormControl';
+import makeStyles from '@mui/styles/makeStyles';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { MessageService } from 'tg.service/MessageService';
@@ -17,7 +17,7 @@ import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles({
+const useStyles = makeStyles<Theme>({
   input: {
     display: 'flex',
     minWidth: 80,
@@ -36,7 +36,6 @@ const useStyles = makeStyles({
     overflow: 'hidden',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
-    margin: '-4px 0px',
   },
 });
 

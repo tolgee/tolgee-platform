@@ -1,8 +1,8 @@
 import { ReactNode, useEffect } from 'react';
-import { Add } from '@material-ui/icons';
+import { Add } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
-import { Box, Button, Container, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Container, Grid, Typography } from '@mui/material';
 
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
 import { useConfig } from 'tg.hooks/useConfig';

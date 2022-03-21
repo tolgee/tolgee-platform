@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Box, Paper } from '@material-ui/core';
+import { Container, Box, Paper } from '@mui/material';
 
 const GlobalError = React.lazy(
   () => import(/* webpackChunkName: "global-error" */ './common/GlobalError')

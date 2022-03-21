@@ -1,9 +1,10 @@
-import { makeStyles } from '@material-ui/core';
+import { Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 
 import { stopBubble } from 'tg.fixtures/eventHandler';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   wrapper: {
     display: 'flex',
     outline: 0,

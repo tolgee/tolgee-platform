@@ -1,7 +1,7 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton } from '@mui/material';
 import React, { createRef, FC, useRef, useState } from 'react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import EditIcon from '@material-ui/icons/Edit';
+import makeStyles from '@mui/styles/makeStyles';
+import EditIcon from '@mui/icons-material/Edit';
 import { T } from '@tolgee/react';
 import { ReactCropperElement } from 'react-cropper';
 import { container } from 'tsyringe';
@@ -21,7 +21,7 @@ export type AvatarOwner = {
   type: 'ORG' | 'USER' | 'PROJECT';
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   editButton: {
     opacity: 0,
   },

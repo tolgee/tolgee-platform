@@ -1,17 +1,17 @@
 import React, { FC } from 'react';
-import { Box, IconButton } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { Close, Edit } from '@material-ui/icons';
+import { Box, IconButton, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { Close, Edit } from '@mui/icons-material';
 import clsx from 'clsx';
 
 import { components } from 'tg.service/apiSchema.generated';
 
 import { FlagImage } from './FlagImage';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   root: {
     border: `1px solid ${theme.palette.grey['100']}`,
-    padding: `${theme.spacing(0.5)}px ${theme.spacing(1)}px`,
+    padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
     borderRadius: theme.shape.borderRadius,
     display: `inline-flex`,
     alignItems: `center`,

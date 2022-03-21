@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Box, BoxProps, Button } from '@material-ui/core';
+import { Box, BoxProps, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';

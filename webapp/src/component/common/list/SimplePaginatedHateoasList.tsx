@@ -1,6 +1,6 @@
 import { JSXElementConstructor, ReactNode, useEffect, useState } from 'react';
-import { Box, Grid, Typography } from '@material-ui/core';
-import { Alert } from '@material-ui/lab';
+import { Box, Grid, Typography } from '@mui/material';
+import { Alert } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import {

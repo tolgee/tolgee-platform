@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { Link } from 'react-router-dom';
@@ -41,7 +41,7 @@ export const ProjectSettingsLanguages = () => {
 
   return (
     <Box mb={6}>
-      <Box mt={4}>
+      <Box mt={2} mb={2}>
         <Typography variant="h5">
           <T>create_language_title</T>
         </Typography>

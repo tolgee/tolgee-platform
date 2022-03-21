@@ -7,7 +7,7 @@ import {
   FormControl,
   InputLabel,
   FormHelperText,
-} from '@material-ui/core';
+} from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';

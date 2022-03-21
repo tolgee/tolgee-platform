@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
-import { Typography, makeStyles } from '@material-ui/core';
+import { Typography, Theme } from '@mui/material';
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import { icuVariants } from 'tg.component/editor/icuVariants';
 import { LimitedHeightText } from './LimitedHeightText';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   variants: {
     display: 'grid',
     gridTemplateColumns: '80px 1fr',

@@ -1,13 +1,13 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, Button, Popover } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { ArrowDropDown } from '@material-ui/icons';
+import { Box, Button, Popover, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { ArrowDropDown } from '@mui/icons-material';
 import { supportedFlags } from '@tginternal/language-util';
 import { useField } from 'formik';
 
 import { FlagImage } from './FlagImage';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   root: {
     cursor: 'pointer',
     display: 'flex',

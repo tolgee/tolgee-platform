@@ -5,7 +5,7 @@ import {
   ListItemSecondaryAction,
   ListItemText,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';

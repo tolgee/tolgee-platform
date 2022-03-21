@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import makeStyles from '@mui/styles/makeStyles';
+import { Autocomplete, Theme } from '@mui/material';
 import { useDebounce } from 'use-debounce';
 import { T } from '@tolgee/react';
 
@@ -10,7 +10,7 @@ import { Wrapper } from './Wrapper';
 import { CloseButton } from './CloseButton';
 import { CustomPopper } from './CustomPopper';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles<Theme>({
   autocomplete: {
     display: 'flex',
     alignItems: 'center',
@@ -121,7 +121,7 @@ export const TagInput: React.FC<Props> = ({
           }
         }}
         getOptionLabel={() => ''}
-        getOptionSelected={() => true}
+        isOptionEqualToValue={() => true}
         renderOption={(option) => {
           return (
             <span data-cy="tag-autocomplete-option" className={classes.option}>

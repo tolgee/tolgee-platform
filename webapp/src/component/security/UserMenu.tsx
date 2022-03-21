@@ -1,5 +1,6 @@
 import { default as React, useState } from 'react';
-import { IconButton, makeStyles, Menu, MenuItem } from '@material-ui/core';
+import { IconButton, Menu, MenuItem, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { T } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -14,7 +15,7 @@ import { UserAvatar } from '../common/avatar/UserAvatar';
 
 const globalActions = container.resolve(GlobalActions);
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   paper: {
     border: '1px solid #d3d4d5',
     marginTop: 5,
@@ -67,7 +68,7 @@ export const UserMenu: React.FC = () => {
         aria-haspopup="true"
         onClick={handleOpen}
         className={classes.iconButton}
-      >
+        size="large">
         <UserAvatar />
       </IconButton>
       <Menu

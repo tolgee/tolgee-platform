@@ -5,11 +5,12 @@ import {
   IconButton,
   InputAdornment,
   InputLabel,
-  makeStyles,
   MenuItem,
   Select,
-} from '@material-ui/core';
-import { Add, Clear } from '@material-ui/icons';
+  Theme,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { Add, Clear } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 import { useQueryClient } from 'react-query';
@@ -26,7 +27,7 @@ import { ImportLanguageCreateDialog } from './ImportLanguageCreateDialog';
 
 const actions = container.resolve(ImportActions);
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   item: {
     padding: `${theme.spacing(1)}, ${theme.spacing(2)}`,
   },

@@ -1,11 +1,11 @@
 import { FunctionComponent, useState } from 'react';
-import { Button, TextField } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
-import Typography from '@material-ui/core/Typography';
+import { Button, TextField } from '@mui/material';
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
 import { T, useTranslate } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';

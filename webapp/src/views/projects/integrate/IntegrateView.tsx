@@ -1,5 +1,5 @@
 import { default as React, FunctionComponent } from 'react';
-import { Box, Step, StepContent, StepLabel, Stepper } from '@material-ui/core';
+import { Box, Step, StepContent, StepLabel, Stepper } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { BaseView } from 'tg.component/layout/BaseView';

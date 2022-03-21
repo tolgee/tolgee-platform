@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit, CameraAlt } from '@material-ui/icons';
+import { Edit, CameraAlt } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 import { useCellStyles } from './styles';

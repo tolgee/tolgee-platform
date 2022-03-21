@@ -1,9 +1,9 @@
-import { Theme, Typography } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import createStyles from '@material-ui/core/styles/createStyles';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { Theme, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles<Theme>((theme) =>
   createStyles({
     image: {
       filter: 'grayscale(50%)',

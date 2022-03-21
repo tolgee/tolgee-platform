@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -9,11 +9,14 @@ export const LanguageValue: FC<{
   language: Partial<components['schemas']['LanguageModel']>;
 }> = (props) => {
   return (
-    <Box display="inline-flex" justifyContent="center" justifyItems="center">
+    <Box
+      display="inline-flex"
+      justifyContent="center"
+      gap={2}
+      justifyItems="center"
+    >
       {props.language.name}{' '}
-      <Box ml={2}>
-        <FlagImage width={20} flagEmoji={props.language.flagEmoji || ''} />
-      </Box>
+      <FlagImage width={20} flagEmoji={props.language.flagEmoji || ''} />
     </Box>
   );
 };

@@ -1,9 +1,10 @@
 import { ComponentProps, FC } from 'react';
 import SearchField from 'tg.component/common/form/fields/SearchField';
 import { useTranslate } from '@tolgee/react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import { Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   root: {
     backgroundColor: theme.palette.common.white,
     transition: 'width 0.1s ease-in-out',

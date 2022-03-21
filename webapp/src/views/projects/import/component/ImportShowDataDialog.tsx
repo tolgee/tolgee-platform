@@ -1,19 +1,16 @@
 import React, { FunctionComponent, useState } from 'react';
-import { Box, Grid } from '@material-ui/core';
-import AppBar from '@material-ui/core/AppBar';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import Slide from '@material-ui/core/Slide';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme,
-} from '@material-ui/core/styles';
-import { TransitionProps } from '@material-ui/core/transitions';
-import CloseIcon from '@material-ui/icons/Close';
+import { Box, Grid } from '@mui/material';
+import AppBar from '@mui/material/AppBar';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
+import Slide from '@mui/material/Slide';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import { Theme, useTheme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import { TransitionProps } from '@mui/material/transitions';
+import CloseIcon from '@mui/icons-material/Close';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
@@ -25,7 +22,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { ImportActions } from 'tg.store/project/ImportActions';
 
 const actions = container.resolve(ImportActions);
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles<Theme>((theme) =>
   createStyles({
     appBar: {
       position: 'relative',
@@ -69,7 +66,7 @@ export const ImportShowDataDialog: FunctionComponent<{
               color="inherit"
               onClick={props.onClose}
               aria-label="close"
-            >
+              size="large">
               <CloseIcon />
             </IconButton>
             <Typography variant="h6" className={classes.title}>

@@ -1,15 +1,16 @@
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@mui/styles/makeStyles';
 import { useTranslate } from '@tolgee/react';
+import { Theme } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { green, grey, orange } from '@material-ui/core/colors';
+import { green, grey, orange } from '@mui/material/colors';
 import { TabMessage } from './TabMessage';
 import { useTranslationTools } from './useTranslationTools';
 
 type PagedModelTranslationMemoryItemModel =
   components['schemas']['PagedModelTranslationMemoryItemModel'];
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     display: 'flex',
     flexDirection: 'column',

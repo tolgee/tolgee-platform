@@ -1,6 +1,7 @@
 import clsx from 'clsx';
-import { makeStyles, Tooltip } from '@material-ui/core';
-import { Clear } from '@material-ui/icons';
+import { Tooltip, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { Clear } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -16,7 +17,7 @@ import { getProviderImg } from '../TranslationTools/getProviderImg';
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   wrapper: {
     height: 0,
   },

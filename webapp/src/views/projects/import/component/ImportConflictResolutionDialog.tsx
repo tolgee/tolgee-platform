@@ -1,13 +1,15 @@
 import React, { FunctionComponent } from 'react';
-import AppBar from '@material-ui/core/AppBar';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import Slide from '@material-ui/core/Slide';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import { TransitionProps } from '@material-ui/core/transitions';
-import CloseIcon from '@material-ui/icons/Close';
+import AppBar from '@mui/material/AppBar';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
+import Slide from '@mui/material/Slide';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import { TransitionProps } from '@mui/material/transitions';
+import CloseIcon from '@mui/icons-material/Close';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
@@ -17,7 +19,7 @@ import { ImportActions } from 'tg.store/project/ImportActions';
 import { ImportConflictsData } from './ImportConflictsData';
 
 container.resolve(ImportActions);
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles<Theme>((theme) =>
   createStyles({
     appBar: {
       position: 'relative',
@@ -30,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & { children?: React.ReactElement },
+  props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -59,6 +61,7 @@ export const ImportConflictResolutionDialog: FunctionComponent<{
               onClick={props.onClose}
               aria-label="close"
               data-cy="import-resolution-dialog-close-button"
+              size="large"
             >
               <CloseIcon />
             </IconButton>

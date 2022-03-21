@@ -1,7 +1,8 @@
 import React from 'react';
 import clsx from 'clsx';
-import { Badge, makeStyles } from '@material-ui/core';
-import { Edit, Comment, Check } from '@material-ui/icons';
+import { Badge, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { Edit, Comment, Check } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
@@ -12,7 +13,7 @@ import { StateTransitionButtons } from './StateTransitionButtons';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   badge: {
     fontSize: 10,
 

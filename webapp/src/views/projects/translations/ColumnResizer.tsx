@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import Draggable from 'react-draggable';
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
+import { Theme } from '@mui/material';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles<Theme>({
   draggable: {
     zIndex: 1,
     position: 'absolute',

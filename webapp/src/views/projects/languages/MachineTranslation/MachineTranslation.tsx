@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, makeStyles, Typography } from '@material-ui/core';
+import { Box, Typography, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { Formik, FormikProps } from 'formik';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { useTableStyles } from '../tableStyles';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useMachineTranslationSettings } from './useMachineTranslationSettings';
 import { SettingsForm } from './SettingsForm';
@@ -14,7 +15,7 @@ import { SettingsForm } from './SettingsForm';
 type MachineTranslationLanguagePropsDto =
   components['schemas']['MachineTranslationLanguagePropsDto'];
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     display: 'flex',
     flexDirection: 'column',

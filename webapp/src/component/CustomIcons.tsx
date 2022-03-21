@@ -1,5 +1,5 @@
 import React, { ComponentProps } from 'react';
-import { SvgIcon } from '@material-ui/core';
+import { SvgIcon } from '@mui/material';
 
 import { ReactComponent as ExportSvg } from '../svgs/icons/export.svg';
 import { ReactComponent as ImportSvg } from '../svgs/icons/import.svg';

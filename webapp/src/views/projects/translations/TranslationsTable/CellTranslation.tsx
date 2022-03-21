@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core';
+import { Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useEditableRow } from '../useEditableRow';
@@ -17,7 +18,7 @@ type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles<Theme>((theme) => {
   return {
     container: {
       display: 'flex',

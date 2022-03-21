@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
-import { Box, Grid, Paper, Theme } from '@material-ui/core';
-import createStyles from '@material-ui/core/styles/createStyles';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { Box, Grid, Paper, Theme } from '@mui/material';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import { container } from 'tsyringe';
@@ -22,7 +22,7 @@ interface ApiKeysListProps {
 
 const messageService = container.resolve(MessageService);
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles<Theme>((theme) =>
   createStyles({
     root: {
       borderBottom: `1px solid ${theme.palette.grey.A100}`,

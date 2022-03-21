@@ -1,5 +1,6 @@
 import React, { ComponentProps } from 'react';
-import { Box, makeStyles } from '@material-ui/core';
+import { Box, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { FlagImage } from 'tg.component/languages/FlagImage';
 import clsx from 'clsx';
 
@@ -8,7 +9,7 @@ type Props = {
   size?: number;
 } & ComponentProps<typeof Box>;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   wrapper: {
     padding: 2,
   },

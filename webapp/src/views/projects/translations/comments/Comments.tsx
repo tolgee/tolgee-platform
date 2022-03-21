@@ -1,7 +1,8 @@
 import React from 'react';
 import { T } from '@tolgee/react';
-import { makeStyles, TextField, IconButton } from '@material-ui/core';
-import { Send } from '@material-ui/icons';
+import { TextField, IconButton, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { Send } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -15,7 +16,7 @@ import { useComments } from './useComments';
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles<Theme>((theme) => {
   const borderColor = theme.palette.grey[200];
   return {
     container: {
@@ -173,7 +174,7 @@ export const Comments: React.FC<Props> = ({
             color="primary"
             onClick={handleAddComment}
             disabled={isAddingComment}
-          >
+            size="large">
             <Send />
           </IconButton>
         </div>

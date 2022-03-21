@@ -1,6 +1,6 @@
 import { FunctionComponent, useState } from 'react';
-import { Button, Menu, MenuItem } from '@material-ui/core';
-import { ArrowDropDown } from '@material-ui/icons';
+import { Button, Menu, MenuItem } from '@mui/material';
+import { ArrowDropDown } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { container } from 'tsyringe';

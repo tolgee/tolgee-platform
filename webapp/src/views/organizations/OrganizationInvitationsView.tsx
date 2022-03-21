@@ -1,7 +1,7 @@
 import { FunctionComponent, useState } from 'react';
-import { Button, ListItemText, TextField, Typography } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import { Button, ListItemText, TextField, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 

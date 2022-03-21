@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { makeStyles, Portal } from '@material-ui/core';
 import { useWindowDimensions } from 'tg.hooks/useWindowDimensions';
 import clsx from 'clsx';
 import { useBottomPanelSetters } from './BottomPanelContext';
+import { Portal, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   '@keyframes fadeIn': {
     '0%': {
       opacity: 0,

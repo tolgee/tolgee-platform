@@ -1,4 +1,5 @@
-import { makeStyles } from '@material-ui/core';
+import { Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React, { useContext, useState, useEffect } from 'react';
 import { SmoothProgress } from './SmoothProgress';
 
@@ -8,7 +9,7 @@ const LoadingSetterContext = React.createContext<{
   setSpinners: React.Dispatch<React.SetStateAction<number>>;
 }>({ setLoading: () => {}, setSpinners: () => {} });
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   loading: {
     position: 'fixed',
     zIndex: theme.zIndex.tooltip,

@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { Box, Button, Grid } from '@material-ui/core';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import { Box, Button, Grid } from '@mui/material';
+import FormHelperText from '@mui/material/FormHelperText';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 

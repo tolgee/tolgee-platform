@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, Button, Typography } from '@material-ui/core';
+import { Box, Button, Typography, Theme } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
@@ -19,7 +19,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import { ProjectTransferModal } from 'tg.views/projects/project/components/ProjectTransferModal';
 import { ProjectProfileAvatar } from './ProjectProfileAvatar';
 
@@ -27,7 +27,7 @@ const messageService = container.resolve(MessageService);
 
 type ValueType = components['schemas']['EditProjectDTO'];
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   dangerZone: {
     borderRadius: theme.shape.borderRadius,
     border: `1px solid ${theme.palette.error.dark}`,
@@ -166,7 +166,6 @@ export const ProjectSettingsView: FunctionComponent = () => {
               </Typography>
             </Box>
             <Button
-              color="default"
               variant="outlined"
               onClick={handleDelete}
               className={classes.dangerButton}
@@ -182,7 +181,6 @@ export const ProjectSettingsView: FunctionComponent = () => {
             </Box>
             <Button
               data-cy="project-settings-transfer-button"
-              color="default"
               variant="outlined"
               onClick={() => {
                 setTransferDialogOpen(true);

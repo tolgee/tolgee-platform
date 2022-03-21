@@ -1,15 +1,10 @@
 import React, { FunctionComponent, LegacyRef, useEffect } from 'react';
-import {
-  Box,
-  BoxProps,
-  CircularProgress,
-  IconButton,
-  makeStyles,
-} from '@material-ui/core';
-import { green } from '@material-ui/core/colors';
-import { KeyboardArrowUp } from '@material-ui/icons';
-import CheckIcon from '@material-ui/icons/Check';
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+import { Box, BoxProps, CircularProgress, IconButton, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { green } from '@mui/material/colors';
+import { KeyboardArrowUp } from '@mui/icons-material';
+import CheckIcon from '@mui/icons-material/Check';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import clsx from 'clsx';
 
 type ImportConflictTranslationProps = {
@@ -25,7 +20,7 @@ type ImportConflictTranslationProps = {
   'data-cy': string;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   root: {
     borderRadius: theme.shape.borderRadius,
     border: `1px dashed ${theme.palette.grey.A100}`,
@@ -145,7 +140,7 @@ export const ImportConflictTranslation = (
               e.stopPropagation();
               props.onToggle();
             }}
-          >
+            size="large">
             {!props.expanded ? <KeyboardArrowDownIcon /> : <KeyboardArrowUp />}
           </IconButton>
         </Box>

@@ -1,7 +1,8 @@
-import { Button, ButtonProps, Link, makeStyles } from '@material-ui/core';
+import { Button, ButtonProps, Link, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { T } from '@tolgee/react';
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles<Theme>((t) => ({
   root: {
     marginLeft: t.spacing(2),
     '&:hover': {

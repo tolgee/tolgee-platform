@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@mui/styles/makeStyles';
+import { Theme } from '@mui/material';
 import { useDebounce } from 'use-debounce';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -12,7 +13,7 @@ type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles<Theme>((theme) => {
   const borderColor = theme.palette.grey[200];
   return {
     container: {

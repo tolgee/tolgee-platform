@@ -1,10 +1,11 @@
-import { Box, makeStyles } from '@material-ui/core';
+import { Box, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { default as React, FC } from 'react';
 import { guides } from 'tg.views/projects/integrate/guides';
-import { ToggleButton } from '@material-ui/lab';
+import { ToggleButton } from '@mui/material';
 import { Guide } from 'tg.views/projects/integrate/types';
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles<Theme>((t) => ({
   root: {
     width: '100%',
     display: 'grid',

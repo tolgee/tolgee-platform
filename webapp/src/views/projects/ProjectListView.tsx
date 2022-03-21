@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
+import { Button, Theme } from '@mui/material';
 
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
@@ -9,10 +10,9 @@ import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
-import { Button } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles<Theme>((t) => ({
   listWrapper: {
     '& > * > * + *': {
       borderTop: `1px solid ${t.palette.extraLightDivider.main}`,

@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core';
+import { Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { StateType } from 'tg.constants/translationStates';
@@ -19,7 +20,7 @@ type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles<Theme>((theme) => {
   return {
     splitContainer: {
       display: 'flex',

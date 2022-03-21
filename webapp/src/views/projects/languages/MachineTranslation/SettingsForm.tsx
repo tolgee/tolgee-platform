@@ -1,12 +1,13 @@
-import { makeStyles, Tooltip } from '@material-ui/core';
-import { Help } from '@material-ui/icons';
+import { Tooltip, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { Help } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
 import { components } from 'tg.service/apiSchema.generated';
 import { useTableStyles } from '../tableStyles';
 import { LanguageRow } from './LanguageRow';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   primaryProvider: {
     display: 'flex',
     gap: 4,

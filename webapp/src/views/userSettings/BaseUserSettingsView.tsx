@@ -1,5 +1,5 @@
 import { FunctionComponent, PropsWithChildren } from 'react';
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 
 import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';

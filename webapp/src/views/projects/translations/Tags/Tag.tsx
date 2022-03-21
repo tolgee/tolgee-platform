@@ -1,7 +1,8 @@
-import { makeStyles } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import makeStyles from '@mui/styles/makeStyles';
+import { Close } from '@mui/icons-material';
 
 import { Wrapper } from './Wrapper';
+import { Theme } from '@mui/material';
 
 type Props = {
   name: string;
@@ -10,7 +11,7 @@ type Props = {
   selected?: boolean;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   tag: {
     marginLeft: 6,
     marginRight: 6,

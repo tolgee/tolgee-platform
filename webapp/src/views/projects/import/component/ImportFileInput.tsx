@@ -1,5 +1,6 @@
 import React, { FunctionComponent, ReactNode } from 'react';
-import { Box, makeStyles, Typography } from '@material-ui/core';
+import { Box, Typography, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
@@ -11,10 +12,10 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { ImportFileDropzone } from './ImportFileDropzone';
 
 export const MAX_FILE_COUNT = 20;
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   root: {
     borderRadius: theme.shape.borderRadius,
-    border: `1px dashed ${theme.palette.grey.A100}`,
+    border: `1px dashed ${theme.palette.grey[400]}`,
   },
 }));
 

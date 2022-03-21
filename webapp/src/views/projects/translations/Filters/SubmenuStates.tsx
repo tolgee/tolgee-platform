@@ -1,18 +1,13 @@
 import { useState } from 'react';
-import {
-  Checkbox,
-  ListItemText,
-  Menu,
-  MenuItem,
-  makeStyles,
-} from '@material-ui/core';
-import { ArrowRight } from '@material-ui/icons';
+import { Checkbox, ListItemText, Menu, MenuItem, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { ArrowRight } from '@mui/icons-material';
 
 import { translationStates } from 'tg.constants/translationStates';
 import { decodeFilter, OptionType } from './useAvailableFilters';
 import { CompactMenuItem } from './FiltersComponents';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   stateDot: {
     width: 8,
     height: 8,

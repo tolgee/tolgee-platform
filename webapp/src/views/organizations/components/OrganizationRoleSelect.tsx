@@ -1,5 +1,5 @@
 import { ComponentProps, default as React, FunctionComponent } from 'react';
-import MenuItem from '@material-ui/core/MenuItem';
+import MenuItem from '@mui/material/MenuItem';
 import { T } from '@tolgee/react';
 
 import { Select } from 'tg.component/common/form/fields/Select';

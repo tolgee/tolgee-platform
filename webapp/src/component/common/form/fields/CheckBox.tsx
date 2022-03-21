@@ -6,8 +6,9 @@ import {
   FormControlProps,
   FormHelperText,
   Theme,
-} from '@material-ui/core';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+} from '@mui/material';
+import createStyles from '@mui/styles/createStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import { useField } from 'formik';
 
 interface PGCheckBoxProps {
@@ -21,7 +22,7 @@ interface PGCheckBoxProps {
 type Props = PGCheckBoxProps & FormControlProps;
 
 export const CheckBox: FunctionComponent<Props> = (props) => {
-  const useStyles = makeStyles((theme: Theme) =>
+  const useStyles = makeStyles<Theme>((theme) =>
     createStyles({
       checkbox: {
         marginTop: theme.spacing(props.mt !== undefined ? props.mt : 2),
@@ -36,7 +37,10 @@ export const CheckBox: FunctionComponent<Props> = (props) => {
 
   return (
     <FormControl className={classes.checkbox} error={!!meta.error} {...props}>
-      <FormControlLabel control={<Checkbox {...field} />} label={props.label} />
+      <FormControlLabel
+        control={<Checkbox {...field} />}
+        label={props.label ?? ''}
+      />
       {meta.error && <FormHelperText>{meta.error}</FormHelperText>}
     </FormControl>
   );

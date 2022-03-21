@@ -1,6 +1,8 @@
-import { InputLabel, makeStyles } from '@material-ui/core';
+import { InputLabel, Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+import makeStyles from '@mui/styles/makeStyles';
+
+const useStyles = makeStyles<Theme>((theme) => ({
   label: {
     fontSize: 14,
     marginBottom: 5,

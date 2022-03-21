@@ -1,18 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Formik, FormikProps } from 'formik';
-import {
-  makeStyles,
-  Checkbox,
-  FormControlLabel,
-  Typography,
-} from '@material-ui/core';
+import { Checkbox, FormControlLabel, Typography, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { useTranslate } from '@tolgee/react';
 
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useAutoTranslateSettings } from './useAutoTranslateSettings';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     display: 'flex',
     flexDirection: 'column',

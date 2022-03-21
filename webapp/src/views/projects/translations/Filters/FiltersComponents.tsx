@@ -1,7 +1,8 @@
-import { makeStyles, MenuItem, ListSubheader } from '@material-ui/core';
+import { MenuItem, ListSubheader, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import React from 'react';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   compactItem: {
     height: '40px',
   },

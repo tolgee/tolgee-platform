@@ -2,11 +2,12 @@ import {
   Button,
   ButtonGroup,
   IconButton,
-  makeStyles,
   Typography,
   Dialog,
-} from '@material-ui/core';
-import { ViewListRounded, AppsRounded, Add, Delete } from '@material-ui/icons';
+  Theme,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { ViewListRounded, AppsRounded, Add, Delete } from '@mui/icons-material';
 import { T, useTranslate } from '@tolgee/react';
 
 import {
@@ -23,7 +24,7 @@ import { KeyCreateDialog } from './KeyCreateDialog';
 import TranslationsSearchField from './TranslationsSearchField';
 import { ViewMode } from './context/types';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     display: 'flex',
     alignItems: 'stretch',
@@ -120,7 +121,7 @@ export const TranslationsHeader = () => {
               className={classes.deleteButton}
               onClick={handleDelete}
               data-cy="translations-delete-button"
-            >
+              size="large">
               <Delete />
             </IconButton>
           )}

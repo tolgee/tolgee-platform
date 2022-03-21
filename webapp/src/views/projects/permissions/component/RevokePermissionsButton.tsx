@@ -1,5 +1,5 @@
 import { FunctionComponent, ReactElement } from 'react';
-import { Button, Tooltip } from '@material-ui/core';
+import { Button, Tooltip } from '@mui/material';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 

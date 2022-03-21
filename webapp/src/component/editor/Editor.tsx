@@ -6,15 +6,16 @@ import 'codemirror/keymap/sublime';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/lint/lint';
 import 'codemirror/addon/lint/lint.css';
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@mui/styles/makeStyles';
 import { useTranslate } from '@tolgee/react';
+import { Theme } from '@mui/material';
 
 import icuMode from './icuMode';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 
 export type Direction = 'DOWN';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   '@global': {
     '.CodeMirror-lint-tooltip': {
       background: 'white',

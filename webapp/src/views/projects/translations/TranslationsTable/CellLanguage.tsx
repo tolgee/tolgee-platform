@@ -1,5 +1,6 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core';
+import makeStyles from '@mui/styles/makeStyles';
+import { Theme } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
@@ -7,7 +8,7 @@ import { CellStateBar } from '../cell/CellStateBar';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles({
+const useStyles = makeStyles<Theme>({
   container: {
     flexGrow: 1,
     position: 'relative',

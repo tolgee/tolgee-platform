@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Box, Link, MenuItem, Popover } from '@material-ui/core';
-import { ArrowDropDown } from '@material-ui/icons';
+import { Box, Link, MenuItem, Popover } from '@mui/material';
+import { ArrowDropDown } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import { Link as RouterLink } from 'react-router-dom';
 

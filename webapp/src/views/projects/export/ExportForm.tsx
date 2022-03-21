@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 import { Formik, FormikErrors } from 'formik';
 import { container } from 'tsyringe';
 import { useTranslate } from '@tolgee/react';
-import { Box, CircularProgress, makeStyles } from '@material-ui/core';
+import { Box, CircularProgress, Theme } from '@mui/material';
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -32,7 +34,7 @@ const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
 
 const EXPORT_DEFAULT_FORMAT: typeof FORMATS[number] = 'JSON';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     display: 'grid',
     border: `1px solid ${theme.palette.lightDivider.main}`,

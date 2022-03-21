@@ -3,13 +3,14 @@ import {
   Box,
   Button,
   IconButton,
-  makeStyles,
   TableCell,
   TableRow,
-} from '@material-ui/core';
-import { CheckCircle, Error, Warning } from '@material-ui/icons';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+  Theme,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { CheckCircle, Error, Warning } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 import { container } from 'tsyringe';
@@ -22,7 +23,7 @@ import { ImportActions } from 'tg.store/project/ImportActions';
 
 import { ImportRowLanguageMenu } from './ImportRowLanguageMenu';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   root: {
     '&:hover': {
       backgroundColor: theme.palette.grey['50'],

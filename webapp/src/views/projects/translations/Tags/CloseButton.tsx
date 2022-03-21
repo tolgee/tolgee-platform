@@ -1,7 +1,8 @@
-import { makeStyles } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import makeStyles from '@mui/styles/makeStyles';
+import { Close } from '@mui/icons-material';
+import { Theme } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   closeIcon: {
     fontSize: 20,
     cursor: 'pointer',

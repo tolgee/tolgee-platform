@@ -1,14 +1,15 @@
 import React, { FunctionComponent, useState } from 'react';
 import {
   Box,
-  makeStyles,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-} from '@material-ui/core';
+  Theme,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { T } from '@tolgee/react';
 
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
@@ -24,7 +25,7 @@ type ImportResultProps = {
   onResolveRow: (row: components['schemas']['ImportLanguageModel']) => void;
 };
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   table: {
     '& th': {
       fontWeight: 'bold',

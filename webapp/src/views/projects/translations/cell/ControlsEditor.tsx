@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { T } from '@tolgee/react';
-import { Button, makeStyles } from '@material-ui/core';
-import { CameraAlt } from '@material-ui/icons';
+import { Button, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { CameraAlt } from '@mui/icons-material';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { components } from 'tg.service/apiSchema.generated';
@@ -12,7 +13,7 @@ import { useTranslationsSelector } from '../context/TranslationsContext';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   leftPart: {
     display: 'flex',
     alignItems: 'flex-start',

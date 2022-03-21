@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Checkbox, makeStyles } from '@material-ui/core';
+import { Checkbox, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import clsx from 'clsx';
 
 import { Editor } from 'tg.component/editor/Editor';
@@ -24,7 +25,7 @@ import { getMeta } from 'tg.fixtures/isMac';
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles<Theme>((theme) => {
   return {
     container: {
       display: 'grid',

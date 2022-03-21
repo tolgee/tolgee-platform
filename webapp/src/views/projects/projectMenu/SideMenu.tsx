@@ -1,15 +1,15 @@
 import clsx from 'clsx';
 import React, { useEffect } from 'react';
-import Drawer from '@material-ui/core/Drawer';
-import { makeStyles } from '@material-ui/core/styles';
-import { useTheme } from '@material-ui/core';
+import Drawer from '@mui/material/Drawer';
+import makeStyles from '@mui/styles/makeStyles';
+import { useTheme, Theme } from '@mui/material';
 
 import { ToggleButton } from './ToggleButton';
 import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 
 const drawerWidth = 240;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   toolbarIcon: {
     display: 'flex',
     alignItems: 'center',

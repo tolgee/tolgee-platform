@@ -1,12 +1,13 @@
-import { Button, makeStyles, Theme } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
+import { Button, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { container } from 'tsyringe';
 
 import { GlobalError as GlobalErrorError } from 'tg.error/GlobalError';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles(() => ({
   image: {
     filter: 'grayscale(50%)',
     opacity: '0.7',

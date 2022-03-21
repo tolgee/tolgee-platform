@@ -4,9 +4,9 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { Box, Button, Collapse, IconButton } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Box, Button, Collapse, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import { Alert, AlertTitle } from '@mui/material';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 

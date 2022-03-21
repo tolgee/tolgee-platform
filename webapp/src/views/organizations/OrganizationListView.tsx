@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Button } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
+import { Button } from '@mui/material';
+import Box from '@mui/material/Box';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import ListItemText from '@mui/material/ListItemText';
 import { T, useTranslate } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 

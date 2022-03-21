@@ -1,5 +1,6 @@
 import { container } from 'tsyringe';
-import { Button, makeStyles } from '@material-ui/core';
+import { Button, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory } from 'react-router';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -25,7 +26,7 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 const messaging = container.resolve(MessageService);
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     display: 'grid',
     rowGap: theme.spacing(2),

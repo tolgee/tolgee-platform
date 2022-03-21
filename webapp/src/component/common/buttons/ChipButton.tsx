@@ -1,13 +1,14 @@
 import { FunctionComponent, ReactNode } from 'react';
-import { Button, ButtonProps, makeStyles } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
+import { Button, ButtonProps } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import Box from '@mui/material/Box';
 import clsx from 'clsx';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   root: {
     border: `1px solid ${theme.palette.grey['200']}`,
     borderRadius: 50,
-    padding: `${theme.spacing(0.125)}px ${theme.spacing(1.5)}px`,
+    padding: `${theme.spacing(0.125)} ${theme.spacing(1.5)}`,
     backgroundColor: theme.palette.common.white,
     cursor: 'pointer',
     minWidth: '0',

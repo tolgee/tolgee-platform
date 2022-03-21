@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, useEffect } from 'react';
-import { MenuItem } from '@material-ui/core';
+import { MenuItem } from '@mui/material';
 import { useFormikContext } from 'formik';
 
 import { Select } from 'tg.component/common/form/fields/Select';
@@ -35,6 +35,7 @@ export const BaseLanguageSelect: FC<{
       data-cy="base-language-select"
       name={props.name}
       label={props.label}
+      style={{ minWidth: '250px' }}
       renderValue={(v) => {
         const language = availableLanguages.find(
           (lang) => lang![valueKey] === v

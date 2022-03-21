@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { FormikProps } from 'formik';
 import { Redirect } from 'react-router-dom';

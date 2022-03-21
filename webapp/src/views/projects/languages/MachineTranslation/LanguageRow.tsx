@@ -1,5 +1,6 @@
 import React from 'react';
-import { Checkbox, makeStyles, MenuItem, Select } from '@material-ui/core';
+import { Checkbox, MenuItem, Select, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { useTranslate } from '@tolgee/react';
 import { Field, getIn } from 'formik';
 
@@ -10,7 +11,7 @@ import { useTableStyles } from '../tableStyles';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   defaultCellSelector: {
     display: 'flex',
     flexDirection: 'column',

@@ -1,6 +1,7 @@
 import clsx from 'clsx';
-import { makeStyles, Tabs, Tab, IconButton } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { Tabs, Tab, IconButton, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { Close } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 import { ControlsEditor } from './cell/ControlsEditor';
@@ -19,7 +20,7 @@ type LanguageModel = components['schemas']['LanguageModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type State = components['schemas']['TranslationViewModel']['state'];
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles<Theme>((theme) => {
   const borderColor = theme.palette.grey[200];
 
   return {
@@ -149,7 +150,7 @@ export const TranslationOpened: React.FC<Props> = ({
           onChange={(_, value) => onModeChange(value)}
           className={classes.tabs}
           variant="scrollable"
-          scrollButtons="off"
+          scrollButtons={false}
         >
           {editEnabled && (
             <Tab

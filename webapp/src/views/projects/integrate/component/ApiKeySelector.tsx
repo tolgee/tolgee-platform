@@ -1,20 +1,15 @@
 import { default as React, FC, useState } from 'react';
-import {
-  Box,
-  FormControl,
-  makeStyles,
-  MenuItem,
-  Select,
-} from '@material-ui/core';
+import { Box, FormControl, MenuItem, Select, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { components } from 'tg.service/apiSchema.generated';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { T } from '@tolgee/react';
-import { Add } from '@material-ui/icons';
+import { Add } from '@mui/icons-material';
 import clsx from 'clsx';
 import { AddApiKeyFormDialog } from 'tg.views/userSettings/apiKeys/AddApiKeyFormDialog';
 import { useProject } from 'tg.hooks/useProject';
 
-const useStyles = makeStyles((t) => ({
+const useStyles = makeStyles<Theme>((t) => ({
   itemWrapper: {
     maxWidth: 400,
   },

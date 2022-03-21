@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, FormHelperText } from '@material-ui/core';
+import { Box, FormHelperText } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 import { container } from 'tsyringe';

@@ -1,8 +1,9 @@
 import React from 'react';
 import clsx from 'clsx';
 import { useCurrentLanguage, T, useTranslate } from '@tolgee/react';
-import { makeStyles, Menu, MenuItem, Tooltip } from '@material-ui/core';
-import { MoreVert, Check } from '@material-ui/icons';
+import { Menu, MenuItem, Tooltip, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { MoreVert, Check } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { confirmation } from 'tg.hooks/confirmation';
@@ -11,7 +12,7 @@ import { SmallActionButton } from './SmallActionButton';
 
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     display: 'grid',
     gridTemplateAreas: `

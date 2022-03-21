@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { Box, makeStyles, Tooltip } from '@material-ui/core';
+import { Box, Tooltip, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { T } from '@tolgee/react';
 import { ClassNameMap } from 'notistack';
 
@@ -11,7 +12,7 @@ type State = keyof typeof translationStates;
 const HEIGHT = 8;
 const BORDER_RADIUS = HEIGHT / 2;
 const DOT_SIZE = 8;
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   root: {
     width: '100%',
     minWidth: 150,
@@ -39,10 +40,10 @@ const useStyles = makeStyles((theme) => ({
   legend: {
     display: 'flex',
     flexWrap: 'wrap',
-    margin: `0 -${theme.spacing(1)}px`,
+    margin: `0 -${theme.spacing(1)}`,
     '& > *': {
       flexShrink: 0,
-      margin: `0 ${theme.spacing(1)}px`,
+      margin: `0 ${theme.spacing(1)}`,
       marginTop: theme.spacing(0.5),
     },
     fontSize: theme.typography.body2.fontSize,

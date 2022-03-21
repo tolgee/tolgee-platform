@@ -1,4 +1,5 @@
-import { DialogTitle, makeStyles } from '@material-ui/core';
+import { DialogTitle, Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -12,7 +13,7 @@ import { KeyCreateForm } from './KeyCreateForm/KeyCreateForm';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   title: {
     justifySelf: 'stretch',
     display: 'flex',

@@ -1,8 +1,9 @@
 import React from 'react';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import { makeStyles } from '@material-ui/core';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import makeStyles from '@mui/styles/makeStyles';
 import { useLocation } from 'react-router-dom';
+import { Theme } from '@mui/material';
 
 import { ListItemLink } from 'tg.component/common/list/ListItemLink';
 
@@ -14,7 +15,7 @@ interface SideMenuItemProps {
   matchAsPrefix?: boolean;
 }
 
-const useStyles = makeStyles({
+const useStyles = makeStyles<Theme>({
   item: {
     '& > span': {
       textOverflow: 'ellipsis',

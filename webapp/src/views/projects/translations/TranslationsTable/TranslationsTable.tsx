@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactList from 'react-list';
 import { T } from '@tolgee/react';
-import { makeStyles } from '@material-ui/core';
+import { Theme } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 
 import {
   useTranslationsSelector,
@@ -14,7 +15,7 @@ import { RowTable } from './RowTable';
 import clsx from 'clsx';
 import { TranslationsToolbar } from '../TranslationsToolbar';
 
-const useStyles = makeStyles((theme) => {
+const useStyles = makeStyles<Theme>((theme) => {
   const borderColor = theme.palette.grey[200];
   return {
     container: {

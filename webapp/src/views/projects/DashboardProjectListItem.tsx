@@ -7,7 +7,8 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
-} from '@material-ui/core';
+  Theme,
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
@@ -15,14 +16,14 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationStatesBar } from 'tg.views/projects/TranslationStatesBar';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import makeStyles from '@mui/styles/makeStyles';
 import { useConfig } from 'tg.hooks/useConfig';
 import { TranslationIcon } from 'tg.component/CustomIcons';
 import { ProjectListItemMenu } from 'tg.views/projects/ProjectListItemMenu';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles<Theme>((theme) => ({
   container: {
     display: 'grid',
     gridTemplateColumns: `${
@@ -40,7 +41,7 @@ const useStyles = makeStyles((theme) => ({
         opacity: 1,
       },
     },
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       gridTemplateColumns: '1fr 1fr 70px',
       gridTemplateAreas: `
         "title keyCount  controls"
@@ -48,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
         "stats stats     stats"
       `,
     },
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       gridGap: theme.spacing(0.5),
       gridTemplateColumns: '1fr 70px',
       gridTemplateAreas: `
@@ -63,7 +64,7 @@ const useStyles = makeStyles((theme) => ({
     gridArea: 'image',
     overflow: 'hidden',
     marginRight: theme.spacing(2),
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       marginRight: 0,
     },
   },
@@ -73,7 +74,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     overflow: 'hidden',
     marginRight: theme.spacing(2),
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       marginRight: 0,
     },
   },
@@ -81,7 +82,7 @@ const useStyles = makeStyles((theme) => ({
     gridArea: 'keyCount',
     display: 'flex',
     justifyContent: 'flex-end',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       justifyContent: 'flex-start',
     },
   },
@@ -90,13 +91,13 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     paddingTop: theme.spacing(1),
     margin: theme.spacing(0, 6),
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       margin: 0,
     },
   },
   languages: {
     gridArea: 'languages',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       justifyContent: 'flex-start',
     },
   },
@@ -129,7 +130,7 @@ const DashboardProjectListItem = (
   });
   const history = useHistory();
   const theme = useTheme();
-  const isCompact = useMediaQuery(theme.breakpoints.down('sm'));
+  const isCompact = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <div
