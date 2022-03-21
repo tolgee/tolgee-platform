@@ -10,7 +10,7 @@ import { LocaleMenu } from '../LocaleMenu';
 import { TolgeeLogo } from '../common/icons/TolgeeLogo';
 import { UserMenu } from '../security/UserMenu';
 import { useConfig } from 'tg.hooks/useConfig';
-import { ThemeMenu } from '../ThemeMenu';
+// import { ThemeMenu } from '../ThemeMenu';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -82,7 +82,7 @@ export function TopBar(props: TopBarProps) {
             </Link>
           </Box>
         </Box>
-        <ThemeMenu />
+        {/* <ThemeMenu /> */}
         <LocaleMenu />
         <UserMenu />
       </Toolbar>

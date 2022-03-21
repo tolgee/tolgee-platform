@@ -1,17 +1,13 @@
 import React, { FunctionComponent } from 'react';
 import { Box } from '@material-ui/core';
+import { grey } from '@material-ui/core/colors';
 
 export const SecondaryBar: FunctionComponent<React.ComponentProps<typeof Box>> =
   (props) => (
     <Box
       sx={{
-        boxShadow: 1, // theme.shadows[1]
-        color: 'primary.main', // theme.palette.primary.main
-        m: 1, // margin: theme.spacing(1)
-        p: {
-          xs: 1, // [theme.breakpoints.up('xs')]: { padding: theme.spacing(1) }
-        },
-        zIndex: 'tooltip', // theme.zIndex.tooltip
+        borderBottom: `1px solid ${grey[200]}`,
+        bgcolor: 'extraLightBackground.main',
       }}
       p={4}
       pb={2}

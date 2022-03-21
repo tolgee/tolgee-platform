@@ -48,8 +48,8 @@ const useStyles = makeStyles((theme) => ({
       minHeight: (props) => props.minHeight,
       height: '100%',
       marginLeft: -5,
-      background: theme.palette.extraLightBackground.main,
-      color: theme.palette.extraLightBackground.contrastText,
+      background: theme.palette.background.default,
+      color: theme.palette.text,
     },
     '& .CodeMirror-lines': {
       padding: '0px !important',
@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
       color: '#002bff',
     },
     '& .cm-string': {
-      color: theme.palette.extraLightBackground.contrastText,
+      color: theme.palette.text,
     },
     '& .cm-bracket': {
       color: '#002bff',
@@ -118,7 +118,6 @@ type Props = {
   onChange?: (val: string) => void;
   onSave?: (val: string) => void;
   onCancel?: () => void;
-  background?: string;
   plaintext?: boolean;
   autofocus?: boolean;
   minHeight?: number | string;
@@ -137,7 +136,6 @@ export const Editor: React.FC<Props> = ({
   onBlur,
   onFocus,
   plaintext,
-  background,
   autofocus,
   minHeight = 100,
   shortcuts,
@@ -145,7 +143,7 @@ export const Editor: React.FC<Props> = ({
   autoScrollIntoView,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const classes = useStyles({ background, minHeight });
+  const classes = useStyles({ minHeight });
   const t = useTranslate();
 
   const handleChange = (val: string) => {

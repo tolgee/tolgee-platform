@@ -22,7 +22,7 @@ const useStyles = makeStyles((t) => ({
   inlineCode: {
     borderRadius: t.shape.borderRadius,
     backgroundColor: t.palette.extraLightBackground.main,
-    color: t.palette.text.secondary,
+    color: t.palette.text.primary,
     padding: '4px 4px',
     fontFamily:
       'ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace',

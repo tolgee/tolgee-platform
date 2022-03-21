@@ -3,7 +3,6 @@ import { IconButton, makeStyles, PaletteType } from '@material-ui/core';
 import { container } from 'tsyringe';
 import { ThemeService } from '../service/ThemeService';
 import { Transition } from '@headlessui/react';
-import { SVGProps } from 'react';
 import { MoonIcon, SunIcon } from './CustomIcons';
 
 const useStyles = makeStyles(() => ({

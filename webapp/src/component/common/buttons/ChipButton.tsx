@@ -8,7 +8,7 @@ const useStyles = makeStyles((theme) => ({
     border: `1px solid ${theme.palette.grey['200']}`,
     borderRadius: 50,
     padding: `${theme.spacing(0.125)}px ${theme.spacing(1.5)}px`,
-    backgroundColor: theme.palette.extraLightBackground.main,
+    backgroundColor: theme.palette.background.default,
     cursor: 'pointer',
     minWidth: '0',
   },

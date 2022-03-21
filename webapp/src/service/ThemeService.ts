@@ -187,6 +187,7 @@ const getDesignTokens = (type: PaletteType) =>
               main: '#2B5582',
             },
             text: {
+              primary: '#212121',
               secondary: '#808080',
             },
             lightDivider: {
@@ -224,11 +225,11 @@ const getDesignTokens = (type: PaletteType) =>
               main: 'rgba(0, 0, 0, 0.08)',
             },
             lightBackground: {
-              main: 'rgb(40, 40, 40)',
+              main: 'rgb(55, 55, 55)',
               contrastText: '#DEDEDE',
             },
             extraLightBackground: {
-              main: 'rgb(55, 55, 55)',
+              main: 'rgb(40, 40, 40)',
               contrastText: '#DEDEDE',
             },
             background: {
