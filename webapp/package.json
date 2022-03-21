@@ -31,7 +31,7 @@
     "react-draggable": "^4.4.3",
     "react-google-recaptcha-v3": "1.9.5",
     "react-list": "^0.8.16",
-    "react-query": "^3.19.1",
+    "react-query": "^3.34.16",
     "react-redux": "^7.2.6",
     "react-router-dom": "^5.2.0",
     "redux": "^4.1.0",
