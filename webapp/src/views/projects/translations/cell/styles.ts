@@ -1,18 +1,7 @@
-import { colors, makeStyles, Theme } from '@material-ui/core';
+import { makeStyles, Theme } from '@material-ui/core';
 import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar';
 
 export type PositionType = 'left' | 'right';
-
-const getCellGradientBackground = (
-  position: PositionType | undefined,
-  color: string
-) => {
-  return position
-    ? `linear-gradient(${
-        position === 'right' ? '-90deg' : '90deg'
-      }, ${color}00 0%, ${color}ff 5px, ${color}ff 100%)`
-    : color;
-};
 
 const opacityAnimation = (start: number, end: number) => ({
   '0%': {
