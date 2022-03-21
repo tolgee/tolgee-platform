@@ -1,10 +1,5 @@
 import React, { ComponentProps, useEffect, useState } from 'react';
-import {
-  IconButton,
-  InputAdornment,
-  TextField,
-  useTheme,
-} from '@mui/material';
+import { IconButton, InputAdornment, TextField, useTheme } from '@mui/material';
 import { Search, Clear } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 import { useDebounce } from 'use-debounce/lib';

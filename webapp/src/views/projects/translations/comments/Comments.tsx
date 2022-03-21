@@ -174,7 +174,8 @@ export const Comments: React.FC<Props> = ({
             color="primary"
             onClick={handleAddComment}
             disabled={isAddingComment}
-            size="large">
+            size="large"
+          >
             <Send />
           </IconButton>
         </div>

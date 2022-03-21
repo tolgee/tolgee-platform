@@ -1,4 +1,4 @@
-import { Button, Theme } from '@mui/material';
+import { Button } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';

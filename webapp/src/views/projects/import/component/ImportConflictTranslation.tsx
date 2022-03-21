@@ -1,5 +1,11 @@
 import React, { FunctionComponent, LegacyRef, useEffect } from 'react';
-import { Box, BoxProps, CircularProgress, IconButton, Theme } from '@mui/material';
+import {
+  Box,
+  BoxProps,
+  CircularProgress,
+  IconButton,
+  Theme,
+} from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import { green } from '@mui/material/colors';
 import { KeyboardArrowUp } from '@mui/icons-material';
@@ -140,7 +146,8 @@ export const ImportConflictTranslation = (
               e.stopPropagation();
               props.onToggle();
             }}
-            size="large">
+            size="large"
+          >
             {!props.expanded ? <KeyboardArrowDownIcon /> : <KeyboardArrowUp />}
           </IconButton>
         </Box>

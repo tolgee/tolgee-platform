@@ -121,7 +121,8 @@ export const TranslationsHeader = () => {
               className={classes.deleteButton}
               onClick={handleDelete}
               data-cy="translations-delete-button"
-              size="large">
+              size="large"
+            >
               <Delete />
             </IconButton>
           )}

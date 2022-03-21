@@ -66,7 +66,8 @@ export const ImportShowDataDialog: FunctionComponent<{
               color="inherit"
               onClick={props.onClose}
               aria-label="close"
-              size="large">
+              size="large"
+            >
               <CloseIcon />
             </IconButton>
             <Typography variant="h6" className={classes.title}>

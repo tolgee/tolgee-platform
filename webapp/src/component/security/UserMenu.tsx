@@ -68,7 +68,8 @@ export const UserMenu: React.FC = () => {
         aria-haspopup="true"
         onClick={handleOpen}
         className={classes.iconButton}
-        size="large">
+        size="large"
+      >
         <UserAvatar />
       </IconButton>
       <Menu

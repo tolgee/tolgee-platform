@@ -74,7 +74,8 @@ export const ToggleButton: React.FC<Props> = ({ open, onClick }) => {
       TouchRippleProps={{
         className: open ? classes.ripppleOpen : classes.rippleClosed,
       }}
-      size="large">
+      size="large"
+    >
       <ChevronLeft className={open ? classes.iconOpen : classes.iconClosed} />
     </IconButton>
   );

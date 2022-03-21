@@ -1,10 +1,5 @@
 import React, { ComponentProps } from 'react';
-import {
-  IconButton,
-  InputAdornment,
-  TextField,
-  useTheme,
-} from '@mui/material';
+import { IconButton, InputAdornment, TextField, useTheme } from '@mui/material';
 import { Search, Clear } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';

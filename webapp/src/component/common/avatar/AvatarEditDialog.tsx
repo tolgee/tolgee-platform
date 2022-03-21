@@ -29,7 +29,8 @@ export const AvatarEditDialog = (props: {
       <Button
         data-cy="global-confirmation-cancel"
         onClick={props.onCancel}
-        type="button">
+        type="button"
+      >
         <T>confirmation_dialog_cancel</T>
       </Button>
       <LoadingButton
