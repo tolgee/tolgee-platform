@@ -41,7 +41,7 @@ const createProjectWithInvitation = (
       let clipboard: string;
       cy.visit(`${HOST}/projects/${r.body.id}`, {
         onBeforeLoad(win) {
-          cy.stub(win, 'prompt').callsFake((label, input) => {
+          cy.stub(win, 'prompt').callsFake((_, input) => {
             clipboard = input;
           });
         },

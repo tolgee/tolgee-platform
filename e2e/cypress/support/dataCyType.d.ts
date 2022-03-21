@@ -100,6 +100,7 @@ declare namespace DataCy {
         "integrate-weapon-selector-button" |
         "invitation-dialog-input-field" |
         "invitation-dialog-invite-button" |
+        "invitation-dialog-role-button" |
         "invitation-dialog-type-email-button" |
         "invitation-dialog-type-link-button" |
         "invite-generate-button" |
@@ -118,6 +119,11 @@ declare namespace DataCy {
         "organization-address-part-field" |
         "organization-delete-button" |
         "organization-description-field" |
+        "organization-invitation-cancel-button" |
+        "organization-invitation-item" |
+        "organization-invitation-item-menu" |
+        "organization-member-item" |
+        "organization-member-leave-button" |
         "organization-members-remove-user-button" |
         "organization-name-field" |
         "organization-profile" |

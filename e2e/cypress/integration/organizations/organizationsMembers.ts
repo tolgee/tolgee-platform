@@ -20,7 +20,7 @@ describe('Organization Members', () => {
   it('contains organization users', () => {
     gcy('global-paginated-list').within(() => {
       cy.contains('Cukrberg')
-        .closestDcy('global-list-item')
+        .closestDcy('organization-member-item')
         .contains('cukrberg@facebook.com')
         .should('be.visible');
       cy.contains('admin');
@@ -36,7 +36,7 @@ describe('Organization Members', () => {
   it('Can remove other users', () => {
     gcy('global-paginated-list').within(() => {
       cy.contains('Goldberg')
-        .closestDcy('global-list-item')
+        .closestDcy('organization-member-item')
         .within(() => {
           cy.gcy('organization-members-remove-user-button').click();
         });
@@ -45,7 +45,7 @@ describe('Organization Members', () => {
     assertMessage('User removed from organization');
     gcy('global-paginated-list').within(() => {
       cy.contains('Cukrberg')
-        .closestDcy('global-list-item')
+        .closestDcy('organization-member-item')
         .within(() => {
           cy.gcy('organization-members-remove-user-button').click();
         });
@@ -75,7 +75,7 @@ describe('Organization Members', () => {
     });
 
     cy.gcy('global-paginated-list').within(() => {
-      cy.gcy('global-list-item').within(() => {
+      cy.gcy('organization-member-item').within(() => {
         cy.contains('Cukrberg').should('not.exist');
         cy.contains('Bill Gates').should('be.visible');
       });
@@ -105,7 +105,7 @@ describe('Organization Members', () => {
   const setGoldbergMember = () => {
     gcy('global-paginated-list').within(() => {
       cy.contains('Goldberg')
-        .closestDcy('global-list-item')
+        .closestDcy('organization-member-item')
         .within(() => {
           cy.gcy('organization-role-menu-button').click();
         });
@@ -122,9 +122,9 @@ describe('Organization Members', () => {
   function leaveOrganization() {
     gcy('global-paginated-list').within(() => {
       cy.contains('admin')
-        .closestDcy('global-list-item')
+        .closestDcy('organization-member-item')
         .within(() => {
-          cy.gcy('organization-members-leave-button').click();
+          cy.gcy('organization-member-leave-button').click();
         });
     });
     confirmStandard();
