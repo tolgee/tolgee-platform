@@ -1,5 +1,11 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, Button, Typography } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@material-ui/core';
 import { T, useTranslate } from '@tolgee/react';
 import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
@@ -31,6 +37,10 @@ const useStyles = makeStyles((theme) => ({
   dangerZone: {
     borderRadius: theme.shape.borderRadius,
     border: `1px solid ${theme.palette.error.dark}`,
+  },
+  dangerZonePart: {
+    display: 'flex',
+    gap: theme.spacing(2),
   },
   dangerButton: {
     whiteSpace: 'nowrap',
@@ -91,6 +101,9 @@ export const ProjectSettingsView: FunctionComponent = () => {
   };
 
   const t = useTranslate();
+
+  const theme = useTheme();
+  const isSmOrLower = useMediaQuery(theme.breakpoints.down('sm'));
 
   const initialValues: ValueType = {
     name: project.name,
@@ -159,7 +172,11 @@ export const ProjectSettingsView: FunctionComponent = () => {
           </Typography>
         </Box>
         <Box className={classes.dangerZone} p={2}>
-          <Box display="flex" alignItems="center">
+          <Box
+            className={classes.dangerZonePart}
+            alignItems={isSmOrLower ? 'start' : 'center'}
+            flexDirection={isSmOrLower ? 'column' : 'row'}
+          >
             <Box flexGrow={1} mr={1}>
               <Typography variant="body1">
                 <T>this_will_delete_project_forever</T>
@@ -174,7 +191,12 @@ export const ProjectSettingsView: FunctionComponent = () => {
               <T>delete_project_button</T>
             </Button>
           </Box>
-          <Box display="flex" alignItems="center" mt={2}>
+          <Box
+            className={classes.dangerZonePart}
+            alignItems={isSmOrLower ? 'start' : 'center'}
+            flexDirection={isSmOrLower ? 'column' : 'row'}
+            mt={2}
+          >
             <Box flexGrow={1} mr={1}>
               <Typography variant="body1">
                 <T>this_will_transfer_project</T>
