@@ -46,7 +46,7 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
   const leaveOrganization = useLeaveOrganization();
 
   return (
-    <div className={classes.listItem}>
+    <div className={classes.listItem} data-cy="organization-member-item">
       <div className={classes.itemText}>
         {user.name} ({user.username}){' '}
       </div>
@@ -58,7 +58,7 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
             variant="outlined"
             size="small"
             onClick={() => leaveOrganization(organizationId)}
-            data-cy={'leave-organization-button'}
+            data-cy="organization-member-leave-button"
           >
             <T>organization_users_leave</T>
           </Button>

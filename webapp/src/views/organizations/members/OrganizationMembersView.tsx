@@ -72,6 +72,7 @@ export const OrganizationMembersView: FunctionComponent = () => {
             color="primary"
             variant="contained"
             onClick={() => setInviteOpen(true)}
+            data-cy="invite-generate-button"
           >
             {t('invitations_invite_button')}
           </Button>

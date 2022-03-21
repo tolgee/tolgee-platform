@@ -134,6 +134,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                       disableElevation
                       color={values.type === 'email' ? 'primary' : undefined}
                       onClick={() => formik.setFieldValue('type', 'email')}
+                      data-cy="invitation-dialog-type-email-button"
                     >
                       Email
                     </Button>
@@ -142,6 +143,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                       disableElevation
                       color={values.type === 'link' ? 'primary' : undefined}
                       onClick={() => formik.setFieldValue('type', 'link')}
+                      data-cy="invitation-dialog-type-link-button"
                     >
                       Link
                     </Button>
@@ -160,6 +162,8 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                         onSelect={(role) => formik.setFieldValue('role', role)}
                         buttonProps={{
                           size: 'small',
+                          // @ts-ignore
+                          'data-cy': 'invitation-dialog-role-button',
                         }}
                       />
                     </div>
@@ -168,6 +172,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                   <Field name="text">
                     {({ field, meta }) => (
                       <TextField
+                        data-cy="invitation-dialog-input-field"
                         type={values.type === 'email' ? 'email' : 'text'}
                         label={
                           values.type === 'email'
@@ -188,6 +193,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                   color="primary"
                   type="submit"
                   disabled={!isValid}
+                  data-cy="invitation-dialog-invite-button"
                 >
                   {values.type === 'email'
                     ? t('project_members_dialog_invite_button')

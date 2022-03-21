@@ -100,7 +100,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   useGlobalLoading(deleteInvitation.isLoading);
 
   return (
-    <div className={classes.listItem}>
+    <div className={classes.listItem} data-cy="organization-invitation-item">
       <div className={classes.itemText}>
         {invitation.invitedUserName || invitation.invitedUserEmail}{' '}
       </div>
@@ -116,6 +116,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
           onClick={(e) => setMenuEl(e.currentTarget as Element)}
           aria-haspopup="true"
           aria-expanded={menuEl ? 'true' : undefined}
+          data-cy="organization-invitation-item-menu"
         >
           <MoreVert />
         </IconButton>
@@ -140,6 +141,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
             onClick={handleCancel}
             color="inherit"
             className={classes.cancelButton}
+            data-cy="organization-invitation-cancel-button"
           >
             <T keyName="invite_user_invitation_cancel_button" />
           </MenuItem>

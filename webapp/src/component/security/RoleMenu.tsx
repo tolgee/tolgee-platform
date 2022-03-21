@@ -88,6 +88,7 @@ export const RoleMenu: React.FC<Props> = (props) => {
             selected={k === props.role}
           >
             <ListItemText
+              data-cy="organization-role-select-item"
               className={classes.item}
               primary={<T>{`organization_role_type_${k}`}</T>}
               secondary={<T>{`organization_role_type_${k}_hint`}</T>}
