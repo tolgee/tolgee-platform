@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { PropTypes, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import Button, { ButtonTypeMap } from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -16,8 +16,8 @@ export class ConfirmationDialogProps {
   cancelButtonText?: ReactNode = (<T>confirmation_dialog_cancel</T>);
   title?: ReactNode = (<T>confirmation_dialog_title</T>);
   hardModeText?: string | null = null;
-  confirmButtonColor?: PropTypes.Color;
-  cancelButtonColor?: PropTypes.Color;
+  confirmButtonColor?: ButtonTypeMap['props']['color'];
+  cancelButtonColor?: ButtonTypeMap['props']['color'];
 
   onCancel?: () => void = () => {};
 
@@ -86,7 +86,7 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
           </Button>
           <Button
             data-cy="global-confirmation-confirm"
-            color={props.confirmButtonColor ?? 'default'}
+            color={props.confirmButtonColor ?? 'inherit'}
             autoFocus
             disabled={!!disabled}
             type="submit"
