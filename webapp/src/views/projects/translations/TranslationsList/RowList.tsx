@@ -78,9 +78,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
             language={language}
             colIndex={0}
             onResize={onResize}
-            editEnabled={permissions.satisfiesPermission(
-              ProjectPermissionType.TRANSLATE
-            )}
+            editEnabled={permissions.canEditLanguage(language.id)}
             width={columnSizes[1]}
             active={relaxedActive}
             // render last focusable button on last item, so it's focusable

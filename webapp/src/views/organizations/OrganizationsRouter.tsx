@@ -7,10 +7,9 @@ import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
 
 import { OrganizationCreateView } from './OrganizationCreateView';
-import { OrganizationInvitationsView } from './OrganizationInvitationsView';
 import { OrganizationsListView } from './OrganizationListView';
 import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivilegesView';
-import { OrganizationMembersView } from './OrganizationMembersView';
+import { OrganizationMembersView } from './members/OrganizationMembersView';
 import { OrganizationProfileView } from './OrganizationProfileView';
 import { OrganizationsProjectListView } from './OrganizationProjectListView';
 import { useOrganization } from './useOrganization';
@@ -33,9 +32,6 @@ const SpecificOrganizationRouter = () => {
             path={LINKS.ORGANIZATION_MEMBER_PRIVILEGES.template}
           >
             <OrganizationMemberPrivilegesView />
-          </PrivateRoute>
-          <PrivateRoute exact path={LINKS.ORGANIZATION_INVITATIONS.template}>
-            <OrganizationInvitationsView />
           </PrivateRoute>
           <PrivateRoute exact path={LINKS.ORGANIZATION_PROJECTS.template}>
             <OrganizationsProjectListView />

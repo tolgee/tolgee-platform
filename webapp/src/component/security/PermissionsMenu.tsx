@@ -1,27 +1,42 @@
 import React, { ComponentProps, FunctionComponent } from 'react';
-import { Button, Menu, MenuItem } from '@material-ui/core';
+import {
+  Button,
+  ListItemText,
+  makeStyles,
+  Menu,
+  MenuItem,
+  Tooltip,
+} from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import { ProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { components } from 'tg.service/apiSchema.generated';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
+
+type computedPermissions = NonNullable<
+  components['schemas']['ProjectModel']['computedPermissions']
+>;
+
+const useStyles = makeStyles((theme) => ({
+  item: {
+    maxWidth: 300,
+  },
+  textSecondary: {
+    whiteSpace: 'normal',
+  },
+}));
 
 export const PermissionsMenu: FunctionComponent<{
-  selected: NonNullable<
-    components['schemas']['ProjectModel']['computedPermissions']
-  >;
-  onSelect: (
-    value: NonNullable<
-      components['schemas']['ProjectModel']['computedPermissions']
-    >
-  ) => void;
+  selected: computedPermissions;
+  onSelect: (value: computedPermissions) => void;
   buttonProps?: ComponentProps<typeof Button>;
-  minPermissions?: NonNullable<
-    components['schemas']['ProjectModel']['computedPermissions']
-  >;
+  minPermissions?: computedPermissions;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const classes = useStyles();
+  const t = useTranslate();
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -35,7 +50,7 @@ export const PermissionsMenu: FunctionComponent<{
 
   if (props.minPermissions) {
     types = types.filter((k) =>
-      new ProjectPermissions(k as any).satisfiesPermission(
+      new ProjectPermissions(k as any, undefined).satisfiesPermission(
         props.minPermissions as any
       )
     );
@@ -43,17 +58,25 @@ export const PermissionsMenu: FunctionComponent<{
 
   return (
     <>
-      <Button
-        data-cy="permissions-menu-button"
-        {...props.buttonProps}
-        variant="outlined"
-        aria-controls="simple-menu"
-        aria-haspopup="true"
-        onClick={handleClick}
+      <Tooltip
+        title={t(
+          `permission_type_${projectPermissionTypes[props.selected]}_hint`
+        )}
       >
-        <T>{`permission_type_${props.selected.toLowerCase()}`}</T>{' '}
-        <ArrowDropDown fontSize="small" />
-      </Button>
+        <span>
+          <Button
+            data-cy="permissions-menu-button"
+            {...props.buttonProps}
+            variant="outlined"
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            onClick={handleClick}
+          >
+            <T>{`permission_type_${props.selected.toLowerCase()}`}</T>{' '}
+            <ArrowDropDown fontSize="small" />
+          </Button>
+        </span>
+      </Tooltip>
       <Menu
         data-cy="permissions-menu"
         elevation={1}
@@ -65,7 +88,7 @@ export const PermissionsMenu: FunctionComponent<{
         onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center',
+          horizontal: 'left',
         }}
         transformOrigin={{
           vertical: 'top',
@@ -82,7 +105,12 @@ export const PermissionsMenu: FunctionComponent<{
             disabled={k === props.selected}
             selected={k === props.selected}
           >
-            <T>{`permission_type_${k.toLowerCase()}`}</T>
+            <ListItemText
+              className={classes.item}
+              primary={<T>{`permission_type_${k.toLowerCase()}`}</T>}
+              secondary={<T>{`permission_type_${k.toLowerCase()}_hint`}</T>}
+              secondaryTypographyProps={{ className: classes.textSecondary }}
+            />
           </MenuItem>
         ))}
       </Menu>
