@@ -1,3 +1,10 @@
+## [2.12.3](https://github.com/tolgee/server/compare/v2.12.2...v2.12.3) (2022-03-21)
+
+
+### Bug Fixes
+
+* User can cannot change their own permission ([79cc46e](https://github.com/tolgee/server/commit/79cc46e3230dc72077f9268de3c8fe90e48edc8f))
+
 ## [2.12.2](https://github.com/tolgee/server/compare/v2.12.1...v2.12.2) (2022-03-18)
 
 
