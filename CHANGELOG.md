@@ -1,3 +1,10 @@
+## [2.12.4](https://github.com/tolgee/server/compare/v2.12.3...v2.12.4) (2022-03-21)
+
+
+### Bug Fixes
+
+* Clean up dependencies ([e7696ef](https://github.com/tolgee/server/commit/e7696ef9e566d384ca3108c59bc497466f42a838))
+
 ## [2.12.3](https://github.com/tolgee/server/compare/v2.12.2...v2.12.3) (2022-03-21)
 
 
