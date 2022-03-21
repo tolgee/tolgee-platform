@@ -38,21 +38,28 @@ const createProjectWithInvitation = (
       })
     )
     .then((r) => {
-      cy.visit(`${HOST}/projects/${r.body.id}`);
-      selectInProjectMenu('Invite user');
+      let clipboard: string;
+      cy.visit(`${HOST}/projects/${r.body.id}`, {
+        onBeforeLoad(win) {
+          cy.stub(win, 'prompt').callsFake((label, input) => {
+            clipboard = input;
+          });
+        },
+      });
+      selectInProjectMenu('Members');
       cy.gcy('invite-generate-button').click();
-      return cy
-        .gcy('invite-generate-input-code')
-        .find('textarea')
-        .invoke('val')
-        .then((invitationLink: string) => {
-          window.localStorage.removeItem('jwtToken');
-          return { projectId: r.body.id, invitationLink };
-        });
+      cy.gcy('invitation-dialog-type-link-button').click();
+      cy.gcy('invitation-dialog-input-field').type('Test invitation');
+      cy.gcy('invitation-dialog-invite-button').click();
+      return assertMessage('Invitation link copied to clipboard').then(() => {
+        window.localStorage.removeItem('jwtToken');
+        return { projectId: r.body.id, invitationLink: clipboard };
+      });
     });
 };
 
 const TEST_USERNAME = 'johndoe@doe.com';
+
 context('Sign up', () => {
   beforeEach(() => {
     visit();

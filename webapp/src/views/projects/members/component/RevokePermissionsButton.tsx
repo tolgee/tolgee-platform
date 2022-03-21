@@ -83,7 +83,7 @@ const RevokePermissionsButton = (props: {
           })
         }
       >
-        Revoke
+        <T keyName="project_members_revoke" />
       </Button>
     </Wrapper>
   );

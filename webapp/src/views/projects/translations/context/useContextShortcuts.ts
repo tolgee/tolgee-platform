@@ -37,6 +37,7 @@ export const useContextShortcuts = () => {
   const permissions = useProjectPermissions();
   const elementsRef = useTranslationsSelector((c) => c.elementsRef);
   const fixedTranslations = useTranslationsSelector((c) => c.translations);
+  const allLanguages = useTranslationsSelector((c) => c.languages);
   const languages = useTranslationsSelector((c) => c.selectedLanguages);
   const list = useTranslationsSelector((c) => c.reactList);
 
@@ -44,11 +45,12 @@ export const useContextShortcuts = () => {
     target === document.body || root?.contains(target);
 
   const canEdit = permissions.satisfiesPermission(ProjectPermissionType.EDIT);
-  const canTranslate = permissions.satisfiesPermission(
-    ProjectPermissionType.TRANSLATE
-  );
 
   const isTranslation = (position: Position | undefined) => position?.language;
+
+  const getLanguageId = (langTag?: string) => {
+    return allLanguages?.find((l) => l.tag === langTag)?.id;
+  };
 
   const getMoveHandler = () => {
     return (e: KeyboardEvent) => {
@@ -83,6 +85,9 @@ export const useContextShortcuts = () => {
   const getEnterHandler = () => {
     const focused = getCurrentlyFocused(elementsRef.current);
     if (focused) {
+      const canTranslate = permissions.canEditLanguage(
+        getLanguageId(focused.language)
+      );
       if (isTranslation(focused) ? canTranslate : canEdit)
         return (e: KeyboardEvent) => {
           e.preventDefault();
@@ -108,6 +113,9 @@ export const useContextShortcuts = () => {
 
   const getChangeStateHandler = () => {
     const focused = getCurrentlyFocused(elementsRef.current);
+    const canTranslate = permissions.canEditLanguage(
+      getLanguageId(focused?.language)
+    );
 
     if (focused?.language && canTranslate) {
       const translation = fixedTranslations?.find(

@@ -98,8 +98,11 @@ declare namespace DataCy {
         "integrate-select-api-key-step-content" |
         "integrate-select-api-key-step-label" |
         "integrate-weapon-selector-button" |
+        "invitation-dialog-input-field" |
+        "invitation-dialog-invite-button" |
+        "invitation-dialog-type-email-button" |
+        "invitation-dialog-type-link-button" |
         "invite-generate-button" |
-        "invite-generate-input-code" |
         "language-delete-button" |
         "language-modify-form" |
         "languages-create-autocomplete-field" |
@@ -115,11 +118,6 @@ declare namespace DataCy {
         "organization-address-part-field" |
         "organization-delete-button" |
         "organization-description-field" |
-        "organization-invitation-cancel-button" |
-        "organization-invitation-generate-button" |
-        "organization-invitation-role-select" |
-        "organization-invitations-generated-field" |
-        "organization-members-leave-button" |
         "organization-members-remove-user-button" |
         "organization-name-field" |
         "organization-profile" |
@@ -128,9 +126,9 @@ declare namespace DataCy {
         "organization-role-select-item" |
         "organization-settings-button" |
         "organization-side-menu" |
-        "organizations-user-email" |
-        "organizations-user-name" |
         "permission-select-item" |
+        "permissions-language-menu-button" |
+        "permissions-languages-menu" |
         "permissions-menu" |
         "permissions-menu-button" |
         "permissions-revoke-button" |

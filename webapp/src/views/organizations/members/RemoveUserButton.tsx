@@ -10,7 +10,7 @@ import { useOrganization } from '../useOrganization';
 
 const messageService = container.resolve(MessageService);
 
-const OrganizationRemoveUserButton = (props: {
+export const RemoveUserButton = (props: {
   userId: number;
   userName: string;
 }) => {
@@ -58,5 +58,3 @@ const OrganizationRemoveUserButton = (props: {
     </Button>
   );
 };
-
-export default OrganizationRemoveUserButton;
