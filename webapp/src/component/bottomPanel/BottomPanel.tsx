@@ -3,6 +3,10 @@ import { makeStyles, Portal } from '@material-ui/core';
 import { useWindowDimensions } from 'tg.hooks/useWindowDimensions';
 import clsx from 'clsx';
 import { useBottomPanelSetters } from './BottomPanelContext';
+import { container } from 'tsyringe';
+import { ThemeService } from 'tg.service/ThemeService';
+
+const paletteType = container.resolve(ThemeService).paletteType;
 
 const useStyles = makeStyles((theme) => ({
   '@keyframes fadeIn': {
@@ -32,7 +36,10 @@ const useStyles = makeStyles((theme) => ({
   popperContent: {
     display: 'flex',
     background: theme.palette.background.default,
-    boxShadow: theme.shadows[10],
+    boxShadow:
+      paletteType === 'light'
+        ? theme.shadows[10]
+        : '0px 3px 3px -2px rgb(255, 255, 255, 0.2), 0px 3px 4px 0px rgb(255, 255, 255, 0.14), 0px 1px 8px 0px rgb(255, 255, 255, 0.12)',
   },
 }));
 

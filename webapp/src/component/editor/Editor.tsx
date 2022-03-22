@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
       color: '#002bff',
     },
     '& .cm-string': {
-      color: theme.palette.text,
+      color: theme.palette.text.secondary,
     },
     '& .cm-bracket': {
       color: '#002bff',

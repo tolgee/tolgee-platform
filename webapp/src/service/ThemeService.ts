@@ -234,6 +234,7 @@ const getDesignTokens = (type: PaletteType) =>
             },
             background: {
               default: 'rgb(22, 22, 22)',
+              paper: 'rgb(40, 40, 40)',
             },
           }),
     },

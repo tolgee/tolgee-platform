@@ -4,8 +4,12 @@ import TranslationTools, {
   Props as TranslationToolsProps,
 } from './TranslationTools';
 import { PopupArrow } from './PopupArrow';
+import { container } from 'tsyringe';
+import { ThemeService } from 'tg.service/ThemeService';
 
 export const TOOLS_HEIGHT = 200;
+
+const paletteType = container.resolve(ThemeService).paletteType;
 
 const useStyles = makeStyles((theme) => ({
   popper: {
@@ -16,7 +20,10 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     height: TOOLS_HEIGHT,
     background: theme.palette.background.default,
-    boxShadow: theme.shadows[3],
+    boxShadow:
+      paletteType === 'light'
+        ? theme.shadows[3]
+        : '0px 3px 3px -2px rgb(255, 255, 255, 0.2), 0px 3px 4px 0px rgb(255, 255, 255, 0.14), 0px 1px 8px 0px rgb(255, 255, 255, 0.12)',
     borderRadius: theme.shape.borderRadius,
   },
 }));
