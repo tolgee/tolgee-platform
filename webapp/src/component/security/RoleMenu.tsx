@@ -47,18 +47,20 @@ export const RoleMenu: React.FC<Props> = (props) => {
   return (
     <>
       <Tooltip title={t(`organization_role_type_${props.role}_hint`)}>
-        <Button
-          data-cy="organization-role-menu-button"
-          {...props.buttonProps}
-          variant="outlined"
-          size="small"
-          aria-controls="simple-menu"
-          aria-haspopup="true"
-          onClick={handleClick}
-        >
-          <T>{`organization_role_type_${props.role}`}</T>{' '}
-          <ArrowDropDown fontSize="small" />
-        </Button>
+        <span>
+          <Button
+            data-cy="organization-role-menu-button"
+            {...props.buttonProps}
+            variant="outlined"
+            size="small"
+            aria-controls="simple-menu"
+            aria-haspopup="true"
+            onClick={handleClick}
+          >
+            <T>{`organization_role_type_${props.role}`}</T>{' '}
+            <ArrowDropDown fontSize="small" />
+          </Button>
+        </span>
       </Tooltip>
       <Menu
         data-cy="organization-role-menu"

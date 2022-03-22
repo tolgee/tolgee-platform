@@ -203,6 +203,33 @@ export class Validation {
       description: Yup.string().nullable(),
     });
   };
+
+  static readonly INVITE_DIALOG_PROJECT = (t: (key: string) => string) =>
+    Yup.object({
+      permission: Yup.string(),
+      permissionLanguages: Yup.array(Yup.string()),
+      type: Yup.string(),
+      text: Yup.string().when('type', (val: string) =>
+        val === 'email'
+          ? Yup.string()
+              .email(t('validation_email_is_not_valid'))
+              .required(t('Validation - required field'))
+          : Yup.string().required(t('Validation - required field'))
+      ),
+    });
+
+  static readonly INVITE_DIALOG_ORGANIZATION = (t: (key: string) => string) =>
+    Yup.object({
+      permission: Yup.string(),
+      type: Yup.string(),
+      text: Yup.string().when('type', (val: string) =>
+        val === 'email'
+          ? Yup.string()
+              .email(t('validation_email_is_not_valid'))
+              .required(t('Validation - required field'))
+          : Yup.string().required(t('Validation - required field'))
+      ),
+    });
 }
 
 let GLOBAL_VALIDATION_DEBOUNCE_TIMER: any = undefined;

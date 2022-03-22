@@ -6,6 +6,7 @@ import {
   deleteUserWithEmailVerification,
   disableEmailVerification,
   enableEmailVerification,
+  getParsedEmailInvitationLink,
   getParsedEmailVerification,
   getRecaptchaSiteKey,
   getUser,
@@ -17,12 +18,16 @@ import {
 import { assertMessage, gcy, selectInProjectMenu } from '../common/shared';
 import { loginWithFakeGithub } from '../common/login';
 
-const createProjectWithInvitation = (
-  name = 'Test'
-): Cypress.Chainable<{
+type ReturnVal = {
   projectId: string;
   invitationLink: string;
-}> => {
+};
+
+const createProjectWithInvitation = (
+  name = 'Test',
+  email = false
+): Cypress.Chainable<ReturnVal> => {
+  let clipboard: string;
   return login()
     .then(() =>
       createProject({
@@ -38,23 +43,38 @@ const createProjectWithInvitation = (
       })
     )
     .then((r) => {
-      let clipboard: string;
       cy.visit(`${HOST}/projects/${r.body.id}`, {
         onBeforeLoad(win) {
-          cy.stub(win, 'prompt').callsFake((_, input) => {
-            clipboard = input;
-          });
+          if (!email) {
+            cy.stub(win, 'prompt').callsFake((_, input) => {
+              clipboard = input;
+            });
+          }
         },
       });
       selectInProjectMenu('Members');
       cy.gcy('invite-generate-button').click();
-      cy.gcy('invitation-dialog-type-link-button').click();
-      cy.gcy('invitation-dialog-input-field').type('Test invitation');
+
+      if (!email) {
+        cy.gcy('invitation-dialog-type-link-button').click();
+      }
+
+      cy.gcy('invitation-dialog-input-field').type('test@invitation.com');
       cy.gcy('invitation-dialog-invite-button').click();
-      return assertMessage('Invitation link copied to clipboard').then(() => {
-        window.localStorage.removeItem('jwtToken');
-        return { projectId: r.body.id, invitationLink: clipboard };
-      });
+      if (!email) {
+        return assertMessage('Invitation link copied to clipboard').then(() => {
+          window.localStorage.removeItem('jwtToken');
+          return { projectId: r.body.id, invitationLink: clipboard };
+        });
+      } else {
+        return assertMessage('Invitation was sent').then(() => {
+          window.localStorage.removeItem('jwtToken');
+          return getParsedEmailInvitationLink().then((code) => ({
+            projectId: r.body.id,
+            invitationLink: code,
+          }));
+        });
+      }
     });
 };
 
@@ -140,6 +160,17 @@ context('Sign up', () => {
   it('will sign up with project invitation code', () => {
     disableEmailVerification();
     createProjectWithInvitation().then(({ invitationLink }) => {
+      cy.visit(HOST + '/sign_up');
+      fillAndSubmitForm();
+      cy.contains('Projects').should('be.visible');
+      cy.visit(invitationLink);
+      assertMessage('Invitation successfully accepted');
+    });
+  });
+
+  it('will sign up with project invitation code from email', () => {
+    disableEmailVerification();
+    createProjectWithInvitation('Test', true).then(({ invitationLink }) => {
       cy.visit(HOST + '/sign_up');
       fillAndSubmitForm();
       cy.contains('Projects').should('be.visible');

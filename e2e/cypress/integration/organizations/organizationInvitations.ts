@@ -1,7 +1,10 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import { assertMessage, gcy } from '../../common/shared';
-import { login } from '../../common/apiCalls/common';
+import {
+  getParsedEmailInvitationLink,
+  login,
+} from '../../common/apiCalls/common';
 import { organizationTestData } from '../../common/apiCalls/testData/testData';
 
 describe('Organization Invitations', () => {
@@ -41,11 +44,19 @@ describe('Organization Invitations', () => {
   });
 
   it('owner invitation can be accepted', () => {
-    testAcceptInvitation('OWNER');
+    testAcceptInvitation('OWNER', false);
   });
 
   it('member invitation can be accepted', () => {
-    testAcceptInvitation('MEMBER');
+    testAcceptInvitation('MEMBER', false);
+  });
+
+  it('owner invitation by email can be accepted', () => {
+    testAcceptInvitation('OWNER', false);
+  });
+
+  it('member invitation by email can be accepted', () => {
+    testAcceptInvitation('MEMBER', false);
   });
 
   after(() => {
@@ -56,18 +67,23 @@ describe('Organization Invitations', () => {
     cy.visit(`${HOST}/organizations/tolgee/members`);
   };
 
-  const generateInvitation = (roleType: 'MEMBER' | 'OWNER') => {
+  const generateInvitation = (roleType: 'MEMBER' | 'OWNER', email = false) => {
     let clipboard: string;
     cy.visit(`${HOST}/organizations/tolgee/members`, {
       onBeforeLoad(win) {
-        cy.stub(win, 'prompt').callsFake((_, input) => {
-          clipboard = input;
-        });
+        if (!email) {
+          cy.stub(win, 'prompt').callsFake((_, input) => {
+            clipboard = input;
+          });
+        }
       },
     });
 
     cy.gcy('invite-generate-button').click();
-    cy.gcy('invitation-dialog-type-link-button').click();
+
+    if (!email) {
+      cy.gcy('invitation-dialog-type-link-button').click();
+    }
 
     gcy('invitation-dialog-role-button').click();
     gcy('organization-role-select-item')
@@ -75,15 +91,25 @@ describe('Organization Invitations', () => {
       .within(() => {
         cy.contains(roleType).click();
       });
-    cy.gcy('invitation-dialog-input-field').type('Test invitation');
+    cy.gcy('invitation-dialog-input-field').type('test@invitation.com');
     cy.gcy('invitation-dialog-invite-button').click();
-    return assertMessage('Invitation link copied to clipboard').then(() => {
-      return clipboard;
-    });
+
+    if (!email) {
+      return assertMessage('Invitation link copied to clipboard').then(() => {
+        return clipboard;
+      });
+    } else {
+      return assertMessage('Invitation was sent').then(() => {
+        return getParsedEmailInvitationLink();
+      });
+    }
   };
 
-  const testAcceptInvitation = (roleType: 'MEMBER' | 'OWNER') => {
-    generateInvitation(roleType).then((code) => {
+  const testAcceptInvitation = (
+    roleType: 'MEMBER' | 'OWNER',
+    email: boolean
+  ) => {
+    generateInvitation(roleType, email).then((code) => {
       login('owner@zzzcool12.com', 'admin');
       cy.visit(code as string);
 

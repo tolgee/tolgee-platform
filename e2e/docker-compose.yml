@@ -10,6 +10,7 @@ services:
       - spring.profiles.active=docker,e2e
       - tolgee.smtp.host=fakesmtp
       - tolgee.smtp.port=1025
+      - tolgee.frontend-url=http://localhost:8201
   fakesmtp:
     image: reachfive/fake-smtp-server:0.8.1
     ports:
