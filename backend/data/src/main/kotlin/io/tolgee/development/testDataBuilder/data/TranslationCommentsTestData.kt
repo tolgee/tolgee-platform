@@ -16,6 +16,7 @@ class TranslationCommentsTestData {
   lateinit var secondComment: TranslationComment
   var project: Project
   lateinit var englishLanguage: Language
+  lateinit var czechLanguage: Language
   var user: UserAccount
   var pepa: UserAccount
   lateinit var aKey: Key
@@ -56,6 +57,12 @@ class TranslationCommentsTestData {
         originalName = "English"
       }.self
 
+      czechLanguage = addLanguage {
+        name = "Czech"
+        tag = "cs"
+        originalName = "Čeština"
+      }.self
+
       addKey {
         name = "A key"
         this@TranslationCommentsTestData.aKey = this
@@ -63,6 +70,20 @@ class TranslationCommentsTestData {
         addTranslation {
           language = englishLanguage
           text = "Z translation"
+          state = TranslationState.REVIEWED
+          this@TranslationCommentsTestData.translation = this
+        }.build {
+          firstComment = addComment {
+            text = "First comment"
+          }.self
+          secondComment = addComment {
+            text = "Second comment"
+          }.self
+        }
+
+        addTranslation {
+          language = czechLanguage
+          text = "Z překlad"
           state = TranslationState.REVIEWED
           this@TranslationCommentsTestData.translation = this
         }.build {
@@ -95,10 +116,10 @@ class TranslationCommentsTestData {
       }
       projectBuilder.apply {
         addPermission {
-
           project = projectBuilder.self
           user = jindra.self
           type = Permission.ProjectPermissionType.TRANSLATE
+          languages = mutableSetOf(englishLanguage)
         }
         addPermission {
 

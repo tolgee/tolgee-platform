@@ -193,6 +193,7 @@ class ProjectsE2eDataController(
           PermittedUserData(
             "vaclav.novak@fake.com",
             Permission.ProjectPermissionType.TRANSLATE
+
           )
         ),
         keyData = mapOf(Pair("test", mapOf(Pair("en", "This is test text!"))))
