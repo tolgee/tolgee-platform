@@ -14,7 +14,6 @@ import {
 import { container } from 'tsyringe';
 import { useTranslate, T } from '@tolgee/react';
 import copy from 'copy-to-clipboard';
-import * as Yup from 'yup';
 
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
@@ -26,6 +25,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { MessageService } from 'tg.service/MessageService';
 import { useMemo } from 'react';
+import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 const messaging = container.resolve(MessageService);
 
@@ -62,22 +62,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
     invalidatePrefix: '/v2/projects/{projectId}/invitations',
   });
 
-  const yupSchema = useMemo(
-    () =>
-      Yup.object({
-        permission: Yup.string(),
-        permissionLanguages: Yup.array(Yup.string()),
-        type: Yup.string(),
-        text: Yup.string().when('type', (val: string) =>
-          val === 'email'
-            ? Yup.string()
-                .email(t('validation_email_is_not_valid'))
-                .required(t('Validation - required field'))
-            : Yup.string().required(t('Validation - required field'))
-        ),
-      }),
-    [t]
-  );
+  const yupSchema = useMemo(() => Validation.INVITE_DIALOG_PROJECT(t), [t]);
 
   return (
     <Dialog {...{ open, onClose }} fullWidth>
@@ -89,7 +74,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
           text: '',
         }}
         validationSchema={yupSchema}
-        isInitialValid={false}
+        validateOnMount={true}
         onSubmit={(data) => {
           invite.mutate(
             {
@@ -108,14 +93,20 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
             },
             {
               onSuccess(data) {
-                copy(
-                  LINKS.ACCEPT_INVITATION.buildWithOrigin({
-                    [PARAMS.INVITATION_CODE]: data.code,
-                  })
-                );
-                messaging.success(
-                  <T keyName="invite_user_invitation_copy_success" />
-                );
+                if (!data.invitedUserEmail) {
+                  copy(
+                    LINKS.ACCEPT_INVITATION.buildWithOrigin({
+                      [PARAMS.INVITATION_CODE]: data.code,
+                    })
+                  );
+                  messaging.success(
+                    <T keyName="invite_user_invitation_copy_success" />
+                  );
+                } else {
+                  messaging.success(
+                    <T keyName="invite_user_invitation_email_success" />
+                  );
+                }
                 onClose();
               },
               onError(e) {
@@ -192,7 +183,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                             ? t('project_members_dialog_email')
                             : t('project_members_dialog_name')
                         }
-                        error={meta.touched && meta.error}
+                        error={Boolean(meta.touched && meta.error)}
                         helperText={meta.touched && meta.error}
                         {...field}
                       />
@@ -207,6 +198,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                   type="submit"
                   disabled={!isValid}
                   data-cy="invitation-dialog-invite-button"
+                  loading={invite.isLoading}
                 >
                   {values.type === 'email'
                     ? t('project_members_dialog_invite_button')

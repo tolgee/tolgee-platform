@@ -54,7 +54,7 @@ export const LanguagePermissionsMenu: FunctionComponent<{
       <Tooltip
         title={t('permission_languages_hint', {
           subject: selectedLanguages?.length
-            ? selectedLanguages.map((l) => l.name).join(', ')
+            ? selectedLanguages.map((l) => l.name || l.tag).join(', ')
             : t('languages_permitted_list_all'),
         })}
       >

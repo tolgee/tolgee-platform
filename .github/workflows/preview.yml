@@ -28,6 +28,12 @@ jobs:
           git config --local user.email "machine@tolgee.io"
           git config --local user.name "Tolgee Machine"
 
+      - name: Download translations
+        run: ./gradlew updateStaticTranslations
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
       - name: Create docker image
         run: ./gradlew docker
         env:

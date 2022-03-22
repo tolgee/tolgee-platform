@@ -227,6 +227,11 @@ export const getParsedEmailVerification = () =>
     };
   });
 
+export const getParsedEmailInvitationLink = () =>
+  getAllEmails().then(
+    (r) => r[0].html.replace(/.*(http:\/\/[\w:/]*).*/gs, '$1') as string
+  );
+
 export const getAllEmails = () =>
   cy.request('http://localhost:21080/api/emails').then((r) => r.body);
 export const deleteAllEmails = () =>
