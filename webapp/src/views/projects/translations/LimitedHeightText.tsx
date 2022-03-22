@@ -151,7 +151,7 @@ export const LimitedHeightText: React.FC<Props> = ({
                   enabled: true,
                   padding: 0,
                 },
-              }
+              },
             },
           ]}
         >
