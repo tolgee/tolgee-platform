@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.hateoas.project
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.api.v2.hateoas.UserPermissionModel
 import io.tolgee.api.v2.hateoas.organization.LanguageModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModel
 import io.tolgee.dtos.Avatar
@@ -30,14 +31,7 @@ open class ProjectWithStatsModel(
     description = "Actual current user's permissions on this project. You can not sort data by this column!",
     example = "EDIT"
   )
-  val computedPermissions: Permission.ProjectPermissionType?,
-
-  @Schema(
-    description = "List of languages current user has TRANSLATE permission to. " +
-      "If null, all languages edition is permitted.",
-    example = "[200001, 200004]"
-  )
-  val permittedLanguageIds: List<Long>?,
+  val computedPermissions: UserPermissionModel,
   val stats: ProjectStatistics,
   val languages: List<LanguageModel>
 ) : RepresentationModel<ProjectWithStatsModel>()

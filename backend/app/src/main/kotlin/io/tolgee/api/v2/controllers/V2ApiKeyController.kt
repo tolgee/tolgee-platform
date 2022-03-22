@@ -100,17 +100,17 @@ class V2ApiKeyController(
       projectId = apiKey.project.id,
       projectName = apiKey.project.name,
       scopes = apiKey.scopesEnum.map { it.value }.toSet(),
-      permittedLanguages = getProjectPermittedLanguages()
+      permittedLanguageIds = getProjectPermittedLanguages()?.toList()
     )
   }
 
-  private fun getProjectPermittedLanguages(): List<String>? {
+  private fun getProjectPermittedLanguages(): Set<Long>? {
     val data = permissionService.getProjectPermissionData(projectHolder.project.id, authenticationFacade.userAccount.id)
     val languageIds = data.computedPermissions.languageIds
     if (languageIds.isNullOrEmpty()) {
       return null
     }
-    return languageService.findByIdIn(languageIds).map { it.tag }
+    return languageIds
   }
 
   @GetMapping(path = ["/projects/{projectId:[0-9]+}/api-keys"])

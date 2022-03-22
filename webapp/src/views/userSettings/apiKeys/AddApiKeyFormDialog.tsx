@@ -73,13 +73,13 @@ export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
   });
 
   const getAvailableScopes = (projectId?: number): Set<string> => {
-    const userPermissions = projects?.data?._embedded?.projects?.find(
+    const userPermissionType = projects?.data?._embedded?.projects?.find(
       (r) => r.id === projectId
-    )?.computedPermissions;
-    if (!userPermissions || !scopes?.data) {
+    )?.computedPermissions.type;
+    if (!userPermissionType || !scopes?.data) {
       return new Set();
     }
-    return new Set(scopes.data[userPermissions]);
+    return new Set(scopes.data[userPermissionType]);
   };
 
   const handleEdit = (value) =>

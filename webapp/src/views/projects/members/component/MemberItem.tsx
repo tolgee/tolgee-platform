@@ -89,7 +89,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
 
   const allLanguages = useProjectLanguages();
   const allLangIds = allLanguages.map((l) => l.id);
-  const projectPermission = user.computedPermissions;
+  const projectPermissionType = user.computedPermissions.type;
 
   return (
     <div className={classes.listItem} data-cy="project-member-item">
@@ -100,16 +100,16 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
         )}
       </div>
       <div className={classes.itemActions}>
-        {projectPermission === 'TRANSLATE' && (
+        {projectPermissionType === 'TRANSLATE' && (
           <LanguagePermissionsMenu
-            selected={user.permittedLanguageIds || []}
+            selected={user.computedPermissions.permittedLanguageIds || []}
             onSelect={(langs) =>
-              changePermission(projectPermission, langs, false)
+              changePermission(projectPermissionType, langs, false)
             }
           />
         )}
         <PermissionsMenu
-          selected={user.computedPermissions}
+          selected={user.computedPermissions.type!}
           onSelect={(permission) =>
             changePermissionConfirm(permission, allLangIds)
           }

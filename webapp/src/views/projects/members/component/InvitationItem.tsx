@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 import {
-  makeStyles,
   IconButton,
+  makeStyles,
   Menu,
   MenuItem,
   Tooltip,
@@ -18,6 +18,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 
 const messaging = container.resolve(MessageService);
 
@@ -70,6 +71,15 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   const classes = useStyles();
   const [menuEl, setMenuEl] = useState<Element | null>(null);
   const t = useTranslate();
+  const languages = useProjectLanguages();
+
+  const findLanguage = useCallback(
+    (languageId: number) => {
+      const result = languages.find((language) => language.id === languageId);
+      return result!;
+    },
+    [languages]
+  );
 
   const deleteInvitation = useApiMutation({
     url: '/v2/invitations/{invitationId}',
@@ -112,13 +122,19 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
         {permission === 'TRANSLATE' && (
           <Tooltip
             title={t('permission_languages_hint', {
-              subject: invitation.languages?.length
-                ? invitation.languages.map((l) => l.name).join(', ')
+              subject: invitation.permittedLanguageIds?.length
+                ? invitation.permittedLanguageIds
+                    .map((l) => findLanguage(l).name)
+                    .join(', ')
                 : t('languages_permitted_list_all'),
             })}
           >
             <span>
-              <LanguagesPermittedList languages={invitation.languages} />
+              <LanguagesPermittedList
+                languages={invitation.permittedLanguageIds?.map(
+                  (permittedLanguageId) => findLanguage(permittedLanguageId)
+                )}
+              />
             </span>
           </Tooltip>
         )}

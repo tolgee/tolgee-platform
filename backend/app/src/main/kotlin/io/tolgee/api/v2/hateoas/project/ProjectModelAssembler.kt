@@ -2,6 +2,7 @@ package io.tolgee.api.v2.hateoas.project
 
 import io.tolgee.api.v2.controllers.OrganizationController
 import io.tolgee.api.v2.controllers.V2ProjectsController
+import io.tolgee.api.v2.hateoas.UserPermissionModel
 import io.tolgee.api.v2.hateoas.organization.LanguageModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
 import io.tolgee.model.views.ProjectWithLanguagesView
@@ -40,10 +41,12 @@ class ProjectModelAssembler(
       baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(baseLanguage) },
       userOwner = view.userOwner?.let { userAccountModelAssembler.toModel(it) },
       directPermissions = view.directPermissions,
-      computedPermissions = permissionService.computeProjectPermissionType(
-        view.organizationRole, view.organizationBasePermissions, view.directPermissions, null
-      ).type,
-      permittedLanguageIds = view.permittedLanguageIds
+      computedPermissions = UserPermissionModel(
+        type = permissionService.computeProjectPermissionType(
+          view.organizationRole, view.organizationBasePermissions, view.directPermissions, null
+        ).type!!,
+        permittedLanguageIds = view.permittedLanguageIds
+      )
     ).add(link).also { model ->
       view.organizationOwnerSlug?.let {
         model.add(linkTo<OrganizationController> { get(it) }.withRel("organizationOwner"))

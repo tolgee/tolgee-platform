@@ -20,5 +20,5 @@ open class ApiKeyWithLanguagesModel(
 If null, all languages are permitted.
   """
   )
-  val permittedLanguages: List<String>?
+  val permittedLanguageIds: List<Long>?
 ) : ApiKeyModel(id, key, username, userFullName, projectId, projectName, scopes)

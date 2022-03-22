@@ -220,11 +220,11 @@ class V2ApiKeyControllerTest : AuthorizedControllerTest() {
     performAuthGet("/v2/api-keys/current?ak=${testData.bothLangsExplicitUserApiKey.key}")
       .andPrettyPrint.andAssertThatJson {
         node("id").isValidId
-        node("permittedLanguages")
+        node("permittedLanguageIds")
           .isArray
           .hasSize(2)
-          .contains("en")
-          .contains("de")
+          .contains(testData.germanLanguage.id)
+          .contains(testData.englishLanguage.id)
       }
   }
 }
