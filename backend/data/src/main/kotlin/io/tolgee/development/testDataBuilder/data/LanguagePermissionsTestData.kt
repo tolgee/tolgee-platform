@@ -77,7 +77,7 @@ class LanguagePermissionsTestData {
         }
         addTranslation {
           language = germanLanguage
-          text = "english_translation"
+          text = "german_translation"
           germanTranslation = this
         }
       }
