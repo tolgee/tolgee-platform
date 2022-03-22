@@ -64,7 +64,7 @@ export const ProjectListItemMenu: FC<{
         onClose={() => setAnchorEl(null)}
         onClick={stopBubble()}
       >
-        {props.computedPermissions === ProjectPermissionType.MANAGE && (
+        {props.computedPermissions.type === ProjectPermissionType.MANAGE && (
           <MenuItem
             component={Link}
             to={LINKS.PROJECT_EDIT.build({

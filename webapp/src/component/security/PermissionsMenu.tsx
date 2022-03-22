@@ -15,8 +15,8 @@ import { components } from 'tg.service/apiSchema.generated';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { projectPermissionTypes } from 'tg.constants/projectPermissionTypes';
 
-type computedPermissions = NonNullable<
-  components['schemas']['ProjectModel']['computedPermissions']
+type PermissionType = NonNullable<
+  components['schemas']['ProjectModel']['computedPermissions']['type']
 >;
 
 const useStyles = makeStyles((theme) => ({
@@ -29,10 +29,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const PermissionsMenu: FunctionComponent<{
-  selected: computedPermissions;
-  onSelect: (value: computedPermissions) => void;
+  selected: PermissionType;
+  onSelect: (value: PermissionType) => void;
   buttonProps?: ComponentProps<typeof Button>;
-  minPermissions?: computedPermissions;
+  minPermissions?: PermissionType;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const classes = useStyles();

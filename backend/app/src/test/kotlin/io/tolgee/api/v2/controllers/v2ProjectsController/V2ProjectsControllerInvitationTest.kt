@@ -64,7 +64,7 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
     performAuthGet("/v2/projects/${project.id}/invitations").andIsOk.andAssertThatJson {
       node("_embedded.invitations[0]") {
         node("type").isEqualTo("TRANSLATE")
-        node("languages").isArray.hasSize(2)
+        node("permittedLanguageIds").isArray.hasSize(2)
         node("invitedUserName").isEqualTo("Franta")
         node("invitedUserEmail").isEqualTo("a@a.a")
       }

@@ -1,6 +1,6 @@
 import { Divider } from '@material-ui/core';
 import List from '@material-ui/core/List';
-import { VpnKey, PersonOutline } from '@material-ui/icons';
+import { Devices, PersonOutline, VpnKey } from '@material-ui/icons';
 import { useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { container } from 'tsyringe';
@@ -22,7 +22,6 @@ import { AppState } from 'tg.store/index';
 import { SideMenu } from './SideMenu';
 import { SideMenuItem } from './SideMenuItem';
 import LanguageIcon from '@material-ui/icons/Language';
-import { Devices } from '@material-ui/icons';
 
 const actions = container.resolve(GlobalActions);
 
@@ -60,7 +59,8 @@ export const ProjectMenu = ({ id }) => {
         </List>
         <Divider />
         <List>
-          {projectDTO.computedPermissions === ProjectPermissionType.MANAGE && (
+          {projectDTO.computedPermissions.type ===
+            ProjectPermissionType.MANAGE && (
             <>
               <SideMenuItem
                 linkTo={LINKS.PROJECT_EDIT.build({

@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.hateoas.user_account
 
 import io.swagger.v3.oas.annotations.media.Schema
+import io.tolgee.api.v2.hateoas.UserPermissionModel
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.UserAccountInProjectView
@@ -19,6 +20,5 @@ data class UserAccountInProjectModel(
     description = "Actual user's permissions on selected project. You can not sort data by this column!",
     example = "EDIT"
   )
-  val computedPermissions: Permission.ProjectPermissionType,
-  val permittedLanguageIds: List<Long>?
+  val computedPermissions: UserPermissionModel,
 ) : RepresentationModel<UserAccountInProjectModel>(), UserAccountInProjectView

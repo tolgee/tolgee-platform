@@ -54,7 +54,10 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
 
     performAuthGet("/v2/projects").andPrettyPrint.andAssertThatJson.node("_embedded.projects").let {
       it.isArray.hasSize(1)
-      it.node("[0].permittedLanguageIds").isArray.hasSize(1).containsAll(listOf(baseTestData.englishLanguage.id))
+      it.node("[0].computedPermissions.permittedLanguageIds")
+        .isArray
+        .hasSize(1)
+        .containsAll(listOf(baseTestData.englishLanguage.id))
     }
   }
 
@@ -103,7 +106,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performAuthGet("/v2/projects/with-stats?sort=id")
       .andIsOk.andAssertThatJson.node("_embedded.projects").let {
         it.isArray.hasSize(1)
-        it.node("[0].permittedLanguageIds").isArray.hasSize(2).containsAll(
+        it.node("[0].computedPermissions.permittedLanguageIds").isArray.hasSize(2).containsAll(
           mutableListOf(
             testData.project2English.id,
             testData.project2Deutsch.id
@@ -124,7 +127,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performAuthGet("/v2/projects/${base.id}").andPrettyPrint.andAssertThatJson.let {
       it.node("userOwner.name").isEqualTo("admin")
       it.node("directPermissions").isEqualTo("MANAGE")
-      it.node("permittedLanguageIds").isArray.hasSize(1).contains(base.languages.first().id)
+      it.node("computedPermissions.permittedLanguageIds").isArray.hasSize(1).contains(base.languages.first().id)
     }
   }
 
@@ -162,7 +165,7 @@ class V2ProjectsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         it.node("[0].organizationRole").isEqualTo("MEMBER")
         it.node("[1].organizationRole").isEqualTo("OWNER")
         it.node("[2].directPermissions").isEqualTo("TRANSLATE")
-        it.node("[2].permittedLanguageIds")
+        it.node("[2].computedPermissions.permittedLanguageIds")
           .isArray
           .hasSize(2)
           .containsAll(directPermissionProject.languages.map { it.id })

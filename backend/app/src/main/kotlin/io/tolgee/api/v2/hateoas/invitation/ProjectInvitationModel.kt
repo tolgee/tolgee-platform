@@ -10,7 +10,7 @@ open class ProjectInvitationModel(
   val id: Long,
   val code: String,
   val type: Permission.ProjectPermissionType,
-  val languages: List<Long>?,
+  val permittedLanguageIds: List<Long>?,
   val createdAt: Date,
   val invitedUserName: String?,
   val invitedUserEmail: String?

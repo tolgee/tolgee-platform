@@ -1,5 +1,6 @@
 package io.tolgee.api.v2.hateoas.user_account
 
+import io.tolgee.api.v2.hateoas.UserPermissionModel
 import io.tolgee.model.views.UserAccountInProjectWithLanguagesView
 import io.tolgee.security.controllers.UserController
 import io.tolgee.service.PermissionService
@@ -20,10 +21,12 @@ class UserAccountInProjectModelAssembler(
       view.organizationRole,
       view.organizationBasePermissions,
       view.directPermissions,
-      permissionService.computeProjectPermissionType(
-        view.organizationRole, view.organizationBasePermissions, view.directPermissions, null
-      ).type!!,
-      view.permittedLanguageIds
+      UserPermissionModel(
+        type = permissionService.computeProjectPermissionType(
+          view.organizationRole, view.organizationBasePermissions, view.directPermissions, null
+        ).type!!,
+        permittedLanguageIds = view.permittedLanguageIds
+      ),
     )
   }
 }

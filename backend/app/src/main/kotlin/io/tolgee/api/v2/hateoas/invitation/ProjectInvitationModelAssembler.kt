@@ -17,7 +17,7 @@ class ProjectInvitationModelAssembler() :
       id = entity.id!!,
       code = entity.code!!,
       type = entity.permission!!.type,
-      languages = entity.permission!!.languages.map { it.id },
+      permittedLanguageIds = entity.permission!!.languages.map { it.id },
       createdAt = entity.createdAt!!,
       invitedUserName = entity.name,
       invitedUserEmail = entity.email

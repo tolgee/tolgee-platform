@@ -1,18 +1,18 @@
-import { Formik, Field } from 'formik';
+import { Field, Formik } from 'formik';
 import {
-  makeStyles,
+  Box,
+  Button,
+  ButtonGroup,
   Dialog,
   DialogActions,
-  DialogTitle,
-  Button,
   DialogContent,
+  DialogTitle,
+  makeStyles,
   TextField,
-  ButtonGroup,
-  Box,
   Typography,
 } from '@material-ui/core';
 import { container } from 'tsyringe';
-import { useTranslate, T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import copy from 'copy-to-clipboard';
 
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -29,8 +29,8 @@ import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 const messaging = container.resolve(MessageService);
 
-type computedPermissions = NonNullable<
-  components['schemas']['ProjectModel']['computedPermissions']
+type PermissionType = NonNullable<
+  components['schemas']['ProjectModel']['computedPermissions']['type']
 >;
 
 const useStyles = makeStyles((theme) => ({
@@ -68,7 +68,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
     <Dialog {...{ open, onClose }} fullWidth>
       <Formik
         initialValues={{
-          permission: 'MANAGE' as computedPermissions,
+          permission: 'MANAGE' as PermissionType,
           permissionLanguages: [],
           type: 'email' as 'email' | 'link',
           text: '',
