@@ -35,12 +35,6 @@ export const useOrganizationMenuItems = (): OrganizationMenuItem[] => {
       }),
       nameTranslationKey: 'organization_menu_member_privileges',
     },
-    {
-      link: LINKS.ORGANIZATION_INVITATIONS.build({
-        [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
-      }),
-      nameTranslationKey: 'organization_menu_invitations',
-    },
   ].map(
     (i) =>
       new OrganizationMenuItem(
