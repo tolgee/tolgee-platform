@@ -1,3 +1,10 @@
+## [2.12.5](https://github.com/tolgee/tolgee-platform/compare/v2.12.4...v2.12.5) (2022-03-22)
+
+
+### Bug Fixes
+
+* Danger zone alignment on small screens ([b997391](https://github.com/tolgee/tolgee-platform/commit/b99739150efef0773b80f83f2e69b9452bb6dc3b))
+
 ## [2.12.4](https://github.com/tolgee/server/compare/v2.12.3...v2.12.4) (2022-03-21)
 
 
