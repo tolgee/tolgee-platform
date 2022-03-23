@@ -18,7 +18,6 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 const messaging = container.resolve(MessageService);
 
 export const exportableStates = Object.keys(translationStates);
-exportableStates.splice(exportableStates.indexOf('MACHINE_TRANSLATED'), 1);
 
 const sortStates = (arr: StateType[]) =>
   [...arr].sort(

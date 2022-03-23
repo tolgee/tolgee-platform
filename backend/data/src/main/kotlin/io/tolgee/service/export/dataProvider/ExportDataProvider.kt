@@ -114,7 +114,7 @@ class ExportDataProvider(
     if (exportParams.filterState != null) {
       var condition = translationJoin.get(Translation_.state).`in`(exportParams.filterState)
 
-      if (exportParams.filterState?.contains(TranslationState.UNTRANSLATED) == true) {
+      if (exportParams.shouldContainUntranslated) {
         condition = cb.or(condition, cb.isNull(translationJoin))
       }
 
@@ -152,7 +152,7 @@ class ExportDataProvider(
   }
 
   private fun transformResult(resultList: MutableList<ExportDataView>): HashMap<Long, ExportKeyView> {
-    val keyMap = HashMap<Long, ExportKeyView>()
+    val keyMap = LinkedHashMap<Long, ExportKeyView>()
     resultList.forEach { dataView ->
       val keyView = keyMap.computeIfAbsent(dataView.keyId) {
         ExportKeyView(dataView.keyId, dataView.keyName)
