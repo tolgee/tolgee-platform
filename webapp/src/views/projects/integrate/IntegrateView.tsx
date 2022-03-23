@@ -30,7 +30,7 @@ export const IntegrateView: FunctionComponent = () => {
 
   return (
     <BaseView
-      windowTitle={t('project_integrate_title', undefined, true)}
+      windowTitle={t('project_integrate_title')}
       navigation={[
         [
           project.name,

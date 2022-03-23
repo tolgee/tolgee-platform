@@ -170,12 +170,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
         )}
       </div>
       {data.state === 'NEEDS_RESOLUTION' && onChangeState && (
-        <Tooltip
-          title={t({
-            key: 'translations_comments_resolve',
-            defaultValue: 'Resolve',
-          })}
-        >
+        <Tooltip title={t('translations_comments_resolve', 'Resolve')}>
           <div className={clsx(classes.resolveButton, classes.hoverVisible)}>
             <SmallActionButton
               onClick={handleResolve}
@@ -199,10 +194,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
               onClick={handleUnresolved}
               data-cy="comment-menu-needs-resolution"
             >
-              {t({
-                key: 'translations_comments_needs_resolution',
-                defaultValue: 'Not resolved',
-              })}
+              {t('translations_comments_needs_resolution', 'Not resolved')}
             </MenuItem>
           )}
           {onDelete && (

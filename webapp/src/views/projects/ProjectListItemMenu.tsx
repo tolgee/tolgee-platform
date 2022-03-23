@@ -34,7 +34,7 @@ export const ProjectListItemMenu: FC<{
 
   return (
     <>
-      <Tooltip title={t('project_list_more_button', undefined, true)}>
+      <Tooltip title={t('project_list_more_button')}>
         <IconButton
           onClick={(e) => {
             e.stopPropagation();

@@ -198,9 +198,7 @@ const DashboardProjectListItem = (
       </div>
       <div className={classes.controls}>
         <Box width="100%" display="flex" justifyContent="flex-end">
-          <Tooltip
-            title={t('project_list_translations_button', undefined, true)}
-          >
+          <Tooltip title={t('project_list_translations_button')}>
             <IconButton
               onClick={stopBubble()}
               aria-label={t('project_list_translations_button')}

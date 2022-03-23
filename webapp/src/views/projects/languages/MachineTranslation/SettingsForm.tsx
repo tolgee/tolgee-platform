@@ -44,12 +44,7 @@ export const SettingsForm = ({ providers, expanded, languages }: Props) => {
       <div className={clsx(tableClasses.topRow, tableClasses.centered)}>
         <Tooltip title={t('project_languages_primary_provider_hint')}>
           <div className={classes.primaryProvider}>
-            <div>
-              {t({
-                key: 'project_languages_primary_provider',
-                defaultValue: 'Primary',
-              })}
-            </div>
+            <div>{t('project_languages_primary_provider', 'Primary')}</div>
             <Help className={classes.helpIcon} />
           </div>
         </Tooltip>

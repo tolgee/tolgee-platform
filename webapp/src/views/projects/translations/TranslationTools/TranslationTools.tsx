@@ -64,10 +64,10 @@ const TranslationTools = React.memo(function TranslationTools({
     <div className={classes.container}>
       <div className={classes.grid} style={{ width, gridTemplateColumns }}>
         <ToolsTab
-          title={t({
-            key: 'translation_tools_translation_memory',
-            defaultValue: 'Translation memory',
-          })}
+          title={t(
+            'translation_tools_translation_memory',
+            'Translation memory'
+          )}
           icon={<TranslationMemoryIcon fontSize="small" color="inherit" />}
           badgeNumber={
             data.memory?.data?._embedded?.translationMemoryItems?.length
@@ -82,10 +82,10 @@ const TranslationTools = React.memo(function TranslationTools({
 
         {mtEnabled && (
           <ToolsTab
-            title={t({
-              key: 'translation_tools_machine_translation',
-              defaultValue: 'Machine translation',
-            })}
+            title={t(
+              'translation_tools_machine_translation',
+              'Machine translation'
+            )}
             icon={<MachineTranslationIcon fontSize="small" color="inherit" />}
             badgeNumber={
               Object.keys(data.machine?.data?.machineTranslations || {}).length

@@ -40,7 +40,7 @@ export const useAvailableFilters = (
       type: 'tags',
       options: [
         {
-          label: t('translations_filters_heading_tags', undefined, true),
+          label: t('translations_filters_heading_tags'),
           value: null,
           submenu:
             tags.data?._embedded?.tags?.map((val) => {

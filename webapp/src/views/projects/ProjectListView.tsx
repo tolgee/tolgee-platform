@@ -46,7 +46,7 @@ export const ProjectListView = () => {
     <DashboardPage>
       <BaseView
         title={<T>projects_title</T>}
-        windowTitle={t('projects_title', undefined, true)}
+        windowTitle={t('projects_title')}
         onSearch={setSearch}
         containerMaxWidth="lg"
         addLinkTo={LINKS.PROJECT_ADD.build()}

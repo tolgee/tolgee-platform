@@ -131,7 +131,7 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
           <div className={classes.stretcher}>{counterContent}</div>
         </div>
         <div className={classes.divider} />
-        <Tooltip title={t('translations_toolbar_to_top', undefined, true)}>
+        <Tooltip title={t('translations_toolbar_to_top')}>
           <IconButton
             data-cy="translations-toolbar-to-top"
             onClick={handleScrollUp}

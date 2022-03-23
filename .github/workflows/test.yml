@@ -4,6 +4,7 @@ on:
   push:
     branches: [ main, release ]
   pull_request:
+
 jobs:
   backend-build:
     name: Build backend 🏗️
@@ -351,16 +352,3 @@ jobs:
 
       - name: Run ktlint
         run: ./gradlew ktlint
-
-  cleanup:
-    if: always()
-    needs: [ e2e, backend-test ]
-    name: Delete artifacts 🧹
-    runs-on: ubuntu-latest
-    steps:
-      - uses: geekyeggo/delete-artifact@v1
-        with:
-          name: |
-            e2e_deps
-            webapp
-            backend

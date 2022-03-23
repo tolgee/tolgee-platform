@@ -43,15 +43,9 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
   const getProviderName = (provider) => {
     switch (provider) {
       case 'default':
-        return t({
-          key: 'project_languages_default_provider_short',
-          defaultValue: 'Default',
-        });
+        return t('project_languages_default_provider_short', 'Default');
       case 'none':
-        return t({
-          key: 'project_languages_primary_none',
-          defaultValue: 'None',
-        });
+        return t('project_languages_primary_none', 'None');
       case 'GOOGLE':
         return 'Google';
       default:
@@ -67,10 +61,7 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
         {lang ? (
           <LanguageItem language={lang} />
         ) : (
-          t({
-            key: 'project_languages_default_providers',
-            defaultValue: 'Default providers',
-          })
+          t('project_languages_default_providers', 'Default providers')
         )}
       </div>
       {providers.map((provider) => (
