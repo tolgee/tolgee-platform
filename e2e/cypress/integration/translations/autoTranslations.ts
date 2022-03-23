@@ -78,7 +78,7 @@ describe('Translation memory', () => {
       .invoke('show')
       .click();
     // auto translated indicator is clearable
-    waitForGlobalLoading();
+    waitForGlobalLoading(300);
     getAutoTranslatedIndicator('Studený přeložený text 1').should('not.exist');
   });
 
