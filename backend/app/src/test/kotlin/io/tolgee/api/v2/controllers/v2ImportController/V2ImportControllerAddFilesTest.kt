@@ -53,6 +53,9 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
   @Value("classpath:import/tooLongTranslation.json")
   lateinit var tooLongTranslation: Resource
 
+  @Value("classpath:import/tooLongErrorParamValue.json")
+  lateinit var tooLongErrorParamValue: Resource
+
   @AfterEach
   fun resetProps() {
     tolgeeProperties.maxTranslationTextLength = 10000
@@ -159,6 +162,26 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
       assertThat(it.files[0].issues).hasSize(1)
       assertThat(it.files[0].issues[0].type).isEqualTo(FileIssueType.TRANSLATION_TOO_LONG)
       assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("too_long")
+    }
+  }
+
+  @Test
+  fun `stores issue with too long value`() {
+    val project = dbPopulator.createBase(generateUniqueString())
+    commitTransaction()
+
+    performStreamingImport(
+      projectId = project.id,
+      mapOf(Pair("tooLongErrorParamValue.json", tooLongErrorParamValue))
+    ).andIsOk
+
+    importService.find(project.id, project.userOwner?.id!!)!!.let {
+      assertThat(it.files[0].issues[0].params?.get(0)?.value).isEqualTo("not_string")
+      assertThat(it.files[0].issues[0].params?.get(2)?.value).isEqualTo(
+        "[Lorem ipsum dolor sit amet," +
+          " consectetur adipiscing elit. Suspendisse" +
+          " ac ultricies tortor. Integer ac..."
+      )
     }
   }
 
