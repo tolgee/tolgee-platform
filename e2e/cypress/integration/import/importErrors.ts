@@ -66,7 +66,7 @@ describe('Import errors', () => {
         .should('be.visible');
     });
 
-    it('error shows more and less', () => {
+    it('error shows more and less', { retries: { runMode: 3 } }, () => {
       expectGlobalLoading();
       gcy('import-file-error')
         .findDcy('import-file-error-more-less-button')
@@ -82,7 +82,7 @@ describe('Import errors', () => {
         .should('not.exist');
     });
 
-    it('collapses error', () => {
+    it('collapses error', { retries: { runMode: 3 } }, () => {
       gcy('import-file-error')
         .findDcy('import-file-error-collapse-button')
         .click()
