@@ -1,55 +1,66 @@
 package io.tolgee.service.export.exporters
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.export.ExportFormat
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.helpers.TextHelper
 import io.tolgee.service.export.dataProvider.ExportTranslationView
-import org.json.JSONObject
 import java.io.InputStream
 
 class JsonFileExporter(
   override val translations: List<ExportTranslationView>,
   override val exportParams: ExportParams
 ) : FileExporter {
+
   override val fileExtension: String = ExportFormat.JSON.extension
 
-  val result = mutableMapOf<String, JSONObject>()
+  val result: LinkedHashMap<String, LinkedHashMap<String, Any?>> = LinkedHashMap()
 
   override fun produceFiles(): Map<String, InputStream> {
     prepare()
-    return result.asSequence().map { (fileName, json) -> fileName to json.toString(2).byteInputStream() }.toMap()
+    return result.asSequence().map { (fileName, json) ->
+      fileName to jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsBytes(json).inputStream()
+    }.toMap()
   }
 
   private fun prepare() {
     translations.forEach { translation ->
       val path = TextHelper.splitOnNonEscapedDelimiter(translation.key.name, exportParams.splitByScopeDelimiter)
-      val fileJsonObject = getFileJsonObject(path, translation)
+      val fileContentResultMap = getFileContentResultMap(path, translation)
       val pathItems = path.asSequence().drop(getRealScopeDepth(path)).toList()
-      addToJsonObject(fileJsonObject, pathItems.toMutableList(), translation)
+      addToMap(fileContentResultMap, pathItems.toMutableList(), translation)
     }
   }
 
-  private fun getFileJsonObject(path: List<String>, translation: ExportTranslationView): JSONObject {
+  private fun getFileContentResultMap(
+    path: List<String>,
+    translation: ExportTranslationView
+  ): LinkedHashMap<String, Any?> {
     val absolutePath = translation.getFileAbsolutePath(path)
     return result[absolutePath] ?: let {
-      JSONObject().also { result[absolutePath] = it }
+      LinkedHashMap<String, Any?>().also { result[absolutePath] = it }
     }
   }
 
-  private fun addToJsonObject(content: JSONObject, pathItems: List<String>, translation: ExportTranslationView) {
+  private fun addToMap(
+    content: LinkedHashMap<String, Any?>,
+    pathItems: List<String>,
+    translation: ExportTranslationView
+  ) {
     val pathItemsMutable = pathItems.toMutableList()
     val pathItem = pathItemsMutable.removeFirst()
     if (pathItemsMutable.size > 0) {
-      val jsonObject = content.opt(pathItem) ?: JSONObject().also {
-        content.put(pathItem, it)
+      val map = content[pathItem] ?: LinkedHashMap<String, Any?>().also {
+        content[pathItem] = it
       }
 
-      if (jsonObject !is JSONObject) {
+      if (map !is Map<*, *>) {
         handleExistingStringScopeCollision(pathItems, content, translation)
         return
       }
 
-      addToJsonObject(jsonObject, pathItemsMutable, translation)
+      @Suppress("UNCHECKED_CAST")
+      addToMap(map as LinkedHashMap<String, Any?>, pathItemsMutable, translation)
       return
     }
 
@@ -58,38 +69,24 @@ class JsonFileExporter(
 
   private fun handleExistingStringScopeCollision(
     pathItems: List<String>,
-    content: JSONObject,
+    content: LinkedHashMap<String, Any?>,
     translation: ExportTranslationView
   ) {
     val last2joined = pathItems.takeLast(2).joinToString(exportParams.splitByScopeDelimiter + "")
     val joinedPathItems = pathItems.dropLast(2) + last2joined
-    addToJsonObject(content, joinedPathItems, translation)
+    addToMap(content, joinedPathItems, translation)
   }
 
-  private fun JSONObject.putTranslationText(
+  private fun LinkedHashMap<String, Any?>.putTranslationText(
     key: String,
     translation: ExportTranslationView,
   ) {
-    val value = getValueOrJsonNull(translation)
+    val value = translation.text
 
-    if (this.opt(key) != null) {
+    if (this.containsKey(key)) {
       throw StringScopeCollisionException()
     }
 
-    this.put(key, value)
+    this[key] = value
   }
-
-  /**
-   * For some reason putting null into JSONObject deletes the value with specified key, so
-   * when we would like to add null, we have to use JSONObject.NULL
-   *
-   * In cases when we would like to add untranslated values we need to do so.
-   */
-  private fun getValueOrJsonNull(translation: ExportTranslationView) =
-    translation.text ?: let {
-      if (exportParams.shouldContainUntranslated) {
-        return@let JSONObject.NULL
-      }
-      return@let null
-    }
 }

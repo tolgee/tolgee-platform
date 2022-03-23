@@ -21,7 +21,7 @@ import java.util.zip.ZipInputStream
 import kotlin.system.measureTimeMillis
 
 @ContextRecreatingTest
-class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+open class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
 
   @AfterEach
@@ -36,7 +36,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `it exports to json without scoping`() {
+  open fun `it exports to json without scoping`() {
     initBaseData()
     val parsed = performExport()
 
@@ -48,7 +48,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `it exports to single json`() {
+  open fun `it exports to single json`() {
     initBaseData()
     val response = performProjectAuthGet("export?languages=en&zip=false")
       .andDo { obj: MvcResult -> obj.asyncResult }
@@ -64,7 +64,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `it exports to single xliff`() {
+  open fun `it exports to single xliff`() {
     initBaseData()
     val response = performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
       .andDo { obj: MvcResult -> obj.asyncResult }
@@ -78,7 +78,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `it exports to json with scoping`() {
+  open fun `it exports to json with scoping`() {
     testData = TranslationsTestData()
     testData.generateScopedData()
     testDataService.saveTestData(testData.root)
@@ -95,7 +95,7 @@ class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  fun `it filters by keyId in`() {
+  open fun `it filters by keyId in`() {
     testData = TranslationsTestData()
     testData.generateLotOfData(1000)
     testDataService.saveTestData(testData.root)
