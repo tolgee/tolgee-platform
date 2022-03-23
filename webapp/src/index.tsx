@@ -246,8 +246,6 @@ ReactDOM.render(
         fr: () => import('./i18n/fr.json'),
       }}
       loadingFallback={<FullPageLoading />}
-      availableLanguages={['en', 'cs', 'es', 'fr']}
-      wrapperMode="invisible"
     >
       <ThemeProvider theme={theme}>
         <CssBaseline />

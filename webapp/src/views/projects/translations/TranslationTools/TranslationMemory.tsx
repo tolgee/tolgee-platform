@@ -116,10 +116,7 @@ export const TranslationMemory: React.FC<Props> = ({ data, operationsRef }) => {
       ) : (
         <TabMessage
           type="placeholder"
-          message={t({
-            key: 'translation_tools_nothing_found',
-            defaultValue: 'Nothing found',
-          })}
+          message={t('translation_tools_nothing_found', 'Nothing found')}
         />
       )}
     </div>
