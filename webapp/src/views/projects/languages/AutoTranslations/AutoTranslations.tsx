@@ -83,10 +83,10 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
               <FormControlLabel
                 name="usingTranslationMemory"
                 data-cy="languages-auto-translation-memory"
-                label={t({
-                  key: 'project_languages_new_keys_translation_memory_switch',
-                  defaultValue: 'Enable translation memory',
-                })}
+                label={t(
+                  'project_languages_new_keys_translation_memory_switch',
+                  'Enable translation memory'
+                )}
                 checked={form.values.usingTranslationMemory}
                 onChange={form.handleChange}
                 control={<Checkbox />}
@@ -94,11 +94,10 @@ export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
               <FormControlLabel
                 name="usingMachineTranslation"
                 data-cy="languages-auto-machine-translation"
-                label={t({
-                  key: 'project_languages_new_keys_machine_translations_switch',
-                  defaultValue:
-                    'Enable machine translation with primary provider',
-                })}
+                label={t(
+                  'project_languages_new_keys_machine_translations_switch',
+                  'Enable machine translation with primary provider'
+                )}
                 checked={form.values.usingMachineTranslation}
                 onChange={form.handleChange}
                 control={<Checkbox />}

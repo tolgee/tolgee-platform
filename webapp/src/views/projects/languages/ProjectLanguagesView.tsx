@@ -28,7 +28,7 @@ export const ProjectLanguagesView = () => {
           }),
         ],
       ]}
-      windowTitle={t('languages_title', undefined, true)}
+      windowTitle={t('languages_title')}
     >
       <ProjectSettingsLanguages />
     </BaseView>

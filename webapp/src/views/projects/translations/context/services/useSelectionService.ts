@@ -36,9 +36,8 @@ export const useSelectionService = ({ translations }: Props) => {
     return new Promise<void>((resolve, reject) =>
       confirmation({
         title: t('translations_delete_selected'),
-        message: t({
-          key: 'translations_key_delete_confirmation_text',
-          parameters: { count: String(selection.length) },
+        message: t('translations_key_delete_confirmation_text', {
+          count: String(selection.length),
         }),
         onConfirm() {
           deleteKeys.mutate(
