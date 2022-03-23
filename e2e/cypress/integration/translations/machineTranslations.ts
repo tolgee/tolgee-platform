@@ -43,6 +43,7 @@ describe('Translation memory', () => {
       .contains('Cool translated text 1 translated with GOOGLE from en to cs')
       .should('be.visible')
       .click();
+    waitForGlobalLoading(300);
     cy.gcy('global-editor')
       .contains('Cool translated text 1 translated with GOOGLE from en to cs')
       .should('be.visible');
