@@ -36,7 +36,7 @@ class ImportFile(
   fun addIssue(type: FileIssueType, params: Map<FileIssueParamType, String>) {
     this.issues.add(
       ImportFileIssue(file = this, type = type).apply {
-        this.params = params.map { ImportFileIssueParam(this, it.key, it.value) }.toMutableList()
+        this.params = params.map { ImportFileIssueParam(this, it.key, it.value.shortenWithEllipsis()) }.toMutableList()
       }
     )
   }
@@ -78,5 +78,12 @@ class ImportFile(
         FileIssueParamType.KEY_NAME to keyName,
       )
     )
+  }
+
+  private fun String.shortenWithEllipsis(): String {
+    if (this.length > 255) {
+      return this.substring(0..100) + "..."
+    }
+    return this
   }
 }
