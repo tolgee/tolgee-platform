@@ -9,13 +9,16 @@ import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
+import io.tolgee.util.TranslationStatsUtil
 import org.hibernate.annotations.ColumnDefault
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.EntityListeners
 import javax.persistence.Enumerated
-import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.PrePersist
+import javax.persistence.PreUpdate
 import javax.persistence.Table
 import javax.persistence.UniqueConstraint
 import javax.validation.constraints.NotNull
@@ -31,6 +34,7 @@ import javax.validation.constraints.NotNull
 )
 
 @ActivityLoggedEntity
+@EntityListeners(Translation.Companion.UpdateStatsListener::class)
 @ActivityEntityDescribingPaths(paths = ["key", "language"])
 class Translation(
   @Column(columnDefinition = "text")
@@ -38,11 +42,11 @@ class Translation(
   @ActivityDescribingProp
   var text: String? = null
 ) : StandardAuditModel() {
-  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @ManyToOne(optional = false)
   @field:NotNull
   lateinit var key: Key
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne
   lateinit var language: Language
 
   @Enumerated
@@ -74,5 +78,16 @@ class Translation(
   constructor(text: String? = null, key: Key, language: Language) : this(text) {
     this.key = key
     this.language = language
+  }
+
+  companion object {
+    class UpdateStatsListener {
+      @PrePersist
+      @PreUpdate
+      fun preRemove(translation: Translation) {
+        translation.characterCount = TranslationStatsUtil.getCharacterCount(translation.text)
+        translation.wordCount = TranslationStatsUtil.getWordCount(translation.text, translation.language.tag)
+      }
+    }
   }
 }
