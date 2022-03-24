@@ -1,3 +1,16 @@
+# [2.13.0](https://github.com/tolgee/tolgee-platform/compare/v2.12.5...v2.13.0) (2022-03-24)
+
+
+### Bug Fixes
+
+* Export fixes ([2c71070](https://github.com/tolgee/tolgee-platform/commit/2c71070dfb63db9cde4a29d7cf755ca607e80ab3))
+* Import issue value too long ([5f1c65f](https://github.com/tolgee/tolgee-platform/commit/5f1c65fc58eac3dbc1a9620ec036b37cc75f0b7d))
+
+
+### Features
+
+* Upgrade tolgee integrations ([d1640fb](https://github.com/tolgee/tolgee-platform/commit/d1640fb6c2ba3f87455d41138375e83f120b57e5))
+
 ## [2.12.5](https://github.com/tolgee/tolgee-platform/compare/v2.12.4...v2.12.5) (2022-03-22)
 
 
