@@ -12,6 +12,7 @@ import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.translation.Translation
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
@@ -41,7 +42,7 @@ class Key(
   @OneToMany(mappedBy = "key")
   var translations: MutableSet<Translation> = HashSet()
 
-  @OneToOne(mappedBy = "key")
+  @OneToOne(mappedBy = "key", fetch = FetchType.LAZY)
   override var keyMeta: KeyMeta? = null
 
   @OneToMany(mappedBy = "key")
