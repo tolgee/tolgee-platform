@@ -1,21 +1,27 @@
 package io.tolgee.jobs.migration.translationStats
 
-import io.tolgee.model.translation.Translation
 import io.tolgee.repository.TranslationRepository
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory
+import org.springframework.batch.item.ItemReader
+import org.springframework.batch.item.ItemWriter
 import org.springframework.batch.item.data.RepositoryItemReader
-import org.springframework.batch.item.data.RepositoryItemWriter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.domain.Sort
 import javax.persistence.EntityManager
+import javax.sql.DataSource
 
 @Configuration
 class TranslationStatsJobConfiguration {
+
+  companion object {
+    const val JOB_NAME = "translationStatsJob"
+  }
+
   @Autowired
   lateinit var jobBuilderFactory: JobBuilderFactory
 
@@ -28,7 +34,10 @@ class TranslationStatsJobConfiguration {
   @Autowired
   lateinit var translationRepository: TranslationRepository
 
-  @Bean("translationStatsJob")
+  @Autowired
+  lateinit var dataSource: DataSource
+
+  @Bean(JOB_NAME)
   fun translationStatsJob(): Job {
     return jobBuilderFactory["translationStats"]
       .flow(step)
@@ -36,23 +45,29 @@ class TranslationStatsJobConfiguration {
       .build()
   }
 
-  val reader: RepositoryItemReader<Translation>
-    get() = RepositoryItemReader<Translation>().apply {
+  val reader: ItemReader<StatsMigrationTranslationView>
+    get() = RepositoryItemReader<StatsMigrationTranslationView>().apply {
       setRepository(translationRepository)
-      setMethodName("findAll")
+      setMethodName(translationRepository::findAllForStatsUpdate.name)
       setSort(mapOf("id" to Sort.Direction.ASC))
-      setPageSize(10)
+      setPageSize(100)
     }
 
-  val writer: RepositoryItemWriter<Translation>
-    get() = RepositoryItemWriter<Translation>().apply {
-      setRepository(translationRepository)
-      setMethodName("save")
+  val writer: ItemWriter<TranslationStats> = ItemWriter { items ->
+    items.forEach {
+      val query = entityManager.createNativeQuery(
+        "UPDATE translation set word_count = :wordCount, character_count = :characterCount where id = :id"
+      )
+      query.setParameter("wordCount", it.wordCount)
+      query.setParameter("characterCount", it.characterCount)
+      query.setParameter("id", it.id)
+      query.executeUpdate()
     }
+  }
 
   val step: Step
     get() = stepBuilderFactory["step"]
-      .chunk<Translation, Translation>(100)
+      .chunk<StatsMigrationTranslationView, TranslationStats>(100)
       .reader(reader)
       .processor(TranslationProcessor())
       .writer(writer)
