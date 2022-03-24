@@ -13,6 +13,7 @@ import org.hibernate.annotations.ColumnDefault
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.Table
@@ -37,12 +38,11 @@ class Translation(
   @ActivityDescribingProp
   var text: String? = null
 ) : StandardAuditModel() {
-
-  @ManyToOne(optional = false)
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @field:NotNull
   lateinit var key: Key
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   lateinit var language: Language
 
   @Enumerated

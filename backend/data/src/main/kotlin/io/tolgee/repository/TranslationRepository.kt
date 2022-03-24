@@ -1,5 +1,6 @@
 package io.tolgee.repository
 
+import io.tolgee.jobs.migration.translationStats.StatsMigrationTranslationView
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
@@ -100,4 +101,22 @@ interface TranslationRepository : JpaRepository<Translation, Long> {
     targetLanguage: Language,
     pageable: Pageable = PageRequest.of(0, 1)
   ): List<TranslationMemoryItemView>
+
+  @Query(
+    """
+    select t.id as id, t.text as text, t.language.tag as languageTag
+    from Translation t
+  """
+  )
+  fun findAllForStatsUpdate(pageable: Pageable): Page<StatsMigrationTranslationView>
+
+  @Query(
+    """
+    select t.id
+    from Translation t
+    where t.text <> null and (t.wordCount is null or t.characterCount is null or (length(text) <> 0 and t.characterCount = 0))
+    order by t.id
+  """
+  )
+  fun findAllIdsForStatsUpdate(): List<Long>
 }
