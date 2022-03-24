@@ -20,6 +20,11 @@ spring:
     lazy-initialization: true
   liquibase:
     change-log: classpath:db/changelog/schema.xml
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
 tolgee:
   postgres-autostart:
     enabled: true
