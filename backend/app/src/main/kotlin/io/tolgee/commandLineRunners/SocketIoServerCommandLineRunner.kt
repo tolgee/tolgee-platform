@@ -1,4 +1,4 @@
-package io.tolgee
+package io.tolgee.commandLineRunners
 
 import com.corundumstudio.socketio.SocketIOServer
 import io.tolgee.configuration.tolgee.TolgeeProperties

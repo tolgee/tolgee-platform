@@ -6,7 +6,7 @@ package io.tolgee.initial_user_creation
 
 import io.tolgee.Application
 import io.tolgee.CleanDbBeforeClass
-import io.tolgee.InitialUserCreatorRunner
+import io.tolgee.commandLineRunners.InitialUserCreatorCommandLineRunner
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.service.UserAccountService
 import io.tolgee.testing.AbstractTransactionalTest
@@ -44,11 +44,11 @@ class CreateEnabledTest : AbstractTransactionalTest() {
   private val passwordFile = File("./build/create-enabled-test-data/initial.pwd")
 
   @Autowired
-  lateinit var initialUserCreatorRunner: InitialUserCreatorRunner
+  lateinit var initialUserCreatorCommandLineRunner: InitialUserCreatorCommandLineRunner
 
   @BeforeAll
   fun callTheRunner() {
-    initialUserCreatorRunner.run()
+    initialUserCreatorCommandLineRunner.run()
   }
 
   @Test
