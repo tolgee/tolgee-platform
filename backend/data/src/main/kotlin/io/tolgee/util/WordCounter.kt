@@ -14,7 +14,7 @@ object WordCounter {
     var end: Int = iterator.next()
     while (end != BreakIterator.DONE) {
       val word = text.substring(start, end)
-      if (!word.matches("[\\p{P} \\t\\n\\r]".toRegex())) {
+      if (!word.matches("""[\p{P} \t\n\r~!@#$%^&*()_+{}\[\]:;,.<>/?-]""".toRegex())) {
         words.add(word)
       }
       start = end
