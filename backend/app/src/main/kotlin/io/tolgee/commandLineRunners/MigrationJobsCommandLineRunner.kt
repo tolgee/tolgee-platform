@@ -1,4 +1,4 @@
-package io.tolgee
+package io.tolgee.commandLineRunners
 
 import io.tolgee.jobs.migration.translationStats.TranslationsStatsUpdateJobRunner
 import org.springframework.boot.CommandLineRunner
