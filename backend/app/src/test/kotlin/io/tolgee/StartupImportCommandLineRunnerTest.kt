@@ -4,6 +4,7 @@
 
 package io.tolgee
 
+import io.tolgee.commandLineRunners.StartupImportCommandLineRunner
 import io.tolgee.configuration.tolgee.ImportProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -28,7 +29,7 @@ class StartupImportCommandLineRunnerTest : AbstractSpringTest() {
   override lateinit var tolgeeProperties: TolgeeProperties
 
   @Autowired
-  lateinit var startupImportCommandLineRunner: MigrationJobsCommandLineRunner
+  lateinit var startupImportCommandLineRunner: StartupImportCommandLineRunner
 
   @BeforeAll
   fun setup() {

@@ -1,4 +1,4 @@
-package io.tolgee
+package io.tolgee.commandLineRunners
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.request.auth.SignUpDto
@@ -11,7 +11,7 @@ import org.springframework.context.event.ContextClosedEvent
 import org.springframework.stereotype.Component
 
 @Component
-class InitialUserCreatorRunner(
+class InitialUserCreatorCommandLineRunner(
   private val properties: TolgeeProperties,
   private val userAccountService: UserAccountService,
   private val initialPasswordManager: InitialPasswordManager
