@@ -1,4 +1,4 @@
-package io.tolgee.api.v2.hateoas.organization
+package io.tolgee.api.v2.hateoas.language
 
 import io.tolgee.api.v2.controllers.V2LanguagesController
 import io.tolgee.model.Language

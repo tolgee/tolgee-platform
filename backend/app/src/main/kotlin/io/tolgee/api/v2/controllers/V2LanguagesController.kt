@@ -9,8 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.activity.RequestActivity
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.api.v2.hateoas.organization.LanguageModel
-import io.tolgee.api.v2.hateoas.organization.LanguageModelAssembler
+import io.tolgee.api.v2.hateoas.language.LanguageModel
+import io.tolgee.api.v2.hateoas.language.LanguageModelAssembler
 import io.tolgee.component.LanguageValidator
 import io.tolgee.constants.Message
 import io.tolgee.controllers.IController

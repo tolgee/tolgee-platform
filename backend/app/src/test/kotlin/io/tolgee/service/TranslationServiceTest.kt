@@ -1,6 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.AbstractSpringTest
+import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -35,5 +36,24 @@ class TranslationServiceTest : AbstractSpringTest() {
     val viewData = translationService.getTranslations(HashSet(Arrays.asList("en", "de")), project.id)
     @Suppress("UNCHECKED_CAST")
     assertThat(viewData["en"] as Map<String, *>).containsKey("folder.folder.translation")
+  }
+
+  @Transactional
+  @Test
+  fun `adds stats on translation save and update`() {
+    val testData = TranslationsTestData()
+    testDataService.saveTestData(testData.root)
+    val translation = testData.aKeyGermanTranslation
+    assertThat(translation.wordCount).isEqualTo(2)
+    assertThat(translation.characterCount).isEqualTo(translation.text!!.length)
+
+    translation.text = "My dog is cool!"
+    translationService.save(translation)
+
+    commitTransaction()
+
+    val updated = translationService.get(translation.id)
+    assertThat(updated.wordCount).isEqualTo(4)
+    assertThat(updated.characterCount).isEqualTo(translation.text!!.length)
   }
 }
