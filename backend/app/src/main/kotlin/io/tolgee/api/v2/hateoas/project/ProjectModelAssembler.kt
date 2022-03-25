@@ -2,8 +2,8 @@ package io.tolgee.api.v2.hateoas.project
 
 import io.tolgee.api.v2.controllers.OrganizationController
 import io.tolgee.api.v2.controllers.V2ProjectsController
+import io.tolgee.api.v2.hateoas.language.LanguageModelAssembler
 import io.tolgee.api.v2.hateoas.UserPermissionModel
-import io.tolgee.api.v2.hateoas.organization.LanguageModelAssembler
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.service.AvatarService
