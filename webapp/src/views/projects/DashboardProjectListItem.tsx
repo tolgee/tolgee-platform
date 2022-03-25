@@ -41,21 +41,21 @@ const useStyles = makeStyles((theme) => ({
       },
     },
     [theme.breakpoints.down('sm')]: {
-      gridTemplateColumns: '1fr 1fr 70px',
+      gridTemplateColumns: 'auto 1fr 1fr 70px',
       gridTemplateAreas: `
-        "title keyCount  controls"
-        "title languages controls"
-        "stats stats     stats"
+        "image title keyCount  controls"
+        "image title languages controls"
+        "image stats stats     stats"
       `,
     },
     [theme.breakpoints.down('xs')]: {
-      gridGap: theme.spacing(0.5),
-      gridTemplateColumns: '1fr 70px',
+      gridGap: theme.spacing(1, 2),
+      gridTemplateColumns: 'auto 1fr 70px',
       gridTemplateAreas: `
-        "title     controls"
-        "keyCount  controls"
-        "languages languages"
-        "stats     stats"
+        "image     title     controls"
+        "image     keyCount  controls"
+        "languages languages languages"
+        "stats     stats     stats"
       `,
     },
   },
