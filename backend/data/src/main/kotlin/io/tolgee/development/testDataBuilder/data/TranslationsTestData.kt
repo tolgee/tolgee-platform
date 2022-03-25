@@ -40,6 +40,7 @@ class TranslationsTestData {
         name = "English"
         tag = "en"
         originalName = "English"
+        this@project.self.baseLanguage = this
       }.self
       germanLanguage = addLanguage {
         name = "German"
