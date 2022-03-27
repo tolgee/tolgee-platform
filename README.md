@@ -36,7 +36,7 @@ To run Tolgee Server with docker
 Now you should be able to access Tolgee web application on http://localhost:8085
 
 To learn more about deploying Tolgee server, visit
-[this documentation page](https://tolgee.io/docs/server_and_web_app/self_hosting/running_with_docker).
+[this documentation page](https://tolgee.io/docs/platform/self_hosting/running_with_docker).
 
 ## Configuration
 
