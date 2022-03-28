@@ -120,8 +120,8 @@ declare namespace DataCy {
         "organization-delete-button" |
         "organization-description-field" |
         "organization-invitation-cancel-button" |
+        "organization-invitation-copy-button" |
         "organization-invitation-item" |
-        "organization-invitation-item-menu" |
         "organization-member-item" |
         "organization-member-leave-button" |
         "organization-members-remove-user-button" |

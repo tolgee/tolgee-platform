@@ -65,7 +65,7 @@ export const ProjectMembersView: FunctionComponent = () => {
           }),
         ],
         [
-          t('edit_project_permissions_title'),
+          t('project_menu_members'),
           LINKS.PROJECT_PERMISSIONS.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
@@ -88,23 +88,7 @@ export const ProjectMembersView: FunctionComponent = () => {
         </Box>
       )}
       <ProjectLanguagesProvider>
-        <PaginatedHateoasList
-          title={t('project_menu_members')}
-          loadable={membersLoadable}
-          onPageChange={setPage}
-          onSearchChange={setSearch}
-          emptyPlaceholder={
-            <Box m={4} display="flex" justifyContent="center">
-              <Typography color="textSecondary">
-                {t('global_nothing_found')}
-              </Typography>
-            </Box>
-          }
-          renderItem={(u) => <MemberItem user={u} />}
-        />
-
         <Box
-          mt={4}
           mb={1}
           display="flex"
           justifyContent="space-between"
@@ -136,6 +120,23 @@ export const ProjectMembersView: FunctionComponent = () => {
           />
         )}
         <InviteDialog onClose={() => setInviteOpen(false)} open={inviteOpen} />
+
+        <Box mt={4} />
+
+        <PaginatedHateoasList
+          title={t('project_menu_members')}
+          loadable={membersLoadable}
+          onPageChange={setPage}
+          onSearchChange={setSearch}
+          emptyPlaceholder={
+            <Box m={4} display="flex" justifyContent="center">
+              <Typography color="textSecondary">
+                {t('global_nothing_found')}
+              </Typography>
+            </Box>
+          }
+          renderItem={(u) => <MemberItem user={u} />}
+        />
       </ProjectLanguagesProvider>
     </BaseView>
   );

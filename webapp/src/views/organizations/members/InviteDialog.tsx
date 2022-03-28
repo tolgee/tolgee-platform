@@ -129,7 +129,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                       onClick={() => formik.setFieldValue('type', 'email')}
                       data-cy="invitation-dialog-type-email-button"
                     >
-                      Email
+                      {t('invite_type_email')}
                     </Button>
                     <Button
                       size="small"
@@ -138,7 +138,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                       onClick={() => formik.setFieldValue('type', 'link')}
                       data-cy="invitation-dialog-type-link-button"
                     >
-                      Link
+                      {t('invite_type_link')}
                     </Button>
                   </ButtonGroup>
                 </Box>

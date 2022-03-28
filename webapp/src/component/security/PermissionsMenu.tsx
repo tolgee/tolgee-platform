@@ -88,11 +88,11 @@ export const PermissionsMenu: FunctionComponent<{
         onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'center',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'left',
+          horizontal: 'center',
         }}
       >
         {types.map((k) => (

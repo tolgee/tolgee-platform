@@ -1,6 +1,7 @@
-import { Button, makeStyles } from '@material-ui/core';
+import { IconButton, Tooltip, makeStyles } from '@material-ui/core';
+import { Clear } from '@material-ui/icons';
 import { useUser } from 'tg.hooks/useUser';
-import { T } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { RemoveUserButton } from './RemoveUserButton';
@@ -41,6 +42,7 @@ type Props = {
 };
 
 export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
+  const t = useTranslate();
   const classes = useStyles();
   const currentUser = useUser();
   const leaveOrganization = useLeaveOrganization();
@@ -54,14 +56,15 @@ export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
         <UpdateRoleButton user={user} />
 
         {currentUser?.id === user.id ? (
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => leaveOrganization(organizationId)}
-            data-cy="organization-member-leave-button"
-          >
-            <T>organization_users_leave</T>
-          </Button>
+          <Tooltip title={t('organization_users_leave')}>
+            <IconButton
+              size="small"
+              onClick={() => leaveOrganization(organizationId)}
+              data-cy="organization-member-leave-button"
+            >
+              <Clear />
+            </IconButton>
+          </Tooltip>
         ) : (
           <RemoveUserButton userId={user.id} userName={user.username} />
         )}

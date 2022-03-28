@@ -35,10 +35,8 @@ describe('Organization Invitations', () => {
     generateInvitation('OWNER');
 
     gcy('organization-invitation-item').should('have.length', 2);
-    gcy('organization-invitation-item-menu').eq(0).click();
-    gcy('organization-invitation-cancel-button').click();
+    gcy('organization-invitation-cancel-button').eq(0).click();
     gcy('organization-invitation-item').should('have.length', 1);
-    gcy('organization-invitation-item-menu').click();
     gcy('organization-invitation-cancel-button').click();
     gcy('organization-invitation-item').should('not.exist');
   });

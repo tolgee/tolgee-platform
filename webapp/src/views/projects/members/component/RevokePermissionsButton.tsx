@@ -1,5 +1,6 @@
 import { FunctionComponent, ReactElement } from 'react';
-import { Button, Tooltip } from '@material-ui/core';
+import { IconButton, Tooltip } from '@material-ui/core';
+import { Clear } from '@material-ui/icons';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
@@ -62,11 +63,10 @@ const RevokePermissionsButton = (props: {
 
   return (
     <Wrapper>
-      <Button
+      <IconButton
         data-cy="project-member-revoke-button"
         disabled={isDisabled}
         size="small"
-        variant="outlined"
         onClick={() =>
           confirmation({
             title: <T>revoke_access_confirmation_title</T>,
@@ -83,8 +83,8 @@ const RevokePermissionsButton = (props: {
           })
         }
       >
-        <T keyName="project_members_revoke" />
-      </Button>
+        <Clear />
+      </IconButton>
     </Wrapper>
   );
 };
