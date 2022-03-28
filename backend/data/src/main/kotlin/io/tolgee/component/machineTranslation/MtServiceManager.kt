@@ -1,5 +1,6 @@
 package io.tolgee.component.machineTranslation
 
+import io.sentry.Sentry
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
@@ -7,11 +8,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import org.springframework.beans.factory.annotation.Autowired
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableBeanFactory
 import org.springframework.cache.CacheManager
 import org.springframework.context.ApplicationContext
-import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -28,9 +28,7 @@ class MtServiceManager(
   private val cacheManager: CacheManager
 ) {
 
-  @set:Autowired
-  @set:Lazy
-  lateinit var mtServiceManagerCachingProxy: MtServiceManagerCachingProxy
+  private val logger = LoggerFactory.getLogger(this::class.java)
 
   private val providers by lazy {
     MtServiceType.values().associateWith { applicationContext.getBean(it.providerClass) }
@@ -55,9 +53,6 @@ class MtServiceManager(
     }
   }
 
-  /**
-   * Translates a text using All services
-   */
   fun translate(
     text: String,
     sourceLanguageTag: String,
@@ -70,23 +65,55 @@ class MtServiceManager(
       return getFaked(params)
     }
 
+    return findInCache(params) ?: translateWithProvider(params)
+  }
+
+  private fun findInCache(
+    params: TranslationParams,
+  ): TranslateResult? {
     return params.findInCache()?.let {
       TranslateResult(
         translatedText = it,
         actualPrice = 0,
-        usedService = serviceType
+        usedService = params.serviceType
       )
-    } ?: let {
-      val price = calculatePrice(params.text, params.serviceType)
-      val result = TranslateResult(
-        params.serviceType.getProvider()
-          .translate(params.text, params.sourceLanguageTag, params.targetLanguageTag),
-        price,
-        params.serviceType
-      )
-      result.translatedText?.let { params.cacheResult(it) }
-      return result
     }
+  }
+
+  private fun translateWithProvider(params: TranslationParams): TranslateResult {
+    var translated: String? = null
+    try {
+      translated = params.serviceType.getProvider()
+        .translate(params.text, params.sourceLanguageTag, params.targetLanguageTag)
+    } catch (e: Exception) {
+      logger.error(
+        """An exception occurred while translating 
+            |text "${params.text}" 
+            |from ${params.sourceLanguageTag} 
+            |to ${params.targetLanguageTag}"""".trimMargin()
+      )
+      logger.error(e.stackTraceToString())
+      Sentry.captureException(e)
+    }
+
+    val price = translated?.let {
+      calculatePrice(
+        params.text,
+        params.serviceType,
+        params.sourceLanguageTag,
+        params.targetLanguageTag
+      )
+    } ?: 0
+
+    val result = TranslateResult(
+      translated,
+      price,
+      params.serviceType
+    )
+
+    result.translatedText?.let { params.cacheResult(it) }
+
+    return result
   }
 
   private fun getParams(
@@ -107,7 +134,7 @@ class MtServiceManager(
     return TranslateResult(
       "${params.text} translated with ${params.serviceType.name} " +
         "from ${params.sourceLanguageTag} to ${params.targetLanguageTag}",
-      calculatePrice(params.text, params.serviceType),
+      calculatePrice(params.text, params.serviceType, params.sourceLanguageTag, params.targetLanguageTag),
       params.serviceType
     )
   }
@@ -161,15 +188,25 @@ class MtServiceManager(
   /**
    * Returns sum price of all translations
    */
-  fun calculatePrice(text: String, service: MtServiceType): Int {
-    return service.getProvider().calculatePrice(text)
+  fun calculatePrice(
+    text: String,
+    service: MtServiceType,
+    sourceLanguageTag: String,
+    targetLanguageTag: String
+  ): Int {
+    return service.getProvider().calculatePrice(text, sourceLanguageTag, targetLanguageTag)
   }
 
   /**
    * Returns sum price of all translations
    */
-  fun calculatePriceAll(text: String, services: List<MtServiceType>): Int {
-    return services.getProviders().values.sumOf { it.calculatePrice(text) }
+  fun calculatePriceAll(
+    text: String,
+    services: List<MtServiceType>,
+    sourceLanguageTag: String,
+    targetLanguageTag: String
+  ): Int {
+    return services.getProviders().values.sumOf { it.calculatePrice(text, sourceLanguageTag, targetLanguageTag) }
   }
 
   fun List<MtServiceType>.getProviders():
