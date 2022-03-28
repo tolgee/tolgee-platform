@@ -1,7 +1,7 @@
 package io.tolgee.cache
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.component.machineTranslation.providers.AwsTranslationProvider
+import io.tolgee.component.machineTranslation.providers.AwsMtValueProvider
 import io.tolgee.component.machineTranslation.providers.GoogleTranslationProvider
 import io.tolgee.constants.Caches
 import io.tolgee.constants.MtServiceType
@@ -50,7 +50,7 @@ abstract class AbstractCacheTest : AbstractSpringTest() {
 
   @Autowired
   @MockBean
-  lateinit var awsTranslationProvider: AwsTranslationProvider
+  lateinit var awsTranslationProvider: AwsMtValueProvider
 
   @BeforeEach
   fun setup() {

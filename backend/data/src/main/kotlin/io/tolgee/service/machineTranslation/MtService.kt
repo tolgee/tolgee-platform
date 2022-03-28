@@ -61,7 +61,7 @@ class MtService(
       .mapIndexed { idx, lang -> idx to lang }
       .groupBy { primaryServices[it.second.id] }
 
-    val price = calculatePrice(serviceIndexedLanguagesMap, prepared)
+    val price = calculatePrice(baseLanguage.tag, serviceIndexedLanguagesMap, prepared)
     publishOnBeforeEvent(prepared, project, price)
 
     val translationResults = serviceIndexedLanguagesMap.map { (service, languageIdxPairs) ->
@@ -92,15 +92,18 @@ class MtService(
   }
 
   private fun calculatePrice(
-    it: Map<MtServiceType?, List<Pair<Int, Language>>>,
-    prepared: TextHelper.ReplaceIcuResult
+    sourceLanguageTag: String,
+    targetServiceLanguagesMap: Map<MtServiceType?, List<Pair<Int, Language>>>,
+    prepared: TextHelper.ReplaceIcuResult,
   ) =
-    it.entries.sumOf { (service, languageIdxPairs) ->
+    targetServiceLanguagesMap.entries.sumOf { (service, languageIdxPairs) ->
       service?.let { serviceNotNull ->
         languageIdxPairs.sumOf {
           machineTranslationManager.calculatePrice(
             text = prepared.text,
-            serviceNotNull
+            serviceNotNull,
+            sourceLanguageTag,
+            it.second.tag
           )
         }
       } ?: 0
@@ -116,7 +119,9 @@ class MtService(
     val prepared = TextHelper.replaceIcuParams(baseTranslationText)
     val expectedPrice = machineTranslationManager.calculatePriceAll(
       text = prepared.text,
-      services = enabledServices
+      services = enabledServices,
+      sourceLanguageTag = baseLanguage.tag,
+      targetLanguageTag = targetLanguage.tag
     )
 
     publishOnBeforeEvent(prepared, project, expectedPrice)
