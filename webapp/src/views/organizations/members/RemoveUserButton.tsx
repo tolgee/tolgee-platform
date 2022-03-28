@@ -1,5 +1,6 @@
-import { Button } from '@material-ui/core';
-import { T } from '@tolgee/react';
+import { IconButton, Tooltip } from '@material-ui/core';
+import { Clear } from '@material-ui/icons';
+import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
 import { confirmation } from 'tg.hooks/confirmation';
@@ -14,6 +15,7 @@ export const RemoveUserButton = (props: {
   userId: number;
   userName: string;
 }) => {
+  const t = useTranslate();
   const organization = useOrganization();
   const removeUserLoadable = useApiMutation({
     url: '/v2/organizations/{organizationId}/users/{userId}',
@@ -46,15 +48,14 @@ export const RemoveUserButton = (props: {
   };
 
   return (
-    <Button
-      data-cy="organization-members-remove-user-button"
-      onClick={removeUser}
-      variant="outlined"
-      size="small"
-      aria-controls="simple-menu"
-      aria-haspopup="true"
-    >
-      <T>organization_users_remove_user</T>
-    </Button>
+    <Tooltip title={t('organization_users_remove_user')}>
+      <IconButton
+        data-cy="organization-members-remove-user-button"
+        onClick={removeUser}
+        size="small"
+      >
+        <Clear />
+      </IconButton>
+    </Tooltip>
   );
 };

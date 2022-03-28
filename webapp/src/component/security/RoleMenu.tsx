@@ -77,7 +77,7 @@ export const RoleMenu: React.FC<Props> = (props) => {
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'right',
+          horizontal: 'center',
         }}
       >
         {Object.keys(OrganizationRoleType).map((k) => (
