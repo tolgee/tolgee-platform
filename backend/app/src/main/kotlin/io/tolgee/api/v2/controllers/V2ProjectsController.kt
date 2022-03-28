@@ -120,7 +120,7 @@ class V2ProjectsController(
     return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
   }
 
-  @Operation(summary = "Returns all projects (includingStatistics) where current user has any permission")
+  @Operation(summary = "Returns all projects (including statistics) where current user has any permission")
   @GetMapping("/with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
