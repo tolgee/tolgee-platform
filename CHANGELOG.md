@@ -1,3 +1,10 @@
+## [2.13.2](https://github.com/tolgee/tolgee-platform/compare/v2.13.1...v2.13.2) (2022-03-28)
+
+
+### Bug Fixes
+
+* Log "Creating initial user..." only when the user doesn't exist, and it is relly being created ([ea69bde](https://github.com/tolgee/tolgee-platform/commit/ea69bde24d3f555525bbaefcfade6547ce363343))
+
 # [2.13.0](https://github.com/tolgee/tolgee-platform/compare/v2.12.5...v2.13.0) (2022-03-24)
 
 
