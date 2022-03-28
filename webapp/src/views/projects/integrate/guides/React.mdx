@@ -1,30 +1,35 @@
-import {GoToDocsButton} from "../component/GoToDocsButton";
+import { GoToDocsButton } from '../component/GoToDocsButton';
 
-<GoToDocsButton href="https://tolgee.io/docs/web/using_with_react/installation" style={{ float: "right" }} />
+<GoToDocsButton
+  href="https://tolgee.io/docs/web/using_with_react/installation"
+  style={{ float: 'right' }}
+/>
 
 To read full documentation about Tolgee for React, visit [docs](https://tolgee.io/docs/web/using_with_react/installation).
 
 ## Install the packages
 
-You will need `@tolgee/react` to use `<T>` component or `useTranslate` hook. `@tolgee/ui` allows you to modify
-translations in-context.
+You will need `@tolgee/react` to use `<T>` component or `useTranslate` hook.
 
 ```
-npm install @tolgee/react @tolgee/ui --save
+npm install @tolgee/react
 ```
 
 ## Setup your environment
+
 Add this to your `.env.development.local`.
+
 ```dotenv
 REACT_APP_TOLGEE_API_URL={{{apiUrl}}}
 REACT_APP_TOLGEE_API_KEY={{{apiKey}}}
 ```
 
 ## Use TolgeeProvider
+
 Wrap your main `App` component with Tolgee provider.
+
 ```typescript jsx
 import {TolgeeProvider} from "@tolgee/react";
-import {UI} from "@tolgee/ui";
 
 ...
 
@@ -32,7 +37,6 @@ import {UI} from "@tolgee/ui";
     filesUrlPrefix="i18n/"
     apiUrl={process.env.REACT_APP_TOLGEE_API_URL}
     apiKey={process.env.REACT_APP_TOLGEE_API_KEY}
-    ui={process.env.REACT_APP_TOLGEE_API_KEY ? UI : undefined}
     loadingFallback={<>Loading...</>}
 >
     <App/>
@@ -40,6 +44,7 @@ import {UI} from "@tolgee/ui";
 ```
 
 ## Use Tolgee!
+
 ```typescript jsx
 import {T} from "@tolgee/react";
 
@@ -63,5 +68,6 @@ t("key_to_translate")
 ```
 
 ## Prepare for production
+
 To prepare your App for production, choose a suitable option described
 [here](https://tolgee.io/docs/web/using_with_react/react_preparing_for_production).

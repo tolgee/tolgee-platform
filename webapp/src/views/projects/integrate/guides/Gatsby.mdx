@@ -1,4 +1,4 @@
-import {GoToDocsButton} from '../component/GoToDocsButton';
+import { GoToDocsButton } from '../component/GoToDocsButton';
 
 <GoToDocsButton
   href="https://tolgee.io/docs/web/using_with_react/ssr/using_with_gatsby"
@@ -9,11 +9,10 @@ To read full documentation about Tolgee for Gatsby, visit [docs](https://tolgee.
 
 ## Install the packages
 
-You will need `@tolgee/react` to use `<T>` component or `useTranslate` hook. `@tolgee/ui` allows you to modify
-translations in-context.
+You will need `@tolgee/react` to use `<T>` component or `useTranslate` hook.
 
 ```
-npm install @tolgee/react @tolgee/ui --save
+npm install @tolgee/react --save
 ```
 
 ## Setup your environment
@@ -55,6 +54,7 @@ module.exports = {
 
 ```jsx
 import { useIntl } from 'gatsby-plugin-react-intl';
+import { TolgeeProvider } from '@tolgee/react';
 
 import * as translationsEn from '../i18n/en.json';
 import * as translationsCs from '../i18n/cs.json';
@@ -72,9 +72,6 @@ export const AppWrapper: React.FC = ({ children }) => {
         cs: translationsCs,
       }}
       loadingFallback={<div>Loading...</div>}
-      ui={
-        process.env.GATSBY_TOLGEE_API_KEY ? require('@tolgee/ui').UI : undefined
-      }
     >
       {children}
     </TolgeeProvider>
