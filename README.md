@@ -41,7 +41,7 @@ To learn more about deploying Tolgee server, visit
 ## Configuration
 
 For more information about configuration, visit
-[docs](https://tolgee.io/server_and_web_app/self_hosting/configuration).
+[docs](https://tolgee.io/docs/platform/self_hosting/configuration).
 
 ## Quick integration guides
 
