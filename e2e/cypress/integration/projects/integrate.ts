@@ -186,7 +186,7 @@ describe('Integrate view', () => {
       },
       {
         weapon: 'JS',
-        textsToContain: ['npm install @tolgee/core @tolgee/ui --save'],
+        textsToContain: ['npm install @tolgee/core @tolgee/ui'],
       },
       {
         weapon: 'Rest',

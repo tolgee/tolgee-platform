@@ -1,4 +1,4 @@
-import {GoToDocsButton} from '../component/GoToDocsButton';
+import { GoToDocsButton } from '../component/GoToDocsButton';
 
 <GoToDocsButton
   href="https://tolgee.io/docs/web/using_with_vue/installation"
@@ -9,11 +9,10 @@ To read full documentation about Tolgee for React, visit [docs](https://tolgee.i
 
 ## Install the packages
 
-You will need `@tolgee/vue` to use `<T>` component or `TolgeeMixin` with `$t` function. `@tolgee/ui` allows you to modify
-translations in-context.
+You will need `@tolgee/vue` to use `<T>` component or `TolgeeMixin` with `$t` function.
 
 ```
-npm install @tolgee/vue @tolgee/ui --save
+npm install @tolgee/vue
 ```
 
 ## Setup your environment
@@ -44,9 +43,6 @@ Wrap your whole app with Tolgee provider.
         config: {
           apiUrl: process.env.VUE_APP_TOLGEE_API_URL,
           apiKey: process.env.VUE_APP_TOLGEE_API_KEY,
-          ui: process.env.VUE_APP_TOLGEE_API_KEY
-            ? require('@tolgee/ui').UI
-            : undefined,
         },
       };
     },

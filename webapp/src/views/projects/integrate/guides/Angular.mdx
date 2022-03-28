@@ -1,32 +1,37 @@
-import {GoToDocsButton} from "../component/GoToDocsButton";
+import { GoToDocsButton } from '../component/GoToDocsButton';
 
-<GoToDocsButton href="https://tolgee.io/docs/web/using_with_angular/installation" style={{ float: "right" }} />
+<GoToDocsButton
+  href="https://tolgee.io/docs/web/using_with_angular/installation"
+  style={{ float: 'right' }}
+/>
 
 To read full documentation about Tolgee for Angular, visit [docs](https://tolgee.io/docs/web/using_with_angular/installation).
-
 
 ## Install packages
 
 ```
-npm install @tolgee/ngx @tolgee/ui --save
+npm install @tolgee/ngx @tolgee/ui
 ```
 
 ## Setup environment
+
 Add Tolgee properties to your `src/environments/environment.<your env>.ts`
+
 ```typescript
 export const environment = {
   production: false,
-  tolgeeApiUrl: "{{{apiUrl}}}",
-  tolgeeApiKey: "{{{apiKey}}}"
+  tolgeeApiUrl: '{{{apiUrl}}}',
+  tolgeeApiKey: '{{{apiKey}}}',
 };
 ```
 
 ## Setup NgModule
+
 Add NgxTolgeeModule to the imports section.
+
 ```typescript
-import {NgxTolgeeModule} from "@tolgee/ngx";
-import {UI} from "@tolgee/ui";
-import {NgModule} from '@angular/core';
+import { NgxTolgeeModule } from "@tolgee/ngx";
+import { NgModule } from '@angular/core';
 import { environment } from '../environments/environment';
 
 
@@ -39,7 +44,7 @@ import { environment } from '../environments/environment';
     NgxTolgeeModule.forRoot({
       apiUrl: environment.tolgeeApiUrl,
       apiKey: environment.tolgeeApiKey,
-      ui: environment.tolgeeApiKey ? UI : undefined
+      ui: environment.tolgeeApiKey ? require('@tolgee/ui') : undefined
     }),
 ...,
 ],
@@ -48,10 +53,11 @@ import { environment } from '../environments/environment';
 export class AppModule {
 }
 ```
+
 Maybe you will also need to set `skipLibCheck` to `true` in your `compilerOptions` section of `tsconfig.json`.
 
-
 ## Use Tolgee!
+
 ```html
 <div t key="hello_world"></div>
 ```
@@ -65,9 +71,12 @@ or
 or
 
 ```typescript
-this.translateService.get('hello_world').subscribe(r => this.helloWorld = r);
+this.translateService
+  .get('hello_world')
+  .subscribe((r) => (this.helloWorld = r));
 ```
 
 ## Prepare for production
+
 To prepare your App for production, choose a suitable option described
 [here](https://tolgee.io/docs/web/using_with_angular/angular_preparing_for_production).
