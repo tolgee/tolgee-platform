@@ -20,11 +20,11 @@ class InitialUserCreatorRunner(
   private val logger = LoggerFactory.getLogger(this::class.java)
 
   override fun run(vararg args: String) {
-    logger.info("Creating initial user...")
     val initialUsername = properties.authentication.initialUsername
     if (properties.authentication.createInitialUser && !userAccountService.isAnyUserAccount &&
       userAccountService.findOptional(initialUsername).isEmpty
     ) {
+      logger.info("Creating initial user...")
       val initialPassword = initialPasswordManager.initialPassword
       userAccountService.createUser(
         SignUpDto(email = initialUsername, password = initialPassword, name = initialUsername)
