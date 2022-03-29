@@ -1,3 +1,10 @@
+## [2.13.4](https://github.com/tolgee/tolgee-platform/compare/v2.13.3...v2.13.4) (2022-03-29)
+
+
+### Bug Fixes
+
+* Error on translation to the same language. ([fd3f497](https://github.com/tolgee/tolgee-platform/commit/fd3f497c5012c2527c7f5248fa5d6a7474688182))
+
 ## [2.13.3](https://github.com/tolgee/tolgee-platform/compare/v2.13.2...v2.13.3) (2022-03-29)
 
 
