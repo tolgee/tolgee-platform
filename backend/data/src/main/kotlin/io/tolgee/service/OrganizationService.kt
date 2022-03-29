@@ -11,6 +11,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page

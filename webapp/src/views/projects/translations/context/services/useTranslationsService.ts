@@ -35,6 +35,7 @@ const projectPreferences = container.resolve(ProjectPreferencesService);
 type Props = {
   projectId: number;
   keyName?: string;
+  keyId?: number;
   initialLangs: string[] | null | undefined;
   pageSize?: number;
   updateLocalStorageLanguages?: boolean;
@@ -98,6 +99,7 @@ export const useTranslationsService = (props: Props) => {
       ...query,
       ...parsedFilters,
       filterKeyName: props.keyName,
+      filterKeyId: props.keyId ? [props.keyId] : undefined,
       search: urlSearch as string,
     },
     options: {

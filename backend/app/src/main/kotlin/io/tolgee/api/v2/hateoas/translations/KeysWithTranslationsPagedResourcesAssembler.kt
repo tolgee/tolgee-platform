@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.translations
 
-import io.tolgee.api.v2.hateoas.organization.LanguageModelAssembler
+import io.tolgee.api.v2.hateoas.language.LanguageModelAssembler
 import io.tolgee.model.Language
 import io.tolgee.model.views.KeyWithTranslationsView
 import org.springframework.data.domain.Page

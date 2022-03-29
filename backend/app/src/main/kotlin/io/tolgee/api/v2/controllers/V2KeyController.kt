@@ -2,6 +2,8 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.key.KeyModel
 import io.tolgee.api.v2.hateoas.key.KeyModelAssembler
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
@@ -61,6 +63,7 @@ class V2KeyController(
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
   @Operation(summary = "Creates new key")
   @ResponseStatus(HttpStatus.CREATED)
+  @RequestActivity(ActivityType.CREATE_KEY)
   fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyWithDataModel> {
     if (dto.screenshotUploadedImageIds != null) {
       projectHolder.projectEntity.checkScreenshotsUploadPermission()
@@ -83,6 +86,7 @@ class V2KeyController(
   @Operation(summary = "Edits key name")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  @RequestActivity(ActivityType.KEY_NAME_EDIT)
   fun edit(@PathVariable id: Long, @RequestBody @Valid dto: EditKeyDto): KeyModel {
     val key = keyService.findOptional(id).orElseThrow { NotFoundException() }
     key.checkInProject()
@@ -94,6 +98,7 @@ class V2KeyController(
   @Operation(summary = "Deletes one or multiple keys by their IDs")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  @RequestActivity(ActivityType.KEY_DELETE)
   fun delete(@PathVariable ids: Set<Long>) {
     keyService.findOptional(ids).forEach { it.checkInProject() }
     keyService.deleteMultiple(ids)

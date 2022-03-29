@@ -2,6 +2,7 @@ package io.tolgee.development.testDataBuilder
 
 import io.tolgee.development.testDataBuilder.builders.ImportBuilder
 import io.tolgee.development.testDataBuilder.builders.KeyBuilder
+import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
@@ -13,7 +14,6 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.PermissionService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.TagService
 import io.tolgee.service.TranslationCommentService
@@ -22,8 +22,12 @@ import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.project.ProjectService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 import javax.persistence.EntityManager
 
 @Service
@@ -45,14 +49,23 @@ class TestDataService(
   private val apiKeyService: ApiKeyService,
   private val mtServiceConfigService: MtServiceConfigService,
   private val mtCreditBucketService: MtCreditBucketService,
-  private val autoTranslateService: AutoTranslationService
+  private val autoTranslateService: AutoTranslationService,
+  private val transactionManager: PlatformTransactionManager,
 ) {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
     prepare()
 
-    saveAllUsers(builder)
-    saveOrganizationData(builder)
+    // Projects have to be stored in separate transaction since projectHolder's
+    // project has to be stored for transaction scope.
+    //
+    // To be able to save project in its separate transaction,
+    // user/organization has to be stored first.
+    executeInNewTransaction {
+      saveAllUsers(builder)
+      saveOrganizationData(builder)
+    }
+
     saveAllMtCreditBuckets(builder)
     saveProjectData(builder)
 
@@ -66,7 +79,6 @@ class TestDataService(
 
   private fun saveProjectData(builder: TestDataBuilder) {
     saveAllProjects(builder)
-    saveAllProjectDependants(builder)
   }
 
   private fun saveOrganizationDependants(builder: TestDataBuilder) {
@@ -97,7 +109,7 @@ class TestDataService(
     clearEntityManager()
   }
 
-  private fun saveAllProjectDependants(builder: TestDataBuilder) {
+  private fun saveAllProjectDependants(builder: ProjectBuilder) {
     savePermissions(builder)
     saveApiKeys(builder)
     saveLanguages(builder)
@@ -109,37 +121,35 @@ class TestDataService(
     saveProjectAvatars(builder)
   }
 
-  private fun saveAutoTranslationConfigs(builder: TestDataBuilder) {
-    builder.data.projects.map { it.data.autoTranslationConfigBuilder }.filterNotNull().forEach {
-      autoTranslateService.saveConfig(it.self)
+  private fun saveAutoTranslationConfigs(builder: ProjectBuilder) {
+    builder.data.autoTranslationConfigBuilder?.self?.let {
+      autoTranslateService.saveConfig(it)
     }
   }
 
-  private fun saveProjectAvatars(builder: TestDataBuilder) {
-    builder.data.projects.forEach { projectBuilder ->
-      projectBuilder.data.avatarFile?.let { file ->
-        projectService.setAvatar(projectBuilder.self, file.inputStream)
-      }
+  private fun saveProjectAvatars(builder: ProjectBuilder) {
+    builder.data.avatarFile?.let { file ->
+      projectService.setAvatar(builder.self, file.inputStream)
     }
   }
 
-  private fun saveImportData(builder: TestDataBuilder) {
+  private fun saveImportData(builder: ProjectBuilder) {
     val importBuilders = saveImports(builder)
     saveAllImportDependants(importBuilders)
   }
 
-  private fun saveImports(builder: TestDataBuilder): List<ImportBuilder> {
-    val importBuilders = builder.data.projects.flatMap { repoBuilder -> repoBuilder.data.imports }
+  private fun saveImports(builder: ProjectBuilder): List<ImportBuilder> {
+    val importBuilders = builder.data.imports
     importService.saveAllImports(importBuilders.map { it.self })
     return importBuilders
   }
 
-  private fun saveTranslationData(builder: TestDataBuilder) {
+  private fun saveTranslationData(builder: ProjectBuilder) {
     val translationBuilders = saveTranslations(builder)
     saveTranslationDependants(translationBuilders)
   }
 
-  private fun saveKeyData(builder: TestDataBuilder) {
+  private fun saveKeyData(builder: ProjectBuilder) {
     val keyBuilders = saveKeys(builder)
     saveAllKeyDependants(keyBuilders)
   }
@@ -149,37 +159,35 @@ class TestDataService(
     translationCommentService.createAll(translationComments)
   }
 
-  private fun saveTranslations(builder: TestDataBuilder): List<TranslationBuilder> {
-    val translationBuilders = builder.data.projects.flatMap { it.data.translations }
+  private fun saveTranslations(builder: ProjectBuilder): List<TranslationBuilder> {
+    val translationBuilders = builder.data.translations
     translationService.saveAll(translationBuilders.map { it.self })
     return translationBuilders
   }
 
-  private fun saveKeys(builder: TestDataBuilder): List<KeyBuilder> {
-    val keyBuilders = builder.data.projects.flatMap { it.data.keys.map { it } }
+  private fun saveKeys(builder: ProjectBuilder): List<KeyBuilder> {
+    val keyBuilders = builder.data.keys.map { it }
     keyService.saveAll(keyBuilders.map { it.self })
     return keyBuilders
   }
 
-  private fun saveMtServiceConfigs(builder: TestDataBuilder) {
+  private fun saveMtServiceConfigs(builder: ProjectBuilder) {
     mtServiceConfigService.saveAll(
-      builder.data.projects.flatMap {
-        it.data.translationServiceConfigs.map { it.self }
-      }
+      builder.data.translationServiceConfigs.map { it.self }
     )
   }
 
-  private fun saveLanguages(builder: TestDataBuilder) {
-    val languages = builder.data.projects.flatMap { it.data.languages.map { it.self } }
+  private fun saveLanguages(builder: ProjectBuilder) {
+    val languages = builder.data.languages.map { it.self }
     languageService.saveAll(languages)
   }
 
-  private fun saveApiKeys(builder: TestDataBuilder) {
-    apiKeyService.saveAll(builder.data.projects.flatMap { it.data.apiKeys.map { it.self } })
+  private fun saveApiKeys(builder: ProjectBuilder) {
+    apiKeyService.saveAll(builder.data.apiKeys.map { it.self })
   }
 
-  private fun savePermissions(builder: TestDataBuilder) {
-    permissionService.saveAll(builder.data.projects.flatMap { it.data.permissions.map { it.self } })
+  private fun savePermissions(builder: ProjectBuilder) {
+    permissionService.saveAll(builder.data.permissions.map { it.self })
   }
 
   private fun saveAllKeyDependants(keyBuilders: List<KeyBuilder>) {
@@ -206,7 +214,22 @@ class TestDataService(
   }
 
   private fun saveAllProjects(builder: TestDataBuilder) {
-    projectService.saveAll(builder.data.projects.map { it.self })
+    val projectBuilders = builder.data.projects
+    projectBuilders.forEach { projectBuilder ->
+      executeInNewTransaction {
+        projectService.save(projectBuilder.self)
+        saveAllProjectDependants(projectBuilder)
+      }
+    }
+  }
+
+  private fun executeInNewTransaction(fn: () -> Unit) {
+    val tt = TransactionTemplate(transactionManager)
+    tt.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
+
+    tt.executeWithoutResult {
+      fn()
+    }
   }
 
   private fun saveAllMtCreditBuckets(builder: TestDataBuilder) {

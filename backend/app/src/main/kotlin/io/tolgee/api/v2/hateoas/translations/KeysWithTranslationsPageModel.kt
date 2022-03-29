@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.hateoas.translations
 
 import io.swagger.v3.oas.annotations.media.Schema
-import io.tolgee.api.v2.hateoas.organization.LanguageModel
+import io.tolgee.api.v2.hateoas.language.LanguageModel
 import org.springframework.hateoas.Link
 import org.springframework.hateoas.PagedModel
 

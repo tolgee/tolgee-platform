@@ -3,8 +3,8 @@ package io.tolgee.security.project_auth
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.security.AuthenticationFacade
-import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
+import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter

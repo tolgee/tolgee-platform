@@ -91,6 +91,7 @@ dependencies {
     implementation("org.springframework.ldap:spring-ldap-core")
     implementation("org.springframework.security:spring-security-ldap")
     implementation("org.springframework.data:spring-data-envers")
+    implementation "org.springframework.boot:spring-boot-starter-batch"
 
     /**
      * SPRING DOC
@@ -117,6 +118,7 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:${findProperty("mockitoVersion")}")
     testCompile("io.findify:s3mock_2.13:0.2.6")
     testImplementation("io.socket:socket.io-client:1.0.1")
+    testImplementation group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.3.5'
 
     /**
      * MISC

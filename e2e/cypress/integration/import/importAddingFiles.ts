@@ -30,20 +30,28 @@ describe('Import Adding files', () => {
     gcy('import-result-total-count-cell').should('contain.text', '8');
   });
 
-  it('uploads multiple xliffs', () => {
-    gcy('import-file-input').attachFile([
-      'import/xliff/larger.xlf',
-      'import/xliff/example.xliff',
-      'import/xliff/error_example.xliff',
-    ]);
+  it(
+    'uploads multiple xliffs',
+    {
+      retries: {
+        runMode: 3,
+      },
+    },
+    () => {
+      gcy('import-file-input').attachFile([
+        'import/xliff/larger.xlf',
+        'import/xliff/example.xliff',
+        'import/xliff/error_example.xliff',
+      ]);
 
-    gcy('import-result-total-count-cell', { timeout: 10000 }).should('exist');
-    getLanguageRow('larger.xlf (en)').should('contain.text', '1151');
-    getLanguageRow('larger.xlf (cs)').should('contain.text', '1151');
-    getLanguageRow('example.xliff (en)')
-      .findDcy('import-result-total-count-cell')
-      .should('contain.text', '176');
-  });
+      gcy('import-result-total-count-cell', { timeout: 10000 }).should('exist');
+      getLanguageRow('larger.xlf (en)').should('contain.text', '1151');
+      getLanguageRow('larger.xlf (cs)').should('contain.text', '1151');
+      getLanguageRow('example.xliff (en)')
+        .findDcy('import-result-total-count-cell')
+        .should('contain.text', '176');
+    }
+  );
 
   it(
     'has valid xliff errors',

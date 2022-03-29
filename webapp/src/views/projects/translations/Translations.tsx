@@ -115,7 +115,7 @@ export const Translations = () => {
       navigation={[
         [
           project.name,
-          LINKS.PROJECT_TRANSLATIONS.build({
+          LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
         ],

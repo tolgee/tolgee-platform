@@ -2,7 +2,8 @@ package io.tolgee.api.v2.hateoas.project
 
 import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.api.v2.hateoas.UserPermissionModel
-import io.tolgee.api.v2.hateoas.organization.LanguageModel
+import io.tolgee.api.v2.hateoas.language.LanguageModel
+import io.tolgee.api.v2.hateoas.organization.SimpleOrganizationModel
 import io.tolgee.api.v2.hateoas.user_account.UserAccountModel
 import io.tolgee.dtos.Avatar
 import io.tolgee.model.Permission
@@ -19,9 +20,13 @@ open class ProjectModel(
   val slug: String?,
   val avatar: Avatar?,
   val userOwner: UserAccountModel?,
+  val organizationOwner: SimpleOrganizationModel?,
   val baseLanguage: LanguageModel?,
+  @Schema(deprecated = true, description = "Use organizationOwner field")
   val organizationOwnerName: String?,
+  @Schema(deprecated = true, description = "Use organizationOwner field")
   val organizationOwnerSlug: String?,
+  @Schema(deprecated = true, description = "Use organizationOwner field")
   val organizationOwnerBasePermissions: Permission.ProjectPermissionType?,
   val organizationRole: OrganizationRoleType?,
   @Schema(description = "Current user's direct permission", example = "MANAGE")

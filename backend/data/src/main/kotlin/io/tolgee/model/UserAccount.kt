@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import org.hibernate.envers.Audited
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -30,7 +29,7 @@ import javax.validation.constraints.NotBlank
     )
   ]
 )
-@Audited
+
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

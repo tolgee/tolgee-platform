@@ -16,6 +16,14 @@ spring:
         order_inserts: true
         order_updates: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
+        types:
+          print:
+            banner: false
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
 #  main:
 #    lazy-initialization: true
 tolgee:

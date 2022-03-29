@@ -4,9 +4,9 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.request.export.ExportParams
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Language
-import io.tolgee.service.ProjectService
 import io.tolgee.service.export.dataProvider.ExportDataProvider
 import io.tolgee.service.export.dataProvider.ExportTranslationView
+import io.tolgee.service.project.ProjectService
 import org.springframework.stereotype.Service
 import java.io.InputStream
 import javax.persistence.EntityManager
