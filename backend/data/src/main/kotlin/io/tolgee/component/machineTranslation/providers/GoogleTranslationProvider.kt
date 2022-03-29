@@ -18,8 +18,8 @@ class GoogleTranslationProvider(
   override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
     return translateService.translate(
       text,
-      Translate.TranslateOption.targetLanguage(sourceTag),
-      Translate.TranslateOption.sourceLanguage(targetTag),
+      Translate.TranslateOption.sourceLanguage(sourceTag),
+      Translate.TranslateOption.targetLanguage(targetTag),
       Translate.TranslateOption.format("text")
     ).translatedText
   }
