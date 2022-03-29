@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import org.hibernate.envers.Audited
 import org.springframework.data.util.ProxyUtils
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -9,8 +8,8 @@ import javax.persistence.MappedSuperclass
 import javax.persistence.SequenceGenerator
 
 @MappedSuperclass
-@Audited
-abstract class StandardAuditModel : AuditModel() {
+
+abstract class StandardAuditModel : AuditModel(), EntityWithId {
   @Id
   @SequenceGenerator(
     name = "sequenceGenerator",
@@ -22,7 +21,7 @@ abstract class StandardAuditModel : AuditModel() {
     strategy = GenerationType.SEQUENCE,
     generator = "sequenceGenerator"
   )
-  val id: Long = 0
+  override val id: Long = 0
 
   override fun equals(other: Any?): Boolean {
     other ?: return false

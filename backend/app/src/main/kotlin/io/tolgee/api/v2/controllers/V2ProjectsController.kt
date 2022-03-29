@@ -6,6 +6,8 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.invitation.ProjectInvitationModel
 import io.tolgee.api.v2.hateoas.invitation.ProjectInvitationModelAssembler
 import io.tolgee.api.v2.hateoas.key.LanguageConfigItemModelAssembler
@@ -47,10 +49,11 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.PermissionService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.project.ProjectService
+import io.tolgee.service.project.ProjectStatsService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -106,7 +109,8 @@ class V2ProjectsController(
   private val projectInvitationModelAssembler: ProjectInvitationModelAssembler,
   private val mtServiceConfigService: MtServiceConfigService,
   private val autoTranslateService: AutoTranslationService,
-  private val languageService: LanguageService
+  private val languageService: LanguageService,
+  private val projectStatsService: ProjectStatsService
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -118,7 +122,7 @@ class V2ProjectsController(
     return arrayResourcesAssembler.toModel(projects, projectModelAssembler)
   }
 
-  @Operation(summary = "Returns all projects (includingStatistics) where current user has any permission")
+  @Operation(summary = "Returns all projects (including statistics) where current user has any permission")
   @GetMapping("/with-stats", produces = [MediaTypes.HAL_JSON_VALUE])
   fun getAllWithStatistics(
     @ParameterObject pageable: Pageable,
@@ -126,7 +130,7 @@ class V2ProjectsController(
   ): PagedModel<ProjectWithStatsModel> {
     val projects = projectService.findPermittedPaged(pageable, search)
     val projectIds = projects.content.map { it.id }
-    val stats = projectService.getProjectsStatistics(projectIds).associateBy { it.projectId }
+    val stats = projectStatsService.getProjectsTotals(projectIds).associateBy { it.projectId }
     val languages = projectService.getProjectsWithFetchedLanguages(projectIds)
       .associate { it.id to it.languages.toList() }
     val projectsWithStatsContent = projects.content.map { ProjectWithStatsView(it, stats[it.id]!!, languages[it.id]!!) }
@@ -139,7 +143,7 @@ class V2ProjectsController(
   @AccessWithApiKey
   @Operation(summary = "Returns project by id")
   fun get(@PathVariable("projectId") projectId: Long): ProjectModel {
-    return projectService.getView(projectId)?.let {
+    return projectService.getView(projectId).let {
       projectModelAssembler.toModel(it)
     }
   }
@@ -236,6 +240,7 @@ class V2ProjectsController(
 
   @PostMapping(value = [""])
   @Operation(summary = "Creates project with specified languages")
+  @RequestActivity(ActivityType.CREATE_PROJECT)
   fun createProject(@RequestBody @Valid dto: CreateProjectDTO): ProjectModel {
     val userAccount = authenticationFacade.userAccount
     if (!this.tolgeeProperties.authentication.userCanCreateProjects &&
@@ -250,6 +255,7 @@ class V2ProjectsController(
   @Operation(summary = "Modifies project")
   @PutMapping(value = ["/{projectId}"])
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @RequestActivity(ActivityType.EDIT_PROJECT)
   fun editProject(@RequestBody @Valid dto: EditProjectDTO): ProjectModel {
     val project = projectService.editProject(projectHolder.project.id, dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))

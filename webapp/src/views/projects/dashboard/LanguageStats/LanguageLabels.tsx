@@ -1,0 +1,124 @@
+import React from 'react';
+import { T } from '@tolgee/react';
+import { Box, styled } from '@mui/material';
+
+import { StateType, translationStates } from 'tg.constants/translationStates';
+import { components } from 'tg.service/apiSchema.generated';
+
+const DOT_SIZE = 8;
+
+type LanguageStatsModel = components['schemas']['LanguageStatsModel'];
+
+const StyledContainer = styled('div')`
+  margin: 8px;
+  display: grid;
+  grid-template-columns: auto auto 1fr 1fr 1fr;
+  gap: 5px;
+  align-items: center;
+  white-space: nowrap;
+`;
+
+const StyledDot = styled(Box)`
+  width: ${DOT_SIZE}px;
+  height: ${DOT_SIZE}px;
+  border-radius: ${DOT_SIZE / 2}px;
+  filter: brightness(
+    ${({ theme }) => (theme.palette.mode === 'dark' ? 0.8 : 1)}
+  );
+`;
+
+type StatItem = {
+  status: StateType;
+  percent: number;
+  keyCount: number;
+  wordCount: number | null;
+};
+
+const formatPercentage = (num: number) => {
+  if (Math.round(num) < 1 && num !== 0) {
+    return <T keyName="project_dashboard_translations_less_then_1_percent" />;
+  } else {
+    return (
+      <T
+        keyName="project_dashboard_percent_count"
+        parameters={{ percentage: num / 100 }}
+      />
+    );
+  }
+};
+
+const statsIntoArray = (data: LanguageStatsModel) => {
+  const statItems: StatItem[] = [];
+  statItems.push({
+    status: 'REVIEWED',
+    percent: data.reviewedPercentage,
+    keyCount: data.reviewedKeyCount,
+    wordCount: data.reviewedWordCount,
+  });
+
+  statItems.push({
+    status: 'TRANSLATED',
+    percent: data.translatedPercentage,
+    keyCount: data.translatedKeyCount,
+    wordCount: data.translatedWordCount,
+  });
+
+  statItems.push({
+    status: 'UNTRANSLATED',
+    percent: data.untranslatedPercentage,
+    keyCount: data.untranslatedKeyCount,
+    wordCount: data.untranslatedWordCount,
+  });
+
+  return statItems.filter((i) => i.keyCount > 0);
+};
+
+type Props = {
+  data: LanguageStatsModel;
+};
+
+export const LanguageLabels: React.FC<Props> = ({ data }) => {
+  const statItems = statsIntoArray(data);
+
+  return (
+    <>
+      {statItems.length ? (
+        <StyledContainer>
+          {statItems.map((item) => (
+            <React.Fragment key={item.status}>
+              <StyledDot
+                gridColumn={1}
+                sx={{ background: translationStates[item.status].color }}
+              />
+              <Box data-cy="project-dashboard-language-label-state">
+                <T keyName={translationStates[item.status].translationKey} />
+              </Box>
+              <Box ml={2} data-cy="project-dashboard-language-label-percentage">
+                {formatPercentage(item.percent)}
+              </Box>
+              <Box ml={2} data-cy="project-dashboard-language-label-keys">
+                <T
+                  keyName="project_dashboard_language_keys"
+                  parameters={{ count: item.keyCount }}
+                />
+              </Box>
+              {item.wordCount !== null && (
+                <Box ml={2} data-cy="project-dashboard-language-label-words">
+                  <T
+                    keyName="project_dashboard_language_words"
+                    parameters={{ count: item.wordCount }}
+                  />
+                </Box>
+              )}
+            </React.Fragment>
+          ))}
+        </StyledContainer>
+      ) : (
+        <T
+          keyName="project_dashboard_language_keys"
+          parameters={{ count: 0 }}
+        />
+      )}
+    </>
+  );
+};

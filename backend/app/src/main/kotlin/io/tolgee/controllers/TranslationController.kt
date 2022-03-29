@@ -10,7 +10,6 @@ import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
 import io.tolgee.dtos.response.ViewDataResponse
 import io.tolgee.dtos.response.translations_view.ResponseParams
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.api_key_auth.AccessWithApiKey
@@ -65,11 +64,11 @@ class TranslationController @Autowired constructor(
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translations for existing key")
-  fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto?) {
-    val key = keyService.findOptional(
+  fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto) {
+    val key = keyService.get(
       projectHolder.project.id,
-      PathDTO.fromFullPath(dto!!.key)
-    ).orElseThrow { NotFoundException() }
+      dto.key
+    )
     securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)
     translationService.setForKey(key, dto.translations)
   }

@@ -13,14 +13,12 @@ const DOT_SIZE = 8;
 
 const StyledContainer = styled('div')`
   width: 100%;
-  min-width: 150px;
 
   & .bar {
     height: ${HEIGHT}px;
     background-color: ${translationStates.UNTRANSLATED.color};
     border-radius: ${BORDER_RADIUS}px;
     width: 100%;
-    min-width: 150px;
     overflow: hidden;
     display: flex;
     margin-bottom: ${({ theme }) => theme.spacing(0.5)};
@@ -68,8 +66,8 @@ const STATES_ORDER = ['REVIEWED', 'TRANSLATED', 'UNTRANSLATED'] as State[];
 
 export function TranslationStatesBar(props: {
   labels: boolean;
+  hideTooltips?: boolean;
   stats: {
-    projectId: number;
     keyCount: number;
     languageCount: number;
     translationStateCounts: {
@@ -133,6 +131,7 @@ export function TranslationStatesBar(props: {
           <Tooltip
             key={idx}
             title={<T>{translationStates[state].translationKey}</T>}
+            open={props.hideTooltips ? false : undefined}
           >
             <Box
               data-cy="project-states-bar-state-progress"

@@ -24,6 +24,7 @@ export interface BaseViewProps {
   lg?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   onSearch?: (string) => void;
   navigation?: React.ComponentProps<typeof Navigation>['path'];
+  customNavigation?: ReactNode;
   customHeader?: ReactNode;
   hideChildrenOnLoading?: boolean;
   containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
@@ -58,18 +59,19 @@ export const BaseView = (props: BaseViewProps) => {
       }}
     >
       <Box minHeight="100%" data-cy={props['data-cy']}>
-        {props.navigation && (
-          <SecondaryBar
-            height={49}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Container maxWidth={false} style={{ padding: 0, margin: 0 }}>
-              <Navigation path={props.navigation} />
-            </Container>
-          </SecondaryBar>
-        )}
+        {props.customNavigation ||
+          (props.navigation && (
+            <SecondaryBar
+              height={49}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Container maxWidth={false} style={{ padding: 0, margin: 0 }}>
+                <Navigation path={props.navigation} />
+              </Container>
+            </SecondaryBar>
+          ))}
         {(props.title || props.customHeader) && (
           <SecondaryBar>
             <Container

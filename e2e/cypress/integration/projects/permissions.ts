@@ -194,6 +194,36 @@ const assertManageMenuItemsNotVisible = () => {
   });
 };
 
+const assertLanguageSettingsNotOnDashboard = () => {
+  gcy('project-dashboard-language-count').should('be.visible').click();
+  cy.location('href').should('not.contain', '/languages');
+  gcy('project-dashboard-language-menu').should('be.visible').click();
+  gcy('project-dashboard-language-menu-export').should('be.visible');
+  gcy('project-dashboard-language-menu-settings').should('not.exist');
+  cy.get('body').click();
+};
+
+const assertLanguageSettingsOnDashboard = () => {
+  gcy('project-dashboard-language-count').should('be.visible').click();
+  cy.location('href').should('contain', '/languages');
+  selectInProjectMenu('Project Dashboard');
+  gcy('project-dashboard-language-menu').should('be.visible').click();
+  gcy('project-dashboard-language-menu-settings').click();
+  cy.location('href').should('contain', '/languages');
+  selectInProjectMenu('Project Dashboard');
+};
+
+const assertUserSettingsNotOnDashboard = () => {
+  gcy('project-dashboard-members').should('be.visible').click();
+  cy.location('href').should('not.contain', '/permissions');
+};
+
+const assertUserSettingsOnDashboard = () => {
+  gcy('project-dashboard-members').should('be.visible').click();
+  cy.location('href').should('contain', '/permissions');
+  selectInProjectMenu('Project Dashboard');
+};
+
 const assertOtherMenuItemsVisible = () => {
   OTHER_PROJECT_ITEMS.forEach((item) => {
     gcy('project-menu-items')
@@ -207,6 +237,9 @@ const validateManagePermissions = (projectName: string) => {
   enterProjectSettings(projectName);
   cy.gcy('global-form-save-button').wait(100).click();
   assertMessage('Project settings successfully saved');
+  selectInProjectMenu('Project Dashboard');
+  assertLanguageSettingsOnDashboard();
+  assertUserSettingsOnDashboard();
   enterProject(projectName);
   MANAGE_PROJECT_ITEMS.forEach((item) => {
     gcy('project-menu-items')
@@ -219,6 +252,9 @@ const validateManagePermissions = (projectName: string) => {
 const validateEditPermissions = (projectName: string) => {
   visitList();
   enterProject(projectName);
+  selectInProjectMenu('Project Dashboard');
+  assertLanguageSettingsNotOnDashboard();
+  assertUserSettingsNotOnDashboard();
   selectInProjectMenu('Translations');
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
@@ -238,6 +274,9 @@ const validateEditPermissions = (projectName: string) => {
 const validateTranslatePermissions = (projectName: string) => {
   visitList();
   enterProject(projectName);
+  selectInProjectMenu('Project Dashboard');
+  assertLanguageSettingsNotOnDashboard();
+  assertUserSettingsNotOnDashboard();
   selectInProjectMenu('Translations');
   assertManageMenuItemsNotVisible();
   assertOtherMenuItemsVisible();
@@ -255,6 +294,9 @@ const validateTranslatePermissions = (projectName: string) => {
 const validateViewPermissions = (projectName: string) => {
   visitList();
   enterProject(projectName);
+  selectInProjectMenu('Project Dashboard');
+  assertLanguageSettingsNotOnDashboard();
+  assertUserSettingsNotOnDashboard();
   gcy('project-menu-items').get(`[aria-label="Projects"]`).should('be.visible');
   gcy('project-menu-items').get(`[aria-label="Export"]`).should('be.visible');
   assertManageMenuItemsNotVisible();

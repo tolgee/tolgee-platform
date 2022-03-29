@@ -1,8 +1,9 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
-import { assertMessage, gcy } from '../../common/shared';
+import { gcy } from '../../common/shared';
 import { projectTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
+import { createProject } from '../../common/projects';
 
 describe('Projects Basics', () => {
   beforeEach(() => {
@@ -28,21 +29,6 @@ describe('Projects Basics', () => {
   it('Creates with organization owner', () => {
     createProject('I am a great project', 'Facebook');
   });
-
-  const createProject = (name: string, owner: string) => {
-    gcy('global-plus-button').click();
-    gcy('project-owner-select').click();
-    gcy('project-owner-select-item').contains(owner).click();
-    gcy('project-name-field').find('input').type(name);
-    gcy('global-form-save-button').click();
-    assertMessage('Project created');
-    gcy('global-paginated-list')
-      .contains(name)
-      .closestDcy('dashboard-projects-list-item')
-      .within(() => {
-        gcy('project-list-owner').contains(owner).should('be.visible');
-      });
-  };
 
   after(() => {
     projectTestData.clean();

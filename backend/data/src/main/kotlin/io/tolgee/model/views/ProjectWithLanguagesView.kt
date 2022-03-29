@@ -1,6 +1,7 @@
 package io.tolgee.model.views
 
 import io.tolgee.model.Language
+import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
@@ -13,9 +14,7 @@ open class ProjectWithLanguagesView(
   override val avatarHash: String?,
   override val userOwner: UserAccount?,
   override val baseLanguage: Language?,
-  override val organizationOwnerName: String?,
-  override val organizationOwnerSlug: String?,
-  override val organizationBasePermissions: Permission.ProjectPermissionType?,
+  override val organizationOwner: Organization?,
   override val organizationRole: OrganizationRoleType?,
   override val directPermissions: Permission.ProjectPermissionType?,
   val permittedLanguageIds: List<Long>?
@@ -30,9 +29,7 @@ open class ProjectWithLanguagesView(
         avatarHash = view.avatarHash,
         userOwner = view.userOwner,
         baseLanguage = view.baseLanguage,
-        organizationOwnerName = view.organizationOwnerName,
-        organizationOwnerSlug = view.organizationOwnerSlug,
-        organizationBasePermissions = view.organizationBasePermissions,
+        organizationOwner = view.organizationOwner,
         organizationRole = view.organizationRole,
         directPermissions = view.directPermissions,
         permittedLanguageIds = permittedLanguageIds

@@ -44,7 +44,7 @@ class ScreenshotService(
   }
 
   fun storeProcessed(image: ByteArray, key: Key): Screenshot {
-    val screenshotEntity = Screenshot(key = key)
+    val screenshotEntity = Screenshot().also { it.key = key }
     key.screenshots.add(screenshotEntity)
     screenshotRepository.save(screenshotEntity)
     fileStorage.storeFile(screenshotEntity.getFilePath(), image)

@@ -1,11 +1,11 @@
 package io.tolgee.model
 
-import org.hibernate.envers.Audited
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -24,7 +24,7 @@ import javax.validation.constraints.Size
     UniqueConstraint(columnNames = ["third_party_billing_id"], name = "organization_third_party_billing_id_unique")
   ]
 )
-@Audited
+
 class Organization(
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0,
@@ -42,7 +42,7 @@ class Organization(
   @Enumerated(EnumType.STRING)
   open var basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
 
-  @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE])
+  @OneToOne(mappedBy = "organization", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
   var mtCreditBucket: MtCreditBucket? = null
 ) : ModelWithAvatar {
   constructor(
