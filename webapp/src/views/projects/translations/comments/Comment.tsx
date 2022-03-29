@@ -23,16 +23,13 @@ const useStyles = makeStyles((theme) => ({
     background: 'transparent',
     transition: 'background 0.1s ease-out',
     '&:hover': {
-      background: theme.palette.grey[200],
+      background: theme.palette.extraLightBackground.main,
       transition: 'background 0.1s ease-in',
     },
     '&:hover $hoverVisible': {
       opacity: 1,
       transition: 'opacity 0.5s ease-in',
     },
-  },
-  unresolved: {
-    background: theme.palette.grey[100],
   },
   hoverVisible: {
     opacity: 0,
@@ -127,12 +124,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
   };
 
   return (
-    <div
-      className={clsx(classes.container, {
-        [classes.unresolved]: data.state === 'NEEDS_RESOLUTION',
-      })}
-      data-cy="comment"
-    >
+    <div className={clsx(classes.container)} data-cy="comment">
       <Tooltip title={data.author.name || data.author.username}>
         <div className={classes.avatar}>
           <AvatarImg

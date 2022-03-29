@@ -8,6 +8,7 @@ import { Editor } from 'tg.component/editor/Editor';
 import { components } from 'tg.service/apiSchema.generated';
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { Comments } from './comments/Comments';
+import { History } from './history/History';
 import { getMeta } from 'tg.fixtures/isMac';
 import { useTranslationsDispatch } from './context/TranslationsContext';
 import { ToolsPopup } from './TranslationTools/ToolsPopup';
@@ -55,13 +56,16 @@ const useStyles = makeStyles((theme) => {
     },
     tab: {
       minHeight: 0,
-      minWidth: 100,
-      margin: '0px 5px',
+      minWidth: 60,
+      margin: '0px 0px',
     },
     closeButton: {
       width: 30,
       height: 30,
       marginRight: 12,
+    },
+    scrollButtons: {
+      width: 30,
     },
   };
 });
@@ -149,7 +153,8 @@ export const TranslationOpened: React.FC<Props> = ({
           onChange={(_, value) => onModeChange(value)}
           className={classes.tabs}
           variant="scrollable"
-          scrollButtons="off"
+          scrollButtons="auto"
+          classes={{ scrollButtons: classes.scrollButtons }}
         >
           {editEnabled && (
             <Tab
@@ -168,6 +173,12 @@ export const TranslationOpened: React.FC<Props> = ({
             value="comments"
             className={classes.tab}
             data-cy="translations-cell-tab-comments"
+          />
+          <Tab
+            label={<T>translations_cell_tab_history</T>}
+            value="history"
+            className={classes.tab}
+            data-cy="translations-cell-tab-history"
           />
         </Tabs>
         <IconButton
@@ -212,6 +223,14 @@ export const TranslationOpened: React.FC<Props> = ({
         </>
       ) : mode === 'comments' ? (
         <Comments
+          keyId={keyId}
+          language={language}
+          translation={translation}
+          onCancel={() => onCancel(true)}
+          editEnabled={editEnabled}
+        />
+      ) : mode === 'history' ? (
+        <History
           keyId={keyId}
           language={language}
           translation={translation}

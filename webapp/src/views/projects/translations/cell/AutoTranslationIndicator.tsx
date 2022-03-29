@@ -1,17 +1,12 @@
 import clsx from 'clsx';
-import { makeStyles, Tooltip } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import { Clear } from '@material-ui/icons';
-import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
-import {
-  MachineTranslationIcon,
-  TranslationMemoryIcon,
-} from 'tg.component/CustomIcons';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
-import { getProviderImg } from '../TranslationTools/getProviderImg';
+import { AutoTranslationIcon } from './AutoTranslationIcon';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -37,17 +32,6 @@ const useStyles = makeStyles((theme) => ({
       transition: 'all 0.1s',
     },
   },
-  icon: {
-    fontSize: 16,
-    color: '#249bad',
-  },
-  imgWrapper: {
-    display: 'flex',
-  },
-  providerImg: {
-    width: 14,
-    height: 14,
-  },
   clearButton: {
     paddingLeft: 2,
     fontSize: 18,
@@ -66,7 +50,6 @@ export const AutoTranslationIndicator: React.FC<Props> = ({
   lang,
   className,
 }) => {
-  const t = useTranslate();
   const classes = useStyles();
   const project = useProject();
   const translation = keyData.translations[lang];
@@ -80,47 +63,29 @@ export const AutoTranslationIndicator: React.FC<Props> = ({
 
   const handleClear = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
     e.stopPropagation();
-    clear
-      .mutateAsync({
+    clear.mutateAsync(
+      {
         path: { projectId: project.id, translationId: translation!.id },
-      })
-      .then(() => {
-        dispatch({
-          type: 'UPDATE_TRANSLATION',
-          payload: { keyId: keyData.keyId, lang, data: { auto: false } },
-        });
-      });
+      },
+      {
+        onSuccess() {
+          dispatch({
+            type: 'UPDATE_TRANSLATION',
+            payload: { keyId: keyData.keyId, lang, data: { auto: false } },
+          });
+        },
+      }
+    );
   };
 
   if (translation?.auto) {
-    const providerImg = getProviderImg(translation.mtProvider);
     return (
       <div className={clsx(className, classes.wrapper)}>
         <div
           className={classes.container}
           data-cy="translations-auto-translated-indicator"
         >
-          <Tooltip
-            title={
-              translation.mtProvider
-                ? t('translations_auto_translated_provider', {
-                    provider: translation.mtProvider,
-                  })
-                : t('translations_auto_translated_tm')
-            }
-          >
-            {translation.mtProvider && providerImg ? (
-              <img src={providerImg} className={classes.providerImg} />
-            ) : (
-              <div className={classes.imgWrapper}>
-                {translation.mtProvider ? (
-                  <MachineTranslationIcon className={classes.icon} />
-                ) : (
-                  <TranslationMemoryIcon className={classes.icon} />
-                )}
-              </div>
-            )}
-          </Tooltip>
+          <AutoTranslationIcon provider={translation.mtProvider} />
           <Clear
             role="button"
             className={classes.clearButton}
