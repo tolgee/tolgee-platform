@@ -1694,18 +1694,8 @@
             <column name="character_count" type="int4"/>
         </addColumn>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1648040856646-2">
-        <addColumn tableName="translation_aud">
-            <column name="character_count" type="int4"/>
-        </addColumn>
-    </changeSet>
     <changeSet author="jenik (generated)" id="1648040856646-3">
         <addColumn tableName="translation">
-            <column name="word_count" type="int4"/>
-        </addColumn>
-    </changeSet>
-    <changeSet author="jenik (generated)" id="1648040856646-4">
-        <addColumn tableName="translation_aud">
             <column name="word_count" type="int4"/>
         </addColumn>
     </changeSet>
