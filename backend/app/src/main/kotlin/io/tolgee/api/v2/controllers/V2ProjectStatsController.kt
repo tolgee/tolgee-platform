@@ -18,14 +18,14 @@ import org.springframework.web.bind.annotation.RestController
 @Suppress("MVCPathVariableInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/projects"])
+@RequestMapping(value = ["/v2/projects/{projectId}/stats", "/v2/projects/stats"])
 @Tag(name = "Projects")
 class V2ProjectStatsController(
   private val projectStatsService: ProjectStatsService
 ) {
 
   @Operation(summary = "Returns project stats")
-  @GetMapping("/{projectId}/stats", produces = [MediaTypes.HAL_JSON_VALUE])
+  @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @AccessWithAnyProjectPermission
   @AccessWithApiKey
   fun getProjectStats(projectId: Long) {
