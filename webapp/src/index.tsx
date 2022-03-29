@@ -2,7 +2,6 @@ import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
 import { TolgeeProvider } from '@tolgee/react';
-import { UI } from '@tolgee/ui';
 import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
@@ -237,7 +236,6 @@ ReactDOM.render(
     <TolgeeProvider
       apiUrl={process.env.REACT_APP_TOLGEE_API_URL}
       apiKey={process.env.REACT_APP_TOLGEE_API_KEY}
-      ui={process.env.REACT_APP_TOLGEE_API_KEY ? UI : undefined}
       staticData={{
         en: () => import('./i18n/en.json'),
         // @ts-ignore
