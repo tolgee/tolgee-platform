@@ -1,3 +1,10 @@
+## [2.13.3](https://github.com/tolgee/tolgee-platform/compare/v2.13.2...v2.13.3) (2022-03-29)
+
+
+### Bug Fixes
+
+* update docs when ui is auto included ([0e71f62](https://github.com/tolgee/tolgee-platform/commit/0e71f6261239f6890de42fa817a600065e0978eb))
+
 ## [2.13.2](https://github.com/tolgee/tolgee-platform/compare/v2.13.1...v2.13.2) (2022-03-28)
 
 
