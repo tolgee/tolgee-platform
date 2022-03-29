@@ -1,3 +1,15 @@
+# [2.14.0](https://github.com/tolgee/tolgee-platform/compare/v2.13.5...v2.14.0) (2022-03-29)
+
+
+### Bug Fixes
+
+* update tolgee dependencies ([b9b3b2d](https://github.com/tolgee/tolgee-platform/commit/b9b3b2d23be2990cbd8e21b57408e840cea66835))
+
+
+### Features
+
+* Translate permissions for specific language [#919](https://github.com/tolgee/tolgee-platform/issues/919) ([e1d4b02](https://github.com/tolgee/tolgee-platform/commit/e1d4b0231acbc9a68d4bb7eeb5ac759572489de5))
+
 ## [2.13.5](https://github.com/tolgee/tolgee-platform/compare/v2.13.4...v2.13.5) (2022-03-29)
 
 
