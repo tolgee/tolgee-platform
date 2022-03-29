@@ -101,7 +101,7 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
             }
             onSubmit={(data) => globalActions.login.dispatch(data)}
           >
-            <TextField name="username" label={<T>login_username_label</T>} />
+            <TextField name="username" label={<T>login_email_label</T>} />
             <TextField
               name="password"
               type="password"
