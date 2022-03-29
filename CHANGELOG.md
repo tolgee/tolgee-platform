@@ -1,3 +1,11 @@
+## [2.13.5](https://github.com/tolgee/tolgee-platform/compare/v2.13.4...v2.13.5) (2022-03-29)
+
+
+### Bug Fixes
+
+* Change login username label to email ([eec956c](https://github.com/tolgee/tolgee-platform/commit/eec956c3520f4076422d5407c9db02b47eed7d8c))
+* Google translator always suggests input ([a504dae](https://github.com/tolgee/tolgee-platform/commit/a504dae095117a8dd05b97447a22d55750ebd8eb))
+
 ## [2.13.4](https://github.com/tolgee/tolgee-platform/compare/v2.13.3...v2.13.4) (2022-03-29)
 
 
