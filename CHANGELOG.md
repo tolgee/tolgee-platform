@@ -1,3 +1,10 @@
+## [2.14.1](https://github.com/tolgee/tolgee-platform/compare/v2.14.0...v2.14.1) (2022-03-31)
+
+
+### Bug Fixes
+
+* disable revoke button when user is organization owner ([5018630](https://github.com/tolgee/tolgee-platform/commit/5018630f80489d546269066e81f9a7cb355c8405))
+
 # [2.14.0](https://github.com/tolgee/tolgee-platform/compare/v2.13.5...v2.14.0) (2022-03-29)
 
 
