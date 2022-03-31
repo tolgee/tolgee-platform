@@ -1,4 +1,4 @@
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 import { Chip, makeStyles } from '@material-ui/core';
 
@@ -11,6 +11,7 @@ import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
+import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import RevokePermissionsButton from './RevokePermissionsButton';
 
 type UserAccountInProjectModel =
@@ -51,6 +52,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   const project = useProject();
   const currentUser = useUser();
   const classes = useStyles();
+  const t = useTranslate();
 
   const editPermission = useApiMutation({
     url: '/v2/projects/{projectId}/users/{userId}/set-permissions/{permissionType}',
@@ -76,6 +78,11 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
             messageService.success(<T>permissions_set_message</T>);
           }
         },
+        onError(e) {
+          parseErrorResponse(e).forEach((err) =>
+            messageService.error(<T>{err}</T>)
+          );
+        },
       }
     );
   };
@@ -90,6 +97,8 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   const allLanguages = useProjectLanguages();
   const allLangIds = allLanguages.map((l) => l.id);
   const projectPermissionType = user.computedPermissions.type;
+  const isCurrentUser = currentUser?.id === user.id;
+  const isOwner = user.organizationRole === 'OWNER';
 
   return (
     <div className={classes.listItem} data-cy="project-member-item">
@@ -109,13 +118,20 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
           />
         )}
         <PermissionsMenu
+          title={
+            isOwner && !isCurrentUser
+              ? t('user_is_owner_of_organization_tooltip')
+              : isOwner
+              ? t('cannot_change_your_own_access_tooltip')
+              : undefined
+          }
           selected={user.computedPermissions.type!}
           onSelect={(permission) =>
             changePermissionConfirm(permission, allLangIds)
           }
           buttonProps={{
             size: 'small',
-            disabled: currentUser?.id === user.id,
+            disabled: isCurrentUser || isOwner,
           }}
           minPermissions={user.organizationBasePermissions}
         />

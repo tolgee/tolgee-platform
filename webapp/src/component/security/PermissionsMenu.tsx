@@ -29,6 +29,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const PermissionsMenu: FunctionComponent<{
+  title?: string;
   selected: PermissionType;
   onSelect: (value: PermissionType) => void;
   buttonProps?: ComponentProps<typeof Button>;
@@ -59,9 +60,10 @@ export const PermissionsMenu: FunctionComponent<{
   return (
     <>
       <Tooltip
-        title={t(
-          `permission_type_${projectPermissionTypes[props.selected]}_hint`
-        )}
+        title={
+          props.title ||
+          t(`permission_type_${projectPermissionTypes[props.selected]}_hint`)
+        }
       >
         <span>
           <Button

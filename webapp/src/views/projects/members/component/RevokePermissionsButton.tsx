@@ -45,9 +45,9 @@ const RevokePermissionsButton = (props: {
   let disabledTooltipTitle = undefined as ReactElement | undefined;
 
   if (currentUser!.id === props.user.id) {
-    disabledTooltipTitle = <T noWrap>cannot_revoke_your_own_access_tooltip</T>;
+    disabledTooltipTitle = <T>cannot_revoke_your_own_access_tooltip</T>;
   } else if (hasOrganizationRole) {
-    disabledTooltipTitle = <T noWrap>user_is_part_of_organization_tooltip</T>;
+    disabledTooltipTitle = <T>user_is_part_of_organization_tooltip</T>;
   }
 
   const isDisabled = !!disabledTooltipTitle;
