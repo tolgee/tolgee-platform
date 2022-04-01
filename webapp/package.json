@@ -41,7 +41,7 @@
     "regenerator-runtime": "^0.13.9",
     "tsyringe": "^4.6.0",
     "use-context-selector": "^1.3.9",
-    "use-debounce": "^7.0.0",
+    "use-debounce": "^7.0.1",
     "web-vitals": "^2.1.0",
     "yup": "^0.32.9"
   },
