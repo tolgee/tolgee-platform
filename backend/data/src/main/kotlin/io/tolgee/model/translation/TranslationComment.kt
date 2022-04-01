@@ -1,5 +1,6 @@
 package io.tolgee.model.translation
 
+import io.tolgee.activity.ActivityLogged
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.TranslationCommentState
@@ -12,12 +13,15 @@ import javax.validation.constraints.NotBlank
 
 @Entity
 @Audited
+@ActivityLogged
 class TranslationComment(
   @field:Length(max = 10000)
   @field:NotBlank
   @Column(columnDefinition = "text")
+  @ActivityLogged
   var text: String = "",
 
+  @ActivityLogged
   var state: TranslationCommentState = TranslationCommentState.NEEDS_RESOLUTION,
 
   @ManyToOne
