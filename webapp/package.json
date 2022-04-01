@@ -107,7 +107,7 @@
     "prismjs": "1.25.0",
     "react-scripts": "4.0.3",
     "redux-devtools-extension": "^2.13.9",
-    "typescript": "^4.3.2",
+    "typescript": "^4.6.3",
     "webpack": "4.44.2"
   }
 }
