@@ -1,5 +1,6 @@
 package io.tolgee.dialects.postgres
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import org.hibernate.NullPrecedence
 import org.hibernate.dialect.PostgreSQL10Dialect
 import org.hibernate.dialect.function.SQLFunction
@@ -7,6 +8,7 @@ import org.hibernate.engine.spi.Mapping
 import org.hibernate.engine.spi.SessionFactoryImplementor
 import org.hibernate.type.FloatType
 import org.hibernate.type.Type
+import java.sql.Types
 
 @Suppress("unused")
 class CustomPostgreSQLDialect : PostgreSQL10Dialect() {
@@ -47,5 +49,6 @@ class CustomPostgreSQLDialect : PostgreSQL10Dialect() {
         }
       }
     )
+    registerHibernateType(Types.OTHER, JsonBinaryType::class.java.name)
   }
 }

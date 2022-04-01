@@ -1,5 +1,6 @@
 package io.tolgee.model.translation
 
+import io.tolgee.activity.ActivityLogged
 import io.tolgee.constants.MtServiceType
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
@@ -26,8 +27,10 @@ import javax.validation.constraints.NotNull
   ]
 )
 @Audited
+@ActivityLogged
 class Translation(
   @Column(columnDefinition = "text")
+  @ActivityLogged
   var text: String? = null
 ) : StandardAuditModel() {
   @ManyToOne(optional = false)
@@ -39,18 +42,21 @@ class Translation(
 
   @Enumerated
   @ColumnDefault(value = "2")
+  @ActivityLogged
   var state: TranslationState = TranslationState.TRANSLATED
 
   /**
    * Was translated automatically?
    */
   @ColumnDefault("false")
+  @ActivityLogged
   var auto: Boolean = false
 
   /**
    * Which machine translation provider was used to translate this value?
    */
   @Enumerated
+  @ActivityLogged
   var mtProvider: MtServiceType? = null
 
   @OneToMany(mappedBy = "translation")
