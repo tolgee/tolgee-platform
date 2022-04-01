@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.activities.SetTranslationActivity
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
 import io.tolgee.api.v2.hateoas.translations.SetTranslationsResponseModel
@@ -111,6 +113,7 @@ class V2TranslationsController(
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translations for existing key")
+  @RequestActivity(SetTranslationActivity::class)
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.get(projectHolder.project.id, dto.key)
     securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)

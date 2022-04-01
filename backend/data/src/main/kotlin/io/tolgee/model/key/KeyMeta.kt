@@ -1,5 +1,6 @@
 package io.tolgee.model.key
 
+import io.tolgee.activity.ActivityLogged
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.ImportKey
@@ -14,6 +15,7 @@ import javax.persistence.PreUpdate
 
 @Entity
 @EntityListeners(KeyMeta.Companion.KeyMetaListener::class)
+@ActivityLogged
 class KeyMeta(
   @OneToOne
   var key: Key? = null,

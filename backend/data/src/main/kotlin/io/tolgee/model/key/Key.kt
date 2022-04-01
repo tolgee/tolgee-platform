@@ -1,5 +1,6 @@
 package io.tolgee.model.key
 
+import io.tolgee.activity.ActivityLogged
 import io.tolgee.dtos.PathDTO
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
@@ -21,10 +22,12 @@ import javax.validation.constraints.Size
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name"], name = "key_project_id_name")])
 @Audited
+@ActivityLogged
 class Key(
   @field:NotBlank
   @field:Size(max = 2000)
   @field:Column(length = 2000)
+  @ActivityLogged
   var name: String = "",
 ) : StandardAuditModel(), WithKeyMeta {
   @field:NotNull
