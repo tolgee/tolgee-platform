@@ -1,6 +1,5 @@
 package io.tolgee.repository
 
-import io.tolgee.model.Project
 import io.tolgee.model.key.Key
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -9,7 +8,6 @@ import java.util.*
 
 @Repository
 interface KeyRepository : JpaRepository<Key, Long> {
-  fun getByNameAndProject(name: String, project: Project): Optional<Key>
   fun getByNameAndProjectId(fullPathString: String, projectId: Long): Optional<Key>
   fun getAllByProjectId(projectId: Long): Set<Key>
 

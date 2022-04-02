@@ -1,7 +1,6 @@
 package io.tolgee.activity
 
 import io.tolgee.activity.holders.ActivityHolder
-import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -27,7 +26,7 @@ class ActivityFilter(
     val activityAnnotation = getActivityAnnotation(request)
 
     if (activityAnnotation != null) {
-      activityHolder.manager = applicationContext.getBean(activityAnnotation.manager)
+      activityHolder.activity = applicationContext.getBean(activityAnnotation.activity.java)
     }
 
     filterChain.doFilter(request, response)

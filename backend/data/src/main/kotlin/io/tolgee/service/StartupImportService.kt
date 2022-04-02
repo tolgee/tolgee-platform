@@ -9,6 +9,7 @@ import io.tolgee.model.ApiKey
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
+import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
@@ -21,7 +22,7 @@ class StartupImportService(
   private val userAccountService: UserAccountService,
   private val properties: TolgeeProperties,
   private val apiKeyService: ApiKeyService,
-  private val projectHolder: ProjectHolder
+  private val applicationContext: ApplicationContext
 ) {
 
   @Transactional
@@ -65,7 +66,10 @@ class StartupImportService(
               }
 
               projectService.save(project)
-              projectHolder.project = ProjectDto.fromEntity(project)
+              applicationContext.getBean(
+                "transactionProjectHolder",
+                ProjectHolder::class.java
+              ).project = ProjectDto.fromEntity(project)
               importService.addFiles(fileDtos, null, project, userAccount)
               val imports = importService.getAllByProject(project.id)
               imports.forEach {

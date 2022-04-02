@@ -92,9 +92,9 @@ class KeyControllerTest : AuthorizedControllerTest() {
     keyService.create(project, keyDto)
     keyService.create(project, keyDto2)
 
-    val keyInstance = keyService.findOptional(project.id, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
+    val keyInstance = keyService.get(project.id, keyDto.key)
 
-    performDelete(projectId = project.id, keyInstance.id!!)
+    performDelete(projectId = project.id, keyInstance.id)
 
     assertThat(keyService.findOptional(project.id, PathDTO.fromFullPath(keyDto.key))).isEmpty
     assertThat(keyService.findOptional(project.id, PathDTO.fromFullPath(keyDto2.key))).isNotEmpty
@@ -105,10 +105,10 @@ class KeyControllerTest : AuthorizedControllerTest() {
     keyService.create(project, keyDto)
     keyService.create(project, keyDto2)
 
-    val keyInstance = keyService.findOptional(project.id, PathDTO.fromFullPath(keyDto.key)).orElseGet(null)
-    val keyInstance2 = keyService.findOptional(project.id, PathDTO.fromFullPath(keyDto2.key)).orElseGet(null)
+    val keyInstance = keyService.get(project.id, keyDto.key)
+    val keyInstance2 = keyService.get(project.id, keyDto2.key)
 
-    performDelete(projectId = project.id, setOf(keyInstance.id!!, keyInstance2.id!!))
+    performDelete(projectId = project.id, setOf(keyInstance.id, keyInstance2.id))
 
     assertThat(keyService.findOptional(project.id, PathDTO.fromFullPath(keyDto.key))).isEmpty
     assertThat(keyService.findOptional(project.id, PathDTO.fromFullPath(keyDto2.key))).isEmpty
@@ -117,7 +117,7 @@ class KeyControllerTest : AuthorizedControllerTest() {
   @Test
   fun get() {
     val key = keyService.create(project, keyDto)
-    val got = performGet(key.project!!.id, key.id!!)
+    val got = performGet(key.project.id, key.id)
       .andExpect(status().isOk)
       .andReturn()
       .mapResponseTo<DeprecatedKeyDto>()
