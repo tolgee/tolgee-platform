@@ -1,4 +1,4 @@
-package io.tolgee.model
+package io.tolgee.model.activity
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import org.hibernate.annotations.Type
@@ -24,7 +24,7 @@ import javax.persistence.TemporalType
 @Table(
   indexes = [
     Index(columnList = "authorId"),
-    Index(columnList = "activityManager")
+    Index(columnList = "type")
   ]
 )
 @EntityListeners(AuditingEntityListener::class)
@@ -44,12 +44,12 @@ class ActivityRevision : java.io.Serializable {
     strategy = GenerationType.SEQUENCE,
     generator = "activitySequenceGenerator"
   )
-  private val id: Long = 0
+  val id: Long = 0
 
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(name = "created_at", nullable = false, updatable = false)
+  @Column(name = "timestamp", nullable = false, updatable = false)
   @CreatedDate
-  var timestamp: Date? = null
+  lateinit var timestamp: Date
 
   /**
    * We don't want a foreign key, since user could have been deleted
@@ -59,7 +59,7 @@ class ActivityRevision : java.io.Serializable {
   @Type(type = "jsonb")
   var meta: MutableMap<String, Any?>? = null
 
-  var activityManager: String? = null
+  var type: String? = null
 
   /**
    * Project of the change
@@ -67,5 +67,5 @@ class ActivityRevision : java.io.Serializable {
   var projectId: Long? = null
 
   @OneToMany(mappedBy = "activityRevision")
-  var activities: MutableList<Activity> = mutableListOf()
+  var modifiedEntities: MutableList<ActivityModifiedEntity> = mutableListOf()
 }

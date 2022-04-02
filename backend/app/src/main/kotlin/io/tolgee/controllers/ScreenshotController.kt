@@ -12,7 +12,6 @@ import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.request.screenshot.GetScreenshotsByKeyDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.dtos.response.ScreenshotDTO
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.model.Screenshot
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
@@ -64,7 +63,7 @@ class ScreenshotController(
 
     projectService.get(projectId)
     securityService.checkProjectPermission(projectId, Permission.ProjectPermissionType.TRANSLATE)
-    val keyEntity = keyService.findOptional(projectId, PathDTO.fromFullPath(key)).orElseThrow { NotFoundException() }
+    val keyEntity = keyService.get(projectId, PathDTO.fromFullPath(key).fullPathString)
     val screenShotEntity = screenshotService.store(screenshot, keyEntity)
     return screenShotEntity.toDTO()
   }

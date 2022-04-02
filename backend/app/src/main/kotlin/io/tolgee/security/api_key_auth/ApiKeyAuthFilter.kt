@@ -25,15 +25,20 @@ class ApiKeyAuthFilter(
   private val resolver: HandlerExceptionResolver,
 ) : OncePerRequestFilter() {
 
+  companion object {
+    val REGEX = "/(?:v2|api)/(?:repositor(?:y|ies)|projects?)/[a-zA-Z]+([a-zA-Z0-9]?)/?.*".toRegex()
+  }
+
   override fun doFilterInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
     filterChain: FilterChain
   ) {
     if (this.isApiAccessAllowed(request)) {
-      val keyParameter = request.getParameter("ak")
-      if (keyParameter != null && !keyParameter.isEmpty()) {
-        val ak = apiKeyService.getApiKey(keyParameter)
+      val apiKey = getApiKey(request)
+
+      if (apiKey != null && apiKey.isNotEmpty()) {
+        val ak = apiKeyService.getApiKey(apiKey)
         if (ak.isPresent) {
           val apiKeyAuthenticationToken = ApiKeyAuthenticationToken(ak.get())
           SecurityContextHolder.getContext().authentication = apiKeyAuthenticationToken
@@ -50,8 +55,11 @@ class ApiKeyAuthFilter(
         }
       }
     }
+
     filterChain.doFilter(request, response)
   }
+
+  private fun getApiKey(request: HttpServletRequest) = request.getParameter("ak")
 
   private fun isApiAccessAllowed(request: HttpServletRequest): Boolean {
     return this.getAccessAllowedAnnotation(request) != null
