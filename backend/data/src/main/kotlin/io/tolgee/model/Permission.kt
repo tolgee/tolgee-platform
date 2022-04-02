@@ -54,8 +54,11 @@ class Permission(
   var project: Project = Project()
 
   enum class ProjectPermissionType(val power: Int, val availableScopes: Array<ApiScope>) {
-    VIEW(1, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.SCREENSHOTS_VIEW)),
-    TRANSLATE(2, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.SCREENSHOTS_VIEW)),
+    VIEW(1, arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.SCREENSHOTS_VIEW, ApiScope.ACTIVITY_VIEW)),
+    TRANSLATE(
+      2,
+      arrayOf(ApiScope.TRANSLATIONS_VIEW, ApiScope.TRANSLATIONS_EDIT, ApiScope.SCREENSHOTS_VIEW, ApiScope.ACTIVITY_VIEW)
+    ),
     EDIT(
       3,
       arrayOf(
@@ -64,7 +67,8 @@ class Permission(
         ApiScope.KEYS_EDIT,
         ApiScope.SCREENSHOTS_VIEW,
         ApiScope.SCREENSHOTS_UPLOAD,
-        ApiScope.SCREENSHOTS_DELETE
+        ApiScope.SCREENSHOTS_DELETE,
+        ApiScope.ACTIVITY_VIEW
       )
     ),
     MANAGE(
@@ -75,7 +79,8 @@ class Permission(
         ApiScope.KEYS_EDIT,
         ApiScope.SCREENSHOTS_VIEW,
         ApiScope.SCREENSHOTS_UPLOAD,
-        ApiScope.SCREENSHOTS_DELETE
+        ApiScope.SCREENSHOTS_DELETE,
+        ApiScope.ACTIVITY_VIEW
       )
     );
   }

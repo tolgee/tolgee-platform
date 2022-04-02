@@ -11,7 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.activity.RequestActivity
-import io.tolgee.activity.activities.SetTranslationActivity
+import io.tolgee.activity.activities.CreateKeyActivity
+import io.tolgee.activity.activities.DismissAutoTranslationStateActivity
+import io.tolgee.activity.activities.SetTranslationStateActivity
+import io.tolgee.activity.activities.SetTranslationsActivity
+import io.tolgee.activity.holders.ActivityHolder
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
 import io.tolgee.api.v2.hateoas.translations.SetTranslationsResponseModel
@@ -20,7 +24,6 @@ import io.tolgee.api.v2.hateoas.translations.TranslationHistoryModelAssembler
 import io.tolgee.api.v2.hateoas.translations.TranslationModel
 import io.tolgee.api.v2.hateoas.translations.TranslationModelAssembler
 import io.tolgee.controllers.IController
-import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.SelectAllResponse
@@ -84,7 +87,10 @@ class V2TranslationsController(
   private val languageService: LanguageService,
   private val securityService: SecurityService,
   private val authenticationFacade: AuthenticationFacade,
-  private val screenshotService: ScreenshotService
+  private val screenshotService: ScreenshotService,
+  private val activityHolder: ActivityHolder,
+  private val setTranslationsActivity: SetTranslationsActivity,
+  private val createKeyActivity: CreateKeyActivity
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @AccessWithAnyProjectPermission
@@ -113,7 +119,7 @@ class V2TranslationsController(
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translations for existing key")
-  @RequestActivity(SetTranslationActivity::class)
+  @RequestActivity(SetTranslationsActivity::class)
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.get(projectHolder.project.id, dto.key)
     securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)
@@ -136,8 +142,13 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    checkEditScopeIfKeyExists(dto)
-    val key = keyService.getOrCreateKey(projectHolder.projectEntity, PathDTO.fromFullPath(dto.key))
+    val key = keyService.find(projectHolder.projectEntity.id, dto.key)?.also {
+      checkKeyEditScope()
+      activityHolder.activity = setTranslationsActivity
+    } ?: let {
+      activityHolder.activity = createKeyActivity
+      keyService.create(projectHolder.projectEntity, dto.key)
+    }
     val translations = translationService.setForKey(key, dto.translations)
     return getSetTranslationsResponse(key, translations)
   }
@@ -146,6 +157,7 @@ class V2TranslationsController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translation state")
+  @RequestActivity(SetTranslationStateActivity::class)
   fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
@@ -199,6 +211,7 @@ class V2TranslationsController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = """Removes "auto translated" indication""")
+  @RequestActivity(DismissAutoTranslationStateActivity::class)
   fun dismissAutoTranslatedState(
     @PathVariable translationId: Long
   ): TranslationModel {
@@ -247,11 +260,9 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     )
   }
 
-  private fun checkEditScopeIfKeyExists(dto: SetTranslationsWithKeyDto) {
-    keyService.findOptional(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
-      if (authenticationFacade.isApiKeyAuthentication) {
-        securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
-      }
+  private fun checkKeyEditScope() {
+    if (authenticationFacade.isApiKeyAuthentication) {
+      securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
     }
   }
 

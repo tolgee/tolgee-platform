@@ -1,15 +1,17 @@
 package io.tolgee.activity
 
+import io.tolgee.activity.activities.common.ActivityProvider
 import io.tolgee.activity.holders.ActivityHolder
 import io.tolgee.dtos.cacheable.UserAccountDto
-import io.tolgee.model.Activity
-import io.tolgee.model.ActivityRevision
 import io.tolgee.model.EntityWithId
+import io.tolgee.model.activity.ActivityModifiedEntity
+import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
 import org.hibernate.EmptyInterceptor
 import org.hibernate.type.Type
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.support.ScopeNotActiveException
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
 import org.springframework.transaction.support.TransactionTemplate
@@ -18,6 +20,10 @@ import kotlin.reflect.full.hasAnnotation
 
 @Component
 class ActivityInterceptor : EmptyInterceptor() {
+
+  @Autowired
+  @org.springframework.context.annotation.Lazy
+  lateinit var activityProvider: ActivityProvider
 
   @Autowired
   lateinit var applicationContext: ApplicationContext
@@ -74,23 +80,27 @@ class ActivityInterceptor : EmptyInterceptor() {
 
       val changesMap = getChangesMap(entity, currentState, previousState, propertyNames)
 
-      val activity = Activity(
+      val activityModifiedEntity = ActivityModifiedEntity(
         activityRevision,
         entity::class.simpleName!!,
         entity.id
       )
 
-      activityRevision.meta = holder.manager?.metaModifier?.let {
+      activityRevision.meta = holder.activity?.metaModifier?.let {
         val meta = activityRevision.meta ?: mutableMapOf()
-        it(meta, activity, entity)
+        it(meta, activityModifiedEntity, entity)
         meta
       }
 
-      activity.revisionType = revisionType
-      activity.oldValues = changesMap.map { (property, change) -> property to change.first }.toMap()
-      activity.newValues = changesMap.map { (property, change) -> property to change.second }.toMap()
+      activityModifiedEntity.revisionType = revisionType
+      activityModifiedEntity.modifications = changesMap.map { (property, change) ->
+        property to PropertyModification(
+          change.first,
+          change.second
+        )
+      }.toMap()
 
-      activityService.onActivity(activity)
+      activityService.onActivity(activityModifiedEntity)
     }
   }
 
@@ -118,11 +128,6 @@ class ActivityInterceptor : EmptyInterceptor() {
     return entity is EntityWithId && entity::class.hasAnnotation<ActivityLogged>()
   }
 
-  private val holder: ActivityHolder
-    get() {
-      return applicationContext.getBean(ActivityHolder::class.java)
-    }
-
   private val activityRevision: ActivityRevision
     get() {
       var activityRevision = holder.activityRevision
@@ -131,7 +136,7 @@ class ActivityInterceptor : EmptyInterceptor() {
         activityRevision = ActivityRevision().also { revision ->
           revision.authorId = userAccount?.id
           revision.projectId = projectHolder.project.id
-          revision.activityManager = holder.manager?.let { it::class.simpleName }
+          revision.type = holder.activity?.type
         }
         holder.activityRevision = activityRevision
       }
@@ -146,7 +151,28 @@ class ActivityInterceptor : EmptyInterceptor() {
     get() = applicationContext.getBean(ActivityService::class.java)
 
   private val projectHolder: ProjectHolder
-    get() = applicationContext.getBean(ProjectHolder::class.java)
+    get() {
+      return try {
+        applicationContext.getBean(ProjectHolder::class.java).also {
+          // we must try to access something to get the exception thrown
+          it.project
+        }
+      } catch (e: ScopeNotActiveException) {
+        return applicationContext.getBean("transactionProjectHolder", ProjectHolder::class.java)
+      }
+    }
+
+  private val holder: ActivityHolder
+    get() {
+      return try {
+        applicationContext.getBean(ActivityHolder::class.java).also {
+          // we must try to access something to get the exception thrown
+          it.activityRevision
+        }
+      } catch (e: ScopeNotActiveException) {
+        applicationContext.getBean("transactionActivityHolder", ActivityHolder::class.java)
+      }
+    }
 
   private val userAccount: UserAccountDto?
     get() = applicationContext.getBean(AuthenticationFacade::class.java).userAccountOrNull
