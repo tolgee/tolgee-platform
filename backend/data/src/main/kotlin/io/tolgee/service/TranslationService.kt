@@ -102,7 +102,7 @@ class TranslationService(
     return translationsMap
   }
 
-  private fun getKeyTranslations(languages: Set<Language>, project: Project, key: Key?): Set<Translation> {
+  fun getKeyTranslations(languages: Set<Language>, project: Project, key: Key?): Set<Translation> {
     return if (key != null) {
       translationRepository.getTranslations(key, project, languages)
     } else LinkedHashSet()

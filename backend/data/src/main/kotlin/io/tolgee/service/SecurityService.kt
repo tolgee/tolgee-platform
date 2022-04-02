@@ -94,6 +94,13 @@ class SecurityService @Autowired constructor(
     }
   }
 
+  fun checkScreenshotsUploadPermission(projectId: Long) {
+    if (authenticationFacade.isApiKeyAuthentication) {
+      checkApiKeyScopes(setOf(ApiScope.SCREENSHOTS_UPLOAD), authenticationFacade.apiKey)
+    }
+    checkProjectPermission(projectId, ProjectPermissionType.TRANSLATE)
+  }
+
   private fun getProjectPermission(projectId: Long, userId: Long = activeUser.id): ProjectPermissionType? {
     return permissionService.getProjectPermissionType(projectId, userId)
   }
