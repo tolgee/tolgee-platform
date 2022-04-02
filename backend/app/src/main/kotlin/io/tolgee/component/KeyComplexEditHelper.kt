@@ -45,6 +45,7 @@ class KeyComplexEditHelper(
   private val authenticationFacade: AuthenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
   private val activityHolder: ActivityHolder = applicationContext.getBean(ActivityHolder::class.java)
 
+
   private lateinit var key: Key
   private var modifiedTranslations: Map<String, String?>? = null
   private val dtoTags = dto.tags
