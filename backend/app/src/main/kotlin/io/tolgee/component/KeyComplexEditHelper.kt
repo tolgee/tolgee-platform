@@ -32,7 +32,6 @@ class KeyComplexEditHelper(
   private val keyId: Long,
   private val dto: ComplexEditKeyDto
 ) {
-
   private val keyWithDataModelAssembler: KeyWithDataModelAssembler =
     applicationContext.getBean(KeyWithDataModelAssembler::class.java)
   private val keyService: KeyService = applicationContext.getBean(KeyService::class.java)
