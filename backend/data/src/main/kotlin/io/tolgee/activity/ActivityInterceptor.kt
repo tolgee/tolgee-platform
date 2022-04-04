@@ -86,9 +86,9 @@ class ActivityInterceptor : EmptyInterceptor() {
         entity.id
       )
 
-      activityRevision.meta = holder.activity?.metaModifier?.let {
-        val meta = activityRevision.meta ?: mutableMapOf()
-        it(meta, activityModifiedEntity, entity)
+      activityRevision.meta = activityHolder.activity?.metaModifier?.let { modifier ->
+        val meta = activityRevision.meta ?: activityHolder.meta
+        modifier(meta, activityModifiedEntity, entity)
         meta
       }
 
@@ -130,15 +130,15 @@ class ActivityInterceptor : EmptyInterceptor() {
 
   private val activityRevision: ActivityRevision
     get() {
-      var activityRevision = holder.activityRevision
+      var activityRevision = activityHolder.activityRevision
 
       if (activityRevision == null) {
         activityRevision = ActivityRevision().also { revision ->
           revision.authorId = userAccount?.id
           revision.projectId = projectHolder.project.id
-          revision.type = holder.activity?.type
+          revision.type = activityHolder.activity?.type
         }
-        holder.activityRevision = activityRevision
+        activityHolder.activityRevision = activityRevision
       }
 
       return activityRevision
@@ -162,7 +162,7 @@ class ActivityInterceptor : EmptyInterceptor() {
       }
     }
 
-  private val holder: ActivityHolder
+  private val activityHolder: ActivityHolder
     get() {
       return try {
         applicationContext.getBean(ActivityHolder::class.java).also {

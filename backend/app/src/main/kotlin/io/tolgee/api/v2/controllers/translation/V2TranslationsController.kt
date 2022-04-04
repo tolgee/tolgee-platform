@@ -11,10 +11,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
 import io.tolgee.activity.RequestActivity
-import io.tolgee.activity.activities.CreateKeyActivity
-import io.tolgee.activity.activities.DismissAutoTranslationStateActivity
-import io.tolgee.activity.activities.SetTranslationStateActivity
-import io.tolgee.activity.activities.SetTranslationsActivity
+import io.tolgee.activity.activities.key.CreateKeyActivity
+import io.tolgee.activity.activities.translation.DismissAutoTranslationStateActivity
+import io.tolgee.activity.activities.translation.SetTranslationStateActivity
+import io.tolgee.activity.activities.translation.SetTranslationsActivity
 import io.tolgee.activity.holders.ActivityHolder
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
