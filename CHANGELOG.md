@@ -1,3 +1,11 @@
+## [2.15.1](https://github.com/tolgee/tolgee-platform/compare/v2.15.0...v2.15.1) (2022-04-04)
+
+
+### Bug Fixes
+
+* Fix complex update permission checking ([b68b417](https://github.com/tolgee/tolgee-platform/commit/b68b417cf8e7e109993d93293001ef0ff13e3064))
+* User id not set for OpenReplay ([e85e6fc](https://github.com/tolgee/tolgee-platform/commit/e85e6fc6869b097f64b8abc5d32e004a97b67bd9))
+
 # [2.15.0](https://github.com/tolgee/tolgee-platform/compare/v2.14.1...v2.15.0) (2022-04-04)
 
 
