@@ -242,6 +242,7 @@ ReactDOM.render(
         es: () => import('./i18n/es.json'),
         cs: () => import('./i18n/cs.json'),
         fr: () => import('./i18n/fr.json'),
+        de: () => import('./i18n/de.json'),
       }}
       loadingFallback={<FullPageLoading />}
     >

@@ -45,7 +45,7 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
       flag: '🇬🇧',
     },
     cs: {
-      name: 'česky',
+      name: 'Česky',
       flag: '🇨🇿',
     },
     fr: {
@@ -53,8 +53,12 @@ export const LocaleMenu: FunctionComponent<{ className?: string }> = (
       flag: '🇫🇷',
     },
     es: {
-      name: 'español',
+      name: 'Español',
       flag: '🇪🇸',
+    },
+    de: {
+      name: 'Deutsch',
+      flag: '🇩🇪',
     },
   };
 
