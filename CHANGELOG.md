@@ -1,3 +1,15 @@
+# [2.15.0](https://github.com/tolgee/tolgee-platform/compare/v2.14.1...v2.15.0) (2022-04-04)
+
+
+### Bug Fixes
+
+* Error when out of credits ([d4c8718](https://github.com/tolgee/tolgee-platform/commit/d4c8718cae9c9a9a724b278ee0235c44513dea9f))
+
+
+### Features
+
+* Add German translations ([f22a07e](https://github.com/tolgee/tolgee-platform/commit/f22a07e04fc838d4f0c57f9fe10552abd3a74373))
+
 ## [2.14.1](https://github.com/tolgee/tolgee-platform/compare/v2.14.0...v2.14.1) (2022-03-31)
 
 
