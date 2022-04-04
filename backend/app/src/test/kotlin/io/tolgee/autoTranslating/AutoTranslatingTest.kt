@@ -24,11 +24,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 import kotlin.system.measureTimeMillis
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
 class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineTranslationTest {
 
   companion object {
@@ -48,6 +48,9 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
   @MockBean
   override lateinit var amazonTranslate: AmazonTranslate
 
+  @Autowired
+  lateinit var transactionTemplate: TransactionTemplate
+
   @BeforeEach
   fun setup() {
     testData = AutoTranslateTestData()
@@ -60,6 +63,7 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
 
   @ProjectJWTAuthTestMethod
   @Test
+  @Transactional
   fun `auto translates new key`() {
     testUsingMtWorks()
     val expectedCost = "Hello".length * 100
@@ -87,6 +91,7 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
 
   @ProjectJWTAuthTestMethod
   @Test
+  @Transactional
   fun `auto translates when base provided (existing, but untranslated)`() {
     performSetEnTranslation(testData.baseTranslationUntranslated.name)
 
@@ -99,12 +104,14 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
 
   @ProjectJWTAuthTestMethod
   @Test
+  @Transactional
   fun `auto translates using TM`() {
     testUsingTmWorks()
   }
 
   @ProjectJWTAuthTestMethod
   @Test
+  @Transactional
   fun `it translates in parallel`() {
     testData.generateManyLanguages()
     initMachineTranslationMocks(500)
@@ -159,13 +166,15 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
   fun `doesn't fail when out of credits`() {
     initMachineTranslationProperties(0)
     performCreateHalloKeyWithEnAndDeTranslations()
-    assertThat(
-      keyService
-        .get(testData.project.id, CREATE_KEY_NAME)
-        .translations
-        .find { it.language == testData.spanishLanguage }
-    )
-      .isNull()
+    transactionTemplate.execute {
+      assertThat(
+        keyService
+          .get(testData.project.id, CREATE_KEY_NAME)
+          .translations
+          .find { it.language == testData.spanishLanguage }
+      )
+        .isNull()
+    }
   }
 
   @ProjectJWTAuthTestMethod
@@ -175,13 +184,15 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
     testDataService.saveTestData(testData.root)
     initMachineTranslationProperties(700)
     performCreateHalloKeyWithEnAndDeTranslations()
-    assertThat(
-      keyService
-        .get(testData.project.id, CREATE_KEY_NAME)
-        .translations
-        .find { it.language == testData.spanishLanguage }
-    )
-      .isNull()
+    transactionTemplate.execute {
+      assertThat(
+        keyService
+          .get(testData.project.id, CREATE_KEY_NAME)
+          .translations
+          .find { it.language == testData.spanishLanguage }
+      )
+        .isNull()
+    }
   }
 
   @ProjectJWTAuthTestMethod
@@ -201,11 +212,14 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
 
   private fun testUsingMtDoesNotWork() {
     performCreateHalloKeyWithEnAndDeTranslations()
-    val esTranslation = keyService.get(testData.project.id, CREATE_KEY_NAME)
-      .translations
-      .find { it.language == testData.spanishLanguage }
 
-    assertThat(esTranslation).isNull()
+    transactionTemplate.execute {
+      val esTranslation = keyService.get(testData.project.id, CREATE_KEY_NAME)
+        .translations
+        .find { it.language == testData.spanishLanguage }
+
+      assertThat(esTranslation).isNull()
+    }
   }
 
   private fun getCreatedEsTranslation() = keyService.get(testData.project.id, CREATE_KEY_NAME)
@@ -264,9 +278,11 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
   }
 
   private fun Key.getLangTranslation(lang: Language): Translation {
-    return keyService.get(this.id).translations.find {
-      it.language == lang
-    } ?: throw IllegalStateException("Translation not found")
+    return transactionTemplate.execute {
+      keyService.get(this.id).translations.find {
+        it.language == lang
+      } ?: throw IllegalStateException("Translation not found")
+    }
   }
 
   private fun performSetEnTranslation(key: String) {

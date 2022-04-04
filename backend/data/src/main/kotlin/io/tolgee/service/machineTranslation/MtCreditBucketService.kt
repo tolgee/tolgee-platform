@@ -20,7 +20,7 @@ class MtCreditBucketService(
   private val currentDateProvider: CurrentDateProvider
 ) {
 
-  @Transactional
+  @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(project: Project, amount: Int) {
     if (machineTranslationProperties.freeCreditsAmount > -1) {
       val bucket = findOrCreateBucket(project)
@@ -28,7 +28,7 @@ class MtCreditBucketService(
     }
   }
 
-  @Transactional
+  @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
     refillIfItsTime(bucket)
     if (getCreditBalance(bucket) - amount < 0) {
