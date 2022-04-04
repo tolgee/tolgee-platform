@@ -8,10 +8,10 @@ abstract class BaseTranslationsActivity(
   activityService
 ) {
   override val metaModifier: (
-    meta: kotlin.collections.MutableMap<kotlin.String, kotlin.Any?>,
+    meta: MutableMap<String, Any?>,
     activityModifiedEntity: io.tolgee.model.activity.ActivityModifiedEntity,
     entity: io.tolgee.model.EntityWithId
-  ) -> kotlin.Unit = { meta, _, entity ->
+  ) -> Unit = { meta, _, entity ->
     if (entity is io.tolgee.model.translation.Translation && meta.isEmpty()) {
       meta["keyName"] = entity.key.name
       meta["keyId"] = entity.key.id

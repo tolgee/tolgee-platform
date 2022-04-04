@@ -14,5 +14,5 @@ interface Activity {
     ) -> Unit
   )?
 
-  fun getModifications(revisionIds: Collection<Long>): Map<Long, List<ActivityModifiedEntity>>
+  fun getModifications(revisionIds: Collection<Long>): Map<Long, List<ActivityModifiedEntity>>?
 }

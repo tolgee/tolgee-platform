@@ -7,6 +7,11 @@ package io.tolgee.api.v2.controllers.translation
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.activities.translation.translationComment.TranslationCommentAddActivity
+import io.tolgee.activity.activities.translation.translationComment.TranslationCommentDeleteActivity
+import io.tolgee.activity.activities.translation.translationComment.TranslationCommentEditActivity
+import io.tolgee.activity.activities.translation.translationComment.TranslationCommentSetStateActivity
 import io.tolgee.api.v2.hateoas.translations.TranslationModelAssembler
 import io.tolgee.api.v2.hateoas.translations.comments.TranslationCommentModel
 import io.tolgee.api.v2.hateoas.translations.comments.TranslationCommentModelAssembler
@@ -103,6 +108,7 @@ class TranslationCommentController(
   @AccessWithAnyProjectPermission
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @Operation(summary = "Updates single translation comment")
+  @RequestActivity(TranslationCommentEditActivity::class)
   fun update(@PathVariable commentId: Long, @RequestBody @Valid dto: TranslationCommentDto): TranslationCommentModel {
     val comment = translationCommentService.get(commentId)
     if (comment.author.id != authenticationFacade.userAccount.id) {
@@ -116,6 +122,7 @@ class TranslationCommentController(
   @Operation(summary = "Sets state of translation comment")
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
+  @RequestActivity(TranslationCommentSetStateActivity::class)
   fun setState(
     @PathVariable commentId: Long,
     @PathVariable state: TranslationCommentState
@@ -130,6 +137,7 @@ class TranslationCommentController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @Operation(summary = "Deletes the translation comment")
+  @RequestActivity(TranslationCommentDeleteActivity::class)
   fun delete(@PathVariable commentId: Long) {
     val comment = translationCommentService.get(commentId)
     comment.checkFromProject()
@@ -151,15 +159,16 @@ class TranslationCommentController(
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment. Empty translation is stored, when not exists.")
+  @RequestActivity(TranslationCommentAddActivity::class)
   fun create(
     @RequestBody @Valid dto: TranslationCommentWithLangKeyDto
   ): ResponseEntity<TranslationWithCommentModel> {
     val translation = translationService.getOrCreate(dto.keyId, dto.languageId)
-    if (translation.key.project?.id != projectHolder.project.id) {
+    if (translation.key.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.KEY_NOT_FROM_PROJECT)
     }
 
-    if (translation.language.project?.id != projectHolder.project.id) {
+    if (translation.language.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.LANGUAGE_NOT_FROM_PROJECT)
     }
 
@@ -185,6 +194,7 @@ class TranslationCommentController(
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @ResponseStatus(HttpStatus.CREATED)
   @Operation(summary = "Creates a translation comment")
+  @RequestActivity(TranslationCommentAddActivity::class)
   fun create(
     @PathVariable translationId: Long,
     @RequestBody @Valid dto: TranslationCommentDto
@@ -196,7 +206,7 @@ class TranslationCommentController(
   }
 
   private fun TranslationComment.checkFromProject() {
-    if (this.translation.key.project?.id != projectHolder.project.id) {
+    if (this.translation.key.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.TRANSLATION_NOT_FROM_PROJECT)
     }
   }

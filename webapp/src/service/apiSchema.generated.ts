@@ -295,6 +295,12 @@ export interface paths {
   "/v2/projects/{projectId}/import/result/files/{importFileId}/issues": {
     get: operations["getImportFileIssues"];
   };
+  "/v2/projects/{projectId}/activity": {
+    get: operations["getActivity"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/history": {
+    get: operations["getTranslationHistory"];
+  };
   "/v2/projects/{projectId}/translations/{languages}": {
     get: operations["getAllTranslations"];
   };
@@ -945,6 +951,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -954,8 +961,8 @@ export interface components {
         | "VALUE_IS_EMPTY"
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
-        | "TARGET_NOT_PROVIDED";
-      params: components["schemas"]["ImportFileIssueParamView"][];
+        | "TARGET_NOT_PROVIDED"
+        | "TRANSLATION_TOO_LONG";
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -974,11 +981,70 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    ModifiedEntityModel: {
+      entityId: number;
+      modifications?: {
+        [key: string]: components["schemas"]["PropertyModification"];
+      };
+    };
+    PagedModelProjectActivityModel: {
+      _embedded?: {
+        activities?: components["schemas"]["ProjectActivityModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    ProjectActivityAuthorModel: {
+      id: number;
+      username?: string;
+      name?: string;
+      avatar?: components["schemas"]["Avatar"];
+    };
+    ProjectActivityModel: {
+      revisionId: number;
+      timestamp: number;
+      type: string;
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+    };
+    PropertyModification: {
+      old?: { [key: string]: unknown };
+      new?: { [key: string]: unknown };
+    };
     PagedModelTranslationCommentModel: {
       _embedded?: {
         translationComments?: components["schemas"]["TranslationCommentModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTranslationHistoryModel: {
+      _embedded?: {
+        revisions?: components["schemas"]["TranslationHistoryModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    /** Author of the change */
+    SimpleUserAccountModel: {
+      id: number;
+      username: string;
+      name?: string;
+      avatar?: components["schemas"]["Avatar"];
+    };
+    TranslationHistoryModel: {
+      /** Translation text */
+      text?: string;
+      /** State of translation */
+      state?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
+      /** Was translated using Translation Memory or Machine translation service? */
+      auto?: boolean;
+      /** Which machine translation service was used to auto translate this */
+      mtProvider?: "GOOGLE" | "AWS";
+      /** Unix timestamp of the revision */
+      timestamp: number;
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      revisionType: "ADD" | "MOD" | "DEL";
     };
     SelectAllResponse: {
       ids: number[];
@@ -4752,6 +4818,77 @@ export interface operations {
       };
     };
   };
+  getActivity: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectActivityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getTranslationHistory: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelTranslationHistoryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllTranslations: {
     parameters: {
       path: {
@@ -4817,12 +4954,6 @@ export interface operations {
         filterHasNoScreenshot?: boolean;
         /** Selects only keys with provided tag */
         filterTag?: string[];
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
       };
       path: {
         projectId: number;
