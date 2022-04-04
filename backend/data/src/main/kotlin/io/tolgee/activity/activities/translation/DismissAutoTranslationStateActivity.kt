@@ -1,4 +1,4 @@
-package io.tolgee.activity.activities
+package io.tolgee.activity.activities.translation
 
 import io.tolgee.activity.ActivityService
 import io.tolgee.activity.activities.common.BaseTranslationsActivity
