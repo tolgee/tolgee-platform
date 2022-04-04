@@ -89,8 +89,10 @@ const MandatoryDataProvider = (props: any) => {
       import('@openreplay/tracker').then(({ default: Tracker }) => {
         window.openReplayTracker = new Tracker({
           projectKey: openReplayApiKey,
-          __DISABLE_SECURE_MODE: true,
+          __DISABLE_SECURE_MODE:
+            process.env.NODE_ENV === 'development' ? true : undefined,
         });
+        setOpenReplayTracker(window.openReplayTracker);
         window.openReplayTracker.start();
       });
     }
