@@ -7,7 +7,7 @@ import {
   FormControl,
   InputLabel,
   FormHelperText,
-} from '@material-ui/core';
+} from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
@@ -27,10 +27,15 @@ export const LanguageSelector: React.FC<Props> = ({ languages, className }) => {
     <Field name="languages">
       {({ field, meta }) => {
         return (
-          <FormControl className={className} error={meta.error}>
+          <FormControl
+            className={className}
+            error={meta.error}
+            variant="standard"
+          >
             <InputLabel>{t('export_translations_languages_label')}</InputLabel>
             <Select
               {...field}
+              variant="standard"
               data-cy="export-language-selector"
               renderValue={(values: StateType[]) => values.join(', ')}
               MenuProps={{ getContentAnchorEl: null }}

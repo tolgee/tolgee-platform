@@ -1,4 +1,4 @@
-import { Menu, MenuProps } from '@material-ui/core';
+import { Menu, MenuProps } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { useTranslationsDispatch } from '../context/TranslationsContext';
@@ -25,7 +25,6 @@ export const FiltersMenu: React.FC<Props> = ({ anchorEl, onClose }) => {
     <Menu
       anchorEl={anchorEl}
       open={Boolean(anchorEl)}
-      getContentAnchorEl={null}
       onClose={onClose}
       anchorOrigin={{
         vertical: 'bottom',

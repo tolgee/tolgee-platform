@@ -1,13 +1,12 @@
 import React, { FunctionComponent } from 'react';
 import {
-  Box,
   FormControlLabel,
   Grid,
-  makeStyles,
+  styled,
   Switch,
   Typography,
-} from '@material-ui/core';
-import { CheckCircle, Warning } from '@material-ui/icons';
+} from '@mui/material';
+import { CheckCircle, Warning } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 import { container } from 'tsyringe';
@@ -15,24 +14,25 @@ import { container } from 'tsyringe';
 import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
 import { ImportActions } from 'tg.store/project/ImportActions';
 
-const useStyles = makeStyles((theme) => ({
-  counter: {
-    display: 'flex',
-    alignItems: 'center',
-    borderRadius: 20,
-  },
-  validIcon: {
-    fontSize: 20,
-    marginRight: 4,
-  },
-  resolvedIcon: {
-    color: theme.palette.success.main,
-  },
-  conflictsIcon: {
-    marginLeft: theme.spacing(2),
-    color: theme.palette.warning.main,
-  },
-}));
+const StyledCounter = styled('div')`
+  display: flex;
+  align-items: center;
+  border-radius: 20px;
+
+  & .resolvedIcon {
+    color: ${({ theme }) => theme.palette.success.main};
+  }
+
+  & .validIcon {
+    font-size: 20px;
+    margin-right: 4px;
+  }
+
+  & .conflictsIcon {
+    margin-left: ${({ theme }) => theme.spacing(2)};
+    color: ${({ theme }) => theme.palette.warning.main};
+  }
+`;
 
 const actions = container.resolve(ImportActions);
 export const ImportConflictsSecondaryBar: FunctionComponent<{
@@ -42,19 +42,14 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
   const languageDataLoadable = actions.useSelector(
     (s) => s.loadables.resolveConflictsLanguage
   );
-
-  const classes = useStyles();
   const resolvedCount = languageDataLoadable.data?.resolvedCount;
 
   return (
     <SecondaryBar>
       <Grid container spacing={4} alignItems="center">
         <Grid item>
-          <Box className={classes.counter}>
-            <CheckCircle
-              className={clsx(classes.validIcon, classes.resolvedIcon)}
-            />
-
+          <StyledCounter>
+            <CheckCircle className={clsx('validIcon', 'resolvedIcon')} />
             <Typography
               variant="body1"
               data-cy="import-resolution-dialog-resolved-count"
@@ -62,9 +57,7 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
               {resolvedCount !== undefined ? resolvedCount : '??'}
             </Typography>
 
-            <Warning
-              className={clsx(classes.validIcon, classes.conflictsIcon)}
-            />
+            <Warning className={clsx('validIcon', 'conflictsIcon')} />
 
             <Typography
               variant="body1"
@@ -72,7 +65,7 @@ export const ImportConflictsSecondaryBar: FunctionComponent<{
             >
               {languageDataLoadable.data?.conflictCount}
             </Typography>
-          </Box>
+          </StyledCounter>
         </Grid>
         <Grid item>
           <FormControlLabel

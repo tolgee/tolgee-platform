@@ -1,9 +1,4 @@
-import {
-  Typography,
-  Dialog,
-  makeStyles,
-  useMediaQuery,
-} from '@material-ui/core';
+import { Typography, Dialog, useMediaQuery, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
@@ -14,18 +9,16 @@ import { KeyCreateDialog } from './KeyCreateDialog';
 import { TranslationControls } from './TranslationControls';
 import { TranslationControlsCompact } from './TranslationControlsCompact';
 
-const useStyles = makeStyles((theme) => ({
-  resultCount: {
-    marginLeft: 1,
-    marginTop: theme.spacing(),
-  },
-  modal: {
-    transition: 'margin-bottom 0.2s',
-  },
-}));
+const StyledResultCount = styled('div')`
+  margin-left: 1px;
+  margin-top: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledDialog = styled(Dialog)`
+  transition: 'margin-bottom 0.2s ease-in-out';
+`;
 
 export const TranslationsHeader = () => {
-  const classes = useStyles();
   const [newDialog, setNewDialog] = useUrlSearchState('create', {
     defaultVal: 'false',
   });
@@ -49,7 +42,7 @@ export const TranslationsHeader = () => {
         <TranslationControls onDialogOpen={onDialogOpen} />
       )}
       {dataReady && translationsTotal ? (
-        <div className={classes.resultCount}>
+        <StyledResultCount>
           <Typography
             color="textSecondary"
             variant="body2"
@@ -59,20 +52,19 @@ export const TranslationsHeader = () => {
               translations_results_count
             </T>
           </Typography>
-        </div>
+        </StyledResultCount>
       ) : null}
       {dataReady && newDialog === 'true' && (
-        <Dialog
+        <StyledDialog
           open={true}
           onClose={() => setNewDialog('false')}
           fullWidth
           maxWidth="md"
           keepMounted={false}
-          className={classes.modal}
           style={{ marginBottom: bottomPanelHeight }}
         >
           <KeyCreateDialog onClose={() => setNewDialog('false')} />
-        </Dialog>
+        </StyledDialog>
       )}
     </>
   );

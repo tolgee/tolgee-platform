@@ -1,4 +1,4 @@
-import { default as React, FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 import {
   Checkbox,
   FormControl,
@@ -7,9 +7,7 @@ import {
   FormGroup,
   FormHelperText,
   FormLabel,
-  Theme,
-} from '@material-ui/core';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+} from '@mui/material';
 import { useField } from 'formik';
 
 interface CheckBoxGroupMultiSelectProps {
@@ -24,17 +22,6 @@ interface CheckBoxGroupMultiSelectProps {
 type Props = CheckBoxGroupMultiSelectProps & FormControlProps;
 
 export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
-  const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-      root: {
-        marginTop: theme.spacing(props.mt !== undefined ? props.mt : 2),
-        marginBottom: theme.spacing(props.mb !== undefined ? props.mb : 2),
-      },
-    })
-  );
-
-  const classes = useStyles({});
-
   const [field, meta, helpers] = useField<Set<string>>(props.name);
 
   const onChange = (option, checked) => {
@@ -55,8 +42,11 @@ export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
         return (
           <FormControl
             key={index}
-            className={classes.root}
             error={!!meta.error}
+            sx={{
+              mt: props.mt !== undefined ? props.mt : 2,
+              mb: props.mb !== undefined ? props.mb : 2,
+            }}
           >
             <FormControlLabel
               label={option}

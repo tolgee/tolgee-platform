@@ -5,9 +5,8 @@ import {
   FormHelperText,
   InputLabel,
   Select as MUISelect,
-  Theme,
-} from '@material-ui/core';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+  styled,
+} from '@mui/material';
 import { useField } from 'formik';
 
 interface PGSelectProps {
@@ -18,29 +17,19 @@ interface PGSelectProps {
 
 type Props = PGSelectProps & FormControlProps;
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    select: {
-      marginTop: theme.spacing(2),
-      marginBottom: theme.spacing(2),
-      minWidth: 120,
-    },
-  })
-);
+const StyledFormControl = styled(FormControl)`
+  margin-top: ${({ theme }) => theme.spacing(2)};
+  margin-bottom: ${({ theme }) => theme.spacing(2)};
+  min-width: 120px;
+`;
 
 export const Select: FunctionComponent<Props> = (props) => {
-  const classes = useStyles({});
-
   const [field, meta, helpers] = useField(props.name);
 
   const { renderValue, ...formControlProps } = props;
 
   return (
-    <FormControl
-      className={classes.select}
-      error={!!meta.error}
-      {...formControlProps}
-    >
+    <StyledFormControl error={!!meta.error} {...formControlProps}>
       {props.label && (
         <InputLabel id={'select_' + field.name + '_label'}>
           {props.label}
@@ -61,6 +50,6 @@ export const Select: FunctionComponent<Props> = (props) => {
         {props.children}
       </MUISelect>
       {meta.error && <FormHelperText>{meta.error}</FormHelperText>}
-    </FormControl>
+    </StyledFormControl>
   );
 };

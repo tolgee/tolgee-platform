@@ -1,6 +1,6 @@
 import React, { ComponentProps, FunctionComponent } from 'react';
-import { Box, Button } from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { Box, Button } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useLoadingRegister } from 'tg.component/GlobalLoading';
 
 const LoadingButton: FunctionComponent<

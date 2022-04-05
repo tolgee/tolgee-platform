@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useTranslate, T } from '@tolgee/react';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';

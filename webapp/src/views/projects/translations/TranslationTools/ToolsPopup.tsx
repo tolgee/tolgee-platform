@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles, Popper } from '@material-ui/core';
+import { Popper, styled } from '@mui/material';
+
 import TranslationTools, {
   Props as TranslationToolsProps,
 } from './TranslationTools';
@@ -7,19 +8,18 @@ import { PopupArrow } from './PopupArrow';
 
 export const TOOLS_HEIGHT = 200;
 
-const useStyles = makeStyles((theme) => ({
-  popper: {
-    position: 'relative',
-    marginTop: 5,
-  },
-  popperContent: {
-    display: 'flex',
-    height: TOOLS_HEIGHT,
-    background: 'white',
-    boxShadow: theme.shadows[3],
-    borderRadius: theme.shape.borderRadius,
-  },
-}));
+const StyledPopper = styled('div')`
+  position: relative;
+  margin-top: 5px;
+`;
+
+const StyledPopperContent = styled('div')`
+  display: flex;
+  height: ${TOOLS_HEIGHT}px;
+  background: white;
+  box-shadow: ${({ theme }) => theme.shadows[3]};
+  border-radius: ${({ theme }) => theme.shape.borderRadius};
+`;
 
 type Props = {
   anchorEl: HTMLDivElement | undefined;
@@ -32,7 +32,6 @@ export const ToolsPopup: React.FC<Props> = ({
   cellPosition,
   data,
 }) => {
-  const classes = useStyles();
   const [width, setWidth] = useState<number | undefined>();
 
   useEffect(() => {
@@ -44,18 +43,19 @@ export const ToolsPopup: React.FC<Props> = ({
       open={true}
       anchorEl={anchorEl}
       placement="bottom-end"
-      modifiers={{
-        flip: {
+      modifiers={[
+        {
+          name: 'flip',
           enabled: false,
         },
-      }}
+      ]}
     >
-      <div className={classes.popper}>
+      <StyledPopper>
         <PopupArrow position={cellPosition || '75%'} />
-        <div className={classes.popperContent}>
+        <StyledPopperContent>
           <TranslationTools width={width} data={data} />
-        </div>
-      </div>
+        </StyledPopperContent>
+      </StyledPopper>
     </Popper>
   ) : null;
 };

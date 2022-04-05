@@ -1,46 +1,46 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, Button, Popover } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { ArrowDropDown } from '@material-ui/icons';
+import { Button, Popover, styled } from '@mui/material';
+import { ArrowDropDown } from '@mui/icons-material';
 import { supportedFlags } from '@tginternal/language-util';
 import { useField } from 'formik';
 
 import { FlagImage } from './FlagImage';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  selectedImg: {
-    width: '50px',
-    height: '50px',
-  },
-  selector: {
-    width: '300px',
-    height: '400px',
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
-  selectorImg: {
-    width: '40px',
-    height: '40px',
-  },
-  selectorImgButton: {
-    padding: theme.spacing(0.5),
-    minWidth: 0,
-    '& > span': {
-      height: '29px',
-    },
-  },
-}));
+const StyledButton = styled(Button)`
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+`;
+
+const StyledImage = styled(FlagImage)`
+  width: 50px;
+  height: 50px;
+`;
+
+const StyledSelector = styled('div')`
+  width: 300px;
+  height: 400px;
+  display: flex;
+  flex-wrap: wrap;
+`;
+
+const StyledFlagButton = styled(Button)`
+  padding: ${({ theme }) => theme.spacing(0.5)};
+  min-width: 0px;
+  & > span {
+    height: 29px;
+  }
+`;
+
+const StyledFlagImage = styled(FlagImage)`
+  width: 50px;
+  height: 50px;
+`;
 
 export const FlagSelector: FunctionComponent<{
   preferredEmojis: string[];
   name: string;
 }> = (props) => {
-  const classes = useStyles();
   const [field, _, helpers] = useField(props.name);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
@@ -48,14 +48,13 @@ export const FlagSelector: FunctionComponent<{
   const flags = [...new Set([...props.preferredEmojis, ...supportedFlags])];
   return (
     <>
-      <Button
+      <StyledButton
         data-cy="languages-flag-selector-open-button"
-        className={classes.root}
         onClick={(event) => setAnchorEl(event.currentTarget)}
       >
-        <FlagImage flagEmoji={selectedEmoji} className={classes.selectedImg} />
+        <StyledImage flagEmoji={selectedEmoji} />
         <ArrowDropDown />
-      </Button>
+      </StyledButton>
       <Popover
         open={!!anchorEl}
         onClose={() => setAnchorEl(null)}
@@ -69,20 +68,19 @@ export const FlagSelector: FunctionComponent<{
           horizontal: 'left',
         }}
       >
-        <Box className={classes.selector}>
+        <StyledSelector>
           {flags.map((f) => (
-            <Button
+            <StyledFlagButton
               key={f}
-              className={classes.selectorImgButton}
               onClick={() => {
                 helpers.setValue(f);
                 setAnchorEl(null);
               }}
             >
-              <FlagImage flagEmoji={f} className={classes.selectorImg} />
-            </Button>
+              <StyledFlagImage flagEmoji={f} />
+            </StyledFlagButton>
           ))}
-        </Box>
+        </StyledSelector>
       </Popover>
     </>
   );

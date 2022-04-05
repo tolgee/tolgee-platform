@@ -1,5 +1,5 @@
 import { container } from 'tsyringe';
-import { Checkbox, ListItemText, MenuItem } from '@material-ui/core';
+import { Checkbox, ListItemText, MenuItem } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { putBaseLangFirst } from 'tg.fixtures/putBaseLangFirst';

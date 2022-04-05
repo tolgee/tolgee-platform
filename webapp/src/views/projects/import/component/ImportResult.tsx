@@ -1,14 +1,14 @@
 import React, { FunctionComponent, useState } from 'react';
 import {
   Box,
-  makeStyles,
+  styled,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-} from '@material-ui/core';
+} from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
@@ -24,17 +24,13 @@ type ImportResultProps = {
   onResolveRow: (row: components['schemas']['ImportLanguageModel']) => void;
 };
 
-const useStyles = makeStyles((theme) => ({
-  table: {
-    '& th': {
-      fontWeight: 'bold',
-    },
-  },
-}));
+const StyledTable = styled(Table)`
+  & th {
+    font-weight: bold;
+  }
+`;
 
 export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
-  const classes = useStyles();
-
   const rows = props.result?._embedded?.languages;
   const [viewFileIssuesRow, setViewFileIssuesRow] = useState(
     undefined as components['schemas']['ImportLanguageModel'] | undefined
@@ -61,7 +57,7 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
       />
       <Box mt={5}>
         <TableContainer>
-          <Table className={classes.table}>
+          <StyledTable>
             <TableHead>
               <TableRow>
                 <TableCell>
@@ -90,7 +86,7 @@ export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
                 />
               ))}
             </TableBody>
-          </Table>
+          </StyledTable>
         </TableContainer>
       </Box>
     </ProjectLanguagesProvider>

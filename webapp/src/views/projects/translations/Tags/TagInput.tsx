@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { Autocomplete, styled } from '@mui/material';
 import { useDebounce } from 'use-debounce';
 import { T } from '@tolgee/react';
 
@@ -9,33 +8,33 @@ import { useProject } from 'tg.hooks/useProject';
 import { Wrapper } from './Wrapper';
 import { CloseButton } from './CloseButton';
 import { CustomPopper } from './CustomPopper';
+import { MenuItem } from '@mui/material';
 
-const useStyles = makeStyles({
-  autocomplete: {
-    display: 'flex',
-    alignItems: 'center',
-    width: 150,
-    overflow: 'hidden',
-  },
-  input: {
-    display: 'flex',
-    border: 0,
-    background: 'transparent',
-    padding: '0px 4px',
-    outline: 0,
-    minWidth: 0,
-    width: '100%',
-    fontSize: 14,
-    flexShrink: 1,
-  },
-  option: {
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-  },
-  listbox: {
-    padding: 0,
-  },
-});
+const StyledWrapper = styled(Wrapper)`
+  & .autocomplete {
+    display: flex;
+    align-items: center;
+    width: 150px;
+    overflow: hidden;
+  }
+`;
+
+const StyledInput = styled('input')`
+  display: flex;
+  border: 0px;
+  background: transparent;
+  padding: 0px 4px;
+  outline: 0px;
+  min-width: 0px;
+  width: 100%;
+  font-size: 14;
+  flex-shrink: 1;
+`;
+
+const StyledOption = styled('span')`
+  white-space: nowrap;
+  overflow: hidden;
+`;
 
 type Props = {
   onClose?: () => void;
@@ -54,7 +53,6 @@ export const TagInput: React.FC<Props> = ({
   existing,
   placeholder,
 }) => {
-  const classes = useStyles();
   const [value, setValue] = useState('');
   const [search] = useDebounce(value, 500);
 
@@ -92,12 +90,16 @@ export const TagInput: React.FC<Props> = ({
     }));
 
   return (
-    <Wrapper role="input" className={className}>
+    <StyledWrapper role="input" className={className}>
       <Autocomplete
+        className="autocomplete"
         loading={tags.isFetching}
-        className={classes.autocomplete}
         autoHighlight
-        noOptionsText={<T>translations_tags_no_results</T>}
+        noOptionsText={
+          <StyledOption>
+            <T>translations_tags_no_results</T>
+          </StyledOption>
+        }
         PopperComponent={CustomPopper}
         options={options}
         filterOptions={(options) => {
@@ -121,26 +123,27 @@ export const TagInput: React.FC<Props> = ({
           }
         }}
         getOptionLabel={() => ''}
-        getOptionSelected={() => true}
-        renderOption={(option) => {
+        isOptionEqualToValue={() => true}
+        renderOption={(attrs, option) => {
           return (
-            <span data-cy="tag-autocomplete-option" className={classes.option}>
-              {option.translation ? (
-                <T parameters={{ tag: search }}>{option.translation}</T>
-              ) : (
-                option.label
-              )}
-            </span>
+            <MenuItem {...attrs}>
+              <StyledOption data-cy="tag-autocomplete-option">
+                {option.translation ? (
+                  <T parameters={{ tag: search }}>{option.translation}</T>
+                ) : (
+                  option.label
+                )}
+              </StyledOption>
+            </MenuItem>
           );
         }}
         ListboxProps={{ style: { padding: 0 } }}
         renderInput={(params) => (
-          <div className={classes.autocomplete} ref={params.InputProps.ref}>
-            <input
+          <div className="autocomplete" ref={params.InputProps.ref}>
+            <StyledInput
               {...params.inputProps}
               data-cy="tag-autocomplete-input"
               size={0}
-              className={classes.input}
               onKeyUp={handleKeyUp}
               autoFocus={autoFocus}
               placeholder={placeholder}
@@ -149,6 +152,6 @@ export const TagInput: React.FC<Props> = ({
           </div>
         )}
       />
-    </Wrapper>
+    </StyledWrapper>
   );
 };

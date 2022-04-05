@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Field, Formik } from 'formik';
 import {
   Box,
@@ -7,10 +8,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  makeStyles,
+  styled,
   TextField,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { container } from 'tsyringe';
 import { T, useTranslate } from '@tolgee/react';
 import copy from 'copy-to-clipboard';
@@ -24,7 +25,6 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { MessageService } from 'tg.service/MessageService';
-import { useMemo } from 'react';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 
 const messaging = container.resolve(MessageService);
@@ -33,19 +33,18 @@ type PermissionType = NonNullable<
   components['schemas']['ProjectModel']['computedPermissions']['type']
 >;
 
-const useStyles = makeStyles((theme) => ({
-  content: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(2),
-    marginBottom: theme.spacing(2),
-    minHeight: 150,
-  },
-  permissions: {
-    display: 'flex',
-    gap: theme.spacing(1),
-  },
-}));
+const StyledContent = styled('div')`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing(2)};
+  margin-bottom: ${({ theme }) => theme.spacing(2)};
+  min-height: 150px;
+`;
+
+const StyledPermissions = styled('div')`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing(1)};
+`;
 
 type Props = {
   open: boolean;
@@ -53,7 +52,6 @@ type Props = {
 };
 
 export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
-  const classes = useStyles();
   const t = useTranslate();
   const project = useProject();
   const invite = useApiMutation({
@@ -128,7 +126,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                     <Button
                       size="small"
                       disableElevation
-                      color={values.type === 'email' ? 'primary' : undefined}
+                      color={values.type === 'email' ? 'primary' : 'default'}
                       onClick={() => formik.setFieldValue('type', 'email')}
                       data-cy="invitation-dialog-type-email-button"
                     >
@@ -137,7 +135,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                     <Button
                       size="small"
                       disableElevation
-                      color={values.type === 'link' ? 'primary' : undefined}
+                      color={values.type === 'link' ? 'primary' : 'default'}
                       onClick={() => formik.setFieldValue('type', 'link')}
                       data-cy="invitation-dialog-type-link-button"
                     >
@@ -147,12 +145,12 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                 </Box>
               </DialogTitle>
               <DialogContent>
-                <div className={classes.content}>
+                <StyledContent>
                   <div>
                     <Typography variant="caption">
                       {t('invite_user_permission_label')}
                     </Typography>
-                    <div className={classes.permissions}>
+                    <StyledPermissions>
                       <PermissionsMenu
                         selected={values.permission}
                         onSelect={(permission) =>
@@ -170,7 +168,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                           }
                         />
                       )}
-                    </div>
+                    </StyledPermissions>
                   </div>
 
                   <Field name="text">
@@ -189,7 +187,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                       />
                     )}
                   </Field>
-                </div>
+                </StyledContent>
               </DialogContent>
               <DialogActions>
                 <LoadingButton

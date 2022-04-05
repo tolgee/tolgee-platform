@@ -1,7 +1,7 @@
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
@@ -23,18 +23,14 @@ export type LanguageType = {
   name: string;
 };
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'grid',
-    rowGap: theme.spacing(2),
-  },
-  languagesMenu: {
-    justifySelf: 'end',
-  },
-  label: {
-    fontWeight: 'bold',
-  },
-}));
+const StyledContainer = styled('div')`
+  display: grid;
+  row-gap: ${({ theme }) => theme.spacing(2)};
+`;
+
+const StyledLanguagesMenu = styled('div')`
+  justify-self: end;
+`;
 
 type Props = {
   keyName?: string;
@@ -42,7 +38,6 @@ type Props = {
 
 export const KeySingle: React.FC<Props> = ({ keyName }) => {
   const queryClient = useQueryClient();
-  const classes = useStyles();
   const project = useProject();
   const t = useTranslate();
 
@@ -101,18 +96,15 @@ export const KeySingle: React.FC<Props> = ({ keyName }) => {
         ],
       ]}
     >
-      <div
-        className={classes.container}
-        style={{ marginBottom: bottomPanelHeight + 20 }}
-      >
-        <div className={classes.languagesMenu}>
+      <StyledContainer style={{ marginBottom: bottomPanelHeight + 20 }}>
+        <StyledLanguagesMenu>
           <LanguagesSelect
             languages={allLanguages}
             onChange={handleLanguageChange}
             value={selectedLanguages}
             context="languages"
           />
-        </div>
+        </StyledLanguagesMenu>
         {keyExists ? (
           <KeyEditForm />
         ) : (
@@ -143,7 +135,7 @@ export const KeySingle: React.FC<Props> = ({ keyName }) => {
             }
           />
         )}
-      </div>
+      </StyledContainer>
     </BaseView>
   ) : null;
 };

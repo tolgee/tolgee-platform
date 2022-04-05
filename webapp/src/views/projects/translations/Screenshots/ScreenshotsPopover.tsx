@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Box, Popover, Typography } from '@material-ui/core';
+import { Box, Popover, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { ScreenshotGallery } from './ScreenshotGallery';

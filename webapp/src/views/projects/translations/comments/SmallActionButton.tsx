@@ -1,36 +1,33 @@
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material';
 
 type Props = React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   HTMLButtonElement
 >;
 
-const useStyles = makeStyles((theme) => ({
-  button: {
-    margin: 0,
-    outline: 0,
-    fontSize: 12,
-    padding: 0,
-    border: 0,
-    opacity: 0.6,
-    background: 'transparent',
-    cursor: 'pointer',
-    '&:hover, &:active': {
-      opacity: 1,
-    },
-  },
-}));
+const StyledButton = styled('button')`
+  margin: 0px;
+  outline: 0;
+  font-size: 12px;
+  padding: 0px;
+  border: 0px;
+  opacity: 0.6;
+  background: transparent;
+  cursor: pointer;
+  &:hover,
+  &:active {
+    opacity: 1;
+  }
+`;
 
 export const SmallActionButton: React.FC<Props> = ({
   children,
   className,
   ...tools
 }) => {
-  const classes = useStyles();
   return (
-    <button {...tools} className={clsx(classes.button, className)}>
+    <StyledButton {...tools} className={className}>
       {children}
-    </button>
+    </StyledButton>
   );
 };

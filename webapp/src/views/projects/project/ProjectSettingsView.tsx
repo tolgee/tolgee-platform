@@ -2,10 +2,11 @@ import { FunctionComponent, useState } from 'react';
 import {
   Box,
   Button,
+  styled,
   Typography,
   useMediaQuery,
   useTheme,
-} from '@material-ui/core';
+} from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
@@ -25,7 +26,6 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
-import makeStyles from '@material-ui/core/styles/makeStyles';
 import { ProjectTransferModal } from 'tg.views/projects/project/components/ProjectTransferModal';
 import { ProjectProfileAvatar } from './ProjectProfileAvatar';
 
@@ -33,20 +33,20 @@ const messageService = container.resolve(MessageService);
 
 type ValueType = components['schemas']['EditProjectDTO'];
 
-const useStyles = makeStyles((theme) => ({
-  dangerZone: {
-    borderRadius: theme.shape.borderRadius,
-    border: `1px solid ${theme.palette.error.dark}`,
-  },
-  dangerZonePart: {
-    display: 'flex',
-    gap: theme.spacing(2),
-  },
-  dangerButton: {
-    whiteSpace: 'nowrap',
-    flexShrink: 0,
-  },
-}));
+const StyledDangerZone = styled(Box)`
+  border-radius: ${({ theme }) => theme.shape.borderRadius};
+  border: 1px solid ${({ theme }) => theme.palette.error.dark};
+`;
+
+const StyledDangerZonePart = styled(Box)`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing(2)};
+`;
+
+const StyledDangerButton = styled(Button)`
+  white-space: nowrap;
+  flex-shrink: 0;
+`;
 
 export const ProjectSettingsView: FunctionComponent = () => {
   const project = useProject();
@@ -59,8 +59,6 @@ export const ProjectSettingsView: FunctionComponent = () => {
     url: '/v2/projects/{projectId}',
     method: 'delete',
   });
-
-  const classes = useStyles();
 
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
   const confirm = (options: ConfirmationDialogProps) =>
@@ -103,7 +101,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
   const t = useTranslate();
 
   const theme = useTheme();
-  const isSmOrLower = useMediaQuery(theme.breakpoints.down('sm'));
+  const isSmOrLower = useMediaQuery(theme.breakpoints.down('md'));
 
   const initialValues: ValueType = {
     name: project.name,
@@ -158,6 +156,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
           initialValues={initialValues}
         >
           <TextField
+            variant="standard"
             label={<T>project_settings_name_label</T>}
             name="name"
             required={true}
@@ -171,9 +170,8 @@ export const ProjectSettingsView: FunctionComponent = () => {
             <T>project_settings_danger_zone_title</T>
           </Typography>
         </Box>
-        <Box className={classes.dangerZone} p={2}>
-          <Box
-            className={classes.dangerZonePart}
+        <StyledDangerZone p={2}>
+          <StyledDangerZonePart
             alignItems={isSmOrLower ? 'start' : 'center'}
             flexDirection={isSmOrLower ? 'column' : 'row'}
           >
@@ -182,17 +180,11 @@ export const ProjectSettingsView: FunctionComponent = () => {
                 <T>this_will_delete_project_forever</T>
               </Typography>
             </Box>
-            <Button
-              color="default"
-              variant="outlined"
-              onClick={handleDelete}
-              className={classes.dangerButton}
-            >
+            <StyledDangerButton variant="outlined" onClick={handleDelete}>
               <T>delete_project_button</T>
-            </Button>
-          </Box>
-          <Box
-            className={classes.dangerZonePart}
+            </StyledDangerButton>
+          </StyledDangerZonePart>
+          <StyledDangerZonePart
             alignItems={isSmOrLower ? 'start' : 'center'}
             flexDirection={isSmOrLower ? 'column' : 'row'}
             mt={2}
@@ -202,24 +194,22 @@ export const ProjectSettingsView: FunctionComponent = () => {
                 <T>this_will_transfer_project</T>
               </Typography>
             </Box>
-            <Button
+            <StyledDangerButton
               data-cy="project-settings-transfer-button"
-              color="default"
               variant="outlined"
               onClick={() => {
                 setTransferDialogOpen(true);
               }}
-              className={classes.dangerButton}
             >
               <T>transfer_project_button</T>
-            </Button>
+            </StyledDangerButton>
 
             <ProjectTransferModal
               open={transferDialogOpen}
               onClose={() => setTransferDialogOpen(false)}
             />
-          </Box>
-        </Box>
+          </StyledDangerZonePart>
+        </StyledDangerZone>
       </Box>
     </BaseView>
   );

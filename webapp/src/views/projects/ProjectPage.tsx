@@ -1,21 +1,19 @@
 import { FunctionComponent } from 'react';
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material';
 
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { useProject } from 'tg.hooks/useProject';
 
 import { ProjectMenu } from './projectMenu/ProjectMenu';
 
-const useStyle = makeStyles({
-  content: {
-    flexGrow: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'stretch',
-    position: 'relative',
-    contain: 'size',
-  },
-});
+const StyledContent = styled('div')`
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+  contain: size;
+`;
 
 interface Props {
   topBarAutoHide?: boolean;
@@ -26,12 +24,11 @@ export const ProjectPage: FunctionComponent<Props> = ({
   children,
 }) => {
   const project = useProject();
-  const classes = useStyle();
 
   return (
     <DashboardPage topBarAutoHide={topBarAutoHide}>
       <ProjectMenu id={project.id} />
-      <div className={classes.content}>{children}</div>
+      <StyledContent>{children}</StyledContent>
     </DashboardPage>
   );
 };

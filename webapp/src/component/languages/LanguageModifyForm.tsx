@@ -1,5 +1,5 @@
 import { FC, FunctionComponent } from 'react';
-import { Box, Button, Dialog, DialogContent } from '@material-ui/core';
+import { Box, Button, Dialog, DialogContent } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Formik } from 'formik';
 

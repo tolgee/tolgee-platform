@@ -1,35 +1,33 @@
 import { FunctionComponent } from 'react';
-import { Select, Typography } from '@material-ui/core';
-import FormControl from '@material-ui/core/FormControl';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { Select, styled, Typography } from '@mui/material';
+import FormControl from '@mui/material/FormControl';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { getLanguagesContent } from './getLanguagesContent';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles({
-  input: {
-    display: 'flex',
-    minWidth: 80,
-    width: 200,
-    height: 40,
-    flexShrink: 1,
-    maxWidth: '100%',
-    '& .MuiSelect-root': {
-      display: 'flex',
-      alignItems: 'center',
-      overflow: 'hidden',
-      position: 'relative',
-    },
-  },
-  inputContent: {
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    margin: '-4px 0px',
-  },
-});
+const StyledSelect = styled(Select)`
+  display: flex;
+  min-width: 80px;
+  width: 200px;
+  height: 40px;
+  flex-shrink: 1;
+  max-width: 100%;
+  & .MuiSelect-root {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+  }
+`;
+
+const StyledTypography = styled(Typography)`
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: -2px 0px;
+`;
 
 export type Props = {
   onChange: (value: string[]) => void;
@@ -39,8 +37,6 @@ export type Props = {
 };
 
 export const LanguagesSelect: FunctionComponent<Props> = (props) => {
-  const classes = useStyles();
-
   const menuProps = {
     variant: 'menu',
     getContentAnchorEl: null,
@@ -48,10 +44,6 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
       style: {
         width: 250,
       },
-    },
-    anchorOrigin: {
-      vertical: 'bottom',
-      horizontal: 'left',
     },
     id: `language-select-${props.context}-menu`,
   } as const;
@@ -62,20 +54,15 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
       variant="outlined"
       size="small"
     >
-      <Select
-        className={classes.input}
+      <StyledSelect
         labelId={`languages-${props.context}`}
         id={`languages-select-${props.context}`}
         multiple
         value={props.value}
         renderValue={(selected) => (
-          <Typography
-            color="textPrimary"
-            variant="body1"
-            className={classes.inputContent}
-          >
+          <StyledTypography color="textPrimary" variant="body1">
             {(selected as string[]).join(', ')}
-          </Typography>
+          </StyledTypography>
         )}
         MenuProps={menuProps}
         margin="dense"
@@ -85,7 +72,7 @@ export const LanguagesSelect: FunctionComponent<Props> = (props) => {
           languages: props.languages,
           value: props.value,
         })}
-      </Select>
+      </StyledSelect>
     </FormControl>
   );
 };

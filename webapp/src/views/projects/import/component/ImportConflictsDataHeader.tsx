@@ -6,8 +6,8 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
-} from '@material-ui/core';
-import { DoneAll } from '@material-ui/icons';
+} from '@mui/material';
+import { DoneAll } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
@@ -22,7 +22,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
   const project = useProject();
 
   const theme = useTheme();
-  const isSmOrLower = useMediaQuery(theme.breakpoints.down('sm'));
+  const isSmOrLower = useMediaQuery(theme.breakpoints.down('md'));
 
   const keepAllExisting = () => {
     actions.loadableActions.resolveAllKeepExisting.dispatch({

@@ -1,5 +1,5 @@
 import { T } from '@tolgee/react';
-import { Menu, MenuItem } from '@material-ui/core';
+import { Menu, MenuItem } from '@mui/material';
 import { FC } from 'react';
 
 export const AvatarEditMenu: FC<{

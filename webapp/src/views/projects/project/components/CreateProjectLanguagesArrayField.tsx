@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { Box, Button, Grid } from '@material-ui/core';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import { Box, Button, Grid } from '@mui/material';
+import FormHelperText from '@mui/material/FormHelperText';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 
@@ -25,7 +25,7 @@ export const CreateProjectLanguagesArrayField: FC = () => {
           name="languages"
           addButton={(addItem) =>
             !hasUnfinishedLanguage && (
-              <Box display="inline-flex" alignItems="center">
+              <Box display="inline-flex" alignItems="center" mt={2} ml={2}>
                 <Button
                   data-cy="create-project-language-add-button"
                   onClick={addItem}
@@ -43,8 +43,9 @@ export const CreateProjectLanguagesArrayField: FC = () => {
             const inputProps = formikContext.getFieldProps(fieldName);
             const isPrepared = !!inputProps.value;
             return (
-              <Grid item {...{ xs: !isPrepared && 12 }}>
+              <Grid item {...{ xs: !isPrepared && 12 }} spacing={2}>
                 <CreateLanguageField
+                  key={index}
                   autoFocus={true}
                   modifyInDialog={true}
                   onChange={helpers.setValue}

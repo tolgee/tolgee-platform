@@ -1,68 +1,70 @@
-import { makeStyles } from '@material-ui/core';
 import { useTranslate } from '@tolgee/react';
+import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { green, grey, orange } from '@material-ui/core/colors';
+import { green, grey, orange } from '@mui/material/colors';
 import { TabMessage } from './TabMessage';
 import { useTranslationTools } from './useTranslationTools';
 
 type PagedModelTranslationMemoryItemModel =
   components['schemas']['PagedModelTranslationMemoryItemModel'];
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  item: {
-    display: 'grid',
-    padding: theme.spacing(1, 1.25),
-    gap: '0px 10px',
-    gridTemplateColumns: 'auto 1fr',
-    gridTemplateRows: 'auto auto 3px auto',
-    gridTemplateAreas: `
-      "target target"
-      "base base"
-      "space space"
-      "similarity source"
-    `,
-    fontSize: 14,
-    cursor: 'pointer',
-    color: theme.palette.text.primary,
-    transition: 'all 0.1s ease-in-out',
-    transitionProperty: 'background color',
-    '&:hover': {
-      background: theme.palette.extraLightBackground.main,
-      color: theme.palette.primary.main,
-    },
-  },
-  target: {
-    gridArea: 'target',
-    fontSize: 15,
-  },
-  base: {
-    gridArea: 'base',
-    fontStyle: 'italic',
-    color: theme.palette.text.secondary,
-    fontSize: 13,
-  },
-  similarity: {
-    gridArea: 'similarity',
-    fontSize: 13,
-    color: 'white',
-    padding: '1px 9px',
-    borderRadius: 10,
-  },
-  source: {
-    gridArea: 'source',
-    fontSize: 13,
-    alignSelf: 'center',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    color: theme.palette.text.secondary,
-  },
-}));
+const StyledContainer = styled('div')`
+  display: flex;
+  flex-direction: column;
+`;
+
+const StyledItem = styled('div')`
+  display: grid;
+  padding: ${({ theme }) => theme.spacing(1, 1.25)};
+  gap: 0px 10px;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto 3px auto;
+  grid-template-areas:
+    'target target'
+    'base base'
+    'space space'
+    'similarity source';
+  font-size: 14px;
+  cursor: pointer;
+  color: ${({ theme }) => theme.palette.text.primary};
+  transition: all 0.1s ease-in-out;
+  transition-property: background color;
+  &:hover {
+    background: ${({ theme }) => theme.palette.extraLightBackground.main};
+    color: ${({ theme }) => theme.palette.primary.main};
+  }
+`;
+
+const StyledTarget = styled('div')`
+  grid-area: target;
+  font-size: 15px;
+`;
+
+const StyledBase = styled('div')`
+  grid-area: base;
+  font-style: italic;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  font-size: 13px;
+`;
+
+const StyledSimilarity = styled('div')`
+  grid-area: similarity;
+  font-size: 13px;
+  color: white;
+  padding: 1px 9px;
+  border-radius: 10px;
+`;
+
+const StyledSource = styled('div')`
+  grid-area: source;
+  font-size: 13px;
+  align-self: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
 
 type Props = {
   data: PagedModelTranslationMemoryItemModel | undefined;
@@ -70,7 +72,6 @@ type Props = {
 };
 
 export const TranslationMemory: React.FC<Props> = ({ data, operationsRef }) => {
-  const classes = useStyles();
   const t = useTranslate();
   const items = data?._embedded?.translationMemoryItems;
 
@@ -79,7 +80,7 @@ export const TranslationMemory: React.FC<Props> = ({ data, operationsRef }) => {
   }
 
   return (
-    <div className={classes.container}>
+    <StyledContainer>
       {items?.length ? (
         items.map((item) => {
           const similarityColor =
@@ -89,8 +90,7 @@ export const TranslationMemory: React.FC<Props> = ({ data, operationsRef }) => {
               ? orange[800]
               : grey[600];
           return (
-            <div
-              className={classes.item}
+            <StyledItem
               key={item.keyName}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -101,16 +101,13 @@ export const TranslationMemory: React.FC<Props> = ({ data, operationsRef }) => {
               role="button"
               data-cy="translation-tools-translation-memory-item"
             >
-              <div className={classes.target}>{item.targetText}</div>
-              <div className={classes.base}>{item.baseText}</div>
-              <div
-                className={classes.similarity}
-                style={{ background: similarityColor }}
-              >
+              <StyledTarget>{item.targetText}</StyledTarget>
+              <StyledBase>{item.baseText}</StyledBase>
+              <StyledSimilarity style={{ background: similarityColor }}>
                 {Math.round(100 * item.similarity)}%
-              </div>
-              <div className={classes.source}>{item.keyName}</div>
-            </div>
+              </StyledSimilarity>
+              <StyledSource>{item.keyName}</StyledSource>
+            </StyledItem>
           );
         })
       ) : (
@@ -119,6 +116,6 @@ export const TranslationMemory: React.FC<Props> = ({ data, operationsRef }) => {
           message={t('translation_tools_nothing_found', 'Nothing found')}
         />
       )}
-    </div>
+    </StyledContainer>
   );
 };

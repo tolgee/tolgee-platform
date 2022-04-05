@@ -1,5 +1,4 @@
 import React, { useRef, useState } from 'react';
-import { makeStyles } from '@material-ui/core';
 import { useDebounce } from 'use-debounce';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -7,28 +6,25 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { CellKey } from '../CellKey';
 import { CellTranslation } from './CellTranslation';
+import { styled } from '@mui/material';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles((theme) => {
-  const borderColor = theme.palette.grey[200];
-  return {
-    container: {
-      display: 'flex',
-      border: `1px solid ${borderColor}`,
-      borderWidth: '1px 0px 0px 0px',
-      position: 'relative',
-    },
-    fakeContainer: {
-      display: 'block',
-      position: 'absolute',
-      bottom: 0,
-      right: 0,
-    },
-  };
-});
+const StyledContainer = styled('div')`
+  display: flex;
+  border: 1px solid ${({ theme }) => theme.palette.grey[200]};
+  border-width: 1px 0px 0px 0px;
+  position: relative;
+`;
+
+const StyledFakeContainer = styled('div')`
+  display: block;
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+`;
 
 type Props = {
   data: KeyWithTranslationsModel;
@@ -44,7 +40,6 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
   onResize,
 }) {
   const permissions = useProjectPermissions();
-  const classes = useStyles();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const active = hover || focus;
@@ -58,12 +53,11 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
   const colSizesNum = columnSizes.map((val) => Number(val.replace('%', '')));
 
   return (
-    <div
+    <StyledContainer
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
-      className={classes.container}
       data-cy="translations-row"
     >
       <CellKey
@@ -106,11 +100,10 @@ export const RowTable: React.FC<Props> = React.memo(function RowTable({
           />
         );
       })}
-      <div
-        className={classes.fakeContainer}
+      <StyledFakeContainer
         ref={containerRef}
         style={{ left: columnSizes[0] }}
       />
-    </div>
+    </StyledContainer>
   );
 });

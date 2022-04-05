@@ -1,9 +1,9 @@
-import IconButton, { IconButtonProps } from '@material-ui/core/IconButton';
-import SettingsIcon from '@material-ui/icons/Settings';
+import IconButton, { IconButtonProps } from '@mui/material/IconButton';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 export function SettingsIconButton(props: IconButtonProps) {
   return (
-    <IconButton aria-label="settings" {...props}>
+    <IconButton aria-label="settings" {...props} size="large">
       <SettingsIcon />
     </IconButton>
   );

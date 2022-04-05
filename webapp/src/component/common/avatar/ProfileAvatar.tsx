@@ -1,7 +1,6 @@
-import { Box, IconButton } from '@material-ui/core';
+import { Box, IconButton, styled } from '@mui/material';
 import React, { createRef, FC, useRef, useState } from 'react';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import { T } from '@tolgee/react';
 import { ReactCropperElement } from 'react-cropper';
 import { container } from 'tsyringe';
@@ -21,30 +20,31 @@ export type AvatarOwner = {
   type: 'ORG' | 'USER' | 'PROJECT';
 };
 
-const useStyles = makeStyles((theme) => ({
-  editButton: {
-    opacity: 0,
-  },
-  editButtonWrapper: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    top: 0,
-    left: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  box: {
-    cursor: 'pointer',
-    '&:hover $editButton': {
-      backgroundColor: 'rgba(234,234,234,0.63)',
-      opacity: 1,
-      color: '#000000',
-    },
-    position: 'relative',
-  },
-}));
+const StyledEditButton = styled(IconButton)`
+  opacity: 0;
+  background: rgba(234, 234, 234, 0.63) !important;
+  transition: opacity 0.2s ease-in-out;
+  color: #000000;
+`;
+
+const EditButtonWrapper = styled(Box)`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const StyledBox = styled(Box)`
+  cursor: pointer;
+  position: relative;
+  &:hover ${StyledEditButton} {
+    opacity: 1;
+  }
+`;
 
 const file2Base64 = (file: File): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
@@ -65,7 +65,6 @@ export const ProfileAvatar: FC<{
   autoAvatarType: AutoAvatarType;
   circle?: boolean;
 }> = (props) => {
-  const classes = useStyles();
   const fileRef = createRef<HTMLInputElement>();
   const [uploaded, setUploaded] = useState(null as string | null | undefined);
   const cropperRef = createRef<ReactCropperElement>();
@@ -125,8 +124,7 @@ export const ProfileAvatar: FC<{
         onChange={onFileInputChange}
         accept={ALLOWED_UPLOAD_TYPES.join(',')}
       />
-      <Box
-        className={classes.box}
+      <StyledBox
         display="inline-block"
         onClick={() => {
           setAvatarMenuAnchorEl(editAvatarRef.current);
@@ -138,17 +136,16 @@ export const ProfileAvatar: FC<{
           autoAvatarType={props.autoAvatarType}
           circle={props.circle}
         />
-        <Box className={classes.editButtonWrapper}>
-          <IconButton
+        <EditButtonWrapper>
+          <StyledEditButton
             data-cy="avatar-menu-open-button"
             size="small"
-            className={classes.editButton}
             ref={editAvatarRef as any}
           >
             <EditIcon />
-          </IconButton>
-        </Box>
-      </Box>
+          </StyledEditButton>
+        </EditButtonWrapper>
+      </StyledBox>
       <AvatarEditMenu
         canRemove={!!props.owner.avatar}
         anchorEl={avatarMenuAnchorEl}

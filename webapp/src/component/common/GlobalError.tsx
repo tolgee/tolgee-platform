@@ -1,21 +1,19 @@
-import { Button, makeStyles, Theme } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
+import { Button, styled } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { container } from 'tsyringe';
 
 import { GlobalError as GlobalErrorError } from 'tg.error/GlobalError';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  image: {
-    filter: 'grayscale(50%)',
-    opacity: '0.7',
-    maxWidth: '100%',
-    width: 500,
-  },
-}));
+const StyledImage = styled('img')`
+  filter: grayscale(50%);
+  opacity: 0.7;
+  max-width: 100%;
+  width: 500px;
+`;
+
 export default function GlobalError(props: { error: GlobalErrorError }) {
-  const classes = useStyles();
   const dev = process.env.NODE_ENV === 'development';
 
   return (
@@ -31,11 +29,7 @@ export default function GlobalError(props: { error: GlobalErrorError }) {
           flexDirection="column"
           alignItems="center"
         >
-          <img
-            src="/images/brokenMouse.svg"
-            draggable="false"
-            className={classes.image}
-          />
+          <StyledImage src="/images/brokenMouse.svg" draggable="false" />
         </Box>
       )}
 

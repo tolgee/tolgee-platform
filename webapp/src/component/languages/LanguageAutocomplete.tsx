@@ -1,10 +1,11 @@
 import React, { FC, ReactNode, useState } from 'react';
-import { Box, IconButton, InputAdornment, TextField } from '@material-ui/core';
-import { Add, Clear } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { Box, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Add, Clear } from '@mui/icons-material';
+import { Autocomplete } from '@mui/material';
 import { suggest } from '@tginternal/language-util';
 import { SuggestResult } from '@tginternal/language-util/lib/suggesting';
 import { T } from '@tolgee/react';
+import { MenuItem } from '@mui/material';
 
 export type AutocompleteOption = Omit<SuggestResult, 'languageId'> & {
   isNew?: true;
@@ -54,13 +55,15 @@ export const LanguageAutocomplete: FC<{
       onChange={(_, value) => {
         props.onSelect(value as AutocompleteOption);
       }}
-      renderOption={(option) => (
-        <span data-cy="languages-create-autocomplete-suggested-option">
-          {option.customRenderOption ||
-            `${option.englishName} - ${option.originalName} - ${
-              option.languageId
-            } ${option.flags?.[0] || ''}`}
-        </span>
+      renderOption={(props, option) => (
+        <MenuItem {...props}>
+          <span data-cy="languages-create-autocomplete-suggested-option">
+            {option.customRenderOption ||
+              `${option.englishName} - ${option.originalName} - ${
+                option.languageId
+              } ${option.flags?.[0] || ''}`}
+          </span>
+        </MenuItem>
       )}
       renderInput={(params) => (
         <TextField
@@ -71,6 +74,7 @@ export const LanguageAutocomplete: FC<{
           }}
           label={<T>language_create_autocomplete_label</T>}
           margin="normal"
+          variant="standard"
           required={true}
           InputProps={{
             autoFocus: props.autoFocus,

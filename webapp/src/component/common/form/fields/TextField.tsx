@@ -1,10 +1,5 @@
 import { FunctionComponent, useEffect, useState } from 'react';
-import {
-  TextField as MUITextField,
-  TextFieldProps,
-  Theme,
-} from '@material-ui/core';
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+import { TextField as MUITextField, TextFieldProps } from '@mui/material';
 import { useField } from 'formik';
 
 interface PGTextFieldProps {
@@ -14,17 +9,7 @@ interface PGTextFieldProps {
 
 type Props = PGTextFieldProps & TextFieldProps;
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    textField: {
-      marginTop: theme.spacing(2),
-      minHeight: 70,
-    },
-  })
-);
-
 export const TextField: FunctionComponent<Props> = (props) => {
-  const classes = useStyles({});
   const [field, meta] = useField(props.name);
   const [oldValue, setOldValue] = useState(field.value);
 
@@ -40,7 +25,8 @@ export const TextField: FunctionComponent<Props> = (props) => {
 
   return (
     <MUITextField
-      className={props.className || classes.textField}
+      sx={{ mt: 2, minHeight: 70 }}
+      className={props.className}
       fullWidth={props.fullWidth ? props.fullWidth : true}
       {...field}
       {...otherProps}

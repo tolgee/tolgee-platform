@@ -1,36 +1,38 @@
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material';
+
 import { components } from 'tg.service/apiSchema.generated';
 import { getProviderImg } from './getProviderImg';
 import { useTranslationTools } from './useTranslationTools';
 
 type SuggestResultModel = components['schemas']['SuggestResultModel'];
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  item: {
-    padding: theme.spacing(1, 1.25),
-    display: 'grid',
-    gap: theme.spacing(0, 1),
-    gridTemplateColumns: '20px 1fr',
-    cursor: 'pointer',
-    transition: 'all 0.1s ease-in-out',
-    transitionProperty: 'background color',
-    '&:hover': {
-      background: theme.palette.extraLightBackground.main,
-      color: theme.palette.primary.main,
-    },
-  },
-  source: {
-    marginTop: 3,
-  },
-  value: {
-    fontSize: 15,
-    alignSelf: 'center',
-  },
-}));
+const StyledContainer = styled('div')`
+  display: flex;
+  flex-direction: column;
+`;
+
+const StyledItem = styled('div')`
+  padding: ${({ theme }) => theme.spacing(1, 1.25)};
+  display: grid;
+  gap: ${({ theme }) => theme.spacing(0, 1)};
+  grid-template-columns: 20px 1fr;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+  transition-property: background color;
+  &:hover {
+    background: ${({ theme }) => theme.palette.extraLightBackground.main};
+    color: ${({ theme }) => theme.palette.primary.main};
+  }
+`;
+
+const StyledSource = styled('div')`
+  margin-top: 3px;
+`;
+
+const StyledValue = styled('div')`
+  font-size: 15px;
+  align-self: center;
+`;
 
 type Props = {
   data: SuggestResultModel | undefined;
@@ -41,19 +43,17 @@ export const MachineTranslation: React.FC<Props> = ({
   data,
   operationsRef,
 }) => {
-  const classes = useStyles();
   const items = data?.machineTranslations
     ? Object.entries(data?.machineTranslations)
     : [];
 
   return (
-    <div className={classes.container}>
+    <StyledContainer>
       {items?.map(([provider, translation]) => {
         const providerImg = getProviderImg(provider);
 
         return (
-          <div
-            className={classes.item}
+          <StyledItem
             key={provider}
             onMouseDown={(e) => {
               e.preventDefault();
@@ -64,13 +64,13 @@ export const MachineTranslation: React.FC<Props> = ({
             role="button"
             data-cy="translation-tools-machine-translation-item"
           >
-            <div className={classes.source}>
+            <StyledSource>
               {providerImg && <img src={providerImg} width="16px" />}
-            </div>
-            <div className={classes.value}>{translation}</div>
-          </div>
+            </StyledSource>
+            <StyledValue>{translation}</StyledValue>
+          </StyledItem>
         );
       })}
-    </div>
+    </StyledContainer>
   );
 };

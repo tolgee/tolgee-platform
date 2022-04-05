@@ -1,21 +1,20 @@
-import { makeStyles, Tooltip } from '@material-ui/core';
-import { Help } from '@material-ui/icons';
+import { styled, Tooltip } from '@mui/material';
+import { Help } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 import clsx from 'clsx';
 import { components } from 'tg.service/apiSchema.generated';
-import { useTableStyles } from '../tableStyles';
 import { LanguageRow } from './LanguageRow';
+import { TABLE_CENTERED, TABLE_DIVIDER, TABLE_TOP_ROW } from '../tableStyles';
 
-const useStyles = makeStyles((theme) => ({
-  primaryProvider: {
-    display: 'flex',
-    gap: 4,
-    alignItems: 'center',
-  },
-  helpIcon: {
-    fontSize: 15,
-  },
-}));
+const StyledPrimaryProvider = styled('div')`
+  display: flex;
+  gap: 4px;
+  align-items: center;
+`;
+
+const StyledHelpIcon = styled(Help)`
+  font-size: 15px;
+`;
 
 type PagedModelLanguageModel = components['schemas']['PagedModelLanguageModel'];
 
@@ -26,34 +25,29 @@ type Props = {
 };
 
 export const SettingsForm = ({ providers, expanded, languages }: Props) => {
-  const classes = useStyles();
-  const tableClasses = useTableStyles();
   const t = useTranslate();
 
   return (
     <>
-      <div className={tableClasses.topRow} />
+      <div className={TABLE_TOP_ROW} />
       {providers.map((provider) => (
-        <div
-          key={provider}
-          className={clsx(tableClasses.topRow, tableClasses.centered)}
-        >
+        <div key={provider} className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
           {provider}
         </div>
       ))}
-      <div className={clsx(tableClasses.topRow, tableClasses.centered)}>
+      <div className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
         <Tooltip title={t('project_languages_primary_provider_hint')}>
-          <div className={classes.primaryProvider}>
+          <StyledPrimaryProvider>
             <div>{t('project_languages_primary_provider', 'Primary')}</div>
-            <Help className={classes.helpIcon} />
-          </div>
+            <StyledHelpIcon />
+          </StyledPrimaryProvider>
         </Tooltip>
       </div>
       <LanguageRow lang={null} providers={providers} />
 
       {expanded && (
         <>
-          <div className={tableClasses.divider} />
+          <div className={TABLE_DIVIDER} />
           {languages?._embedded?.languages
             ?.filter(({ base }) => !base)
             .map((lang) => (

@@ -1,46 +1,48 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { makeStyles, Tooltip } from '@material-ui/core';
 import clsx from 'clsx';
+import { Link, useLocation } from 'react-router-dom';
+import { styled, Tooltip } from '@mui/material';
 
-interface SideMenuItemProps {
+type SideMenuItemProps = {
   linkTo?: string;
   icon: React.ReactElement;
   text: string;
   selected?: boolean;
   matchAsPrefix?: boolean;
   hidden?: boolean;
-}
+};
 
-const useStyles = makeStyles((theme) => ({
-  item: {
-    display: 'flex',
-    listStyle: 'none',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  link: {
-    display: 'flex',
-    padding: '10px 0px',
-    cursor: 'pointer',
-    justifyContent: 'center',
-    color: theme.palette.grey[600],
-    outline: 0,
-    transition: 'all 0.2s ease-in-out',
-    '&:focus, &:hover': {
-      color: theme.palette.grey[800],
-    },
-    width: 44,
-    borderRadius: 10,
-  },
-  selected: {
-    color: theme.palette.primary.main + ' !important',
-    background: theme.palette.grey[200] + ' !important',
-  },
-  tooltip: {
-    margin: theme.spacing(0, 0.5),
-  },
-}));
+const StyledItem = styled('li')`
+  display: flex;
+  list-style: none;
+  flex-direction: column;
+  align-items: center;
+
+  & .tooltip {
+    margin: ${({ theme }) => theme.spacing(0, 0.5)};
+  }
+
+  & .link {
+    display: flex;
+    padding: 10px 0px;
+    cursor: pointer;
+    justify-content: center;
+    color: ${({ theme }) => theme.palette.grey[600]};
+    outline: 0;
+    transition: all 0.2s ease-in-out;
+    &:focus,
+    &:hover {
+      color: ${({ theme }) => theme.palette.grey[800]};
+    }
+    width: 44px;
+    border-radius: 10px;
+  }
+
+  & .selected {
+    color: ${({ theme }) => theme.palette.primary.main + ' !important'};
+    background: ${({ theme }) => theme.palette.grey[200] + ' !important'};
+  }
+`;
 
 export function SideMenuItem({
   linkTo,
@@ -51,7 +53,6 @@ export function SideMenuItem({
   hidden,
 }: SideMenuItemProps) {
   const match = useLocation();
-  const classes = useStyles();
 
   const isSelected = selected
     ? true
@@ -60,21 +61,17 @@ export function SideMenuItem({
     : match.pathname === linkTo;
 
   return (
-    <li className={classes.item}>
-      <Tooltip
-        title={text}
-        placement="right"
-        classes={{ tooltip: classes.tooltip }}
-      >
+    <StyledItem>
+      <Tooltip title={text} placement="right" classes={{ tooltip: 'tooltip' }}>
         <Link
           aria-label={text}
           to={linkTo as string}
           tabIndex={hidden ? -1 : undefined}
-          className={clsx(classes.link, { [classes.selected]: isSelected })}
+          className={clsx('link', { selected: isSelected })}
         >
           {icon}
         </Link>
       </Tooltip>
-    </li>
+    </StyledItem>
   );
 }

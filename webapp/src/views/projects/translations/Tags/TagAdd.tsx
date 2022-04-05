@@ -1,23 +1,22 @@
-import { makeStyles } from '@material-ui/core';
-import { Add } from '@material-ui/icons';
+import { Add } from '@mui/icons-material';
+import { styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 
-import { useCellStyles } from '../cell/styles';
+import { CELL_SHOW_ON_HOVER } from '../cell/styles';
 import { Wrapper } from './Wrapper';
 
-const useStyles = makeStyles({
-  addIcon: {
-    fontSize: 16,
-    padding: 2,
-    width: 20,
-    height: 20,
-  },
-  label: {
-    marginTop: -2,
-    marginRight: 6,
-  },
-});
+const StyledAddIcon = styled(Add)`
+  font-size: 16px;
+  padding: 2px;
+  width: 20px;
+  height: 20px;
+`;
+
+const StyledLabel = styled('div')`
+  margin-top: -2px;
+  margin-right: 6px;
+`;
 
 type Props = {
   onClick: () => void;
@@ -30,20 +29,17 @@ export const TagAdd: React.FC<Props> = ({
   withFullLabel,
   className,
 }) => {
-  const classes = useStyles();
-  const cellClasses = useCellStyles({});
-
   return (
     <Wrapper
       role="add"
       onClick={onClick}
-      className={clsx(cellClasses.showOnHover, className)}
+      className={clsx(CELL_SHOW_ON_HOVER, className)}
     >
-      <Add className={classes.addIcon} data-cy="translations-tags-add" />
+      <StyledAddIcon data-cy="translations-tags-add" />
       {withFullLabel && (
-        <div className={classes.label}>
+        <StyledLabel>
           <T>translations_tag_label</T>
-        </div>
+        </StyledLabel>
       )}
     </Wrapper>
   );

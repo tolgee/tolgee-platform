@@ -1,11 +1,6 @@
 import React, { ComponentProps, useEffect, useState } from 'react';
-import {
-  IconButton,
-  InputAdornment,
-  TextField,
-  useTheme,
-} from '@material-ui/core';
-import { Search, Clear } from '@material-ui/icons';
+import { IconButton, InputAdornment, TextField, useTheme } from '@mui/material';
+import { Search, Clear } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 import { useDebounce } from 'use-debounce/lib';
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';

@@ -2,12 +2,12 @@ import React, { ComponentProps, FunctionComponent } from 'react';
 import {
   Button,
   ListItemText,
-  makeStyles,
   Menu,
   MenuItem,
   Tooltip,
-} from '@material-ui/core';
-import { ArrowDropDown } from '@material-ui/icons';
+  styled,
+} from '@mui/material';
+import { ArrowDropDown } from '@mui/icons-material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { ProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -19,14 +19,12 @@ type PermissionType = NonNullable<
   components['schemas']['ProjectModel']['computedPermissions']['type']
 >;
 
-const useStyles = makeStyles((theme) => ({
-  item: {
-    maxWidth: 300,
-  },
-  textSecondary: {
-    whiteSpace: 'normal',
-  },
-}));
+const StyledListItemText = styled(ListItemText)`
+  max-width: 300px;
+  & .textSecondary {
+    white-space: normal;
+  }
+`;
 
 export const PermissionsMenu: FunctionComponent<{
   title?: string;
@@ -36,7 +34,6 @@ export const PermissionsMenu: FunctionComponent<{
   minPermissions?: PermissionType;
 }> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const classes = useStyles();
   const t = useTranslate();
 
   const handleClose = () => {
@@ -81,10 +78,8 @@ export const PermissionsMenu: FunctionComponent<{
       </Tooltip>
       <Menu
         data-cy="permissions-menu"
-        elevation={1}
         id="simple-menu"
         anchorEl={anchorEl}
-        getContentAnchorEl={null}
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleClose}
@@ -107,11 +102,10 @@ export const PermissionsMenu: FunctionComponent<{
             disabled={k === props.selected}
             selected={k === props.selected}
           >
-            <ListItemText
-              className={classes.item}
+            <StyledListItemText
               primary={<T>{`permission_type_${k.toLowerCase()}`}</T>}
               secondary={<T>{`permission_type_${k.toLowerCase()}_hint`}</T>}
-              secondaryTypographyProps={{ className: classes.textSecondary }}
+              secondaryTypographyProps={{ className: 'textSecondary' }}
             />
           </MenuItem>
         ))}

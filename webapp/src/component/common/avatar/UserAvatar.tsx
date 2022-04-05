@@ -1,36 +1,29 @@
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material';
 import { useUser } from 'tg.hooks/useUser';
 import { AvatarImg } from './AvatarImg';
 
 const SIZE = 24;
 
-const useStyle = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    width: SIZE,
-    height: SIZE,
-    color: 'black',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: 12,
-    flexShrink: 0,
-    boxSizing: 'border-box',
-    fontWeight: 600,
-    overflow: 'hidden',
-    filter: 'drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.2))',
-  },
-  img: {
-    objectFit: 'cover',
-  },
-}));
+const StyledContainer = styled('div')`
+  display: flex;
+  width: ${SIZE};
+  height: ${SIZE};
+  color: black;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  font-weight: 600;
+  overflow: hidden;
+  filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.2));
+`;
 
 export const UserAvatar: React.FC = () => {
-  const classes = useStyle();
-
   const user = useUser();
 
   return (
-    <div className={classes.root}>
+    <StyledContainer>
       {user && (
         <AvatarImg
           owner={{
@@ -44,6 +37,6 @@ export const UserAvatar: React.FC = () => {
           size={SIZE}
         />
       )}
-    </div>
+    </StyledContainer>
   );
 };

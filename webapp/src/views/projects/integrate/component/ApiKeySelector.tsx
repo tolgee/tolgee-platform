@@ -1,38 +1,33 @@
 import { default as React, FC, useState } from 'react';
-import {
-  Box,
-  FormControl,
-  makeStyles,
-  MenuItem,
-  Select,
-} from '@material-ui/core';
+import { Box, FormControl, MenuItem, Select, styled } from '@mui/material';
+import { T } from '@tolgee/react';
+import { Add } from '@mui/icons-material';
+
 import { components } from 'tg.service/apiSchema.generated';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { T } from '@tolgee/react';
-import { Add } from '@material-ui/icons';
-import clsx from 'clsx';
 import { AddApiKeyFormDialog } from 'tg.views/userSettings/apiKeys/AddApiKeyFormDialog';
 import { useProject } from 'tg.hooks/useProject';
 
-const useStyles = makeStyles((t) => ({
-  itemWrapper: {
-    maxWidth: 400,
-  },
-  scopes: {
-    fontSize: 11,
-    whiteSpace: 'normal',
-  },
-  addIcon: {
-    marginRight: t.spacing(1),
-  },
-  addItem: {
-    display: 'flex',
-    alignItems: 'center',
-    color: t.palette.primary.main,
-    paddingTop: t.spacing(1),
-    paddingBottom: t.spacing(1),
-  },
-}));
+const StyledItemWrapper = styled('div')`
+  max-width: 400;
+
+  &.addItem {
+    display: flex;
+    align-items: center;
+    color: ${({ theme }) => theme.palette.primary.main};
+    padding-top: ${({ theme }) => theme.spacing(1)};
+    padding-bottom: ${({ theme }) => theme.spacing(1)};
+  }
+`;
+
+const StyledScopes = styled('div')`
+  font-size: 11px;
+  white-space: normal;
+`;
+
+const StyledAddIcon = styled(Add)`
+  marginright: ${({ theme }) => theme.spacing(1)};
+`;
 
 export const ApiKeySelector: FC<{
   selected: components['schemas']['ApiKeyModel'] | undefined;
@@ -41,8 +36,6 @@ export const ApiKeySelector: FC<{
   keysLoading: boolean;
   onNewCreated: (key: components['schemas']['ApiKeyModel']) => void;
 }> = (props) => {
-  const classes = useStyles();
-
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const findKey = (id: number) => props.keys?.find((k) => k.id === id);
@@ -83,20 +76,20 @@ export const ApiKeySelector: FC<{
                 value={k.id}
                 data-cy="integrate-api-key-selector-item"
               >
-                <Box className={classes.itemWrapper}>
+                <StyledItemWrapper>
                   <Box data-openreplay-masked="">{k.key}</Box>
-                  <Box className={classes.scopes}>{k.scopes.join(', ')}</Box>
-                </Box>
+                  <StyledScopes>{k.scopes.join(', ')}</StyledScopes>
+                </StyledItemWrapper>
               </MenuItem>
             ))}
             <MenuItem
               value={0}
               data-cy="integrate-api-key-selector-create-new-item"
             >
-              <Box className={clsx(classes.itemWrapper, classes.addItem)}>
+              <StyledItemWrapper className="addItem">
                 <T>api_key_selector_create_new</T>
-                <Add fontSize="small" className={classes.addIcon} />
-              </Box>
+                <StyledAddIcon fontSize="small" />
+              </StyledItemWrapper>
             </MenuItem>
           </Select>
         </FormControl>

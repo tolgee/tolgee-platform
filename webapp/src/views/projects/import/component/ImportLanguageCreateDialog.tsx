@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Box, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
+import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
@@ -20,7 +20,7 @@ export const ImportLanguageCreateDialog: FunctionComponent<{
         <T>import_add_new_language_dialog_title</T>
       </DialogTitle>
       <DialogContent>
-        <Box mt={-1} minWidth={600}>
+        <Box minWidth={600}>
           <CreateSingleLanguage
             onCreated={(language) => {
               props.onCreated(language.id);

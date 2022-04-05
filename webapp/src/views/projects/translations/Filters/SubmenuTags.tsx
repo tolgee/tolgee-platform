@@ -1,21 +1,9 @@
 import React, { useState } from 'react';
 import { T } from '@tolgee/react';
-import {
-  Checkbox,
-  ListItemText,
-  Menu,
-  MenuItem,
-  makeStyles,
-} from '@material-ui/core';
-import { ArrowRight } from '@material-ui/icons';
+import { Checkbox, ListItemText, Menu, MenuItem } from '@mui/material';
+import { ArrowRight } from '@mui/icons-material';
 
 import { OptionType } from './useAvailableFilters';
-
-const useStyles = makeStyles((theme) => ({
-  item: {
-    height: 50,
-  },
-}));
 
 type Props = {
   item: OptionType;
@@ -25,7 +13,6 @@ type Props = {
 
 export const SubmenuTags: React.FC<Props> = React.forwardRef(
   function SubmenuTags({ item, handleToggle, activeFilters }, ref) {
-    const classes = useStyles();
     const [menuOpen, setMenuOpen] = useState<HTMLElement | null>(null);
 
     const handleMenuClick = (e) => {
@@ -45,8 +32,8 @@ export const SubmenuTags: React.FC<Props> = React.forwardRef(
         <MenuItem
           onClick={handleMenuClick}
           selected={Boolean(menuOpen || subFiltersNumber)}
-          className={classes.item}
           ref={ref as any}
+          sx={{ height: 50 }}
         >
           <ListItemText
             primary={
@@ -76,6 +63,7 @@ export const SubmenuTags: React.FC<Props> = React.forwardRef(
                   key={item.value}
                   value={item.value!}
                   onClick={handleToggle(item.value)}
+                  sx={{ height: 50 }}
                 >
                   <Checkbox
                     size="small"
@@ -89,7 +77,7 @@ export const SubmenuTags: React.FC<Props> = React.forwardRef(
               );
             })
           ) : (
-            <MenuItem className={classes.item} disabled>
+            <MenuItem sx={{ height: 50 }} disabled>
               <T>translations_filters_tags_empty</T>
             </MenuItem>
           )}

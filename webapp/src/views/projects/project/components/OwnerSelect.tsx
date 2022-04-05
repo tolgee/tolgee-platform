@@ -1,10 +1,4 @@
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-} from '@material-ui/core';
+import { Box, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useField } from 'formik';
 
@@ -43,7 +37,7 @@ const OwnerSelect = () => {
 
   return (
     <Box mt={2}>
-      <FormControl fullWidth={true}>
+      <FormControl fullWidth={true} variant="standard">
         <InputLabel id="project-owner-select">
           <T>create_project_owner_label</T>
         </InputLabel>

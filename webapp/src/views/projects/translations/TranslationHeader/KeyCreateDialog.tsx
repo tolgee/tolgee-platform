@@ -1,4 +1,4 @@
-import { DialogTitle, makeStyles } from '@material-ui/core';
+import { DialogTitle, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -12,28 +12,26 @@ import { KeyCreateForm } from '../KeyCreateForm/KeyCreateForm';
 
 type KeyWithDataModel = components['schemas']['KeyWithDataModel'];
 
-const useStyles = makeStyles((theme) => ({
-  title: {
-    justifySelf: 'stretch',
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-  },
-  content: {
-    display: 'grid',
-    rowGap: theme.spacing(2),
-    marginLeft: theme.spacing(3),
-    marginRight: theme.spacing(3),
-    marginBottom: theme.spacing(2),
-  },
-}));
+const StyledTitle = styled('div')`
+  justify-self: stretch;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+`;
+
+const StyledContent = styled('div')`
+  display: grid;
+  row-gap: ${({ theme }) => theme.spacing(2)};
+  margin-left: ${({ theme }) => theme.spacing(3)};
+  margin-right: ${({ theme }) => theme.spacing(3)};
+  margin-bottom: ${({ theme }) => theme.spacing(2)};
+`;
 
 type Props = {
   onClose: () => void;
 };
 
 export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
-  const classes = useStyles();
   const dispatch = useTranslationsDispatch();
 
   const languages = useTranslationsSelector((c) => c.languages);
@@ -93,7 +91,7 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
   return (
     <>
       <DialogTitle>
-        <div className={classes.title}>
+        <StyledTitle>
           <T>translation_single_create_title</T>
           <LanguagesSelect
             languages={languages || []}
@@ -101,16 +99,16 @@ export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
             onChange={handleLanguageChange}
             context="translations-dialog"
           />
-        </div>
+        </StyledTitle>
       </DialogTitle>
-      <div className={classes.content}>
+      <StyledContent>
         <KeyCreateForm
           languages={selectedLanguagesMapped!}
           onSuccess={handleOnSuccess}
           onCancel={onClose}
           autofocus
         />
-      </div>
+      </StyledContent>
     </>
   );
 };

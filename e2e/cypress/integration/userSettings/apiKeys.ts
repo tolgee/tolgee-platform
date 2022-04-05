@@ -2,6 +2,7 @@ import {
   allScopes,
   assertMessage,
   clickAdd,
+  confirmStandard,
   getPopover,
 } from '../../common/shared';
 import {
@@ -111,5 +112,5 @@ const del = (key) => {
     .xpath("(./ancestor::*//*[@aria-label='delete'])[1]")
     .scrollIntoView({ offset: { top: -500, left: 0 } })
     .click();
-  cy.xpath(getAnyContainingText('confirm', 'span')).click();
+  confirmStandard();
 };

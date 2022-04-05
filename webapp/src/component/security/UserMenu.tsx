@@ -1,5 +1,5 @@
 import { default as React, useState } from 'react';
-import { IconButton, makeStyles, Menu, MenuItem } from '@material-ui/core';
+import { IconButton, Menu, MenuItem, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -14,26 +14,23 @@ import { UserAvatar } from '../common/avatar/UserAvatar';
 
 const globalActions = container.resolve(GlobalActions);
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    border: '1px solid #d3d4d5',
-    marginTop: 5,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-  },
-  icon: {
-    width: 30,
-    height: 30,
-  },
-  menuTitle: {
-    opacity: '0.7 !important',
-  },
-}));
+const StyledIconButton = styled(IconButton)`
+  width: 40px;
+  height: 40px;
+`;
+
+const StyledMenu = styled(Menu)`
+  & .paper {
+    border: 1px solid #d3d4d5;
+    margin-top: 5px;
+  }
+`;
+
+const StyledMenuItem = styled(MenuItem)`
+  opacity: 0.7 !important;
+`;
 
 export const UserMenu: React.FC = () => {
-  const classes = useStyles();
   const userLogged = useSelector(
     (state: AppState) => state.global.security.allowPrivate
   );
@@ -60,24 +57,23 @@ export const UserMenu: React.FC = () => {
 
   return userLogged ? (
     <div>
-      <IconButton
+      <StyledIconButton
         color="inherit"
         data-cy="global-user-menu-button"
         aria-controls="user-menu"
         aria-haspopup="true"
         onClick={handleOpen}
-        className={classes.iconButton}
+        size="large"
       >
         <UserAvatar />
-      </IconButton>
-      <Menu
+      </StyledIconButton>
+      <StyledMenu
         id="user-menu"
         keepMounted
         open={!!anchorEl}
         anchorEl={anchorEl}
         onClose={handleClose}
         elevation={0}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right',
@@ -86,11 +82,11 @@ export const UserMenu: React.FC = () => {
           vertical: 'top',
           horizontal: 'right',
         }}
-        classes={{ paper: classes.paper }}
+        classes={{ paper: 'paper' }}
       >
-        <MenuItem divider disabled className={classes.menuTitle}>
+        <StyledMenuItem divider disabled>
           {user.name}
-        </MenuItem>
+        </StyledMenuItem>
         {userMenuItems.map((item, index) => (
           //@ts-ignore
           <MenuItem key={index} component={Link} to={item.link}>
@@ -100,7 +96,7 @@ export const UserMenu: React.FC = () => {
         <MenuItem onClick={() => globalActions.logout.dispatch()}>
           <T noWrap>user_menu_logout</T>
         </MenuItem>
-      </Menu>
+      </StyledMenu>
     </div>
   ) : null;
 };

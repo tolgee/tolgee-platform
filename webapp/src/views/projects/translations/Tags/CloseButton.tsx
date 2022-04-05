@@ -1,27 +1,22 @@
-import { makeStyles } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { styled } from '@mui/material';
+import { Close } from '@mui/icons-material';
 
-const useStyles = makeStyles((theme) => ({
-  closeIcon: {
-    fontSize: 20,
-    cursor: 'pointer',
-    padding: 2,
-    color: theme.palette.text.secondary,
-  },
-}));
+const StyledCloseIcon = styled(Close)`
+  font-size: 20px;
+  cursor: pointer;
+  padding: 2px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
 
 type Props = {
   onClick?: React.MouseEventHandler<SVGElement>;
 };
 
 export const CloseButton: React.FC<Props> = ({ onClick }) => {
-  const classes = useStyles();
-
   return (
-    <Close
+    <StyledCloseIcon
       role="button"
       data-cy="translations-tag-close"
-      className={classes.closeIcon}
       onClick={onClick}
     />
   );

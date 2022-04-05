@@ -17,9 +17,10 @@ export const clickAdd = () => {
 };
 
 export const getPopover = () => {
-  return cy.xpath(
-    "//*[contains(@class, 'MuiPopover-root') and not(contains(@style, 'visibility'))]"
-  );
+  return cy
+    .xpath("//*[contains(@class, 'MuiPopover-root')]")
+    .filter(':visible')
+    .should('be.visible');
 };
 
 export const gcy = (dataCy: Value, options?: Parameters<typeof cy.get>[1]) =>
@@ -90,33 +91,28 @@ export const toggleInMultiselect = (
   chainable.find('div').first().click();
 
   getPopover().within(() => {
-    renderedValues.forEach((val) => {
-      cy.xpath(`.//*[text() = '${val}']/ancestor::li//input`).each(($input) => {
-        cy.wrap($input).click();
-      });
-    });
-
-    cy.get('li').each(($li) => {
-      const input = cy.wrap($li).find('input');
-      input.each(($input) => {
-        let isInValues = false;
-        for (let i = 0; i < renderedValues.length; i++) {
-          const val = renderedValues[i];
-          if (
-            document
-              .evaluate(`.//*[text() = '${val}']`, $li.get(0))
-              .iterateNext()
-          ) {
-            isInValues = true;
-            break;
+    // first select all
+    getPopover()
+      .get('input')
+      .each(
+        // cy.xpath(`.//*[text() = '${val}']/ancestor/ancestor::li//input`).each(
+        ($input) => {
+          const isChecked = $input.is(':checked');
+          if (!isChecked) {
+            cy.wrap($input).click();
           }
         }
-        const isChecked = $input.is(':checked');
-        if ((isChecked && !isInValues) || (!isChecked && isInValues)) {
-          input.click();
+      );
+
+    // unselect necessary
+    getPopover()
+      .get('.MuiListItemText-primary')
+      .each(($label) => {
+        const labelText = $label.text();
+        if (!renderedValues.includes(labelText)) {
+          cy.wrap($label).click();
         }
       });
-    });
   });
   cy.get('body').click(0, 0);
   waitForGlobalLoading();

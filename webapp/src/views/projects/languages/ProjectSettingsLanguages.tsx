@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { Link } from 'react-router-dom';
@@ -13,12 +13,17 @@ import { invalidateUrlPrefix, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { MachineTranslation } from './MachineTranslation/MachineTranslation';
 import { LanguageItem } from './LanguageItem';
-import { useTableStyles } from './tableStyles';
 import { AutoTranslations } from './AutoTranslations/AutoTranslations';
 import { useConfig } from 'tg.hooks/useConfig';
+import {
+  StyledLanguageTable,
+  TABLE_CENTERED,
+  TABLE_FIRST_CELL,
+  TABLE_LAST_CELL,
+  TABLE_TOP_ROW,
+} from './tableStyles';
 
 export const ProjectSettingsLanguages = () => {
-  const tableClasses = useTableStyles();
   const queryClient = useQueryClient();
   const project = useProject();
   const t = useTranslate();
@@ -55,28 +60,27 @@ export const ProjectSettingsLanguages = () => {
           }}
         />
       </Box>
-      <div
-        className={tableClasses.table}
+      <StyledLanguageTable
         style={{ gridTemplateColumns: '1fr auto auto' }}
         data-cy="project-settings-languages"
       >
-        <div className={tableClasses.topRow} />
-        <div className={clsx(tableClasses.topRow, tableClasses.centered)}>
+        <div className={TABLE_TOP_ROW} />
+        <div className={clsx(TABLE_TOP_ROW, TABLE_CENTERED)}>
           {t('project_languages_base_language')}
         </div>
-        <div className={tableClasses.topRow} />
+        <div className={TABLE_TOP_ROW} />
 
         {languagesLoadable.data?._embedded?.languages?.map((l) => (
           <React.Fragment key={l.id}>
             <div
-              className={tableClasses.firstCell}
+              className={TABLE_FIRST_CELL}
               data-cy="project-settings-languages-list-name"
             >
               <LanguageItem language={l} />
             </div>
-            <div className={tableClasses.centered}>{l?.base ? '✓' : ''}</div>
+            <div className={TABLE_CENTERED}>{l?.base ? '✓' : ''}</div>
             <Box
-              className={tableClasses.lastCell}
+              className={TABLE_LAST_CELL}
               mt={1}
               mb={1}
               data-cy="project-settings-languages-list-edit-button"
@@ -95,7 +99,7 @@ export const ProjectSettingsLanguages = () => {
             </Box>
           </React.Fragment>
         ))}
-      </div>
+      </StyledLanguageTable>
 
       {mtEnabled && (
         <>

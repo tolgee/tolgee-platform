@@ -1,6 +1,6 @@
-import { Devices, PersonOutline, VpnKey } from '@material-ui/icons';
+import { Devices, PersonOutline, VpnKey } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
-import LanguageIcon from '@material-ui/icons/Language';
+import LanguageIcon from '@mui/icons-material/Language';
 import {
   ExportIcon,
   ImportIcon,

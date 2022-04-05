@@ -1,51 +1,52 @@
 import React from 'react';
-import { makeStyles, Typography } from '@material-ui/core';
+import { styled, Typography } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { TabMessage } from './TabMessage';
 import { UseQueryResult } from 'react-query';
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-    minWidth: 0,
-  },
-  tab: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(1),
-    padding: theme.spacing(0.5, 1),
-    background: theme.palette.extraLightBackground.main,
-    borderBottom: `1px solid ${theme.palette.extraLightDivider.main}`,
-    textTransform: 'uppercase',
-    color: '#808080',
-    position: 'sticky',
-    top: '0px',
-    height: 32,
-    flexShrink: 1,
-    flexBasis: 0,
-  },
-  badge: {
-    background: theme.palette.lightBackground.main,
-    padding: '2px 4px',
-    borderRadius: '12px',
-    fontSize: 12,
-    height: 20,
-    minWidth: 20,
-    boxSizing: 'border-box',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    fontSize: 14,
-  },
-  content: {},
-}));
+const StyledContainer = styled('div')`
+  display: flex;
+  flex-direction: column;
+  min-width: 0px;
+`;
+
+const StyledTab = styled('div')`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(1)};
+  padding: ${({ theme }) => theme.spacing(0.5, 1)};
+  background: ${({ theme }) => theme.palette.extraLightBackground.main};
+  border-bottom: 1px solid
+    ${({ theme }) => theme.palette.extraLightDivider.main};
+  text-transform: uppercase;
+  color: #808080;
+  position: sticky;
+  top: 0px;
+  height: 32px;
+  flex-shrink: 1;
+  flex-basis: 0px;
+`;
+
+const StyledBadge = styled('div')`
+  background: ${({ theme }) => theme.palette.lightBackground.main};
+  padding: 2px 4px;
+  border-radius: 12px;
+  font-size: 12px;
+  height: 20px;
+  min-width: 20px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const StyledTitle = styled(Typography)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+`;
 
 type Props = {
   icon: React.ReactNode;
@@ -61,7 +62,6 @@ export const ToolsTab: React.FC<Props> = ({
   children,
   data,
 }) => {
-  const classes = useStyles();
   const t = useTranslate();
 
   const getErrorMessage = (code: string) => {
@@ -79,22 +79,18 @@ export const ToolsTab: React.FC<Props> = ({
   const errorMessage = getErrorMessage(errorCode);
 
   return (
-    <div className={classes.container}>
-      <div className={classes.tab}>
+    <StyledContainer>
+      <StyledTab>
         {icon}
-        <Typography variant="button" className={classes.title}>
-          {title}
-        </Typography>
-        {badgeNumber ? (
-          <div className={classes.badge}>{badgeNumber}</div>
-        ) : null}
-      </div>
+        <StyledTitle variant="button">{title}</StyledTitle>
+        {badgeNumber ? <StyledBadge>{badgeNumber}</StyledBadge> : null}
+      </StyledTab>
 
       {data?.isError ? (
         <TabMessage type="error" message={errorMessage} />
       ) : (
         children
       )}
-    </div>
+    </StyledContainer>
   );
 };

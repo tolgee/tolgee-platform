@@ -7,11 +7,11 @@ import {
   Button,
   DialogContent,
   TextField,
-  makeStyles,
   ButtonGroup,
   Box,
   Typography,
-} from '@material-ui/core';
+  styled,
+} from '@mui/material';
 import { container } from 'tsyringe';
 import { useTranslate, T } from '@tolgee/react';
 import copy from 'copy-to-clipboard';
@@ -32,19 +32,18 @@ type RoleType = NonNullable<
   components['schemas']['OrganizationInviteUserDto']['roleType']
 >;
 
-const useStyles = makeStyles((theme) => ({
-  content: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing(2),
-    marginBottom: theme.spacing(2),
-    minHeight: 150,
-  },
-  permissions: {
-    display: 'flex',
-    gap: theme.spacing(1),
-  },
-}));
+const StyledContent = styled('div')`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.spacing(2)};
+  margin-bottom: ${({ theme }) => theme.spacing(2)};
+  min-height: 150px;
+`;
+
+const StyledPermissions = styled('div')`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing(1)};
+`;
 
 type Props = {
   open: boolean;
@@ -52,7 +51,6 @@ type Props = {
 };
 
 export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
-  const classes = useStyles();
   const t = useTranslate();
   const organization = useOrganization();
   const invite = useApiMutation({
@@ -144,12 +142,12 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                 </Box>
               </DialogTitle>
               <DialogContent>
-                <div className={classes.content}>
+                <StyledContent>
                   <div>
                     <Typography variant="caption">
                       {t('invite_user_organization_role_label')}
                     </Typography>
-                    <div className={classes.permissions}>
+                    <StyledPermissions>
                       <RoleMenu
                         role={values.role}
                         onSelect={(role) => formik.setFieldValue('role', role)}
@@ -159,7 +157,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                           'data-cy': 'invitation-dialog-role-button',
                         }}
                       />
-                    </div>
+                    </StyledPermissions>
                   </div>
 
                   <Field name="text">
@@ -178,7 +176,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                       />
                     )}
                   </Field>
-                </div>
+                </StyledContent>
               </DialogContent>
               <DialogActions>
                 <LoadingButton

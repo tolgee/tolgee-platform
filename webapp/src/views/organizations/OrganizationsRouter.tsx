@@ -1,4 +1,4 @@
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { Switch } from 'react-router-dom';
 
 import { BoxLoading } from 'tg.component/common/BoxLoading';

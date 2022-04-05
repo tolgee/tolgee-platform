@@ -5,10 +5,10 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { makeStyles, Theme } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import AddIcon from '@material-ui/icons/Add';
-import { Skeleton } from '@material-ui/lab';
+import { styled } from '@mui/material';
+import Box from '@mui/material/Box';
+import AddIcon from '@mui/icons-material/Add';
+import { Skeleton } from '@mui/material';
 import { T, useCurrentLanguage, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
@@ -30,38 +30,38 @@ export interface ScreenshotGalleryProps {
   keyId: number;
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-  addIcon: {
-    fontSize: 50,
-  },
-  addBox: {
-    overflow: 'hidden',
-    width: '100px',
-    height: '100px',
-    alignItems: 'center',
-    justifyContent: 'center',
-    display: 'flex',
-    margin: '1px',
-    cursor: 'pointer',
-    borderColor: theme.palette.grey[200],
-    color: theme.palette.grey[200],
-    border: `1px dashed ${theme.palette.grey[200]}`,
-    '&:hover': {
-      borderColor: theme.palette.primary.main,
-      color: theme.palette.primary.main,
-    },
-    flex: '0 0 auto',
-  },
-  hintText: {
-    overflow: 'hidden',
-    // Adds a hyphen where the word breaks
-    '-ms-hyphens': 'auto',
-    '-moz-hyphens': 'auto',
-    '-webkit-hyphens': 'auto',
-    hyphens: 'auto',
-    textAlign: 'justify',
-  },
-}));
+const StyledAddIcon = styled(AddIcon)`
+  font-size: 50px;
+`;
+
+const StyledAddBox = styled('div')`
+  overflow: hidden;
+  width: 100px;
+  height: 100px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  margin: 1px;
+  cursor: pointer;
+  border-color: ${({ theme }) => theme.palette.grey[200]};
+  color: ${({ theme }) => theme.palette.grey[200]};
+  border: 1px dashed ${({ theme }) => theme.palette.grey[200]};
+  &:hover {
+    border-color: ${({ theme }) => theme.palette.primary.main};
+    color: ${({ theme }) => theme.palette.primary.main};
+  }
+  flex: '0 0 auto';
+`;
+
+const StyledHintText = styled(Box)`
+  overflow: hidden;
+  // Adds a hyphen where the word breaks
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  text-align: justify;
+`;
 
 const messageService = container.resolve(MessageService);
 export const MAX_FILE_COUNT = 20;
@@ -70,7 +70,6 @@ const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   const fileRef = createRef<HTMLInputElement>();
   const projectPermissions = useProjectPermissions();
-  const classes = useStyles({});
   const config = useConfig();
   const project = useProject();
   const dispatch = useTranslationsDispatch();
@@ -113,15 +112,14 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   };
 
   const addBox = canEdit && (
-    <Box
+    <StyledAddBox
       key="add"
-      className={`${classes.addBox}`}
       data-cy="add-box"
       //@ts-ignore
       onClick={() => fileRef.current.dispatchEvent(new MouseEvent('click'))}
     >
-      <AddIcon className={classes.addIcon} />
-    </Box>
+      <StyledAddIcon />
+    </StyledAddBox>
   );
 
   const validate = (files: File[]) => {
@@ -252,7 +250,7 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
   useGlobalLoading(uploadLoadable.isLoading || deleteLoadable.isLoading);
 
   const loadingSkeleton = uploadLoadable.isLoading ? (
-    <Skeleton variant="rect" width={100} height={100} />
+    <Skeleton variant="rectangular" width={100} height={100} />
   ) : null;
 
   return (
@@ -285,18 +283,17 @@ export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
         ) : (
           <>
             {addBox}
-            <Box
+            <StyledHintText
               display="flex"
               alignItems="center"
               justifyContent="center"
               flexGrow={1}
               p={2}
-              className={classes.hintText}
               lang={lang()}
             >
               {t('no_screenshots_yet')}{' '}
               {canEdit && t('add_screenshots_message')}
-            </Box>
+            </StyledHintText>
           </>
         )}
       </ScreenshotDropzone>

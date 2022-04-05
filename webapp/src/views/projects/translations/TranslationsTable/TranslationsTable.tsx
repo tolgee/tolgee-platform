@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactList from 'react-list';
+import { styled } from '@mui/material';
 import { T } from '@tolgee/react';
-import { makeStyles } from '@material-ui/core';
 
 import {
   useTranslationsSelector,
@@ -11,53 +11,44 @@ import { resizeColumn, useResize } from '../useResize';
 import { ColumnResizer } from '../ColumnResizer';
 import { CellLanguage } from './CellLanguage';
 import { RowTable } from './RowTable';
-import clsx from 'clsx';
 import { TranslationsToolbar } from '../TranslationsToolbar';
 
-const useStyles = makeStyles((theme) => {
-  const borderColor = theme.palette.grey[200];
-  return {
-    container: {
-      position: 'relative',
-      margin: '10px 0px 100px 0px',
-      borderLeft: 0,
-      borderRight: 0,
-      background: 'white',
-      flexGrow: 1,
-    },
-    headerRow: {
-      border: `1px solid ${borderColor}`,
-      borderWidth: '1px 0px 1px 0px',
-      position: 'sticky',
-      background: 'white',
-      zIndex: 1,
-      top: 0,
-      marginBottom: -1,
-      display: 'flex',
-    },
-    resizer: {
-      width: 3,
-      background: 'black',
-    },
-    headerCell: {
-      boxSizing: 'border-box',
-      display: 'flex',
-      flexGrow: 0,
-      alignItems: 'center',
-      overflow: 'hidden',
-    },
-    keyCell: {
-      paddingLeft: 13,
-    },
-  };
-});
+const StyledContainer = styled('div')`
+  position: relative;
+  margin: 10px 0px 100px 0px;
+  border-left: 0px;
+  border-right: 0px;
+  background: white;
+  flex-grow: 1;
+`;
+
+const StyledHeaderRow = styled('div')`
+  border: 1px solid ${({ theme }) => theme.palette.grey[200]};
+  border-width: 1px 0px 1px 0px;
+  position: sticky;
+  background: white;
+  z-index: 1;
+  top: 0px;
+  margin-bottom: -1px;
+  display: flex;
+`;
+
+const StyledHeaderCell = styled('div')`
+  box-sizing: border-box;
+  display: flex;
+  flex-grow: 0;
+  align-items: center;
+  overflow: hidden;
+
+  &.keyCell {
+    padding-left: 13px;
+  }
+`;
 
 export const TranslationsTable = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const reactListRef = useRef<ReactList>(null);
   const resizersCallbacksRef = useRef<(() => void)[]>([]);
-
-  const classes = useStyles();
 
   const dispatch = useTranslationsDispatch();
   const translations = useTranslationsSelector((v) => v.translations);
@@ -142,38 +133,33 @@ export const TranslationsTable = () => {
   }
 
   return (
-    <div
-      className={classes.container}
+    <StyledContainer
       style={{ marginBottom: cursorKeyId ? 500 : undefined }}
       ref={tableRef}
       data-cy="translations-view-table"
     >
-      <div className={classes.headerRow}>
+      <StyledHeaderRow>
         {columns.map((tag, i) => {
           const language = languages!.find((lang) => lang.tag === tag)!;
           return tag ? (
-            <div
-              key={i}
-              style={{ width: columnSizesPercent[i] }}
-              className={classes.headerCell}
-            >
+            <StyledHeaderCell key={i} style={{ width: columnSizesPercent[i] }}>
               <CellLanguage
                 colIndex={i - 1}
                 onResize={handleResize}
                 language={language}
               />
-            </div>
+            </StyledHeaderCell>
           ) : (
-            <div
+            <StyledHeaderCell
               key={i}
               style={{ width: columnSizesPercent[i] }}
-              className={clsx(classes.headerCell, classes.keyCell)}
+              className="keyCell"
             >
               <T>translation_grid_key_text</T>
-            </div>
+            </StyledHeaderCell>
           );
         })}
-      </div>
+      </StyledHeaderRow>
       {columnSizes.slice(0, -1).map((w, i) => {
         const left = columnSizes.slice(0, i + 1).reduce((a, b) => a + b, 0);
         return (
@@ -218,6 +204,6 @@ export const TranslationsTable = () => {
         }}
       />
       <TranslationsToolbar width={width} />
-    </div>
+    </StyledContainer>
   );
 };

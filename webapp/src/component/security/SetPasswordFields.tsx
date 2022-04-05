@@ -10,11 +10,17 @@ export const SetPasswordFields: FunctionComponent<SetPasswordFieldsProps> = (
 ) => {
   return (
     <>
-      <TextField name="password" type="password" label={<T>Password</T>} />
+      <TextField
+        name="password"
+        type="password"
+        label={<T>Password</T>}
+        variant="standard"
+      />
       <TextField
         name="passwordRepeat"
         type="password"
         label={<T>Password confirmation</T>}
+        variant="standard"
       />
     </>
   );

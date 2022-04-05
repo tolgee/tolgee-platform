@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 import { useHistory } from 'react-router-dom';
@@ -61,8 +61,16 @@ export const UserProfileView: FunctionComponent = () => {
     return (
       <Box data-cy="user-profile">
         <UserProfileAvatar />
-        <TextField name="name" label={<T>User settings - Full name</T>} />
-        <TextField name="email" label={<T>User settings - E-mail</T>} />
+        <TextField
+          variant="standard"
+          name="name"
+          label={<T>User settings - Full name</T>}
+        />
+        <TextField
+          variant="standard"
+          name="email"
+          label={<T>User settings - E-mail</T>}
+        />
         {userLoadable?.data?.emailAwaitingVerification && (
           <Box>
             <Typography variant="body1">

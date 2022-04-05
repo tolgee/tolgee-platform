@@ -1,6 +1,6 @@
 import { default as React } from 'react';
 import { Guide } from 'tg.views/projects/integrate/types';
-import { Code, Settings } from '@material-ui/icons';
+import { Code, Settings } from '@mui/icons-material';
 
 const getTechnologyImgComponent = (imgName: string) => {
   return function TechnologyImage(props) {

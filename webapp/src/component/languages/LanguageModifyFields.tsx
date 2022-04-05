@@ -1,6 +1,6 @@
 import { FC, useState } from 'react';
-import { Box } from '@material-ui/core';
-import { Alert } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import { Alert } from '@mui/material';
 import { isValidLanguageTag } from '@tginternal/language-util';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
@@ -24,11 +24,13 @@ export const LanguageModifyFields: FC<{
   return (
     <>
       <TextField
+        variant="standard"
         label={<T>language_create_edit_english_name_label</T>}
         name="name"
         required={true}
       />
       <TextField
+        variant="standard"
         label={<T>language_create_edit_original_name_label</T>}
         name="originalName"
         required={true}
@@ -40,6 +42,7 @@ export const LanguageModifyFields: FC<{
         />
         <Box flexGrow={1} ml={2}>
           <TextField
+            variant="standard"
             fullWidth
             label={<T>language_create_edit_abbreviation</T>}
             name="tag"

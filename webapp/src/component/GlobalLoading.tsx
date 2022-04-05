@@ -1,5 +1,5 @@
-import { makeStyles } from '@material-ui/core';
 import React, { useContext, useState, useEffect } from 'react';
+import { styled } from '@mui/material';
 import { SmoothProgress } from './SmoothProgress';
 
 const LoadingContext = React.createContext({ loading: 0, spinners: 0 });
@@ -8,23 +8,15 @@ const LoadingSetterContext = React.createContext<{
   setSpinners: React.Dispatch<React.SetStateAction<number>>;
 }>({ setLoading: () => {}, setSpinners: () => {} });
 
-const useStyles = makeStyles((theme) => ({
-  loading: {
-    position: 'fixed',
-    zIndex: theme.zIndex.tooltip,
-  },
-}));
+const StyledSmoothProgress = styled(SmoothProgress)`
+  position: fixed;
+  z-index: ${({ theme }) => theme.zIndex.tooltip};
+`;
 
 export const GlobalLoading: React.FC = () => {
-  const classes = useStyles();
   const { loading, spinners } = useContext(LoadingContext);
 
-  return (
-    <SmoothProgress
-      loading={Boolean(loading && spinners === 0)}
-      className={classes.loading}
-    />
-  );
+  return <StyledSmoothProgress loading={Boolean(loading && spinners === 0)} />;
 };
 
 export const LoadingProvider: React.FC = (props) => {

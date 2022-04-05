@@ -1,25 +1,17 @@
 import { useState } from 'react';
-import {
-  Checkbox,
-  ListItemText,
-  Menu,
-  MenuItem,
-  makeStyles,
-} from '@material-ui/core';
-import { ArrowRight } from '@material-ui/icons';
+import { Checkbox, ListItemText, Menu, MenuItem, styled } from '@mui/material';
+import { ArrowRight } from '@mui/icons-material';
 
 import { translationStates } from 'tg.constants/translationStates';
 import { decodeFilter, OptionType } from './useAvailableFilters';
 import { CompactMenuItem } from './FiltersComponents';
 
-const useStyles = makeStyles((theme) => ({
-  stateDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginLeft: theme.spacing(2),
-  },
-}));
+const StyledDot = styled('div')`
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  margin-left: ${({ theme }) => theme.spacing(2)};
+`;
 
 type Props = {
   item: OptionType;
@@ -32,7 +24,6 @@ export const SubmenuStates: React.FC<Props> = ({
   handleToggle,
   activeFilters,
 }) => {
-  const classes = useStyles();
   const [menuOpen, setMenuOpen] = useState<HTMLElement | null>(null);
 
   const handleMenuClick = (e) => {
@@ -90,8 +81,7 @@ export const SubmenuStates: React.FC<Props> = ({
                 disableRipple
               />
               <ListItemText primary={item.label} />
-              <div
-                className={classes.stateDot}
+              <StyledDot
                 style={{
                   background: translationStates[state]?.color,
                 }}

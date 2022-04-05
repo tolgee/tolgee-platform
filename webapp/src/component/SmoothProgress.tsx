@@ -1,23 +1,21 @@
 import { useState, useEffect } from 'react';
-import clsx from 'clsx';
 import { useDebounce } from 'use-debounce';
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material';
+import clsx from 'clsx';
 
-const useStyles = makeStyles((theme) => ({
-  progress: {
-    height: 4,
-    background: theme.palette.primary.light,
-    width: 0,
-  },
-  loading: {
-    transition: 'width 30s cubic-bezier(0.150, 0.735, 0.095, 1.0)',
-  },
-  finish: {
-    height: 0,
-    transition:
-      'width 0.2s ease-in-out, height 0.5s cubic-bezier(0.930, 0.000, 0.850, 0.015)',
-  },
-}));
+const StyledProgress = styled('div')<{ loading?: string; finish?: string }>`
+  height: 4px;
+  background: ${({ theme }) => theme.palette.primary.light};
+  width: 0px;
+  &.loading {
+    transition: width 30s cubic-bezier(0.15, 0.735, 0.095, 1);
+  }
+  &.finish {
+    height: 0px;
+    transition: width 0.2s ease-in-out,
+      height 0.5s cubic-bezier(0.93, 0, 0.85, 0.015);
+  }
+`;
 
 type Props = {
   loading: boolean;
@@ -25,7 +23,6 @@ type Props = {
 };
 
 export const SmoothProgress: React.FC<Props> = ({ loading, className }) => {
-  const classes = useStyles();
   const [stateLoading, setStateLoading] = useState(false);
   const [smoothedLoading] = useDebounce(stateLoading, 100);
   const [progress, setProgress] = useState(0);
@@ -55,14 +52,13 @@ export const SmoothProgress: React.FC<Props> = ({ loading, className }) => {
   }, [smoothedLoading]);
 
   return loading || smoothedLoading || progress ? (
-    <div
+    <StyledProgress
       data-cy="global-loading"
       style={{ width: `${progress === 1 ? 100 : progress * 95}%` }}
       className={clsx(
         {
-          [classes.progress]: true,
-          [classes.loading]: progress > 0 && progress < 1,
-          [classes.finish]: progress === 1,
+          loading: progress > 0 && progress < 1,
+          finish: progress === 1,
         },
         className
       )}

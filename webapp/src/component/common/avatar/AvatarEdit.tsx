@@ -1,25 +1,22 @@
 import React, { FC } from 'react';
 import Cropper, { ReactCropperElement } from 'react-cropper';
+import { styled } from '@mui/material';
+import Box from '@mui/material/Box';
 import 'cropperjs/dist/cropper.css';
-import Box from '@material-ui/core/Box';
-import makeStyles from '@material-ui/core/styles/makeStyles';
 
-const useStyles = makeStyles(() => ({
-  box: {
-    '& .cropper-crop-box, & .cropper-view-box': {
-      borderRadius: `50%`,
-    },
-  },
-}));
+const StyledBox = styled(Box)`
+  .cropper-crop-box,
+  .cropper-view-box {
+    border-radius: 50%;
+  }
+`;
 
 export const AvatarEdit: FC<{
   src: string;
   cropperRef: React.RefObject<ReactCropperElement>;
 }> = ({ src, cropperRef }) => {
-  const classes = useStyles();
-
   return (
-    <Box className={classes.box}>
+    <StyledBox>
       <Cropper
         src={src}
         style={{ height: 400, width: 400 }}
@@ -29,6 +26,6 @@ export const AvatarEdit: FC<{
         guides={false}
         ref={cropperRef}
       />
-    </Box>
+    </StyledBox>
   );
 };

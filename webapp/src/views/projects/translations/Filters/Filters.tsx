@@ -1,13 +1,13 @@
 import { T } from '@tolgee/react';
-import { Clear } from '@material-ui/icons';
+import { Clear } from '@mui/icons-material';
 import {
-  makeStyles,
   Select,
   Typography,
   IconButton,
   Tooltip,
   useTheme,
-} from '@material-ui/core';
+  styled,
+} from '@mui/material';
 
 import { stopAndPrevent } from 'tg.fixtures/eventHandler';
 import {
@@ -18,45 +18,53 @@ import { useAvailableFilters } from './useAvailableFilters';
 import { useActiveFilters } from './useActiveFilters';
 import { useFiltersContent } from './useFiltersContent';
 
-const useStyles = makeStyles((theme) => ({
-  wrapper: {
-    display: 'flex',
-    alignItems: 'center',
-  },
-  input: {
-    height: 40,
-    marginTop: 0,
-    marginBottom: 0,
-    display: 'flex',
-    alignItems: 'center',
-    width: 200,
-    '& div:focus': {
-      backgroundColor: 'transparent',
-    },
-    '& .MuiSelect-root': {
-      display: 'flex',
-      alignItems: 'center',
-      overflow: 'hidden',
-      position: 'relative',
-    },
-  },
-  inputContent: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    margin: theme.spacing(-1, 0),
-    width: '100%',
-  },
-  inputText: {
-    overflow: 'hidden',
-    flexShrink: 1,
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-  },
-  clearButton: {
-    margin: theme.spacing(-1, -0.5, -1, -0.25),
-  },
-}));
+const StyledWrapper = styled('div')`
+  display: flex;
+  align-items: center;
+`;
+
+const StyledSelect = styled(Select)`
+  height: 40px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  display: flex;
+  align-items: stretch;
+  width: 200px;
+  & div:focus {
+    background-color: transparent;
+  }
+  & .MuiSelect-select {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+  }
+`;
+
+const StyledInputContent = styled('div')`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  overflow: hidden;
+`;
+
+const StyledInputText = styled(Typography)`
+  margin-top: 2px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  flex-grow: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const StyledClearButton = styled(IconButton)`
+  margin: ${({ theme }) => theme.spacing(-1, -0.5, -1, -0.25)};
+`;
 
 export const Filters = () => {
   const dispatch = useTranslationsDispatch();
@@ -64,7 +72,6 @@ export const Filters = () => {
 
   const activeFilters = useActiveFilters();
 
-  const classes = useStyles();
   const theme = useTheme();
 
   const availableFilters = useAvailableFilters(selectedLanguages);
@@ -81,15 +88,14 @@ export const Filters = () => {
   };
 
   return (
-    <div className={classes.wrapper}>
-      <Select
-        className={classes.input}
+    <StyledWrapper>
+      <StyledSelect
         variant="outlined"
         value={activeFilters}
         data-cy="translations-filter-select"
         renderValue={(value: any) => (
-          <div className={classes.inputContent}>
-            <Typography
+          <StyledInputContent>
+            <StyledInputText
               style={{
                 color:
                   value.length === 0
@@ -97,7 +103,6 @@ export const Filters = () => {
                     : theme.palette.text.primary,
               }}
               variant="body2"
-              className={classes.inputText}
             >
               {value.length === 0 ? (
                 <T>translations_filter_placeholder</T>
@@ -108,36 +113,30 @@ export const Filters = () => {
                   translations_filters_text
                 </T>
               )}
-            </Typography>
+            </StyledInputText>
             {Boolean(activeFilters.length) && (
               <Tooltip title={<T noWrap>translations_filters_heading_clear</T>}>
-                <IconButton
+                <StyledClearButton
                   size="small"
-                  className={classes.clearButton}
                   onClick={stopAndPrevent(handleClearFilters)}
                   onMouseDown={stopAndPrevent()}
                   data-cy="translations-filter-clear-all"
                 >
                   <Clear fontSize="small" />
-                </IconButton>
+                </StyledClearButton>
               </Tooltip>
             )}
-          </div>
+          </StyledInputContent>
         )}
         MenuProps={{
           variant: 'menu',
-          getContentAnchorEl: null,
-          anchorOrigin: {
-            vertical: 'bottom',
-            horizontal: 'left',
-          },
         }}
         margin="dense"
         displayEmpty
         multiple
       >
         {filtersContent}
-      </Select>
-    </div>
+      </StyledSelect>
+    </StyledWrapper>
   );
 };

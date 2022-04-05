@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { Box, makeStyles, Tooltip } from '@material-ui/core';
+import { Box, styled, Tooltip } from '@mui/material';
 import { T } from '@tolgee/react';
-import { ClassNameMap } from 'notistack';
 
 import { translationStates } from 'tg.constants/translationStates';
 
@@ -11,49 +10,53 @@ type State = keyof typeof translationStates;
 const HEIGHT = 8;
 const BORDER_RADIUS = HEIGHT / 2;
 const DOT_SIZE = 8;
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-    minWidth: 150,
-  },
-  bar: {
-    height: HEIGHT,
-    backgroundColor: translationStates.UNTRANSLATED.color,
-    borderRadius: BORDER_RADIUS,
-    width: '100%',
-    minWidth: 150,
-    overflow: 'hidden',
-    display: 'flex',
-    marginBottom: theme.spacing(0.5),
-  },
-  state: {
-    height: '100%',
-    overflow: 'hidden',
-    borderRadius: BORDER_RADIUS,
-    marginLeft: -BORDER_RADIUS,
-    transition: 'width 0.4s ease-in-out',
-  },
-  loadedState: {
-    width: '0 !important',
-  },
-  legend: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    margin: `0 -${theme.spacing(1)}px`,
-    '& > *': {
-      flexShrink: 0,
-      margin: `0 ${theme.spacing(1)}px`,
-      marginTop: theme.spacing(0.5),
-    },
-    fontSize: theme.typography.body2.fontSize,
-    justifyContent: 'space-between',
-  },
-  legendDot: {
-    width: DOT_SIZE,
-    height: DOT_SIZE,
-    borderRadius: DOT_SIZE / 2,
-  },
-}));
+
+const StyledContainer = styled('div')`
+  width: 100%;
+  min-width: 150px;
+
+  & .bar {
+    height: ${HEIGHT}px;
+    background-color: ${translationStates.UNTRANSLATED.color};
+    border-radius: ${BORDER_RADIUS}px;
+    width: 100%;
+    min-width: 150px;
+    overflow: hidden;
+    display: flex;
+    margin-bottom: ${({ theme }) => theme.spacing(0.5)};
+  }
+
+  & .state {
+    height: 100%;
+    overflow: hidden;
+    border-radius: ${BORDER_RADIUS}px;
+    margin-left: ${-BORDER_RADIUS}px;
+    transition: width 0.4s ease-in-out;
+  }
+
+  & .loadedState {
+    width: 0px !important;
+  }
+
+  & .legend {
+    display: flex;
+    flex-wrap: wrap;
+    margin: ${({ theme }) => theme.spacing(0, -1)};
+    & > * {
+      flex-shrink: 0;
+      margin: ${({ theme }) => theme.spacing(0, 1)};
+      margin-top: ${({ theme }) => theme.spacing(0.5)};
+    }
+    font-size: ${({ theme }) => theme.typography.body2.fontSize}px;
+    justify-content: space-between;
+  }
+
+  & .legendDot {
+    width: ${DOT_SIZE}px;
+    height: ${DOT_SIZE}px;
+    border-radius: ${DOT_SIZE / 2}px;
+  }
+`;
 
 const STATES_ORDER = ['REVIEWED', 'TRANSLATED', 'UNTRANSLATED'] as State[];
 
@@ -68,7 +71,6 @@ export function TranslationStatesBar(props: {
     };
   };
 }) {
-  const classes = useStyles();
   const translationsCount = props.stats.languageCount * props.stats.keyCount;
   const [loaded, setLoaded] = useState(false);
   const percents = Object.entries(props.stats.translationStateCounts).reduce(
@@ -83,12 +85,7 @@ export function TranslationStatesBar(props: {
     setTimeout(() => setLoaded(true), 50);
   }, []);
 
-  const LegendItem = (legendItemProps: {
-    classes: ClassNameMap<
-      'legendDot' | 'bar' | 'loadedState' | 'legend' | 'root' | 'state'
-    >;
-    state: State;
-  }) => {
+  const LegendItem = (legendItemProps: { state: State }) => {
     const percent =
       props.stats.translationStateCounts[legendItemProps.state] /
       (props.stats.keyCount * props.stats.languageCount);
@@ -98,7 +95,7 @@ export function TranslationStatesBar(props: {
         <Box
           data-cy="project-states-bar-dot"
           mr={1}
-          className={legendItemProps.classes.legendDot}
+          className="legendDot"
           style={{
             backgroundColor: translationStates[legendItemProps.state].color,
           }}
@@ -124,8 +121,8 @@ export function TranslationStatesBar(props: {
   );
 
   return (
-    <Box className={classes.root} data-cy="project-states-bar-root">
-      <Box className={classes.bar} data-cy="project-states-bar-bar">
+    <StyledContainer data-cy="project-states-bar-root">
+      <div className="bar" data-cy="project-states-bar-bar">
         {visibleStates.map((state, idx) => (
           <Tooltip
             key={idx}
@@ -134,8 +131,8 @@ export function TranslationStatesBar(props: {
             <Box
               data-cy="project-states-bar-state-progress"
               className={clsx({
-                [classes.state]: true,
-                [classes.loadedState]: !loaded,
+                state: true,
+                loadedState: !loaded,
               })}
               style={{
                 zIndex: 5 - idx,
@@ -145,14 +142,14 @@ export function TranslationStatesBar(props: {
             />
           </Tooltip>
         ))}
-      </Box>
+      </div>
       {props.labels && (
-        <Box className={classes.legend} data-cy="project-states-bar-legend">
+        <Box className="legend" data-cy="project-states-bar-legend">
           {visibleStates.map((state, i) => (
-            <LegendItem key={i} classes={classes} state={state} />
+            <LegendItem key={i} state={state} />
           ))}
         </Box>
       )}
-    </Box>
+    </StyledContainer>
   );
 }

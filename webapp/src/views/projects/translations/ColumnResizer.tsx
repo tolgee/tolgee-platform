@@ -1,27 +1,27 @@
 import { useEffect, useState } from 'react';
-import Draggable from 'react-draggable';
-import { makeStyles } from '@material-ui/core';
 import clsx from 'clsx';
+import Draggable from 'react-draggable';
+import { styled } from '@mui/material';
 
-const useStyles = makeStyles({
-  draggable: {
-    zIndex: 1,
-    position: 'absolute',
-    top: 0,
-    cursor: 'col-resize',
-    display: 'flex',
-    justifyContent: 'center',
-  },
-  expanded: {
-    width: 34,
-    marginLeft: -15,
-    marginRight: -15,
-  },
-  indicator: {
-    height: '100%',
-    width: 4,
-  },
-});
+const StyledDraggableContent = styled('div')`
+  z-index: 1;
+  position: absolute;
+  top: 0px;
+  cursor: col-resize;
+  display: flex;
+  justify-content: center;
+
+  & .expanded {
+    width: 34px;
+    margin-left: -15px;
+    margin-right: -15px;
+  }
+`;
+
+const StyledIndicator = styled('div')`
+  height: 100%;
+  width: 4px;
+`;
 
 type Props = {
   onResize: (change: number) => void;
@@ -36,7 +36,6 @@ export const ColumnResizer: React.FC<Props> = ({
   onResize,
   passResizeCallback,
 }) => {
-  const classes = useStyles();
   const [offset, setOffset] = useState(left);
   const [originalSize, setOriginalSize] = useState(size);
   const [isDragging, setIsDragging] = useState(false);
@@ -69,7 +68,7 @@ export const ColumnResizer: React.FC<Props> = ({
       }}
       bounds="parent"
     >
-      <div
+      <StyledDraggableContent
         ref={(el) =>
           passResizeCallback?.(() =>
             el?.dispatchEvent(new Event('mousedown', { bubbles: true }))
@@ -81,18 +80,15 @@ export const ColumnResizer: React.FC<Props> = ({
           height: '100%',
         }}
         className={clsx({
-          [classes.draggable]: true,
-          [classes.expanded]: isDragging,
+          expanded: isDragging,
         })}
       >
-        <div
-          className={classes.indicator}
+        <StyledIndicator
           style={{
             background: isDragging ? '#00000030' : undefined,
-            height: '100%',
           }}
         />
-      </div>
+      </StyledDraggableContent>
     </Draggable>
   );
 };
