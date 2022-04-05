@@ -25,20 +25,18 @@ export const useEditableRow = ({
   const dispatch = useTranslationsDispatch();
 
   const cursor = useTranslationsSelector((v) => {
-    // find language or keyName (in case of undefined)
-    return v.cursor?.keyId === keyId && v.cursor.language === language
-      ? v.cursor
-      : undefined;
+    return v.cursor?.keyId === keyId ? v.cursor : undefined;
   });
 
-  const value = cursor?.value || '';
+  const isEditingRow = Boolean(cursor?.keyId === keyId);
+  const isEditing = Boolean(isEditingRow && cursor?.language === language);
 
-  const originalValue = defaultVal || '';
+  const value = (isEditing && cursor?.value) || '';
+
+  const originalValue = (isEditing && defaultVal) || '';
 
   const setValue = (val: string) =>
     dispatch({ type: 'UPDATE_EDIT', payload: { value: val } });
-
-  const isEditing = Boolean(cursor);
 
   useEffect(() => {
     dispatch({
@@ -95,7 +93,7 @@ export const useEditableRow = ({
   useEffect(() => {
     const isChanged = originalValue !== value;
     // let context know, that something has changed
-    if (cursor && Boolean(cursor?.changed) !== isChanged) {
+    if (isEditing && Boolean(cursor?.changed) !== isChanged) {
       dispatch({ type: 'UPDATE_EDIT', payload: { changed: isChanged } });
     }
   }, [originalValue, cursor?.changed, value]);
@@ -115,6 +113,7 @@ export const useEditableRow = ({
     setValue,
     editVal: isEditing ? cursor : undefined,
     isEditing,
+    isEditingRow,
     autofocus: true,
   };
 };

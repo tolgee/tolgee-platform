@@ -119,6 +119,7 @@ export const CellTranslation: React.FC<Props> = ({
     handleSave,
     handleModeChange,
     autofocus,
+    isEditingRow,
   } = useEditableRow({
     keyId: data.keyId,
     keyName: data.keyName,
@@ -150,6 +151,8 @@ export const CellTranslation: React.FC<Props> = ({
       handleOpen('editor');
     }
   };
+
+  const showAllLines = isEditing || (language.base && isEditingRow);
 
   const state = translation?.state || 'UNTRANSLATED';
 
@@ -193,7 +196,7 @@ export const CellTranslation: React.FC<Props> = ({
               width={width}
               text={isEditing ? value : translation?.text}
               locale={language.tag}
-              limitLines={!isEditing}
+              limitLines={!showAllLines}
             />
           </div>
           <AutoTranslationIndicator
