@@ -1,6 +1,6 @@
 import { default as React, FunctionComponent, ReactNode } from 'react';
-import { Box, Button } from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { Box, Button } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import { T } from '@tolgee/react';
 import { Form, Formik, FormikProps } from 'formik';
 import { FormikHelpers } from 'formik/dist/types';

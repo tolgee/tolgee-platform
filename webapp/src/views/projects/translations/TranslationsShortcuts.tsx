@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles, Typography } from '@material-ui/core';
-import { alpha } from '@material-ui/core/styles/colorManipulator';
+import { styled, keyframes, Typography } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import { useDebouncedCallback } from 'use-debounce/lib';
-import { Close, Help } from '@material-ui/icons';
+import { Close, Help } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 import { stopBubble } from 'tg.fixtures/eventHandler';
@@ -20,106 +20,142 @@ import { getMetaName } from 'tg.fixtures/isMac';
 import { translationStates } from 'tg.constants/translationStates';
 import { getCurrentlyFocused } from './context/shortcuts/tools';
 
-const useStyles = makeStyles((theme) => ({
-  '@keyframes easeIn': {
-    '0%': {
-      opacity: 0,
-    },
-  },
-  container: {
-    position: 'absolute',
-    display: 'flex',
-    bottom: 0,
-    right: 0,
-    width: '100%',
-    transition: 'all 300ms ease-in-out',
-    flexShrink: 1,
-  },
-  containerCollapsed: {
-    background: 'transparent',
-    width: 50,
-    textOverflow: 'clip',
-    pointerEvents: 'none',
-  },
-  content: {
-    display: 'flex',
-    alignItems: 'center',
-    boxSizing: 'border-box',
-    transition: 'background 300ms ease-in-out, visibility 0ms',
-    padding: theme.spacing(0, 1, 0, 2),
-    pointerEvents: 'all',
-    borderRadius: 6,
-    height: 40,
-    maxWidth: '100%',
-    background: alpha(theme.palette.extraLightBackground.main, 0.9),
-    '@supports (backdrop-filter: blur()) or (-webkit-backdrop-filter: blur()) or (-moz-backdrop-filter: blur())':
-      {
-        background: alpha(theme.palette.extraLightBackground.main, 0.5),
-        '-webkit-backdrop-filter': 'blur(7px)',
-        '-moz-backdrop-filter': 'blur(7px)',
-        backdropFilter: 'blur(7px)',
-      },
-    '-webkit-box-shadow': '2px 2px 5px rgba(0, 0, 0, 0.25)',
-    'box-shadow': '2px 2px 5px rgba(0, 0, 0, 0.25)',
-    '&:hover $icon': {
-      opacity: 1,
-    },
-    '&:hover $items': {
-      opacity: 1,
-    },
-    '&:hover $hoverHidden': {
-      opacity: 1,
-    },
-  },
-  contentEmpty: {
-    opacity: 0,
-  },
-  contentCollapsed: {
-    '-webkit-backdrop-filter': 'none',
-    backdropFilter: 'none',
-    background: 'transparent',
-    '-webkit-box-shadow': 'none',
-    'box-shadow': 'none',
-    pointerEvents: 'none',
-  },
-  items: {
-    flexShrink: 1,
-    opacity: 0.5,
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    transition: 'all 300ms ease-in-out',
-    height: 22,
-    '& > * + *': {
-      marginLeft: theme.spacing(2),
-    },
-  },
-  item: {
-    display: 'inline',
-    animationName: '$easeIn',
-    animationDuration: '0.2s',
-    animationTimingFunction: 'ease-in',
-    '& > * + *': {
-      marginLeft: '0.4em',
-    },
-  },
-  icon: {
-    opacity: 0.5,
-    cursor: 'pointer',
-    marginLeft: theme.spacing(1),
-    transition: 'all 300ms ease-in-out',
-    animationName: '$easeIn',
-    animationDuration: '0.5s',
-    animationTimingFunction: 'ease-in',
-    pointerEvents: 'all',
-  },
-  hoverHidden: {
-    opacity: 0.2,
-  },
-}));
+const StyledContainer = styled('div')`
+  position: absolute;
+  display: flex;
+  bottom: 0px;
+  right: 0px;
+  width: 100%;
+  transition: all 300ms ease-in-out;
+  flex-shrink: 1;
+
+  &.collapsed {
+    background: transparent;
+    width: 50px;
+    text-overflow: clip;
+    pointer-events: none;
+  }
+`;
+
+const StyledItems = styled('div')`
+  display: flex;
+  flex-shrink: 1;
+  opacity: 0.5;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: all 300ms ease-in-out;
+  & > * + * {
+    margin-left: ${({ theme }) => theme.spacing(2)};
+  }
+`;
+
+const easeIn = keyframes`
+  0% {
+    opacity: 0;
+  }
+`;
+
+const StyledContent = styled('div')`
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  transition: background-color 300ms ease-in-out, visibility 0ms;
+  padding: ${({ theme }) => theme.spacing(0, 1, 0, 2)};
+  pointer-events: all;
+  border-radius: 6px;
+  height: 40px;
+  max-width: 100%;
+  background-color: ${({ theme }) =>
+    alpha(theme.palette.extraLightBackground.main, 0.9)};
+
+  @supports (backdrop-filter: blur()) or (-webkit-backdrop-filter: blur()) or
+    (-moz-backdrop-filter: blur()) {
+    background-color: ${({ theme }) =>
+      alpha(theme.palette.extraLightBackground.main, 0.5)};
+    -webkit-backdrop-filter: blur(7px);
+    -moz-backdrop-filter: blur(7px);
+    backdrop-filter: blur(7px);
+  }
+  -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
+
+  .icon {
+    opacity: 0.5;
+    cursor: pointer;
+    margin-left: ${({ theme }) => theme.spacing(1)};
+    transition: all 300ms ease-in-out;
+    animation: ${easeIn} 0.2s ease-in;
+    pointer-events: all;
+  }
+
+  .hoverHidden {
+    opacity: 0.2;
+  }
+
+  &:hover .icon {
+    opacity: 1;
+  }
+
+  &:hover ${StyledItems} {
+    opacity: 1;
+  }
+
+  &:hover .hoverHidden {
+    opacity: 1;
+  }
+
+  &.contentEmpty {
+    opacity: 0;
+  }
+
+  &.contentCollapsed {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: transparent;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    pointer-events: none;
+  }
+`;
+
+const StyledItem = styled('span')`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  animation: ${easeIn} 0.2s ease-in;
+  & > * + * {
+    margin-left: 0.4em;
+  }
+`;
+
+const StyledItemContent = styled(Typography)`
+  font-size: 15px;
+`;
+
+const StyledHelp = styled(Help)`
+  opacity: 0.5;
+  cursor: pointer;
+  margin-left: ${({ theme }) => theme.spacing(1)};
+  transition: all 300ms ease-in-out;
+  animation: ${easeIn} 0.2s ease-in;
+  pointer-events: all;
+`;
+
+const StyledClose = styled(Close)`
+  opacity: 0.5;
+  cursor: pointer;
+  margin-left: ${({ theme }) => theme.spacing(1)};
+  transition: all 300ms ease-in-out;
+  animation: ${easeIn} 0.2s ease-in;
+  pointer-events: all;
+
+  .hoverHidden {
+    opacity: 0.2;
+  }
+`;
 
 export const TranslationsShortcuts = () => {
-  const classes = useStyles();
   const [collapsed, setCollapsed] = useHideShortcuts();
 
   const toggleCollapse = () => {
@@ -223,48 +259,40 @@ export const TranslationsShortcuts = () => {
   ).filter((i) => i.name);
 
   return (
-    <div
-      className={clsx(
-        classes.container,
-        collapsed ? classes.containerCollapsed : undefined
-      )}
-      onMouseDown={stopBubble()}
-    >
-      <div
-        className={clsx(
-          classes.content,
-          collapsed
-            ? classes.contentCollapsed
-            : !items.length
-            ? classes.contentEmpty
-            : undefined
-        )}
+    <StyledContainer className={clsx({ collapsed })} onMouseDown={stopBubble()}>
+      <StyledContent
+        className={clsx({
+          contentCollapsed: collapsed,
+          contentEmpty: !collapsed && !items.length,
+        })}
       >
-        <div className={classes.items}>
+        <StyledItems>
           {!collapsed &&
             items.map((item, i) => {
               return (
-                <span className={classes.item} key={i}>
-                  <Typography
+                <StyledItem key={i}>
+                  <StyledItemContent
                     variant="inherit"
                     data-cy="translations-shortcuts-command"
                   >
                     {item.name}
-                  </Typography>
-                  <Typography variant="inherit">{item.formula}</Typography>
-                </span>
+                  </StyledItemContent>
+                  <StyledItemContent variant="inherit">
+                    {item.formula}
+                  </StyledItemContent>
+                </StyledItem>
               );
             })}
-        </div>
+        </StyledItems>
         {!collapsed ? (
-          <Close
-            className={clsx(classes.icon, classes.hoverHidden)}
+          <StyledClose
+            className="hoverHidden"
             onClick={stopBubble(toggleCollapse)}
           />
         ) : (
-          <Help className={classes.icon} onClick={stopBubble(toggleCollapse)} />
+          <StyledHelp onClick={stopBubble(toggleCollapse)} />
         )}
-      </div>
-    </div>
+      </StyledContent>
+    </StyledContainer>
   );
 };

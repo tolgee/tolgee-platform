@@ -1,6 +1,6 @@
 import React from 'react';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { ThemeProvider } from '@material-ui/core/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 import { TolgeeProvider } from '@tolgee/react';
 import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -22,12 +22,13 @@ import RubikWoff2 from './fonts/Rubik/Rubik-Regular.woff2';
 import reportWebVitals from './reportWebVitals';
 import { DispatchService } from './service/DispatchService';
 import configureStore from './store';
-import { createTheme } from '@material-ui/core';
+import { createTheme } from '@mui/material';
 import { GlobalLoading, LoadingProvider } from 'tg.component/GlobalLoading';
 import { GlobalErrorModal } from 'tg.component/GlobalErrorModal';
 import { BottomPanelProvider } from 'tg.component/bottomPanel/BottomPanelContext';
 import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
 import { TopBarProvider } from 'tg.component/layout/TopBar/TopBarContext';
+import { grey } from '@mui/material/colors';
 
 const store = configureStore();
 
@@ -38,6 +39,10 @@ const SnackbarProvider = React.lazy(() =>
 );
 
 container.resolve(DispatchService).store = store;
+
+const { palette } = createTheme();
+const { augmentColor } = palette;
+const createColor = (mainColor) => augmentColor({ color: { main: mainColor } });
 
 const rubik = {
   fontFamily: 'Rubik',
@@ -142,6 +147,7 @@ const theme = createTheme({
     primary: {
       main: '#822B55',
     },
+    default: createColor(grey[700]),
     secondary: {
       main: '#2B5582',
     },
@@ -169,20 +175,20 @@ const theme = createTheme({
       minHeight: TOP_BAR_HEIGHT,
     },
   },
-  overrides: {
+  components: {
     MuiTooltip: {
-      tooltip: {
-        fontSize: 12,
-        boxShadow: '1px 1px 6px rgba(0, 0, 0, 0.25)',
-        borderRadius: '11px',
-        color: 'black',
-        backgroundColor: 'white',
+      styleOverrides: {
+        tooltip: {
+          fontSize: 12,
+          boxShadow: '1px 1px 6px rgba(0, 0, 0, 0.25)',
+          borderRadius: '11px',
+          color: 'black',
+          backgroundColor: 'white',
+        },
       },
     },
     MuiCssBaseline: {
-      // @ts-ignore
-      '@global': {
-        // @ts-ignore
+      styleOverrides: {
         '@font-face': [rubik, righteousLatinExt, righteousLatin],
         html: {
           height: '100%',
@@ -193,6 +199,7 @@ const theme = createTheme({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'stretch',
+          fontSize: 15,
         },
         '#root': {
           flexGrow: 1,
@@ -203,20 +210,34 @@ const theme = createTheme({
       },
     },
     MuiButton: {
-      root: {
-        borderRadius: 3,
-        padding: '6px 16px',
-        minHeight: 40,
+      defaultProps: {
+        color: 'default',
       },
-      sizeSmall: {
-        minHeight: 32,
-        padding: '4px 16px',
+      styleOverrides: {
+        root: {
+          borderRadius: 3,
+          padding: '6px 16px',
+          minHeight: 40,
+        },
+        sizeSmall: {
+          minHeight: 32,
+          padding: '4px 16px',
+        },
       },
     },
     MuiList: {
-      padding: {
-        paddingTop: 0,
-        paddingBottom: 0,
+      styleOverrides: {
+        padding: {
+          paddingTop: 0,
+          paddingBottom: 0,
+        },
+      },
+    },
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          textDecoration: 'none',
+        },
       },
     },
   },
@@ -247,28 +268,30 @@ ReactDOM.render(
       }}
       loadingFallback={<FullPageLoading />}
     >
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            {/* @ts-ignore */}
-            <ErrorBoundary>
-              <SnackbarProvider data-cy="global-snackbars">
-                <LoadingProvider>
-                  <BottomPanelProvider>
-                    <TopBarProvider>
-                      <GlobalLoading />
-                      <App />
-                      <GlobalErrorModal />
-                    </TopBarProvider>
-                  </BottomPanelProvider>
-                </LoadingProvider>
-              </SnackbarProvider>
-            </ErrorBoundary>
-            <ReactQueryDevtools />
-          </QueryClientProvider>
-        </Provider>
-      </ThemeProvider>
+      <StyledEngineProvider injectFirst>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Provider store={store}>
+            <QueryClientProvider client={queryClient}>
+              {/* @ts-ignore */}
+              <ErrorBoundary>
+                <SnackbarProvider data-cy="global-snackbars">
+                  <LoadingProvider>
+                    <BottomPanelProvider>
+                      <TopBarProvider>
+                        <GlobalLoading />
+                        <App />
+                        <GlobalErrorModal />
+                      </TopBarProvider>
+                    </BottomPanelProvider>
+                  </LoadingProvider>
+                </SnackbarProvider>
+              </ErrorBoundary>
+              <ReactQueryDevtools />
+            </QueryClientProvider>
+          </Provider>
+        </ThemeProvider>
+      </StyledEngineProvider>
     </TolgeeProvider>
   </React.Suspense>,
   document.getElementById('root')

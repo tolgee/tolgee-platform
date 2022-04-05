@@ -5,10 +5,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-} from '@material-ui/core';
+} from '@mui/material';
 import { T } from '@tolgee/react';
 import { AvatarEdit } from './AvatarEdit';
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 import LoadingButton from '../form/LoadingButton';
 
 export const AvatarEditDialog = (props: {
@@ -30,7 +30,6 @@ export const AvatarEditDialog = (props: {
         data-cy="global-confirmation-cancel"
         onClick={props.onCancel}
         type="button"
-        color="default"
       >
         <T>confirmation_dialog_cancel</T>
       </Button>

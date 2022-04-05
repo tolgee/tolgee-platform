@@ -1,7 +1,7 @@
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
-import { makeStyles, IconButton, Tooltip } from '@material-ui/core';
-import { Link, Clear } from '@material-ui/icons';
+import { IconButton, styled, Tooltip } from '@mui/material';
+import { Link, Clear } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
@@ -15,50 +15,47 @@ const messaging = container.resolve(MessageService);
 type OrganizationInvitationModel =
   components['schemas']['OrganizationInvitationModel'];
 
-const useStyles = makeStyles((theme) => ({
-  listItem: {
-    display: 'flex',
-    borderBottom: `1px solid ${theme.palette.lightDivider.main}`,
-    '&:last-child': {
-      borderBottom: 0,
-    },
-    position: 'relative',
-    padding: theme.spacing(1),
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  itemText: {
-    flexGrow: 1,
-    padding: theme.spacing(1),
-  },
-  itemActions: {
-    display: 'flex',
-    gap: theme.spacing(1),
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  permission: {
-    display: 'flex',
-    padding: '3px 8px',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: theme.palette.extraLightBackground.main,
-    height: 33,
-    borderRadius: 3,
-    cursor: 'default',
-  },
-  cancelButton: {
-    color: theme.palette.error.dark,
-  },
-}));
+const StyledListItem = styled('div')`
+  display: flex;
+  border-bottom: 1px solid ${({ theme }) => theme.palette.lightDivider.main};
+  &:last-child {
+    border-bottom: 0px;
+  }
+  position: relative;
+  padding: ${({ theme }) => theme.spacing(1)};
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+`;
+
+const StyledItemText = styled('div')`
+  flex-grow: 1;
+  padding: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledItemActions = styled('div')`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing(1)};
+  align-items: center;
+  flex-wrap: wrap;
+`;
+
+const StyledPermission = styled('div')`
+  display: flex;
+  padding: 3px 8px;
+  align-items: center;
+  justify-content: center;
+  background: ${({ theme }) => theme.palette.extraLightBackground.main};
+  height: 33px;
+  border-radius: 3px;
+  cursor: default;
+`;
 
 type Props = {
   invitation: OrganizationInvitationModel;
 };
 
 export const InvitationItem: React.FC<Props> = ({ invitation }) => {
-  const classes = useStyles();
   const t = useTranslate();
 
   const deleteInvitation = useApiMutation({
@@ -91,15 +88,15 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
   useGlobalLoading(deleteInvitation.isLoading);
 
   return (
-    <div className={classes.listItem} data-cy="organization-invitation-item">
-      <div className={classes.itemText}>
+    <StyledListItem data-cy="organization-invitation-item">
+      <StyledItemText>
         {invitation.invitedUserName || invitation.invitedUserEmail}{' '}
-      </div>
-      <div className={classes.itemActions}>
+      </StyledItemText>
+      <StyledItemActions>
         <Tooltip title={t(`organization_role_type_${invitation.type}_hint`)}>
-          <div className={classes.permission}>
+          <StyledPermission>
             <T keyName={`organization_role_type_${invitation.type}`} />
-          </div>
+          </StyledPermission>
         </Tooltip>
 
         <Tooltip title={t('invite_user_invitation_copy_button')}>
@@ -121,7 +118,7 @@ export const InvitationItem: React.FC<Props> = ({ invitation }) => {
             <Clear />
           </IconButton>
         </Tooltip>
-      </div>
-    </div>
+      </StyledItemActions>
+    </StyledListItem>
   );
 };

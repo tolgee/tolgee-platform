@@ -1,26 +1,23 @@
-import { makeStyles, MenuItem, ListSubheader } from '@material-ui/core';
+import { MenuItem, ListSubheader, styled } from '@mui/material';
 import React from 'react';
 
-const useStyles = makeStyles((theme) => ({
-  compactItem: {
-    height: '40px',
-  },
-  listSubheader: {
-    lineHeight: 'unset',
-    paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(0.5),
-  },
-}));
+const StyledMenuItem = styled(MenuItem)`
+  height: 40px;
+`;
+
+const StyledListSubheader = styled(ListSubheader)`
+  line-height: unset;
+  padding-top: ${({ theme }) => theme.spacing(2)};
+  padding-bottom: ${({ theme }) => theme.spacing(0.5)};
+`;
 
 export const CompactMenuItem: React.FC<React.ComponentProps<typeof MenuItem>> =
   React.forwardRef(function CompactMenuItem(props, ref) {
-    const classes = useStyles();
-    return <MenuItem ref={ref} className={classes.compactItem} {...props} />;
+    return <StyledMenuItem ref={ref} {...props} />;
   });
 
 export const CompactListSubheader: React.FC<
   React.ComponentProps<typeof ListSubheader>
 > = (props) => {
-  const classes = useStyles();
-  return <ListSubheader className={classes.listSubheader} {...props} />;
+  return <StyledListSubheader {...props} />;
 };

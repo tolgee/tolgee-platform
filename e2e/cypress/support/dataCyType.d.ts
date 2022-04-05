@@ -118,6 +118,7 @@ declare namespace DataCy {
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
         "leave-organization-button" |
+        "login-button" |
         "organization-address-part-field" |
         "organization-delete-button" |
         "organization-description-field" |

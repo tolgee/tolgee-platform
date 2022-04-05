@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, Typography, Button } from '@material-ui/core';
+import { Box, Typography, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';

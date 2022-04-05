@@ -1,37 +1,39 @@
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material';
 import clsx from 'clsx';
 
 import { stopBubble } from 'tg.fixtures/eventHandler';
 
-const useStyles = makeStyles((theme) => ({
-  wrapper: {
-    display: 'flex',
-    outline: 0,
-    cursor: 'default',
-    padding: '4px 4px',
-    borderRadius: '12px',
-    alignItems: 'center',
-    height: '24px',
-    fontSize: 14,
-    background: theme.palette.lightBackground.main,
-    border: '1px solid transparent',
-    maxWidth: '100%',
-  },
-  preview: {
-    background: 'white',
-    border: `1px solid ${theme.palette.text.secondary}`,
-    color: theme.palette.text.secondary,
-  },
-  hover: {
-    '&:focus-within, &:hover': {
-      border: `1px solid ${theme.palette.primary.main}`,
-      color: theme.palette.primary.main,
-    },
-  },
-  clickable: {
-    cursor: 'pointer',
-  },
-}));
+const StyledWrapper = styled('div')`
+  display: flex;
+  outline: 0;
+  cursor: default;
+  padding: 4px 4px;
+  border-radius: 12px;
+  align-items: center;
+  height: 24px;
+  font-size: 14px;
+  background: ${({ theme }) => theme.palette.lightBackground.main};
+  border: 1px solid transparent;
+  max-width: 100%;
+
+  &.preview {
+    background: white;
+    border: 1px solid ${({ theme }) => theme.palette.text.secondary};
+    color: ${({ theme }) => theme.palette.text.secondary};
+  }
+
+  &.hover {
+    &:focus-within,
+    &:hover {
+      border: 1px solid ${({ theme }) => theme.palette.primary.main};
+      color: ${({ theme }) => theme.palette.primary.main};
+    }
+  }
+
+  &.clickable {
+    cursor: pointer;
+  }
+`;
 
 type Props = {
   role?: 'input' | 'add';
@@ -45,54 +47,41 @@ export const Wrapper: React.FC<Props> = ({
   onClick,
   className,
 }) => {
-  const classes = useStyles();
-
   switch (role) {
     case 'add':
       return (
-        <button
+        <StyledWrapper
+          as="button"
           data-cy="translations-tag-add"
-          className={clsx(
-            classes.wrapper,
-            classes.preview,
-            classes.clickable,
-            classes.hover,
-            className
-          )}
+          className={clsx('preview', 'clickable', 'hover', className)}
           onClick={stopBubble(onClick)}
         >
           {children}
-        </button>
+        </StyledWrapper>
       );
     case 'input':
       return (
-        <div
+        <StyledWrapper
           data-cy="translations-tag-input"
-          className={clsx(
-            classes.wrapper,
-            classes.preview,
-            classes.hover,
-            className
-          )}
+          className={clsx('preview', 'hover', className)}
           onClick={stopBubble(onClick)}
         >
           {children}
-        </div>
+        </StyledWrapper>
       );
     default:
       return (
-        <div
+        <StyledWrapper
           data-cy="translations-tag"
           className={clsx({
-            [classes.wrapper]: true,
-            [classes.hover]: Boolean(onClick),
-            [classes.clickable]: Boolean(onClick),
+            hover: Boolean(onClick),
+            clickable: Boolean(onClick),
             [className || '']: true,
           })}
           onClick={stopBubble(onClick)}
         >
           {children}
-        </div>
+        </StyledWrapper>
       );
   }
 };

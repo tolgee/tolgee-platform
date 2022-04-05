@@ -3,13 +3,13 @@ import {
   Box,
   Button,
   IconButton,
-  makeStyles,
+  styled,
   TableCell,
   TableRow,
-} from '@material-ui/core';
-import { CheckCircle, Error, Warning } from '@material-ui/icons';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+} from '@mui/material';
+import { CheckCircle, Error, Warning } from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { T } from '@tolgee/react';
 import clsx from 'clsx';
 import { container } from 'tsyringe';
@@ -22,42 +22,40 @@ import { ImportActions } from 'tg.store/project/ImportActions';
 
 import { ImportRowLanguageMenu } from './ImportRowLanguageMenu';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    '&:hover': {
-      backgroundColor: theme.palette.grey['50'],
-    },
-    '&:hover $helperIcon': {
-      opacity: 1,
-    },
-  },
-  resolvedIcon: {
-    fontSize: 16,
-    marginRight: 4,
-  },
-  resolvedSuccessIcon: {
-    color: theme.palette.success.main,
-  },
-  resolvedErrorIcon: {
-    color: theme.palette.error.main,
-  },
-  resolveButton: {
-    marginLeft: 25,
-    paddingRight: 25 + theme.spacing(0.5),
-  },
-  pencil: {
-    position: 'absolute',
-    right: theme.spacing(0.5),
-  },
-  helperIcon: {
-    fontSize: 20,
-    opacity: 0,
-    color: theme.palette.grey['500'],
-  },
-  warningIcon: {
-    color: theme.palette.warning.main,
-  },
-}));
+const StyledTableRow = styled(TableRow)`
+  &:hover {
+    background-color: ${({ theme }) => theme.palette.grey['50']};
+  }
+  & .helperIcon {
+    font-size: 20px;
+    opacity: 0;
+    color: ${({ theme }) => theme.palette.grey['500']};
+  }
+  &:hover .helperIcon {
+    opacity: 1;
+  }
+  & .resolvedIcon {
+    font-size: 16px;
+    margin-right: 4px;
+  }
+  & .warningIcon {
+    color: ${({ theme }) => theme.palette.warning.main};
+  }
+  & .resolvedSuccessIcon {
+    color: ${({ theme }) => theme.palette.success.main};
+  }
+  & .resolvedErrorIcon {
+    color: ${({ theme }) => theme.palette.error.main};
+  }
+  & .resolvebutton: {
+    margin-left: 25px;
+    padding-right: calc(25px + ${({ theme }) => theme.spacing(0.5)});
+  }
+  & .pencil: {
+    position: absolute;
+    right: ${({ theme }) => theme.spacing(0.5)};
+  }
+`;
 
 const actions = container.resolve(ImportActions);
 export const ImportResultRow = (props: {
@@ -67,8 +65,6 @@ export const ImportResultRow = (props: {
   onShowData: () => void;
 }) => {
   const project = useProject();
-
-  const classes = useStyles();
 
   const deleteLanguage = () => {
     confirmation({
@@ -90,7 +86,7 @@ export const ImportResultRow = (props: {
 
   return (
     <React.Fragment>
-      <TableRow className={classes.root} data-cy="import-result-row">
+      <StyledTableRow data-cy="import-result-row">
         <TableCell scope="row" data-cy="import-result-language-menu-cell">
           <ImportRowLanguageMenu
             value={props.row.existingLanguageId}
@@ -108,7 +104,7 @@ export const ImportResultRow = (props: {
                 onClick={() => {
                   props.onShowFileIssues();
                 }}
-                beforeIcon={<Warning className={classes.warningIcon} />}
+                beforeIcon={<Warning className="warningIcon" />}
               >
                 {props.row.importFileIssueCount}
               </ChipButton>
@@ -141,26 +137,18 @@ export const ImportResultRow = (props: {
             disabled={props.row.conflictCount < 1}
             onClick={() => props.onResolveConflicts()}
             size="small"
-            className={classes.resolveButton}
+            className="resolveButton"
           >
             {props.row.resolvedCount < props.row.conflictCount ? (
-              <Error
-                className={clsx(
-                  classes.resolvedIcon,
-                  classes.resolvedErrorIcon
-                )}
-              />
+              <Error className={clsx('resolvedIcon', 'resolvedErrorIcon')} />
             ) : (
               <CheckCircle
-                className={clsx(
-                  classes.resolvedIcon,
-                  classes.resolvedSuccessIcon
-                )}
+                className={clsx('resolvedIcon', 'resolvedSuccessIcon')}
               />
             )}
             {props.row.resolvedCount} / {props.row.conflictCount}
             {props.row.conflictCount > 0 && (
-              <EditIcon className={clsx(classes.pencil, classes.helperIcon)} />
+              <EditIcon className={clsx('pencil', 'helperIcon')} />
             )}
           </Button>
         </TableCell>
@@ -174,7 +162,7 @@ export const ImportResultRow = (props: {
             <DeleteIcon />
           </IconButton>
         </TableCell>
-      </TableRow>
+      </StyledTableRow>
     </React.Fragment>
   );
 };

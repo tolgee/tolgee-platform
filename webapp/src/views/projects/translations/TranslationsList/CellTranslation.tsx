@@ -1,11 +1,18 @@
 import { useRef } from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { StateType } from 'tg.constants/translationStates';
 import { CircledLanguageIcon } from 'tg.component/languages/CircledLanguageIcon';
-import { useCellStyles } from '../cell/styles';
+import {
+  StyledCell,
+  CELL_CLICKABLE,
+  CELL_HOVER,
+  CELL_PLAIN,
+  CELL_RAISED,
+  CELL_SELECTED,
+} from '../cell/styles';
 import { useEditableRow } from '../useEditableRow';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
 import { TranslationVisual } from '../TranslationVisual';
@@ -19,65 +26,70 @@ type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 
-const useStyles = makeStyles((theme) => {
-  return {
-    splitContainer: {
-      display: 'flex',
-      flexGrow: 1,
-      position: 'relative',
-    },
-    container: {
-      flexBasis: '50%',
-      flexGrow: 1,
-      position: 'relative',
-      display: 'grid',
-      gridTemplateColumns: '40px 60px 1fr',
-      gridTemplateRows: '1fr auto',
-      gridTemplateAreas: `
-        "flag     language translation  "
-        "controls controls controls     "
-      `,
-    },
-    flag: {
-      gridArea: 'flag',
-      margin: '12px 8px 8px 12px',
-      width: 20,
-      height: 20,
-      padding: 1,
-    },
-    language: {
-      margin: '12px 8px 8px 0px',
-    },
-    editor: {
-      overflow: 'hidden',
-      flexBasis: '50%',
-      flexGrow: 1,
-    },
-    translation: {
-      gridArea: 'translation',
-      margin: '12px 12px 8px 0px',
-    },
-    translationContent: {
-      overflow: 'hidden',
-      position: 'relative',
-    },
-    autoIndicator: {
-      position: 'relative',
-      height: 0,
-      justifySelf: 'start',
-    },
-    controls: {
-      boxSizing: 'border-box',
-      gridArea: 'controls',
-      display: 'flex',
-      justifyContent: 'flex-end',
-      overflow: 'hidden',
-      minHeight: 44,
-      padding: '12px 14px 12px 12px',
-      marginTop: -16,
-    },
-  };
-});
+const StyledWrapper = styled(StyledCell)`
+  &.splitContainer {
+    display: flex;
+    flex-grow: 1;
+    position: relative;
+  }
+`;
+
+const StyledContainer = styled('div')`
+  flex-basis: 50%;
+  flex-grow: 1;
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px 60px 1fr;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    'flag     language translation  '
+    'controls controls controls     ';
+`;
+
+const StyledAutoTranslationIndicator = styled(AutoTranslationIndicator)`
+  position: relative;
+  height: 0px;
+  justify-self: start;
+`;
+
+const StyledTranslation = styled('div')`
+  grid-area: translation;
+  margin: 12px 12px 8px 0px;
+`;
+
+const StyledTranslationContent = styled('div')`
+  overflow: hidden;
+  position: relative;
+`;
+
+const StyledLanguage = styled('div')`
+  margin: 12px 8px 8px 0px;
+`;
+
+const StyledCircledLanguageIcon = styled(CircledLanguageIcon)`
+  grid-area: flag;
+  margin: 12px 8px 8px 12px;
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+`;
+
+const StyledTranslationOpened = styled(TranslationOpened)`
+  overflow: hidden;
+  flex-basis: 50%;
+  flex-grow: 1;
+`;
+
+const StyledControlsWrapper = styled('div')`
+  box-sizing: border-box;
+  grid-area: controls;
+  display: flex;
+  justify-content: flex-end;
+  overflow: hidden;
+  min-height: 44px;
+  padding: 12px 14px 12px 12px;
+  margin-top: -16px;
+`;
 
 type Props = {
   data: KeyWithTranslationsModel;
@@ -100,9 +112,7 @@ export const CellTranslation: React.FC<Props> = ({
   active,
   lastFocusable,
 }) => {
-  const classes = useStyles();
   const cellRef = useRef<HTMLDivElement>(null);
-  const cellClasses = useCellStyles({ position: 'right' });
   const dispatch = useTranslationsDispatch();
 
   const translation = data.translations[language.tag] as
@@ -157,58 +167,47 @@ export const CellTranslation: React.FC<Props> = ({
   const state = translation?.state || 'UNTRANSLATED';
 
   return (
-    <div
+    <StyledWrapper
+      position="right"
       className={clsx({
-        [cellClasses.cellPlain]: true,
-        [classes.splitContainer]: true,
-        [cellClasses.scrollMargins]: true,
-        [cellClasses.cellRaised]: isEditing,
+        [CELL_PLAIN]: true,
+        [CELL_RAISED]: isEditing,
+        splitContainer: true,
       })}
       tabIndex={0}
       ref={cellRef}
     >
-      <div
+      <StyledContainer
         className={clsx({
-          [classes.container]: true,
-          [cellClasses.hover]: !isEditing,
-          [cellClasses.cellClickable]: editEnabled,
-          [cellClasses.cellSelected]: isEditing,
+          [CELL_HOVER]: !isEditing,
+          [CELL_CLICKABLE]: editEnabled,
+          [CELL_SELECTED]: isEditing,
         })}
         style={{ width }}
         onClick={editEnabled ? () => toggleEdit() : undefined}
         data-cy="translations-table-cell"
       >
-        <CircledLanguageIcon
-          flag={language.flagEmoji}
-          className={classes.flag}
-        />
+        <StyledCircledLanguageIcon flag={language.flagEmoji} />
 
-        <div
-          className={classes.language}
-          data-cy="translations-table-cell-language"
-        >
+        <StyledLanguage data-cy="translations-table-cell-language">
           {language.tag}
-        </div>
+        </StyledLanguage>
 
-        <div className={classes.translation}>
-          <div className={classes.translationContent}>
+        <StyledTranslation>
+          <StyledTranslationContent>
             <TranslationVisual
               width={width}
               text={isEditing ? value : translation?.text}
               locale={language.tag}
               limitLines={!showAllLines}
             />
-          </div>
-          <AutoTranslationIndicator
-            keyData={data}
-            lang={language.tag}
-            className={classes.autoIndicator}
-          />
-        </div>
+          </StyledTranslationContent>
+          <StyledAutoTranslationIndicator keyData={data} lang={language.tag} />
+        </StyledTranslation>
 
         <CellStateBar state={state} onResize={handleResize} />
 
-        <div className={classes.controls}>
+        <StyledControlsWrapper>
           {!isEditing &&
             (active ? (
               <ControlsTranslation
@@ -228,12 +227,11 @@ export const CellTranslation: React.FC<Props> = ({
                 unresolvedCommentCount={translation?.unresolvedCommentCount}
               />
             ))}
-        </div>
-      </div>
+        </StyledControlsWrapper>
+      </StyledContainer>
 
       {editVal && (
-        <TranslationOpened
-          className={classes.editor}
+        <StyledTranslationOpened
           keyId={data.keyId}
           language={language}
           translation={translation}
@@ -251,6 +249,6 @@ export const CellTranslation: React.FC<Props> = ({
           cellRef={cellRef}
         />
       )}
-    </div>
+    </StyledWrapper>
   );
 };

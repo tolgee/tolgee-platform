@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core';
 import { useDebounce } from 'use-debounce';
+import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
@@ -12,22 +12,18 @@ type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles((theme) => {
-  const borderColor = theme.palette.grey[200];
-  return {
-    container: {
-      display: 'flex',
-      border: `1px solid ${borderColor}`,
-      borderWidth: '1px 0px 0px 0px',
-    },
-    languages: {
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative',
-      alignItems: 'stretch',
-    },
-  };
-});
+const StyledContainer = styled('div')`
+  display: flex;
+  border: 1px solid ${({ theme }) => theme.palette.grey[200]};
+  border-width: 1px 0px 0px 0px;
+`;
+
+const StyledLanguages = styled('div')`
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-items: stretch;
+`;
 
 type Props = {
   data: KeyWithTranslationsModel;
@@ -43,7 +39,6 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
   onResize,
 }) {
   const permissions = useProjectPermissions();
-  const classes = useStyles();
   const [hover, setHover] = useState(false);
   const [focus, setFocus] = useState(false);
   const active = hover || focus;
@@ -53,12 +48,11 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
   const relaxedActive = active || activeDebounced;
 
   return (
-    <div
+    <StyledContainer
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
-      className={classes.container}
       data-cy="translations-row"
     >
       <CellKey
@@ -70,7 +64,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
         active={relaxedActive}
         position="left"
       />
-      <div className={classes.languages} style={{ width: columnSizes[1] }}>
+      <StyledLanguages style={{ width: columnSizes[1] }}>
         {languages.map((language, index) => (
           <CellTranslation
             key={language.tag}
@@ -85,7 +79,7 @@ export const RowList: React.FC<Props> = React.memo(function RowList({
             lastFocusable={index === languages.length - 1}
           />
         ))}
-      </div>
-    </div>
+      </StyledLanguages>
+    </StyledContainer>
   );
 });

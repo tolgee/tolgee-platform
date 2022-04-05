@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, RefObject } from 'react';
-import { makeStyles, Popper } from '@material-ui/core';
-import clsx from 'clsx';
+import { Popper, keyframes, styled } from '@mui/material';
 import { useTimer } from './useTimer';
 
 function getInheritedBackgroundColor(el) {
@@ -29,34 +28,36 @@ function getDefaultBackground() {
   return bg;
 }
 
-const useStyles = makeStyles((theme) => ({
-  '@keyframes fadeIn': {
-    from: { opacity: 0 },
-    to: { opacity: 1 },
-  },
-  container: {
-    position: 'relative',
-    display: 'flex',
-    animationName: '$fadeIn',
-    animationDuration: '0.1s',
-    animationTimingFunction: 'ease-in-out',
-  },
-  overlay: {
-    position: 'relative',
-    boxSizing: 'content-box',
-    zIndex: theme.zIndex.tooltip,
-    '-webkit-box-shadow': '0px 0px 5px 2px rgba(0,0,0,0.1)',
-    'box-shadow': '0px 0px 5px 2px rgba(0,0,0,0.1)',
-  },
-  text: {
-    overflow: 'hidden',
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
+const StyledContainer = styled('div')`
+  position: relative;
+  display: flex;
+  animation: ${fadeIn} 0.1s ease-in-out;
+
+  & .text {
+    overflow: hidden;
     // Adds a hyphen where the word breaks
-    '-ms-hyphens': 'auto',
-    '-moz-hyphens': 'auto',
-    '-webkit-hyphens': 'auto',
-    hyphens: 'auto',
-  },
-}));
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: 'auto';
+    hyphens: auto;
+  }
+`;
+
+const StyledOverlay = styled('div')`
+  position: relative;
+  box-sizing: content-box;
+  z-index: ${({ theme }) => theme.zIndex.tooltip};
+  box-shadow: '0px 0px 5px 2px rgba(0,0,0,0.1)';
+`;
 
 type Props = {
   maxLines?: number | undefined;
@@ -78,7 +79,6 @@ export const LimitedHeightText: React.FC<Props> = ({
   lineHeight = '1.2rem',
   overlay = true,
 }) => {
-  const classes = useStyles();
   const textRef = useRef<HTMLDivElement>();
   const [expandable, setExpandable] = useState<boolean>(false);
   const [overlayOpen, setOverlayOpen] = useState(false);
@@ -86,7 +86,9 @@ export const LimitedHeightText: React.FC<Props> = ({
   const detectExpandability = () => {
     const textElement = textRef.current;
     if (textElement != null) {
-      setExpandable(textElement.clientHeight < textElement.scrollHeight);
+      // values should be the same, however firefox applies some weird rounding
+      // so by adding one we eliminate that
+      setExpandable(textElement.clientHeight + 1 < textElement.scrollHeight);
     }
   };
 
@@ -114,8 +116,8 @@ export const LimitedHeightText: React.FC<Props> = ({
     : undefined;
 
   return (
-    <div
-      className={clsx(classes.container, classes.text)}
+    <StyledContainer
+      className="text"
       ref={textRef as RefObject<HTMLDivElement>}
       // when moving mouse, reinitialize timer
       // so it only fires when you stop the mouse
@@ -139,20 +141,33 @@ export const LimitedHeightText: React.FC<Props> = ({
           style={{
             pointerEvents: 'none',
           }}
-          modifiers={{
-            offset: { offset: '0, -100%p' },
-            computeStyle: {
-              gpuAcceleration: false,
+          modifiers={[
+            {
+              name: 'offset',
+              options: {
+                offset: ({ reference }) => {
+                  return [0, -reference.height];
+                },
+              },
             },
-            preventOverflow: {
+            {
+              name: 'computeStyles',
+              options: {
+                gpuAcceleration: false,
+              },
+            },
+            {
+              name: 'preventOverflow',
               enabled: true,
-              padding: 0,
+              options: {
+                padding: 0,
+              },
             },
-          }}
+          ]}
         >
-          <div
+          <StyledOverlay
             lang={lang}
-            className={clsx(classes.text, classes.overlay)}
+            className="text"
             style={{
               width: textRef.current?.clientWidth + 'px',
               background: getInheritedBackgroundColor(textRef.current),
@@ -165,9 +180,9 @@ export const LimitedHeightText: React.FC<Props> = ({
             }}
           >
             {children}
-          </div>
+          </StyledOverlay>
         </Popper>
       ) : null}
-    </div>
+    </StyledContainer>
   );
 };

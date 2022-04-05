@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Checkbox, makeStyles } from '@material-ui/core';
+import { Checkbox, styled } from '@mui/material';
 import clsx from 'clsx';
 
 import { Editor } from 'tg.component/editor/Editor';
@@ -8,7 +8,14 @@ import { LimitedHeightText } from './LimitedHeightText';
 import { Tags } from './Tags/Tags';
 import { useEditableRow } from './useEditableRow';
 import { ScreenshotsPopover } from './Screenshots/ScreenshotsPopover';
-import { PositionType, useCellStyles } from './cell/styles';
+import {
+  CELL_CLICKABLE,
+  CELL_HOVER,
+  CELL_PLAIN,
+  CELL_RAISED,
+  PositionType,
+  StyledCell,
+} from './cell/styles';
 import {
   useTranslationsSelector,
   useTranslationsDispatch,
@@ -24,73 +31,82 @@ import { getMeta } from 'tg.fixtures/isMac';
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 
-const useStyles = makeStyles((theme) => {
-  return {
-    container: {
-      display: 'grid',
-      gridTemplateColumns: 'auto 1fr',
-      gridTemplateRows: 'auto auto 1fr auto',
-      gridTemplateAreas: `
-        "checkbox key          "
-        ".        tags         "
-        "editor   editor       "
-        "controls controls     "
-      `,
-    },
-    checkbox: {
-      gridArea: 'checkbox',
-      width: 38,
-      height: 38,
-      margin: '3px -9px -9px 3px',
-    },
-    key: {
-      gridArea: 'key',
-      margin: '12px 12px 8px 12px',
-      overflow: 'hidden',
-      position: 'relative',
-    },
-    tags: {
-      gridArea: 'tags',
-      display: 'flex',
-      flexWrap: 'wrap',
-      alignItems: 'flex-start',
-      overflow: 'hidden',
-      '& > *': {
-        margin: '0px 3px 3px 0px',
-      },
-      margin: '0px 12px 0px 12px',
-      position: 'relative',
-      paddingBottom: 24,
-      marginBottom: -24,
-    },
-    tagAdd: {
-      position: 'absolute',
-      bottom: 0,
-      margin: 0,
-    },
-    editor: {
-      gridArea: 'editor',
-      overflow: 'hidden',
-      padding: '12px 12px 0px 12px',
-    },
-    controls: {
-      gridArea: 'controls',
-      display: 'flex',
-      justifyContent: 'space-between',
-      overflow: 'hidden',
-      alignItems: 'flex-end',
-    },
-    controlsSmall: {
-      boxSizing: 'border-box',
-      gridArea: 'controls',
-      display: 'flex',
-      justifyContent: 'flex-end',
-      overflow: 'hidden',
-      minHeight: 44,
-      padding: '12px 12px 12px 12px',
-    },
-  };
-});
+const StyledContainer = styled(StyledCell)`
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-areas:
+    'checkbox key          '
+    '.        tags         '
+    'editor   editor       '
+    'controls controls     ';
+
+  & .controls {
+    grid-area: controls;
+    display: flex;
+    justify-content: space-between;
+    overflow: hidden;
+    align-items: flex-end;
+  }
+
+  & .controlsSmall {
+    box-sizing: border-box;
+    grid-area: controls;
+    display: flex;
+    justify-content: flex-end;
+    overflow: hidden;
+    min-height: 44px;
+    padding: 12px 12px 12px 12px;
+  }
+`;
+
+const StyledCheckbox = styled(Checkbox)`
+    grid-area: checkbox;
+    width: 38px;
+    height: 38px;
+    margin: 3px -9px -9px 3px;
+  }
+`;
+
+const StyledKey = styled('div')`
+  grid-area: key;
+  margin: 12px 12px 8px 12px;
+  overflow: hidden;
+  position: relative;
+`;
+
+const StyledTags = styled('div')`
+  grid-area: tags;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  overflow: hidden;
+  & > * {
+    margin: 0px 3px 3px 0px;
+  }
+  margin: 0px 12px 0px 12px;
+  position: relative;
+  padding-bottom: 24px;
+  margin-bottom: -24px;
+`;
+
+const StyledTagAdd = styled(TagAdd)`
+  position: absolute;
+  bottom: 0px;
+  margin: 0px;
+`;
+
+const StyledTagInput = styled(TagInput)`
+  position: absolute;
+  bottom: 0px;
+  margin: 0px;
+`;
+
+const StyledEditor = styled('div')`
+  grid-area: editor;
+  overflow: hidden;
+  padding: 12px 12px 0px 12px;
+`;
 
 type Props = {
   data: KeyWithTranslationsModel;
@@ -111,8 +127,6 @@ export const CellKey: React.FC<Props> = ({
   position,
   onSaveSuccess,
 }) => {
-  const classes = useStyles();
-  const cellClasses = useCellStyles({ position });
   const cellRef = useRef<HTMLDivElement>(null);
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
   const dispatch = useTranslationsDispatch();
@@ -158,14 +172,13 @@ export const CellKey: React.FC<Props> = ({
 
   return (
     <>
-      <div
+      <StyledContainer
+        position={position}
         className={clsx({
-          [classes.container]: true,
-          [cellClasses.cellPlain]: true,
-          [cellClasses.hover]: !isEditing,
-          [cellClasses.cellClickable]: editEnabled && !isEditing,
-          [cellClasses.cellRaised]: isEditing,
-          [cellClasses.scrollMargins]: true,
+          [CELL_PLAIN]: true,
+          [CELL_HOVER]: !isEditing,
+          [CELL_CLICKABLE]: editEnabled && !isEditing,
+          [CELL_RAISED]: isEditing,
         })}
         style={{ width }}
         onClick={
@@ -178,8 +191,7 @@ export const CellKey: React.FC<Props> = ({
         {!isEditing ? (
           <>
             {editEnabled && !simple && (
-              <Checkbox
-                className={classes.checkbox}
+              <StyledCheckbox
                 size="small"
                 checked={isSelected}
                 onChange={toggleSelect}
@@ -187,13 +199,13 @@ export const CellKey: React.FC<Props> = ({
                 data-cy="translations-row-checkbox"
               />
             )}
-            <div className={classes.key}>
+            <StyledKey>
               <LimitedHeightText width={width} maxLines={3} wrap="break-all">
                 {data.keyName}
               </LimitedHeightText>
-            </div>
+            </StyledKey>
             {!simple && (
-              <div className={classes.tags}>
+              <StyledTags>
                 <Tags
                   keyId={data.keyId}
                   tags={data.keyTags}
@@ -201,26 +213,24 @@ export const CellKey: React.FC<Props> = ({
                 />
                 {editEnabled &&
                   (tagEdit ? (
-                    <TagInput
-                      className={classes.tagAdd}
+                    <StyledTagInput
                       onAdd={handleAddTag}
                       onClose={() => setTagEdit(false)}
                       autoFocus
                     />
                   ) : (
                     active && (
-                      <TagAdd
-                        className={classes.tagAdd}
+                      <StyledTagAdd
                         onClick={() => setTagEdit(true)}
                         withFullLabel={!data.keyTags?.length}
                       />
                     )
                   ))}
-              </div>
+              </StyledTags>
             )}
           </>
         ) : (
-          <div className={classes.editor}>
+          <StyledEditor>
             <Editor
               plaintext
               value={value}
@@ -232,10 +242,10 @@ export const CellKey: React.FC<Props> = ({
                 [`${getMeta()}-Enter`]: () => handleSave('EDIT_NEXT'),
               }}
             />
-          </div>
+          </StyledEditor>
         )}
 
-        <div className={isEditing ? classes.controls : classes.controlsSmall}>
+        <div className={isEditing ? 'controls' : 'controlsSmall'}>
           {isEditing ? (
             <ControlsEditor
               onCancel={() => handleClose(true)}
@@ -273,7 +283,7 @@ export const CellKey: React.FC<Props> = ({
             )
           ) : null}
         </div>
-      </div>
+      </StyledContainer>
       {screenshotsOpen && (
         <ScreenshotsPopover
           anchorEl={screenshotEl.current!}

@@ -1,7 +1,7 @@
 import { container } from 'tsyringe';
-import { Button, makeStyles } from '@material-ui/core';
+import { Button, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
@@ -25,51 +25,50 @@ import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 
 const messaging = container.resolve(MessageService);
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'grid',
-    rowGap: theme.spacing(2),
-    marginBottom: theme.spacing(2),
-  },
-  label: {
-    fontWeight: 'bold',
-  },
-  tags: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    alignItems: 'flex-start',
-    overflow: 'hidden',
-    '& > *': {
-      margin: '0px 3px 3px 0px',
-    },
-    position: 'relative',
-  },
-  field: {
-    borderColor: theme.palette.grey[200],
-    borderWidth: 1,
-    borderStyle: 'solid',
-  },
-  galleryField: {
-    borderColor: theme.palette.grey[200],
-    borderWidth: 1,
-    borderStyle: 'solid',
-    padding: 2,
-  },
-  languageField: {
-    borderColor: theme.palette.grey[200],
-    borderWidth: '1px 1px 1px 0px',
-    borderStyle: 'solid',
-    '& + &': {
-      borderTop: 0,
-    },
-  },
-  actions: {
-    marginTop: 20,
-  },
-}));
+const StyledContainer = styled('div')`
+  display: grid;
+  row-gap: ${({ theme }) => theme.spacing(2)};
+  margin-bottom: ${({ theme }) => theme.spacing(2)};
+`;
+
+const StyledTags = styled('div')`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  overflow: hidden;
+  & > * {
+    margin: 0px 3px 3px 0px;
+  }
+  position: relative;
+`;
+
+const StyledField = styled('div')`
+  border-color: ${({ theme }) => theme.palette.grey[200]};
+  border-width: 1px;
+  border-style: solid;
+`;
+
+const StyledGalleryField = styled('div')`
+  border-color: ${({ theme }) => theme.palette.grey[200]};
+  border-width: 1px;
+  border-style: solid;
+  padding: 2px;
+`;
+
+const StyledLanguageField = styled('div')`
+  border-color: ${({ theme }) => theme.palette.grey[200]};
+  border-width: 1px 1px 1px 0px;
+  border-style: solid;
+  & + & {
+    border-top: 0px;
+  }
+`;
+
+const StyledActions = styled('div')`
+  margin-top: 20px;
+`;
 
 export const KeyEditForm: React.FC = () => {
-  const classes = useStyles();
   const dispatch = useTranslationsDispatch();
   const t = useTranslate();
   const project = useProject();
@@ -134,12 +133,12 @@ export const KeyEditForm: React.FC = () => {
   };
 
   return translation ? (
-    <div className={classes.container}>
+    <StyledContainer>
       <div>
         <FieldLabel>
           <T>translation_single_label_key</T>
         </FieldLabel>
-        <div className={classes.field} data-cy="translation-edit-key-field">
+        <StyledField data-cy="translation-edit-key-field">
           <CellKey
             data={translation!}
             editEnabled={editEnabled}
@@ -147,14 +146,14 @@ export const KeyEditForm: React.FC = () => {
             simple={true}
             onSaveSuccess={(key) => setUrlKey(key)}
           />
-        </div>
+        </StyledField>
       </div>
 
       <div>
         <FieldLabel>
           <T>translation_single_label_tags</T>
         </FieldLabel>
-        <div className={classes.tags}>
+        <StyledTags>
           {translation.keyTags.map((tag) => {
             return (
               <Tag
@@ -172,7 +171,7 @@ export const KeyEditForm: React.FC = () => {
               placeholder={t('translation_single_tag_placeholder')}
             />
           )}
-        </div>
+        </StyledTags>
       </div>
 
       <div>
@@ -182,9 +181,8 @@ export const KeyEditForm: React.FC = () => {
         {selectedLanguages?.map((lang) => {
           const language = languages?.find((l) => l.tag === lang);
           return language ? (
-            <div
+            <StyledLanguageField
               key={lang}
-              className={classes.languageField}
               data-cy="translation-edit-translation-field"
             >
               <CellTranslation
@@ -194,7 +192,7 @@ export const KeyEditForm: React.FC = () => {
                 editEnabled={permissions.canEditLanguage(language.id)}
                 lastFocusable={false}
               />
-            </div>
+            </StyledLanguageField>
           ) : null;
         })}
       </div>
@@ -203,12 +201,12 @@ export const KeyEditForm: React.FC = () => {
         <FieldLabel>
           <T>translation_single_label_screenshots</T>
         </FieldLabel>
-        <div className={classes.galleryField}>
+        <StyledGalleryField>
           <ScreenshotGallery keyId={translation!.keyId} />
-        </div>
+        </StyledGalleryField>
       </div>
 
-      <div className={classes.actions}>
+      <StyledActions>
         {editEnabled && (
           <Button
             color="secondary"
@@ -219,7 +217,7 @@ export const KeyEditForm: React.FC = () => {
             <T>translation_single_label_delete</T>
           </Button>
         )}
-      </div>
-    </div>
+      </StyledActions>
+    </StyledContainer>
   ) : null;
 };

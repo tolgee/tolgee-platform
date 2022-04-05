@@ -4,15 +4,15 @@ import {
   BoxProps,
   CircularProgress,
   IconButton,
-  makeStyles,
-} from '@material-ui/core';
-import { green } from '@material-ui/core/colors';
-import { KeyboardArrowUp } from '@material-ui/icons';
-import CheckIcon from '@material-ui/icons/Check';
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
+  styled,
+} from '@mui/material';
+import { green } from '@mui/material/colors';
+import { KeyboardArrowUp } from '@mui/icons-material';
+import CheckIcon from '@mui/icons-material/Check';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import clsx from 'clsx';
 
-type ImportConflictTranslationProps = {
+type Props = {
   text?: string;
   selected?: boolean;
   onSelect?: () => void;
@@ -25,45 +25,44 @@ type ImportConflictTranslationProps = {
   'data-cy': string;
 };
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    borderRadius: theme.shape.borderRadius,
-    border: `1px dashed ${theme.palette.grey.A100}`,
-    padding: theme.spacing(1),
-    cursor: 'pointer',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-  },
-  expanded: {
-    whiteSpace: 'initial',
-    transition: 'max-height 1s',
-  },
-  selected: {
-    borderColor: green['900'],
-    backgroundColor: green['50'],
-  },
-  loading: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  toggleButton: {
-    padding: theme.spacing(0.5),
-    marginTop: -theme.spacing(1),
-    marginRight: -theme.spacing(0.5),
-    marginBottom: -theme.spacing(1),
-  },
+const StyledRoot = styled(Box)`
+  border-radius: ${({ theme }) => theme.shape.borderRadius};
+  border: 1px dashed ${({ theme }) => theme.palette.grey.A100};
+  padding: ${({ theme }) => theme.spacing(1)};
+  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+
+  &.expanded {
+    white-space: initial;
+    transition: max-height 1s;
+  }
+
+  &.selected {
+    border-color: ${green['900']};
+    background-color: ${green['50']};
+  }
+`;
+
+const StyledLoading = styled(Box)`
+  position: absolute;
+  right: 0px;
+  top: 0px;
+`;
+
+const StyledToggleButton = styled(IconButton)(({ theme }) => ({
+  padding: theme.spacing(0.5),
+  marginTop: -theme.spacing(1),
+  marginRight: -theme.spacing(0.5),
+  marginBottom: -theme.spacing(1),
 }));
 
 const BoxWithRef = Box as FunctionComponent<
   BoxProps & { ref: LegacyRef<HTMLDivElement> }
 >;
 
-export const ImportConflictTranslation = (
-  props: ImportConflictTranslationProps
-) => {
-  const classes = useStyles();
+export const ImportConflictTranslation: React.FC<Props> = (props) => {
   const textRef = React.createRef<HTMLDivElement>();
 
   const detectExpandability = () => {
@@ -94,35 +93,32 @@ export const ImportConflictTranslation = (
   const dataCySelected = { 'data-cy-selected': props.selected || undefined };
 
   return (
-    <Box
+    <StyledRoot
       position="relative"
       onClick={props.onSelect}
       className={clsx(
-        classes.root,
-        { [classes.selected]: props.selected || props.loaded },
-        { [classes.expanded]: props.expanded }
+        { selected: props.selected || props.loaded },
+        { expanded: props.expanded }
       )}
       display="flex"
       {...dataCySelected}
       data-cy={props['data-cy']}
     >
       {props.loading && (
-        <Box
-          className={classes.loading}
+        <StyledLoading
           p={1}
           data-cy="import-resolution-dialog-translation-loading"
         >
           <CircularProgress size={20} />
-        </Box>
+        </StyledLoading>
       )}
       {props.loaded && (
-        <Box
-          className={classes.loading}
+        <StyledLoading
           p={1}
           data-cy="import-resolution-dialog-translation-check"
         >
           <CheckIcon />
-        </Box>
+        </StyledLoading>
       )}
       <BoxWithRef
         flexGrow={1}
@@ -138,18 +134,18 @@ export const ImportConflictTranslation = (
             opacity: props.loading || props.loaded ? 0 : 1,
           }}
         >
-          <IconButton
+          <StyledToggleButton
             data-cy="import-resolution-translation-expand-button"
-            className={classes.toggleButton}
             onClick={(e) => {
               e.stopPropagation();
               props.onToggle();
             }}
+            size="large"
           >
             {!props.expanded ? <KeyboardArrowDownIcon /> : <KeyboardArrowUp />}
-          </IconButton>
+          </StyledToggleButton>
         </Box>
       )}
-    </Box>
+    </StyledRoot>
   );
 };

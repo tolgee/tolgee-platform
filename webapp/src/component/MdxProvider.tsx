@@ -1,53 +1,54 @@
 import { default as React, FC } from 'react';
-import { Link, makeStyles, Typography } from '@material-ui/core';
+import { Link, Typography } from '@mui/material';
 import { MDXProvider } from '@mdx-js/react';
 import Highlight, { defaultProps, Prism } from 'prism-react-renderer';
 import theme from 'prism-react-renderer/themes/github';
-import clsx from 'clsx';
 import { API_KEY_PLACEHOLDER } from 'tg.views/projects/integrate/IntegrateView';
+import { styled } from '@mui/material';
 
 (typeof global !== 'undefined' ? global : window).Prism = Prism;
 require('prismjs/components/prism-php');
 require('prismjs/components/prism-shell-session');
 require('prism-svelte');
 
-const useStyles = makeStyles((t) => ({
-  code: {
-    borderRadius: t.shape.borderRadius,
-    minWidth: 700,
-    padding: '20px',
-    fontFamily:
-      'ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace',
-  },
-  inlineCode: {
-    borderRadius: t.shape.borderRadius,
-    backgroundColor: 'rgb(246, 248, 250)',
-    color: 'rgb(57, 58, 52)',
-    padding: '4px 4px',
-    fontFamily:
-      'ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace',
-  },
-  p: {
-    padding: `${t.spacing(1)}px 0`,
-  },
-  h1: {
-    fontSize: 35,
-  },
-  h2: {
-    fontWeight: 400,
-    fontSize: 26,
-    marginTop: t.spacing(6),
-  },
-  h3: {
-    fontSize: 22,
-  },
-}));
+const StyledCode = styled('pre')`
+  border-radius: ${({ theme }) => theme.shape.borderRadius};
+  min-width: 700px;
+  padding: 20px;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace;
+`;
+
+const StyledInlineCode = styled('span')`
+  border-radius: ${({ theme }) => theme.shape.borderRadius};
+  background-color: rgb(246, 248, 250);
+  color: rgb(57, 58, 52);
+  padding: 4px 4px;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
+    Liberation Mono, monospace;
+`;
+
+const StyledParagraph = styled(Typography)`
+  padding: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledH1 = styled(Typography)`
+  font-size: 35px;
+`;
+
+const StyledH2 = styled(Typography)`
+  font-weight: 400;
+  font-size: 26px;
+  margin-top: ${({ theme }) => theme.spacing(6)};
+`;
+
+const StyledH3 = styled(Typography)`
+  font-size: 22px;
+`;
 
 export const MdxProvider: FC<{
   modifyValue?: (code: string) => string;
 }> = (props) => {
-  const classes = useStyles();
-
   const modifyValue = (code: string) =>
     props.modifyValue ? props.modifyValue(code) : code;
 
@@ -59,39 +60,20 @@ export const MdxProvider: FC<{
         },
         p: function P(props) {
           return (
-            <Typography variant="body1" className={classes.p}>
-              {props.children}
-            </Typography>
+            <StyledParagraph variant="body1">{props.children}</StyledParagraph>
           );
         },
-        h1: function H2(props) {
-          return (
-            <Typography variant="h1" className={classes.h1}>
-              {props.children}
-            </Typography>
-          );
+        h1: function H1(props) {
+          return <StyledH1 variant="h1">{props.children}</StyledH1>;
         },
         h2: function H2(props) {
-          return (
-            <Typography variant="h2" className={classes.h2}>
-              {props.children}
-            </Typography>
-          );
+          return <StyledH2 variant="h2">{props.children}</StyledH2>;
         },
-        h3: function H2(props) {
-          return (
-            <Typography variant="h3" className={classes.h3}>
-              {props.children}
-            </Typography>
-          );
+        h3: function H3(props) {
+          return <StyledH3 variant="h3">{props.children}</StyledH3>;
         },
         inlineCode: function InlineCode(props) {
-          return (
-            <span
-              {...props}
-              className={clsx(props.className, classes.inlineCode)}
-            />
-          );
+          return <StyledInlineCode {...props} className={props.className} />;
         },
         code: function Code({ children, className }) {
           const language = className?.replace(/language-/, '');
@@ -104,8 +86,8 @@ export const MdxProvider: FC<{
               language={language}
             >
               {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                <pre
-                  className={clsx(className, classes.code)}
+                <StyledCode
+                  className={className}
                   style={{
                     ...style,
                   }}
@@ -129,7 +111,7 @@ export const MdxProvider: FC<{
                       })}
                     </div>
                   ))}
-                </pre>
+                </StyledCode>
               )}
             </Highlight>
           );

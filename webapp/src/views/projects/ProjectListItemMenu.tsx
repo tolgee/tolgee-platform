@@ -1,9 +1,9 @@
-import { IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
+import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { MoreVert } from '@material-ui/icons';
+import { MoreVert } from '@mui/icons-material';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { container } from 'tsyringe';
 import { MessageService } from 'tg.service/MessageService';
@@ -59,7 +59,6 @@ export const ProjectListItemMenu: FC<{
         }}
         id="project-item-menu"
         anchorEl={anchorEl}
-        getContentAnchorEl={null}
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEl(null)}
         onClick={stopBubble()}

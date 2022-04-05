@@ -1,5 +1,5 @@
 import { Field } from 'formik';
-import { MenuItem, Select, FormControl, InputLabel } from '@material-ui/core';
+import { MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 export const FORMATS = ['JSON', 'XLIFF'] as const;
@@ -15,12 +15,13 @@ export const FormatSelector: React.FC<Props> = ({ className }) => {
     <Field name="format">
       {({ field }) => {
         return (
-          <FormControl className={className}>
+          <FormControl className={className} variant="standard">
             <InputLabel>{t('export_translations_format_label')}</InputLabel>
             <Select
               {...field}
               data-cy="export-format-selector"
               MenuProps={{ getContentAnchorEl: null }}
+              variant="standard"
             >
               {FORMATS.map((format) => (
                 <MenuItem

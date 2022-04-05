@@ -1,18 +1,15 @@
-import { InputLabel, makeStyles } from '@material-ui/core';
+import { InputLabel, styled } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
-  label: {
-    fontSize: 14,
-    marginBottom: 5,
-    fontWeight: 500,
-  },
-}));
+const StyledInputLabel = styled(InputLabel)`
+  font-size: 14px;
+  margin-bottom: 5px;
+  font-weight: 500px;
+`;
 
 export const FieldLabel: React.FC = ({ children }) => {
-  const classes = useStyles();
   return (
-    <InputLabel className={classes.label} data-cy="translation-field-label">
+    <StyledInputLabel data-cy="translation-field-label">
       {children}
-    </InputLabel>
+    </StyledInputLabel>
   );
 };

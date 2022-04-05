@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Box, FormHelperText } from '@material-ui/core';
+import { Box, FormHelperText } from '@mui/material';
 import { T } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 import { container } from 'tsyringe';
@@ -46,6 +46,7 @@ export const OrganizationFields = () => {
   return (
     <>
       <TextField
+        variant="standard"
         data-cy={'organization-name-field'}
         fullWidth
         label={<T>create_organization_name_label</T>}
@@ -57,6 +58,7 @@ export const OrganizationFields = () => {
         style={{ cursor: slugDisabled ? 'pointer' : 'initial' }}
       >
         <TextField
+          variant="standard"
           data-cy={'organization-address-part-field'}
           disabled={slugDisabled}
           fullWidth
@@ -78,6 +80,7 @@ export const OrganizationFields = () => {
       </Box>
 
       <TextField
+        variant="standard"
         data-cy={'organization-description-field'}
         fullWidth
         label={<T>create_organization_description_label</T>}

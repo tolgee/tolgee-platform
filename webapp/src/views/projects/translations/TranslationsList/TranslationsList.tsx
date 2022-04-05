@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, useEffect, useRef } from 'react';
-import { makeStyles } from '@material-ui/core';
 import ReactList from 'react-list';
+import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import {
@@ -14,24 +14,19 @@ import { TranslationsToolbar } from '../TranslationsToolbar';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles((theme) => {
-  return {
-    container: {
-      display: 'flex',
-      position: 'relative',
-      margin: '10px 0px 100px 0px',
-      borderLeft: 0,
-      borderRight: 0,
-      background: 'white',
-      flexGrow: 1,
-      flexDirection: 'column',
-      alignItems: 'stretch',
-    },
-  };
-});
+const StyledContainer = styled('div')`
+  display: flex;
+  position: relative;
+  margin: 10px 0px 100px 0px;
+  border-left: 0px;
+  border-right: 0px;
+  background: white;
+  flex-grow: 1;
+  flex-direction: column;
+  align-items: stretch;
+`;
 
 export const TranslationsList = () => {
-  const classes = useStyles();
   const tableRef = useRef<HTMLDivElement>(null);
   const resizersCallbacksRef = useRef<(() => void)[]>([]);
   const reactListRef = useRef<ReactList>(null);
@@ -107,8 +102,7 @@ export const TranslationsList = () => {
   }
 
   return (
-    <div
-      className={classes.container}
+    <StyledContainer
       style={{ marginBottom: cursorKeyId ? 500 : undefined }}
       ref={tableRef}
       data-cy="translations-view-list"
@@ -159,6 +153,6 @@ export const TranslationsList = () => {
         }}
       />
       <TranslationsToolbar width={width} />
-    </div>
+    </StyledContainer>
   );
 };

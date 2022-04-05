@@ -1,17 +1,16 @@
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
-  wrapper: {
-    padding: theme.spacing(1, 1.25),
-  },
-  placeholder: {
-    color: theme.palette.text.disabled,
-  },
-  error: {
-    color: theme.palette.error.dark,
-  },
-}));
+const StyledWrapper = styled('div')`
+  padding: ${({ theme }) => theme.spacing(1, 1.25)};
+
+  &.placeholder {
+    color: ${({ theme }) => theme.palette.text.disabled};
+  }
+
+  &.error {
+    color: ${({ theme }) => theme.palette.error.dark};
+  }
+`;
 
 type Props = {
   type: 'placeholder' | 'error';
@@ -19,7 +18,5 @@ type Props = {
 };
 
 export const TabMessage: React.FC<Props> = ({ type, message }) => {
-  const classes = useStyles();
-
-  return <div className={clsx(classes.wrapper, classes[type])}>{message}</div>;
+  return <StyledWrapper className={type}>{message}</StyledWrapper>;
 };

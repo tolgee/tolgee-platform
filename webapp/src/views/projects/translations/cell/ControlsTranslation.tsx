@@ -1,41 +1,41 @@
 import React from 'react';
 import clsx from 'clsx';
-import { Badge, makeStyles } from '@material-ui/core';
-import { Edit, Comment, Check } from '@material-ui/icons';
+import { Badge, styled } from '@mui/material';
+import { Edit, Comment, Check } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 import { StateType } from 'tg.constants/translationStates';
 import { components } from 'tg.service/apiSchema.generated';
-import { useCellStyles } from './styles';
 import { ControlsButton } from './ControlsButton';
 import { StateTransitionButtons } from './StateTransitionButtons';
+import { CELL_HIGHLIGHT_ON_HOVER, CELL_SHOW_ON_HOVER } from './styles';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 
-const useStyles = makeStyles((theme) => ({
-  badge: {
-    fontSize: 10,
+const StyledBadge = styled(Badge)`
+  & .unresolved {
+    font-size: 10px;
+    height: unset;
+    padding: 3px 3px;
+    display: flex;
+  }
+  & .resolved {
+    background: ${({ theme }) => theme.palette.grey[600]};
+    padding: 0px;
+    height: 16px;
+    width: 18px;
+    display: flex;
+    min-width: unset;
+    align-items: center;
+    justify-content: center;
+  }
+`;
 
-    height: 'unset',
-    padding: '3px 3px',
-    display: 'flex',
-  },
-  badgeResolved: {
-    background: theme.palette.grey[600],
-    padding: 0,
-    height: 16,
-    width: 18,
-    display: 'flex',
-    minWidth: 'unset',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkIcon: {
-    color: theme.palette.grey[100],
-    fontSize: 14,
-    margin: -5,
-  },
-}));
+const StyledCheckIcon = styled(Check)`
+  color: ${({ theme }) => theme.palette.grey[100]};
+  font-size: 14px;
+  margin: -5px;
+`;
 
 type ControlsProps = {
   state?: State;
@@ -59,9 +59,6 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
   unresolvedCommentCount,
   lastFocusable,
 }) => {
-  const classes = useStyles();
-  const cellClasses = useCellStyles({});
-
   const displayTransitionButtons = editEnabled && state;
   const displayEdit = editEnabled && onEdit;
   const commentsPresent = Boolean(commentsCount);
@@ -74,14 +71,14 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
         <StateTransitionButtons
           state={state}
           onStateChange={onStateChange}
-          className={cellClasses.showOnHover}
+          className={CELL_SHOW_ON_HOVER}
         />
       )}
       {displayEdit && (
         <ControlsButton
           onClick={onEdit}
           data-cy="translations-cell-edit-button"
-          className={cellClasses.showOnHover}
+          className={CELL_SHOW_ON_HOVER}
           tooltip={<T>translations_cell_edit</T>}
         >
           <Edit fontSize="small" />
@@ -92,30 +89,28 @@ export const ControlsTranslation: React.FC<ControlsProps> = ({
           onClick={onComments}
           data-cy="translations-cell-comments-button"
           className={clsx({
-            [cellClasses.showOnHover]: !commentsPresent,
-            [cellClasses.highlightOnHover]: onlyResolved,
+            [CELL_SHOW_ON_HOVER]: !commentsPresent,
+            [CELL_HIGHLIGHT_ON_HOVER]: onlyResolved,
           })}
           tooltip={<T>translation_cell_comments</T>}
         >
           {onlyResolved ? (
-            <Badge
-              badgeContent={
-                <Check fontSize="small" className={classes.checkIcon} />
-              }
+            <StyledBadge
+              badgeContent={<StyledCheckIcon fontSize="small" />}
               classes={{
-                badge: classes.badgeResolved,
+                badge: 'resolved',
               }}
             >
               <Comment fontSize="small" />
-            </Badge>
+            </StyledBadge>
           ) : (
-            <Badge
+            <StyledBadge
               badgeContent={unresolvedCommentCount}
               color="primary"
-              classes={{ badge: classes.badge }}
+              classes={{ badge: 'unresolved' }}
             >
               <Comment fontSize="small" />
-            </Badge>
+            </StyledBadge>
           )}
         </ControlsButton>
       )}

@@ -1,23 +1,21 @@
 import { default as React, FunctionComponent } from 'react';
-import { Box, Fade, CircularProgress, makeStyles } from '@material-ui/core';
+import { Box, Fade, CircularProgress, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { SadEmotionMessage } from './SadEmotionMessage';
 import { useLoadingRegister } from 'tg.component/GlobalLoading';
 
-const useStyles = makeStyles({
-  progressWrapper: {
-    position: 'absolute',
-    display: 'flex',
-    top: 0,
-    height: 400,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    pointerEvents: 'none',
-  },
-});
+const ProgressWrapper = styled('div')`
+  position: absolute;
+  display: flex;
+  top: 0px;
+  height: 400px;
+  left: 0;
+  right: 0;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+`;
 
 type Props = {
   hint?: React.ReactNode;
@@ -29,7 +27,6 @@ export const EmptyListMessage: FunctionComponent<Props> = ({
   loading,
   children,
 }) => {
-  const classes = useStyles();
   useLoadingRegister(loading);
   return (
     <Box py={8} data-cy="global-empty-list" position="relative" height={500}>
@@ -41,9 +38,9 @@ export const EmptyListMessage: FunctionComponent<Props> = ({
         </div>
       </Fade>
       <Fade in={loading} mountOnEnter unmountOnExit>
-        <div className={classes.progressWrapper}>
+        <ProgressWrapper>
           <CircularProgress />
-        </div>
+        </ProgressWrapper>
       </Fade>
     </Box>
   );

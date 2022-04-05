@@ -1,6 +1,5 @@
 import React from 'react';
-
-import { makeStyles } from '@material-ui/core';
+import { styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import {
@@ -16,26 +15,27 @@ import { useConfig } from 'tg.hooks/useConfig';
 
 const HORIZONTAL_BRAKEPOINT = 500;
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    overflow: 'auto',
-  },
-  grid: {
-    display: 'grid',
-    gridAutoFlow: 'dense',
-  },
-  loadingWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    borderRadius: '4px 4px 0px 0px',
-    overflow: 'hidden',
-  },
-  loading: {
-    background: theme.palette.grey[400],
-  },
-}));
+const StyledContainer = styled('div')`
+  overflow: auto;
+`;
+
+const StyledGrid = styled('div')`
+  display: grid;
+  grid-auto-flow: dense;
+`;
+
+const StyledLoadingWrapper = styled('div')`
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  border-radius: 4px 4px 0px 0px;
+  overflow: hidden;
+`;
+
+const StyledSmoothProgress = styled(SmoothProgress)`
+  background: theme.palette.grey[400];
+`;
 
 export type Props = {
   width: number | string;
@@ -46,7 +46,6 @@ const TranslationTools = React.memo(function TranslationTools({
   width,
   data,
 }: Props) {
-  const classes = useStyles();
   const t = useTranslate();
   const config = useConfig();
 
@@ -61,8 +60,8 @@ const TranslationTools = React.memo(function TranslationTools({
   const gridTemplateColumns = isVertical ? '1fr' : '1fr '.repeat(numberOfItems);
 
   return (
-    <div className={classes.container} style={{ width }}>
-      <div className={classes.grid} style={{ gridTemplateColumns }}>
+    <StyledContainer style={{ width }}>
+      <StyledGrid style={{ gridTemplateColumns }}>
         <ToolsTab
           title={t(
             'translation_tools_translation_memory',
@@ -98,11 +97,11 @@ const TranslationTools = React.memo(function TranslationTools({
             />
           </ToolsTab>
         )}
-      </div>
-      <div className={classes.loadingWrapper}>
-        <SmoothProgress loading={data.isFetching} className={classes.loading} />
-      </div>
-    </div>
+      </StyledGrid>
+      <StyledLoadingWrapper>
+        <StyledSmoothProgress loading={data.isFetching} />
+      </StyledLoadingWrapper>
+    </StyledContainer>
   );
 });
 

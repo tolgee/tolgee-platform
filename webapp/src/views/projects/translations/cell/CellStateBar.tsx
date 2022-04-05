@@ -1,5 +1,4 @@
-import { makeStyles, Tooltip } from '@material-ui/core';
-import clsx from 'clsx';
+import { styled, Tooltip } from '@mui/material';
 import { T } from '@tolgee/react';
 
 import { translationStates } from 'tg.constants/translationStates';
@@ -8,20 +7,17 @@ import { components } from 'tg.service/apiSchema.generated';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 
-const useStyles = makeStyles({
-  state: {
-    cursor: 'col-resize',
-  },
-  stateHover: {
-    position: 'absolute',
-    width: 12,
-    height: '100%',
-  },
-  stateBorder: {
-    height: '100%',
-    width: '4px',
-  },
-});
+const StyledStateHover = styled('div')`
+  position: absolute;
+  width: 12px;
+  height: 100%;
+`;
+
+const StyledState = styled('div')`
+  cursor: col-resize;
+  height: 100%;
+  width: 4px;
+`;
 
 type Props = {
   state?: State;
@@ -29,12 +25,9 @@ type Props = {
 };
 
 export const CellStateBar: React.FC<Props> = ({ state, onResize }) => {
-  const classes = useStyles();
-
   const getContent = () => (
-    <div className={classes.stateHover} data-cy="translations-state-indicator">
-      <div
-        className={clsx(classes.stateBorder, classes.state)}
+    <StyledStateHover data-cy="translations-state-indicator">
+      <StyledState
         onMouseDown={stopAndPrevent(onResize)}
         onClick={stopAndPrevent()}
         onMouseUp={stopAndPrevent()}
@@ -45,7 +38,7 @@ export const CellStateBar: React.FC<Props> = ({ state, onResize }) => {
           }`,
         }}
       />
-    </div>
+    </StyledStateHover>
   );
 
   return state && translationStates[state] ? (

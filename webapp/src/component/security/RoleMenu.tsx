@@ -4,26 +4,24 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  styled,
   Tooltip,
-} from '@material-ui/core';
-import { ArrowDropDown } from '@material-ui/icons';
+} from '@mui/material';
+import { ArrowDropDown } from '@mui/icons-material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { OrganizationRoleType } from 'tg.service/response.types';
 import { components } from 'tg.service/apiSchema.generated';
-import { makeStyles } from '@material-ui/core';
 
 type RoleType =
   components['schemas']['UserAccountWithOrganizationRoleModel']['organizationRole'];
 
-const useStyles = makeStyles((theme) => ({
-  item: {
-    maxWidth: 300,
-  },
-  textSecondary: {
-    whiteSpace: 'normal',
-  },
-}));
+const StyledListItemText = styled(ListItemText)`
+  max-width: 300px;
+  & .textSecondary {
+    white-space: normal;
+  }
+`;
 
 type Props = {
   buttonProps?: ComponentProps<typeof Button>;
@@ -32,7 +30,6 @@ type Props = {
 };
 
 export const RoleMenu: React.FC<Props> = (props) => {
-  const classes = useStyles();
   const t = useTranslate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -67,7 +64,6 @@ export const RoleMenu: React.FC<Props> = (props) => {
         elevation={1}
         id="simple-menu"
         anchorEl={anchorEl}
-        getContentAnchorEl={null}
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleClose}
@@ -89,12 +85,11 @@ export const RoleMenu: React.FC<Props> = (props) => {
             }}
             selected={k === props.role}
           >
-            <ListItemText
+            <StyledListItemText
               data-cy="organization-role-select-item"
-              className={classes.item}
               primary={<T>{`organization_role_type_${k}`}</T>}
               secondary={<T>{`organization_role_type_${k}_hint`}</T>}
-              secondaryTypographyProps={{ className: classes.textSecondary }}
+              secondaryTypographyProps={{ className: 'textSecondary' }}
             />
           </MenuItem>
         ))}

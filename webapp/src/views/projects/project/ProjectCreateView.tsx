@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, Grid, Typography } from '@material-ui/core';
+import { Box, Grid, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { FormikProps } from 'formik';
 import { Redirect } from 'react-router-dom';
@@ -90,6 +90,7 @@ export const ProjectCreateView: FunctionComponent = () => {
               <Grid container spacing={2}>
                 <Grid item lg md sm xs={12}>
                   <TextField
+                    variant="standard"
                     autoFocus
                     data-cy="project-name-field"
                     label={<T>create_project_name_label</T>}

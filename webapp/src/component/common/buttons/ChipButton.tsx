@@ -1,28 +1,23 @@
 import { FunctionComponent, ReactNode } from 'react';
-import { Button, ButtonProps, makeStyles } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import clsx from 'clsx';
+import { Button, ButtonProps, styled } from '@mui/material';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    border: `1px solid ${theme.palette.grey['200']}`,
-    borderRadius: 50,
-    padding: `${theme.spacing(0.125)}px ${theme.spacing(1.5)}px`,
-    backgroundColor: theme.palette.common.white,
-    cursor: 'pointer',
-    minWidth: '0',
-  },
-  validIcon: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    '& svg': {
-      fontSize: 16,
-    },
-  },
-  beforeIcon: {
-    marginRight: theme.spacing(0.5),
-  },
-}));
+const StyledButton = styled(Button)`
+  border: 1px solid ${({ theme }) => theme.palette.grey['200']};
+  border-radius: 50px;
+  padding: ${({ theme }) => theme.spacing(0.125, 1.5)};
+  background-color: ${({ theme }) => theme.palette.common.white};
+  cursor: pointer;
+  min-width: 0px;
+`;
+
+const StyledIconWrapper = styled('div')`
+  display: inline-flex;
+  align-items: center;
+  margin-right: ${({ theme }) => theme.spacing(0.5)};
+  & svg {
+    font-size: 16px;
+  }
+`;
 
 export const ChipButton: FunctionComponent<
   {
@@ -32,19 +27,10 @@ export const ChipButton: FunctionComponent<
 > = (props) => {
   const { beforeIcon, children, ...buttonProps } = props;
 
-  const classes = useStyles();
-
   return (
-    <Button className={classes.root} {...buttonProps}>
-      {beforeIcon && (
-        <Box
-          display="inline-flex"
-          className={clsx(classes.beforeIcon, classes.validIcon)}
-        >
-          {beforeIcon}
-        </Box>
-      )}
+    <StyledButton {...buttonProps}>
+      {beforeIcon && <StyledIconWrapper>{beforeIcon}</StyledIconWrapper>}
       {children}
-    </Button>
+    </StyledButton>
   );
 };

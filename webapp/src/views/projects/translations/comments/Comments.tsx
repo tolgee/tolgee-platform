@@ -1,7 +1,7 @@
 import React from 'react';
 import { T } from '@tolgee/react';
-import { makeStyles, TextField, IconButton } from '@material-ui/core';
-import { Send } from '@material-ui/icons';
+import { TextField, IconButton, styled } from '@mui/material';
+import { Send } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
@@ -15,67 +15,69 @@ import { useComments } from './useComments';
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles((theme) => {
-  const borderColor = theme.palette.grey[200];
-  return {
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      flexGrow: 1,
-      flexBasis: 100,
-      overflow: 'hidden',
-      position: 'relative',
-    },
-    scrollerWrapper: {
-      flexGrow: 1,
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    reverseScroller: {
-      display: 'flex',
-      flexDirection: 'column-reverse',
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      overscrollBehavior: 'contain',
-    },
-    loadMore: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'flex-end',
-      minHeight: 50,
-    },
-    bottomPanel: {
-      display: 'flex',
-      alignItems: 'flex-end',
-      borderTop: `1px solid ${borderColor}`,
-    },
-    progressWrapper: {
-      height: 0,
-      position: 'relative',
-    },
-    linearProgress: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-    },
-    input: {
-      flexGrow: 1,
-      padding: 12,
-      alignSelf: 'center',
-      '& *:after': {
-        display: 'none',
-      },
-      '& *:before': {
-        display: 'none',
-      },
-      '& > div': {
-        padding: 0,
-      },
-    },
-  };
-});
+const StyledContainer = styled('div')`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  flex-basis: 100px;
+  overflow: hidden;
+  position: relative;
+`;
+
+const StyledScrollerWrapper = styled('div')`
+  flex-grow: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+`;
+
+const StyledReverseScroller = styled('div')`
+  display: flex;
+  flex-direction: column-reverse;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+`;
+
+const StyledLoadMore = styled('div')`
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 50px;
+`;
+
+const StyledBottomPanel = styled('div')`
+  display: flex;
+  align-items: flex-end;
+  border-top: 1px solid ${({ theme }) => theme.palette.grey[200]};
+`;
+
+const StyledProgressWrapper = styled('div')`
+  height: 0px;
+  position: relative;
+`;
+
+const StyledSmoothProgress = styled(SmoothProgress)`
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+`;
+
+const StyledTextField = styled(TextField)`
+  flex-grow: 1;
+  padding: 12px;
+  align-self: center;
+  & *:after {
+    display: none;
+  }
+  & *:before {
+    display: none;
+  }
+  & > div {
+    padding: 0px;
+  }
+`;
 
 type Props = {
   keyId: number;
@@ -92,7 +94,6 @@ export const Comments: React.FC<Props> = ({
   onCancel,
   editEnabled,
 }) => {
-  const classes = useStyles();
   const permissions = useProjectPermissions();
   const user = useUser();
 
@@ -116,9 +117,9 @@ export const Comments: React.FC<Props> = ({
   });
 
   return (
-    <div className={classes.container}>
-      <div className={classes.scrollerWrapper}>
-        <div className={classes.reverseScroller} ref={scrollRef}>
+    <StyledContainer>
+      <StyledScrollerWrapper>
+        <StyledReverseScroller ref={scrollRef}>
           {commentsList?.map((comment) => {
             const canDelete =
               user?.id === comment.author.id ||
@@ -137,7 +138,7 @@ export const Comments: React.FC<Props> = ({
           })}
 
           {comments.hasNextPage && (
-            <div className={classes.loadMore}>
+            <StyledLoadMore>
               <LoadingButton
                 onClick={() => comments.fetchNextPage()}
                 loading={comments.isFetchingNextPage}
@@ -145,22 +146,18 @@ export const Comments: React.FC<Props> = ({
               >
                 <T>translations_comments_load_more</T>
               </LoadingButton>
-            </div>
+            </StyledLoadMore>
           )}
-        </div>
-      </div>
+        </StyledReverseScroller>
+      </StyledScrollerWrapper>
 
-      <div className={classes.progressWrapper}>
-        <SmoothProgress
-          className={classes.linearProgress}
-          loading={isLoading}
-        />
-      </div>
+      <StyledProgressWrapper>
+        <StyledSmoothProgress loading={isLoading} />
+      </StyledProgressWrapper>
 
       {editEnabled && (
-        <div className={classes.bottomPanel}>
-          <TextField
-            className={classes.input}
+        <StyledBottomPanel>
+          <StyledTextField
             multiline
             value={inputValue}
             onChange={(e) => setInputValue(e.currentTarget.value)}
@@ -173,11 +170,12 @@ export const Comments: React.FC<Props> = ({
             color="primary"
             onClick={handleAddComment}
             disabled={isAddingComment}
+            size="large"
           >
             <Send />
           </IconButton>
-        </div>
+        </StyledBottomPanel>
       )}
-    </div>
+    </StyledContainer>
   );
 };

@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, CheckCircle } from '@material-ui/icons';
+import { CheckCircleOutlined, CheckCircle } from '@mui/icons-material';
 import { components } from 'tg.service/apiSchema.generated';
 
 type State = components['schemas']['TranslationViewModel']['state'];

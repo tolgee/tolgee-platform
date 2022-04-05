@@ -1,6 +1,6 @@
-import { Button, Chip } from '@material-ui/core';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
+import { Button, Chip } from '@mui/material';
+import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction';
+import ListItemText from '@mui/material/ListItemText';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 

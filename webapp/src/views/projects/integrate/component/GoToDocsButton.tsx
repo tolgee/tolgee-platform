@@ -1,24 +1,19 @@
-import { Button, ButtonProps, Link, makeStyles } from '@material-ui/core';
+import { Button, ButtonProps, Link, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 
-const useStyles = makeStyles((t) => ({
-  root: {
-    marginLeft: t.spacing(2),
-    '&:hover': {
-      textDecoration: 'none',
-    },
-  },
-}));
+const StyledButton = styled(Button)`
+  margin-left: ${({ theme }) => theme.spacing(2)};
+  &:hover {
+    text-decoration: none;
+  }
+`;
 
 export const GoToDocsButton = (props: ButtonProps & { href: string }) => {
-  const classes = useStyles();
-
   return (
     <>
-      <Button
+      <StyledButton
         // @ts-ignore
         component={Link}
-        className={classes.root}
         target="_blank"
         size="large"
         color="primary"
@@ -28,7 +23,7 @@ export const GoToDocsButton = (props: ButtonProps & { href: string }) => {
         {...props}
       >
         <T>integrate_guides_go_to_docs</T>
-      </Button>
+      </StyledButton>
     </>
   );
 };

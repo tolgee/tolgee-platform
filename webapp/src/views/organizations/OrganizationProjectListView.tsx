@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 import { useTranslate } from '@tolgee/react';
 
 import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';

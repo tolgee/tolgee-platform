@@ -1,6 +1,6 @@
 import { default as React } from 'react';
-import Box from '@material-ui/core/Box';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export function BoxLoading(props: React.ComponentProps<typeof Box>) {
   return (

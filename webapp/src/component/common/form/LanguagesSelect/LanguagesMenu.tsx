@@ -1,4 +1,4 @@
-import { MenuProps, Menu } from '@material-ui/core';
+import { MenuProps, Menu } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { getLanguagesContent } from './getLanguagesContent';
@@ -24,7 +24,6 @@ export const LanguagesMenu: React.FC<Props> = ({
     <Menu
       anchorEl={anchorEl}
       open={Boolean(anchorEl)}
-      getContentAnchorEl={null}
       onClose={onClose}
       anchorOrigin={{
         vertical: 'bottom',

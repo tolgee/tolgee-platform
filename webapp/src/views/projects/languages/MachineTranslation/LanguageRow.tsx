@@ -1,33 +1,27 @@
 import React from 'react';
-import { Checkbox, makeStyles, MenuItem, Select } from '@material-ui/core';
+import { Checkbox, MenuItem, Select, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 import { Field, getIn } from 'formik';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { LanguageItem } from '../LanguageItem';
 import { getProviderImg } from 'tg.views/projects/translations/TranslationTools/getProviderImg';
-import { useTableStyles } from '../tableStyles';
+import { TABLE_CENTERED, TABLE_FIRST_CELL } from '../tableStyles';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles((theme) => ({
-  defaultCellSelector: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'stretch',
-    padding: theme.spacing(1, 2, 1, 1),
-    minWidth: 150,
-  },
-  centered: {
-    display: 'flex',
-    justifySelf: 'stretch',
-    justifyContent: 'center',
-  },
-  providerImg: {
-    width: 13,
-    marginRight: theme.spacing(1),
-  },
-}));
+const StyledDefaultCellSelector = styled('div')`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: ${({ theme }) => theme.spacing(1, 2, 1, 1)};
+  min-width: 150px;
+`;
+
+const StyledProviderImg = styled('img')`
+  width: 13px;
+  margin-right: ${({ theme }) => theme.spacing(1)};
+`;
 
 type Props = {
   lang: LanguageModel | null;
@@ -36,8 +30,6 @@ type Props = {
 };
 
 export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
-  const classes = useStyles();
-  const tableClasses = useTableStyles();
   const t = useTranslate();
 
   const getProviderName = (provider) => {
@@ -57,7 +49,7 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
 
   return (
     <>
-      <div className={tableClasses.firstCell}>
+      <div className={TABLE_FIRST_CELL}>
         {lang ? (
           <LanguageItem language={lang} />
         ) : (
@@ -65,7 +57,7 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
         )}
       </div>
       {providers.map((provider) => (
-        <div key={provider} className={classes.centered}>
+        <div key={provider} className={TABLE_CENTERED}>
           <Field name={`${languagePath}.enabled`}>
             {({ field, form }) => {
               const isDefault =
@@ -88,14 +80,14 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
           </Field>
         </div>
       ))}
-      <div className={classes.defaultCellSelector}>
+      <StyledDefaultCellSelector>
         <Field name={`${languagePath}.primary`}>
           {({ field }) => {
             const langProviders = lang ? ['default', ...providers] : providers;
 
             return (
               <Select
-                margin="dense"
+                size="small"
                 variant="outlined"
                 name={field.name}
                 value={field.value}
@@ -107,9 +99,7 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
                   return (
                     provider && (
                       <MenuItem key={provider} value={provider}>
-                        {img && (
-                          <img src={img} className={classes.providerImg} />
-                        )}
+                        {img && <StyledProviderImg src={img} />}
                         {getProviderName(provider)}
                       </MenuItem>
                     )
@@ -119,7 +109,7 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
             );
           }}
         </Field>
-      </div>
+      </StyledDefaultCellSelector>
     </>
   );
 };

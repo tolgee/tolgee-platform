@@ -1,5 +1,5 @@
 import React, { FunctionComponent, ReactNode } from 'react';
-import { Box, makeStyles, Typography } from '@material-ui/core';
+import { Box, styled, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
@@ -11,12 +11,6 @@ import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { ImportFileDropzone } from './ImportFileDropzone';
 
 export const MAX_FILE_COUNT = 20;
-const useStyles = makeStyles((theme) => ({
-  root: {
-    borderRadius: theme.shape.borderRadius,
-    border: `1px dashed ${theme.palette.grey.A100}`,
-  },
-}));
 
 type ImportFileInputProps = {
   onNewFiles: (files: File[]) => void;
@@ -28,9 +22,13 @@ export type ValidationResult = {
   errors: ReactNode[];
 };
 
+const StyledRoot = styled(Box)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
+  border: `1px dashed ${theme.palette.grey[400]}`,
+}));
+
 const messageActions = container.resolve(MessageActions);
 const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
-  const classes = useStyles();
   const fileRef = React.createRef<HTMLInputElement>();
   const config = useConfig();
   const ALLOWED_EXTENSIONS = ['json', 'zip', 'po', 'xliff', 'xlf'];
@@ -126,15 +124,16 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
 
   return (
     <ImportFileDropzone onNewFiles={onNewFiles}>
-      <Box
-        mt={4}
-        className={classes.root}
-        pt={5}
-        pb={5}
-        justifyContent="space-between"
-        alignItems="center"
-        flexDirection="column"
-        display="flex"
+      <StyledRoot
+        sx={{
+          mt: 4,
+          pt: 5,
+          pb: 5,
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexDirection: 'column',
+          display: 'flex',
+        }}
       >
         <input
           data-cy={'import-file-input'}
@@ -163,7 +162,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
         <Typography variant="body1">
           <T>import_file_supported_formats</T>
         </Typography>
-      </Box>
+      </StyledRoot>
     </ImportFileDropzone>
   );
 };

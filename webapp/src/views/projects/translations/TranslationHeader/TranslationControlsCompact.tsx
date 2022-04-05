@@ -7,16 +7,10 @@ import {
   Search,
   FilterList,
   Clear,
-} from '@material-ui/icons';
-import {
-  Badge,
-  Button,
-  ButtonGroup,
-  IconButton,
-  makeStyles,
-} from '@material-ui/core';
+} from '@mui/icons-material';
+import { Badge, Button, ButtonGroup, IconButton, styled } from '@mui/material';
 import { useTranslate } from '@tolgee/react';
-import LanguageIcon from '@material-ui/icons/Language';
+import LanguageIcon from '@mui/icons-material/Language';
 
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
@@ -31,76 +25,84 @@ import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 import { useActiveFilters } from '../Filters/useActiveFilters';
 import { FiltersMenu } from '../Filters/FiltersMenu';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
+import clsx from 'clsx';
 
-const useStyles = makeStyles((theme) => ({
-  controls: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    margin: '-12px -5px',
-    marginLeft: -theme.spacing(2),
-    marginRight: -theme.spacing(2),
-    padding: theme.spacing(0, 1.5),
-    position: 'sticky',
-    top: 50,
-    height: 50,
-    zIndex: theme.zIndex.appBar + 1,
-    background: theme.palette.background.default,
-    transition: 'all 0.20s ease-in-out',
-    paddingBottom: 4,
-    paddingTop: 7,
-  },
-  shadow: {
-    background: theme.palette.background.default,
-    height: 1,
-    position: 'sticky',
-    zIndex: theme.zIndex.appBar,
-    marginLeft: -theme.spacing(1),
-    marginRight: -theme.spacing(1),
-    '-webkit-box-shadow': '0px -1px 7px 0px #000000',
-    'box-shadow': '0px -1px 7px 0px #000000',
-    top: 99,
-    transition: 'all 0.25s',
-  },
-  spaced: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(1),
-    padding: theme.spacing(0, 1),
-  },
-  searchSpaced: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(0.5),
-    paddingRight: theme.spacing(1),
-    flexGrow: 1,
-    position: 'relative',
-  },
-  deleteButton: {
-    display: 'flex',
-    flexShrink: 1,
-    width: 38,
-    height: 38,
-  },
-  search: {
-    minWidth: 200,
-  },
-  toggleButton: {
-    padding: '0px 2px',
-    height: 35,
-    minHeight: 35,
-  },
-  iconButton: {
-    width: 38,
-    height: 38,
-  },
-  buttonWrapper: {
-    margin: '-8px 0px',
-  },
-  modal: {
-    transition: 'margin-bottom 0.2s',
-  },
-}));
+const StyledControls = styled('div')`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: -12px -5px;
+  margin-left: ${({ theme }) => theme.spacing(-2)};
+  margin-right: ${({ theme }) => theme.spacing(-2)};
+  padding: ${({ theme }) => theme.spacing(0, 1.5)};
+  position: sticky;
+  top: 50px;
+  height: 50px;
+  z-index: ${({ theme }) => theme.zIndex.appBar + 1};
+  background: ${({ theme }) => theme.palette.background.default};
+  transition: all 0.2s ease-in-out;
+  padding-bottom: 4px;
+  padding-top: 7px;
+`;
+
+const StyledShadow = styled('div')`
+  background: ${({ theme }) => theme.palette.background.default};
+  height: 1px;
+  position: sticky;
+  z-index: ${({ theme }) => theme.zIndex.appBar};
+  margin-left: ${({ theme }) => theme.spacing(-1)};
+  margin-right: ${({ theme }) => theme.spacing(-1)};
+  -webkit-box-shadow: 0px -1px 7px 0px #000000;
+  box-shadow: 0px -1px 7px 0px #000000;
+  top: 99px;
+  transition: all 0.25s;
+`;
+
+const StyledSpaced = styled('div')`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(1)};
+  padding: ${({ theme }) => theme.spacing(0, 1)};
+`;
+
+const StyledSearchSpaced = styled('div')`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing(0.5)};
+  padding-right: ${({ theme }) => theme.spacing(1)};
+  flex-grow: 1;
+  position: relative;
+`;
+
+const StyledDeleteButton = styled(IconButton)`
+  display: flex;
+  flex-shrink: 1;
+  width: 38px;
+  height: 38px;
+`;
+
+const StyledSearch = styled(TranslationsSearchField)`
+  min-width: 200px;
+`;
+
+const StyledToggleButton = styled(Button)`
+  padding: 0px 2px;
+  height: 35px;
+  min-height: 35px;
+  :not(&.selected) {
+    color: ${({ theme }) => theme.palette.text.primary};
+    border-color: ${({ theme }) => theme.palette.grey[400]};
+  }
+`;
+
+const StyledIconButton = styled(IconButton)`
+  width: 38px;
+  height: 38px;
+`;
+
+const StyledButtonWrapper = styled('div')`
+  margin: -8px 0px;
+`;
 
 type Props = {
   onDialogOpen: () => void;
@@ -109,7 +111,6 @@ type Props = {
 export const TranslationControlsCompact: React.FC<Props> = ({
   onDialogOpen,
 }) => {
-  const classes = useStyles();
   const projectPermissions = useProjectPermissions();
   const [searchOpen, setSearchOpen] = useState(false);
   const search = useTranslationsSelector((v) => v.search);
@@ -154,18 +155,16 @@ export const TranslationControlsCompact: React.FC<Props> = ({
 
   return (
     <>
-      <div
-        className={classes.controls}
+      <StyledControls
         style={{
           transform: trigger ? 'translate(0px, -50px)' : 'translate(0px, 0px)',
         }}
       >
         {searchOpen ? (
-          <div className={classes.searchSpaced}>
-            <TranslationsSearchField
+          <StyledSearchSpaced>
+            <StyledSearch
               value={search || ''}
               onSearchChange={handleSearchChange}
-              className={classes.search}
               label={null}
               variant="outlined"
               placeholder={t('standard_search_label')}
@@ -175,64 +174,57 @@ export const TranslationControlsCompact: React.FC<Props> = ({
                 width: '100%',
               }}
             />
-            <IconButton
-              size="small"
-              className={classes.iconButton}
-              onClick={() => setSearchOpen(false)}
-            >
+            <StyledIconButton size="small" onClick={() => setSearchOpen(false)}>
               <Clear />
-            </IconButton>
-          </div>
+            </StyledIconButton>
+          </StyledSearchSpaced>
         ) : (
           <>
-            <div className={classes.spaced}>
+            <StyledSpaced>
               {selection.length > 0 && (
-                <IconButton
-                  className={classes.deleteButton}
+                <StyledDeleteButton
                   onClick={handleDelete}
                   data-cy="translations-delete-button"
+                  size="large"
                 >
                   <Delete />
-                </IconButton>
+                </StyledDeleteButton>
               )}
               <Badge color="primary" badgeContent={search.length} variant="dot">
-                <div className={classes.buttonWrapper}>
-                  <IconButton
+                <StyledButtonWrapper>
+                  <StyledIconButton
                     size="small"
-                    className={classes.iconButton}
                     onClick={() => setSearchOpen(true)}
                   >
                     <Search />
-                  </IconButton>
-                </div>
+                  </StyledIconButton>
+                </StyledButtonWrapper>
               </Badge>
 
               <Badge color="primary" badgeContent={activeFilters?.length}>
-                <div className={classes.buttonWrapper}>
-                  <IconButton
+                <StyledButtonWrapper>
+                  <StyledIconButton
                     size="small"
-                    className={classes.iconButton}
                     onClick={(e) => setAnchorFiltersEl(e.currentTarget)}
                   >
                     <FilterList />
-                  </IconButton>
-                </div>
+                  </StyledIconButton>
+                </StyledButtonWrapper>
               </Badge>
 
               <FiltersMenu
                 anchorEl={anchorFiltersEl}
                 onClose={() => setAnchorFiltersEl(null)}
               />
-            </div>
+            </StyledSpaced>
 
-            <div className={classes.spaced}>
-              <IconButton
+            <StyledSpaced>
+              <StyledIconButton
                 size="small"
-                className={classes.iconButton}
                 onClick={(e) => setAnchorLanguagesEl(e.currentTarget)}
               >
                 <LanguageIcon />
-              </IconButton>
+              </StyledIconButton>
 
               <LanguagesMenu
                 anchorEl={anchorLanguagesEl}
@@ -243,43 +235,39 @@ export const TranslationControlsCompact: React.FC<Props> = ({
               />
 
               <ButtonGroup>
-                <Button
-                  color={view === 'LIST' ? 'primary' : undefined}
+                <StyledToggleButton
+                  className={clsx({ selected: view === 'LIST' })}
                   onClick={() => handleViewChange('LIST')}
                   data-cy="translations-view-list-button"
-                  className={classes.toggleButton}
                 >
                   <ViewListRounded />
-                </Button>
-                <Button
-                  color={view === 'TABLE' ? 'primary' : undefined}
+                </StyledToggleButton>
+                <StyledToggleButton
+                  className={clsx({ selected: view === 'TABLE' })}
                   onClick={() => handleViewChange('TABLE')}
                   data-cy="translations-view-table-button"
-                  className={classes.toggleButton}
                 >
                   <AppsRounded />
-                </Button>
+                </StyledToggleButton>
               </ButtonGroup>
 
               {projectPermissions.satisfiesPermission(
                 ProjectPermissionType.EDIT
               ) && (
-                <IconButton
+                <StyledIconButton
                   color="primary"
                   size="small"
                   onClick={handleAddTranslation}
-                  className={classes.iconButton}
                   data-cy="translations-add-button"
                 >
                   <Add />
-                </IconButton>
+                </StyledIconButton>
               )}
-            </div>
+            </StyledSpaced>
           </>
         )}
-      </div>
-      <div
-        className={classes.shadow}
+      </StyledControls>
+      <StyledShadow
         style={{
           transform: trigger ? 'translate(0px, -50px)' : 'translate(0px, 0px)',
         }}

@@ -1,7 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Box, Grid, Paper, Theme } from '@material-ui/core';
-import createStyles from '@material-ui/core/styles/createStyles';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { Box, Grid, Paper, styled } from '@mui/material';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import { container } from 'tsyringe';
@@ -22,20 +20,14 @@ interface ApiKeysListProps {
 
 const messageService = container.resolve(MessageService);
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      borderBottom: `1px solid ${theme.palette.grey.A100}`,
-      '&:last-child': {
-        borderBottom: `none`,
-      },
-    },
-  })
-);
+const StyledRoot = styled(Box)`
+  border-bottom: 1px solid ${({ theme }) => theme.palette.grey.A100};
+  &:last-child {
+    border-bottom: none;
+  }
+`;
 
 const Item: FunctionComponent<{ keyDTO: ApiKeyModel }> = (props) => {
-  const classes = useStyles();
-
   const deleteKey = useApiMutation({
     url: '/v2/api-keys/{apiKeyId}',
     method: 'delete',
@@ -68,7 +60,7 @@ const Item: FunctionComponent<{ keyDTO: ApiKeyModel }> = (props) => {
   };
 
   return (
-    <Box p={2} className={classes.root}>
+    <StyledRoot p={2}>
       <Grid container justifyContent="space-between">
         <Grid item>
           <Box mr={2}>
@@ -102,7 +94,7 @@ const Item: FunctionComponent<{ keyDTO: ApiKeyModel }> = (props) => {
           />
         </Grid>
       </Grid>
-    </Box>
+    </StyledRoot>
   );
 };
 

@@ -1,6 +1,5 @@
-import clsx from 'clsx';
-import { makeStyles, Tabs, Tab, IconButton } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { Tabs, Tab, IconButton, styled } from '@mui/material';
+import { Close } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
 import { ControlsEditor } from './cell/ControlsEditor';
@@ -19,52 +18,53 @@ type LanguageModel = components['schemas']['LanguageModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type State = components['schemas']['TranslationViewModel']['state'];
 
-const useStyles = makeStyles((theme) => {
-  const borderColor = theme.palette.grey[200];
+const StyledContainer = styled('div')`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 300px;
+`;
 
-  return {
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'stretch',
-      minHeight: 300,
-    },
-    editorContainer: {
-      padding: '12px 12px 0px 12px',
-      flexGrow: 1,
-      display: 'flex',
-      alignItems: 'stretch',
-      flexDirection: 'column',
-    },
-    editorControls: {
-      display: 'flex',
-      position: 'relative',
-      marginTop: theme.spacing(3),
-    },
-    tabsWrapper: {
-      display: 'flex',
-      borderBottom: `1px solid ${borderColor}`,
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    tabs: {
-      maxWidth: '100%',
-      overflow: 'hidden',
-      minHeight: 0,
-      marginBottom: -1,
-    },
-    tab: {
-      minHeight: 0,
-      minWidth: 100,
-      margin: '0px 5px',
-    },
-    closeButton: {
-      width: 30,
-      height: 30,
-      marginRight: 12,
-    },
-  };
-});
+const StyledEditorContainer = styled('div')`
+  padding: 12px 12px 0px 12px;
+  flex-grow: 1;
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+`;
+
+const StyledEditorControls = styled('div')`
+  display: flex;
+  position: relative;
+  margin-top: ${({ theme }) => theme.spacing(3)};
+`;
+
+const StyledTabsWrapper = styled('div')`
+  display: flex;
+  border-bottom: 1px solid ${({ theme }) => theme.palette.grey[200]};
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const StyledTabs = styled(Tabs)`
+  max-width: 100%;
+  overflow: hidden;
+  min-height: 0px;
+  margin-bottom: -1px;
+`;
+
+const StyledTab = styled(Tab)`
+  min-height: 0px;
+  min-width: 100px;
+  margin: 0px 5px;
+  padding: 9px 12px;
+`;
+
+const StyledCloseButton = styled(IconButton)`
+  width: 30px;
+  height: 30px;
+  margin-right: 12px;
+`;
 
 type Props = {
   value: string;
@@ -106,7 +106,6 @@ export const TranslationOpened: React.FC<Props> = ({
   cellPosition,
 }) => {
   const project = useProject();
-  const classes = useStyles();
   const dispatch = useTranslationsDispatch();
 
   const nextState = translationStates[state]?.next;
@@ -141,47 +140,43 @@ export const TranslationOpened: React.FC<Props> = ({
   });
 
   return (
-    <div className={clsx(classes.container, className)}>
-      <div className={classes.tabsWrapper}>
-        <Tabs
+    <StyledContainer className={className}>
+      <StyledTabsWrapper>
+        <StyledTabs
           indicatorColor="primary"
           value={mode}
           onChange={(_, value) => onModeChange(value)}
-          className={classes.tabs}
           variant="scrollable"
-          scrollButtons="off"
+          scrollButtons={false}
         >
           {editEnabled && (
-            <Tab
+            <StyledTab
               label={<T>translations_cell_tab_edit</T>}
               value="editor"
-              className={classes.tab}
               data-cy="translations-cell-tab-edit"
             />
           )}
-          <Tab
+          <StyledTab
             label={
               <T parameters={{ count: String(translation?.commentCount || 0) }}>
                 translations_cell_tab_comments
               </T>
             }
             value="comments"
-            className={classes.tab}
             data-cy="translations-cell-tab-comments"
           />
-        </Tabs>
-        <IconButton
+        </StyledTabs>
+        <StyledCloseButton
           size="small"
           onClick={() => onCancel(true)}
-          className={classes.closeButton}
           data-cy="translations-cell-close"
         >
           <Close />
-        </IconButton>
-      </div>
+        </StyledCloseButton>
+      </StyledTabsWrapper>
       {mode === 'editor' ? (
         <>
-          <div className={classes.editorContainer}>
+          <StyledEditorContainer>
             <Editor
               value={value}
               onChange={onChange}
@@ -193,15 +188,15 @@ export const TranslationOpened: React.FC<Props> = ({
                 [`${getMeta()}-Enter`]: onCmdSave,
               }}
             />
-          </div>
-          <div className={classes.editorControls}>
+          </StyledEditorContainer>
+          <StyledEditorControls>
             <ControlsEditor
               state={state}
               onSave={onSave}
               onCancel={() => onCancel(true)}
               onStateChange={onStateChange}
             />
-          </div>
+          </StyledEditorControls>
           {!language.base && (
             <ToolsPopup
               anchorEl={cellRef.current || undefined}
@@ -219,6 +214,6 @@ export const TranslationOpened: React.FC<Props> = ({
           editEnabled={editEnabled}
         />
       ) : null}
-    </div>
+    </StyledContainer>
   );
 };

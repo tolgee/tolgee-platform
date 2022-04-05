@@ -8,17 +8,18 @@ import {
   Divider,
   TextField,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React, { FC, useState } from 'react';
 import { T } from '@tolgee/react';
-import { Alert, Autocomplete } from '@material-ui/lab';
+import { Alert, Autocomplete } from '@mui/material';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { components } from 'tg.service/apiSchema.generated';
 import { useProject } from 'tg.hooks/useProject';
 import { useDebounce } from 'use-debounce/lib';
-import { Warning } from '@material-ui/icons';
+import { Warning } from '@mui/icons-material';
 import { container } from 'tsyringe';
 import { MessageService } from 'tg.service/MessageService';
+import { MenuItem } from '@mui/material';
 
 const messaging = container.resolve(MessageService);
 
@@ -134,19 +135,22 @@ export const ProjectTransferModal: FC<{
                 value as components['schemas']['ProjectTransferOptionModel']
               );
             }}
-            renderOption={(option) => (
-              <span data-cy="project-transfer-autocomplete-suggested-option">
-                {option.name} (
-                {option.type === 'ORGANIZATION' ? (
-                  <T>transfer_option_organization</T>
-                ) : (
-                  <T>transfer_option_user</T>
-                )}
-                )
-              </span>
+            renderOption={(props, option) => (
+              <MenuItem {...props}>
+                <span data-cy="project-transfer-autocomplete-suggested-option">
+                  {option.name} (
+                  {option.type === 'ORGANIZATION' ? (
+                    <T>transfer_option_organization</T>
+                  ) : (
+                    <T>transfer_option_user</T>
+                  )}
+                  )
+                </span>
+              </MenuItem>
             )}
             renderInput={(params) => (
               <TextField
+                variant="standard"
                 data-cy="project-transfer-autocomplete-field"
                 {...params}
                 onChange={(e) => {
@@ -170,6 +174,7 @@ export const ProjectTransferModal: FC<{
               <T>project_transfer_rewrite_project_name_to_confirm_message</T>
             </Typography>
             <TextField
+              variant="standard"
               data-cy="project-transfer-confirmation-field"
               onChange={(e) =>
                 setRewrote(e.target.value === project.name.toUpperCase())
@@ -187,7 +192,7 @@ export const ProjectTransferModal: FC<{
       <DialogActions>
         <Box pr={2} pb={1} display="flex">
           <Box mr={1}>
-            <Button color="default" onClick={() => props.onClose()}>
+            <Button onClick={() => props.onClose()}>
               <T>confirmation_dialog_cancel</T>
             </Button>
           </Box>

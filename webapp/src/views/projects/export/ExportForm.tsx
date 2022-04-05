@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Formik, FormikErrors } from 'formik';
 import { container } from 'tsyringe';
 import { useTranslate } from '@tolgee/react';
-import { Box, CircularProgress, makeStyles } from '@material-ui/core';
+import { Box, CircularProgress, styled } from '@mui/material';
 
 import { useProject } from 'tg.hooks/useProject';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
@@ -31,38 +31,34 @@ const EXPORT_DEFAULT_STATES: StateType[] = sortStates([
 
 const EXPORT_DEFAULT_FORMAT: typeof FORMATS[number] = 'JSON';
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'grid',
-    border: `1px solid ${theme.palette.lightDivider.main}`,
-    marginTop: theme.spacing(5),
-    padding: theme.spacing(4),
-    gap: theme.spacing(3),
-    gridTemplateColumns: '1fr 1fr',
-    gridTemplateAreas: `
-      "states states"
-      "langs  format"
-      ".      submit"
-    `,
-  },
-  states: {
-    gridArea: 'states',
-  },
-  langs: {
-    gridArea: 'langs',
-  },
-  format: {
-    gridArea: 'format',
-  },
-  submit: {
-    gridArea: 'submit',
-    justifySelf: 'end',
-  },
-}));
+const StyledForm = styled('form')`
+  display: grid;
+  border: 1px solid ${({ theme }) => theme.palette.lightDivider.main};
+  margin-top: ${({ theme }) => theme.spacing(5)};
+  padding: ${({ theme }) => theme.spacing(4)};
+  gap: ${({ theme }) => theme.spacing(3)};
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    'states states'
+    'langs  format'
+    '.      submit';
+
+  & .states {
+    grid-area: states;
+  }
+  & .langs {
+    grid-area: langs;
+  }
+  & .format {
+    grid-area: format;
+  }
+  & .submit {
+    grid-area: submit;
+    justify-self: end;
+  }
+`;
 
 export const ExportForm = () => {
-  const classes = useStyles();
-
   const project = useProject();
   const exportLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/export',
@@ -178,14 +174,14 @@ export const ExportForm = () => {
       }}
     >
       {({ isSubmitting, handleSubmit, isValid }) => (
-        <form onSubmit={handleSubmit} className={classes.container}>
-          <StateSelector className={classes.states} />
+        <StyledForm onSubmit={handleSubmit}>
+          <StateSelector className="states" />
           <LanguageSelector
-            className={classes.langs}
+            className="langs"
             languages={languagesLoadable.data?._embedded?.languages}
           />
-          <FormatSelector className={classes.format} />
-          <div className={classes.submit}>
+          <FormatSelector className="format" />
+          <div className="submit">
             <LoadingButton
               data-cy="export-submit-button"
               loading={isSubmitting}
@@ -197,7 +193,7 @@ export const ExportForm = () => {
               {t('export_translations_export_label')}
             </LoadingButton>
           </div>
-        </form>
+        </StyledForm>
       )}
     </Formik>
   );

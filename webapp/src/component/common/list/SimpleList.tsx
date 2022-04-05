@@ -1,6 +1,6 @@
 import React, { JSXElementConstructor, ReactNode } from 'react';
-import { Box, List, Paper, PaperProps } from '@material-ui/core';
-import { Pagination } from '@material-ui/lab';
+import { Box, List, Paper, PaperProps } from '@mui/material';
+import { Pagination } from '@mui/material';
 
 export type OverridableListWrappers<
   WrapperComponent extends

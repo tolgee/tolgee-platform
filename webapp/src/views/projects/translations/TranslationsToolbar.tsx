@@ -1,73 +1,77 @@
 import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useTranslate } from '@tolgee/react';
-import { IconButton, makeStyles, Tooltip } from '@material-ui/core';
-import { KeyboardArrowUp } from '@material-ui/icons';
+import { IconButton, styled, Tooltip, useTheme } from '@mui/material';
+import { KeyboardArrowUp } from '@mui/icons-material';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
 import { TranslationsShortcuts } from './TranslationsShortcuts';
-import { useTheme } from '@material-ui/styles';
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    zIndex: theme.zIndex.drawer,
-    position: 'fixed',
-    display: 'flex',
-    alignItems: 'stretch',
-    justifyContent: 'space-between',
-    bottom: 0,
-    right: 0,
-    pointerEvents: 'none',
-  },
-  shortcutsContainer: {
-    flexGrow: 1,
-    margin: theme.spacing(2, 1, 2, 3),
-    flexShrink: 1,
-    flexBasis: 1,
-    position: 'relative',
-  },
-  counterContainer: {
-    display: 'flex',
-    background: theme.palette.extraLightBackground.main,
-    alignItems: 'stretch',
-    transition: 'opacity 0.3s ease-in-out',
-    borderRadius: 6,
-    '-webkit-box-shadow': '2px 2px 5px rgba(0, 0, 0, 0.25)',
-    'box-shadow': '2px 2px 5px rgba(0, 0, 0, 0.25)',
-    margin: theme.spacing(2, 3, 2, 0),
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
-    pointerEvents: 'all',
-  },
-  hidden: {
-    opacity: '0',
-    pointerEvents: 'none',
-    width: 0,
-    marginRight: theme.spacing(1),
-  },
-  divider: {
-    borderRight: `1px solid ${theme.palette.divider}`,
-  },
-  index: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    marginRight: theme.spacing(2),
-    marginLeft: theme.spacing(),
-  },
-  button: {
-    flexShrink: 0,
-    width: 40,
-    height: 40,
-  },
-  stretcher: {
-    fontFamily: 'monospace',
-    height: 0,
-    overflow: 'hidden',
-  },
-}));
+const StyledContainer = styled('div')`
+  z-index: ${({ theme }) => theme.zIndex.drawer};
+  position: fixed;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  bottom: 0px;
+  right: 0px;
+  pointer-events: none;
+`;
+
+const StyledShortcutsContainer = styled('div')`
+  flex-grow: 1;
+  margin: ${({ theme }) => theme.spacing(2, 1, 2, 3)};
+  flex-shrink: 1;
+  flex-basis: 1px;
+  position: relative;
+`;
+
+const StyledCounterContainer = styled('div')`
+  display: flex;
+  background: ${({ theme }) => theme.palette.extraLightBackground.main};
+  align-items: stretch;
+  transition: opacity 0.3s ease-in-out;
+  border-radius: 6px;
+  -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.25);
+  margin: ${({ theme }) => theme.spacing(2, 3, 2, 0)};
+  flex-shrink: 0;
+  white-space: nowrap;
+  pointer-events: all;
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+    width: 0px;
+    margin-right: ${({ theme }) => theme.spacing(1)};
+  }
+`;
+
+const StyledDivider = styled('div')`
+  border-right: 1px solid ${({ theme }) => theme.palette.divider};
+`;
+
+const StyledIndex = styled('div')`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  margin-right: ${({ theme }) => theme.spacing(2)};
+  margin-left: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledIconButton = styled(IconButton)`
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+`;
+
+const StyledStretcher = styled('div')`
+  font-family: monospace;
+  height: 0px;
+  overflow: hidden;
+`;
 
 type Props = {
   width: number;
@@ -77,7 +81,6 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
   const [index, setIndex] = useState(1);
   const theme = useTheme();
   const [toolbarVisible, setToolbarVisible] = useState(false);
-  const classes = useStyles();
   const t = useTranslate();
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
   const list = useTranslationsSelector((c) => c.reactList);
@@ -111,38 +114,32 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
   const counterContent = `${index} / ${totalCount}`;
 
   return width ? (
-    <div
-      className={classes.container}
-      // @ts-ignore
-      style={{ width: width + theme.spacing(8) }}
-    >
-      <div className={classes.shortcutsContainer}>
+    <StyledContainer style={{ width: `calc(${width}px + ${theme.spacing(8)}` }}>
+      <StyledShortcutsContainer>
         <TranslationsShortcuts />
-      </div>
-      <div
+      </StyledShortcutsContainer>
+      <StyledCounterContainer
         className={clsx({
-          [classes.counterContainer]: true,
-          [classes.hidden]: !toolbarVisible,
+          hidden: !toolbarVisible,
         })}
       >
-        <div className={classes.index}>
+        <StyledIndex>
           <span data-cy="translations-toolbar-counter">{counterContent}</span>
           {/* stretch content by monospace font, so it's not jumping */}
-          <div className={classes.stretcher}>{counterContent}</div>
-        </div>
-        <div className={classes.divider} />
+          <StyledStretcher>{counterContent}</StyledStretcher>
+        </StyledIndex>
+        <StyledDivider />
         <Tooltip title={t('translations_toolbar_to_top')}>
-          <IconButton
+          <StyledIconButton
             data-cy="translations-toolbar-to-top"
             onClick={handleScrollUp}
             size="small"
-            className={classes.button}
             aria-label={t('translations_toolbar_to_top')}
           >
             <KeyboardArrowUp />
-          </IconButton>
+          </StyledIconButton>
         </Tooltip>
-      </div>
-    </div>
+      </StyledCounterContainer>
+    </StyledContainer>
   ) : null;
 };

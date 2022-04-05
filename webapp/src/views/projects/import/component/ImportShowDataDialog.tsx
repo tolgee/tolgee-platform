@@ -1,19 +1,14 @@
 import React, { FunctionComponent, useState } from 'react';
-import { Box, Grid } from '@material-ui/core';
-import AppBar from '@material-ui/core/AppBar';
-import Dialog from '@material-ui/core/Dialog';
-import IconButton from '@material-ui/core/IconButton';
-import Slide from '@material-ui/core/Slide';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme,
-} from '@material-ui/core/styles';
-import { TransitionProps } from '@material-ui/core/transitions';
-import CloseIcon from '@material-ui/icons/Close';
+import { Box, Grid, styled } from '@mui/material';
+import AppBar from '@mui/material/AppBar';
+import Dialog from '@mui/material/Dialog';
+import IconButton from '@mui/material/IconButton';
+import Slide from '@mui/material/Slide';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
+import { TransitionProps } from '@mui/material/transitions';
+import CloseIcon from '@mui/icons-material/Close';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
@@ -25,20 +20,18 @@ import { components } from 'tg.service/apiSchema.generated';
 import { ImportActions } from 'tg.store/project/ImportActions';
 
 const actions = container.resolve(ImportActions);
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    appBar: {
-      position: 'relative',
-    },
-    title: {
-      marginLeft: theme.spacing(2),
-      flex: 1,
-    },
-  })
-);
+
+const StyledAppBar = styled(AppBar)`
+  position: relative;
+`;
+
+const StyledTitle = styled(Typography)`
+  margin-left: ${({ theme }) => theme.spacing(2)};
+  flex: 1;
+`;
 
 const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & { children?: React.ReactElement },
+  props: TransitionProps & { children: React.ReactElement },
   ref: React.Ref<unknown>
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -48,7 +41,6 @@ export const ImportShowDataDialog: FunctionComponent<{
   row?: components['schemas']['ImportLanguageModel'];
   onClose: () => void;
 }> = (props) => {
-  const classes = useStyles();
   const project = useProject();
   const theme = useTheme();
   const [search, setSearch] = useState(undefined as string | undefined);
@@ -62,28 +54,29 @@ export const ImportShowDataDialog: FunctionComponent<{
         TransitionComponent={Transition}
         data-cy="import-show-data-dialog"
       >
-        <AppBar className={classes.appBar}>
+        <StyledAppBar>
           <Toolbar>
             <IconButton
               edge="start"
               color="inherit"
               onClick={props.onClose}
               aria-label="close"
+              size="large"
             >
               <CloseIcon />
             </IconButton>
-            <Typography variant="h6" className={classes.title}>
+            <StyledTitle variant="h6">
               <T>import_show_translations_title</T>
-            </Typography>
+            </StyledTitle>
           </Toolbar>
-        </AppBar>
+        </StyledAppBar>
         <SecondaryBar>
           <SearchField onSearch={setSearch} />
         </SecondaryBar>
         {!!props.row && (
           <SimplePaginatedHateoasList
             wrapperComponent={Box}
-            wrapperComponentProps={{ m: 2 }}
+            wrapperComponentProps={{ sx: { m: 2 } }}
             actions={actions}
             loadableName="translations"
             searchText={search}

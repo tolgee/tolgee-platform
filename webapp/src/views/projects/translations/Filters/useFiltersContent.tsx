@@ -1,4 +1,4 @@
-import { Checkbox, ListItemText } from '@material-ui/core';
+import { Checkbox, ListItemText } from '@mui/material';
 
 import {
   useTranslationsDispatch,

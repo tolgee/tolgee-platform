@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from 'react';
-import { Box, Dialog, DialogContent, DialogTitle } from '@material-ui/core';
-import { Warning } from '@material-ui/icons';
-import { Alert } from '@material-ui/lab';
+import { Box, Dialog, DialogContent, DialogTitle } from '@mui/material';
+import { Warning } from '@mui/icons-material';
+import { Alert } from '@mui/material';
 import { T } from '@tolgee/react';
 import { container } from 'tsyringe';
 
@@ -48,7 +48,7 @@ export const ImportFileIssuesDialog: FunctionComponent<{
                   },
                 ]}
                 wrapperComponent={Box}
-                wrapperComponentProps={{ mb: 2 }}
+                wrapperComponentProps={{ sx: { mb: 2 } }}
                 listComponent={Box}
                 sortBy={[]}
                 renderItem={(i) => (

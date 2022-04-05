@@ -1,12 +1,12 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { PropTypes, TextField } from '@material-ui/core';
-import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import { PropTypes, TextField } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import { T } from '@tolgee/react';
 
 export class ConfirmationDialogProps {
@@ -59,6 +59,7 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
           {props.hardModeText && (
             <Box>
               <TextField
+                variant="standard"
                 data-cy={'global-confirmation-hard-mode-text-field'}
                 fullWidth={true}
                 label={
@@ -80,13 +81,13 @@ export default function ConfirmationDialog(props: ConfirmationDialogProps) {
               props.onCancel && props.onCancel();
             }}
             type="button"
-            color={props.cancelButtonColor}
+            sx={{ color: props.cancelButtonColor }}
           >
             {props.cancelButtonText}
           </Button>
           <Button
             data-cy="global-confirmation-confirm"
-            color={props.confirmButtonColor}
+            color="primary"
             autoFocus
             disabled={!!disabled}
             type="submit"

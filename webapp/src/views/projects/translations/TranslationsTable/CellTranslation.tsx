@@ -1,66 +1,61 @@
 import React, { useRef } from 'react';
 import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useEditableRow } from '../useEditableRow';
 import { TranslationVisual } from '../TranslationVisual';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
-import { useCellStyles } from '../cell/styles';
+import {
+  StyledCell,
+  CELL_PLAIN,
+  CELL_HOVER,
+  CELL_CLICKABLE,
+  CELL_RAISED,
+} from '../cell/styles';
 import { CellStateBar } from '../cell/CellStateBar';
 import { ControlsTranslation } from '../cell/ControlsTranslation';
 import { TranslationOpened } from '../TranslationOpened';
 import { AutoTranslationIndicator } from '../cell/AutoTranslationIndicator';
 import { StateType } from 'tg.constants/translationStates';
+import { styled } from '@mui/material';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 
-const useStyles = makeStyles((theme) => {
-  return {
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative',
-    },
-    editor: {
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      flexGrow: 1,
-    },
-    autoIndicator: {
-      height: 0,
-      position: 'relative',
-    },
-    editorContainer: {
-      padding: theme.spacing(1.5, 1.5, 0, 1.5),
-      flexGrow: 1,
-    },
-    editorControls: {
-      display: 'flex',
-    },
-    translation: {
-      flexGrow: 1,
-      margin: theme.spacing(1.5, 1.5, 1, 1.5),
-    },
-    translationContent: {
-      overflow: 'hidden',
-      position: 'relative',
-    },
-    controls: {
-      boxSizing: 'border-box',
-      gridArea: 'controls',
-      display: 'flex',
-      justifyContent: 'flex-end',
-      overflow: 'hidden',
-      minHeight: 44,
-      padding: '12px 14px 12px 12px',
-      marginTop: -16,
-    },
-  };
-});
+const StyledContainer = styled(StyledCell)`
+  display: flex;
+  flex-direction: column;
+  position: relative;
+`;
+
+const StyledTranslationOpened = styled(TranslationOpened)`
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+`;
+
+const StyledAutoIndicator = styled(AutoTranslationIndicator)`
+  height: 0;
+  position: relative;
+`;
+
+const StyledTranslation = styled('div')`
+  flex-grow: 1;
+  margin: ${({ theme }) => theme.spacing(1.5, 1.5, 1, 1.5)};
+`;
+
+const StyledControls = styled('div')`
+  box-sizing: border-box;
+  grid-area: controls;
+  display: flex;
+  justify-content: flex-end;
+  overflow: hidden;
+  min-height: 44;
+  padding: 12px 14px 12px 12px;
+  margin-top: -16px;
+`;
 
 type Props = {
   data: KeyWithTranslationsModel;
@@ -87,11 +82,7 @@ export const CellTranslation: React.FC<Props> = ({
   lastFocusable,
   containerRef,
 }) => {
-  const classes = useStyles();
   const cellRef = useRef<HTMLDivElement>(null);
-  const cellClasses = useCellStyles({
-    position: lastFocusable ? 'right' : undefined,
-  });
 
   const translation = data.translations[language.tag];
   const state = translation?.state || 'UNTRANSLATED';
@@ -135,14 +126,13 @@ export const CellTranslation: React.FC<Props> = ({
   const showAllLines = isEditing || (language.base && isEditingRow);
 
   return (
-    <div
+    <StyledContainer
+      position={lastFocusable ? 'right' : undefined}
       className={clsx({
-        [classes.container]: true,
-        [cellClasses.cellPlain]: true,
-        [cellClasses.hover]: !isEditing,
-        [cellClasses.cellClickable]: editEnabled && !isEditing,
-        [cellClasses.scrollMargins]: true,
-        [cellClasses.cellRaised]: isEditing,
+        [CELL_PLAIN]: true,
+        [CELL_HOVER]: !isEditing,
+        [CELL_CLICKABLE]: editEnabled && !isEditing,
+        [CELL_RAISED]: isEditing,
       })}
       style={{ width }}
       onClick={
@@ -152,8 +142,7 @@ export const CellTranslation: React.FC<Props> = ({
       ref={cellRef}
     >
       {editVal ? (
-        <TranslationOpened
-          className={classes.editor}
+        <StyledTranslationOpened
           keyId={data.keyId}
           language={language}
           translation={translation}
@@ -173,7 +162,7 @@ export const CellTranslation: React.FC<Props> = ({
         />
       ) : (
         <>
-          <div className={classes.translation}>
+          <StyledTranslation>
             <div data-cy="translations-table-cell">
               <TranslationVisual
                 width={width}
@@ -183,14 +172,10 @@ export const CellTranslation: React.FC<Props> = ({
               />
             </div>
 
-            <AutoTranslationIndicator
-              keyData={data}
-              lang={language.tag}
-              className={classes.autoIndicator}
-            />
-          </div>
+            <StyledAutoIndicator keyData={data} lang={language.tag} />
+          </StyledTranslation>
 
-          <div className={classes.controls}>
+          <StyledControls>
             {active ? (
               <ControlsTranslation
                 onEdit={() => handleOpen('editor')}
@@ -209,11 +194,11 @@ export const CellTranslation: React.FC<Props> = ({
                 lastFocusable={lastFocusable}
               />
             )}
-          </div>
+          </StyledControls>
         </>
       )}
 
       <CellStateBar state={state} onResize={handleResize} />
-    </div>
+    </StyledContainer>
   );
 };

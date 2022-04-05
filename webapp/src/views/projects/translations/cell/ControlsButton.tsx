@@ -1,20 +1,17 @@
 import React from 'react';
-import clsx from 'clsx';
-import { IconButton, makeStyles, Tooltip } from '@material-ui/core';
+import { IconButton, styled, Tooltip } from '@mui/material';
 import { stopBubble } from 'tg.fixtures/eventHandler';
 
-const useStyles = makeStyles({
-  button: {
-    display: 'flex',
-    cursor: 'pointer',
-    width: 36,
-    height: 36,
-    margin: -8,
-    '& + &': {
-      marginLeft: 4,
-    },
-  },
-});
+const StyledIconButton = styled(IconButton)`
+  display: flex;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  margin: -8px;
+  & + & {
+    margin-left: 4px;
+  }
+`;
 
 type Props = React.ComponentProps<typeof IconButton> & {
   tooltip?: React.ReactNode;
@@ -25,18 +22,16 @@ export const ControlsButton: React.FC<Props> = React.forwardRef(
     { children, className, onClick, tooltip, ...props },
     ref
   ) {
-    const classes = useStyles();
-
     const content = (
-      <IconButton
+      <StyledIconButton
         size="small"
-        className={clsx(classes.button, className)}
+        className={className}
         onClick={stopBubble(onClick)}
         ref={ref}
         {...props}
       >
         {children}
-      </IconButton>
+      </StyledIconButton>
     );
 
     return tooltip ? <Tooltip title={tooltip}>{content}</Tooltip> : content;

@@ -1,65 +1,67 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Button, makeStyles, Typography } from '@material-ui/core';
-import { useTranslate, T } from '@tolgee/react';
 import { FastField, FieldArray, FieldProps, useFormikContext } from 'formik';
+import { Box, Button, styled, Typography } from '@mui/material';
+import { useTranslate, T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { Editor } from 'tg.component/editor/Editor';
+import { useProject } from 'tg.hooks/useProject';
 import { FieldLabel } from '../KeySingle/FieldLabel';
 import { Tag } from '../Tags/Tag';
 import { TagInput } from '../Tags/TagInput';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { ToolsPottomPanel } from '../TranslationTools/ToolsBottomPanel';
 import { useTranslationTools } from '../TranslationTools/useTranslationTools';
-import { useProject } from 'tg.hooks/useProject';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'grid',
-    rowGap: theme.spacing(2),
-    marginBottom: theme.spacing(2),
-  },
-  field: {
-    border: `1px solid ${theme.palette.grey[400]}`,
-    overflow: 'hidden',
-    borderRadius: 4,
-    '&:hover': {
-      border: `1px solid ${theme.palette.common.black}`,
-    },
-    '&:focus-within': {
-      borderColor: theme.palette.primary.main,
-      borderWidth: 2,
-    },
-    '& > *': {
-      padding: 10,
-    },
-    '&:focus-within > *': {
-      padding: 9,
-    },
-  },
-  editorWrapper: {
-    background: 'white',
-    alignSelf: 'stretch',
-    display: 'flex',
-    alignItems: 'stretch',
-  },
-  tags: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    alignItems: 'flex-start',
-    overflow: 'hidden',
-    '& > *': {
-      margin: '0px 3px 3px 0px',
-    },
-    position: 'relative',
-  },
-  error: {
-    display: 'flex',
-    minHeight: '1.2rem',
-  },
-}));
+const StyledContainer = styled('div')`
+  display: grid;
+  row-gap: ${({ theme }) => theme.spacing(2)};
+  margin-bottom: ${({ theme }) => theme.spacing(2)};
+`;
+
+const StyledField = styled('div')`
+  border: 1px solid ${({ theme }) => theme.palette.grey[400]};
+  overflow: hidden;
+  border-radius: 4px;
+  &:hover {
+    border: 1px solid ${({ theme }) => theme.palette.common.black};
+  }
+  &:focus-within {
+    border-color: ${({ theme }) => theme.palette.primary.main};
+    border-width: 2px;
+  }
+  & > * {
+    padding: 10px;
+  }
+  &:focus-within > * {
+    padding: 9px;
+  }
+`;
+
+const StyledEdtorWrapper = styled('div')`
+  background: white;
+  align-self: stretch;
+  display: flex;
+  align-items: stretch;
+`;
+
+const StyledTags = styled('div')`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  overflow: hidden;
+  & > * {
+    margin: 0px 3px 3px 0px;
+  }
+  position: relative;
+`;
+
+const StyledError = styled(Typography)`
+  display: flex;
+  min-height: 1.2rem;
+`;
 
 type Props = {
   onCancel?: () => void;
@@ -122,10 +124,9 @@ export const FormBody: React.FC<Props> = ({
     enabled: hintRelevant,
   });
 
-  const classes = useStyles();
   return (
     <>
-      <div className={classes.container}>
+      <StyledContainer>
         <FastField name="name">
           {({ field, form, meta }: FieldProps<any>) => {
             return (
@@ -133,11 +134,8 @@ export const FormBody: React.FC<Props> = ({
                 <FieldLabel>
                   <T>translation_single_label_key</T>
                 </FieldLabel>
-                <div className={classes.field}>
-                  <div
-                    className={classes.editorWrapper}
-                    data-cy="translation-create-key-input"
-                  >
+                <StyledField>
+                  <StyledEdtorWrapper data-cy="translation-create-key-input">
                     <Editor
                       plaintext
                       value={field.value}
@@ -151,15 +149,11 @@ export const FormBody: React.FC<Props> = ({
                       scrollMargins={{ bottom: 150 }}
                       autoScrollIntoView
                     />
-                  </div>
-                </div>
-                <Typography
-                  color="error"
-                  variant="caption"
-                  className={classes.error}
-                >
+                  </StyledEdtorWrapper>
+                </StyledField>
+                <StyledError color="error" variant="caption">
                   {meta.touched && meta.error}
-                </Typography>
+                </StyledError>
               </div>
             );
           }}
@@ -175,7 +169,7 @@ export const FormBody: React.FC<Props> = ({
                     <FieldLabel>
                       <T>translation_single_label_tags</T>
                     </FieldLabel>
-                    <div className={classes.tags}>
+                    <StyledTags>
                       {field.value.map((tag, index) => {
                         return (
                           <Tag
@@ -192,7 +186,7 @@ export const FormBody: React.FC<Props> = ({
                         }
                         placeholder={t('translation_single_tag_placeholder')}
                       />
-                    </div>
+                    </StyledTags>
                   </div>
                 );
               }}
@@ -204,11 +198,8 @@ export const FormBody: React.FC<Props> = ({
             {({ field, form, meta }) => (
               <div key={lang.tag}>
                 <FieldLabel>{lang.name}</FieldLabel>
-                <div className={classes.field}>
-                  <div
-                    className={classes.editorWrapper}
-                    data-cy="translation-create-translation-input"
-                  >
+                <StyledField>
+                  <StyledEdtorWrapper data-cy="translation-create-translation-input">
                     <Editor
                       value={field.value || ''}
                       onSave={() => form.handleSubmit()}
@@ -221,20 +212,16 @@ export const FormBody: React.FC<Props> = ({
                       scrollMargins={{ bottom: 150 }}
                       autoScrollIntoView
                     />
-                  </div>
-                </div>
-                <Typography
-                  color="error"
-                  variant="caption"
-                  className={classes.error}
-                >
+                  </StyledEdtorWrapper>
+                </StyledField>
+                <StyledError color="error" variant="caption">
                   {meta.touched && meta.error}
-                </Typography>
+                </StyledError>
               </div>
             )}
           </FastField>
         ))}
-      </div>
+      </StyledContainer>
       <Box display="flex" alignItems="flex-end" justifySelf="flex-end">
         {onCancel && (
           <Button data-cy="global-form-cancel-button" onClick={onCancel}>

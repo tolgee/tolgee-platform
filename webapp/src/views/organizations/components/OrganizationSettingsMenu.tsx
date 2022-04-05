@@ -1,4 +1,4 @@
-import { MenuItem, MenuList, Paper } from '@material-ui/core';
+import { MenuItem, MenuList, Paper } from '@mui/material';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 

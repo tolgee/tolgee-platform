@@ -1,5 +1,5 @@
 import { ComponentProps, FC } from 'react';
-import { Skeleton } from '@material-ui/lab';
+import { Skeleton } from '@mui/material';
 import { useAutoAvatarImgSrc } from './useAutoAvatarImgSrc';
 
 export type AutoAvatarType = 'INITIALS' | 'IDENTICON';
@@ -25,6 +25,6 @@ export const AutoAvatar: FC<ComponentProps<'img'> & AutoAvatarProps> = ({
       <img data-cy="auto-avatar-img" {...imgProps} src={src} alt={ownerName} />
     </div>
   ) : (
-    <Skeleton variant="rect" width={size} height={size} />
+    <Skeleton variant="rectangular" width={size} height={size} />
   );
 };

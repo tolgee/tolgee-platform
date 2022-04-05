@@ -1,5 +1,5 @@
 import { FunctionComponent, useCallback } from 'react';
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
@@ -19,7 +19,7 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { CompactView } from 'tg.component/layout/CompactView';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { Link, Typography } from '@material-ui/core';
+import { Link, Typography } from '@mui/material';
 
 const actions = container.resolve(SignUpActions);
 
@@ -119,8 +119,16 @@ const SignUpView: FunctionComponent = () => {
               }
               onSubmit={props.onSubmit}
             >
-              <TextField name="name" label={<T>sign_up_form_full_name</T>} />
-              <TextField name="email" label={<T>sign_up_form_email</T>} />
+              <TextField
+                name="name"
+                label={<T>sign_up_form_full_name</T>}
+                variant="standard"
+              />
+              <TextField
+                name="email"
+                label={<T>sign_up_form_email</T>}
+                variant="standard"
+              />
               <SetPasswordFields />
               <Box mt={2} mb={3}>
                 <Typography variant="body2">

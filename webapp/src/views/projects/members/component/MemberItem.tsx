@@ -1,6 +1,6 @@
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
-import { Chip, makeStyles } from '@material-ui/core';
+import { Chip, styled } from '@mui/material';
 
 import { PermissionsMenu } from 'tg.component/security/PermissionsMenu';
 import { LanguagePermissionsMenu } from 'tg.component/security/LanguagePermissionsMenu';
@@ -19,30 +19,30 @@ type UserAccountInProjectModel =
 
 const messageService = container.resolve(MessageService);
 
-const useStyles = makeStyles((theme) => ({
-  listItem: {
-    display: 'flex',
-    borderBottom: `1px solid ${theme.palette.lightDivider.main}`,
-    '&:last-child': {
-      borderBottom: 0,
-    },
-    position: 'relative',
-    padding: theme.spacing(1),
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  itemText: {
-    flexGrow: 1,
-    padding: theme.spacing(1),
-  },
-  itemActions: {
-    display: 'flex',
-    gap: theme.spacing(1),
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-}));
+const StyledListItem = styled('div')`
+  display: flex;
+  border-bottom: 1px solid ${({ theme }) => theme.palette.lightDivider.main};
+  &:last-child {
+    border-bottom: 0;
+  }
+  position: relative;
+  padding: ${({ theme }) => theme.spacing(1)};
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+`;
+
+const StyledItemText = styled('div')`
+  flex-grow: 1;
+  padding: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledItemActions = styled('div')`
+  display: flex;
+  gap: ${({ theme }) => theme.spacing(1)};
+  align-items: center;
+  flex-wrap: wrap;
+`;
 
 type Props = {
   user: UserAccountInProjectModel;
@@ -51,7 +51,6 @@ type Props = {
 export const MemberItem: React.FC<Props> = ({ user }) => {
   const project = useProject();
   const currentUser = useUser();
-  const classes = useStyles();
   const t = useTranslate();
 
   const editPermission = useApiMutation({
@@ -101,14 +100,14 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
   const isOwner = user.organizationRole === 'OWNER';
 
   return (
-    <div className={classes.listItem} data-cy="project-member-item">
-      <div className={classes.itemText}>
+    <StyledListItem data-cy="project-member-item">
+      <StyledItemText>
         {user.name} ({user.username}){' '}
         {user.organizationRole && (
           <Chip size="small" label={project.organizationOwnerName} />
         )}
-      </div>
-      <div className={classes.itemActions}>
+      </StyledItemText>
+      <StyledItemActions>
         {projectPermissionType === 'TRANSLATE' && (
           <LanguagePermissionsMenu
             selected={user.computedPermissions.permittedLanguageIds || []}
@@ -136,7 +135,7 @@ export const MemberItem: React.FC<Props> = ({ user }) => {
           minPermissions={user.organizationBasePermissions}
         />
         <RevokePermissionsButton user={user} />
-      </div>
-    </div>
+      </StyledItemActions>
+    </StyledListItem>
   );
 };

@@ -7,7 +7,7 @@ import {
   ListItemText,
   MenuItem,
   Select,
-} from '@material-ui/core';
+} from '@mui/material';
 import { useTranslate } from '@tolgee/react';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';
@@ -24,10 +24,15 @@ export const StateSelector: React.FC<Props> = ({ className }) => {
     <Field name="states">
       {({ field, meta }) => {
         return (
-          <FormControl className={className} error={meta.error}>
+          <FormControl
+            className={className}
+            error={meta.error}
+            variant="standard"
+          >
             <InputLabel>{t('export_translations_states_label')}</InputLabel>
             <Select
               {...field}
+              variant="standard"
               data-cy="export-state-selector"
               renderValue={(values: StateType[]) =>
                 values

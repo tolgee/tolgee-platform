@@ -1,5 +1,5 @@
-import { ViewListRounded, AppsRounded, Add, Delete } from '@material-ui/icons';
-import { Button, ButtonGroup, IconButton, makeStyles } from '@material-ui/core';
+import { ViewListRounded, AppsRounded, Add, Delete } from '@mui/icons-material';
+import { Button, ButtonGroup, IconButton, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
@@ -14,68 +14,73 @@ import {
 import { Filters } from '../Filters/Filters';
 import { ViewMode } from '../context/types';
 import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
+import clsx from 'clsx';
 
-const useStyles = makeStyles((theme) => ({
-  controls: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    flexWrap: 'wrap',
-    margin: '-12px -5px -10px -5px',
-    marginLeft: -theme.spacing(2),
-    marginRight: -theme.spacing(2),
-    padding: theme.spacing(0, 1.5),
-    position: 'sticky',
-    top: 50,
-    zIndex: theme.zIndex.appBar + 1,
-    background: theme.palette.background.default,
-    transition: 'all 0.20s ease-in-out',
-    paddingBottom: 3,
-    paddingTop: 8,
-  },
-  shadow: {
-    background: theme.palette.background.default,
-    height: 1,
-    position: 'sticky',
-    zIndex: theme.zIndex.appBar,
-    marginLeft: -theme.spacing(1),
-    marginRight: -theme.spacing(1),
-    '-webkit-box-shadow': '0px -1px 7px 0px #000000',
-    'box-shadow': '0px -1px 7px 0px #000000',
-    top: 110,
-    transition: 'all 0.25s',
-  },
-  spaced: {
-    display: 'flex',
-    '& > *': {
-      margin: 5,
-    },
-    flexWrap: 'wrap',
-  },
-  deleteButton: {
-    display: 'flex',
-    flexShrink: 1,
-    width: 38,
-    height: 38,
-    marginLeft: 3,
-  },
-  search: {
-    minWidth: 200,
-  },
-  toggleButton: {
-    padding: '4px 8px',
-  },
-  modal: {
-    transition: 'margin-bottom 0.2s',
-  },
-}));
+const StyledControls = styled('div')`
+  display: flex;
+  box-sizing: border-box;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: -12px -5px -10px -5px;
+  margin-left: ${({ theme }) => theme.spacing(-2)};
+  margin-right: ${({ theme }) => theme.spacing(-2)};
+  padding: ${({ theme }) => theme.spacing(0, 1.5)};
+  position: sticky;
+  top: 50px;
+  height: 61px;
+  z-index: ${({ theme }) => theme.zIndex.appBar + 1};
+  background: ${({ theme }) => theme.palette.background.default};
+  transition: all 0.2s ease-in-out;
+  padding-bottom: 8px;
+  padding-top: 13px;
+`;
+
+const StyledShadow = styled('div')`
+  background: ${({ theme }) => theme.palette.background.default};
+  height: 1px;
+  position: sticky;
+  z-index: ${({ theme }) => theme.zIndex.appBar};
+  margin-left: ${({ theme }) => theme.spacing(-1)};
+  margin-right: ${({ theme }) => theme.spacing(-1)};
+  -webkit-box-shadow: 0px -1px 7px 0px #000000;
+  box-shadow: 0px -1px 7px 0px #000000;
+  top: 110px;
+  transition: all 0.25s;
+`;
+
+const StyledSpaced = styled('div')`
+  display: flex;
+  gap: 10px;
+  padding: 0px 5px;
+  flex-wrap: wrap;
+`;
+
+const StyledDeleteButton = styled(IconButton)`
+  display: flex;
+  flex-shrink: 1;
+  width: 38px;
+  height: 38px;
+  margin-left: 3px;
+`;
+
+const StyledTranslationsSearchField = styled(TranslationsSearchField)`
+  min-width: 200px;
+`;
+
+const StyledToggleButton = styled(Button)`
+  padding: 4px 8px;
+  :not(&.selected) {
+    color: ${({ theme }) => theme.palette.text.primary};
+    border-color: ${({ theme }) => theme.palette.grey[400]};
+  }
+`;
 
 type Props = {
   onDialogOpen: () => void;
 };
 
 export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
-  const classes = useStyles();
   const projectPermissions = useProjectPermissions();
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);
@@ -113,34 +118,32 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
 
   return (
     <>
-      <div
-        className={classes.controls}
+      <StyledControls
         style={{
           transform: trigger ? 'translate(0px, -55px)' : 'translate(0px, 0px)',
         }}
       >
-        <div className={classes.spaced}>
+        <StyledSpaced>
           {selection.length > 0 && (
-            <IconButton
-              className={classes.deleteButton}
+            <StyledDeleteButton
               onClick={handleDelete}
               data-cy="translations-delete-button"
+              size="large"
             >
               <Delete />
-            </IconButton>
+            </StyledDeleteButton>
           )}
-          <TranslationsSearchField
+          <StyledTranslationsSearchField
             value={search || ''}
             onSearchChange={handleSearchChange}
-            className={classes.search}
             label={null}
             variant="outlined"
             placeholder={t('standard_search_label')}
           />
           <Filters />
-        </div>
+        </StyledSpaced>
 
-        <div className={classes.spaced}>
+        <StyledSpaced>
           <LanguagesSelect
             onChange={handleLanguageChange}
             value={selectedLanguages || []}
@@ -149,22 +152,20 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
           />
 
           <ButtonGroup>
-            <Button
-              color={view === 'LIST' ? 'primary' : undefined}
+            <StyledToggleButton
+              className={clsx({ selected: view === 'LIST' })}
               onClick={() => handleViewChange('LIST')}
               data-cy="translations-view-list-button"
-              className={classes.toggleButton}
             >
               <ViewListRounded />
-            </Button>
-            <Button
-              color={view === 'TABLE' ? 'primary' : undefined}
+            </StyledToggleButton>
+            <StyledToggleButton
+              className={clsx({ selected: view === 'TABLE' })}
               onClick={() => handleViewChange('TABLE')}
               data-cy="translations-view-table-button"
-              className={classes.toggleButton}
             >
               <AppsRounded />
-            </Button>
+            </StyledToggleButton>
           </ButtonGroup>
 
           {projectPermissions.satisfiesPermission(
@@ -180,10 +181,9 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
               <T>language_create_add</T>
             </Button>
           )}
-        </div>
-      </div>
-      <div
-        className={classes.shadow}
+        </StyledSpaced>
+      </StyledControls>
+      <StyledShadow
         style={{
           transform: trigger ? 'translate(0px, -55px)' : 'translate(0px, 0px)',
         }}

@@ -1,7 +1,8 @@
-import { makeStyles } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { styled } from '@mui/material';
+import { Close } from '@mui/icons-material';
 
 import { Wrapper } from './Wrapper';
+import clsx from 'clsx';
 
 type Props = {
   name: string;
@@ -10,46 +11,46 @@ type Props = {
   selected?: boolean;
 };
 
-const useStyles = makeStyles((theme) => ({
-  tag: {
-    marginLeft: 6,
-    marginRight: 6,
-    marginTop: -1,
-    flexShrink: 1,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  closeIcon: {
-    marginLeft: -6,
-    padding: 1,
-    cursor: 'pointer',
-    width: 20,
-    height: 20,
-    color: theme.palette.text.secondary,
-  },
-  selected: {
-    borderColor: theme.palette.primary.main,
-    borderWidth: 1,
-  },
-}));
+const StyledTag = styled('div')`
+  margin-left: 6px;
+  margin-right: 6px;
+  margin-top: -1px;
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const StyledCloseIcon = styled(Close)`
+  margin-left: -6px;
+  padding: 1px;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const StyledWrapper = styled(Wrapper)`
+  &.selected {
+    border-color: ${({ theme }) => theme.palette.primary.main};
+    border-width: 1px;
+  }
+`;
 
 export const Tag: React.FC<Props> = ({ name, onDelete, onClick, selected }) => {
-  const classes = useStyles();
   return (
-    <Wrapper
+    <StyledWrapper
       onClick={onClick ? () => onClick?.(name) : undefined}
-      className={selected ? classes.selected : undefined}
+      className={clsx({ selected })}
     >
-      <div className={classes.tag}>{name}</div>
+      <StyledTag>{name}</StyledTag>
       {onDelete && (
-        <Close
+        <StyledCloseIcon
           role="button"
           data-cy="translations-tag-close"
-          className={classes.closeIcon}
           onClick={onDelete}
         />
       )}
-    </Wrapper>
+    </StyledWrapper>
   );
 };

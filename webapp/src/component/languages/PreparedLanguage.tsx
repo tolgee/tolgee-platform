@@ -1,75 +1,65 @@
-import React, { FC } from 'react';
-import { Box, IconButton } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { Close, Edit } from '@material-ui/icons';
-import clsx from 'clsx';
+import { Box, IconButton, styled } from '@mui/material';
+import { Close, Edit } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 
 import { FlagImage } from './FlagImage';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    border: `1px solid ${theme.palette.grey['100']}`,
-    padding: `${theme.spacing(0.5)}px ${theme.spacing(1)}px`,
-    borderRadius: theme.shape.borderRadius,
-    display: `inline-flex`,
-    alignItems: `center`,
-  },
-  flagImage: {
-    width: `20px`,
-    height: `20px`,
-    marginRight: theme.spacing(1),
-  },
-  editButton: {
-    marginLeft: theme.spacing(1),
-  },
-  icon: {
-    '& svg': {
-      width: 20,
-      height: 20,
-    },
-  },
-}));
-export const PreparedLanguage: FC<
+const StyledContainer = styled('div')`
+  border: 1px solid ${({ theme }) => theme.palette.grey['100']};
+  padding: ${({ theme }) => theme.spacing(0.5, 1)};
+  border-radius: ${({ theme }) => theme.shape.borderRadius};
+  display: inline-flex;
+  align-items: center;
+`;
+
+const StyledFlagImage = styled(FlagImage)`
+  width: 20px;
+  height: 20px;
+  margin-right: ${({ theme }) => theme.spacing(1)};
+`;
+
+const StyledIconButton = styled(IconButton)`
+  &.editButton {
+    margin-left: ${({ theme }) => theme.spacing(1)};
+  }
+  & svg {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+export const PreparedLanguage: React.FC<
   components['schemas']['LanguageDto'] & {
     onReset: () => void;
     onEdit: () => void;
   }
 > = (props) => {
-  const classes = useStyles();
-
   return (
     <>
-      <Box className={classes.root} data-cy="languages-prepared-language-box">
-        {props.flagEmoji && (
-          <FlagImage
-            flagEmoji={props.flagEmoji}
-            className={classes.flagImage}
-          />
-        )}{' '}
+      <StyledContainer data-cy="languages-prepared-language-box">
+        {props.flagEmoji && <StyledFlagImage flagEmoji={props.flagEmoji} />}{' '}
         <Box>
           {props.name} | {props.originalName} ({props.tag})
         </Box>
         <Box>
-          <IconButton
+          <StyledIconButton
             data-cy="languages-create-customize-button"
             size="small"
-            className={clsx(classes.icon, classes.editButton)}
+            className="editButton"
             onClick={props.onEdit}
           >
             <Edit />
-          </IconButton>
-          <IconButton
+          </StyledIconButton>
+          <StyledIconButton
             size="small"
-            className={clsx(classes.icon)}
             onClick={props.onReset}
             data-cy="languages-create-cancel-prepared-button"
           >
             <Close />
-          </IconButton>
+          </StyledIconButton>
         </Box>
-      </Box>
+      </StyledContainer>
     </>
   );
 };

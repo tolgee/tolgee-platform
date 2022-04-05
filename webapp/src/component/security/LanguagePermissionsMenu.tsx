@@ -2,28 +2,22 @@ import React, { ComponentProps, FunctionComponent } from 'react';
 import {
   Menu,
   MenuItem,
-  makeStyles,
   Checkbox,
   ListItemText,
   Button,
   Tooltip,
-} from '@material-ui/core';
-import { ArrowDropDown } from '@material-ui/icons';
+} from '@mui/material';
+import { ArrowDropDown } from '@mui/icons-material';
 
 import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
 import { useTranslate } from '@tolgee/react';
-
-const useStyles = makeStyles((theme) => ({
-  languagesList: {},
-}));
 
 export const LanguagePermissionsMenu: FunctionComponent<{
   selected: number[];
   onSelect: (value: number[]) => void;
   buttonProps?: ComponentProps<typeof Button>;
 }> = (props) => {
-  const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const t = useTranslate();
 
@@ -67,19 +61,14 @@ export const LanguagePermissionsMenu: FunctionComponent<{
           aria-haspopup="true"
           onClick={handleClick}
         >
-          <LanguagesPermittedList
-            className={classes.languagesList}
-            languages={selectedLanguages}
-          />
+          <LanguagesPermittedList languages={selectedLanguages} />
           <ArrowDropDown fontSize="small" />
         </Button>
       </Tooltip>
       <Menu
         data-cy="permissions-languages-menu"
-        elevation={1}
         id="simple-menu"
         anchorEl={anchorEl}
-        getContentAnchorEl={null}
         keepMounted
         open={Boolean(anchorEl)}
         onClose={handleClose}

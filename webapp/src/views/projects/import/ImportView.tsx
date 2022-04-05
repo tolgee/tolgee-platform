@@ -1,5 +1,5 @@
 import { FunctionComponent, useEffect, useState } from 'react';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 

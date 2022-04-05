@@ -1,36 +1,27 @@
 import { ComponentProps, default as React, FunctionComponent } from 'react';
-import { Theme } from '@material-ui/core';
-import ListItem from '@material-ui/core/ListItem';
-import createStyles from '@material-ui/core/styles/createStyles';
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { styled } from '@mui/material';
+import ListItem from '@mui/material/ListItem';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    container: {
-      borderBottom: `1px solid ${theme.palette.grey.A100}`,
-      flexWrap: 'wrap',
-      '&:last-child': {
-        borderBottom: `none`,
-      },
-    },
-  })
-);
+const StyledListItem = styled(ListItem)`
+  border-bottom: 1px solid ${({ theme }) => theme.palette.grey.A100};
+  flex-wrap: wrap;
+  &:last-child {
+    border-bottom: none;
+  }
+`;
 
 type PropTypes = Omit<ComponentProps<typeof ListItem>, 'button'> & {
   button?: boolean;
 };
 
 export const SimpleListItem: FunctionComponent<PropTypes> = (props) => {
-  const classes = useStyles();
-
   return (
-    <ListItem
+    <StyledListItem
       data-cy="global-list-item"
       {...props}
       button={props.button as any}
-      classes={{ container: classes.container }}
     >
       {props.children}
-    </ListItem>
+    </StyledListItem>
   );
 };

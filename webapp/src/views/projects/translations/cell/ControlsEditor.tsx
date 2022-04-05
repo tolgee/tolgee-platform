@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { T } from '@tolgee/react';
-import { Button, makeStyles } from '@material-ui/core';
-import { CameraAlt } from '@material-ui/icons';
+import { Button, styled } from '@mui/material';
+import { CameraAlt } from '@mui/icons-material';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { components } from 'tg.service/apiSchema.generated';
@@ -12,22 +12,19 @@ import { useTranslationsSelector } from '../context/TranslationsContext';
 
 type State = components['schemas']['TranslationViewModel']['state'];
 
-const useStyles = makeStyles((theme) => ({
-  leftPart: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    overflow: 'hidden',
-    padding: theme.spacing(1, 1.5, 1.5, 1.5),
-    '& > * + *': {
-      marginLeft: 10,
-    },
-  },
-  rightPart: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: theme.spacing(1, 1.5, 1.5, 0),
-  },
-}));
+const StyledLeftPart = styled('div')`
+  display: flex;
+  align-items: flex-start;
+  overflow: hidden;
+  padding: ${({ theme }) => theme.spacing(1, 1.5, 1.5, 1.5)};
+  gap: 10px;
+`;
+
+const StyledRightPart = styled('div')`
+  display: flex;
+  align-items: center;
+  padding: ${({ theme }) => theme.spacing(1, 1.5, 1.5, 0)};
+`;
 
 type ControlsProps = {
   state?: State;
@@ -48,8 +45,6 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
   screenshotRef,
   screenshotsPresent,
 }) => {
-  const classes = useStyles();
-
   // right section
   const displayTransitionButtons = state;
   const displayScreenshots = onScreenshots;
@@ -66,7 +61,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
 
   return (
     <>
-      <div className={classes.leftPart}>
+      <StyledLeftPart>
         <Button
           onClick={onCancel}
           color="primary"
@@ -86,10 +81,10 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
         >
           <T>translations_cell_save</T>
         </LoadingButton>
-      </div>
+      </StyledLeftPart>
 
       {displayRightPart && (
-        <div className={classes.rightPart}>
+        <StyledRightPart>
           {displayTransitionButtons && (
             <StateTransitionButtons
               state={state}
@@ -109,7 +104,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
               />
             </ControlsButton>
           )}
-        </div>
+        </StyledRightPart>
       )}
     </>
   );

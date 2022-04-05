@@ -1,6 +1,6 @@
 import { FunctionComponent, useEffect } from 'react';
 import { T } from '@tolgee/react';
-import Box from '@material-ui/core/Box';
+import Box from '@mui/material/Box';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';

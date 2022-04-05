@@ -1,43 +1,44 @@
 import React, { useMemo } from 'react';
-import { Typography, makeStyles } from '@material-ui/core';
+import { styled, Typography } from '@mui/material';
 
 import { icuVariants } from 'tg.component/editor/icuVariants';
 import { LimitedHeightText } from './LimitedHeightText';
 
-const useStyles = makeStyles((theme) => ({
-  variants: {
-    display: 'grid',
-    gridTemplateColumns: '80px 1fr',
-    columnGap: 4,
-  },
-  wrapped: {
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-  },
-  parameter: {
-    display: 'flex',
-    margin: '1px 0px 3px 0px',
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-  },
-  chip: {
-    padding: '0px 5px 0px 5px',
-    boxSizing: 'border-box',
-    background: theme.palette.lightBackground.main,
-    borderRadius: 4,
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    maxWidth: '100%',
-    justifySelf: 'start',
-    alignSelf: 'start',
-    paddingBottom: 1,
-    height: 24,
-    marginBottom: 2,
-  },
-}));
+const StyledVariants = styled('div')`
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  column-gap: 4px;
+
+  & .textWrapped {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  & .chip {
+    padding: 0px 5px 0px 5px;
+    box-sizing: border-box;
+    background: ${({ theme }) => theme.palette.lightBackground.main};
+    border-radius: 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    justify-self: start;
+    align-self: start;
+    padding-bottom: 1px;
+    height: 24px;
+    margin-bottom: 2px;
+  }
+`;
+
+const StyledParameter = styled(Typography)`
+  display: flex;
+  margin: 1px 0px 3px 0px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
 
 type Props = {
   limitLines?: boolean;
@@ -53,7 +54,6 @@ export const TranslationVisual: React.FC<Props> = ({
   locale,
   width,
 }) => {
-  const classes = useStyles();
   const { variants, parameters } = useMemo(
     () => icuVariants(text || '', locale),
     [text]
@@ -77,13 +77,9 @@ export const TranslationVisual: React.FC<Props> = ({
     return (
       <div>
         {allParams && (
-          <Typography
-            className={classes.parameter}
-            variant="caption"
-            color="textSecondary"
-          >
+          <StyledParameter variant="caption" color="textSecondary">
             {allParams}
-          </Typography>
+          </StyledParameter>
         )}
         {variants.length === 1 ? (
           <LimitedHeightText
@@ -100,16 +96,16 @@ export const TranslationVisual: React.FC<Props> = ({
             lang={locale}
             lineHeight="26px"
           >
-            <div className={classes.variants}>
+            <StyledVariants>
               {variants.map(({ option, value }, i) => (
                 <React.Fragment key={i}>
-                  <div className={classes.chip}>{option}</div>
-                  <div className={limitLines ? classes.wrapped : undefined}>
+                  <div className="chip">{option}</div>
+                  <div className={limitLines ? 'textWrapped' : undefined}>
                     {value}
                   </div>
                 </React.Fragment>
               ))}
-            </div>
+            </StyledVariants>
           </LimitedHeightText>
         )}
       </div>

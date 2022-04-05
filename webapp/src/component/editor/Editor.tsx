@@ -1,92 +1,86 @@
 import { useMemo, useRef } from 'react';
+import { useTranslate } from '@tolgee/react';
 import CodeMirror from 'codemirror';
-import { Controlled as CodeMirrorReact } from 'react-codemirror2';
+import { Controlled as CodeMirrorReact } from 'react-codemirror2-react-17';
 import { parse } from '@formatjs/icu-messageformat-parser';
+import { styled, GlobalStyles } from '@mui/material';
 import 'codemirror/keymap/sublime';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/lint/lint';
 import 'codemirror/addon/lint/lint.css';
-import { makeStyles } from '@material-ui/core';
-import { useTranslate } from '@tolgee/react';
 
 import icuMode from './icuMode';
 import { useScrollMargins } from 'tg.hooks/useScrollMargins';
 
 export type Direction = 'DOWN';
 
-const useStyles = makeStyles((theme) => ({
-  '@global': {
-    '.CodeMirror-lint-tooltip': {
-      background: 'white',
-      borderRadius: 0,
-      zIndex: theme.zIndex.tooltip,
-    },
-    '.CodeMirror-lint-message-error': {
-      backgroundImage: 'unset',
-      paddingLeft: 0,
-    },
-    '.CodeMirror-gutters': {
-      border: 0,
-      background: 'transparent',
-    },
-  },
-  wrapper: {
-    display: 'flex',
-    flexGrow: 1,
-    alignItems: 'stretch',
-    '& .react-codemirror2': {
-      display: 'flex',
-      flexGrow: 1,
-      position: 'relative',
-    },
-    '& *': {
-      overflow: 'hidden !important',
-    },
-    '& .CodeMirror': {
-      width: '100%',
-      // @ts-ignore
-      minHeight: (props) => props.minHeight,
-      height: '100%',
-      marginLeft: -5,
-      // @ts-ignore
-      background: (props) => props.background,
-    },
-    '& .CodeMirror-lines': {
-      padding: '0px !important',
-    },
-    '& .CodeMirror-line': {
-      padding: '0px !important',
-      fontFamily:
-        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol" !important',
-    },
-    '& .CodeMirror-lint-markers': {
-      width: 5,
-    },
-    '& .CodeMirror-lint-marker-error': {
-      width: 5,
-      background: 'red',
-      cursor: 'default',
-    },
-    '& .cm-function': {
-      color: '#007300',
-    },
-    '& .cm-parameter': {
-      color: '#002bff',
-    },
-    '& .cm-option': {
-      color: '#002bff',
-    },
-    '& .cm-keyword': {
-      color: '#002bff',
-    },
-    '& .cm-string': {
-      color: '#000000',
-    },
-    '& .cm-bracket': {
-      color: '#002bff',
-    },
-  },
-}));
+const StyledWrapper = styled('div')<{
+  minheight: string | number;
+  background: string | undefined;
+}>`
+  display: flex;
+  flex-grow: 1;
+  align-items: stretch;
+  & .react-codemirror2 {
+    display: flex;
+    flex-grow: 1;
+    position: relative;
+  }
+  & .CodeMirror {
+    width: 100%;
+    min-height: ${({ minheight }) => minheight}px;
+    height: 100%;
+    margin-left: -5px;
+    background: ${({ background }) => background};
+
+    * {
+      overflow: visible !important;
+    }
+
+    .CodeMirror-lines {
+      padding: 0px !important;
+    }
+
+    .CodeMirror-line {
+      padding: 0px !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol' !important;
+    }
+    .CodeMirror-lint-markers {
+      width: 5px;
+    }
+    .CodeMirror-gutters {
+      border: 0px;
+      background: transparent;
+    }
+    .CodeMirror-lint-marker-error {
+      width: 4px;
+      background: red;
+      cursor: default;
+      position: relative;
+      top: -1px;
+    }
+    .cm-function {
+      color: #007300;
+    }
+    .cm-parameter {
+      color: #002bff;
+    }
+    .cm-option {
+      color: #002bff;
+    }
+    .cm-keyword {
+      color: #002bff;
+    }
+    .cm-string {
+      color: #000000;
+    }
+    .cm-bracket {
+      color: #002bff;
+    }
+  }
+`;
 
 function linter(text: string, data: any) {
   const errors = data.errors;
@@ -144,7 +138,6 @@ export const Editor: React.FC<Props> = ({
   autoScrollIntoView,
 }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const classes = useStyles({ background, minHeight });
   const t = useTranslate();
 
   const handleChange = (val: string) => {
@@ -185,32 +178,48 @@ export const Editor: React.FC<Props> = ({
   const wrapperScrollMargins = useScrollMargins(scrollMargins);
 
   return (
-    <div
-      data-cy="global-editor"
-      className={classes.wrapper}
-      style={scrollMargins ? wrapperScrollMargins : undefined}
-      ref={wrapperRef}
-    >
-      <CodeMirrorReact
-        value={value}
-        // @ts-ignore
-        defineMode={{ name: 'icu', fn: icuMode }}
-        options={options}
-        onBeforeChange={(editor, data, value) => {
-          handleChange(value);
-        }}
-        onBlur={() => onBlur?.()}
-        onFocus={(e) => {
-          onFocus?.();
-          if (autoScrollIntoView) {
-            wrapperRef.current?.scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'nearest',
-            });
-          }
-        }}
+    <>
+      <GlobalStyles
+        styles={(theme) => ({
+          '.CodeMirror-lint-tooltip': {
+            background: 'white !important',
+            borderRadius: '0px !important',
+            zIndex: theme.zIndex.tooltip + ' !important',
+          },
+          '.CodeMirror-lint-message-error': {
+            backgroundImage: 'unset !important',
+            paddingLeft: '0px !important',
+          },
+        })}
       />
-    </div>
+      <StyledWrapper
+        background={background}
+        minheight={minHeight}
+        data-cy="global-editor"
+        style={scrollMargins ? wrapperScrollMargins : undefined}
+        ref={wrapperRef}
+      >
+        <CodeMirrorReact
+          value={value}
+          // @ts-ignore
+          defineMode={{ name: 'icu', fn: icuMode }}
+          options={options}
+          onBeforeChange={(editor, data, value) => {
+            handleChange(value);
+          }}
+          onBlur={() => onBlur?.()}
+          onFocus={(e) => {
+            onFocus?.();
+            if (autoScrollIntoView) {
+              wrapperRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'nearest',
+              });
+            }
+          }}
+        />
+      </StyledWrapper>
+    </>
   );
 };

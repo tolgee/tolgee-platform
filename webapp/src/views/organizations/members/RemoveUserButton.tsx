@@ -1,5 +1,5 @@
-import { IconButton, Tooltip } from '@material-ui/core';
-import { Clear } from '@material-ui/icons';
+import { IconButton, Tooltip } from '@mui/material';
+import { Clear } from '@mui/icons-material';
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 

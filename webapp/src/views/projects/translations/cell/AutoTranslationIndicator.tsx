@@ -1,6 +1,5 @@
-import clsx from 'clsx';
-import { makeStyles, Tooltip } from '@material-ui/core';
-import { Clear } from '@material-ui/icons';
+import { styled, Tooltip } from '@mui/material';
+import { Clear } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
@@ -16,44 +15,47 @@ import { getProviderImg } from '../TranslationTools/getProviderImg';
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
 
-const useStyles = makeStyles((theme) => ({
-  wrapper: {
-    height: 0,
-  },
-  container: {
-    display: 'inline-flex',
-    flexGrow: 0,
-    alignItems: 'center',
-    height: 20,
-    border: `1px solid transparent`,
-    padding: '0px 4px',
-    marginLeft: -4,
-    borderRadius: 10,
-    '&:hover $clearButton': {
-      display: 'block',
-    },
-    '&:hover': {
-      border: `1px solid ${theme.palette.lightDivider.main}`,
-      transition: 'all 0.1s',
-    },
-  },
-  icon: {
-    fontSize: 16,
-    color: '#249bad',
-  },
-  imgWrapper: {
-    display: 'flex',
-  },
-  providerImg: {
-    width: 14,
-    height: 14,
-  },
-  clearButton: {
-    paddingLeft: 2,
-    fontSize: 18,
-    display: 'none',
-  },
-}));
+const StyledWrapper = styled('div')`
+  height: 0px;
+`;
+
+const StyledClearButton = styled(Clear)`
+  padding-left: 2px;
+  font-size: 18px;
+  display: none;
+`;
+
+const StyledContainer = styled('div')`
+  display: inline-flex;
+  flex-grow: 0;
+  align-items: center;
+  height: 20px;
+  border: 1px solid transparent;
+  padding: 0px 4px;
+  margin-left: -4px;
+  border-radius: 10px;
+
+  &:hover ${StyledClearButton} {
+    display: block;
+  }
+  &:hover {
+    border: 1px solid ${({ theme }) => theme.palette.lightDivider.main};
+    transition: all 0.1s;
+  }
+`;
+
+const StyledImgWrapper = styled('div')`
+  display: flex;
+  & .icon {
+    font-size: 16px;
+    color: #249bad;
+  }
+`;
+
+const StyledProviderImg = styled('img')`
+  width: 14px;
+  height: 14px;
+`;
 
 type Props = {
   keyData: KeyWithTranslationsModel;
@@ -67,7 +69,6 @@ export const AutoTranslationIndicator: React.FC<Props> = ({
   className,
 }) => {
   const t = useTranslate();
-  const classes = useStyles();
   const project = useProject();
   const translation = keyData.translations[lang];
 
@@ -95,11 +96,8 @@ export const AutoTranslationIndicator: React.FC<Props> = ({
   if (translation?.auto) {
     const providerImg = getProviderImg(translation.mtProvider);
     return (
-      <div className={clsx(className, classes.wrapper)}>
-        <div
-          className={classes.container}
-          data-cy="translations-auto-translated-indicator"
-        >
+      <StyledWrapper className={className}>
+        <StyledContainer data-cy="translations-auto-translated-indicator">
           <Tooltip
             title={
               translation.mtProvider
@@ -110,25 +108,24 @@ export const AutoTranslationIndicator: React.FC<Props> = ({
             }
           >
             {translation.mtProvider && providerImg ? (
-              <img src={providerImg} className={classes.providerImg} />
+              <StyledProviderImg src={providerImg} />
             ) : (
-              <div className={classes.imgWrapper}>
+              <StyledImgWrapper>
                 {translation.mtProvider ? (
-                  <MachineTranslationIcon className={classes.icon} />
+                  <MachineTranslationIcon className="icon" />
                 ) : (
-                  <TranslationMemoryIcon className={classes.icon} />
+                  <TranslationMemoryIcon className="icon" />
                 )}
-              </div>
+              </StyledImgWrapper>
             )}
           </Tooltip>
-          <Clear
+          <StyledClearButton
             role="button"
-            className={classes.clearButton}
             onClick={handleClear}
             data-cy="translations-auto-translated-clear-button"
           />
-        </div>
-      </div>
+        </StyledContainer>
+      </StyledWrapper>
     );
   } else {
     return null;

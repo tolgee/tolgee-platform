@@ -9,6 +9,7 @@ import {
 } from '../common/apiCalls/common';
 import { assertMessage, getPopover } from '../common/shared';
 import { loginWithFakeGithub } from '../common/login';
+import { waitForGlobalLoading } from '../common/loading';
 
 context('Login', () => {
   beforeEach(() => {
@@ -22,7 +23,9 @@ context('Login', () => {
     cy.xpath('//input[@name="password"]')
       .type(PASSWORD)
       .should('have.value', PASSWORD);
-    cy.xpath("//button//*[text() = 'Login']").click().should('not.exist');
+    cy.gcy('login-button').click();
+    waitForGlobalLoading();
+    cy.gcy('login-button').should('not.exist');
     cy.xpath("//*[@aria-controls='user-menu']").should('be.visible');
   });
 
@@ -33,7 +36,7 @@ context('Login', () => {
     cy.xpath('//input[@name="password"]')
       .type(PASSWORD)
       .should('have.value', PASSWORD);
-    cy.xpath("//button//*[text() = 'Login']").should('be.visible').click();
+    cy.gcy('login-button').should('be.visible').click();
     cy.xpath(getAnyContainingText('Login')).should('be.visible');
     cy.contains('Invalid credentials').should('be.visible');
   });
@@ -47,7 +50,7 @@ context('Login', () => {
     cy.reload();
     cy.xpath("//*[@aria-controls='user-menu']").click();
     getPopover().contains('Logout').click();
-    cy.contains('Login').should('be.visible');
+    cy.gcy('login-button').should('be.visible');
   });
 
   it('will reset password', () => {

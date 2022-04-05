@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Box, makeStyles, Typography } from '@material-ui/core';
+import { Box, styled, Typography } from '@mui/material';
 import { Formik, FormikProps } from 'formik';
 import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
-import { useTableStyles } from '../tableStyles';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { StyledLanguageTable } from '../tableStyles';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useMachineTranslationSettings } from './useMachineTranslationSettings';
 import { SettingsForm } from './SettingsForm';
@@ -14,36 +14,36 @@ import { SettingsForm } from './SettingsForm';
 type MachineTranslationLanguagePropsDto =
   components['schemas']['MachineTranslationLanguagePropsDto'];
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  toggle: {
-    display: 'flex',
-    justifyContent: 'center',
-    gridColumn: '1 / -1',
-    cursor: 'pointer',
-    background: theme.palette.extraLightBackground.main,
-    transition: 'background 0.1s ease-in-out',
-    '&:active, &:hover': {
-      background: theme.palette.lightBackground.main,
-    },
-  },
-  hint: {
-    color: theme.palette.text.secondary,
-  },
-  loading: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-  },
-}));
+const StyledContainer = styled('div')`
+  display: flex;
+  flex-direction: column;
+`;
+
+const StyledToggle = styled('div')`
+  display: flex;
+  justify-content: center;
+  grid-column: 1 / -1;
+  cursor: pointer;
+  background-color: ${({ theme }) => theme.palette.extraLightBackground.main};
+  transition: background-color 0.1s ease-in-out;
+  &:active,
+  &:hover {
+    background: ${({ theme }) => theme.palette.lightBackground.main};
+  }
+`;
+
+const StyledHint = styled(Typography)`
+  color: ${({ theme }) => theme.palette.text.secondary};
+`;
+
+const StyledLoadingWrapper = styled('div')`
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+`;
 
 export const MachineTranslation = () => {
-  const classes = useStyles();
-  const tableClasses = useTableStyles();
   const formRef = useRef<FormikProps<any>>();
   const [expanded, setExpanded] = useState(false);
   const t = useTranslate();
@@ -148,8 +148,8 @@ export const MachineTranslation = () => {
   return (
     <>
       {settings.data && languages.data && creditBalance.data && (
-        <div className={classes.container}>
-          <div className={tableClasses.table} style={{ gridTemplateColumns }}>
+        <StyledContainer>
+          <StyledLanguageTable style={{ gridTemplateColumns }}>
             <Formik
               key={formInstance}
               initialValues={initialValues}
@@ -170,18 +170,17 @@ export const MachineTranslation = () => {
               }}
             </Formik>
             {languagesCount > 1 && (
-              <div
-                className={classes.toggle}
+              <StyledToggle
                 role="button"
                 onClick={() => setExpanded((expanded) => !expanded)}
               >
                 {expanded ? <ExpandLess /> : <ExpandMore />}
-              </div>
+              </StyledToggle>
             )}
-            <div className={classes.loading}>
+            <StyledLoadingWrapper>
               <SmoothProgress loading={isUpdating} />
-            </div>
-          </div>
+            </StyledLoadingWrapper>
+          </StyledLanguageTable>
           {creditBalance.data.creditBalance !== -1 && (
             <Box my={1} display="flex" flexDirection="column">
               <Typography variant="body1">
@@ -189,12 +188,12 @@ export const MachineTranslation = () => {
                   balance: String(creditBalance.data.creditBalance / 100),
                 })}
               </Typography>
-              <Typography variant="caption" className={classes.hint}>
+              <StyledHint variant="caption">
                 {t('project_languages_credit_balance_hint')}
-              </Typography>
+              </StyledHint>
             </Box>
           )}
-        </div>
+        </StyledContainer>
       )}
     </>
   );
