@@ -1,3 +1,10 @@
+# [2.16.0](https://github.com/tolgee/tolgee-platform/compare/v2.15.2...v2.16.0) (2022-04-05)
+
+
+### Features
+
+* auto hide topbar and filters sticky ([fb455ff](https://github.com/tolgee/tolgee-platform/commit/fb455ffd02ed6367f6e76be9f6113ef1671fd2c5))
+
 ## [2.15.1](https://github.com/tolgee/tolgee-platform/compare/v2.15.0...v2.15.1) (2022-04-04)
 
 
