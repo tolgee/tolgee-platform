@@ -14,12 +14,19 @@ class ZipTypeProcessor : ImportArchiveProcessor {
     var nextEntry: ZipEntry?
     val files = mutableListOf<ImportFileDto>()
     while (zipInputStream.nextEntry.also { nextEntry = it } != null) {
-      nextEntry?.name?.let { name ->
-        if (!IGNORE_PREFIXES.any { name.startsWith(it) }) {
-          files.add(ImportFileDto(name = nextEntry!!.name, zipInputStream.readAllBytes().inputStream()))
-        }
+      val fileName = nextEntry?.name?.replaceRootSlash() ?: continue
+
+      if (!IGNORE_PREFIXES.any { fileName.startsWith(it) }) {
+        files.add(
+          ImportFileDto(
+            name = fileName,
+            zipInputStream.readAllBytes().inputStream()
+          )
+        )
       }
     }
     return files
   }
+
+  private fun String.replaceRootSlash() = this.replace("^/".toRegex(), "")
 }

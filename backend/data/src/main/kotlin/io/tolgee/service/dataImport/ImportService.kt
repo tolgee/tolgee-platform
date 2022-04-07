@@ -1,6 +1,5 @@
 package io.tolgee.service.dataImport
 
-import io.tolgee.component.CurrentDateProvider
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.exceptions.BadRequestException
@@ -27,10 +26,7 @@ import io.tolgee.repository.dataImport.ImportRepository
 import io.tolgee.repository.dataImport.ImportTranslationRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueParamRepository
 import io.tolgee.repository.dataImport.issues.ImportFileIssueRepository
-import io.tolgee.security.AuthenticationFacade
-import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.KeyMetaService
-import org.apache.commons.lang3.time.DateUtils
 import org.springframework.context.ApplicationContext
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -43,8 +39,6 @@ import org.springframework.transaction.interceptor.TransactionInterceptor
 class ImportService(
   private val importRepository: ImportRepository,
   private val importFileRepository: ImportFileRepository,
-  private val authenticationFacade: AuthenticationFacade,
-  private val projectHolder: ProjectHolder,
   private val importFileIssueRepository: ImportFileIssueRepository,
   private val importLanguageRepository: ImportLanguageRepository,
   private val importKeyRepository: ImportKeyRepository,
@@ -52,7 +46,7 @@ class ImportService(
   private val importTranslationRepository: ImportTranslationRepository,
   private val importFileIssueParamRepository: ImportFileIssueParamRepository,
   private val keyMetaService: KeyMetaService,
-  private val currentDateProvider: CurrentDateProvider
+  private val removeExpiredImportService: RemoveExpiredImportService
 ) {
   @Transactional
   fun addFiles(
@@ -61,9 +55,7 @@ class ImportService(
     project: Project,
     userAccount: UserAccount
   ): List<ErrorResponseBody> {
-    val import = find(project.id, userAccount.id)
-      .removeIfExpired()
-      ?: Import(userAccount, project)
+    val import = findNotExpired(project.id, userAccount.id) ?: Import(userAccount, project)
 
     val nonNullMessageClient = messageClient ?: { _, _ -> }
     val languages = findLanguages(import)
@@ -125,26 +117,16 @@ class ImportService(
    * When expired import is found, it is removed
    */
   fun getNotExpired(projectId: Long, authorId: Long): Import {
-    return find(projectId, authorId).removeIfExpired() ?: throw NotFoundException()
+    return findNotExpired(projectId, authorId) ?: throw NotFoundException()
+  }
+
+  private fun findNotExpired(projectId: Long, userAccountId: Long): Import? {
+    val import = this.find(projectId, userAccountId)
+    return removeExpiredImportService.removeIfExpired(import)
   }
 
   fun find(projectId: Long, authorId: Long): Import? {
     return this.importRepository.findByProjectIdAndAuthorId(projectId, authorId)
-  }
-
-  private fun Import?.removeIfExpired(): Import? {
-    this?.let { import ->
-      if (import.createdAt == null) {
-        return null
-      }
-      val minDate = DateUtils.addHours(currentDateProvider.getDate(), -2)
-      if (minDate > import.createdAt) {
-        deleteImport(import)
-        throw NotFoundException(io.tolgee.constants.Message.IMPORT_HAS_EXPIRED)
-      }
-      return import
-    }
-    return null
   }
 
   fun findOrThrow(projectId: Long, authorId: Long) =

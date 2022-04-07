@@ -18,7 +18,7 @@ class JsonFileExporterTest {
   fun `it scopes and handles collisions`() {
     val data = generateTranslationsForKeys(listOf("a.a.a.a", "a.a", "a.a.a", "a.b.b", "a.c.c", "b", "b.b"))
     val exported = JsonFileExporter(data, ExportParams()).produceFiles()
-    val json = exported.getFileTextContent("/en.json")
+    val json = exported.getFileTextContent("en.json")
     val parsed = jacksonObjectMapper()
       .readValue<Map<String, Any>>(json)
 
@@ -46,7 +46,7 @@ class JsonFileExporterTest {
       }
     ).produceFiles()
 
-    val ajson = exported.getFileTextContent("/en.json")
+    val ajson = exported.getFileTextContent("en.json")
     assertThatJson(ajson) {
       node("a").isEqualTo("text")
     }
@@ -69,7 +69,7 @@ class JsonFileExporterTest {
       data,
       ExportParams()
     ).produceFiles()
-    val parsed: LinkedHashMap<String, String> = exported.parseFileContent("/en.json")
+    val parsed: LinkedHashMap<String, String> = exported.parseFileContent("en.json")
     assertThat(parsed.keys.toList()).isEqualTo(keys)
   }
 
@@ -82,7 +82,7 @@ class JsonFileExporterTest {
       data,
       ExportParams()
     ).produceFiles()
-    assertThat(exported.getFileTextContent("/en.json")).contains("\n").contains("  ")
+    assertThat(exported.getFileTextContent("en.json")).contains("\n").contains("  ")
   }
 
   private fun Map<String, InputStream>.getFileTextContent(fileName: String): String {

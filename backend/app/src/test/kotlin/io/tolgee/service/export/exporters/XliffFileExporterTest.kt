@@ -36,13 +36,13 @@ class XliffFileExporterTest {
     ).produceFiles()
 
     assertThat(files).hasSize(2)
-    var fileContent = files["/de.xlf"]!!.bufferedReader().readText()
+    var fileContent = files["de.xlf"]!!.bufferedReader().readText()
     var transUnit = assertHasTransUnitAndReturn(fileContent, "en", "de")
     assertThat(transUnit.attribute("id").value).isEqualTo("A key")
     assertThat(transUnit.selectNodes("./source")).isEmpty()
     assertThat(transUnit.selectNodes("./target")[0].text).isEqualTo("Z translation")
 
-    fileContent = files["/en.xlf"]!!.bufferedReader().readText()
+    fileContent = files["en.xlf"]!!.bufferedReader().readText()
     transUnit = assertHasTransUnitAndReturn(fileContent, "en", "en")
     assertThat(transUnit.attribute("id").value).isEqualTo("Z key")
     assertThat(transUnit.selectNodes("./source")[0].text).isEqualTo("A translation")
@@ -76,7 +76,7 @@ class XliffFileExporterTest {
     ).produceFiles()
 
     assertThat(files).hasSize(2)
-    val fileContent = files["/de.xlf"]!!.bufferedReader().readText()
+    val fileContent = files["de.xlf"]!!.bufferedReader().readText()
     val document = fileContent.parseToDocument()
     val valid = document.selectNodes("//trans-unit[@id = 'html_key']/source/p")[0]
     assertThat(valid.text).isEqualTo("Sweat jesus, this is HTML!")
