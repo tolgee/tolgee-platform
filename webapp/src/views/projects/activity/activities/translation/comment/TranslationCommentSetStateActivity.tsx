@@ -4,19 +4,20 @@ import { T, useTranslate } from '@tolgee/react';
 import { Box } from '@material-ui/core';
 import {
   ActivityValue,
-  getOnlyModifiedEntityModification,
+  getOnlyModifiedEntity,
   prepareValue,
 } from '../../../activityUtil';
 
 export const TranslationCommentSetStateActivity = (props: {
   item: components['schemas']['ProjectActivityModel'];
 }) => {
-  const newState =
-    (getOnlyModifiedEntityModification({
-      item: props.item,
-      entity: 'TranslationComment',
-      field: 'state',
-    })?.new as any as string | undefined) || '?';
+  const modifiedComment = getOnlyModifiedEntity({
+    item: props.item,
+    entity: 'TranslationComment',
+  });
+
+  const newState = modifiedComment?.modifications?.['state']?.new as any;
+  const commentText = modifiedComment?.description?.['text'];
 
   const t = useTranslate();
 
@@ -33,8 +34,8 @@ export const TranslationCommentSetStateActivity = (props: {
         <T
           parameters={{
             translationText: prepareValue(translationText),
-            commentText: '??',
-            newState: stateTranslations[newState] || '?',
+            commentText: prepareValue(commentText),
+            newState: prepareValue(stateTranslations[newState || '']),
             h: <ActivityValue />,
           }}
         >

@@ -10,14 +10,11 @@ class KeyTagsEditActivity() : Activity {
   override val type: String = "KEY_TAGS_EDIT"
 
   override val metaModifier: (
-    (
-      meta: MutableMap<String, Any?>,
-      activityModifiedEntity: ActivityModifiedEntity,
-      entity: EntityWithId
-    ) -> Unit
+  (
+    meta: MutableMap<String, Any?>,
+    activityModifiedEntity: ActivityModifiedEntity,
+    entity: EntityWithId
+  ) -> Unit
   )? = null
 
-  override fun getModifications(revisionIds: Collection<Long>): Map<Long, List<ActivityModifiedEntity>>? {
-    return null
-  }
 }

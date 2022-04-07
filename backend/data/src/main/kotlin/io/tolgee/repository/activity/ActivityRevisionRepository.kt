@@ -1,5 +1,6 @@
-package io.tolgee.repository
+package io.tolgee.repository.activity
 
+import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import org.springframework.data.domain.Page
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Repository
 interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
   @Query(
     """
-    from ActivityRevision ar where ar.projectId = :projectId and ar.type is not null
+    from ActivityRevision ar
+    where ar.projectId = :projectId and ar.type is not null
   """
   )
   fun getForProject(projectId: Long, pageable: Pageable): Page<ActivityRevision>
@@ -24,4 +26,14 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     """
   )
   fun getModificationsForEachRevision(ids: Collection<Long>): List<ActivityModifiedEntity>
+
+  @Query(
+    """
+      select dr
+      from ActivityRevision ar 
+      join ar.describingRelations dr
+      where ar.id in :revisionIds
+    """
+  )
+  fun getRelationsForRevisions(revisionIds: List<Long>): List<ActivityDescribingEntity>
 }

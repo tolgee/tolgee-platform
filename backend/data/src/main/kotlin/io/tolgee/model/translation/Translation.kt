@@ -1,13 +1,15 @@
 package io.tolgee.model.translation
 
-import io.tolgee.activity.ActivityLogged
+import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
+import io.tolgee.activity.annotation.ActivityLoggedEntity
+import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.constants.MtServiceType
 import io.tolgee.model.Language
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.enums.TranslationState
 import io.tolgee.model.key.Key
 import org.hibernate.annotations.ColumnDefault
-import org.hibernate.envers.Audited
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Enumerated
@@ -26,13 +28,16 @@ import javax.validation.constraints.NotNull
     )
   ]
 )
-@Audited
-@ActivityLogged
+
+@ActivityLoggedEntity
+@ActivityEntityDescribingPaths(paths = ["key", "language"])
 class Translation(
   @Column(columnDefinition = "text")
-  @ActivityLogged
+  @ActivityLoggedProp
+  @ActivityDescribingProp
   var text: String? = null
 ) : StandardAuditModel() {
+
   @ManyToOne(optional = false)
   @field:NotNull
   lateinit var key: Key
@@ -42,21 +47,21 @@ class Translation(
 
   @Enumerated
   @ColumnDefault(value = "2")
-  @ActivityLogged
+  @ActivityLoggedProp
   var state: TranslationState = TranslationState.TRANSLATED
 
   /**
    * Was translated automatically?
    */
   @ColumnDefault("false")
-  @ActivityLogged
+  @ActivityLoggedProp
   var auto: Boolean = false
 
   /**
    * Which machine translation provider was used to translate this value?
    */
   @Enumerated
-  @ActivityLogged
+  @ActivityLoggedProp
   var mtProvider: MtServiceType? = null
 
   @OneToMany(mappedBy = "translation")

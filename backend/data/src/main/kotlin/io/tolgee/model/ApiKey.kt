@@ -1,7 +1,6 @@
 package io.tolgee.model
 
 import io.tolgee.model.enums.ApiScope
-import org.hibernate.envers.Audited
 import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.EnumType
@@ -16,7 +15,7 @@ import javax.validation.constraints.NotNull
 @Suppress("JoinDeclarationAndAssignment")
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["key"], name = "api_key_unique")])
-@Audited
+
 class ApiKey(
   @field:NotEmpty
   @field:NotNull

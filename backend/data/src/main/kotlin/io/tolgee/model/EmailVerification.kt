@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import org.hibernate.envers.Audited
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -12,7 +11,7 @@ import javax.validation.constraints.NotBlank
 
 @Entity
 @Table(uniqueConstraints = [])
-@Audited
+
 data class EmailVerification(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,7 +1,6 @@
 package io.tolgee.model
 
 import io.tolgee.model.enums.OrganizationRoleType
-import org.hibernate.envers.Audited
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
@@ -23,7 +22,7 @@ import javax.validation.constraints.NotNull
     )
   ]
 )
-@Audited
+
 data class OrganizationRole(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
