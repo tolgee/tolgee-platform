@@ -1,6 +1,5 @@
 package io.tolgee.activity
 
-import io.tolgee.activity.activities.common.ActivityProvider
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.holders.ActivityHolder
@@ -26,10 +25,6 @@ import kotlin.reflect.full.hasAnnotation
 
 @Component
 class ActivityInterceptor : EmptyInterceptor() {
-
-  @Autowired
-  @org.springframework.context.annotation.Lazy
-  lateinit var activityProvider: ActivityProvider
 
   @Autowired
   lateinit var applicationContext: ApplicationContext
@@ -87,8 +82,9 @@ class ActivityInterceptor : EmptyInterceptor() {
     }
 
     val collectionOwner = collection.owner
-    if (collectionOwner !is EntityWithId
-      || !collectionOwner::class.hasAnnotation<ActivityLoggedEntity>()) {
+    if (collectionOwner !is EntityWithId ||
+      !collectionOwner::class.hasAnnotation<ActivityLoggedEntity>()
+    ) {
       return
     }
 
@@ -152,12 +148,6 @@ class ActivityInterceptor : EmptyInterceptor() {
           entity.id
         )
       }
-
-    activityRevision.meta = activityHolder.activity?.metaModifier?.let { modifier ->
-      val meta = activityRevision.meta ?: activityHolder.meta
-      modifier(meta, activityModifiedEntity, entity)
-      meta
-    }
 
     return activityModifiedEntity
   }
@@ -238,7 +228,7 @@ class ActivityInterceptor : EmptyInterceptor() {
         activityRevision = ActivityRevision().also { revision ->
           revision.authorId = userAccount?.id
           revision.projectId = projectHolder.project.id
-          revision.type = activityHolder.activity?.type
+          revision.type = activityHolder.activity?.name
         }
         activityHolder.activityRevision = activityRevision
       }

@@ -1,11 +1,6 @@
 package io.tolgee.component
 
-import io.tolgee.activity.activities.key.ComplexEditActivity
-import io.tolgee.activity.activities.key.KeyNameEditActivity
-import io.tolgee.activity.activities.key.KeyTagsEditActivity
-import io.tolgee.activity.activities.key.ScreenshotAddActivity
-import io.tolgee.activity.activities.key.ScreenshotDeleteActivity
-import io.tolgee.activity.activities.translation.SetTranslationsActivity
+import io.tolgee.activity.ActivityType
 import io.tolgee.activity.holders.ActivityHolder
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
@@ -43,7 +38,6 @@ class KeyComplexEditHelper(
   private val screenshotService: ScreenshotService = applicationContext.getBean(ScreenshotService::class.java)
   private val authenticationFacade: AuthenticationFacade = applicationContext.getBean(AuthenticationFacade::class.java)
   private val activityHolder: ActivityHolder = applicationContext.getBean(ActivityHolder::class.java)
-
 
   private lateinit var key: Key
   private var modifiedTranslations: Map<String, String?>? = null
@@ -83,32 +77,32 @@ class KeyComplexEditHelper(
 
   private fun setActivityHolder() {
     if (!isOnlyOneOperation) {
-      activityHolder.activityClass = ComplexEditActivity::class.java
+      activityHolder.activity = ActivityType.COMPLEX_EDIT
       return
     }
 
     if (areTranslationsModified) {
-      activityHolder.activityClass = SetTranslationsActivity::class.java
+      activityHolder.activity = ActivityType.SET_TRANSLATIONS
       return
     }
 
     if (areTagsModified) {
-      activityHolder.activityClass = KeyTagsEditActivity::class.java
+      activityHolder.activity = ActivityType.KEY_TAGS_EDIT
       return
     }
 
     if (isKeyModified) {
-      activityHolder.activityClass = KeyNameEditActivity::class.java
+      activityHolder.activity = ActivityType.KEY_NAME_EDIT
       return
     }
 
     if (isScreenshotAdded) {
-      activityHolder.activityClass = ScreenshotAddActivity::class.java
+      activityHolder.activity = ActivityType.SCREENSHOT_ADD
       return
     }
 
     if (isScreenshotDeleted) {
-      activityHolder.activityClass = ScreenshotDeleteActivity::class.java
+      activityHolder.activity = ActivityType.SCREENSHOT_DELETE
       return
     }
   }
