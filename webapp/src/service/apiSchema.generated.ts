@@ -951,7 +951,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -963,6 +962,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -981,11 +981,18 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    EntityDescription: {
+      entityClass: string;
+      entityId: number;
+      data: { [key: string]: { [key: string]: unknown } };
+    };
     ModifiedEntityModel: {
       entityId: number;
+      description?: { [key: string]: { [key: string]: unknown } };
       modifications?: {
         [key: string]: components["schemas"]["PropertyModification"];
       };
+      relations?: { [key: string]: components["schemas"]["EntityDescription"] };
     };
     PagedModelProjectActivityModel: {
       _embedded?: {

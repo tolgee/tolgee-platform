@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import org.hibernate.envers.Audited
 import org.springframework.data.util.ProxyUtils
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -9,7 +8,7 @@ import javax.persistence.MappedSuperclass
 import javax.persistence.SequenceGenerator
 
 @MappedSuperclass
-@Audited
+
 abstract class StandardAuditModel : AuditModel(), EntityWithId {
   @Id
   @SequenceGenerator(

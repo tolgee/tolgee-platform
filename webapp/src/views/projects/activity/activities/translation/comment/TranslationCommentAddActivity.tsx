@@ -4,18 +4,22 @@ import { T } from '@tolgee/react';
 import { Box } from '@material-ui/core';
 import {
   ActivityValue,
-  getOnlyModifiedEntityModification,
+  getOnlyModifiedEntity,
   prepareValue,
 } from '../../../activityUtil';
 
 export const TranslationCommentAddActivity = (props: {
   item: components['schemas']['ProjectActivityModel'];
 }) => {
-  const commentText = getOnlyModifiedEntityModification({
+  const commentText = getOnlyModifiedEntity({
     item: props.item,
     entity: 'TranslationComment',
-    field: 'text',
-  })?.new;
+  })?.modifications?.['text']?.new;
+
+  const keyName = getOnlyModifiedEntity({
+    item: props.item,
+    entity: 'TranslationComment',
+  })?.relations?.['translation']['relations']['key'].data.name;
 
   const translationText = props.item.meta?.['translationText'];
 
@@ -24,6 +28,7 @@ export const TranslationCommentAddActivity = (props: {
       <Box>
         <T
           parameters={{
+            keyName: prepareValue(keyName),
             commentText: prepareValue(commentText),
             translationText: prepareValue(translationText),
             h: <ActivityValue />,

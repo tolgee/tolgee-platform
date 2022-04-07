@@ -1628,7 +1628,23 @@
     <changeSet author="jenik (generated)" id="1648644553219-1">
         <createSequence incrementBy="10" sequenceName="activity_sequence" startValue="10"/>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1648830321311-1">
+    <changeSet author="jenik (generated)" id="1649159424935-1">
+        <createTable tableName="activity_describing_entity">
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_describing_entityPK"/>
+            </column>
+            <column name="entity_class" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_describing_entityPK"/>
+            </column>
+            <column name="data" type="JSONB"/>
+            <column name="describing_relations" type="JSONB"/>
+            <column name="revision_type" type="INTEGER"/>
+            <column name="activity_revision_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_describing_entityPK"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1649159424935-2">
         <createTable tableName="activity_modified_entity">
             <column name="entity_id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="activity_modified_entityPK"/>
@@ -1636,6 +1652,8 @@
             <column name="entity_class" type="VARCHAR(255)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="activity_modified_entityPK"/>
             </column>
+            <column name="describing_relations" type="JSONB"/>
+            <column name="description" type="JSONB"/>
             <column name="modifications" type="JSONB"/>
             <column name="revision_type" type="INTEGER"/>
             <column name="activity_revision_id" type="BIGINT">
@@ -1643,7 +1661,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1648830321311-2">
+    <changeSet author="jenik (generated)" id="1649159424935-3">
         <createTable tableName="activity_revision">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="activity_revisionPK"/>
@@ -1657,17 +1675,20 @@
             <column name="type" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1648830321311-3">
+    <changeSet author="jenik (generated)" id="1649159424935-4">
         <createIndex indexName="IDXau6hururiosck0in4s0bintp4" tableName="activity_revision">
             <column name="type"/>
         </createIndex>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1648830321311-4">
+    <changeSet author="jenik (generated)" id="1649159424935-5">
         <createIndex indexName="IDXe1pk0fttwygawrf99gbby6scc" tableName="activity_revision">
             <column name="author_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1648830321311-5">
+    <changeSet author="jenik (generated)" id="1649159424935-6">
+        <addForeignKeyConstraint baseColumnNames="activity_revision_id" baseTableName="activity_describing_entity" constraintName="FK9xs5a07fba5yqje5jqm6qrehs" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_revision" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1649159424935-7">
         <addForeignKeyConstraint baseColumnNames="activity_revision_id" baseTableName="activity_modified_entity" constraintName="FKtqmx9nlfhcmio41b5xieb0ki4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_revision" validate="true"/>
     </changeSet>
 </databaseChangeLog>

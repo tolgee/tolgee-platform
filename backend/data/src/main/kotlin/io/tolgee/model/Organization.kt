@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import org.hibernate.envers.Audited
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -24,7 +23,7 @@ import javax.validation.constraints.Size
     UniqueConstraint(columnNames = ["third_party_billing_id"], name = "organization_third_party_billing_id_unique")
   ]
 )
-@Audited
+
 class Organization(
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0,

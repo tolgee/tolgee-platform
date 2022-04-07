@@ -1,8 +1,8 @@
 package io.tolgee.model
 
-import io.tolgee.activity.ActivityLogged
+import io.tolgee.activity.annotation.ActivityLoggedEntity
+import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.key.Key
-import org.hibernate.envers.Audited
 import java.util.*
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -27,8 +27,8 @@ import javax.validation.constraints.Size
 @Entity
 @EntityListeners(Project.Companion.ProjectListener::class)
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
-@Audited
-@ActivityLogged
+
+@ActivityLoggedEntity
 class Project(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,15 +36,15 @@ class Project(
 
   @field:NotBlank
   @field:Size(min = 3, max = 50)
-  @ActivityLogged
+  @ActivityLoggedProp
   var name: String = "",
 
   @field:Size(min = 3, max = 2000)
-  @ActivityLogged
+  @ActivityLoggedProp
   var description: String? = null,
 
   @Column(name = "address_part")
-  @ActivityLogged
+  @ActivityLoggedProp
   @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   var slug: String? = null,
@@ -70,14 +70,14 @@ class Project(
   var organizationOwner: Organization? = null
 
   @OneToOne(fetch = FetchType.LAZY)
-  @ActivityLogged
+  @ActivityLoggedProp
   var baseLanguage: Language? = null
 
-  @ActivityLogged
+  @ActivityLoggedProp
   @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "project")
   var autoTranslationConfig: AutoTranslationConfig? = null
 
-  @ActivityLogged
+  @ActivityLoggedProp
   override var avatarHash: String? = null
 
   constructor(name: String, description: String? = null, slug: String?, userOwner: UserAccount?) :

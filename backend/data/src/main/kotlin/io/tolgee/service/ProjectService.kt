@@ -26,6 +26,7 @@ import io.tolgee.model.views.ProjectView
 import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.repository.ProjectRepository
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.util.SlugGenerator
@@ -56,6 +57,8 @@ class ProjectService constructor(
   private val slugGenerator: SlugGenerator,
   private val userAccountService: UserAccountService,
   private val avatarService: AvatarService,
+  @Lazy
+  private val projectHolder: ProjectHolder
 ) {
   @set:Autowired
   @set:Lazy
@@ -138,6 +141,8 @@ class ProjectService constructor(
     }
 
     entityManager.persist(project)
+    projectHolder.project = ProjectDto.fromEntity(project)
+
     val createdLanguages = dto.languages!!.map { languageService.createLanguage(it, project) }
     project.baseLanguage = getOrCreateBaseLanguage(dto, createdLanguages)
 
@@ -153,7 +158,7 @@ class ProjectService constructor(
 
     dto.baseLanguageId?.let {
       val language = project.languages.find { it.id == dto.baseLanguageId }
-        ?: throw BadRequestException(io.tolgee.constants.Message.LANGUAGE_NOT_FROM_PROJECT)
+        ?: throw BadRequestException(Message.LANGUAGE_NOT_FROM_PROJECT)
       project.baseLanguage = language
     }
 

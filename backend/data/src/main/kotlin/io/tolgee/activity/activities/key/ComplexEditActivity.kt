@@ -11,11 +11,11 @@ class ComplexEditActivity() : Activity {
   override val type: String = "COMPLEX_EDIT_ACTIVITY"
 
   override val metaModifier: (
-    (
-      meta: MutableMap<String, Any?>,
-      activityModifiedEntity: ActivityModifiedEntity,
-      entity: EntityWithId
-    ) -> Unit
+  (
+    meta: MutableMap<String, Any?>,
+    activityModifiedEntity: ActivityModifiedEntity,
+    entity: EntityWithId
+  ) -> Unit
   )? = { meta: MutableMap<String, Any?>, activityModifiedEntity: ActivityModifiedEntity, entity: EntityWithId ->
     if (entity is Translation) {
       val tags = meta.computeIfAbsent("modifiedTranslationTags") {
@@ -25,7 +25,4 @@ class ComplexEditActivity() : Activity {
     }
   }
 
-  override fun getModifications(revisionIds: Collection<Long>): Map<Long, List<ActivityModifiedEntity>>? {
-    return null
-  }
 }

@@ -1,6 +1,8 @@
 package io.tolgee.model.activity
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import org.hibernate.annotations.NotFound
+import org.hibernate.annotations.NotFoundAction
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
@@ -65,6 +67,10 @@ class ActivityRevision : java.io.Serializable {
    * Project of the change
    */
   var projectId: Long? = null
+
+  @OneToMany(mappedBy = "activityRevision")
+  @NotFound(action = NotFoundAction.IGNORE)
+  var describingRelations: MutableList<ActivityDescribingEntity> = mutableListOf()
 
   @OneToMany(mappedBy = "activityRevision")
   var modifiedEntities: MutableList<ActivityModifiedEntity> = mutableListOf()

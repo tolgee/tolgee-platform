@@ -2,8 +2,9 @@ package io.tolgee.model.activity
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.EntityDescriptionRef
-import io.tolgee.activity.PropertyModification
 import io.tolgee.activity.RevisionType
+import org.hibernate.annotations.NotFound
+import org.hibernate.annotations.NotFoundAction
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
@@ -18,10 +19,11 @@ import javax.persistence.ManyToOne
 @TypeDefs(
   value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
-@IdClass(ActivityModifiedEntityId::class)
-class ActivityModifiedEntity(
+@IdClass(ActivityDescribingEntityId::class)
+class ActivityDescribingEntity(
   @ManyToOne
   @Id
+  @NotFound(action = NotFoundAction.IGNORE)
   val activityRevision: ActivityRevision,
 
   @Id
@@ -32,10 +34,7 @@ class ActivityModifiedEntity(
 ) : Serializable {
 
   @Type(type = "jsonb")
-  var modifications: MutableMap<String, PropertyModification> = mutableMapOf()
-
-  @Type(type = "jsonb")
-  var description: Map<String, Any?>? = null
+  var data: Map<String, Any?> = mutableMapOf()
 
   @Type(type = "jsonb")
   var describingRelations: Map<String, EntityDescriptionRef>? = null

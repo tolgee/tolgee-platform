@@ -12,7 +12,6 @@ export const ActivityValue: FC<{ maxLength?: number }> = (props) => {
     typeof children[0] === 'string'
   ) {
     const string = children[0];
-    console.log(maxLength, string);
 
     if (string.length > maxLength) {
       children = [string.substr(0, maxLength - 3) + '...'];
@@ -29,7 +28,13 @@ export const ActivityValue: FC<{ maxLength?: number }> = (props) => {
 
   return (
     <Wrapper>
-      <span style={{ backgroundColor: '#f1f1f1', padding: 2, borderRadius: 5 }}>
+      <span
+        style={{
+          backgroundColor: '#f1f1f1',
+          padding: '3px 6px',
+          borderRadius: 5,
+        }}
+      >
         {children}
       </span>
     </Wrapper>
@@ -41,12 +46,22 @@ export const prepareValue = (value: any) => {
   return string;
 };
 
-export const getOnlyModifiedEntityModification = (props: {
+export const getOnlyModifiedEntity = (props: {
   item: components['schemas']['ProjectActivityModel'];
   entity: string;
-  field: string;
 }) => {
-  return props.item.modifiedEntities?.[props.entity][0]?.modifications?.[
-    props.field
-  ];
+  return props.item.modifiedEntities?.[props.entity]?.[0];
+};
+
+export const getAllModifiedEntites = (props: {
+  item: components['schemas']['ProjectActivityModel'];
+  entity: string;
+}) => {
+  return props.item.modifiedEntities?.[props.entity];
+};
+
+export const renderEntityLanguage = (languageDescription) => {
+  const name = languageDescription.data['name'];
+  const flagEmoji = languageDescription.data['flagEmoji'];
+  return `${name}${flagEmoji ? ` ${flagEmoji}` : ''}`;
 };
