@@ -1009,12 +1009,29 @@ export interface components {
     ProjectActivityModel: {
       revisionId: number;
       timestamp: number;
-      type: string;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
       };
       meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
     };
     PropertyModification: {
       old?: { [key: string]: unknown };

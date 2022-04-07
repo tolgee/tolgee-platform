@@ -4,47 +4,39 @@ import { T } from '@tolgee/react';
 import { Box } from '@material-ui/core';
 import {
   ActivityValue,
-  getOnlyModifiedEntityModification,
+  getOnlyModifiedEntity,
   prepareValue,
 } from '../../activityUtil';
 
-export const SetTranslationsActivity = (props: {
+export const SetTranslationsStateActivity = (props: {
   item: components['schemas']['ProjectActivityModel'];
 }) => {
-  const keyName = props.item.meta?.['keyName'];
-  const languageTag = props.item.meta?.['languageTag'];
-
-  const textModification = getOnlyModifiedEntityModification({
+  const modifiedTranslation = getOnlyModifiedEntity({
     item: props.item,
     entity: 'Translation',
-    field: 'text',
   });
 
-  const oldValue = textModification?.old;
-  const newValue = textModification?.new;
+  const stateModification = modifiedTranslation?.modifications?.['state'];
+  const newState = stateModification?.new;
+  const keyName = modifiedTranslation?.relations?.['key']?.data?.['name'];
+
+  const translationText = getOnlyModifiedEntity({
+    item: props.item,
+    entity: 'Translation',
+  })?.description?.['text'];
 
   return (
     <>
       <Box>
         <T
           parameters={{
+            newState: prepareValue(newState),
             keyName: prepareValue(keyName),
-            languageTag: prepareValue(languageTag),
-            h: <ActivityValue />,
-          }}
-        >
-          activity_set_translation
-        </T>
-      </Box>
-      <Box>
-        <T
-          parameters={{
-            oldValue: prepareValue(oldValue),
-            newValue: prepareValue(newValue),
+            translationText: prepareValue(translationText),
             h: <ActivityValue maxLength={50} />,
           }}
         >
-          activity_set_value_from_to
+          activity_set_translation_state
         </T>
       </Box>
     </>

@@ -1,6 +1,7 @@
 package io.tolgee.model.activity
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import io.tolgee.activity.ActivityType
 import org.hibernate.annotations.NotFound
 import org.hibernate.annotations.NotFoundAction
 import org.hibernate.annotations.Type
@@ -12,6 +13,8 @@ import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
@@ -61,7 +64,8 @@ class ActivityRevision : java.io.Serializable {
   @Type(type = "jsonb")
   var meta: MutableMap<String, Any?>? = null
 
-  var type: String? = null
+  @Enumerated(EnumType.STRING)
+  var type: ActivityType? = null
 
   /**
    * Project of the change
