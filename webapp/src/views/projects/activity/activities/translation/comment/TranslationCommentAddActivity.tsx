@@ -11,17 +11,23 @@ import {
 export const TranslationCommentAddActivity = (props: {
   item: components['schemas']['ProjectActivityModel'];
 }) => {
+  const translationCommentModification = getOnlyModifiedEntity({
+    item: props.item,
+    entity: 'TranslationComment',
+  });
+
   const commentText = getOnlyModifiedEntity({
     item: props.item,
     entity: 'TranslationComment',
   })?.modifications?.['text']?.new;
 
-  const keyName = getOnlyModifiedEntity({
-    item: props.item,
-    entity: 'TranslationComment',
-  })?.relations?.['translation']['relations']['key'].data.name;
+  const keyName =
+    translationCommentModification?.relations?.['translation']['relations'][
+      'key'
+    ].data.name;
 
-  const translationText = props.item.meta?.['translationText'];
+  const translationText =
+    translationCommentModification?.relations?.['translation']?.data['text'];
 
   return (
     <>
