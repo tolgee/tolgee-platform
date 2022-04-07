@@ -62,15 +62,17 @@ class CoreImportFilesProcessor(
     val errors = mutableListOf<ErrorResponseBody>()
 
     if (file.isArchive) {
-      messageClient(FOUND_ARCHIVE, null)
-      val processor = processorFactory.getArchiveProcessor(file)
-      processor.process(file).apply {
-        messageClient(FOUND_FILES_IN_ARCHIVE, listOf(size))
-        errors.addAll(processFiles(this, messageClient))
-      }
-      return errors
+      return processArchive(messageClient, file, errors)
     }
 
+    return processFile(file, messageClient, errors)
+  }
+
+  private fun processFile(
+    file: ImportFileDto,
+    messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit,
+    errors: MutableList<ErrorResponseBody>
+  ): MutableList<ErrorResponseBody> {
     val savedFileEntity = file.saveFileEntity()
     val fileProcessorContext = FileProcessorContext(
       file,
@@ -81,6 +83,20 @@ class CoreImportFilesProcessor(
     val processor = processorFactory.getProcessor(file, fileProcessorContext)
     processor.process()
     processor.context.processResult()
+    return errors
+  }
+
+  private fun processArchive(
+    messageClient: (ImportStreamingProgressMessageType, List<Any>?) -> Unit,
+    archive: ImportFileDto,
+    errors: MutableList<ErrorResponseBody>
+  ): MutableList<ErrorResponseBody> {
+    messageClient(FOUND_ARCHIVE, null)
+    val processor = processorFactory.getArchiveProcessor(archive)
+    val files = processor.process(archive)
+
+    messageClient(FOUND_FILES_IN_ARCHIVE, listOf(files.size))
+    errors.addAll(processFiles(files, messageClient))
     return errors
   }
 

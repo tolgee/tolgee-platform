@@ -32,6 +32,6 @@ interface FileExporter {
   fun ExportTranslationView.getFileAbsolutePath(path: List<String>): String {
     val filename = "${this.languageTag}.$fileExtension"
     val filePath = path.take(getRealScopeDepth(path)).joinToString("/")
-    return "$filePath/$filename"
+    return "$filePath/$filename".replace("^/".toRegex(), "")
   }
 }

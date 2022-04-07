@@ -21,7 +21,7 @@ import java.util.zip.ZipInputStream
 import kotlin.system.measureTimeMillis
 
 @ContextRecreatingTest
-open class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
+class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   lateinit var testData: TranslationsTestData
 
   @AfterEach
@@ -36,11 +36,11 @@ open class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  open fun `it exports to json without scoping`() {
+  fun `it exports to json without scoping`() {
     initBaseData()
     val parsed = performExport()
 
-    assertThatJson(parsed["/en.json"]!!) {
+    assertThatJson(parsed["en.json"]!!) {
       node("Z key").isEqualTo("A translation")
     }
   }
@@ -48,7 +48,7 @@ open class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  open fun `it exports to single json`() {
+  fun `it exports to single json`() {
     initBaseData()
     val response = performProjectAuthGet("export?languages=en&zip=false")
       .andDo { obj: MvcResult -> obj.asyncResult }
@@ -64,7 +64,7 @@ open class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  open fun `it exports to single xliff`() {
+  fun `it exports to single xliff`() {
     initBaseData()
     val response = performProjectAuthGet("export?languages=en&zip=false&format=XLIFF")
       .andDo { obj: MvcResult -> obj.asyncResult }
@@ -78,7 +78,7 @@ open class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  open fun `it exports to json with scoping`() {
+  fun `it exports to json with scoping`() {
     testData = TranslationsTestData()
     testData.generateScopedData()
     testDataService.saveTestData(testData.root)
@@ -95,7 +95,7 @@ open class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
   @Test
   @Transactional
   @ProjectJWTAuthTestMethod
-  open fun `it filters by keyId in`() {
+  fun `it filters by keyId in`() {
     testData = TranslationsTestData()
     testData.generateLotOfData(1000)
     testDataService.saveTestData(testData.root)
@@ -108,7 +108,7 @@ open class V2ExportControllerTest : ProjectAuthControllerTest("/v2/projects/") {
         .andGetContentAsString
       val keyIds = jacksonObjectMapper().readValue<Map<String, List<Long>>>(selectAllResult)["ids"]?.take(500)
       val parsed = performExportPost(mapOf("filterKeyId" to keyIds))
-      assertThatJson(parsed["/en.json"]!!) {
+      assertThatJson(parsed["en.json"]!!) {
         isObject.hasSize(499)
       }
     }

@@ -7,6 +7,7 @@ import io.tolgee.fixtures.andIsNotFound
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.testing.AuthorizedControllerTest
+import io.tolgee.testing.assertions.Assertions.assertThat
 import org.apache.commons.lang3.time.DateUtils
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -60,6 +61,9 @@ class V2ImportControllerResultTest : AuthorizedControllerTest() {
 
     performAuthGet("/v2/projects/${testData.project.id}/import/result")
       .andIsNotFound
+
+    val import = importService.find(testData.project.id, testData.userAccount.id)
+    assertThat(import).isNull()
   }
 
   @Test
