@@ -1,3 +1,10 @@
+## [2.16.1](https://github.com/tolgee/tolgee-platform/compare/v2.16.0...v2.16.1) (2022-04-07)
+
+
+### Bug Fixes
+
+* Fix import issues. Closes [#1069](https://github.com/tolgee/tolgee-platform/issues/1069) ([81f49db](https://github.com/tolgee/tolgee-platform/commit/81f49dbf5e7901efc1517ad12402e47386557b9d))
+
 # [2.16.0](https://github.com/tolgee/tolgee-platform/compare/v2.15.2...v2.16.0) (2022-04-05)
 
 
