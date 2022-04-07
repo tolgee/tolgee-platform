@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.ActivityType
+import io.tolgee.activity.RequestActivity
 import io.tolgee.api.v2.hateoas.dataImport.ImportAddFilesResultModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModelAssembler
@@ -149,6 +151,7 @@ class V2ImportController(
   @PutMapping("/apply")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Imports the data prepared in previous step")
+  @RequestActivity(ActivityType.IMPORT)
   fun applyImport(
     @PathVariable("projectId") projectId: Long,
     @Schema(description = "Whether override or keep all translations with unresolved conflicts")

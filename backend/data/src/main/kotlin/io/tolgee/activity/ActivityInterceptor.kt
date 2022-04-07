@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.support.ScopeNotActiveException
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Component
-import org.springframework.transaction.support.TransactionTemplate
 import java.io.Serializable
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
@@ -36,9 +35,7 @@ class ActivityInterceptor : EmptyInterceptor() {
     propertyNames: Array<out String>?,
     types: Array<out Type>?
   ): Boolean {
-    if (shouldHandleActivity(entity)) {
-      onFieldModificationsActivity(entity, state, null, propertyNames, types, RevisionType.ADD)
-    }
+    onFieldModificationsActivity(entity, state, null, propertyNames, types, RevisionType.ADD)
     return true
   }
 
@@ -228,19 +225,13 @@ class ActivityInterceptor : EmptyInterceptor() {
         activityRevision = ActivityRevision().also { revision ->
           revision.authorId = userAccount?.id
           revision.projectId = projectHolder.project.id
-          revision.type = activityHolder.activity?.name
+          revision.type = activityHolder.activity
         }
         activityHolder.activityRevision = activityRevision
       }
 
       return activityRevision
     }
-
-  private val transactionTemplate: TransactionTemplate
-    get() = applicationContext.getBean(TransactionTemplate::class.java)
-
-  private val activityService: ActivityService
-    get() = applicationContext.getBean(ActivityService::class.java)
 
   private val projectHolder: ProjectHolder
     get() = applicationContext.getBean(ProjectHolder::class.java)

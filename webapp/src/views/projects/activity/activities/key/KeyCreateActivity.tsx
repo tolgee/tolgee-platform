@@ -29,14 +29,6 @@ export const KeyCreateActivity = (props: {
       entity: 'KeyMeta',
     })?.modifications?.['tags']?.new as any as string[]) || undefined;
 
-  console.log(
-    tags,
-    getOnlyModifiedEntity({
-      item: props.item,
-      entity: 'KeyMeta',
-    })
-  );
-
   return (
     <>
       <Box>

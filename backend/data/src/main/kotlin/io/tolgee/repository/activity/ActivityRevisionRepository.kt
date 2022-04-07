@@ -1,5 +1,6 @@
 package io.tolgee.repository.activity
 
+import io.tolgee.activity.ActivityType
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
@@ -22,10 +23,15 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
   @Query(
     """
       from ActivityModifiedEntity ame 
-      where ame.activityRevision.id in :ids
+      join ame.activityRevision ar
+      where ar.id in :ids and 
+      ar.type in :allowedActivityTypes
     """
   )
-  fun getModificationsForEachRevision(ids: Collection<Long>): List<ActivityModifiedEntity>
+  fun getModificationsByRevisionIdIn(
+    ids: Collection<Long>,
+    allowedActivityTypes: List<ActivityType>
+  ): List<ActivityModifiedEntity>
 
   @Query(
     """
@@ -33,7 +39,23 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
       from ActivityRevision ar 
       join ar.describingRelations dr
       where ar.id in :revisionIds
+      and ar.type in :allowedTypes
     """
   )
-  fun getRelationsForRevisions(revisionIds: List<Long>): List<ActivityDescribingEntity>
+  fun getRelationsForRevisions(
+    revisionIds: List<Long>,
+    allowedTypes: Collection<ActivityType>
+  ): List<ActivityDescribingEntity>
+
+  @Query(
+    """
+      select ar.id, me.entityClass, count(me)
+      from ActivityRevision ar 
+      join ar.modifiedEntities me
+      where ar.id in :revisionIds
+      and ar.type in :allowedTypes
+      group by ar.id, me.entityClass
+    """
+  )
+  fun getModifiedEntityTypeCounts(revisionIds: List<Long>, allowedTypes: Collection<ActivityType>): List<Array<Any>>
 }

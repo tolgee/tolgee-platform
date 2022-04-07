@@ -6,14 +6,23 @@ import { TranslationCommentSetStateActivity } from './activities/translation/com
 import { KeyCreateActivity } from './activities/key/KeyCreateActivity';
 import { KeyTagsEditActivity } from './activities/key/KeyTagsEditActivity';
 import { KeyNameEditActivity } from './activities/key/KeyNameEditActivity';
+import { ImportActivity } from './activities/ImportActivity';
+import { components } from 'tg.service/apiSchema.generated';
+import { ScreenshotAddActivity } from './activities/key/screenshot/ScreenshotAddActivity';
+import { ScreenshotDeleteActivity } from './activities/key/screenshot/ScreenshotDeleteActivity';
+import { SetTranslationsStateActivity } from './activities/translation/SetTranslationsStateActivity';
 
 export const activityComponents = {
   SET_TRANSLATIONS: SetTranslationsActivity,
-  KEY_DELETE_ACTIVITY: KeyDeleteActivity,
+  SET_TRANSLATION_STATE: SetTranslationsStateActivity,
+  KEY_DELETE: KeyDeleteActivity,
   TRANSLATION_COMMENT_ADD: TranslationCommentAddActivity,
   TRANSLATION_COMMENT_DELETE: TranslationCommentDeleteActivity,
   TRANSLATION_COMMENT_SET_STATE: TranslationCommentSetStateActivity,
   CREATE_KEY: KeyCreateActivity,
   KEY_TAGS_EDIT: KeyTagsEditActivity,
-  KEY_NAME_EDIT_ACTIVITY: KeyNameEditActivity,
-};
+  KEY_NAME_EDIT: KeyNameEditActivity,
+  IMPORT: ImportActivity,
+  SCREENSHOT_ADD: ScreenshotAddActivity,
+  SCREENSHOT_DELETE: ScreenshotDeleteActivity,
+} as Record<components['schemas']['ProjectActivityModel']['type'], any>;

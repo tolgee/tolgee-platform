@@ -18,7 +18,7 @@ open class ActivityHolder(
 
   @PreDestroy
   open fun preDestroy() {
-    applicationContext.getBean(ActivityService::class.java).storeData(this)
+    applicationContext.getBean(ActivityService::class.java).storeActivityData(this)
   }
 
   /**
