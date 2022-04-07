@@ -75,7 +75,6 @@ class ActivityService(
           description = it.description,
           describingRelations = relations
         )
-
       }
       .groupBy { it.activityRevision.id }
   }
