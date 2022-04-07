@@ -6,6 +6,8 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.ActivityType
+import io.tolgee.activity.RequestActivity
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModel
 import io.tolgee.api.v2.hateoas.screenshot.ScreenshotModelAssembler
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
@@ -56,6 +58,7 @@ class V2ScreenshotController(
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey([ApiScope.SCREENSHOTS_UPLOAD])
   @ResponseStatus(HttpStatus.CREATED)
+  @RequestActivity(ActivityType.SCREENSHOT_ADD)
   fun uploadScreenshot(
     @PathVariable keyId: Long,
     @RequestParam("screenshot") screenshot: MultipartFile,
@@ -84,6 +87,7 @@ class V2ScreenshotController(
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Deletes multiple screenshots by ids")
   @AccessWithApiKey([ApiScope.SCREENSHOTS_VIEW])
+  @RequestActivity(ActivityType.SCREENSHOT_DELETE)
   fun deleteScreenshots(@PathVariable("ids") ids: Set<Long>) {
     val screenshots = screenshotService.findByIdIn(ids)
     screenshots.forEach {

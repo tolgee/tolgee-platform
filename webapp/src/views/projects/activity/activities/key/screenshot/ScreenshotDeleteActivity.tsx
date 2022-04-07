@@ -6,29 +6,26 @@ import {
   ActivityValue,
   getOnlyModifiedEntity,
   prepareValue,
-} from '../../activityUtil';
+} from '../../../activityUtil';
 
-export const KeyNameEditActivity = (props: {
+export const ScreenshotDeleteActivity = (props: {
   item: components['schemas']['ProjectActivityModel'];
 }) => {
-  const keyNameChange = getOnlyModifiedEntity({
+  const keyName = getOnlyModifiedEntity({
     item: props.item,
-    entity: 'Key',
-  })?.modifications?.['name'];
+    entity: 'Screenshot',
+  })?.relations?.['key']?.data?.['name'];
 
-  const oldKeyName = keyNameChange?.old;
-  const newKeyName = keyNameChange?.new;
   return (
     <>
       <Box>
         <T
           parameters={{
-            oldKeyName: prepareValue(oldKeyName),
-            newKeyName: prepareValue(newKeyName),
+            keyName: prepareValue(keyName),
             h: <ActivityValue />,
           }}
         >
-          activity_key_name_edit
+          activity_delete_screenshot
         </T>
       </Box>
     </>
