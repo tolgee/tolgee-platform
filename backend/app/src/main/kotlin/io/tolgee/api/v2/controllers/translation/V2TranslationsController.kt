@@ -10,11 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import io.tolgee.activity.ActivityType
 import io.tolgee.activity.RequestActivity
-import io.tolgee.activity.activities.key.CreateKeyActivity
-import io.tolgee.activity.activities.translation.DismissAutoTranslationStateActivity
-import io.tolgee.activity.activities.translation.SetTranslationStateActivity
-import io.tolgee.activity.activities.translation.SetTranslationsActivity
 import io.tolgee.activity.holders.ActivityHolder
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
@@ -89,8 +86,6 @@ class V2TranslationsController(
   private val authenticationFacade: AuthenticationFacade,
   private val screenshotService: ScreenshotService,
   private val activityHolder: ActivityHolder,
-  private val setTranslationsActivity: SetTranslationsActivity,
-  private val createKeyActivity: CreateKeyActivity
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @AccessWithAnyProjectPermission
@@ -119,7 +114,7 @@ class V2TranslationsController(
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translations for existing key")
-  @RequestActivity(SetTranslationsActivity::class)
+  @RequestActivity(ActivityType.SET_TRANSLATIONS)
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.get(projectHolder.project.id, dto.key)
     securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)
@@ -144,9 +139,9 @@ class V2TranslationsController(
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.find(projectHolder.projectEntity.id, dto.key)?.also {
       checkKeyEditScope()
-      activityHolder.activity = setTranslationsActivity
+      activityHolder.activity = ActivityType.SET_TRANSLATIONS
     } ?: let {
-      activityHolder.activity = createKeyActivity
+      activityHolder.activity = ActivityType.CREATE_KEY
       keyService.create(projectHolder.projectEntity, dto.key)
     }
     val translations = translationService.setForKey(key, dto.translations)
@@ -157,7 +152,7 @@ class V2TranslationsController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translation state")
-  @RequestActivity(SetTranslationStateActivity::class)
+  @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
   fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
@@ -211,7 +206,7 @@ class V2TranslationsController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = """Removes "auto translated" indication""")
-  @RequestActivity(DismissAutoTranslationStateActivity::class)
+  @RequestActivity(ActivityType.DISMISS_AUTO_TRANSLATED_STATE)
   fun dismissAutoTranslatedState(
     @PathVariable translationId: Long
   ): TranslationModel {

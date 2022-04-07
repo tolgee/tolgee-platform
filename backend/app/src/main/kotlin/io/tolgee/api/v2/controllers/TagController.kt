@@ -1,8 +1,8 @@
 package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
+import io.tolgee.activity.ActivityType
 import io.tolgee.activity.RequestActivity
-import io.tolgee.activity.activities.key.KeyTagsEditActivity
 import io.tolgee.api.v2.hateoas.invitation.TagModel
 import io.tolgee.api.v2.hateoas.invitation.TagModelAssembler
 import io.tolgee.controllers.IController
@@ -56,7 +56,7 @@ class TagController(
   @Operation(summary = "Tags a key with tag. If tag with provided name doesn't exist, it is created")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
-  @RequestActivity(KeyTagsEditActivity::class)
+  @RequestActivity(ActivityType.KEY_TAGS_EDIT)
   fun tagKey(@PathVariable keyId: Long, @Valid @RequestBody tagKeyDto: TagKeyDto): TagModel {
     val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     key.checkInProject()
@@ -67,7 +67,7 @@ class TagController(
   @Operation(summary = "Removes tag with provided id from key with provided id")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
-  @RequestActivity(KeyTagsEditActivity::class)
+  @RequestActivity(ActivityType.KEY_TAGS_EDIT)
   fun removeTag(@PathVariable keyId: Long, @PathVariable tagId: Long) {
     val key = keyService.findOptional(keyId).orElseThrow { NotFoundException() }
     val tag = tagService.find(tagId) ?: throw NotFoundException()
