@@ -1,9 +1,11 @@
 package io.tolgee.model
 
+import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityLoggedEntity
+import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.dataImport.ImportService
-import org.hibernate.envers.Audited
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
@@ -45,7 +47,8 @@ import javax.validation.constraints.Size
     )
   ]
 )
-@Audited
+
+@ActivityLoggedEntity
 class Language : StandardAuditModel() {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
   var translations: MutableSet<Translation>? = null
@@ -55,14 +58,20 @@ class Language : StandardAuditModel() {
 
   @Column(nullable = false)
   @field:NotEmpty
+  @ActivityLoggedProp
+  @ActivityDescribingProp
   var tag: String = ""
 
+  @ActivityLoggedProp
+  @ActivityDescribingProp
   var name: String? = null
 
   var originalName: String? = null
 
   @field:Size(max = 20)
   @Column(length = 20)
+  @ActivityLoggedProp
+  @ActivityDescribingProp
   var flagEmoji: String? = null
 
   fun updateByDTO(dto: LanguageDto) {

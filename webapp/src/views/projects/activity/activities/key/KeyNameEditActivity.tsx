@@ -6,29 +6,26 @@ import {
   ActivityValue,
   getOnlyModifiedEntity,
   prepareValue,
-} from '../../../activityUtil';
+} from '../../activityUtil';
 
-export const TranslationCommentDeleteActivity = (props: {
+export const KeyNameEditActivity = (props: {
   item: components['schemas']['ProjectActivityModel'];
 }) => {
-  const commentText = getOnlyModifiedEntity({
+  const keyName = getOnlyModifiedEntity({
     item: props.item,
-    entity: 'TranslationComment',
-  })?.modifications?.['text']?.old;
-
-  const translationText = props.item.meta?.['translationText'];
+    entity: 'Key',
+  })?.modifications?.['name'].old;
 
   return (
     <>
       <Box>
         <T
           parameters={{
-            commentText: prepareValue(commentText),
-            translationText: prepareValue(translationText),
+            keyName: prepareValue(keyName),
             h: <ActivityValue />,
           }}
         >
-          activity_translation_comment_delete
+          activity_key_delete
         </T>
       </Box>
     </>

@@ -1,22 +1,20 @@
 package io.tolgee.model.key
 
-import io.tolgee.activity.ActivityLogged
 import io.tolgee.model.Project
 import io.tolgee.model.StandardAuditModel
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OrderBy
 import javax.validation.constraints.NotEmpty
 
 @Entity
-@ActivityLogged
 class Tag : StandardAuditModel() {
   @field:NotEmpty
-  @ActivityLogged
   var name: String = ""
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   var project: Project = Project()
 
   @ManyToMany(mappedBy = "tags")

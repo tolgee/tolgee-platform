@@ -1,13 +1,14 @@
 package io.tolgee.model.key
 
-import io.tolgee.activity.ActivityLogged
+import io.tolgee.activity.annotation.ActivityDescribingProp
+import io.tolgee.activity.annotation.ActivityLoggedEntity
+import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.dtos.PathDTO
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.translation.Translation
-import org.hibernate.envers.Audited
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.ManyToOne
@@ -21,13 +22,14 @@ import javax.validation.constraints.Size
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name"], name = "key_project_id_name")])
-@Audited
-@ActivityLogged
+
+@ActivityLoggedEntity
 class Key(
   @field:NotBlank
   @field:Size(max = 2000)
   @field:Column(length = 2000)
-  @ActivityLogged
+  @ActivityLoggedProp
+  @ActivityDescribingProp
   var name: String = "",
 ) : StandardAuditModel(), WithKeyMeta {
   @field:NotNull

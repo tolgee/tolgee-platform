@@ -7,12 +7,10 @@ interface Activity {
   val type: String
 
   val metaModifier: (
-    (
-      meta: MutableMap<String, Any?>,
-      activityModifiedEntity: ActivityModifiedEntity,
-      entity: EntityWithId
-    ) -> Unit
+  (
+    meta: MutableMap<String, Any?>,
+    activityModifiedEntity: ActivityModifiedEntity,
+    entity: EntityWithId
+  ) -> Unit
   )?
-
-  fun getModifications(revisionIds: Collection<Long>): Map<Long, List<ActivityModifiedEntity>>?
 }
