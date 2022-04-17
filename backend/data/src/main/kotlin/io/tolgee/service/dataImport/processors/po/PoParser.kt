@@ -37,6 +37,7 @@ class PoParser(
   private var currentLine = 1
   private var currentPosition = 1
   private var nextEscaped = false
+  private var expectNewlineAfterCarriageReturn = false
 
   operator fun invoke(): PoParserResult {
     processInputStream()
@@ -74,6 +75,7 @@ class PoParser(
       '\\' -> handleEscapeChar()
       '"' -> handleQuote()
       '\n' -> handleNewLine()
+      '\r' -> handleCarriageReturn()
       ' ' -> handleSpace()
       '#' -> handleHash()
       else -> this.handleOther()
@@ -84,6 +86,10 @@ class PoParser(
     currentEscaped = nextEscaped
     nextEscaped = false
     currentPosition++
+  }
+
+  private fun handleCarriageReturn() {
+    expectNewlineAfterCarriageReturn = true
   }
 
   private fun processInputStream() {
@@ -124,6 +130,12 @@ class PoParser(
       currentSequence.append(this)
       return
     }
+
+    if (expectNewlineAfterCarriageReturn) {
+      expectNewlineAfterCarriageReturn = false
+      '\r'.handleOther()
+    }
+
     if (wasHash) {
       handleAfterHash()
       return
@@ -239,6 +251,7 @@ class PoParser(
     if (hashed) {
       currentSequenceEnd()
     }
+    expectNewlineAfterCarriageReturn = false
     currentPosition = 0
     currentLine++
   }
