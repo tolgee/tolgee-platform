@@ -1,40 +1,33 @@
 package io.tolgee.unit.service.dataImport.processors.processors.po
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.dtos.dataImport.ImportFileDto
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.service.dataImport.processors.FileProcessorContext
 import io.tolgee.service.dataImport.processors.po.PoFileProcessor
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import java.io.File
+import java.io.InputStream
 
 class PoFileProcessorTest {
   private lateinit var importMock: Import
   private lateinit var importFile: ImportFile
   private lateinit var importFileDto: ImportFileDto
   private lateinit var fileProcessorContext: FileProcessorContext
-
-  @BeforeEach
-  fun setup() {
-    importMock = mock()
-    importFile = ImportFile("exmample.po", importMock)
-    importFileDto = ImportFileDto(
-      "exmample.po",
-      File("src/test/resources/import/po/example.po")
-        .inputStream()
-    )
-    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
-  }
+  private lateinit var file: File
 
   @Test
-  fun `processes po file correctly`() {
+  fun `processes standard file correctly`() {
+    mockImportFile("example.po")
     PoFileProcessor(fileProcessorContext).process()
     assertThat(fileProcessorContext.languages).hasSize(1)
     assertThat(fileProcessorContext.translations).hasSize(8)
-    assertThat(fileProcessorContext.translations["%d pages read."]?.get(0)?.text)
+    val text = fileProcessorContext.translations["%d pages read."]?.get(0)?.text
+    assertThat(text)
       .isEqualTo(
         "{0, plural,\n" +
           "one {Eine Seite gelesen wurde.}\n" +
@@ -47,6 +40,7 @@ class PoFileProcessorTest {
 
   @Test
   fun `adds metadata`() {
+    mockImportFile("example.po")
     PoFileProcessor(fileProcessorContext).process()
     val keyMeta = fileProcessorContext.keys[
       "We connect developers and translators around the globe " +
@@ -62,5 +56,33 @@ class PoFileProcessorTest {
     assertThat(keyMeta.codeReferences).hasSize(6)
     assertThat(keyMeta.codeReferences[0].path).isEqualTo("light_interface.c")
     assertThat(keyMeta.codeReferences[0].line).isEqualTo(196)
+  }
+
+  @Test
+  fun `processes windows newlines`() {
+    val string = jacksonObjectMapper().readValue<String>(File("src/test/resources/import/po/windows-newlines.po.json"))
+    assertThat(string).contains("\r\n")
+
+    mockImportFile(string.byteInputStream())
+    PoFileProcessor(fileProcessorContext).process()
+    assertThat(fileProcessorContext.languages).hasSize(1)
+    assertThat(fileProcessorContext.translations).hasSize(1)
+    assertThat(fileProcessorContext.translations.values.toList()[0][0].text)
+      .isEqualTo("# Hex код (#fff)")
+  }
+
+  private fun mockImportFile(fileName: String) {
+    file = File("src/test/resources/import/po/$fileName")
+    mockImportFile(file.inputStream())
+  }
+
+  private fun mockImportFile(inputStream: InputStream) {
+    importMock = mock()
+    importFile = ImportFile("exmample.po", importMock)
+    importFileDto = ImportFileDto(
+      "exmample.po",
+      inputStream
+    )
+    fileProcessorContext = FileProcessorContext(importFileDto, importFile, mock())
   }
 }
