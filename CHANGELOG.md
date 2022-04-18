@@ -1,3 +1,10 @@
+## [2.16.3](https://github.com/tolgee/tolgee-platform/compare/v2.16.2...v2.16.3) (2022-04-18)
+
+
+### Bug Fixes
+
+* .po import with carriage return ([6b9f096](https://github.com/tolgee/tolgee-platform/commit/6b9f09600d0dc46f4e4927ddcda23e06de4732ef))
+
 ## [2.16.2](https://github.com/tolgee/tolgee-platform/compare/v2.16.1...v2.16.2) (2022-04-18)
 
 
