@@ -22,6 +22,9 @@ object TextHelper {
   }
 
   private fun isCharEscaped(position: Int, fullString: String): Boolean {
+    if (position == 0) {
+      return false
+    }
     var pos = position
     var escapeCharsCount = 0
     while (pos > -1 && fullString[pos - 1] == '\\') {
