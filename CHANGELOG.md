@@ -1,3 +1,10 @@
+## [2.16.2](https://github.com/tolgee/tolgee-platform/compare/v2.16.1...v2.16.2) (2022-04-18)
+
+
+### Bug Fixes
+
+* Export > key name starts with delimiter Closes [#1072](https://github.com/tolgee/tolgee-platform/issues/1072) ([c9b63ad](https://github.com/tolgee/tolgee-platform/commit/c9b63ad3db6eb4eac04f34b10c3187132124d273))
+
 ## [2.16.1](https://github.com/tolgee/tolgee-platform/compare/v2.16.0...v2.16.1) (2022-04-07)
 
 
