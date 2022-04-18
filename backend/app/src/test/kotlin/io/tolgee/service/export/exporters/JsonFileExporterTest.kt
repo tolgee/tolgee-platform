@@ -36,6 +36,20 @@ class JsonFileExporterTest {
 
   @Suppress("UNCHECKED_CAST")
   @Test
+  fun `it exports when key starts with dot`() {
+    val data = generateTranslationsForKeys(listOf(".a"))
+    val exported = JsonFileExporter(data, ExportParams()).produceFiles()
+    val json = exported.getFileTextContent("en.json")
+    val parsed = jacksonObjectMapper()
+      .readValue<Map<String, Any>>(json)
+
+    val map = (parsed[""] as Map<String, String>)
+    val a = map["a"]
+    assertThat(a).isEqualTo("text")
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  @Test
   fun `it scopes to files`() {
     val data = generateTranslationsForKeys(listOf("a.a.a", "a", "a.a"))
     val exported = JsonFileExporter(
