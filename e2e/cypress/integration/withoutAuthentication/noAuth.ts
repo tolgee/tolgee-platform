@@ -17,16 +17,24 @@ describe('Test no authentication mode', () => {
     cy.visit(`${HOST}`);
   });
 
-  it('Has API keys item in project menu', () => {
-    disableAuthentication();
-    createTestProject();
-    cy.reload();
-    gcy('project-list-more-button').click();
-    gcy('project-settings-button').click();
-    gcy('project-menu-items')
-      .get(`[aria-label="API keys"]`)
-      .should('be.visible');
-  });
+  it(
+    'Has API keys item in project menu',
+    {
+      retries: {
+        runMode: 3,
+      },
+    },
+    () => {
+      disableAuthentication();
+      createTestProject();
+      cy.reload();
+      gcy('project-list-more-button').click();
+      gcy('project-settings-button').click();
+      gcy('project-menu-items')
+        .get(`[aria-label="API keys"]`)
+        .should('be.visible');
+    }
+  );
 
   it('Has no user menu', () => {
     cy.reload();
