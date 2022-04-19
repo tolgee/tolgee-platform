@@ -3,6 +3,7 @@ package io.tolgee.model.key
 import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.dtos.PathDTO
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
@@ -24,6 +25,7 @@ import javax.validation.constraints.Size
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name"], name = "key_project_id_name")])
 
 @ActivityLoggedEntity
+@ActivityReturnsExistence
 class Key(
   @field:NotBlank
   @field:Size(max = 2000)

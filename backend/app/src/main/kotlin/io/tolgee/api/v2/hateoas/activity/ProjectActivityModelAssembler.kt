@@ -36,10 +36,11 @@ class ProjectActivityModelAssembler(
     ?.map { entry ->
       entry.key to entry.value.map {
         ModifiedEntityModel(
-          it.entityId,
-          it.description,
-          it.modifications,
-          it.describingRelations
+          entityId = it.entityId,
+          description = it.description,
+          modifications = it.modifications,
+          relations = it.describingRelations,
+          exists = it.exists
         )
       }
     }?.toMap()
