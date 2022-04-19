@@ -7,5 +7,6 @@ data class ModifiedEntityModel(
   val entityId: Long,
   val description: Map<String, Any?>? = null,
   var modifications: Map<String, PropertyModification>? = null,
-  var relations: Map<String, EntityDescription>? = null
+  var relations: Map<String, EntityDescription>? = null,
+  val exists: Boolean? = null
 )
