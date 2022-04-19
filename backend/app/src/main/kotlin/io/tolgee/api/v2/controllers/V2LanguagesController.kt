@@ -7,6 +7,8 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import io.tolgee.activity.ActivityType
+import io.tolgee.activity.RequestActivity
 import io.tolgee.api.v2.hateoas.organization.LanguageModel
 import io.tolgee.api.v2.hateoas.organization.LanguageModelAssembler
 import io.tolgee.component.LanguageValidator
@@ -65,6 +67,7 @@ class V2LanguagesController(
 
   @PostMapping(value = [""])
   @Operation(summary = "Creates language")
+  @RequestActivity(ActivityType.CREATE_LANGUAGE)
   fun createLanguage(
     @PathVariable("projectId") projectId: Long,
     @RequestBody @Valid dto: LanguageDto
@@ -78,6 +81,7 @@ class V2LanguagesController(
 
   @Operation(summary = "Edits language")
   @PutMapping(value = ["/{languageId}"])
+  @RequestActivity(ActivityType.EDIT_LANGUAGE)
   fun editLanguage(
     @RequestBody @Valid dto: LanguageDto,
     @PathVariable("languageId") languageId: Long
@@ -105,16 +109,17 @@ class V2LanguagesController(
   @AccessWithAnyProjectPermission
   operator fun get(@PathVariable("languageId") id: Long?): LanguageModel {
     val language = languageService.findById(id!!).orElseThrow { NotFoundException() }
-    securityService.checkAnyProjectPermission(language.project!!.id)
+    securityService.checkAnyProjectPermission(language.project.id)
     return languageModelAssembler.toModel(language)
   }
 
   @Operation(summary = "Deletes specific language")
   @DeleteMapping(value = ["/{languageId}"])
+  @RequestActivity(ActivityType.DELETE_LANGUAGE)
   fun deleteLanguage(@PathVariable languageId: Long) {
     val language = languageService.findById(languageId)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-    securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
+    securityService.checkProjectPermission(language.project.id, Permission.ProjectPermissionType.MANAGE)
 
     // if base language is missing, select first language
     val baseLanguage = projectService.getOrCreateBaseLanguage(projectHolder.project.id)
