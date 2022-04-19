@@ -6,6 +6,8 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import io.tolgee.activity.ActivityType
+import io.tolgee.activity.RequestActivity
 import io.tolgee.api.v2.hateoas.invitation.ProjectInvitationModel
 import io.tolgee.api.v2.hateoas.invitation.ProjectInvitationModelAssembler
 import io.tolgee.api.v2.hateoas.key.LanguageConfigItemModelAssembler
@@ -236,6 +238,7 @@ class V2ProjectsController(
 
   @PostMapping(value = [""])
   @Operation(summary = "Creates project with specified languages")
+  @RequestActivity(ActivityType.CREATE_PROJECT)
   fun createProject(@RequestBody @Valid dto: CreateProjectDTO): ProjectModel {
     val userAccount = authenticationFacade.userAccount
     if (!this.tolgeeProperties.authentication.userCanCreateProjects &&
@@ -250,6 +253,7 @@ class V2ProjectsController(
   @Operation(summary = "Modifies project")
   @PutMapping(value = ["/{projectId}"])
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
+  @RequestActivity(ActivityType.EDIT_PROJECT)
   fun editProject(@RequestBody @Valid dto: EditProjectDTO): ProjectModel {
     val project = projectService.editProject(projectHolder.project.id, dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))
