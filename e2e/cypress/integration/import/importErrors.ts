@@ -33,7 +33,7 @@ describe('Import errors', () => {
     });
   });
 
-  it('does not add too many languages', () => {
+  it('does not add too many languages', { retries: { runMode: 3 } }, () => {
     importTestData.generateWithManyLanguages().then((importData) => {
       login('franta');
       visitImport(importData.body.project.id);
