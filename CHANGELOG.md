@@ -1,3 +1,10 @@
+# [2.17.0](https://github.com/tolgee/tolgee-platform/compare/v2.16.3...v2.17.0) (2022-04-19)
+
+
+### Features
+
+* upgrade to mui5 ([b37c2b3](https://github.com/tolgee/tolgee-platform/commit/b37c2b3aad43444fbbcf872bc35b7137649949f4))
+
 ## [2.16.3](https://github.com/tolgee/tolgee-platform/compare/v2.16.2...v2.16.3) (2022-04-18)
 
 
