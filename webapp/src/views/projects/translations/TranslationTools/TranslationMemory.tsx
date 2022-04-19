@@ -16,7 +16,9 @@ const StyledContainer = styled('div')`
 
 const StyledItem = styled('div')`
   display: grid;
-  padding: ${({ theme }) => theme.spacing(1, 1.25)};
+  padding: ${({ theme }) => theme.spacing(0.5, 0.75)};
+  margin: ${({ theme }) => theme.spacing(0.5, 0.5)};
+  border-radius: 4px;
   gap: 0px 10px;
   grid-template-columns: auto 1fr;
   grid-template-rows: auto auto 3px auto;
