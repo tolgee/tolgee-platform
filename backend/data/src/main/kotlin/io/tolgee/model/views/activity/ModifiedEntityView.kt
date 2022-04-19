@@ -8,7 +8,8 @@ data class ModifiedEntityView(
   val activityRevision: ActivityRevision,
   val entityClass: String,
   val entityId: Long,
+  val exists: Boolean?,
   var modifications: Map<String, PropertyModification> = mutableMapOf(),
   var description: Map<String, Any?>? = null,
-  var describingRelations: Map<String, EntityDescription>? = null
+  var describingRelations: Map<String, EntityDescription>? = null,
 )
