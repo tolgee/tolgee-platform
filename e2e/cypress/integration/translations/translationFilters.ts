@@ -5,6 +5,8 @@ import { waitForGlobalLoading } from '../../common/loading';
 import { translationsTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 
+const TIMEOUT_ONE_MINUTE = 1000 * 60;
+
 describe('Translations Base', () => {
   let project: ProjectDTO = null;
 
@@ -71,7 +73,7 @@ describe('Translations Base', () => {
       ['No screenshots', 'With screenshots'],
       ['At least one translated', 'Missing translation'],
     ].forEach((pair) => {
-      cy.contains(pair[0]).click();
+      cy.contains(pair[0], { timeout: TIMEOUT_ONE_MINUTE }).click();
       cy.contains(pair[1]).click();
 
       gcy('translations-filter-option')
@@ -115,7 +117,9 @@ describe('Translations Base', () => {
     getPopover().contains('Lame tag').click();
     cy.focused().type('{Esc}');
     cy.focused().type('{Esc}');
-    cy.contains('Z translation').should('be.visible');
+    cy.contains('Z translation', { timeout: TIMEOUT_ONE_MINUTE }).should(
+      'be.visible'
+    );
     cy.contains('A translation').should('be.visible');
     cy.contains('key with screenshot').should('not.exist');
   });
