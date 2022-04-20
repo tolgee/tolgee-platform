@@ -1,8 +1,8 @@
 package io.tolgee.model.activity
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
-import io.tolgee.activity.EntityDescriptionRef
-import io.tolgee.activity.RevisionType
+import io.tolgee.activity.data.EntityDescriptionRef
+import io.tolgee.activity.data.RevisionType
 import org.hibernate.annotations.NotFound
 import org.hibernate.annotations.NotFoundAction
 import org.hibernate.annotations.Type

@@ -1,6 +1,5 @@
 package io.tolgee.activity
 
-import io.tolgee.activity.holders.ActivityHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod

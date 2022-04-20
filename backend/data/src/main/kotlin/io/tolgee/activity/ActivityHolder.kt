@@ -1,7 +1,6 @@
-package io.tolgee.activity.holders
+package io.tolgee.activity
 
-import io.tolgee.activity.ActivityService
-import io.tolgee.activity.ActivityType
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import org.springframework.context.ApplicationContext

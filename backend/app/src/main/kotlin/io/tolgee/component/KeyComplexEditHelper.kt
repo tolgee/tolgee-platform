@@ -1,7 +1,7 @@
 package io.tolgee.component
 
-import io.tolgee.activity.ActivityType
-import io.tolgee.activity.holders.ActivityHolder
+import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
 import io.tolgee.constants.Message

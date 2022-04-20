@@ -1,7 +1,7 @@
 package io.tolgee.api.v2.hateoas.activity
 
-import io.tolgee.activity.EntityDescription
-import io.tolgee.activity.PropertyModification
+import io.tolgee.activity.data.EntityDescription
+import io.tolgee.activity.data.PropertyModification
 
 data class ModifiedEntityModel(
   val entityId: Long,

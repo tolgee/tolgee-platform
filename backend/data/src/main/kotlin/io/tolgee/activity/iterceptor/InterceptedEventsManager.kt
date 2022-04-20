@@ -1,8 +1,13 @@
-package io.tolgee.activity
+package io.tolgee.activity.iterceptor
 
+import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.EntityDescriptionProvider
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
-import io.tolgee.activity.holders.ActivityHolder
+import io.tolgee.activity.data.EntityDescription
+import io.tolgee.activity.data.EntityDescriptionRef
+import io.tolgee.activity.data.PropertyModification
+import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.propChangesProvider.PropChangesProvider
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.model.EntityWithId
@@ -11,69 +16,26 @@ import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.project_auth.ProjectHolder
-import org.hibernate.EmptyInterceptor
 import org.hibernate.collection.internal.AbstractPersistentCollection
-import org.hibernate.type.Type
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.support.ScopeNotActiveException
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 import java.io.Serializable
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
 
 @Component
-class ActivityInterceptor : EmptyInterceptor() {
+@Scope(SCOPE_PROTOTYPE)
+class InterceptedEventsManager(
+  private val projectHolder: ProjectHolder,
+  private val activityHolder: ActivityHolder,
+  private val applicationContext: ApplicationContext
+) {
+  private val logger = LoggerFactory.getLogger(this::class.java)
 
-  @Autowired
-  lateinit var applicationContext: ApplicationContext
-
-  override fun onSave(
-    entity: Any?,
-    id: Serializable?,
-    state: Array<out Any>?,
-    propertyNames: Array<out String>?,
-    types: Array<out Type>?
-  ): Boolean {
-    onFieldModificationsActivity(entity, state, null, propertyNames, types, RevisionType.ADD)
-    return true
-  }
-
-  override fun onDelete(
-    entity: Any?,
-    id: Serializable?,
-    state: Array<out Any>?,
-    propertyNames: Array<out String>?,
-    types: Array<out Type>?
-  ) {
-    onFieldModificationsActivity(entity, null, state, propertyNames, types, RevisionType.DEL)
-  }
-
-  override fun onFlushDirty(
-    entity: Any?,
-    id: Serializable?,
-    currentState: Array<out Any>?,
-    previousState: Array<out Any>?,
-    propertyNames: Array<out String>?,
-    types: Array<out Type>?
-  ): Boolean {
-    onFieldModificationsActivity(entity, currentState, previousState, propertyNames, types, RevisionType.MOD)
-    return true
-  }
-
-  override fun onCollectionRemove(collection: Any?, key: Serializable?) {
-    onCollectionModification(collection, key)
-  }
-
-  override fun onCollectionRecreate(collection: Any?, key: Serializable?) {
-    onCollectionModification(collection, key)
-  }
-
-  override fun onCollectionUpdate(collection: Any?, key: Serializable?) {
-    onCollectionModification(collection, key)
-  }
-
-  private fun onCollectionModification(collection: Any?, key: Serializable?) {
+  fun onCollectionModification(collection: Any?, key: Serializable?) {
     if (collection !is AbstractPersistentCollection || collection !is Collection<*> || key !is Long) {
       return
     }
@@ -106,7 +68,6 @@ class ActivityInterceptor : EmptyInterceptor() {
     currentState: Array<out Any>?,
     previousState: Array<out Any>?,
     propertyNames: Array<out String>?,
-    types: Array<out Type>?,
     revisionType: RevisionType
   ) {
     if (!shouldHandleActivity(entity)) {
@@ -129,7 +90,7 @@ class ActivityInterceptor : EmptyInterceptor() {
     entity: EntityWithId,
   ) {
     val describingData = getChangeEntityDescription(entity, activityRevision)
-    this.description = describingData.first?.filter { !this.modifications.keys.contains(it.key) }
+    this.describingData = describingData.first?.filter { !this.modifications.keys.contains(it.key) }
     this.describingRelations = describingData.second
   }
 
@@ -173,11 +134,12 @@ class ActivityInterceptor : EmptyInterceptor() {
           activityRevision,
           value.entityClass,
           value.entityId
-        ).also {
-          it.data = value.data
-          it.describingRelations = compressedRelations
-        }
+        )
+
+        activityDescribingEntity.data = value.data
+        activityDescribingEntity.describingRelations = compressedRelations
         activityRevision.describingRelations.add(activityDescribingEntity)
+
         activityDescribingEntity
       }
     return EntityDescriptionRef(activityDescribingEntity.entityClass, activityDescribingEntity.entityId)
@@ -213,7 +175,7 @@ class ActivityInterceptor : EmptyInterceptor() {
     return applicationContext.getBean(providerClass.java)
   }
 
-  fun shouldHandleActivity(entity: Any?): Boolean {
+  private fun shouldHandleActivity(entity: Any?): Boolean {
     return entity is EntityWithId && entity::class.hasAnnotation<ActivityLoggedEntity>()
   }
 
@@ -224,28 +186,17 @@ class ActivityInterceptor : EmptyInterceptor() {
       if (activityRevision == null) {
         activityRevision = ActivityRevision().also { revision ->
           revision.authorId = userAccount?.id
-          revision.projectId = projectHolder.project.id
+          try {
+            revision.projectId = projectHolder.project.id
+          } catch (e: UninitializedPropertyAccessException) {
+            logger.info("Project is not set in ProjectHolder. Activity will be stored without projectId.")
+          }
           revision.type = activityHolder.activity
         }
         activityHolder.activityRevision = activityRevision
       }
 
       return activityRevision
-    }
-
-  private val projectHolder: ProjectHolder
-    get() = applicationContext.getBean(ProjectHolder::class.java)
-
-  private val activityHolder: ActivityHolder
-    get() {
-      return try {
-        applicationContext.getBean(ActivityHolder::class.java).also {
-          // we must try to access something to get the exception thrown
-          it.activityRevision
-        }
-      } catch (e: ScopeNotActiveException) {
-        applicationContext.getBean("transactionActivityHolder", ActivityHolder::class.java)
-      }
     }
 
   private val userAccount: UserAccountDto?

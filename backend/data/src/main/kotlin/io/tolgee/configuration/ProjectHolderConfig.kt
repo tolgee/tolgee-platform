@@ -40,6 +40,7 @@ class ProjectHolderConfig {
           // we must try to access something to get the exception thrown
           it.project
         } catch (e: UninitializedPropertyAccessException) {
+          // UninitializedPropertyAccessException is normal, since project is not set initially
           return it
         }
       }

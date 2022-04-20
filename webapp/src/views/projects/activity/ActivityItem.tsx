@@ -1,6 +1,6 @@
 import React from 'react';
 import { components } from 'tg.service/apiSchema.generated';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { T, useCurrentLanguage } from '@tolgee/react';
 import { activityComponents } from './activityComponents';
