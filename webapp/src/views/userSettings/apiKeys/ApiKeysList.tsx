@@ -21,7 +21,7 @@ interface ApiKeysListProps {
 const messageService = container.resolve(MessageService);
 
 const StyledRoot = styled(Box)`
-  border-bottom: 1px solid ${({ theme }) => theme.palette.grey.A100};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.emphasis.A100};
   &:last-child {
     border-bottom: none;
   }

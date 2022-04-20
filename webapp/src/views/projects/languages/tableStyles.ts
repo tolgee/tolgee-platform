@@ -9,14 +9,14 @@ export const TABLE_DIVIDER = 'divider';
 export const StyledLanguageTable = styled('div')`
   display: grid;
   align-items: center;
-  border: 1px ${({ theme }) => theme.palette.extraLightDivider.main} solid;
+  border: 1px ${({ theme }) => theme.palette.divider1.main} solid;
   border-radius: 4px;
   overflow: hidden;
   position: relative;
 
   & .${TABLE_TOP_ROW} {
     display: flex;
-    background: ${({ theme }) => theme.palette.extraLightBackground.main};
+    background: ${({ theme }) => theme.palette.emphasis[100]};
     align-self: stretch;
     font-size: 13px;
     min-width: 60px;
@@ -42,7 +42,7 @@ export const StyledLanguageTable = styled('div')`
 
   & .${TABLE_DIVIDER} {
     grid-column: 1 / -1;
-    background: ${({ theme }) => theme.palette.lightBackground.main};
+    background: ${({ theme }) => theme.palette.emphasis[200]};
     height: 1px;
   }
 `;

@@ -1,6 +1,7 @@
 import API from '@openreplay/tracker';
 import { PaletteColor } from '@mui/material/styles';
 import { PaletteColorOptions } from '@mui/material';
+import { Editor, Emphasis } from 'colors';
 
 declare module '*.svg' {
   const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
@@ -9,19 +10,25 @@ declare module '*.svg' {
 
 declare module '@mui/material/styles/createPalette' {
   interface Palette {
-    lightDivider: PaletteColor;
-    extraLightDivider: PaletteColor;
-    lightBackground: PaletteColor;
-    extraLightBackground: PaletteColor;
-    default: Palette['primary'];
+    divider2: PaletteColor;
+    divider1: PaletteColor;
+    cellSelected1: PaletteColor;
+    cellSelected2: PaletteColor;
+    default: PaletteColor;
+    navbarBackground: PaletteColor;
+    emphasis: Emphasis;
+    editor: Editor;
   }
 
   interface PaletteOptions {
-    lightDivider: PaletteColorOptions;
-    extraLightDivider: PaletteColorOptions;
-    lightBackground: PaletteColorOptions;
-    extraLightBackground: PaletteColorOptions;
-    default: Palette['primary'];
+    divider2: PaletteColorOptions;
+    divider1: PaletteColorOptions;
+    cellSelected1: PaletteColorOptions;
+    cellSelected2: PaletteColorOptions;
+    default: PaletteColor;
+    navbarBackground: PaletteColor;
+    emphasis: Emphasis;
+    editor: Editor;
   }
 }
 

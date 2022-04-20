@@ -17,6 +17,9 @@ const StyledState = styled('div')`
   cursor: col-resize;
   height: 100%;
   width: 4px;
+  filter: brightness(
+    ${({ theme }) => (theme.palette.mode === 'dark' ? 0.7 : 1)}
+  );
 `;
 
 type Props = {

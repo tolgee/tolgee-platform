@@ -34,7 +34,7 @@ const StyledContainer = styled('div')`
     transition: opacity 0.2s ease-in-out;
   }
   &:hover {
-    background-color: ${({ theme }) => theme.palette.grey['50']};
+    background-color: ${({ theme }) => theme.palette.emphasis['50']};
     & .translationIconButton {
       opacity: 1;
     }

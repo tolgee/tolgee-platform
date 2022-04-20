@@ -33,7 +33,7 @@ const EXPORT_DEFAULT_FORMAT: typeof FORMATS[number] = 'JSON';
 
 const StyledForm = styled('form')`
   display: grid;
-  border: 1px solid ${({ theme }) => theme.palette.lightDivider.main};
+  border: 1px solid ${({ theme }) => theme.palette.divider2.main};
   margin-top: ${({ theme }) => theme.spacing(5)};
   padding: ${({ theme }) => theme.spacing(4)};
   gap: ${({ theme }) => theme.spacing(3)};

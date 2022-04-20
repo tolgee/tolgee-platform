@@ -22,11 +22,11 @@ const StyledContainer = styled('div')`
 `;
 
 const StyledField = styled('div')`
-  border: 1px solid ${({ theme }) => theme.palette.grey[400]};
+  border: 1px solid ${({ theme }) => theme.palette.emphasis[400]};
   overflow: hidden;
   border-radius: 4px;
   &:hover {
-    border: 1px solid ${({ theme }) => theme.palette.common.black};
+    border: 1px solid ${({ theme }) => theme.palette.emphasis[900]};
   }
   &:focus-within {
     border-color: ${({ theme }) => theme.palette.primary.main};
@@ -41,7 +41,7 @@ const StyledField = styled('div')`
 `;
 
 const StyledEdtorWrapper = styled('div')`
-  background: white;
+  background: ${({ theme }) => theme.palette.background.default};
   align-self: stretch;
   display: flex;
   align-items: stretch;

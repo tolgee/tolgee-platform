@@ -2,10 +2,10 @@ import { FunctionComponent, ReactNode } from 'react';
 import { Button, ButtonProps, styled } from '@mui/material';
 
 const StyledButton = styled(Button)`
-  border: 1px solid ${({ theme }) => theme.palette.grey['200']};
+  border: 1px solid ${({ theme }) => theme.palette.emphasis['200']};
   border-radius: 50px;
   padding: ${({ theme }) => theme.spacing(0.125, 1.5)};
-  background-color: ${({ theme }) => theme.palette.common.white};
+  background-color: ${({ theme }) => theme.palette.background.default};
   cursor: pointer;
   min-width: 0px;
 `;

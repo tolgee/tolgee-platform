@@ -25,7 +25,6 @@ import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 import { useActiveFilters } from '../Filters/useActiveFilters';
 import { FiltersMenu } from '../Filters/FiltersMenu';
 import { LanguagesMenu } from 'tg.component/common/form/LanguagesSelect/LanguagesMenu';
-import clsx from 'clsx';
 
 const StyledControls = styled('div')`
   display: flex;
@@ -40,7 +39,7 @@ const StyledControls = styled('div')`
   height: 50px;
   z-index: ${({ theme }) => theme.zIndex.appBar + 1};
   background: ${({ theme }) => theme.palette.background.default};
-  transition: all 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out;
   padding-bottom: 4px;
   padding-top: 7px;
 `;
@@ -53,7 +52,10 @@ const StyledShadow = styled('div')`
   margin-left: ${({ theme }) => theme.spacing(-1)};
   margin-right: ${({ theme }) => theme.spacing(-1)};
   -webkit-box-shadow: 0px -1px 7px 0px #000000;
-  box-shadow: 0px -1px 7px 0px #000000;
+  box-shadow: ${({ theme }) =>
+    theme.palette.mode === 'dark'
+      ? '0px 1px 6px 0px #000000, 0px 1px 6px 0px #000000'
+      : '0px -1px 7px 0px #000000'};
   top: 99px;
   transition: all 0.25s;
 `;
@@ -89,10 +91,6 @@ const StyledToggleButton = styled(Button)`
   padding: 0px 2px;
   height: 35px;
   min-height: 35px;
-  :not(&.selected) {
-    color: ${({ theme }) => theme.palette.text.primary};
-    border-color: ${({ theme }) => theme.palette.grey[400]};
-  }
 `;
 
 const StyledIconButton = styled(IconButton)`
@@ -236,14 +234,14 @@ export const TranslationControlsCompact: React.FC<Props> = ({
 
               <ButtonGroup>
                 <StyledToggleButton
-                  className={clsx({ selected: view === 'LIST' })}
+                  color={view === 'LIST' ? 'primary' : 'default'}
                   onClick={() => handleViewChange('LIST')}
                   data-cy="translations-view-list-button"
                 >
                   <ViewListRounded />
                 </StyledToggleButton>
                 <StyledToggleButton
-                  className={clsx({ selected: view === 'TABLE' })}
+                  color={view === 'TABLE' ? 'primary' : 'default'}
                   onClick={() => handleViewChange('TABLE')}
                   data-cy="translations-view-table-button"
                 >

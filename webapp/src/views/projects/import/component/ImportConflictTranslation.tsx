@@ -27,7 +27,7 @@ type Props = {
 
 const StyledRoot = styled(Box)`
   border-radius: ${({ theme }) => theme.shape.borderRadius};
-  border: 1px dashed ${({ theme }) => theme.palette.grey.A100};
+  border: 1px dashed ${({ theme }) => theme.palette.emphasis.A100};
   padding: ${({ theme }) => theme.spacing(1)};
   cursor: pointer;
   text-overflow: ellipsis;
@@ -40,8 +40,10 @@ const StyledRoot = styled(Box)`
   }
 
   &.selected {
-    border-color: ${green['900']};
-    background-color: ${green['50']};
+    border-color: ${({ theme }) =>
+      theme.palette.mode === 'light' ? green['900'] : green['100']};
+    background-color: ${({ theme }) =>
+      theme.palette.mode === 'light' ? green['50'] : green['900']};
   }
 `;
 

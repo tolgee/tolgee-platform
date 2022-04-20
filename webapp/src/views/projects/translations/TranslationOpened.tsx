@@ -1,4 +1,4 @@
-import { Tabs, Tab, IconButton, styled } from '@mui/material';
+import { Tabs, Tab, IconButton, styled, useTheme } from '@mui/material';
 import { Close } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 
@@ -23,6 +23,7 @@ const StyledContainer = styled('div')`
   flex-direction: column;
   align-items: stretch;
   min-height: 300px;
+  background: ${({ theme }) => theme.palette.cellSelected2.main};
 `;
 
 const StyledEditorContainer = styled('div')`
@@ -41,7 +42,7 @@ const StyledEditorControls = styled('div')`
 
 const StyledTabsWrapper = styled('div')`
   display: flex;
-  border-bottom: 1px solid ${({ theme }) => theme.palette.grey[200]};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1.main};
   justify-content: space-between;
   align-items: center;
 `;
@@ -107,6 +108,7 @@ export const TranslationOpened: React.FC<Props> = ({
 }) => {
   const project = useProject();
   const dispatch = useTranslationsDispatch();
+  const theme = useTheme();
 
   const nextState = translationStates[state]?.next;
 
@@ -178,6 +180,7 @@ export const TranslationOpened: React.FC<Props> = ({
         <>
           <StyledEditorContainer>
             <Editor
+              background={theme.palette.cellSelected2.main}
               value={value}
               onChange={onChange}
               onCancel={() => onCancel(true)}

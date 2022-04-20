@@ -18,16 +18,15 @@ const StyledContainer = styled('div')`
   margin: 10px 0px 100px 0px;
   border-left: 0px;
   border-right: 0px;
-  background: white;
+  background: ${({ theme }) => theme.palette.background.default};
   flex-grow: 1;
 `;
 
 const StyledHeaderRow = styled('div')`
-  border: 1px solid ${({ theme }) => theme.palette.grey[200]};
+  border: 1px solid ${({ theme }) => theme.palette.emphasis[200]};
   border-width: 1px 0px 1px 0px;
   position: sticky;
-  background: white;
-  z-index: 1;
+  background: ${({ theme }) => theme.palette.background.default};
   top: 0px;
   margin-bottom: -1px;
   display: flex;

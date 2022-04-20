@@ -24,7 +24,7 @@ export type ValidationResult = {
 
 const StyledRoot = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
-  border: `1px dashed ${theme.palette.grey[400]}`,
+  border: `1px dashed ${theme.palette.emphasis[400]}`,
 }));
 
 const messageActions = container.resolve(MessageActions);

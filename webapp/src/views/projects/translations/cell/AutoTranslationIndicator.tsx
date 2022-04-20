@@ -10,7 +10,7 @@ import {
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
-import { getProviderImg } from '../TranslationTools/getProviderImg';
+import { useProviderImg } from '../TranslationTools/useProviderImg';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -39,7 +39,7 @@ const StyledContainer = styled('div')`
     display: block;
   }
   &:hover {
-    border: 1px solid ${({ theme }) => theme.palette.lightDivider.main};
+    border: 1px solid ${({ theme }) => theme.palette.divider2.main};
     transition: all 0.1s;
   }
 `;
@@ -68,6 +68,7 @@ export const AutoTranslationIndicator: React.FC<Props> = ({
   lang,
   className,
 }) => {
+  const getProviderImg = useProviderImg();
   const t = useTranslate();
   const project = useProject();
   const translation = keyData.translations[lang];

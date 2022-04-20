@@ -43,20 +43,20 @@ const StyledTags = styled('div')`
 `;
 
 const StyledField = styled('div')`
-  border-color: ${({ theme }) => theme.palette.grey[200]};
+  border-color: ${({ theme }) => theme.palette.emphasis[200]};
   border-width: 1px;
   border-style: solid;
 `;
 
 const StyledGalleryField = styled('div')`
-  border-color: ${({ theme }) => theme.palette.grey[200]};
+  border-color: ${({ theme }) => theme.palette.emphasis[200]};
   border-width: 1px;
   border-style: solid;
   padding: 2px;
 `;
 
 const StyledLanguageField = styled('div')`
-  border-color: ${({ theme }) => theme.palette.grey[200]};
+  border-color: ${({ theme }) => theme.palette.emphasis[200]};
   border-width: 1px 1px 1px 0px;
   border-style: solid;
   & + & {

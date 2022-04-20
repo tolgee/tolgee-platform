@@ -1,14 +1,16 @@
 import { Link } from 'react-router-dom';
-import { Box, Slide, styled } from '@mui/material';
+import { Box, IconButton, Slide, styled } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import { LightMode, DarkMode } from '@mui/icons-material';
 
 import { LocaleMenu } from '../../LocaleMenu';
 import { UserMenu } from '../../security/UserMenu';
 import { useConfig } from 'tg.hooks/useConfig';
 import { TolgeeLogo } from 'tg.component/common/icons/TolgeeLogo';
 import { useTopBarHidden } from './TopBarContext';
+import { useThemeContext } from '../../../ThemeProvider';
 
 export const TOP_BAR_HEIGHT = 52;
 
@@ -21,12 +23,15 @@ const StyledAppBar = styled(AppBar)(
         duration: theme.transitions.duration.leavingScreen,
       }),
       ...theme.mixins.toolbar,
+      background: theme.palette.navbarBackground.main,
+      boxShadow:
+        theme.palette.mode === 'dark' ? 'none' : theme.mixins.toolbar.boxShadow,
     } as any)
 );
 
 const StyledToolbar = styled(Toolbar)`
-  padding-right: ${({ theme }) => theme.spacing(2)} !important;
-  padding-left: ${({ theme }) => theme.spacing(2)} !important;
+  padding-right: 12.5px !important;
+  padding-left: 12.5px !important;
 `;
 
 const StyledVersion = styled(Typography)`
@@ -58,6 +63,11 @@ const StyledTolgeeLink = styled(Link)`
   }
 `;
 
+const StyledIconButton = styled(IconButton)`
+  width: 40px;
+  height: 40px;
+`;
+
 type Props = {
   autoHide?: boolean;
 };
@@ -66,6 +76,16 @@ export const TopBar: React.FC<Props> = ({ autoHide = false }) => {
   const config = useConfig();
 
   const trigger = useTopBarHidden() && autoHide;
+
+  const { mode, setMode } = useThemeContext();
+
+  const toggleTheme = () => {
+    if (mode === 'dark') {
+      setMode('light');
+    } else {
+      setMode('dark');
+    }
+  };
 
   return (
     <Slide appear={false} direction="down" in={!trigger}>
@@ -94,6 +114,9 @@ export const TopBar: React.FC<Props> = ({ autoHide = false }) => {
               </StyledTolgeeLink>
             </Box>
           </Box>
+          <StyledIconButton onClick={toggleTheme} color="inherit">
+            {mode === 'dark' ? <LightMode /> : <DarkMode />}
+          </StyledIconButton>
           <LocaleMenu />
           <UserMenu />
         </StyledToolbar>

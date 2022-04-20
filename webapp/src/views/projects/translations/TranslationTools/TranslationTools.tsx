@@ -34,7 +34,7 @@ const StyledLoadingWrapper = styled('div')`
 `;
 
 const StyledSmoothProgress = styled(SmoothProgress)`
-  background: theme.palette.grey[400];
+  background: ${({ theme }) => theme.palette.emphasis[400]};
 `;
 
 export type Props = {

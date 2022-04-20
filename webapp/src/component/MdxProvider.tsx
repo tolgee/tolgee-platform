@@ -1,8 +1,9 @@
 import { default as React, FC } from 'react';
-import { Link, Typography } from '@mui/material';
+import { Link, Typography, useTheme } from '@mui/material';
 import { MDXProvider } from '@mdx-js/react';
 import Highlight, { defaultProps, Prism } from 'prism-react-renderer';
-import theme from 'prism-react-renderer/themes/github';
+import lightTheme from 'prism-react-renderer/themes/github';
+import darkTheme from 'prism-react-renderer/themes/nightOwl';
 import { API_KEY_PLACEHOLDER } from 'tg.views/projects/integrate/IntegrateView';
 import { styled } from '@mui/material';
 
@@ -21,8 +22,8 @@ const StyledCode = styled('pre')`
 
 const StyledInlineCode = styled('span')`
   border-radius: ${({ theme }) => theme.shape.borderRadius};
-  background-color: rgb(246, 248, 250);
-  color: rgb(57, 58, 52);
+  background-color: ${({ theme }) => theme.palette.emphasis[200]};
+  color: ${({ theme }) => theme.palette.emphasis[900]};
   padding: 4px 4px;
   font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas,
     Liberation Mono, monospace;
@@ -51,6 +52,8 @@ export const MdxProvider: FC<{
 }> = (props) => {
   const modifyValue = (code: string) =>
     props.modifyValue ? props.modifyValue(code) : code;
+
+  const theme = useTheme();
 
   return (
     <MDXProvider
@@ -81,7 +84,7 @@ export const MdxProvider: FC<{
           return (
             <Highlight
               {...defaultProps}
-              theme={theme}
+              theme={theme.palette.mode === 'dark' ? darkTheme : lightTheme}
               code={children}
               language={language}
             >

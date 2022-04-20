@@ -26,12 +26,18 @@ const StyledWrapper = styled('div')<{
     flex-grow: 1;
     position: relative;
   }
+
+  & .CodeMirror *::selection {
+    background: ${({ theme }) => theme.palette.emphasis[300]};
+  }
+
   & .CodeMirror {
     width: 100%;
     min-height: ${({ minheight }) => minheight}px;
     height: 100%;
     margin-left: -5px;
-    background: ${({ background }) => background};
+    background: ${({ background, theme }) =>
+      background || theme.palette.background.default};
 
     * {
       overflow: visible !important;
@@ -43,6 +49,7 @@ const StyledWrapper = styled('div')<{
 
     .CodeMirror-line {
       padding: 0px !important;
+      color: ${({ theme }) => theme.palette.editor.main} !important;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
         Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol' !important;
@@ -62,22 +69,25 @@ const StyledWrapper = styled('div')<{
       top: -1px;
     }
     .cm-function {
-      color: #007300;
-    }
-    .cm-parameter {
-      color: #002bff;
-    }
-    .cm-option {
-      color: #002bff;
-    }
-    .cm-keyword {
-      color: #002bff;
+      color: ${({ theme }) => theme.palette.editor.function};
     }
     .cm-string {
-      color: #000000;
+      color: ${({ theme }) => theme.palette.editor.main};
+    }
+    .cm-parameter {
+      color: ${({ theme }) => theme.palette.editor.other};
+    }
+    .cm-option {
+      color: ${({ theme }) => theme.palette.editor.other};
+    }
+    .cm-keyword {
+      color: ${({ theme }) => theme.palette.editor.other};
     }
     .cm-bracket {
-      color: #002bff;
+      color: ${({ theme }) => theme.palette.editor.other};
+    }
+    .cm-def {
+      color: ${({ theme }) => theme.palette.editor.function};
     }
   }
 `;
@@ -182,9 +192,10 @@ export const Editor: React.FC<Props> = ({
       <GlobalStyles
         styles={(theme) => ({
           '.CodeMirror-lint-tooltip': {
-            background: 'white !important',
+            background: theme.palette.emphasis[100] + ' !important',
             borderRadius: '0px !important',
             zIndex: theme.zIndex.tooltip + ' !important',
+            color: theme.palette.text.primary + ' !important',
           },
           '.CodeMirror-lint-message-error': {
             backgroundImage: 'unset !important',

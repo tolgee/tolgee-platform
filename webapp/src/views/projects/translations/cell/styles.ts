@@ -1,4 +1,4 @@
-import { colors, keyframes, styled } from '@mui/material';
+import { keyframes, styled } from '@mui/material';
 
 import { TOP_BAR_HEIGHT } from 'tg.component/layout/TopBar/TopBar';
 
@@ -60,15 +60,12 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
       animation: ${highlightIn} 0.4s ease-in;
     }
     &:focus-within .${CELL_HIGHLIGHT_ON_HOVER} {
-      opacity: 0;
+      opacity: 1;
       animation-name: none;
     }
     &:focus-within {
       background: ${({ position, theme }) =>
-        getCellGradientBackground(
-          position,
-          theme.palette.extraLightBackground.main
-        )};
+        getCellGradientBackground(position, theme.palette.emphasis[100])};
     }
   }
 
@@ -80,20 +77,23 @@ export const StyledCell = styled('div')<{ position?: PositionType }>`
     background: transparent;
     transition: background 0.1s ease-out;
     &:hover {
-      background: ${({ position }) =>
-        getCellGradientBackground(position, colors.grey[50])};
+      background: ${({ position, theme }) =>
+        getCellGradientBackground(position, theme.palette.emphasis[50])};
       transition: background 0.1s ease-in;
     }
   }
 
   ${combine('&', CELL_RAISED)} {
+    z-index: 1;
     background: transparent !important;
-    -webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2) !important;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: ${({ theme }) =>
+      theme.palette.mode === 'dark'
+        ? '0px 0px 7px rgba(0, 0, 0, 1)'
+        : '0px 0px 10px rgba(0, 0, 0, 0.2)'} !important;
   }
 
   ${combine('&', CELL_SELECTED)} {
-    background: #efefef !important;
+    background: ${({ theme }) => theme.palette.cellSelected1.main} !important;
   }
 
   ${combine('&', CELL_STATE)} {
