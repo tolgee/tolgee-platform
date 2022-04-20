@@ -66,13 +66,11 @@ const StyledContent = styled('div')`
   border-radius: 6px;
   height: 40px;
   max-width: 100%;
-  background-color: ${({ theme }) =>
-    alpha(theme.palette.extraLightBackground.main, 0.9)};
+  background-color: ${({ theme }) => alpha(theme.palette.emphasis[100], 0.9)};
 
   @supports (backdrop-filter: blur()) or (-webkit-backdrop-filter: blur()) or
     (-moz-backdrop-filter: blur()) {
-    background-color: ${({ theme }) =>
-      alpha(theme.palette.extraLightBackground.main, 0.5)};
+    background-color: ${({ theme }) => alpha(theme.palette.emphasis[100], 0.5)};
     -webkit-backdrop-filter: blur(7px);
     -moz-backdrop-filter: blur(7px);
     backdrop-filter: blur(7px);

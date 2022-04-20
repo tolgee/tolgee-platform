@@ -5,7 +5,7 @@ import { Field, getIn } from 'formik';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { LanguageItem } from '../LanguageItem';
-import { getProviderImg } from 'tg.views/projects/translations/TranslationTools/getProviderImg';
+import { useProviderImg } from 'tg.views/projects/translations/TranslationTools/useProviderImg';
 import { TABLE_CENTERED, TABLE_FIRST_CELL } from '../tableStyles';
 
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -31,6 +31,8 @@ type Props = {
 
 export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
   const t = useTranslate();
+
+  const getProviderImg = useProviderImg();
 
   const getProviderName = (provider) => {
     switch (provider) {

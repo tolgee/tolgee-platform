@@ -21,7 +21,7 @@ type UserAccountInProjectModel =
 
 const StyledListItem = styled('div')`
   display: flex;
-  border-bottom: 1px solid ${({ theme }) => theme.palette.lightDivider.main};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider2.main};
   &:last-child {
     border-bottom: 0;
   }
@@ -49,7 +49,7 @@ const StyledPermissions = styled('div')`
   padding: 3px 8px;
   align-items: center;
   justify-content: center;
-  background: ${({ theme }) => theme.palette.extraLightBackground.main};
+  background: ${({ theme }) => theme.palette.emphasis[100]};
   height: 33px;
   border-radius: 3px;
   cursor: default;

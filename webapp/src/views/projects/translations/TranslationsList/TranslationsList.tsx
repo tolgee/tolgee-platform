@@ -20,7 +20,7 @@ const StyledContainer = styled('div')`
   margin: 10px 0px 100px 0px;
   border-left: 0px;
   border-right: 0px;
-  background: white;
+  background: ${({ theme }) => theme.palette.background.default};
   flex-grow: 1;
   flex-direction: column;
   align-items: stretch;

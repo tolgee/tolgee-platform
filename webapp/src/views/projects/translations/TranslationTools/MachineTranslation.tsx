@@ -1,7 +1,7 @@
 import { styled } from '@mui/material';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { getProviderImg } from './getProviderImg';
+import { useProviderImg } from './useProviderImg';
 import { useTranslationTools } from './useTranslationTools';
 
 type SuggestResultModel = components['schemas']['SuggestResultModel'];
@@ -22,7 +22,7 @@ const StyledItem = styled('div')`
   transition: all 0.1s ease-in-out;
   transition-property: background color;
   &:hover {
-    background: ${({ theme }) => theme.palette.extraLightBackground.main};
+    background: ${({ theme }) => theme.palette.emphasis[100]};
     color: ${({ theme }) => theme.palette.primary.main};
   }
 `;
@@ -45,6 +45,7 @@ export const MachineTranslation: React.FC<Props> = ({
   data,
   operationsRef,
 }) => {
+  const getProviderImg = useProviderImg();
   const items = data?.machineTranslations
     ? Object.entries(data?.machineTranslations)
     : [];

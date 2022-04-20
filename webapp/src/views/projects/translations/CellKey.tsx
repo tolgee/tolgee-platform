@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Checkbox, styled } from '@mui/material';
+import { Checkbox, styled, useTheme } from '@mui/material';
 import clsx from 'clsx';
 
 import { Editor } from 'tg.component/editor/Editor';
@@ -13,6 +13,7 @@ import {
   CELL_HOVER,
   CELL_PLAIN,
   CELL_RAISED,
+  CELL_SELECTED,
   PositionType,
   StyledCell,
 } from './cell/styles';
@@ -130,6 +131,7 @@ export const CellKey: React.FC<Props> = ({
   const cellRef = useRef<HTMLDivElement>(null);
   const [screenshotsOpen, setScreenshotsOpen] = useState(false);
   const dispatch = useTranslationsDispatch();
+  const theme = useTheme();
 
   const screenshotEl = useRef<HTMLButtonElement | null>(null);
 
@@ -179,6 +181,7 @@ export const CellKey: React.FC<Props> = ({
           [CELL_HOVER]: !isEditing,
           [CELL_CLICKABLE]: editEnabled && !isEditing,
           [CELL_RAISED]: isEditing,
+          [CELL_SELECTED]: isEditing,
         })}
         style={{ width }}
         onClick={
@@ -241,6 +244,7 @@ export const CellKey: React.FC<Props> = ({
               shortcuts={{
                 [`${getMeta()}-Enter`]: () => handleSave('EDIT_NEXT'),
               }}
+              background={theme.palette.cellSelected1.main}
             />
           </StyledEditor>
         )}

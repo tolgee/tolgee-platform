@@ -23,6 +23,11 @@ const StyledLink = styled(Link)`
   }
 `;
 
+const StyledTolgeeLogo = styled(TolgeeLogo)`
+  color: ${({ theme: { palette } }) =>
+    palette.mode === 'dark' ? palette.text.primary : palette.primary.main};
+`;
+
 type Props = {
   hidden: boolean;
 };
@@ -31,7 +36,7 @@ export const SideLogo: React.FC<Props> = ({ hidden }) => {
   return (
     <StyledItem>
       <StyledLink to="/" tabIndex={hidden ? -1 : undefined}>
-        <TolgeeLogo fontSize="large" color="primary" />
+        <StyledTolgeeLogo fontSize="large" />
       </StyledLink>
     </StyledItem>
   );

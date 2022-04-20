@@ -16,11 +16,10 @@ const StyledTab = styled('div')`
   align-items: center;
   gap: ${({ theme }) => theme.spacing(1)};
   padding: ${({ theme }) => theme.spacing(0.5, 1)};
-  background: ${({ theme }) => theme.palette.extraLightBackground.main};
-  border-bottom: 1px solid
-    ${({ theme }) => theme.palette.extraLightDivider.main};
+  background: ${({ theme }) => theme.palette.cellSelected1.main};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider1.main};
   text-transform: uppercase;
-  color: #808080;
+  color: ${({ theme }) => theme.palette.text.secondary};
   position: sticky;
   top: 0px;
   height: 32px;
@@ -29,7 +28,7 @@ const StyledTab = styled('div')`
 `;
 
 const StyledBadge = styled('div')`
-  background: ${({ theme }) => theme.palette.lightBackground.main};
+  background: ${({ theme }) => theme.palette.emphasis[200]};
   padding: 2px 4px;
   border-radius: 12px;
   font-size: 12px;

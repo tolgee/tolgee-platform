@@ -5,6 +5,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
 import TranslationsSearchField from './TranslationsSearchField';
 
 import {
@@ -13,8 +14,6 @@ import {
 } from '../context/TranslationsContext';
 import { Filters } from '../Filters/Filters';
 import { ViewMode } from '../context/types';
-import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
-import clsx from 'clsx';
 
 const StyledControls = styled('div')`
   display: flex;
@@ -31,7 +30,7 @@ const StyledControls = styled('div')`
   height: 61px;
   z-index: ${({ theme }) => theme.zIndex.appBar + 1};
   background: ${({ theme }) => theme.palette.background.default};
-  transition: all 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out;
   padding-bottom: 8px;
   padding-top: 13px;
 `;
@@ -43,8 +42,10 @@ const StyledShadow = styled('div')`
   z-index: ${({ theme }) => theme.zIndex.appBar};
   margin-left: ${({ theme }) => theme.spacing(-1)};
   margin-right: ${({ theme }) => theme.spacing(-1)};
-  -webkit-box-shadow: 0px -1px 7px 0px #000000;
-  box-shadow: 0px -1px 7px 0px #000000;
+  box-shadow: ${({ theme }) =>
+    theme.palette.mode === 'dark'
+      ? '0px 1px 6px 0px #000000, 0px 1px 6px 0px #000000'
+      : '0px -1px 7px 0px #000000'};
   top: 110px;
   transition: all 0.25s;
 `;
@@ -70,10 +71,6 @@ const StyledTranslationsSearchField = styled(TranslationsSearchField)`
 
 const StyledToggleButton = styled(Button)`
   padding: 4px 8px;
-  :not(&.selected) {
-    color: ${({ theme }) => theme.palette.text.primary};
-    border-color: ${({ theme }) => theme.palette.grey[400]};
-  }
 `;
 
 type Props = {
@@ -150,17 +147,16 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
             languages={languages || []}
             context="translations"
           />
-
           <ButtonGroup>
             <StyledToggleButton
-              className={clsx({ selected: view === 'LIST' })}
+              color={view === 'LIST' ? 'primary' : 'default'}
               onClick={() => handleViewChange('LIST')}
               data-cy="translations-view-list-button"
             >
               <ViewListRounded />
             </StyledToggleButton>
             <StyledToggleButton
-              className={clsx({ selected: view === 'TABLE' })}
+              color={view === 'TABLE' ? 'primary' : 'default'}
               onClick={() => handleViewChange('TABLE')}
               data-cy="translations-view-table-button"
             >

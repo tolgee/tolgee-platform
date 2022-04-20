@@ -6,7 +6,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { FlagImage } from './FlagImage';
 
 const StyledContainer = styled('div')`
-  border: 1px solid ${({ theme }) => theme.palette.grey['100']};
+  border: 1px solid ${({ theme }) => theme.palette.emphasis['100']};
   padding: ${({ theme }) => theme.spacing(0.5, 1)};
   border-radius: ${({ theme }) => theme.shape.borderRadius};
   display: inline-flex;

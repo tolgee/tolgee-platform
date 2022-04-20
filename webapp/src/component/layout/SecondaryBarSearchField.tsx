@@ -5,7 +5,7 @@ import { useTranslate } from '@tolgee/react';
 import SearchField from 'tg.component/common/form/fields/SearchField';
 
 const StyledSearchField = styled(SearchField)`
-  background-color: ${({ theme }) => theme.palette.common.white};
+  background-color: ${({ theme }) => theme.palette.background.default};
   transition: width 0.1s ease-in-out;
   width: 250px;
 `;

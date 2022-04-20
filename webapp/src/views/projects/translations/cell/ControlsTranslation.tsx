@@ -20,7 +20,7 @@ const StyledBadge = styled(Badge)`
     display: flex;
   }
   & .resolved {
-    background: ${({ theme }) => theme.palette.grey[600]};
+    background: ${({ theme }) => theme.palette.emphasis[600]};
     padding: 0px;
     height: 16px;
     width: 18px;
@@ -32,7 +32,7 @@ const StyledBadge = styled(Badge)`
 `;
 
 const StyledCheckIcon = styled(Check)`
-  color: ${({ theme }) => theme.palette.grey[100]};
+  color: ${({ theme }) => theme.palette.emphasis[100]};
   font-size: 14px;
   margin: -5px;
 `;

@@ -24,6 +24,9 @@ const StyledContainer = styled('div')`
     overflow: hidden;
     display: flex;
     margin-bottom: ${({ theme }) => theme.spacing(0.5)};
+    filter: brightness(
+      ${({ theme }) => (theme.palette.mode === 'dark' ? 0.8 : 1)}
+    );
   }
 
   & .state {
@@ -55,6 +58,9 @@ const StyledContainer = styled('div')`
     width: ${DOT_SIZE}px;
     height: ${DOT_SIZE}px;
     border-radius: ${DOT_SIZE / 2}px;
+    filter: brightness(
+      ${({ theme }) => (theme.palette.mode === 'dark' ? 0.8 : 1)}
+    );
   }
 `;
 

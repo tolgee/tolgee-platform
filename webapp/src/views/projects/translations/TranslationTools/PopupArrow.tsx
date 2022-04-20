@@ -18,7 +18,7 @@ const StyledArrow = styled('div')`
   border-left: ${SIZE}px solid transparent;
   border-right: ${SIZE}px solid transparent;
   border-bottom: ${SIZE}px solid
-    ${({ theme }) => theme.palette.extraLightBackground.main};
+    ${({ theme }) => theme.palette.cellSelected1.main};
   filter: drop-shadow(0px 3px 5px rgba(0, 0, 0, 0.5));
 `;
 

@@ -16,8 +16,11 @@ const StyledPopper = styled('div')`
 const StyledPopperContent = styled('div')`
   display: flex;
   height: ${TOOLS_HEIGHT}px;
-  background: white;
-  box-shadow: ${({ theme }) => theme.shadows[3]};
+  background: ${({ theme }) => theme.palette.cellSelected2.main};
+  box-shadow: ${({ theme }) =>
+    theme.palette.mode === 'dark'
+      ? `${theme.shadows[5]}, ${theme.shadows[3]}`
+      : theme.shadows[3]};
   border-radius: ${({ theme }) => theme.shape.borderRadius};
 `;
 

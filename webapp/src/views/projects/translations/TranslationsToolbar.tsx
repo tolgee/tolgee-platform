@@ -29,7 +29,7 @@ const StyledShortcutsContainer = styled('div')`
 
 const StyledCounterContainer = styled('div')`
   display: flex;
-  background: ${({ theme }) => theme.palette.extraLightBackground.main};
+  background: ${({ theme }) => theme.palette.emphasis[100]};
   align-items: stretch;
   transition: opacity 0.3s ease-in-out;
   border-radius: 6px;

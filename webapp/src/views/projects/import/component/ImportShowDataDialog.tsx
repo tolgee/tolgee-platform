@@ -99,7 +99,7 @@ export const ImportShowDataDialog: FunctionComponent<{
                 pl={2}
                 pr={2}
                 style={{
-                  borderBottom: `1px solid ${theme.palette.grey['100']}`,
+                  borderBottom: `1px solid ${theme.palette.emphasis['100']}`,
                   wordBreak: 'break-all',
                 }}
               >

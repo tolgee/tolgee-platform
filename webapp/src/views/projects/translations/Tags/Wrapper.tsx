@@ -12,12 +12,16 @@ const StyledWrapper = styled('div')`
   align-items: center;
   height: 24px;
   font-size: 14px;
-  background: ${({ theme }) => theme.palette.lightBackground.main};
+  background: ${({ theme }) => theme.palette.emphasis[200]};
   border: 1px solid transparent;
   max-width: 100%;
 
+  & input {
+    color: ${({ theme }) => theme.palette.text.primary};
+  }
+
   &.preview {
-    background: white;
+    background: ${({ theme }) => theme.palette.background.default};
     border: 1px solid ${({ theme }) => theme.palette.text.secondary};
     color: ${({ theme }) => theme.palette.text.secondary};
   }

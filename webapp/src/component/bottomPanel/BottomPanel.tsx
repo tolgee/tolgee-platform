@@ -26,8 +26,8 @@ const StyledPopper = styled('div')`
 
 const StyledPopperContent = styled('div')`
   display: flex;
-  background: white;
-  boxshadow: ${({ theme }) => theme.shadows[10]};
+  background: ${({ theme }) => theme.palette.cellSelected2.main};
+  box-shadow: ${({ theme }) => theme.shadows[10]};
 `;
 
 type Props = {

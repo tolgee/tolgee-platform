@@ -98,9 +98,7 @@ export const Filters = () => {
             <StyledInputText
               style={{
                 color:
-                  value.length === 0
-                    ? theme.palette.grey[500]
-                    : theme.palette.text.primary,
+                  value.length === 0 ? '#8b9097' : theme.palette.text.primary,
               }}
               variant="body2"
             >

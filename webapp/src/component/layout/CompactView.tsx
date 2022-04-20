@@ -67,8 +67,7 @@ export const CompactView: React.FC<Props> = ({
       <GlobalStyles
         styles={(theme) => ({
           body: {
-            backgroundColor:
-              theme.palette.extraLightBackground.main + ' !important',
+            backgroundColor: theme.palette.emphasis[100] + ' !important',
           },
         })}
       />

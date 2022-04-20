@@ -3,7 +3,7 @@ import { styled } from '@mui/material';
 import ListItem from '@mui/material/ListItem';
 
 const StyledListItem = styled(ListItem)`
-  border-bottom: 1px solid ${({ theme }) => theme.palette.grey.A100};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.emphasis.A100};
   flex-wrap: wrap;
   &:last-child {
     border-bottom: none;

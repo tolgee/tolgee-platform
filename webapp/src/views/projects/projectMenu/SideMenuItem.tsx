@@ -27,12 +27,12 @@ const StyledItem = styled('li')`
     padding: 10px 0px;
     cursor: pointer;
     justify-content: center;
-    color: ${({ theme }) => theme.palette.grey[600]};
+    color: ${({ theme }) => theme.palette.emphasis[600]};
     outline: 0;
     transition: all 0.2s ease-in-out;
     &:focus,
     &:hover {
-      color: ${({ theme }) => theme.palette.grey[800]};
+      color: ${({ theme }) => theme.palette.emphasis[800]};
     }
     width: 44px;
     border-radius: 10px;
@@ -40,7 +40,7 @@ const StyledItem = styled('li')`
 
   & .selected {
     color: ${({ theme }) => theme.palette.primary.main + ' !important'};
-    background: ${({ theme }) => theme.palette.grey[200] + ' !important'};
+    background: ${({ theme }) => theme.palette.grey[500] + '33 !important'};
   }
 `;
 

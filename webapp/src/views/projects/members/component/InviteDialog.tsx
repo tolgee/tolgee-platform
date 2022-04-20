@@ -174,6 +174,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                   <Field name="text">
                     {({ field, meta }) => (
                       <TextField
+                        variant="standard"
                         data-cy="invitation-dialog-input-field"
                         type={values.type === 'email' ? 'email' : 'text'}
                         label={

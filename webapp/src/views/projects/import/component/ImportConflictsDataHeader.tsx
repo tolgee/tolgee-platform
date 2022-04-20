@@ -75,7 +75,7 @@ export const ImportConflictsDataHeader: FunctionComponent<{
       pr={2}
       mb={1}
       style={{
-        borderBottom: `1px solid ${theme.palette.grey['200']}`,
+        borderBottom: `1px solid ${theme.palette.emphasis['200']}`,
       }}
     >
       {!isSmOrLower ? (

@@ -21,6 +21,7 @@ const StyledExtraCircle = styled('div')`
   justify-content: center;
   margin: 2px;
   background: ${({ theme }) => theme.palette.grey[400]};
+  color: ${({ theme }) => theme.palette.common.black};
   border-radius: 50%;
   font-size: 10px;
 `;

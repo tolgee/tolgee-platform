@@ -24,12 +24,12 @@ import { ImportRowLanguageMenu } from './ImportRowLanguageMenu';
 
 const StyledTableRow = styled(TableRow)`
   &:hover {
-    background-color: ${({ theme }) => theme.palette.grey['50']};
+    background-color: ${({ theme }) => theme.palette.emphasis['50']};
   }
   & .helperIcon {
     font-size: 20px;
     opacity: 0;
-    color: ${({ theme }) => theme.palette.grey['500']};
+    color: ${({ theme }) => theme.palette.emphasis['500']};
   }
   &:hover .helperIcon {
     opacity: 1;

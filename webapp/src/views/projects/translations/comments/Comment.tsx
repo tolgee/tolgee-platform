@@ -22,7 +22,7 @@ const StyledContainer = styled('div')`
   transition: background-color 0.1s ease-out;
 
   &:hover {
-    background-color: ${({ theme }) => theme.palette.grey[200]};
+    background-color: ${({ theme }) => theme.palette.emphasis[100]}cc;
     transition: background-color 0.1s ease-in;
   }
 
@@ -37,7 +37,7 @@ const StyledContainer = styled('div')`
   }
 
   &.unresolved {
-    background: ${({ theme }) => theme.palette.grey[100]};
+    background: ${({ theme }) => theme.palette.emphasis[100]};
   }
 `;
 
@@ -54,6 +54,7 @@ const StyledMenu = styled('div')`
 `;
 
 const StyledSmallActionButton = styled(SmallActionButton)`
+  color: ${({ theme }) => theme.palette.text.primary};
   height: 26px;
   width: 26px;
 `;

@@ -33,7 +33,7 @@ const StyledItem = styled('div')`
   transition: all 0.1s ease-in-out;
   transition-property: background color;
   &:hover {
-    background: ${({ theme }) => theme.palette.extraLightBackground.main};
+    background: ${({ theme }) => theme.palette.emphasis[100]};
     color: ${({ theme }) => theme.palette.primary.main};
   }
 `;

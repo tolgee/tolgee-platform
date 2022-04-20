@@ -44,9 +44,9 @@ const StyledAddBox = styled('div')`
   display: flex;
   margin: 1px;
   cursor: pointer;
-  border-color: ${({ theme }) => theme.palette.grey[200]};
-  color: ${({ theme }) => theme.palette.grey[200]};
-  border: 1px dashed ${({ theme }) => theme.palette.grey[200]};
+  border-color: ${({ theme }) => theme.palette.emphasis[200]};
+  color: ${({ theme }) => theme.palette.emphasis[200]};
+  border: 1px dashed ${({ theme }) => theme.palette.emphasis[200]};
   &:hover {
     border-color: ${({ theme }) => theme.palette.primary.main};
     color: ${({ theme }) => theme.palette.primary.main};
