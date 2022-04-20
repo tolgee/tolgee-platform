@@ -39,7 +39,6 @@ export const StateSelector: React.FC<Props> = ({ className }) => {
                   .map((val) => t(translationStates[val]?.translationKey))
                   .join(', ')
               }
-              MenuProps={{ getContentAnchorEl: null }}
               multiple
             >
               {exportableStates.map((state) => (

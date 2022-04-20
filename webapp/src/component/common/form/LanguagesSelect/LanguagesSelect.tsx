@@ -39,7 +39,6 @@ export type Props = {
 export const LanguagesSelect: FunctionComponent<Props> = (props) => {
   const menuProps = {
     variant: 'menu',
-    getContentAnchorEl: null,
     PaperProps: {
       style: {
         width: 250,

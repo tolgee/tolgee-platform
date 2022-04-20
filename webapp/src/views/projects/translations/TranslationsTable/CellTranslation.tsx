@@ -52,7 +52,7 @@ const StyledControls = styled('div')`
   display: flex;
   justify-content: flex-end;
   overflow: hidden;
-  min-height: 44;
+  min-height: 44px;
   padding: 12px 14px 12px 12px;
   margin-top: -16px;
 `;
