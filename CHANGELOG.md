@@ -1,3 +1,10 @@
+## [2.18.2](https://github.com/tolgee/tolgee-platform/compare/v2.18.1...v2.18.2) (2022-04-20)
+
+
+### Bug Fixes
+
+* Screenshots gallery shrink ([7ff04db](https://github.com/tolgee/tolgee-platform/commit/7ff04db63f663feac499a6356619021658f02d3d))
+
 ## [2.18.1](https://github.com/tolgee/tolgee-platform/compare/v2.18.0...v2.18.1) (2022-04-20)
 
 
