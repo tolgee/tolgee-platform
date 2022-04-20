@@ -86,10 +86,8 @@ class V2TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/proje
       node("_embedded.revisions") {
         isArray.hasSize(20)
         node("[0]") {
-          node("text").isEqualTo("nt 20")
-          node("state").isEqualTo("TRANSLATED")
-          node("auto").isEqualTo("false")
-          node("mtProvider").isEqualTo("null")
+          node("modifications.text.old").isEqualTo("nt 19")
+          node("modifications.text.new").isEqualTo("nt 20")
           node("timestamp").isNumber.isLessThanOrEqualTo((Date().time * 1000).toBigDecimal())
           node("revisionType").isEqualTo("MOD")
           node("author") {
@@ -103,7 +101,7 @@ class V2TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/proje
           }
         }
       }
-      node("page.totalElements").isEqualTo(21)
+      node("page.totalElements").isEqualTo(20)
     }
   }
 

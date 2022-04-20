@@ -1,4 +1,4 @@
-package io.tolgee.activity
+package io.tolgee.activity.data
 
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.key.Key

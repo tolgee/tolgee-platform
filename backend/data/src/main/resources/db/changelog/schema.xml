@@ -1628,40 +1628,40 @@
     <changeSet author="jenik (generated)" id="1648644553219-1">
         <createSequence incrementBy="10" sequenceName="activity_sequence" startValue="10"/>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1649159424935-1">
+    <changeSet author="jenik (generated)" id="1650442105133-1">
         <createTable tableName="activity_describing_entity">
-            <column name="entity_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_describing_entityPK"/>
-            </column>
             <column name="entity_class" type="VARCHAR(255)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_describing_entityPK"/>
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
             </column>
             <column name="data" type="JSONB"/>
             <column name="describing_relations" type="JSONB"/>
             <column name="revision_type" type="INTEGER"/>
             <column name="activity_revision_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_describing_entityPK"/>
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1649159424935-2">
+    <changeSet author="jenik (generated)" id="1650442105133-2">
         <createTable tableName="activity_modified_entity">
-            <column name="entity_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_modified_entityPK"/>
-            </column>
             <column name="entity_class" type="VARCHAR(255)">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_modified_entityPK"/>
+                <constraints nullable="false"/>
             </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="describing_data" type="JSONB"/>
             <column name="describing_relations" type="JSONB"/>
-            <column name="description" type="JSONB"/>
             <column name="modifications" type="JSONB"/>
             <column name="revision_type" type="INTEGER"/>
             <column name="activity_revision_id" type="BIGINT">
-                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_modified_entityPK"/>
+                <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1649159424935-3">
+    <changeSet author="jenik (generated)" id="1650442105133-3">
         <createTable tableName="activity_revision">
             <column name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="activity_revisionPK"/>
@@ -1675,20 +1675,116 @@
             <column name="type" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1649159424935-4">
+    <changeSet author="jenik (generated)" id="1650442105133-4">
+        <addPrimaryKey columnNames="activity_revision_id, entity_class, entity_id" constraintName="activity_describing_entityPK" tableName="activity_describing_entity"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-5">
+        <addPrimaryKey columnNames="activity_revision_id, entity_class, entity_id" constraintName="activity_modified_entityPK" tableName="activity_modified_entity"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-6">
         <createIndex indexName="IDXau6hururiosck0in4s0bintp4" tableName="activity_revision">
             <column name="type"/>
         </createIndex>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1649159424935-5">
+    <changeSet author="jenik (generated)" id="1650442105133-7">
         <createIndex indexName="IDXe1pk0fttwygawrf99gbby6scc" tableName="activity_revision">
             <column name="author_id"/>
         </createIndex>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1649159424935-6">
+    <changeSet author="jenik (generated)" id="1650442105133-8">
         <addForeignKeyConstraint baseColumnNames="activity_revision_id" baseTableName="activity_describing_entity" constraintName="FK9xs5a07fba5yqje5jqm6qrehs" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_revision" validate="true"/>
     </changeSet>
-    <changeSet author="jenik (generated)" id="1649159424935-7">
+    <changeSet author="jenik (generated)" id="1650442105133-9">
         <addForeignKeyConstraint baseColumnNames="activity_revision_id" baseTableName="activity_modified_entity" constraintName="FKtqmx9nlfhcmio41b5xieb0ki4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_revision" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-10">
+        <dropForeignKeyConstraint baseTableName="email_verification_aud" constraintName="FK1diai27pxl7epr7wmiddlwns5"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-11">
+        <dropForeignKeyConstraint baseTableName="api_key_scopes_enum_aud" constraintName="FK3jkyqktbidh2cyx3xy3qml99l"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-12">
+        <dropForeignKeyConstraint baseTableName="key_aud" constraintName="FKcwyby3t6jg4ybxox3nchfbpqy"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-13">
+        <dropForeignKeyConstraint baseTableName="invitation_aud" constraintName="FKdkc05rqm5p3ahqp80ukr4y6se"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-14">
+        <dropForeignKeyConstraint baseTableName="user_account_aud" constraintName="FKfi9ywuk505xl9g17jib6b7urx"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-15">
+        <dropForeignKeyConstraint baseTableName="organization_role_aud" constraintName="FKgey5u1uwkslc6hhyp3uka2wj8"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-16">
+        <dropForeignKeyConstraint baseTableName="organization_aud" constraintName="FKgrkrhev0nmxi9r1h096cm8lxe"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-17">
+        <dropForeignKeyConstraint baseTableName="api_key_aud" constraintName="FKhqt2jx03076gcmame7hggtppa"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-18">
+        <dropForeignKeyConstraint baseTableName="translation_aud" constraintName="FKlkb2y39ix1nhtnjkco5pkwa5w"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-19">
+        <dropForeignKeyConstraint baseTableName="permission_aud" constraintName="FKlkd3khuueqm30qwpdrku4w6eo"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-20">
+        <dropForeignKeyConstraint baseTableName="language_aud" constraintName="FKq4t05s4qw8uasc9mjl2tk83sm"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-21">
+        <dropForeignKeyConstraint baseTableName="screenshot_aud" constraintName="FKq6jhbxmwvr0o19sfqwog5gk7s"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-22">
+        <dropForeignKeyConstraint baseTableName="translation_comment_aud" constraintName="FKq8g6phhnoyyuyjh9omekg8ja7"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-23">
+        <dropForeignKeyConstraint baseTableName="permission_languages_aud" constraintName="FKqrbr6c2d8ujo1y43a6ftsdp8c"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-24">
+        <dropForeignKeyConstraint baseTableName="project_aud" constraintName="FKqsyp928iixx9oharj1ofavbk5"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-25">
+        <dropTable tableName="api_key_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-26">
+        <dropTable tableName="api_key_scopes_enum_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-27">
+        <dropTable tableName="email_verification_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-28">
+        <dropTable tableName="invitation_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-29">
+        <dropTable tableName="key_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-30">
+        <dropTable tableName="language_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-31">
+        <dropTable tableName="organization_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-32">
+        <dropTable tableName="organization_role_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-33">
+        <dropTable tableName="permission_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-34">
+        <dropTable tableName="permission_languages_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-35">
+        <dropTable tableName="project_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-36">
+        <dropTable tableName="screenshot_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-37">
+        <dropTable tableName="translation_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-38">
+        <dropTable tableName="translation_comment_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-39">
+        <dropTable tableName="user_account_aud"/>
     </changeSet>
 </databaseChangeLog>

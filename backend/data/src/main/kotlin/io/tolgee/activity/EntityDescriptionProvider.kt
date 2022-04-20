@@ -2,6 +2,7 @@ package io.tolgee.activity
 
 import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
+import io.tolgee.activity.data.EntityDescription
 import io.tolgee.model.EntityWithId
 import io.tolgee.util.EntityUtil
 import org.springframework.stereotype.Component

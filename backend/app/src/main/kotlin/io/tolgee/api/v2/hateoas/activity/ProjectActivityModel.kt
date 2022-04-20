@@ -1,6 +1,6 @@
 package io.tolgee.api.v2.hateoas.activity
 
-import io.tolgee.activity.ActivityType
+import io.tolgee.activity.data.ActivityType
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 import java.io.Serializable

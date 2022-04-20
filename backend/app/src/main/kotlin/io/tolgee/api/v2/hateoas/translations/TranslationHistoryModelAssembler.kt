@@ -17,10 +17,7 @@ class TranslationHistoryModelAssembler(
     val avatar = avatarService.getAvatarLinks(view.authorAvatarHash)
 
     return TranslationHistoryModel(
-      text = view.text,
-      state = view.state,
-      auto = view.auto,
-      mtProvider = view.mtProvider,
+      modifications = view.modifications,
       author = view.authorId?.let {
         SimpleUserAccountModel(
           id = it,
@@ -29,7 +26,7 @@ class TranslationHistoryModelAssembler(
           avatar = avatar
         )
       },
-      timestamp = view.timestamp,
+      timestamp = view.timestamp.time,
       revisionType = view.revisionType
     )
   }

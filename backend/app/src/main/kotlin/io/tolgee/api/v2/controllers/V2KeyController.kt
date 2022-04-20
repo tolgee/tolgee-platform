@@ -2,8 +2,8 @@ package io.tolgee.api.v2.controllers
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.activity.ActivityType
 import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.key.KeyModel
 import io.tolgee.api.v2.hateoas.key.KeyModelAssembler
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModel

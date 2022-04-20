@@ -1,7 +1,7 @@
 import React from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { T } from '@tolgee/react';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import {
   ActivityValue,
   getAllModifiedEntites,

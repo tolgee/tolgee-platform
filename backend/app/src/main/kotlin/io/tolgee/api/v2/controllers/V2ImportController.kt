@@ -9,8 +9,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.tags.Tag
-import io.tolgee.activity.ActivityType
 import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.dataImport.ImportAddFilesResultModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModelAssembler

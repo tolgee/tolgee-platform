@@ -1,6 +1,6 @@
 package io.tolgee.repository.activity
 
-import io.tolgee.activity.ActivityType
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
