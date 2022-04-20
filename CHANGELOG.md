@@ -1,3 +1,10 @@
+## [2.18.1](https://github.com/tolgee/tolgee-platform/compare/v2.18.0...v2.18.1) (2022-04-20)
+
+
+### Bug Fixes
+
+* Mui5 updgrade bugs ([3741d94](https://github.com/tolgee/tolgee-platform/commit/3741d94deb441bfa9e96224db9a447a31c0c7c40))
+
 # [2.18.0](https://github.com/tolgee/tolgee-platform/compare/v2.17.0...v2.18.0) (2022-04-20)
 
 
