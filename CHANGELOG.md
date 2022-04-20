@@ -1,3 +1,10 @@
+# [2.18.0](https://github.com/tolgee/tolgee-platform/compare/v2.17.0...v2.18.0) (2022-04-20)
+
+
+### Features
+
+* Make TM/MT tools hover styling nicer ([17c395b](https://github.com/tolgee/tolgee-platform/commit/17c395b4df75f005317f91d1645d2f081f6b9149))
+
 # [2.17.0](https://github.com/tolgee/tolgee-platform/compare/v2.16.3...v2.17.0) (2022-04-19)
 
 
