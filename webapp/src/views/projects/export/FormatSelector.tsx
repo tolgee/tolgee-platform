@@ -20,7 +20,6 @@ export const FormatSelector: React.FC<Props> = ({ className }) => {
             <Select
               {...field}
               data-cy="export-format-selector"
-              MenuProps={{ getContentAnchorEl: null }}
               variant="standard"
             >
               {FORMATS.map((format) => (

@@ -38,7 +38,6 @@ export const LanguageSelector: React.FC<Props> = ({ languages, className }) => {
               variant="standard"
               data-cy="export-language-selector"
               renderValue={(values: StateType[]) => values.join(', ')}
-              MenuProps={{ getContentAnchorEl: null }}
               multiple
             >
               {languages?.map((lang) => (

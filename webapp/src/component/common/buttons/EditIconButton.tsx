@@ -3,7 +3,7 @@ import EditIcon from '@mui/icons-material/Edit';
 
 export function EditIconButton(props) {
   return (
-    <IconButton aria-label="edit" color="primary" {...props} size="large">
+    <IconButton aria-label="edit" color="primary" size="large" {...props}>
       <EditIcon />
     </IconButton>
   );
