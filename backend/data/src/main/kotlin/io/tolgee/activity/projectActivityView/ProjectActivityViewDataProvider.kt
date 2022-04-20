@@ -1,9 +1,9 @@
 package io.tolgee.activity.projectActivityView
 
-import io.tolgee.activity.ActivityType
-import io.tolgee.activity.EntityDescription
-import io.tolgee.activity.EntityDescriptionRef
 import io.tolgee.activity.annotation.ActivityReturnsExistence
+import io.tolgee.activity.data.ActivityType
+import io.tolgee.activity.data.EntityDescription
+import io.tolgee.activity.data.EntityDescriptionRef
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -134,7 +134,7 @@ class ProjectActivityViewDataProvider(
         entityId = modifiedEntity.entityId,
         exists = entityExistences[modifiedEntity.entityClass to modifiedEntity.entityId],
         modifications = modifiedEntity.modifications,
-        description = modifiedEntity.description,
+        description = modifiedEntity.describingData,
         describingRelations = relations
       )
     }.groupBy { it.activityRevision.id }

@@ -22,6 +22,7 @@ import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.PermissionService
+import io.tolgee.service.ProjectService
 import io.tolgee.service.UserAccountService
 import io.tolgee.util.SlugGenerator
 import org.springframework.stereotype.Service
@@ -42,7 +43,8 @@ class DbPopulatorReal(
   private val initialPasswordManager: InitialPasswordManager,
   private val organizationRepository: OrganizationRepository,
   private val slugGenerator: SlugGenerator,
-  private val organizationRoleService: OrganizationRoleService
+  private val organizationRoleService: OrganizationRoleService,
+  private val projectService: ProjectService
 ) {
   private lateinit var de: Language
   private lateinit var en: Language
@@ -104,7 +106,7 @@ class DbPopulatorReal(
     project.slug = slugGenerator.generate(projectName, 3, 60) { true }
     en = createLanguage("en", project)
     de = createLanguage("de", project)
-    projectRepository.saveAndFlush(project)
+    projectService.save(project)
     organization.projects.add(project)
     entityManager.flush()
     entityManager.clear()
@@ -117,11 +119,12 @@ class DbPopulatorReal(
     val project = Project()
     project.name = projectName
     project.userOwner = userAccount
+    projectService.save(project)
     en = createLanguage("en", project)
     project.baseLanguage = en
     de = createLanguage("de", project)
     permissionService.grantFullAccessToProject(userAccount, project)
-    projectRepository.saveAndFlush(project)
+    projectService.save(project)
     entityManager.flush()
     entityManager.clear()
     return project

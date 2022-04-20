@@ -1,7 +1,7 @@
 package io.tolgee.model.activity
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
-import io.tolgee.activity.ActivityType
+import io.tolgee.activity.data.ActivityType
 import org.hibernate.annotations.NotFound
 import org.hibernate.annotations.NotFoundAction
 import org.hibernate.annotations.Type

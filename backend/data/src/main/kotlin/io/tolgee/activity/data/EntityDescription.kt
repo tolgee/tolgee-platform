@@ -1,4 +1,4 @@
-package io.tolgee.activity
+package io.tolgee.activity.data
 
 data class EntityDescription(
   val entityClass: String,

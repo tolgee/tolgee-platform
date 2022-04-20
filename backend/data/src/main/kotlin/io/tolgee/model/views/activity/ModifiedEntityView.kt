@@ -1,7 +1,7 @@
 package io.tolgee.model.views.activity
 
-import io.tolgee.activity.EntityDescription
-import io.tolgee.activity.PropertyModification
+import io.tolgee.activity.data.EntityDescription
+import io.tolgee.activity.data.PropertyModification
 import io.tolgee.model.activity.ActivityRevision
 
 data class ModifiedEntityView(

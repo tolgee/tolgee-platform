@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
-import { Tooltip } from '@material-ui/core';
+import { Tooltip } from '@mui/material';
 
 export const ActivityValue: FC<{ maxLength?: number }> = (props) => {
   let children = props.children;

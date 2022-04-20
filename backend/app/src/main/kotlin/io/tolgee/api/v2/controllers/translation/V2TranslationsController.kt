@@ -10,9 +10,10 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
-import io.tolgee.activity.ActivityType
+import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.ActivityService
 import io.tolgee.activity.RequestActivity
-import io.tolgee.activity.holders.ActivityHolder
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
 import io.tolgee.api.v2.hateoas.translations.SetTranslationsResponseModel
@@ -47,7 +48,9 @@ import io.tolgee.service.TranslationService
 import io.tolgee.service.query_builders.CursorUtil
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -79,13 +82,14 @@ class V2TranslationsController(
   private val keyService: KeyService,
   private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
   private val historyPagedAssembler: PagedResourcesAssembler<TranslationHistoryView>,
-  private val translationHistoryModelAssembler: TranslationHistoryModelAssembler,
+  private val historyModelAssembler: TranslationHistoryModelAssembler,
   private val translationModelAssembler: TranslationModelAssembler,
   private val languageService: LanguageService,
   private val securityService: SecurityService,
   private val authenticationFacade: AuthenticationFacade,
   private val screenshotService: ScreenshotService,
   private val activityHolder: ActivityHolder,
+  private val activityService: ActivityService
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @AccessWithAnyProjectPermission
@@ -138,9 +142,9 @@ class V2TranslationsController(
   @Operation(summary = "Sets translations for existing or not existing key")
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.find(projectHolder.projectEntity.id, dto.key)?.also {
-      checkKeyEditScope()
       activityHolder.activity = ActivityType.SET_TRANSLATIONS
     } ?: let {
+      checkKeyEditScope()
       activityHolder.activity = ActivityType.CREATE_KEY
       keyService.create(projectHolder.projectEntity, dto.key)
     }
@@ -226,12 +230,12 @@ Sorting is not supported for supported. It is automatically sorted from newest t
   )
   fun getTranslationHistory(
     @PathVariable translationId: Long,
-    @ParameterObject pageable: Pageable
+    @ParameterObject @SortDefault(sort = ["timestamp"], direction = Sort.Direction.DESC) pageable: Pageable
   ): PagedModel<TranslationHistoryModel> {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
-    val translations = translationService.getHistory(translationId, pageable)
-    return historyPagedAssembler.toModel(translations, translationHistoryModelAssembler)
+    val translations = activityService.getTranslationHistory(translation.id, pageable)
+    return historyPagedAssembler.toModel(translations, historyModelAssembler)
   }
 
   private fun getKeysWithScreenshots(keyIds: Collection<Long>): Map<Long, MutableSet<Screenshot>>? {

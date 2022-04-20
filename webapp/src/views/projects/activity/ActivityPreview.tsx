@@ -1,11 +1,11 @@
 import { BaseView } from 'tg.component/layout/BaseView';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
-import { Box } from '@material-ui/core';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import React, { useState } from 'react';
 import { useProject } from 'tg.hooks/useProject';
 import { ActivityItem } from './ActivityItem';
+import { Box } from '@mui/material';
 
 export const ActivityPreview = () => {
   const project = useProject();

@@ -1,6 +1,6 @@
 package io.tolgee.model.views.activity
 
-import io.tolgee.activity.ActivityType
+import io.tolgee.activity.data.ActivityType
 
 class ProjectActivityView(
   val revisionId: Long,

@@ -268,6 +268,13 @@ class ProjectService constructor(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#id")
   fun deleteProject(id: Long) {
     val project = get(id)
+
+    try {
+      projectHolder.project
+    } catch (e: UninitializedPropertyAccessException) {
+      projectHolder.project = ProjectDto.fromEntity(project)
+    }
+
     importService.getAllByProject(id).forEach {
       importService.deleteImport(it)
     }
@@ -344,7 +351,12 @@ class ProjectService constructor(
 
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
   fun save(project: Project): Project {
-    return projectRepository.save(project)
+    val isCreating = project.id == 0L
+    projectRepository.save(project)
+    if (isCreating) {
+      projectHolder.project = ProjectDto.fromEntity(project)
+    }
+    return project
   }
 
   fun refresh(project: Project): Project {

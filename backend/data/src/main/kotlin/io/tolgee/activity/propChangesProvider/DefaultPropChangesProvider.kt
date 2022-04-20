@@ -1,6 +1,6 @@
 package io.tolgee.activity.propChangesProvider
 
-import io.tolgee.activity.PropertyModification
+import io.tolgee.activity.data.PropertyModification
 import org.springframework.stereotype.Component
 
 @Component
