@@ -38,6 +38,7 @@ const StyledAddBox = styled('div')`
   overflow: hidden;
   width: 100px;
   height: 100px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   display: flex;
