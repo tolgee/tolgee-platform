@@ -34,7 +34,7 @@ open class ProjectStatsProvider(
     val selection = mutableListOf<Selection<*>>(
       project.get(Project_.id),
       getKeyCountSelection(),
-      getUserCountSelection(),
+      getMemberCountSelection(),
       getTagSelection()
     )
 
@@ -59,7 +59,7 @@ open class ProjectStatsProvider(
     return sub.select(cb.coalesce(cb.countDistinct(tag.get(Tag_.id)), 0))
   }
 
-  private fun getUserCountSelection(): Selection<Long> {
+  private fun getMemberCountSelection(): Selection<Long> {
     val sub = query.subquery(Long::class.java)
     val subProject = sub.from(Project::class.java)
     val subUserAccount = sub.from(UserAccount::class.java)

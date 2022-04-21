@@ -61,13 +61,18 @@ open class LanguageStatsProvider(
     query.where(cb.equal(project.get(Project_.id), projectId))
   }
 
-  private fun selectKeyCount(state: TranslationState): Selection<Int> {
+  private fun selectKeyCount(state: TranslationState): Selection<Long> {
     val sub = query.subquery(Int::class.java)
     val project = sub.from(Project::class.java)
     val keyJoin = project.join(Project_.keys)
     val targetTranslationsJoin = joinTargetTranslations(keyJoin, state)
     val count = cb.count(targetTranslationsJoin.get(Translation_.id)) as Expression<Int>
-    return sub.select(count)
+
+    val coalesceCount = cb.coalesce<Int>()
+    coalesceCount.value(count)
+    coalesceCount.value(0)
+
+    return sub.select(coalesceCount) as Selection<Long>
   }
 
   private fun selectWordCount(state: TranslationState): Selection<Int> {
@@ -82,7 +87,13 @@ open class LanguageStatsProvider(
         cb.equal(translation.get(Translation_.language), project.get(Project_.baseLanguage))
       )
     }
-    return sub.select(cb.sum(baseTranslationJoin.get(Translation_.wordCount)))
+
+    val count = cb.sum(baseTranslationJoin.get(Translation_.wordCount))
+    val coalesceCount = cb.coalesce<Int>()
+    coalesceCount.value(count)
+    coalesceCount.value(0)
+
+    return sub.select(coalesceCount)
   }
 
   private fun joinTargetTranslations(

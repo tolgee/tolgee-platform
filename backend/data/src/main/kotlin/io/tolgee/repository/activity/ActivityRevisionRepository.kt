@@ -58,4 +58,14 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     """
   )
   fun getModifiedEntityTypeCounts(revisionIds: List<Long>, allowedTypes: Collection<ActivityType>): List<Array<Any>>
+
+  @Query(
+    """
+      select count(ar.id) as count, function('to_char', ar.timestamp, 'yyyy-MM-dd') as date
+      from ActivityRevision ar
+      group by date
+      order by date
+    """
+  )
+  fun getProjectDailyActivity(projectId: Long): List<Array<Any>>
 }

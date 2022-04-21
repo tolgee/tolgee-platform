@@ -6,8 +6,8 @@ data class ProjectLanguageStatsResultView(
   val languageName: String?,
   val languageOriginalName: String?,
   val languageFlagEmoji: String?,
-  val translatedKeys: Long?,
-  val translatedWords: Long?,
-  val reviewedKeys: Long?,
-  val reviewedWords: Long?,
+  val translatedKeys: Long,
+  val translatedWords: Long,
+  val reviewedKeys: Long,
+  val reviewedWords: Long,
 )

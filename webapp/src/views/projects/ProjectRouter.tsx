@@ -17,6 +17,7 @@ import { SingleKeyView } from './translations/SingleKeyView';
 import React from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { ActivityPreview } from './activity/ActivityPreview';
+import { DashboardPreview } from './dashboard/DashboardPreview';
 
 const IntegrateView = React.lazy(() =>
   import('tg.views/projects/integrate/IntegrateView').then((r) => ({
@@ -84,6 +85,10 @@ export const ProjectRouter = () => {
 
             <Route exact path={LINKS.ACTIVITY_PREVIEW.template}>
               <ActivityPreview />
+            </Route>
+
+            <Route exact path={LINKS.PROJECT_DASHBOARD.template}>
+              <DashboardPreview />
             </Route>
           </React.Suspense>
         </ProjectPage>
