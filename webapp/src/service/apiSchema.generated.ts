@@ -279,6 +279,12 @@ export interface paths {
   "/v2/projects/{projectId}/tags": {
     get: operations["getAll_1"];
   };
+  "/v2/projects/{projectId}/stats/daily-activity": {
+    get: operations["getProjectDailyActivity"];
+  };
+  "/v2/projects/{projectId}/stats": {
+    get: operations["getProjectStats"];
+  };
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
   };
@@ -480,9 +486,13 @@ export interface components {
       slug?: string;
       avatar?: components["schemas"]["Avatar"];
       userOwner?: components["schemas"]["UserAccountModel"];
+      organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
+      /** Use organizationOwner field */
       organizationOwnerName?: string;
+      /** Use organizationOwner field */
       organizationOwnerSlug?: string;
+      /** Use organizationOwner field */
       organizationOwnerBasePermissions?:
         | "VIEW"
         | "TRANSLATE"
@@ -492,6 +502,14 @@ export interface components {
       /** Current user's direct permission */
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       computedPermissions: components["schemas"]["UserPermissionModel"];
+    };
+    SimpleOrganizationModel: {
+      id: number;
+      name: string;
+      slug: string;
+      description?: string;
+      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      avatar?: components["schemas"]["Avatar"];
     };
     UserPermissionModel: {
       /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
@@ -931,6 +949,30 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    LanguageStatsModel: {
+      languageId?: number;
+      languageTag?: string;
+      languageName?: string;
+      languageOriginalName?: string;
+      languageFlagEmoji?: string;
+      translatedKeyCount: number;
+      translatedWordCount: number;
+      translatedPercentage: number;
+      reviewedKeyCount: number;
+      reviewedWordCount: number;
+      reviewedPercentage: number;
+    };
+    ProjectStatsModel: {
+      projectId: number;
+      languageCount: number;
+      keyCount: number;
+      baseWordsCount: number;
+      translatedPercentage: number;
+      reviewedPercentage: number;
+      membersCount: number;
+      tagCount: number;
+      languageStats: components["schemas"]["LanguageStatsModel"][];
+    };
     CreditBalanceModel: {
       creditBalance: number;
     };
@@ -951,6 +993,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -962,7 +1005,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -985,6 +1027,7 @@ export interface components {
       entityClass: string;
       entityId: number;
       data: { [key: string]: { [key: string]: unknown } };
+      exists?: boolean;
     };
     ModifiedEntityModel: {
       entityId: number;
@@ -993,6 +1036,7 @@ export interface components {
         [key: string]: components["schemas"]["PropertyModification"];
       };
       relations?: { [key: string]: components["schemas"]["EntityDescription"] };
+      exists?: boolean;
     };
     PagedModelProjectActivityModel: {
       _embedded?: {
@@ -1025,7 +1069,12 @@ export interface components {
         | "KEY_DELETE"
         | "CREATE_KEY"
         | "COMPLEX_EDIT"
-        | "IMPORT";
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
@@ -1057,14 +1106,10 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
     };
     TranslationHistoryModel: {
-      /** Translation text */
-      text?: string;
-      /** State of translation */
-      state?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
-      /** Was translated using Translation Memory or Machine translation service? */
-      auto?: boolean;
-      /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS";
+      /** Modified fields */
+      modifications?: {
+        [key: string]: components["schemas"]["PropertyModification"];
+      };
       /** Unix timestamp of the revision */
       timestamp: number;
       author?: components["schemas"]["SimpleUserAccountModel"];
@@ -1170,9 +1215,13 @@ export interface components {
       slug?: string;
       avatar?: components["schemas"]["Avatar"];
       userOwner?: components["schemas"]["UserAccountModel"];
+      organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
+      /** Use organizationOwner field */
       organizationOwnerName?: string;
+      /** Use organizationOwner field */
       organizationOwnerSlug?: string;
+      /** Use organizationOwner field */
       organizationOwnerBasePermissions?:
         | "VIEW"
         | "TRANSLATE"
@@ -4637,6 +4686,60 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelTagModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getProjectDailyActivity: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": { [key: string]: number };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getProjectStats: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["ProjectStatsModel"];
         };
       };
       /** Bad Request */
