@@ -6,16 +6,20 @@ import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
+import io.tolgee.model.Language
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.transaction.support.TransactionTemplate
 import java.util.*
 
 @SpringBootTest
@@ -26,6 +30,11 @@ class V2TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/proje
 
   lateinit var testUser: UserAccount
   lateinit var testProject: Project
+  lateinit var lang: Language
+  lateinit var emptyKey: Key
+
+  @Autowired
+  lateinit var transactionTemplate: TransactionTemplate
 
   @BeforeEach
   fun setup() {
@@ -46,19 +55,23 @@ class V2TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/proje
             type = Permission.ProjectPermissionType.TRANSLATE
             project = testProject
           }
-          val lang = addLanguage {
+          lang = addLanguage {
             name = "Deutsch"
             tag = "de"
           }.self
 
           addKey {
             name = "yey"
+            emptyKey = this
           }.build {
             addTranslation {
               language = lang
               text = "Test text"
               translation = this
             }
+          }
+          addKey {
+            name = "yey2"
           }
         }
       }
@@ -102,6 +115,23 @@ class V2TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/proje
         }
       }
       node("page.totalElements").isEqualTo(20)
+    }
+  }
+
+  @ProjectJWTAuthTestMethod
+  @Test
+  fun `does not return comment added events`() {
+    performProjectAuthPost(
+      "/translations/create-comment",
+      mapOf("keyId" to emptyKey.id, "languageId" to lang.id, "text" to "Yey!")
+    )
+
+    val translation = transactionTemplate.execute {
+      translationService.find(emptyKey, lang).get()
+    }
+
+    performProjectAuthGet("/translations/${translation.id}/history").andPrettyPrint.andAssertThatJson {
+      node("page.totalElements").isEqualTo(0)
     }
   }
 
