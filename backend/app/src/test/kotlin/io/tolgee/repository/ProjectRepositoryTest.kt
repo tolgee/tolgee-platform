@@ -81,8 +81,8 @@ class ProjectRepositoryTest {
     dbPopulatorReal.createBase("No org repo", users[3].username)
     val result = projectRepository.findAllPermitted(users[3].id, PageRequest.of(0, 20, Sort.by(Sort.Order.asc("id"))))
     assertThat(result).hasSize(10)
-    assertThat(result.content[0].organizationOwnerName).isNotNull
-    assertThat(result.content[8].organizationOwnerSlug).isNotNull
+    assertThat(result.content[0].organizationOwner?.name).isNotNull
+    assertThat(result.content[8].organizationOwner?.slug).isNotNull
     assertThat(result.content[9].userOwner).isNotNull
     assertThat(result.content[9].directPermissions).isNotNull
   }

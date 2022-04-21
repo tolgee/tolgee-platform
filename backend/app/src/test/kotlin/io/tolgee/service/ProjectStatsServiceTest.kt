@@ -25,7 +25,7 @@ internal class ProjectStatsServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     val data = projectStatsService.getProjectStats(testData.projectBuilder.self.id)
     assertThat(data.id).isPositive
-    assertThat(data.userCount).isEqualTo(3)
+    assertThat(data.memberCount).isEqualTo(3)
     assertThat(data.keyCount).isEqualTo(5)
     assertThat(data.tagCount).isEqualTo(3)
   }
