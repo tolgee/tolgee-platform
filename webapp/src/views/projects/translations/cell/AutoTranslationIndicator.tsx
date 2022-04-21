@@ -1,16 +1,11 @@
-import { styled, Tooltip } from '@mui/material';
+import { styled } from '@mui/material';
 import { Clear } from '@mui/icons-material';
-import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
-import {
-  MachineTranslationIcon,
-  TranslationMemoryIcon,
-} from 'tg.component/CustomIcons';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { useProject } from 'tg.hooks/useProject';
 import { useTranslationsDispatch } from '../context/TranslationsContext';
-import { getProviderImg } from '../TranslationTools/getProviderImg';
+import { AutoTranslationIcon } from './AutoTranslationIcon';
 
 type KeyWithTranslationsModel =
   components['schemas']['KeyWithTranslationsModel'];
@@ -44,19 +39,6 @@ const StyledContainer = styled('div')`
   }
 `;
 
-const StyledImgWrapper = styled('div')`
-  display: flex;
-  & .icon {
-    font-size: 16px;
-    color: #249bad;
-  }
-`;
-
-const StyledProviderImg = styled('img')`
-  width: 14px;
-  height: 14px;
-`;
-
 type Props = {
   keyData: KeyWithTranslationsModel;
   lang: string;
@@ -68,7 +50,6 @@ export const AutoTranslationIndicator: React.FC<Props> = ({
   lang,
   className,
 }) => {
-  const t = useTranslate();
   const project = useProject();
   const translation = keyData.translations[lang];
 
@@ -94,31 +75,10 @@ export const AutoTranslationIndicator: React.FC<Props> = ({
   };
 
   if (translation?.auto) {
-    const providerImg = getProviderImg(translation.mtProvider);
     return (
       <StyledWrapper className={className}>
         <StyledContainer data-cy="translations-auto-translated-indicator">
-          <Tooltip
-            title={
-              translation.mtProvider
-                ? t('translations_auto_translated_provider', {
-                    provider: translation.mtProvider,
-                  })
-                : t('translations_auto_translated_tm')
-            }
-          >
-            {translation.mtProvider && providerImg ? (
-              <StyledProviderImg src={providerImg} />
-            ) : (
-              <StyledImgWrapper>
-                {translation.mtProvider ? (
-                  <MachineTranslationIcon className="icon" />
-                ) : (
-                  <TranslationMemoryIcon className="icon" />
-                )}
-              </StyledImgWrapper>
-            )}
-          </Tooltip>
+          <AutoTranslationIcon provider={translation.mtProvider} />
           <StyledClearButton
             role="button"
             onClick={handleClear}

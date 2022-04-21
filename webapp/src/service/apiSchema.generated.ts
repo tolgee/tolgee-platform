@@ -985,6 +985,7 @@ export interface components {
       entityClass: string;
       entityId: number;
       data: { [key: string]: { [key: string]: unknown } };
+      exists?: boolean;
     };
     ModifiedEntityModel: {
       entityId: number;
@@ -993,6 +994,7 @@ export interface components {
         [key: string]: components["schemas"]["PropertyModification"];
       };
       relations?: { [key: string]: components["schemas"]["EntityDescription"] };
+      exists?: boolean;
     };
     PagedModelProjectActivityModel: {
       _embedded?: {
@@ -1025,7 +1027,12 @@ export interface components {
         | "KEY_DELETE"
         | "CREATE_KEY"
         | "COMPLEX_EDIT"
-        | "IMPORT";
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT";
       author?: components["schemas"]["ProjectActivityAuthorModel"];
       modifiedEntities?: {
         [key: string]: components["schemas"]["ModifiedEntityModel"][];
@@ -1057,14 +1064,10 @@ export interface components {
       avatar?: components["schemas"]["Avatar"];
     };
     TranslationHistoryModel: {
-      /** Translation text */
-      text?: string;
-      /** State of translation */
-      state?: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
-      /** Was translated using Translation Memory or Machine translation service? */
-      auto?: boolean;
-      /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS";
+      /** Modified fields */
+      modifications?: {
+        [key: string]: components["schemas"]["PropertyModification"];
+      };
       /** Unix timestamp of the revision */
       timestamp: number;
       author?: components["schemas"]["SimpleUserAccountModel"];

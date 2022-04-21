@@ -177,6 +177,7 @@ declare namespace DataCy {
         "translation-edit-key-field" |
         "translation-edit-translation-field" |
         "translation-field-label" |
+        "translation-history-item" |
         "translation-state-button" |
         "translation-tools-machine-translation-item" |
         "translation-tools-translation-memory-item" |
@@ -191,6 +192,7 @@ declare namespace DataCy {
         "translations-cell-screenshots-button" |
         "translations-cell-tab-comments" |
         "translations-cell-tab-edit" |
+        "translations-cell-tab-history" |
         "translations-comments-input" |
         "translations-comments-load-more-button" |
         "translations-delete-button" |
@@ -198,6 +200,7 @@ declare namespace DataCy {
         "translations-filter-option" |
         "translations-filter-select" |
         "translations-filters-subheader" |
+        "translations-history-load-more-button" |
         "translations-key-count" |
         "translations-language-select-form-control" |
         "translations-language-select-item" |

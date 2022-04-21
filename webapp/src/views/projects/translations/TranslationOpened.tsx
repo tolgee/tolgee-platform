@@ -13,6 +13,7 @@ import { ToolsPopup } from './TranslationTools/ToolsPopup';
 import { useTranslationTools } from './TranslationTools/useTranslationTools';
 import { useProject } from 'tg.hooks/useProject';
 import { EditMode } from './context/types';
+import { History } from './history/History';
 
 type LanguageModel = components['schemas']['LanguageModel'];
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
@@ -51,12 +52,16 @@ const StyledTabs = styled(Tabs)`
   overflow: hidden;
   min-height: 0px;
   margin-bottom: -1px;
+
+  & .scrollButtons {
+    width: 30px;
+  }
 `;
 
 const StyledTab = styled(Tab)`
   min-height: 0px;
-  min-width: 100px;
-  margin: 0px 5px;
+  min-width: 60px;
+  margin: 0px 0px;
   padding: 9px 12px;
 `;
 
@@ -147,7 +152,8 @@ export const TranslationOpened: React.FC<Props> = ({
           value={mode}
           onChange={(_, value) => onModeChange(value)}
           variant="scrollable"
-          scrollButtons={false}
+          scrollButtons="auto"
+          classes={{ scrollButtons: 'scrollButtons' }}
         >
           {editEnabled && (
             <StyledTab
@@ -164,6 +170,11 @@ export const TranslationOpened: React.FC<Props> = ({
             }
             value="comments"
             data-cy="translations-cell-tab-comments"
+          />
+          <StyledTab
+            label={<T>translations_cell_tab_history</T>}
+            value="history"
+            data-cy="translations-cell-tab-history"
           />
         </StyledTabs>
         <StyledCloseButton
@@ -207,6 +218,14 @@ export const TranslationOpened: React.FC<Props> = ({
         </>
       ) : mode === 'comments' ? (
         <Comments
+          keyId={keyId}
+          language={language}
+          translation={translation}
+          onCancel={() => onCancel(true)}
+          editEnabled={editEnabled}
+        />
+      ) : mode === 'history' ? (
+        <History
           keyId={keyId}
           language={language}
           translation={translation}

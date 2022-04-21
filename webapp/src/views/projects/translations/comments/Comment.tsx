@@ -22,8 +22,8 @@ const StyledContainer = styled('div')`
   transition: background-color 0.1s ease-out;
 
   &:hover {
-    background-color: ${({ theme }) => theme.palette.grey[200]};
-    transition: background-color 0.1s ease-in;
+    background: ${({ theme }) => theme.palette.extraLightBackground.main};
+    transition: background 0.1s ease-in;
   }
 
   & .hoverVisible {
