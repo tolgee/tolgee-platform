@@ -1,5 +1,6 @@
 package io.tolgee.activity
 
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.activity.projectActivityView.ProjectActivityViewDataProvider
 import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.model.views.activity.ProjectActivityView
@@ -50,6 +51,10 @@ class ActivityService(
 
   @Transactional
   fun getTranslationHistory(translationId: Long, pageable: Pageable): Page<TranslationHistoryView> {
-    return activityModifiedEntityRepository.getTranslationHistory(translationId, pageable)
+    return activityModifiedEntityRepository.getTranslationHistory(
+      translationId = translationId,
+      pageable = pageable,
+      ignoredActivityTypes = listOf(ActivityType.TRANSLATION_COMMENT_ADD)
+    )
   }
 }

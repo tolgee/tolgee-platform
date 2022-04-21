@@ -1,5 +1,6 @@
 package io.tolgee.repository.activity
 
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityModifiedEntityId
@@ -21,7 +22,12 @@ interface ActivityModifiedEntityRepository : JpaRepository<ActivityModifiedEntit
     join ame.activityRevision ar
     join UserAccount u on ar.authorId = u.id
     where ame.entityClass = 'Translation' and ame.entityId = :translationId
+    and ar.type not in :ignoredActivityTypes
   """
   )
-  fun getTranslationHistory(translationId: Long, pageable: Pageable): Page<TranslationHistoryView>
+  fun getTranslationHistory(
+    translationId: Long,
+    pageable: Pageable,
+    ignoredActivityTypes: List<ActivityType>
+  ): Page<TranslationHistoryView>
 }
