@@ -18,10 +18,10 @@ npm install @tolgee/core @tolgee/ui
 ## Create Tolgee instance
 
 ```javascript
-import { Tolgee } from '@tolgee/ui';
+import { Tolgee, IcuFormatter } from '@tolgee/core';
 import { UI } from '@tolgee/ui';
 
-const tg = new Tolgee({
+const tg = Tolgee.use(IcuFormatter).init({
   // ############################################################
   // ## you should never leak your API key                     ##
   // ## remove it in for production publicly accessible site   ##
