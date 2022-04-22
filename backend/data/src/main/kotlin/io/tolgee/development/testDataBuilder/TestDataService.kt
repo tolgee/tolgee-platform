@@ -14,7 +14,6 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.PermissionService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.ScreenshotService
 import io.tolgee.service.TagService
 import io.tolgee.service.TranslationCommentService
@@ -23,6 +22,7 @@ import io.tolgee.service.UserAccountService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.project.ProjectService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionDefinition

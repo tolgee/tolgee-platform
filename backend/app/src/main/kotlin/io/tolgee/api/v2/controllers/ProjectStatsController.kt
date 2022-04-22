@@ -14,8 +14,8 @@ import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.ProjectService
-import io.tolgee.service.ProjectStatsService
+import io.tolgee.service.project.ProjectService
+import io.tolgee.service.project.ProjectStatsService
 import org.springframework.hateoas.MediaTypes
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping

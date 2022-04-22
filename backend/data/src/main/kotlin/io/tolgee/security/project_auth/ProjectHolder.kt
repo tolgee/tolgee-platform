@@ -2,7 +2,7 @@ package io.tolgee.security.project_auth
 
 import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.model.Project
-import io.tolgee.service.ProjectService
+import io.tolgee.service.project.ProjectService
 
 open class ProjectHolder(
   private val projectService: ProjectService

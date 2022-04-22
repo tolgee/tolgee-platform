@@ -35,8 +35,8 @@ import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.project.ProjectService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort

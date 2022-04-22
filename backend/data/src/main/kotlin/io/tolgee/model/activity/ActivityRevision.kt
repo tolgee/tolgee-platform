@@ -2,13 +2,15 @@ package io.tolgee.model.activity
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.component.CurrentDateProvider
 import org.hibernate.annotations.NotFound
 import org.hibernate.annotations.NotFoundAction
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
 import org.hibernate.annotations.TypeDefs
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import org.springframework.beans.factory.ObjectFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Configurable
 import java.util.*
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -20,6 +22,7 @@ import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.Index
 import javax.persistence.OneToMany
+import javax.persistence.PrePersist
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 import javax.persistence.Temporal
@@ -32,7 +35,7 @@ import javax.persistence.TemporalType
     Index(columnList = "type")
   ]
 )
-@EntityListeners(AuditingEntityListener::class)
+@EntityListeners(ActivityRevision.Companion.ActivityRevisionListener::class)
 @TypeDefs(
   value = [TypeDef(name = "jsonb", typeClass = JsonBinaryType::class)]
 )
@@ -53,7 +56,6 @@ class ActivityRevision : java.io.Serializable {
 
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "timestamp", nullable = false, updatable = false)
-  @CreatedDate
   lateinit var timestamp: Date
 
   /**
@@ -78,4 +80,17 @@ class ActivityRevision : java.io.Serializable {
 
   @OneToMany(mappedBy = "activityRevision")
   var modifiedEntities: MutableList<ActivityModifiedEntity> = mutableListOf()
+
+  companion object {
+    @Configurable
+    class ActivityRevisionListener {
+      @Autowired
+      lateinit var provider: ObjectFactory<CurrentDateProvider>
+
+      @PrePersist
+      fun preRemove(activityRevision: ActivityRevision) {
+        activityRevision.timestamp = provider.`object`.getDate()
+      }
+    }
+  }
 }

@@ -3,6 +3,7 @@ package io.tolgee.model
 import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
+import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.dataImport.ImportService
@@ -49,6 +50,7 @@ import javax.validation.constraints.Size
 )
 
 @ActivityLoggedEntity
+@ActivityReturnsExistence
 class Language : StandardAuditModel() {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "language")
   var translations: MutableSet<Translation>? = null

@@ -23,8 +23,8 @@ import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
+import io.tolgee.service.project.ProjectService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler

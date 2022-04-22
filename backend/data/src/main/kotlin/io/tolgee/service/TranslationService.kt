@@ -23,6 +23,7 @@ import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.query_builders.TranslationsViewBuilder
 import io.tolgee.service.query_builders.TranslationsViewBuilderOld
 import io.tolgee.socketio.ITranslationsSocketIoModule
