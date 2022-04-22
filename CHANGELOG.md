@@ -1,3 +1,10 @@
+## [2.18.3](https://github.com/tolgee/tolgee-platform/compare/v2.18.2...v2.18.3) (2022-04-22)
+
+
+### Bug Fixes
+
+* JS integration guide ([f3bb0b8](https://github.com/tolgee/tolgee-platform/commit/f3bb0b84ef29c485337acb18323c7a2c0d1842eb))
+
 ## [2.18.2](https://github.com/tolgee/tolgee-platform/compare/v2.18.1...v2.18.2) (2022-04-20)
 
 
