@@ -63,6 +63,7 @@ interface ActivityRevisionRepository : JpaRepository<ActivityRevision, Long> {
     """
       select count(ar.id) as count, function('to_char', ar.timestamp, 'yyyy-MM-dd') as date
       from ActivityRevision ar
+      where ar.projectId = :projectId
       group by date
       order by date
     """

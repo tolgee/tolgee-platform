@@ -1,8 +1,10 @@
 package io.tolgee.activity
 
+import io.sentry.Sentry
 import io.tolgee.activity.data.ActivityType
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import javax.annotation.PreDestroy
 
@@ -15,9 +17,16 @@ open class ActivityHolder(
 
   open var activityRevision: ActivityRevision? = null
 
+  private val logger = LoggerFactory.getLogger(this::class.java)
+
   @PreDestroy
   open fun preDestroy() {
-    applicationContext.getBean(ActivityService::class.java).storeActivityData(this)
+    try {
+      applicationContext.getBean(ActivityService::class.java).storeActivityData(this)
+    } catch (e: Exception) {
+      Sentry.captureException(e)
+      logger.error(e.stackTraceToString())
+    }
   }
 
   /**

@@ -49,10 +49,11 @@ import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.PermissionService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
+import io.tolgee.service.project.ProjectService
+import io.tolgee.service.project.ProjectStatsService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -108,7 +109,8 @@ class V2ProjectsController(
   private val projectInvitationModelAssembler: ProjectInvitationModelAssembler,
   private val mtServiceConfigService: MtServiceConfigService,
   private val autoTranslateService: AutoTranslationService,
-  private val languageService: LanguageService
+  private val languageService: LanguageService,
+  private val projectStatsService: ProjectStatsService
 ) {
   @Operation(summary = "Returns all projects where current user has any permission")
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
@@ -128,7 +130,7 @@ class V2ProjectsController(
   ): PagedModel<ProjectWithStatsModel> {
     val projects = projectService.findPermittedPaged(pageable, search)
     val projectIds = projects.content.map { it.id }
-    val stats = projectService.getProjectsStatistics(projectIds).associateBy { it.projectId }
+    val stats = projectStatsService.getProjectsTotals(projectIds).associateBy { it.projectId }
     val languages = projectService.getProjectsWithFetchedLanguages(projectIds)
       .associate { it.id to it.languages.toList() }
     val projectsWithStatsContent = projects.content.map { ProjectWithStatsView(it, stats[it.id]!!, languages[it.id]!!) }
@@ -141,7 +143,7 @@ class V2ProjectsController(
   @AccessWithApiKey
   @Operation(summary = "Returns project by id")
   fun get(@PathVariable("projectId") projectId: Long): ProjectModel {
-    return projectService.getView(projectId)?.let {
+    return projectService.getView(projectId).let {
       projectModelAssembler.toModel(it)
     }
   }

@@ -22,8 +22,8 @@ import io.tolgee.security.InitialPasswordManager
 import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.PermissionService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

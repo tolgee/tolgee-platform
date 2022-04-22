@@ -2,7 +2,7 @@ package io.tolgee.configuration
 
 import io.tolgee.configuration.TransactionScopeConfig.Companion.SCOPE_TRANSACTION
 import io.tolgee.security.project_auth.ProjectHolder
-import io.tolgee.service.ProjectService
+import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
 import org.springframework.beans.factory.support.ScopeNotActiveException

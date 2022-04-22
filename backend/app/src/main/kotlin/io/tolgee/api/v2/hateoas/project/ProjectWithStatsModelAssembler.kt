@@ -9,7 +9,7 @@ import io.tolgee.api.v2.hateoas.user_account.UserAccountModelAssembler
 import io.tolgee.model.views.ProjectWithStatsView
 import io.tolgee.service.AvatarService
 import io.tolgee.service.PermissionService
-import io.tolgee.service.ProjectService
+import io.tolgee.service.project.ProjectService
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.hateoas.server.mvc.linkTo
 import org.springframework.stereotype.Component

@@ -9,6 +9,7 @@ import io.tolgee.model.ApiKey
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.dataImport.ImportService
+import io.tolgee.service.project.ProjectService
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

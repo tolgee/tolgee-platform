@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.dtos.request.GenerateSlugDto
 import io.tolgee.service.OrganizationService
-import io.tolgee.service.ProjectService
+import io.tolgee.service.project.ProjectService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping

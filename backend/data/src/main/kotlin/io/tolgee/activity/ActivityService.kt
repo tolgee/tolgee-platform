@@ -41,7 +41,7 @@ class ActivityService(
   }
 
   @Transactional
-  fun getProjectActivity(projectId: Long, pageable: Pageable): Page<ProjectActivityView>? {
+  fun getProjectActivity(projectId: Long, pageable: Pageable): Page<ProjectActivityView> {
     return ProjectActivityViewDataProvider(
       applicationContext = applicationContext,
       projectId = projectId,
