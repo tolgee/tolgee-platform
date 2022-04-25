@@ -8,7 +8,6 @@ import javax.persistence.MappedSuperclass
 import javax.persistence.SequenceGenerator
 
 @MappedSuperclass
-
 abstract class StandardAuditModel : AuditModel(), EntityWithId {
   @Id
   @SequenceGenerator(

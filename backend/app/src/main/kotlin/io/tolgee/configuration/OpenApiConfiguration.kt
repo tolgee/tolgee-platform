@@ -39,109 +39,71 @@ class OpenApiConfiguration {
 
   @Bean
   fun internalV1OpenApi(): GroupedOpenApi? {
-    return internalGroupForPaths(arrayOf("/api/**"), "V1 Internal - for Tolgee Web application")
+    return internalGroupForPaths(
+      paths = arrayOf("/api/**"),
+      excludedPaths = arrayOf("!/v2/billing/**"),
+      name = "V1 Internal - for Tolgee Web application"
+    )
   }
 
   @Bean
   fun internalV2OpenApi(): GroupedOpenApi? {
-    return internalGroupForPaths(arrayOf("/v2/**"), "V2 Internal - for Tolgee Web application")
+    return internalGroupForPaths(
+      paths = arrayOf("/v2/**"),
+      excludedPaths = arrayOf("!/v2/billing/**"),
+      name = "V2 Internal - for Tolgee Web application"
+    )
   }
 
   @Bean
   fun internalAllOpenApi(): GroupedOpenApi? {
-    return internalGroupForPaths(arrayOf("/v2/**", "/api/**"), "All Internal - for Tolgee Web application")
+    return internalGroupForPaths(
+      paths = arrayOf("/v2/**", "/api/**"),
+      excludedPaths = arrayOf("!/v2/billing/**"),
+      name = "All Internal - for Tolgee Web application"
+    )
   }
 
   @Bean
   fun apiKeyAllOpenApi(): GroupedOpenApi? {
-    return apiKeyGroupForPaths(arrayOf("/api/**", "/v2/**"), "Accessible with API key")
+    return apiKeyGroupForPaths(
+      paths = arrayOf("/api/**", "/v2/**"),
+      excludedPaths = arrayOf("!/v2/billing/**"),
+      name = "Accessible with API key"
+    )
   }
 
   @Bean
   fun apiKeyV1OpenApi(): GroupedOpenApi? {
-    return apiKeyGroupForPaths(arrayOf("/api/**"), "V1 Accessible with API key")
+    return apiKeyGroupForPaths(
+      paths = arrayOf("/api/**"),
+      excludedPaths = arrayOf("!/v2/billing/**"),
+      name = "V1 Accessible with API key"
+    )
   }
 
   @Bean
   fun apiKeyV2OpenApi(): GroupedOpenApi? {
-    return apiKeyGroupForPaths(arrayOf("/v2/**"), "V2 Accessible with API key V2")
+    return apiKeyGroupForPaths(
+      paths = arrayOf("/v2/**"),
+      excludedPaths = arrayOf("!/v2/billing/**"),
+      name = "V2 Accessible with API key V2"
+    )
   }
 
-  fun apiKeyGroupForPaths(paths: Array<String>, name: String): GroupedOpenApi? {
-    val operationHandlers = HashMap<Operation, HandlerMethod>()
-
-    return GroupedOpenApi.builder().group(name)
-      .pathsToMatch(*paths)
-      .addOpenApiCustomiser { openApi ->
-        val newPaths = Paths()
-        openApi.paths.forEach { pathEntry ->
-          val operations = ArrayList<Operation>()
-          val newPathItem = PathItem()
-          val oldPathItem = pathEntry.value
-          oldPathItem.readOperations().forEach { operation ->
-            val annotation = operationHandlers[operation]
-              ?.getMethodAnnotation(AccessWithApiKey::class.java)
-
-            if (annotation != null) {
-              val containsProjectIdParam = pathEntry.key
-                .contains("{$PROJECT_ID_PARAMETER}")
-              if (!pathEntry.key.matches("^/(?:api|v2)/projects?/\\{$PROJECT_ID_PARAMETER}.*".toRegex())) {
-                if (!containsProjectIdParam) {
-                  operation.parameters.removeIf { it.name == PROJECT_ID_PARAMETER }
-                }
-                operations.add(operation)
-              }
-            }
-          }
-
-          operations.forEach { operation ->
-            newPathItem.operation(oldPathItem.getHttpMethod(operation), operation)
-          }
-
-          if (operations.isNotEmpty()) {
-            newPaths.addPathItem(pathEntry.key, newPathItem)
-          }
-        }
-        openApi.paths = newPaths
-
-        val usedTags = newPaths.flatMap { it.value.readOperations() }.flatMap { it.tags }
-        openApi.tags.removeIf { !usedTags.contains(it.name) }
-      }
-      .addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
-        operationHandlers[operation] = handlerMethod
-        operation
-      }.handleLinks().build()
+  @Bean
+  fun billingOpenApi(): GroupedOpenApi? {
+    return internalGroupForPaths(
+      paths = arrayOf("/v2/billing/**"),
+      name = "V2 Billing"
+    )
   }
 
-  private fun GroupedOpenApi.Builder.handleLinks(): GroupedOpenApi.Builder {
-    this.addOpenApiCustomiser {
-      it.components.schemas.values.forEach {
-        it?.properties?.remove("_links")
-      }
-    }
-    return this
-  }
-
-  private fun String.removeRefPath(): String {
-    val refReplacePath = "#/components/schemas/"
-    return this.replace(refReplacePath, "")
-  }
-
-  private fun PathItem.getHttpMethod(operation: Operation): PathItem.HttpMethod? {
-    return when (operation) {
-      this.get -> PathItem.HttpMethod.GET
-      this.delete -> PathItem.HttpMethod.DELETE
-      this.head -> PathItem.HttpMethod.HEAD
-      this.post -> PathItem.HttpMethod.POST
-      this.patch -> PathItem.HttpMethod.PATCH
-      this.put -> PathItem.HttpMethod.PUT
-      this.options -> PathItem.HttpMethod.OPTIONS
-      this.trace -> PathItem.HttpMethod.TRACE
-      else -> null
-    }
-  }
-
-  private fun internalGroupForPaths(paths: Array<String>, name: String): GroupedOpenApi? {
+  private fun internalGroupForPaths(
+    paths: Array<String>,
+    excludedPaths: Array<String> = arrayOf(),
+    name: String
+  ): GroupedOpenApi? {
     val operationHandlers = HashMap<Operation, HandlerMethod>()
     val handlerPaths = HashMap<Method, MutableList<String>>()
 
@@ -149,7 +111,8 @@ class OpenApiConfiguration {
       .addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
         operationHandlers[operation] = handlerMethod
         operation
-      }.pathsToMatch(*paths)
+      }
+      .pathsToMatch(*paths).pathsToExclude(*excludedPaths)
       .addOpenApiCustomiser { openApi ->
         openApi.paths.forEach { (path, value) ->
           value.readOperations().forEach { operation ->
@@ -220,5 +183,75 @@ class OpenApiConfiguration {
       }.handleLinks()
       .pathsToExclude("/api/project/{$PROJECT_ID_PARAMETER}/sources/**")
       .build()
+  }
+
+  fun apiKeyGroupForPaths(paths: Array<String>, excludedPaths: Array<String>, name: String): GroupedOpenApi? {
+    val operationHandlers = HashMap<Operation, HandlerMethod>()
+
+    return GroupedOpenApi.builder().group(name)
+      .pathsToMatch(*paths)
+      .pathsToExclude(*excludedPaths)
+      .addOpenApiCustomiser { openApi ->
+        val newPaths = Paths()
+        openApi.paths.forEach { pathEntry ->
+          val operations = ArrayList<Operation>()
+          val newPathItem = PathItem()
+          val oldPathItem = pathEntry.value
+          oldPathItem.readOperations().forEach { operation ->
+            val annotation = operationHandlers[operation]
+              ?.getMethodAnnotation(AccessWithApiKey::class.java)
+
+            if (annotation != null) {
+              val containsProjectIdParam = pathEntry.key
+                .contains("{$PROJECT_ID_PARAMETER}")
+              if (!pathEntry.key.matches("^/(?:api|v2)/projects?/\\{$PROJECT_ID_PARAMETER}.*".toRegex())) {
+                if (!containsProjectIdParam) {
+                  operation.parameters.removeIf { it.name == PROJECT_ID_PARAMETER }
+                }
+                operations.add(operation)
+              }
+            }
+          }
+
+          operations.forEach { operation ->
+            newPathItem.operation(oldPathItem.getHttpMethod(operation), operation)
+          }
+
+          if (operations.isNotEmpty()) {
+            newPaths.addPathItem(pathEntry.key, newPathItem)
+          }
+        }
+        openApi.paths = newPaths
+
+        val usedTags = newPaths.flatMap { it.value.readOperations() }.flatMap { it.tags }
+        openApi.tags.removeIf { !usedTags.contains(it.name) }
+      }
+      .addOperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
+        operationHandlers[operation] = handlerMethod
+        operation
+      }.handleLinks().build()
+  }
+
+  private fun GroupedOpenApi.Builder.handleLinks(): GroupedOpenApi.Builder {
+    this.addOpenApiCustomiser {
+      it.components.schemas.values.forEach {
+        it?.properties?.remove("_links")
+      }
+    }
+    return this
+  }
+
+  private fun PathItem.getHttpMethod(operation: Operation): PathItem.HttpMethod? {
+    return when (operation) {
+      this.get -> PathItem.HttpMethod.GET
+      this.delete -> PathItem.HttpMethod.DELETE
+      this.head -> PathItem.HttpMethod.HEAD
+      this.post -> PathItem.HttpMethod.POST
+      this.patch -> PathItem.HttpMethod.PATCH
+      this.put -> PathItem.HttpMethod.PUT
+      this.options -> PathItem.HttpMethod.OPTIONS
+      this.trace -> PathItem.HttpMethod.TRACE
+      else -> null
+    }
   }
 }
