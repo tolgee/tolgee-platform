@@ -14,7 +14,6 @@ import javax.persistence.ManyToOne
 import javax.validation.constraints.NotBlank
 
 @Entity
-
 @ActivityLoggedEntity
 @ActivityEntityDescribingPaths(paths = ["translation"])
 class TranslationComment(

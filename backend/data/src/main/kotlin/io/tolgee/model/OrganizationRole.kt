@@ -22,7 +22,6 @@ import javax.validation.constraints.NotNull
     )
   ]
 )
-
 data class OrganizationRole(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

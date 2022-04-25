@@ -24,7 +24,6 @@ import javax.validation.constraints.Size
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["project_id", "name"], name = "key_project_id_name")])
-
 @ActivityLoggedEntity
 @ActivityReturnsExistence
 class Key(

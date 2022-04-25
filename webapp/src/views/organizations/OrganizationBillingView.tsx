@@ -2,13 +2,13 @@ import { FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
 
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
-import Button from '@material-ui/core/Button';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { useOrganization } from './useOrganization';
 import { components } from 'tg.service/apiSchema.generated';
 import { useLocation } from 'react-router-dom';
 import { MessageService } from 'tg.service/MessageService';
 import { container } from 'tsyringe';
+import { Button } from '@mui/material';
 
 const messaging = container.resolve(MessageService);
 export const OrganizationBillingView: FunctionComponent = () => {

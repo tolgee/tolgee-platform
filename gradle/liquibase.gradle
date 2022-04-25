@@ -1,0 +1,39 @@
+ext {
+    configureLiquibase = { schema, referenceUrlPrefix, changeLogPah ->
+        def liveDb = [
+                url         : "jdbc:postgresql://localhost:55432/postgres?currentSchema=$schema",
+                referenceUrl: referenceUrlPrefix +
+                        '?dialect=io.tolgee.dialects.postgres.CustomPostgreSQLDialect' +
+                        '&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy' +
+                        '&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy',
+                username    : 'postgres',
+                password    : 'postgres',
+                driver      : "org.postgresql.Driver"
+        ]
+
+        liquibase {
+            activities {
+                //noinspection GroovyAssignabilityCheck
+                main {
+                    changeLogFile changeLogPah
+                    url liveDb.url
+                    referenceUrl liveDb.referenceUrl
+                    username liveDb.username
+                    password liveDb.password
+                    driver liveDb.driver
+                    excludeObjects "table:batch_job_execution_context," +
+                            "batch_step_execution_seq," +
+                            "batch_job_seq," +
+                            "batch_job_execution_seq," +
+                            "batch_step_execution_context," +
+                            "batch_step_execution," +
+                            "batch_job_instance," +
+                            "table:batch_job_execution," +
+                            "table:batch_job_execution_params," +
+                            "hibernate_sequence," +
+                            "revision_sequence_generator"
+                }
+            }
+        }
+    }
+}

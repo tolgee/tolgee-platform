@@ -27,7 +27,6 @@ import javax.validation.constraints.Size
 @Entity
 @EntityListeners(Project.Companion.ProjectListener::class)
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
-@ActivityLoggedEntity
 class Project(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

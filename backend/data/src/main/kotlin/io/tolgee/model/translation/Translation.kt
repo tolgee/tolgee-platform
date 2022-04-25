@@ -32,7 +32,6 @@ import javax.validation.constraints.NotNull
     )
   ]
 )
-
 @ActivityLoggedEntity
 @EntityListeners(Translation.Companion.UpdateStatsListener::class)
 @ActivityEntityDescribingPaths(paths = ["key", "language"])

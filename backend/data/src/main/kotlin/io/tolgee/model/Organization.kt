@@ -24,7 +24,6 @@ import javax.validation.constraints.Size
     UniqueConstraint(columnNames = ["third_party_billing_id"], name = "organization_third_party_billing_id_unique")
   ]
 )
-
 class Organization(
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   override var id: Long = 0,
@@ -57,9 +56,6 @@ class Organization(
 
   @OneToMany(mappedBy = "organizationOwner")
   var projects: MutableList<Project> = mutableListOf()
-
-  @Column(name = "third_party_billing_id")
-  var thirdPartyBillingId: String? = null
 
   override var avatarHash: String? = null
 }

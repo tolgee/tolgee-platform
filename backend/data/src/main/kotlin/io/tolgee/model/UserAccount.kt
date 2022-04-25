@@ -29,7 +29,6 @@ import javax.validation.constraints.NotBlank
     )
   ]
 )
-
 data class UserAccount(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
