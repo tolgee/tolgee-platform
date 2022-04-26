@@ -21,7 +21,6 @@ import javax.validation.constraints.Size
 @Table(
   uniqueConstraints = [
     UniqueConstraint(columnNames = ["address_part"], name = "organization_address_part_unique"),
-    UniqueConstraint(columnNames = ["third_party_billing_id"], name = "organization_third_party_billing_id_unique")
   ]
 )
 class Organization(
