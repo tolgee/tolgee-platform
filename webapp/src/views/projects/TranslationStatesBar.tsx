@@ -63,7 +63,6 @@ const STATES_ORDER = ['REVIEWED', 'TRANSLATED', 'UNTRANSLATED'] as State[];
 export function TranslationStatesBar(props: {
   labels: boolean;
   stats: {
-    projectId: number;
     keyCount: number;
     languageCount: number;
     translationStateCounts: {

@@ -1,9 +1,10 @@
-import { useProject } from 'tg.hooks/useProject';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useMemo } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { useCurrentLanguage, useTranslate } from '@tolgee/react';
-import React, { useMemo } from 'react';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
+
+import { useProject } from 'tg.hooks/useProject';
+import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const DailyActivityChart = () => {
   const project = useProject();

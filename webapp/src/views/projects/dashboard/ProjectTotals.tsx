@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { components } from 'tg.service/apiSchema.generated';
 import { useTranslate } from '@tolgee/react';
 import { useProject } from 'tg.hooks/useProject';
@@ -7,14 +7,14 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
 const StyledTiles = styled(Box)`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 10px;
 `;
 
 const StyledTile = styled(Box)`
   background-color: #f8f8f8;
   border-radius: 20px;
-  height: 180px;
+  height: 140px;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -33,9 +33,8 @@ const StyledTileDataItem = styled(Box)`
   align-items: center;
 `;
 
-const StyledTileValue = styled(Box)<{ fontSize?: number }>`
-  font-size: ${(props) =>
-    props.fontSize !== undefined ? props.fontSize : 36}px;
+const StyledTileValue = styled(Box)`
+  font-size: 28px;
 `;
 
 const StyledTileDescription = styled(Typography)`
@@ -69,7 +68,7 @@ export const ProjectTotals: FC<{
 
         <StyledDoubleTile>
           <StyledTileDataItem>
-            <StyledTileValue fontSize={28}>{stats.keyCount}</StyledTileValue>
+            <StyledTileValue>{stats.keyCount}</StyledTileValue>
             <StyledTileDescription>
               {t('project_dashboard_key_count', 'Keys', {
                 count: stats.keyCount,
@@ -77,9 +76,7 @@ export const ProjectTotals: FC<{
             </StyledTileDescription>
           </StyledTileDataItem>
           <StyledTileDataItem>
-            <StyledTileValue fontSize={28}>
-              {stats.baseWordsCount}
-            </StyledTileValue>
+            <StyledTileValue>{stats.baseWordsCount}</StyledTileValue>
             <StyledTileDescription>
               {t('project_dashboard_base_words_count', 'Base words', {
                 count: stats.baseWordsCount,
@@ -90,7 +87,7 @@ export const ProjectTotals: FC<{
 
         <StyledDoubleTile>
           <StyledTileDataItem>
-            <StyledTileValue fontSize={28}>
+            <StyledTileValue>
               {!isNaN(stats.translatedPercentage)
                 ? t(
                     'project_dashboard_percent_count',
@@ -106,7 +103,7 @@ export const ProjectTotals: FC<{
             </StyledTileDescription>
           </StyledTileDataItem>
           <StyledTileDataItem>
-            <StyledTileValue fontSize={28}>
+            <StyledTileValue>
               {!isNaN(stats.reviewedPercentage)
                 ? t(
                     'project_dashboard_percent_count',
@@ -139,9 +136,7 @@ export const ProjectTotals: FC<{
             </StyledTileSubDescription>
           </StyledTileDataItem>
           <StyledTileDataItem>
-            <StyledTileValue fontSize={28}>
-              {stats.membersCount}
-            </StyledTileValue>
+            <StyledTileValue>{stats.membersCount}</StyledTileValue>
             <StyledTileDescription>
               {t('project_dashboard_member_count', 'Members')}
             </StyledTileDescription>
