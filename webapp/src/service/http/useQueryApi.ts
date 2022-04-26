@@ -13,6 +13,7 @@ import {
 import { container } from 'tsyringe';
 
 import { paths } from '../apiSchema.generated';
+
 import { RequestOptions } from './ApiHttpService';
 import {
   ApiSchemaHttpService,
@@ -22,22 +23,56 @@ import {
 
 const apiHttpService = container.resolve(ApiSchemaHttpService);
 
+export type QueryProps<
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
+> = {
+  url: Url;
+  method: Method;
+  fetchOptions?: RequestOptions;
+  options?: UseQueryOptions<ResponseContent<Url, Method, Paths>>;
+} & RequestParamsType<Url, Method, Paths>;
+
+export type InfiniteQueryProps<
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
+> = {
+  url: Url;
+  method: Method;
+  fetchOptions?: RequestOptions;
+  options?: UseInfiniteQueryOptions<ResponseContent<Url, Method, Paths>>;
+} & RequestParamsType<Url, Method, Paths>;
+
+export type MutationProps<
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
+> = {
+  url: Url;
+  method: Method;
+  fetchOptions?: RequestOptions;
+  options?: UseMutationOptions<
+    ResponseContent<Url, Method, Paths>,
+    any,
+    RequestParamsType<Url, Method, Paths>
+  >;
+  invalidatePrefix?: string;
+};
+
 export const useApiInfiniteQuery = <
-  Url extends keyof paths,
-  Method extends keyof paths[Url]
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
 >(
-  props: {
-    url: Url;
-    method: Method;
-    fetchOptions?: RequestOptions;
-    options?: UseInfiniteQueryOptions<ResponseContent<Url, Method>>;
-  } & RequestParamsType<Url, Method>
+  props: InfiniteQueryProps<Url, Method, Paths>
 ) => {
   const { url, method, fetchOptions, options, ...request } = props;
-  return useInfiniteQuery<ResponseContent<Url, Method>, any>(
+  return useInfiniteQuery<ResponseContent<Url, Method, Paths>, any>(
     [url, (request as any)?.path, (request as any)?.query],
     ({ pageParam }) => {
-      return apiHttpService.schemaRequest(
+      return apiHttpService.schemaRequest<Url, Method, Paths>(
         url,
         method,
         fetchOptions
@@ -48,47 +83,45 @@ export const useApiInfiniteQuery = <
 };
 
 export const useApiQuery = <
-  Url extends keyof paths,
-  Method extends keyof paths[Url]
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
 >(
-  props: {
-    url: Url;
-    method: Method;
-    fetchOptions?: RequestOptions;
-    options?: UseQueryOptions<ResponseContent<Url, Method>>;
-  } & RequestParamsType<Url, Method>
+  props: QueryProps<Url, Method, Paths>
 ) => {
   const { url, method, fetchOptions, options, ...request } = props;
-  return useQuery<ResponseContent<Url, Method>, any>(
+  return useQuery<ResponseContent<Url, Method, Paths>, any>(
     [url, (request as any)?.path, (request as any)?.query],
-    () => apiHttpService.schemaRequest(url, method, fetchOptions)(request),
+    () =>
+      apiHttpService.schemaRequest<Url, Method, Paths>(
+        url,
+        method,
+        fetchOptions
+      )(request),
     options
   );
 };
 
 export const useApiMutation = <
-  Url extends keyof paths,
-  Method extends keyof paths[Url]
->(props: {
-  url: Url;
-  method: Method;
-  fetchOptions?: RequestOptions;
-  options?: UseMutationOptions<
-    ResponseContent<Url, Method>,
-    any,
-    RequestParamsType<Url, Method>
-  >;
-  invalidatePrefix?: string;
-}) => {
+  Url extends keyof Paths,
+  Method extends keyof Paths[Url],
+  Paths = paths
+>(
+  props: MutationProps<Url, Method, Paths>
+) => {
   const queryClient = useQueryClient();
   const { url, method, fetchOptions, options, invalidatePrefix } = props;
   const mutation = useMutation<
-    ResponseContent<Url, Method>,
+    ResponseContent<Url, Method, Paths>,
     any,
-    RequestParamsType<Url, Method>
+    RequestParamsType<Url, Method, Paths>
   >(
     (request) =>
-      apiHttpService.schemaRequest(url, method, fetchOptions)(request),
+      apiHttpService.schemaRequest<Url, Method, Paths>(
+        url,
+        method,
+        fetchOptions
+      )(request),
     options
   );
 
