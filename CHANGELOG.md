@@ -1,3 +1,10 @@
+# [2.19.0](https://github.com/tolgee/tolgee-platform/compare/v2.18.3...v2.19.0) (2022-04-26)
+
+
+### Features
+
+* Dark mode ([1cd90b8](https://github.com/tolgee/tolgee-platform/commit/1cd90b85de388ea7d3115514f17b26988a7becac))
+
 ## [2.18.3](https://github.com/tolgee/tolgee-platform/compare/v2.18.2...v2.18.3) (2022-04-22)
 
 
