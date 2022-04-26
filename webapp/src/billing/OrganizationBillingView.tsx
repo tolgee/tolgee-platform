@@ -1,14 +1,17 @@
 import { FunctionComponent } from 'react';
 import { T } from '@tolgee/react';
 
-import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
-import { useOrganization } from './useOrganization';
-import { components } from 'tg.service/apiSchema.generated';
+import { BaseOrganizationSettingsView } from 'tg.views/organizations/BaseOrganizationSettingsView';
+
+import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useLocation } from 'react-router-dom';
 import { MessageService } from 'tg.service/MessageService';
 import { container } from 'tsyringe';
 import { Button } from '@mui/material';
+import {
+  useBillingApiMutation,
+  useBillingApiQuery,
+} from './useBillingQueryApi';
 
 const messaging = container.resolve(MessageService);
 export const OrganizationBillingView: FunctionComponent = () => {
@@ -21,11 +24,13 @@ export const OrganizationBillingView: FunctionComponent = () => {
   const url = new URL(window.location.href);
   url.search = '';
 
-  const getSubscribeSession = useApiMutation({
+  const getSubscribeSession = useBillingApiMutation({
     url: '/v2/billing/create-checkout-session',
     method: 'post',
     options: {
-      onSuccess: (data) => (window.location = data),
+      onSuccess: (data) => {
+        window.location.href = data;
+      },
       onError: (data) => {
         if (data.code === 'organization_already_subscribed') {
           messaging.error(
@@ -36,17 +41,19 @@ export const OrganizationBillingView: FunctionComponent = () => {
     },
   });
 
-  const getCustomerPortalSession = useApiMutation({
+  const getCustomerPortalSession = useBillingApiMutation({
     url: '/v2/billing/create-customer-portal-session',
     method: 'post',
     options: {
-      onSuccess: (data) => (window.location = data),
+      onSuccess: (data) => {
+        window.location.href = data;
+      },
     },
   });
 
   const organization = useOrganization();
 
-  const stateLoadable = useApiQuery({
+  const stateLoadable = useBillingApiQuery({
     url: '/v2/billing/subscription-state/{organizationId}',
     method: 'get',
     path: {
@@ -61,7 +68,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
           cancelUrl: `${url}?canceled`,
           successUrl: `${url}?success`,
           organizationId: organization!.id,
-        } as components['schemas']['CreateCheckoutSessionRequest'],
+        },
       },
     });
   };
@@ -84,7 +91,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
             content: {
               'application/json': {
                 organizationId: organization!.id,
-                returnUrl: url,
+                returnUrl: url.href,
               },
             },
           })

@@ -13,7 +13,7 @@ import { OrganizationMembersView } from './members/OrganizationMembersView';
 import { OrganizationProfileView } from './OrganizationProfileView';
 import { OrganizationsProjectListView } from './OrganizationProjectListView';
 import { useOrganization } from './useOrganization';
-import { OrganizationBillingView } from './OrganizationBillingView';
+import { OrganizationBillingView } from '../../billing/OrganizationBillingView';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
