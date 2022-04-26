@@ -20,16 +20,14 @@ describe('Translations Base', () => {
       .then(() => {
         login('franta', 'admin');
         visit();
-        cy.contains('Translations').should('be.visible');
-        waitForGlobalLoading();
       });
   });
 
   beforeEach(() => {
     login('franta', 'admin');
     visit();
-    cy.contains('Translations').should('be.visible');
     waitForGlobalLoading();
+    cy.contains('A key', { timeout: TIMEOUT_ONE_MINUTE }).should('be.visible');
   });
 
   after(() => {
@@ -73,7 +71,7 @@ describe('Translations Base', () => {
       ['No screenshots', 'With screenshots'],
       ['At least one translated', 'Missing translation'],
     ].forEach((pair) => {
-      cy.contains(pair[0], { timeout: TIMEOUT_ONE_MINUTE }).click();
+      cy.contains(pair[0]).click();
       cy.contains(pair[1]).click();
 
       gcy('translations-filter-option')
@@ -117,9 +115,7 @@ describe('Translations Base', () => {
     getPopover().contains('Lame tag').click();
     cy.focused().type('{Esc}');
     cy.focused().type('{Esc}');
-    cy.contains('Z translation', { timeout: TIMEOUT_ONE_MINUTE }).should(
-      'be.visible'
-    );
+    cy.contains('Z translation').should('be.visible');
     cy.contains('A translation').should('be.visible');
     cy.contains('key with screenshot').should('not.exist');
   });
