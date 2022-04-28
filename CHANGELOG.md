@@ -1,3 +1,10 @@
+## [2.19.1](https://github.com/tolgee/tolgee-platform/compare/v2.19.0...v2.19.1) (2022-04-28)
+
+
+### Bug Fixes
+
+* theme color to match topbar ([303fdd3](https://github.com/tolgee/tolgee-platform/commit/303fdd39b1f4938befa22dd70a8cdc71d9a7161b))
+
 # [2.19.0](https://github.com/tolgee/tolgee-platform/compare/v2.18.3...v2.19.0) (2022-04-26)
 
 
