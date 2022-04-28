@@ -3,6 +3,8 @@ import * as Sentry from '@sentry/browser';
 import { useSelector } from 'react-redux';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { container } from 'tsyringe';
+import { Helmet } from 'react-helmet';
+import { useTheme } from '@mui/material';
 
 import { LINKS } from '../constants/links';
 import { GlobalError } from '../error/GlobalError';
@@ -156,6 +158,29 @@ const GlobalConfirmation = () => {
   );
 };
 
+const RecaptchaProvider: FC = (props) => {
+  const config = useConfig();
+  if (!config.recaptchaSiteKey) {
+    return <>{props.children}</>;
+  }
+
+  return (
+    <GoogleReCaptchaProvider reCaptchaKey={config.recaptchaSiteKey}>
+      {props.children}
+    </GoogleReCaptchaProvider>
+  );
+};
+
+const Head: FC = () => {
+  const theme = useTheme();
+
+  return (
+    <Helmet>
+      <meta name="theme-color" content={theme.palette.navbarBackground.main} />
+    </Helmet>
+  );
+};
+
 export class App extends React.Component {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     errorActions.globalError.dispatch(error as GlobalError);
@@ -163,61 +188,51 @@ export class App extends React.Component {
   }
 
   render() {
-    const RecaptchaProvider: FC = (props) => {
-      const config = useConfig();
-      if (!config.recaptchaSiteKey) {
-        return <>{props.children}</>;
-      }
-
-      return (
-        <GoogleReCaptchaProvider reCaptchaKey={config.recaptchaSiteKey}>
-          {props.children}
-        </GoogleReCaptchaProvider>
-      );
-    };
-
     return (
-      <BrowserRouter>
-        <Redirection />
-        <MandatoryDataProvider>
-          <Switch>
-            <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
-              <PasswordResetView />
-            </Route>
-            <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
-              <PasswordResetSetView />
-            </Route>
-            <Route exact path={LINKS.SIGN_UP.template}>
-              <RecaptchaProvider>
-                <SignUpView />
-              </RecaptchaProvider>
-            </Route>
-            <Route path={LINKS.LOGIN.template}>
-              <LoginRouter />
-            </Route>
-            <Route path={LINKS.ACCEPT_INVITATION.template}>
-              <AcceptInvitationHandler />
-            </Route>
-            <PrivateRoute exact path={LINKS.ROOT.template}>
-              <Redirect to={LINKS.PROJECTS.template} />
-            </PrivateRoute>
-            <PrivateRoute exact path={LINKS.USER_SETTINGS.template}>
-              <UserProfileView />
-            </PrivateRoute>
-            <PrivateRoute path={LINKS.PROJECTS.template}>
-              <ProjectsRouter />
-            </PrivateRoute>
-            <PrivateRoute path={`${LINKS.USER_API_KEYS.template}`}>
-              <ApiKeysView />
-            </PrivateRoute>
-            <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
-              <OrganizationsRouter />
-            </PrivateRoute>
-          </Switch>
-          <SnackBar />
-          <GlobalConfirmation />
-        </MandatoryDataProvider>
-      </BrowserRouter>
+      <>
+        <Head />
+        <BrowserRouter>
+          <Redirection />
+          <MandatoryDataProvider>
+            <Switch>
+              <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
+                <PasswordResetView />
+              </Route>
+              <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
+                <PasswordResetSetView />
+              </Route>
+              <Route exact path={LINKS.SIGN_UP.template}>
+                <RecaptchaProvider>
+                  <SignUpView />
+                </RecaptchaProvider>
+              </Route>
+              <Route path={LINKS.LOGIN.template}>
+                <LoginRouter />
+              </Route>
+              <Route path={LINKS.ACCEPT_INVITATION.template}>
+                <AcceptInvitationHandler />
+              </Route>
+              <PrivateRoute exact path={LINKS.ROOT.template}>
+                <Redirect to={LINKS.PROJECTS.template} />
+              </PrivateRoute>
+              <PrivateRoute exact path={LINKS.USER_SETTINGS.template}>
+                <UserProfileView />
+              </PrivateRoute>
+              <PrivateRoute path={LINKS.PROJECTS.template}>
+                <ProjectsRouter />
+              </PrivateRoute>
+              <PrivateRoute path={`${LINKS.USER_API_KEYS.template}`}>
+                <ApiKeysView />
+              </PrivateRoute>
+              <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
+                <OrganizationsRouter />
+              </PrivateRoute>
+            </Switch>
+            <SnackBar />
+            <GlobalConfirmation />
+          </MandatoryDataProvider>
+        </BrowserRouter>
+      </>
     );
   }
 }
