@@ -34,7 +34,7 @@ repositories {
 def unpackTarget = "${project.buildDir}/dependency"
 
 dependencies {
-    ktlint("com.pinterest:ktlint:0.43.2") {
+    ktlint("com.pinterest:ktlint:0.45.2") {
         attributes {
             attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
         }
