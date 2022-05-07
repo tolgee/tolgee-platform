@@ -1,8 +1,8 @@
-import { useRouteMatch } from 'react-router-dom';
+import {useRouteMatch} from 'react-router-dom';
 
-import { LINKS, PARAMS } from 'tg.constants/links';
+import {LINKS, PARAMS} from 'tg.constants/links';
 
-import { useOrganization } from './useOrganization';
+import {useOrganization} from './useOrganization';
 
 export class OrganizationMenuItem {
   constructor(
@@ -34,12 +34,6 @@ export const useOrganizationMenuItems = (): OrganizationMenuItem[] => {
         [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
       }),
       nameTranslationKey: 'organization_menu_member_privileges',
-    },
-    {
-      link: LINKS.ORGANIZATION_INVITATIONS.build({
-        [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
-      }),
-      nameTranslationKey: 'organization_menu_invitations',
     },
     {
       link: LINKS.ORGANIZATION_BILLING.build({

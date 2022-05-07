@@ -4,55 +4,169 @@
  */
 
 export interface paths {
+  "/v2/billing/refresh-subscription/{organizationId}": {
+    /** Refreshes organizations subscription by Stripe data */
+    put: operations["refresh"];
+  };
+  "/v2/billing/update-subscription": {
+    /** Updates subscription session */
+    post: operations["updateSubscription"];
+  };
+  "/v2/billing/subscribe": {
+    /** Returns url of Stripe checkout session */
+    post: operations["subscribe"];
+  };
   "/v2/billing/create-customer-portal-session": {
     /** Returns url of Stripe checkout session */
     post: operations["createCustomerPortalSession"];
   };
-  "/v2/billing/create-checkout-session": {
-    /** Returns url of Stripe checkout session */
-    post: operations["createCheckoutSession"];
+  "/v2/billing/cancel-subscription/{organizationId}": {
+    /** Cancels subscription */
+    post: operations["cancelSubscription"];
   };
   "/v2/billing/subscriptions": {
     get: operations["getSubscriptions"];
   };
-  "/v2/billing/subscription-state/{organizationId}": {
-    get: operations["getSubscriptionState"];
-  };
   "/v2/billing/plans": {
     get: operations["getPlans"];
+  };
+  "/v2/billing/create-change-payment-method-session/{organizationId}": {
+    /** Creates change payment method session */
+    get: operations["createChangePaymentMethodSession"];
+  };
+  "/v2/billing/active-plan/{organizationId}": {
+    /** Refreshes organizations subscription by Stripe data */
+    get: operations["getActivePlan"];
   };
 }
 
 export interface components {
   schemas: {
+    ActivePlanModel: {
+      id: number;
+      name: string;
+      translationLimit?: number;
+      includedMtCredits?: number;
+      monthlyPrice?: number;
+      yearlyPrice?: number;
+      currentPeriodEnd: number;
+      cancelAtPeriodEnd: boolean;
+    };
+    UpdateSubscriptionRequest: {
+      /** Id of the organization */
+      organizationId: number;
+      /** Id of the subscription plan */
+      planId: number;
+    };
+    SubscribeRequest: {
+      /** Id of the organization */
+      organizationId: number;
+      /** Id of the subscription plan */
+      planId: number;
+    };
     CreateCustomerPortalSessionRequest: {
       /** Id of the organization */
       organizationId?: number;
       /** Url to return afterwards */
       returnUrl: string;
     };
-    CreateCheckoutSessionRequest: {
-      /** Id of the organization */
-      organizationId?: number;
-      /** Url to return to when success */
-      successUrl: string;
-      /** Url to return to when cancelled */
-      cancelUrl: string;
-    };
     CollectionModelPlanModel: {
       _embedded?: {
-        keys?: components["schemas"]["PlanModel"][];
+        plans?: components["schemas"]["PlanModel"][];
       };
     };
     PlanModel: {
+      id: number;
       name: string;
-      translationLimit: number;
-      includedMtCredits: number;
+      translationLimit?: number;
+      includedMtCredits?: number;
+      monthlyPrice?: number;
+      yearlyPrice?: number;
     };
   };
 }
 
 export interface operations {
+  /** Refreshes organizations subscription by Stripe data */
+  refresh: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ActivePlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Updates subscription session */
+  updateSubscription: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSubscriptionRequest"];
+      };
+    };
+  };
+  /** Returns url of Stripe checkout session */
+  subscribe: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SubscribeRequest"];
+      };
+    };
+  };
   /** Returns url of Stripe checkout session */
   createCustomerPortalSession: {
     responses: {
@@ -81,15 +195,16 @@ export interface operations {
       };
     };
   };
-  /** Returns url of Stripe checkout session */
-  createCheckoutSession: {
+  /** Cancels subscription */
+  cancelSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
     responses: {
       /** OK */
-      200: {
-        content: {
-          "*/*": string;
-        };
-      };
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -101,11 +216,6 @@ export interface operations {
         content: {
           "*/*": string;
         };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateCheckoutSessionRequest"];
       };
     };
   };
@@ -127,17 +237,12 @@ export interface operations {
       };
     };
   };
-  getSubscriptionState: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
+  getPlans: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": { [key: string]: unknown };
+          "*/*": components["schemas"]["CollectionModelPlanModel"];
         };
       };
       /** Bad Request */
@@ -154,12 +259,46 @@ export interface operations {
       };
     };
   };
-  getPlans: {
+  /** Creates change payment method session */
+  createChangePaymentMethodSession: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelPlanModel"];
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Refreshes organizations subscription by Stripe data */
+  getActivePlan: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ActivePlanModel"];
         };
       };
       /** Bad Request */
