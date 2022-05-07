@@ -7,13 +7,13 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Component
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.nio.charset.StandardCharsets
 
 @Component
 class TolgeeEmailSender(
   private val tolgeeProperties: TolgeeProperties,
-  private val mailSender: JavaMailSender
+  private val mailSender: JavaMailSender,
+  private val frontendUrlProvider: FrontendUrlProvider
 ) {
   fun sendEmailVerification(
     userId: Long,
@@ -73,14 +73,7 @@ class TolgeeEmailSender(
   }
 
   private fun getInvitationAcceptUrl(code: String): String {
-    var hostUrl = tolgeeProperties.frontEndUrl
-    if (hostUrl.isNullOrBlank()) {
-      val builder = ServletUriComponentsBuilder.fromCurrentRequestUri()
-      builder.replacePath("")
-      builder.replaceQuery("")
-      hostUrl = builder.build().toUriString()
-    }
-    return "$hostUrl/accept_invitation/$code"
+    return "${frontendUrlProvider.frontEndUrl}/accept_invitation/$code"
   }
 
   private fun sendEmail(params: TolgeeEmailParams) {

@@ -106,17 +106,18 @@ class OrganizationService(
   fun edit(id: Long, editDto: OrganizationDto): OrganizationView {
     val organization = this.find(id) ?: throw NotFoundException()
 
-    if (editDto.slug == null) {
+    val newSlug = editDto.slug
+    if (newSlug == null) {
       editDto.slug = organization.slug
     }
 
-    if (editDto.slug != organization.slug && !validateSlugUniqueness(editDto.slug!!)) {
+    if (newSlug != organization.slug && !validateSlugUniqueness(newSlug!!)) {
       throw ValidationException(io.tolgee.constants.Message.ADDRESS_PART_NOT_UNIQUE)
     }
 
     organization.name = editDto.name
     organization.description = editDto.description
-    organization.slug = editDto.slug
+    organization.slug = newSlug
     organization.basePermissions = editDto.basePermissions
     organizationRepository.save(organization)
     return OrganizationView.of(organization, OrganizationRoleType.OWNER)

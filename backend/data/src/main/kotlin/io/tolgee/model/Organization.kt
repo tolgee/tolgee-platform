@@ -35,7 +35,7 @@ class Organization(
   @Column(name = "address_part")
   @field:NotBlank @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
-  open var slug: String? = null,
+  open var slug: String = "",
 
   @Enumerated(EnumType.STRING)
   open var basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
@@ -46,7 +46,7 @@ class Organization(
   constructor(
     name: String?,
     description: String? = null,
-    slug: String?,
+    slug: String = "",
     basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
   ) : this(0, name, description, slug, basePermissions)
 
