@@ -47,6 +47,7 @@ import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -111,19 +112,17 @@ class V2TranslationsController(
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translations for existing key")
+  @Transactional
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.get(projectHolder.project.id, dto.key)
     securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)
-
     val modifiedTranslations = translationService.setForKey(key, dto.translations)
 
-    val translations = dto.languagesToReturn
-      ?.let { languagesToReturn ->
-        key.translations
-          .filter { languagesToReturn.contains(it.language.tag) }
-          .associateBy { it.language.tag }
+    val translations = dto.languagesToReturn?.let { it ->
+      translationService.getKeyTranslations(dto.key, it, projectHolder.project.id).associateBy {
+        it.language.tag
       }
-      ?: modifiedTranslations
+    } ?: modifiedTranslations
 
     return getSetTranslationsResponse(key, translations)
   }
@@ -132,6 +131,7 @@ class V2TranslationsController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
+  @Transactional
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     checkEditScopeIfKeyExists(dto)
     val key = keyService.getOrCreateKey(projectHolder.projectEntity, PathDTO.fromFullPath(dto.key))

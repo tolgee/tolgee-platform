@@ -5,6 +5,7 @@ import io.tolgee.exceptions.PermissionException
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.SecurityService
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -17,11 +18,15 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class ApiKeyAuthFilter(
+  @Lazy
   private val apiKeyService: io.tolgee.service.ApiKeyService,
   private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
+  @Lazy
   private val securityService: SecurityService,
+  @Lazy
   private val projectHolder: ProjectHolder,
   @param:Qualifier("handlerExceptionResolver")
+  @Lazy
   private val resolver: HandlerExceptionResolver,
 ) : OncePerRequestFilter() {
 

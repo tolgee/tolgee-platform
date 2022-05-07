@@ -63,7 +63,6 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
 
   @ProjectJWTAuthTestMethod
   @Test
-  @Transactional
   fun `auto translates new key`() {
     testUsingMtWorks()
     val expectedCost = "Hello".length * 100
@@ -111,7 +110,6 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
 
   @ProjectJWTAuthTestMethod
   @Test
-  @Transactional
   fun `it translates in parallel`() {
     testData.generateManyLanguages()
     initMachineTranslationMocks(500)
@@ -127,10 +125,13 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
 
     assertThat(time).isLessThan(2000)
 
-    val translations = keyService.get(testData.project.id, CREATE_KEY_NAME).translations.toList()
-    assertThat(translations).hasSize(9)
-    assertThat(translations[4].text).isEqualTo("Translated with Amazon")
-    assertThat(translations[5].text).isEqualTo("Translated with Google")
+    transactionTemplate.execute {
+      val translations = keyService.get(testData.project.id, CREATE_KEY_NAME).getAllTranslations()?.toList()
+        ?: throw IllegalStateException("No translations!")
+      assertThat(translations).hasSize(9)
+      assertThat(translations[4].text).isEqualTo("Translated with Amazon")
+      assertThat(translations[5].text).isEqualTo("Translated with Google")
+    }
   }
 
   @ProjectJWTAuthTestMethod
@@ -279,9 +280,15 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
 
   private fun Key.getLangTranslation(lang: Language): Translation {
     return transactionTemplate.execute {
-      keyService.get(this.id).translations.find {
+      this.getAllTranslations()?.find {
         it.language == lang
       } ?: throw IllegalStateException("Translation not found")
+    }!!
+  }
+
+  private fun Key.getAllTranslations(): MutableSet<Translation>? {
+    return transactionTemplate.execute {
+      keyService.get(this.id).translations
     }
   }
 

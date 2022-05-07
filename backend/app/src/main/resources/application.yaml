@@ -16,8 +16,9 @@ spring:
         order_inserts: true
         order_updates: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
-#  main:
-#    lazy-initialization: true
+    open-in-view: false
+  main:
+    lazy-initialization: true
 tolgee:
   authentication:
     enabled: false

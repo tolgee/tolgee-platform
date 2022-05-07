@@ -5,6 +5,7 @@ import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
+import javax.persistence.FetchType
 import javax.persistence.OneToOne
 
 @Entity
@@ -22,6 +23,6 @@ class MtServiceConfig : StandardAuditModel() {
   var primaryService: MtServiceType? = null
 
   @Enumerated(EnumType.STRING)
-  @ElementCollection(targetClass = MtServiceType::class)
+  @ElementCollection(targetClass = MtServiceType::class, fetch = FetchType.EAGER)
   var enabledServices: MutableSet<MtServiceType> = mutableSetOf()
 }

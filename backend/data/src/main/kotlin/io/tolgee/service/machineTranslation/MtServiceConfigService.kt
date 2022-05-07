@@ -98,6 +98,7 @@ class MtServiceConfigService(
     delete(toDelete)
   }
 
+  @Transactional
   fun getProjectSettings(project: Project): List<MtServiceConfig> {
     return getStoredConfigs(project.id).sortedBy { it.targetLanguage == null }.toMutableList().also { configs ->
       if (configs.find { it.targetLanguage == null } == null) {

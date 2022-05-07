@@ -6,6 +6,7 @@ import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.method.HandlerMethod
@@ -18,12 +19,13 @@ import javax.servlet.http.HttpServletResponse
 @Component
 class ProjectPermissionFilter(
   private val requestMappingHandlerMapping: RequestMappingHandlerMapping,
-  private val securityService: SecurityService,
+  @Lazy private val securityService: SecurityService,
   @param:Qualifier("handlerExceptionResolver")
+  @Lazy
   private val resolver: HandlerExceptionResolver,
-  private val projectHolder: ProjectHolder,
-  private val projectService: ProjectService,
-  private val authenticationFacade: AuthenticationFacade
+  @Lazy private val projectHolder: ProjectHolder,
+  @Lazy private val projectService: ProjectService,
+  @Lazy private val authenticationFacade: AuthenticationFacade
 ) : OncePerRequestFilter() {
   companion object {
     const val REGEX = "/(?:v2|api)/(?:repositor(?:y|ies)|projects?)/([0-9]+)/?.*"

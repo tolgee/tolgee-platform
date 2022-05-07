@@ -17,11 +17,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
 class KeyControllerTest : AuthorizedControllerTest() {
   private val keyDto = SetTranslationsWithKeyDto("test string", mapOf(Pair("en", "Hello")))
   private val keyDto2 = SetTranslationsWithKeyDto("test string 2", mapOf(Pair("en", "Hello 2")))

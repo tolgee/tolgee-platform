@@ -8,15 +8,14 @@ import io.tolgee.api.v2.hateoas.key.KeyWithDataModel
 import io.tolgee.api.v2.hateoas.key.KeyWithDataModelAssembler
 import io.tolgee.component.KeyComplexEditHelper
 import io.tolgee.controllers.IController
+import io.tolgee.dtos.cacheable.ProjectDto
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
-import io.tolgee.model.Project
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.key.Key
-import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
@@ -53,7 +52,6 @@ class V2KeyController(
   private val keyModelAssembler: KeyModelAssembler,
   private val keyWithDataModelAssembler: KeyWithDataModelAssembler,
   private val securityService: SecurityService,
-  private val authenticationFacade: AuthenticationFacade,
   private val applicationContext: ApplicationContext
 ) : IController {
   @PostMapping(value = ["/create", ""])
@@ -61,11 +59,12 @@ class V2KeyController(
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
   @Operation(summary = "Creates new key")
   @ResponseStatus(HttpStatus.CREATED)
+  @Transactional
   fun create(@RequestBody @Valid dto: CreateKeyDto): ResponseEntity<KeyWithDataModel> {
     if (dto.screenshotUploadedImageIds != null) {
-      projectHolder.projectEntity.checkScreenshotsUploadPermission()
+      projectHolder.project.checkScreenshotsUploadPermission()
     }
-    val key = keyService.create(projectHolder.projectEntity, dto)
+    val key = keyService.create(projectHolder.project.id, dto)
     return ResponseEntity(keyWithDataModelAssembler.toModel(key), HttpStatus.CREATED)
   }
 
@@ -106,7 +105,7 @@ class V2KeyController(
   private val Key.model: KeyModel
     get() = keyModelAssembler.toModel(this)
 
-  private fun Project.checkScreenshotsUploadPermission() {
+  private fun ProjectDto.checkScreenshotsUploadPermission() {
     securityService.checkScreenshotsUploadPermission(this.id)
   }
 }

@@ -5,6 +5,11 @@
 package io.tolgee.configuration
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.datatype.jsr310.deser.DurationDeserializer
+import com.fasterxml.jackson.datatype.jsr310.deser.InstantDeserializer
+import com.fasterxml.jackson.datatype.jsr310.ser.DurationSerializer
+import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import org.springframework.boot.web.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
@@ -19,6 +24,8 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.security.SecureRandom
+import java.time.Duration
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 import javax.servlet.MultipartConfigElement
 
@@ -62,7 +69,17 @@ class WebConfiguration(
 
   @Bean
   fun objectMapper(): ObjectMapper {
-    return ObjectMapper()
+    return ObjectMapper().also {
+      it.registerModule(object : SimpleModule() {
+        init {
+          addDeserializer(Instant::class.java, InstantDeserializer.INSTANT)
+          addSerializer(Instant::class.java, InstantSerializer.INSTANCE)
+
+          addSerializer(Duration::class.java, DurationSerializer.INSTANCE)
+          addDeserializer(Duration::class.java, DurationDeserializer.INSTANCE)
+        }
+      })
+    }
   }
 
   @Bean

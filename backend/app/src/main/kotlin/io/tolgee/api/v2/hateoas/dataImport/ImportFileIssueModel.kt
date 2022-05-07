@@ -1,13 +1,12 @@
 package io.tolgee.api.v2.hateoas.dataImport
 
 import io.tolgee.model.dataImport.issues.issueTypes.FileIssueType
-import io.tolgee.model.views.ImportFileIssueView
 import org.springframework.hateoas.RepresentationModel
 import org.springframework.hateoas.server.core.Relation
 
-@Relation(collectionRelation = "fileIssues", itemRelation = "fileIssue")
+@Relation(collectionRelation = "importFileIssues", itemRelation = "importFileIssue")
 open class ImportFileIssueModel(
-  override val id: Long,
-  override val type: FileIssueType,
-  override val params: List<ImportFileIssueParamModel>
-) : RepresentationModel<ImportFileIssueModel>(), ImportFileIssueView
+  val id: Long,
+  val type: FileIssueType,
+  val params: List<ImportFileIssueParamModel>
+) : RepresentationModel<ImportFileIssueModel>()

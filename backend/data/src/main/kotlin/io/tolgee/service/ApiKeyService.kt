@@ -7,6 +7,7 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.repository.ApiKeyRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -16,6 +17,7 @@ import java.util.*
 
 @Service
 class ApiKeyService @Autowired constructor(
+  @Lazy
   private val apiKeyRepository: ApiKeyRepository,
   private val random: SecureRandom
 ) {

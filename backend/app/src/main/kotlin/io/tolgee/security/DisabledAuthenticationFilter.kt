@@ -6,6 +6,7 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.service.UserAccountService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -15,15 +16,16 @@ import javax.servlet.FilterChain
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-
 @Component
 class DisabledAuthenticationFilter @Autowired constructor(
   private val configuration: TolgeeProperties,
+  @Lazy
   @param:Qualifier("handlerExceptionResolver")
   private val resolver: HandlerExceptionResolver,
+  @Lazy
   private val userAccountService: UserAccountService,
+  @Lazy
   private val authenticationProvider: AuthenticationProvider
-
 ) : OncePerRequestFilter() {
   @Throws(ServletException::class, IOException::class)
   override fun doFilterInternal(

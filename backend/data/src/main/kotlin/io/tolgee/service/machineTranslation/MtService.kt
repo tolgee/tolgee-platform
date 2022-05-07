@@ -5,6 +5,7 @@ import io.tolgee.component.machineTranslation.TranslateResult
 import io.tolgee.constants.MtServiceType
 import io.tolgee.events.OnAfterMachineTranslationEvent
 import io.tolgee.events.OnBeforeMachineTranslationEvent
+import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
 import io.tolgee.model.Project
@@ -13,6 +14,7 @@ import io.tolgee.service.ProjectService
 import io.tolgee.service.TranslationService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class MtService(
@@ -22,6 +24,7 @@ class MtService(
   private val projectService: ProjectService,
   private val mtServiceConfigService: MtServiceConfigService
 ) {
+  @Transactional(noRollbackFor = [OutOfCreditsException::class])
   fun getMachineTranslations(key: Key, targetLanguage: Language):
     Map<MtServiceType, String?>? {
     val baseLanguage = projectService.getOrCreateBaseLanguage(key.project.id)!!
@@ -30,6 +33,7 @@ class MtService(
     return getMachineTranslations(key.project, baseTranslationText, baseLanguage, targetLanguage)
   }
 
+  @Transactional(noRollbackFor = [OutOfCreditsException::class])
   fun getMachineTranslations(
     project: Project,
     baseTranslationText: String,
@@ -39,6 +43,7 @@ class MtService(
     return getMachineTranslations(project, baseTranslationText, baseLanguage, targetLanguage)
   }
 
+  @Transactional(noRollbackFor = [OutOfCreditsException::class])
   fun getPrimaryMachineTranslations(key: Key, targetLanguages: List<Language>):
     List<TranslateResult?> {
     val baseLanguage = projectService.getOrCreateBaseLanguage(key.project.id)!!

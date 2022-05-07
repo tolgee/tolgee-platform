@@ -2,6 +2,7 @@ package io.tolgee.repository.dataImport.issues
 
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.dataImport.issues.ImportFileIssue
+import io.tolgee.model.views.ImportFileIssueParamView
 import io.tolgee.model.views.ImportFileIssueView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -16,6 +17,15 @@ interface ImportFileIssueRepository : JpaRepository<ImportFileIssue, Long> {
 
   @Query("""select ifi from ImportFileIssue ifi where ifi.file.id = :fileId""")
   fun findAllByFileIdView(fileId: Long, pageable: Pageable): Page<ImportFileIssueView>
+
+  @Query(
+    """
+     select p.value as value, p.type as type, p.issue.id as issueId
+     from ImportFileIssueParam p
+     where p.issue.id in :issueIds
+  """
+  )
+  fun findParamsByIssueIds(issueIds: Collection<Long>): List<ImportFileIssueParamView>
 
   @Transactional
   @Query(

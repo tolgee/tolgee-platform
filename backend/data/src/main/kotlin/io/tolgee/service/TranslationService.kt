@@ -108,6 +108,11 @@ class TranslationService(
     } else LinkedHashSet()
   }
 
+  @Transactional
+  fun getKeyTranslations(keyName: String, languageTags: Set<String>, projectId: Long): Set<Translation> {
+    return translationRepository.getTranslations(keyName, languageTags, projectId)
+  }
+
   fun getOrCreate(key: Key, language: Language): Translation {
     return find(key, language).orElseGet {
       Translation(language = language, key = key)

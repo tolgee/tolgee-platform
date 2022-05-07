@@ -4,6 +4,7 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.exceptions.AuthenticationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.annotation.Lazy
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -16,9 +17,11 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 class JwtTokenFilter @Autowired constructor(
+  @Lazy
   private val jwtTokenProvider: JwtTokenProviderImpl,
   private val configuration: TolgeeProperties,
   @param:Qualifier("handlerExceptionResolver")
+  @Lazy
   private val resolver: HandlerExceptionResolver
 
 ) : OncePerRequestFilter() {

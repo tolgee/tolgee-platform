@@ -8,11 +8,15 @@ spring:
         order_inserts: true
         order_updates: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
+    open-in-view: false
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
   data:
     redis:
+      repositories:
+        enabled: false
+    ldap:
       repositories:
         enabled: false
   main:

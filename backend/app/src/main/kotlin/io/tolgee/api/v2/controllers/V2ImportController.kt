@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.parameters.RequestBody
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.dataImport.ImportAddFilesResultModel
+import io.tolgee.api.v2.hateoas.dataImport.ImportFileIssueModel
+import io.tolgee.api.v2.hateoas.dataImport.ImportFileIssueModelAssembler
 import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModel
 import io.tolgee.api.v2.hateoas.dataImport.ImportLanguageModelAssembler
 import io.tolgee.api.v2.hateoas.dataImport.ImportTranslationModel
@@ -39,12 +41,12 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.data.web.SortDefault
-import org.springframework.hateoas.EntityModel
 import org.springframework.hateoas.PagedModel
 import org.springframework.hateoas.mediatype.hal.HalMediaTypeConfiguration
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -69,6 +71,7 @@ class V2ImportController(
   private val authenticationFacade: AuthenticationFacade,
   private val importLanguageModelAssembler: ImportLanguageModelAssembler,
   private val importTranslationModelAssembler: ImportTranslationModelAssembler,
+  private val importFileIssueModelAssembler: ImportFileIssueModelAssembler,
   @Suppress("SpringJavaInjectionPointsAutowiringInspection")
   private val pagedLanguagesResourcesAssembler: PagedResourcesAssembler<ImportLanguageView>,
 
@@ -272,13 +275,14 @@ class V2ImportController(
 
   @GetMapping("/result/files/{importFileId}/issues")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @Transactional
   fun getImportFileIssues(
     @PathVariable("importFileId") importFileId: Long,
     @ParameterObject pageable: Pageable
-  ): PagedModel<EntityModel<ImportFileIssueView>> {
+  ): PagedModel<ImportFileIssueModel> {
     checkFileFromProject(importFileId)
     val page = importService.getFileIssues(importFileId, pageable)
-    return pagedImportFileIssueResourcesAssembler.toModel(page)
+    return pagedImportFileIssueResourcesAssembler.toModel(page, importFileIssueModelAssembler)
   }
 
   private fun resolveAllOfLanguage(languageId: Long, override: Boolean) {
