@@ -1,6 +1,7 @@
 package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.MtCreditBucket
@@ -17,7 +18,8 @@ import javax.transaction.Transactional
 class MtCreditBucketService(
   private val machineTranslationCreditBucketRepository: MachineTranslationCreditBucketRepository,
   private val machineTranslationProperties: MachineTranslationProperties,
-  private val currentDateProvider: CurrentDateProvider
+  private val currentDateProvider: CurrentDateProvider,
+  private val mtCreditBucketSizeProvider: MtBucketSizeProvider,
 ) {
 
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
@@ -81,12 +83,12 @@ class MtCreditBucketService(
   }
 
   fun refillBucket(bucket: MtCreditBucket) {
-    bucket.credits = getRefillAmount()
+    bucket.credits = getRefillAmount(bucket.organization)
     bucket.refilled = currentDateProvider.getDate()
   }
 
-  private fun getRefillAmount(): Long {
-    return machineTranslationProperties.freeCreditsAmount
+  private fun getRefillAmount(organization: Organization?): Long {
+    return mtCreditBucketSizeProvider.getSize(organization)
   }
 
   fun refillIfItsTime(bucket: MtCreditBucket) {
@@ -98,7 +100,7 @@ class MtCreditBucketService(
   private fun findOrCreateBucket(userAccount: UserAccount): MtCreditBucket {
     return machineTranslationCreditBucketRepository.findByUserAccount(userAccount)
       ?: MtCreditBucket(userAccount = userAccount).apply {
-        credits = getRefillAmount()
+        credits = getRefillAmount(null)
         save(this)
       }
   }
@@ -106,7 +108,7 @@ class MtCreditBucketService(
   private fun findOrCreateBucket(organization: Organization): MtCreditBucket {
     return machineTranslationCreditBucketRepository.findByOrganization(organization)
       ?: MtCreditBucket(organization = organization).apply {
-        credits = getRefillAmount()
+        credits = getRefillAmount(organization)
         save(this)
       }
   }
