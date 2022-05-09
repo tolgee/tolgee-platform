@@ -14,5 +14,7 @@ class MtCreditBucket(
 ) : StandardAuditModel() {
   var credits: Long = 0
 
+  var bucketSize: Long = 0
+
   var refilled: Date = Date()
 }
