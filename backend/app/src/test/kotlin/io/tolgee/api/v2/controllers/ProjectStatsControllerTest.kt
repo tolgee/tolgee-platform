@@ -78,6 +78,9 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
           node("reviewedKeyCount").isEqualTo(2)
           node("reviewedWordCount").isEqualTo(1)
           node("reviewedPercentage").isEqualTo(14.285714285714285)
+          node("untranslatedKeyCount").isEqualTo(4)
+          node("untranslatedWordCount").isEqualTo(5)
+          node("untranslatedPercentage").isEqualTo(71.42857142857143)
         }
       }
     }

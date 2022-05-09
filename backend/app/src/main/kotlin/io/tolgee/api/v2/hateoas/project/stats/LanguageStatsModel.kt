@@ -12,4 +12,7 @@ open class LanguageStatsModel(
   val reviewedKeyCount: Long,
   val reviewedWordCount: Long,
   val reviewedPercentage: Double,
+  val untranslatedKeyCount: Long,
+  val untranslatedWordCount: Long,
+  val untranslatedPercentage: Double
 )
