@@ -1,3 +1,10 @@
+## [2.19.2](https://github.com/tolgee/tolgee-platform/compare/v2.19.1...v2.19.2) (2022-05-09)
+
+
+### Bug Fixes
+
+* Upgrade Spring ([9b7579a](https://github.com/tolgee/tolgee-platform/commit/9b7579afb85676f487403078a19ee10d890fe713))
+
 ## [2.19.1](https://github.com/tolgee/tolgee-platform/compare/v2.19.0...v2.19.1) (2022-04-28)
 
 
