@@ -2,6 +2,7 @@ package io.tolgee.activity
 
 import io.sentry.Sentry
 import io.tolgee.activity.data.ActivityType
+import io.tolgee.model.EntityWithId
 import io.tolgee.model.activity.ActivityModifiedEntity
 import io.tolgee.model.activity.ActivityRevision
 import org.slf4j.LoggerFactory
@@ -18,6 +19,8 @@ open class ActivityHolder(
   open var activityRevision: ActivityRevision? = null
 
   private val logger = LoggerFactory.getLogger(this::class.java)
+
+  open var modifiedCollections: MutableMap<Pair<EntityWithId, String>, List<Any?>?> = mutableMapOf()
 
   @PreDestroy
   open fun preDestroy() {

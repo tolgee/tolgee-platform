@@ -68,6 +68,7 @@ class Language : StandardAuditModel() {
   @ActivityDescribingProp
   var name: String? = null
 
+  @ActivityLoggedProp
   var originalName: String? = null
 
   @field:Size(max = 20)

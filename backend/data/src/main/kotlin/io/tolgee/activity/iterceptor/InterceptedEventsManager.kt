@@ -4,8 +4,8 @@ import io.tolgee.activity.ActivityHolder
 import io.tolgee.activity.EntityDescriptionProvider
 import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
-import io.tolgee.activity.data.EntityDescription
 import io.tolgee.activity.data.EntityDescriptionRef
+import io.tolgee.activity.data.EntityDescriptionWithRelations
 import io.tolgee.activity.data.PropertyModification
 import io.tolgee.activity.data.RevisionType
 import io.tolgee.activity.propChangesProvider.PropChangesProvider
@@ -54,7 +54,12 @@ class InterceptedEventsManager(
     val provider = getChangesProvider(collectionOwner, ownerField.name) ?: return
 
     val stored = (collection.storedSnapshot as? HashMap<*, *>)?.values?.toList()
-    val changes = provider.getChanges(stored, collection) ?: return
+
+    val old = activityHolder.modifiedCollections.computeIfAbsent(collectionOwner to ownerField.name) {
+      stored
+    }
+
+    val changes = provider.getChanges(old, collection) ?: return
     val activityModifiedEntity = getModifiedEntity(collectionOwner)
 
     val newChanges = activityModifiedEntity.modifications + mutableMapOf(ownerField.name to changes)
@@ -114,7 +119,9 @@ class InterceptedEventsManager(
     entity: EntityWithId,
     activityRevision: ActivityRevision
   ): Pair<Map<String, Any?>?, Map<String, EntityDescriptionRef>?> {
-    val rootDescription = applicationContext.getBean(EntityDescriptionProvider::class.java).getDescription(entity)
+    val rootDescription = applicationContext.getBean(EntityDescriptionProvider::class.java).getDescriptionWithRelations(
+      entity
+    )
     val relations = rootDescription?.relations
       ?.map { it.key to compressRelation(it.value, activityRevision) }
       ?.toMap()
@@ -122,7 +129,10 @@ class InterceptedEventsManager(
     return (rootDescription?.data to relations)
   }
 
-  private fun compressRelation(value: EntityDescription, activityRevision: ActivityRevision): EntityDescriptionRef {
+  private fun compressRelation(
+    value: EntityDescriptionWithRelations,
+    activityRevision: ActivityRevision
+  ): EntityDescriptionRef {
     val activityDescribingEntity = activityRevision.describingRelations
       .find { it.entityId == value.entityId && it.entityClass == value.entityClass }
       ?: let {
@@ -155,13 +165,11 @@ class InterceptedEventsManager(
       return mapOf()
     }
 
-    val changes = propertyNames.asSequence().mapIndexed { idx, name ->
-      name to PropertyModification(previousState?.get(idx), currentState?.get(idx))
-    }
-
-    return changes.mapNotNull { (propertyName, change) ->
-      val provider = getChangesProvider(entity, propertyName) ?: return@mapNotNull null
-      propertyName to (provider.getChanges(change.old, change.new) ?: return@mapNotNull null)
+    return propertyNames.asSequence().mapIndexedNotNull { idx, propertyName ->
+      val old = previousState?.get(idx)
+      val new = currentState?.get(idx)
+      val provider = getChangesProvider(entity, propertyName) ?: return@mapIndexedNotNull null
+      propertyName to (provider.getChanges(old, new) ?: return@mapIndexedNotNull null)
     }.toMap()
   }
 
