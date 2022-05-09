@@ -11,6 +11,7 @@ import io.tolgee.api.v2.hateoas.project.stats.ProjectStatsModel
 import io.tolgee.constants.Message
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.views.projectStats.ProjectLanguageStatsResultView
+import io.tolgee.model.views.projectStats.ProjectStatsView
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithAnyProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
@@ -65,7 +66,7 @@ class ProjectStatsController(
       reviewedPercentage = reviewedPercent,
       membersCount = projectStats.memberCount,
       tagCount = projectStats.tagCount,
-      languageStats = getSortedLanguageStatModels(languageStats, baseStats)
+      languageStats = getSortedLanguageStatModels(languageStats, baseStats, projectStats)
     )
   }
 
@@ -79,8 +80,13 @@ class ProjectStatsController(
 
   private fun getSortedLanguageStatModels(
     languageStats: List<ProjectLanguageStatsResultView>,
-    baseStats: ProjectLanguageStatsResultView
+    baseStats: ProjectLanguageStatsResultView,
+    projectStats: ProjectStatsView
   ) = languageStats.sortedBy { it.languageName }.sortedBy { it.languageId != baseStats.languageId }.map {
+    val baseWords = baseStats.translatedWords + baseStats.reviewedWords
+    val translatedOrReviewedKeys = it.translatedKeys + it.reviewedKeys
+    val translatedOrReviewedWords = it.translatedWords + it.reviewedWords
+    val untranslatedWords = baseWords - translatedOrReviewedWords
     LanguageStatsModel(
       languageId = it.languageId,
       languageTag = it.languageTag,
@@ -89,12 +95,13 @@ class ProjectStatsController(
       languageFlagEmoji = it.languageFlagEmoji,
       translatedKeyCount = it.translatedKeys,
       translatedWordCount = it.translatedWords,
-      translatedPercentage = it.translatedWords.toDouble() /
-        (baseStats.translatedWords + baseStats.reviewedWords) * 100,
+      translatedPercentage = it.translatedWords.toDouble() / baseWords * 100,
       reviewedKeyCount = it.reviewedKeys,
       reviewedWordCount = it.reviewedWords,
-      reviewedPercentage = it.reviewedWords.toDouble() /
-        (baseStats.translatedWords + baseStats.reviewedWords) * 100,
+      reviewedPercentage = it.reviewedWords.toDouble() / baseWords * 100,
+      untranslatedKeyCount = projectStats.keyCount - translatedOrReviewedKeys,
+      untranslatedWordCount = baseWords - translatedOrReviewedWords,
+      untranslatedPercentage = untranslatedWords.toDouble() / baseWords * 100,
     )
   }
 }
