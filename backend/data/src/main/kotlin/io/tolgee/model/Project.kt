@@ -27,7 +27,6 @@ import javax.validation.constraints.Size
 @Entity
 @EntityListeners(Project.Companion.ProjectListener::class)
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["address_part"], name = "project_address_part_unique")])
-
 @ActivityLoggedEntity
 class Project(
   @Id
@@ -48,7 +47,7 @@ class Project(
   @field:Size(min = 3, max = 60)
   @field:Pattern(regexp = "^[a-z0-9-]*[a-z]+[a-z0-9-]*$", message = "invalid_pattern")
   var slug: String? = null,
-) : AuditModel(), ModelWithAvatar {
+) : AuditModel(), ModelWithAvatar, EntityWithId {
 
   @OrderBy("id")
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
@@ -73,7 +72,6 @@ class Project(
   @ActivityLoggedProp
   var baseLanguage: Language? = null
 
-  @ActivityLoggedProp
   @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], mappedBy = "project")
   var autoTranslationConfig: AutoTranslationConfig? = null
 

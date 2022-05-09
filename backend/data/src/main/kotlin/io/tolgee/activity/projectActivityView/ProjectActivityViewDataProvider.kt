@@ -2,8 +2,8 @@ package io.tolgee.activity.projectActivityView
 
 import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.activity.data.ActivityType
-import io.tolgee.activity.data.EntityDescription
 import io.tolgee.activity.data.EntityDescriptionRef
+import io.tolgee.activity.data.ExistenceEntityDescription
 import io.tolgee.model.UserAccount
 import io.tolgee.model.activity.ActivityDescribingEntity
 import io.tolgee.model.activity.ActivityModifiedEntity
@@ -194,14 +194,14 @@ class ProjectActivityViewDataProvider(
   private fun decompressRef(
     value: EntityDescriptionRef,
     describingEntities: List<ActivityDescribingEntity>
-  ): EntityDescription {
+  ): ExistenceEntityDescription {
     val entity = describingEntities.find { it.entityClass == value.entityClass && it.entityId == value.entityId }
 
     val relations = entity?.describingRelations
       ?.map { it.key to decompressRef(it.value, describingEntities) }
       ?.toMap()
 
-    return EntityDescription(
+    return ExistenceEntityDescription(
       entityClass = value.entityClass,
       entityId = value.entityId,
       exists = entityExistences[value.entityClass to value.entityId],

@@ -3,6 +3,7 @@ package io.tolgee.activity
 import io.tolgee.activity.annotation.ActivityDescribingProp
 import io.tolgee.activity.annotation.ActivityEntityDescribingPaths
 import io.tolgee.activity.data.EntityDescription
+import io.tolgee.activity.data.EntityDescriptionWithRelations
 import io.tolgee.model.EntityWithId
 import io.tolgee.util.EntityUtil
 import org.springframework.stereotype.Component
@@ -13,16 +14,13 @@ import kotlin.reflect.full.hasAnnotation
 class EntityDescriptionProvider(
   private val entityUtil: EntityUtil
 ) {
-  fun getDescription(
+  fun getDescriptionWithRelations(
     entity: EntityWithId,
-  ): EntityDescription? {
-    val entityClass = entityUtil.getRealEntityClass(entity::class.java) ?: return null
+  ): EntityDescriptionWithRelations? {
 
-    val fieldValues = entityClass.kotlin.members.filter { member ->
-      member.hasAnnotation<ActivityDescribingProp>()
-    }.associateTo(HashMap()) { it.name to it.call(entity) }
+    val description = getDescription(entity) ?: return null
 
-    val description = mutableMapOf<String, EntityDescription>()
+    val relations = mutableMapOf<String, EntityDescriptionWithRelations>()
 
     entity::class.findAnnotation<ActivityEntityDescribingPaths>()?.paths?.forEach pathsForEach@{ path ->
       var realDescribingEntity: Any = entity
@@ -32,15 +30,27 @@ class EntityDescriptionProvider(
       }
 
       (realDescribingEntity as? EntityWithId)?.let {
-        description[path] = getDescription(it) ?: return@pathsForEach
+        relations[path] = getDescriptionWithRelations(it) ?: return@pathsForEach
       }
     }
 
+    return EntityDescriptionWithRelations(
+      description.entityClass,
+      description.entityId,
+      description.data,
+      relations
+    )
+  }
+
+  fun getDescription(entity: EntityWithId): EntityDescription? {
+    val entityClass = entityUtil.getRealEntityClass(entity::class.java) ?: return null
+
+    val fieldValues = entityClass.kotlin.members.filter { member ->
+      member.hasAnnotation<ActivityDescribingProp>()
+    }.associateTo(HashMap()) { it.name to it.call(entity) }
+
     return EntityDescription(
-      entityClass.simpleName,
-      entity.id,
-      fieldValues,
-      description
+      entityClass.simpleName, entityId = entity.id, fieldValues
     )
   }
 }
