@@ -8,6 +8,7 @@ import io.tolgee.AbstractSpringTest
 import io.tolgee.development.testDataBuilder.data.ImportTestData
 import io.tolgee.development.testDataBuilder.data.LanguagePermissionsTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
+import io.tolgee.development.testDataBuilder.data.TranslationCommentsTestData
 import io.tolgee.model.Permission
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -38,6 +39,15 @@ class LanguageServiceTest : AbstractSpringTest() {
     testDataService.saveTestData(testData.root)
     entityManager.flush()
     languageService.deleteLanguage(testData.germanLanguage.id)
+  }
+
+  @Test
+  @Transactional
+  fun `deletes language with Comments`() {
+    val testData = TranslationCommentsTestData()
+    testDataService.saveTestData(testData.root)
+    entityManager.flush()
+    languageService.deleteLanguage(testData.englishLanguage.id)
   }
 
   @Test

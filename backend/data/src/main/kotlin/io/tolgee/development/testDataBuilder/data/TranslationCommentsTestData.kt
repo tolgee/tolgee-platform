@@ -26,11 +26,9 @@ class TranslationCommentsTestData {
 
   val root: TestDataBuilder = TestDataBuilder().apply {
     user = addUserAccount {
-
       username = "franta"
     }.self
     pepa = addUserAccount {
-
       username = "pepa"
     }.self
 
@@ -39,19 +37,16 @@ class TranslationCommentsTestData {
       userOwner = user
     }.build {
       addPermission {
-
         user = this@TranslationCommentsTestData.user
         type = Permission.ProjectPermissionType.MANAGE
       }
 
       addPermission {
-
         user = this@TranslationCommentsTestData.pepa
         type = Permission.ProjectPermissionType.EDIT
       }
 
       englishLanguage = addLanguage {
-
         name = "English"
         tag = "en"
         originalName = "English"
