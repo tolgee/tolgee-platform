@@ -180,13 +180,13 @@ class TranslationService(
     return TranslationsViewBuilder.getSelectAllKeys(applicationContext, projectId, languages, params)
   }
 
-  fun setTranslation(key: Key, languageTag: String?, text: String?): Translation {
+  fun setTranslation(key: Key, languageTag: String?, text: String?): Translation? {
     val language = languageService.findByTag(languageTag!!, key.project)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
     return setTranslation(key, language, text)
   }
 
-  fun setTranslation(key: Key, language: Language, text: String?): Translation {
+  fun setTranslation(key: Key, language: Language, text: String?): Translation? {
     val translation = getOrCreate(key, language)
     translation.text = text
     if (translation.state == TranslationState.UNTRANSLATED && !translation.text.isNullOrEmpty()) {
@@ -194,6 +194,10 @@ class TranslationService(
     }
     if (translation.id == 0L) {
       key.translations.add(translation)
+    }
+    if (text == null || text.isEmpty()) {
+      translation.state = TranslationState.UNTRANSLATED
+      translation.text = null
     }
     dismissAutoTranslated(translation)
     return save(translation)
@@ -220,9 +224,6 @@ class TranslationService(
     val oldTranslations = getKeyTranslations(languages, key.project, key).associate { it.language.tag to it.text }
 
     return translations.entries.associate { (languageTag, value) ->
-      if (value == null || value.isEmpty()) {
-        return@associate languageTag to setUntranslatedStateIfExists(key, languageTag)
-      }
       languageTag to setTranslation(key, languageTag, value)
     }.filterValues { it != null }.mapValues { it.value as Translation }.also {
       applicationEventPublisher.publishEvent(
@@ -252,18 +253,6 @@ class TranslationService(
       }
   }
 
-  fun setUntranslatedStateIfExists(key: Key, languageTag: String): Translation? {
-    val language = languageService.findByTag(languageTag, key.project)
-      .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-    return translationRepository.findOneByKeyAndLanguage(key, language).orElse(null)
-      ?.let { entity: Translation ->
-        entity.state = TranslationState.UNTRANSLATED
-        entity.text = null
-        save(entity)
-        entity
-      }
-  }
-
   @Suppress("UNCHECKED_CAST")
   private fun addToMap(translation: SimpleTranslationView, map: MutableMap<String, Any?>) {
     var currentMap = map
@@ -283,13 +272,13 @@ class TranslationService(
   }
 
   fun deleteByIdIn(ids: Collection<Long>) {
+    translationCommentService.deleteByTranslationIdIn(ids)
     importService.onExistingTranslationsRemoved(ids)
     translationRepository.deleteByIdIn(ids)
   }
 
   fun deleteAllByProject(projectId: Long) {
     val ids = translationRepository.selectIdsByProject(projectId)
-    translationCommentService.deleteByTranslationIdIn(ids)
     deleteByIdIn(ids)
     entityManager.flush()
   }
