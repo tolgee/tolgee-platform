@@ -1,3 +1,10 @@
+## [2.19.3](https://github.com/tolgee/tolgee-platform/compare/v2.19.2...v2.19.3) (2022-05-09)
+
+
+### Bug Fixes
+
+* Fix minor bugs ([3137368](https://github.com/tolgee/tolgee-platform/commit/3137368f99dd89b63bf5371c79132662ac772360))
+
 ## [2.19.2](https://github.com/tolgee/tolgee-platform/compare/v2.19.1...v2.19.2) (2022-05-09)
 
 
