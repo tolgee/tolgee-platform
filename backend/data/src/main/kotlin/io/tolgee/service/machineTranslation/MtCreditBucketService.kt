@@ -3,12 +3,14 @@ package io.tolgee.service.machineTranslation
 import io.tolgee.component.CurrentDateProvider
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
+import io.tolgee.dtos.MtCreditBalanceDto
 import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
+import io.tolgee.service.OrganizationService
 import org.apache.commons.lang3.time.DateUtils
 import org.springframework.stereotype.Service
 import java.util.*
@@ -20,6 +22,7 @@ class MtCreditBucketService(
   private val machineTranslationProperties: MachineTranslationProperties,
   private val currentDateProvider: CurrentDateProvider,
   private val mtCreditBucketSizeProvider: MtBucketSizeProvider,
+  private val organizationService: OrganizationService
 ) {
 
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
@@ -33,7 +36,7 @@ class MtCreditBucketService(
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
     refillIfItsTime(bucket)
-    if (getCreditBalance(bucket) - amount < 0) {
+    if (getCreditBalance(bucket).creditBalance - amount < 0) {
       throw OutOfCreditsException()
     }
     bucket.credits -= amount
@@ -61,20 +64,20 @@ class MtCreditBucketService(
     machineTranslationCreditBucketRepository.saveAll(buckets)
   }
 
-  fun getCreditBalance(project: Project): Long {
+  fun getCreditBalance(project: Project): MtCreditBalanceDto {
     return getCreditBalance(findOrCreateBucket(project))
   }
 
-  fun getCreditBalance(bucket: MtCreditBucket): Long {
+  fun getCreditBalance(bucket: MtCreditBucket): MtCreditBalanceDto {
     refillIfItsTime(bucket)
-    return bucket.credits
+    return MtCreditBalanceDto(bucket.credits, bucket.bucketSize)
   }
 
-  fun getCreditBalance(userAccount: UserAccount): Long {
+  fun getCreditBalance(userAccount: UserAccount): MtCreditBalanceDto {
     return getCreditBalance(findOrCreateBucket(userAccount))
   }
 
-  fun getCreditBalance(organization: Organization): Long {
+  fun getCreditBalance(organization: Organization): MtCreditBalanceDto {
     return getCreditBalance(findOrCreateBucket(organization))
   }
 
@@ -83,8 +86,13 @@ class MtCreditBucketService(
   }
 
   fun refillBucket(bucket: MtCreditBucket) {
-    bucket.credits = getRefillAmount(bucket.organization)
+    refillBucket(bucket, getRefillAmount(bucket.organization))
+  }
+
+  fun refillBucket(bucket: MtCreditBucket, bucketSize: Long) {
+    bucket.credits = bucketSize
     bucket.refilled = currentDateProvider.getDate()
+    bucket.bucketSize = bucket.credits
   }
 
   private fun getRefillAmount(organization: Organization?): Long {
@@ -100,7 +108,7 @@ class MtCreditBucketService(
   private fun findOrCreateBucket(userAccount: UserAccount): MtCreditBucket {
     return machineTranslationCreditBucketRepository.findByUserAccount(userAccount)
       ?: MtCreditBucket(userAccount = userAccount).apply {
-        credits = getRefillAmount(null)
+        this.initCredits()
         save(this)
       }
   }
@@ -108,9 +116,19 @@ class MtCreditBucketService(
   private fun findOrCreateBucket(organization: Organization): MtCreditBucket {
     return machineTranslationCreditBucketRepository.findByOrganization(organization)
       ?: MtCreditBucket(organization = organization).apply {
-        credits = getRefillAmount(organization)
+        this.initCredits()
         save(this)
       }
+  }
+
+  private fun MtCreditBucket.initCredits() {
+    credits = getRefillAmount(null)
+    bucketSize = credits
+  }
+
+  fun findOrCreateBucketByOrganizationId(organizationId: Long): MtCreditBucket {
+    val organization = organizationService.get(organizationId)
+    return findOrCreateBucket(organization)
   }
 
   private fun findOrCreateBucket(project: Project): MtCreditBucket {
