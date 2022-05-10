@@ -1,6 +1,7 @@
 package io.tolgee.activity.data
 
 import io.tolgee.model.EntityWithId
+import io.tolgee.model.Language
 import io.tolgee.model.key.Key
 import kotlin.reflect.KClass
 
@@ -26,7 +27,7 @@ enum class ActivityType(
   IMPORT(true),
   CREATE_LANGUAGE,
   EDIT_LANGUAGE,
-  DELETE_LANGUAGE(true),
+  DELETE_LANGUAGE(restrictEntitiesInList = arrayOf(Language::class)),
   CREATE_PROJECT,
   EDIT_PROJECT,
 }
