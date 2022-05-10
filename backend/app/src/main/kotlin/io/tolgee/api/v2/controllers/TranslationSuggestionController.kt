@@ -57,7 +57,7 @@ class TranslationSuggestionController(
     val targetLanguage = languageService.findById(dto.targetLanguageId)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
 
-    val balanceBefore = mtCreditBucketService.getCreditBalance(projectHolder.projectEntity)
+    val balanceBefore = mtCreditBucketService.getCreditBalance(projectHolder.projectEntity).creditBalance
 
     try {
       val resultMap = dto.baseText?.ifBlank { null }?.let {
@@ -68,7 +68,7 @@ class TranslationSuggestionController(
         mtService.getMachineTranslations(key, targetLanguage)
       }
 
-      val balanceAfter = mtCreditBucketService.getCreditBalance(projectHolder.projectEntity)
+      val balanceAfter = mtCreditBucketService.getCreditBalance(projectHolder.projectEntity).creditBalance
 
       return SuggestResultModel(
         machineTranslations = resultMap,

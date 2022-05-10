@@ -1,15 +1,19 @@
-import {FunctionComponent, useEffect} from 'react';
-import {T, useCurrentLanguage} from '@tolgee/react';
+import { FunctionComponent, useEffect } from 'react';
+import { T, useCurrentLanguage } from '@tolgee/react';
 
-import {BaseOrganizationSettingsView} from 'tg.views/organizations/BaseOrganizationSettingsView';
+import { BaseOrganizationSettingsView } from 'tg.views/organizations/BaseOrganizationSettingsView';
 
-import {useOrganization} from 'tg.views/organizations/useOrganization';
-import {useLocation} from 'react-router-dom';
-import {MessageService} from 'tg.service/MessageService';
-import {container} from 'tsyringe';
-import {Box, Button, Typography} from '@mui/material';
-import {useBillingApiMutation, useBillingApiQuery,} from './useBillingQueryApi';
+import { useOrganization } from 'tg.views/organizations/useOrganization';
+import { useLocation } from 'react-router-dom';
+import { MessageService } from 'tg.service/MessageService';
+import { container } from 'tsyringe';
+import { Box, Button, Typography } from '@mui/material';
+import {
+  useBillingApiMutation,
+  useBillingApiQuery,
+} from './useBillingQueryApi';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
+import { useOrganizationCreditBalance } from './useOrganizationCreditBalance';
 
 const messaging = container.resolve(MessageService);
 export const OrganizationBillingView: FunctionComponent = () => {
@@ -22,18 +26,28 @@ export const OrganizationBillingView: FunctionComponent = () => {
 
   const organization = useOrganization();
 
+  const creditBalance = useOrganizationCreditBalance();
+
   const url = new URL(window.location.href);
+
   url.search = '';
 
-  const onSuccessMutation = useBillingApiMutation({
+  const refreshSubscription = useBillingApiMutation({
     url: `/v2/billing/refresh-subscription/{organizationId}`,
     method: `put`,
     invalidatePrefix: `/v2/billing`,
+    options: {
+      onSuccess: (data) => {
+        creditBalance.refetch();
+      },
+    },
   });
 
   useEffect(() => {
     if (success) {
-      onSuccessMutation.mutate({ path: { organizationId: organization!.id } });
+      refreshSubscription.mutate({
+        path: { organizationId: organization!.id },
+      });
     }
   }, [success]);
 
@@ -122,16 +136,23 @@ export const OrganizationBillingView: FunctionComponent = () => {
       loading={
         activePlan.isLoading ||
         plansLoadable.isLoading ||
-        onSuccessMutation.isLoading ||
+        refreshSubscription.isLoading ||
         activePlan.isLoading
       }
     >
+      <Box>
+        Credit Balance: {(creditBalance.data?.creditBalance || 0) / 100} /{' '}
+        {(creditBalance.data?.bucketSize || 0) / 100}
+      </Box>
+
       {plansLoadable.data &&
         plansLoadable.data?._embedded?.plans?.map((plan) => (
           <Box key={plan.id}>
             <Box>{plan.name}</Box>
             <Box>Translation limit: {plan.translationLimit}</Box>
-            <Box>Mt Credits included: {plan.translationLimit}</Box>
+            <Box>
+              Mt Credits included: {(plan.includedMtCredits || 0) / 100}
+            </Box>
             {activePlan.data ? (
               activePlan.data.id === plan.id ? (
                 <>
@@ -139,7 +160,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
                   <Box>
                     Period end:{' '}
                     {new Date(
-                      activePlan.data.currentPeriodEnd * 1000
+                      activePlan.data.currentPeriodEnd
                     ).toLocaleDateString(getCurrentLang())}
                   </Box>
                   <Box>
@@ -187,7 +208,6 @@ export const OrganizationBillingView: FunctionComponent = () => {
             )}
           </Box>
         ))}
-
       <Typography>
         To review your invoices, update your payment method or review your
         billing info, continue to customer portal.

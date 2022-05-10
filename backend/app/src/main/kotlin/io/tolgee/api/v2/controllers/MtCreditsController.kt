@@ -3,8 +3,7 @@ package io.tolgee.api.v2.controllers
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.machineTranslation.CreditBalanceModel
-import io.tolgee.constants.Message
-import io.tolgee.exceptions.NotFoundException
+import io.tolgee.dtos.MtCreditBalanceDto
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.AuthenticationFacade
@@ -35,7 +34,7 @@ class MtCreditsController(
   @GetMapping("/machine-translation-credit-balance")
   @Operation(summary = "Returns machine translation credit balance for current user")
   fun getUserCredits(): CreditBalanceModel {
-    return CreditBalanceModel(mtCreditBucketService.getCreditBalance(authenticationFacade.userAccountEntity))
+    return mtCreditBucketService.getCreditBalance(authenticationFacade.userAccountEntity).model
   }
 
   @GetMapping("/projects/{projectId}/machine-translation-credit-balance")
@@ -43,15 +42,17 @@ class MtCreditsController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
   fun getProjectCredits(@PathVariable projectId: Long): CreditBalanceModel {
-    return CreditBalanceModel(mtCreditBucketService.getCreditBalance(projectHolder.projectEntity))
+    return mtCreditBucketService.getCreditBalance(projectHolder.projectEntity).model
   }
 
   @GetMapping("/organizations/{organizationId}/machine-translation-credit-balance")
   @Operation(summary = "Returns machine translation credit balance for organization")
   fun getOrganizationCredits(@PathVariable organizationId: Long): CreditBalanceModel {
     organizationRoleService.checkUserIsMemberOrOwner(organizationId)
-    organizationService.find(organizationId)?.let { o ->
-      return CreditBalanceModel(mtCreditBucketService.getCreditBalance(o))
-    } ?: throw NotFoundException(Message.ORGANIZATION_NOT_FOUND)
+    val organization = organizationService.get(organizationId)
+    return mtCreditBucketService.getCreditBalance(organization).model
   }
+
+  private val MtCreditBalanceDto.model
+    get() = CreditBalanceModel(this.creditBalance, this.bucketSize)
 }
