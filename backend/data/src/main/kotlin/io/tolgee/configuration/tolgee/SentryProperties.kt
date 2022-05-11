@@ -6,4 +6,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 class SentryProperties {
   var serverDsn: String? = null
   var clientDsn: String? = null
+  var tracesSampleRate: Double? = null
 }
