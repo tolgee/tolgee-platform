@@ -1799,7 +1799,7 @@
     </changeSet>
     <changeSet author="jenik (generated)" id="1652166351731-1">
         <addColumn tableName="mt_credit_bucket">
-            <column name="bucket_size" type="int8">
+            <column name="bucket_size" type="int8" defaultValue="1000000">
                 <constraints nullable="false"/>
             </column>
         </addColumn>

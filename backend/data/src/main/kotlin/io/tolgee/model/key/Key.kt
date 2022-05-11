@@ -12,6 +12,7 @@ import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.translation.Translation
 import org.springframework.beans.factory.ObjectFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.context.ApplicationEventPublisher
 import javax.persistence.Column
@@ -69,6 +70,7 @@ class Key(
   companion object {
     @Configurable
     class KeyListeners {
+      @Autowired
       lateinit var eventPublisherProvider: ObjectFactory<ApplicationEventPublisher>
 
       @PrePersist
