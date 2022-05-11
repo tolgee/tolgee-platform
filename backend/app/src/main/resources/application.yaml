@@ -70,6 +70,7 @@ server:
     include-stacktrace: never
 sentry:
   dsn: ${tolgee.sentry.server-dsn:}
+  traces-sample-rate: ${tolgee.sentry.traces-sample-rate:}
 management:
   health:
     ldap:
