@@ -1,5 +1,6 @@
 package io.tolgee.service.project
 
+import io.tolgee.activity.ActivityHolder
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.ProjectDto
@@ -58,6 +59,7 @@ class ProjectService constructor(
   private val slugGenerator: SlugGenerator,
   private val userAccountService: UserAccountService,
   private val avatarService: AvatarService,
+  private val activityHolder: ActivityHolder,
   @Lazy
   private val projectHolder: ProjectHolder
 ) {
@@ -141,8 +143,7 @@ class ProjectService constructor(
       securityService.grantFullAccessToRepo(project, project.userOwner!!.id)
     }
 
-    entityManager.persist(project)
-    projectHolder.project = ProjectDto.fromEntity(project)
+    save(project)
 
     val createdLanguages = dto.languages!!.map { languageService.createLanguage(it, project) }
     project.baseLanguage = getOrCreateBaseLanguage(dto, createdLanguages)
@@ -317,6 +318,7 @@ class ProjectService constructor(
     projectRepository.save(project)
     if (isCreating) {
       projectHolder.project = ProjectDto.fromEntity(project)
+      activityHolder.activityRevision?.projectId = projectHolder.project.id
     }
     return project
   }

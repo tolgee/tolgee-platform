@@ -31,6 +31,7 @@ import javax.persistence.TemporalType
 @Entity
 @Table(
   indexes = [
+    Index(columnList = "projectId"),
     Index(columnList = "authorId"),
     Index(columnList = "type")
   ]

@@ -98,6 +98,7 @@ class ProjectStatsControllerTest : ProjectAuthControllerTest("/v2/projects/") {
     performProjectAuthGet("stats/daily-activity").andIsOk.andAssertThatJson.isEqualTo(
       """
       {
+        "2022-03-20" : 1,
         "2022-04-01" : 1,
         "2022-04-05" : 5,
         "2022-04-20" : 2

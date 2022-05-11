@@ -1699,4 +1699,9 @@
             <column name="word_count" type="int4"/>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1652252690924-1">
+        <createIndex indexName="IDX4wcn6c3o02pp43ldnu3nggorg" tableName="activity_revision">
+            <column name="project_id"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
