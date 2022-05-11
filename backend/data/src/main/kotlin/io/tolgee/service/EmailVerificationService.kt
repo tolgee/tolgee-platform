@@ -70,6 +70,7 @@ class EmailVerificationService(
     }
   }
 
+  @Transactional
   fun verify(userId: Long, code: String) {
     val user = userAccountService.get(userId).orElseThrow { NotFoundException() }
     val old = UserAccountDto.fromEntity(user)
