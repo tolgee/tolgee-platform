@@ -1,3 +1,10 @@
+# [2.20.0](https://github.com/tolgee/tolgee-platform/compare/v2.19.3...v2.20.0) (2022-05-11)
+
+
+### Features
+
+* Enable sentry performance measuring ([ec3db87](https://github.com/tolgee/tolgee-platform/commit/ec3db876a0c9abc904c977ab02b0d0c983e844ad))
+
 ## [2.19.3](https://github.com/tolgee/tolgee-platform/compare/v2.19.2...v2.19.3) (2022-05-09)
 
 
