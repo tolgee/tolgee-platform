@@ -11,5 +11,5 @@ open class ProjectHolder(
     projectService.get(project.id)
   }
 
-  open lateinit var project: ProjectDto
+  openlateinit var project: ProjectDto
 }

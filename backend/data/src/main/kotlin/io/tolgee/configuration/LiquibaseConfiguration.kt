@@ -15,6 +15,7 @@ class LiquibaseConfiguration {
 
     liquibase.dataSource = dataSource
     liquibase.changeLog = "classpath:db/changelog/schema.xml"
+    liquibase.defaultSchema = "public"
 
     return liquibase
   }
