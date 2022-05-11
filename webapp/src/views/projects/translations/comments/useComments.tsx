@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { container } from 'tsyringe';
 import { useQueryClient } from 'react-query';
 import { T } from '@tolgee/react';
@@ -138,9 +138,6 @@ export const useComments = ({
       messaging.error(<T>global_empty_value</T>);
       return;
     }
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-    });
     addComment
       .mutateAsync(
         {
@@ -242,15 +239,35 @@ export const useComments = ({
       });
   };
 
-  const commentsList = comments.data?.pages
-    ?.flatMap((p) => p._embedded?.translationComments)
-    .filter(Boolean) as TranslationCommentModel[] | undefined;
+  const commentsList: TranslationCommentModel[] = [];
+  comments.data?.pages.forEach((page) =>
+    page._embedded?.translationComments?.forEach((item) =>
+      commentsList.push(item)
+    )
+  );
+  commentsList.reverse();
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+  }, [comments.data?.pages?.[0].page?.totalElements]);
+
+  const fetchMore = () => {
+    const previousHeight = Number(scrollRef.current?.scrollHeight);
+    comments.fetchNextPage().then(() => {
+      const newHeight = Number(scrollRef.current?.scrollHeight);
+      scrollRef.current?.scrollTo({
+        // persist scrolling position
+        top: newHeight - previousHeight,
+      });
+    });
+  };
 
   return {
     inputValue,
     setInputValue,
     scrollRef,
     comments,
+    fetchMore,
     handleKeyDown,
     handleAddComment,
     handleDelete,

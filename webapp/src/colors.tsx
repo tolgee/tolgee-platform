@@ -23,6 +23,12 @@ export type Editor = {
   main: string;
 };
 
+export type Activity = {
+  removed: string;
+  added: string;
+  addedHighlight: string;
+};
+
 export const colors = {
   light: {
     white: '#fff',
@@ -39,6 +45,11 @@ export const colors = {
     cellSelected2: '#ffffff',
     backgroundPaper: '#ffffff',
     emphasis: grey as Emphasis,
+    activity: {
+      removed: '#822B55',
+      added: '#006900',
+      addedHighlight: '#c4f0da',
+    } as Activity,
     editor: {
       function: '#007300',
       other: '#002bff',
@@ -52,7 +63,7 @@ export const colors = {
     default: grey[400],
     navbarBackground: '#182230',
     text: '#dddddd',
-    textSecondary: '#d2d2d2',
+    textSecondary: '#acacac',
     divider1: '#eeeeee14',
     divider2: '#ffffff1e',
     background: '#1f2d40',
@@ -75,6 +86,11 @@ export const colors = {
       A400: '#eeeeee',
       A700: '#f5f5f5',
     } as Emphasis,
+    activity: {
+      removed: '#ff7e7e',
+      added: '#7fe07f',
+      addedHighlight: '#006300',
+    } as Activity,
     editor: {
       function: '#9ac99a',
       other: '#99aaff',

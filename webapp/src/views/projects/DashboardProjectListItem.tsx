@@ -136,7 +136,7 @@ const DashboardProjectListItem = (
       data-cy="dashboard-projects-list-item"
       onClick={() =>
         history.push(
-          LINKS.PROJECT_TRANSLATIONS.build({
+          LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: p.id,
           })
         )
@@ -193,6 +193,7 @@ const DashboardProjectListItem = (
         <Box width="100%" display="flex" justifyContent="flex-end">
           <Tooltip title={t('project_list_translations_button')}>
             <IconButton
+              data-cy="project-list-translations-button"
               onClick={stopBubble()}
               aria-label={t('project_list_translations_button')}
               component={Link}

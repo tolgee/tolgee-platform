@@ -140,6 +140,7 @@ const getTheme = (mode: PaletteMode) => {
         default: c.background,
         paper: c.backgroundPaper,
       },
+      activity: c.activity,
       emphasis: c.emphasis,
       editor: c.editor,
     },

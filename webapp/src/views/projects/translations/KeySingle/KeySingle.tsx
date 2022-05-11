@@ -34,9 +34,10 @@ const StyledLanguagesMenu = styled('div')`
 
 type Props = {
   keyName?: string;
+  keyId?: number;
 };
 
-export const KeySingle: React.FC<Props> = ({ keyName }) => {
+export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
   const queryClient = useQueryClient();
   const project = useProject();
   const t = useTranslate();
@@ -67,7 +68,7 @@ export const KeySingle: React.FC<Props> = ({ keyName }) => {
 
   const { height: bottomPanelHeight } = useBottomPanel();
 
-  const keyExists = translation && keyName;
+  const keyExists = translation && (keyName || keyId);
 
   useGlobalLoading(isFetching);
 
@@ -76,7 +77,7 @@ export const KeySingle: React.FC<Props> = ({ keyName }) => {
       navigation={[
         [
           project.name,
-          LINKS.PROJECT_TRANSLATIONS.build({
+          LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
         ],

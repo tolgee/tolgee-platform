@@ -961,6 +961,9 @@ export interface components {
       reviewedKeyCount: number;
       reviewedWordCount: number;
       reviewedPercentage: number;
+      untranslatedKeyCount: number;
+      untranslatedWordCount: number;
+      untranslatedPercentage: number;
     };
     ProjectStatsModel: {
       projectId: number;
