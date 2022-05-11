@@ -1,3 +1,10 @@
+## [2.20.1](https://github.com/tolgee/tolgee-platform/compare/v2.20.0...v2.20.1) (2022-05-11)
+
+
+### Bug Fixes
+
+* Dark mode - add contrast to emphasis colors ([40abeda](https://github.com/tolgee/tolgee-platform/commit/40abedafe0a73f6ac51ee7a4867186332ce45d4b))
+
 # [2.20.0](https://github.com/tolgee/tolgee-platform/compare/v2.19.3...v2.20.0) (2022-05-11)
 
 
