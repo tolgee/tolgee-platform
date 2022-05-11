@@ -11,10 +11,10 @@ const StyledWrapper = styled('div')`
     position: relative;
     top: -2px;
   }
+`;
 
-  &.removed {
-    text-decoration: line-through;
-  }
+const StyledRemoved = styled(StyledWrapper)`
+  text-decoration: line-through;
 `;
 
 const getContent = (auto: boolean | string) => {
@@ -40,8 +40,6 @@ export const getAutoChange = (input?: DiffValue<boolean | string>) => {
   if (input?.new) {
     return <StyledWrapper>{getContent(input.new)}</StyledWrapper>;
   } else if (input?.old) {
-    return (
-      <StyledWrapper className="removed">{getContent(input.old)}</StyledWrapper>
-    );
+    return <StyledRemoved>{getContent(input.old)}</StyledRemoved>;
   }
 };

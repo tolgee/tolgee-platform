@@ -15,10 +15,10 @@ const StyledTag = styled('span')`
   & + & {
     margin-left: 3px;
   }
+`;
 
-  &.removed {
-    text-decoration: line-through;
-  }
+const StyledTagRemoved = styled(StyledTag)`
+  text-decoration: line-through;
 `;
 
 const StyledAdded = styled('span')`
@@ -48,9 +48,7 @@ export const getKeyTagsChange = (input?: DiffValue<string[]>) => {
   return (
     <>
       {removed.map((tag, i) => (
-        <StyledTag key={i} className="removed">
-          {tag}
-        </StyledTag>
+        <StyledTagRemoved key={i}>{tag}</StyledTagRemoved>
       ))}
       {added.map((tag, i) => (
         <StyledTag key={i}>
