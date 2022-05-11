@@ -1,17 +1,15 @@
 import { styled } from '@mui/material';
-import clsx from 'clsx';
 import { diffWordsWithSpace } from 'diff';
 
 import { DiffValue } from '../types';
 
-const StyledDiff = styled('span')`
-  & .removed {
-    color: ${({ theme }) => theme.palette.activity.removed};
-    text-decoration: line-through;
-  }
-  & .added {
-    background: ${({ theme }) => theme.palette.activity.addedHighlight};
-  }
+const StyledRemoved = styled('span')`
+  color: ${({ theme }) => theme.palette.activity.removed};
+  text-decoration: line-through;
+`;
+
+const StyledAdded = styled('span')`
+  background: ${({ theme }) => theme.palette.activity.addedHighlight};
 `;
 
 export const getTextDiff = (input?: DiffValue) => {
@@ -20,30 +18,29 @@ export const getTextDiff = (input?: DiffValue) => {
   if (oldInput && newInput) {
     const diffed = diffWordsWithSpace(oldInput, newInput);
     return (
-      <StyledDiff>
-        {diffed.map((part, i) => {
-          return (
-            <span
-              key={i}
-              className={clsx({ added: part.added, removed: part.removed })}
-            >
-              {part.value}
-            </span>
-          );
-        })}
-      </StyledDiff>
+      <span>
+        {diffed.map((part, i) =>
+          part.added ? (
+            <StyledAdded key={i}>{part.value}</StyledAdded>
+          ) : part.removed ? (
+            <StyledRemoved key={i}>{part.value}</StyledRemoved>
+          ) : (
+            <span key={i}>{part.value}</span>
+          )
+        )}
+      </span>
     );
   } else if (oldInput) {
     return (
-      <StyledDiff>
-        <span className="removed">{oldInput}</span>
-      </StyledDiff>
+      <span>
+        <StyledRemoved>{oldInput}</StyledRemoved>
+      </span>
     );
   } else if (newInput) {
     return (
-      <StyledDiff>
-        <span className="added">{newInput}</span>
-      </StyledDiff>
+      <span>
+        <StyledAdded>{newInput}</StyledAdded>
+      </span>
     );
   }
 };

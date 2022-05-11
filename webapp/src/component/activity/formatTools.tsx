@@ -9,11 +9,13 @@ import { getLanguageFlagChange } from './types/getLanguageFlagChange';
 import { getProjectLanguageChange } from './types/getProjectLanguageChange';
 import { getNoDiffChange } from './types/getNoDiffChange';
 
-export const formatDiff = (
-  value: DiffValue<any>,
-  options: FieldOptionsObj,
-  diffEnabled: boolean
-) => {
+type Props = {
+  value: DiffValue<any>;
+  options: FieldOptionsObj;
+  diffEnabled: boolean;
+};
+
+export const formatDiff = ({ value, options, diffEnabled }: Props) => {
   switch (options.type) {
     case 'translation_auto':
       return getAutoChange(value);

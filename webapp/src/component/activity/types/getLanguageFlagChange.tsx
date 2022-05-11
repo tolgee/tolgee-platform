@@ -4,10 +4,11 @@ import { DiffValue } from '../types';
 
 const StyledDiff = styled('span')`
   word-break: break-word;
-  & .removed {
-    position: relative;
-  }
-  & .removed::after {
+`;
+
+const StyledRemoved = styled('span')`
+  position: relative;
+  &::after {
     content: '';
     pointer-events: none;
     position: absolute;
@@ -17,11 +18,10 @@ const StyledDiff = styled('span')`
     background: ${({ theme }) => theme.palette.text.primary};
     height: 1px;
   }
-  & .added {
-  }
-  & .arrow {
-    padding: 0px 6px;
-  }
+`;
+
+const StyledArrow = styled('span')`
+  padding: 0px 6px;
 `;
 
 export const getLanguageFlagChange = (input?: DiffValue<string>) => {
@@ -31,22 +31,22 @@ export const getLanguageFlagChange = (input?: DiffValue<string>) => {
     return (
       <StyledDiff>
         <InlineLanguageIcon flag={oldInput} />
-        <span className="arrow">→</span>
+        <StyledArrow>→</StyledArrow>
         <InlineLanguageIcon flag={newInput} />
       </StyledDiff>
     );
   } else if (oldInput) {
     return (
       <StyledDiff>
-        <span className="removed">
+        <StyledRemoved>
           <InlineLanguageIcon flag={oldInput} />
-        </span>
+        </StyledRemoved>
       </StyledDiff>
     );
   } else if (newInput) {
     return (
       <StyledDiff>
-        <span className="added">
+        <span>
           <InlineLanguageIcon flag={newInput} />
         </span>
       </StyledDiff>

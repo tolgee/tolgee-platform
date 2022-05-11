@@ -25,7 +25,11 @@ export const ActivityFields: React.FC<Props> = ({ fields, diffEnabled }) => {
       {fields.map((field, i) => {
         return (
           <StyledField key={i}>
-            {formatDiff(field.value, field.options, diffEnabled)}
+            {formatDiff({
+              value: field.value,
+              options: field.options,
+              diffEnabled,
+            })}
           </StyledField>
         );
       })}
