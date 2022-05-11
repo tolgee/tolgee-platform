@@ -9,14 +9,14 @@ const StyledCircledLanguageIcon = styled(CircledLanguageIcon)`
 
 const StyledDiff = styled('span')`
   word-break: break-word;
-  & .removed {
-    text-decoration: line-through;
-  }
-  & .added {
-  }
-  & .arrow {
-    padding: 0px 6px;
-  }
+`;
+
+const StyledRemoved = styled('span')`
+  text-decoration: line-through;
+`;
+
+const StyledArrow = styled('span')`
+  padding: 0px 6px;
 `;
 
 type Language = {
@@ -42,21 +42,21 @@ export const getProjectLanguageChange = (
   if (oldInput && newInput) {
     return (
       <StyledDiff>
-        <span className="removed">{formatLanguage(oldInput.data)}</span>
-        <span className="arrow">→</span>
-        <span className="added">{formatLanguage(newInput.data)}</span>
+        <StyledRemoved>{formatLanguage(oldInput.data)}</StyledRemoved>
+        <StyledArrow>→</StyledArrow>
+        <span>{formatLanguage(newInput.data)}</span>
       </StyledDiff>
     );
   } else if (oldInput) {
     return (
       <StyledDiff>
-        <span className="removed">{formatLanguage(oldInput.data)}</span>
+        <StyledRemoved>{formatLanguage(oldInput.data)}</StyledRemoved>
       </StyledDiff>
     );
   } else if (newInput) {
     return (
       <StyledDiff>
-        <span className="added">{formatLanguage(newInput.data)}</span>
+        <span>{formatLanguage(newInput.data)}</span>
       </StyledDiff>
     );
   }
