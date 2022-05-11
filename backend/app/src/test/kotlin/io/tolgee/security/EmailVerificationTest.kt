@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
 import javax.mail.internet.MimeMessage
 
-open class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
+class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
 
   override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
 

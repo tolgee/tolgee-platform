@@ -5,6 +5,7 @@ import com.sun.istack.NotNull
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import io.tolgee.constants.Message
 import io.tolgee.development.DbPopulatorReal
 import io.tolgee.dtos.request.auth.ResetPassword
 import io.tolgee.dtos.request.auth.ResetPasswordRequest
@@ -12,7 +13,6 @@ import io.tolgee.dtos.request.auth.SignUpDto
 import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
-import io.tolgee.model.Invitation
 import io.tolgee.model.UserAccount
 import io.tolgee.security.JwtTokenProviderImpl
 import io.tolgee.security.payload.ApiResponse
@@ -20,7 +20,7 @@ import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.payload.LoginRequest
 import io.tolgee.security.third_party.GithubOAuthDelegate
 import io.tolgee.service.EmailVerificationService
-import io.tolgee.service.InvitationService
+import io.tolgee.service.SignUpService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.security.ReCaptchaValidationService
 import org.apache.commons.lang3.RandomStringUtils
@@ -56,18 +56,17 @@ class PublicController(
   private val properties: TolgeeProperties,
   private val userAccountService: UserAccountService,
   private val mailSender: JavaMailSender,
-  private val invitationService: InvitationService,
   private val emailVerificationService: EmailVerificationService,
   private val dbPopulatorReal: DbPopulatorReal,
   private val reCaptchaValidationService: ReCaptchaValidationService,
-  private val tolgeeProperties: TolgeeProperties
+  private val signUpService: SignUpService
 ) {
   @Operation(summary = "Generates JWT token")
   @PostMapping("/generatetoken")
   fun authenticateUser(@RequestBody loginRequest: LoginRequest): ResponseEntity<*> {
     if (loginRequest.username.isEmpty() || loginRequest.password.isEmpty()) {
       return ResponseEntity(
-        ApiResponse(false, io.tolgee.constants.Message.USERNAME_OR_PASSWORD_INVALID.code),
+        ApiResponse(false, Message.USERNAME_OR_PASSWORD_INVALID.code),
         HttpStatus.BAD_REQUEST
       )
     }
@@ -136,32 +135,10 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
     """
   )
   fun signUp(@RequestBody @Valid dto: SignUpDto): JwtAuthenticationResponse? {
-    var invitation: Invitation? = null
-    if (dto.invitationCode == null) {
-      properties.authentication.checkAllowedRegistrations()
-    } else {
-      invitation = invitationService.getInvitation(dto.invitationCode) // it throws an exception
-    }
-
-    userAccountService.findOptional(dto.email).ifPresent {
-      throw BadRequestException(io.tolgee.constants.Message.USERNAME_ALREADY_EXISTS)
-    }
-
     if (!reCaptchaValidationService.validate(dto.recaptchaToken, "")) {
-      throw BadRequestException(io.tolgee.constants.Message.INVALID_RECAPTCHA_TOKEN)
+      throw BadRequestException(Message.INVALID_RECAPTCHA_TOKEN)
     }
-
-    val user = userAccountService.createUser(dto)
-    if (invitation != null) {
-      invitationService.accept(invitation.code, user)
-    }
-
-    if (!tolgeeProperties.authentication.needsEmailVerification) {
-      return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
-    }
-
-    emailVerificationService.createForUser(user, dto.callbackUrl)
-    return null
+    return signUpService.signUp(dto)
   }
 
   @GetMapping("/verify_email/{userId}/{code}")
@@ -182,6 +159,7 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
 
   @GetMapping("/authorize_oauth/{serviceType}/{code}")
   @Operation(summary = "Authenticates user using third party oAuth service")
+  @Transactional
   fun authenticateUser(
     @PathVariable("serviceType") serviceType: String?,
     @PathVariable("code") code: String?,
@@ -196,12 +174,12 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
 
   private fun doNativeAuth(loginRequest: LoginRequest): String {
     val userAccount = userAccountService.findOptional(loginRequest.username).orElseThrow {
-      AuthenticationException(io.tolgee.constants.Message.BAD_CREDENTIALS)
+      AuthenticationException(Message.BAD_CREDENTIALS)
     }
     val bCryptPasswordEncoder = BCryptPasswordEncoder()
     val matches = bCryptPasswordEncoder.matches(loginRequest.password, userAccount.password)
     if (!matches) {
-      throw AuthenticationException(io.tolgee.constants.Message.BAD_CREDENTIALS)
+      throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
     emailVerificationService.check(userAccount)
     return tokenProvider.generateToken(userAccount.id).toString()
@@ -224,16 +202,16 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
       }
       tokenProvider.generateToken(userAccountEntity.id).toString()
     } catch (e: BadCredentialsException) {
-      throw AuthenticationException(io.tolgee.constants.Message.BAD_CREDENTIALS)
+      throw AuthenticationException(Message.BAD_CREDENTIALS)
     }
   }
 
   private fun validateEmailCode(code: String, email: String): UserAccount {
     val userAccount = userAccountService.findOptional(email).orElseThrow { NotFoundException() }
-      ?: throw BadRequestException(io.tolgee.constants.Message.BAD_CREDENTIALS)
+      ?: throw BadRequestException(Message.BAD_CREDENTIALS)
     val resetCodeValid = userAccountService.isResetCodeValid(userAccount, code)
     if (!resetCodeValid) {
-      throw BadRequestException(io.tolgee.constants.Message.BAD_CREDENTIALS)
+      throw BadRequestException(Message.BAD_CREDENTIALS)
     }
     return userAccount
   }

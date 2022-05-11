@@ -8,6 +8,7 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.model.UserAccount
 import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
+import io.tolgee.util.GitHubAuthUtil
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -24,8 +25,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.web.client.RestTemplate
 import sibApi.ContactsApi
 import sibModel.CreateContact
 import sibModel.UpdateContact
@@ -50,6 +53,15 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
 
   lateinit var createContactArgumentCaptor: ArgumentCaptor<CreateContact>
   lateinit var updateContactArgumentCaptor: ArgumentCaptor<UpdateContact>
+
+  @MockBean
+  @Autowired
+  private val restTemplate: RestTemplate? = null
+
+  @Autowired
+  private var authMvc: MockMvc? = null
+
+  private val gitHubAuthUtil: GitHubAuthUtil by lazy { GitHubAuthUtil(tolgeeProperties, authMvc, restTemplate) }
 
   val updateRequestDto = UserUpdateRequestDto(
     name = "New Name",
@@ -121,6 +133,12 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
     verifyEmailSentOnUpdate()
   }
 
+  @Test
+  fun `adds contact when registered via github`() {
+    gitHubAuthUtil.authorizeGithubUser()
+    verifyCreateContactCalled("fake_email@email.com", "fakeName")
+  }
+
   private fun acceptEmailVerification(user: UserAccount) {
     val emailVerificationCode = user.emailVerification!!.code
     mvc.perform(MockMvcRequestBuilders.get("/api/public/verify_email/${user.id}/$emailVerificationCode"))
@@ -136,11 +154,11 @@ class MarketingEmailingTest : AuthorizedControllerTest() {
     Mockito.clearInvocations(contactsApi)
   }
 
-  private fun verifyCreateContactCalled() {
+  private fun verifyCreateContactCalled(email: String = testMail, name: String = testName) {
     Thread.sleep(100)
     verify(contactsApi).createContact(createContactArgumentCaptor.capture())
-    assertThat(createContactArgumentCaptor.value.email).isEqualTo(testMail)
+    assertThat(createContactArgumentCaptor.value.email).isEqualTo(email)
     val attributes = createContactArgumentCaptor.value.attributes as Map<String, String>
-    assertThat(attributes["NAME"] as String).isEqualTo(testName)
+    assertThat(attributes["NAME"] as String).isEqualTo(name)
   }
 }

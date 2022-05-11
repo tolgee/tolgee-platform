@@ -5,8 +5,8 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.events.user.OnUserCreated
 import io.tolgee.events.user.OnUserEmailVerifiedFirst
 import io.tolgee.events.user.OnUserUpdated
-import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import org.springframework.transaction.event.TransactionalEventListener
 
 @Component
 class MailServiceUserListener(
@@ -14,9 +14,9 @@ class MailServiceUserListener(
   private val marketingEmailServiceManager: MarketingEmailServiceManager
 ) {
 
-  @EventListener(OnUserCreated::class)
+  @TransactionalEventListener(OnUserCreated::class)
   fun onUserCreated(event: OnUserCreated) {
-    if (!tolgeeProperties.authentication.needsEmailVerification) {
+    if (!tolgeeProperties.authentication.needsEmailVerification || event.userAccount.emailVerification == null) {
       marketingEmailServiceManager.submitNewContact(
         name = event.userAccount.name,
         email = event.userAccount.username
@@ -24,7 +24,7 @@ class MailServiceUserListener(
     }
   }
 
-  @EventListener(OnUserEmailVerifiedFirst::class)
+  @TransactionalEventListener(OnUserEmailVerifiedFirst::class)
   fun onUserEmailVerifiedFirst(event: OnUserEmailVerifiedFirst) {
     marketingEmailServiceManager.submitNewContact(
       name = event.userAccount.name,
@@ -32,7 +32,7 @@ class MailServiceUserListener(
     )
   }
 
-  @EventListener(OnUserUpdated::class)
+  @TransactionalEventListener(OnUserUpdated::class)
   fun onUserUpdated(event: OnUserUpdated) {
     if (
       event.oldUserAccount.username != event.newUserAccount.username ||
