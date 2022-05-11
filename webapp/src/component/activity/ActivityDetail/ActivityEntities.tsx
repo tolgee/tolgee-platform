@@ -58,7 +58,11 @@ export const ActivityEntities: React.FC<Props> = ({
             </StyledEntityTitle>
             {entity.fields.map((field, i) => {
               const label = field.options.label;
-              const value = formatDiff(field.value, field.options, diffEnabled);
+              const value = formatDiff({
+                value: field.value,
+                options: field.options,
+                diffEnabled,
+              });
               return value ? (
                 <React.Fragment key={i}>
                   {field.options.label && (
@@ -69,7 +73,7 @@ export const ActivityEntities: React.FC<Props> = ({
                   <StyledFieldContent
                     gridColumn={!label ? '1 / span 2' : undefined}
                   >
-                    {formatDiff(field.value, field.options, diffEnabled)}
+                    {value}
                   </StyledFieldContent>
                 </React.Fragment>
               ) : null;

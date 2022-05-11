@@ -3,11 +3,10 @@ import { DiffValue } from '../types';
 
 const StyledDiff = styled('span')`
   word-break: break-word;
-  & .removed {
-    text-decoration: line-through;
-  }
-  & .added {
-  }
+`;
+
+const StyledRemoved = styled('span')`
+  text-decoration: line-through;
 `;
 
 export const getNoDiffChange = (input?: DiffValue) => {
@@ -22,7 +21,7 @@ export const getNoDiffChange = (input?: DiffValue) => {
   } else if (oldInput) {
     return (
       <StyledDiff>
-        <span className="removed">{oldInput}</span>
+        <StyledRemoved>{oldInput}</StyledRemoved>
       </StyledDiff>
     );
   }

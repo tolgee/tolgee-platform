@@ -19,36 +19,34 @@ const StyledDiff = styled('span')`
     background: ${({ theme }) => theme.palette.text.primary};
     height: 1px;
   }
-  &.added {
-  }
 `;
 
-const StyledSuccess = styled(StyledDiff)`
+const StyledResolved = styled(StyledDiff)`
   color: ${({ theme }) => theme.palette.activity.added};
 `;
 
-const StyledProblem = styled(StyledDiff)`
+const StyledNeedsResolution = styled(StyledDiff)`
   color: ${({ theme }) => theme.palette.activity.removed};
 `;
 
 export const getValue = (value: string, type: 'removed' | 'added') => {
   if (value === 'RESOLVED') {
     return (
-      <StyledSuccess className={type}>
+      <StyledResolved className={type}>
         <Check fontSize="small" />
         <div>
           <T keyName="translations_comments_resolved" />
         </div>
-      </StyledSuccess>
+      </StyledResolved>
     );
   } else {
     return (
-      <StyledProblem className={type}>
+      <StyledNeedsResolution className={type}>
         <Clear fontSize="small" />
         <div>
           <T keyName="translations_comments_needs_resolution" />
         </div>
-      </StyledProblem>
+      </StyledNeedsResolution>
     );
   }
 };
