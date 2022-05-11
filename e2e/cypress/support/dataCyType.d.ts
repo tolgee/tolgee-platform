@@ -1,5 +1,7 @@
 declare namespace DataCy {
     export type Value = 
+        "activity-compact" |
+        "activity-detail" |
         "add-box" |
         "api-keys-create-edit-dialog" |
         "api-keys-edit-button" |
@@ -140,11 +142,28 @@ declare namespace DataCy {
         "permissions-languages-menu" |
         "permissions-menu" |
         "permissions-menu-button" |
+        "project-dashboard-base-word-count" |
+        "project-dashboard-key-count" |
+        "project-dashboard-language-bar" |
+        "project-dashboard-language-count" |
+        "project-dashboard-language-label-keys" |
+        "project-dashboard-language-label-percentage" |
+        "project-dashboard-language-label-state" |
+        "project-dashboard-language-label-words" |
+        "project-dashboard-language-menu" |
+        "project-dashboard-language-menu-export" |
+        "project-dashboard-language-menu-settings" |
+        "project-dashboard-members" |
+        "project-dashboard-members-count" |
+        "project-dashboard-reviewed-percentage" |
+        "project-dashboard-tags" |
+        "project-dashboard-translated-percentage" |
         "project-leave-button" |
         "project-list-languages" |
         "project-list-languages-item" |
         "project-list-more-button" |
         "project-list-owner" |
+        "project-list-translations-button" |
         "project-member-item" |
         "project-member-revoke-button" |
         "project-menu-items" |
@@ -177,6 +196,7 @@ declare namespace DataCy {
         "translation-edit-key-field" |
         "translation-edit-translation-field" |
         "translation-field-label" |
+        "translation-history-item" |
         "translation-state-button" |
         "translation-tools-machine-translation-item" |
         "translation-tools-translation-memory-item" |
@@ -191,6 +211,7 @@ declare namespace DataCy {
         "translations-cell-screenshots-button" |
         "translations-cell-tab-comments" |
         "translations-cell-tab-edit" |
+        "translations-cell-tab-history" |
         "translations-comments-input" |
         "translations-comments-load-more-button" |
         "translations-delete-button" |
@@ -198,6 +219,7 @@ declare namespace DataCy {
         "translations-filter-option" |
         "translations-filter-select" |
         "translations-filters-subheader" |
+        "translations-history-load-more-button" |
         "translations-key-count" |
         "translations-language-select-form-control" |
         "translations-language-select-item" |

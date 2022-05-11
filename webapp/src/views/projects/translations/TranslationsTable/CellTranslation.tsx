@@ -34,6 +34,7 @@ const StyledTranslationOpened = styled(TranslationOpened)`
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  padding-left: 4px;
 `;
 
 const StyledAutoIndicator = styled(AutoTranslationIndicator)`

@@ -16,8 +16,7 @@ import { ProjectLanguagesView } from 'tg.views/projects/languages/ProjectLanguag
 import { SingleKeyView } from './translations/SingleKeyView';
 import React from 'react';
 import { FullPageLoading } from 'tg.component/common/FullPageLoading';
-import { ActivityPreview } from './activity/ActivityPreview';
-import { DashboardPreview } from './dashboard/DashboardPreview';
+import { DashboardView } from './dashboard/DashboardView';
 
 const IntegrateView = React.lazy(() =>
   import('tg.views/projects/integrate/IntegrateView').then((r) => ({
@@ -75,20 +74,16 @@ export const ProjectRouter = () => {
               <IntegrateView />
             </Route>
 
+            <Route exact path={LINKS.PROJECT_DASHBOARD.template}>
+              <DashboardView />
+            </Route>
+
             {/*
               Preview section...
             */}
 
             <Route exact path={LINKS.PROJECT_SOCKET_IO_PREVIEW.template}>
               <SocketIoPreview />
-            </Route>
-
-            <Route exact path={LINKS.ACTIVITY_PREVIEW.template}>
-              <ActivityPreview />
-            </Route>
-
-            <Route exact path={LINKS.PROJECT_DASHBOARD.template}>
-              <DashboardPreview />
             </Route>
           </React.Suspense>
         </ProjectPage>

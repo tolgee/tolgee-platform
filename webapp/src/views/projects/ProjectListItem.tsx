@@ -13,7 +13,7 @@ const ProjectListItem = (r: components['schemas']['ProjectModel']) => {
   return (
     <ListItemLink
       key={r.id}
-      to={LINKS.PROJECT_TRANSLATIONS.build({ [PARAMS.PROJECT_ID]: r.id })}
+      to={LINKS.PROJECT_DASHBOARD.build({ [PARAMS.PROJECT_ID]: r.id })}
     >
       <ListItemText>
         {r.name}{' '}

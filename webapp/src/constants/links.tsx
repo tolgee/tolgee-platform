@@ -172,7 +172,7 @@ export class LINKS {
 
   static ACTIVITY_PREVIEW = Link.ofParent(LINKS.PROJECT, 'activity');
 
-  static PROJECT_DASHBOARD = Link.ofParent(LINKS.PROJECT, 'dashboard');
+  static PROJECT_DASHBOARD = LINKS.PROJECT;
 
   static PROJECT_INTEGRATE = Link.ofParent(LINKS.PROJECT, 'integrate');
 

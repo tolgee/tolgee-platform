@@ -11,6 +11,8 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { Comment } from './Comment';
 import { useComments } from './useComments';
+import { useDateCounter } from 'tg.hooks/useDateCounter';
+import { StickyDateSeparator } from 'tg.component/common/StickyDateSeparator';
 
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type LanguageModel = components['schemas']['LanguageModel'];
@@ -32,8 +34,9 @@ const StyledScrollerWrapper = styled('div')`
 `;
 
 const StyledReverseScroller = styled('div')`
+  margin-top: -1px;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
@@ -96,6 +99,7 @@ export const Comments: React.FC<Props> = ({
 }) => {
   const permissions = useProjectPermissions();
   const user = useUser();
+  const counter = useDateCounter();
 
   const {
     commentsList,
@@ -109,6 +113,7 @@ export const Comments: React.FC<Props> = ({
     isAddingComment,
     inputValue,
     setInputValue,
+    fetchMore,
   } = useComments({
     keyId,
     language,
@@ -120,27 +125,10 @@ export const Comments: React.FC<Props> = ({
     <StyledContainer>
       <StyledScrollerWrapper>
         <StyledReverseScroller ref={scrollRef}>
-          {commentsList?.map((comment) => {
-            const canDelete =
-              user?.id === comment.author.id ||
-              permissions.satisfiesPermission(ProjectPermissionType.MANAGE);
-            const canChangeState =
-              user?.id === comment.author.id ||
-              permissions.satisfiesPermission(ProjectPermissionType.TRANSLATE);
-            return (
-              <Comment
-                key={comment.id}
-                data={comment}
-                onDelete={canDelete ? handleDelete : undefined}
-                onChangeState={canChangeState ? changeState : undefined}
-              />
-            );
-          })}
-
           {comments.hasNextPage && (
             <StyledLoadMore>
               <LoadingButton
-                onClick={() => comments.fetchNextPage()}
+                onClick={fetchMore}
                 loading={comments.isFetchingNextPage}
                 data-cy="translations-comments-load-more-button"
               >
@@ -148,6 +136,26 @@ export const Comments: React.FC<Props> = ({
               </LoadingButton>
             </StyledLoadMore>
           )}
+
+          {commentsList?.map((comment) => {
+            const canDelete =
+              user?.id === comment.author.id ||
+              permissions.satisfiesPermission(ProjectPermissionType.MANAGE);
+            const canChangeState =
+              user?.id === comment.author.id ||
+              permissions.satisfiesPermission(ProjectPermissionType.TRANSLATE);
+            const date = new Date(comment.createdAt);
+            return (
+              <React.Fragment key={comment.id}>
+                {counter.isNewDate(date) && <StickyDateSeparator date={date} />}
+                <Comment
+                  data={comment}
+                  onDelete={canDelete ? handleDelete : undefined}
+                  onChangeState={canChangeState ? changeState : undefined}
+                />
+              </React.Fragment>
+            );
+          })}
         </StyledReverseScroller>
       </StyledScrollerWrapper>
 
