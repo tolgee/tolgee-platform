@@ -42,6 +42,8 @@ export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
         return t('project_languages_primary_none', 'None');
       case 'GOOGLE':
         return 'Google';
+      case 'DEEPL':
+        return 'DeepL';
       default:
         return provider;
     }
