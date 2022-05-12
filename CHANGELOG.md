@@ -1,3 +1,10 @@
+## [2.20.2](https://github.com/tolgee/tolgee-platform/compare/v2.20.1...v2.20.2) (2022-05-11)
+
+
+### Bug Fixes
+
+* E-mail is not provided to SendInBlue on GitHub signUp ([169faaf](https://github.com/tolgee/tolgee-platform/commit/169faaff27d62f96ca8d6cddb7d0784c1c8fd6c7))
+
 ## [2.20.1](https://github.com/tolgee/tolgee-platform/compare/v2.20.0...v2.20.1) (2022-05-11)
 
 
