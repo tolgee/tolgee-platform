@@ -13,7 +13,8 @@ class SuggestResultModel(
     example = """
     {
       "GOOGLE": "This was translated by Google",
-      "AWS": "This was translated by AWS"
+      "AWS": "This was translated by AWS",
+      "DEEPL": "This was translated by DeepL"
     }
   """
   )

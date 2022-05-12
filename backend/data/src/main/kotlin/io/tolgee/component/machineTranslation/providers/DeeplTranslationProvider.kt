@@ -1,0 +1,109 @@
+package io.tolgee.component.machineTranslation.providers
+
+import com.fasterxml.jackson.annotation.JsonProperty
+import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
+import org.springframework.beans.factory.config.ConfigurableBeanFactory
+import org.springframework.context.annotation.Scope
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.stereotype.Component
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
+import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.postForEntity
+
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
+class DeeplTranslationProvider(
+    private val deeplMachineTranslationProperties: DeeplMachineTranslationProperties,
+    private val restTemplate: RestTemplate,
+) : AbstractMtValueProvider() {
+
+    override val isEnabled: Boolean
+        get() = !deeplMachineTranslationProperties.authKey.isNullOrEmpty()
+
+    override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+
+        val requestBody: MultiValueMap<String, String> = LinkedMultiValueMap()
+        // Mandatory parameters
+        requestBody.add("auth_key", deeplMachineTranslationProperties.authKey)
+        requestBody.add("text", text)
+        requestBody.add("source_lang", sourceTag.uppercase())
+        requestBody.add("target_lang", targetTag.uppercase())
+        // Optional parameters
+        requestBody.add("formality", deeplMachineTranslationProperties.formality)
+
+        val response = restTemplate.postForEntity<DeeplResponse>(
+            apiEndpointFromKey(),
+            requestBody
+        )
+
+        return response.body?.translations?.first()?.text
+            ?: throw RuntimeException(response.toString())
+    }
+
+    /**
+     * Free API keys are identified by the ':fx' suffix, they also require a different endpoint.
+     */
+    private fun apiEndpointFromKey(): String {
+        if (deeplMachineTranslationProperties.authKey!!.endsWith(":fx")) {
+            return "https://api-free.deepl.com/v2/translate"
+        }
+        return "https://api.deepl.com/v2/translate"
+    }
+
+    /**
+     * Data structure for mapping the DeepL JSON response objects.
+     */
+    companion object {
+        class DeeplResponse {
+            @JsonProperty("translations")
+            var translations: List<DeeplTranslation>? = null
+        }
+
+        class DeeplTranslation {
+            @JsonProperty("detected_source_language")
+            var detectedSourceLanguage: String? = null
+
+            @JsonProperty("text")
+            var text: String? = null
+        }
+    }
+
+    override fun calculateProviderPrice(text: String): Int {
+        return text.length * 100
+    }
+
+    override val supportedLanguages = arrayOf(
+        "bg",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "en",
+        "en-gb",
+        "en-us",
+        "es",
+        "et",
+        "fi",
+        "fr",
+        "hu",
+        "it",
+        "ja",
+        "lt",
+        "lv",
+        "nl",
+        "pl",
+        "pt",
+        "pt-pt",
+        "pt-br",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "zh"
+    )
+}

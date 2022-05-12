@@ -9,6 +9,8 @@ export const useProviderImg = () => {
         return '/images/providers/google-translate.svg';
       case 'AWS':
         return `/images/providers/aws-logo-${palette.mode}.svg`;
+      case 'DEEPL':
+        return `/images/providers/deepl-logo.svg`;
       default:
         return null;
     }
