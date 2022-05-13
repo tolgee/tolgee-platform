@@ -13,6 +13,7 @@ import { ActivityDetailDialog } from 'tg.component/activity/ActivityDetail/Activ
 import { mapHistoryToActivity } from './mapHistoryToActivity';
 import { SmallActionButton } from '../cell/SmallActionButton';
 import { LimitedHeightText } from '../LimitedHeightText';
+import { getNoDiffChange } from 'tg.component/activity/types/getNoDiffChange';
 
 type TranslationHistoryModel = components['schemas']['TranslationHistoryModel'];
 
@@ -85,9 +86,10 @@ const StyledSmallActionButton = styled(SmallActionButton)`
 
 type Props = {
   entry: TranslationHistoryModel;
+  showDifferences: boolean;
 };
 
-export const HistoryItem: React.FC<Props> = ({ entry }) => {
+export const HistoryItem: React.FC<Props> = ({ entry, showDifferences }) => {
   const lang = useCurrentLanguage();
   const [detailOpen, setDetailOpen] = useState(false);
 
@@ -98,7 +100,11 @@ export const HistoryItem: React.FC<Props> = ({ entry }) => {
   const mtChanges = entry.modifications?.['mtProvider'] as DiffInput;
   const autoChanges = entry.modifications?.['auto'] as DiffInput<boolean>;
 
-  const textDiff = useMemo(() => getTextDiff(textChanges), [textChanges]);
+  const textDiff = useMemo(
+    () =>
+      showDifferences ? getTextDiff(textChanges) : getNoDiffChange(textChanges),
+    [textChanges, showDifferences]
+  );
   const stateDiff = useMemo(() => getStateChange(stateChanges), [stateChanges]);
   const mtProviderDiff = getAutoChange(mtChanges || autoChanges);
 
@@ -150,7 +156,7 @@ export const HistoryItem: React.FC<Props> = ({ entry }) => {
           maxWidth="lg"
           open={detailOpen}
           onClose={() => setDetailOpen(false)}
-          initialDiffEnabled={true}
+          initialDiffEnabled={showDifferences}
           data={mapHistoryToActivity(entry)}
         />
       )}

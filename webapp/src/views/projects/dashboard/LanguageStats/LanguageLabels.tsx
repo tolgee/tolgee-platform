@@ -4,6 +4,7 @@ import { Box, styled } from '@mui/material';
 
 import { StateType, translationStates } from 'tg.constants/translationStates';
 import { components } from 'tg.service/apiSchema.generated';
+import { PercentFormat } from '../PercentFormat';
 
 const DOT_SIZE = 8;
 
@@ -32,19 +33,6 @@ type StatItem = {
   percent: number;
   keyCount: number;
   wordCount: number | null;
-};
-
-const formatPercentage = (num: number) => {
-  if (Math.round(num) < 1 && num !== 0) {
-    return <T keyName="project_dashboard_translations_less_then_1_percent" />;
-  } else {
-    return (
-      <T
-        keyName="project_dashboard_percent_count"
-        parameters={{ percentage: num / 100 }}
-      />
-    );
-  }
 };
 
 const statsIntoArray = (data: LanguageStatsModel) => {
@@ -94,7 +82,7 @@ export const LanguageLabels: React.FC<Props> = ({ data }) => {
                 <T keyName={translationStates[item.status].translationKey} />
               </Box>
               <Box ml={2} data-cy="project-dashboard-language-label-percentage">
-                {formatPercentage(item.percent)}
+                <PercentFormat number={item.percent} />
               </Box>
               <Box ml={2} data-cy="project-dashboard-language-label-keys">
                 <T
