@@ -1,8 +1,8 @@
-import { GoToDocsButton } from '../component/GoToDocsButton';
+import {GoToDocsButton} from '../component/GoToDocsButton';
 
 <GoToDocsButton
   href="https://tolgee.io/docs/web/get_started/hello_world"
-  style={{ float: 'right' }}
+  style={{float: 'right'}}
 />
 
 To read more about how to use Tolgee on Web without any modern JS framework,
@@ -21,7 +21,8 @@ You need `core` library to translate your texts and `ui` library to translate te
 
 ```javascript
 // index.js
-const tg = new window['@tolgee/core'].Tolgee({
+const { Tolgee, IcuFormatter } = window["@tolgee/core"]
+const tg = Tolgee.use(IcuFormatter).init({
   apiUrl: '{{{apiUrl}}}',
 
   // ############################################################
@@ -59,8 +60,8 @@ tg.run().then(() => {
 or
 
 ```javascript
-pg.onLangChange.subscribe(() => {
-  pg.translate('tolgee_example_title', undefined, true).then((t) => {
+tg.onLangChange.subscribe(() => {
+  tg.translate('tolgee_example_title', undefined, true).then((t) => {
     document.title = t; //change the document title when language changes!
   });
 });
