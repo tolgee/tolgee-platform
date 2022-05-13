@@ -27,6 +27,7 @@ import { useRefsService } from './services/useRefsService';
 import { useTagsService } from './services/useTagsService';
 import { useSelectionService } from './services/useSelectionService';
 import { useStateService } from './services/useStateService';
+import { useUrlSearchArray } from 'tg.hooks/useUrlSearch';
 
 type ActionType =
   | { type: 'SET_SEARCH'; payload: string }
@@ -62,7 +63,6 @@ type Props = {
   baseLang: string | undefined;
   keyId?: number;
   keyName?: string;
-  languages?: string[];
   updateLocalStorageLanguages?: boolean;
   pageSize?: number;
 };
@@ -77,6 +77,12 @@ export const [
     null
   );
 
+  const urlLanguages = useUrlSearchArray().languages;
+
+  const requiredLanguages = urlLanguages?.length
+    ? urlLanguages
+    : projectPreferences.getForProject(props.projectId);
+
   const languages = useApiQuery({
     url: '/v2/projects/{projectId}/languages',
     method: 'get',
@@ -84,8 +90,6 @@ export const [
     query: { size: 1000, sort: ['tag'] },
     options: {
       onSuccess(data) {
-        const requiredLanguages =
-          props.languages || projectPreferences.getForProject(props.projectId);
         const languages = requiredLanguages?.filter((l) =>
           data._embedded?.languages?.find((lang) => lang.tag === l)
         );

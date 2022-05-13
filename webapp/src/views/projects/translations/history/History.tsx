@@ -1,16 +1,15 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { T } from '@tolgee/react';
-import { styled } from '@mui/material';
+import { styled, Switch, FormControlLabel } from '@mui/material';
 
 import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { SmoothProgress } from 'tg.component/SmoothProgress';
 import { useProject } from 'tg.hooks/useProject';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
-import { HistoryItem } from './HistoryItem';
+import { StickyDateSeparator } from 'tg.component/common/StickyDateSeparator';
 import { useDateCounter } from 'tg.hooks/useDateCounter';
-import { StickyDateSeparator } from '../../../../component/common/StickyDateSeparator';
-import { useEffect } from 'react';
+import { HistoryItem } from './HistoryItem';
 
 type TranslationViewModel = components['schemas']['TranslationViewModel'];
 type TranslationHistoryModel = components['schemas']['TranslationHistoryModel'];
@@ -24,6 +23,18 @@ const StyledContainer = styled('div')`
   position: relative;
   contain: size;
   overflow: hidden;
+`;
+
+const StyledDifferenceToggle = styled(FormControlLabel)`
+  position: absolute;
+  right: 24px;
+  top: 2px;
+  z-index: 2;
+  display: flex;
+  align-items: start;
+  & > span {
+    font-size: 14px;
+  }
 `;
 
 const StyledScroller = styled('div')`
@@ -119,8 +130,22 @@ export const History: React.FC<Props> = ({ translation }) => {
     scrollerRef.current?.scrollTo({ top: scrollerRef.current.scrollHeight });
   }, [history.data?.pages?.[0].page?.totalElements]);
 
+  const [showdifferences, setShowDifferences] = useState(true);
+  const toggleDifferences = () => setShowDifferences((val) => !val);
+
   return (
     <StyledContainer>
+      <StyledDifferenceToggle
+        label={<T keyName="translations-history-differences-toggle" />}
+        labelPlacement="start"
+        control={
+          <Switch
+            size="small"
+            checked={showdifferences}
+            onChange={toggleDifferences}
+          />
+        }
+      />
       <StyledScroller ref={scrollerRef}>
         {history.hasNextPage && (
           <StyledLoadMore>
@@ -138,7 +163,11 @@ export const History: React.FC<Props> = ({ translation }) => {
           return (
             <React.Fragment key={entry.timestamp}>
               {counter.isNewDate(date) && <StickyDateSeparator date={date} />}
-              <HistoryItem key={entry.timestamp} entry={entry} />
+              <HistoryItem
+                key={entry.timestamp}
+                entry={entry}
+                showDifferences={showdifferences}
+              />
             </React.Fragment>
           );
         })}
