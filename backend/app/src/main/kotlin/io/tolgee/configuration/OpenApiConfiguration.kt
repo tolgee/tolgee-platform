@@ -94,7 +94,7 @@ class OpenApiConfiguration {
   @Bean
   fun billingOpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
-      paths = arrayOf("/v2/billing/**"),
+      paths = arrayOf("/v2/organizations/*/billing/**", "/v2/billing/**"),
       name = "V2 Billing"
     )
   }

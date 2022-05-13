@@ -4,37 +4,34 @@
  */
 
 export interface paths {
-  "/v2/billing/refresh-subscription/{organizationId}": {
+  "/v2/organizations/{organizationId}/billing/refresh-subscription": {
     /** Refreshes organizations subscription by Stripe data */
     put: operations["refresh"];
   };
-  "/v2/billing/update-subscription": {
+  "/v2/organizations/{organizationId}/billing/update-subscription": {
     /** Updates subscription session */
     post: operations["updateSubscription"];
   };
-  "/v2/billing/subscribe": {
+  "/v2/organizations/{organizationId}/billing/subscribe": {
     /** Returns url of Stripe checkout session */
     post: operations["subscribe"];
   };
-  "/v2/billing/create-customer-portal-session": {
+  "/v2/organizations/{organizationId}/billing/create-customer-portal-session": {
     /** Returns url of Stripe checkout session */
     post: operations["createCustomerPortalSession"];
   };
-  "/v2/billing/cancel-subscription/{organizationId}": {
+  "/v2/organizations/{organizationId}/billing/cancel-subscription": {
     /** Cancels subscription */
     post: operations["cancelSubscription"];
   };
-  "/v2/billing/subscriptions": {
-    get: operations["getSubscriptions"];
+  "/v2/organizations/{organizationId}/billing/buy-more-credits": {
+    /** Returns url of Stripe checkout session */
+    post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
   };
-  "/v2/billing/plans": {
+  "/v2/organizations/{organizationId}/billing/plans": {
     get: operations["getPlans"];
   };
-  "/v2/billing/create-change-payment-method-session/{organizationId}": {
-    /** Creates change payment method session */
-    get: operations["createChangePaymentMethodSession"];
-  };
-  "/v2/billing/active-plan/{organizationId}": {
+  "/v2/organizations/{organizationId}/billing/active-plan": {
     /** Refreshes organizations subscription by Stripe data */
     get: operations["getActivePlan"];
   };
@@ -49,26 +46,25 @@ export interface components {
       includedMtCredits?: number;
       monthlyPrice?: number;
       yearlyPrice?: number;
-      currentPeriodEnd: number;
+      currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
+      free: boolean;
     };
     UpdateSubscriptionRequest: {
-      /** Id of the organization */
-      organizationId: number;
       /** Id of the subscription plan */
       planId: number;
     };
     SubscribeRequest: {
-      /** Id of the organization */
-      organizationId: number;
       /** Id of the subscription plan */
       planId: number;
     };
     CreateCustomerPortalSessionRequest: {
-      /** Id of the organization */
-      organizationId?: number;
       /** Url to return afterwards */
       returnUrl: string;
+    };
+    BuyMoreMtCreditsRequest: {
+      /** Amount of credit packages */
+      amount: number;
     };
     CollectionModelPlanModel: {
       _embedded?: {
@@ -82,6 +78,7 @@ export interface components {
       includedMtCredits?: number;
       monthlyPrice?: number;
       yearlyPrice?: number;
+      free: boolean;
     };
   };
 }
@@ -117,6 +114,11 @@ export interface operations {
   };
   /** Updates subscription session */
   updateSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
     responses: {
       /** OK */
       200: unknown;
@@ -141,6 +143,11 @@ export interface operations {
   };
   /** Returns url of Stripe checkout session */
   subscribe: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
     responses: {
       /** OK */
       200: {
@@ -169,6 +176,11 @@ export interface operations {
   };
   /** Returns url of Stripe checkout session */
   createCustomerPortalSession: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
     responses: {
       /** OK */
       200: {
@@ -219,48 +231,8 @@ export interface operations {
       };
     };
   };
-  getSubscriptions: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  getPlans: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelPlanModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  /** Creates change payment method session */
-  createChangePaymentMethodSession: {
+  /** Returns url of Stripe checkout session */
+  getBuyMoreCreditsCheckoutSessionUrl: {
     parameters: {
       path: {
         organizationId: number;
@@ -271,6 +243,33 @@ export interface operations {
       200: {
         content: {
           "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BuyMoreMtCreditsRequest"];
+      };
+    };
+  };
+  getPlans: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelPlanModel"];
         };
       };
       /** Bad Request */
