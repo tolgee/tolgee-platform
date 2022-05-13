@@ -10,7 +10,7 @@ export const useProviderImg = () => {
       case 'AWS':
         return `/images/providers/aws-logo-${palette.mode}.svg`;
       case 'DEEPL':
-        return `/images/providers/deepl-logo.svg`;
+        return `/images/providers/deepl-logo-${palette.mode}.svg`;
       default:
         return null;
     }
