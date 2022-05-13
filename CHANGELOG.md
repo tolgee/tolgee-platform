@@ -1,3 +1,10 @@
+## [2.20.3](https://github.com/tolgee/tolgee-platform/compare/v2.20.2...v2.20.3) (2022-05-13)
+
+
+### Bug Fixes
+
+* Web integration guide ([d5ffbbf](https://github.com/tolgee/tolgee-platform/commit/d5ffbbf786566b322f54165d326fc602d6ddc686))
+
 ## [2.20.2](https://github.com/tolgee/tolgee-platform/compare/v2.20.1...v2.20.2) (2022-05-11)
 
 
