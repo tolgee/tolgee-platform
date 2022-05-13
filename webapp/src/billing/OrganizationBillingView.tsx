@@ -1,28 +1,23 @@
 import { FunctionComponent, useEffect } from 'react';
-import { T, useCurrentLanguage } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import { BaseOrganizationSettingsView } from 'tg.views/organizations/BaseOrganizationSettingsView';
 
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useLocation } from 'react-router-dom';
-import { MessageService } from 'tg.service/MessageService';
-import { container } from 'tsyringe';
 import { Box, Button, Typography } from '@mui/material';
 import {
   useBillingApiMutation,
   useBillingApiQuery,
 } from './useBillingQueryApi';
-import LoadingButton from 'tg.component/common/form/LoadingButton';
 import { useOrganizationCreditBalance } from './useOrganizationCreditBalance';
+import { BillingPlans } from './BillingPlans';
 
-const messaging = container.resolve(MessageService);
 export const OrganizationBillingView: FunctionComponent = () => {
   const { search } = useLocation();
   const params = new URLSearchParams(search);
 
   const success = params.has('success');
-
-  const getCurrentLang = useCurrentLanguage();
 
   const organization = useOrganization();
 
@@ -33,7 +28,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
   url.search = '';
 
   const refreshSubscription = useBillingApiMutation({
-    url: `/v2/billing/refresh-subscription/{organizationId}`,
+    url: `/v2/organizations/{organizationId}/billing/refresh-subscription`,
     method: `put`,
     invalidatePrefix: `/v2/billing`,
     options: {
@@ -52,41 +47,15 @@ export const OrganizationBillingView: FunctionComponent = () => {
   }, [success]);
 
   const plansLoadable = useBillingApiQuery({
-    url: '/v2/billing/plans',
+    url: '/v2/organizations/{organizationId}/billing/plans',
     method: 'get',
-  });
-
-  const upgradeMutation = useBillingApiMutation({
-    url: '/v2/billing/update-subscription',
-    method: 'post',
-    invalidatePrefix: '/v2/billing/active-plan',
-  });
-
-  const cancelMutation = useBillingApiMutation({
-    url: '/v2/billing/cancel-subscription/{organizationId}',
-    method: 'post',
-    invalidatePrefix: '/v2/billing/active-plan',
-  });
-
-  const subscribeMutation = useBillingApiMutation({
-    url: '/v2/billing/subscribe',
-    method: 'post',
-    options: {
-      onSuccess: (data) => {
-        window.location.href = data;
-      },
-      onError: (data) => {
-        if (data.code === 'organization_already_subscribed') {
-          messaging.error(
-            <T keyName="billing_organization_already_subscribed" />
-          );
-        }
-      },
+    path: {
+      organizationId: organization!.id,
     },
   });
 
   const getCustomerPortalSession = useBillingApiMutation({
-    url: '/v2/billing/create-customer-portal-session',
+    url: '/v2/organizations/{organizationId}/billing/create-customer-portal-session',
     method: 'post',
     options: {
       onSuccess: (data) => {
@@ -96,38 +65,14 @@ export const OrganizationBillingView: FunctionComponent = () => {
   });
 
   const activePlan = useBillingApiQuery({
-    url: '/v2/billing/active-plan/{organizationId}',
+    url: '/v2/organizations/{organizationId}/billing/active-plan',
     method: 'get',
     path: {
       organizationId: organization!.id,
     },
   });
 
-  const onSubscribe = (planId: number) => {
-    subscribeMutation.mutate({
-      content: {
-        'application/json': {
-          planId: planId,
-          organizationId: organization!.id,
-        },
-      },
-    });
-  };
-
-  const onCancel = () => {
-    cancelMutation.mutate({ path: { organizationId: organization!.id } });
-  };
-
-  const onUpgrade = (planId: number) => {
-    upgradeMutation.mutate({
-      content: {
-        'application/json': {
-          planId: planId,
-          organizationId: organization!.id,
-        },
-      },
-    });
-  };
+  const t = useTranslate();
 
   return (
     <BaseOrganizationSettingsView
@@ -139,75 +84,20 @@ export const OrganizationBillingView: FunctionComponent = () => {
         refreshSubscription.isLoading ||
         activePlan.isLoading
       }
+      windowTitle={t({ key: 'organization_billing_title', noWrap: true })}
     >
       <Box>
         Credit Balance: {(creditBalance.data?.creditBalance || 0) / 100} /{' '}
         {(creditBalance.data?.bucketSize || 0) / 100}
       </Box>
 
-      {plansLoadable.data &&
-        plansLoadable.data?._embedded?.plans?.map((plan) => (
-          <Box key={plan.id}>
-            <Box>{plan.name}</Box>
-            <Box>Translation limit: {plan.translationLimit}</Box>
-            <Box>
-              Mt Credits included: {(plan.includedMtCredits || 0) / 100}
-            </Box>
-            {activePlan.data ? (
-              activePlan.data.id === plan.id ? (
-                <>
-                  This is Active
-                  <Box>
-                    Period end:{' '}
-                    {new Date(
-                      activePlan.data.currentPeriodEnd
-                    ).toLocaleDateString(getCurrentLang())}
-                  </Box>
-                  <Box>
-                    Cancel at period end:{' '}
-                    {activePlan.data.cancelAtPeriodEnd ? 'true' : 'false'}
-                  </Box>
-                  {activePlan.data.cancelAtPeriodEnd ? (
-                    <LoadingButton
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => onUpgrade(plan.id)}
-                    >
-                      Subscribe
-                    </LoadingButton>
-                  ) : (
-                    <LoadingButton
-                      loading={cancelMutation.isLoading}
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => onCancel()}
-                    >
-                      Cancel subscription
-                    </LoadingButton>
-                  )}
-                </>
-              ) : (
-                <LoadingButton
-                  loading={upgradeMutation.isLoading}
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => onUpgrade(plan.id)}
-                >
-                  Change subscription
-                </LoadingButton>
-              )
-            ) : (
-              <LoadingButton
-                loading={subscribeMutation.isLoading}
-                variant="outlined"
-                color="primary"
-                onClick={() => onSubscribe(plan.id)}
-              >
-                Subscribe
-              </LoadingButton>
-            )}
-          </Box>
-        ))}
+      {plansLoadable.data?._embedded?.plans && activePlan.data && (
+        <BillingPlans
+          plans={plansLoadable.data._embedded.plans}
+          activePlan={activePlan.data}
+        />
+      )}
+
       <Typography>
         To review your invoices, update your payment method or review your
         billing info, continue to customer portal.
@@ -216,9 +106,11 @@ export const OrganizationBillingView: FunctionComponent = () => {
         variant={'outlined'}
         onClick={() =>
           getCustomerPortalSession.mutate({
+            path: {
+              organizationId: organization!.id,
+            },
             content: {
               'application/json': {
-                organizationId: organization!.id,
                 returnUrl: url.href,
               },
             },
