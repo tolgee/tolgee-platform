@@ -20,7 +20,7 @@ type Props = {
 export const ActivityTitle: React.FC<Props> = ({ activity }) => {
   let references = 0;
   const filteredReferences: Reference[] = [];
-  const titleReferences = activity.options.titleReferences;
+  const titleReferences = activity.options?.titleReferences;
 
   activity.references.forEach((ref) => {
     references += 1;

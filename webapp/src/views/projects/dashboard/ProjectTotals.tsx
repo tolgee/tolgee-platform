@@ -12,6 +12,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { PercentFormat } from './PercentFormat';
 
 const StyledTiles = styled(Box)`
   display: grid;
@@ -237,15 +238,7 @@ export const ProjectTotals: React.FC<{
         >
           <StyledTileDataItem data-cy="project-dashboard-translated-percentage">
             <StyledTileValue>
-              {!isNaN(stats.translatedPercentage)
-                ? t(
-                    'project_dashboard_percent_count',
-                    '{percentage, number, :: % }',
-                    {
-                      percentage: stats.translatedPercentage / 100,
-                    }
-                  )
-                : t('project_dashboard_percent_nan', '-')}
+              <PercentFormat number={stats.translatedPercentage} />
             </StyledTileValue>
             <StyledTileDescription>
               {t('project_dashboard_translated_percent', 'Translated')}
@@ -253,15 +246,7 @@ export const ProjectTotals: React.FC<{
           </StyledTileDataItem>
           <StyledTileDataItem data-cy="project-dashboard-reviewed-percentage">
             <StyledTileValue>
-              {!isNaN(stats.reviewedPercentage)
-                ? t(
-                    'project_dashboard_percent_count',
-                    '{percentage, number, :: % }',
-                    {
-                      percentage: stats.reviewedPercentage / 100,
-                    }
-                  )
-                : t('project_dashboard_percent_nan', '-')}
+              <PercentFormat number={stats.reviewedPercentage} />
             </StyledTileValue>
             <StyledTileDescription>
               {t('project_dashboard_reviewed_percent', 'Reviewed')}

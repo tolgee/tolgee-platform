@@ -23,9 +23,15 @@ export const LanguageMenu: React.FC<Props> = ({ language }) => {
   const project = useProject();
   const projectPermissions = useProjectPermissions();
 
-  const closeWith = (action?: () => void) => () => {
+  const closeWith = (action?: () => void) => (e) => {
+    e?.stopPropagation();
     setAnchorEl(undefined);
     action?.();
+  };
+
+  const handleOpen = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    setAnchorEl(e.target as HTMLElement);
   };
 
   const redirectToSettings = () => {
@@ -52,7 +58,7 @@ export const LanguageMenu: React.FC<Props> = ({ language }) => {
   return (
     <>
       <IconButton
-        onClick={(e) => setAnchorEl(e.target as HTMLElement)}
+        onClick={handleOpen}
         data-cy="project-dashboard-language-menu"
       >
         <MoreVert />

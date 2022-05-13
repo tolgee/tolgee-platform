@@ -57,6 +57,7 @@ export const useTranslationsService = (props: Props) => {
   );
   // wait for initialLangs to not be null
   const [enabled, setEnabled] = useState(props.initialLangs !== null);
+  const [_, setUrlLanguages] = useUrlSearchState('languages', {});
 
   const [urlSearch, _setUrlSearch] = useUrlSearchState('search', {
     defaultVal: '',
@@ -189,6 +190,8 @@ export const useTranslationsService = (props: Props) => {
         props.projectId,
         queryWithLanguages.languages
       );
+      // override url languages
+      setUrlLanguages(undefined);
     }
     refetchTranslations(() => {
       setQuery(queryWithLanguages);

@@ -192,6 +192,14 @@ export const actionsConfiguration: Partial<
       Key: [],
     },
   },
+  COMPLEX_EDIT: {
+    label: 'activity_complex_edit',
+    entities: {
+      Translation: true,
+      Key: true,
+      Screenshot: true,
+    },
+  },
   DELETE_LANGUAGE: {
     label: 'activity_delete_language',
     entities: { Language: [] },
