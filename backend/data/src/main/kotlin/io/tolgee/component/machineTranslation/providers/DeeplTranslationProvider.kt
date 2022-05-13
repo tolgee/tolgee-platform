@@ -15,95 +15,95 @@ import org.springframework.web.client.postForEntity
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 class DeeplTranslationProvider(
-    private val deeplMachineTranslationProperties: DeeplMachineTranslationProperties,
-    private val restTemplate: RestTemplate,
+  private val deeplMachineTranslationProperties: DeeplMachineTranslationProperties,
+  private val restTemplate: RestTemplate,
 ) : AbstractMtValueProvider() {
 
-    override val isEnabled: Boolean
-        get() = !deeplMachineTranslationProperties.authKey.isNullOrEmpty()
+  override val isEnabled: Boolean
+    get() = !deeplMachineTranslationProperties.authKey.isNullOrEmpty()
 
-    override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+  override fun translateViaProvider(text: String, sourceTag: String, targetTag: String): String? {
+    val headers = HttpHeaders()
+    headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
 
-        val requestBody: MultiValueMap<String, String> = LinkedMultiValueMap()
-        // Mandatory parameters
-        requestBody.add("auth_key", deeplMachineTranslationProperties.authKey)
-        requestBody.add("text", text)
-        requestBody.add("source_lang", sourceTag.uppercase())
-        requestBody.add("target_lang", targetTag.uppercase())
-        // Optional parameters
-        requestBody.add("formality", deeplMachineTranslationProperties.formality)
+    val requestBody: MultiValueMap<String, String> = LinkedMultiValueMap()
+    // Mandatory parameters
+    requestBody.add("auth_key", deeplMachineTranslationProperties.authKey)
+    requestBody.add("text", text)
+    requestBody.add("source_lang", sourceTag.uppercase())
+    requestBody.add("target_lang", targetTag.uppercase())
+    // Optional parameters
+    requestBody.add("formality", deeplMachineTranslationProperties.formality)
 
-        val response = restTemplate.postForEntity<DeeplResponse>(
-            apiEndpointFromKey(),
-            requestBody
-        )
-
-        return response.body?.translations?.first()?.text
-            ?: throw RuntimeException(response.toString())
-    }
-
-    /**
-     * Free API keys are identified by the ':fx' suffix, they also require a different endpoint.
-     */
-    private fun apiEndpointFromKey(): String {
-        if (deeplMachineTranslationProperties.authKey!!.endsWith(":fx")) {
-            return "https://api-free.deepl.com/v2/translate"
-        }
-        return "https://api.deepl.com/v2/translate"
-    }
-
-    /**
-     * Data structure for mapping the DeepL JSON response objects.
-     */
-    companion object {
-        class DeeplResponse {
-            @JsonProperty("translations")
-            var translations: List<DeeplTranslation>? = null
-        }
-
-        class DeeplTranslation {
-            @JsonProperty("detected_source_language")
-            var detectedSourceLanguage: String? = null
-
-            @JsonProperty("text")
-            var text: String? = null
-        }
-    }
-
-    override fun calculateProviderPrice(text: String): Int {
-        return text.length * 100
-    }
-
-    override val supportedLanguages = arrayOf(
-        "bg",
-        "cs",
-        "da",
-        "de",
-        "el",
-        "en",
-        "en-gb",
-        "en-us",
-        "es",
-        "et",
-        "fi",
-        "fr",
-        "hu",
-        "it",
-        "ja",
-        "lt",
-        "lv",
-        "nl",
-        "pl",
-        "pt",
-        "pt-pt",
-        "pt-br",
-        "ro",
-        "ru",
-        "sk",
-        "sl",
-        "sv",
-        "zh"
+    val response = restTemplate.postForEntity<DeeplResponse>(
+      apiEndpointFromKey(),
+      requestBody
     )
+
+    return response.body?.translations?.first()?.text
+      ?: throw RuntimeException(response.toString())
+  }
+
+  /**
+   * Free API keys are identified by the ':fx' suffix, they also require a different endpoint.
+   */
+  private fun apiEndpointFromKey(): String {
+    if (deeplMachineTranslationProperties.authKey!!.endsWith(":fx")) {
+      return "https://api-free.deepl.com/v2/translate"
+    }
+    return "https://api.deepl.com/v2/translate"
+  }
+
+  /**
+   * Data structure for mapping the DeepL JSON response objects.
+   */
+  companion object {
+    class DeeplResponse {
+      @JsonProperty("translations")
+      var translations: List<DeeplTranslation>? = null
+    }
+
+    class DeeplTranslation {
+      @JsonProperty("detected_source_language")
+      var detectedSourceLanguage: String? = null
+
+      @JsonProperty("text")
+      var text: String? = null
+    }
+  }
+
+  override fun calculateProviderPrice(text: String): Int {
+    return text.length * 100
+  }
+
+  override val supportedLanguages = arrayOf(
+    "bg",
+    "cs",
+    "da",
+    "de",
+    "el",
+    "en",
+    "en-gb",
+    "en-us",
+    "es",
+    "et",
+    "fi",
+    "fr",
+    "hu",
+    "it",
+    "ja",
+    "lt",
+    "lv",
+    "nl",
+    "pl",
+    "pt",
+    "pt-pt",
+    "pt-br",
+    "ro",
+    "ru",
+    "sk",
+    "sl",
+    "sv",
+    "zh"
+  )
 }
