@@ -19,6 +19,7 @@ import io.tolgee.security.payload.ApiResponse
 import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.payload.LoginRequest
 import io.tolgee.security.third_party.GithubOAuthDelegate
+import io.tolgee.security.third_party.GoogleOAuthDelegate
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.SignUpService
 import io.tolgee.service.UserAccountService
@@ -35,13 +36,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
@@ -53,6 +48,7 @@ class PublicController(
   private val authenticationManager: AuthenticationManager,
   private val tokenProvider: JwtTokenProviderImpl,
   private val githubOAuthDelegate: GithubOAuthDelegate,
+  private val googleOAuthDelegate: GoogleOAuthDelegate,
   private val properties: TolgeeProperties,
   private val userAccountService: UserAccountService,
   private val mailSender: JavaMailSender,
@@ -157,19 +153,30 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
     return userAccountService.findOptional(email.asText()).isEmpty
   }
 
-  @GetMapping("/authorize_oauth/{serviceType}/{code}")
+  @GetMapping("/authorize_oauth/{serviceType}")
   @Operation(summary = "Authenticates user using third party oAuth service")
   @Transactional
   fun authenticateUser(
     @PathVariable("serviceType") serviceType: String?,
-    @PathVariable("code") code: String?,
+    @RequestParam(value = "code", required = true) code: String?,
+    @RequestParam(value = "redirect_uri", required = true) redirectUri: String?,
     @RequestParam(value = "invitationCode", required = false) invitationCode: String?
   ): JwtAuthenticationResponse {
     if (properties.internal.fakeGithubLogin && code == "this_is_dummy_code") {
       val user = dbPopulatorReal.createUserIfNotExists("johndoe@doe.com")
       return JwtAuthenticationResponse(tokenProvider.generateToken(user.id).toString())
     }
-    return githubOAuthDelegate.getTokenResponse(code, invitationCode)
+    return when (serviceType) {
+      "github" -> {
+        githubOAuthDelegate.getTokenResponse(code, invitationCode)
+      }
+      "google" -> {
+        googleOAuthDelegate.getTokenResponse(code, invitationCode, redirectUri)
+      }
+      else -> {
+        throw NotFoundException(Message.SERVICE_NOT_FOUND)
+      }
+    }
   }
 
   private fun doNativeAuth(loginRequest: LoginRequest): String {

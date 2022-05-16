@@ -1,8 +1,8 @@
-import {GoToDocsButton} from '../component/GoToDocsButton';
+import { GoToDocsButton } from '../component/GoToDocsButton';
 
 <GoToDocsButton
   href="https://tolgee.io/docs/web/get_started/hello_world"
-  style={{float: 'right'}}
+  style={{ float: 'right' }}
 />
 
 To read more about how to use Tolgee on Web without any modern JS framework,
@@ -21,7 +21,7 @@ You need `core` library to translate your texts and `ui` library to translate te
 
 ```javascript
 // index.js
-const { Tolgee, IcuFormatter } = window["@tolgee/core"]
+const { Tolgee, IcuFormatter } = window['@tolgee/core'];
 const tg = Tolgee.use(IcuFormatter).init({
   apiUrl: '{{{apiUrl}}}',
 

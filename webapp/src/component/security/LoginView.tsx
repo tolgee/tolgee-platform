@@ -1,13 +1,12 @@
 import { FunctionComponent } from 'react';
-import { Button, Typography, Link as MuiLink } from '@mui/material';
+import { Alert, Button, Link as MuiLink, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
-import GitHubIcon from '@mui/icons-material/GitHub';
 import { T } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Link, Redirect, useHistory } from 'react-router-dom';
 import { container } from 'tsyringe';
 
-import { LINKS, PARAMS } from 'tg.constants/links';
+import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.hooks/useConfig';
 import { SecurityService } from 'tg.service/SecurityService';
 import { AppState } from 'tg.store/index';
@@ -17,12 +16,15 @@ import { StandardForm } from '../common/form/StandardForm';
 import { TextField } from '../common/form/fields/TextField';
 import { DashboardPage } from '../layout/DashboardPage';
 import { CompactView } from 'tg.component/layout/CompactView';
-import { Alert } from '@mui/material';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
+import {
+  gitHubService,
+  googleService,
+  OAuthService,
+} from 'tg.component/security/OAuthService';
 
 interface LoginProps {}
 
-const GITHUB_BASE = 'https://github.com/login/oauth/authorize';
 const globalActions = container.resolve(GlobalActions);
 const securityServiceIns = container.resolve(SecurityService);
 // noinspection JSUnusedLocalSymbols
@@ -33,13 +35,15 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
   );
   const remoteConfig = useConfig();
 
-  const githubRedirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({
-    [PARAMS.SERVICE_TYPE]: 'github',
-  });
-  const clientId = remoteConfig.authMethods!.github.clientId;
-  const gitHubUrl =
-    GITHUB_BASE +
-    `?client_id=${clientId}&redirect_uri=${githubRedirectUri}&scope=user%3Aemail`;
+  const oAuthServices: OAuthService[] = [];
+  const githubConfig = remoteConfig.authMethods?.github;
+  const googleConfig = remoteConfig.authMethods?.google;
+  if (githubConfig?.enabled && githubConfig.clientId) {
+    oAuthServices.push(gitHubService(githubConfig.clientId));
+  }
+  if (googleConfig?.enabled && googleConfig.clientId) {
+    oAuthServices.push(googleService(googleConfig.clientId));
+  }
 
   const history = useHistory();
   if (history.location.state && (history.location.state as any).from) {
@@ -78,25 +82,28 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
                     <T>login_login_button</T>
                   </LoadingButton>
 
-                  {remoteConfig.authMethods?.github?.enabled && (
+                  {oAuthServices.length > 0 && (
+                    <Box
+                      height="1px"
+                      bgcolor="lightgray"
+                      marginY={4}
+                      marginX={-1}
+                    />
+                  )}
+                  {oAuthServices.map((provider) => (
                     <>
-                      <Box
-                        height="1px"
-                        bgcolor="lightgray"
-                        marginY={4}
-                        marginX={-1}
-                      />
                       <Button
                         component="a"
-                        href={gitHubUrl}
+                        href={provider.authenticationUrl}
                         size="medium"
-                        endIcon={<GitHubIcon />}
+                        endIcon={provider.buttonIcon}
                         variant="outlined"
+                        style={{ marginBottom: '0.5rem' }}
                       >
-                        <T>login_github_login_button</T>
+                        <T>{provider.buttonLabelTranslationKey}</T>
                       </Button>
                     </>
-                  )}
+                  ))}
                 </Box>
               </Box>
             }

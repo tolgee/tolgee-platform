@@ -36,8 +36,8 @@ class PublicConfigurationDTO(
   val recaptchaSiteKey = properties.recaptcha.siteKey
   val openReplayApiKey = properties.openReplayApiKey
 
-  class AuthMethodsDTO(val github: GithubPublicConfigDTO)
-  data class GithubPublicConfigDTO(val clientId: String?) {
+  class AuthMethodsDTO(val github: OAuthPublicConfigDTO, val google: OAuthPublicConfigDTO)
+  data class OAuthPublicConfigDTO(val clientId: String?) {
     val enabled: Boolean = clientId != null && clientId.isNotEmpty()
   }
 
@@ -55,7 +55,8 @@ class PublicConfigurationDTO(
 
   init {
     if (authentication) {
-      authMethods = AuthMethodsDTO(GithubPublicConfigDTO(properties.authentication.github.clientId))
+      authMethods = AuthMethodsDTO(OAuthPublicConfigDTO(properties.authentication.github.clientId),
+        OAuthPublicConfigDTO(properties.authentication.google.clientId))
     }
     passwordResettable = properties.authentication.nativeEnabled
     allowRegistrations = properties.authentication.registrationsAllowed

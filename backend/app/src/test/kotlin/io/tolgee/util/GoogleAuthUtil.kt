@@ -2,6 +2,7 @@ package io.tolgee.util
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.security.third_party.GithubOAuthDelegate
+import io.tolgee.security.third_party.GoogleOAuthDelegate
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
@@ -14,26 +15,22 @@ import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.web.client.RestTemplate
 
-class GitHubAuthUtil(
+class GoogleAuthUtil(
   private val tolgeeProperties: TolgeeProperties,
   private var authMvc: MockMvc? = null,
   private val restTemplate: RestTemplate? = null
 ) {
-  private val defaultEmailResponse: GithubOAuthDelegate.GithubEmailResponse
-    get() {
-      val githubEmailResponse = GithubOAuthDelegate.GithubEmailResponse()
-      githubEmailResponse.email = "fake_email@email.com"
-      githubEmailResponse.primary = true
-      githubEmailResponse.verified = true
-      return githubEmailResponse
-    }
 
-  private val defaultUserResponse: GithubOAuthDelegate.GithubUserResponse
+  private val defaultUserResponse: GoogleOAuthDelegate.GoogleUserResponse
     get() {
-      val fakeGithubUser = GithubOAuthDelegate.GithubUserResponse()
-      fakeGithubUser.id = "fakeId"
-      fakeGithubUser.name = "fakeName"
-      return fakeGithubUser
+      val fakeGoogleUser = GoogleOAuthDelegate.GoogleUserResponse()
+      fakeGoogleUser.sub = "fakeId"
+      fakeGoogleUser.name = "fakeName"
+      fakeGoogleUser.given_name = "fakeGiveName"
+      fakeGoogleUser.family_name = "fakeGivenFamilyName"
+      fakeGoogleUser.email = "fakeEmail@domain.com"
+      fakeGoogleUser.email_verified = true
+      return fakeGoogleUser
     }
 
   private val defaultTokenResponse: Map<String, String?>
@@ -44,44 +41,30 @@ class GitHubAuthUtil(
       return tokenResponse
     }
 
-  fun authorizeGithubUser(
+  fun authorizeGoogleUser(
     tokenResponse: Map<String, String?>? = this.defaultTokenResponse,
-    userResponse: ResponseEntity<GithubOAuthDelegate.GithubUserResponse> = ResponseEntity(
+    userResponse: ResponseEntity<GoogleOAuthDelegate.GoogleUserResponse> = ResponseEntity(
       this.defaultUserResponse,
-      HttpStatus.OK
-    ),
-    emailResponse: ResponseEntity<Array<GithubOAuthDelegate.GithubEmailResponse>> = ResponseEntity(
-      arrayOf(this.defaultEmailResponse),
       HttpStatus.OK
     )
   ): MvcResult {
     val receivedCode = "ThiS_Is_Fake_valid_COde"
-    val githubConf = tolgeeProperties.authentication.github
+    val googleConf = tolgeeProperties.authentication.google
 
-    whenever(restTemplate!!.postForObject<Map<*, *>>(eq(githubConf.authorizationUrl), any(), any()))
+    whenever(restTemplate!!.postForObject<Map<*, *>>(eq(googleConf.authorizationUrl), any(), any()))
       .thenReturn(tokenResponse)
 
     whenever(
       restTemplate.exchange(
-        eq(githubConf.userUrl),
+        eq(googleConf.userUrl),
         eq(HttpMethod.GET),
         any(),
-        eq(GithubOAuthDelegate.GithubUserResponse::class.java)
+        eq(GoogleOAuthDelegate.GoogleUserResponse::class.java)
       )
     ).thenReturn(userResponse)
 
-    whenever(
-      restTemplate.exchange(
-        eq(value = githubConf.userUrl + "/emails"),
-        eq(HttpMethod.GET),
-        any(),
-        eq(Array<GithubOAuthDelegate.GithubEmailResponse>::class.java)
-      )
-    )
-      .thenReturn(emailResponse)
-
     return authMvc!!.perform(
-      MockMvcRequestBuilders.get("/api/public/authorize_oauth/github?code=$receivedCode")
+      MockMvcRequestBuilders.get("/api/public/authorize_oauth/google?code=$receivedCode")
         .accept(MediaType.ALL)
         .contentType(MediaType.APPLICATION_JSON)
     )
