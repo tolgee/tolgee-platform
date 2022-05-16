@@ -187,6 +187,7 @@
   "leave_project_confirmation_message": "¿Realmente quieres salir de este proyecto?",
   "leave_project_confirmation_title": "Salir del proyecto",
   "login_github_login_button": "Acceso a GitHub",
+  "login_google_login_button": "Acceso a Google",
   "login_login_button": "Iniciar sesión",
   "login_password_label": "Contraseña",
   "login_reset_password_button": "Restablecer la contraseña",

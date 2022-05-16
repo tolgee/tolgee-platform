@@ -8,6 +8,7 @@ import io.tolgee.fixtures.mapResponseTo
 import io.tolgee.security.third_party.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.util.GitHubAuthUtil
+import io.tolgee.util.GoogleAuthUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,6 +36,7 @@ class AuthTest : AbstractControllerTest() {
   private var authMvc: MockMvc? = null
 
   private val gitHubAuthUtil: GitHubAuthUtil by lazy { GitHubAuthUtil(tolgeeProperties, authMvc, restTemplate) }
+  private val googleAuthUtil: GoogleAuthUtil by lazy { GoogleAuthUtil(tolgeeProperties, authMvc, restTemplate) }
 
   @BeforeEach
   fun setup() {
@@ -96,7 +98,22 @@ class AuthTest : AbstractControllerTest() {
   }
 
   @Test
-  fun doesNotAuthorizeWhenRegistrationsNotAllowed() {
+  fun doesNotAuthorizeGoogleUserWhenNoReceivedToken() {
+    var tokenResponse: MutableMap<String, String?>? = null
+    var mvcResult = googleAuthUtil.authorizeGoogleUser(tokenResponse = tokenResponse)
+    var response = mvcResult.response
+    assertThat(response.status).isEqualTo(401)
+    assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR.code)
+    tokenResponse = HashMap()
+    tokenResponse["error"] = null
+    mvcResult = googleAuthUtil.authorizeGoogleUser(tokenResponse = tokenResponse)
+    response = mvcResult.response
+    assertThat(response.status).isEqualTo(401)
+    assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE.code)
+  }
+
+  @Test
+  fun doesNotAuthorizeGitHubUserWhenRegistrationsNotAllowed() {
     val oldRegistrationsAllowed = tolgeeProperties.authentication.registrationsAllowed
     tolgeeProperties.authentication.registrationsAllowed = false
     val response = gitHubAuthUtil.authorizeGithubUser()
@@ -106,8 +123,26 @@ class AuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun doesNotAuthorizeGoogleUserWhenRegistrationsNotAllowed() {
+    val oldRegistrationsAllowed = tolgeeProperties.authentication.registrationsAllowed
+    tolgeeProperties.authentication.registrationsAllowed = false
+    val response = googleAuthUtil.authorizeGoogleUser()
+    val result = response.mapResponseTo<Map<String, String>>()
+    assertThat(result["code"]).isEqualTo("registrations_not_allowed")
+    tolgeeProperties.authentication.registrationsAllowed = oldRegistrationsAllowed
+  }
+
+  @Test
   fun authorizesGithubUser() {
     val response = gitHubAuthUtil.authorizeGithubUser().response.contentAsString
+    val result = ObjectMapper().readValue(response, HashMap::class.java)
+    assertThat(result["accessToken"]).isNotNull
+    assertThat(result["tokenType"]).isEqualTo("Bearer")
+  }
+
+  @Test
+  fun authorizesGoogleUser() {
+    val response = googleAuthUtil.authorizeGoogleUser().response.contentAsString
     val result = ObjectMapper().readValue(response, HashMap::class.java)
     assertThat(result["accessToken"]).isNotNull
     assertThat(result["tokenType"]).isEqualTo("Bearer")

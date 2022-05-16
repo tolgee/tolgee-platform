@@ -21,16 +21,15 @@ export const OAuthRedirectionHandler: FunctionComponent<OAuthRedirectionHandlerP
 
     const match = useRouteMatch();
 
-    const code = new URLSearchParams(window.location.search).get('code');
-
     useEffect(() => {
+      const code = new URLSearchParams(window.location.search).get('code');
       if (code && !security.allowPrivate) {
         actions.oAuthSuccessful.dispatch(
           match.params[PARAMS.SERVICE_TYPE],
           code
         );
       }
-    }, [code, security.allowPrivate]);
+    }, [security.allowPrivate]);
 
     if (security.jwtToken) {
       return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
