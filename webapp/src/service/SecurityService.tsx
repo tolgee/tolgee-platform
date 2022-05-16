@@ -2,7 +2,7 @@ import { T } from '@tolgee/react';
 import { singleton } from 'tsyringe';
 
 import { API_LINKS } from '../constants/apiLinks';
-import { LINKS } from '../constants/links';
+import { LINKS, PARAMS } from '../constants/links';
 import { InvitationCodeService } from './InvitationCodeService';
 import { MessageService } from './MessageService';
 import { TokenService } from './TokenService';
@@ -34,10 +34,13 @@ export class SecurityService {
   ): Promise<TokenDTO> => {
     const invitationCode = this.invitationCodeService.getCode();
     const invitationCodeQueryPart = invitationCode
-      ? '?invitationCode=' + invitationCode
+      ? '&invitationCode=' + invitationCode
       : '';
+    const redirectUri = LINKS.OAUTH_RESPONSE.buildWithOrigin({
+      [PARAMS.SERVICE_TYPE]: type,
+    });
     const response = await fetch(
-      `${API_URL}public/authorize_oauth/${type}/${code}${invitationCodeQueryPart}`
+      `${API_URL}public/authorize_oauth/${type}?code=${code}&redirect_uri=${redirectUri}${invitationCodeQueryPart}`
     );
     this.invitationCodeService.disposeCode();
     return this.handleLoginResponse(response);

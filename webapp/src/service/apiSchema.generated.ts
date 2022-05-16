@@ -1290,9 +1290,10 @@ export interface components {
       emailAwaitingVerification?: string;
     };
     AuthMethodsDTO: {
-      github: components["schemas"]["GithubPublicConfigDTO"];
+      github: components["schemas"]["OAuthPublicConfigDTO"];
+      google: components["schemas"]["OAuthPublicConfigDTO"];
     };
-    GithubPublicConfigDTO: {
+    OAuthPublicConfigDTO: {
       clientId?: string;
       enabled: boolean;
     };

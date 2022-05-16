@@ -209,6 +209,7 @@
   "leave_project_confirmation_title": "Leave project",
   "login_email_label": "Email",
   "login_github_login_button": "GitHub login",
+  "login_google_login_button": "Google login",
   "login_login_button": "Login",
   "login_password_label": "Password",
   "login_reset_password_button": "Reset password",
