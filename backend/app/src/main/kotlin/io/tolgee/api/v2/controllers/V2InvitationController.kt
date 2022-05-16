@@ -27,7 +27,6 @@ class V2InvitationController @Autowired constructor(
   @GetMapping("invitations/{code}/accept")
   @Operation(summary = "Accepts invitation to project or organization")
   fun acceptInvitation(@PathVariable("code") code: String?): ResponseEntity<Void> {
-    invitationService.removeExpired()
     invitationService.accept(code)
     return ResponseEntity(HttpStatus.OK)
   }
