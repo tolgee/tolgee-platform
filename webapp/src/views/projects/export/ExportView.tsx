@@ -1,6 +1,7 @@
 import { useTranslate } from '@tolgee/react';
 import { FunctionComponent } from 'react';
 
+import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
@@ -18,6 +19,7 @@ export const ExportView: FunctionComponent = () => {
           LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
+          <SmallProjectAvatar key={0} project={project} />,
         ],
         [
           t('export_translations_title'),

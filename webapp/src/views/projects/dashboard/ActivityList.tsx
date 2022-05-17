@@ -35,7 +35,7 @@ const StyledScroller = styled('div')`
 
 const StyledList = styled('div')`
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(auto, 30%) 1fr auto;
   gap: 3px 0px;
   padding-bottom: 12px;
 `;
