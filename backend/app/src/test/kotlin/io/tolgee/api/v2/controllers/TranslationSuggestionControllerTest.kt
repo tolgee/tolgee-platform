@@ -5,6 +5,7 @@ import com.amazonaws.services.translate.model.TranslateTextResult
 import com.google.cloud.translate.Translate
 import com.google.cloud.translate.Translation
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.machineTranslation.providers.DeeplApiService
 import io.tolgee.constants.Caches
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.SuggestionTestData
@@ -50,6 +51,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Autowired
   @MockBean
+  lateinit var deeplApiService: DeeplApiService
+
+  @Autowired
+  @MockBean
   lateinit var cacheManager: CacheManager
   lateinit var cacheMock: Cache
 
@@ -84,6 +89,14 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     whenever(amazonTranslate.translateText(any())).thenReturn(awsTranslateTextResult)
 
     whenever(awsTranslateTextResult.translatedText).thenReturn("Translated with Amazon")
+
+    whenever(
+      deeplApiService.translate(
+        any() as String,
+        any() as String,
+        any() as String,
+      )
+    ).thenReturn("Translated with DeepL")
   }
 
   private fun initTestData() {
@@ -192,17 +205,18 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it suggests using just enabled services (Google, AWS)`() {
-    machineTranslationProperties.freeCreditsAmount = 2000
-    testData.enableBoth()
+  fun `it suggests using just enabled services (Google, AWS, DeepL)`() {
+    machineTranslationProperties.freeCreditsAmount = 3000
+    testData.enableAll()
     testDataService.saveTestData(testData.root)
 
     performMtRequest().andIsOk.andPrettyPrint.andAssertThatJson {
       node("machineTranslations") {
         node("AWS").isEqualTo("Translated with Amazon")
         node("GOOGLE").isEqualTo("Translated with Google")
+        node("DEEPL").isEqualTo("Translated with DeepL")
       }
-      node("translationCreditsBalanceAfter").isEqualTo(200)
+      node("translationCreditsBalanceAfter").isEqualTo(1200)
     }
   }
 
@@ -228,7 +242,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @ProjectJWTAuthTestMethod
   fun `primary service is first (AWS)`() {
     machineTranslationProperties.freeCreditsAmount = -1
-    testData.enableBoth()
+    testData.enableAll()
     testDataService.saveTestData(testData.root)
 
     (0..20).forEach {
@@ -240,7 +254,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
   @ProjectJWTAuthTestMethod
   fun `primary service is first (GOOGLE)`() {
     machineTranslationProperties.freeCreditsAmount = -1
-    testData.enableBothGooglePrimary()
+    testData.enableAllGooglePrimary()
     testDataService.saveTestData(testData.root)
 
     (0..20).forEach {
