@@ -125,7 +125,7 @@ def SPRING_DOC_VERSION = findProperty("springDocVersion")
 
 
 def LIQUIBASE_VERSION = "4.7.1"
-def LIQUIBASE_HIBERNATE_VERSION = "4.7.1"
+def LIQUIBASE_HIBERNATE_VERSION = "4.10.0"
 
 dependencies {
     /**
