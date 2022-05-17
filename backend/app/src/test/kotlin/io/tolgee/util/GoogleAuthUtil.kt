@@ -1,7 +1,6 @@
 package io.tolgee.util
 
 import io.tolgee.configuration.tolgee.TolgeeProperties
-import io.tolgee.security.third_party.GithubOAuthDelegate
 import io.tolgee.security.third_party.GoogleOAuthDelegate
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
