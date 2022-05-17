@@ -27,10 +27,12 @@ import io.tolgee.model.Permission
 import io.tolgee.model.dataImport.ImportFile
 import io.tolgee.model.dataImport.ImportLanguage
 import io.tolgee.model.dataImport.ImportTranslation
+import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.views.ImportFileIssueView
 import io.tolgee.model.views.ImportLanguageView
 import io.tolgee.model.views.ImportTranslationView
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
 import io.tolgee.service.LanguageService
@@ -64,7 +66,7 @@ import java.io.OutputStream
 @Suppress("MVCPathVariableInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/projects/{projectId}/import"])
+@RequestMapping(value = ["/v2/projects/{projectId:\\d+}/import", "/v2/projects/import"])
 @Tag(name = "Import")
 class V2ImportController(
   private val importService: ImportService,
@@ -91,7 +93,6 @@ class V2ImportController(
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Prepares provided files to import, streams operation progress")
   fun addFilesStreaming(
-    @PathVariable("projectId") projectId: Long,
     @RequestPart("files") files: Array<MultipartFile>,
   ): ResponseEntity<StreamingResponseBody> {
     val stream = StreamingResponseBody { responseStream: OutputStream ->
@@ -108,7 +109,7 @@ class V2ImportController(
         userAccount = authenticationFacade.userAccountEntity
       )
 
-      val result = getImportAddFilesResultModel(projectId, errors)
+      val result = getImportAddFilesResultModel(errors)
 
       val mapper = jacksonObjectMapper()
       halMediaTypeConfiguration.configureObjectMapper(mapper)
@@ -123,8 +124,8 @@ class V2ImportController(
   @PostMapping("", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Prepares provided files to import")
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun addFiles(
-    @PathVariable("projectId") projectId: Long,
     @RequestPart("files") files: Array<MultipartFile>,
   ): ImportAddFilesResultModel {
     val fileDtos = files.map { ImportFileDto(it.originalFilename ?: "", it.inputStream) }
@@ -133,15 +134,14 @@ class V2ImportController(
       project = projectHolder.projectEntity,
       userAccount = authenticationFacade.userAccountEntity
     )
-    return getImportAddFilesResultModel(projectId, errors)
+    return getImportAddFilesResultModel(errors)
   }
 
   private fun getImportAddFilesResultModel(
-    projectId: Long,
     errors: List<ErrorResponseBody>
   ): ImportAddFilesResultModel {
     val result: PagedModel<ImportLanguageModel>? = try {
-      this.getImportResult(projectId, PageRequest.of(0, 100))
+      this.getImportResult(PageRequest.of(0, 100))
     } catch (e: NotFoundException) {
       null
     }
@@ -152,20 +152,22 @@ class V2ImportController(
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Imports the data prepared in previous step")
   @RequestActivity(ActivityType.IMPORT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun applyImport(
-    @PathVariable("projectId") projectId: Long,
     @Schema(description = "Whether override or keep all translations with unresolved conflicts")
     @RequestParam("forceMode", defaultValue = "NO_FORCE") forceMode: ForceMode,
   ) {
+    val projectId = projectHolder.project.id
     this.importService.import(projectId, authenticationFacade.userAccount.id, forceMode)
   }
 
   @GetMapping("/result")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun getImportResult(
-    @PathVariable("projectId") projectId: Long,
     @ParameterObject pageable: Pageable
   ): PagedModel<ImportLanguageModel> {
+    val projectId = projectHolder.project.id
     val userId = authenticationFacade.userAccount.id
     val languages = importService.getResult(projectId, userId, pageable)
     return pagedLanguagesResourcesAssembler.toModel(languages, importLanguageModelAssembler)
@@ -173,9 +175,9 @@ class V2ImportController(
 
   @GetMapping("/result/languages/{languageId}")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun getImportLanguage(
     @PathVariable("languageId") languageId: Long,
-    @PathVariable("projectId") projectId: Long,
   ): ImportLanguageModel {
     checkImportLanguageInProject(languageId)
     val language = importService.findLanguageView(languageId) ?: throw NotFoundException()
@@ -184,6 +186,7 @@ class V2ImportController(
 
   @GetMapping("/result/languages/{languageId}/translations")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun getImportTranslations(
     @PathVariable("projectId") projectId: Long,
     @PathVariable("languageId") languageId: Long,
@@ -208,12 +211,14 @@ class V2ImportController(
 
   @DeleteMapping("")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun cancelImport() {
     this.importService.deleteImport(projectHolder.project.id, authenticationFacade.userAccount.id)
   }
 
   @DeleteMapping("/result/languages/{languageId}")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun deleteLanguage(@PathVariable("languageId") languageId: Long) {
     val language = checkImportLanguageInProject(languageId)
     this.importService.deleteLanguage(language)
@@ -221,6 +226,7 @@ class V2ImportController(
 
   @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-override")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun resolveTranslationSetOverride(
     @PathVariable("languageId") languageId: Long,
     @PathVariable("translationId") translationId: Long
@@ -230,6 +236,7 @@ class V2ImportController(
 
   @PutMapping("/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun resolveTranslationSetKeepExisting(
     @PathVariable("languageId") languageId: Long,
     @PathVariable("translationId") translationId: Long
@@ -239,6 +246,7 @@ class V2ImportController(
 
   @PutMapping("/result/languages/{languageId}/resolve-all/set-override")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun resolveTranslationSetOverride(
     @PathVariable("languageId") languageId: Long
   ) {
@@ -247,6 +255,7 @@ class V2ImportController(
 
   @PutMapping("/result/languages/{languageId}/resolve-all/set-keep-existing")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun resolveTranslationSetKeepExisting(
     @PathVariable("languageId") languageId: Long,
   ) {
@@ -255,6 +264,7 @@ class V2ImportController(
 
   @PutMapping("/result/languages/{importLanguageId}/select-existing/{existingLanguageId}")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun selectExistingLanguage(
     @PathVariable("importLanguageId") importLanguageId: Long,
     @PathVariable("existingLanguageId") existingLanguageId: Long,
@@ -266,6 +276,7 @@ class V2ImportController(
 
   @PutMapping("/result/languages/{importLanguageId}/reset-existing")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun resetExistingLanguage(
     @PathVariable("importLanguageId") importLanguageId: Long,
   ) {
@@ -275,6 +286,7 @@ class V2ImportController(
 
   @GetMapping("/result/files/{importFileId}/issues")
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.IMPORT])
   fun getImportFileIssues(
     @PathVariable("importFileId") importFileId: Long,
     @ParameterObject pageable: Pageable
@@ -305,7 +317,7 @@ class V2ImportController(
 
   private fun checkLanguageFromProject(languageId: Long): Language {
     val existingLanguage = languageService.findById(languageId).orElse(null) ?: throw NotFoundException()
-    if (existingLanguage.project!!.id != projectHolder.project.id) {
+    if (existingLanguage.project.id != projectHolder.project.id) {
       throw BadRequestException(io.tolgee.constants.Message.IMPORT_LANGUAGE_NOT_FROM_PROJECT)
     }
     return existingLanguage
