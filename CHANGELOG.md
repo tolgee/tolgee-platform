@@ -1,3 +1,12 @@
+# [2.21.0](https://github.com/tolgee/tolgee-platform/compare/v2.20.3...v2.21.0) (2022-05-17)
+
+
+### Features
+
+* **Dashboard:** languages clickable, history diffs ([06e9ef5](https://github.com/tolgee/tolgee-platform/commit/06e9ef5bd86617c8ca71bb7a2fe3bffe35058228))
+* Project dashboard and activity backend, data migration ([d3d2ffa](https://github.com/tolgee/tolgee-platform/commit/d3d2ffaeef2fd22373835b4b6ebcc6f793575b76))
+* Project dashboard and activity FE - remove styled inner classes ([7c057b2](https://github.com/tolgee/tolgee-platform/commit/7c057b210ebe0fe64237b22b521c43321728c3c2))
+
 ## [2.20.3](https://github.com/tolgee/tolgee-platform/compare/v2.20.2...v2.20.3) (2022-05-13)
 
 
