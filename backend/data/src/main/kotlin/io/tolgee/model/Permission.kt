@@ -14,7 +14,6 @@ import javax.persistence.OneToOne
 
 @Suppress("LeakingThis")
 @Entity
-
 class Permission(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,7 +66,8 @@ class Permission(
         ApiScope.SCREENSHOTS_VIEW,
         ApiScope.SCREENSHOTS_UPLOAD,
         ApiScope.SCREENSHOTS_DELETE,
-        ApiScope.ACTIVITY_VIEW
+        ApiScope.ACTIVITY_VIEW,
+        ApiScope.IMPORT
       )
     ),
     MANAGE(
@@ -79,7 +79,8 @@ class Permission(
         ApiScope.SCREENSHOTS_VIEW,
         ApiScope.SCREENSHOTS_UPLOAD,
         ApiScope.SCREENSHOTS_DELETE,
-        ApiScope.ACTIVITY_VIEW
+        ApiScope.ACTIVITY_VIEW,
+        ApiScope.IMPORT
       )
     );
   }

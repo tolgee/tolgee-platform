@@ -10,7 +10,8 @@ enum class ApiScope(var value: String) {
   SCREENSHOTS_UPLOAD("screenshots.upload"),
   SCREENSHOTS_DELETE("screenshots.delete"),
   SCREENSHOTS_VIEW("screenshots.view"),
-  ACTIVITY_VIEW("activity.view");
+  ACTIVITY_VIEW("activity.view"),
+  IMPORT("import");
 
   companion object {
     fun fromValue(value: String): ApiScope {
