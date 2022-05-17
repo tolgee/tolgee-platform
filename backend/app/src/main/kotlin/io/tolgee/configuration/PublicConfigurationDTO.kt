@@ -55,8 +55,12 @@ class PublicConfigurationDTO(
 
   init {
     if (authentication) {
-      authMethods = AuthMethodsDTO(OAuthPublicConfigDTO(properties.authentication.github.clientId),
-        OAuthPublicConfigDTO(properties.authentication.google.clientId))
+      authMethods = AuthMethodsDTO(
+        OAuthPublicConfigDTO(
+          properties.authentication.github.clientId
+        ),
+        OAuthPublicConfigDTO(properties.authentication.google.clientId)
+      )
     }
     passwordResettable = properties.authentication.nativeEnabled
     allowRegistrations = properties.authentication.registrationsAllowed

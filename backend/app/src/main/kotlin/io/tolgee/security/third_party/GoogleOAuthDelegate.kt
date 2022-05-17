@@ -29,7 +29,11 @@ class GoogleOAuthDelegate(
 ) {
   private val googleConfigurationProperties: GoogleAuthenticationProperties = properties.authentication.google
 
-  fun getTokenResponse(receivedCode: String?, @Nullable invitationCode: String?, redirectUri: String?): JwtAuthenticationResponse {
+  fun getTokenResponse(
+    receivedCode: String?,
+    @Nullable invitationCode: String?,
+    redirectUri: String?
+  ): JwtAuthenticationResponse {
     try {
       val body = HashMap<String, String?>()
       body["client_id"] = googleConfigurationProperties.clientId
@@ -55,7 +59,6 @@ class GoogleOAuthDelegate(
         }
         val userResponse = exchange.body
 
-
         // check google email verified
         if (userResponse.email_verified == false) {
           throw AuthenticationException(Message.THIRD_PARTY_AUTH_NO_EMAIL)
@@ -67,7 +70,6 @@ class GoogleOAuthDelegate(
             throw AuthenticationException(Message.THIRD_PARTY_GOOGLE_WORKSPACE_MISMATCH)
           }
         }
-
 
         val userAccountOptional = userAccountService.findByThirdParty("google", userResponse!!.sub)
         val user = userAccountOptional.orElseGet {
@@ -107,9 +109,7 @@ class GoogleOAuthDelegate(
       if (response.containsKey("error")) {
         throw AuthenticationException(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE)
       }
-
       throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
-
     } catch (e: HttpClientErrorException) {
       throw AuthenticationException(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR)
     }
