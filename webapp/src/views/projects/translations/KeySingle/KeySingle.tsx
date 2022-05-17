@@ -2,8 +2,9 @@ import { styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { useHistory } from 'react-router-dom';
-import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 
+import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
+import { useBottomPanel } from 'tg.component/bottomPanel/BottomPanelContext';
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { BaseView } from 'tg.component/layout/BaseView';
@@ -80,6 +81,7 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
           LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
+          <SmallProjectAvatar key={0} project={project} />,
         ],
         [
           t('translations_view_title'),

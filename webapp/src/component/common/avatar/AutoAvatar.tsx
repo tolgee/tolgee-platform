@@ -27,14 +27,12 @@ export const AutoAvatar: FC<ComponentProps<'img'> & AutoAvatarProps> = ({
   const src = useAutoAvatarImgSrc({ entityId, size, type, ownerName });
 
   return src ? (
-    <div style={{ backgroundColor: 'rgb(239,239,239)', display: 'flex' }}>
-      <StyledImg
-        data-cy="auto-avatar-img"
-        {...imgProps}
-        src={src}
-        alt={ownerName}
-      />
-    </div>
+    <StyledImg
+      data-cy="auto-avatar-img"
+      {...imgProps}
+      src={src}
+      alt={ownerName}
+    />
   ) : (
     <Skeleton variant="rectangular" width={size} height={size} />
   );

@@ -3,6 +3,7 @@ import { Box, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { container } from 'tsyringe';
 
+import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
@@ -133,6 +134,7 @@ export const ImportView: FunctionComponent = () => {
           LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
+          <SmallProjectAvatar key={0} project={project} />,
         ],
         [
           t('import_translations_title'),

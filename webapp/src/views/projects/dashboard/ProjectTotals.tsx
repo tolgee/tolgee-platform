@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import clsx from 'clsx';
 import { useCurrentLanguage, useTranslate } from '@tolgee/react';
-import { Box, styled, Typography, Menu, MenuItem } from '@mui/material';
+import { Box, styled, Menu, MenuItem } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 
@@ -72,11 +72,12 @@ const StyledTile = styled(Box)`
 
 const StyledTileDataItem = styled(Box)`
   display: grid;
-  grid-template-rows: 1fr auto auto 1fr;
+  grid-template-rows: 1fr auto auto auto 1fr;
   grid-template-areas:
     '.'
     'data'
     'label'
+    'sublabel'
     'menu';
   border-radius: 20px;
 `;
@@ -91,23 +92,37 @@ const StyledTileValue = styled(Box)`
   }
 `;
 
-const StyledTileDescription = styled('span')`
+const StyledTileDescription = styled('div')`
   grid-area: label;
+  padding: 0px 8px;
   font-size: 18px;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
   @media (max-width: 800px) {
     font-size: 14px;
   }
 `;
 
-const StyledTileSubDescription = styled(Typography)`
-  font-size: 13px;
-  text-align: center;
-  color: ${({ theme }) => theme.palette.text.secondary};
+const StyledTileDescriptionSmall = styled(StyledTileDescription)`
+  padding: 0px 8px;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   @media (max-width: 800px) {
     font-size: 12px;
+  }
+`;
+
+const StyledTileSubDescription = styled('div')`
+  grid-area: sublabel;
+  padding: 0px 8px;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  @media (max-width: 800px) {
+    font-size: 11px;
   }
 `;
 
@@ -267,12 +282,12 @@ export const ProjectTotals: React.FC<{
                 organizationOwner={project.organizationOwner}
               />
             </StyledTileValue>
-            <StyledTileDescription>
+            <StyledTileDescriptionSmall>
               {project.userOwner?.name || project.organizationOwner?.name}
-              <StyledTileSubDescription>
-                {t('project_dashboard_project_owner', 'Project Owner')}
-              </StyledTileSubDescription>
-            </StyledTileDescription>
+            </StyledTileDescriptionSmall>
+            <StyledTileSubDescription>
+              {t('project_dashboard_project_owner', 'Project Owner')}
+            </StyledTileSubDescription>
           </StyledTileDataItem>
           <StyledTileDataItem data-cy="project-dashboard-members-count">
             <StyledTileValue>
@@ -308,7 +323,7 @@ export const ProjectTotals: React.FC<{
           </StyledTileDataItem>
         </StyledTile>
         <Menu
-          PaperProps={{ sx: { minWidth: anchorWidth.current + 'px' } }}
+          PaperProps={{ sx: { minWidth: anchorWidth.current } }}
           anchorEl={anchorEl}
           open={open}
           onClose={handleMenuClose}

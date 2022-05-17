@@ -3,6 +3,7 @@ import { useTranslate } from '@tolgee/react';
 import { ProjectSettingsLanguages } from 'tg.views/projects/languages/ProjectSettingsLanguages';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useProject } from 'tg.hooks/useProject';
+import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 
 export const ProjectLanguagesView = () => {
   const t = useTranslate();
@@ -20,6 +21,7 @@ export const ProjectLanguagesView = () => {
           LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
+          <SmallProjectAvatar key={0} project={project} />,
         ],
         [
           t('project_menu_languages'),
