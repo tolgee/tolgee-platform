@@ -102,19 +102,18 @@ class SuggestionTestData : BaseTestData() {
     }
   }
 
-  fun enableBoth() {
+  fun enableAll() {
     projectBuilder.addMtServiceConfig {
-
       this.targetLanguage = germanLanguage
-      this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS)
+      this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL)
       this.primaryService = MtServiceType.AWS
     }
   }
 
-  fun enableBothGooglePrimary() {
+  fun enableAllGooglePrimary() {
     projectBuilder.addMtServiceConfig {
       this.targetLanguage = germanLanguage
-      this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS)
+      this.enabledServices = mutableSetOf(MtServiceType.GOOGLE, MtServiceType.AWS, MtServiceType.DEEPL)
       this.primaryService = MtServiceType.GOOGLE
     }
   }

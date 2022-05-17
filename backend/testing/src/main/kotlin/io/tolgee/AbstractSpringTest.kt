@@ -8,6 +8,7 @@ import io.tolgee.configuration.tolgee.AuthenticationProperties
 import io.tolgee.configuration.tolgee.InternalProperties
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.configuration.tolgee.machineTranslation.AwsMachineTranslationProperties
+import io.tolgee.configuration.tolgee.machineTranslation.DeeplMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.GoogleMachineTranslationProperties
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.development.DbPopulatorReal
@@ -135,6 +136,9 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
   lateinit var googleMachineTranslationProperties: GoogleMachineTranslationProperties
 
   @Autowired
+  lateinit var deeplMachineTranslationProperties: DeeplMachineTranslationProperties
+
+  @Autowired
   lateinit var internalProperties: InternalProperties
 
   @Autowired
@@ -174,6 +178,8 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
     awsMachineTranslationProperties.secretKey = "dummy"
     googleMachineTranslationProperties.apiKey = "dummy"
     googleMachineTranslationProperties.defaultEnabled = true
+    deeplMachineTranslationProperties.defaultEnabled = false
+    deeplMachineTranslationProperties.authKey = "dummy"
     internalProperties.fakeMtProviders = false
   }
 }
