@@ -1,3 +1,10 @@
+# [2.22.0](https://github.com/tolgee/tolgee-platform/compare/v2.21.0...v2.22.0) (2022-05-17)
+
+
+### Features
+
+* Add project avatar to navigation and fix long name overflows ([4a3e1f6](https://github.com/tolgee/tolgee-platform/commit/4a3e1f6b7259497333df5b89415cfe1ab26c8d7c))
+
 # [2.21.0](https://github.com/tolgee/tolgee-platform/compare/v2.20.3...v2.21.0) (2022-05-17)
 
 
