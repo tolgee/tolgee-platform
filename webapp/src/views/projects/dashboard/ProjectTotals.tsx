@@ -12,6 +12,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
+import { useConfig } from 'tg.hooks/useConfig';
 import { PercentFormat } from './PercentFormat';
 
 const StyledTiles = styled(Box)`
@@ -140,6 +141,7 @@ export const ProjectTotals: React.FC<{
   const t = useTranslate();
   const project = useProject();
   const history = useHistory();
+  const config = useConfig();
   const tags = useApiQuery({
     url: '/v2/projects/{projectId}/tags',
     method: 'get',
@@ -192,6 +194,8 @@ export const ProjectTotals: React.FC<{
   );
 
   const tagsPresent = Boolean(stats.tagCount);
+
+  const membersEditable = config.authentication && canManage;
 
   return (
     <>
@@ -272,8 +276,8 @@ export const ProjectTotals: React.FC<{
         <StyledTile
           gridArea="users"
           data-cy="project-dashboard-members"
-          onClick={canManage ? redirectToPermissions : undefined}
-          className={clsx({ clickable: canManage })}
+          onClick={membersEditable ? redirectToPermissions : undefined}
+          className={clsx({ clickable: membersEditable })}
         >
           <StyledTileDataItem>
             <StyledTileValue>
@@ -297,7 +301,7 @@ export const ProjectTotals: React.FC<{
               {t('project_dashboard_member_count', 'Members')}
             </StyledTileDescription>
           </StyledTileDataItem>
-          {canManage && (
+          {membersEditable && (
             <StyledTileEdit>
               <Edit fontSize="small" />
             </StyledTileEdit>

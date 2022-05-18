@@ -96,25 +96,27 @@ export const DashboardView = () => {
           </SecondaryBar>
         }
       >
-        {statsLoadable.data && (
-          <StyledContainer>
-            <Box gridArea="totalStats">
-              <ProjectTotals stats={statsLoadable.data} />
-            </Box>
-            <Box gridArea="langStats">
-              <LanguageStats
-                languageStats={statsLoadable.data.languageStats}
-                wordCount={statsLoadable.data.baseWordsCount}
-              />
-            </Box>
-            <Box gridArea="activityList">
-              <ActivityList />
-            </Box>
-            <Box gridArea="activityChart">
-              <DailyActivityChart />
-            </Box>
-          </StyledContainer>
-        )}
+        <StyledContainer>
+          {statsLoadable.data && (
+            <>
+              <Box gridArea="totalStats">
+                <ProjectTotals stats={statsLoadable.data} />
+              </Box>
+              <Box gridArea="langStats">
+                <LanguageStats
+                  languageStats={statsLoadable.data.languageStats}
+                  wordCount={statsLoadable.data.baseWordsCount}
+                />
+              </Box>
+            </>
+          )}
+          <Box gridArea="activityList">
+            <ActivityList />
+          </Box>
+          <Box gridArea="activityChart">
+            <DailyActivityChart />
+          </Box>
+        </StyledContainer>
       </BaseView>
     </ProjectLanguagesProvider>
   );
