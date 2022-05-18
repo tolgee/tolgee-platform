@@ -207,7 +207,9 @@ context('Sign up', () => {
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(invitationLink);
       assertMessage('Log in or sign up first please');
-      cy.intercept('/api/public/authorize_oauth/github/*').as('GithubSignup');
+      cy.intercept('/api/public/authorize_oauth/github**http://**').as(
+        'GithubSignup'
+      );
       loginWithFakeGithub();
       cy.wait('@GithubSignup').then((interception) => {
         assert.isTrue(interception.request.url.includes('invitationCode'));
