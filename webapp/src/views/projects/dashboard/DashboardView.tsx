@@ -1,5 +1,5 @@
 import { Box, Chip, styled } from '@mui/material';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 
 import { BaseView } from 'tg.component/layout/BaseView';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
@@ -60,6 +60,7 @@ const StyledProjectId = styled(Box)`
 
 export const DashboardView = () => {
   const project = useProject();
+  const t = useTranslate();
 
   const statsLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/stats',
@@ -72,6 +73,7 @@ export const DashboardView = () => {
   return (
     <ProjectLanguagesProvider>
       <BaseView
+        windowTitle={t('project_dashboard_title')}
         containerMaxWidth="xl"
         customNavigation={
           <SecondaryBar>

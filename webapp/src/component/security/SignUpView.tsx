@@ -85,7 +85,8 @@ const SignUpView: FunctionComponent = () => {
   const View = (props: { onSubmit: (v) => void }) => (
     <DashboardPage>
       <CompactView
-        title={<T>sign_up_title</T>}
+        windowTitle={t('sign_up_title')}
+        title={t('sign_up_title')}
         backLink={LINKS.LOGIN.build()}
         content={
           state.loaded && config.needsEmailVerification ? (

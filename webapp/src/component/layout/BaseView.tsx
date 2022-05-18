@@ -1,18 +1,18 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import { Add } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import { Box, Button, Container, Grid, Typography } from '@mui/material';
 
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
-import { useConfig } from 'tg.hooks/useConfig';
 import { Navigation } from 'tg.component/navigation/Navigation';
 
 import { SecondaryBar } from './SecondaryBar';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 
 export interface BaseViewProps {
-  windowTitle?: string;
+  windowTitle: string;
   loading?: boolean;
   title?: ReactNode;
   onAdd?: () => void;
@@ -35,19 +35,9 @@ export const BaseView = (props: BaseViewProps) => {
   const hideChildrenOnLoading =
     props.hideChildrenOnLoading === undefined || props.hideChildrenOnLoading;
 
-  const config = useConfig();
-
   useGlobalLoading(props.loading);
 
-  useEffect(() => {
-    if (props.windowTitle) {
-      const oldTitle = window.document.title;
-      window.document.title = `${config.appName} - ${props.windowTitle}`;
-      return () => {
-        window.document.title = oldTitle;
-      };
-    }
-  }, []);
+  useWindowTitle(props.windowTitle);
 
   return (
     <Container

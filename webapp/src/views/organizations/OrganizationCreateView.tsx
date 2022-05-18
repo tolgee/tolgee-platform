@@ -52,6 +52,7 @@ export const OrganizationCreateView: FunctionComponent = () => {
   return (
     <DashboardPage>
       <BaseFormView
+        windowTitle={t('create_organization_title')}
         lg={6}
         md={8}
         title={<T>create_organization_title</T>}

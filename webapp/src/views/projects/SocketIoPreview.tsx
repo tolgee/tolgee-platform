@@ -55,7 +55,7 @@ export const SocketIoPreview = () => {
   });
 
   return (
-    <BaseView>
+    <BaseView windowTitle="Sockets demo">
       {messages.map((v, idx) => (
         <pre key={idx}>{v}</pre>
       ))}

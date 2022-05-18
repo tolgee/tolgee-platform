@@ -100,6 +100,7 @@ export const LanguageEditView = () => {
       lg={6}
       md={8}
       xs={10}
+      windowTitle={t('language_settings_title')}
       navigation={[
         [
           project.name,

@@ -131,6 +131,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
       lg={7}
       md={9}
       containerMaxWidth="lg"
+      windowTitle={t('project_settings_title')}
       navigation={[
         [
           project.name,
