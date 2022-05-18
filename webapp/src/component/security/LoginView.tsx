@@ -2,7 +2,7 @@ import { FunctionComponent } from 'react';
 import { Button, Typography, Link as MuiLink } from '@mui/material';
 import Box from '@mui/material/Box';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Link, Redirect, useHistory } from 'react-router-dom';
 import { container } from 'tsyringe';
@@ -27,6 +27,7 @@ const globalActions = container.resolve(GlobalActions);
 const securityServiceIns = container.resolve(SecurityService);
 // noinspection JSUnusedLocalSymbols
 export const LoginView: FunctionComponent<LoginProps> = (props) => {
+  const t = useTranslate();
   const security = useSelector((state: AppState) => state.global.security);
   const authLoading = useSelector(
     (state: AppState) => state.global.authLoading
@@ -53,6 +54,8 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
   return (
     <DashboardPage>
       <CompactView
+        windowTitle={t('login_title')}
+        title={t('login_title')}
         alerts={
           security.loginErrorCode &&
           !authLoading && (
@@ -61,7 +64,6 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
             </Alert>
           )
         }
-        title={<T>login_title</T>}
         content={
           <StandardForm
             initialValues={{ username: '', password: '' }}

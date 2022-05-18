@@ -75,6 +75,9 @@ export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
 
   return allLanguages && selectedLanguages && translations ? (
     <BaseView
+      windowTitle={
+        keyExists ? translation!.keyName : t('translation_single_create_title')
+      }
       navigation={[
         [
           project.name,

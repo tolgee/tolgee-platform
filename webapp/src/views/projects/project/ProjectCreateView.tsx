@@ -77,7 +77,8 @@ export const ProjectCreateView: FunctionComponent = () => {
       <BaseFormView
         lg={6}
         md={8}
-        title={<T>create_project_view</T>}
+        windowTitle={t('create_project_view')}
+        title={t('create_project_view')}
         initialValues={initialValues}
         onSubmit={onSubmit}
         onCancel={() => setCancelled(true)}

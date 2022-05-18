@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
 import { Box, Typography } from '@mui/material';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useFormikContext } from 'formik';
 import { useHistory } from 'react-router-dom';
 import { container } from 'tsyringe';
@@ -19,6 +19,7 @@ import { UserProfileAvatar } from './UserProfileAvatar';
 const messagesService = container.resolve(MessageService);
 
 export const UserProfileView: FunctionComponent = () => {
+  const t = useTranslate();
   const userLoadable = useApiQuery({
     url: '/api/user',
     method: 'get',
@@ -97,7 +98,8 @@ export const UserProfileView: FunctionComponent = () => {
 
   return (
     <BaseUserSettingsView
-      title={<T>user_profile_title</T>}
+      windowTitle={t('user_profile_title')}
+      title={t('user_profile_title')}
       loading={userLoadable.isFetching}
     >
       {userLoadable.data && (

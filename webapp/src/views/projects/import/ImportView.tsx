@@ -128,6 +128,7 @@ export const ImportView: FunctionComponent = () => {
 
   return (
     <BaseView
+      windowTitle={t('import_translations_title')}
       navigation={[
         [
           project.name,

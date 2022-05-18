@@ -1,6 +1,6 @@
 import { FunctionComponent, useEffect } from 'react';
 import Box from '@mui/material/Box';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
@@ -27,6 +27,7 @@ type ValueType = {
 };
 
 const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
+  const t = useTranslate();
   const security = useSelector((state: AppState) => state.global.security);
   const remoteConfig = useConfig();
 
@@ -53,8 +54,9 @@ const PasswordResetView: FunctionComponent<LoginProps> = (props) => {
         alerts={
           loadable.error && <Alert severity="error">{loadable.error}</Alert>
         }
+        windowTitle={t('reset_password_title')}
+        title={t('reset_password_title')}
         backLink={LINKS.LOGIN.build()}
-        title={<T>login_reset_password_button</T>}
         content={
           loadable.loaded ? (
             <Alert severity="success">

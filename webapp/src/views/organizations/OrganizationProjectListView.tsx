@@ -34,6 +34,7 @@ export const OrganizationsProjectListView = () => {
 
   return (
     <BaseView
+      windowTitle={t('organizations_title')}
       navigation={[
         [t('organizations_title'), LINKS.ORGANIZATIONS.build()],
         [

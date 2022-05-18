@@ -99,7 +99,8 @@ export const OrganizationProfileView: FunctionComponent = () => {
 
   return (
     <BaseOrganizationSettingsView
-      title={<T>edit_organization_title</T>}
+      windowTitle={t('edit_organization_title')}
+      title={t('edit_organization_title')}
       loading={organization.isFetching || deleteOrganization.isLoading}
       hideChildrenOnLoading={false}
     >

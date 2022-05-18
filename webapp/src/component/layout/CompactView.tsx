@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
+import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 
 const StyledContainer = styled('div')`
   flex-direction: column;
@@ -48,6 +49,7 @@ const StyledFooter = styled('div')`
 `;
 
 type Props = {
+  windowTitle: string;
   backLink?: string;
   alerts?: React.ReactNode;
   title: React.ReactNode;
@@ -56,12 +58,15 @@ type Props = {
 };
 
 export const CompactView: React.FC<Props> = ({
+  windowTitle,
   content,
   title,
   footer,
   alerts,
   backLink,
 }) => {
+  useWindowTitle(windowTitle);
+
   return (
     <>
       <GlobalStyles

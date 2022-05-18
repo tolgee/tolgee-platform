@@ -58,6 +58,7 @@ export const ProjectMembersView: FunctionComponent = () => {
 
   return (
     <BaseView
+      windowTitle={t('project_members_title')}
       navigation={[
         [
           project.name,
@@ -67,7 +68,7 @@ export const ProjectMembersView: FunctionComponent = () => {
           <SmallProjectAvatar key={0} project={project} />,
         ],
         [
-          t('project_menu_members'),
+          t('project_members_title'),
           LINKS.PROJECT_PERMISSIONS.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),

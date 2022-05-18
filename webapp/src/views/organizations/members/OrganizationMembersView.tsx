@@ -48,7 +48,10 @@ export const OrganizationMembersView: FunctionComponent = () => {
     invitationsLoadable.data?._embedded?.organizationInvitations;
 
   return (
-    <BaseOrganizationSettingsView loading={membersLoadable.isFetching}>
+    <BaseOrganizationSettingsView
+      loading={membersLoadable.isFetching}
+      windowTitle={t('organization_members_title')}
+    >
       <Box
         mb={1}
         display="flex"

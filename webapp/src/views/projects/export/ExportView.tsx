@@ -13,6 +13,7 @@ export const ExportView: FunctionComponent = () => {
 
   return (
     <BaseView
+      windowTitle={t('export_translations_title')}
       navigation={[
         [
           project.name,

@@ -113,6 +113,7 @@ export const Translations = () => {
 
   return (
     <BaseView
+      windowTitle={t('translations_view_title')}
       navigation={[
         [
           project.name,

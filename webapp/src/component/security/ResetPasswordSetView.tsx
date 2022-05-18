@@ -1,5 +1,5 @@
 import { FunctionComponent, useEffect } from 'react';
-import { T } from '@tolgee/react';
+import { useTranslate } from '@tolgee/react';
 import Box from '@mui/material/Box';
 import { useSelector } from 'react-redux';
 import { Redirect, useRouteMatch } from 'react-router-dom';
@@ -26,6 +26,7 @@ type ValueType = {
 };
 
 const PasswordResetSetView: FunctionComponent = () => {
+  const t = useTranslate();
   const match = useRouteMatch();
   const encodedData = match.params[PARAMS.ENCODED_EMAIL_AND_CODE];
   const [code, email] = atob(encodedData).split(',');
@@ -68,7 +69,8 @@ const PasswordResetSetView: FunctionComponent = () => {
               <Alert severity="error">{passwordResetSetError}</Alert>
             )
           }
-          title={<T>reset_password_set_title</T>}
+          windowTitle={t('reset_password_set_title')}
+          title={t('reset_password_set_title')}
           content={
             <StandardForm
               initialValues={{ password: '', passwordRepeat: '' } as ValueType}
