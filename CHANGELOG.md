@@ -1,3 +1,10 @@
+## [2.22.1](https://github.com/tolgee/tolgee-platform/compare/v2.22.0...v2.22.1) (2022-05-18)
+
+
+### Bug Fixes
+
+* Invitation bugs ([033cd45](https://github.com/tolgee/tolgee-platform/commit/033cd45cfcadf2bd5cccef4d10d6d58636d694e4))
+
 # [2.22.0](https://github.com/tolgee/tolgee-platform/compare/v2.21.0...v2.22.0) (2022-05-17)
 
 
