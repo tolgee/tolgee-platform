@@ -216,7 +216,7 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
         node("GOOGLE").isEqualTo("Translated with Google")
         node("DEEPL").isEqualTo("Translated with DeepL")
       }
-      node("translationCreditsBalanceAfter").isEqualTo(1200)
+      node("translationCreditsBalanceAfter").isEqualTo(300)
     }
   }
 
