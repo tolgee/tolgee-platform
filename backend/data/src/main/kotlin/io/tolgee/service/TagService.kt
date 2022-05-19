@@ -1,6 +1,7 @@
 package io.tolgee.service
 
 import io.tolgee.exceptions.BadRequestException
+import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Project
 import io.tolgee.model.dataImport.WithKeyMeta
 import io.tolgee.model.key.Key
@@ -81,6 +82,10 @@ class TagService(
 
   fun find(id: Long): Tag? {
     return tagRepository.findById(id).orElse(null)
+  }
+
+  fun get(id: Long): Tag {
+    return find(id) ?: throw NotFoundException()
   }
 
   fun find(project: Project, tagName: String): Tag? {

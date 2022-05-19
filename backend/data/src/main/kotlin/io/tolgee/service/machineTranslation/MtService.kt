@@ -9,8 +9,8 @@ import io.tolgee.helpers.TextHelper
 import io.tolgee.model.Language
 import io.tolgee.model.Project
 import io.tolgee.model.key.Key
-import io.tolgee.service.ProjectService
 import io.tolgee.service.TranslationService
+import io.tolgee.service.project.ProjectService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 

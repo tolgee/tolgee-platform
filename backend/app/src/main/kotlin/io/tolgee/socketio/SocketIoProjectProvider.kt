@@ -5,8 +5,8 @@ import io.tolgee.exceptions.AuthenticationException
 import io.tolgee.model.Project
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.security.JwtTokenProviderImpl
-import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
+import io.tolgee.service.project.ProjectService
 import org.springframework.stereotype.Component
 
 @Component

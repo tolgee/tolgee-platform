@@ -7,8 +7,8 @@ import io.tolgee.dtos.response.InvitationDTO
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.service.InvitationService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.SecurityService
+import io.tolgee.service.project.ProjectService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -31,7 +31,6 @@ class InvitationController @Autowired constructor(
   @GetMapping("/accept/{code}")
   @Operation(summary = "Accepts invitation to project")
   fun acceptInvitation(@PathVariable("code") code: String?): ResponseEntity<Void> {
-    invitationService.removeExpired()
     invitationService.accept(code)
     return ResponseEntity(HttpStatus.OK)
   }

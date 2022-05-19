@@ -279,6 +279,12 @@ export interface paths {
   "/v2/projects/{projectId}/tags": {
     get: operations["getAll_1"];
   };
+  "/v2/projects/{projectId}/stats/daily-activity": {
+    get: operations["getProjectDailyActivity"];
+  };
+  "/v2/projects/{projectId}/stats": {
+    get: operations["getProjectStats"];
+  };
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
   };
@@ -294,6 +300,12 @@ export interface paths {
   };
   "/v2/projects/{projectId}/import/result/files/{importFileId}/issues": {
     get: operations["getImportFileIssues"];
+  };
+  "/v2/projects/{projectId}/activity": {
+    get: operations["getActivity"];
+  };
+  "/v2/projects/{projectId}/translations/{translationId}/history": {
+    get: operations["getTranslationHistory"];
   };
   "/v2/projects/{projectId}/translations/{languages}": {
     get: operations["getAllTranslations"];
@@ -474,9 +486,13 @@ export interface components {
       slug?: string;
       avatar?: components["schemas"]["Avatar"];
       userOwner?: components["schemas"]["UserAccountModel"];
+      organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
+      /** Use organizationOwner field */
       organizationOwnerName?: string;
+      /** Use organizationOwner field */
       organizationOwnerSlug?: string;
+      /** Use organizationOwner field */
       organizationOwnerBasePermissions?:
         | "VIEW"
         | "TRANSLATE"
@@ -486,6 +502,14 @@ export interface components {
       /** Current user's direct permission */
       directPermissions?: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
       computedPermissions: components["schemas"]["UserPermissionModel"];
+    };
+    SimpleOrganizationModel: {
+      id: number;
+      name: string;
+      slug: string;
+      description?: string;
+      basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
+      avatar?: components["schemas"]["Avatar"];
     };
     UserPermissionModel: {
       /** List of languages current user has TRANSLATE permission to. If null, all languages edition is permitted. */
@@ -925,6 +949,33 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    LanguageStatsModel: {
+      languageId?: number;
+      languageTag?: string;
+      languageName?: string;
+      languageOriginalName?: string;
+      languageFlagEmoji?: string;
+      translatedKeyCount: number;
+      translatedWordCount: number;
+      translatedPercentage: number;
+      reviewedKeyCount: number;
+      reviewedWordCount: number;
+      reviewedPercentage: number;
+      untranslatedKeyCount: number;
+      untranslatedWordCount: number;
+      untranslatedPercentage: number;
+    };
+    ProjectStatsModel: {
+      projectId: number;
+      languageCount: number;
+      keyCount: number;
+      baseWordsCount: number;
+      translatedPercentage: number;
+      reviewedPercentage: number;
+      membersCount: number;
+      tagCount: number;
+      languageStats: components["schemas"]["LanguageStatsModel"][];
+    };
     CreditBalanceModel: {
       creditBalance: number;
     };
@@ -945,6 +996,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -954,8 +1006,8 @@ export interface components {
         | "VALUE_IS_EMPTY"
         | "PO_MSGCTXT_NOT_SUPPORTED"
         | "ID_ATTRIBUTE_NOT_PROVIDED"
-        | "TARGET_NOT_PROVIDED";
-      params: components["schemas"]["ImportFileIssueParamView"][];
+        | "TARGET_NOT_PROVIDED"
+        | "TRANSLATION_TOO_LONG";
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -974,11 +1026,97 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
+    EntityDescription: {
+      entityClass: string;
+      entityId: number;
+      data: { [key: string]: { [key: string]: unknown } };
+      exists?: boolean;
+    };
+    ModifiedEntityModel: {
+      entityId: number;
+      description?: { [key: string]: { [key: string]: unknown } };
+      modifications?: {
+        [key: string]: components["schemas"]["PropertyModification"];
+      };
+      relations?: { [key: string]: components["schemas"]["EntityDescription"] };
+      exists?: boolean;
+    };
+    PagedModelProjectActivityModel: {
+      _embedded?: {
+        activities?: components["schemas"]["ProjectActivityModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    ProjectActivityAuthorModel: {
+      id: number;
+      username?: string;
+      name?: string;
+      avatar?: components["schemas"]["Avatar"];
+    };
+    ProjectActivityModel: {
+      revisionId: number;
+      timestamp: number;
+      type:
+        | "UNKNOWN"
+        | "SET_TRANSLATION_STATE"
+        | "SET_TRANSLATIONS"
+        | "DISMISS_AUTO_TRANSLATED_STATE"
+        | "TRANSLATION_COMMENT_ADD"
+        | "TRANSLATION_COMMENT_DELETE"
+        | "TRANSLATION_COMMENT_EDIT"
+        | "TRANSLATION_COMMENT_SET_STATE"
+        | "SCREENSHOT_DELETE"
+        | "SCREENSHOT_ADD"
+        | "KEY_TAGS_EDIT"
+        | "KEY_NAME_EDIT"
+        | "KEY_DELETE"
+        | "CREATE_KEY"
+        | "COMPLEX_EDIT"
+        | "IMPORT"
+        | "CREATE_LANGUAGE"
+        | "EDIT_LANGUAGE"
+        | "DELETE_LANGUAGE"
+        | "CREATE_PROJECT"
+        | "EDIT_PROJECT";
+      author?: components["schemas"]["ProjectActivityAuthorModel"];
+      modifiedEntities?: {
+        [key: string]: components["schemas"]["ModifiedEntityModel"][];
+      };
+      meta?: { [key: string]: { [key: string]: unknown } };
+      counts?: { [key: string]: number };
+    };
+    PropertyModification: {
+      old?: { [key: string]: unknown };
+      new?: { [key: string]: unknown };
+    };
     PagedModelTranslationCommentModel: {
       _embedded?: {
         translationComments?: components["schemas"]["TranslationCommentModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
+    };
+    PagedModelTranslationHistoryModel: {
+      _embedded?: {
+        revisions?: components["schemas"]["TranslationHistoryModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    /** Author of the change */
+    SimpleUserAccountModel: {
+      id: number;
+      username: string;
+      name?: string;
+      avatar?: components["schemas"]["Avatar"];
+    };
+    TranslationHistoryModel: {
+      /** Modified fields */
+      modifications?: {
+        [key: string]: components["schemas"]["PropertyModification"];
+      };
+      /** Unix timestamp of the revision */
+      timestamp: number;
+      author?: components["schemas"]["SimpleUserAccountModel"];
+      revisionType: "ADD" | "MOD" | "DEL";
     };
     SelectAllResponse: {
       ids: number[];
@@ -1080,9 +1218,13 @@ export interface components {
       slug?: string;
       avatar?: components["schemas"]["Avatar"];
       userOwner?: components["schemas"]["UserAccountModel"];
+      organizationOwner?: components["schemas"]["SimpleOrganizationModel"];
       baseLanguage?: components["schemas"]["LanguageModel"];
+      /** Use organizationOwner field */
       organizationOwnerName?: string;
+      /** Use organizationOwner field */
       organizationOwnerSlug?: string;
+      /** Use organizationOwner field */
       organizationOwnerBasePermissions?:
         | "VIEW"
         | "TRANSLATE"
@@ -4564,6 +4706,60 @@ export interface operations {
       };
     };
   };
+  getProjectDailyActivity: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": { [key: string]: number };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getProjectStats: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["ProjectStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getProjectCredits: {
     parameters: {
       path: {
@@ -4753,6 +4949,77 @@ export interface operations {
       };
     };
   };
+  getActivity: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectActivityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getTranslationHistory: {
+    parameters: {
+      path: {
+        translationId: number;
+        projectId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelTranslationHistoryModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllTranslations: {
     parameters: {
       path: {
@@ -4818,12 +5085,6 @@ export interface operations {
         filterHasNoScreenshot?: boolean;
         /** Selects only keys with provided tag */
         filterTag?: string[];
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
       };
       path: {
         projectId: number;

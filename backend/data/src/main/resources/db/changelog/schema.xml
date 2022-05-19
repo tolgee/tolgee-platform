@@ -330,18 +330,9 @@
     </changeSet>
     <changeSet author="jenik" id="1616320983872-4">
         <sql>
-            insert into API_KEY_SCOPES_ENUM
-            select id, 0
-            from API_KEY
-            where SCOPES like '%translations.view%';
-            insert into API_KEY_SCOPES_ENUM
-            select id, 1
-            from API_KEY
-            where SCOPES like '%translations.edit%';
-            insert into API_KEY_SCOPES_ENUM
-            select id, 2
-            from API_KEY
-            where SCOPES like '%keys.edit%';
+            insert into API_KEY_SCOPES_ENUM select id, 0 from API_KEY where SCOPES like '%translations.view%';
+            insert into API_KEY_SCOPES_ENUM select id, 1 from API_KEY where SCOPES like '%translations.edit%';
+            insert into API_KEY_SCOPES_ENUM select id, 2 from API_KEY where SCOPES like '%keys.edit%';
         </sql>
         <rollback>
             delete from API_KEY_SCOPES_ENUM where 1 = 1
@@ -923,10 +914,7 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1623399568034-4">
-        <addForeignKeyConstraint baseColumnNames="base_language_id" baseTableName="project"
-                                 constraintName="FKe87b2cgwpk3qttqh95tgrehlt" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="base_language_id" baseTableName="project" constraintName="FKe87b2cgwpk3qttqh95tgrehlt" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1623406128517-2">
         <addColumn tableName="language">
@@ -1178,112 +1166,58 @@
         </createTable>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-19">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="email_verification_aud"
-                                 constraintName="FK1diai27pxl7epr7wmiddlwns5" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="email_verification_aud" constraintName="FK1diai27pxl7epr7wmiddlwns5" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-20">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="api_key_scopes_enum_aud"
-                                 constraintName="FK3jkyqktbidh2cyx3xy3qml99l" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="api_key_scopes_enum_aud" constraintName="FK3jkyqktbidh2cyx3xy3qml99l" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-21">
-        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="translation_comment"
-                                 constraintName="FK9ac0dmcy0armtdh781gs8bq01" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="translation_comment" constraintName="FK9ac0dmcy0armtdh781gs8bq01" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-22">
-        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="revision"
-                                 constraintName="FKb7qk3ljn3o8bqwum6a5io3tpe" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="author_id" baseTableName="revision" constraintName="FKb7qk3ljn3o8bqwum6a5io3tpe" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-23">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="key_aud"
-                                 constraintName="FKcwyby3t6jg4ybxox3nchfbpqy" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="key_aud" constraintName="FKcwyby3t6jg4ybxox3nchfbpqy" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-24">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="invitation_aud"
-                                 constraintName="FKdkc05rqm5p3ahqp80ukr4y6se" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="invitation_aud" constraintName="FKdkc05rqm5p3ahqp80ukr4y6se" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-25">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="user_account_aud"
-                                 constraintName="FKfi9ywuk505xl9g17jib6b7urx" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="user_account_aud" constraintName="FKfi9ywuk505xl9g17jib6b7urx" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-26">
-        <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_comment"
-                                 constraintName="FKfre351ty5rjdolc8qeq3tbdlg" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="translation"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="translation_id" baseTableName="translation_comment" constraintName="FKfre351ty5rjdolc8qeq3tbdlg" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="translation" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-27">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="organization_role_aud"
-                                 constraintName="FKgey5u1uwkslc6hhyp3uka2wj8" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="organization_role_aud" constraintName="FKgey5u1uwkslc6hhyp3uka2wj8" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-28">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="organization_aud"
-                                 constraintName="FKgrkrhev0nmxi9r1h096cm8lxe" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="organization_aud" constraintName="FKgrkrhev0nmxi9r1h096cm8lxe" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-29">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="api_key_aud"
-                                 constraintName="FKhqt2jx03076gcmame7hggtppa" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="api_key_aud" constraintName="FKhqt2jx03076gcmame7hggtppa" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-30">
-        <addForeignKeyConstraint baseColumnNames="updated_by_id" baseTableName="translation_comment"
-                                 constraintName="FKi84l90hnwf1m1wg1hn2ov7ykr" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="updated_by_id" baseTableName="translation_comment" constraintName="FKi84l90hnwf1m1wg1hn2ov7ykr" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-31">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="translation_aud"
-                                 constraintName="FKlkb2y39ix1nhtnjkco5pkwa5w" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="translation_aud" constraintName="FKlkb2y39ix1nhtnjkco5pkwa5w" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-32">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="permission_aud"
-                                 constraintName="FKlkd3khuueqm30qwpdrku4w6eo" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="permission_aud" constraintName="FKlkd3khuueqm30qwpdrku4w6eo" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-33">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="language_aud"
-                                 constraintName="FKq4t05s4qw8uasc9mjl2tk83sm" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="language_aud" constraintName="FKq4t05s4qw8uasc9mjl2tk83sm" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-34">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="screenshot_aud"
-                                 constraintName="FKq6jhbxmwvr0o19sfqwog5gk7s" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="screenshot_aud" constraintName="FKq6jhbxmwvr0o19sfqwog5gk7s" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-35">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="translation_comment_aud"
-                                 constraintName="FKq8g6phhnoyyuyjh9omekg8ja7" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="translation_comment_aud" constraintName="FKq8g6phhnoyyuyjh9omekg8ja7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624975131291-36">
-        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="project_aud"
-                                 constraintName="FKqsyp928iixx9oharj1ofavbk5" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rev" baseTableName="project_aud" constraintName="FKqsyp928iixx9oharj1ofavbk5" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="revision" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1624978579675-3">
         <dropForeignKeyConstraint baseTableName="revision" constraintName="FKb7qk3ljn3o8bqwum6a5io3tpe"/>
@@ -1314,22 +1248,13 @@
         </createTable>
     </changeSet>
     <changeSet author="jenik (generated)" id="1626873700632-7">
-        <addForeignKeyConstraint baseColumnNames="tags_id" baseTableName="key_meta_tags"
-                                 constraintName="FK1hhq8sx3mn7isckcoaq277ix6" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tag"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="tags_id" baseTableName="key_meta_tags" constraintName="FK1hhq8sx3mn7isckcoaq277ix6" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="tag" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1626873700632-8">
-        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="tag"
-                                 constraintName="FKbyy56vice9njgl86752up8120" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="tag" constraintName="FKbyy56vice9njgl86752up8120" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1626873700632-9">
-        <addForeignKeyConstraint baseColumnNames="key_metas_id" baseTableName="key_meta_tags"
-                                 constraintName="FKsbnhi8xkxfybrf26ypraemrmk" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key_meta"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="key_metas_id" baseTableName="key_meta_tags" constraintName="FKsbnhi8xkxfybrf26ypraemrmk" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="key_meta" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1626957302292-5">
         <addPrimaryKey columnNames="key_metas_id, tags_id" tableName="key_meta_tags"/>
@@ -1350,8 +1275,7 @@
         <dropColumn columnName="updated_by_id" tableName="translation_comment_aud"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1626957302292-3">
-        <addNotNullConstraint columnDataType="bigint" columnName="author_id" tableName="translation_comment"
-                              validate="true"/>
+        <addNotNullConstraint columnDataType="bigint" columnName="author_id" tableName="translation_comment" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1626957302292-4">
         <addNotNullConstraint columnDataType="bigint" columnName="key_id" tableName="translation" validate="true"/>
@@ -1375,14 +1299,10 @@
         </createTable>
     </changeSet>
     <changeSet author="jenik (generated)" id="1633085681853-11">
-        <addUniqueConstraint columnNames="filename" constraintName="uploaded_image_filename"
-                             tableName="uploaded_image"/>
+        <addUniqueConstraint columnNames="filename" constraintName="uploaded_image_filename" tableName="uploaded_image"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1633085681853-14">
-        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="uploaded_image"
-                                 constraintName="FKelfpas8y8t5pq40m57ttdcnf" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="uploaded_image" constraintName="FKelfpas8y8t5pq40m57ttdcnf" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1637177424360-3">
         <addColumn tableName="organization">
@@ -1395,8 +1315,7 @@
         </addColumn>
     </changeSet>
     <changeSet author="jenik (generated)" id="1637177424360-5">
-        <addUniqueConstraint columnNames="third_party_billing_id"
-                             constraintName="organization_third_party_billing_id_unique" tableName="organization"/>
+        <addUniqueConstraint columnNames="third_party_billing_id" constraintName="organization_third_party_billing_id_unique" tableName="organization"/>
     </changeSet>
     <changeSet author="jenik" id="1637177424380-0">
         <modifyDataType
@@ -1448,40 +1367,23 @@
         </createTable>
     </changeSet>
     <changeSet author="jenik (generated)" id="1638968082095-5">
-        <addForeignKeyConstraint baseColumnNames="target_language_id" baseTableName="mt_service_config"
-                                 constraintName="FK6dcse6i27cymn9au7m51etb43" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="target_language_id" baseTableName="mt_service_config" constraintName="FK6dcse6i27cymn9au7m51etb43" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="language" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1638968082095-6">
-        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="mt_service_config"
-                                 constraintName="FK7cklk7byifpo0jj5q58dwn6rt" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="mt_service_config" constraintName="FK7cklk7byifpo0jj5q58dwn6rt" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1638968082095-7">
-        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="mt_credit_bucket"
-                                 constraintName="FKlgwarx2xdphg9imptapjv2p6j" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="mt_credit_bucket" constraintName="FKlgwarx2xdphg9imptapjv2p6j" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1638968082095-8">
-        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="mt_credit_bucket"
-                                 constraintName="FKsx03b0rw40yo8jtqkklir7h04" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization"
-                                 validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="mt_credit_bucket" constraintName="FKsx03b0rw40yo8jtqkklir7h04" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
     </changeSet>
     <changeSet author="jenik (generated)" id="1638968082095-9">
-        <addForeignKeyConstraint baseColumnNames="mt_service_config_id"
-                                 baseTableName="mt_service_config_enabled_services"
-                                 constraintName="FKvo4mgub2uvhr99nqjm2gwy57" deferrable="false"
-                                 initiallyDeferred="false" referencedColumnNames="id"
-                                 referencedTableName="mt_service_config" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="mt_service_config_id" baseTableName="mt_service_config_enabled_services" constraintName="FKvo4mgub2uvhr99nqjm2gwy57" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="mt_service_config" validate="true"/>
     </changeSet>
     <changeSet id="1638968082096-0" author="jenik">
         <sql dbms="postgresql">
-            CREATE
-            EXTENSION IF NOT EXISTS pg_trgm;
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
             CREATE INDEX translation_text_gin_trgm_index ON translation USING GIN (text gin_trgm_ops);
         </sql>
     </changeSet>
@@ -1624,5 +1526,182 @@
             UPDATE translation_aud set state = 1 where state = 2 or state = 4;
             UPDATE translation_aud set state = 2 where state = 3;
         </sql>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1648644553219-1">
+        <createSequence incrementBy="10" sequenceName="activity_sequence" startValue="10"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-1">
+        <createTable tableName="activity_describing_entity">
+            <column name="entity_class" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data" type="JSONB"/>
+            <column name="describing_relations" type="JSONB"/>
+            <column name="revision_type" type="INTEGER"/>
+            <column name="activity_revision_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-2">
+        <createTable tableName="activity_modified_entity">
+            <column name="entity_class" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="describing_data" type="JSONB"/>
+            <column name="describing_relations" type="JSONB"/>
+            <column name="modifications" type="JSONB"/>
+            <column name="revision_type" type="INTEGER"/>
+            <column name="activity_revision_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-3">
+        <createTable tableName="activity_revision">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="activity_revisionPK"/>
+            </column>
+            <column name="author_id" type="BIGINT"/>
+            <column name="meta" type="JSONB"/>
+            <column name="project_id" type="BIGINT"/>
+            <column name="timestamp" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-4">
+        <addPrimaryKey columnNames="activity_revision_id, entity_class, entity_id" constraintName="activity_describing_entityPK" tableName="activity_describing_entity"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-5">
+        <addPrimaryKey columnNames="activity_revision_id, entity_class, entity_id" constraintName="activity_modified_entityPK" tableName="activity_modified_entity"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-6">
+        <createIndex indexName="IDXau6hururiosck0in4s0bintp4" tableName="activity_revision">
+            <column name="type"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-7">
+        <createIndex indexName="IDXe1pk0fttwygawrf99gbby6scc" tableName="activity_revision">
+            <column name="author_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-8">
+        <addForeignKeyConstraint baseColumnNames="activity_revision_id" baseTableName="activity_describing_entity" constraintName="FK9xs5a07fba5yqje5jqm6qrehs" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_revision" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-9">
+        <addForeignKeyConstraint baseColumnNames="activity_revision_id" baseTableName="activity_modified_entity" constraintName="FKtqmx9nlfhcmio41b5xieb0ki4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="activity_revision" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-10">
+        <dropForeignKeyConstraint baseTableName="email_verification_aud" constraintName="FK1diai27pxl7epr7wmiddlwns5"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-11">
+        <dropForeignKeyConstraint baseTableName="api_key_scopes_enum_aud" constraintName="FK3jkyqktbidh2cyx3xy3qml99l"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-12">
+        <dropForeignKeyConstraint baseTableName="key_aud" constraintName="FKcwyby3t6jg4ybxox3nchfbpqy"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-13">
+        <dropForeignKeyConstraint baseTableName="invitation_aud" constraintName="FKdkc05rqm5p3ahqp80ukr4y6se"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-14">
+        <dropForeignKeyConstraint baseTableName="user_account_aud" constraintName="FKfi9ywuk505xl9g17jib6b7urx"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-15">
+        <dropForeignKeyConstraint baseTableName="organization_role_aud" constraintName="FKgey5u1uwkslc6hhyp3uka2wj8"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-16">
+        <dropForeignKeyConstraint baseTableName="organization_aud" constraintName="FKgrkrhev0nmxi9r1h096cm8lxe"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-17">
+        <dropForeignKeyConstraint baseTableName="api_key_aud" constraintName="FKhqt2jx03076gcmame7hggtppa"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-18">
+        <dropForeignKeyConstraint baseTableName="translation_aud" constraintName="FKlkb2y39ix1nhtnjkco5pkwa5w"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-19">
+        <dropForeignKeyConstraint baseTableName="permission_aud" constraintName="FKlkd3khuueqm30qwpdrku4w6eo"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-20">
+        <dropForeignKeyConstraint baseTableName="language_aud" constraintName="FKq4t05s4qw8uasc9mjl2tk83sm"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-21">
+        <dropForeignKeyConstraint baseTableName="screenshot_aud" constraintName="FKq6jhbxmwvr0o19sfqwog5gk7s"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-22">
+        <dropForeignKeyConstraint baseTableName="translation_comment_aud" constraintName="FKq8g6phhnoyyuyjh9omekg8ja7"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-23">
+        <dropForeignKeyConstraint baseTableName="permission_languages_aud" constraintName="FKqrbr6c2d8ujo1y43a6ftsdp8c"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-24">
+        <dropForeignKeyConstraint baseTableName="project_aud" constraintName="FKqsyp928iixx9oharj1ofavbk5"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-25">
+        <dropTable tableName="api_key_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-26">
+        <dropTable tableName="api_key_scopes_enum_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-27">
+        <dropTable tableName="email_verification_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-28">
+        <dropTable tableName="invitation_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-29">
+        <dropTable tableName="key_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-30">
+        <dropTable tableName="language_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-31">
+        <dropTable tableName="organization_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-32">
+        <dropTable tableName="organization_role_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-33">
+        <dropTable tableName="permission_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-34">
+        <dropTable tableName="permission_languages_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-35">
+        <dropTable tableName="project_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-36">
+        <dropTable tableName="screenshot_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-37">
+        <dropTable tableName="translation_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-38">
+        <dropTable tableName="translation_comment_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1650442105133-39">
+        <dropTable tableName="user_account_aud"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1648040856646-1">
+        <addColumn tableName="translation">
+            <column name="character_count" type="int4"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1648040856646-3">
+        <addColumn tableName="translation">
+            <column name="word_count" type="int4"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1652252690924-1">
+        <createIndex indexName="IDX4wcn6c3o02pp43ldnu3nggorg" tableName="activity_revision">
+            <column name="project_id"/>
+        </createIndex>
     </changeSet>
 </databaseChangeLog>

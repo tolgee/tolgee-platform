@@ -135,10 +135,18 @@ export class SecurityService {
 
     const code = this.invitationCodeService.getCode();
     if (code) {
-      await this.apiSchemaService.schemaRequest(
-        '/api/invitation/accept/{code}',
-        'get'
-      )({ path: { code } });
+      try {
+        await this.apiSchemaService.schemaRequest(
+          '/api/invitation/accept/{code}',
+          'get'
+        )({ path: { code } });
+      } catch (e) {
+        if (e.code === 'invitation_code_does_not_exist_or_expired') {
+          this.messageService.error(<T>{e.code}</T>);
+        } else {
+          throw e;
+        }
+      }
       this.invitationCodeService.disposeCode();
     }
     return tokenDTO;

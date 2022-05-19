@@ -39,6 +39,7 @@ export const OrganizationsListView = () => {
 
   return (
     <BaseUserSettingsView
+      windowTitle={t('organizations_title')}
       title={t('organizations_title')}
       containerMaxWidth="lg"
       loading={organizatationsLoadable.isFetching}

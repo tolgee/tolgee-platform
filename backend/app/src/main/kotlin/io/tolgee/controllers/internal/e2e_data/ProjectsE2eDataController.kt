@@ -17,8 +17,8 @@ import io.tolgee.service.KeyService
 import io.tolgee.service.LanguageService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.project.ProjectService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping

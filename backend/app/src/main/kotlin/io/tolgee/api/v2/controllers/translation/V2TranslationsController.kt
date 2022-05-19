@@ -10,6 +10,10 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.tags.Tags
+import io.tolgee.activity.ActivityHolder
+import io.tolgee.activity.ActivityService
+import io.tolgee.activity.RequestActivity
+import io.tolgee.activity.data.ActivityType
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPageModel
 import io.tolgee.api.v2.hateoas.translations.KeysWithTranslationsPagedResourcesAssembler
 import io.tolgee.api.v2.hateoas.translations.SetTranslationsResponseModel
@@ -18,7 +22,6 @@ import io.tolgee.api.v2.hateoas.translations.TranslationHistoryModelAssembler
 import io.tolgee.api.v2.hateoas.translations.TranslationModel
 import io.tolgee.api.v2.hateoas.translations.TranslationModelAssembler
 import io.tolgee.controllers.IController
-import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.SelectAllResponse
@@ -45,7 +48,9 @@ import io.tolgee.service.TranslationService
 import io.tolgee.service.query_builders.CursorUtil
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -77,12 +82,14 @@ class V2TranslationsController(
   private val keyService: KeyService,
   private val pagedAssembler: KeysWithTranslationsPagedResourcesAssembler,
   private val historyPagedAssembler: PagedResourcesAssembler<TranslationHistoryView>,
-  private val translationHistoryModelAssembler: TranslationHistoryModelAssembler,
+  private val historyModelAssembler: TranslationHistoryModelAssembler,
   private val translationModelAssembler: TranslationModelAssembler,
   private val languageService: LanguageService,
   private val securityService: SecurityService,
   private val authenticationFacade: AuthenticationFacade,
-  private val screenshotService: ScreenshotService
+  private val screenshotService: ScreenshotService,
+  private val activityHolder: ActivityHolder,
+  private val activityService: ActivityService
 ) : IController {
   @GetMapping(value = ["/{languages}"])
   @AccessWithAnyProjectPermission
@@ -111,6 +118,7 @@ class V2TranslationsController(
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translations for existing key")
+  @RequestActivity(ActivityType.SET_TRANSLATIONS)
   fun setTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
     val key = keyService.get(projectHolder.project.id, dto.key)
     securityService.checkLanguageTagPermissions(dto.translations.keys, projectHolder.project.id)
@@ -133,8 +141,13 @@ class V2TranslationsController(
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.EDIT)
   @Operation(summary = "Sets translations for existing or not existing key")
   fun createOrUpdateTranslations(@RequestBody @Valid dto: SetTranslationsWithKeyDto): SetTranslationsResponseModel {
-    checkEditScopeIfKeyExists(dto)
-    val key = keyService.getOrCreateKey(projectHolder.projectEntity, PathDTO.fromFullPath(dto.key))
+    val key = keyService.find(projectHolder.projectEntity.id, dto.key)?.also {
+      activityHolder.activity = ActivityType.SET_TRANSLATIONS
+    } ?: let {
+      checkKeyEditScope()
+      activityHolder.activity = ActivityType.CREATE_KEY
+      keyService.create(projectHolder.projectEntity, dto.key)
+    }
     val translations = translationService.setForKey(key, dto.translations)
     return getSetTranslationsResponse(key, translations)
   }
@@ -143,6 +156,7 @@ class V2TranslationsController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(permission = Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = "Sets translation state")
+  @RequestActivity(ActivityType.SET_TRANSLATION_STATE)
   fun setTranslationState(@PathVariable translationId: Long, @PathVariable state: TranslationState): TranslationModel {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
@@ -196,6 +210,7 @@ class V2TranslationsController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
   @Operation(summary = """Removes "auto translated" indication""")
+  @RequestActivity(ActivityType.DISMISS_AUTO_TRANSLATED_STATE)
   fun dismissAutoTranslatedState(
     @PathVariable translationId: Long
   ): TranslationModel {
@@ -215,12 +230,12 @@ Sorting is not supported for supported. It is automatically sorted from newest t
   )
   fun getTranslationHistory(
     @PathVariable translationId: Long,
-    @ParameterObject pageable: Pageable
+    @ParameterObject @SortDefault(sort = ["timestamp"], direction = Sort.Direction.DESC) pageable: Pageable
   ): PagedModel<TranslationHistoryModel> {
     val translation = translationService.get(translationId)
     translation.checkFromProject()
-    val translations = translationService.getHistory(translationId, pageable)
-    return historyPagedAssembler.toModel(translations, translationHistoryModelAssembler)
+    val translations = activityService.getTranslationHistory(translation.id, pageable)
+    return historyPagedAssembler.toModel(translations, historyModelAssembler)
   }
 
   private fun getKeysWithScreenshots(keyIds: Collection<Long>): Map<Long, MutableSet<Screenshot>>? {
@@ -244,11 +259,9 @@ Sorting is not supported for supported. It is automatically sorted from newest t
     )
   }
 
-  private fun checkEditScopeIfKeyExists(dto: SetTranslationsWithKeyDto) {
-    keyService.findOptional(projectHolder.projectEntity.id, dto.key).orElse(null) ?: let {
-      if (authenticationFacade.isApiKeyAuthentication) {
-        securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
-      }
+  private fun checkKeyEditScope() {
+    if (authenticationFacade.isApiKeyAuthentication) {
+      securityService.checkApiKeyScopes(setOf(ApiScope.KEYS_EDIT), authenticationFacade.apiKey)
     }
   }
 

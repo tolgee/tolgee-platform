@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom';
 import { Box } from '@mui/material';
 
@@ -13,6 +13,7 @@ import { AddApiKeyFormDialog } from './AddApiKeyFormDialog';
 import { ApiKeysList } from './ApiKeysList';
 
 export const ApiKeysView: FunctionComponent = () => {
+  const t = useTranslate();
   const list = useApiQuery({
     url: '/v2/api-keys',
     query: {
@@ -39,7 +40,8 @@ export const ApiKeysView: FunctionComponent = () => {
   return (
     <>
       <BaseUserSettingsView
-        title={<T>Api keys title</T>}
+        windowTitle={t('api_keys_title')}
+        title={t('api_keys_title')}
         loading={list.isFetching}
         hideChildrenOnLoading={false}
       >

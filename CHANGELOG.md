@@ -1,3 +1,40 @@
+## [2.23.1](https://github.com/tolgee/tolgee-platform/compare/v2.23.0...v2.23.1) (2022-05-19)
+
+
+### Bug Fixes
+
+* Dashboard faster loading, members link and user name layout ([7f4710d](https://github.com/tolgee/tolgee-platform/commit/7f4710d6cd3e275edaf0c7cc047e2484b9e46e24))
+
+# [2.23.0](https://github.com/tolgee/tolgee-platform/compare/v2.22.1...v2.23.0) (2022-05-19)
+
+
+### Features
+
+* Import accessible with API key ([14c0568](https://github.com/tolgee/tolgee-platform/commit/14c0568525b36d2abda95f6ab071ae48f06b4128))
+
+## [2.22.1](https://github.com/tolgee/tolgee-platform/compare/v2.22.0...v2.22.1) (2022-05-18)
+
+
+### Bug Fixes
+
+* Invitation bugs ([033cd45](https://github.com/tolgee/tolgee-platform/commit/033cd45cfcadf2bd5cccef4d10d6d58636d694e4))
+
+# [2.22.0](https://github.com/tolgee/tolgee-platform/compare/v2.21.0...v2.22.0) (2022-05-17)
+
+
+### Features
+
+* Add project avatar to navigation and fix long name overflows ([4a3e1f6](https://github.com/tolgee/tolgee-platform/commit/4a3e1f6b7259497333df5b89415cfe1ab26c8d7c))
+
+# [2.21.0](https://github.com/tolgee/tolgee-platform/compare/v2.20.3...v2.21.0) (2022-05-17)
+
+
+### Features
+
+* **Dashboard:** languages clickable, history diffs ([06e9ef5](https://github.com/tolgee/tolgee-platform/commit/06e9ef5bd86617c8ca71bb7a2fe3bffe35058228))
+* Project dashboard and activity backend, data migration ([d3d2ffa](https://github.com/tolgee/tolgee-platform/commit/d3d2ffaeef2fd22373835b4b6ebcc6f793575b76))
+* Project dashboard and activity FE - remove styled inner classes ([7c057b2](https://github.com/tolgee/tolgee-platform/commit/7c057b210ebe0fe64237b22b521c43321728c3c2))
+
 ## [2.20.3](https://github.com/tolgee/tolgee-platform/compare/v2.20.2...v2.20.3) (2022-05-13)
 
 

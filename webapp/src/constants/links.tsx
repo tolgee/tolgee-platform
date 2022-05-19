@@ -170,6 +170,10 @@ export class LINKS {
     'socket_io_preview'
   );
 
+  static ACTIVITY_PREVIEW = Link.ofParent(LINKS.PROJECT, 'activity');
+
+  static PROJECT_DASHBOARD = LINKS.PROJECT;
+
   static PROJECT_INTEGRATE = Link.ofParent(LINKS.PROJECT, 'integrate');
 
   /**

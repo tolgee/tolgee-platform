@@ -19,6 +19,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 
 export const Translations = () => {
   const t = useTranslate();
@@ -112,12 +113,14 @@ export const Translations = () => {
 
   return (
     <BaseView
+      windowTitle={t('translations_view_title')}
       navigation={[
         [
           project.name,
-          LINKS.PROJECT_TRANSLATIONS.build({
+          LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
+          <SmallProjectAvatar key={0} project={project} />,
         ],
         [
           t('translations_view_title'),

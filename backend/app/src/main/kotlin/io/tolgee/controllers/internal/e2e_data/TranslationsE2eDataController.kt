@@ -4,11 +4,10 @@ import io.swagger.v3.oas.annotations.Hidden
 import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.TranslationsTestData
 import io.tolgee.dtos.request.translation.SetTranslationsWithKeyDto
-import io.tolgee.model.Project
 import io.tolgee.security.InternalController
 import io.tolgee.service.KeyService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.project.ProjectService
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -49,12 +48,12 @@ class TranslationsE2eDataController(
 
   @GetMapping(value = ["/generate-for-filters"])
   @Transactional
-  fun generateForFilters(): Project {
+  fun generateForFilters(): Map<String, Long> {
     val testData = TranslationsTestData()
     testData.addKeysWithScreenshots()
     testData.addTranslationsWithStates()
     testDataService.saveTestData(testData.root)
-    return testData.project
+    return mapOf("id" to testData.project.id)
   }
 
   @GetMapping(value = ["/cleanup-for-filters"])

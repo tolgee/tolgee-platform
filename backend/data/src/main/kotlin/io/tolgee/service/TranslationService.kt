@@ -4,7 +4,6 @@ import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.PathDTO
 import io.tolgee.dtos.query_results.KeyWithTranslationsDto
-import io.tolgee.dtos.query_results.TranslationHistoryView
 import io.tolgee.dtos.request.translation.GetTranslationsParams
 import io.tolgee.dtos.request.translation.TranslationFilters
 import io.tolgee.dtos.response.KeyWithTranslationsResponseDto
@@ -24,7 +23,7 @@ import io.tolgee.model.views.SimpleTranslationView
 import io.tolgee.model.views.TranslationMemoryItemView
 import io.tolgee.repository.TranslationRepository
 import io.tolgee.service.dataImport.ImportService
-import io.tolgee.service.query_builders.TranslationHistoryProvider
+import io.tolgee.service.project.ProjectService
 import io.tolgee.service.query_builders.TranslationsViewBuilder
 import io.tolgee.service.query_builders.TranslationsViewBuilderOld
 import io.tolgee.socketio.ITranslationsSocketIoModule
@@ -237,11 +236,6 @@ class TranslationService(
     }
   }
 
-  @Transactional
-  fun getHistory(translationId: Long, pageable: Pageable): Page<TranslationHistoryView> {
-    return TranslationHistoryProvider(applicationContext, translationId, pageable).getHistory()
-  }
-
   fun deleteIfExists(key: Key, languageTag: String) {
     val language = languageService.findByTag(languageTag, key.project)
       .orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
@@ -321,7 +315,7 @@ class TranslationService(
     key: Key,
     targetLanguage: Language,
   ): TranslationMemoryItemView? {
-    val baseLanguage = projectService.getOrCreateBaseLanguage(targetLanguage.project!!.id)
+    val baseLanguage = projectService.getOrCreateBaseLanguage(targetLanguage.project.id)
       ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
 
     val baseTranslationText = findBaseTranslation(key)?.text ?: return null
@@ -352,7 +346,7 @@ class TranslationService(
     targetLanguage: Language,
     pageable: Pageable
   ): Page<TranslationMemoryItemView> {
-    val baseLanguage = projectService.getOrCreateBaseLanguage(targetLanguage.project!!.id)
+    val baseLanguage = projectService.getOrCreateBaseLanguage(targetLanguage.project.id)
       ?: throw NotFoundException(Message.BASE_LANGUAGE_NOT_FOUND)
 
     if ((baseTranslationText.length) < 3) {

@@ -40,6 +40,25 @@ class TranslationServiceTest : AbstractSpringTest() {
 
   @Transactional
   @Test
+  fun `adds stats on translation save and update`() {
+    val testData = TranslationsTestData()
+    testDataService.saveTestData(testData.root)
+    val translation = testData.aKeyGermanTranslation
+    assertThat(translation.wordCount).isEqualTo(2)
+    assertThat(translation.characterCount).isEqualTo(translation.text!!.length)
+
+    translation.text = "My dog is cool!"
+    translationService.save(translation)
+
+    commitTransaction()
+
+    val updated = translationService.get(translation.id)
+    assertThat(updated.wordCount).isEqualTo(4)
+    assertThat(updated.characterCount).isEqualTo(translation.text!!.length)
+  }
+
+  @Transactional
+  @Test
   fun `clears auto translation when set empty`() {
     val testData = TranslationsTestData()
     testDataService.saveTestData(testData.root)

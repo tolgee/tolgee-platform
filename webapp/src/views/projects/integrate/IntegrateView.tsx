@@ -2,6 +2,7 @@ import { default as React, FunctionComponent } from 'react';
 import { Box, Step, StepContent, StepLabel, Stepper } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
+import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { WeaponSelector } from 'tg.views/projects/integrate/component/WeaponSelector';
@@ -34,9 +35,10 @@ export const IntegrateView: FunctionComponent = () => {
       navigation={[
         [
           project.name,
-          LINKS.PROJECT_TRANSLATIONS.build({
+          LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
+          <SmallProjectAvatar key={0} project={project} />,
         ],
         [
           <span key={''} data-cy={'integrate-navigation-title'}>

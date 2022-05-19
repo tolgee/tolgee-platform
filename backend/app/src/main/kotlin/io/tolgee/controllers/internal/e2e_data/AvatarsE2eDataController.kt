@@ -5,8 +5,8 @@ import io.tolgee.development.testDataBuilder.TestDataService
 import io.tolgee.development.testDataBuilder.data.AvatarsTestData
 import io.tolgee.security.InternalController
 import io.tolgee.service.OrganizationService
-import io.tolgee.service.ProjectService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.project.ProjectService
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin

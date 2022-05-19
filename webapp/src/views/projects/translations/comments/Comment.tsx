@@ -7,7 +7,7 @@ import { MoreVert, Check } from '@mui/icons-material';
 import { components } from 'tg.service/apiSchema.generated';
 import { confirmation } from 'tg.hooks/confirmation';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
-import { SmallActionButton } from './SmallActionButton';
+import { SmallActionButton } from '../cell/SmallActionButton';
 
 type TranslationCommentModel = components['schemas']['TranslationCommentModel'];
 
@@ -17,12 +17,14 @@ const StyledContainer = styled('div')`
     'avatar  text   time            menu'
     'avatar  text   resolveAction   menu';
   grid-template-columns: auto 1fr auto 26px;
-  padding: 7px 12px 7px 12px;
+  padding: 4px 9px 4px 9px;
+  margin: 3px;
   background: transparent;
   transition: background-color 0.1s ease-out;
+  border-radius: 8px;
 
   &:hover {
-    background-color: ${({ theme }) => theme.palette.emphasis[100]}cc;
+    background: ${({ theme }) => theme.palette.emphasis[100]};
     transition: background-color 0.1s ease-in;
   }
 
@@ -34,10 +36,6 @@ const StyledContainer = styled('div')`
   &:hover .hoverVisible {
     opacity: 1;
     transition: opacity 0.5s ease-in;
-  }
-
-  &.unresolved {
-    background: ${({ theme }) => theme.palette.emphasis[100]};
   }
 `;
 
@@ -80,7 +78,8 @@ const StyledTextPre = styled('pre')`
   word-wrap: break-word;
 
   &.textUnresolved {
-    font-weight: 600;
+    color: ${({ theme }) => theme.palette.primary.main};
+    font-weight: 500;
   }
 `;
 
@@ -103,7 +102,6 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const lang = useCurrentLanguage();
   const date = new Date(data.createdAt);
-  const isToday = date.toLocaleDateString() === new Date().toLocaleDateString();
   const t = useTranslate();
 
   const unresolveVisible = data.state !== 'NEEDS_RESOLUTION' && onChangeState;
@@ -160,7 +158,6 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
         {data.text}
       </StyledTextPre>
       <StyledTime>
-        {!isToday && date.toLocaleDateString(lang()) + ' '}
         {date.toLocaleTimeString(lang(), {
           hour: 'numeric',
           minute: 'numeric',

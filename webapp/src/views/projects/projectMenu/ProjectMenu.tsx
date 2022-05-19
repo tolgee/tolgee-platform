@@ -17,6 +17,7 @@ import { SideMenu } from './SideMenu';
 import { SideMenuItem } from './SideMenuItem';
 import { SideLogo } from './SideLogo';
 import { useTopBarHidden } from 'tg.component/layout/TopBar/TopBarContext';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 export const ProjectMenu = ({ id }) => {
   const projectDTO = useProject();
@@ -33,6 +34,11 @@ export const ProjectMenu = ({ id }) => {
         linkTo={LINKS.PROJECTS.build({ [PARAMS.PROJECT_ID]: id })}
         icon={<ProjectsIcon />}
         text={t('project_menu_projects')}
+      />
+      <SideMenuItem
+        linkTo={LINKS.PROJECT_DASHBOARD.build({ [PARAMS.PROJECT_ID]: id })}
+        icon={<DashboardIcon />}
+        text={t('project_menu_dashboard', 'Project Dashboard')}
       />
       <SideMenuItem
         linkTo={LINKS.PROJECT_TRANSLATIONS.build({

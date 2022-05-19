@@ -1,18 +1,18 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import { Add } from '@mui/icons-material';
 import { T } from '@tolgee/react';
 import { Link } from 'react-router-dom';
 import { Box, Button, Container, Grid, Typography } from '@mui/material';
 
 import { SecondaryBarSearchField } from 'tg.component/layout/SecondaryBarSearchField';
-import { useConfig } from 'tg.hooks/useConfig';
 import { Navigation } from 'tg.component/navigation/Navigation';
 
 import { SecondaryBar } from './SecondaryBar';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { useWindowTitle } from 'tg.hooks/useWindowTitle';
 
 export interface BaseViewProps {
-  windowTitle?: string;
+  windowTitle: string;
   loading?: boolean;
   title?: ReactNode;
   onAdd?: () => void;
@@ -24,6 +24,7 @@ export interface BaseViewProps {
   lg?: boolean | 'auto' | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
   onSearch?: (string) => void;
   navigation?: React.ComponentProps<typeof Navigation>['path'];
+  customNavigation?: ReactNode;
   customHeader?: ReactNode;
   hideChildrenOnLoading?: boolean;
   containerMaxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
@@ -34,19 +35,9 @@ export const BaseView = (props: BaseViewProps) => {
   const hideChildrenOnLoading =
     props.hideChildrenOnLoading === undefined || props.hideChildrenOnLoading;
 
-  const config = useConfig();
-
   useGlobalLoading(props.loading);
 
-  useEffect(() => {
-    if (props.windowTitle) {
-      const oldTitle = window.document.title;
-      window.document.title = `${config.appName} - ${props.windowTitle}`;
-      return () => {
-        window.document.title = oldTitle;
-      };
-    }
-  }, []);
+  useWindowTitle(props.windowTitle);
 
   return (
     <Container
@@ -58,18 +49,19 @@ export const BaseView = (props: BaseViewProps) => {
       }}
     >
       <Box minHeight="100%" data-cy={props['data-cy']}>
-        {props.navigation && (
-          <SecondaryBar
-            height={49}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Container maxWidth={false} style={{ padding: 0, margin: 0 }}>
-              <Navigation path={props.navigation} />
-            </Container>
-          </SecondaryBar>
-        )}
+        {props.customNavigation ||
+          (props.navigation && (
+            <SecondaryBar
+              height={49}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Container maxWidth={false} style={{ padding: 0, margin: 0 }}>
+                <Navigation path={props.navigation} />
+              </Container>
+            </SecondaryBar>
+          ))}
         {(props.title || props.customHeader) && (
           <SecondaryBar>
             <Container

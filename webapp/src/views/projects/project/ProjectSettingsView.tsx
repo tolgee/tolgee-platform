@@ -11,6 +11,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
 
+import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
@@ -130,12 +131,14 @@ export const ProjectSettingsView: FunctionComponent = () => {
       lg={7}
       md={9}
       containerMaxWidth="lg"
+      windowTitle={t('project_settings_title')}
       navigation={[
         [
           project.name,
-          LINKS.PROJECT_TRANSLATIONS.build({
+          LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
+          <SmallProjectAvatar key={0} project={project} />,
         ],
         [
           t('project_settings_title'),

@@ -136,6 +136,7 @@ class InvitationService @Autowired constructor(
   }
 
   fun getInvitation(code: String?): Invitation {
+    removeExpired()
     return invitationRepository.findOneByCode(code).orElseThrow {
       // this exception is important for sign up service! Do not remove!!
       BadRequestException(Message.INVITATION_CODE_DOES_NOT_EXIST_OR_EXPIRED)

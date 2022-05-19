@@ -2,6 +2,7 @@ import { FunctionComponent, useState } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
+import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { BaseView } from 'tg.component/layout/BaseView';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -57,15 +58,17 @@ export const ProjectMembersView: FunctionComponent = () => {
 
   return (
     <BaseView
+      windowTitle={t('project_members_title')}
       navigation={[
         [
           project.name,
-          LINKS.PROJECT_TRANSLATIONS.build({
+          LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
+          <SmallProjectAvatar key={0} project={project} />,
         ],
         [
-          t('project_menu_members'),
+          t('project_members_title'),
           LINKS.PROJECT_PERMISSIONS.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),

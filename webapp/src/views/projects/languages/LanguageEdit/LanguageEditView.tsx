@@ -3,6 +3,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
 
+import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
 import { LanguageModifyFields } from 'tg.component/languages/LanguageModifyFields';
 import { BaseFormView } from 'tg.component/layout/BaseFormView';
@@ -99,12 +100,14 @@ export const LanguageEditView = () => {
       lg={6}
       md={8}
       xs={10}
+      windowTitle={t('language_settings_title')}
       navigation={[
         [
           project.name,
-          LINKS.PROJECT_TRANSLATIONS.build({
+          LINKS.PROJECT_DASHBOARD.build({
             [PARAMS.PROJECT_ID]: project.id,
           }),
+          <SmallProjectAvatar key={0} project={project} />,
         ],
         [
           t('project_menu_languages'),
