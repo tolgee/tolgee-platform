@@ -1,3 +1,16 @@
+# [2.24.0](https://github.com/tolgee/tolgee-platform/compare/v2.23.2...v2.24.0) (2022-05-19)
+
+
+### Bug Fixes
+
+* E2E test ([68f5f83](https://github.com/tolgee/tolgee-platform/commit/68f5f83dd4541e59c6845e6bad20250932ba688c))
+* Reformatting files correctly ([878d1ba](https://github.com/tolgee/tolgee-platform/commit/878d1ba82f6afdcce419b037a73e367207dfa6ad))
+
+
+### Features
+
+* Implement Google oauth login ([50ab9f2](https://github.com/tolgee/tolgee-platform/commit/50ab9f26d67ff2a012a1734bdc8f46dc9ca68ff6))
+
 ## [2.23.2](https://github.com/tolgee/tolgee-platform/compare/v2.23.1...v2.23.2) (2022-05-19)
 
 
