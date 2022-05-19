@@ -1,3 +1,10 @@
+## [2.23.2](https://github.com/tolgee/tolgee-platform/compare/v2.23.1...v2.23.2) (2022-05-19)
+
+
+### Bug Fixes
+
+* App titles everywhere ([f9c4b5b](https://github.com/tolgee/tolgee-platform/commit/f9c4b5b4c8e80577fc2e94fcc49602166eff8b5b))
+
 ## [2.23.1](https://github.com/tolgee/tolgee-platform/compare/v2.23.0...v2.23.1) (2022-05-19)
 
 
