@@ -1,3 +1,10 @@
+## [2.23.1](https://github.com/tolgee/tolgee-platform/compare/v2.23.0...v2.23.1) (2022-05-19)
+
+
+### Bug Fixes
+
+* Dashboard faster loading, members link and user name layout ([7f4710d](https://github.com/tolgee/tolgee-platform/commit/7f4710d6cd3e275edaf0c7cc047e2484b9e46e24))
+
 # [2.23.0](https://github.com/tolgee/tolgee-platform/compare/v2.22.1...v2.23.0) (2022-05-19)
 
 
