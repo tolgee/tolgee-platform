@@ -1,3 +1,10 @@
+# [2.23.0](https://github.com/tolgee/tolgee-platform/compare/v2.22.1...v2.23.0) (2022-05-19)
+
+
+### Features
+
+* Import accessible with API key ([14c0568](https://github.com/tolgee/tolgee-platform/commit/14c0568525b36d2abda95f6ab071ae48f06b4128))
+
 ## [2.22.1](https://github.com/tolgee/tolgee-platform/compare/v2.22.0...v2.22.1) (2022-05-18)
 
 
