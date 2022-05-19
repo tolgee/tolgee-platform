@@ -110,9 +110,9 @@ class TestDataService(
   }
 
   private fun saveAllProjectDependants(builder: ProjectBuilder) {
-    savePermissions(builder)
     saveApiKeys(builder)
     saveLanguages(builder)
+    savePermissions(builder)
     saveMtServiceConfigs(builder)
     saveKeyData(builder)
     saveTranslationData(builder)
