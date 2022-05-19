@@ -83,6 +83,7 @@ project(':server-app').afterEvaluate {
         dependsOn project(':server-app').tasks.findByName("check")
         dependsOn ktlint
     }
+
     task bootJar {
         dependsOn project(':server-app').tasks.findByName("bootJar")
     }
@@ -134,14 +135,14 @@ task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
     main = "com.pinterest.ktlint.Main"
-    args "**/*.kt", "!**/data/PluralData.kt"
+    args "**/*.kt", "!**/data/PluralData.kt", '../billing/**/*.kt'
 }
 
 task ktlintFormat(type: JavaExec, group: "formatting") {
     description = "Fix Kotlin code style deviations."
     classpath = configurations.ktlint
     main = "com.pinterest.ktlint.Main"
-    args "-F", "**/*.kt", "!**/data/PluralData.kt"
+    args "-F", "**/*.kt", "!**/data/PluralData.kt", '../billing/**/*.kt'
 }
 
 subprojects {
