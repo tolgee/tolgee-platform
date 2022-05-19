@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import io.tolgee.activity.annotation.ActivityLoggedEntity
 import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.model.key.Key
 import java.util.*

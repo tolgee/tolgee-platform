@@ -108,13 +108,22 @@ project(':server-app').afterEvaluate {
 
         project(':server-app').tasks.findByName("bootRun").mustRunAfter(startDbChangelogContainer)
 
+
         finalizedBy = [
                 startDbChangelogContainer,
                 project(':server-app').tasks.findByName("bootRun"),
                 project(':data').tasks.findByName("diffChangeLog"),
-                project(':billing-app').tasks.findByName("diffChangeLog"),
-                stopDbChangelogContainer
         ]
+
+        def billingDiffChangelog = project(':billing-app').tasks.findByName("diffChangeLog")
+
+        if (billingDiffChangelog != null) {
+            finalizedBy.add(billingDiffChangelog)
+        }
+
+        finalizedBy.add(stopDbChangelogContainer)
+
+
         doFirst {
             project(':server-app').bootRun.systemProperty('spring.profiles.active', 'dbschema')
         }
