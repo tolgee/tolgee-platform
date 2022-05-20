@@ -1,4 +1,6 @@
-FROM openjdk:14-jdk-alpine
+FROM alpine:edge
+
+RUN apk --no-cache add openjdk14
 
 ####################################################################################
 ### Postgres from postgres official Dockerfile                                     #
@@ -7,11 +9,11 @@ FROM openjdk:14-jdk-alpine
 
 # 70 is the standard uid/gid for "postgres" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/postgresql/postgresql.pre-install?h=3.12-stable
-#RUN set -eux; \
-#	addgroup -g 70 -S postgres; \
-#	adduser -u 70 -S -D -G postgres -H -h /var/lib/postgresql -s /bin/sh postgres; \
-#	mkdir -p /var/lib/postgresql; \
-#	chown -R postgres:postgres /var/lib/postgresql
+RUN set -eux; \
+	addgroup -g 70 -S postgres; \
+	adduser -u 70 -S -D -G postgres -H -h /var/lib/postgresql -s /bin/sh postgres; \
+	mkdir -p /var/lib/postgresql; \
+	chown -R postgres:postgres /var/lib/postgresql
 
 # su-exec (gosu-compatible) is installed further down
 
