@@ -1,3 +1,10 @@
+## [2.24.1](https://github.com/tolgee/tolgee-platform/compare/v2.24.0...v2.24.1) (2022-05-20)
+
+
+### Bug Fixes
+
+* the expected balance was not adapted to new credit consumption ([d742fe2](https://github.com/tolgee/tolgee-platform/commit/d742fe217f613083fa6c89a43b0643d3c8f524b5))
+
 # [2.24.0](https://github.com/tolgee/tolgee-platform/compare/v2.23.2...v2.24.0) (2022-05-19)
 
 
