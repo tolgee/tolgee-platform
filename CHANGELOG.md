@@ -1,3 +1,10 @@
+## [2.25.1](https://github.com/tolgee/tolgee-platform/compare/v2.25.0...v2.25.1) (2022-05-20)
+
+
+### Bug Fixes
+
+* Language permission doesn't work with user with multiple projects ([e6507d9](https://github.com/tolgee/tolgee-platform/commit/e6507d903cf8fead19ea110877824f2019f7a938))
+
 # [2.25.0](https://github.com/tolgee/tolgee-platform/compare/v2.24.1...v2.25.0) (2022-05-20)
 
 
