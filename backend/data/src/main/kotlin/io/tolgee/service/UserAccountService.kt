@@ -171,7 +171,10 @@ class UserAccountService(
     exceptUserId: Long? = null
   ): Page<UserAccountInProjectWithLanguagesView> {
     val users = getAllInProject(projectId, pageable, search, exceptUserId)
-    val permittedLanguageMap = permissionService.getPermittedTranslateLanguagesForUserIds(users.content.map { it.id })
+    val permittedLanguageMap = permissionService.getPermittedTranslateLanguagesForUserIds(
+      users.content.map { it.id },
+      projectId
+    )
     return users.map {
       UserAccountInProjectWithLanguagesView(
         id = it.id,
