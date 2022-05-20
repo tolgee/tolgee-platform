@@ -82,8 +82,8 @@ class PermissionService(
     )
   }
 
-  fun getPermittedTranslateLanguagesForUserIds(userIds: List<Long>): Map<Long, List<Long>> {
-    val data = permissionRepository.getUserPermittedLanguageIds(userIds)
+  fun getPermittedTranslateLanguagesForUserIds(userIds: List<Long>, projectId: Long): Map<Long, List<Long>> {
+    val data = permissionRepository.getUserPermittedLanguageIds(userIds, projectId)
     val result = mutableMapOf<Long, MutableList<Long>>()
     data.forEach {
       val languageIds = result.computeIfAbsent(it[0]) {

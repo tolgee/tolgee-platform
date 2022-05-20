@@ -35,9 +35,10 @@ interface PermissionRepository : JpaRepository<Permission, Long> {
       select p.user.id, l.id from Permission p
       join p.languages l
       where p.user.id in :userIds
+      and p.project.id = :projectId
     """
   )
-  fun getUserPermittedLanguageIds(userIds: List<Long>): List<Array<Long>>
+  fun getUserPermittedLanguageIds(userIds: List<Long>, projectId: Long): List<Array<Long>>
 
   @Query(
     """
