@@ -2,7 +2,7 @@ ext {
     dockerPath = buildDir.absolutePath + "/docker"
 }
 
-task docker {
+task dockerPrepare {
     doLast {
         copy {
             from(tasks.unpack.outputs, 'docker/app')
@@ -13,15 +13,21 @@ task docker {
             from("${projectDir.absolutePath}/docker/app")
             into(dockerPath)
         }
+    }
+    dependsOn("unpack", "copyDist", "copyDockerIgnore", "addVersionFile")
+}
 
+task docker {
+    doLast {
         exec {
             workingDir dockerPath
             commandLine "docker", "build", ".", "-t", "tolgee/tolgee"
             environment.put("DOCKER_BUILDKIT", "0")
         }
     }
-    dependsOn("unpack", "copyDist", "copyDockerIgnore", "addVersionFile")
+    dependsOn("dockerPrepare")
 }
+
 
 task cleanDocker{
     delete(dockerPath)

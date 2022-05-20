@@ -34,12 +34,6 @@ jobs:
           TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
           TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
-      - name: Create docker image
-        run: ./gradlew docker
-        env:
-          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
-          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
-
       - name: Login to docker
         run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p "${{ secrets.DOCKERHUB_PASSWORD }}"
 
@@ -47,13 +41,17 @@ jobs:
         id: version
         run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | sed -e 's/refs\/tags\///g' -e 's/\//-/g')
 
-      - name: Tag the image
-        run: |
-          docker tag tolgee/tolgee tgint/tgpreview:${{ steps.version.outputs.VERSION }}
+      - name: Prepare for docker build
+        run: ./gradlew dockerPrepare
+        env:
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
 
-      - name: Publish docker image
+      - name: Create docker image
         run: |
-          docker push tgint/tgpreview:${{ steps.version.outputs.VERSION }}
+          docker buildx create --use 
+          docker buildx build . -t tgint/tgpreview:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --push
+        working-directory: build/docker
 
       - name: Deploy
         uses: nickgronow/kubectl@master
