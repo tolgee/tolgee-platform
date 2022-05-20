@@ -1,3 +1,10 @@
+# [2.25.0](https://github.com/tolgee/tolgee-platform/compare/v2.24.1...v2.25.0) (2022-05-20)
+
+
+### Features
+
+* multiplatform docker image ([c9a6f70](https://github.com/tolgee/tolgee-platform/commit/c9a6f708ec6fa18e6ea58a0f942d6b84933ab19a))
+
 ## [2.24.1](https://github.com/tolgee/tolgee-platform/compare/v2.24.0...v2.24.1) (2022-05-20)
 
 
