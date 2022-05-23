@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Box,
   Typography,
@@ -16,10 +16,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-
-import { useProject } from 'tg.hooks/useProject';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { useState } from 'react';
 
 // seconds * minutes * hours * milliseconds = 1 day
 const DAY = 60 * 60 * 24 * 1000;
@@ -48,18 +44,12 @@ const StyledHeader = styled('div')`
   align-items: center;
 `;
 
-export const DailyActivityChart = () => {
-  const project = useProject();
+type Props = {
+  dailyActivity?: { [key: string]: number };
+};
 
+export const DailyActivityChart: React.FC<Props> = ({ dailyActivity }) => {
   const getLang = useCurrentLanguage();
-
-  const dailyActivityLoadable = useApiQuery({
-    url: '/v2/projects/{projectId}/stats/daily-activity',
-    method: 'get',
-    path: {
-      projectId: project.id,
-    },
-  });
 
   const [period, setPeriod] = useState<'week' | 'month' | 'year' | 'all'>(
     'month'
@@ -74,13 +64,13 @@ export const DailyActivityChart = () => {
   };
 
   const dailyActivityData = useMemo(() => {
-    if (dailyActivityLoadable.data) {
+    if (dailyActivity) {
       const numberOfDays =
         period === 'week' ? 7 : period === 'month' ? 30 : 365;
       const periodStart = new Date(
         new Date().setDate(new Date().getDate() - numberOfDays)
       );
-      const firstDate = new Date(Object.keys(dailyActivityLoadable.data)[0]);
+      const firstDate = new Date(Object.keys(dailyActivity)[0]);
 
       const startDate =
         period === 'all'
@@ -93,10 +83,10 @@ export const DailyActivityChart = () => {
 
       const allDates = getAllDates(startDate, lastDate);
 
-      return getDailyActivity(dailyActivityLoadable.data, allDates);
+      return getDailyActivity(dailyActivity, allDates);
     }
     return [];
-  }, [dailyActivityLoadable.data, period]);
+  }, [dailyActivity, period]);
 
   return dailyActivityData.length > 0 ? (
     <StyledContainer style={{ height: '450px' }}>

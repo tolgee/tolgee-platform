@@ -2,7 +2,8 @@ import { Box, Chip, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { BaseView } from 'tg.component/layout/BaseView';
-import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiInfiniteQuery, useApiQuery } from 'tg.service/http/useQueryApi';
+import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 import { useProject } from 'tg.hooks/useProject';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
 import { ProjectTotals } from './ProjectTotals';
@@ -11,6 +12,7 @@ import { DailyActivityChart } from './DailyActivityChart';
 import { ActivityList } from './ActivityList';
 import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
 import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -62,6 +64,33 @@ export const DashboardView = () => {
   const project = useProject();
   const t = useTranslate();
 
+  const path = { projectId: project.id };
+  const query = { size: 15, sort: ['timestamp,desc'] };
+  const activityLoadable = useApiInfiniteQuery({
+    url: '/v2/projects/{projectId}/activity',
+    method: 'get',
+    path,
+    query,
+    options: {
+      getNextPageParam: (lastPage) => {
+        if (
+          lastPage.page &&
+          lastPage.page.number! < lastPage.page.totalPages! - 1
+        ) {
+          return {
+            path,
+            query: {
+              ...query,
+              page: lastPage.page!.number! + 1,
+            },
+          };
+        } else {
+          return null;
+        }
+      },
+    },
+  });
+
   const statsLoadable = useApiQuery({
     url: '/v2/projects/{projectId}/stats',
     method: 'get',
@@ -69,6 +98,26 @@ export const DashboardView = () => {
       projectId: project.id,
     },
   });
+
+  const dailyActivityLoadable = useApiQuery({
+    url: '/v2/projects/{projectId}/stats/daily-activity',
+    method: 'get',
+    path: {
+      projectId: project.id,
+    },
+  });
+
+  const anythingLoading =
+    activityLoadable.isLoading ||
+    statsLoadable.isLoading ||
+    dailyActivityLoadable.isLoading;
+
+  const anythingFetching =
+    activityLoadable.isFetching ||
+    statsLoadable.isFetching ||
+    dailyActivityLoadable.isFetching;
+
+  useGlobalLoading(anythingFetching);
 
   return (
     <ProjectLanguagesProvider>
@@ -98,27 +147,27 @@ export const DashboardView = () => {
           </SecondaryBar>
         }
       >
-        <StyledContainer>
-          {statsLoadable.data && (
-            <>
-              <Box gridArea="totalStats">
-                <ProjectTotals stats={statsLoadable.data} />
-              </Box>
-              <Box gridArea="langStats">
-                <LanguageStats
-                  languageStats={statsLoadable.data.languageStats}
-                  wordCount={statsLoadable.data.baseWordsCount}
-                />
-              </Box>
-            </>
-          )}
-          <Box gridArea="activityList">
-            <ActivityList />
-          </Box>
-          <Box gridArea="activityChart">
-            <DailyActivityChart />
-          </Box>
-        </StyledContainer>
+        {anythingLoading ? (
+          <EmptyListMessage loading={true} />
+        ) : (
+          <StyledContainer>
+            <Box gridArea="totalStats">
+              <ProjectTotals stats={statsLoadable.data!} />
+            </Box>
+            <Box gridArea="langStats">
+              <LanguageStats
+                languageStats={statsLoadable.data!.languageStats}
+                wordCount={statsLoadable.data!.baseWordsCount}
+              />
+            </Box>
+            <Box gridArea="activityList">
+              <ActivityList activityLoadable={activityLoadable} />
+            </Box>
+            <Box gridArea="activityChart">
+              <DailyActivityChart dailyActivity={dailyActivityLoadable.data} />
+            </Box>
+          </StyledContainer>
+        )}
       </BaseView>
     </ProjectLanguagesProvider>
   );
