@@ -1,3 +1,10 @@
+# [2.26.0](https://github.com/tolgee/tolgee-platform/compare/v2.25.1...v2.26.0) (2022-05-23)
+
+
+### Features
+
+* change window title order and update tolgee lib ([2ab63a5](https://github.com/tolgee/tolgee-platform/commit/2ab63a57a9398da2a9764b9c4787e11f82d887e0))
+
 ## [2.25.1](https://github.com/tolgee/tolgee-platform/compare/v2.25.0...v2.25.1) (2022-05-20)
 
 
