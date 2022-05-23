@@ -356,16 +356,18 @@ type OwnerAvatarProps = {
   organizationOwner?: components['schemas']['SimpleOrganizationModel'];
 };
 
-const OwnerAvatar = (props: OwnerAvatarProps) => (
-  <AvatarImg
-    size={32}
-    owner={{
-      avatar: props.userOwner?.avatar || props.organizationOwner?.avatar,
-      id: props.userOwner?.id || props.organizationOwner!.id,
-      name: props.userOwner?.name || props.organizationOwner?.name,
-      type: props.userOwner ? 'PROJECT' : 'ORG',
-    }}
-    autoAvatarType={props.userOwner ? 'IDENTICON' : 'INITIALS'}
-    circle={true}
-  />
-);
+const OwnerAvatar = (props: OwnerAvatarProps) => {
+  return (
+    <AvatarImg
+      size={32}
+      owner={{
+        avatar: props.userOwner?.avatar || props.organizationOwner?.avatar,
+        id: props.userOwner?.id || props.organizationOwner!.id,
+        name: props.userOwner?.name || props.organizationOwner?.name,
+        type: props.userOwner ? 'USER' : 'ORG',
+      }}
+      autoAvatarType={props.userOwner ? 'IDENTICON' : 'INITIALS'}
+      circle={true}
+    />
+  );
+};
