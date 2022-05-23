@@ -7,7 +7,7 @@ export const useWindowTitle = (title: string) => {
   useEffect(() => {
     if (title) {
       const oldTitle = window.document.title;
-      window.document.title = `${config.appName} | ${title}`;
+      window.document.title = `${title} | ${config.appName}`;
       return () => {
         window.document.title = oldTitle;
       };

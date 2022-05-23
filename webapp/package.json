@@ -14,7 +14,7 @@
     "@mui/material": "^5.5.3",
     "@openreplay/tracker": "^3.5.4",
     "@sentry/browser": "^6.10.0",
-    "@tolgee/react": "^4.3.0",
+    "@tolgee/react": "^4.6.0",
     "@tolgee/socketio-client": "^4.0.0",
     "clsx": "^1.1.1",
     "codemirror": "^5.62.0",
