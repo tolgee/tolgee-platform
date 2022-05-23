@@ -1,3 +1,10 @@
+## [2.26.1](https://github.com/tolgee/tolgee-platform/compare/v2.26.0...v2.26.1) (2022-05-23)
+
+
+### Bug Fixes
+
+* Dashboard loading placeholder and fix user avatar ([ac0d627](https://github.com/tolgee/tolgee-platform/commit/ac0d627f1b7822ad12358caa199e94ada4f7f363))
+
 # [2.26.0](https://github.com/tolgee/tolgee-platform/compare/v2.25.1...v2.26.0) (2022-05-23)
 
 
