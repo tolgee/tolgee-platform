@@ -1,4 +1,4 @@
-import { AutoAvatar, AutoAvatarType } from './AutoAvatar';
+import { AutoAvatar } from './AutoAvatar';
 import { AvatarOwner } from './ProfileAvatar';
 import { styled } from '@mui/material';
 
@@ -7,12 +7,7 @@ const StyledContainer = styled('div')`
   display: flex;
 `;
 
-export const AvatarImg = (props: {
-  size: number;
-  owner: AvatarOwner;
-  autoAvatarType: AutoAvatarType;
-  circle?: boolean;
-}) => {
+export const AvatarImg = (props: { size: number; owner: AvatarOwner }) => {
   const background = 'rgb(239, 239, 239)';
   const avatarPath =
     props.size <= 50
@@ -22,7 +17,7 @@ export const AvatarImg = (props: {
   return (
     <StyledContainer
       style={{
-        borderRadius: props.circle ? '50%' : '10%',
+        borderRadius: props.owner.type === 'PROJECT' ? '10%' : '50%',
         overflow: 'hidden',
         display: 'flex',
       }}
@@ -41,9 +36,9 @@ export const AvatarImg = (props: {
       ) : (
         <AutoAvatar
           entityId={`${props.owner.type}-${props.owner.id}`}
-          type={props.autoAvatarType}
           size={props.size}
           ownerName={props.owner.name || 'AVATAR'}
+          ownerType={props.owner.type}
           style={{
             background,
           }}

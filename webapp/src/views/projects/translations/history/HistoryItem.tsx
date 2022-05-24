@@ -119,8 +119,6 @@ export const HistoryItem: React.FC<Props> = ({ entry, showDifferences }) => {
               id: entry.author?.id as number,
             }}
             size={24}
-            autoAvatarType="IDENTICON"
-            circle
           />
         </StyledAvatar>
       </Tooltip>

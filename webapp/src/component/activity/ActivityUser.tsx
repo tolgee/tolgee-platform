@@ -50,8 +50,6 @@ export const ActivityUser: React.FC<Props> = ({ item, onlyTime }) => {
               id: item.author.id,
               avatar: item.author.avatar,
             }}
-            autoAvatarType="IDENTICON"
-            circle
           />
         </StyledAvatar>
       )}

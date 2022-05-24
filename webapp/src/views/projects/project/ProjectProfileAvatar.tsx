@@ -30,7 +30,6 @@ export const ProjectProfileAvatar = () => {
         id: project.id,
         name: project.name,
       }}
-      autoAvatarType="INITIALS"
       onUpload={(blob: Blob) =>
         uploadLoadable.mutateAsync({
           path: {

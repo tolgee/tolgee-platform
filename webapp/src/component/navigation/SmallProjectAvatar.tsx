@@ -16,7 +16,6 @@ export const SmallProjectAvatar: React.FC<Props> = ({ project }) => {
         type: 'PROJECT',
         id: project.id,
       }}
-      autoAvatarType="INITIALS"
       size={18}
     />
   );

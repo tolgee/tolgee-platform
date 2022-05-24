@@ -30,8 +30,6 @@ export const UserProfileAvatar = () => {
         id: user.id,
         name: user.name,
       }}
-      circle={true}
-      autoAvatarType="IDENTICON"
       onUpload={(blob: Blob) =>
         uploadLoadable.mutateAsync({
           content: {
