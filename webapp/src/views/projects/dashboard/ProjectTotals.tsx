@@ -366,8 +366,6 @@ const OwnerAvatar = (props: OwnerAvatarProps) => {
         name: props.userOwner?.name || props.organizationOwner?.name,
         type: props.userOwner ? 'USER' : 'ORG',
       }}
-      autoAvatarType={props.userOwner ? 'IDENTICON' : 'INITIALS'}
-      circle={true}
     />
   );
 };

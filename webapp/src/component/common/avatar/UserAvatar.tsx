@@ -32,8 +32,6 @@ export const UserAvatar: React.FC = () => {
             name: user.name,
             type: 'USER',
           }}
-          circle={true}
-          autoAvatarType="IDENTICON"
           size={SIZE}
         />
       )}

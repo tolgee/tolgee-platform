@@ -11,7 +11,6 @@ import { AvatarEditDialog } from './AvatarEditDialog';
 import { useConfig } from 'tg.hooks/useConfig';
 import { parseErrorResponse } from 'tg.fixtures/errorFIxtures';
 import { components } from 'tg.service/apiSchema.generated';
-import { AutoAvatarType } from './AutoAvatar';
 
 export type AvatarOwner = {
   name?: string;
@@ -62,8 +61,6 @@ export const ProfileAvatar: FC<{
   onUpload: (blob: Blob) => Promise<any>;
   onRemove: () => Promise<any>;
   owner: AvatarOwner;
-  autoAvatarType: AutoAvatarType;
-  circle?: boolean;
 }> = (props) => {
   const fileRef = createRef<HTMLInputElement>();
   const [uploaded, setUploaded] = useState(null as string | null | undefined);
@@ -130,12 +127,7 @@ export const ProfileAvatar: FC<{
           setAvatarMenuAnchorEl(editAvatarRef.current);
         }}
       >
-        <AvatarImg
-          owner={props.owner}
-          size={200}
-          autoAvatarType={props.autoAvatarType}
-          circle={props.circle}
-        />
+        <AvatarImg owner={props.owner} size={200} />
         <EditButtonWrapper>
           <StyledEditButton
             data-cy="avatar-menu-open-button"

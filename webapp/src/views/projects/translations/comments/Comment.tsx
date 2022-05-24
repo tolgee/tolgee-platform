@@ -141,12 +141,7 @@ export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
     >
       <Tooltip title={data.author.name || data.author.username}>
         <StyledAvatar>
-          <AvatarImg
-            owner={{ ...data.author, type: 'USER' }}
-            size={24}
-            autoAvatarType="IDENTICON"
-            circle
-          />
+          <AvatarImg owner={{ ...data.author, type: 'USER' }} size={24} />
         </StyledAvatar>
       </Tooltip>
       <StyledTextPre

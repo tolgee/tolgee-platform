@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AutoAvatarProps } from './AutoAvatar';
 
-function getInitialsAvatarSvg(ownerName: string, size: number) {
+function getInitialsAvatarSvg(ownerName: string, size: number, light: boolean) {
   return Promise.all([
     importCreateAvatarFunction(),
     import('@dicebear/avatars-initials-sprites'),
@@ -10,6 +10,7 @@ function getInitialsAvatarSvg(ownerName: string, size: number) {
       seed: ownerName,
       size,
       scale: 100,
+      backgroundColorLevel: light ? 300 : 700,
     });
   });
 }
@@ -32,15 +33,19 @@ export const useAutoAvatarImgSrc = (props: AutoAvatarProps) => {
 
   useEffect(() => {
     const svgStringPromise =
-      props.type === 'INITIALS'
-        ? getInitialsAvatarSvg(props.ownerName, props.size)
-        : getIdenticonAvatarSvg(props.entityId, props.size);
+      props.ownerType === 'USER'
+        ? getIdenticonAvatarSvg(props.entityId, props.size)
+        : getInitialsAvatarSvg(
+            props.ownerName,
+            props.size,
+            props.ownerType === 'PROJECT'
+          );
 
     svgStringPromise.then((svgString) => {
       const base64 = Buffer.from(svgString).toString('base64');
       setBase64(base64);
     });
-  }, [props.size, props.entityId, props.type, props.ownerName]);
+  }, [props.size, props.entityId, props.ownerName, props.ownerType]);
 
   if (!base64) {
     return undefined;
