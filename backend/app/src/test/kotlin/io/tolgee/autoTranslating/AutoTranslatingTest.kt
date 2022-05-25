@@ -67,7 +67,7 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
   fun `auto translates new key`() {
     testUsingMtWorks()
     val expectedCost = "Hello".length * 100
-    assertThat(mtCreditBucketService.getCreditBalance(testData.project))
+    assertThat(mtCreditBucketService.getCreditBalances(testData.project))
       .isEqualTo(INITIAL_BUCKET_CREDITS - expectedCost)
   }
 

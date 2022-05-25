@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.method.HandlerMethod
 import java.lang.reflect.Method
 
+private const val BILLING_EXCLUSION = "!/v2/**/billing/**"
+
 @Configuration
 class OpenApiConfiguration {
 
@@ -41,7 +43,7 @@ class OpenApiConfiguration {
   fun internalV1OpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/api/**"),
-      excludedPaths = arrayOf("!/v2/billing/**"),
+      excludedPaths = arrayOf(BILLING_EXCLUSION),
       name = "V1 Internal - for Tolgee Web application"
     )
   }
@@ -50,7 +52,7 @@ class OpenApiConfiguration {
   fun internalV2OpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/v2/**"),
-      excludedPaths = arrayOf("!/v2/billing/**"),
+      excludedPaths = arrayOf(BILLING_EXCLUSION),
       name = "V2 Internal - for Tolgee Web application"
     )
   }
@@ -59,7 +61,7 @@ class OpenApiConfiguration {
   fun internalAllOpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
       paths = arrayOf("/v2/**", "/api/**"),
-      excludedPaths = arrayOf("!/v2/billing/**"),
+      excludedPaths = arrayOf(BILLING_EXCLUSION),
       name = "All Internal - for Tolgee Web application"
     )
   }
@@ -68,7 +70,7 @@ class OpenApiConfiguration {
   fun apiKeyAllOpenApi(): GroupedOpenApi? {
     return apiKeyGroupForPaths(
       paths = arrayOf("/api/**", "/v2/**"),
-      excludedPaths = arrayOf("!/v2/billing/**"),
+      excludedPaths = arrayOf(BILLING_EXCLUSION),
       name = "Accessible with API key"
     )
   }
@@ -77,7 +79,7 @@ class OpenApiConfiguration {
   fun apiKeyV1OpenApi(): GroupedOpenApi? {
     return apiKeyGroupForPaths(
       paths = arrayOf("/api/**"),
-      excludedPaths = arrayOf("!/v2/billing/**"),
+      excludedPaths = arrayOf(BILLING_EXCLUSION),
       name = "V1 Accessible with API key"
     )
   }
@@ -86,7 +88,7 @@ class OpenApiConfiguration {
   fun apiKeyV2OpenApi(): GroupedOpenApi? {
     return apiKeyGroupForPaths(
       paths = arrayOf("/v2/**"),
-      excludedPaths = arrayOf("!/v2/billing/**"),
+      excludedPaths = arrayOf(BILLING_EXCLUSION),
       name = "V2 Accessible with API key V2"
     )
   }
@@ -94,7 +96,7 @@ class OpenApiConfiguration {
   @Bean
   fun billingOpenApi(): GroupedOpenApi? {
     return internalGroupForPaths(
-      paths = arrayOf("/v2/organizations/*/billing/**", "/v2/billing/**"),
+      paths = arrayOf("/v2/**/billing/**", "!/v2/public/billing/webhook"),
       name = "V2 Billing"
     )
   }
@@ -234,7 +236,7 @@ class OpenApiConfiguration {
 
   private fun GroupedOpenApi.Builder.handleLinks(): GroupedOpenApi.Builder {
     this.addOpenApiCustomiser {
-      it.components.schemas.values.forEach {
+      it.components?.schemas?.values?.forEach {
         it?.properties?.remove("_links")
       }
     }

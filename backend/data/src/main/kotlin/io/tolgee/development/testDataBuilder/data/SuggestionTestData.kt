@@ -30,7 +30,6 @@ class SuggestionTestData : BaseTestData() {
           text = "Beautiful"
         }
         addTranslation {
-
           language = germanLanguage
           key = this@keyBuilder.self
           text = "Wunderschönen"
@@ -145,6 +144,13 @@ class SuggestionTestData : BaseTestData() {
           }
         }
       }
+    }
+  }
+
+  fun addBucketWithAdditionalCredits() {
+    userAccountBuilder.addMtCreditBucket {
+      credits = 1000
+      additionalCredits = 1000
     }
   }
 }

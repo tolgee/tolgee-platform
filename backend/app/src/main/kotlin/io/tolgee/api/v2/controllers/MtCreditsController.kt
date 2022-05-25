@@ -34,7 +34,7 @@ class MtCreditsController(
   @GetMapping("/machine-translation-credit-balance")
   @Operation(summary = "Returns machine translation credit balance for current user")
   fun getUserCredits(): CreditBalanceModel {
-    return mtCreditBucketService.getCreditBalance(authenticationFacade.userAccountEntity).model
+    return mtCreditBucketService.getCreditBalances(authenticationFacade.userAccountEntity).model
   }
 
   @GetMapping("/projects/{projectId}/machine-translation-credit-balance")
@@ -42,7 +42,7 @@ class MtCreditsController(
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.TRANSLATE)
   fun getProjectCredits(@PathVariable projectId: Long): CreditBalanceModel {
-    return mtCreditBucketService.getCreditBalance(projectHolder.projectEntity).model
+    return mtCreditBucketService.getCreditBalances(projectHolder.projectEntity).model
   }
 
   @GetMapping("/organizations/{organizationId}/machine-translation-credit-balance")
@@ -50,7 +50,7 @@ class MtCreditsController(
   fun getOrganizationCredits(@PathVariable organizationId: Long): CreditBalanceModel {
     organizationRoleService.checkUserIsMemberOrOwner(organizationId)
     val organization = organizationService.get(organizationId)
-    return mtCreditBucketService.getCreditBalance(organization).model
+    return mtCreditBucketService.getCreditBalances(organization).model
   }
 
   private val MtCreditBalanceDto.model
