@@ -8,6 +8,9 @@ export interface paths {
     /** Refreshes organizations subscription by Stripe data */
     put: operations["refresh"];
   };
+  "/v2/public/billing/webhook": {
+    post: operations["webhook"];
+  };
   "/v2/organizations/{organizationId}/billing/update-subscription": {
     /** Updates subscription session */
     post: operations["updateSubscription"];
@@ -24,16 +27,19 @@ export interface paths {
     /** Cancels subscription */
     post: operations["cancelSubscription"];
   };
-  "/v2/organizations/{organizationId}/billing/buy-more-credits": {
-    /** Returns url of Stripe checkout session */
+  "/v2/organizations/{organizationId}/billing/buy-more-credits/{priceId}": {
+    /** Returns url of Stripe checkout session to buy more credits */
     post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
-  };
-  "/v2/organizations/{organizationId}/billing/plans": {
-    get: operations["getPlans"];
   };
   "/v2/organizations/{organizationId}/billing/active-plan": {
     /** Refreshes organizations subscription by Stripe data */
     get: operations["getActivePlan"];
+  };
+  "/v2/billing/plans": {
+    get: operations["getPlans"];
+  };
+  "/v2/billing/mt-credit-prices": {
+    get: operations["getMtCreditPrices"];
   };
 }
 
@@ -62,10 +68,6 @@ export interface components {
       /** Url to return afterwards */
       returnUrl: string;
     };
-    BuyMoreMtCreditsRequest: {
-      /** Amount of credit packages */
-      amount: number;
-    };
     CollectionModelPlanModel: {
       _embedded?: {
         plans?: components["schemas"]["PlanModel"][];
@@ -79,6 +81,16 @@ export interface components {
       monthlyPrice?: number;
       yearlyPrice?: number;
       free: boolean;
+    };
+    CollectionModelMtCreditsPriceModel: {
+      _embedded?: {
+        prices?: components["schemas"]["MtCreditsPriceModel"][];
+      };
+    };
+    MtCreditsPriceModel: {
+      id: number;
+      price: number;
+      amount: number;
     };
   };
 }
@@ -109,6 +121,38 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+  };
+  webhook: {
+    parameters: {
+      header: {
+        "Stripe-Signature": string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": string;
       };
     };
   };
@@ -231,11 +275,12 @@ export interface operations {
       };
     };
   };
-  /** Returns url of Stripe checkout session */
+  /** Returns url of Stripe checkout session to buy more credits */
   getBuyMoreCreditsCheckoutSessionUrl: {
     parameters: {
       path: {
         organizationId: number;
+        priceId: number;
       };
     };
     responses: {
@@ -243,33 +288,6 @@ export interface operations {
       200: {
         content: {
           "*/*": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BuyMoreMtCreditsRequest"];
-      };
-    };
-  };
-  getPlans: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelPlanModel"];
         };
       };
       /** Bad Request */
@@ -298,6 +316,50 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["ActivePlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getPlans: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelPlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getMtCreditPrices: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelMtCreditsPriceModel"];
         };
       };
       /** Bad Request */

@@ -32,7 +32,7 @@ ext {
                             "table:batch_job_execution_params," +
                             "hibernate_sequence," +
                             "revision_sequence_generator," +
-                            "billing_sequence",
+                            "billing_sequence,",
                             "activity_sequence"
                 }
             }

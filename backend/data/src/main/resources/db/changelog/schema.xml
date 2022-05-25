@@ -1807,4 +1807,11 @@
     <changeSet author="jenik (generated)" id="1652283377276-1">
         <dropDefaultValue columnDataType="bigint" columnName="bucket_size" tableName="mt_credit_bucket"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1653294010887-2">
+        <addColumn tableName="mt_credit_bucket">
+            <column name="additional_credits" type="int8">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -26,58 +26,107 @@ export interface paths {
   "/v2/projects/{projectId}/keys/{keyId}/tags": {
     put: operations["tagKey"];
   };
+  "/v2/projects/keys/{keyId}/tags": {
+    put: operations["tagKey_1"];
+  };
   "/v2/projects/{projectId}/keys/{id}/complex-update": {
     put: operations["complexEdit"];
+  };
+  "/v2/projects/keys/{id}/complex-update": {
+    put: operations["complexEdit_1"];
   };
   "/v2/projects/{projectId}/keys/{id}": {
     put: operations["edit"];
   };
+  "/v2/projects/keys/{id}": {
+    put: operations["edit_1"];
+  };
   "/v2/projects/{projectId}/invite": {
     put: operations["inviteUser"];
-  };
-  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
-    put: operations["resolveTranslationSetOverride"];
-  };
-  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing": {
-    put: operations["resolveTranslationSetKeepExisting"];
-  };
-  "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override": {
-    put: operations["resolveTranslationSetOverride_1"];
-  };
-  "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
-    put: operations["resolveTranslationSetKeepExisting_1"];
-  };
-  "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}": {
-    put: operations["selectExistingLanguage"];
-  };
-  "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/reset-existing": {
-    put: operations["resetExistingLanguage"];
-  };
-  "/v2/projects/{projectId}/import/apply": {
-    put: operations["applyImport"];
   };
   "/v2/projects/{projectId}/auto-translation-settings": {
     get: operations["getAutoTranslationSettings"];
     put: operations["setAutoTranslationSettings"];
   };
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
+    put: operations["resolveTranslationSetOverride"];
+  };
+  "/v2/projects/import/result/languages/{languageId}/translations/{translationId}/resolve/set-override": {
+    put: operations["resolveTranslationSetOverride_1"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing": {
+    put: operations["resolveTranslationSetKeepExisting"];
+  };
+  "/v2/projects/import/result/languages/{languageId}/translations/{translationId}/resolve/set-keep-existing": {
+    put: operations["resolveTranslationSetKeepExisting_1"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-override": {
+    put: operations["resolveTranslationSetOverride_2"];
+  };
+  "/v2/projects/import/result/languages/{languageId}/resolve-all/set-override": {
+    put: operations["resolveTranslationSetOverride_3"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
+    put: operations["resolveTranslationSetKeepExisting_2"];
+  };
+  "/v2/projects/import/result/languages/{languageId}/resolve-all/set-keep-existing": {
+    put: operations["resolveTranslationSetKeepExisting_3"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}": {
+    put: operations["selectExistingLanguage"];
+  };
+  "/v2/projects/import/result/languages/{importLanguageId}/select-existing/{existingLanguageId}": {
+    put: operations["selectExistingLanguage_1"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{importLanguageId}/reset-existing": {
+    put: operations["resetExistingLanguage"];
+  };
+  "/v2/projects/import/result/languages/{importLanguageId}/reset-existing": {
+    put: operations["resetExistingLanguage_1"];
+  };
+  "/v2/projects/{projectId}/import/apply": {
+    put: operations["applyImport"];
+  };
+  "/v2/projects/import/apply": {
+    put: operations["applyImport_1"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/set-state/{state}": {
     put: operations["setTranslationState"];
   };
+  "/v2/projects/translations/{translationId}/set-state/{state}": {
+    put: operations["setTranslationState_1"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}/set-state/{state}": {
     put: operations["setState"];
+  };
+  "/v2/projects/translations/{translationId}/comments/{commentId}/set-state/{state}": {
+    put: operations["setState_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
     get: operations["get_1"];
     put: operations["update"];
     delete: operations["delete_2"];
   };
+  "/v2/projects/translations/{translationId}/comments/{commentId}": {
+    get: operations["get_2"];
+    put: operations["update_1"];
+    delete: operations["delete_3"];
+  };
   "/v2/projects/{projectId}/translations/{translationId}/dismiss-auto-translated-state": {
     put: operations["dismissAutoTranslatedState"];
+  };
+  "/v2/projects/translations/{translationId}/dismiss-auto-translated-state": {
+    put: operations["dismissAutoTranslatedState_1"];
   };
   "/v2/projects/{projectId}/translations": {
     get: operations["getTranslations"];
     put: operations["setTranslations"];
     post: operations["createOrUpdateTranslations"];
+  };
+  "/v2/projects/translations": {
+    get: operations["getTranslations_1"];
+    put: operations["setTranslations_1"];
+    post: operations["createOrUpdateTranslations_1"];
   };
   "/v2/projects/{projectId}/transfer-to-user/{userId}": {
     put: operations["transferProjectToUser"];
@@ -91,7 +140,12 @@ export interface paths {
   "/v2/projects/{projectId}/languages/{languageId}": {
     get: operations["get_3"];
     put: operations["editLanguage"];
-    delete: operations["deleteLanguage_1"];
+    delete: operations["deleteLanguage_2"];
+  };
+  "/v2/projects/languages/{languageId}": {
+    get: operations["get_4"];
+    put: operations["editLanguage_1"];
+    delete: operations["deleteLanguage_3"];
   };
   "/v2/projects/{id}/avatar": {
     put: operations["uploadAvatar_1"];
@@ -102,6 +156,10 @@ export interface paths {
   };
   "/api/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole_1"];
+  };
+  "/v2/organizations/{organizationId}/billing/refresh-subscription": {
+    /** Refreshes organizations subscription by Stripe data */
+    put: operations["refresh"];
   };
   "/v2/organizations/{id}/leave": {
     put: operations["leaveOrganization"];
@@ -133,10 +191,6 @@ export interface paths {
     put: operations["update_3"];
     delete: operations["delete_5"];
   };
-  "/v2/billing/refresh-subscription/{organizationId}": {
-    /** Refreshes organizations subscription by Stripe data */
-    put: operations["refresh"];
-  };
   "/v2/api-keys/{apiKeyId}": {
     put: operations["update_4"];
     delete: operations["delete_7"];
@@ -146,9 +200,16 @@ export interface paths {
     post: operations["create_12"];
     delete: operations["delete_10"];
   };
+  "/api/project/keys": {
+    delete: operations["delete_11"];
+  };
   "/api/project/{projectId}/translations": {
     put: operations["setTranslations_2"];
     post: operations["createOrUpdateTranslations_2"];
+  };
+  "/api/project/translations": {
+    put: operations["setTranslations_3"];
+    post: operations["createOrUpdateTranslations_3"];
   };
   "/v2/user": {
     get: operations["getInfo"];
@@ -179,25 +240,51 @@ export interface paths {
   "/v2/projects/{projectId}/keys": {
     post: operations["create_1"];
   };
+  "/v2/projects/keys/create": {
+    post: operations["create_2"];
+  };
+  "/v2/projects/keys": {
+    post: operations["create_3"];
+  };
+  "/v2/projects/{projectId}/import/with-streaming-response": {
+    post: operations["addFilesStreaming"];
+  };
+  "/v2/projects/import/with-streaming-response": {
+    post: operations["addFilesStreaming_1"];
+  };
   "/v2/projects/{projectId}/import": {
     post: operations["addFiles"];
     delete: operations["cancelImport"];
   };
-  "/v2/projects/{projectId}/import/with-streaming-response": {
-    post: operations["addFilesStreaming"];
+  "/v2/projects/import": {
+    post: operations["addFiles_1"];
+    delete: operations["cancelImport_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments": {
     get: operations["getAll_3"];
     post: operations["create_4"];
   };
+  "/v2/projects/translations/{translationId}/comments": {
+    get: operations["getAll_4"];
+    post: operations["create_5"];
+  };
   "/v2/projects/{projectId}/translations/create-comment": {
     post: operations["create_6"];
+  };
+  "/v2/projects/translations/create-comment": {
+    post: operations["create_7"];
   };
   "/v2/projects/{projectId}/suggest/translation-memory": {
     post: operations["suggestTranslationMemory"];
   };
+  "/v2/projects/suggest/translation-memory": {
+    post: operations["suggestTranslationMemory_1"];
+  };
   "/v2/projects/{projectId}/suggest/machine-translations": {
     post: operations["suggestMachineTranslations"];
+  };
+  "/v2/projects/suggest/machine-translations": {
+    post: operations["suggestMachineTranslations_1"];
   };
   "/v2/projects/{projectId}/languages": {
     get: operations["getAll_5"];
@@ -207,9 +294,33 @@ export interface paths {
     get: operations["export"];
     post: operations["exportPost"];
   };
+  "/v2/projects/keys/{keyId}/screenshots": {
+    get: operations["getKeyScreenshots_2"];
+    post: operations["uploadScreenshot"];
+  };
   "/v2/projects/{projectId}/keys/{keyId}/screenshots": {
     get: operations["getKeyScreenshots_3"];
     post: operations["uploadScreenshot_1"];
+  };
+  "/v2/organizations/{organizationId}/billing/update-subscription": {
+    /** Updates subscription session */
+    post: operations["updateSubscription"];
+  };
+  "/v2/organizations/{organizationId}/billing/subscribe": {
+    /** Returns url of Stripe checkout session */
+    post: operations["subscribe"];
+  };
+  "/v2/organizations/{organizationId}/billing/create-customer-portal-session": {
+    /** Returns url of Stripe checkout session */
+    post: operations["createCustomerPortalSession"];
+  };
+  "/v2/organizations/{organizationId}/billing/cancel-subscription": {
+    /** Cancels subscription */
+    post: operations["cancelSubscription"];
+  };
+  "/v2/organizations/{organizationId}/billing/buy-more-credits/{priceId}": {
+    /** Returns url of Stripe checkout session to buy more credits */
+    post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
   };
   "/v2/organizations": {
     get: operations["getAll_7"];
@@ -221,22 +332,6 @@ export interface paths {
   };
   "/v2/image-upload": {
     post: operations["upload"];
-  };
-  "/v2/billing/update-subscription": {
-    /** Updates subscription session */
-    post: operations["updateSubscription"];
-  };
-  "/v2/billing/subscribe": {
-    /** Returns url of Stripe checkout session */
-    post: operations["subscribe"];
-  };
-  "/v2/billing/create-customer-portal-session": {
-    /** Returns url of Stripe checkout session */
-    post: operations["createCustomerPortalSession"];
-  };
-  "/v2/billing/cancel-subscription/{organizationId}": {
-    /** Cancels subscription */
-    post: operations["cancelSubscription"];
   };
   "/v2/api-keys": {
     get: operations["allByUser"];
@@ -264,6 +359,10 @@ export interface paths {
   "/api/project/{projectId}/keys/translations/{languages}": {
     /** Key name must be provided in method body, since it can be long and can contain characters hard to encode */
     post: operations["getKeyTranslationsPost"];
+  };
+  "/api/project/keys/translations/{languages}": {
+    /** Key name must be provided in method body, since it can be long and can contain characters hard to encode */
+    post: operations["getKeyTranslationsPost_1"];
   };
   "/api/project/{projectId}/keys/edit": {
     post: operations["editDeprecated"];
@@ -302,6 +401,9 @@ export interface paths {
   "/v2/projects/{projectId}/tags": {
     get: operations["getAll_1"];
   };
+  "/v2/projects/tags": {
+    get: operations["getAll_2"];
+  };
   "/v2/projects/{projectId}/stats/daily-activity": {
     get: operations["getProjectDailyActivity"];
   };
@@ -311,30 +413,52 @@ export interface paths {
   "/v2/projects/{projectId}/machine-translation-credit-balance": {
     get: operations["getProjectCredits"];
   };
-  "/v2/projects/{projectId}/import/result": {
-    get: operations["getImportResult"];
+  "/v2/projects/{projectId}/activity": {
+    get: operations["getActivity"];
+  };
+  "/v2/projects/activity": {
+    get: operations["getActivity_1"];
+  };
+  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations": {
+    get: operations["getImportTranslations"];
   };
   "/v2/projects/{projectId}/import/result/languages/{languageId}": {
     get: operations["getImportLanguage"];
     delete: operations["deleteLanguage"];
   };
-  "/v2/projects/{projectId}/import/result/languages/{languageId}/translations": {
-    get: operations["getImportTranslations"];
+  "/v2/projects/import/result/languages/{languageId}": {
+    get: operations["getImportLanguage_1"];
+    delete: operations["deleteLanguage_1"];
   };
   "/v2/projects/{projectId}/import/result/files/{importFileId}/issues": {
     get: operations["getImportFileIssues"];
   };
-  "/v2/projects/{projectId}/activity": {
-    get: operations["getActivity"];
+  "/v2/projects/import/result/files/{importFileId}/issues": {
+    get: operations["getImportFileIssues_1"];
+  };
+  "/v2/projects/{projectId}/import/result": {
+    get: operations["getImportResult"];
+  };
+  "/v2/projects/import/result": {
+    get: operations["getImportResult_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/history": {
     get: operations["getTranslationHistory"];
   };
+  "/v2/projects/translations/{translationId}/history": {
+    get: operations["getTranslationHistory_1"];
+  };
   "/v2/projects/{projectId}/translations/{languages}": {
     get: operations["getAllTranslations"];
   };
+  "/v2/projects/translations/{languages}": {
+    get: operations["getAllTranslations_1"];
+  };
   "/v2/projects/{projectId}/translations/select-all": {
     get: operations["getSelectAllKeyIds"];
+  };
+  "/v2/projects/translations/select-all": {
+    get: operations["getSelectAllKeyIds_1"];
   };
   "/v2/projects/{projectId}/transfer-options": {
     get: operations["getTransferOptions"];
@@ -369,6 +493,10 @@ export interface paths {
   "/api/organizations/{organizationId}/invitations": {
     get: operations["getInvitations_1"];
   };
+  "/v2/organizations/{organizationId}/billing/active-plan": {
+    /** Refreshes organizations subscription by Stripe data */
+    get: operations["getActivePlan"];
+  };
   "/v2/organizations/{id}/users": {
     get: operations["getAllUsers_1"];
   };
@@ -387,19 +515,11 @@ export interface paths {
   "/v2/invitations/{code}/accept": {
     get: operations["acceptInvitation"];
   };
-  "/v2/billing/subscriptions": {
-    get: operations["getSubscriptions"];
-  };
   "/v2/billing/plans": {
     get: operations["getPlans"];
   };
-  "/v2/billing/create-change-payment-method-session/{organizationId}": {
-    /** Creates change payment method session */
-    get: operations["createChangePaymentMethodSession"];
-  };
-  "/v2/billing/active-plan/{organizationId}": {
-    /** Refreshes organizations subscription by Stripe data */
-    get: operations["getActivePlan"];
+  "/v2/billing/mt-credit-prices": {
+    get: operations["getMtCreditPrices"];
   };
   "/v2/api-keys/{keyId}": {
     get: operations["get_9"];
@@ -426,6 +546,10 @@ export interface paths {
     get: operations["getDeprecated"];
     delete: operations["delete_8"];
   };
+  "/api/project/keys/{id}": {
+    get: operations["getDeprecated_1"];
+    delete: operations["delete_9"];
+  };
   "/api/project/{projectId}/export/jsonZip": {
     get: operations["doExportJsonZip"];
   };
@@ -434,6 +558,9 @@ export interface paths {
   };
   "/api/project/{projectId}/translations/{languages}": {
     get: operations["getTranslations_2"];
+  };
+  "/api/project/translations/{languages}": {
+    get: operations["getTranslations_3"];
   };
   "/api/project/{projectId}/translations/view": {
     get: operations["getViewData"];
@@ -456,8 +583,17 @@ export interface paths {
   "/v2/projects/{projectId}/keys/{keyId}/tags/{tagId}": {
     delete: operations["removeTag"];
   };
+  "/v2/projects/keys/{keyId}/tags/{tagId}": {
+    delete: operations["removeTag_1"];
+  };
   "/v2/projects/{projectId}/keys/{ids}": {
     delete: operations["delete"];
+  };
+  "/v2/projects/keys/{ids}": {
+    delete: operations["delete_1"];
+  };
+  "/v2/projects/keys/{keyId}/screenshots/{ids}": {
+    delete: operations["deleteScreenshots"];
   };
   "/v2/projects/{projectId}/keys/{keyId}/screenshots/{ids}": {
     delete: operations["deleteScreenshots_1"];
@@ -473,6 +609,9 @@ export interface paths {
   };
   "/v2/image-upload/{ids}": {
     delete: operations["delete_6"];
+  };
+  "/api/project/screenshots/{ids}": {
+    delete: operations["deleteScreenshots_2"];
   };
   "/api/project/{projectId}/screenshots/{ids}": {
     delete: operations["deleteScreenshots_3"];
@@ -729,6 +868,17 @@ export interface components {
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
     };
+    ActivePlanModel: {
+      id: number;
+      name: string;
+      translationLimit?: number;
+      includedMtCredits?: number;
+      monthlyPrice?: number;
+      yearlyPrice?: number;
+      currentPeriodEnd?: number;
+      cancelAtPeriodEnd: boolean;
+      free: boolean;
+    };
     OrganizationInviteUserDto: {
       roleType: "MEMBER" | "OWNER";
       /** Name of invited user */
@@ -758,16 +908,6 @@ export interface components {
       description?: string;
       slug?: string;
       basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-    };
-    ActivePlanModel: {
-      id: number;
-      name: string;
-      translationLimit?: number;
-      includedMtCredits?: number;
-      monthlyPrice?: number;
-      yearlyPrice?: number;
-      currentPeriodEnd: number;
-      cancelAtPeriodEnd: boolean;
     };
     V2EditApiKeyDto: {
       scopes: string[];
@@ -821,6 +961,7 @@ export interface components {
       /** Ids of screenshots uploaded with /v2/image-upload endpoint */
       screenshotUploadedImageIds?: number[];
     };
+    StreamingResponseBody: { [key: string]: unknown };
     ErrorResponseBody: {
       code: string;
       params?: { [key: string]: unknown }[];
@@ -855,7 +996,6 @@ export interface components {
       };
       page?: components["schemas"]["PageMetadata"];
     };
-    StreamingResponseBody: { [key: string]: unknown };
     TranslationCommentWithLangKeyDto: {
       keyId: number;
       languageId: number;
@@ -890,6 +1030,10 @@ export interface components {
       machineTranslations?: { [key: string]: string };
       translationCreditsBalanceBefore: number;
       translationCreditsBalanceAfter: number;
+      /** Additional credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
+      translationAdditionalCreditsBalanceBefore: number;
+      /** Additional credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
+      translationAdditionalCreditsBalanceAfter: number;
     };
     ExportParams: {
       languages?: string[];
@@ -904,30 +1048,24 @@ export interface components {
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED")[];
       zip: boolean;
     };
+    UpdateSubscriptionRequest: {
+      /** Id of the subscription plan */
+      planId: number;
+    };
+    SubscribeRequest: {
+      /** Id of the subscription plan */
+      planId: number;
+    };
+    CreateCustomerPortalSessionRequest: {
+      /** Url to return afterwards */
+      returnUrl: string;
+    };
     UploadedImageModel: {
       id: number;
       filename: string;
       fileUrl: string;
       requestFilename: string;
       createdAt: string;
-    };
-    UpdateSubscriptionRequest: {
-      /** Id of the organization */
-      organizationId: number;
-      /** Id of the subscription plan */
-      planId: number;
-    };
-    SubscribeRequest: {
-      /** Id of the organization */
-      organizationId: number;
-      /** Id of the subscription plan */
-      planId: number;
-    };
-    CreateCustomerPortalSessionRequest: {
-      /** Id of the organization */
-      organizationId?: number;
-      /** Url to return afterwards */
-      returnUrl: string;
     };
     CreateApiKeyDto: {
       projectId: number;
@@ -1045,57 +1183,18 @@ export interface components {
       creditBalance: number;
       bucketSize: number;
     };
-    ImportTranslationModel: {
-      id: number;
-      text?: string;
-      keyName: string;
-      keyId: number;
-      conflictId?: number;
-      conflictText?: string;
-      override: boolean;
-      resolved: boolean;
-    };
-    PagedModelImportTranslationModel: {
-      _embedded?: {
-        translations?: components["schemas"]["ImportTranslationModel"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
-      id: number;
-      type:
-        | "KEY_IS_NOT_STRING"
-        | "MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE"
-        | "VALUE_IS_NOT_STRING"
-        | "KEY_IS_EMPTY"
-        | "VALUE_IS_EMPTY"
-        | "PO_MSGCTXT_NOT_SUPPORTED"
-        | "ID_ATTRIBUTE_NOT_PROVIDED"
-        | "TARGET_NOT_PROVIDED"
-        | "TRANSLATION_TOO_LONG";
-    };
-    ImportFileIssueParamView: {
-      value?: string;
-      type:
-        | "KEY_NAME"
-        | "KEY_ID"
-        | "LANGUAGE_ID"
-        | "KEY_INDEX"
-        | "VALUE"
-        | "LINE"
-        | "FILE_NODE_ORIGINAL";
-    };
-    PagedModelEntityModelImportFileIssueView: {
-      _embedded?: {
-        importFileIssueViews?: components["schemas"]["EntityModelImportFileIssueView"][];
-      };
-      page?: components["schemas"]["PageMetadata"];
-    };
-    EntityDescription: {
+    EntityDescriptionWithRelations: {
       entityClass: string;
       entityId: number;
       data: { [key: string]: { [key: string]: unknown } };
+    };
+    ExistenceEntityDescription: {
+      entityClass: string;
+      entityId: number;
+      data: { [key: string]: { [key: string]: unknown } };
+      relations: {
+        [key: string]: components["schemas"]["EntityDescriptionWithRelations"];
+      };
       exists?: boolean;
     };
     ModifiedEntityModel: {
@@ -1104,7 +1203,9 @@ export interface components {
       modifications?: {
         [key: string]: components["schemas"]["PropertyModification"];
       };
-      relations?: { [key: string]: components["schemas"]["EntityDescription"] };
+      relations?: {
+        [key: string]: components["schemas"]["ExistenceEntityDescription"];
+      };
       exists?: boolean;
     };
     PagedModelProjectActivityModel: {
@@ -1154,6 +1255,53 @@ export interface components {
     PropertyModification: {
       old?: { [key: string]: unknown };
       new?: { [key: string]: unknown };
+    };
+    ImportTranslationModel: {
+      id: number;
+      text?: string;
+      keyName: string;
+      keyId: number;
+      conflictId?: number;
+      conflictText?: string;
+      override: boolean;
+      resolved: boolean;
+    };
+    PagedModelImportTranslationModel: {
+      _embedded?: {
+        translations?: components["schemas"]["ImportTranslationModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
+    };
+    EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
+      id: number;
+      type:
+        | "KEY_IS_NOT_STRING"
+        | "MULTIPLE_VALUES_FOR_KEY_AND_LANGUAGE"
+        | "VALUE_IS_NOT_STRING"
+        | "KEY_IS_EMPTY"
+        | "VALUE_IS_EMPTY"
+        | "PO_MSGCTXT_NOT_SUPPORTED"
+        | "ID_ATTRIBUTE_NOT_PROVIDED"
+        | "TARGET_NOT_PROVIDED"
+        | "TRANSLATION_TOO_LONG";
+    };
+    ImportFileIssueParamView: {
+      value?: string;
+      type:
+        | "KEY_NAME"
+        | "KEY_ID"
+        | "LANGUAGE_ID"
+        | "KEY_INDEX"
+        | "VALUE"
+        | "LINE"
+        | "FILE_NODE_ORIGINAL";
+    };
+    PagedModelEntityModelImportFileIssueView: {
+      _embedded?: {
+        importFileIssueViews?: components["schemas"]["EntityModelImportFileIssueView"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     PagedModelTranslationCommentModel: {
       _embedded?: {
@@ -1346,6 +1494,17 @@ export interface components {
       includedMtCredits?: number;
       monthlyPrice?: number;
       yearlyPrice?: number;
+      free: boolean;
+    };
+    CollectionModelMtCreditsPriceModel: {
+      _embedded?: {
+        prices?: components["schemas"]["MtCreditsPriceModel"][];
+      };
+    };
+    MtCreditsPriceModel: {
+      id: number;
+      price: number;
+      amount: number;
     };
     ApiKeyWithLanguagesModel: {
       id: number;
@@ -1718,11 +1877,75 @@ export interface operations {
       };
     };
   };
+  tagKey_1: {
+    parameters: {
+      path: {
+        keyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TagModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TagKeyDto"];
+      };
+    };
+  };
   complexEdit: {
     parameters: {
       path: {
         id: number;
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["KeyWithDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ComplexEditKeyDto"];
+      };
+    };
+  };
+  complexEdit_1: {
+    parameters: {
+      path: {
+        id: number;
       };
     };
     responses: {
@@ -1784,6 +2007,38 @@ export interface operations {
       };
     };
   };
+  edit_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["KeyModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["EditKeyDto"];
+      };
+    };
+  };
   inviteUser: {
     parameters: {
       path: {
@@ -1813,179 +2068,6 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["ProjectInviteUserDto"];
-      };
-    };
-  };
-  resolveTranslationSetOverride: {
-    parameters: {
-      path: {
-        languageId: number;
-        translationId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  resolveTranslationSetKeepExisting: {
-    parameters: {
-      path: {
-        languageId: number;
-        translationId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  resolveTranslationSetOverride_1: {
-    parameters: {
-      path: {
-        languageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  resolveTranslationSetKeepExisting_1: {
-    parameters: {
-      path: {
-        languageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  selectExistingLanguage: {
-    parameters: {
-      path: {
-        importLanguageId: number;
-        existingLanguageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  resetExistingLanguage: {
-    parameters: {
-      path: {
-        importLanguageId: number;
-        projectId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  applyImport: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-      query: {
-        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
       };
     };
   };
@@ -2048,6 +2130,343 @@ export interface operations {
       };
     };
   };
+  resolveTranslationSetOverride: {
+    parameters: {
+      path: {
+        languageId: number;
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  resolveTranslationSetOverride_1: {
+    parameters: {
+      path: {
+        languageId: number;
+        translationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  resolveTranslationSetKeepExisting: {
+    parameters: {
+      path: {
+        languageId: number;
+        translationId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  resolveTranslationSetKeepExisting_1: {
+    parameters: {
+      path: {
+        languageId: number;
+        translationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  resolveTranslationSetOverride_2: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  resolveTranslationSetOverride_3: {
+    parameters: {
+      path: {
+        languageId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  resolveTranslationSetKeepExisting_2: {
+    parameters: {
+      path: {
+        languageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  resolveTranslationSetKeepExisting_3: {
+    parameters: {
+      path: {
+        languageId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  selectExistingLanguage: {
+    parameters: {
+      path: {
+        importLanguageId: number;
+        existingLanguageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  selectExistingLanguage_1: {
+    parameters: {
+      path: {
+        importLanguageId: number;
+        existingLanguageId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  resetExistingLanguage: {
+    parameters: {
+      path: {
+        importLanguageId: number;
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  resetExistingLanguage_1: {
+    parameters: {
+      path: {
+        importLanguageId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  applyImport: {
+    parameters: {
+      query: {
+        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  applyImport_1: {
+    parameters: {
+      query: {
+        forceMode?: "OVERRIDE" | "KEEP" | "NO_FORCE";
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   setTranslationState: {
     parameters: {
       path: {
@@ -2077,12 +2496,68 @@ export interface operations {
       };
     };
   };
+  setTranslationState_1: {
+    parameters: {
+      path: {
+        translationId: number;
+        state: "UNTRANSLATED" | "TRANSLATED" | "REVIEWED";
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   setState: {
     parameters: {
       path: {
         commentId: number;
         state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setState_1: {
+    parameters: {
+      path: {
+        commentId: number;
+        state: "RESOLUTION_NOT_NEEDED" | "NEEDS_RESOLUTION" | "RESOLVED";
       };
     };
     responses: {
@@ -2192,11 +2667,121 @@ export interface operations {
       };
     };
   };
+  get_2: {
+    parameters: {
+      path: {
+        translationId: number;
+        commentId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  update_1: {
+    parameters: {
+      path: {
+        commentId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TranslationCommentDto"];
+      };
+    };
+  };
+  delete_3: {
+    parameters: {
+      path: {
+        commentId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   dismissAutoTranslatedState: {
     parameters: {
       path: {
         translationId: number;
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["TranslationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  dismissAutoTranslatedState_1: {
+    parameters: {
+      path: {
+        translationId: number;
       };
     };
     responses: {
@@ -2263,7 +2848,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
       path: {
@@ -2329,6 +2914,130 @@ export interface operations {
         projectId: number;
       };
     };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SetTranslationsResponseModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
+      };
+    };
+  };
+  getTranslations_1: {
+    parameters: {
+      query: {
+        /** Cursor to get next data */
+        cursor?: string;
+        /**
+         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
+         *
+         * When used with multiple states for same language it is applied with logical OR.
+         *
+         * When used with multiple languages, it is applied with logical AND.
+         */
+        filterState?: string[];
+        /**
+         * Languages to be contained in response.
+         *
+         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
+         */
+        languages?: string[];
+        /** String to search in key name or translation text */
+        search?: string;
+        /** Selects only one key with provided name */
+        filterKeyName?: string;
+        /** Selects only one key with provided id */
+        filterKeyId?: number[];
+        /** Selects only keys, where translation is missing in any language */
+        filterUntranslatedAny?: boolean;
+        /** Selects only keys, where translation is provided in any language */
+        filterTranslatedAny?: boolean;
+        /** Selects only keys, where translation is missing in specified language */
+        filterUntranslatedInLang?: string;
+        /** Selects only keys, where translation is provided in specified language */
+        filterTranslatedInLang?: string;
+        /** Selects only keys with screenshots */
+        filterHasScreenshot?: boolean;
+        /** Selects only keys without screenshots */
+        filterHasNoScreenshot?: boolean;
+        /** Selects only keys with provided tag */
+        filterTag?: string[];
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["KeysWithTranslationsPageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  setTranslations_1: {
+    parameters: {};
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SetTranslationsResponseModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
+      };
+    };
+  };
+  createOrUpdateTranslations_1: {
+    parameters: {};
     responses: {
       /** OK */
       200: {
@@ -2487,11 +3196,93 @@ export interface operations {
       };
     };
   };
-  deleteLanguage_1: {
+  deleteLanguage_2: {
     parameters: {
       path: {
         languageId: number;
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  get_4: {
+    parameters: {
+      path: {
+        languageId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["LanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  editLanguage_1: {
+    parameters: {
+      path: {
+        languageId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["LanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LanguageDto"];
+      };
+    };
+  };
+  deleteLanguage_3: {
+    parameters: {
+      path: {
+        languageId: number;
       };
     };
     responses: {
@@ -2627,6 +3418,34 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetOrganizationRoleDto"];
+      };
+    };
+  };
+  /** Refreshes organizations subscription by Stripe data */
+  refresh: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ActivePlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
       };
     };
   };
@@ -3026,34 +3845,6 @@ export interface operations {
       };
     };
   };
-  /** Refreshes organizations subscription by Stripe data */
-  refresh: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ActivePlanModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   update_4: {
     parameters: {
       path: {
@@ -3193,6 +3984,29 @@ export interface operations {
       };
     };
   };
+  delete_11: {
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": number[];
+      };
+    };
+  };
   setTranslations_2: {
     parameters: {
       path: {
@@ -3227,6 +4041,54 @@ export interface operations {
         projectId: number;
       };
     };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
+      };
+    };
+  };
+  setTranslations_3: {
+    parameters: {};
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetTranslationsWithKeyDto"];
+      };
+    };
+  };
+  createOrUpdateTranslations_3: {
+    parameters: {};
     responses: {
       /** OK */
       200: unknown;
@@ -3445,7 +4307,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
       };
@@ -3562,6 +4424,125 @@ export interface operations {
       };
     };
   };
+  create_2: {
+    parameters: {};
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["KeyWithDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateKeyDto"];
+      };
+    };
+  };
+  create_3: {
+    parameters: {};
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["KeyWithDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateKeyDto"];
+      };
+    };
+  };
+  addFilesStreaming: {
+    parameters: {
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          files: string[];
+        };
+      };
+    };
+  };
+  addFilesStreaming_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          files: string[];
+        };
+      };
+    };
+  };
   addFiles: {
     parameters: {
       path: {
@@ -3619,17 +4600,13 @@ export interface operations {
       };
     };
   };
-  addFilesStreaming: {
-    parameters: {
-      path: {
-        projectId: number;
-      };
-    };
+  addFiles_1: {
+    parameters: {};
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["StreamingResponseBody"];
+          "*/*": components["schemas"]["ImportAddFilesResultModel"];
         };
       };
       /** Bad Request */
@@ -3653,6 +4630,25 @@ export interface operations {
       };
     };
   };
+  cancelImport_1: {
+    parameters: {};
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAll_3: {
     parameters: {
       path: {
@@ -3664,7 +4660,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
     };
@@ -3694,6 +4690,73 @@ export interface operations {
       path: {
         translationId: number;
         projectId: number;
+      };
+    };
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["TranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TranslationCommentDto"];
+      };
+    };
+  };
+  getAll_4: {
+    parameters: {
+      path: {
+        translationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelTranslationCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  create_5: {
+    parameters: {
+      path: {
+        translationId: number;
       };
     };
     responses: {
@@ -3754,6 +4817,34 @@ export interface operations {
       };
     };
   };
+  create_7: {
+    parameters: {};
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["TranslationWithCommentModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["TranslationCommentWithLangKeyDto"];
+      };
+    };
+  };
   suggestTranslationMemory: {
     parameters: {
       query: {
@@ -3761,11 +4852,48 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
       path: {
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelTranslationMemoryItemModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SuggestRequestDto"];
+      };
+    };
+  };
+  suggestTranslationMemory_1: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
@@ -3826,6 +4954,34 @@ export interface operations {
       };
     };
   };
+  suggestMachineTranslations_1: {
+    parameters: {};
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SuggestResultModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SuggestRequestDto"];
+      };
+    };
+  };
   getAll_5: {
     parameters: {
       path: {
@@ -3836,7 +4992,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
     };
@@ -3994,6 +5150,67 @@ export interface operations {
       };
     };
   };
+  getKeyScreenshots_2: {
+    parameters: {
+      path: {
+        keyId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelScreenshotModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  uploadScreenshot: {
+    parameters: {
+      path: {
+        keyId: number;
+      };
+    };
+    responses: {
+      /** Created */
+      201: {
+        content: {
+          "*/*": components["schemas"]["ScreenshotModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          screenshot: string;
+        };
+      };
+    };
+  };
   getKeyScreenshots_3: {
     parameters: {
       path: {
@@ -4057,6 +5274,154 @@ export interface operations {
       };
     };
   };
+  /** Updates subscription session */
+  updateSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSubscriptionRequest"];
+      };
+    };
+  };
+  /** Returns url of Stripe checkout session */
+  subscribe: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SubscribeRequest"];
+      };
+    };
+  };
+  /** Returns url of Stripe checkout session */
+  createCustomerPortalSession: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateCustomerPortalSessionRequest"];
+      };
+    };
+  };
+  /** Cancels subscription */
+  cancelSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Returns url of Stripe checkout session to buy more credits */
+  getBuyMoreCreditsCheckoutSessionUrl: {
+    parameters: {
+      path: {
+        organizationId: number;
+        priceId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAll_7: {
     parameters: {
       query: {
@@ -4064,7 +5429,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         params: components["schemas"]["OrganizationRequestParamsDto"];
       };
@@ -4124,7 +5489,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         params: components["schemas"]["OrganizationRequestParamsDto"];
       };
@@ -4203,110 +5568,6 @@ export interface operations {
       content: {
         "multipart/form-data": {
           image: string;
-        };
-      };
-    };
-  };
-  /** Updates subscription session */
-  updateSubscription: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateSubscriptionRequest"];
-      };
-    };
-  };
-  /** Returns url of Stripe checkout session */
-  subscribe: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SubscribeRequest"];
-      };
-    };
-  };
-  /** Returns url of Stripe checkout session */
-  createCustomerPortalSession: {
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateCustomerPortalSessionRequest"];
-      };
-    };
-  };
-  /** Cancels subscription */
-  cancelSubscription: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
         };
       };
     };
@@ -4544,6 +5805,39 @@ export interface operations {
       path: {
         languages: string[];
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": { [key: string]: string };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GetKeyTranslationsReqDto"];
+      };
+    };
+  };
+  /** Key name must be provided in method body, since it can be long and can contain characters hard to encode */
+  getKeyTranslationsPost_1: {
+    parameters: {
+      path: {
+        languages: string[];
       };
     };
     responses: {
@@ -4887,7 +6181,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
       };
@@ -4921,11 +6215,44 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
       path: {
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelTagModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAll_2: {
+    parameters: {
+      query: {
+        search?: string;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
       };
     };
     responses: {
@@ -5030,17 +6357,49 @@ export interface operations {
       };
     };
   };
-  getImportResult: {
+  getActivity: {
     parameters: {
-      path: {
-        projectId: number;
-      };
       query: {
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+      path: {
+        projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectActivityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getActivity_1: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
     };
@@ -5048,7 +6407,46 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelImportLanguageModel"];
+          "application/hal+json": components["schemas"]["PagedModelProjectActivityModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getImportTranslations: {
+    parameters: {
+      path: {
+        projectId: number;
+        languageId: number;
+      };
+      query: {
+        onlyConflicts?: boolean;
+        onlyUnresolved?: boolean;
+        search?: string;
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelImportTranslationModel"];
         };
       };
       /** Bad Request */
@@ -5117,31 +6515,42 @@ export interface operations {
       };
     };
   };
-  getImportTranslations: {
+  getImportLanguage_1: {
     parameters: {
       path: {
-        projectId: number;
         languageId: number;
-      };
-      query: {
-        onlyConflicts?: boolean;
-        onlyUnresolved?: boolean;
-        search?: string;
-        /** Zero-based page index (0..N) */
-        page?: number;
-        /** The size of the page to be returned */
-        size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
-        sort?: string[];
       };
     };
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["PagedModelImportTranslationModel"];
+          "*/*": components["schemas"]["ImportLanguageModel"];
         };
       };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  deleteLanguage_1: {
+    parameters: {
+      path: {
+        languageId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
       /** Bad Request */
       400: {
         content: {
@@ -5167,7 +6576,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
     };
@@ -5192,14 +6601,49 @@ export interface operations {
       };
     };
   };
-  getActivity: {
+  getImportFileIssues_1: {
+    parameters: {
+      path: {
+        importFileId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelEntityModelImportFileIssueView"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getImportResult: {
     parameters: {
       query: {
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
       path: {
@@ -5210,7 +6654,39 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "application/hal+json": components["schemas"]["PagedModelProjectActivityModel"];
+          "*/*": components["schemas"]["PagedModelImportLanguageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getImportResult_1: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelImportLanguageModel"];
         };
       };
       /** Bad Request */
@@ -5238,7 +6714,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
     };
@@ -5263,18 +6739,17 @@ export interface operations {
       };
     };
   };
-  getTranslationHistory: {
+  getTranslationHistory_1: {
     parameters: {
       path: {
         translationId: number;
-        projectId: number;
       };
       query: {
         /** Zero-based page index (0..N) */
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
       };
     };
@@ -5304,6 +6779,33 @@ export interface operations {
       path: {
         languages: string[];
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllTranslations_1: {
+    parameters: {
+      path: {
+        languages: string[];
       };
     };
     responses: {
@@ -5367,6 +6869,66 @@ export interface operations {
       };
       path: {
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SelectAllResponse"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getSelectAllKeyIds_1: {
+    parameters: {
+      query: {
+        /**
+         * Translation state in the format: languageTag,state. You can use this parameter multiple times.
+         *
+         * When used with multiple states for same language it is applied with logical OR.
+         *
+         * When used with multiple languages, it is applied with logical AND.
+         */
+        filterState?: string[];
+        /**
+         * Languages to be contained in response.
+         *
+         * To add multiple languages, repeat this param (eg. ?languages=en&languages=de)
+         */
+        languages?: string[];
+        /** String to search in key name or translation text */
+        search?: string;
+        /** Selects only one key with provided name */
+        filterKeyName?: string;
+        /** Selects only one key with provided id */
+        filterKeyId?: number[];
+        /** Selects only keys, where translation is missing in any language */
+        filterUntranslatedAny?: boolean;
+        /** Selects only keys, where translation is provided in any language */
+        filterTranslatedAny?: boolean;
+        /** Selects only keys, where translation is missing in specified language */
+        filterUntranslatedInLang?: string;
+        /** Selects only keys, where translation is provided in specified language */
+        filterTranslatedInLang?: string;
+        /** Selects only keys with screenshots */
+        filterHasScreenshot?: boolean;
+        /** Selects only keys without screenshots */
+        filterHasNoScreenshot?: boolean;
+        /** Selects only keys with provided tag */
+        filterTag?: string[];
       };
     };
     responses: {
@@ -5484,7 +7046,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
       };
@@ -5520,7 +7082,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
       };
@@ -5556,7 +7118,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
       };
@@ -5717,6 +7279,34 @@ export interface operations {
       };
     };
   };
+  /** Refreshes organizations subscription by Stripe data */
+  getActivePlan: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["ActivePlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllUsers_1: {
     parameters: {
       path: {
@@ -5727,7 +7317,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
       };
@@ -5763,7 +7353,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
       };
@@ -5799,7 +7389,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
       };
@@ -5835,7 +7425,7 @@ export interface operations {
         page?: number;
         /** The size of the page to be returned */
         size?: number;
-        /** Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
         sort?: string[];
         search?: string;
       };
@@ -5906,24 +7496,6 @@ export interface operations {
       };
     };
   };
-  getSubscriptions: {
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   getPlans: {
     responses: {
       /** OK */
@@ -5946,46 +7518,12 @@ export interface operations {
       };
     };
   };
-  /** Creates change payment method session */
-  createChangePaymentMethodSession: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
+  getMtCreditPrices: {
     responses: {
       /** OK */
       200: {
         content: {
-          "*/*": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  /** Refreshes organizations subscription by Stripe data */
-  getActivePlan: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["ActivePlanModel"];
+          "*/*": components["schemas"]["CollectionModelMtCreditsPriceModel"];
         };
       };
       /** Bad Request */
@@ -6231,6 +7769,56 @@ export interface operations {
       };
     };
   };
+  getDeprecated_1: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["DeprecatedKeyDto"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  delete_9: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   doExportJsonZip: {
     parameters: {
       path: {
@@ -6290,6 +7878,33 @@ export interface operations {
       path: {
         languages: string[];
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": { [key: string]: { [key: string]: unknown } };
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getTranslations_3: {
+    parameters: {
+      path: {
+        languages: string[];
       };
     };
     responses: {
@@ -6493,11 +8108,81 @@ export interface operations {
       };
     };
   };
+  removeTag_1: {
+    parameters: {
+      path: {
+        keyId: number;
+        tagId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   delete: {
     parameters: {
       path: {
         ids: number[];
         projectId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  delete_1: {
+    parameters: {
+      path: {
+        ids: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  deleteScreenshots: {
+    parameters: {
+      path: {
+        ids: number[];
       };
     };
     responses: {
@@ -6613,6 +8298,29 @@ export interface operations {
     };
   };
   delete_6: {
+    parameters: {
+      path: {
+        ids: number[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  deleteScreenshots_2: {
     parameters: {
       path: {
         ids: number[];

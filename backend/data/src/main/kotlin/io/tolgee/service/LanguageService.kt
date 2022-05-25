@@ -110,6 +110,10 @@ class LanguageService(
     languageRepository.deleteAllByProjectId(projectId)
   }
 
+  fun save(language: Language): Language {
+    return this.languageRepository.save(language)
+  }
+
   fun saveAll(languages: Iterable<Language>): MutableList<Language>? {
     return this.languageRepository.saveAll(languages)
   }

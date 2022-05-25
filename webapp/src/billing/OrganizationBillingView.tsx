@@ -12,6 +12,7 @@ import {
 } from './useBillingQueryApi';
 import { useOrganizationCreditBalance } from './useOrganizationCreditBalance';
 import { BillingPlans } from './BillingPlans';
+import { MoreMtCredits } from './MoreMtCredits';
 
 export const OrganizationBillingView: FunctionComponent = () => {
   const { search } = useLocation();
@@ -47,11 +48,8 @@ export const OrganizationBillingView: FunctionComponent = () => {
   }, [success]);
 
   const plansLoadable = useBillingApiQuery({
-    url: '/v2/organizations/{organizationId}/billing/plans',
+    url: '/v2/billing/plans',
     method: 'get',
-    path: {
-      organizationId: organization!.id,
-    },
   });
 
   const getCustomerPortalSession = useBillingApiMutation({
@@ -97,6 +95,8 @@ export const OrganizationBillingView: FunctionComponent = () => {
           activePlan={activePlan.data}
         />
       )}
+
+      <MoreMtCredits />
 
       <Typography>
         To review your invoices, update your payment method or review your

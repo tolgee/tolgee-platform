@@ -36,11 +36,26 @@ class MtCreditBucketService(
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
     refillIfItsTime(bucket)
-    if (getCreditBalance(bucket).creditBalance - amount < 0) {
+    val balances = getCreditBalances(bucket)
+    val totalBalance = balances.creditBalance + balances.additionalCreditBalance
+
+    if (totalBalance - amount < 0) {
       throw OutOfCreditsException()
     }
-    bucket.credits -= amount
+
+    bucket.consumeSufficientCredits(amount)
     save(bucket)
+  }
+
+  private fun MtCreditBucket.consumeSufficientCredits(amount: Int) {
+    if (this.credits >= amount) {
+      this.credits -= amount
+      return
+    }
+
+    val amountToConsumeFromAdditionalCredits = amount - this.credits
+    this.credits = 0
+    this.additionalCredits -= amountToConsumeFromAdditionalCredits
   }
 
   @Transactional
@@ -64,21 +79,25 @@ class MtCreditBucketService(
     machineTranslationCreditBucketRepository.saveAll(buckets)
   }
 
-  fun getCreditBalance(project: Project): MtCreditBalanceDto {
-    return getCreditBalance(findOrCreateBucket(project))
+  fun getCreditBalances(project: Project): MtCreditBalanceDto {
+    return getCreditBalances(findOrCreateBucket(project))
   }
 
-  fun getCreditBalance(bucket: MtCreditBucket): MtCreditBalanceDto {
+  fun getCreditBalances(bucket: MtCreditBucket): MtCreditBalanceDto {
     refillIfItsTime(bucket)
-    return MtCreditBalanceDto(bucket.credits, bucket.bucketSize)
+    return MtCreditBalanceDto(
+      creditBalance = bucket.credits,
+      bucketSize = bucket.bucketSize,
+      additionalCreditBalance = bucket.additionalCredits
+    )
   }
 
-  fun getCreditBalance(userAccount: UserAccount): MtCreditBalanceDto {
-    return getCreditBalance(findOrCreateBucket(userAccount))
+  fun getCreditBalances(userAccount: UserAccount): MtCreditBalanceDto {
+    return getCreditBalances(findOrCreateBucket(userAccount))
   }
 
-  fun getCreditBalance(organization: Organization): MtCreditBalanceDto {
-    return getCreditBalance(findOrCreateBucket(organization))
+  fun getCreditBalances(organization: Organization): MtCreditBalanceDto {
+    return getCreditBalances(findOrCreateBucket(organization))
   }
 
   private fun MtCreditBucket.getNextRefillDate(): Date {
