@@ -1,5 +1,5 @@
-import { ViewListRounded, AppsRounded, Add, Delete } from '@mui/icons-material';
-import { Button, ButtonGroup, IconButton, styled } from '@mui/material';
+import { ViewListRounded, AppsRounded, Add } from '@mui/icons-material';
+import { Button, ButtonGroup, styled } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 
 import { LanguagesSelect } from 'tg.component/common/form/LanguagesSelect/LanguagesSelect';
@@ -57,14 +57,6 @@ const StyledSpaced = styled('div')`
   flex-wrap: wrap;
 `;
 
-const StyledDeleteButton = styled(IconButton)`
-  display: flex;
-  flex-shrink: 1;
-  width: 38px;
-  height: 38px;
-  margin-left: 3px;
-`;
-
 const StyledTranslationsSearchField = styled(TranslationsSearchField)`
   min-width: 200px;
 `;
@@ -84,7 +76,6 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
   const t = useTranslate();
 
   const dispatch = useTranslationsDispatch();
-  const selection = useTranslationsSelector((v) => v.selection);
   const view = useTranslationsSelector((v) => v.view);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
 
@@ -103,10 +94,6 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
     dispatch({ type: 'CHANGE_VIEW', payload: val });
   };
 
-  const handleDelete = () => {
-    dispatch({ type: 'DELETE_TRANSLATIONS' });
-  };
-
   const handleAddTranslation = () => {
     onDialogOpen();
   };
@@ -121,15 +108,6 @@ export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
         }}
       >
         <StyledSpaced>
-          {selection.length > 0 && (
-            <StyledDeleteButton
-              onClick={handleDelete}
-              data-cy="translations-delete-button"
-              size="large"
-            >
-              <Delete />
-            </StyledDeleteButton>
-          )}
           <StyledTranslationsSearchField
             value={search || ''}
             onSearchChange={handleSearchChange}

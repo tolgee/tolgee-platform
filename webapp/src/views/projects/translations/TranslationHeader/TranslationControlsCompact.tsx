@@ -3,7 +3,6 @@ import {
   ViewListRounded,
   AppsRounded,
   Add,
-  Delete,
   Search,
   FilterList,
   Clear,
@@ -76,13 +75,6 @@ const StyledSearchSpaced = styled('div')`
   position: relative;
 `;
 
-const StyledDeleteButton = styled(IconButton)`
-  display: flex;
-  flex-shrink: 1;
-  width: 38px;
-  height: 38px;
-`;
-
 const StyledSearch = styled(TranslationsSearchField)`
   min-width: 200px;
 `;
@@ -116,7 +108,6 @@ export const TranslationControlsCompact: React.FC<Props> = ({
   const t = useTranslate();
 
   const dispatch = useTranslationsDispatch();
-  const selection = useTranslationsSelector((v) => v.selection);
   const view = useTranslationsSelector((v) => v.view);
   const selectedLanguages = useTranslationsSelector((c) => c.selectedLanguages);
   const [anchorFiltersEl, setAnchorFiltersEl] =
@@ -139,10 +130,6 @@ export const TranslationControlsCompact: React.FC<Props> = ({
 
   const handleViewChange = (val: ViewMode) => {
     dispatch({ type: 'CHANGE_VIEW', payload: val });
-  };
-
-  const handleDelete = () => {
-    dispatch({ type: 'DELETE_TRANSLATIONS' });
   };
 
   const handleAddTranslation = () => {
@@ -179,15 +166,6 @@ export const TranslationControlsCompact: React.FC<Props> = ({
         ) : (
           <>
             <StyledSpaced>
-              {selection.length > 0 && (
-                <StyledDeleteButton
-                  onClick={handleDelete}
-                  data-cy="translations-delete-button"
-                  size="large"
-                >
-                  <Delete />
-                </StyledDeleteButton>
-              )}
               <Badge color="primary" badgeContent={search.length} variant="dot">
                 <StyledButtonWrapper>
                   <StyledIconButton
