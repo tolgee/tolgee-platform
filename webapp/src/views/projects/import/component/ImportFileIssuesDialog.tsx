@@ -53,7 +53,7 @@ export const ImportFileIssuesDialog: FunctionComponent<{
                 sortBy={[]}
                 renderItem={(i) => (
                   <>
-                    <Alert color="warning" icon={<Warning />}>
+                    <Alert severity="warning" icon={<Warning />}>
                       {i.type && (
                         <T>{`file_issue_type_${i.type!.toLowerCase()}`}</T>
                       )}
