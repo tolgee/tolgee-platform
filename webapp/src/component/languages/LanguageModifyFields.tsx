@@ -51,7 +51,7 @@ export const LanguageModifyFields: FC<{
           />
           {!tagValid && (
             <Box mb={4}>
-              <Alert color="warning">
+              <Alert severity="warning">
                 <T>invalid_language_tag</T>
               </Alert>
             </Box>

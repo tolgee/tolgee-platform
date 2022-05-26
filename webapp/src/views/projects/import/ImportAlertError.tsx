@@ -44,7 +44,7 @@ export const ImportAlertError: FunctionComponent<{
     <Collapse in={open}>
       <Box mt={4} data-cy="import-file-error">
         <Alert
-          color="error"
+          severity="error"
           action={
             <>
               <Box display="inline" mr={1}>
