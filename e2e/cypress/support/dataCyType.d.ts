@@ -225,6 +225,7 @@ declare namespace DataCy {
         "translations-language-select-item" |
         "translations-row" |
         "translations-row-checkbox" |
+        "translations-select-all-button" |
         "translations-shortcuts-command" |
         "translations-state-indicator" |
         "translations-table-cell" |

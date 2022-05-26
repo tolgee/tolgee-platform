@@ -7,6 +7,7 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
 import { TranslationsShortcuts } from './TranslationsShortcuts';
+import { TranslationsSelection } from './TranslationsSelection';
 
 const StyledContainer = styled('div')`
   z-index: ${({ theme }) => theme.zIndex.drawer};
@@ -84,6 +85,7 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
   const t = useTranslate();
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
   const list = useTranslationsSelector((c) => c.reactList);
+  const selection = useTranslationsSelector((c) => c.selection);
   const getVisibleRange = list?.getVisibleRange.bind(list);
 
   const handleScrollUp = () => {
@@ -116,7 +118,11 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
   return width ? (
     <StyledContainer style={{ width: `calc(${width}px + ${theme.spacing(8)}` }}>
       <StyledShortcutsContainer>
-        <TranslationsShortcuts />
+        {selection.length ? (
+          <TranslationsSelection />
+        ) : (
+          <TranslationsShortcuts />
+        )}
       </StyledShortcutsContainer>
       <StyledCounterContainer
         className={clsx({

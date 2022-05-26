@@ -28,6 +28,10 @@ export const useSelectionService = ({ translations }: Props) => {
     setSelection(newSelection);
   };
 
+  const select = (data: number[]) => {
+    setSelection(data);
+  };
+
   const clear = () => {
     setSelection([]);
   };
@@ -68,6 +72,7 @@ export const useSelectionService = ({ translations }: Props) => {
     toggle,
     clear,
     deleteSelected,
+    select,
     isLoading: deleteKeys.isLoading,
     data: selection,
   };

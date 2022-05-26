@@ -3,7 +3,10 @@ import { InfiniteData } from 'react-query';
 import { container } from 'tsyringe';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { useApiInfiniteQuery } from 'tg.service/http/useQueryApi';
+import {
+  useApiInfiniteQuery,
+  useApiMutation,
+} from 'tg.service/http/useQueryApi';
 import { components, operations } from 'tg.service/apiSchema.generated';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { ProjectPreferencesService } from 'tg.service/ProjectPreferencesService';
@@ -92,17 +95,19 @@ export const useTranslationsService = (props: Props) => {
     [props.projectId]
   );
 
+  const requrestQuery = {
+    ...query,
+    ...parsedFilters,
+    filterKeyName: props.keyName,
+    filterKeyId: props.keyId ? [props.keyId] : undefined,
+    search: urlSearch as string,
+  };
+
   const translations = useApiInfiniteQuery({
     url: '/v2/projects/{projectId}/translations',
     method: 'get',
     path,
-    query: {
-      ...query,
-      ...parsedFilters,
-      filterKeyName: props.keyName,
-      filterKeyId: props.keyId ? [props.keyId] : undefined,
-      search: urlSearch as string,
-    },
+    query: requrestQuery,
     options: {
       cacheTime: 0,
       // fetch after languages are loaded,
@@ -144,6 +149,17 @@ export const useTranslationsService = (props: Props) => {
       },
     },
   });
+
+  const allIds = useApiMutation({
+    url: '/v2/projects/{projectId}/translations/select-all',
+    method: 'get',
+  });
+
+  const getAllIds = () =>
+    allIds.mutateAsync({
+      path: { projectId: props.projectId },
+      query: requrestQuery,
+    });
 
   const insertAsFirst = (data: KeyWithTranslationsModelType) => {
     setFixedTranslations((translations) => [data, ...(translations || [])]);
@@ -282,6 +298,7 @@ export const useTranslationsService = (props: Props) => {
     isLoading: translations.isLoading,
     isFetching: translations.isFetching,
     isFetchingNextPage: translations.isFetchingNextPage,
+    isLoadingAllIds: allIds.isLoading,
     hasNextPage: translations.hasNextPage,
     query,
     filters: parsedFilters,
@@ -304,5 +321,6 @@ export const useTranslationsService = (props: Props) => {
     insertAsFirst,
     urlSearch: urlSearch as string | undefined,
     updateScreenshotCount,
+    getAllIds,
   };
 };
