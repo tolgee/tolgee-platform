@@ -1,3 +1,15 @@
+# [2.27.0](https://github.com/tolgee/tolgee-platform/compare/v2.26.1...v2.27.0) (2022-05-27)
+
+
+### Bug Fixes
+
+* Alert proper icon ([6913765](https://github.com/tolgee/tolgee-platform/commit/6913765623b278f07e3013733d7ae8473b46f430))
+
+
+### Features
+
+* Avatar different accent for organization ([51401a6](https://github.com/tolgee/tolgee-platform/commit/51401a6792daf592eaa476f5ed7b2baa960fe47f))
+
 ## [2.26.1](https://github.com/tolgee/tolgee-platform/compare/v2.26.0...v2.26.1) (2022-05-23)
 
 
