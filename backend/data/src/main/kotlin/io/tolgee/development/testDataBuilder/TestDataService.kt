@@ -23,11 +23,10 @@ import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
 import io.tolgee.service.project.ProjectService
+import io.tolgee.util.executeInNewTransaction
 import org.springframework.stereotype.Service
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.TransactionTemplate
 import javax.persistence.EntityManager
 
 @Service
@@ -61,7 +60,7 @@ class TestDataService(
     //
     // To be able to save project in its separate transaction,
     // user/organization has to be stored first.
-    executeInNewTransaction {
+    executeInNewTransaction(transactionManager) {
       saveAllUsers(builder)
       saveOrganizationData(builder)
     }
@@ -216,20 +215,11 @@ class TestDataService(
   private fun saveAllProjects(builder: TestDataBuilder) {
     val projectBuilders = builder.data.projects
     projectBuilders.forEach { projectBuilder ->
-      executeInNewTransaction {
+      executeInNewTransaction(transactionManager) {
         projectBuilder.self.baseLanguage?.let { languageService.save(it) }
         projectService.save(projectBuilder.self)
         saveAllProjectDependants(projectBuilder)
       }
-    }
-  }
-
-  private fun executeInNewTransaction(fn: () -> Unit) {
-    val tt = TransactionTemplate(transactionManager)
-    tt.propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
-
-    tt.executeWithoutResult {
-      fn()
     }
   }
 

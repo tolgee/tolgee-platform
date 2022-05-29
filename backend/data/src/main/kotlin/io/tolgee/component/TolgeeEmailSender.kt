@@ -73,7 +73,7 @@ class TolgeeEmailSender(
   }
 
   private fun getInvitationAcceptUrl(code: String): String {
-    return "${frontendUrlProvider.frontEndUrl}/accept_invitation/$code"
+    return "${frontendUrlProvider.url}/accept_invitation/$code"
   }
 
   private fun sendEmail(params: TolgeeEmailParams) {

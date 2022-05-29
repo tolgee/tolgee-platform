@@ -6,6 +6,7 @@ package io.tolgee.configuration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.tolgee.configuration.tolgee.TolgeeProperties
+import org.apache.http.impl.client.HttpClientBuilder
 import org.springframework.boot.web.servlet.MultipartConfigFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -53,7 +54,11 @@ class WebConfiguration(
 
   @Bean
   fun restTemplate(): RestTemplate {
-    return RestTemplate(HttpComponentsClientHttpRequestFactory())
+    return RestTemplate(
+      HttpComponentsClientHttpRequestFactory().apply {
+        this.httpClient = HttpClientBuilder.create().disableCookieManagement().useSystemProperties().build()
+      }
+    )
   }
 
   @Bean

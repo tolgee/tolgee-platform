@@ -172,6 +172,12 @@ class OrganizationService(
     }
   }
 
+  fun getOrganizationAndCheckUserIsOwner(organizationId: Long): Organization {
+    val organization = this.get(organizationId)
+    organizationRoleService.checkUserIsOwner(organization.id)
+    return organization
+  }
+
   fun deleteAllByName(name: String) {
     organizationRepository.findAllByName(name).forEach {
       this.delete(it.id)

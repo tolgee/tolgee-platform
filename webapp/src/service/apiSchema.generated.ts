@@ -157,6 +157,10 @@ export interface paths {
   "/api/organizations/{organizationId}/users/{userId}/set-role": {
     put: operations["setUserRole_1"];
   };
+  "/v2/organizations/{organizationId}/billing/update-subscription": {
+    /** Updates subscription */
+    put: operations["updateSubscription"];
+  };
   "/v2/organizations/{organizationId}/billing/refresh-subscription": {
     /** Refreshes organizations subscription by Stripe data */
     put: operations["refresh"];
@@ -302,15 +306,11 @@ export interface paths {
     get: operations["getKeyScreenshots_3"];
     post: operations["uploadScreenshot_1"];
   };
-  "/v2/organizations/{organizationId}/billing/update-subscription": {
-    /** Updates subscription session */
-    post: operations["updateSubscription"];
-  };
   "/v2/organizations/{organizationId}/billing/subscribe": {
     /** Returns url of Stripe checkout session */
     post: operations["subscribe"];
   };
-  "/v2/organizations/{organizationId}/billing/create-customer-portal-session": {
+  "/v2/organizations/{organizationId}/billing/customer-portal-session": {
     /** Returns url of Stripe checkout session */
     post: operations["createCustomerPortalSession"];
   };
@@ -318,7 +318,7 @@ export interface paths {
     /** Cancels subscription */
     post: operations["cancelSubscription"];
   };
-  "/v2/organizations/{organizationId}/billing/buy-more-credits/{priceId}": {
+  "/v2/organizations/{organizationId}/billing/buy-more-credits": {
     /** Returns url of Stripe checkout session to buy more credits */
     post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
   };
@@ -492,6 +492,14 @@ export interface paths {
   };
   "/api/organizations/{organizationId}/invitations": {
     get: operations["getInvitations_1"];
+  };
+  "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf": {
+    /** Returns organization invoices */
+    get: operations["getInvoicePdf"];
+  };
+  "/v2/organizations/{organizationId}/billing/invoices/": {
+    /** Returns organization invoices */
+    get: operations["getInvoices"];
   };
   "/v2/organizations/{organizationId}/billing/active-plan": {
     /** Refreshes organizations subscription by Stripe data */
@@ -868,6 +876,10 @@ export interface components {
     SetOrganizationRoleDto: {
       roleType: "MEMBER" | "OWNER";
     };
+    UpdateSubscriptionRequest: {
+      /** Id of the subscription plan */
+      planId: number;
+    };
     ActivePlanModel: {
       id: number;
       name: string;
@@ -1048,17 +1060,13 @@ export interface components {
       filterState?: ("UNTRANSLATED" | "TRANSLATED" | "REVIEWED")[];
       zip: boolean;
     };
-    UpdateSubscriptionRequest: {
-      /** Id of the subscription plan */
-      planId: number;
-    };
     SubscribeRequest: {
       /** Id of the subscription plan */
       planId: number;
     };
-    CreateCustomerPortalSessionRequest: {
-      /** Url to return afterwards */
-      returnUrl: string;
+    BuyMoreCreditsRequest: {
+      priceId: number;
+      amount: number;
     };
     UploadedImageModel: {
       id: number;
@@ -1182,6 +1190,7 @@ export interface components {
     CreditBalanceModel: {
       creditBalance: number;
       bucketSize: number;
+      additionalCreditBalance: number;
     };
     EntityDescriptionWithRelations: {
       entityClass: string;
@@ -1273,7 +1282,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1285,6 +1293,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1460,6 +1469,22 @@ export interface components {
       _embedded?: {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
       };
+    };
+    InvoiceModel: {
+      id: number;
+      /** The number on the invoice */
+      number: string;
+      createdAt: number;
+      /** The Total amount with tax */
+      total: number;
+      /** Whether pdf is ready to download. If not, wait around few minutes until it's generated. */
+      pdfReady: boolean;
+    };
+    PagedModelInvoiceModel: {
+      _embedded?: {
+        invoices?: components["schemas"]["InvoiceModel"][];
+      };
+      page?: components["schemas"]["PageMetadata"];
     };
     PagedModelUserAccountWithOrganizationRoleModel: {
       _embedded?: {
@@ -3421,6 +3446,35 @@ export interface operations {
       };
     };
   };
+  /** Updates subscription */
+  updateSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSubscriptionRequest"];
+      };
+    };
+  };
   /** Refreshes organizations subscription by Stripe data */
   refresh: {
     parameters: {
@@ -5274,35 +5328,6 @@ export interface operations {
       };
     };
   };
-  /** Updates subscription session */
-  updateSubscription: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateSubscriptionRequest"];
-      };
-    };
-  };
   /** Returns url of Stripe checkout session */
   subscribe: {
     parameters: {
@@ -5363,11 +5388,6 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateCustomerPortalSessionRequest"];
-      };
-    };
   };
   /** Cancels subscription */
   cancelSubscription: {
@@ -5398,7 +5418,6 @@ export interface operations {
     parameters: {
       path: {
         organizationId: number;
-        priceId: number;
       };
     };
     responses: {
@@ -5419,6 +5438,11 @@ export interface operations {
         content: {
           "*/*": string;
         };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BuyMoreCreditsRequest"];
       };
     };
   };
@@ -7263,6 +7287,71 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Returns organization invoices */
+  getInvoicePdf: {
+    parameters: {
+      path: {
+        organizationId: number;
+        invoiceId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/pdf": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Returns organization invoices */
+  getInvoices: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["PagedModelInvoiceModel"];
         };
       };
       /** Bad Request */

@@ -8,7 +8,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 class FrontendUrlProvider(
   private val tolgeeProperties: TolgeeProperties
 ) {
-  val frontEndUrl: String
+  val url: String
     get() {
       if (!tolgeeProperties.frontEndUrl.isNullOrBlank()) {
         return tolgeeProperties.frontEndUrl!!
@@ -19,4 +19,8 @@ class FrontendUrlProvider(
       builder.replaceQuery("")
       return builder.build().toUriString()
     }
+
+  fun getBillingUrl(organizationSlug: String): String {
+    return "${this.url}/organizations/$organizationSlug/billing"
+  }
 }

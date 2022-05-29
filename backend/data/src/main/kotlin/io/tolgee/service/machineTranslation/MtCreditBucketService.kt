@@ -71,6 +71,18 @@ class MtCreditBucketService(
     save(bucket)
   }
 
+  @Transactional
+  fun addAdditionalCredits(organization: Organization, amount: Long) {
+    val bucket = findOrCreateBucket(organization)
+    addAdditionalCredits(bucket, amount)
+  }
+
+  @Transactional
+  fun addAdditionalCredits(bucket: MtCreditBucket, amount: Long) {
+    bucket.additionalCredits += amount
+    save(bucket)
+  }
+
   fun save(bucket: MtCreditBucket) {
     machineTranslationCreditBucketRepository.save(bucket)
   }
