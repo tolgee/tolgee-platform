@@ -1814,4 +1814,7 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1653641788780-1">
+        <dropForeignKeyConstraint baseTableName="activity_describing_entity" constraintName="FK9xs5a07fba5yqje5jqm6qrehs"/>
+    </changeSet>
 </databaseChangeLog>

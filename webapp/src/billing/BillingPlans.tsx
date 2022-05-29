@@ -1,6 +1,6 @@
 import { components } from 'tg.service/billingApiSchema.generated';
-import { Box } from '@mui/material';
-import { FC } from 'react';
+import { Box, Switch } from '@mui/material';
+import { FC, useState } from 'react';
 import { ActivePlan } from './ActivePlan';
 import { Plan } from './Plan';
 
@@ -10,8 +10,14 @@ type BillingPlansProps = {
 };
 
 export const BillingPlans: FC<BillingPlansProps> = (props) => {
+  const [billedYearly, setBilledYearly] = useState(true);
+
   return (
     <>
+      <Box>
+        Monthly <Switch checked={billedYearly} /> Yearly
+      </Box>
+
       {props.plans.map((plan) => (
         <Box key={plan.id}>
           {props.activePlan &&
@@ -21,6 +27,7 @@ export const BillingPlans: FC<BillingPlansProps> = (props) => {
               <Plan
                 plan={plan}
                 isOrganizationSubscribed={!props.activePlan.free}
+                period={billedYearly ? 'yearly' : 'monthly'}
               />
             ))}
         </Box>

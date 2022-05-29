@@ -12,7 +12,8 @@ import {
 } from './useBillingQueryApi';
 import { useOrganizationCreditBalance } from './useOrganizationCreditBalance';
 import { BillingPlans } from './BillingPlans';
-import { MoreMtCredits } from './MoreMtCredits';
+import { MoreMtCredits } from './mtCredits/MoreMtCredits';
+import { Invoices } from './invoices/Invoices';
 
 export const OrganizationBillingView: FunctionComponent = () => {
   const { search } = useLocation();
@@ -31,7 +32,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
   const refreshSubscription = useBillingApiMutation({
     url: `/v2/organizations/{organizationId}/billing/refresh-subscription`,
     method: `put`,
-    invalidatePrefix: `/v2/billing`,
+    invalidatePrefix: `/v2/organizations/{organizationId}/billing`,
     options: {
       onSuccess: (data) => {
         creditBalance.refetch();
@@ -53,7 +54,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
   });
 
   const getCustomerPortalSession = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/create-customer-portal-session',
+    url: '/v2/organizations/{organizationId}/billing/customer-portal-session',
     method: 'post',
     options: {
       onSuccess: (data) => {
@@ -109,16 +110,13 @@ export const OrganizationBillingView: FunctionComponent = () => {
             path: {
               organizationId: organization!.id,
             },
-            content: {
-              'application/json': {
-                returnUrl: url.href,
-              },
-            },
           })
         }
       >
         Go to customer portal
       </Button>
+
+      <Invoices />
     </BaseOrganizationSettingsView>
   );
 };

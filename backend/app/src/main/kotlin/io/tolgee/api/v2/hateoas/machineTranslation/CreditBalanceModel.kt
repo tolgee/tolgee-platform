@@ -6,5 +6,6 @@ import java.io.Serializable
 @Suppress("unused")
 class CreditBalanceModel(
   val creditBalance: Long,
-  val bucketSize: Long
+  val bucketSize: Long,
+  val additionalCreditBalance: Long
 ) : RepresentationModel<CreditBalanceModel>(), Serializable

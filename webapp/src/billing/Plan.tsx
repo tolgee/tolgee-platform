@@ -4,19 +4,22 @@ import { FC } from 'react';
 import { components } from 'tg.service/billingApiSchema.generated';
 import { PlanInfo } from './PlanInfo';
 import { useBillingApiMutation } from './useBillingQueryApi';
-import { T } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { container } from 'tsyringe';
 import { MessageService } from 'tg.service/MessageService';
+import { Box } from '@mui/material';
 
 const messaging = container.resolve(MessageService);
 export const Plan: FC<{
   plan: components['schemas']['PlanModel'];
   isOrganizationSubscribed: boolean;
+  period: 'monthly' | 'yearly';
 }> = (props) => {
   const { upgradeMutation, onUpgrade } = useUpgradeSubscription();
 
   const organization = useOrganization();
+  const t = useTranslate();
 
   const onSubscribe = (planId: number) => {
     subscribeMutation.mutate({
@@ -34,6 +37,7 @@ export const Plan: FC<{
   const subscribeMutation = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/subscribe',
     method: 'post',
+    invalidatePrefix: '/v2/organizations/{organizationId}/billing',
     options: {
       onSuccess: (data) => {
         window.location.href = data;
@@ -51,6 +55,19 @@ export const Plan: FC<{
   return (
     <>
       <PlanInfo plan={props.plan} />
+      <Box>
+        {t({
+          key: 'billing_plan_price',
+          defaultValue: 'Price: {price, number, :: currency/EUR}',
+          parameters: {
+            price:
+              ((props.period === 'monthly'
+                ? props.plan.monthlyPrice
+                : props.plan.yearlyPrice) || 0) / 100,
+          },
+        })}
+      </Box>
+
       {!props.plan.free &&
         (props.isOrganizationSubscribed ? (
           <LoadingButton

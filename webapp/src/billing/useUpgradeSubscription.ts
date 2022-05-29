@@ -19,8 +19,8 @@ export const useUpgradeSubscription = () => {
 
   const upgradeMutation = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/update-subscription',
-    method: 'post',
-    invalidatePrefix: '/v2/billing/active-plan',
+    method: 'put',
+    invalidatePrefix: '/v2/organizations/{organizationId}/billing/active-plan',
   });
 
   return {
