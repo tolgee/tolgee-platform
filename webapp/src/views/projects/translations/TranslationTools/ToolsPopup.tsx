@@ -30,7 +30,7 @@ type Props = {
   data: TranslationToolsProps['data'];
 };
 
-export const ToolsPopup: React.FC<Props> = ({
+export const ToolsPopup: React.FC<React.PropsWithChildren<Props>> = ({
   anchorEl,
   cellPosition,
   data,

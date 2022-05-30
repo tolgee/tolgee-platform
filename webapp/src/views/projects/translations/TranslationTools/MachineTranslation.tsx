@@ -41,7 +41,7 @@ type Props = {
   operationsRef: ReturnType<typeof useTranslationTools>['operationsRef'];
 };
 
-export const MachineTranslation: React.FC<Props> = ({
+export const MachineTranslation: React.FC<React.PropsWithChildren<Props>> = ({
   data,
   operationsRef,
 }) => {

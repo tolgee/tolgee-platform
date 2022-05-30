@@ -47,9 +47,11 @@ const StyledH3 = styled(Typography)`
   font-size: 22px;
 `;
 
-export const MdxProvider: FC<{
-  modifyValue?: (code: string) => string;
-}> = (props) => {
+export const MdxProvider: FC<
+  React.PropsWithChildren<{
+    modifyValue?: (code: string) => string;
+  }>
+> = (props) => {
   const modifyValue = (code: string) =>
     props.modifyValue ? props.modifyValue(code) : code;
 

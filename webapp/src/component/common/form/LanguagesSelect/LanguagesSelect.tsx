@@ -36,7 +36,9 @@ export type Props = {
   context: string;
 };
 
-export const LanguagesSelect: FunctionComponent<Props> = (props) => {
+export const LanguagesSelect: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = (props) => {
   const menuProps = {
     variant: 'menu',
     PaperProps: {

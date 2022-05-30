@@ -35,7 +35,7 @@ type Props = {
   autofocus?: boolean;
 };
 
-export const KeyCreateForm: React.FC<Props> = ({
+export const KeyCreateForm: React.FC<React.PropsWithChildren<Props>> = ({
   languages,
   onSuccess,
   onCancel,

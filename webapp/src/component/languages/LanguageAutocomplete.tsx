@@ -37,11 +37,13 @@ const getOptions = (input: string): AutocompleteOption[] => {
   return [newLang, ...suggest(input)];
 };
 
-export const LanguageAutocomplete: FC<{
-  onSelect: (value: AutocompleteOption) => void;
-  onClear?: () => void;
-  autoFocus?: boolean;
-}> = (props) => {
+export const LanguageAutocomplete: FC<
+  React.PropsWithChildren<{
+    onSelect: (value: AutocompleteOption) => void;
+    onClear?: () => void;
+    autoFocus?: boolean;
+  }>
+> = (props) => {
   const [options, setOptions] = useState([] as AutocompleteOption[]);
 
   return (

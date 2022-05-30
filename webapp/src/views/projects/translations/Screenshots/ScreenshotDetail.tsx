@@ -8,22 +8,23 @@ interface ScreenshotDetailProps {
   fileName: string;
 }
 
-export const ScreenshotDetail: React.FunctionComponent<ScreenshotDetailProps> =
-  (props) => {
-    const config = useConfig();
+export const ScreenshotDetail: React.FunctionComponent<
+  React.PropsWithChildren<ScreenshotDetailProps>
+> = (props) => {
+  const config = useConfig();
 
-    return (
-      <Dialog
-        onClose={props.onClose}
-        aria-labelledby="simple-dialog-title"
-        open={!!props.fileName}
-        maxWidth={'xl'}
-      >
-        <img
-          style={{ width: '100%' }}
-          src={config.screenshotsUrl + '/' + props.fileName}
-          alt="screenshot"
-        />
-      </Dialog>
-    );
-  };
+  return (
+    <Dialog
+      onClose={props.onClose}
+      aria-labelledby="simple-dialog-title"
+      open={!!props.fileName}
+      maxWidth={'xl'}
+    >
+      <img
+        style={{ width: '100%' }}
+        src={config.screenshotsUrl + '/' + props.fileName}
+        alt="screenshot"
+      />
+    </Dialog>
+  );
+};

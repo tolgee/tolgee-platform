@@ -16,7 +16,9 @@ import { MemberItem } from './component/MemberItem';
 import { InviteDialog } from './component/InviteDialog';
 import { InvitationItem } from './component/InvitationItem';
 
-export const ProjectMembersView: FunctionComponent = () => {
+export const ProjectMembersView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const project = useProject();
 
   const t = useTranslate();

@@ -35,10 +35,12 @@ const StyledCounter = styled('div')`
 `;
 
 const actions = container.resolve(ImportActions);
-export const ImportConflictsSecondaryBar: FunctionComponent<{
-  onShowResolvedToggle: () => void;
-  showResolved: boolean;
-}> = (props) => {
+export const ImportConflictsSecondaryBar: FunctionComponent<
+  React.PropsWithChildren<{
+    onShowResolvedToggle: () => void;
+    showResolved: boolean;
+  }>
+> = (props) => {
   const languageDataLoadable = actions.useSelector(
     (s) => s.loadables.resolveConflictsLanguage
   );

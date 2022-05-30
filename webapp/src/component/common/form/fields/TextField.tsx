@@ -9,7 +9,9 @@ interface PGTextFieldProps {
 
 type Props = PGTextFieldProps & TextFieldProps;
 
-export const TextField: FunctionComponent<Props> = (props) => {
+export const TextField: FunctionComponent<React.PropsWithChildren<Props>> = (
+  props
+) => {
   const [field, meta] = useField(props.name);
   const [oldValue, setOldValue] = useState(field.value);
 

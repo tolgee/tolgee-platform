@@ -18,7 +18,9 @@ export const ProjectLanguagesContext =
 const translationActions = container.resolve(TranslationActions);
 const selectedLanguagesService = container.resolve(ProjectPreferencesService);
 
-export const ProjectLanguagesProvider: FunctionComponent = (props) => {
+export const ProjectLanguagesProvider: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = (props) => {
   const projectDTO = useProject();
 
   const selectedLanguages = useSelector(

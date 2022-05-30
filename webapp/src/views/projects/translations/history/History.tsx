@@ -68,7 +68,9 @@ type Props = {
   editEnabled: boolean;
 };
 
-export const History: React.FC<Props> = ({ translation }) => {
+export const History: React.FC<React.PropsWithChildren<Props>> = ({
+  translation,
+}) => {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const project = useProject();
   const counter = useDateCounter();

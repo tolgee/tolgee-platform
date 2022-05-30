@@ -9,10 +9,12 @@ import { ImportActions } from 'tg.store/project/ImportActions';
 import { ImportConflictTranslation } from './ImportConflictTranslation';
 
 const actions = container.resolve(ImportActions);
-export const ImportConflictTranslationsPair: FunctionComponent<{
-  translation: components['schemas']['ImportTranslationModel'];
-  languageId: number;
-}> = ({ translation, languageId }) => {
+export const ImportConflictTranslationsPair: FunctionComponent<
+  React.PropsWithChildren<{
+    translation: components['schemas']['ImportTranslationModel'];
+    languageId: number;
+  }>
+> = ({ translation, languageId }) => {
   const project = useProject();
   const [expanded, setExpanded] = useState(false);
   const [leftExpandable, setLeftExpandable] = useState(false);

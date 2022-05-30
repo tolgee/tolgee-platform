@@ -106,9 +106,9 @@ type Props = {
   onDialogOpen: () => void;
 };
 
-export const TranslationControlsCompact: React.FC<Props> = ({
-  onDialogOpen,
-}) => {
+export const TranslationControlsCompact: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ onDialogOpen }) => {
   const projectPermissions = useProjectPermissions();
   const [searchOpen, setSearchOpen] = useState(false);
   const search = useTranslationsSelector((v) => v.search);

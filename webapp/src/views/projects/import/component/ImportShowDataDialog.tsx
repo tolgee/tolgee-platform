@@ -37,10 +37,12 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const ImportShowDataDialog: FunctionComponent<{
-  row?: components['schemas']['ImportLanguageModel'];
-  onClose: () => void;
-}> = (props) => {
+export const ImportShowDataDialog: FunctionComponent<
+  React.PropsWithChildren<{
+    row?: components['schemas']['ImportLanguageModel'];
+    onClose: () => void;
+  }>
+> = (props) => {
   const project = useProject();
   const theme = useTheme();
   const [search, setSearch] = useState(undefined as string | undefined);

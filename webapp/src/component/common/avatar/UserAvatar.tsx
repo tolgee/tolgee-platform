@@ -19,7 +19,7 @@ const StyledContainer = styled('div')`
   filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.2));
 `;
 
-export const UserAvatar: React.FC = () => {
+export const UserAvatar: React.FC<React.PropsWithChildren<unknown>> = () => {
   const user = useUser();
 
   return (

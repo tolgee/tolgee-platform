@@ -9,7 +9,9 @@ import { OAuthRedirectionHandler } from './OAuthRedirectionHandler';
 
 interface LoginRouterProps {}
 
-const LoginRouter: FunctionComponent<LoginRouterProps> = (props) => {
+const LoginRouter: FunctionComponent<
+  React.PropsWithChildren<LoginRouterProps>
+> = (props) => {
   return (
     <Switch>
       <Route exact path={LINKS.LOGIN.template}>

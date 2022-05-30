@@ -10,9 +10,9 @@ const StyledSearchField = styled(SearchField)`
   width: 250px;
 `;
 
-export const SecondaryBarSearchField: FC<ComponentProps<typeof SearchField>> = (
-  props
-) => {
+export const SecondaryBarSearchField: FC<
+  React.PropsWithChildren<ComponentProps<typeof SearchField>>
+> = (props) => {
   const t = useTranslate();
 
   return (

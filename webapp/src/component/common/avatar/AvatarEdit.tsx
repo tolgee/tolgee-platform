@@ -11,10 +11,12 @@ const StyledBox = styled(Box)`
   }
 `;
 
-export const AvatarEdit: FC<{
-  src: string;
-  cropperRef: React.RefObject<ReactCropperElement>;
-}> = ({ src, cropperRef }) => {
+export const AvatarEdit: FC<
+  React.PropsWithChildren<{
+    src: string;
+    cropperRef: React.RefObject<ReactCropperElement>;
+  }>
+> = ({ src, cropperRef }) => {
   return (
     <StyledBox>
       <Cropper

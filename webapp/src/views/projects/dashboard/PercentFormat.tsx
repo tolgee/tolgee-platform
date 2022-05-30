@@ -4,7 +4,9 @@ type Props = {
   number: number;
 };
 
-export const PercentFormat: React.FC<Props> = ({ number }) => {
+export const PercentFormat: React.FC<React.PropsWithChildren<Props>> = ({
+  number,
+}) => {
   const t = useTranslate();
   return (
     <>

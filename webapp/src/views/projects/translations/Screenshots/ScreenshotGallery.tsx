@@ -68,7 +68,9 @@ const messageService = container.resolve(MessageService);
 export const MAX_FILE_COUNT = 20;
 const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
-export const ScreenshotGallery: React.FC<ScreenshotGalleryProps> = (props) => {
+export const ScreenshotGallery: React.FC<
+  React.PropsWithChildren<ScreenshotGalleryProps>
+> = (props) => {
   const fileRef = createRef<HTMLInputElement>();
   const projectPermissions = useProjectPermissions();
   const config = useConfig();

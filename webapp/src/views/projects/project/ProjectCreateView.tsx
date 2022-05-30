@@ -26,7 +26,9 @@ export type CreateProjectValueType =
     owner: number;
   };
 
-export const ProjectCreateView: FunctionComponent = () => {
+export const ProjectCreateView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const createProjectLoadable = useApiMutation({
     url: '/v2/projects',
     method: 'post',
@@ -85,6 +87,7 @@ export const ProjectCreateView: FunctionComponent = () => {
         saveActionLoadable={createProjectLoadable}
         validationSchema={Validation.PROJECT_CREATION(t)}
       >
+        {/* @ts-ignore */}
         {(props: FormikProps<CreateProjectValueType>) => {
           return (
             <Box mb={8}>

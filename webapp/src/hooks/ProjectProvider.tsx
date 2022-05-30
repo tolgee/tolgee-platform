@@ -8,7 +8,9 @@ export const ProjectContext = createContext<
   components['schemas']['ProjectModel'] | null
 >(null);
 
-export const ProjectProvider: React.FC<{ id: number }> = ({ id, children }) => {
+export const ProjectProvider: React.FC<
+  React.PropsWithChildren<{ id: number }>
+> = ({ id, children }) => {
   const { isLoading, data, error } = useApiQuery({
     url: '/v2/projects/{projectId}',
     method: 'get',

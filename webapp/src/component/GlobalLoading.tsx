@@ -13,19 +13,19 @@ const StyledSmoothProgress = styled(SmoothProgress)`
   z-index: ${({ theme }) => theme.zIndex.tooltip};
 `;
 
-export const GlobalLoading: React.FC = () => {
+export const GlobalLoading: React.FC<React.PropsWithChildren<unknown>> = () => {
   const { loading, spinners } = useContext(LoadingContext);
 
   return <StyledSmoothProgress loading={Boolean(loading && spinners === 0)} />;
 };
 
-export const LoadingProvider: React.FC = (props) => {
+export const LoadingProvider = ({ children }) => {
   const [loading, setLoading] = useState(0);
   const [spinners, setSpinners] = useState(0);
   return (
     <LoadingContext.Provider value={{ loading, spinners }}>
       <LoadingSetterContext.Provider value={{ setLoading, setSpinners }}>
-        {props.children}
+        {children}
       </LoadingSetterContext.Provider>
     </LoadingContext.Provider>
   );

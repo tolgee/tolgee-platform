@@ -49,7 +49,9 @@ const StyledDangerButton = styled(Button)`
   flex-shrink: 0;
 `;
 
-export const ProjectSettingsView: FunctionComponent = () => {
+export const ProjectSettingsView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const project = useProject();
   const updateLoadable = useApiMutation({
     url: '/v2/projects/{projectId}',

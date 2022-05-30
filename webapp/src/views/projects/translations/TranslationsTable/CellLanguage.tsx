@@ -23,7 +23,7 @@ type Props = {
   onResize: (colIndex: number) => void;
 };
 
-export const CellLanguage: React.FC<Props> = ({
+export const CellLanguage: React.FC<React.PropsWithChildren<Props>> = ({
   language,
   onResize,
   colIndex,

@@ -13,11 +13,13 @@ import { useProjectLanguages } from 'tg.hooks/useProjectLanguages';
 import { LanguagesPermittedList } from 'tg.component/languages/LanguagesPermittedList';
 import { useTranslate } from '@tolgee/react';
 
-export const LanguagePermissionsMenu: FunctionComponent<{
-  selected: number[];
-  onSelect: (value: number[]) => void;
-  buttonProps?: ComponentProps<typeof Button>;
-}> = (props) => {
+export const LanguagePermissionsMenu: FunctionComponent<
+  React.PropsWithChildren<{
+    selected: number[];
+    onSelect: (value: number[]) => void;
+    buttonProps?: ComponentProps<typeof Button>;
+  }>
+> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const t = useTranslate();
 

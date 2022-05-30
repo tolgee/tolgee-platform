@@ -4,11 +4,13 @@ import { T } from '@tolgee/react';
 
 import { CreateSingleLanguage } from 'tg.component/languages/CreateSingleLanguage';
 
-export const ImportLanguageCreateDialog: FunctionComponent<{
-  open: boolean;
-  onCreated: (id: number) => void;
-  onClose: () => void;
-}> = (props) => {
+export const ImportLanguageCreateDialog: FunctionComponent<
+  React.PropsWithChildren<{
+    open: boolean;
+    onCreated: (id: number) => void;
+    onClose: () => void;
+  }>
+> = (props) => {
   return (
     <Dialog
       open={props.open}

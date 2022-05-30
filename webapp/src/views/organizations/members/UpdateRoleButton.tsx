@@ -14,9 +14,11 @@ import { useOrganization } from '../useOrganization';
 
 const messagingService = container.resolve(MessageService);
 
-export const UpdateRoleButton: FunctionComponent<{
-  user: components['schemas']['UserAccountWithOrganizationRoleModel'];
-}> = (props) => {
+export const UpdateRoleButton: FunctionComponent<
+  React.PropsWithChildren<{
+    user: components['schemas']['UserAccountWithOrganizationRoleModel'];
+  }>
+> = (props) => {
   const queryClient = useQueryClient();
 
   const currentUser = useUser();

@@ -18,7 +18,9 @@ import { UserProfileAvatar } from './UserProfileAvatar';
 
 const messagesService = container.resolve(MessageService);
 
-export const UserProfileView: FunctionComponent = () => {
+export const UserProfileView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const t = useTranslate();
   const userLoadable = useApiQuery({
     url: '/api/user',

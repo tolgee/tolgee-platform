@@ -23,6 +23,8 @@ const StyledContainer = styled('span')`
   font-size: ${({ theme }) => theme.typography.caption.fontSize};
 `;
 
-export const KeyTemplate: React.FC = ({ children }) => {
+export const KeyTemplate: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   return <StyledContainer>{children}</StyledContainer>;
 };

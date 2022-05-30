@@ -9,11 +9,9 @@ import { useUser } from 'tg.hooks/useUser';
 import UserOrganizationSettingsSubtitleLink from '../organizations/components/UserOrganizationSettingsSubtitleLink';
 import { UserSettingsMenu } from './UserSettingsMenu';
 
-export const BaseUserSettingsView: FunctionComponent<BaseViewProps> = ({
-  children,
-  title,
-  ...otherProps
-}: PropsWithChildren<BaseViewProps>) => {
+export const BaseUserSettingsView: FunctionComponent<
+  React.PropsWithChildren<BaseViewProps>
+> = ({ children, title, ...otherProps }: PropsWithChildren<BaseViewProps>) => {
   const user = useUser();
   const config = useConfig();
 

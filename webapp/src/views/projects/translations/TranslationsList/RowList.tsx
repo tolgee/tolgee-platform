@@ -32,54 +32,51 @@ type Props = {
   onResize: (colIndex: number) => void;
 };
 
-export const RowList: React.FC<Props> = React.memo(function RowList({
-  data,
-  columnSizes,
-  languages,
-  onResize,
-}) {
-  const permissions = useProjectPermissions();
-  const [hover, setHover] = useState(false);
-  const [focus, setFocus] = useState(false);
-  const active = hover || focus;
+export const RowList: React.FC<React.PropsWithChildren<Props>> = React.memo(
+  function RowList({ data, columnSizes, languages, onResize }) {
+    const permissions = useProjectPermissions();
+    const [hover, setHover] = useState(false);
+    const [focus, setFocus] = useState(false);
+    const active = hover || focus;
 
-  const [activeDebounced] = useDebounce(active, 100);
+    const [activeDebounced] = useDebounce(active, 100);
 
-  const relaxedActive = active || activeDebounced;
+    const relaxedActive = active || activeDebounced;
 
-  return (
-    <StyledContainer
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onFocus={() => setFocus(true)}
-      onBlur={() => setFocus(false)}
-      data-cy="translations-row"
-    >
-      <CellKey
-        editEnabled={permissions.satisfiesPermission(
-          ProjectPermissionType.EDIT
-        )}
-        data={data}
-        width={columnSizes[0]}
-        active={relaxedActive}
-        position="left"
-      />
-      <StyledLanguages style={{ width: columnSizes[1] }}>
-        {languages.map((language, index) => (
-          <CellTranslation
-            key={language.tag}
-            data={data}
-            language={language}
-            colIndex={0}
-            onResize={onResize}
-            editEnabled={permissions.canEditLanguage(language.id)}
-            width={columnSizes[1]}
-            active={relaxedActive}
-            // render last focusable button on last item, so it's focusable
-            lastFocusable={index === languages.length - 1}
-          />
-        ))}
-      </StyledLanguages>
-    </StyledContainer>
-  );
-});
+    return (
+      <StyledContainer
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
+        data-cy="translations-row"
+      >
+        <CellKey
+          editEnabled={permissions.satisfiesPermission(
+            ProjectPermissionType.EDIT
+          )}
+          data={data}
+          width={columnSizes[0]}
+          active={relaxedActive}
+          position="left"
+        />
+        <StyledLanguages style={{ width: columnSizes[1] }}>
+          {languages.map((language, index) => (
+            <CellTranslation
+              key={language.tag}
+              data={data}
+              language={language}
+              colIndex={0}
+              onResize={onResize}
+              editEnabled={permissions.canEditLanguage(language.id)}
+              width={columnSizes[1]}
+              active={relaxedActive}
+              // render last focusable button on last item, so it's focusable
+              lastFocusable={index === languages.length - 1}
+            />
+          ))}
+        </StyledLanguages>
+      </StyledContainer>
+    );
+  }
+);

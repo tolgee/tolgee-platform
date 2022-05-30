@@ -31,7 +31,7 @@ export type SignUpType = {
   invitationCode?: string;
 };
 
-const SignUpView: FunctionComponent = () => {
+const SignUpView: FunctionComponent<React.PropsWithChildren<unknown>> = () => {
   const security = useSelector((state: AppState) => state.global.security);
   const state = useSelector((state: AppState) => state.signUp.loadables.signUp);
   const config = useConfig();

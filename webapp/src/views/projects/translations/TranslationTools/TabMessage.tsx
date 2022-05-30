@@ -17,6 +17,9 @@ type Props = {
   message: string;
 };
 
-export const TabMessage: React.FC<Props> = ({ type, message }) => {
+export const TabMessage: React.FC<React.PropsWithChildren<Props>> = ({
+  type,
+  message,
+}) => {
   return <StyledWrapper className={type}>{message}</StyledWrapper>;
 };

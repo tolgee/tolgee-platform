@@ -28,128 +28,135 @@ interface LoginProps {}
 const globalActions = container.resolve(GlobalActions);
 const securityServiceIns = container.resolve(SecurityService);
 // noinspection JSUnusedLocalSymbols
-export const LoginView: FunctionComponent<LoginProps> = (props) => {
-  const t = useTranslate();
-  const security = useSelector((state: AppState) => state.global.security);
-  const authLoading = useSelector(
-    (state: AppState) => state.global.authLoading
-  );
-  const remoteConfig = useConfig();
+export const LoginView: FunctionComponent<React.PropsWithChildren<LoginProps>> =
+  (props) => {
+    const t = useTranslate();
+    const security = useSelector((state: AppState) => state.global.security);
+    const authLoading = useSelector(
+      (state: AppState) => state.global.authLoading
+    );
+    const remoteConfig = useConfig();
 
-  const oAuthServices: OAuthService[] = [];
-  const githubConfig = remoteConfig.authMethods?.github;
-  const googleConfig = remoteConfig.authMethods?.google;
-  if (githubConfig?.enabled && githubConfig.clientId) {
-    oAuthServices.push(gitHubService(githubConfig.clientId));
-  }
-  if (googleConfig?.enabled && googleConfig.clientId) {
-    oAuthServices.push(googleService(googleConfig.clientId));
-  }
+    const oAuthServices: OAuthService[] = [];
+    const githubConfig = remoteConfig.authMethods?.github;
+    const googleConfig = remoteConfig.authMethods?.google;
+    if (githubConfig?.enabled && githubConfig.clientId) {
+      oAuthServices.push(gitHubService(githubConfig.clientId));
+    }
+    if (googleConfig?.enabled && googleConfig.clientId) {
+      oAuthServices.push(googleService(googleConfig.clientId));
+    }
 
-  const history = useHistory();
-  if (history.location.state && (history.location.state as any).from) {
-    securityServiceIns.saveAfterLoginLink((history.location.state as any).from);
-  }
+    const history = useHistory();
+    if (history.location.state && (history.location.state as any).from) {
+      securityServiceIns.saveAfterLoginLink(
+        (history.location.state as any).from
+      );
+    }
 
-  if (!remoteConfig.authentication || security.allowPrivate) {
-    return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
-  }
+    if (!remoteConfig.authentication || security.allowPrivate) {
+      return <Redirect to={LINKS.AFTER_LOGIN.build()} />;
+    }
 
-  return (
-    <DashboardPage>
-      <CompactView
-        windowTitle={t('login_title')}
-        title={t('login_title')}
-        alerts={
-          security.loginErrorCode &&
-          !authLoading && (
-            <Alert severity="error">
-              <T>{security.loginErrorCode}</T>
-            </Alert>
-          )
-        }
-        content={
-          <StandardForm
-            initialValues={{ username: '', password: '' }}
-            submitButtons={
-              <Box mt={2}>
-                <Box display="flex" flexDirection="column" alignItems="stretch">
-                  <LoadingButton
-                    loading={authLoading}
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    data-cy="login-button"
+    return (
+      <DashboardPage>
+        <CompactView
+          windowTitle={t('login_title')}
+          title={t('login_title')}
+          alerts={
+            security.loginErrorCode &&
+            !authLoading && (
+              <Alert severity="error">
+                <T>{security.loginErrorCode}</T>
+              </Alert>
+            )
+          }
+          content={
+            <StandardForm
+              initialValues={{ username: '', password: '' }}
+              submitButtons={
+                <Box mt={2}>
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="stretch"
                   >
-                    <T>login_login_button</T>
-                  </LoadingButton>
+                    <LoadingButton
+                      loading={authLoading}
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      data-cy="login-button"
+                    >
+                      <T>login_login_button</T>
+                    </LoadingButton>
 
-                  {oAuthServices.length > 0 && (
-                    <Box
-                      height="1px"
-                      bgcolor="lightgray"
-                      marginY={4}
-                      marginX={-1}
-                    />
-                  )}
-                  {oAuthServices.map((provider) => (
-                    <>
-                      <Button
-                        component="a"
-                        href={provider.authenticationUrl}
-                        size="medium"
-                        endIcon={provider.buttonIcon}
-                        variant="outlined"
-                        style={{ marginBottom: '0.5rem' }}
-                      >
-                        <T>{provider.buttonLabelTranslationKey}</T>
-                      </Button>
-                    </>
-                  ))}
+                    {oAuthServices.length > 0 && (
+                      <Box
+                        height="1px"
+                        bgcolor="lightgray"
+                        marginY={4}
+                        marginX={-1}
+                      />
+                    )}
+                    {oAuthServices.map((provider) => (
+                      <>
+                        <Button
+                          component="a"
+                          href={provider.authenticationUrl}
+                          size="medium"
+                          endIcon={provider.buttonIcon}
+                          variant="outlined"
+                          style={{ marginBottom: '0.5rem' }}
+                        >
+                          <T>{provider.buttonLabelTranslationKey}</T>
+                        </Button>
+                      </>
+                    ))}
+                  </Box>
                 </Box>
+              }
+              onSubmit={(data) => globalActions.login.dispatch(data)}
+            >
+              <TextField
+                name="username"
+                label={<T>login_email_label</T>}
+                variant="standard"
+              />
+              <TextField
+                name="password"
+                type="password"
+                label={<T>login_password_label</T>}
+                variant="standard"
+              />
+            </StandardForm>
+          }
+          footer={
+            <Box display="flex" justifyContent="space-between" flexWrap="wrap">
+              <Box>
+                {security.allowRegistration && (
+                  <>
+                    <Link to={LINKS.SIGN_UP.build()} component={MuiLink}>
+                      <Typography variant="caption">
+                        <T>login_sign_up</T>
+                      </Typography>
+                    </Link>
+                  </>
+                )}
               </Box>
-            }
-            onSubmit={(data) => globalActions.login.dispatch(data)}
-          >
-            <TextField
-              name="username"
-              label={<T>login_email_label</T>}
-              variant="standard"
-            />
-            <TextField
-              name="password"
-              type="password"
-              label={<T>login_password_label</T>}
-              variant="standard"
-            />
-          </StandardForm>
-        }
-        footer={
-          <Box display="flex" justifyContent="space-between" flexWrap="wrap">
-            <Box>
-              {security.allowRegistration && (
-                <>
-                  <Link to={LINKS.SIGN_UP.build()} component={MuiLink}>
-                    <Typography variant="caption">
-                      <T>login_sign_up</T>
-                    </Typography>
-                  </Link>
-                </>
+              {remoteConfig.passwordResettable && (
+                <Link
+                  to={LINKS.RESET_PASSWORD_REQUEST.build()}
+                  component={MuiLink}
+                >
+                  <Typography variant="caption">
+                    <T>login_reset_password_button</T>
+                  </Typography>
+                </Link>
               )}
             </Box>
-            {remoteConfig.passwordResettable && (
-              <Link
-                to={LINKS.RESET_PASSWORD_REQUEST.build()}
-                component={MuiLink}
-              >
-                <Typography variant="caption">
-                  <T>login_reset_password_button</T>
-                </Typography>
-              </Link>
-            )}
-          </Box>
-        }
-      />
-    </DashboardPage>
-  );
-};
+          }
+        />
+      </DashboardPage>
+    );
+  };

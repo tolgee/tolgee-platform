@@ -12,7 +12,9 @@ export const getFlagPath = (hex: string) =>
   `/static/flags/${getSvgNameByEmoji(hex)}.svg`;
 
 export const FlagImage: FC<
-  ImgHTMLAttributes<HTMLImageElement> & { flagEmoji: string }
+  React.PropsWithChildren<
+    ImgHTMLAttributes<HTMLImageElement> & { flagEmoji: string }
+  >
 > = ({ flagEmoji, ...props }) => {
   return (
     <StyledImg

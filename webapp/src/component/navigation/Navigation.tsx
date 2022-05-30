@@ -14,7 +14,9 @@ type Props = {
   path: [name: string | ReactNode, url: string, icon?: ReactNode][];
 };
 
-export const Navigation: React.FC<Props> = ({ path }) => {
+export const Navigation: React.FC<React.PropsWithChildren<Props>> = ({
+  path,
+}) => {
   return (
     <Breadcrumbs
       aria-label="breadcrumb"

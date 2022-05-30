@@ -18,7 +18,9 @@ interface PGCheckBoxProps {
 
 type Props = PGCheckBoxProps & FormControlProps;
 
-export const CheckBox: FunctionComponent<Props> = (props) => {
+export const CheckBox: FunctionComponent<React.PropsWithChildren<Props>> = (
+  props
+) => {
   const [field, meta] = useField(props.name);
 
   return (

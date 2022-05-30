@@ -26,7 +26,9 @@ type Props = {
   position: string;
 };
 
-export const PopupArrow: React.FC<Props> = ({ position }) => {
+export const PopupArrow: React.FC<React.PropsWithChildren<Props>> = ({
+  position,
+}) => {
   return (
     <StyledWrapper style={{ left: `calc(${position} - ${PADDING + SIZE}px)` }}>
       <StyledArrow />

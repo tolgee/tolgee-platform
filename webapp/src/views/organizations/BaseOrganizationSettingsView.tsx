@@ -9,7 +9,9 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { OrganizationSettingsMenu } from './components/OrganizationSettingsMenu';
 import UserOrganizationSettingsSubtitleLink from './components/UserOrganizationSettingsSubtitleLink';
 
-export const BaseOrganizationSettingsView: FunctionComponent<BaseViewProps> = ({
+export const BaseOrganizationSettingsView: FunctionComponent<
+  React.PropsWithChildren<BaseViewProps>
+> = ({
   children,
   title,
   loading,

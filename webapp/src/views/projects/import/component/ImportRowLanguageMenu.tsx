@@ -42,10 +42,12 @@ const StyledInputAdornment = styled(InputAdornment)`
 `;
 
 const NEW_LANGUAGE_VALUE = '__new_language';
-export const ImportRowLanguageMenu: React.FC<{
-  value?: number;
-  importLanguageId: number;
-}> = (props) => {
+export const ImportRowLanguageMenu: React.FC<
+  React.PropsWithChildren<{
+    value?: number;
+    importLanguageId: number;
+  }>
+> = (props) => {
   const queryClient = useQueryClient();
   const languages = useProjectLanguages();
   const importData = useImportDataHelper();

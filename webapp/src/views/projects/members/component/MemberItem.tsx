@@ -48,7 +48,9 @@ type Props = {
   user: UserAccountInProjectModel;
 };
 
-export const MemberItem: React.FC<Props> = ({ user }) => {
+export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
+  user,
+}) => {
   const project = useProject();
   const currentUser = useUser();
   const t = useTranslate();

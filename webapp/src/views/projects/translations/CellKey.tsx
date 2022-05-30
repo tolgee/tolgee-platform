@@ -119,7 +119,7 @@ type Props = {
   onSaveSuccess?: (value: string) => void;
 };
 
-export const CellKey: React.FC<Props> = ({
+export const CellKey: React.FC<React.PropsWithChildren<Props>> = ({
   data,
   width,
   editEnabled,

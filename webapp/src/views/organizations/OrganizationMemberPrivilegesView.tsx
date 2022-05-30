@@ -6,7 +6,9 @@ import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { OrganizationBasePermissionMenu } from './components/OrganizationBasePermissionMenu';
 import { useOrganization } from './useOrganization';
 
-export const OrganizationMemberPrivilegesView: FunctionComponent = () => {
+export const OrganizationMemberPrivilegesView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const organization = useOrganization();
   const t = useTranslate();
 

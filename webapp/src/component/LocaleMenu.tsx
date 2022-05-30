@@ -20,9 +20,9 @@ const StyledIconButton = styled(IconButton)`
   }
 `;
 
-export const LocaleMenu: FunctionComponent<{ className?: string }> = (
-  props
-) => {
+export const LocaleMenu: FunctionComponent<
+  React.PropsWithChildren<{ className?: string }>
+> = (props) => {
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     // @ts-ignore
     setAnchorEl(event.currentTarget);

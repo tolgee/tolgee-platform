@@ -89,7 +89,10 @@ type Props = {
   showDifferences: boolean;
 };
 
-export const HistoryItem: React.FC<Props> = ({ entry, showDifferences }) => {
+export const HistoryItem: React.FC<React.PropsWithChildren<Props>> = ({
+  entry,
+  showDifferences,
+}) => {
   const lang = useCurrentLanguage();
   const [detailOpen, setDetailOpen] = useState(false);
 

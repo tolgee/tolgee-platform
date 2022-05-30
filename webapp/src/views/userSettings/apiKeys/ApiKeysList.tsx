@@ -27,7 +27,9 @@ const StyledRoot = styled(Box)`
   }
 `;
 
-const Item: FunctionComponent<{ keyDTO: ApiKeyModel }> = (props) => {
+const Item: FunctionComponent<
+  React.PropsWithChildren<{ keyDTO: ApiKeyModel }>
+> = (props) => {
   const deleteKey = useApiMutation({
     url: '/v2/api-keys/{apiKeyId}',
     method: 'delete',
@@ -98,7 +100,9 @@ const Item: FunctionComponent<{ keyDTO: ApiKeyModel }> = (props) => {
   );
 };
 
-export const ApiKeysList: FunctionComponent<ApiKeysListProps> = (props) => {
+export const ApiKeysList: FunctionComponent<
+  React.PropsWithChildren<ApiKeysListProps>
+> = (props) => {
   return (
     <Paper elevation={0} variant={'outlined'}>
       {props.data.map((k) => (

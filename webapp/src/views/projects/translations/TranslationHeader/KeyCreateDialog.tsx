@@ -31,7 +31,9 @@ type Props = {
   onClose: () => void;
 };
 
-export const KeyCreateDialog: React.FC<Props> = ({ onClose }) => {
+export const KeyCreateDialog: React.FC<React.PropsWithChildren<Props>> = ({
+  onClose,
+}) => {
   const dispatch = useTranslationsDispatch();
 
   const languages = useTranslationsSelector((c) => c.languages);

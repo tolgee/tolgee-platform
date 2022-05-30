@@ -49,9 +49,9 @@ const StyledInvalidIcon = styled(HighlightOff)`
   color: ${({ theme }) => theme.palette.common.white};
 `;
 
-export const ImportFileDropzone: FunctionComponent<ScreenshotDropzoneProps> = (
-  props
-) => {
+export const ImportFileDropzone: FunctionComponent<
+  React.PropsWithChildren<ScreenshotDropzoneProps>
+> = (props) => {
   const [dragOver, setDragOver] = useState(null as null | 'valid' | 'invalid');
   const [dragEnterTarget, setDragEnterTarget] = useState(
     null as EventTarget | null

@@ -17,7 +17,9 @@ type Props = {
   language: LanguageModel;
 };
 
-export const LanguageMenu: React.FC<Props> = ({ language }) => {
+export const LanguageMenu: React.FC<React.PropsWithChildren<Props>> = ({
+  language,
+}) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>();
   const history = useHistory();
   const project = useProject();

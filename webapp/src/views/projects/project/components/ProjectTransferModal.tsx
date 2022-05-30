@@ -23,10 +23,12 @@ import { MenuItem } from '@mui/material';
 
 const messaging = container.resolve(MessageService);
 
-export const ProjectTransferModal: FC<{
-  open: boolean;
-  onClose: () => void;
-}> = (props) => {
+export const ProjectTransferModal: FC<
+  React.PropsWithChildren<{
+    open: boolean;
+    onClose: () => void;
+  }>
+> = (props) => {
   const project = useProject();
 
   const [search, setSearch] = useState(undefined as string | undefined);

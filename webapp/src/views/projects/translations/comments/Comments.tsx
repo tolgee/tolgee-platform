@@ -90,7 +90,7 @@ type Props = {
   editEnabled: boolean;
 };
 
-export const Comments: React.FC<Props> = ({
+export const Comments: React.FC<React.PropsWithChildren<Props>> = ({
   keyId,
   language,
   translation,

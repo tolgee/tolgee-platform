@@ -29,7 +29,11 @@ type Props = {
   disabled?: boolean;
 };
 
-export const LanguageRow: React.FC<Props> = ({ lang, providers, disabled }) => {
+export const LanguageRow: React.FC<React.PropsWithChildren<Props>> = ({
+  lang,
+  providers,
+  disabled,
+}) => {
   const t = useTranslate();
 
   const getProviderImg = useProviderImg();

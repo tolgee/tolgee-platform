@@ -12,19 +12,21 @@ import {
 import { LanguageModifyForm } from './LanguageModifyForm';
 import { PreparedLanguage } from './PreparedLanguage';
 
-export const CreateLanguageField: FC<{
-  onSubmit?: (value) => void;
-  value: components['schemas']['LanguageDto'] | null;
-  onChange: (value: components['schemas']['LanguageDto'] | null) => void;
-  onPreparedLanguageEdit?: () => void;
-  showSubmitButton?: boolean;
-  onPreparedClear?: () => void;
-  preparedLanguageWrapperProps?: BoxProps;
-  onAutocompleteClear?: () => void;
-  onEditChange?: (edit: boolean) => void;
-  modifyInDialog?: boolean;
-  autoFocus?: boolean;
-}> = (props) => {
+export const CreateLanguageField: FC<
+  React.PropsWithChildren<{
+    onSubmit?: (value) => void;
+    value: components['schemas']['LanguageDto'] | null;
+    onChange: (value: components['schemas']['LanguageDto'] | null) => void;
+    onPreparedLanguageEdit?: () => void;
+    showSubmitButton?: boolean;
+    onPreparedClear?: () => void;
+    preparedLanguageWrapperProps?: BoxProps;
+    onAutocompleteClear?: () => void;
+    onEditChange?: (edit: boolean) => void;
+    modifyInDialog?: boolean;
+    autoFocus?: boolean;
+  }>
+> = (props) => {
   const [preferredEmojis, setPreferredEmojis] = useState([] as string[]);
   const [edit, setEdit] = useState(false);
 

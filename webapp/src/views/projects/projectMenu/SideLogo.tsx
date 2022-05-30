@@ -32,7 +32,9 @@ type Props = {
   hidden: boolean;
 };
 
-export const SideLogo: React.FC<Props> = ({ hidden }) => {
+export const SideLogo: React.FC<React.PropsWithChildren<Props>> = ({
+  hidden,
+}) => {
   return (
     <StyledItem>
       <StyledLink to="/" tabIndex={hidden ? -1 : undefined}>

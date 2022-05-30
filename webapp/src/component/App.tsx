@@ -158,20 +158,20 @@ const GlobalConfirmation = () => {
   );
 };
 
-const RecaptchaProvider: FC = (props) => {
+const RecaptchaProvider = ({ children }) => {
   const config = useConfig();
   if (!config.recaptchaSiteKey) {
-    return <>{props.children}</>;
+    return <>{children}</>;
   }
 
   return (
     <GoogleReCaptchaProvider reCaptchaKey={config.recaptchaSiteKey}>
-      {props.children}
+      {children}
     </GoogleReCaptchaProvider>
   );
 };
 
-const Head: FC = () => {
+const Head: FC<React.PropsWithChildren<unknown>> = () => {
   const theme = useTheme();
 
   return (
@@ -191,6 +191,7 @@ export class App extends React.Component {
     return (
       <>
         <Head />
+        {/* @ts-ignore */}
         <BrowserRouter>
           <Redirection />
           <MandatoryDataProvider>

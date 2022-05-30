@@ -19,7 +19,9 @@ const StyledMenuFixed = styled('menu')`
   flex-direction: column;
 `;
 
-export const SideMenu: React.FC = ({ children }) => {
+export const SideMenu: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   return (
     <StyledMenuWrapper>
       <StyledMenuFixed color="secondary" data-cy="project-menu-items">

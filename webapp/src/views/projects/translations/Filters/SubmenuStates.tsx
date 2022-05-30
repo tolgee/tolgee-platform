@@ -19,7 +19,7 @@ type Props = {
   activeFilters: string[];
 };
 
-export const SubmenuStates: React.FC<Props> = ({
+export const SubmenuStates: React.FC<React.PropsWithChildren<Props>> = ({
   item,
   handleToggle,
   activeFilters,

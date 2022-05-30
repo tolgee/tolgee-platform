@@ -57,7 +57,7 @@ type Props = {
   footer?: React.ReactNode;
 };
 
-export const CompactView: React.FC<Props> = ({
+export const CompactView: React.FC<React.PropsWithChildren<Props>> = ({
   windowTitle,
   content,
   title,

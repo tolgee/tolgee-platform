@@ -30,7 +30,9 @@ const StyledTable = styled(Table)`
   }
 `;
 
-export const ImportResult: FunctionComponent<ImportResultProps> = (props) => {
+export const ImportResult: FunctionComponent<
+  React.PropsWithChildren<ImportResultProps>
+> = (props) => {
   const rows = props.result?._embedded?.languages;
   const [viewFileIssuesRow, setViewFileIssuesRow] = useState(
     undefined as components['schemas']['ImportLanguageModel'] | undefined

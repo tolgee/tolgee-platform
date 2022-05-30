@@ -3,11 +3,13 @@ import { Box } from '@mui/material';
 
 import { BoxLoading } from './BoxLoading';
 
-export const LazyLoadOnScroll: FunctionComponent<{
-  onLoad: () => void;
-  isMore: boolean;
-  maxHeight: number;
-}> = (props) => {
+export const LazyLoadOnScroll: FunctionComponent<
+  React.PropsWithChildren<{
+    onLoad: () => void;
+    isMore: boolean;
+    maxHeight: number;
+  }>
+> = (props) => {
   const wrapperRef = createRef<HTMLDivElement>();
   const loadingDivRef = createRef<HTMLDivElement>();
 

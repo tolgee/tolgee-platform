@@ -5,9 +5,11 @@ import { components } from 'tg.service/apiSchema.generated';
 
 import { FlagImage } from './FlagImage';
 
-export const LanguageValue: FC<{
-  language: Partial<components['schemas']['LanguageModel']>;
-}> = (props) => {
+export const LanguageValue: FC<
+  React.PropsWithChildren<{
+    language: Partial<components['schemas']['LanguageModel']>;
+  }>
+> = (props) => {
   return (
     <Box display="inline-flex" justifyContent="center" justifyItems="center">
       {props.language.name}{' '}

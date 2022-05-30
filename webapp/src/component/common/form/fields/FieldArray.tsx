@@ -1,17 +1,19 @@
 import { default as React, FC, ReactElement, ReactNode } from 'react';
 import { FieldArray as FormikFieldArray, useField } from 'formik';
 
-export const FieldArray: FC<{
-  name: string;
-  children: (
-    nameCallback: (fieldName: string) => string,
-    index: number,
-    removeItem: () => void
-  ) => ReactElement;
-  defaultItemValue?: any;
-  addButton: (addItem: () => void) => ReactNode;
-  showArrayErrors?: boolean;
-}> = (props) => {
+export const FieldArray: FC<
+  React.PropsWithChildren<{
+    name: string;
+    children: (
+      nameCallback: (fieldName: string) => string,
+      index: number,
+      removeItem: () => void
+    ) => ReactElement;
+    defaultItemValue?: any;
+    addButton: (addItem: () => void) => ReactNode;
+    showArrayErrors?: boolean;
+  }>
+> = (props) => {
   const [field, _] = useField(props.name);
   const values = field.value;
 

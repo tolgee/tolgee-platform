@@ -13,10 +13,9 @@ import { ReactComponent as MachineTranslationSvg } from '../svgs/icons/machineTr
 
 type IconProps = ComponentProps<typeof SvgIcon>;
 
-const CustomIcon: React.FC<IconProps & { icon: typeof ExportSvg }> = ({
-  icon,
-  ...props
-}) => {
+const CustomIcon: React.FC<
+  React.PropsWithChildren<IconProps & { icon: typeof ExportSvg }>
+> = ({ icon, ...props }) => {
   const Icon = icon;
   return (
     <SvgIcon {...props}>
@@ -25,30 +24,30 @@ const CustomIcon: React.FC<IconProps & { icon: typeof ExportSvg }> = ({
   );
 };
 
-export const ExportIcon: React.FC<IconProps> = (props) => (
-  <CustomIcon icon={ExportSvg} {...props} />
-);
-export const ImportIcon: React.FC<IconProps> = (props) => (
-  <CustomIcon icon={ImportSvg} {...props} />
-);
-export const ProjectsIcon: React.FC<IconProps> = (props) => (
-  <CustomIcon icon={ProjectsSvg} {...props} />
-);
-export const SettingsIcon: React.FC<IconProps> = (props) => (
-  <CustomIcon icon={SettingsSvg} {...props} />
-);
-export const TranslationIcon: React.FC<IconProps> = (props) => (
-  <CustomIcon icon={TranslationSvg} {...props} />
-);
-export const UserAddIcon: React.FC<IconProps> = (props) => (
-  <CustomIcon icon={UserAddSvg} {...props} />
-);
-export const UserSettingIcon: React.FC<IconProps> = (props) => (
-  <CustomIcon icon={UserSettingSvg} {...props} />
-);
-export const TranslationMemoryIcon: React.FC<IconProps> = (props) => (
-  <CustomIcon icon={TranslationMemorySvg} {...props} />
-);
-export const MachineTranslationIcon: React.FC<IconProps> = (props) => (
-  <CustomIcon icon={MachineTranslationSvg} {...props} />
-);
+export const ExportIcon: React.FC<React.PropsWithChildren<IconProps>> = (
+  props
+) => <CustomIcon icon={ExportSvg} {...props} />;
+export const ImportIcon: React.FC<React.PropsWithChildren<IconProps>> = (
+  props
+) => <CustomIcon icon={ImportSvg} {...props} />;
+export const ProjectsIcon: React.FC<React.PropsWithChildren<IconProps>> = (
+  props
+) => <CustomIcon icon={ProjectsSvg} {...props} />;
+export const SettingsIcon: React.FC<React.PropsWithChildren<IconProps>> = (
+  props
+) => <CustomIcon icon={SettingsSvg} {...props} />;
+export const TranslationIcon: React.FC<React.PropsWithChildren<IconProps>> = (
+  props
+) => <CustomIcon icon={TranslationSvg} {...props} />;
+export const UserAddIcon: React.FC<React.PropsWithChildren<IconProps>> = (
+  props
+) => <CustomIcon icon={UserAddSvg} {...props} />;
+export const UserSettingIcon: React.FC<React.PropsWithChildren<IconProps>> = (
+  props
+) => <CustomIcon icon={UserSettingSvg} {...props} />;
+export const TranslationMemoryIcon: React.FC<
+  React.PropsWithChildren<IconProps>
+> = (props) => <CustomIcon icon={TranslationMemorySvg} {...props} />;
+export const MachineTranslationIcon: React.FC<
+  React.PropsWithChildren<IconProps>
+> = (props) => <CustomIcon icon={MachineTranslationSvg} {...props} />;

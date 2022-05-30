@@ -54,7 +54,7 @@ type Props = {
   data?: UseQueryResult<unknown, any>;
 };
 
-export const ToolsTab: React.FC<Props> = ({
+export const ToolsTab: React.FC<React.PropsWithChildren<Props>> = ({
   icon,
   title,
   badgeNumber,

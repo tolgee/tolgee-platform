@@ -30,24 +30,22 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
   languages?: LanguageModel[];
 };
 
-export const LanguagesPermittedList: React.FC<Props> = ({
-  languages,
-  ...props
-}) => {
-  const selectedLanguages = languages?.slice(0, 3) || [];
+export const LanguagesPermittedList: React.FC<React.PropsWithChildren<Props>> =
+  ({ languages, ...props }) => {
+    const selectedLanguages = languages?.slice(0, 3) || [];
 
-  const numOfExtra = (languages?.length || 0) - selectedLanguages.length;
+    const numOfExtra = (languages?.length || 0) - selectedLanguages.length;
 
-  return (
-    <StyledContainer {...props}>
-      {!selectedLanguages.length ? (
-        <T keyName="languages_permitted_list_all" />
-      ) : (
-        selectedLanguages.map((l) => (
-          <CircledLanguageIcon key={l.id} size={20} flag={l.flagEmoji} />
-        ))
-      )}
-      {numOfExtra > 0 && <StyledExtraCircle>+{numOfExtra}</StyledExtraCircle>}
-    </StyledContainer>
-  );
-};
+    return (
+      <StyledContainer {...props}>
+        {!selectedLanguages.length ? (
+          <T keyName="languages_permitted_list_all" />
+        ) : (
+          selectedLanguages.map((l) => (
+            <CircledLanguageIcon key={l.id} size={20} flag={l.flagEmoji} />
+          ))
+        )}
+        {numOfExtra > 0 && <StyledExtraCircle>+{numOfExtra}</StyledExtraCircle>}
+      </StyledContainer>
+    );
+  };

@@ -69,7 +69,7 @@ type Props = {
   overlay?: boolean;
 };
 
-export const LimitedHeightText: React.FC<Props> = ({
+export const LimitedHeightText: React.FC<React.PropsWithChildren<Props>> = ({
   maxLines,
   children,
   lang,

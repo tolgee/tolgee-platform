@@ -51,10 +51,9 @@ const StyledInvalidIcon = styled(HighlightOff)`
   color: ${({ theme }) => theme.palette.common.white};
 `;
 
-export const ScreenshotDropzone: FunctionComponent<ScreenshotDropzoneProps> = ({
-  validateAndUpload,
-  ...props
-}) => {
+export const ScreenshotDropzone: FunctionComponent<
+  React.PropsWithChildren<ScreenshotDropzoneProps>
+> = ({ validateAndUpload, ...props }) => {
   const [dragOver, setDragOver] = useState(null as null | 'valid' | 'invalid');
   const [dragEnterTarget, setDragEnterTarget] = useState(
     null as EventTarget | null

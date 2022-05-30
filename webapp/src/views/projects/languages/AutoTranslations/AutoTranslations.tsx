@@ -36,7 +36,9 @@ type Props = {
   mtEnabled: boolean;
 };
 
-export const AutoTranslations: React.FC<Props> = ({ mtEnabled }) => {
+export const AutoTranslations: React.FC<React.PropsWithChildren<Props>> = ({
+  mtEnabled,
+}) => {
   const t = useTranslate();
   const [formInstance, setFormInstance] = useState(0);
   const formRef = useRef<FormikProps<any>>();

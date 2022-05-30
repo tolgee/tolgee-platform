@@ -22,7 +22,10 @@ type Props = {
   className?: string;
 };
 
-export const SmoothProgress: React.FC<Props> = ({ loading, className }) => {
+export const SmoothProgress: React.FC<React.PropsWithChildren<Props>> = ({
+  loading,
+  className,
+}) => {
   const [stateLoading, setStateLoading] = useState(false);
   const [smoothedLoading] = useDebounce(stateLoading, 100);
   const [progress, setProgress] = useState(0);

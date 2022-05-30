@@ -28,7 +28,9 @@ const StyledRoot = styled(Box)(({ theme }) => ({
 }));
 
 const messageActions = container.resolve(MessageActions);
-const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
+const ImportFileInput: FunctionComponent<
+  React.PropsWithChildren<ImportFileInputProps>
+> = (props) => {
   const fileRef = React.createRef<HTMLInputElement>();
   const config = useConfig();
   const ALLOWED_EXTENSIONS = ['json', 'zip', 'po', 'xliff', 'xlf'];
@@ -85,6 +87,7 @@ const ImportFileInput: FunctionComponent<ImportFileInputProps> = (props) => {
       return;
     }
     validation.errors.forEach((e) =>
+      // @ts-ignore
       messageActions.showMessage.dispatch(new Message(e, 'error'))
     );
   };

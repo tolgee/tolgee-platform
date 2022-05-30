@@ -10,9 +10,9 @@ export interface ScreenshotsPopoverProps {
   onClose: () => void;
 }
 
-export const ScreenshotsPopover: FunctionComponent<ScreenshotsPopoverProps> = (
-  props
-) => {
+export const ScreenshotsPopover: FunctionComponent<
+  React.PropsWithChildren<ScreenshotsPopoverProps>
+> = (props) => {
   const id = `screenshot-popover-${props.keyId}`;
 
   return (

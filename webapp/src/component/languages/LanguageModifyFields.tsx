@@ -10,9 +10,11 @@ import { components } from 'tg.service/apiSchema.generated';
 import { TextField } from '../common/form/fields/TextField';
 import { FlagSelector } from './FlagSelector';
 
-export const LanguageModifyFields: FC<{
-  preferredEmojis?: string[];
-}> = (props) => {
+export const LanguageModifyFields: FC<
+  React.PropsWithChildren<{
+    preferredEmojis?: string[];
+  }>
+> = (props) => {
   const [tagValid, setTagValid] = useState(true);
   const { values } = useFormikContext<components['schemas']['LanguageDto']>();
 

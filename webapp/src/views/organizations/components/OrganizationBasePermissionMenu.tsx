@@ -16,9 +16,11 @@ type OrganizationDto = components['schemas']['OrganizationDto'];
 
 const messageService = container.resolve(MessageService);
 
-export const OrganizationBasePermissionMenu: FunctionComponent<{
-  organization: OrganizationModel;
-}> = (props) => {
+export const OrganizationBasePermissionMenu: FunctionComponent<
+  React.PropsWithChildren<{
+    organization: OrganizationModel;
+  }>
+> = (props) => {
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
 

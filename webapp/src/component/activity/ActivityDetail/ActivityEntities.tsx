@@ -39,7 +39,7 @@ type Props = {
   diffEnabled: boolean;
 };
 
-export const ActivityEntities: React.FC<Props> = ({
+export const ActivityEntities: React.FC<React.PropsWithChildren<Props>> = ({
   activity,
   diffEnabled,
 }) => {

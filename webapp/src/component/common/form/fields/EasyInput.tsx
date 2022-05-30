@@ -8,7 +8,9 @@ interface EasyInputProps {
 
 type Props = EasyInputProps & InputProps;
 
-export const EasyInput: FunctionComponent<Props> = (props) => {
+export const EasyInput: FunctionComponent<React.PropsWithChildren<Props>> = (
+  props
+) => {
   const [field, meta] = useField(props.name);
 
   const onChange = (e) => {

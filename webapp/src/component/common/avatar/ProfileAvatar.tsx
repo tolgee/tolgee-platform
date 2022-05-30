@@ -57,11 +57,13 @@ const file2Base64 = (file: File): Promise<string> => {
 const messageService = container.resolve(MessageService);
 const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
-export const ProfileAvatar: FC<{
-  onUpload: (blob: Blob) => Promise<any>;
-  onRemove: () => Promise<any>;
-  owner: AvatarOwner;
-}> = (props) => {
+export const ProfileAvatar: FC<
+  React.PropsWithChildren<{
+    onUpload: (blob: Blob) => Promise<any>;
+    onRemove: () => Promise<any>;
+    owner: AvatarOwner;
+  }>
+> = (props) => {
   const fileRef = createRef<HTMLInputElement>();
   const [uploaded, setUploaded] = useState(null as string | null | undefined);
   const cropperRef = createRef<ReactCropperElement>();

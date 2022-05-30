@@ -19,7 +19,9 @@ type OrganizationBody = components['schemas']['OrganizationDto'];
 const redirectionActions = container.resolve(RedirectionActions);
 const messageService = container.resolve(MessageService);
 
-export const OrganizationCreateView: FunctionComponent = () => {
+export const OrganizationCreateView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const loadable = useApiMutation({
     url: '/v2/organizations',
     method: 'post',

@@ -55,7 +55,9 @@ type Props = {
   invitation: OrganizationInvitationModel;
 };
 
-export const InvitationItem: React.FC<Props> = ({ invitation }) => {
+export const InvitationItem: React.FC<React.PropsWithChildren<Props>> = ({
+  invitation,
+}) => {
   const t = useTranslate();
 
   const deleteInvitation = useApiMutation({

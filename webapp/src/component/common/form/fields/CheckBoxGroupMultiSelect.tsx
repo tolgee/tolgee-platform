@@ -21,7 +21,9 @@ interface CheckBoxGroupMultiSelectProps {
 
 type Props = CheckBoxGroupMultiSelectProps & FormControlProps;
 
-export const CheckBoxGroupMultiSelect: FunctionComponent<Props> = (props) => {
+export const CheckBoxGroupMultiSelect: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = (props) => {
   const [field, meta, helpers] = useField<Set<string>>(props.name);
 
   const onChange = (option, checked) => {

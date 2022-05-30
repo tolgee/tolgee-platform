@@ -7,7 +7,7 @@ import { translatedPermissionType } from 'tg.fixtures/translatePermissionFile';
 import { Select } from '../common/form/fields/Select';
 
 export const PermissionSelect: FunctionComponent<
-  ComponentProps<typeof Select>
+  React.PropsWithChildren<ComponentProps<typeof Select>>
 > = (props) => {
   return (
     <Select {...props} renderValue={(v) => translatedPermissionType(v)}>

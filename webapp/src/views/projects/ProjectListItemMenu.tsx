@@ -14,11 +14,13 @@ import { stopBubble } from 'tg.fixtures/eventHandler';
 
 const messaging = container.resolve(MessageService);
 
-export const ProjectListItemMenu: FC<{
-  projectId: number;
-  computedPermissions: components['schemas']['ProjectWithStatsModel']['computedPermissions'];
-  projectName: string;
-}> = (props) => {
+export const ProjectListItemMenu: FC<
+  React.PropsWithChildren<{
+    projectId: number;
+    computedPermissions: components['schemas']['ProjectWithStatsModel']['computedPermissions'];
+    projectName: string;
+  }>
+> = (props) => {
   const t = useTranslate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 

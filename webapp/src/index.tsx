@@ -1,8 +1,8 @@
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import CssBaseline from '@mui/material/CssBaseline';
 import { StyledEngineProvider } from '@mui/material/styles';
 import { TolgeeProvider } from '@tolgee/react';
-import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { Provider } from 'react-redux';
@@ -88,7 +88,9 @@ const MainWrapper = () => {
   );
 };
 
-ReactDOM.render(<MainWrapper />, document.getElementById('root'));
+const root = createRoot(document.getElementById('root')!);
+
+root.render(<MainWrapper />);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

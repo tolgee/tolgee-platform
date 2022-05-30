@@ -13,7 +13,9 @@ type Props = {
   data: KeyReferenceData;
 };
 
-export const KeyReference: React.FC<Props> = ({ data }) => {
+export const KeyReference: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+}) => {
   const project = useProject();
 
   const href = data.exists

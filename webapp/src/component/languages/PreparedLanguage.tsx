@@ -30,10 +30,12 @@ const StyledIconButton = styled(IconButton)`
 `;
 
 export const PreparedLanguage: React.FC<
-  components['schemas']['LanguageDto'] & {
-    onReset: () => void;
-    onEdit: () => void;
-  }
+  React.PropsWithChildren<
+    components['schemas']['LanguageDto'] & {
+      onReset: () => void;
+      onEdit: () => void;
+    }
+  >
 > = (props) => {
   return (
     <>

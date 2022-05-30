@@ -72,7 +72,9 @@ type Props = {
   autoHide?: boolean;
 };
 
-export const TopBar: React.FC<Props> = ({ autoHide = false }) => {
+export const TopBar: React.FC<React.PropsWithChildren<Props>> = ({
+  autoHide = false,
+}) => {
   const config = useConfig();
 
   const trigger = useTopBarHidden() && autoHide;

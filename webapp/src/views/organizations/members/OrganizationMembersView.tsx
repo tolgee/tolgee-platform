@@ -12,7 +12,9 @@ import { SimpleList } from 'tg.component/common/list/SimpleList';
 import { InviteDialog } from './InviteDialog';
 import { InvitationItem } from './InvitationItem';
 
-export const OrganizationMembersView: FunctionComponent = () => {
+export const OrganizationMembersView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const organization = useOrganization();
   const t = useTranslate();
 

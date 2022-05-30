@@ -34,7 +34,7 @@ const StyledFlagBlur = styled(FlagImage)`
   opacity: 0.05;
 `;
 
-export const CircledLanguageIcon: React.FC<Props> = ({
+export const CircledLanguageIcon: React.FC<React.PropsWithChildren<Props>> = ({
   flag,
   size,
   ...boxProps

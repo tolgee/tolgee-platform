@@ -38,7 +38,10 @@ type Props = {
   keyId?: number;
 };
 
-export const KeySingle: React.FC<Props> = ({ keyName, keyId }) => {
+export const KeySingle: React.FC<React.PropsWithChildren<Props>> = ({
+  keyName,
+  keyId,
+}) => {
   const queryClient = useQueryClient();
   const project = useProject();
   const t = useTranslate();

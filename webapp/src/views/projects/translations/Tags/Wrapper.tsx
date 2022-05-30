@@ -45,7 +45,7 @@ type Props = {
   className?: string;
 };
 
-export const Wrapper: React.FC<Props> = ({
+export const Wrapper: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   role,
   onClick,

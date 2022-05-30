@@ -5,13 +5,13 @@ const BottomPanelSettersContext = React.createContext<{
   setHeight: React.Dispatch<React.SetStateAction<number>>;
 }>({ setHeight: () => {} });
 
-export const BottomPanelProvider: React.FC = (props) => {
+export const BottomPanelProvider = ({ children }) => {
   const [height, setHeight] = useState(0);
 
   return (
     <BottomPanelContext.Provider value={{ height }}>
       <BottomPanelSettersContext.Provider value={{ setHeight }}>
-        {props.children}
+        {children}
       </BottomPanelSettersContext.Provider>
     </BottomPanelContext.Provider>
   );

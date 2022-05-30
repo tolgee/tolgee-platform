@@ -10,7 +10,9 @@ import { AppState } from 'tg.store/index';
 interface PrivateRouteProps {}
 
 export const PrivateRoute: FunctionComponent<
-  PrivateRouteProps & React.ComponentProps<typeof Route>
+  React.PropsWithChildren<
+    PrivateRouteProps & React.ComponentProps<typeof Route>
+  >
 > = (props) => {
   const allowPrivate = useSelector(
     (state: AppState) => state.global.security.allowPrivate

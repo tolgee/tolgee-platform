@@ -29,13 +29,15 @@ const StyledAddIcon = styled(Add)`
   marginright: ${({ theme }) => theme.spacing(1)};
 `;
 
-export const ApiKeySelector: FC<{
-  selected: components['schemas']['ApiKeyModel'] | undefined;
-  onSelect: (key: components['schemas']['ApiKeyModel']) => void;
-  keys?: components['schemas']['ApiKeyModel'][];
-  keysLoading: boolean;
-  onNewCreated: (key: components['schemas']['ApiKeyModel']) => void;
-}> = (props) => {
+export const ApiKeySelector: FC<
+  React.PropsWithChildren<{
+    selected: components['schemas']['ApiKeyModel'] | undefined;
+    onSelect: (key: components['schemas']['ApiKeyModel']) => void;
+    keys?: components['schemas']['ApiKeyModel'][];
+    keysLoading: boolean;
+    onNewCreated: (key: components['schemas']['ApiKeyModel']) => void;
+  }>
+> = (props) => {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const findKey = (id: number) => props.keys?.find((k) => k.id === id);

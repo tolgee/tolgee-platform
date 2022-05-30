@@ -2,13 +2,15 @@ import { T } from '@tolgee/react';
 import { Menu, MenuItem } from '@mui/material';
 import { FC } from 'react';
 
-export const AvatarEditMenu: FC<{
-  anchorEl: Element | undefined | null;
-  onClose: () => void;
-  onRemove: () => void;
-  onUpload: () => void;
-  canRemove: boolean;
-}> = ({ anchorEl, onClose, onRemove, onUpload, canRemove }) => {
+export const AvatarEditMenu: FC<
+  React.PropsWithChildren<{
+    anchorEl: Element | undefined | null;
+    onClose: () => void;
+    onRemove: () => void;
+    onUpload: () => void;
+    canRemove: boolean;
+  }>
+> = ({ anchorEl, onClose, onRemove, onUpload, canRemove }) => {
   return (
     <>
       <Menu

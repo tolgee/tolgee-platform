@@ -41,7 +41,10 @@ type Props = {
   organizationId: number;
 };
 
-export const MemberItem: React.FC<Props> = ({ user, organizationId }) => {
+export const MemberItem: React.FC<React.PropsWithChildren<Props>> = ({
+  user,
+  organizationId,
+}) => {
   const t = useTranslate();
   const currentUser = useUser();
   const leaveOrganization = useLeaveOrganization();

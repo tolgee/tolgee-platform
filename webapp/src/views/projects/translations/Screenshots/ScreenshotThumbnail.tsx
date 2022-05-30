@@ -72,61 +72,62 @@ const StyledDeleteIcon = styled(ClearIcon)`
   font-size: 20px;
 `;
 
-export const ScreenshotThumbnail: FunctionComponent<ScreenshotThumbnailProps> =
-  (props) => {
-    const config = useConfig();
-    const [hover, setHover] = useState(false);
-    const projectPermissions = useProjectPermissions();
+export const ScreenshotThumbnail: FunctionComponent<
+  React.PropsWithChildren<ScreenshotThumbnailProps>
+> = (props) => {
+  const config = useConfig();
+  const [hover, setHover] = useState(false);
+  const projectPermissions = useProjectPermissions();
 
-    const onMouseOver = () => {
-      setHover(true);
-    };
-
-    const onMouseOut = () => {
-      setHover(false);
-    };
-
-    const onDeleteClick = () => {
-      confirmation({
-        title: <T>screenshot_delete_title</T>,
-        message: <T>screenshot_delete_message</T>,
-        onConfirm: () => props.onDelete(props.screenshotData.id),
-      });
-    };
-
-    return (
-      <>
-        <StyledScreenshotBox
-          onMouseOver={onMouseOver}
-          onMouseOut={onMouseOut}
-          data-cy="screenshot-box"
-        >
-          {projectPermissions.satisfiesPermission(
-            ProjectPermissionType.TRANSLATE
-          ) && (
-            <Tooltip
-              title={<T noWrap>translations.screenshots.delete_tooltip</T>}
-            >
-              <StyledDeleteIconButton
-                className={clsx({ hover })}
-                onClick={onDeleteClick}
-                size="large"
-              >
-                <StyledDeleteIcon />
-              </StyledDeleteIconButton>
-            </Tooltip>
-          )}
-          <StyledScreenshotOverflowWrapper
-            key={props.screenshotData.id}
-            onClick={props.onClick}
-          >
-            <StyledScreenshot
-              onMouseDown={(e) => e.preventDefault()}
-              src={`${config.screenshotsUrl}/${props.screenshotData.filename}`}
-              alt="Screenshot"
-            />
-          </StyledScreenshotOverflowWrapper>
-        </StyledScreenshotBox>
-      </>
-    );
+  const onMouseOver = () => {
+    setHover(true);
   };
+
+  const onMouseOut = () => {
+    setHover(false);
+  };
+
+  const onDeleteClick = () => {
+    confirmation({
+      title: <T>screenshot_delete_title</T>,
+      message: <T>screenshot_delete_message</T>,
+      onConfirm: () => props.onDelete(props.screenshotData.id),
+    });
+  };
+
+  return (
+    <>
+      <StyledScreenshotBox
+        onMouseOver={onMouseOver}
+        onMouseOut={onMouseOut}
+        data-cy="screenshot-box"
+      >
+        {projectPermissions.satisfiesPermission(
+          ProjectPermissionType.TRANSLATE
+        ) && (
+          <Tooltip
+            title={<T noWrap>translations.screenshots.delete_tooltip</T>}
+          >
+            <StyledDeleteIconButton
+              className={clsx({ hover })}
+              onClick={onDeleteClick}
+              size="large"
+            >
+              <StyledDeleteIcon />
+            </StyledDeleteIconButton>
+          </Tooltip>
+        )}
+        <StyledScreenshotOverflowWrapper
+          key={props.screenshotData.id}
+          onClick={props.onClick}
+        >
+          <StyledScreenshot
+            onMouseDown={(e) => e.preventDefault()}
+            src={`${config.screenshotsUrl}/${props.screenshotData.filename}`}
+            alt="Screenshot"
+          />
+        </StyledScreenshotOverflowWrapper>
+      </StyledScreenshotBox>
+    </>
+  );
+};

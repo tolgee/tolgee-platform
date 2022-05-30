@@ -17,7 +17,9 @@ type Props = {
   className: string;
 };
 
-export const StateSelector: React.FC<Props> = ({ className }) => {
+export const StateSelector: React.FC<React.PropsWithChildren<Props>> = ({
+  className,
+}) => {
   const t = useTranslate();
 
   return (

@@ -45,7 +45,7 @@ type Props = {
   placeholder?: string;
 };
 
-export const TagInput: React.FC<Props> = ({
+export const TagInput: React.FC<React.PropsWithChildren<Props>> = ({
   onClose,
   onAdd,
   className,
@@ -100,6 +100,7 @@ export const TagInput: React.FC<Props> = ({
             <T>translations_tags_no_results</T>
           </StyledOption>
         }
+        // @ts-ignore
         PopperComponent={CustomPopper}
         options={options}
         filterOptions={(options) => {

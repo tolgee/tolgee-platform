@@ -7,7 +7,9 @@ interface ListItemLinkProps {
   selected?: boolean;
 }
 
-export const ListItemLink: FunctionComponent<ListItemLinkProps> = (props) => (
+export const ListItemLink: FunctionComponent<
+  React.PropsWithChildren<ListItemLinkProps>
+> = (props) => (
   <ListItem
     data-cy="global-list-item"
     button

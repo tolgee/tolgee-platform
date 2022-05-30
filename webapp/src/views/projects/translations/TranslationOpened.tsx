@@ -92,7 +92,7 @@ type Props = {
   cellPosition?: string;
 };
 
-export const TranslationOpened: React.FC<Props> = ({
+export const TranslationOpened: React.FC<React.PropsWithChildren<Props>> = ({
   value,
   keyId,
   language,

@@ -98,7 +98,11 @@ type Props = {
     | undefined;
 };
 
-export const Comment: React.FC<Props> = ({ data, onDelete, onChangeState }) => {
+export const Comment: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+  onDelete,
+  onChangeState,
+}) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const lang = useCurrentLanguage();
   const date = new Date(data.createdAt);

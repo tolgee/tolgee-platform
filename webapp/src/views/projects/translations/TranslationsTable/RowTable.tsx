@@ -33,77 +33,74 @@ type Props = {
   onResize: (colIndex: number) => void;
 };
 
-export const RowTable: React.FC<Props> = React.memo(function RowTable({
-  data,
-  columnSizes,
-  languages,
-  onResize,
-}) {
-  const permissions = useProjectPermissions();
-  const [hover, setHover] = useState(false);
-  const [focus, setFocus] = useState(false);
-  const active = hover || focus;
+export const RowTable: React.FC<React.PropsWithChildren<Props>> = React.memo(
+  function RowTable({ data, columnSizes, languages, onResize }) {
+    const permissions = useProjectPermissions();
+    const [hover, setHover] = useState(false);
+    const [focus, setFocus] = useState(false);
+    const active = hover || focus;
 
-  const [activeDebounced] = useDebounce(active, 100);
+    const [activeDebounced] = useDebounce(active, 100);
 
-  const relaxedActive = active || activeDebounced;
+    const relaxedActive = active || activeDebounced;
 
-  const containerRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-  const colSizesNum = columnSizes.map((val) => Number(val.replace('%', '')));
+    const colSizesNum = columnSizes.map((val) => Number(val.replace('%', '')));
 
-  return (
-    <StyledContainer
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onFocus={() => setFocus(true)}
-      onBlur={() => setFocus(false)}
-      data-cy="translations-row"
-    >
-      <CellKey
-        editEnabled={permissions.satisfiesPermission(
-          ProjectPermissionType.EDIT
-        )}
-        data={data}
-        width={columnSizes[0]}
-        active={relaxedActive}
-        position="left"
-      />
-      {languages.map((language, index) => {
-        const allWidth = 100 - colSizesNum[0];
+    return (
+      <StyledContainer
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
+        data-cy="translations-row"
+      >
+        <CellKey
+          editEnabled={permissions.satisfiesPermission(
+            ProjectPermissionType.EDIT
+          )}
+          data={data}
+          width={columnSizes[0]}
+          active={relaxedActive}
+          position="left"
+        />
+        {languages.map((language, index) => {
+          const allWidth = 100 - colSizesNum[0];
 
-        const prevWidth = colSizesNum
-          .slice(1, index + 1)
-          .reduce((prev, cur) => prev + cur, 0);
+          const prevWidth = colSizesNum
+            .slice(1, index + 1)
+            .reduce((prev, cur) => prev + cur, 0);
 
-        const cellWidth = Number(colSizesNum[index + 1]);
+          const cellWidth = Number(colSizesNum[index + 1]);
 
-        // calculate arrow position for popup
-        const cellPosition = `${
-          ((prevWidth + cellWidth / 2) / allWidth) * 100
-        }%`;
+          // calculate arrow position for popup
+          const cellPosition = `${
+            ((prevWidth + cellWidth / 2) / allWidth) * 100
+          }%`;
 
-        return (
-          <CellTranslation
-            key={language.tag}
-            data={data}
-            language={language}
-            colIndex={index}
-            onResize={onResize}
-            editEnabled={permissions.canEditLanguage(language.id)}
-            width={columnSizes[index + 1]}
-            cellPosition={cellPosition}
-            active={relaxedActive}
-            // render last focusable button on last item, so it's focusable
-            lastFocusable={index === languages.length - 1}
-            containerRef={containerRef}
-          />
-        );
-      })}
-      <StyledFakeContainer
-        ref={containerRef}
-        style={{ left: columnSizes[0] }}
-      />
-    </StyledContainer>
-  );
-});
+          return (
+            <CellTranslation
+              key={language.tag}
+              data={data}
+              language={language}
+              colIndex={index}
+              onResize={onResize}
+              editEnabled={permissions.canEditLanguage(language.id)}
+              width={columnSizes[index + 1]}
+              cellPosition={cellPosition}
+              active={relaxedActive}
+              // render last focusable button on last item, so it's focusable
+              lastFocusable={index === languages.length - 1}
+              containerRef={containerRef}
+            />
+          );
+        })}
+        <StyledFakeContainer
+          ref={containerRef}
+          style={{ left: columnSizes[0] }}
+        />
+      </StyledContainer>
+    );
+  }
+);

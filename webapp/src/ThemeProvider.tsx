@@ -1,4 +1,10 @@
-import React, { useContext, useMemo, useState, useCallback } from 'react';
+import React, {
+  useContext,
+  useMemo,
+  useState,
+  useCallback,
+  PropsWithChildren,
+} from 'react';
 import { createTheme, PaletteMode, useMediaQuery } from '@mui/material';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 
@@ -249,7 +255,7 @@ const ThemeContext = React.createContext({
 
 export const useThemeContext = () => useContext(ThemeContext);
 
-export const ThemeProvider: React.FC = ({ children }) => {
+export const ThemeProvider = ({ children }) => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)', {
     noSsr: true,
   });

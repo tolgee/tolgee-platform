@@ -77,7 +77,9 @@ type Props = {
   onDialogOpen: () => void;
 };
 
-export const TranslationControls: React.FC<Props> = ({ onDialogOpen }) => {
+export const TranslationControls: React.FC<React.PropsWithChildren<Props>> = ({
+  onDialogOpen,
+}) => {
   const projectPermissions = useProjectPermissions();
   const search = useTranslationsSelector((v) => v.search);
   const languages = useTranslationsSelector((v) => v.languages);

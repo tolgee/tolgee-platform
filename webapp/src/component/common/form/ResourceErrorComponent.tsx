@@ -7,9 +7,11 @@ import { ErrorResponseDto } from 'tg.service/response.types';
 
 import { Alert } from '../Alert';
 
-export const ResourceErrorComponent: FunctionComponent<{
-  error: ErrorResponseDto | any;
-}> = (props) => {
+export const ResourceErrorComponent: FunctionComponent<
+  React.PropsWithChildren<{
+    error: ErrorResponseDto | any;
+  }>
+> = (props) => {
   return (
     <>
       {props.error &&

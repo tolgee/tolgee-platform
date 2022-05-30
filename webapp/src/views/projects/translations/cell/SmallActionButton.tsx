@@ -20,7 +20,7 @@ const StyledButton = styled('button')`
   }
 `;
 
-export const SmallActionButton: React.FC<Props> = ({
+export const SmallActionButton: React.FC<React.PropsWithChildren<Props>> = ({
   children,
   className,
   ...tools

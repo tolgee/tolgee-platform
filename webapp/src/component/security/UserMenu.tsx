@@ -30,7 +30,7 @@ const StyledMenuItem = styled(MenuItem)`
   opacity: 0.7 !important;
 `;
 
-export const UserMenu: React.FC = () => {
+export const UserMenu: React.FC<React.PropsWithChildren<unknown>> = () => {
   const userLogged = useSelector(
     (state: AppState) => state.global.security.allowPrivate
   );

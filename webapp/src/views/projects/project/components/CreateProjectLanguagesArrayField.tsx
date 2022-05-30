@@ -9,7 +9,9 @@ import { CreateLanguageField } from 'tg.component/languages/CreateLanguageField'
 
 import { CreateProjectValueType } from '../ProjectCreateView';
 
-export const CreateProjectLanguagesArrayField: FC = () => {
+export const CreateProjectLanguagesArrayField: FC<
+  React.PropsWithChildren<unknown>
+> = () => {
   const formikContext = useFormikContext<CreateProjectValueType>();
   const hasUnfinishedLanguage =
     formikContext.values.languages.findIndex((l) => l === null || !l?.name) >
@@ -37,6 +39,7 @@ export const CreateProjectLanguagesArrayField: FC = () => {
             )
           }
         >
+          {/* @ts-ignore */}
           {(_, index, removeItem) => {
             const fieldName = `languages.${index}`;
             const helpers = formikContext.getFieldHelpers(fieldName);

@@ -23,7 +23,9 @@ type Props = {
   entity: Entity;
 };
 
-export const EntityDescription: React.FC<Props> = ({ entity }) => {
+export const EntityDescription: React.FC<React.PropsWithChildren<Props>> = ({
+  entity,
+}) => {
   const descriptionReferences = entity.references.filter((ref) =>
     entity.options.description?.includes(ref.type)
   );

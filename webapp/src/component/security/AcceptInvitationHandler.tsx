@@ -21,41 +21,42 @@ const messaging = container.resolve(MessageService);
 const invitationCodeService = container.resolve(InvitationCodeService);
 const tokenService = container.resolve(TokenService);
 
-const AcceptInvitationHandler: FunctionComponent<AcceptInvitationHandlerProps> =
-  () => {
-    const match = useRouteMatch();
+const AcceptInvitationHandler: FunctionComponent<
+  React.PropsWithChildren<AcceptInvitationHandlerProps>
+> = () => {
+  const match = useRouteMatch();
 
-    const code = match.params[PARAMS.INVITATION_CODE];
+  const code = match.params[PARAMS.INVITATION_CODE];
 
-    const acceptCode = useApiMutation({
-      url: '/api/invitation/accept/{code}',
-      method: 'get',
-    });
+  const acceptCode = useApiMutation({
+    url: '/api/invitation/accept/{code}',
+    method: 'get',
+  });
 
-    useEffect(() => {
-      if (!tokenService.getToken()) {
-        invitationCodeService.setCode(code);
-        globalActions.allowRegistration.dispatch();
-        redirectActions.redirect.dispatch(LINKS.LOGIN.build());
-        messaging.success(<T>invitation_log_in_first</T>);
-      } else {
-        acceptCode.mutate(
-          { path: { code } },
-          {
-            onSuccess() {
-              messaging.success(<T>invitation_code_accepted</T>);
-            },
-            onError(e) {
-              messaging.error(<T>{e.code}</T>);
-            },
-            onSettled() {
-              redirectActions.redirect.dispatch(LINKS.PROJECTS.build());
-            },
-          }
-        );
-      }
-    }, []);
+  useEffect(() => {
+    if (!tokenService.getToken()) {
+      invitationCodeService.setCode(code);
+      globalActions.allowRegistration.dispatch();
+      redirectActions.redirect.dispatch(LINKS.LOGIN.build());
+      messaging.success(<T>invitation_log_in_first</T>);
+    } else {
+      acceptCode.mutate(
+        { path: { code } },
+        {
+          onSuccess() {
+            messaging.success(<T>invitation_code_accepted</T>);
+          },
+          onError(e) {
+            messaging.error(<T>{e.code}</T>);
+          },
+          onSettled() {
+            redirectActions.redirect.dispatch(LINKS.PROJECTS.build());
+          },
+        }
+      );
+    }
+  }, []);
 
-    return <FullPageLoading />;
-  };
+  return <FullPageLoading />;
+};
 export default AcceptInvitationHandler;

@@ -14,7 +14,9 @@ type PropTypes = Omit<ComponentProps<typeof ListItem>, 'button'> & {
   button?: boolean;
 };
 
-export const SimpleListItem: FunctionComponent<PropTypes> = (props) => {
+export const SimpleListItem: FunctionComponent<
+  React.PropsWithChildren<PropTypes>
+> = (props) => {
   return (
     <StyledListItem
       data-cy="global-list-item"

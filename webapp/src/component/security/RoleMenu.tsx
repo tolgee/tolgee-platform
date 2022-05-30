@@ -29,7 +29,7 @@ type Props = {
   onSelect: (value: RoleType) => void;
 };
 
-export const RoleMenu: React.FC<Props> = (props) => {
+export const RoleMenu: React.FC<React.PropsWithChildren<Props>> = (props) => {
   const t = useTranslate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 

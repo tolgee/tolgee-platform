@@ -48,7 +48,7 @@ type Props = {
   width?: number | string;
 };
 
-export const TranslationVisual: React.FC<Props> = ({
+export const TranslationVisual: React.FC<React.PropsWithChildren<Props>> = ({
   text,
   limitLines,
   locale,

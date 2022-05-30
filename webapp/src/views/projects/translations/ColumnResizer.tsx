@@ -30,7 +30,7 @@ type Props = {
   passResizeCallback?: (callback: () => void) => void;
 };
 
-export const ColumnResizer: React.FC<Props> = ({
+export const ColumnResizer: React.FC<React.PropsWithChildren<Props>> = ({
   size,
   left,
   onResize,
@@ -53,6 +53,7 @@ export const ColumnResizer: React.FC<Props> = ({
   }, [isDragging, left]);
 
   return (
+    // @ts-ignore
     <Draggable
       axis="x"
       position={position}

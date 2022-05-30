@@ -13,7 +13,9 @@ import { useIntegrateState } from 'tg.views/projects/integrate/useIntegrateState
 import { useProject } from 'tg.hooks/useProject';
 
 export const API_KEY_PLACEHOLDER = '{{{apiKey}}}';
-export const IntegrateView: FunctionComponent = () => {
+export const IntegrateView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const project = useProject();
 
   const {

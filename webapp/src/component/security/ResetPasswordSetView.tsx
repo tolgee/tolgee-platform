@@ -25,7 +25,9 @@ type ValueType = {
   passwordRepeat: string;
 };
 
-const PasswordResetSetView: FunctionComponent = () => {
+const PasswordResetSetView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const t = useTranslate();
   const match = useRouteMatch();
   const encodedData = match.params[PARAMS.ENCODED_EMAIL_AND_CODE];

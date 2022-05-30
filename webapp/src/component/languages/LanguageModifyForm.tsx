@@ -8,14 +8,18 @@ import { components } from 'tg.service/apiSchema.generated';
 
 import { LanguageModifyFields } from './LanguageModifyFields';
 
-export const LanguageModifyForm: FC<{
-  preferredEmojis: string[];
-  values: components['schemas']['LanguageDto'];
-  onModified: (values: components['schemas']['LanguageDto']) => void;
-  onCancel: () => void;
-  inDialog?: boolean;
-}> = (props) => {
-  const Wrapper: FunctionComponent = (wrapperProps) =>
+export const LanguageModifyForm: FC<
+  React.PropsWithChildren<{
+    preferredEmojis: string[];
+    values: components['schemas']['LanguageDto'];
+    onModified: (values: components['schemas']['LanguageDto']) => void;
+    onCancel: () => void;
+    inDialog?: boolean;
+  }>
+> = (props) => {
+  const Wrapper: FunctionComponent<React.PropsWithChildren<unknown>> = (
+    wrapperProps
+  ) =>
     props.inDialog ? (
       <Dialog open={true}>
         <DialogContent>

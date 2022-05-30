@@ -73,7 +73,10 @@ type Props = {
   operationsRef: ReturnType<typeof useTranslationTools>['operationsRef'];
 };
 
-export const TranslationMemory: React.FC<Props> = ({ data, operationsRef }) => {
+export const TranslationMemory: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+  operationsRef,
+}) => {
   const t = useTranslate();
   const items = data?._embedded?.translationMemoryItems;
 

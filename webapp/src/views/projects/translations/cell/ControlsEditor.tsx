@@ -36,76 +36,77 @@ type ControlsProps = {
   screenshotsPresent?: boolean;
 };
 
-export const ControlsEditor: React.FC<ControlsProps> = ({
-  state,
-  onSave,
-  onCancel,
-  onScreenshots,
-  onStateChange,
-  screenshotRef,
-  screenshotsPresent,
-}) => {
-  // right section
-  const displayTransitionButtons = state;
-  const displayScreenshots = onScreenshots;
-  const displayRightPart = displayTransitionButtons || displayScreenshots;
+export const ControlsEditor: React.FC<React.PropsWithChildren<ControlsProps>> =
+  ({
+    state,
+    onSave,
+    onCancel,
+    onScreenshots,
+    onStateChange,
+    screenshotRef,
+    screenshotsPresent,
+  }) => {
+    // right section
+    const displayTransitionButtons = state;
+    const displayScreenshots = onScreenshots;
+    const displayRightPart = displayTransitionButtons || displayScreenshots;
 
-  const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
+    const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
 
-  const [isLoading, setIsLoading] = useState(isEditLoading);
-  useEffect(() => {
-    if (isEditLoading && !isLoading) {
-      setIsLoading(true);
-    }
-  }, [isEditLoading]);
+    const [isLoading, setIsLoading] = useState(isEditLoading);
+    useEffect(() => {
+      if (isEditLoading && !isLoading) {
+        setIsLoading(true);
+      }
+    }, [isEditLoading]);
 
-  return (
-    <>
-      <StyledLeftPart>
-        <Button
-          onClick={onCancel}
-          color="primary"
-          variant="outlined"
-          size="small"
-          data-cy="translations-cell-cancel-button"
-        >
-          <T>translations_cell_cancel</T>
-        </Button>
-        <LoadingButton
-          onClick={onSave}
-          color="primary"
-          variant="contained"
-          size="small"
-          loading={isLoading}
-          data-cy="translations-cell-save-button"
-        >
-          <T>translations_cell_save</T>
-        </LoadingButton>
-      </StyledLeftPart>
+    return (
+      <>
+        <StyledLeftPart>
+          <Button
+            onClick={onCancel}
+            color="primary"
+            variant="outlined"
+            size="small"
+            data-cy="translations-cell-cancel-button"
+          >
+            <T>translations_cell_cancel</T>
+          </Button>
+          <LoadingButton
+            onClick={onSave}
+            color="primary"
+            variant="contained"
+            size="small"
+            loading={isLoading}
+            data-cy="translations-cell-save-button"
+          >
+            <T>translations_cell_save</T>
+          </LoadingButton>
+        </StyledLeftPart>
 
-      {displayRightPart && (
-        <StyledRightPart>
-          {displayTransitionButtons && (
-            <StateTransitionButtons
-              state={state}
-              onStateChange={onStateChange}
-            />
-          )}
-          {displayScreenshots && (
-            <ControlsButton
-              onClick={onScreenshots}
-              ref={screenshotRef}
-              tooltip={<T>translations_screenshots_tooltip</T>}
-              data-cy="translations-cell-screenshots-button"
-            >
-              <CameraAlt
-                fontSize="small"
-                color={screenshotsPresent ? 'primary' : undefined}
+        {displayRightPart && (
+          <StyledRightPart>
+            {displayTransitionButtons && (
+              <StateTransitionButtons
+                state={state}
+                onStateChange={onStateChange}
               />
-            </ControlsButton>
-          )}
-        </StyledRightPart>
-      )}
-    </>
-  );
-};
+            )}
+            {displayScreenshots && (
+              <ControlsButton
+                onClick={onScreenshots}
+                ref={screenshotRef}
+                tooltip={<T>translations_screenshots_tooltip</T>}
+                data-cy="translations-cell-screenshots-button"
+              >
+                <CameraAlt
+                  fontSize="small"
+                  color={screenshotsPresent ? 'primary' : undefined}
+                />
+              </ControlsButton>
+            )}
+          </StyledRightPart>
+        )}
+      </>
+    );
+  };

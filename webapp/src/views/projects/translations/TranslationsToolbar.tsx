@@ -77,7 +77,9 @@ type Props = {
   width: number;
 };
 
-export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
+export const TranslationsToolbar: React.FC<React.PropsWithChildren<Props>> = ({
+  width,
+}) => {
   const [index, setIndex] = useState(1);
   const theme = useTheme();
   const [toolbarVisible, setToolbarVisible] = useState(false);

@@ -17,11 +17,13 @@ const messageService = container.resolve(MessageService);
 
 type LanguageDto = components['schemas']['LanguageDto'];
 
-export const CreateSingleLanguage: FunctionComponent<{
-  onCancel: () => void;
-  onCreated?: (language: components['schemas']['LanguageModel']) => void;
-  autoFocus?: boolean;
-}> = (props) => {
+export const CreateSingleLanguage: FunctionComponent<
+  React.PropsWithChildren<{
+    onCancel: () => void;
+    onCreated?: (language: components['schemas']['LanguageModel']) => void;
+    autoFocus?: boolean;
+  }>
+> = (props) => {
   const project = useProject();
   const createLoadable = useApiMutation({
     url: '/v2/projects/{projectId}/languages',

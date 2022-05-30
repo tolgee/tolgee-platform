@@ -22,7 +22,9 @@ type OrganizationBody = components['schemas']['OrganizationDto'];
 const redirectionActions = container.resolve(RedirectionActions);
 const messageService = container.resolve(MessageService);
 
-export const OrganizationProfileView: FunctionComponent = () => {
+export const OrganizationProfileView: FunctionComponent<
+  React.PropsWithChildren<unknown>
+> = () => {
   const t = useTranslate();
 
   const match = useRouteMatch();

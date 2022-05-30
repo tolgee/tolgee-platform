@@ -37,10 +37,12 @@ const StyledFlagImage = styled(FlagImage)`
   height: 50px;
 `;
 
-export const FlagSelector: FunctionComponent<{
-  preferredEmojis: string[];
-  name: string;
-}> = (props) => {
+export const FlagSelector: FunctionComponent<
+  React.PropsWithChildren<{
+    preferredEmojis: string[];
+    name: string;
+  }>
+> = (props) => {
   const [field, _, helpers] = useField(props.name);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 

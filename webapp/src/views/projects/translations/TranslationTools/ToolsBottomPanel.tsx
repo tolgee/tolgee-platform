@@ -10,7 +10,9 @@ type Props = {
   data: TranslationToolsProps['data'];
 };
 
-export const ToolsPottomPanel: React.FC<Props> = ({ data }) => {
+export const ToolsPottomPanel: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+}) => {
   return (
     <BottomPanel height={TOOLS_BOTTOM_HEIGHT}>
       {(width) => <TranslationTools width={width} data={data} />}

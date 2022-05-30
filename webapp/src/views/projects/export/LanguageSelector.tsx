@@ -20,7 +20,10 @@ type Props = {
   className: string;
 };
 
-export const LanguageSelector: React.FC<Props> = ({ languages, className }) => {
+export const LanguageSelector: React.FC<React.PropsWithChildren<Props>> = ({
+  languages,
+  className,
+}) => {
   const t = useTranslate();
 
   return (

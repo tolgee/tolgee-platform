@@ -22,11 +22,9 @@ type Props = {
   loading?: boolean;
 };
 
-export const EmptyListMessage: FunctionComponent<Props> = ({
-  hint,
-  loading,
-  children,
-}) => {
+export const EmptyListMessage: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = ({ hint, loading, children }) => {
   useLoadingRegister(loading);
   return (
     <Box py={8} data-cy="global-empty-list" position="relative" height={500}>

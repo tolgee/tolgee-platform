@@ -9,11 +9,13 @@ import {
 } from '@mui/material';
 import { T } from '@tolgee/react';
 
-export const ImportConflictNotResolvedErrorDialog: FunctionComponent<{
-  open: boolean;
-  onClose: () => void;
-  onResolve: () => void;
-}> = (props) => {
+export const ImportConflictNotResolvedErrorDialog: FunctionComponent<
+  React.PropsWithChildren<{
+    open: boolean;
+    onClose: () => void;
+    onResolve: () => void;
+  }>
+> = (props) => {
   return (
     <div>
       <Dialog

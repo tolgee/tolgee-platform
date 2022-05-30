@@ -135,9 +135,11 @@ const StyledTileEdit = styled(Box)`
   color: ${({ theme }) => theme.palette.text.secondary};
 `;
 
-export const ProjectTotals: React.FC<{
-  stats: components['schemas']['ProjectStatsModel'];
-}> = ({ stats }) => {
+export const ProjectTotals: React.FC<
+  React.PropsWithChildren<{
+    stats: components['schemas']['ProjectStatsModel'];
+  }>
+> = ({ stats }) => {
   const t = useTranslate();
   const project = useProject();
   const history = useHistory();

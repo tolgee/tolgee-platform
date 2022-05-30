@@ -102,7 +102,7 @@ type Props = {
   lastFocusable: boolean;
 };
 
-export const CellTranslation: React.FC<Props> = ({
+export const CellTranslation: React.FC<React.PropsWithChildren<Props>> = ({
   data,
   language,
   colIndex,

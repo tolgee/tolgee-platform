@@ -43,7 +43,9 @@ const messageService = container.resolve(MessageService);
 const setsIntersection = (set1: Set<unknown>, set2: Set<unknown>) =>
   new Set([...set1].filter((v) => set2.has(v)));
 
-export const AddApiKeyFormDialog: FunctionComponent<Props> = (props) => {
+export const AddApiKeyFormDialog: FunctionComponent<
+  React.PropsWithChildren<Props>
+> = (props) => {
   const onDialogClose = () => {
     if (props.onClose) {
       props.onClose();

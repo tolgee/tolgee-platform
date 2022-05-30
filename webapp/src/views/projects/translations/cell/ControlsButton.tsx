@@ -17,8 +17,8 @@ type Props = React.ComponentProps<typeof IconButton> & {
   tooltip?: React.ReactNode;
 };
 
-export const ControlsButton: React.FC<Props> = React.forwardRef(
-  function ControlsButton(
+export const ControlsButton: React.FC<React.PropsWithChildren<Props>> =
+  React.forwardRef(function ControlsButton(
     { children, className, onClick, tooltip, ...props },
     ref
   ) {
@@ -35,5 +35,4 @@ export const ControlsButton: React.FC<Props> = React.forwardRef(
     );
 
     return tooltip ? <Tooltip title={tooltip}>{content}</Tooltip> : content;
-  }
-);
+  });

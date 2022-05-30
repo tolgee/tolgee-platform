@@ -28,19 +28,21 @@ type Props = {
   date: Date;
 };
 
-export const ActivityDateSeparator: React.FC<Props> = ({ date }) => {
-  const lang = useCurrentLanguage();
-  const isToday = new Date().toLocaleDateString() === date.toLocaleDateString();
-  const t = useTranslate();
+export const ActivityDateSeparator: React.FC<React.PropsWithChildren<Props>> =
+  ({ date }) => {
+    const lang = useCurrentLanguage();
+    const isToday =
+      new Date().toLocaleDateString() === date.toLocaleDateString();
+    const t = useTranslate();
 
-  return (
-    <StyledContainer>
-      <StyledLine maxWidth={10} />
-      <StyledDate>
-        {isToday && `${t('activity_date_today')} `}
-        {date.toLocaleDateString(lang())}
-      </StyledDate>
-      <StyledLine />
-    </StyledContainer>
-  );
-};
+    return (
+      <StyledContainer>
+        <StyledLine maxWidth={10} />
+        <StyledDate>
+          {isToday && `${t('activity_date_today')} `}
+          {date.toLocaleDateString(lang())}
+        </StyledDate>
+        <StyledLine />
+      </StyledContainer>
+    );
+  };

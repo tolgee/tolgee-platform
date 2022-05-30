@@ -16,9 +16,11 @@ import { ImportConflictsSecondaryBar } from './ImportConflictsSecondaryBar';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const actions = container.resolve(ImportActions);
-export const ImportConflictsData: FunctionComponent<{
-  row: components['schemas']['ImportLanguageModel'];
-}> = (props) => {
+export const ImportConflictsData: FunctionComponent<
+  React.PropsWithChildren<{
+    row: components['schemas']['ImportLanguageModel'];
+  }>
+> = (props) => {
   const conflictsLoadable = actions.useSelector((s) => s.loadables.conflicts);
   const project = useProject();
   const languageId = props.row.id;

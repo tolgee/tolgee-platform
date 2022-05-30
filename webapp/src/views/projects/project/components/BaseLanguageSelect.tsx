@@ -6,12 +6,14 @@ import { Select } from 'tg.component/common/form/fields/Select';
 import { LanguageValue } from 'tg.component/languages/LanguageValue';
 import { components } from 'tg.service/apiSchema.generated';
 
-export const BaseLanguageSelect: FC<{
-  languages: Partial<components['schemas']['LanguageModel']>[];
-  label?: ReactNode;
-  name: string;
-  valueKey?: keyof components['schemas']['LanguageModel'];
-}> = (props) => {
+export const BaseLanguageSelect: FC<
+  React.PropsWithChildren<{
+    languages: Partial<components['schemas']['LanguageModel']>[];
+    label?: ReactNode;
+    name: string;
+    valueKey?: keyof components['schemas']['LanguageModel'];
+  }>
+> = (props) => {
   const availableLanguages = props.languages.filter((l) => !!l);
   const context = useFormikContext();
   const value = context.getFieldProps(props.name).value;

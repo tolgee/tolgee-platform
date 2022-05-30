@@ -69,7 +69,7 @@ type Props = {
   languages: LanguageModel[];
 };
 
-export const FormBody: React.FC<Props> = ({
+export const FormBody: React.FC<React.PropsWithChildren<Props>> = ({
   onCancel,
   autofocus,
   languages,

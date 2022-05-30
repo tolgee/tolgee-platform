@@ -35,7 +35,7 @@ type Props = DialogProps & {
   onClose: () => void;
 };
 
-export const ActivityDetailDialog: React.FC<Props> = ({
+export const ActivityDetailDialog: React.FC<React.PropsWithChildren<Props>> = ({
   data,
   initialDiffEnabled,
   ...dialogProps

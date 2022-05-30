@@ -51,7 +51,10 @@ type Props = {
   onClose: () => void;
 };
 
-export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
+export const InviteDialog: React.FC<React.PropsWithChildren<Props>> = ({
+  open,
+  onClose,
+}) => {
   const t = useTranslate();
   const project = useProject();
   const invite = useApiMutation({

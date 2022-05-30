@@ -79,7 +79,10 @@ type Props = {
   wordCount: number;
 };
 
-export const LanguageStats: FC<Props> = ({ languageStats, wordCount }) => {
+export const LanguageStats: FC<React.PropsWithChildren<Props>> = ({
+  languageStats,
+  wordCount,
+}) => {
   const languages = useProjectLanguages();
   const project = useProject();
   const t = useTranslate();

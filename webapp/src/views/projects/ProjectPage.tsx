@@ -19,7 +19,7 @@ interface Props {
   topBarAutoHide?: boolean;
 }
 
-export const ProjectPage: FunctionComponent<Props> = ({
+export const ProjectPage: FunctionComponent<React.PropsWithChildren<Props>> = ({
   topBarAutoHide,
   children,
 }) => {

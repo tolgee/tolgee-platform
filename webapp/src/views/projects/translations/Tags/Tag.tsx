@@ -37,7 +37,12 @@ const StyledWrapper = styled(Wrapper)`
   }
 `;
 
-export const Tag: React.FC<Props> = ({ name, onDelete, onClick, selected }) => {
+export const Tag: React.FC<React.PropsWithChildren<Props>> = ({
+  name,
+  onDelete,
+  onClick,
+  selected,
+}) => {
   return (
     <StyledWrapper
       onClick={onClick ? () => onClick?.(name) : undefined}

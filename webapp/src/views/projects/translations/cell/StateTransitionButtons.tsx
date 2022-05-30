@@ -13,30 +13,27 @@ type Props = {
   className?: string;
 };
 
-export const StateTransitionButtons: React.FC<Props> = ({
-  state,
-  onStateChange,
-  className,
-}) => {
-  const t = useTranslate();
+export const StateTransitionButtons: React.FC<React.PropsWithChildren<Props>> =
+  ({ state, onStateChange, className }) => {
+    const t = useTranslate();
 
-  const nextState: StateType =
-    (state && translationStates[state]?.next) || 'TRANSLATED';
+    const nextState: StateType =
+      (state && translationStates[state]?.next) || 'TRANSLATED';
 
-  return (
-    <>
-      {state !== 'UNTRANSLATED' && (
-        <ControlsButton
-          data-cy="translation-state-button"
-          onClick={() => onStateChange?.(nextState)}
-          className={className}
-          tooltip={t('translation_state_change', {
-            newState: t(translationStates[nextState]?.translationKey || ''),
-          })}
-        >
-          <StateIcon state={state} fontSize="small" />
-        </ControlsButton>
-      )}
-    </>
-  );
-};
+    return (
+      <>
+        {state !== 'UNTRANSLATED' && (
+          <ControlsButton
+            data-cy="translation-state-button"
+            onClick={() => onStateChange?.(nextState)}
+            className={className}
+            tooltip={t('translation_state_change', {
+              newState: t(translationStates[nextState]?.translationKey || ''),
+            })}
+          >
+            <StateIcon state={state} fontSize="small" />
+          </ControlsButton>
+        )}
+      </>
+    );
+  };

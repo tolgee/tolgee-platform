@@ -11,8 +11,11 @@ type Props = {
   activeFilters: string[];
 };
 
-export const SubmenuTags: React.FC<Props> = React.forwardRef(
-  function SubmenuTags({ item, handleToggle, activeFilters }, ref) {
+export const SubmenuTags: React.FC<React.PropsWithChildren<Props>> =
+  React.forwardRef(function SubmenuTags(
+    { item, handleToggle, activeFilters },
+    ref
+  ) {
     const [menuOpen, setMenuOpen] = useState<HTMLElement | null>(null);
 
     const handleMenuClick = (e) => {
@@ -84,5 +87,4 @@ export const SubmenuTags: React.FC<Props> = React.forwardRef(
         </Menu>
       </>
     );
-  }
-);
+  });

@@ -61,10 +61,12 @@ const StyledToggleButton = styled(IconButton)(({ theme }) => ({
 }));
 
 const BoxWithRef = Box as FunctionComponent<
-  BoxProps & { ref: LegacyRef<HTMLDivElement> }
+  React.PropsWithChildren<BoxProps & { ref: LegacyRef<HTMLDivElement> }>
 >;
 
-export const ImportConflictTranslation: React.FC<Props> = (props) => {
+export const ImportConflictTranslation: React.FC<
+  React.PropsWithChildren<Props>
+> = (props) => {
   const textRef = React.createRef<HTMLDivElement>();
 
   const detectExpandability = () => {

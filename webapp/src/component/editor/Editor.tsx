@@ -132,7 +132,7 @@ type Props = {
   autoScrollIntoView?: boolean;
 };
 
-export const Editor: React.FC<Props> = ({
+export const Editor: React.FC<React.PropsWithChildren<Props>> = ({
   value,
   onChange,
   onCancel,

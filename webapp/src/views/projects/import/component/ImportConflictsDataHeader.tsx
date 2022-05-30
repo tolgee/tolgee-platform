@@ -16,9 +16,11 @@ import { components } from 'tg.service/apiSchema.generated';
 import { ImportActions } from 'tg.store/project/ImportActions';
 
 const actions = container.resolve(ImportActions);
-export const ImportConflictsDataHeader: FunctionComponent<{
-  language: components['schemas']['ImportLanguageModel'];
-}> = (props) => {
+export const ImportConflictsDataHeader: FunctionComponent<
+  React.PropsWithChildren<{
+    language: components['schemas']['ImportLanguageModel'];
+  }>
+> = (props) => {
   const project = useProject();
 
   const theme = useTheme();

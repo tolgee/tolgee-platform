@@ -55,7 +55,9 @@ const getReference = (reference: Reference) => {
   }
 };
 
-export const AnyReference: React.FC<Props> = ({ data }) => {
+export const AnyReference: React.FC<React.PropsWithChildren<Props>> = ({
+  data,
+}) => {
   return (
     <StyledReferences>
       {data.map((ref, i) => {

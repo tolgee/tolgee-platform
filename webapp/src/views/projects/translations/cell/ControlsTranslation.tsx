@@ -49,7 +49,9 @@ type ControlsProps = {
   lastFocusable?: boolean;
 };
 
-export const ControlsTranslation: React.FC<ControlsProps> = ({
+export const ControlsTranslation: React.FC<
+  React.PropsWithChildren<ControlsProps>
+> = ({
   state,
   editEnabled,
   onEdit,

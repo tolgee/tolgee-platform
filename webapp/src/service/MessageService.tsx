@@ -10,6 +10,7 @@ export class MessageService {
   constructor(private actions: MessageActions) {}
 
   yell(message: ReactNode | string, variant: VariantType) {
+    // @ts-ignore
     this.actions.showMessage.dispatch(new Message(message, variant));
   }
 

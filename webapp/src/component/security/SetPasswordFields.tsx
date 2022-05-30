@@ -5,9 +5,9 @@ import { TextField } from '../common/form/fields/TextField';
 
 interface SetPasswordFieldsProps {}
 
-export const SetPasswordFields: FunctionComponent<SetPasswordFieldsProps> = (
-  props
-) => {
+export const SetPasswordFields: FunctionComponent<
+  React.PropsWithChildren<SetPasswordFieldsProps>
+> = (props) => {
   return (
     <>
       <TextField

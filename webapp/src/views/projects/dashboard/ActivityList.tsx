@@ -50,7 +50,9 @@ type Props = {
   activityLoadable: UseInfiniteQueryResult<PagedModelProjectActivityModel>;
 };
 
-export const ActivityList: React.FC<Props> = ({ activityLoadable }) => {
+export const ActivityList: React.FC<React.PropsWithChildren<Props>> = ({
+  activityLoadable,
+}) => {
   const data = useMemo(() => {
     const result: ProjectActivityModel[] = [];
     activityLoadable.data?.pages.forEach((p) =>

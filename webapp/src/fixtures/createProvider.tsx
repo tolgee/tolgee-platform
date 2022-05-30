@@ -22,7 +22,10 @@ export const createProvider = <
     DispatchType<ActionType, DispatchReturn>
   >(null as any);
 
-  const Provider: React.FC<ProviderProps> = ({ children, ...props }) => {
+  const Provider: React.FC<React.PropsWithChildren<ProviderProps>> = ({
+    children,
+    ...props
+  }) => {
     const [state, _dispatch] = controller(props as any);
     const dispatchRef = useRef(_dispatch);
 

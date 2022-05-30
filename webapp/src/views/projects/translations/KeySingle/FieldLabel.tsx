@@ -6,7 +6,9 @@ const StyledInputLabel = styled(InputLabel)`
   font-weight: 500px;
 `;
 
-export const FieldLabel: React.FC = ({ children }) => {
+export const FieldLabel: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   return (
     <StyledInputLabel data-cy="translation-field-label">
       {children}

@@ -11,7 +11,10 @@ type Props = {
   onClose: () => void;
 };
 
-export const FiltersMenu: React.FC<Props> = ({ anchorEl, onClose }) => {
+export const FiltersMenu: React.FC<React.PropsWithChildren<Props>> = ({
+  anchorEl,
+  onClose,
+}) => {
   const dispatch = useTranslationsDispatch();
   const filtersContent = useFiltersContent();
   const activeFilters = useActiveFilters();

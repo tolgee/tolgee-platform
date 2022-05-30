@@ -14,9 +14,11 @@ import { components } from 'tg.service/apiSchema.generated';
 import { ImportActions } from 'tg.store/project/ImportActions';
 
 const actions = container.resolve(ImportActions);
-export const ImportAlertError: FunctionComponent<{
-  error: components['schemas']['ImportAddFilesResultModel']['errors'][0];
-}> = (props) => {
+export const ImportAlertError: FunctionComponent<
+  React.PropsWithChildren<{
+    error: components['schemas']['ImportAddFilesResultModel']['errors'][0];
+  }>
+> = (props) => {
   const [moreOpen, setMoreOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 

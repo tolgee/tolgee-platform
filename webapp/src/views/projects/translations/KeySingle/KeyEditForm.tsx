@@ -68,7 +68,7 @@ const StyledActions = styled('div')`
   margin-top: 20px;
 `;
 
-export const KeyEditForm: React.FC = () => {
+export const KeyEditForm: React.FC<React.PropsWithChildren<unknown>> = () => {
   const dispatch = useTranslationsDispatch();
   const t = useTranslate();
   const project = useProject();

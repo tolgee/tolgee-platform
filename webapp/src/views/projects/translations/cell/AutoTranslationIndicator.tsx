@@ -45,11 +45,9 @@ type Props = {
   className?: string;
 };
 
-export const AutoTranslationIndicator: React.FC<Props> = ({
-  keyData,
-  lang,
-  className,
-}) => {
+export const AutoTranslationIndicator: React.FC<
+  React.PropsWithChildren<Props>
+> = ({ keyData, lang, className }) => {
   const project = useProject();
   const translation = keyData.translations[lang];
 

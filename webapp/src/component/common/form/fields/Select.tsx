@@ -23,7 +23,9 @@ const StyledFormControl = styled(FormControl)`
   min-width: 120px;
 `;
 
-export const Select: FunctionComponent<Props> = (props) => {
+export const Select: FunctionComponent<React.PropsWithChildren<Props>> = (
+  props
+) => {
   const [field, meta, helpers] = useField(props.name);
 
   const { renderValue, ...formControlProps } = props;

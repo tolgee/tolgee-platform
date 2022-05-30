@@ -11,13 +11,14 @@ const StyledListSubheader = styled(ListSubheader)`
   padding-bottom: ${({ theme }) => theme.spacing(0.5)};
 `;
 
-export const CompactMenuItem: React.FC<React.ComponentProps<typeof MenuItem>> =
-  React.forwardRef(function CompactMenuItem(props, ref) {
-    return <StyledMenuItem ref={ref} {...props} />;
-  });
+export const CompactMenuItem: React.FC<
+  React.PropsWithChildren<React.ComponentProps<typeof MenuItem>>
+> = React.forwardRef(function CompactMenuItem(props, ref) {
+  return <StyledMenuItem ref={ref} {...props} />;
+});
 
 export const CompactListSubheader: React.FC<
-  React.ComponentProps<typeof ListSubheader>
+  React.PropsWithChildren<React.ComponentProps<typeof ListSubheader>>
 > = (props) => {
   return <StyledListSubheader {...props} />;
 };

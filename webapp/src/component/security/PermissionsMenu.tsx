@@ -26,13 +26,15 @@ const StyledListItemText = styled(ListItemText)`
   }
 `;
 
-export const PermissionsMenu: FunctionComponent<{
-  title?: string;
-  selected: PermissionType;
-  onSelect: (value: PermissionType) => void;
-  buttonProps?: ComponentProps<typeof Button>;
-  minPermissions?: PermissionType;
-}> = (props) => {
+export const PermissionsMenu: FunctionComponent<
+  React.PropsWithChildren<{
+    title?: string;
+    selected: PermissionType;
+    onSelect: (value: PermissionType) => void;
+    buttonProps?: ComponentProps<typeof Button>;
+    minPermissions?: PermissionType;
+  }>
+> = (props) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const t = useTranslate();
 

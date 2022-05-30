@@ -4,7 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useLoadingRegister } from 'tg.component/GlobalLoading';
 
 const LoadingButton: FunctionComponent<
-  ComponentProps<typeof Button> & { loading?: boolean }
+  React.PropsWithChildren<ComponentProps<typeof Button> & { loading?: boolean }>
 > = (props) => {
   const { disabled, children, loading, ...otherProps } = props;
 

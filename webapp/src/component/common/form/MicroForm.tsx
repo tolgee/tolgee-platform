@@ -9,11 +9,9 @@ interface MicroFormProps<T = { [key: string]: any }> {
   onChange?: (value: any) => any;
 }
 
-export const MicroForm: FunctionComponent<MicroFormProps> = ({
-  initialValues,
-  validationSchema,
-  ...props
-}) => {
+export const MicroForm: FunctionComponent<
+  React.PropsWithChildren<MicroFormProps>
+> = ({ initialValues, validationSchema, ...props }) => {
   return (
     <Formik
       initialValues={initialValues}

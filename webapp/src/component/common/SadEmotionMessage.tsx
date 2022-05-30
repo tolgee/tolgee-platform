@@ -16,7 +16,9 @@ type Props = {
   hint?: React.ReactNode;
 };
 
-export const SadEmotionMessage: React.FC<Props> = (props) => {
+export const SadEmotionMessage: React.FC<React.PropsWithChildren<Props>> = (
+  props
+) => {
   return (
     <Box
       display="flex"
