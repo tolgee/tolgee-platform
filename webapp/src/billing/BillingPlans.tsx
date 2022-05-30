@@ -10,12 +10,17 @@ type BillingPlansProps = {
 };
 
 export const BillingPlans: FC<BillingPlansProps> = (props) => {
-  const [billedYearly, setBilledYearly] = useState(true);
+  const [billedYearly, setBilledYearly] = useState(false);
 
   return (
     <>
       <Box>
-        Monthly <Switch checked={billedYearly} /> Yearly
+        Monthly{' '}
+        <Switch
+          checked={billedYearly}
+          onChange={(_, val) => setBilledYearly(val)}
+        />{' '}
+        Yearly
       </Box>
 
       {props.plans.map((plan) => (
@@ -27,7 +32,7 @@ export const BillingPlans: FC<BillingPlansProps> = (props) => {
               <Plan
                 plan={plan}
                 isOrganizationSubscribed={!props.activePlan.free}
-                period={billedYearly ? 'yearly' : 'monthly'}
+                period={billedYearly ? 'YEARLY' : 'MONTHLY'}
               />
             ))}
         </Box>
