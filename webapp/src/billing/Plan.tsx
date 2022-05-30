@@ -14,21 +14,25 @@ const messaging = container.resolve(MessageService);
 export const Plan: FC<{
   plan: components['schemas']['PlanModel'];
   isOrganizationSubscribed: boolean;
-  period: 'monthly' | 'yearly';
+  period: components['schemas']['SubscribeRequest']['period'];
 }> = (props) => {
-  const { upgradeMutation, onUpgrade } = useUpgradeSubscription();
+  const { upgradeMutation, onUpgrade } = useUpgradeSubscription(
+    props.plan.id,
+    props.period
+  );
 
   const organization = useOrganization();
   const t = useTranslate();
 
-  const onSubscribe = (planId: number) => {
+  const onSubscribe = () => {
     subscribeMutation.mutate({
       path: {
         organizationId: organization!.id,
       },
       content: {
         'application/json': {
-          planId: planId,
+          planId: props.plan.id,
+          period: props.period,
         },
       },
     });
@@ -58,12 +62,14 @@ export const Plan: FC<{
       <Box>
         {t({
           key: 'billing_plan_price',
-          defaultValue: 'Price: {price, number, :: currency/EUR}',
+          defaultValue:
+            'Price: {price, number, :: currency/EUR} per {period, select, MONTHLY {month} other {year}}',
           parameters: {
+            period: props.period,
             price:
-              ((props.period === 'monthly'
+              (props.period === 'MONTHLY'
                 ? props.plan.monthlyPrice
-                : props.plan.yearlyPrice) || 0) / 100,
+                : props.plan.yearlyPrice) || 0,
           },
         })}
       </Box>
@@ -74,7 +80,7 @@ export const Plan: FC<{
             loading={upgradeMutation.isLoading}
             variant="outlined"
             color="primary"
-            onClick={() => onUpgrade(props.plan.id)}
+            onClick={() => onUpgrade()}
           >
             Subscribe
           </LoadingButton>
@@ -83,7 +89,7 @@ export const Plan: FC<{
             loading={subscribeMutation.isLoading}
             variant="outlined"
             color="primary"
-            onClick={() => onSubscribe(props.plan.id)}
+            onClick={() => onSubscribe()}
           >
             Subscribe
           </LoadingButton>

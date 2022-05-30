@@ -56,14 +56,15 @@ export interface components {
     UpdateSubscriptionRequest: {
       /** Id of the subscription plan */
       planId: number;
+      period: "MONTHLY" | "YEARLY";
     };
     ActivePlanModel: {
       id: number;
       name: string;
       translationLimit?: number;
       includedMtCredits?: number;
-      monthlyPrice?: number;
-      yearlyPrice?: number;
+      monthlyPrice: number;
+      yearlyPrice: number;
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
       free: boolean;
@@ -71,6 +72,7 @@ export interface components {
     SubscribeRequest: {
       /** Id of the subscription plan */
       planId: number;
+      period: "MONTHLY" | "YEARLY";
     };
     BuyMoreCreditsRequest: {
       priceId: number;
@@ -108,8 +110,8 @@ export interface components {
       name: string;
       translationLimit?: number;
       includedMtCredits?: number;
-      monthlyPrice?: number;
-      yearlyPrice?: number;
+      monthlyPrice: number;
+      yearlyPrice: number;
       free: boolean;
     };
     CollectionModelMtCreditsPriceModel: {

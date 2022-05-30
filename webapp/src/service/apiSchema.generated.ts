@@ -1063,6 +1063,7 @@ export interface components {
     SubscribeRequest: {
       /** Id of the subscription plan */
       planId: number;
+      period: "MONTHLY" | "YEARLY";
     };
     BuyMoreCreditsRequest: {
       priceId: number;

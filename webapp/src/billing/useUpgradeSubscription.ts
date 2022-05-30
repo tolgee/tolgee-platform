@@ -1,17 +1,22 @@
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import { useBillingApiMutation } from './useBillingQueryApi';
+import { components } from 'tg.service/billingApiSchema.generated';
 
-export const useUpgradeSubscription = () => {
+export const useUpgradeSubscription = (
+  planId: number,
+  period: components['schemas']['SubscribeRequest']['period']
+) => {
   const organization = useOrganization();
 
-  const onUpgrade = (planId: number) => {
+  const onUpgrade = () => {
     upgradeMutation.mutate({
       path: {
         organizationId: organization!.id,
       },
       content: {
         'application/json': {
-          planId: planId,
+          planId,
+          period,
         },
       },
     });
