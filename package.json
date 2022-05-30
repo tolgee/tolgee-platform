@@ -6,10 +6,11 @@
     "release-dry-debug": "semantic-release --no-ci -d --debug"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "^5.0.1",
-    "@semantic-release/exec": "^5.0.0",
-    "@semantic-release/git": "^9.0.0",
-    "semantic-release": "^17.4.4"
+    "@semantic-release/changelog": "^6.0.1",
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^8.0.4",
+    "semantic-release": "^19.0.2"
   },
   "release": {
     "plugins": [
@@ -17,6 +18,17 @@
       "@semantic-release/release-notes-generator",
       "@semantic-release/changelog",
       "@semantic-release/git",
+      [
+        "@semantic-release/github",
+        {
+          "assets": [
+            {
+              "path": "./build/libs/tolgee.jar",
+              "name": "tolgee-${ nextRelease.version }.jar"
+            }
+          ]
+        }
+      ],
       [
         "@semantic-release/exec",
         {
@@ -28,6 +40,10 @@
       "next",
       {
         "name": "main"
+      },
+      {
+        "name": "beta",
+        "prerelease": true
       }
     ]
   }

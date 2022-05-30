@@ -69,7 +69,7 @@ project(':server-app').afterEvaluate {
         dependsOn "copyDist"
         dependsOn "addVersionFile"
         from "${project.projectDir}/build/dependency"
-        archiveFileName = "tolgee-${project.version}.jar"
+        archiveFileName = "tolgee.jar"
         destinationDirectory = file("$buildDir/libs")
         entryCompression ZipEntryCompression.STORED
     }
