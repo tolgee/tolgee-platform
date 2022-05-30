@@ -7,6 +7,9 @@ on:
       - preview/stepan/2
       - preview/honza/1
       - preview/honza/2
+    branches:
+      - 'beta'
+
 
 jobs:
   deploy:
@@ -21,12 +24,18 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
+          node-version: '14.x'
+      
+      - name: Fetch tags
+        run: git fetch --tags -f
 
       - name: Set git globals
         run: |
           git config --local user.email "machine@tolgee.io"
           git config --local user.name "Tolgee Machine"
+
+      - name: Install node modules
+        run: npm ci
 
       - name: Download translations
         run: ./gradlew updateStaticTranslations
@@ -52,6 +61,25 @@ jobs:
           docker buildx create --use 
           docker buildx build . -t tgint/tgpreview:${{ steps.version.outputs.VERSION }} --platform linux/arm64,linux/amd64 --push
         working-directory: build/docker
+
+      - name: Pack with webapp
+        if: ${{ steps.version.outputs.VERSION != '' }}
+        run: ./gradlew packResources
+        env:
+          VERSION: ${{ steps.version.outputs.VERSION }}
+          TOLGEE_API_KEY: ${{secrets.TOLGEE_API_KEY}}
+          TOLGEE_API_URL: ${{secrets.TOLGEE_API_URL}}
+
+      # - name: Create branch on origin
+      #   if: ${{ steps.version.outputs.VERSION != '' }}
+      #   run: git push --follow-tags -u origin $(git rev-parse --abbrev-ref HEAD)
+
+      - name: Run npm release
+        if: ${{ steps.version.outputs.VERSION != '' }}
+        run: npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.VERSION }}
 
       - name: Deploy
         uses: nickgronow/kubectl@master

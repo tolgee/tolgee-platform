@@ -79,17 +79,9 @@ jobs:
       - name: Run npm release
         if: ${{ steps.version.outputs.VERSION != '' }}
         run: npm run release
-
-      - name: Create Release
-        if: ${{ steps.version.outputs.VERSION != '' }}
-        id: create_release
-        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.version.outputs.VERSION }}
-          release_name: Release ${{ steps.version.outputs.VERSION }}
-          draft: false
+          VERSION: ${{ steps.version.outputs.VERSION }}
 
       - name: Upload Release Asset
         if: ${{ steps.version.outputs.VERSION != '' }}
