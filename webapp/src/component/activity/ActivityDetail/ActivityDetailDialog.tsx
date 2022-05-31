@@ -41,6 +41,7 @@ export const ActivityDetailDialog: React.FC<Props> = ({
   ...dialogProps
 }) => {
   const activity = useMemo(() => buildActivity(data), [data]);
+  const filteredActivity = useMemo(() => buildActivity(data, true), [data]);
   const [diffEnabled, setDiffEnabled] = useState(initialDiffEnabled);
 
   const toggleDiff = () => {
@@ -53,7 +54,7 @@ export const ActivityDetailDialog: React.FC<Props> = ({
     <Dialog {...dialogProps}>
       <StyledDialogTitle>
         <span>
-          <ActivityTitle activity={activity} />
+          <ActivityTitle activity={filteredActivity} />
         </span>
         <FormControlLabel
           control={
