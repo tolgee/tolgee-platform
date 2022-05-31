@@ -39,7 +39,8 @@
     "branches": [
       "next",
       {
-        "name": "main"
+        "name": "main",
+        "channel": "latest"
       },
       {
         "name": "beta",
