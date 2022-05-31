@@ -37,10 +37,10 @@
       ]
     ],
     "branches": [
-      "next",
       {
         "name": "main",
-        "channel": "latest"
+        "channel": "latest",
+        "prerelease": false
       },
       {
         "name": "beta",
