@@ -100,7 +100,8 @@ class MtCreditBucketService(
     return MtCreditBalanceDto(
       creditBalance = bucket.credits,
       bucketSize = bucket.bucketSize,
-      additionalCreditBalance = bucket.additionalCredits
+      additionalCreditBalance = bucket.additionalCredits,
+      refilledAt = bucket.refilled
     )
   }
 

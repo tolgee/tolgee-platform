@@ -6,6 +6,7 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.dtos.PathDTO
 import io.tolgee.events.OnKeyPrePersist
+import io.tolgee.events.OnKeyPreRemove
 import io.tolgee.model.Project
 import io.tolgee.model.Screenshot
 import io.tolgee.model.StandardAuditModel
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.context.ApplicationEventPublisher
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
@@ -23,6 +25,7 @@ import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
 import javax.persistence.PrePersist
+import javax.persistence.PreRemove
 import javax.persistence.Table
 import javax.persistence.UniqueConstraint
 import javax.validation.constraints.NotBlank
@@ -49,7 +52,7 @@ class Key(
   @OneToMany(mappedBy = "key")
   var translations: MutableSet<Translation> = HashSet()
 
-  @OneToOne(mappedBy = "key", fetch = FetchType.LAZY)
+  @OneToOne(mappedBy = "key", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   override var keyMeta: KeyMeta? = null
 
   @OneToMany(mappedBy = "key")
@@ -76,6 +79,11 @@ class Key(
       @PrePersist
       fun prePersist(key: Key) {
         eventPublisherProvider.`object`.publishEvent(OnKeyPrePersist(source = this, key))
+      }
+
+      @PreRemove
+      fun preRemove(key: Key) {
+        eventPublisherProvider.`object`.publishEvent(OnKeyPreRemove(source = this, key))
       }
     }
   }

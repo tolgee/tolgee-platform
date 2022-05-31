@@ -493,6 +493,14 @@ export interface paths {
   "/api/organizations/{organizationId}/invitations": {
     get: operations["getInvitations_1"];
   };
+  "/v2/organizations/{organizationId}/usage": {
+    /** Returns current organization usage */
+    get: operations["getUsage"];
+  };
+  "/api/organizations/{organizationId}/usage": {
+    /** Returns current organization usage */
+    get: operations["getUsage_1"];
+  };
   "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf": {
     /** Returns organization invoices */
     get: operations["getInvoicePdf"];
@@ -879,14 +887,15 @@ export interface components {
     UpdateSubscriptionRequest: {
       /** Id of the subscription plan */
       planId: number;
+      period: "MONTHLY" | "YEARLY";
     };
     ActivePlanModel: {
       id: number;
       name: string;
       translationLimit?: number;
       includedMtCredits?: number;
-      monthlyPrice?: number;
-      yearlyPrice?: number;
+      monthlyPrice: number;
+      yearlyPrice: number;
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
       free: boolean;
@@ -1283,6 +1292,7 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
+      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1294,7 +1304,6 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
-      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1471,6 +1480,19 @@ export interface components {
         organizationInvitations?: components["schemas"]["OrganizationInvitationModel"][];
       };
     };
+    UsageModel: {
+      organizationId: number;
+      /** Current balance of standard credits. Standard credits are refilled every month. */
+      creditBalance: number;
+      /** Date when credits were refilled. (In epoch format.) */
+      creditBalanceRefilledAt: number;
+      /** Additional credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits. */
+      additionalCreditBalance: number;
+      /** How many translations can be stored within your organization. */
+      translationLimit: number;
+      /** How many translations are currently stored within your organization. */
+      currentTranslations: number;
+    };
     InvoiceModel: {
       id: number;
       /** The number on the invoice */
@@ -1518,8 +1540,8 @@ export interface components {
       name: string;
       translationLimit?: number;
       includedMtCredits?: number;
-      monthlyPrice?: number;
-      yearlyPrice?: number;
+      monthlyPrice: number;
+      yearlyPrice: number;
       free: boolean;
     };
     CollectionModelMtCreditsPriceModel: {
@@ -7288,6 +7310,62 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["CollectionModelOrganizationInvitationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Returns current organization usage */
+  getUsage: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UsageModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Returns current organization usage */
+  getUsage_1: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UsageModel"];
         };
       };
       /** Bad Request */

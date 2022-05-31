@@ -22,10 +22,14 @@ open class ActivityHolder(
 
   open var modifiedCollections: MutableMap<Pair<EntityWithId, String>, List<Any?>?> = mutableMapOf()
 
+  open var transactionRollbackOnly = false
+
   @PreDestroy
   open fun preDestroy() {
     try {
-      applicationContext.getBean(ActivityService::class.java).storeActivityData(this)
+      if (!transactionRollbackOnly) {
+        applicationContext.getBean(ActivityService::class.java).storeActivityData(this)
+      }
     } catch (e: Exception) {
       Sentry.captureException(e)
       logger.error(e.stackTraceToString())

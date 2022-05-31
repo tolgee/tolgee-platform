@@ -34,7 +34,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
     method: `put`,
     invalidatePrefix: `/v2/organizations/{organizationId}/billing`,
     options: {
-      onSuccess: (data) => {
+      onSuccess: () => {
         creditBalance.refetch();
       },
     },
