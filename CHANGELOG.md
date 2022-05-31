@@ -1,3 +1,10 @@
+## [2.27.1-beta.1](https://github.com/tolgee/tolgee-platform/compare/v2.27.0...v2.27.1-beta.1) (2022-05-31)
+
+
+### Bug Fixes
+
+* Better release info in github ([fb74c83](https://github.com/tolgee/tolgee-platform/commit/fb74c836d67604e385b3e07f4a6959b5007e3759))
+
 # [2.27.0](https://github.com/tolgee/tolgee-platform/compare/v2.26.1...v2.27.0) (2022-05-27)
 
 
