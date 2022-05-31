@@ -1,3 +1,11 @@
+## [2.27.1](https://github.com/tolgee/tolgee-platform/compare/v2.27.0...v2.27.1) (2022-05-31)
+
+
+### Bug Fixes
+
+* Better relase info in github - fix release-dry ([536d522](https://github.com/tolgee/tolgee-platform/commit/536d52239d455b18b857d98b53f7d3abed0ec98c))
+* Better release info in github ([097556d](https://github.com/tolgee/tolgee-platform/commit/097556d4f30d0f22a6e99317a319c461519c735f))
+
 # [2.27.0](https://github.com/tolgee/tolgee-platform/compare/v2.26.1...v2.27.0) (2022-05-27)
 
 
