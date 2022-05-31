@@ -1,3 +1,10 @@
+## [2.27.3](https://github.com/tolgee/tolgee-platform/compare/v2.27.2...v2.27.3) (2022-05-31)
+
+
+### Bug Fixes
+
+* Better relase info in github - channel latest ([d33206a](https://github.com/tolgee/tolgee-platform/commit/d33206af9b0f5887262700a0a6b447c9ae49ad5e))
+
 ## [2.27.2](https://github.com/tolgee/tolgee-platform/compare/v2.27.1...v2.27.2) (2022-05-31)
 
 
