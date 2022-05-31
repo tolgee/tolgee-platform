@@ -11,6 +11,7 @@ type BillingPlansProps = {
 
 export const BillingPlans: FC<BillingPlansProps> = (props) => {
   const [billedYearly, setBilledYearly] = useState(false);
+  const period = billedYearly ? 'YEARLY' : 'MONTHLY';
 
   return (
     <>
@@ -27,12 +28,12 @@ export const BillingPlans: FC<BillingPlansProps> = (props) => {
         <Box key={plan.id}>
           {props.activePlan &&
             (props.activePlan.id === plan.id ? (
-              <ActivePlan plan={props.activePlan} />
+              <ActivePlan plan={props.activePlan} period={period} />
             ) : (
               <Plan
                 plan={plan}
                 isOrganizationSubscribed={!props.activePlan.free}
-                period={billedYearly ? 'YEARLY' : 'MONTHLY'}
+                period={period}
               />
             ))}
         </Box>

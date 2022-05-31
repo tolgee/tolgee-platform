@@ -21,6 +21,7 @@ class ActivityService(
   private val applicationContext: ApplicationContext,
   private val activityModifiedEntityRepository: ActivityModifiedEntityRepository
 ) {
+  @Transactional
   fun storeActivityData(activityHolder: ActivityHolder) {
     val activityRevision = activityHolder.activityRevision ?: return
     val modifiedEntities = activityHolder.modifiedEntities

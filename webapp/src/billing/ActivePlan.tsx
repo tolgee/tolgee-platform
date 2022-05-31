@@ -10,6 +10,7 @@ import { useUpgradeSubscription } from './useUpgradeSubscription';
 
 export const ActivePlan: FC<{
   plan: components['schemas']['ActivePlanModel'];
+  period: components['schemas']['SubscribeRequest']['period'];
 }> = (props) => {
   const organization = useOrganization();
 
@@ -25,7 +26,10 @@ export const ActivePlan: FC<{
     cancelMutation.mutate({ path: { organizationId: organization!.id } });
   };
 
-  const { upgradeMutation, onUpgrade } = useUpgradeSubscription();
+  const { upgradeMutation, onUpgrade } = useUpgradeSubscription(
+    props.plan.id,
+    props.period
+  );
 
   return (
     <>
@@ -48,7 +52,7 @@ export const ActivePlan: FC<{
             loading={upgradeMutation.isLoading}
             variant="outlined"
             color="primary"
-            onClick={() => onUpgrade(props.plan.id)}
+            onClick={() => onUpgrade()}
           >
             Subscribe
           </LoadingButton>

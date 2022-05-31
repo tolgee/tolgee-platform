@@ -6,6 +6,7 @@ import io.tolgee.activity.annotation.ActivityLoggedProp
 import io.tolgee.activity.annotation.ActivityReturnsExistence
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.events.OnLanguagePrePersist
+import io.tolgee.events.OnLanguagePreRemove
 import io.tolgee.model.translation.Translation
 import io.tolgee.service.dataImport.ImportService
 import org.springframework.beans.factory.ObjectFactory
@@ -119,6 +120,7 @@ class Language : StandardAuditModel() {
       @Transactional
       fun preRemove(language: Language) {
         importServiceProvider.`object`.onExistingLanguageRemoved(language)
+        eventPublisherProvider.`object`.publishEvent(OnLanguagePreRemove(source = this, language))
       }
     }
   }

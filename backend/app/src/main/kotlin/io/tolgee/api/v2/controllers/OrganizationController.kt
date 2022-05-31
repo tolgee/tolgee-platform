@@ -10,10 +10,12 @@ import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModel
 import io.tolgee.api.v2.hateoas.invitation.OrganizationInvitationModelAssembler
 import io.tolgee.api.v2.hateoas.organization.OrganizationModel
 import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
+import io.tolgee.api.v2.hateoas.organization.UsageModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
 import io.tolgee.api.v2.hateoas.project.ProjectModel
 import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
+import io.tolgee.component.translationsLimitProvider.TranslationsLimitProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.misc.CreateOrganizationInvitationParams
@@ -35,7 +37,9 @@ import io.tolgee.service.ImageUploadService
 import io.tolgee.service.InvitationService
 import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
+import io.tolgee.service.OrganizationStatsService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.project.ProjectService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
@@ -83,9 +87,11 @@ class OrganizationController(
   private val projectModelAssembler: ProjectModelAssembler,
   private val invitationService: InvitationService,
   private val organizationInvitationModelAssembler: OrganizationInvitationModelAssembler,
-  private val imageUploadService: ImageUploadService
+  private val imageUploadService: ImageUploadService,
+  private val mtCreditBucketService: MtCreditBucketService,
+  private val organizationStatsService: OrganizationStatsService,
+  private val translationsLimitProvider: TranslationsLimitProvider
 ) {
-
   @PostMapping
   @Transactional
   @Operation(summary = "Creates organization")
@@ -279,6 +285,24 @@ class OrganizationController(
     val roleType = organizationRoleService.getType(organization.id)
     organizationService.removeAvatar(organization)
     return organizationModelAssembler.toModel(OrganizationView.of(organization, roleType))
+  }
+
+  @GetMapping(value = ["/{organizationId:[0-9]+}/usage"])
+  @Operation(description = "Returns current organization usage")
+  fun getUsage(
+    @PathVariable organizationId: Long
+  ): UsageModel {
+    val organization = organizationService.getOrganizationAndCheckUserIsOwner(organizationId)
+    val creditBalances = mtCreditBucketService.getCreditBalances(organization)
+    val currentTranslations = organizationStatsService.getCurrentTranslationCount(organizationId)
+    return UsageModel(
+      organizationId = organizationId,
+      creditBalance = creditBalances.creditBalance,
+      additionalCreditBalance = creditBalances.additionalCreditBalance,
+      creditBalanceRefilledAt = creditBalances.refilledAt.time,
+      currentTranslations = currentTranslations,
+      translationLimit = translationsLimitProvider.get(organization)
+    )
   }
 
   private fun OrganizationView.toModel(): OrganizationModel {

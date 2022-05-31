@@ -13,6 +13,7 @@ import { ActivityList } from './ActivityList';
 import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
 import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
+import { Usage } from 'tg.component/Usage';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -40,7 +41,7 @@ const StyledContainer = styled(Box)`
 
 const StyledHeader = styled(Box)`
   display: grid;
-  grid-template-columns: auto auto auto 1fr auto;
+  grid-template-columns: auto auto auto 1fr auto auto;
   gap: 8px;
   align-items: center;
   margin-top: -4px;
@@ -58,6 +59,12 @@ const StyledProjectId = styled(Box)`
   font-size: 14px;
   color: ${({ theme }) => theme.palette.text.secondary};
   grid-column: -1;
+`;
+
+const StyledUsage = styled(Box)`
+  font-size: 14px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  grid-column: -2;
 `;
 
 export const DashboardView = () => {
@@ -143,6 +150,11 @@ export const DashboardView = () => {
                   parameters={{ id: project.id }}
                 />
               </StyledProjectId>
+              {project.organizationOwner && (
+                <StyledUsage>
+                  <Usage organizationId={project.organizationOwner.id} />
+                </StyledUsage>
+              )}
             </StyledHeader>
           </SecondaryBar>
         }
