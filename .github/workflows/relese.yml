@@ -35,6 +35,8 @@ jobs:
 
       - name: Run get new version
         run: npm run release-dry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set version property
         id: version
