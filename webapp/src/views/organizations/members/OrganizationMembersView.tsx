@@ -11,6 +11,7 @@ import { MemberItem } from './MemberItem';
 import { SimpleList } from 'tg.component/common/list/SimpleList';
 import { InviteDialog } from './InviteDialog';
 import { InvitationItem } from './InvitationItem';
+import { LINKS, PARAMS } from 'tg.constants/links';
 
 export const OrganizationMembersView: FunctionComponent = () => {
   const organization = useOrganization();
@@ -51,6 +52,15 @@ export const OrganizationMembersView: FunctionComponent = () => {
     <BaseOrganizationSettingsView
       loading={membersLoadable.isFetching}
       windowTitle={t('organization_members_title')}
+      link={LINKS.ORGANIZATION_MEMBERS}
+      navigation={[
+        [
+          t('organization_members_title'),
+          LINKS.ORGANIZATION_MEMBERS.build({
+            [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
+          }),
+        ],
+      ]}
     >
       <Box
         mb={1}

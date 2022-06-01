@@ -5,6 +5,7 @@ import { useTranslate, T } from '@tolgee/react';
 import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
 import { OrganizationBasePermissionMenu } from './components/OrganizationBasePermissionMenu';
 import { useOrganization } from './useOrganization';
+import { LINKS, PARAMS } from 'tg.constants/links';
 
 export const OrganizationMemberPrivilegesView: FunctionComponent = () => {
   const organization = useOrganization();
@@ -14,6 +15,15 @@ export const OrganizationMemberPrivilegesView: FunctionComponent = () => {
     <BaseOrganizationSettingsView
       windowTitle={t('organization_member_privileges_title')}
       title={t('organization_member_privileges_title')}
+      link={LINKS.ORGANIZATION_MEMBER_PRIVILEGES}
+      navigation={[
+        [
+          t('organization_member_privileges_title'),
+          LINKS.ORGANIZATION_MEMBER_PRIVILEGES.build({
+            [PARAMS.ORGANIZATION_SLUG]: organization!.slug,
+          }),
+        ],
+      ]}
     >
       <Typography variant="body1">
         <T>organization_member_privileges_text</T>

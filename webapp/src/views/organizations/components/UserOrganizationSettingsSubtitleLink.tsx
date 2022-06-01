@@ -1,25 +1,31 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { Box, Link, MenuItem, Popover } from '@mui/material';
+import { useRef, useState } from 'react';
+import { Box, Link, MenuItem, Popover, styled } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
-import { T } from '@tolgee/react';
 import { Link as RouterLink } from 'react-router-dom';
 
-import { LINKS, PARAMS } from 'tg.constants/links';
-import { useUser } from 'tg.hooks/useUser';
+import { components } from 'tg.service/apiSchema.generated';
+import { LINKS, PARAMS, Link as UrlLink } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
-type UserOrganizationSettingsSubtitleLinkProps = {
-  isUser: boolean;
+type OrganizationModel = components['schemas']['OrganizationModel'];
+
+const StyledOrgItem = styled('div')`
+  display: grid;
+  grid-auto-flow: column;
+  gap: 6px;
+  align-items: center;
+`;
+
+type Props = {
+  selectedId?: number;
+  link: UrlLink;
 };
 
-type ListDataType = {
-  name: string;
-  linkTo: string;
-}[];
-
-const UserOrganizationSettingsSubtitleLink = (
-  props: UserOrganizationSettingsSubtitleLinkProps
-) => {
+const UserOrganizationSettingsSubtitleLink: React.FC<Props> = ({
+  selectedId,
+  link,
+}) => {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -31,8 +37,6 @@ const UserOrganizationSettingsSubtitleLink = (
     setIsOpen(true);
   };
 
-  const user = useUser();
-
   const organizationsLoadable = useApiQuery({
     url: '/v2/organizations',
     method: 'get',
@@ -42,35 +46,47 @@ const UserOrganizationSettingsSubtitleLink = (
     },
   });
 
-  const data: ListDataType = useMemo(
-    () => [
-      {
-        name: user?.name as string,
-        linkTo: LINKS.USER_SETTINGS.build(),
-      },
-      ...(organizationsLoadable.data?._embedded?.organizations?.map((i) => ({
-        name: i.name,
-        linkTo: LINKS.ORGANIZATION_PROFILE.build({
-          [PARAMS.ORGANIZATION_SLUG]: i.slug,
-        }),
-      })) || []),
-    ],
-    [organizationsLoadable.data]
+  const OrganizationItem = ({ data }: { data: OrganizationModel }) => {
+    return (
+      <StyledOrgItem>
+        <Box>
+          <AvatarImg
+            key={0}
+            owner={{
+              name: data.name,
+              avatar: data.avatar,
+              type: 'ORG',
+              id: data.id,
+            }}
+            size={18}
+          />
+        </Box>
+        <Box>{data.name}</Box>
+      </StyledOrgItem>
+    );
+  };
+
+  const selected = organizationsLoadable.data?._embedded?.organizations?.find(
+    (org) => org.id === selectedId
   );
 
   const MenuItems = () => {
     return (
       <>
-        {data.map((item, idx) => (
-          <MenuItem
-            key={idx}
-            component={RouterLink}
-            to={item.linkTo}
-            onClick={() => handleClose()}
-          >
-            {item.name}
-          </MenuItem>
-        ))}
+        {organizationsLoadable.data?._embedded?.organizations?.map(
+          (item, idx) => (
+            <MenuItem
+              key={idx}
+              component={RouterLink}
+              to={link.build({
+                [PARAMS.ORGANIZATION_SLUG]: item.slug,
+              })}
+              onClick={() => handleClose()}
+            >
+              <OrganizationItem data={item} />
+            </MenuItem>
+          )
+        )}
       </>
     );
   };
@@ -89,11 +105,7 @@ const UserOrganizationSettingsSubtitleLink = (
           }}
           onClick={handleClick}
         >
-          {props.isUser ? (
-            <T>user_account_subtitle</T>
-          ) : (
-            <T>organization_account_subtitle</T>
-          )}
+          {selected && <OrganizationItem data={selected!} />}
           <ArrowDropDown fontSize={'small'} />
         </Link>
 

@@ -10,8 +10,14 @@ const StyledLink = styled(Link)`
   gap: 8px;
 `;
 
+export type NavigationItem = [
+  name: string | ReactNode,
+  url?: string,
+  icon?: ReactNode
+];
+
 type Props = {
-  path: [name: string | ReactNode, url: string, icon?: ReactNode][];
+  path: NavigationItem[];
 };
 
 export const Navigation: React.FC<Props> = ({ path }) => {
