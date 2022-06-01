@@ -8,7 +8,7 @@ import { FabAddButtonLink } from 'tg.component/common/buttons/FabAddButtonLink';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
-import { BaseUserSettingsView } from '../BaseUserSettingsView';
+import { BaseSettingsView } from '../../component/layout/BaseSettingsView';
 import { AddApiKeyFormDialog } from './AddApiKeyFormDialog';
 import { ApiKeysList } from './ApiKeysList';
 
@@ -39,7 +39,7 @@ export const ApiKeysView: FunctionComponent = () => {
 
   return (
     <>
-      <BaseUserSettingsView
+      <BaseSettingsView
         windowTitle={t('api_keys_title')}
         title={t('api_keys_title')}
         loading={list.isFetching}
@@ -63,7 +63,7 @@ export const ApiKeysView: FunctionComponent = () => {
             <FabAddButtonLink to={LINKS.USER_API_KEYS_GENERATE.build()} />
           </Box>
         </>
-      </BaseUserSettingsView>
+      </BaseSettingsView>
       <Switch>
         <Route exact path={LINKS.USER_API_KEYS_EDIT.template}>
           <EditForm />

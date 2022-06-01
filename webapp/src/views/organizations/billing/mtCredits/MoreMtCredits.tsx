@@ -1,17 +1,20 @@
 import { FC, useMemo, useState } from 'react';
+import { Box, Slider, Typography } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
+
 import {
   useBillingApiMutation,
   useBillingApiQuery,
-} from '../useBillingQueryApi';
-import { Box, Slider, Typography } from '@mui/material';
-import { useTranslate } from '@tolgee/react';
+} from 'tg.service/http/useQueryApi';
 import { useOrganization } from 'tg.views/organizations/useOrganization';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { getPossibleValues } from './creditsUtil';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
+import { getPossibleValues } from './creditsUtil';
+import { useOrganizationCreditBalance } from '../useOrganizationCreditBalance';
 
 export const MoreMtCredits: FC = () => {
   const organization = useOrganization();
+  const creditBalance = useOrganizationCreditBalance();
 
   const actualCreditBalanceLoadable = useApiQuery({
     url: '/v2/organizations/{organizationId}/machine-translation-credit-balance',
@@ -72,6 +75,10 @@ export const MoreMtCredits: FC = () => {
   return (
     <>
       <Typography variant="h3">More credits</Typography>
+      <Box>
+        Credit Balance: {(creditBalance.data?.creditBalance || 0) / 100} /{' '}
+        {(creditBalance.data?.bucketSize || 0) / 100}
+      </Box>
 
       {actualCreditBalanceLoadable.data &&
         t({

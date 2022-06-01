@@ -17,7 +17,7 @@ import { RedirectionActions } from '../store/global/RedirectionActions';
 import { OrganizationsRouter } from '../views/organizations/OrganizationsRouter';
 import { ProjectsRouter } from '../views/projects/ProjectsRouter';
 import { UserProfileView } from '../views/userSettings/UserProfileView';
-import { ApiKeysView } from '../views/userSettings/apiKeys/ApiKeysView';
+import { ApiKeysView } from '../views/apiKeys/ApiKeysView';
 import ConfirmationDialog from './common/ConfirmationDialog';
 import { FullPageLoading } from './common/FullPageLoading';
 import { PrivateRoute } from './common/PrivateRoute';

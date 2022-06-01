@@ -1,19 +1,20 @@
 import { FunctionComponent, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
+import { Box, Button, Typography } from '@mui/material';
 
 import { BaseOrganizationSettingsView } from 'tg.views/organizations/BaseOrganizationSettingsView';
+import { LINKS } from 'tg.constants/links';
 
 import { useOrganization } from 'tg.views/organizations/useOrganization';
-import { useLocation } from 'react-router-dom';
-import { Box, Button, Typography } from '@mui/material';
+import { useOrganizationCreditBalance } from './useOrganizationCreditBalance';
+import { BillingPlans } from './plans/BillingPlans';
+import { MoreMtCredits } from './mtCredits/MoreMtCredits';
+import { Invoices } from './invoices/Invoices';
 import {
   useBillingApiMutation,
   useBillingApiQuery,
-} from './useBillingQueryApi';
-import { useOrganizationCreditBalance } from './useOrganizationCreditBalance';
-import { BillingPlans } from './BillingPlans';
-import { MoreMtCredits } from './mtCredits/MoreMtCredits';
-import { Invoices } from './invoices/Invoices';
+} from 'tg.service/http/useQueryApi';
 
 export const OrganizationBillingView: FunctionComponent = () => {
   const { search } = useLocation();
@@ -24,6 +25,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
   const organization = useOrganization();
 
   const creditBalance = useOrganizationCreditBalance();
+  const t = useTranslate();
 
   const url = new URL(window.location.href);
 
@@ -71,8 +73,6 @@ export const OrganizationBillingView: FunctionComponent = () => {
     },
   });
 
-  const t = useTranslate();
-
   return (
     <BaseOrganizationSettingsView
       title={<T>organization_billing_title</T>}
@@ -83,13 +83,15 @@ export const OrganizationBillingView: FunctionComponent = () => {
         refreshSubscription.isLoading ||
         activePlan.isLoading
       }
+      link={LINKS.ORGANIZATION_BILLING}
+      navigation={[
+        [
+          t('organization_menu_billing'),
+          LINKS.ORGANIZATION_BILLING.build({ slug: organization!.slug }),
+        ],
+      ]}
       windowTitle={t({ key: 'organization_billing_title', noWrap: true })}
     >
-      <Box>
-        Credit Balance: {(creditBalance.data?.creditBalance || 0) / 100} /{' '}
-        {(creditBalance.data?.bucketSize || 0) / 100}
-      </Box>
-
       {plansLoadable.data?._embedded?.plans && activePlan.data && (
         <BillingPlans
           plans={plansLoadable.data._embedded.plans}
@@ -97,7 +99,9 @@ export const OrganizationBillingView: FunctionComponent = () => {
         />
       )}
 
-      <MoreMtCredits />
+      <Box>
+        <MoreMtCredits />
+      </Box>
 
       <Typography>
         To review your invoices, update your payment method or review your

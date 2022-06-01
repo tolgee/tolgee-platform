@@ -13,7 +13,7 @@ import { LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { OrganizationRoleType } from 'tg.service/response.types';
 
-import { BaseUserSettingsView } from '../userSettings/BaseUserSettingsView';
+import { BaseSettingsView } from '../../component/layout/BaseSettingsView';
 import { useLeaveOrganization } from './useLeaveOrganization';
 import { EmptyListMessage } from 'tg.component/common/EmptyListMessage';
 
@@ -38,7 +38,7 @@ export const OrganizationsListView = () => {
   });
 
   return (
-    <BaseUserSettingsView
+    <BaseSettingsView
       windowTitle={t('organizations_title')}
       title={t('organizations_title')}
       containerMaxWidth="lg"
@@ -101,6 +101,6 @@ export const OrganizationsListView = () => {
       >
         <FabAddButtonLink to={LINKS.ORGANIZATIONS_ADD.build()} />
       </Box>
-    </BaseUserSettingsView>
+    </BaseSettingsView>
   );
 };

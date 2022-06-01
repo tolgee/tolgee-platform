@@ -13,6 +13,7 @@ import {
 import { container } from 'tsyringe';
 
 import { paths } from '../apiSchema.generated';
+import { paths as billingPaths } from '../billingApiSchema.generated';
 
 import { RequestOptions } from './ApiHttpService';
 import {
@@ -163,3 +164,17 @@ export const matchUrlPrefix = (prefix: string) => {
 
 export const invalidateUrlPrefix = (queryClient: QueryClient, prefix: string) =>
   queryClient.invalidateQueries(matchUrlPrefix(prefix));
+
+export const useBillingApiQuery = <
+  Url extends keyof billingPaths,
+  Method extends keyof billingPaths[Url]
+>(
+  props: QueryProps<Url, Method, billingPaths>
+) => useApiQuery<Url, Method, billingPaths>(props);
+
+export const useBillingApiMutation = <
+  Url extends keyof billingPaths,
+  Method extends keyof billingPaths[Url]
+>(
+  props: MutationProps<Url, Method, billingPaths>
+) => useApiMutation<Url, Method, billingPaths>(props);

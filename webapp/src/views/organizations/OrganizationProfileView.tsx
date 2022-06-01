@@ -100,6 +100,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
   return (
     <BaseOrganizationSettingsView
       windowTitle={t('edit_organization_title')}
+      link={LINKS.ORGANIZATION_PROFILE}
       title={t('edit_organization_title')}
       loading={organization.isFetching || deleteOrganization.isLoading}
       hideChildrenOnLoading={false}

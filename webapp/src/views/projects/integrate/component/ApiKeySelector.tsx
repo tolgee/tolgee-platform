@@ -5,7 +5,7 @@ import { Add } from '@mui/icons-material';
 
 import { components } from 'tg.service/apiSchema.generated';
 import { BoxLoading } from 'tg.component/common/BoxLoading';
-import { AddApiKeyFormDialog } from 'tg.views/userSettings/apiKeys/AddApiKeyFormDialog';
+import { AddApiKeyFormDialog } from 'tg.views/apiKeys/AddApiKeyFormDialog';
 import { useProject } from 'tg.hooks/useProject';
 
 const StyledItemWrapper = styled('div')`

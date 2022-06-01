@@ -1,9 +1,10 @@
 import { FC, useState } from 'react';
-import { useOrganization } from 'tg.views/organizations/useOrganization';
-import { useBillingApiQuery } from '../useBillingQueryApi';
-import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
-import { Table, TableCell, TableRow, Typography } from '@mui/material';
 import { T } from '@tolgee/react';
+import { Table, TableCell, TableRow, Typography } from '@mui/material';
+
+import { useOrganization } from 'tg.views/organizations/useOrganization';
+import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
+import { useBillingApiQuery } from 'tg.service/http/useQueryApi';
 import { DownloadButton } from './DownloadButton';
 
 export const Invoices: FC = () => {
