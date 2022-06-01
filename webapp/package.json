@@ -22,7 +22,7 @@
     "diff": "^5.0.0",
     "formik": "^2.2.9",
     "intl-messageformat": "^9.8.1",
-    "notistack": "^2.0.4",
+    "notistack": "^2.0.5",
     "prism-react-renderer": "1.2.1",
     "prism-svelte": "0.4.7",
     "react": "^17.0.1",
