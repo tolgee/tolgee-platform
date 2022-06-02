@@ -23,14 +23,14 @@ class SuggestResultModel(
   val translationCreditsBalanceAfter: Long,
 
   @Schema(
-    description = "Additional credits are neither refilled nor reset every period." +
+    description = "Extra credits are neither refilled nor reset every period." +
       " User's can refill them on Tolgee cloud."
   )
-  val translationAdditionalCreditsBalanceBefore: Long,
+  val translationExtraCreditsBalanceBefore: Long,
 
   @Schema(
-    description = "Additional credits are neither refilled nor reset every period." +
+    description = "Extra credits are neither refilled nor reset every period." +
       " User's can refill them on Tolgee cloud."
   )
-  val translationAdditionalCreditsBalanceAfter: Long,
+  val translationExtraCreditsBalanceAfter: Long,
 ) : RepresentationModel<KeyModel>(), Serializable

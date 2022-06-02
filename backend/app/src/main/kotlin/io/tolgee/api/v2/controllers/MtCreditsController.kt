@@ -54,5 +54,5 @@ class MtCreditsController(
   }
 
   private val MtCreditBalanceDto.model
-    get() = CreditBalanceModel(this.creditBalance, this.bucketSize, this.additionalCreditBalance)
+    get() = CreditBalanceModel(this.creditBalance, this.bucketSize, this.extraCreditBalance)
 }

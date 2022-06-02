@@ -290,8 +290,8 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `it consumes additional credits`() {
-    testData.addBucketWithAdditionalCredits()
+  fun `it consumes extra credits`() {
+    testData.addBucketWithExtraCredits()
     testDataService.saveTestData(testData.root)
     performMtRequestAndExpectAfterBalance(100, 1000)
     performMtRequestAndExpectAfterBalance(0, 200)
@@ -319,10 +319,10 @@ class TranslationSuggestionControllerTest : ProjectAuthControllerTest("/v2/proje
     whenever(currentDateProvider.getDate()).thenAnswer { dateProvider() }
   }
 
-  private fun performMtRequestAndExpectAfterBalance(creditBalance: Int, additionalCreditBalance: Int = 0) {
+  private fun performMtRequestAndExpectAfterBalance(creditBalance: Int, extraCreditBalance: Int = 0) {
     performMtRequest().andIsOk.andAssertThatJson {
       node("translationCreditsBalanceAfter").isEqualTo(creditBalance)
-      node("translationAdditionalCreditsBalanceAfter").isEqualTo(additionalCreditBalance)
+      node("translationExtraCreditsBalanceAfter").isEqualTo(extraCreditBalance)
     }
   }
 

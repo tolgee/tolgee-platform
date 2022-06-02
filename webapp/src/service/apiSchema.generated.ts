@@ -1051,10 +1051,10 @@ export interface components {
       machineTranslations?: { [key: string]: string };
       translationCreditsBalanceBefore: number;
       translationCreditsBalanceAfter: number;
-      /** Additional credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
-      translationAdditionalCreditsBalanceBefore: number;
-      /** Additional credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
-      translationAdditionalCreditsBalanceAfter: number;
+      /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
+      translationExtraCreditsBalanceBefore: number;
+      /** Extra credits are neither refilled nor reset every period. User's can refill them on Tolgee cloud. */
+      translationExtraCreditsBalanceAfter: number;
     };
     ExportParams: {
       languages?: string[];
@@ -1200,7 +1200,7 @@ export interface components {
     CreditBalanceModel: {
       creditBalance: number;
       bucketSize: number;
-      additionalCreditBalance: number;
+      extraCreditBalance: number;
     };
     EntityDescriptionWithRelations: {
       entityClass: string;
@@ -1486,8 +1486,8 @@ export interface components {
       creditBalance: number;
       /** Date when credits were refilled. (In epoch format.) */
       creditBalanceRefilledAt: number;
-      /** Additional credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits. */
-      additionalCreditBalance: number;
+      /** Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits. */
+      extraCreditBalance: number;
       /** How many translations can be stored within your organization. */
       translationLimit: number;
       /** How many translations are currently stored within your organization. */

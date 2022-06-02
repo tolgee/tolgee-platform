@@ -17,10 +17,10 @@ open class UsageModel(
   val creditBalanceRefilledAt: Long,
 
   @Schema(
-    description = "Additional credits, which are neither refilled nor reset every month. These credits are " +
+    description = "Extra credits, which are neither refilled nor reset every month. These credits are " +
       "used when there are no standard credits."
   )
-  val additionalCreditBalance: Long,
+  val extraCreditBalance: Long,
 
   @Schema(
     description = """How many translations can be stored within your organization."""
