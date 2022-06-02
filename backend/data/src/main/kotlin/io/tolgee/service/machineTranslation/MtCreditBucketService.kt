@@ -37,7 +37,7 @@ class MtCreditBucketService(
   fun consumeCredits(bucket: MtCreditBucket, amount: Int) {
     refillIfItsTime(bucket)
     val balances = getCreditBalances(bucket)
-    val totalBalance = balances.creditBalance + balances.additionalCreditBalance
+    val totalBalance = balances.creditBalance + balances.extraCreditBalance
 
     if (totalBalance - amount < 0) {
       throw OutOfCreditsException()
@@ -53,9 +53,9 @@ class MtCreditBucketService(
       return
     }
 
-    val amountToConsumeFromAdditionalCredits = amount - this.credits
+    val amountToConsumeFromExtraCredits = amount - this.credits
     this.credits = 0
-    this.additionalCredits -= amountToConsumeFromAdditionalCredits
+    this.extraCredits -= amountToConsumeFromExtraCredits
   }
 
   @Transactional
@@ -72,14 +72,14 @@ class MtCreditBucketService(
   }
 
   @Transactional
-  fun addAdditionalCredits(organization: Organization, amount: Long) {
+  fun addExtraCredits(organization: Organization, amount: Long) {
     val bucket = findOrCreateBucket(organization)
-    addAdditionalCredits(bucket, amount)
+    addExtraCredits(bucket, amount)
   }
 
   @Transactional
-  fun addAdditionalCredits(bucket: MtCreditBucket, amount: Long) {
-    bucket.additionalCredits += amount
+  fun addExtraCredits(bucket: MtCreditBucket, amount: Long) {
+    bucket.extraCredits += amount
     save(bucket)
   }
 
@@ -100,7 +100,7 @@ class MtCreditBucketService(
     return MtCreditBalanceDto(
       creditBalance = bucket.credits,
       bucketSize = bucket.bucketSize,
-      additionalCreditBalance = bucket.additionalCredits,
+      extraCreditBalance = bucket.extraCredits,
       refilledAt = bucket.refilled
     )
   }

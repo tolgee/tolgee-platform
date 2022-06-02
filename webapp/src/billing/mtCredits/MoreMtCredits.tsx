@@ -78,7 +78,7 @@ export const MoreMtCredits: FC = () => {
           key: 'billing_mt_credits_actual_balance',
           defaultValue: 'Actual balance: {amount, number} Credits',
           parameters: {
-            amount: actualCreditBalanceLoadable.data.additionalCreditBalance,
+            amount: actualCreditBalanceLoadable.data.extraCreditBalance,
           },
         })}
 

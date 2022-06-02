@@ -147,10 +147,10 @@ class SuggestionTestData : BaseTestData() {
     }
   }
 
-  fun addBucketWithAdditionalCredits() {
+  fun addBucketWithExtraCredits() {
     userAccountBuilder.addMtCreditBucket {
       credits = 1000
-      additionalCredits = 1000
+      extraCredits = 1000
     }
   }
 }

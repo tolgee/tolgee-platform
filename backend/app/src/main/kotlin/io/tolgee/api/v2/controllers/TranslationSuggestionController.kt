@@ -74,13 +74,13 @@ class TranslationSuggestionController(
         machineTranslations = resultMap,
         translationCreditsBalanceBefore = balanceBefore.creditBalance,
         translationCreditsBalanceAfter = balanceAfter.creditBalance,
-        translationAdditionalCreditsBalanceBefore = balanceBefore.additionalCreditBalance,
-        translationAdditionalCreditsBalanceAfter = balanceAfter.additionalCreditBalance,
+        translationExtraCreditsBalanceBefore = balanceBefore.extraCreditBalance,
+        translationExtraCreditsBalanceAfter = balanceAfter.extraCreditBalance,
       )
     } catch (e: OutOfCreditsException) {
       throw BadRequestException(
         Message.OUT_OF_CREDITS,
-        listOf(balanceBefore.creditBalance, balanceBefore.additionalCreditBalance)
+        listOf(balanceBefore.creditBalance, balanceBefore.extraCreditBalance)
       )
     }
   }

@@ -33,7 +33,8 @@ ext {
                             "hibernate_sequence," +
                             "revision_sequence_generator," +
                             "billing_sequence," +
-                            "activity_sequence"
+                            "activity_sequence," +
+                            "FK9xs5a07fba5yqje5jqm6qrehs"
                 }
             }
         }
