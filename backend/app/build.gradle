@@ -111,14 +111,15 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
-    runtime "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
+    implementation "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
             "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
     implementation group: 'com.ninja-squad', name: 'springmockk', version: findProperty("springMockkVersion")
     implementation "net.javacrumbs.json-unit:json-unit-assertj:${findProperty("jsonUnitAssertJVersion")}"
     testImplementation("org.mockito.kotlin:mockito-kotlin:${findProperty("mockitoVersion")}")
-    testCompile("io.findify:s3mock_2.13:0.2.6")
+    testImplementation("io.findify:s3mock_2.13:0.2.6")
     testImplementation("io.socket:socket.io-client:1.0.1")
     testImplementation group: 'org.springframework.batch', name: 'spring-batch-test', version: '4.3.5'
+    testImplementation libs.sendInBlue
 
     /**
      * MISC

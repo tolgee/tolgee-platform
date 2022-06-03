@@ -66,7 +66,7 @@ class Project(
   @ManyToOne(optional = true)
   var organizationOwner: Organization? = null
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
   @ActivityLoggedProp
   var baseLanguage: Language? = null
 
