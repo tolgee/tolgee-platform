@@ -216,7 +216,6 @@ class TestDataService(
     val projectBuilders = builder.data.projects
     projectBuilders.forEach { projectBuilder ->
       executeInNewTransaction(transactionManager) {
-        projectBuilder.self.baseLanguage?.let { languageService.save(it) }
         projectService.save(projectBuilder.self)
         saveAllProjectDependants(projectBuilder)
       }

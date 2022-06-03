@@ -16,6 +16,15 @@ pluginManagement {
     }
 }
 
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            library('stripe', 'com.stripe', 'stripe-java').version('20.88.0')
+            library('sendInBlue', 'com.sendinblue', 'sib-api-v3-sdk').version('5.3.0')
+        }
+    }
+}
+
 include ':server-app'
 project(':server-app').projectDir = new File('backend/app')
 
