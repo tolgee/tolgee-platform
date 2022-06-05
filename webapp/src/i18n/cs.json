@@ -247,6 +247,7 @@
   "leave_project_confirmation_title" : "Opustit projekt",
   "login_email_label" : "Email",
   "login_github_login_button" : "Přihlášení přes GitHub",
+  "login_oauth2_login_button" : "Přihlášení přes OAuth2",
   "login_google_login_button" : "Přihlášení přes Google",
   "login_login_button" : "Přihlásit",
   "login_password_label" : "Heslo",
