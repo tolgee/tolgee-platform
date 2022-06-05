@@ -35,6 +35,16 @@ tolgee:
     native-enabled: true
     registrationsAllowed: true
     create-initial-user: false
+    oauth2:
+      client-id: fake_client_id
+      client-secret: fake_client_secret
+      scopes:
+        - openid
+        - email
+        - profile
+      authorization-url: "https://example.com/authorize"
+      token-url: "https://example.com/oauth/token"
+      user-url: "https://example.com/userinfo"
   internal:
     fake-mt-providers: true
   socket-io:

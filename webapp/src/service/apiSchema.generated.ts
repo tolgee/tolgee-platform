@@ -1292,10 +1292,13 @@ export interface components {
     AuthMethodsDTO: {
       github: components["schemas"]["OAuthPublicConfigDTO"];
       google: components["schemas"]["OAuthPublicConfigDTO"];
+      oauth2: components["schemas"]["OAuthPublicConfigDTO"];
     };
     OAuthPublicConfigDTO: {
       clientId?: string;
       enabled: boolean;
+      authorizationUrl?: string;
+      scopes?: string[];
     };
     MtServiceDTO: {
       enabled: boolean;

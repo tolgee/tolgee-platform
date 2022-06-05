@@ -20,6 +20,7 @@ import io.tolgee.security.payload.JwtAuthenticationResponse
 import io.tolgee.security.payload.LoginRequest
 import io.tolgee.security.third_party.GithubOAuthDelegate
 import io.tolgee.security.third_party.GoogleOAuthDelegate
+import io.tolgee.security.third_party.OAuth2Delegate
 import io.tolgee.service.EmailVerificationService
 import io.tolgee.service.SignUpService
 import io.tolgee.service.UserAccountService
@@ -49,6 +50,7 @@ class PublicController(
   private val tokenProvider: JwtTokenProviderImpl,
   private val githubOAuthDelegate: GithubOAuthDelegate,
   private val googleOAuthDelegate: GoogleOAuthDelegate,
+  private val oauth2Delegate: OAuth2Delegate,
   private val properties: TolgeeProperties,
   private val userAccountService: UserAccountService,
   private val mailSender: JavaMailSender,
@@ -172,6 +174,9 @@ When E-mail verification is enabled, null is returned. Otherwise JWT token is pr
       }
       "google" -> {
         googleOAuthDelegate.getTokenResponse(code, invitationCode, redirectUri)
+      }
+      "oauth2" -> {
+        oauth2Delegate.getTokenResponse(code, invitationCode, redirectUri)
       }
       else -> {
         throw NotFoundException(Message.SERVICE_NOT_FOUND)

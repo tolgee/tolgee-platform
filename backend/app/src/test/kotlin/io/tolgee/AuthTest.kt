@@ -9,6 +9,7 @@ import io.tolgee.security.third_party.GithubOAuthDelegate.GithubEmailResponse
 import io.tolgee.testing.AbstractControllerTest
 import io.tolgee.util.GitHubAuthUtil
 import io.tolgee.util.GoogleAuthUtil
+import io.tolgee.util.OAuth2AuthUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -37,6 +38,7 @@ class AuthTest : AbstractControllerTest() {
 
   private val gitHubAuthUtil: GitHubAuthUtil by lazy { GitHubAuthUtil(tolgeeProperties, authMvc, restTemplate) }
   private val googleAuthUtil: GoogleAuthUtil by lazy { GoogleAuthUtil(tolgeeProperties, authMvc, restTemplate) }
+  private val oAuth2AuthUtil: OAuth2AuthUtil by lazy { OAuth2AuthUtil(tolgeeProperties, authMvc, restTemplate) }
 
   @BeforeEach
   fun setup() {
@@ -113,6 +115,21 @@ class AuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun doesNotAuthorizeOAuth2UserWhenNoReceivedToken() {
+    var tokenResponse: MutableMap<String, String?>? = null
+    var mvcResult = oAuth2AuthUtil.authorizeOAuth2User(tokenResponse = tokenResponse)
+    var response = mvcResult.response
+    assertThat(response.status).isEqualTo(401)
+    assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_UNKNOWN_ERROR.code)
+    tokenResponse = HashMap()
+    tokenResponse["error"] = null
+    mvcResult = oAuth2AuthUtil.authorizeOAuth2User(tokenResponse = tokenResponse)
+    response = mvcResult.response
+    assertThat(response.status).isEqualTo(401)
+    assertThat(response.contentAsString).contains(Message.THIRD_PARTY_AUTH_ERROR_MESSAGE.code)
+  }
+
+  @Test
   fun doesNotAuthorizeGitHubUserWhenRegistrationsNotAllowed() {
     val oldRegistrationsAllowed = tolgeeProperties.authentication.registrationsAllowed
     tolgeeProperties.authentication.registrationsAllowed = false
@@ -133,6 +150,36 @@ class AuthTest : AbstractControllerTest() {
   }
 
   @Test
+  fun doesNotAuthorizeOAuth2UserWhenRegistrationsNotAllowed() {
+    val oldRegistrationsAllowed = tolgeeProperties.authentication.registrationsAllowed
+    tolgeeProperties.authentication.registrationsAllowed = false
+    val response = oAuth2AuthUtil.authorizeOAuth2User()
+    val result = response.mapResponseTo<Map<String, String>>()
+    assertThat(result["code"]).isEqualTo("registrations_not_allowed")
+    tolgeeProperties.authentication.registrationsAllowed = oldRegistrationsAllowed
+  }
+
+  @Test
+  fun doesNotAuthorizeOAuth2UserWhenUrlsMissingInConfiguration() {
+    // tokenUrl
+    val oldTokenUrl = tolgeeProperties.authentication.oauth2.tokenUrl
+    tolgeeProperties.authentication.oauth2.tokenUrl = null
+    var mvcResult = oAuth2AuthUtil.authorizeOAuth2User()
+    var response = mvcResult.response
+    assertThat(response.status).isEqualTo(401)
+    assertThat(response.contentAsString).contains(Message.OAUTH2_TOKEN_URL_NOT_SET.code)
+    tolgeeProperties.authentication.oauth2.tokenUrl = oldTokenUrl
+    // userUrl
+    val oldUserUrl = tolgeeProperties.authentication.oauth2.userUrl
+    tolgeeProperties.authentication.oauth2.userUrl = null
+    mvcResult = oAuth2AuthUtil.authorizeOAuth2User()
+    response = mvcResult.response
+    assertThat(response.status).isEqualTo(401)
+    assertThat(response.contentAsString).contains(Message.OAUTH2_USER_URL_NOT_SET.code)
+    tolgeeProperties.authentication.oauth2.userUrl = oldUserUrl
+  }
+
+  @Test
   fun authorizesGithubUser() {
     val response = gitHubAuthUtil.authorizeGithubUser().response.contentAsString
     val result = ObjectMapper().readValue(response, HashMap::class.java)
@@ -143,6 +190,14 @@ class AuthTest : AbstractControllerTest() {
   @Test
   fun authorizesGoogleUser() {
     val response = googleAuthUtil.authorizeGoogleUser().response.contentAsString
+    val result = ObjectMapper().readValue(response, HashMap::class.java)
+    assertThat(result["accessToken"]).isNotNull
+    assertThat(result["tokenType"]).isEqualTo("Bearer")
+  }
+
+  @Test
+  fun authorizesOAuth2User() {
+    val response = oAuth2AuthUtil.authorizeOAuth2User().response.contentAsString
     val result = ObjectMapper().readValue(response, HashMap::class.java)
     assertThat(result["accessToken"]).isNotNull
     assertThat(result["tokenType"]).isEqualTo("Bearer")

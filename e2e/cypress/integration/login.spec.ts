@@ -8,7 +8,7 @@ import {
   login,
 } from '../common/apiCalls/common';
 import { assertMessage, getPopover } from '../common/shared';
-import { loginWithFakeGithub } from '../common/login';
+import { loginWithFakeGithub, loginWithFakeOAuth2 } from '../common/login';
 import { waitForGlobalLoading } from '../common/loading';
 
 context('Login', () => {
@@ -43,6 +43,9 @@ context('Login', () => {
 
   it('Will login with github', () => {
     loginWithFakeGithub();
+  });
+  it('Will login with oauth2', () => {
+    loginWithFakeOAuth2();
   });
 
   it('Will logout', () => {
