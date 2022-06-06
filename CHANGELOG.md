@@ -1,3 +1,10 @@
+# [2.29.0](https://github.com/tolgee/tolgee-platform/compare/v2.28.0...v2.29.0) (2022-06-06)
+
+
+### Features
+
+* Selection menu + select all ([2443f4b](https://github.com/tolgee/tolgee-platform/commit/2443f4b93109af52455424e9fe9655f410a449c1))
+
 # [2.28.0](https://github.com/tolgee/tolgee-platform/compare/v2.27.3...v2.28.0) (2022-06-06)
 
 
