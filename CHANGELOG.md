@@ -1,3 +1,10 @@
+# [2.28.0](https://github.com/tolgee/tolgee-platform/compare/v2.27.3...v2.28.0) (2022-06-06)
+
+
+### Features
+
+* Implement OAuth2 login ([f91cfb4](https://github.com/tolgee/tolgee-platform/commit/f91cfb4866e9ec168b4e061401bc0f66ea09ebec))
+
 ## [2.27.3](https://github.com/tolgee/tolgee-platform/compare/v2.27.2...v2.27.3) (2022-05-31)
 
 
