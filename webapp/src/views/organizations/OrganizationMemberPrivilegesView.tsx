@@ -2,7 +2,7 @@ import { FunctionComponent } from 'react';
 import { Box, Typography } from '@mui/material';
 import { useTranslate, T } from '@tolgee/react';
 
-import { BaseOrganizationSettingsView } from './BaseOrganizationSettingsView';
+import { BaseOrganizationSettingsView } from './components/BaseOrganizationSettingsView';
 import { OrganizationBasePermissionMenu } from './components/OrganizationBasePermissionMenu';
 import { useOrganization } from './useOrganization';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -16,6 +16,7 @@ export const OrganizationMemberPrivilegesView: FunctionComponent = () => {
       windowTitle={t('organization_member_privileges_title')}
       title={t('organization_member_privileges_title')}
       link={LINKS.ORGANIZATION_MEMBER_PRIVILEGES}
+      containerMaxWidth="md"
       navigation={[
         [
           t('organization_member_privileges_title'),

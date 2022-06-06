@@ -1,20 +1,44 @@
-import { FunctionComponent, useEffect } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { T, useTranslate } from '@tolgee/react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, styled, Typography } from '@mui/material';
 
-import { BaseOrganizationSettingsView } from 'tg.views/organizations/BaseOrganizationSettingsView';
+import { BaseOrganizationSettingsView } from 'tg.views/organizations/components/BaseOrganizationSettingsView';
 import { LINKS } from 'tg.constants/links';
-
 import { useOrganization } from 'tg.views/organizations/useOrganization';
-import { useOrganizationCreditBalance } from './useOrganizationCreditBalance';
-import { BillingPlans } from './plans/BillingPlans';
-import { MoreMtCredits } from './mtCredits/MoreMtCredits';
-import { Invoices } from './invoices/Invoices';
 import {
+  useApiQuery,
   useBillingApiMutation,
   useBillingApiQuery,
 } from 'tg.service/http/useQueryApi';
+import { useOrganizationCreditBalance } from './useOrganizationCreditBalance';
+import { BillingPlans } from './BillingPlans/BillingPlans';
+import { Credits } from './Credits/Credits';
+import { CustomerPortal } from './CustomerPortal/CustomerPortal';
+import { BillingPeriodType, PeriodSelect } from './BillingPlans/PeriodSelect';
+import { ActivePlan } from './ActivePlan/ActivePlan';
+
+const StyledCurrent = styled('div')`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 16px;
+  margin: 16px 0px;
+  align-items: start;
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const StyledShopping = styled('div')`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-rows: auto 1fr auto;
+  gap: 16px;
+  margin: 16px 0px;
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+`;
 
 export const OrganizationBillingView: FunctionComponent = () => {
   const { search } = useLocation();
@@ -28,6 +52,8 @@ export const OrganizationBillingView: FunctionComponent = () => {
   const t = useTranslate();
 
   const url = new URL(window.location.href);
+
+  const [period, setPeriod] = useState<BillingPeriodType>('MONTHLY');
 
   url.search = '';
 
@@ -55,16 +81,6 @@ export const OrganizationBillingView: FunctionComponent = () => {
     method: 'get',
   });
 
-  const getCustomerPortalSession = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/customer-portal-session',
-    method: 'post',
-    options: {
-      onSuccess: (data) => {
-        window.location.href = data;
-      },
-    },
-  });
-
   const activePlan = useBillingApiQuery({
     url: '/v2/organizations/{organizationId}/billing/active-plan',
     method: 'get',
@@ -73,15 +89,24 @@ export const OrganizationBillingView: FunctionComponent = () => {
     },
   });
 
+  const usage = useApiQuery({
+    url: '/v2/organizations/{organizationId}/usage',
+    method: 'get',
+    path: {
+      organizationId: organization!.id,
+    },
+  });
+
   return (
     <BaseOrganizationSettingsView
-      title={<T>organization_billing_title</T>}
+      title={t('organization_billing_title')}
       hideChildrenOnLoading={true}
       loading={
         activePlan.isLoading ||
         plansLoadable.isLoading ||
         refreshSubscription.isLoading ||
-        activePlan.isLoading
+        activePlan.isLoading ||
+        usage.isLoading
       }
       link={LINKS.ORGANIZATION_BILLING}
       navigation={[
@@ -91,36 +116,44 @@ export const OrganizationBillingView: FunctionComponent = () => {
         ],
       ]}
       windowTitle={t({ key: 'organization_billing_title', noWrap: true })}
+      containerMaxWidth="xl"
     >
-      {plansLoadable.data?._embedded?.plans && activePlan.data && (
-        <BillingPlans
-          plans={plansLoadable.data._embedded.plans}
-          activePlan={activePlan.data}
-        />
-      )}
+      {plansLoadable.data?._embedded?.plans &&
+        activePlan.data &&
+        usage.data &&
+        creditBalance.data && (
+          <>
+            <StyledCurrent>
+              <ActivePlan
+                activePlan={activePlan.data}
+                usage={usage.data}
+                balance={creditBalance.data}
+              />
+              <CustomerPortal />
+            </StyledCurrent>
+            <Typography variant="h6">
+              <Box display="flex" gap={2} alignItems="center">
+                <T>organization_pricing_plans_title</T>
+                <PeriodSelect
+                  value={period}
+                  onChange={(e) =>
+                    setPeriod(e.target.value as BillingPeriodType)
+                  }
+                  size="small"
+                />
+              </Box>
+            </Typography>
+            <StyledShopping>
+              <BillingPlans
+                plans={plansLoadable.data._embedded.plans}
+                activePlan={activePlan.data}
+                period={period}
+              />
 
-      <Box>
-        <MoreMtCredits />
-      </Box>
-
-      <Typography>
-        To review your invoices, update your payment method or review your
-        billing info, continue to customer portal.
-      </Typography>
-      <Button
-        variant={'outlined'}
-        onClick={() =>
-          getCustomerPortalSession.mutate({
-            path: {
-              organizationId: organization!.id,
-            },
-          })
-        }
-      >
-        Go to customer portal
-      </Button>
-
-      <Invoices />
+              <Credits />
+            </StyledShopping>
+          </>
+        )}
     </BaseOrganizationSettingsView>
   );
 };

@@ -1,25 +1,26 @@
-import { PropsWithChildren } from 'react';
-import { Box, Typography, styled } from '@mui/material';
+import { styled } from '@mui/material';
 import { useRouteMatch } from 'react-router-dom';
 
-import { BaseView, BaseViewProps } from 'tg.component/layout/BaseView';
+import { BaseViewProps } from 'tg.component/layout/BaseView';
 import { Link, LINKS, PARAMS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
-import { OrganizationSettingsMenu } from './components/OrganizationSettingsMenu';
-import UserOrganizationSettingsSubtitleLink from './components/UserOrganizationSettingsSubtitleLink';
+import UserOrganizationSettingsSubtitleLink from './UserOrganizationSettingsSubtitleLink';
 import { Navigation, NavigationItem } from 'tg.component/navigation/Navigation';
 import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useTranslate } from '@tolgee/react';
+import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
+import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
 
 const StyledHeaderWrapper = styled('div')`
   display: grid;
   grid-auto-flow: column;
-  align-items: center;
+  align-items: start;
   margin-top: -4px;
   margin-bottom: -4px;
-  height: 24px;
+  min-height: 24px;
+  gap: 10px;
 `;
 
 const StyledNavigation = styled('div')``;
@@ -29,24 +30,12 @@ const StyledOrganization = styled('div')`
   justify-self: end;
 `;
 
-const StyledContainer = styled('div')`
-  display: grid;
-  grid-auto-flow: column;
-  grid-template-columns: 250px 1fr;
-  gap: 32px;
-`;
-
-const StyledContent = styled('div')`
-  display: grid;
-`;
-
 type Props = BaseViewProps & {
   link: Link;
 };
 
 export const BaseOrganizationSettingsView: React.FC<Props> = ({
   children,
-  title,
   loading,
   navigation,
   link,
@@ -55,6 +44,33 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
   const t = useTranslate();
+
+  const menuItems: SettingsMenuItem[] = [
+    {
+      link: LINKS.ORGANIZATION_PROFILE.build({
+        [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+      }),
+      label: t('organization_menu_profile'),
+    },
+    {
+      link: LINKS.ORGANIZATION_MEMBERS.build({
+        [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+      }),
+      label: t('organization_menu_members'),
+    },
+    {
+      link: LINKS.ORGANIZATION_MEMBER_PRIVILEGES.build({
+        [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+      }),
+      label: t('organization_menu_member_privileges'),
+    },
+    {
+      link: LINKS.ORGANIZATION_BILLING.build({
+        [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
+      }),
+      label: t('organization_menu_billing'),
+    },
+  ];
 
   const organization = useApiQuery({
     url: '/v2/organizations/{slug}',
@@ -85,7 +101,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
     : [];
 
   return (
-    <BaseView
+    <BaseSettingsView
       {...otherProps}
       loading={organization.isLoading || loading}
       customNavigation={
@@ -103,21 +119,10 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
           </StyledHeaderWrapper>
         </SecondaryBar>
       }
+      menuItems={menuItems}
       hideChildrenOnLoading={false}
     >
-      <StyledContainer>
-        <Box>
-          <OrganizationSettingsMenu />
-        </Box>
-        <StyledContent>
-          {title && (
-            <Box mb={2}>
-              <Typography variant="h6">{title}</Typography>
-            </Box>
-          )}
-          {children}
-        </StyledContent>
-      </StyledContainer>
-    </BaseView>
+      {children}
+    </BaseSettingsView>
   );
 };

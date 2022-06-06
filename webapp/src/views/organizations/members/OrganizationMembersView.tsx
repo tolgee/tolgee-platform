@@ -5,7 +5,7 @@ import { T, useTranslate } from '@tolgee/react';
 import { PaginatedHateoasList } from 'tg.component/common/list/PaginatedHateoasList';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
-import { BaseOrganizationSettingsView } from '../BaseOrganizationSettingsView';
+import { BaseOrganizationSettingsView } from '../components/BaseOrganizationSettingsView';
 import { useOrganization } from '../useOrganization';
 import { MemberItem } from './MemberItem';
 import { SimpleList } from 'tg.component/common/list/SimpleList';
@@ -53,6 +53,7 @@ export const OrganizationMembersView: FunctionComponent = () => {
       loading={membersLoadable.isFetching}
       windowTitle={t('organization_members_title')}
       link={LINKS.ORGANIZATION_MEMBERS}
+      containerMaxWidth="md"
       navigation={[
         [
           t('organization_members_title'),

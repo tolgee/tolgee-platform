@@ -4,7 +4,7 @@ import { ArrowDropDown } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { LINKS, PARAMS, Link as UrlLink } from 'tg.constants/links';
+import { PARAMS, Link as UrlLink } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 
@@ -78,6 +78,7 @@ const UserOrganizationSettingsSubtitleLink: React.FC<Props> = ({
             <MenuItem
               key={idx}
               component={RouterLink}
+              selected={item.id === selected?.id}
               to={link.build({
                 [PARAMS.ORGANIZATION_SLUG]: item.slug,
               })}
