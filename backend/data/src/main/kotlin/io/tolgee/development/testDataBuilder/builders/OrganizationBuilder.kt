@@ -6,7 +6,8 @@ import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import org.springframework.core.io.ClassPathResource
 
-class OrganizationBuilder(
+class
+OrganizationBuilder(
   val testDataBuilder: TestDataBuilder
 ) : BaseEntityDataBuilder<Organization, OrganizationBuilder>() {
   class DATA {

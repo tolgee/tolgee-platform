@@ -10,6 +10,12 @@ class TestDataBuilder {
     val projects = mutableListOf<ProjectBuilder>()
     val organizations = mutableListOf<OrganizationBuilder>()
     val mtCreditBuckets = mutableListOf<MtCreditBucketBuilder>()
+
+    /**
+     * These data are populated by external modules and saved via one of the
+     * AdditionalTestDataSavers
+     */
+    var additionalData = mutableMapOf<String, Any>()
   }
 
   val data = DATA()
