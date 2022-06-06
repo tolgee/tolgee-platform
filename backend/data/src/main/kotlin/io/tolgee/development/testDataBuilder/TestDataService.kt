@@ -50,6 +50,7 @@ class TestDataService(
   private val mtCreditBucketService: MtCreditBucketService,
   private val autoTranslateService: AutoTranslationService,
   private val transactionManager: PlatformTransactionManager,
+  private val additionalTestDataSavers: List<AdditionalTestDataSaver>
 ) {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
@@ -67,6 +68,8 @@ class TestDataService(
 
     saveAllMtCreditBuckets(builder)
     saveProjectData(builder)
+
+    additionalTestDataSavers.forEach { it.save(builder) }
 
     finalize()
   }
