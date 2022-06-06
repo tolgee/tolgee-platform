@@ -240,7 +240,6 @@ declare namespace DataCy {
         "translations-view-list-button" |
         "translations-view-table" |
         "translations-view-table-button" |
-        "user-account-side-menu" |
         "user-organizations-settings-subtitle-link" |
         "user-profile"
 }

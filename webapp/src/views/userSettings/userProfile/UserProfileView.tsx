@@ -13,8 +13,8 @@ import { useConfig } from 'tg.hooks/useConfig';
 import { MessageService } from 'tg.service/MessageService';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { UserUpdateDTO } from 'tg.service/request.types';
-import { BaseSettingsView } from '../../component/layout/BaseSettingsView';
 import { UserProfileAvatar } from './UserProfileAvatar';
+import { BaseUserSettingsView } from '../BaseUserSettingsView';
 
 const messagesService = container.resolve(MessageService);
 
@@ -97,10 +97,11 @@ export const UserProfileView: FunctionComponent = () => {
   };
 
   return (
-    <BaseSettingsView
+    <BaseUserSettingsView
       windowTitle={t('user_profile_title')}
       title={t('user_profile_title')}
       loading={userLoadable.isFetching}
+      containerMaxWidth="md"
     >
       {userLoadable.data && (
         <StandardForm
@@ -120,6 +121,6 @@ export const UserProfileView: FunctionComponent = () => {
           <Fields />
         </StandardForm>
       )}
-    </BaseSettingsView>
+    </BaseUserSettingsView>
   );
 };

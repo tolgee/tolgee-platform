@@ -5,7 +5,7 @@ type SliderValue = {
   totalPrice: number;
   priceId: number;
   itemQuantity: number;
-  discount: number;
+  regularPrice: number | undefined;
 };
 
 export const getPossibleValues = (
@@ -31,14 +31,14 @@ export const getPossibleValues = (
     return stepAmount * sortedPrices[currentStep].amount;
   };
 
-  const getDiscount = () => {
-    if (currentStep < 1) {
-      return 0;
+  const getRegularPrice = () => {
+    if (currentStep === 0) {
+      return undefined;
     }
-    const lowerTear = sortedPrices[currentStep - 1];
-    const lowerTearUnitPrice = lowerTear.price / lowerTear.amount;
-    const priceWithLowerTear = getCurrentAmount() * lowerTearUnitPrice;
-    return priceWithLowerTear - getCurrentPrice();
+    const lowestTear = sortedPrices[0];
+    const lowestTearUnitPrice = lowestTear.price / lowestTear.amount;
+    const priceWithLowerTear = getCurrentAmount() * lowestTearUnitPrice;
+    return priceWithLowerTear;
   };
 
   while (getCurrentAmount() <= max) {
@@ -54,7 +54,7 @@ export const getPossibleValues = (
       totalPrice: getCurrentPrice(),
       priceId: sortedPrices[currentStep].id,
       itemQuantity: stepAmount,
-      discount: getDiscount(),
+      regularPrice: getRegularPrice(),
     });
     stepAmount++;
   }

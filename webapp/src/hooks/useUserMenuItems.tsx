@@ -15,7 +15,7 @@ export const useUserMenuItems = (): UserMenuItem[] => {
 
   return [
     {
-      link: LINKS.USER_SETTINGS.build(),
+      link: LINKS.USER_PROFILE.build(),
       nameTranslationKey: 'user_menu_user_settings',
     },
     {

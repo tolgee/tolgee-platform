@@ -5,7 +5,10 @@ import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { container } from 'tsyringe';
 import { Helmet } from 'react-helmet';
 import { useTheme } from '@mui/material';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+import type API from '@openreplay/tracker';
 
+import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { LINKS } from '../constants/links';
 import { GlobalError } from '../error/GlobalError';
 import { useConfig } from '../hooks/useConfig';
@@ -16,14 +19,10 @@ import { GlobalActions } from '../store/global/GlobalActions';
 import { RedirectionActions } from '../store/global/RedirectionActions';
 import { OrganizationsRouter } from '../views/organizations/OrganizationsRouter';
 import { ProjectsRouter } from '../views/projects/ProjectsRouter';
-import { UserProfileView } from '../views/userSettings/UserProfileView';
-import { ApiKeysView } from '../views/apiKeys/ApiKeysView';
 import ConfirmationDialog from './common/ConfirmationDialog';
 import { FullPageLoading } from './common/FullPageLoading';
 import { PrivateRoute } from './common/PrivateRoute';
 import SnackBar from './common/SnackBar';
-import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
-import type API from '@openreplay/tracker';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/LoginRouter')
@@ -215,14 +214,11 @@ export class App extends React.Component {
               <PrivateRoute exact path={LINKS.ROOT.template}>
                 <Redirect to={LINKS.PROJECTS.template} />
               </PrivateRoute>
-              <PrivateRoute exact path={LINKS.USER_SETTINGS.template}>
-                <UserProfileView />
-              </PrivateRoute>
               <PrivateRoute path={LINKS.PROJECTS.template}>
                 <ProjectsRouter />
               </PrivateRoute>
-              <PrivateRoute path={`${LINKS.USER_API_KEYS.template}`}>
-                <ApiKeysView />
+              <PrivateRoute path={LINKS.USER_SETTINGS.template}>
+                <UserSettingsRouter />
               </PrivateRoute>
               <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
                 <OrganizationsRouter />
