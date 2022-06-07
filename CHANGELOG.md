@@ -1,3 +1,10 @@
+## [2.29.1](https://github.com/tolgee/tolgee-platform/compare/v2.29.0...v2.29.1) (2022-06-07)
+
+
+### Bug Fixes
+
+* Select all endpoint should return distinct key ids ([e7dc56e](https://github.com/tolgee/tolgee-platform/commit/e7dc56e1774acb8fff5095eb7981d05064185aa8))
+
 # [2.29.0](https://github.com/tolgee/tolgee-platform/compare/v2.28.0...v2.29.0) (2022-06-06)
 
 
