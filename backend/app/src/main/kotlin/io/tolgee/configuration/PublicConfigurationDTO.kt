@@ -4,13 +4,15 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.FileStoragePath
 import io.tolgee.constants.MtServiceType
+import io.tolgee.dtos.response.PublicBillingConfigurationDTO
 import io.tolgee.util.VersionProvider
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class PublicConfigurationDTO(
   @Schema(hidden = true)
   properties: TolgeeProperties,
-  val machineTranslationServices: MtServicesDTO
+  val machineTranslationServices: MtServicesDTO,
+  val billing: PublicBillingConfigurationDTO
 ) {
 
   val authentication: Boolean = properties.authentication.enabled

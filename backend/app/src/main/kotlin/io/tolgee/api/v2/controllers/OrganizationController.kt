@@ -292,7 +292,8 @@ class OrganizationController(
   fun getUsage(
     @PathVariable organizationId: Long
   ): UsageModel {
-    val organization = organizationService.getOrganizationAndCheckUserIsOwner(organizationId)
+    val organization = organizationService.get(organizationId)
+    organizationRoleService.checkUserIsMemberOrOwner(organizationId)
     val creditBalances = mtCreditBucketService.getCreditBalances(organization)
     val currentTranslations = organizationStatsService.getCurrentTranslationCount(organizationId)
     return UsageModel(
