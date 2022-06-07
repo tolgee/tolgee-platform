@@ -29,7 +29,10 @@ export const BillingPlans: React.FC<BillingPlansProps> = ({
           {activePlan && (
             <Plan
               plan={plan}
-              isActive={activePlan.id === plan.id}
+              isActive={
+                activePlan.id === plan.id &&
+                activePlan.currentBillingPeriod === period
+              }
               isOrganizationSubscribed={!activePlan.free}
               period={period}
             />

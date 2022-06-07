@@ -4,7 +4,7 @@ import { useNumberFormatter } from 'tg.hooks/useLocale';
 
 export const StyledMetrics = styled('div')`
   display: grid;
-  grid-template-columns: min(30%, 300px) auto 2fr auto;
+  grid-template-columns: min(30%, 250px) auto 2fr auto;
   gap: 16px 8px;
   margin: 16px 0px;
 `;

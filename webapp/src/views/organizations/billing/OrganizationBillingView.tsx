@@ -87,6 +87,13 @@ export const OrganizationBillingView: FunctionComponent = () => {
     path: {
       organizationId: organization!.id,
     },
+    options: {
+      onSuccess(data) {
+        if (data.currentBillingPeriod) {
+          setPeriod(data.currentBillingPeriod);
+        }
+      },
+    },
   });
 
   const usage = useApiQuery({

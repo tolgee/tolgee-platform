@@ -555,7 +555,7 @@ export interface paths {
   "/api/public/configuration": {
     get: operations["getPublicConfiguration"];
   };
-  "/api/public/authorize_oauth/{serviceType}/{code}": {
+  "/api/public/authorize_oauth/{serviceType}": {
     get: operations["authenticateUser_1"];
   };
   "/api/project/{projectId}/keys/{id}": {
@@ -713,9 +713,9 @@ export interface components {
       /** The language to apply those rules. If null, then this settings are default. */
       targetLanguageId?: number;
       /** This service will be used for automated translation */
-      primaryService?: "GOOGLE" | "AWS";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL";
       /** List of enabled services */
-      enabledServices: ("GOOGLE" | "AWS")[];
+      enabledServices: ("GOOGLE" | "AWS" | "DEEPL")[];
     };
     SetMachineTranslationSettingsDto: {
       settings: components["schemas"]["MachineTranslationLanguagePropsDto"][];
@@ -733,9 +733,9 @@ export interface components {
       /** When null, its a default configuration applied to not configured languages */
       targetLanguageName?: string;
       /** Service used for automated translating */
-      primaryService?: "GOOGLE" | "AWS";
+      primaryService?: "GOOGLE" | "AWS" | "DEEPL";
       /** Services to be used for suggesting */
-      enabledServices: ("GOOGLE" | "AWS")[];
+      enabledServices: ("GOOGLE" | "AWS" | "DEEPL")[];
     };
     TagKeyDto: {
       name: string;
@@ -793,7 +793,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL";
     };
     EditKeyDto: {
       name: string;
@@ -898,6 +898,7 @@ export interface components {
       yearlyPrice: number;
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
+      currentBillingPeriod?: "MONTHLY" | "YEARLY";
       free: boolean;
     };
     OrganizationInviteUserDto: {
@@ -1391,7 +1392,7 @@ export interface components {
       /** Was translated using Translation Memory or Machine translation service? */
       auto: boolean;
       /** Which machine translation service was used to auto translate this */
-      mtProvider?: "GOOGLE" | "AWS";
+      mtProvider?: "GOOGLE" | "AWS" | "DEEPL";
       /** Count of translation comments */
       commentCount: number;
       /** Count of unresolved translation comments */
@@ -1484,6 +1485,8 @@ export interface components {
       organizationId: number;
       /** Current balance of standard credits. Standard credits are refilled every month. */
       creditBalance: number;
+      /** How many credits are included in your current plan. */
+      includedMtCredits: number;
       /** Date when credits were refilled. (In epoch format.) */
       creditBalanceRefilledAt: number;
       /** Extra credits, which are neither refilled nor reset every month. These credits are used when there are no standard credits. */
@@ -1579,17 +1582,17 @@ export interface components {
       github: components["schemas"]["OAuthPublicConfigDTO"];
       google: components["schemas"]["OAuthPublicConfigDTO"];
     };
-    OAuthPublicConfigDTO: {
-      clientId?: string;
-      enabled: boolean;
-    };
     MtServiceDTO: {
       enabled: boolean;
       defaultEnabledForProject: boolean;
     };
     MtServicesDTO: {
-      defaultPrimaryService?: "GOOGLE" | "AWS";
+      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL";
       services: { [key: string]: components["schemas"]["MtServiceDTO"] };
+    };
+    OAuthPublicConfigDTO: {
+      clientId?: string;
+      enabled: boolean;
     };
     PublicConfigurationDTO: {
       machineTranslationServices: components["schemas"]["MtServicesDTO"];
@@ -7858,9 +7861,10 @@ export interface operations {
     parameters: {
       path: {
         serviceType: string;
-        code: string;
       };
       query: {
+        code?: string;
+        redirect_uri?: string;
         invitationCode?: string;
       };
     };
