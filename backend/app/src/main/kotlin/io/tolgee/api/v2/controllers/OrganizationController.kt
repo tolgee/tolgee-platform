@@ -298,6 +298,7 @@ class OrganizationController(
     return UsageModel(
       organizationId = organizationId,
       creditBalance = creditBalances.creditBalance,
+      includedMtCredits = creditBalances.bucketSize,
       extraCreditBalance = creditBalances.extraCreditBalance,
       creditBalanceRefilledAt = creditBalances.refilledAt.time,
       currentTranslations = currentTranslations,
