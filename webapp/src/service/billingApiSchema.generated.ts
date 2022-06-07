@@ -67,6 +67,7 @@ export interface components {
       yearlyPrice: number;
       currentPeriodEnd?: number;
       cancelAtPeriodEnd: boolean;
+      currentBillingPeriod?: "MONTHLY" | "YEARLY";
       free: boolean;
     };
     SubscribeRequest: {

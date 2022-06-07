@@ -39,8 +39,14 @@ export const Plan: FC<Props> = ({
   isActive,
 }) => {
   const t = useTranslate();
-  const { onUpgrade, upgradeMutation, onSubscribe, subscribeMutation } =
-    usePlan({ planId: plan.id, period: period });
+  const {
+    onUpgrade,
+    upgradeMutation,
+    onSubscribe,
+    subscribeMutation,
+    onCancel,
+    cancelMutation,
+  } = usePlan({ planId: plan.id, period: period });
 
   return (
     <StyledPlan>
@@ -52,7 +58,14 @@ export const Plan: FC<Props> = ({
       />
 
       {!plan.free &&
-        (isActive ? null : isOrganizationSubscribed ? (
+        (isActive ? (
+          <PlanActionButton
+            loading={cancelMutation.isLoading}
+            onClick={() => onCancel()}
+          >
+            {t('billing_plan_cancel')}
+          </PlanActionButton>
+        ) : isOrganizationSubscribed ? (
           <PlanActionButton
             loading={upgradeMutation.isLoading}
             onClick={() => onUpgrade()}
