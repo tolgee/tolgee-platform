@@ -1,3 +1,15 @@
+# [2.30.0](https://github.com/tolgee/tolgee-platform/compare/v2.29.2...v2.30.0) (2022-06-07)
+
+
+### Bug Fixes
+
+* Use new delete endpoint for keys delete ([20cac29](https://github.com/tolgee/tolgee-platform/commit/20cac297ce33307c71322473077e3631bae120b5))
+
+
+### Features
+
+* Delete multiple keys via DELETE endpoint with key ids in request body ([32c5131](https://github.com/tolgee/tolgee-platform/commit/32c51310e1e28961e8a3b5896f0921f42298407f))
+
 ## [2.29.2](https://github.com/tolgee/tolgee-platform/compare/v2.29.1...v2.29.2) (2022-06-07)
 
 
