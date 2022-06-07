@@ -1,3 +1,11 @@
+## [2.29.2](https://github.com/tolgee/tolgee-platform/compare/v2.29.1...v2.29.2) (2022-06-07)
+
+
+### Bug Fixes
+
+* Activity title same in compact view and detail ([f6270ac](https://github.com/tolgee/tolgee-platform/commit/f6270ac6ba1a22a75f335d2439fc78c843153aab))
+* Show partly selected as indeterminate ([96e552e](https://github.com/tolgee/tolgee-platform/commit/96e552e7b9af15279cdc8db9e60d2f7327d37661))
+
 ## [2.29.1](https://github.com/tolgee/tolgee-platform/compare/v2.29.0...v2.29.1) (2022-06-07)
 
 
