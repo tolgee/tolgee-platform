@@ -79,7 +79,12 @@ export const TranslationsSelection = () => {
             data-cy="translations-select-all-button"
             size="small"
           >
-            <Checkbox disabled={isLoading} size="small" checked={allSelected} />
+            <Checkbox
+              disabled={isLoading}
+              size="small"
+              checked={true}
+              indeterminate={!allSelected}
+            />
           </StyledToggleAllButton>
         </Tooltip>
         <T
