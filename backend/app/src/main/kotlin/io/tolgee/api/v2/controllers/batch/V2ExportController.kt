@@ -32,8 +32,8 @@ import java.util.zip.ZipOutputStream
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}"])
-@Tag(name = "Export controller")
+@RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}", "/v2/projects"])
+@Tag(name = "Export")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
 class V2ExportController(
   private val exportService: ExportService,
