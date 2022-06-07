@@ -12,13 +12,13 @@ import io.tolgee.component.KeyComplexEditHelper
 import io.tolgee.controllers.IController
 import io.tolgee.dtos.request.key.ComplexEditKeyDto
 import io.tolgee.dtos.request.key.CreateKeyDto
+import io.tolgee.dtos.request.key.DeleteKeysDto
 import io.tolgee.dtos.request.key.EditKeyDto
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.enums.ApiScope
 import io.tolgee.model.key.Key
-import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
@@ -55,7 +55,6 @@ class V2KeyController(
   private val keyModelAssembler: KeyModelAssembler,
   private val keyWithDataModelAssembler: KeyWithDataModelAssembler,
   private val securityService: SecurityService,
-  private val authenticationFacade: AuthenticationFacade,
   private val applicationContext: ApplicationContext
 ) : IController {
   @PostMapping(value = ["/create", ""])
@@ -102,6 +101,16 @@ class V2KeyController(
   fun delete(@PathVariable ids: Set<Long>) {
     keyService.findOptional(ids).forEach { it.checkInProject() }
     keyService.deleteMultiple(ids)
+  }
+
+  @DeleteMapping(value = [""])
+  @Transactional
+  @Operation(summary = "Deletes one or multiple keys by their IDs in request body")
+  @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
+  @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
+  @RequestActivity(ActivityType.KEY_DELETE)
+  fun delete(@RequestBody @Valid dto: DeleteKeysDto) {
+    delete(dto.ids.toSet())
   }
 
   private fun Key.checkInProject() {
