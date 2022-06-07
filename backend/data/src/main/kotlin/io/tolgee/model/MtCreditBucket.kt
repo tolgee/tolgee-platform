@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import org.hibernate.annotations.ColumnDefault
 import java.util.*
 import javax.persistence.Entity
 import javax.persistence.OneToOne
@@ -21,6 +22,7 @@ class MtCreditBucket(
    *
    * (In Tolgee Cloud users can buy these Extra credits)
    */
+  @ColumnDefault("0")
   var extraCredits: Long = 0
 
   var bucketSize: Long = 0

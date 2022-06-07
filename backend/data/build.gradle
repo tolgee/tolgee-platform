@@ -154,7 +154,7 @@ dependencies {
     implementation "io.jsonwebtoken:jjwt-api:${JJWT_VERSION}"
     implementation "io.jsonwebtoken:jjwt-impl:${JJWT_VERSION}",
             "io.jsonwebtoken:jjwt-jackson:${JJWT_VERSION}"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:${findProperty("jacksonModuleKotlinVersion")}"
+    implementation libs.jacksonModuleKotlin
     implementation 'com.github.javafaker:javafaker:1.0.2'
     implementation 'jaxen:jaxen:1.2.0'
     implementation libs.sendInBlue
