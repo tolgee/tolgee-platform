@@ -2,6 +2,7 @@ package io.tolgee.fixtures
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Scope
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
@@ -12,6 +13,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 @Component
 @Scope("prototype")
+@Primary
 class BaseRequestPerformer : RequestPerformer {
 
   @field:Autowired

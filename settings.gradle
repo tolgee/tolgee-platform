@@ -21,6 +21,7 @@ dependencyResolutionManagement {
         libs {
             library('stripe', 'com.stripe', 'stripe-java').version('20.88.0')
             library('sendInBlue', 'com.sendinblue', 'sib-api-v3-sdk').version('5.3.0')
+            library('jacksonModuleKotlin', 'com.fasterxml.jackson.module', 'jackson-module-kotlin').version('2.12.4')
         }
     }
 }
