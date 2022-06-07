@@ -46,7 +46,8 @@ export const useSelectionService = ({ translations }: Props) => {
         onConfirm() {
           deleteKeys.mutate(
             {
-              path: { projectId: project.id, ids: selection },
+              path: { projectId: project.id },
+              content: { 'application/json': { ids: selection } },
             },
             {
               onSuccess() {
