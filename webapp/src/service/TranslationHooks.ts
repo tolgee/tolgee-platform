@@ -14,7 +14,7 @@ export const usePostKey = () =>
 
 export const useDeleteKeys = () =>
   useApiMutation({
-    url: '/v2/projects/{projectId}/keys/{ids}',
+    url: '/v2/projects/{projectId}/keys',
     method: 'delete',
   });
 
