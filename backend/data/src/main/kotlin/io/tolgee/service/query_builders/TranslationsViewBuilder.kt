@@ -311,6 +311,7 @@ class TranslationsViewBuilder(
       val query = getBaseQuery(cb.createQuery(Long::class.java))
       query.select(keyIdExpression)
       query.where(*whereConditions.toTypedArray())
+      query.distinct(true)
       return query
     }
 
