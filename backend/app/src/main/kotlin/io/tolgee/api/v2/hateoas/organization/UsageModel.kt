@@ -13,6 +13,11 @@ open class UsageModel(
   @Schema(description = "Current balance of standard credits. Standard credits are refilled every month.")
   val creditBalance: Long,
 
+  @Schema(
+    description = """How many credits are included in your current plan."""
+  )
+  val includedMtCredits: Long,
+
   @Schema(description = "Date when credits were refilled. (In epoch format.)")
   val creditBalanceRefilledAt: Long,
 
@@ -30,5 +35,5 @@ open class UsageModel(
   @Schema(
     description = """How many translations are currently stored within your organization."""
   )
-  val currentTranslations: Long
+  val currentTranslations: Long,
 ) : RepresentationModel<UsageModel>(), Serializable
