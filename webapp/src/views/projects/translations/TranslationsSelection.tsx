@@ -23,6 +23,7 @@ const StyledContent = styled('div')`
   gap: 10px;
   align-items: center;
   box-sizing: border-box;
+  position: relative;
   transition: background-color 300ms ease-in-out, visibility 0ms;
   padding: ${({ theme }) => theme.spacing(0.5, 2, 0.5, 2)};
   pointer-events: all;
@@ -46,9 +47,11 @@ export const TranslationsSelection = () => {
   const selection = useTranslationsSelector((c) => c.selection);
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
   const isLoading = useTranslationsSelector((c) => c.isLoadingAllIds);
+  const isDeleting = useTranslationsSelector((c) => c.isDeleting);
   const dispatch = useTranslationsDispatch();
 
   const allSelected = totalCount === selection.length;
+  const somethingSelected = !allSelected && Boolean(selection.length);
 
   const handleToggleSelectAll = () => {
     if (!allSelected) {
@@ -62,7 +65,7 @@ export const TranslationsSelection = () => {
     dispatch({ type: 'DELETE_TRANSLATIONS' });
   };
 
-  useGlobalLoading(isLoading);
+  useGlobalLoading(isLoading || isDeleting);
 
   return (
     <StyledContainer>
@@ -80,10 +83,10 @@ export const TranslationsSelection = () => {
             size="small"
           >
             <Checkbox
-              disabled={isLoading}
+              disabled={isLoading || isDeleting}
               size="small"
-              checked={true}
-              indeterminate={!allSelected}
+              checked={Boolean(selection.length)}
+              indeterminate={somethingSelected}
             />
           </StyledToggleAllButton>
         </Tooltip>
@@ -95,6 +98,7 @@ export const TranslationsSelection = () => {
           <IconButton
             data-cy="translations-delete-button"
             onClick={handleDelete}
+            disabled={isDeleting}
             size="small"
           >
             <Delete />

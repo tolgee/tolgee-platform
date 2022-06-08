@@ -222,12 +222,12 @@ export const [
     isFetching:
       translationService.isFetching ||
       languages.isFetching ||
-      selectionService.isLoading ||
       stateService.isLoading ||
       tagsService.isLoading,
     isEditLoading: editService.isLoading,
     isFetchingMore: translationService.isFetchingNextPage,
     isLoadingAllIds: translationService.isLoadingAllIds,
+    isDeleting: selectionService.isDeleting,
     hasMoreToFetch: translationService.hasNextPage,
     search: translationService.search as string,
     urlSearch: translationService.urlSearch,
