@@ -1,6 +1,8 @@
 import { styled } from '@mui/material';
+import { useTranslate } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
+import { TabMessage } from './TabMessage';
 import { useProviderImg } from './useProviderImg';
 import { useTranslationTools } from './useTranslationTools';
 
@@ -45,35 +47,44 @@ export const MachineTranslation: React.FC<Props> = ({
   data,
   operationsRef,
 }) => {
+  const t = useTranslate();
   const getProviderImg = useProviderImg();
+  const baseIsEmpty = data?.machineTranslations === null;
   const items = data?.machineTranslations
     ? Object.entries(data?.machineTranslations)
     : [];
 
   return (
     <StyledContainer>
-      {items?.map(([provider, translation]) => {
-        const providerImg = getProviderImg(provider);
+      {baseIsEmpty ? (
+        <TabMessage
+          type="placeholder"
+          message={t('translation_tools_base_empty')}
+        />
+      ) : (
+        items?.map(([provider, translation]) => {
+          const providerImg = getProviderImg(provider);
 
-        return (
-          <StyledItem
-            key={provider}
-            onMouseDown={(e) => {
-              e.preventDefault();
-            }}
-            onClick={() => {
-              operationsRef.current.updateTranslation(translation);
-            }}
-            role="button"
-            data-cy="translation-tools-machine-translation-item"
-          >
-            <StyledSource>
-              {providerImg && <img src={providerImg} width="16px" />}
-            </StyledSource>
-            <StyledValue>{translation}</StyledValue>
-          </StyledItem>
-        );
-      })}
+          return (
+            <StyledItem
+              key={provider}
+              onMouseDown={(e) => {
+                e.preventDefault();
+              }}
+              onClick={() => {
+                operationsRef.current.updateTranslation(translation);
+              }}
+              role="button"
+              data-cy="translation-tools-machine-translation-item"
+            >
+              <StyledSource>
+                {providerImg && <img src={providerImg} width="16px" />}
+              </StyledSource>
+              <StyledValue>{translation}</StyledValue>
+            </StyledItem>
+          );
+        })
+      )}
     </StyledContainer>
   );
 };
