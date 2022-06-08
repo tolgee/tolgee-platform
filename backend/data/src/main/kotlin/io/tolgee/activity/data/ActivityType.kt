@@ -2,7 +2,6 @@ package io.tolgee.activity.data
 
 import io.tolgee.model.EntityWithId
 import io.tolgee.model.Language
-import io.tolgee.model.key.Key
 import kotlin.reflect.KClass
 
 enum class ActivityType(
@@ -21,7 +20,7 @@ enum class ActivityType(
   SCREENSHOT_ADD,
   KEY_TAGS_EDIT,
   KEY_NAME_EDIT,
-  KEY_DELETE(restrictEntitiesInList = arrayOf(Key::class)),
+  KEY_DELETE(true),
   CREATE_KEY,
   COMPLEX_EDIT,
   IMPORT(true),
