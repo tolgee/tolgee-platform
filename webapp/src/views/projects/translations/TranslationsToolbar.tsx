@@ -81,6 +81,7 @@ type Props = {
 export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
   const [index, setIndex] = useState(1);
   const [isMouseOver, setIsMouseOver] = useState(false);
+  const [selectionOpen, setSelectionOpen] = useState(false);
   const theme = useTheme();
   const [toolbarVisible, setToolbarVisible] = useState(false);
   const t = useTranslate();
@@ -121,6 +122,14 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
     setIsMouseOver(false);
   };
 
+  useEffect(() => {
+    if (selection.length || (selectionOpen && isMouseOver)) {
+      setSelectionOpen(true);
+    } else {
+      setSelectionOpen(false);
+    }
+  }, [isMouseOver, Boolean(selection.length)]);
+
   const counterContent = `${index} / ${totalCount}`;
 
   return width ? (
@@ -130,11 +139,7 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
       onPointerLeave={handlePointerLeave}
     >
       <StyledShortcutsContainer>
-        {selection.length || isMouseOver ? (
-          <TranslationsSelection />
-        ) : (
-          <TranslationsShortcuts />
-        )}
+        {selectionOpen ? <TranslationsSelection /> : <TranslationsShortcuts />}
       </StyledShortcutsContainer>
       <StyledCounterContainer
         className={clsx({

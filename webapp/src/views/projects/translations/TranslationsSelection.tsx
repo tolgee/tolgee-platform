@@ -98,7 +98,7 @@ export const TranslationsSelection = () => {
           <IconButton
             data-cy="translations-delete-button"
             onClick={handleDelete}
-            disabled={isDeleting}
+            disabled={isDeleting || !selection.length}
             size="small"
           >
             <Delete />
