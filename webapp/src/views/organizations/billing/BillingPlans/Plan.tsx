@@ -19,6 +19,7 @@ const StyledPlan = styled('div')`
   padding: 20px;
   display: grid;
   gap: 8px;
+  grid-template-rows: 1fr auto auto;
   grid-template-areas:
     'title    title'
     'info     info'
@@ -30,6 +31,7 @@ type Props = {
   isOrganizationSubscribed: boolean;
   period: Period;
   isActive: boolean;
+  isEnded: boolean;
 };
 
 export const Plan: FC<Props> = ({
@@ -37,6 +39,7 @@ export const Plan: FC<Props> = ({
   isOrganizationSubscribed,
   period,
   isActive,
+  isEnded,
 }) => {
   const t = useTranslate();
   const {
@@ -50,7 +53,17 @@ export const Plan: FC<Props> = ({
 
   return (
     <StyledPlan>
-      <PlanTitle title={plan.name} />
+      <PlanTitle
+        title={plan.name}
+        subtitle={
+          isActive
+            ? isEnded
+              ? t('billing_subscription_cancelled')
+              : t('billing_subscription_active')
+            : undefined
+        }
+      />
+
       <PlanInfo plan={plan} />
       <PlanPrice
         price={period === 'MONTHLY' ? plan.monthlyPrice : plan.yearlyPrice}
@@ -58,12 +71,19 @@ export const Plan: FC<Props> = ({
       />
 
       {!plan.free &&
-        (isActive ? (
+        (isActive && !isEnded ? (
           <PlanActionButton
             loading={cancelMutation.isLoading}
             onClick={() => onCancel()}
           >
             {t('billing_plan_cancel')}
+          </PlanActionButton>
+        ) : isActive && isEnded ? (
+          <PlanActionButton
+            loading={upgradeMutation.isLoading}
+            onClick={() => onUpgrade()}
+          >
+            {t('billing_plan_resubscribe')}
           </PlanActionButton>
         ) : isOrganizationSubscribed ? (
           <PlanActionButton

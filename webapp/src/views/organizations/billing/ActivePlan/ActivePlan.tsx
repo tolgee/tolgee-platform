@@ -1,12 +1,23 @@
+import { useTranslate } from '@tolgee/react';
+import { Box, styled } from '@mui/material';
+
 import { components as billingComponents } from 'tg.service/billingApiSchema.generated';
 import { components } from 'tg.service/apiSchema.generated';
+import { useDateFormatter } from 'tg.hooks/useLocale';
 import { BillingSection } from '../BillingSection';
 import { PlanMetric, StyledMetrics } from './PlanMetric';
-import { useTranslate } from '@tolgee/react';
 
 type ActivePlanModel = billingComponents['schemas']['ActivePlanModel'];
 type UsageModel = components['schemas']['UsageModel'];
 type CreditBalanceModel = components['schemas']['CreditBalanceModel'];
+
+const StyledPositive = styled('span')`
+  color: ${({ theme }) => theme.palette.success.main};
+`;
+
+const StyledNegative = styled('span')`
+  color: ${({ theme }) => theme.palette.error.main};
+`;
 
 type Props = {
   activePlan: ActivePlanModel;
@@ -16,6 +27,7 @@ type Props = {
 
 export const ActivePlan: React.FC<Props> = ({ activePlan, usage, balance }) => {
   const t = useTranslate();
+  const formatDate = useDateFormatter();
   return (
     <BillingSection
       title={t('billing_actual_title')}
@@ -38,6 +50,24 @@ export const ActivePlan: React.FC<Props> = ({ activePlan, usage, balance }) => {
           name={t('billing_actual_extra_credits')}
           currentAmount={balance.extraCreditBalance || 0}
         />
+        {!activePlan.free && (
+          <>
+            <Box gridColumn="1">{t('billing_actual_period_end')}</Box>
+            <Box gridColumn="2 / -1">
+              {formatDate(activePlan.currentPeriodEnd)} (
+              {!activePlan.cancelAtPeriodEnd ? (
+                <StyledPositive>
+                  {t('billing_actual_period_renewal')}
+                </StyledPositive>
+              ) : (
+                <StyledNegative>
+                  {t('billing_actual_period_finish')}
+                </StyledNegative>
+              )}
+              )
+            </Box>
+          </>
+        )}
       </StyledMetrics>
     </BillingSection>
   );

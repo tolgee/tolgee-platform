@@ -10,6 +10,7 @@ const StyledMainTitle = styled(Typography)``;
 const StyledSecondaryTitle = styled(Typography)`
   color: ${({ theme }) => theme.palette.primary.main};
   font-size: 14px;
+  height: 10px;
 `;
 
 type Props = {
