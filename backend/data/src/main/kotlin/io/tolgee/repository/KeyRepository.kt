@@ -15,4 +15,7 @@ interface KeyRepository : JpaRepository<Key, Long> {
   fun getIdsByProjectId(projectId: Long?): List<Long>
   fun deleteAllByIdIn(ids: Collection<Long>)
   fun findAllByIdIn(ids: Collection<Long>): List<Key>
+
+  @Query("from Key k join fetch k.project left join fetch k.keyMeta where k.id in :ids")
+  fun findWithProjectsAndMetas(ids: Set<Long>): List<Key>
 }

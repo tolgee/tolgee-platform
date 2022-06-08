@@ -4,7 +4,7 @@ spring:
     properties:
       hibernate:
         jdbc:
-          batch_size: 100
+          batch_size: 1000
         order_inserts: true
         order_updates: true
         dialect: io.tolgee.dialects.postgres.CustomPostgreSQLDialect
