@@ -27,6 +27,7 @@ import io.tolgee.service.SecurityService
 import org.springframework.context.ApplicationContext
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -55,7 +56,8 @@ class V2KeyController(
   private val keyModelAssembler: KeyModelAssembler,
   private val keyWithDataModelAssembler: KeyWithDataModelAssembler,
   private val securityService: SecurityService,
-  private val applicationContext: ApplicationContext
+  private val applicationContext: ApplicationContext,
+  private val transactionManager: PlatformTransactionManager
 ) : IController {
   @PostMapping(value = ["/create", ""])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.EDIT)
@@ -99,7 +101,7 @@ class V2KeyController(
   @AccessWithApiKey(scopes = [ApiScope.KEYS_EDIT])
   @RequestActivity(ActivityType.KEY_DELETE)
   fun delete(@PathVariable ids: Set<Long>) {
-    keyService.findOptional(ids).forEach { it.checkInProject() }
+    keyService.findAllWithProjectsAndMetas(ids).forEach { it.checkInProject() }
     keyService.deleteMultiple(ids)
   }
 

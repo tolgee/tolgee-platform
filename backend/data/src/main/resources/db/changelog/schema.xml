@@ -1704,4 +1704,7 @@
             <column name="project_id"/>
         </createIndex>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1652252690925-1">
+        <alterSequence incrementBy="1000" sequenceName="hibernate_sequence"/>
+    </changeSet>
 </databaseChangeLog>
