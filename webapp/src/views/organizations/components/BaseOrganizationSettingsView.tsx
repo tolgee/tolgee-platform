@@ -12,6 +12,7 @@ import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { useTranslate } from '@tolgee/react';
 import { BaseSettingsView } from 'tg.component/layout/BaseSettingsView/BaseSettingsView';
 import { SettingsMenuItem } from 'tg.component/layout/BaseSettingsView/SettingsMenu';
+import { useConfig } from 'tg.hooks/useConfig';
 
 const StyledHeaderWrapper = styled('div')`
   display: grid;
@@ -41,6 +42,7 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
   link,
   ...otherProps
 }) => {
+  const config = useConfig();
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
   const t = useTranslate();
@@ -64,13 +66,16 @@ export const BaseOrganizationSettingsView: React.FC<Props> = ({
       }),
       label: t('organization_menu_member_privileges'),
     },
-    {
+  ];
+
+  if (config.billing.enabled) {
+    menuItems.push({
       link: LINKS.ORGANIZATION_BILLING.build({
         [PARAMS.ORGANIZATION_SLUG]: organizationSlug,
       }),
       label: t('organization_menu_billing'),
-    },
-  ];
+    });
+  }
 
   const organization = useApiQuery({
     url: '/v2/organizations/{slug}',
