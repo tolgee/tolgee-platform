@@ -5,6 +5,7 @@ import { BoxLoading } from 'tg.component/common/BoxLoading';
 import { PrivateRoute } from 'tg.component/common/PrivateRoute';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
+import { useConfig } from 'tg.hooks/useConfig';
 
 import { OrganizationCreateView } from './OrganizationCreateView';
 import { OrganizationsListView } from './OrganizationListView';
@@ -17,6 +18,7 @@ import { OrganizationBillingView } from './billing/OrganizationBillingView';
 
 const SpecificOrganizationRouter = () => {
   const organization = useOrganization();
+  const config = useConfig();
 
   return (
     <DashboardPage>
@@ -37,9 +39,11 @@ const SpecificOrganizationRouter = () => {
           <PrivateRoute exact path={LINKS.ORGANIZATION_PROJECTS.template}>
             <OrganizationsProjectListView />
           </PrivateRoute>
-          <PrivateRoute exact path={LINKS.ORGANIZATION_BILLING.template}>
-            <OrganizationBillingView />
-          </PrivateRoute>
+          {config.billing.enabled && (
+            <PrivateRoute exact path={LINKS.ORGANIZATION_BILLING.template}>
+              <OrganizationBillingView />
+            </PrivateRoute>
+          )}
         </>
       ) : (
         <Box

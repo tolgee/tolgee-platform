@@ -14,6 +14,7 @@ import { SecondaryBar } from 'tg.component/layout/SecondaryBar';
 import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
 import { Usage } from 'tg.views/projects/dashboard/Usage';
+import { useConfig } from 'tg.hooks/useConfig';
 
 const StyledContainer = styled(Box)`
   display: grid;
@@ -75,7 +76,13 @@ const StyledUsage = styled(Box)`
 
 export const DashboardView = () => {
   const project = useProject();
+  const config = useConfig();
   const t = useTranslate();
+
+  const showStats =
+    project.organizationOwner &&
+    project.organizationRole &&
+    config.billing.enabled;
 
   const path = { projectId: project.id };
   const query = { size: 15, sort: ['timestamp,desc'] };
@@ -150,11 +157,11 @@ export const DashboardView = () => {
                   project.userOwner?.name || project.organizationOwner?.name
                 }
               />
-              {project.organizationOwner && project.organizationRole && (
+              {showStats && (
                 <StyledUsage>
                   <Usage
-                    organizationId={project.organizationOwner.id}
-                    slug={project.organizationOwner.slug}
+                    organizationId={project.organizationOwner!.id}
+                    slug={project.organizationOwner!.slug}
                   />
                 </StyledUsage>
               )}
