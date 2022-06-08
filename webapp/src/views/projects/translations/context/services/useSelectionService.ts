@@ -74,7 +74,7 @@ export const useSelectionService = ({ translations }: Props) => {
     clear,
     deleteSelected,
     select,
-    isLoading: deleteKeys.isLoading,
+    isDeleting: deleteKeys.isLoading,
     data: selection,
   };
 };

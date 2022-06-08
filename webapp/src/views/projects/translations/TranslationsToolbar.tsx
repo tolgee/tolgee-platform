@@ -80,6 +80,7 @@ type Props = {
 
 export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
   const [index, setIndex] = useState(1);
+  const [isMouseOver, setIsMouseOver] = useState(false);
   const theme = useTheme();
   const [toolbarVisible, setToolbarVisible] = useState(false);
   const t = useTranslate();
@@ -113,12 +114,23 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
     return () => window.removeEventListener('scroll', onScroll);
   }, [getVisibleRange]);
 
+  const handlePointerEnter = () => {
+    setIsMouseOver(true);
+  };
+  const handlePointerLeave = () => {
+    setIsMouseOver(false);
+  };
+
   const counterContent = `${index} / ${totalCount}`;
 
   return width ? (
-    <StyledContainer style={{ width: `calc(${width}px + ${theme.spacing(8)}` }}>
+    <StyledContainer
+      style={{ width: `calc(${width}px + ${theme.spacing(8)}` }}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+    >
       <StyledShortcutsContainer>
-        {selection.length ? (
+        {selection.length || isMouseOver ? (
           <TranslationsSelection />
         ) : (
           <TranslationsShortcuts />
