@@ -35,7 +35,7 @@ export const usePlan = ({ planId, period }: Props) => {
   const upgradeMutation = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/update-subscription',
     method: 'put',
-    invalidatePrefix: '/v2/organizations/{organizationId}/billing/active-plan',
+    invalidatePrefix: '/',
   });
 
   const onSubscribe = () => {
@@ -55,7 +55,7 @@ export const usePlan = ({ planId, period }: Props) => {
   const subscribeMutation = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/subscribe',
     method: 'post',
-    invalidatePrefix: '/v2/organizations/{organizationId}/billing',
+    invalidatePrefix: '/',
     options: {
       onSuccess: (data) => {
         window.location.href = data;
@@ -73,7 +73,7 @@ export const usePlan = ({ planId, period }: Props) => {
   const cancelMutation = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/cancel-subscription',
     method: 'post',
-    invalidatePrefix: '/v2/organizations/{organizationId}/billing',
+    invalidatePrefix: '/',
   });
 
   const onCancel = () => {

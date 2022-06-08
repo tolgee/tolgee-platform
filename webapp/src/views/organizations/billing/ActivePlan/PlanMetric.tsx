@@ -5,7 +5,7 @@ import { useNumberFormatter } from 'tg.hooks/useLocale';
 export const StyledMetrics = styled('div')`
   display: grid;
   grid-template-columns: min(30%, 250px) auto 2fr auto;
-  gap: 16px 8px;
+  gap: 4px 8px;
   margin: 16px 0px;
 `;
 
@@ -15,7 +15,7 @@ const StyledName = styled(Box)`
 `;
 
 const StyledProgress = styled(Box)`
-  padding: 9px 0px;
+  padding-top: 9px;
 `;
 
 type Props = {

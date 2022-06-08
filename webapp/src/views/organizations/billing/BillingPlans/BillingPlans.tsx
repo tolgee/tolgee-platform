@@ -24,21 +24,26 @@ export const BillingPlans: React.FC<BillingPlansProps> = ({
 }) => {
   return (
     <>
-      {plans.map((plan) => (
-        <StyledPlanWrapper key={plan.id}>
-          {activePlan && (
-            <Plan
-              plan={plan}
-              isActive={
-                activePlan.id === plan.id &&
-                activePlan.currentBillingPeriod === period
-              }
-              isOrganizationSubscribed={!activePlan.free}
-              period={period}
-            />
-          )}
-        </StyledPlanWrapper>
-      ))}
+      {plans.map((plan) => {
+        const isActive =
+          activePlan.id === plan.id &&
+          activePlan.currentBillingPeriod === period;
+        const isEnded = isActive && activePlan.cancelAtPeriodEnd;
+
+        return (
+          <StyledPlanWrapper key={plan.id}>
+            {activePlan && (
+              <Plan
+                plan={plan}
+                isActive={isActive}
+                isEnded={isEnded}
+                isOrganizationSubscribed={!activePlan.free}
+                period={period}
+              />
+            )}
+          </StyledPlanWrapper>
+        );
+      })}
     </>
   );
 };
