@@ -1,3 +1,14 @@
+## [2.30.1](https://github.com/tolgee/tolgee-platform/compare/v2.30.0...v2.30.1) (2022-06-08)
+
+
+### Bug Fixes
+
+* Group actions loading and better hiding logic ([422ae08](https://github.com/tolgee/tolgee-platform/commit/422ae0858efe9b179563d5396934396a9220ab0b))
+* Group selection keep open only while mouse over ([68968f4](https://github.com/tolgee/tolgee-platform/commit/68968f42938517d6149a2a93fbc3f946c9ae9d0f))
+* Minor fixes ([9c56baf](https://github.com/tolgee/tolgee-platform/commit/9c56baf7f4ce35a0f287923f3c6272fea22de3eb))
+* Minor fixes - adapt FE ([0c66a1e](https://github.com/tolgee/tolgee-platform/commit/0c66a1ef231ba1624efc32adbf9526d8974cf266))
+* V2 Export controller access with API key ([b1c83b6](https://github.com/tolgee/tolgee-platform/commit/b1c83b61b16affdaf9d89917e68b471b5c4fb551))
+
 # [2.30.0](https://github.com/tolgee/tolgee-platform/compare/v2.29.2...v2.30.0) (2022-06-07)
 
 
