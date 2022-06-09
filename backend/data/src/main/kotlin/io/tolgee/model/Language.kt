@@ -21,6 +21,7 @@ import javax.persistence.FetchType
 import javax.persistence.Index
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
+import javax.persistence.OneToOne
 import javax.persistence.PrePersist
 import javax.persistence.PreRemove
 import javax.persistence.Table
@@ -80,6 +81,9 @@ class Language : StandardAuditModel() {
   @ActivityLoggedProp
   @ActivityDescribingProp
   var flagEmoji: String? = null
+
+  @OneToOne(mappedBy = "targetLanguage", orphanRemoval = true)
+  var mtServiceConfig: MtServiceConfig? = null
 
   fun updateByDTO(dto: LanguageDto) {
     name = dto.name

@@ -106,8 +106,10 @@ class LanguageService(
     return languageRepository.findByNameAndProject(name, project)
   }
 
-  fun deleteAllByProject(projectId: Long?) {
-    languageRepository.deleteAllByProjectId(projectId)
+  fun deleteAllByProject(projectId: Long) {
+    findAll(projectId).forEach {
+      deleteLanguage(it.id)
+    }
   }
 
   fun save(language: Language): Language {

@@ -49,6 +49,8 @@ tolgee:
     aws:
       accessKey: aaa
       secretKey: aaa
+  billing:
+    enabled: false
 #logging:
 #  level:
 #    org.springframework.orm.jpa: DEBUG

@@ -5,7 +5,6 @@
 package io.tolgee.service.project
 
 import io.tolgee.AbstractSpringTest
-import io.tolgee.development.testDataBuilder.data.AutoTranslateTestData
 import io.tolgee.development.testDataBuilder.data.MtSettingsTestData
 import io.tolgee.development.testDataBuilder.data.TagsTestData
 import io.tolgee.fixtures.generateUniqueString
@@ -122,14 +121,6 @@ class ProjectServiceTest : AbstractSpringTest() {
   @Test
   fun `deletes project with MT Settings`() {
     val testData = MtSettingsTestData()
-    testDataService.saveTestData(testData.root)
-    entityManager.flush()
-    projectService.deleteProject(testData.projectBuilder.self.id)
-  }
-
-  @Test
-  fun `deletes project with `() {
-    val testData = AutoTranslateTestData()
     testDataService.saveTestData(testData.root)
     entityManager.flush()
     projectService.deleteProject(testData.projectBuilder.self.id)
