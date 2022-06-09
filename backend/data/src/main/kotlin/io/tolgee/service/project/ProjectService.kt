@@ -241,6 +241,11 @@ class ProjectService constructor(
     importService.getAllByProject(id).forEach {
       importService.deleteImport(it)
     }
+
+    // otherwise we cannot delete the languages
+    project.baseLanguage = null
+    projectRepository.saveAndFlush(project)
+
     permissionService.deleteAllByProject(project.id)
     translationService.deleteAllByProject(project.id)
     screenshotService.deleteAllByProject(project.id)
