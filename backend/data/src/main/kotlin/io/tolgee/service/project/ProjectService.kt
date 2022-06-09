@@ -245,12 +245,11 @@ class ProjectService constructor(
     // otherwise we cannot delete the languages
     project.baseLanguage = null
     projectRepository.saveAndFlush(project)
-
+    apiKeyService.deleteAllByProject(project.id)
     permissionService.deleteAllByProject(project.id)
     screenshotService.deleteAllByProject(project.id)
-    keyService.deleteAllByProject(project.id)
-    apiKeyService.deleteAllByProject(project.id)
     languageService.deleteAllByProject(project.id)
+    keyService.deleteAllByProject(project.id)
     avatarService.unlinkAvatarFiles(project)
     projectRepository.delete(project)
   }
