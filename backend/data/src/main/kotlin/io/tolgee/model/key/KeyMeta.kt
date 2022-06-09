@@ -7,7 +7,6 @@ import io.tolgee.activity.propChangesProvider.TagsPropChangesProvider
 import io.tolgee.model.StandardAuditModel
 import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.ImportKey
-import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.ManyToMany
@@ -22,7 +21,7 @@ import javax.persistence.PreUpdate
 @ActivityLoggedEntity
 @ActivityEntityDescribingPaths(paths = ["key"])
 class KeyMeta(
-  @OneToOne(cascade = [CascadeType.PERSIST])
+  @OneToOne
   var key: Key? = null,
 
   @OneToOne
