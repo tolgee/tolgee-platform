@@ -47,7 +47,6 @@ class LanguageService(
   fun deleteLanguage(id: Long) {
     val language = languageRepository.findById(id).orElseThrow { NotFoundException() }
     translationService.deleteAllByLanguage(language.id)
-    mtServiceConfigService.deleteAllByTargetLanguageId(language.id)
     permissionService.onLanguageDeleted(language)
     languageRepository.delete(language)
   }
