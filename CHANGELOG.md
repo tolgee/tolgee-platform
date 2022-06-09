@@ -1,3 +1,12 @@
+## [2.30.3](https://github.com/tolgee/tolgee-platform/compare/v2.30.2...v2.30.3) (2022-06-09)
+
+
+### Bug Fixes
+
+* Avoid infinite loading on saving error ([c26d94c](https://github.com/tolgee/tolgee-platform/commit/c26d94c570cc8ac3c21576c5ad50ca0c6b2a432a))
+* Editor long words not wrapping ([abb664e](https://github.com/tolgee/tolgee-platform/commit/abb664e73a7f2c68a10b0cd5b82a5295c8ac73cf))
+* Use T component in messaging to avoid blank error messages ([d285c01](https://github.com/tolgee/tolgee-platform/commit/d285c0189ddca8754aa226f905812eccd242c2b3))
+
 ## [2.30.2](https://github.com/tolgee/tolgee-platform/compare/v2.30.1...v2.30.2) (2022-06-09)
 
 
