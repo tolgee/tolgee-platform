@@ -247,12 +247,10 @@ class ProjectService constructor(
     projectRepository.saveAndFlush(project)
 
     permissionService.deleteAllByProject(project.id)
-    translationService.deleteAllByProject(project.id)
     screenshotService.deleteAllByProject(project.id)
     keyService.deleteAllByProject(project.id)
     apiKeyService.deleteAllByProject(project.id)
     languageService.deleteAllByProject(project.id)
-    mtServiceConfigService.deleteAllByProjectId(project.id)
     avatarService.unlinkAvatarFiles(project)
     projectRepository.delete(project)
   }

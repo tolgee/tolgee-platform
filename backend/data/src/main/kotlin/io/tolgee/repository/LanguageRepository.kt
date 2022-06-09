@@ -4,8 +4,6 @@ import io.tolgee.model.Language
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Modifying
-import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.util.*
 
@@ -17,9 +15,6 @@ interface LanguageRepository : JpaRepository<Language, Long> {
   fun findAllByProjectId(projectId: Long?): Set<Language>
   fun findAllByProjectId(projectId: Long?, pageable: Pageable): Page<Language>
   fun findAllByTagInAndProjectId(abbreviation: Collection<String?>?, projectId: Long?): Set<Language>
-
-  @Modifying
-  @Query("delete from Language l where l.project.id = :projectId")
   fun deleteAllByProjectId(projectId: Long?)
   fun countByIdInAndProjectId(languageIds: Set<Long>, projectId: Long): Int
 }
