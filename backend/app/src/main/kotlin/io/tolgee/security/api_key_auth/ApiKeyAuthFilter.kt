@@ -24,11 +24,6 @@ class ApiKeyAuthFilter(
   @param:Qualifier("handlerExceptionResolver")
   private val resolver: HandlerExceptionResolver,
 ) : OncePerRequestFilter() {
-
-  companion object {
-    val REGEX = "/(?:v2|api)/(?:repositor(?:y|ies)|projects?)/[a-zA-Z]+([a-zA-Z0-9]?)/?.*".toRegex()
-  }
-
   override fun doFilterInternal(
     request: HttpServletRequest,
     response: HttpServletResponse,
