@@ -13,7 +13,6 @@ class CleanDbTestListener : TestExecutionListener {
   private val logger = LoggerFactory.getLogger(this::class.java)
   private val ignoredTables = listOf<String>(
     "mt_credits_price",
-    "subscription_plan",
     "databasechangelog",
     "databasechangeloglock"
   )
