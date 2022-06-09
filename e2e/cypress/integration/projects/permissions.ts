@@ -138,7 +138,7 @@ describe('Project Permissions', () => {
         login('cukrberg@facebook.com', 'admin');
       });
 
-      it.only('Can modify permissions', () => {
+      it('Can modify permissions', () => {
         visitList();
         enterProjectSettings('Facebook itself');
         selectInProjectMenu('Members');
