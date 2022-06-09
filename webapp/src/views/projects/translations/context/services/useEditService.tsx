@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { container } from 'tsyringe';
-import { useTranslate } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
 import {
@@ -178,7 +178,7 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
     const { keyId, language, value } = position;
     if (!language && !value) {
       // key can't be empty
-      return messaging.error(t('global_empty_value'));
+      return messaging.error(<T keyName="global_empty_value" />);
     }
     try {
       if (language) {
@@ -212,7 +212,7 @@ export const useEditService = ({ translations, viewRefs }: Props) => {
       data.onSuccess?.();
     } catch (e) {
       const parsed = parseErrorResponse(e);
-      parsed.forEach((error) => messaging.error(t(error)));
+      parsed.forEach((error) => messaging.error(<T>{error}</T>));
     }
     return;
   };

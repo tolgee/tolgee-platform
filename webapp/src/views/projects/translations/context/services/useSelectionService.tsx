@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { container } from 'tsyringe';
-import { useTranslate } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
 
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
@@ -59,7 +59,7 @@ export const useSelectionService = ({ translations }: Props) => {
               },
               onError(e) {
                 const parsed = parseErrorResponse(e);
-                parsed.forEach((error) => messaging.error(t(error)));
+                parsed.forEach((error) => messaging.error(<T>{error}</T>));
                 reject(e);
               },
             }
