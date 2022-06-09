@@ -1,3 +1,11 @@
+## [2.30.2](https://github.com/tolgee/tolgee-platform/compare/v2.30.1...v2.30.2) (2022-06-09)
+
+
+### Bug Fixes
+
+* Max key length to 2000 - Closes [#1184](https://github.com/tolgee/tolgee-platform/issues/1184) ([ab7d5a9](https://github.com/tolgee/tolgee-platform/commit/ab7d5a9e8805c3551eb1ed45f4c8c1636674324b))
+* Using API key endpoints in no auth mode ([f4a1001](https://github.com/tolgee/tolgee-platform/commit/f4a10019bad06b2926517774e42eab4b2ebddf38))
+
 ## [2.30.1](https://github.com/tolgee/tolgee-platform/compare/v2.30.0...v2.30.1) (2022-06-08)
 
 
