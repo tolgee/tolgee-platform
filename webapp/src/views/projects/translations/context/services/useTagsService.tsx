@@ -1,4 +1,4 @@
-import { useTranslate, T } from '@tolgee/react';
+import { T } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { container } from 'tsyringe';
 
@@ -21,7 +21,6 @@ export const useTagsService = ({ translations }: Props) => {
   const putTag = usePutTag();
   const deleteTag = useDeleteTag();
   const project = useProject();
-  const t = useTranslate();
 
   const removeTag = (data: RemoveTag) =>
     deleteTag
