@@ -43,8 +43,7 @@ const StyledField = styled('div')`
 const StyledEdtorWrapper = styled('div')`
   background: ${({ theme }) => theme.palette.background.default};
   align-self: stretch;
-  display: flex;
-  align-items: stretch;
+  display: grid;
 `;
 
 const StyledTags = styled('div')`
