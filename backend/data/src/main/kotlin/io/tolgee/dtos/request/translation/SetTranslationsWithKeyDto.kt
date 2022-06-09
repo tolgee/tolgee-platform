@@ -13,7 +13,7 @@ data class SetTranslationsWithKeyDto(
    */
   @Schema(description = "Key name to set translations for", example = "what_a_key_to_translate")
   @field:NotBlank
-  @field:Length(max = 200)
+  @field:Length(max = 2000)
   val key: String = "",
 
   /**
