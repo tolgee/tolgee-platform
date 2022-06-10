@@ -56,6 +56,7 @@ export const SettingsMenuItem: React.FC<Props> = ({
       <Link
         aria-label={text}
         to={linkTo as string}
+        data-cy="settings-menu-item"
         tabIndex={hidden ? -1 : undefined}
         className={clsx('link', { selected: isSelected })}
       >

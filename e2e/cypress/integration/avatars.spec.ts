@@ -63,7 +63,7 @@ describe('Avatars', () => {
 
   describe('User avatar', () => {
     beforeEach(() => {
-      cy.visit(HOST + '/user');
+      cy.visit(HOST + '/account/profile');
     });
 
     it('shows the avatar in the user menu', () => {
