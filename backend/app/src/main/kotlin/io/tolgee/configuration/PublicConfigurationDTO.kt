@@ -35,6 +35,7 @@ class PublicConfigurationDTO(
   val maxTranslationTextLength: Long = properties.maxTranslationTextLength
   val recaptchaSiteKey = properties.recaptcha.siteKey
   val openReplayApiKey = properties.openReplayApiKey
+  val chatwootToken = properties.chatwootToken
 
   class AuthMethodsDTO(
     val github: OAuthPublicConfigDTO,
