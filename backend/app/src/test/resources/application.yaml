@@ -37,6 +37,7 @@ tolgee:
     create-initial-user: false
   internal:
     fake-mt-providers: true
+    mock-free-plan: true
   socket-io:
     port: 19090
     enabled: false

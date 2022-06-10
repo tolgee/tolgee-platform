@@ -9,9 +9,8 @@ import javax.sql.DataSource
 import kotlin.system.measureTimeMillis
 
 class CleanDbTestListener : TestExecutionListener {
-
   private val logger = LoggerFactory.getLogger(this::class.java)
-  private val ignoredTables = listOf<String>(
+  private val ignoredTables = listOf(
     "mt_credits_price",
     "databasechangelog",
     "databasechangeloglock"
