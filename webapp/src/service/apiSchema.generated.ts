@@ -1210,7 +1210,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1222,6 +1221,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1482,6 +1482,7 @@ export interface components {
       maxTranslationTextLength: number;
       recaptchaSiteKey?: string;
       openReplayApiKey?: string;
+      chatwootToken?: string;
     };
     SocketIo: {
       enabled: boolean;
