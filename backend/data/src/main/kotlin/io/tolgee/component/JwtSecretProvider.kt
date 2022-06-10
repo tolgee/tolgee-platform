@@ -2,7 +2,7 @@
  * Copyright (c) 2020. Tolgee
  */
 
-package io.tolgee.security
+package io.tolgee.component
 
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
