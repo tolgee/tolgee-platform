@@ -1,3 +1,10 @@
+# [2.31.0](https://github.com/tolgee/tolgee-platform/compare/v2.30.3...v2.31.0) (2022-06-10)
+
+
+### Features
+
+* Add chatwoot to tolgee ([bff4be2](https://github.com/tolgee/tolgee-platform/commit/bff4be2a6155043d668787aea8717374e73de13f))
+
 ## [2.30.3](https://github.com/tolgee/tolgee-platform/compare/v2.30.2...v2.30.3) (2022-06-09)
 
 
