@@ -46,26 +46,19 @@ describe('Test no authentication mode', () => {
     gcy(globalUserMenuDataCy).should('not.exist');
   });
 
-  it('Has no side menu in api keys', () => {
-    cy.visit(HOST + '/apiKeys');
+  it('Has no link to Account settings', () => {
+    cy.visit(HOST + '/account/apiKeys');
     cy.contains('My API keys');
-    const userAccountSideMenuDataCy = 'user-account-side-menu';
-    cy.gcy(userAccountSideMenuDataCy).should('be.visible');
-    disableAuthentication();
-    cy.reload();
-    cy.contains('My API keys').should('be.visible');
-    cy.gcy(userAccountSideMenuDataCy).should('not.exist');
-  });
 
-  it('Has menu under title in api keys', () => {
-    cy.visit(HOST + '/apiKeys');
-    cy.contains('My API keys');
-    const dataCy = 'user-organizations-settings-subtitle-link';
-    gcy(dataCy).should('be.visible');
+    cy.gcy('settings-menu-item')
+      .contains('Account settings')
+      .should('be.visible');
     disableAuthentication();
     cy.reload();
     cy.contains('My API keys').should('be.visible');
-    cy.gcy(dataCy).should('not.exist');
+    cy.gcy('settings-menu-item')
+      .contains('Account settings')
+      .should('not.exist');
   });
 
   after(() => {

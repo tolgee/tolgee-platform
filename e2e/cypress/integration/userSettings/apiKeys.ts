@@ -30,7 +30,7 @@ describe('Api keys', () => {
         name: 'Test',
         languages: [{ tag: 'en', name: 'English', originalName: 'English' }],
       }).then((r) => (project = r.body));
-      cy.visit(HOST + '/apiKeys');
+      cy.visit(HOST + '/account/apiKeys');
     });
 
     afterEach(() => {
@@ -90,7 +90,7 @@ describe('Api keys', () => {
 });
 
 const visit = () => {
-  cy.visit(HOST + '/apiKeys');
+  cy.visit(HOST + '/account/apiKeys');
 };
 
 const create = (project: string, scopes: Scope[]) => {
