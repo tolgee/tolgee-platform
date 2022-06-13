@@ -41,7 +41,7 @@ class WebConfiguration(
   }
 
   override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-    registry.addResourceHandler("/*.js", "/**/*.woff2", "/*.css", "/**/*.svg")
+    registry.addResourceHandler("/**/*.js", "/**/*.woff2", "/**/*.css", "/**/*.svg")
       .addResourceLocations("classpath:/static/")
       .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS))
   }
