@@ -12,20 +12,20 @@ export interface paths {
     /** Refreshes organizations subscription by Stripe data */
     put: operations["refresh"];
   };
+  "/v2/organizations/{organizationId}/billing/prepare-update-subscription": {
+    /** Prepares update subscription session */
+    put: operations["prepareUpdateSubscription"];
+  };
+  "/v2/organizations/{organizationId}/billing/cancel-subscription": {
+    /** Cancels subscription */
+    put: operations["cancelSubscription"];
+  };
   "/v2/public/billing/webhook": {
     post: operations["webhook"];
   };
   "/v2/organizations/{organizationId}/billing/subscribe": {
     /** Returns url of Stripe checkout session */
     post: operations["subscribe"];
-  };
-  "/v2/organizations/{organizationId}/billing/customer-portal-session": {
-    /** Returns url of Stripe checkout session */
-    post: operations["createCustomerPortalSession"];
-  };
-  "/v2/organizations/{organizationId}/billing/cancel-subscription": {
-    /** Cancels subscription */
-    post: operations["cancelSubscription"];
   };
   "/v2/organizations/{organizationId}/billing/buy-more-credits": {
     /** Returns url of Stripe checkout session to buy more credits */
@@ -38,6 +38,10 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/invoices/": {
     /** Returns organization invoices */
     get: operations["getInvoices"];
+  };
+  "/v2/organizations/{organizationId}/billing/customer-portal": {
+    /** Returns url of Stripe customer portal session */
+    get: operations["goToCustomerPortal"];
   };
   "/v2/organizations/{organizationId}/billing/active-plan": {
     /** Refreshes organizations subscription by Stripe data */
@@ -54,9 +58,7 @@ export interface paths {
 export interface components {
   schemas: {
     UpdateSubscriptionRequest: {
-      /** Id of the subscription plan */
-      planId: number;
-      period: "MONTHLY" | "YEARLY";
+      token: string;
     };
     ActivePlanModel: {
       id: number;
@@ -70,14 +72,38 @@ export interface components {
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
       free: boolean;
     };
+    UpdateSubscriptionPrepareRequest: {
+      /** Id of the subscription plan */
+      planId: number;
+      period: "MONTHLY" | "YEARLY";
+    };
+    SubscriptionUpdatePreviewItem: {
+      description: string;
+      amount: number;
+      taxRate: number;
+    };
+    SubscriptionUpdatePreviewModel: {
+      items: components["schemas"]["SubscriptionUpdatePreviewItem"][];
+      total: number;
+      amountDue: number;
+      updateToken: string;
+      prorationDate: number;
+      endingBalance: number;
+    };
     SubscribeRequest: {
       /** Id of the subscription plan */
       planId: number;
       period: "MONTHLY" | "YEARLY";
     };
+    SubscribeModel: {
+      url: string;
+    };
     BuyMoreCreditsRequest: {
       priceId: number;
       amount: number;
+    };
+    BuyMoreCreditsModel: {
+      url: string;
     };
     InvoiceModel: {
       id: number;
@@ -100,6 +126,9 @@ export interface components {
         invoices?: components["schemas"]["InvoiceModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
+    };
+    GoToCustomerPortalModel: {
+      url: string;
     };
     CollectionModelPlanModel: {
       _embedded?: {
@@ -186,10 +215,67 @@ export interface operations {
       };
     };
   };
+  /** Prepares update subscription session */
+  prepareUpdateSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["SubscriptionUpdatePreviewModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSubscriptionPrepareRequest"];
+      };
+    };
+  };
+  /** Cancels subscription */
+  cancelSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   webhook: {
     parameters: {
       header: {
-        "Stripe-Signature": string;
+        "Stripe-Signature"?: string;
       };
     };
     responses: {
@@ -229,7 +315,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": string;
+          "*/*": components["schemas"]["SubscribeModel"];
         };
       };
       /** Bad Request */
@@ -251,58 +337,6 @@ export interface operations {
       };
     };
   };
-  /** Returns url of Stripe checkout session */
-  createCustomerPortalSession: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  /** Cancels subscription */
-  cancelSubscription: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   /** Returns url of Stripe checkout session to buy more credits */
   getBuyMoreCreditsCheckoutSessionUrl: {
     parameters: {
@@ -314,7 +348,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": string;
+          "*/*": components["schemas"]["BuyMoreCreditsModel"];
         };
       };
       /** Bad Request */
@@ -385,6 +419,34 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelInvoiceModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Returns url of Stripe customer portal session */
+  goToCustomerPortal: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["GoToCustomerPortalModel"];
         };
       };
       /** Bad Request */

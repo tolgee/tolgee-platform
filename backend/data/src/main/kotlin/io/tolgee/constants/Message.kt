@@ -91,7 +91,8 @@ enum class Message {
   EMAIL_ALREADY_INVITED_OR_MEMBER,
   PRICE_NOT_FOUND,
   INVOICE_NOT_FROM_ORGANIZATION,
-  INVOICE_NOT_FOUND;
+  INVOICE_NOT_FOUND,
+  PLAN_NOT_FOUND;
 
   val code: String
     get() = name.lowercase(Locale.getDefault())

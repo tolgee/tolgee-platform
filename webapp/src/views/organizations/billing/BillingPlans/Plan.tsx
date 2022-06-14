@@ -8,6 +8,7 @@ import { usePlan } from './usePlan';
 import { PlanActionButton } from './PlanActionButton';
 import { PlanTitle } from './PlanTitle';
 import { PlanPrice } from './PlanPrice';
+import { PrepareUpgradeDialog } from '../PrepareUpgradeDialog';
 
 type PlanModel = components['schemas']['PlanModel'];
 type Period = components['schemas']['SubscribeRequest']['period'];
@@ -43,8 +44,8 @@ export const Plan: FC<Props> = ({
 }) => {
   const t = useTranslate();
   const {
-    onUpgrade,
-    upgradeMutation,
+    onPrepareUpgrade,
+    prepareUpgradeMutation,
     onSubscribe,
     subscribeMutation,
     onCancel,
@@ -70,6 +71,15 @@ export const Plan: FC<Props> = ({
         period={period}
       />
 
+      {prepareUpgradeMutation.data && (
+        <PrepareUpgradeDialog
+          data={prepareUpgradeMutation.data}
+          onClose={() => {
+            prepareUpgradeMutation.reset();
+          }}
+        />
+      )}
+
       {!plan.free &&
         (isActive && !isEnded ? (
           <PlanActionButton
@@ -80,15 +90,15 @@ export const Plan: FC<Props> = ({
           </PlanActionButton>
         ) : isActive && isEnded ? (
           <PlanActionButton
-            loading={upgradeMutation.isLoading}
-            onClick={() => onUpgrade()}
+            loading={prepareUpgradeMutation.isLoading}
+            onClick={() => onPrepareUpgrade()}
           >
             {t('billing_plan_resubscribe')}
           </PlanActionButton>
         ) : isOrganizationSubscribed ? (
           <PlanActionButton
-            loading={upgradeMutation.isLoading}
-            onClick={() => onUpgrade()}
+            loading={prepareUpgradeMutation.isLoading}
+            onClick={() => onPrepareUpgrade()}
           >
             {t('billing_plan_subscribe')}
           </PlanActionButton>

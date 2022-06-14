@@ -18,8 +18,8 @@ type Props = {
 export const usePlan = ({ planId, period }: Props) => {
   const organization = useOrganization();
 
-  const onUpgrade = () => {
-    upgradeMutation.mutate({
+  const onPrepareUpgrade = () => {
+    prepareUpgradeMutation.mutate({
       path: {
         organizationId: organization!.id,
       },
@@ -32,8 +32,8 @@ export const usePlan = ({ planId, period }: Props) => {
     });
   };
 
-  const upgradeMutation = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/update-subscription',
+  const prepareUpgradeMutation = useBillingApiMutation({
+    url: '/v2/organizations/{organizationId}/billing/prepare-update-subscription',
     method: 'put',
     invalidatePrefix: '/',
   });
@@ -58,7 +58,7 @@ export const usePlan = ({ planId, period }: Props) => {
     invalidatePrefix: '/',
     options: {
       onSuccess: (data) => {
-        window.location.href = data;
+        window.location.href = data.url;
       },
       onError: (data) => {
         if (data.code === 'organization_already_subscribed') {
@@ -72,7 +72,7 @@ export const usePlan = ({ planId, period }: Props) => {
 
   const cancelMutation = useBillingApiMutation({
     url: '/v2/organizations/{organizationId}/billing/cancel-subscription',
-    method: 'post',
+    method: 'put',
     invalidatePrefix: '/',
   });
 
@@ -81,8 +81,8 @@ export const usePlan = ({ planId, period }: Props) => {
   };
 
   return {
-    onUpgrade,
-    upgradeMutation,
+    onPrepareUpgrade,
+    prepareUpgradeMutation,
     onSubscribe,
     subscribeMutation,
     onCancel,
