@@ -66,10 +66,14 @@ class TestDataService(
       saveOrganizationData(builder)
     }
 
+    executeInNewTransaction(transactionManager) {
+      additionalTestDataSavers.forEach { it.save(builder) }
+    }
+    entityManager.flush()
+    entityManager.clear()
+
     saveAllMtCreditBuckets(builder)
     saveProjectData(builder)
-
-    additionalTestDataSavers.forEach { it.save(builder) }
 
     finalize()
   }

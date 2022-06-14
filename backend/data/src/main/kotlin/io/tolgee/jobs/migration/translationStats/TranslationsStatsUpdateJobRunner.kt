@@ -13,6 +13,7 @@ import org.springframework.batch.core.repository.JobRepository
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Component
 class TranslationsStatsUpdateJobRunner(
   val tolgeeProperties: TolgeeProperties,

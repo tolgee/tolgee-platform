@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort
 import javax.persistence.EntityManager
 import javax.sql.DataSource
 
+@Suppress("SpringJavaInjectionPointsAutowiringInspection")
 @Configuration
 class TranslationStatsJobConfiguration {
 
