@@ -3,7 +3,7 @@ package io.tolgee.api.v2.controllers.v2ProjectsController
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.tolgee.dtos.request.LanguageDto
 import io.tolgee.dtos.request.project.CreateProjectDTO
-import io.tolgee.fixtures.LoggedRequestFactory
+import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -32,8 +32,11 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
 
   @BeforeEach
   fun setup() {
+    val base = dbPopulator.createBase("SomeProject", "user")
+    userAccount = base.userAccount
     createForLanguagesDto = CreateProjectDTO(
       name = "What a project",
+      organizationId = base.organization.id,
       languages = listOf(
         LanguageDto(
           name = "English",
@@ -104,9 +107,10 @@ class V2ProjectsControllerCreateTest : AuthorizedControllerTest() {
   }
 
   private fun testCreateCorrectRequest() {
-    val request = CreateProjectDTO("aaa", listOf(languageDTO))
+    val organization = dbPopulator.createOrganizationIfNotExist("nice", userAccount = userAccount!!)
+    val request = CreateProjectDTO("aaa", listOf(languageDTO), organizationId = organization.id)
     mvc.perform(
-      LoggedRequestFactory.loggedPost("/v2/projects")
+      AuthorizedRequestFactory.loggedPost("/v2/projects")
         .contentType(MediaType.APPLICATION_JSON).content(
           jacksonObjectMapper().writeValueAsString(request)
         )

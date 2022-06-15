@@ -35,14 +35,16 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
 
   @Test
   fun `does not return when has no project permission`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     userAccount = dbPopulator.createUserIfNotExists("pavol")
     performAuthGet("/v2/projects/${project.id}/invitations").andIsForbidden
   }
 
   @Test
   fun `deletes translate invitation with languages`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     tolgeeProperties.frontEndUrl = "https://dummyUrl.com"
     val invitation = createTranslateInvitation(project)
 
@@ -53,7 +55,8 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
 
   @Test
   fun `deletes edit invitation`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
 
     val invitation = invitationService.create(
       CreateProjectInvitationParams(
@@ -68,7 +71,8 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
 
   @Test
   fun `accepts invitation`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val code = invitationService.create(
       CreateProjectInvitationParams(
         project,
@@ -85,7 +89,8 @@ class V2InvitationControllerTest : AuthorizedControllerTest(), JavaMailSenderMoc
 
   @Test
   fun `accepts translate invitation with languages`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val code = invitationService.create(
       CreateProjectInvitationParams(
         project,

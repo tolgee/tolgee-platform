@@ -28,16 +28,17 @@ class TranslationControllerTest :
 
   @Test
   fun getViewDataSearch() {
-    val app = dbPopulator.populate(generateUniqueString())
+    val base = dbPopulator.populate(generateUniqueString())
     val searchString = "This"
-    val response = performValidViewRequest(app, "?search=$searchString")
+    val response = performValidViewRequest(base.project, "?search=$searchString")
     Assertions.assertThat(response.data.size).isPositive
     assertThat(jacksonObjectMapper().writeValueAsString(response)).contains(searchString)
   }
 
   @Test
   fun getViewDataQueryLanguages() {
-    val project = dbPopulator.populate(generateUniqueString())
+    val base = dbPopulator.populate(generateUniqueString())
+    val project = base.project
     val response = performValidViewRequest(project, "?languages=en")
     Assertions.assertThat(response.data.size).isGreaterThan(8)
     for ((_, _, translations) in response.data) {
@@ -57,7 +58,7 @@ class TranslationControllerTest :
 
   @Test
   fun getViewDataQueryPagination() {
-    val project = dbPopulator.populate(generateUniqueString())
+    val project = dbPopulator.populate(generateUniqueString()).project
     val limit = 5
     val response = performValidViewRequest(project, String.format("?limit=%d", limit))
     Assertions.assertThat(response.data.size).isEqualTo(limit)
@@ -81,14 +82,14 @@ class TranslationControllerTest :
   fun getViewDataMetadata() {
     val project = dbPopulator.populate(generateUniqueString())
     val limit = 5
-    val response = performValidViewRequest(project, String.format("?limit=%d", limit))
+    val response = performValidViewRequest(project.project, String.format("?limit=%d", limit))
     Assertions.assertThat(response.params.languages).contains("en", "de")
   }
 
   @Test
   fun getTranslations() {
-    val project = dbPopulator.populate(generateUniqueString())
-    val mvcResult = performAuthGet("/api/project/${project.id}/translations/en,de")
+    val base = dbPopulator.populate(generateUniqueString())
+    val mvcResult = performAuthGet("/api/project/${base.project.id}/translations/en,de")
       .andExpect(status().isOk).andReturn()
     val result: Map<String, Any> = mvcResult.mapResponseTo()
     assertThat(result).containsKeys("en", "de")
@@ -96,7 +97,8 @@ class TranslationControllerTest :
 
   @Test
   fun setTranslations() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"))
 
     performAuthPost(
@@ -154,7 +156,8 @@ class TranslationControllerTest :
 
   @Test
   fun updateTranslations() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val translationsMap = mapOf(Pair("en", "Hello"), Pair("de", "Hallo"))
     keyService.create(project, SetTranslationsWithKeyDto(key = "hello", translations = translationsMap))
 

@@ -37,8 +37,8 @@ class ProjectServiceTest : AbstractSpringTest() {
   @Test
   fun testFindAllSingleProject() {
     dbPopulator.createUsersAndOrganizations() // create some data
-    val repo = dbPopulator.createBase("Hello world", generateUniqueString())
-    val projects = projectService.findAllPermitted(repo.userOwner!!)
+    val base = dbPopulator.createBase("Hello world", generateUniqueString())
+    val projects = projectService.findAllPermitted(base.userAccount)
     assertThat(projects).hasSize(1)
     assertThat(projects[0].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
   }
@@ -47,17 +47,16 @@ class ProjectServiceTest : AbstractSpringTest() {
   @Transactional
   fun testFindMultiple() {
     val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("helga") // create some data
-    val repo = dbPopulator.createBase("Hello world")
-    repo.userOwner = userAccountService.get(repo.userOwner!!.id).get()
+    val base = dbPopulator.createBase("Hello world")
     val organization = usersWithOrganizations[0].organizationRoles[0].organization
-    organizationRoleService.grantRoleToUser(repo.userOwner!!, organization!!, OrganizationRoleType.MEMBER)
+    organizationRoleService.grantRoleToUser(base.userAccount, organization!!, OrganizationRoleType.MEMBER)
 
     val user3 = entityManager.merge(usersWithOrganizations[3])
     entityManager.refresh(user3)
 
     val organization2 = user3.organizationRoles[0].organization
-    organizationRoleService.grantRoleToUser(repo.userOwner!!, organization2!!, OrganizationRoleType.OWNER)
-    val projects = projectService.findAllPermitted(repo.userOwner!!)
+    organizationRoleService.grantRoleToUser(base.userAccount, organization2!!, OrganizationRoleType.OWNER)
+    val projects = projectService.findAllPermitted(base.userAccount)
     assertThat(projects).hasSize(7)
     assertThat(projects[6].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
     assertThat(projects[1].permissionType).isEqualTo(Permission.ProjectPermissionType.VIEW)
@@ -67,35 +66,34 @@ class ProjectServiceTest : AbstractSpringTest() {
   @Test
   fun testFindMultiplePermissions() {
     val usersWithOrganizations = dbPopulator.createUsersAndOrganizations("agnes") // create some data
-    val repo = dbPopulator.createBase("Hello world")
-    repo.userOwner = userAccountService.get(repo.userOwner!!.id).get()
+    val base = dbPopulator.createBase("Hello world")
     val organization = usersWithOrganizations[0].organizationRoles[0].organization
-    organizationRoleService.grantRoleToUser(repo.userOwner!!, organization!!, OrganizationRoleType.MEMBER)
+    organizationRoleService.grantRoleToUser(base.userAccount, organization!!, OrganizationRoleType.MEMBER)
 
     val user3 = entityManager.merge(usersWithOrganizations[3])
     entityManager.refresh(user3)
 
     val organization2 = user3.organizationRoles[0].organization
-    organizationRoleService.grantRoleToUser(repo.userOwner!!, organization2!!, OrganizationRoleType.OWNER)
+    organizationRoleService.grantRoleToUser(base.userAccount, organization2!!, OrganizationRoleType.OWNER)
 
-    val customPermissionRepo = usersWithOrganizations[0].organizationRoles[0].organization!!.projects[2]
-    val customPermissionRepo2 = user3.organizationRoles[0].organization!!.projects[2]
+    val customPermissionProject = usersWithOrganizations[0].organizationRoles[0].organization!!.projects[2]
+    val customPermissionProject2 = user3.organizationRoles[0].organization!!.projects[2]
     permissionService.create(
       Permission(
-        user = repo.userOwner,
-        project = customPermissionRepo,
+        user = base.userAccount,
+        project = customPermissionProject,
         type = Permission.ProjectPermissionType.TRANSLATE
       )
     )
     permissionService.create(
       Permission(
-        user = repo.userOwner,
-        project = customPermissionRepo2,
+        user = base.userAccount,
+        project = customPermissionProject2,
         type = Permission.ProjectPermissionType.TRANSLATE
       )
     )
 
-    val projects = projectService.findAllPermitted(repo.userOwner!!)
+    val projects = projectService.findAllPermitted(base.userAccount)
     assertThat(projects).hasSize(7)
     assertThat(projects[6].permissionType).isEqualTo(Permission.ProjectPermissionType.MANAGE)
     assertThat(projects[2].permissionType).isEqualTo(Permission.ProjectPermissionType.TRANSLATE)

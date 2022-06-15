@@ -1,7 +1,7 @@
 package io.tolgee.repository
 
+import io.tolgee.model.Organization
 import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
 import io.tolgee.model.views.ProjectView
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -15,12 +15,10 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   companion object {
     const val BASE_VIEW_QUERY = """select r.id as id, r.name as name, r.description as description,
         r.slug as slug, r.avatarHash as avatarHash,
-        ua as userOwner,
         bl as baseLanguage, o as organizationOwner,
         role.type as organizationRole, p.type as directPermissions
         from Project r
         left join r.baseLanguage bl
-        left join UserAccount ua on ua.id = r.userOwner.id
         left join Permission p on p.project = r and p.user.id = :userAccountId
         left join Organization o on r.organizationOwner = o
         left join OrganizationRole role on role.organization = o and role.user.id = :userAccountId
@@ -42,8 +40,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   @Query(
     """$BASE_VIEW_QUERY 
         and (:search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
-        or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
-        or lower(ua.name) like lower(concat('%', cast(:search as text),'%')))
+        or lower(o.name) like lower(concat('%', cast(:search as text),'%'))))
     """
   )
   fun findAllPermitted(
@@ -59,7 +56,7 @@ interface ProjectRepository : JpaRepository<Project, Long> {
       $BASE_VIEW_QUERY and o.id = :organizationOwnerId and o is not null
       and ((lower(r.name) like lower(concat('%', cast(:search as text),'%'))
       or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
-      or lower(ua.name) like lower(concat('%', cast(:search as text),'%')) or cast(:search as text) is null)
+      or cast(:search as text) is null)
         """
   )
   fun findAllPermittedInOrganization(
@@ -97,5 +94,5 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   )
   fun getWithLanguages(projectIds: Iterable<Long>): List<Project>
 
-  fun findAllByNameAndUserOwner(name: String, userOwner: UserAccount): List<Project>
+  fun findAllByNameAndOrganizationOwner(name: String, organization: Organization): List<Project>
 }

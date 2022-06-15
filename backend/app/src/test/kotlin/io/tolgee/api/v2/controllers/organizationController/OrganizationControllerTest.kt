@@ -65,7 +65,7 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
       .andPrettyPrint.andAssertThatJson.let {
         it.node("_embedded.organizations").let {
           it.isArray.hasSize(6)
-          it.node("[0].name").isEqualTo("user 2's organization 1")
+          it.node("[0].name").isEqualTo("user-2's organization 1")
           it.node("[0].basePermissions").isEqualTo("VIEW")
           it.node("[0].currentUserRole").isEqualTo("OWNER")
         }
@@ -82,7 +82,7 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
       .andPrettyPrint.andAssertThatJson.let {
         it.node("_embedded.organizations").let {
           it.isArray.hasSize(1)
-          it.node("[0].name").isEqualTo("user 2's organization 1")
+          it.node("[0].name").isEqualTo("user-2's organization 1")
           it.node("[0].basePermissions").isEqualTo("VIEW")
           it.node("[0].currentUserRole").isEqualTo("OWNER")
         }
@@ -98,7 +98,7 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
     performAuthGet("/api/organizations?size=100&sort=basePermissions,desc&sort=name,desc")
       .andPrettyPrint
       .andAssertThatJson
-      .node("_embedded.organizations").node("[0].name").isEqualTo("user 4's organization 3")
+      .node("_embedded.organizations").node("[0].name").isEqualTo("user-4's organization 3")
   }
 
   @Test
@@ -348,9 +348,9 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
         .andIsOk.andAssertThatJson.let {
           it.node("_embedded.projects").let { projectsNode ->
             projectsNode.isArray.hasSize(3)
-            projectsNode.node("[1].name").isEqualTo("user 2's organization 1 project 2")
+            projectsNode.node("[1].name").isEqualTo("user-2's organization 1 project 2")
             projectsNode.node("[1].organizationOwnerSlug").isEqualTo("user-2-s-organization-1")
-            projectsNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
+            projectsNode.node("[1].organizationOwnerName").isEqualTo("user-2's organization 1")
           }
         }
     }
@@ -365,9 +365,9 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
         .andIsOk.andAssertThatJson.let {
           it.node("_embedded.projects").let { projectsNode ->
             projectsNode.isArray.hasSize(3)
-            projectsNode.node("[1].name").isEqualTo("user 2's organization 1 project 2")
+            projectsNode.node("[1].name").isEqualTo("user-2's organization 1 project 2")
             projectsNode.node("[1].organizationOwnerSlug").isEqualTo("user-2-s-organization-1")
-            projectsNode.node("[1].organizationOwnerName").isEqualTo("user 2's organization 1")
+            projectsNode.node("[1].organizationOwnerName").isEqualTo("user-2's organization 1")
           }
         }
     }

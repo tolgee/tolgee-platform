@@ -17,14 +17,14 @@ class ProjectPermissionFilterTest : AuthorizedControllerTest() {
   @Test
   fun allowsAccessToPrivilegedUser() {
     val base = dbPopulator.createBase(generateUniqueString())
-    performAuthGet("/api/project/${base.id}/translations/en")
+    performAuthGet("/api/project/${base.project.id}/translations/en")
       .andExpect(MockMvcResultMatchers.status().isOk).andReturn()
   }
 
   @Test
   fun deniesAccessToNonPrivilegedUser() {
-    val base2 = dbPopulator.createBase(generateUniqueString(), "newUser")
-    performAuthGet("/api/project/${base2.id}/translations/en")
+    val base2 = dbPopulator.createBase(generateUniqueString(), "new-user")
+    performAuthGet("/api/project/${base2.project.id}/translations/en")
       .andExpect(MockMvcResultMatchers.status().isForbidden).andReturn()
   }
 

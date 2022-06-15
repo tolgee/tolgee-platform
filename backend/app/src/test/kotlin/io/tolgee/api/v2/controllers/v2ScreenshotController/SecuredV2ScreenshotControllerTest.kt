@@ -35,7 +35,8 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
 
   @Test
   fun getScreenshotFileNoTimestamp() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
@@ -48,7 +49,8 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
 
   @Test
   fun getScreenshotFileInvalidTimestamp() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
@@ -64,7 +66,8 @@ class SecuredV2ScreenshotControllerTest : AbstractV2ScreenshotControllerTest() {
 
   @Test
   fun getScreenshotFile() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 

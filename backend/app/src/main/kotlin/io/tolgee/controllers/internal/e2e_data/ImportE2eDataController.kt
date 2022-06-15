@@ -107,17 +107,19 @@ class ImportE2eDataController(
   @Transactional
   fun generateBaseData(): Project {
     val data = testDataService.saveTestData {
-      addUserAccount {
+      val userAccountBuilder = addUserAccount {
         username = "franta"
         name = "Frantisek Dobrota"
-      }.apply {
+      }
+
+      userAccountBuilder.build buildUserAccount@{
         addProject {
-          userOwner = this@apply.self
+          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
           name = "Repo"
         }.build buildProject@{
           addPermission {
             type = Permission.ProjectPermissionType.MANAGE
-            user = this@apply.self
+            user = this@buildUserAccount.self
             project = this@buildProject.self
           }
         }

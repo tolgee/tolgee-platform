@@ -1,7 +1,7 @@
 package io.tolgee.testing
 
 import io.tolgee.fixtures.AuthRequestPerformer
-import io.tolgee.fixtures.LoggedRequestFactory.init
+import io.tolgee.fixtures.AuthorizedRequestFactory.init
 import io.tolgee.fixtures.SignedInRequestPerformer
 import io.tolgee.model.UserAccount
 import io.tolgee.security.JwtTokenProvider

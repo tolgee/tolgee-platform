@@ -33,7 +33,8 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun getScreenshotFileNoTimestamp() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
@@ -46,7 +47,8 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun getScreenshotFileInvalidTimestamp() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
@@ -62,7 +64,8 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun getScreenshotFile() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
@@ -76,7 +79,8 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun uploadScreenshot() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
 
     val key = keyService.create(project, DeprecatedKeyDto("test"))
 
@@ -93,7 +97,8 @@ class SecuredScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun findAll() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     screenshotService.store(screenshotFile, key)
     val result: List<ScreenshotDTO> = performAuthPost(

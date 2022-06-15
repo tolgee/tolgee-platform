@@ -42,7 +42,6 @@ class ProjectModelAssembler(
       organizationRole = view.organizationRole,
       organizationOwner = view.organizationOwner?.let { simpleOrganizationModelAssembler.toModel(it) },
       baseLanguage = baseLanguage?.let { languageModelAssembler.toModel(baseLanguage) },
-      userOwner = view.userOwner?.let { userAccountModelAssembler.toModel(it) },
       directPermissions = view.directPermissions,
       computedPermissions = UserPermissionModel(
         type = permissionService.computeProjectPermissionType(

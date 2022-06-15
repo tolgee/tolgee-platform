@@ -6,7 +6,6 @@ import io.tolgee.api.v2.hateoas.machineTranslation.CreditBalanceModel
 import io.tolgee.dtos.MtCreditBalanceDto
 import io.tolgee.model.Permission
 import io.tolgee.model.enums.ApiScope
-import io.tolgee.security.AuthenticationFacade
 import io.tolgee.security.api_key_auth.AccessWithApiKey
 import io.tolgee.security.project_auth.AccessWithProjectPermission
 import io.tolgee.security.project_auth.ProjectHolder
@@ -27,16 +26,9 @@ import org.springframework.web.bind.annotation.RestController
 class MtCreditsController(
   private val projectHolder: ProjectHolder,
   private val mtCreditBucketService: MtCreditBucketService,
-  private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val organizationService: OrganizationService
 ) {
-  @GetMapping("/machine-translation-credit-balance")
-  @Operation(summary = "Returns machine translation credit balance for current user")
-  fun getUserCredits(): CreditBalanceModel {
-    return mtCreditBucketService.getCreditBalances(authenticationFacade.userAccountEntity).model
-  }
-
   @GetMapping("/projects/{projectId}/machine-translation-credit-balance")
   @Operation(summary = "Returns machine translation credit balance for specified project")
   @AccessWithApiKey([ApiScope.TRANSLATIONS_EDIT])

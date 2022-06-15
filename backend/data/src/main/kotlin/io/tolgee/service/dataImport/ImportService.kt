@@ -55,7 +55,9 @@ class ImportService(
     project: Project,
     userAccount: UserAccount
   ): List<ErrorResponseBody> {
-    val import = findNotExpired(project.id, userAccount.id) ?: Import(userAccount, project)
+    val import = findNotExpired(project.id, userAccount.id) ?: Import(project).also {
+      it.author = userAccount
+    }
 
     val nonNullMessageClient = messageClient ?: { _, _ -> }
     val languages = findLanguages(import)

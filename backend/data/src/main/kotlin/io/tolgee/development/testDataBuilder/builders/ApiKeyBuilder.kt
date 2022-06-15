@@ -10,7 +10,7 @@ class ApiKeyBuilder(
     "test_api_key", mutableSetOf()
   ).apply {
     project = projectBuilder.self
-    projectBuilder.self.userOwner?.let {
+    projectBuilder.onlyUser?.let {
       this.userAccount = it
     }
   }

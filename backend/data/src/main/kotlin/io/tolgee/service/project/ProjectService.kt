@@ -128,19 +128,14 @@ class ProjectService constructor(
 
   @Transactional
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#result.id")
-  fun createProject(dto: CreateProjectDTO, userAccount: UserAccount? = null): Project {
+  fun createProject(dto: CreateProjectDTO): Project {
     val project = Project()
     project.name = dto.name
-    dto.organizationId?.also {
-      organizationRoleService.checkUserIsOwner(it)
-      project.organizationOwner = organizationService.find(it) ?: throw NotFoundException()
 
-      if (dto.slug == null) {
-        project.slug = generateSlug(dto.name, null)
-      }
-    } ?: let {
-      project.userOwner = userAccount ?: authenticationFacade.userAccountEntity
-      securityService.grantFullAccessToRepo(project, project.userOwner!!.id)
+    project.organizationOwner = organizationService.get(dto.organizationId)
+
+    if (dto.slug == null) {
+      project.slug = generateSlug(dto.name, null)
     }
 
     save(project)
@@ -343,24 +338,12 @@ class ProjectService constructor(
   @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
   fun transferToOrganization(projectId: Long, organizationId: Long) {
     val project = get(projectId)
-    project.userOwner = null
     val organization = organizationService.find(organizationId) ?: throw NotFoundException()
     project.organizationOwner = organization
     save(project)
   }
 
-  @CacheEvict(cacheNames = [Caches.PROJECTS], key = "#projectId")
-  @Transactional
-  fun transferToUser(projectId: Long, userId: Long) {
-    val project = get(projectId)
-    val userAccount = userAccountService[userId].orElseThrow { NotFoundException() }
-    project.organizationOwner = null
-    project.userOwner = userAccount
-    save(project)
-    permissionService.onProjectTransferredToUser(project, userAccount)
-  }
-
-  fun findAllByNameAndUserOwner(name: String, userOwner: UserAccount): List<Project> {
-    return projectRepository.findAllByNameAndUserOwner(name, userOwner)
+  fun findAllByNameAndOrganizationOwner(name: String, organization: Organization): List<Project> {
+    return projectRepository.findAllByNameAndOrganizationOwner(name, organization)
   }
 }
