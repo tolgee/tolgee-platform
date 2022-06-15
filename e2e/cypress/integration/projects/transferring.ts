@@ -12,7 +12,7 @@ describe('Projects Basics', () => {
 
   it('shows proper dialog content', () => {
     login('test_username', 'admin');
-    openTransferDialog('test_project');
+    openTransferDialog('Organization owned project');
     gcy('project-transfer-dialog').should(
       'contain',
       'This will transfer the project to another owner.'
@@ -22,27 +22,15 @@ describe('Projects Basics', () => {
 
   it('closes transfer dialog', () => {
     login('test_username', 'admin');
-    openTransferDialog('test_project');
+    openTransferDialog('Organization owned project');
     gcy('project-transfer-dialog').contains('Cancel').click();
     gcy('project-transfer-dialog').should('not.exist');
   });
 
-  it('transfers to other user', () => {
-    login('test_username', 'admin');
-    transferProject('test_project', 'Kajetan');
-    assertTransferred('test_project', 'Kajetan');
-  });
-
   it('transfers to organization', () => {
     login('test_username', 'admin');
-    transferProject('test_project', 'Owned organization');
-    assertTransferred('test_project', 'Owned organization');
-  });
-
-  it('transfers from organization to user', () => {
-    login('test_username', 'admin');
-    transferProject('Organization owned project', 'Kajetan');
-    assertTransferred('Organization owned project', 'Kajetan', true);
+    transferProject('Organization owned project', 'Another organization');
+    assertTransferred('Organization owned project', 'Another organization');
   });
 
   after(() => {

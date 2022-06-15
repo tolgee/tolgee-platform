@@ -6,6 +6,7 @@ import io.tolgee.constants.Message
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.dtos.request.UserUpdateRequestDto
 import io.tolgee.dtos.request.auth.SignUpDto
+import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.events.user.OnUserCreated
 import io.tolgee.events.user.OnUserUpdated
@@ -34,6 +35,8 @@ class UserAccountService(
   private val applicationEventPublisher: ApplicationEventPublisher,
   private val tolgeeProperties: TolgeeProperties,
   private val avatarService: AvatarService,
+  @Lazy
+  private val organizationService: OrganizationService
 ) {
   @Autowired
   lateinit var emailVerificationService: EmailVerificationService
@@ -98,6 +101,7 @@ class UserAccountService(
       return userAccountRepository.findByUsername(username).orElseGet {
         val account = UserAccount(name = "No auth user", username = username, role = UserAccount.Role.ADMIN)
         this.createUser(account)
+        this.organizationService.create(OrganizationDto(name = account.name), account)
         account
       }
     }

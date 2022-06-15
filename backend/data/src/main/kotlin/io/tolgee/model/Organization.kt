@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -50,6 +51,7 @@ class Organization(
     basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,
   ) : this(0, name, description, slug, basePermissions)
 
+  @JsonIgnore
   @OneToMany(mappedBy = "organization")
   var memberRoles: MutableList<OrganizationRole> = mutableListOf()
 

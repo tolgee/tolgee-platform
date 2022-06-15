@@ -12,8 +12,9 @@ class ProjectTransferringTestData {
   lateinit var user: UserAccount
   lateinit var organization: Organization
   lateinit var notOwnedOrganization: Organization
+  lateinit var anotherOrganization: Organization
+
   lateinit var project: Project
-  lateinit var vobtahlo: UserAccount
 
   val root = TestDataBuilder()
 
@@ -25,7 +26,7 @@ class ProjectTransferringTestData {
         user2 = this
       }
       addUserAccount {
-        username = "filip"
+        username = "test_username"
         name = "Filip Malecek"
         user = this
       }
@@ -39,6 +40,7 @@ class ProjectTransferringTestData {
       addOrganization {
         name = "Another organization"
         slug = "another-organization"
+        anotherOrganization = this
       }.build {
         addRole {
           user = this@ProjectTransferringTestData.user
