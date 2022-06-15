@@ -1,3 +1,11 @@
+## [2.31.1](https://github.com/tolgee/tolgee-platform/compare/v2.31.0...v2.31.1) (2022-06-15)
+
+
+### Bug Fixes
+
+* JS and CSS files caching ([47409de](https://github.com/tolgee/tolgee-platform/commit/47409de12b91b43b6f949c3ace8a8f43e404f693))
+* Set content-type header and extend error logger ([5740126](https://github.com/tolgee/tolgee-platform/commit/5740126324864f4224a46985dac90cc96194b7a0))
+
 # [2.31.0](https://github.com/tolgee/tolgee-platform/compare/v2.30.3...v2.31.0) (2022-06-10)
 
 
