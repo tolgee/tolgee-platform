@@ -32,20 +32,6 @@ class V2ProjectsControllerLeavingTest : ProjectAuthControllerTest("/v2/projects/
 
   @Test
   @ProjectJWTAuthTestMethod
-  fun `user cannot leave project when is owner`() {
-    val testData = ProjectLeavingTestData()
-    testDataService.saveTestData(testData.root)
-    userAccount = testData.user
-    projectSupplier = { testData.projectBuilder.self }
-    performProjectAuthPut("/leave", null).andPrettyPrint.andIsBadRequest.andAssertThatJson {
-      node("code").isEqualTo("cannot_leave_owning_project")
-    }
-    assertThat(permissionService.findOneByProjectIdAndUserId(testData.projectBuilder.self.id, userAccount!!.id))
-      .isNotNull
-  }
-
-  @Test
-  @ProjectJWTAuthTestMethod
   fun `cannot leave project with organization role`() {
     val testData = ProjectLeavingTestData()
     testDataService.saveTestData(testData.root)

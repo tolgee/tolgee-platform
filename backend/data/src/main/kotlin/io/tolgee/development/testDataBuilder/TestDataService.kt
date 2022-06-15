@@ -238,7 +238,7 @@ class TestDataService(
       builder.data.organizations.map {
         it.self.apply {
           val slug = this.slug
-          if (slug == null || slug.isEmpty()) {
+          if (slug.isEmpty()) {
             this.slug = organizationService.generateSlug(this.name!!)
           }
         }

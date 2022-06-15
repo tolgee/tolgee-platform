@@ -148,7 +148,7 @@ class SuggestionTestData : BaseTestData() {
   }
 
   fun addBucketWithExtraCredits() {
-    userAccountBuilder.addMtCreditBucket {
+    userAccountBuilder.defaultOrganizationBuilder.addMtCreditBucket {
       credits = 1000
       extraCredits = 1000
     }

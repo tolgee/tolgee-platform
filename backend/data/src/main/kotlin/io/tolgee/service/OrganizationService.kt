@@ -36,14 +36,19 @@ class OrganizationService(
   lateinit var projectService: ProjectService
 
   @Transactional
-  fun create(createDto: OrganizationDto): Organization {
-    return this.create(createDto, authenticationFacade.userAccountEntity)
+  fun create(
+    createDto: OrganizationDto,
+  ): Organization {
+    return create(createDto, authenticationFacade.userAccountEntity)
   }
 
   @Transactional
-  fun create(createDto: OrganizationDto, userAccount: UserAccount): Organization {
+  fun create(
+    createDto: OrganizationDto,
+    userAccount: UserAccount
+  ): Organization {
     if (createDto.slug != null && !validateSlugUniqueness(createDto.slug!!)) {
-      throw ValidationException(io.tolgee.constants.Message.ADDRESS_PART_NOT_UNIQUE)
+      throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
     }
 
     val slug = createDto.slug
@@ -112,7 +117,7 @@ class OrganizationService(
     }
 
     if (newSlug != organization.slug && !validateSlugUniqueness(newSlug!!)) {
-      throw ValidationException(io.tolgee.constants.Message.ADDRESS_PART_NOT_UNIQUE)
+      throw ValidationException(Message.ADDRESS_PART_NOT_UNIQUE)
     }
 
     organization.name = editDto.name

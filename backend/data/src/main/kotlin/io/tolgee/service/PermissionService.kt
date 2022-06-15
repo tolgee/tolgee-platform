@@ -228,17 +228,6 @@ class PermissionService(
     return cachedPermissionService.save(permission)
   }
 
-  fun onProjectTransferredToUser(project: Project, userAccount: UserAccount) {
-    val permission = findOneByProjectIdAndUserId(project.id, userAccount.id)
-      ?: Permission().also {
-        it.user = userAccount
-        it.project = project
-      }
-    permission.type = ProjectPermissionType.MANAGE
-    permission.languages = mutableSetOf()
-    cachedPermissionService.save(permission)
-  }
-
   private fun validateLanguagePermissions(
     languages: Set<Language>?,
     newPermissionType: ProjectPermissionType

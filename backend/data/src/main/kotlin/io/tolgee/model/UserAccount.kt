@@ -1,6 +1,5 @@
 package io.tolgee.model
 
-import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
@@ -60,11 +59,11 @@ data class UserAccount(
   var resetPasswordCode: String? = null
 
   @OrderBy("id ASC")
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", orphanRemoval = true)
   var organizationRoles: MutableList<OrganizationRole> = mutableListOf()
 
-  @OneToOne(mappedBy = "userAccount", cascade = [CascadeType.REMOVE])
-  var mtCreditBucket: MtCreditBucket? = null
+//  @OneToOne(mappedBy = "userAccount", cascade = [CascadeType.REMOVE])
+//  var mtCreditBucket: MtCreditBucket? = null
 
   override var avatarHash: String? = null
 

@@ -17,12 +17,13 @@ class ImportRepositoryTest : AbstractSpringTest() {
 
   @Test
   fun `creates, saves and gets Import entity`() {
-    val base = dbPopulator.createBase("hello", "importUser")
-    Import(author = base.userOwner!!, project = base).let {
+    val base = dbPopulator.createBase("hello", "import-user")
+    Import(project = base.project).let {
+      it.author = base.userAccount
       importRepository.save(it).let {
         importRepository.getOne(it.id).let { got ->
-          assertThat(got.author).isEqualTo(base.userOwner)
-          assertThat(got.project).isEqualTo(base)
+          assertThat(got.author).isEqualTo(base.userAccount)
+          assertThat(got.project).isEqualTo(base.project)
           assertThat(got.id).isGreaterThan(0L)
         }
       }

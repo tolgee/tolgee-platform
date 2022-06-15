@@ -17,7 +17,7 @@ class TranslationCommentsTestData {
   var project: Project
   lateinit var englishLanguage: Language
   lateinit var czechLanguage: Language
-  var user: UserAccount
+  lateinit var user: UserAccount
   var pepa: UserAccount
   lateinit var aKey: Key
   lateinit var bKey: Key
@@ -25,16 +25,17 @@ class TranslationCommentsTestData {
   lateinit var translation: Translation
 
   val root: TestDataBuilder = TestDataBuilder().apply {
-    user = addUserAccount {
+    var userAccountBuilder = addUserAccount {
       username = "franta"
-    }.self
+      user = this
+    }
     pepa = addUserAccount {
       username = "pepa"
     }.self
 
     project = addProject {
       name = "Franta's project"
-      userOwner = user
+      organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
     }.build {
       addPermission {
         user = this@TranslationCommentsTestData.user

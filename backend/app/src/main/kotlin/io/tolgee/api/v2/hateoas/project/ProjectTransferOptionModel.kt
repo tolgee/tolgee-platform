@@ -6,12 +6,7 @@ import org.springframework.hateoas.server.core.Relation
 @Suppress("unused")
 @Relation(collectionRelation = "transferOptions", itemRelation = "transferOption")
 open class ProjectTransferOptionModel(
-  val name: String?,
-  val username: String? = null,
-  val id: Long,
-  val type: TransferOptionType
-) : RepresentationModel<ProjectTransferOptionModel>() {
-  enum class TransferOptionType {
-    USER, ORGANIZATION
-  }
-}
+  val name: String,
+  val slug: String,
+  val id: Long
+) : RepresentationModel<ProjectTransferOptionModel>()

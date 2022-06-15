@@ -3,6 +3,7 @@ package io.tolgee.development.testDataBuilder.builders
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
+import io.tolgee.model.enums.OrganizationRoleType
 
 class TestDataBuilder {
   class DATA {
@@ -24,15 +25,23 @@ class TestDataBuilder {
     val builder = UserAccountBuilder(this)
     data.userAccounts.add(builder)
     ft(builder.self)
+    val organizationBuilder = addOrganization {
+      name = if (builder.self.name.isNotBlank()) builder.self.name else builder.self.username
+    }.build {
+      addRole {
+        user = builder.self
+        type = OrganizationRoleType.OWNER
+      }
+    }
+    builder.defaultOrganizationBuilder = organizationBuilder
     return builder
   }
 
   fun addProject(
-    userOwner: UserAccount? = null,
     organizationOwner: Organization? = null,
     ft: Project.() -> Unit
   ): ProjectBuilder {
-    val projectBuilder = ProjectBuilder(userOwner, organizationOwner, testDataBuilder = this)
+    val projectBuilder = ProjectBuilder(organizationOwner, testDataBuilder = this)
     data.projects.add(projectBuilder)
     ft(projectBuilder.self)
     return projectBuilder

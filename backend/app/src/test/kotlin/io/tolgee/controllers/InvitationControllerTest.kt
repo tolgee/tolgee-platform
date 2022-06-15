@@ -20,7 +20,8 @@ class InvitationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun getProjectInvitations() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val invitation = invitationService.create(
       CreateProjectInvitationParams(
         project,
@@ -35,7 +36,8 @@ class InvitationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun acceptInvitation() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val invitation = invitationService.create(
       CreateProjectInvitationParams(project, Permission.ProjectPermissionType.EDIT)
     )

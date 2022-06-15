@@ -18,7 +18,7 @@
     "cy-verify-downloads": "^0.0.7",
     "cypress": "^7.1.0",
     "cypress-dotenv": "^1.2.2",
-    "cypress-file-upload": "^5.0.7",
+    "cypress-file-upload": "^5.0.8",
     "cypress-promise": "^1.1.0",
     "cypress-xpath": "^1.6.1",
     "dotenv": "^8.2.0",

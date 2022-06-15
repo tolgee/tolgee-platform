@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.tolgee.controllers.ProjectAuthControllerTest
 import io.tolgee.development.testDataBuilder.data.BaseTestData
 import io.tolgee.dtos.misc.CreateProjectInvitationParams
-import io.tolgee.dtos.request.organization.OrganizationInviteUserDto
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.fixtures.JavaMailSenderMocked
 import io.tolgee.fixtures.andAssertThatJson
@@ -17,7 +16,6 @@ import io.tolgee.fixtures.node
 import io.tolgee.model.Invitation
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
-import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -30,6 +28,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.transaction.support.TransactionTemplate
 import javax.mail.internet.MimeMessage
 
 @SpringBootTest
@@ -47,6 +46,9 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
 
   override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
 
+  @Autowired
+  lateinit var transactionTemplate: TransactionTemplate
+
   @BeforeEach
   @AfterEach
   fun reset() {
@@ -55,7 +57,8 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
 
   @Test
   fun `returns project invitations`() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     tolgeeProperties.frontEndUrl = "https://dummyUrl.com"
     createTranslateInvitation(project)
     performAuthGet("/v2/projects/${project.id}/invitations").andIsOk.andAssertThatJson {
@@ -148,26 +151,39 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   @Test
   @ProjectJWTAuthTestMethod
   fun `does not invite when email already member`() {
-    userAccount!!.username = "hello@hello.com"
-    userAccountService.save(userAccount!!)
+    transactionTemplate.execute {
+      val user = dbPopulator.createUserIfNotExists("hello@hello.com")
+      val user2 = dbPopulator.createUserIfNotExists("hello@hello2.com")
+      val organization = dbPopulator.createOrganization("org", user)
+      val project = dbPopulator.createProject("hello", organization)
+      permissionService.create(
+        Permission(
+          user = user2,
+          project = project,
+          type = Permission.ProjectPermissionType.MANAGE
+        )
+      )
+      userAccount = user
+      projectSupplier = { project }
+    }
 
     performAuthPut(
       "/v2/projects/${project.id}/invite",
-      OrganizationInviteUserDto(
-        roleType = OrganizationRoleType.MEMBER,
-        email = "hello@hello.com",
+      ProjectInviteUserDto(
+        type = Permission.ProjectPermissionType.VIEW,
+        email = "hello@hello2.com",
         name = "Franta"
       )
     ).andIsBadRequest
   }
 
-  private fun inviteWithManagePermissions(): String? {
+  private fun inviteWithManagePermissions(): String {
     val invitationJson = performProjectAuthPut("/invite", ProjectInviteUserDto(Permission.ProjectPermissionType.MANAGE))
       .andIsOk.andGetContentAsString
     return parseCode(invitationJson)
   }
 
-  private fun inviteWithUserWithNameAndEmail(): String? {
+  private fun inviteWithUserWithNameAndEmail(): String {
     val invitationJson = performInviteWithNameAndEmail().andIsOk.andGetContentAsString
     return parseCode(invitationJson)
   }

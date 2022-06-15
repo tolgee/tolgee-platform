@@ -7,8 +7,8 @@ import javax.persistence.OneToOne
 
 @Entity
 class MtCreditBucket(
-  @OneToOne
-  var userAccount: UserAccount? = null,
+//  @OneToOne
+//  var userAccount: UserAccount? = null,
 
   @OneToOne
   var organization: Organization? = null

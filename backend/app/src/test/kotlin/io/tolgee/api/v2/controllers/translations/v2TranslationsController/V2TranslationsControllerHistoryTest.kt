@@ -13,7 +13,6 @@ import io.tolgee.model.UserAccount
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -79,12 +78,6 @@ class V2TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/proje
 
     userAccount = testUser
     projectSupplier = { testProject }
-  }
-
-  @AfterEach
-  fun cleanup() {
-    projectService.deleteProject(project.id)
-    userAccountService.delete(userAccount!!)
   }
 
   @ProjectJWTAuthTestMethod

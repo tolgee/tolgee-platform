@@ -13,24 +13,23 @@ import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
 class KeyControllerTest : AuthorizedControllerTest() {
   private val keyDto = SetTranslationsWithKeyDto("test string", mapOf(Pair("en", "Hello")))
   private val keyDto2 = SetTranslationsWithKeyDto("test string 2", mapOf(Pair("en", "Hello 2")))
 
   private lateinit var project: Project
 
+  @Autowired
+  lateinit var transactionTemplate: TransactionTemplate
+
   @BeforeEach
   fun setup() {
-    this.project = dbPopulator.createBase(generateUniqueString())
+    this.project = dbPopulator.createBase(generateUniqueString()).project
   }
 
   @Test
@@ -126,9 +125,11 @@ class KeyControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun getKeyTranslations() {
-    val base = dbPopulator.populate(generateUniqueString())
+    val base = transactionTemplate.execute {
+      dbPopulator.populate(generateUniqueString())
+    }!!
     val got = performAuthPost(
-      "/api/project/${base.id}/keys/translations/en,de",
+      "/api/project/${base.project.id}/keys/translations/en,de",
       GetKeyTranslationsReqDto("sampleApp.hello_world!")
     ).andReturn()
       .mapResponseTo<Map<String, String>>()

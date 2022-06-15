@@ -22,6 +22,10 @@ class LanguagePermissionsTestData {
   lateinit var germanTranslation: Translation
 
   val root: TestDataBuilder = TestDataBuilder().apply {
+    val organization = addOrganization {
+      name = "Org"
+    }
+
     addUserAccount {
       username = "en_only_user"
       enOnlyUser = this
@@ -40,6 +44,7 @@ class LanguagePermissionsTestData {
     addProject {
       project = this
       name = "Project"
+      organizationOwner = organization.self
     }.build {
       englishLanguage = addEnglish().self
       germanLanguage = addGerman().self

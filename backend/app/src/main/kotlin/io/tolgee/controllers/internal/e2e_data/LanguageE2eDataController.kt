@@ -35,7 +35,7 @@ class LanguageE2eDataController(
       val userAccount = userAccountBuilder.self
       userAccountBuilder.build {
         val projectBuilder = addProject {
-          userOwner = userAccount
+          organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
           name = "Project"
         }
 

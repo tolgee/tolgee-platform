@@ -1,18 +1,21 @@
 package io.tolgee.development.testDataBuilder.data
 
+import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 
-class ProjectTransferringTestData : BaseTestData() {
+class ProjectTransferringTestData {
   lateinit var user2: UserAccount
-  lateinit var user3: UserAccount
+  lateinit var user: UserAccount
   lateinit var organization: Organization
   lateinit var notOwnedOrganization: Organization
-  lateinit var organizationOwnedProject: Project
+  lateinit var project: Project
   lateinit var vobtahlo: UserAccount
+
+  val root = TestDataBuilder()
 
   init {
     root.apply {
@@ -24,21 +27,7 @@ class ProjectTransferringTestData : BaseTestData() {
       addUserAccount {
         username = "filip"
         name = "Filip Malecek"
-        user3 = this
-      }
-      addUserAccount {
-        username = "vobtah"
-        name = "Petr Vobtahlo"
-        vobtahlo = this
-
-        projectBuilder.addPermission {
-          user = this@addUserAccount
-          type = Permission.ProjectPermissionType.VIEW
-        }
-      }
-      projectBuilder.addPermission {
-        user = user2
-        type = Permission.ProjectPermissionType.VIEW
+        user = this
       }
 
       addOrganization {
@@ -48,20 +37,30 @@ class ProjectTransferringTestData : BaseTestData() {
       }
 
       addOrganization {
+        name = "Another organization"
+        slug = "another-organization"
+      }.build {
+        addRole {
+          user = this@ProjectTransferringTestData.user
+          type = OrganizationRoleType.OWNER
+        }
+      }
+
+      addOrganization {
         name = "Owned organization"
         organization = this
         slug = "owned-organization"
-      }.apply {
+      }.build organizationBuilder@{
         addRole {
           type = OrganizationRoleType.OWNER
           user = this@ProjectTransferringTestData.user
         }
-        addProject(organizationOwner = this@apply.self) {
+        addProject(organizationOwner = this@organizationBuilder.self) {
           name = "Organization owned project"
-          organizationOwnedProject = this
+          organizationOwner = this@organizationBuilder.self
+          project = this
         }.build {
           addPermission {
-
             user = this@ProjectTransferringTestData.user2
             type = Permission.ProjectPermissionType.VIEW
           }

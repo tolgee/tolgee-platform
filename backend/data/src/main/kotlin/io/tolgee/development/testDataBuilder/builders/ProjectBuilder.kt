@@ -8,28 +8,22 @@ import io.tolgee.model.MtServiceConfig
 import io.tolgee.model.Organization
 import io.tolgee.model.Permission
 import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
 import io.tolgee.model.dataImport.Import
 import io.tolgee.model.key.Key
 import io.tolgee.model.translation.Translation
 import org.springframework.core.io.ClassPathResource
 
 class ProjectBuilder(
-  userOwner: UserAccount? = null,
   organizationOwner: Organization? = null,
   val testDataBuilder: TestDataBuilder
 ) : BaseEntityDataBuilder<Project, ProjectBuilder>() {
   override var self: Project = Project().apply {
-    if (userOwner == null && organizationOwner == null) {
-      if (testDataBuilder.data.userAccounts.size > 0) {
-        this.userOwner = testDataBuilder.data.userAccounts.first().self
-      } else if (testDataBuilder.data.organizations.size > 0) {
+    if (organizationOwner == null) {
+      if (testDataBuilder.data.organizations.size > 0) {
         this.organizationOwner = testDataBuilder.data.organizations.first().self
       }
       return@apply
     }
-
-    this.userOwner = userOwner
     this.organizationOwner = organizationOwner
   }
 
@@ -51,8 +45,8 @@ class ProjectBuilder(
 
   fun addApiKey(ft: FT<ApiKey>) = addOperation(data.apiKeys, ft)
 
-  fun addImport(author: UserAccount? = null, ft: FT<Import>) =
-    addOperation(data.imports, ImportBuilder(this, author), ft)
+  fun addImport(ft: FT<Import> = {}) =
+    addOperation(data.imports, ImportBuilder(this), ft)
 
   fun addLanguage(ft: FT<Language>) =
     addOperation(data.languages, ft)
@@ -94,4 +88,6 @@ class ProjectBuilder(
       tag = "cs"
     }
   }
+
+  val onlyUser get() = this.self.organizationOwner?.memberRoles?.singleOrNull()?.user
 }

@@ -7,7 +7,7 @@ package io.tolgee.controllers.screenshot
 import io.tolgee.dtos.request.screenshot.GetScreenshotsByKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.dtos.response.ScreenshotDTO
-import io.tolgee.fixtures.LoggedRequestFactory.addToken
+import io.tolgee.fixtures.AuthorizedRequestFactory.addToken
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -25,7 +25,8 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun uploadScreenshot() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
 
     val key = keyService.create(project, DeprecatedKeyDto("test"))
 
@@ -41,7 +42,8 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun uploadMultipleScreenshots() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     repeat((1..5).count()) {
       performStoreScreenshot(project, key)
@@ -51,7 +53,8 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun findAll() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     val key2 = keyService.create(project, DeprecatedKeyDto("test_2"))
 
@@ -81,7 +84,8 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun getScreenshotFile() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     val screenshot = screenshotService.store(screenshotFile, key)
 
@@ -98,7 +102,8 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun delete() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
 
     val list = (1..20).map {
@@ -115,7 +120,8 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun uploadValidationNoImage() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     val key = keyService.create(project, DeprecatedKeyDto("test"))
     loginAsUser("admin")
     val response = mvc.perform(
@@ -137,7 +143,8 @@ class ScreenshotControllerTest : AbstractScreenshotControllerTest() {
 
   @Test
   fun uploadValidationBlankKey() {
-    val project = dbPopulator.createBase(generateUniqueString())
+    val base = dbPopulator.createBase(generateUniqueString())
+    val project = base.project
     loginAsUser("admin")
     val response = mvc.perform(
       addToken(

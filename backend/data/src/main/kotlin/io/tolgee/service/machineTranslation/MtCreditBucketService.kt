@@ -8,7 +8,6 @@ import io.tolgee.exceptions.OutOfCreditsException
 import io.tolgee.model.MtCreditBucket
 import io.tolgee.model.Organization
 import io.tolgee.model.Project
-import io.tolgee.model.UserAccount
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
 import io.tolgee.service.OrganizationService
 import org.apache.commons.lang3.time.DateUtils
@@ -105,10 +104,6 @@ class MtCreditBucketService(
     )
   }
 
-  fun getCreditBalances(userAccount: UserAccount): MtCreditBalanceDto {
-    return getCreditBalances(findOrCreateBucket(userAccount))
-  }
-
   fun getCreditBalances(organization: Organization): MtCreditBalanceDto {
     return getCreditBalances(findOrCreateBucket(organization))
   }
@@ -137,14 +132,6 @@ class MtCreditBucketService(
     }
   }
 
-  private fun findOrCreateBucket(userAccount: UserAccount): MtCreditBucket {
-    return machineTranslationCreditBucketRepository.findByUserAccount(userAccount)
-      ?: MtCreditBucket(userAccount = userAccount).apply {
-        this.initCredits()
-        save(this)
-      }
-  }
-
   private fun findOrCreateBucket(organization: Organization): MtCreditBucket {
     return machineTranslationCreditBucketRepository.findByOrganization(organization)
       ?: MtCreditBucket(organization = organization).apply {
@@ -164,10 +151,6 @@ class MtCreditBucketService(
   }
 
   private fun findOrCreateBucket(project: Project): MtCreditBucket {
-    return project.userOwner?.let { userAccount ->
-      findOrCreateBucket(userAccount)
-    } ?: project.organizationOwner?.let { organization ->
-      findOrCreateBucket(organization)
-    } ?: throw RuntimeException("Project has no owner")
+    return findOrCreateBucket(project.organizationOwner)
   }
 }

@@ -14,14 +14,14 @@ class ApiKeysTestData : BaseTestData() {
 
   init {
     this.root.apply {
-      addUserAccount {
+      val userAccountBuilder = addUserAccount {
         name = "Franta Dobrota"
         username = "franta"
         frantisekDobrota = this
       }
 
       addProject {
-        userOwner = frantisekDobrota
+        organizationOwner = userAccountBuilder.defaultOrganizationBuilder.self
         name = "Frantisek's project"
         frantasProject = this
       }.build {

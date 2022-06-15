@@ -86,7 +86,11 @@ abstract class AbstractSocketIoTest : AbstractSpringTest() {
   fun prepareSockets() {
     beforePrepareSockets()
     project = testData.projectBuilder.self
-    val apiKey = apiKeyService.create(project.userOwner!!, setOf(ApiScope.TRANSLATIONS_VIEW), project).key
+    val apiKey = apiKeyService.create(
+      testData.projectBuilder.onlyUser!!,
+      setOf(ApiScope.TRANSLATIONS_VIEW),
+      project
+    ).key
     sockets = socketPorts.map {
       IO.socket(URI.create("http://localhost:$it/translations?apiKey=$apiKey"))
     }

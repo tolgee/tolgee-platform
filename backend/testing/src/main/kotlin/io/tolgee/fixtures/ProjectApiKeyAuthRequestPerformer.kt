@@ -53,7 +53,7 @@ class ProjectApiKeyAuthRequestPerformer(
     files.forEach { builder.file(it) }
     params.forEach { (name, values) -> builder.param(name, *values) }
     return mvc.perform(
-      LoggedRequestFactory.addToken(
+      AuthorizedRequestFactory.addToken(
         MockMvcRequestBuilders.multipart(projectUrlPrefix + url.withApiKey)
       )
     )

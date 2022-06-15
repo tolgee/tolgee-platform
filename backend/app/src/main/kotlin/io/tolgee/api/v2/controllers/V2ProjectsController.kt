@@ -248,6 +248,9 @@ class V2ProjectsController(
     ) {
       throw PermissionException()
     }
+
+    organizationRoleService.checkUserIsOwner(dto.organizationId)
+
     val project = projectService.createProject(dto)
     return projectModelAssembler.toModel(projectService.getView(project.id))
   }
@@ -276,22 +279,11 @@ class V2ProjectsController(
     projectService.transferToOrganization(projectId, organizationId)
   }
 
-  @PutMapping(value = ["/{projectId:[0-9]+}/transfer-to-user/{userId:[0-9]+}"])
-  @Operation(summary = "Transfers project's ownership to user")
-  @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
-  fun transferProjectToUser(@PathVariable projectId: Long, @PathVariable userId: Long) {
-    securityService.checkAnyProjectPermission(projectId, userId)
-    projectService.transferToUser(projectId, userId)
-  }
-
   @PutMapping(value = ["/{projectId:[0-9]+}/leave"])
   @Operation(summary = "Leave project")
   @AccessWithProjectPermission(ProjectPermissionType.VIEW)
   fun leaveProject(@PathVariable projectId: Long) {
     val project = projectHolder.projectEntity
-    if (project.userOwner?.id == authenticationFacade.userAccount.id) {
-      throw BadRequestException(Message.CANNOT_LEAVE_OWNING_PROJECT)
-    }
     val permissionData = permissionService.getProjectPermissionData(project.id, authenticationFacade.userAccount.id)
     if (permissionData.organizationRole != null) {
       throw BadRequestException(Message.CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE)
@@ -320,26 +312,10 @@ class V2ProjectsController(
     val options = organizations.content.map {
       ProjectTransferOptionModel(
         name = it.name,
+        slug = it.slug,
         id = it.id,
-        type = ProjectTransferOptionModel.TransferOptionType.ORGANIZATION
       )
     }.toMutableList()
-    val users = userAccountService.getAllInProject(
-      projectId = project.id,
-      PageRequest.of(0, 10),
-      search,
-      project.userOwnerId
-    )
-    options.addAll(
-      users.content.map {
-        ProjectTransferOptionModel(
-          name = it.name,
-          username = it.username,
-          id = it.id,
-          type = ProjectTransferOptionModel.TransferOptionType.USER
-        )
-      }
-    )
     options.sortBy { it.name }
     return CollectionModel.of(options)
   }
