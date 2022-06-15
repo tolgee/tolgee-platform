@@ -55,7 +55,7 @@ export const Credits: FC = () => {
     method: 'post',
     options: {
       onSuccess(data) {
-        window.location.href = data;
+        window.location.href = data.url;
       },
     },
   });

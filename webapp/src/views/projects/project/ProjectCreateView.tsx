@@ -21,10 +21,11 @@ import OwnerSelect from './components/OwnerSelect';
 
 const messageService = container.resolve(MessageService);
 
-export type CreateProjectValueType =
-  components['schemas']['CreateProjectDTO'] & {
-    owner: number;
-  };
+export type CreateProjectValueType = Partial<
+  components['schemas']['CreateProjectDTO']
+> & {
+  owner: number;
+};
 
 export const ProjectCreateView: FunctionComponent = () => {
   const createProjectLoadable = useApiMutation({
@@ -118,7 +119,7 @@ export const ProjectCreateView: FunctionComponent = () => {
                 <BaseLanguageSelect
                   valueKey="tag"
                   name="baseLanguageTag"
-                  languages={props.values.languages}
+                  languages={props.values.languages!}
                 />
               </Box>
             </Box>

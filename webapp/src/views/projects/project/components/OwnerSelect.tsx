@@ -20,10 +20,15 @@ const OwnerSelect = () => {
     },
   });
 
-  const data = [{ value: 0, render: user?.name, key: 0 }];
-  organizationsLoadable.data?._embedded?.organizations?.forEach((i) =>
-    data.push({ value: i.id, key: i.id, render: i.name })
-  );
+  const data = organizationsLoadable.data?._embedded?.organizations?.map(
+    (i) => ({ value: i.id, key: i.id, render: <>i.name</> })
+  ) || [
+    {
+      value: 0,
+      key: 0,
+      render: <T>project_create_select_owner_no_organization</T>,
+    },
+  ];
   const items = data.map((item) => (
     <MenuItem
       data-cy="project-owner-select-item"

@@ -10,8 +10,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { useHistory } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 import { TranslationStatesBar } from 'tg.views/projects/TranslationStatesBar';
@@ -160,7 +159,7 @@ const DashboardProjectListItem = (
             <Chip
               data-cy="project-list-owner"
               size="small"
-              label={p.organizationOwnerName || p.userOwner?.name}
+              label={p.organizationOwnerName}
             />
           </Box>
         )}

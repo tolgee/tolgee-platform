@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import clsx from 'clsx';
 import { useCurrentLanguage, useTranslate } from '@tolgee/react';
-import { Box, styled, Menu, MenuItem } from '@mui/material';
+import { Box, Menu, MenuItem, styled } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 
@@ -56,6 +56,7 @@ const StyledTile = styled(Box)`
   &.clickable {
     transition: background-color 0.1s ease-out;
     cursor: pointer;
+
     &:hover {
       background-color: ${({ theme }) => theme.palette.emphasis[200]};
       transition: background-color 0.2s ease-in;
@@ -281,13 +282,10 @@ export const ProjectTotals: React.FC<{
         >
           <StyledTileDataItem>
             <StyledTileValue>
-              <OwnerAvatar
-                userOwner={project.userOwner}
-                organizationOwner={project.organizationOwner}
-              />
+              <OwnerAvatar organizationOwner={project.organizationOwner} />
             </StyledTileValue>
             <StyledTileDescriptionSmall>
-              {project.userOwner?.name || project.organizationOwner?.name}
+              {project.organizationOwner?.name}
             </StyledTileDescriptionSmall>
             <StyledTileSubDescription>
               {t('project_dashboard_project_owner', 'Project Owner')}
@@ -352,7 +350,6 @@ export const ProjectTotals: React.FC<{
 };
 
 type OwnerAvatarProps = {
-  userOwner?: components['schemas']['UserAccountModel'];
   organizationOwner?: components['schemas']['SimpleOrganizationModel'];
 };
 
@@ -361,10 +358,10 @@ const OwnerAvatar = (props: OwnerAvatarProps) => {
     <AvatarImg
       size={32}
       owner={{
-        avatar: props.userOwner?.avatar || props.organizationOwner?.avatar,
-        id: props.userOwner?.id || props.organizationOwner!.id,
-        name: props.userOwner?.name || props.organizationOwner?.name,
-        type: props.userOwner ? 'USER' : 'ORG',
+        avatar: props.organizationOwner?.avatar,
+        id: props.organizationOwner!.id,
+        name: props.organizationOwner?.name,
+        type: 'ORG',
       }}
     />
   );
