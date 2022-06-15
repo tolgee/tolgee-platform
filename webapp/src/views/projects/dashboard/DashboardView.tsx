@@ -151,12 +151,7 @@ export const DashboardView = () => {
                 <SmallProjectAvatar project={project} />
               </StyledProjectIcon>
               <StyledProjectName>{project.name}</StyledProjectName>
-              <Chip
-                size="small"
-                label={
-                  project.userOwner?.name || project.organizationOwner?.name
-                }
-              />
+              <Chip size="small" label={project.organizationOwner?.name} />
               {showStats && (
                 <StyledUsage>
                   <Usage

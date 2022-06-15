@@ -24,11 +24,11 @@ export const CustomerPortal = () => {
   const organization = useOrganization();
 
   const getCustomerPortalSession = useBillingApiMutation({
-    url: '/v2/organizations/{organizationId}/billing/customer-portal-session',
-    method: 'post',
+    url: '/v2/organizations/{organizationId}/billing/customer-portal',
+    method: 'get',
     options: {
       onSuccess: (data) => {
-        window.location.href = data;
+        window.location.href = data.url;
       },
     },
   });
