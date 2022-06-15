@@ -94,11 +94,6 @@ export const ProjectListItemMenu: FC<{
                     },
                     onError(e) {
                       switch (e.code) {
-                        case 'cannot_leave_owning_project':
-                          messaging.error(
-                            <T>cannot_leave_owning_project_error_message</T>
-                          );
-                          break;
                         case 'cannot_leave_project_with_organization_role':
                           messaging.error(
                             <T>

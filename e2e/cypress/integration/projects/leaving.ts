@@ -13,13 +13,6 @@ describe('Projects Basics', () => {
     cy.visit(`${HOST}`);
   });
 
-  it('cannot leave owning project', () => {
-    leaveProject('test_project');
-    assertMessage(
-      'Cannot leave project owned by you. Transfer ownership to other user first.'
-    );
-  });
-
   it('cannot leave project with organization role', () => {
     login('pepik', 'admin');
     cy.visit(`${HOST}`);

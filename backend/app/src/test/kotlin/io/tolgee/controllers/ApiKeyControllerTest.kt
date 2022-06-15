@@ -115,7 +115,11 @@ class ApiKeyControllerTest : ProjectAuthControllerTest() {
     val base = dbPopulator.createBase(generateUniqueString())
     val project = base.project
     val apiKeyDTO = doCreate(project)
-    val apiKey1 = apiKeyService.create(project.organizationOwner.memberRoles.singleOrNull()?.user!!, setOf(ApiScope.KEYS_EDIT), project)
+    val apiKey1 = apiKeyService.create(
+      base.userAccount,
+      setOf(ApiScope.KEYS_EDIT),
+      project
+    )
     val project2 = dbPopulator.createBase(generateUniqueString(), initialUsername).project
     val apiKey2 = apiKeyService.create(
       base.userAccount, setOf(ApiScope.KEYS_EDIT, ApiScope.TRANSLATIONS_VIEW), project
