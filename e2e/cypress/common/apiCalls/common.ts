@@ -71,15 +71,30 @@ export const login = (username = USERNAME, password = PASSWORD) => {
     });
 };
 
+export const getDefaultOrganization = () => {
+  return v2apiFetch('organizations').then((res) => {
+    const organizations =
+      res.body as components['schemas']['PagedModelOrganizationModel'];
+    const org = organizations._embedded.organizations[0];
+    if (!org) {
+      throw Error('No default organization found!');
+    }
+    return org;
+  });
+};
+
 export const createProject = (createProjectDto: {
   name: string;
   languages: Partial<components['schemas']['LanguageDto']>[];
 }): Chainable<Cypress.Response> => {
-  const create = () =>
-    v2apiFetch('projects', {
-      body: JSON.stringify(createProjectDto),
-      method: 'POST',
+  const create = () => {
+    return getDefaultOrganization().then((org) => {
+      return v2apiFetch('projects', {
+        body: JSON.stringify({ ...createProjectDto, organizationId: org.id }),
+        method: 'POST',
+      });
     });
+  };
   return v2apiFetch('projects').then((res) => {
     const projects = res.body?._embedded?.projects.filter(
       (i) => i.name === createProjectDto.name

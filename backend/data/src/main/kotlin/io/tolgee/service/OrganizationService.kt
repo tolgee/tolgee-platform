@@ -52,9 +52,7 @@ class OrganizationService(
     }
 
     val slug = createDto.slug
-      ?: slugGenerator.generate(createDto.name!!, 3, 60) {
-        this.validateSlugUniqueness(it)
-      }
+      ?: generateSlug(createDto.name)
 
     Organization(
       name = createDto.name,
@@ -67,6 +65,12 @@ class OrganizationService(
       return it
     }
   }
+
+  private fun generateSlug(name: String) =
+    slugGenerator.generate(name, 3, 60) {
+      @Suppress("BlockingMethodInNonBlockingContext") // this is bug in IDEA
+      this.validateSlugUniqueness(it)
+    }
 
   fun findPermittedPaged(
     pageable: Pageable,

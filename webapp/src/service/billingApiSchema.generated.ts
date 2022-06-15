@@ -31,6 +31,9 @@ export interface paths {
     /** Returns url of Stripe checkout session to buy more credits */
     post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
   };
+  "/v2/organizations/{organizationId}/billing/plans": {
+    get: operations["getPlans"];
+  };
   "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf": {
     /** Returns organization invoices */
     get: operations["getInvoicePdf"];
@@ -48,7 +51,7 @@ export interface paths {
     get: operations["getActivePlan"];
   };
   "/v2/billing/plans": {
-    get: operations["getPlans"];
+    get: operations["getPlans_1"];
   };
   "/v2/billing/mt-credit-prices": {
     get: operations["getMtCreditPrices"];
@@ -105,6 +108,20 @@ export interface components {
     BuyMoreCreditsModel: {
       url: string;
     };
+    CollectionModelPlanModel: {
+      _embedded?: {
+        plans?: components["schemas"]["PlanModel"][];
+      };
+    };
+    PlanModel: {
+      id: number;
+      name: string;
+      translationLimit?: number;
+      includedMtCredits?: number;
+      monthlyPrice: number;
+      yearlyPrice: number;
+      free: boolean;
+    };
     InvoiceModel: {
       id: number;
       /** The number on the invoice */
@@ -129,20 +146,6 @@ export interface components {
     };
     GoToCustomerPortalModel: {
       url: string;
-    };
-    CollectionModelPlanModel: {
-      _embedded?: {
-        plans?: components["schemas"]["PlanModel"][];
-      };
-    };
-    PlanModel: {
-      id: number;
-      name: string;
-      translationLimit?: number;
-      includedMtCredits?: number;
-      monthlyPrice: number;
-      yearlyPrice: number;
-      free: boolean;
     };
     CollectionModelMtCreditsPriceModel: {
       _embedded?: {
@@ -370,6 +373,33 @@ export interface operations {
       };
     };
   };
+  getPlans: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["CollectionModelPlanModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   /** Returns organization invoices */
   getInvoicePdf: {
     parameters: {
@@ -491,7 +521,7 @@ export interface operations {
       };
     };
   };
-  getPlans: {
+  getPlans_1: {
     responses: {
       /** OK */
       200: {
