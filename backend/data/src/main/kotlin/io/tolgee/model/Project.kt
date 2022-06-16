@@ -56,10 +56,10 @@ class Project(
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
   var apiKeys: MutableSet<ApiKey> = LinkedHashSet()
 
-//  @Suppress("SetterBackingFieldAssignment")
-//  @ManyToOne(optional = true, fetch = FetchType.LAZY)
-//  @Deprecated(message = "Project can be owned only by organization")
-//  var userOwner: UserAccount? = null
+  @Suppress("SetterBackingFieldAssignment")
+  @ManyToOne(optional = true, fetch = FetchType.LAZY)
+  @Deprecated(message = "Project can be owned only by organization")
+  var userOwner: UserAccount? = null
 
   @ManyToOne(optional = true)
   lateinit var organizationOwner: Organization

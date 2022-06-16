@@ -4,11 +4,19 @@ import org.hibernate.annotations.ColumnDefault
 import java.util.*
 import javax.persistence.Entity
 import javax.persistence.OneToOne
+import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 
 @Entity
+@Table(
+  uniqueConstraints = [
+    UniqueConstraint(columnNames = ["organization_id"], name = "mt_credit_bucket_organization_unique"),
+  ]
+)
 class MtCreditBucket(
-//  @OneToOne
-//  var userAccount: UserAccount? = null,
+  @OneToOne
+  @Deprecated("Only organization can own a credit bucket...")
+  var userAccount: UserAccount? = null,
 
   @OneToOne
   var organization: Organization? = null
