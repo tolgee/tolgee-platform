@@ -35,6 +35,9 @@ project(':data').projectDir = new File('backend/data')
 include ':billing-app'
 project(':billing-app').projectDir = new File('../billing/app')
 
+include ':billing-test'
+project(':billing-test').projectDir = new File('../billing/tests')
+
 include ':testing'
 project(':testing').projectDir = new File('backend/testing')
 
