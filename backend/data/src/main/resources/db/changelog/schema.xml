@@ -1944,4 +1944,7 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1655369201458-1">
+        <addUniqueConstraint columnNames="organization_id" constraintName="mt_credit_bucket_organization_unique" tableName="mt_credit_bucket"/>
+    </changeSet>
 </databaseChangeLog>
