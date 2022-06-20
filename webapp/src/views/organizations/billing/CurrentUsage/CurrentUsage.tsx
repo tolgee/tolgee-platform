@@ -6,6 +6,7 @@ import { components } from 'tg.service/apiSchema.generated';
 import { useDateFormatter } from 'tg.hooks/useLocale';
 import { BillingSection } from '../BillingSection';
 import { PlanMetric, StyledMetrics } from './PlanMetric';
+import { FC } from 'react';
 
 type ActivePlanModel = billingComponents['schemas']['ActivePlanModel'];
 type UsageModel = components['schemas']['UsageModel'];
@@ -25,7 +26,7 @@ type Props = {
   balance: CreditBalanceModel;
 };
 
-export const ActivePlan: React.FC<Props> = ({ activePlan, usage, balance }) => {
+export const CurrentUsage: FC<Props> = ({ activePlan, usage, balance }) => {
   const t = useTranslate();
   const formatDate = useDateFormatter();
   return (
@@ -42,13 +43,13 @@ export const ActivePlan: React.FC<Props> = ({ activePlan, usage, balance }) => {
         />
         <PlanMetric
           name={t('billing_actual_monthly_credits')}
-          currentAmount={balance.creditBalance || 0}
-          totalAmount={activePlan.includedMtCredits || 0}
+          currentAmount={usage.creditBalance / 100}
+          totalAmount={(activePlan.includedMtCredits || 0) / 100}
           periodEnd={activePlan.currentPeriodEnd}
         />
         <PlanMetric
           name={t('billing_actual_extra_credits')}
-          currentAmount={balance.extraCreditBalance || 0}
+          currentAmount={usage.extraCreditBalance || 0}
         />
         {!activePlan.free && (
           <>

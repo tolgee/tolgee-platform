@@ -1,6 +1,7 @@
 package io.tolgee.service.machineTranslation
 
 import io.tolgee.component.CurrentDateProvider
+import io.tolgee.component.LockingProvider
 import io.tolgee.component.mtBucketSizeProvider.MtBucketSizeProvider
 import io.tolgee.configuration.tolgee.machineTranslation.MachineTranslationProperties
 import io.tolgee.dtos.MtCreditBalanceDto
@@ -11,6 +12,7 @@ import io.tolgee.model.Project
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
 import io.tolgee.service.OrganizationService
 import org.apache.commons.lang3.time.DateUtils
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.transaction.Transactional
@@ -21,9 +23,10 @@ class MtCreditBucketService(
   private val machineTranslationProperties: MachineTranslationProperties,
   private val currentDateProvider: CurrentDateProvider,
   private val mtCreditBucketSizeProvider: MtBucketSizeProvider,
-  private val organizationService: OrganizationService
+  private val organizationService: OrganizationService,
+  @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+  private val lockingProvider: LockingProvider
 ) {
-
   @Transactional(dontRollbackOn = [OutOfCreditsException::class])
   fun consumeCredits(project: Project, amount: Int) {
     if (machineTranslationProperties.freeCreditsAmount > -1) {
@@ -133,11 +136,32 @@ class MtCreditBucketService(
   }
 
   private fun findOrCreateBucket(organization: Organization): MtCreditBucket {
-    return machineTranslationCreditBucketRepository.findByOrganization(organization)
-      ?: MtCreditBucket(organization = organization).apply {
-        this.initCredits()
-        save(this)
+    return tryUntilItDoesntBreakConstraint {
+      machineTranslationCreditBucketRepository.findByOrganization(organization) ?: createBucket(
+        organization
+      )
+    }
+  }
+
+  private fun <T> tryUntilItDoesntBreakConstraint(fn: () -> T): T {
+    var exception: DataIntegrityViolationException? = null
+    for (it in 0..100) {
+      try {
+        return fn()
+      } catch (e: DataIntegrityViolationException) {
+        Thread.sleep(10)
+        exception = e
       }
+    }
+
+    throw exception!!
+  }
+
+  private fun createBucket(organization: Organization): MtCreditBucket {
+    return MtCreditBucket(organization = organization).apply {
+      this.initCredits()
+      save(this)
+    }
   }
 
   private fun MtCreditBucket.initCredits() {

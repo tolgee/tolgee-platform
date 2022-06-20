@@ -16,7 +16,7 @@ import { BillingPlans } from './BillingPlans/BillingPlans';
 import { Credits } from './Credits/Credits';
 import { CustomerPortal } from './CustomerPortal/CustomerPortal';
 import { BillingPeriodType, PeriodSelect } from './BillingPlans/PeriodSelect';
-import { ActivePlan } from './ActivePlan/ActivePlan';
+import { CurrentUsage } from './CurrentUsage/CurrentUsage';
 
 const StyledCurrent = styled('div')`
   display: grid;
@@ -60,12 +60,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
   const refreshSubscription = useBillingApiMutation({
     url: `/v2/organizations/{organizationId}/billing/refresh-subscription`,
     method: `put`,
-    invalidatePrefix: `/v2/organizations/{organizationId}/billing`,
-    options: {
-      onSuccess: () => {
-        creditBalance.refetch();
-      },
-    },
+    invalidatePrefix: `/`,
   });
 
   useEffect(() => {
@@ -131,7 +126,7 @@ export const OrganizationBillingView: FunctionComponent = () => {
         creditBalance.data && (
           <>
             <StyledCurrent>
-              <ActivePlan
+              <CurrentUsage
                 activePlan={activePlan.data}
                 usage={usage.data}
                 balance={creditBalance.data}

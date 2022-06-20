@@ -1,7 +1,7 @@
 package io.tolgee.security.rateLimits
 
 import io.tolgee.component.CurrentDateProvider
-import io.tolgee.component.lockingProvider.LockingProvider
+import io.tolgee.component.LockingProvider
 import io.tolgee.configuration.tolgee.RateLimitProperties
 import io.tolgee.constants.Caches
 import io.tolgee.constants.Message
