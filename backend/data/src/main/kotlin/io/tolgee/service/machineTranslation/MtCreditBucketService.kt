@@ -11,8 +11,8 @@ import io.tolgee.model.Organization
 import io.tolgee.model.Project
 import io.tolgee.repository.machineTranslation.MachineTranslationCreditBucketRepository
 import io.tolgee.service.OrganizationService
+import io.tolgee.util.tryUntilItDoesntBreakConstraint
 import org.apache.commons.lang3.time.DateUtils
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.transaction.Transactional
@@ -141,20 +141,6 @@ class MtCreditBucketService(
         organization
       )
     }
-  }
-
-  private fun <T> tryUntilItDoesntBreakConstraint(fn: () -> T): T {
-    var exception: DataIntegrityViolationException? = null
-    for (it in 0..100) {
-      try {
-        return fn()
-      } catch (e: DataIntegrityViolationException) {
-        Thread.sleep(10)
-        exception = e
-      }
-    }
-
-    throw exception!!
   }
 
   private fun createBucket(organization: Organization): MtCreditBucket {

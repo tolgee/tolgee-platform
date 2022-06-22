@@ -27,6 +27,7 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
+import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
@@ -39,6 +40,7 @@ import io.tolgee.service.OrganizationRoleService
 import io.tolgee.service.OrganizationService
 import io.tolgee.service.OrganizationStatsService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.project.ProjectService
 import org.springdoc.api.annotations.ParameterObject
@@ -90,7 +92,8 @@ class OrganizationController(
   private val imageUploadService: ImageUploadService,
   private val mtCreditBucketService: MtCreditBucketService,
   private val organizationStatsService: OrganizationStatsService,
-  private val translationsLimitProvider: TranslationsLimitProvider
+  private val translationsLimitProvider: TranslationsLimitProvider,
+  private val userPreferencesService: UserPreferencesService
 ) {
   @PostMapping
   @Transactional
@@ -112,14 +115,22 @@ class OrganizationController(
   @Operation(summary = "Returns organization by ID")
   fun get(@PathVariable("id") id: Long): OrganizationModel? {
     val organization = organizationService.get(id)
+    setPreferredOrganization(organization)
     val roleType = organizationRoleService.getType(id)
     return OrganizationView.of(organization, roleType).toModel()
+  }
+
+  private fun setPreferredOrganization(organization: Organization) {
+    if (!authenticationFacade.isApiKeyAuthentication) {
+      userPreferencesService.setPreferredOrganization(organization)
+    }
   }
 
   @GetMapping("/{slug:.*[a-z].*}")
   @Operation(summary = "Returns organization by address part")
   fun get(@PathVariable("slug") slug: String): OrganizationModel {
     val organization = organizationService.get(slug)
+    setPreferredOrganization(organization)
     val roleType = organizationRoleService.getType(organization.id)
     return OrganizationView.of(organization, roleType).toModel()
   }
@@ -127,7 +138,7 @@ class OrganizationController(
   @GetMapping("", produces = [MediaTypes.HAL_JSON_VALUE])
   @Operation(summary = "Returns all organizations, which is current user allowed to view")
   fun getAll(
-    @ParameterObject pageable: Pageable,
+    @ParameterObject @SortDefault(sort = ["id"]) pageable: Pageable,
     params: OrganizationRequestParamsDto
   ): PagedModel<OrganizationModel>? {
     val organizations = organizationService.findPermittedPaged(pageable, params)
@@ -204,7 +215,6 @@ class OrganizationController(
     @RequestParam("search") search: String?
   ): PagedModel<ProjectModel> {
     return organizationService.find(id)?.let {
-      organizationRoleService.checkUserIsMemberOrOwner(it.id)
       projectService.findAllInOrganization(it.id, pageable, search).let { projects ->
         pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
       }
@@ -219,10 +229,7 @@ class OrganizationController(
     @RequestParam("search") search: String?
   ): PagedModel<ProjectModel> {
     return organizationService.find(slug)?.let {
-      organizationRoleService.checkUserIsMemberOrOwner(it.id)
-      projectService.findAllInOrganization(it.id, pageable, search).let { projects ->
-        pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
-      }
+      getAllProjects(it.id, pageable, search)
     } ?: throw NotFoundException()
   }
 

@@ -87,6 +87,12 @@ class OrganizationService(
     )
   }
 
+  fun findAllPermitted(): List<Organization> {
+    return organizationRepository.findAllPermitted(
+      userId = authenticationFacade.userAccount.id
+    )
+  }
+
   fun findPermittedPaged(
     pageable: Pageable,
     requestParamsDto: OrganizationRequestParamsDto,

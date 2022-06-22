@@ -6,6 +6,7 @@ import io.tolgee.development.testDataBuilder.builders.ProjectBuilder
 import io.tolgee.development.testDataBuilder.builders.TestDataBuilder
 import io.tolgee.development.testDataBuilder.builders.TranslationBuilder
 import io.tolgee.development.testDataBuilder.builders.UserAccountBuilder
+import io.tolgee.development.testDataBuilder.builders.UserPreferencesBuilder
 import io.tolgee.service.ApiKeyService
 import io.tolgee.service.AutoTranslationService
 import io.tolgee.service.KeyMetaService
@@ -19,6 +20,7 @@ import io.tolgee.service.TagService
 import io.tolgee.service.TranslationCommentService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtServiceConfigService
@@ -50,7 +52,8 @@ class TestDataService(
   private val mtCreditBucketService: MtCreditBucketService,
   private val autoTranslateService: AutoTranslationService,
   private val transactionManager: PlatformTransactionManager,
-  private val additionalTestDataSavers: List<AdditionalTestDataSaver>
+  private val additionalTestDataSavers: List<AdditionalTestDataSaver>,
+  private val userPreferencesService: UserPreferencesService
 ) {
   @Transactional
   fun saveTestData(builder: TestDataBuilder) {
@@ -255,6 +258,11 @@ class TestDataService(
       }
     )
     saveUserAvatars(userAccountBuilders)
+    saveUserPreferences(userAccountBuilders.mapNotNull { it.data.userPreferences })
+  }
+
+  private fun saveUserPreferences(data: List<UserPreferencesBuilder>) {
+    data.forEach { userPreferencesService.save(it.self) }
   }
 
   private fun saveUserAvatars(userAccountBuilders: MutableList<UserAccountBuilder>) {
