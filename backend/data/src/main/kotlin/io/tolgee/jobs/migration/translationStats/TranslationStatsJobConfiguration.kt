@@ -40,7 +40,7 @@ class TranslationStatsJobConfiguration {
 
   @Bean(JOB_NAME)
   fun translationStatsJob(): Job {
-    return jobBuilderFactory["translationStats"]
+    return jobBuilderFactory[JOB_NAME]
       .flow(step)
       .end()
       .build()

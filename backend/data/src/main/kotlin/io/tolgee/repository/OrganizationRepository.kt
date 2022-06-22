@@ -1,6 +1,7 @@
 package io.tolgee.repository
 
 import io.tolgee.model.Organization
+import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
 import org.springframework.data.domain.Page
@@ -33,4 +34,14 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
 
   fun countAllBySlug(slug: String): Long
   fun findAllByName(name: String): List<Organization>
+
+  @Query(
+    """
+    from Organization o 
+    join o.memberRoles mr on mr.user = :user
+    join mr.user u
+    where o.name = u.name and mr.type = 1
+  """
+  )
+  fun findUsersDefaultOrganization(user: UserAccount): Organization?
 }

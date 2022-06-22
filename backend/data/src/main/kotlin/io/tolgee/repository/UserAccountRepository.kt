@@ -52,4 +52,24 @@ interface UserAccountRepository : JpaRepository<UserAccount, Long> {
     search: String? = "",
     exceptUserId: Long? = null
   ): Page<UserAccountInProjectView>
+
+  @Query(
+    """
+    select ua
+    from UserAccount ua
+    left join ua.organizationRoles orl
+    where orl is null
+  """
+  )
+  fun findAllWithoutAnyOrganization(pageable: Pageable): Page<UserAccount>
+
+  @Query(
+    """
+    select ua.id
+    from UserAccount ua
+    left join ua.organizationRoles orl
+    where orl is null
+  """
+  )
+  fun findAllWithoutAnyOrganizationIds(): List<Long>
 }
