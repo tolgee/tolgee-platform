@@ -62,9 +62,6 @@ data class UserAccount(
   @OneToMany(mappedBy = "user", orphanRemoval = true)
   var organizationRoles: MutableList<OrganizationRole> = mutableListOf()
 
-//  @OneToOne(mappedBy = "userAccount", cascade = [CascadeType.REMOVE])
-//  var mtCreditBucket: MtCreditBucket? = null
-
   override var avatarHash: String? = null
 
   constructor(

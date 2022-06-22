@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.organizationController
 
 import io.tolgee.constants.Message
+import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.fixtures.andAssertError
@@ -58,7 +59,6 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
   @Test
   fun testGetAll() {
     val users = dbPopulator.createUsersAndOrganizations()
-
     loginAsUser(users[1].name)
 
     performAuthGet("/api/organizations?size=100")
@@ -68,6 +68,39 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
           it.node("[0].name").isEqualTo("user-2's organization 1")
           it.node("[0].basePermissions").isEqualTo("VIEW")
           it.node("[0].currentUserRole").isEqualTo("OWNER")
+        }
+      }
+  }
+
+  @Test
+  fun `get all returns also organizations with project with direct permission`() {
+    val testData = OrganizationTestData()
+    testDataService.saveTestData(testData.root)
+
+    userAccount = testData.franta
+
+    performAuthGet("/api/organizations?size=100")
+      .andPrettyPrint.andAssertThatJson.let {
+        it.node("_embedded.organizations").let {
+          it.isArray.hasSize(2)
+        }
+      }
+  }
+
+  @Test
+  fun `returns all project in organization without checking for permissions`() {
+    val testData = OrganizationTestData()
+
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.franta
+    val organization = testData.root.data.organizations.map { it.self }
+      .filter { it.name == "test_username" }
+      .single()
+
+    performAuthGet("/v2/organizations/${organization.slug}/projects?size=100")
+      .andPrettyPrint.andAssertThatJson.let {
+        it.node("_embedded.projects").let {
+          it.isArray.hasSize(1)
         }
       }
   }

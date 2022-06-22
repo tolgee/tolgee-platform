@@ -21,7 +21,7 @@ open class OrganizationModel(
   val description: String?,
   val basePermissions: Permission.ProjectPermissionType,
 
-  val currentUserRole: OrganizationRoleType,
+  val currentUserRole: OrganizationRoleType?,
 
   @Schema(example = "Links to avatar images")
   var avatar: Avatar?

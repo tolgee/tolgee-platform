@@ -1947,4 +1947,25 @@
     <changeSet author="jenik (generated)" id="1655369201458-1">
         <addUniqueConstraint columnNames="organization_id" constraintName="mt_credit_bucket_organization_unique" tableName="mt_credit_bucket"/>
     </changeSet>
+    <changeSet author="jenik (generated)" id="1655898263795-1">
+        <createTable tableName="user_preferences">
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language" type="VARCHAR(255)"/>
+            <column name="user_account_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="user_preferencesPK"/>
+            </column>
+            <column name="preferred_organization_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1655898263795-2">
+        <addForeignKeyConstraint baseColumnNames="user_account_id" baseTableName="user_preferences" constraintName="FKdhlxchq1m65xxjrioelwhqrh7" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="user_account" validate="true"/>
+    </changeSet>
+    <changeSet author="jenik (generated)" id="1655898263795-3">
+        <addForeignKeyConstraint baseColumnNames="preferred_organization_id" baseTableName="user_preferences" constraintName="FKhypy4dq2btwfhsifbvr1nvjt0" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="organization" validate="true"/>
+    </changeSet>
 </databaseChangeLog>

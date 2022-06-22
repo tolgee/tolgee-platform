@@ -29,7 +29,7 @@ class Organization(
   override var id: Long = 0,
 
   @field:NotBlank @field:Size(min = 3, max = 50)
-  open var name: String? = null,
+  open var name: String = "",
 
   open var description: String? = null,
 
@@ -45,7 +45,7 @@ class Organization(
   var mtCreditBucket: MtCreditBucket? = null
 ) : ModelWithAvatar {
   constructor(
-    name: String?,
+    name: String,
     description: String? = null,
     slug: String = "",
     basePermissions: Permission.ProjectPermissionType = Permission.ProjectPermissionType.VIEW,

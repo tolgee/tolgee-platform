@@ -15,11 +15,14 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
   fun getOneBySlug(slug: String): Organization?
 
   @Query(
-    """select o.id as id, o.name as name, o.description as description, o.slug as slug,
+    """select distinct o.id as id, o.name as name, o.description as description, o.slug as slug,
         o.basePermissions as basePermissions, r.type as currentUserRole, o.avatarHash as avatarHash
         from Organization o 
-        join OrganizationRole r on r.user.id = :userId 
+        left join OrganizationRole r on r.user.id = :userId
         and r.organization = o and (r.type = :roleType or :roleType is null)
+        left join o.projects p
+        left join p.permissions perm on perm.user.id = :userId
+        where (perm is not null or r is not null)
         and (:search is null or (lower(o.name) like lower(concat('%', cast(:search as text), '%'))))
         and (:exceptOrganizationId is null or (o.id <> :exceptOrganizationId))
         """
@@ -31,6 +34,20 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     search: String? = null,
     exceptOrganizationId: Long? = null
   ): Page<OrganizationView>
+
+  @Query(
+    """
+    select distinct o
+    from Organization o
+    left join o.memberRoles mr on mr.user.id = :userId
+    left join o.projects p
+    left p.permissions perm on perm.user.id = :userId
+    where perm is not null or mr is not null
+  """
+  )
+  fun findAllPermitted(
+    userId: Long,
+  ): List<Organization>
 
   fun countAllBySlug(slug: String): Long
   fun findAllByName(name: String): List<Organization>
