@@ -95,4 +95,21 @@ interface ProjectRepository : JpaRepository<Project, Long> {
   fun getWithLanguages(projectIds: Iterable<Long>): List<Project>
 
   fun findAllByNameAndOrganizationOwner(name: String, organization: Organization): List<Project>
+
+  @Query(
+    """
+    from Project p 
+    where p.organizationOwner is null and p.userOwner is not null
+  """
+  )
+  fun findAllWithUserOwner(pageable: Pageable): Page<Project>
+
+  @Query(
+    """
+    select p.id
+    from Project p
+    where p.organizationOwner is null
+  """
+  )
+  fun findAllWithUserOwnerIds(): List<Long>
 }

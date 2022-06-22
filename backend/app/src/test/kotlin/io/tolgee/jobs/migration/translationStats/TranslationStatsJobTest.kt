@@ -39,7 +39,7 @@ class TranslationStatsJobTest : AbstractSpringTest() {
 
   @Test
   @Transactional
-  fun `it does not run multiple times for same `() {
+  fun `it does not run multiple times for same params`() {
     prepareData()
 
     // first - it really runs
