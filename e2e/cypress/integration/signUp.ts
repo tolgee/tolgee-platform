@@ -3,7 +3,7 @@ import { getInput } from '../common/xPath';
 import {
   createProject,
   deleteAllEmails,
-  deleteUserWithEmailVerification,
+  deleteUser,
   disableEmailVerification,
   enableEmailVerification,
   getParsedEmailInvitationLink,
@@ -83,13 +83,13 @@ const TEST_USERNAME = 'johndoe@doe.com';
 context('Sign up', () => {
   beforeEach(() => {
     visit();
-    deleteUserWithEmailVerification(TEST_USERNAME);
+    deleteUser(TEST_USERNAME);
     deleteAllEmails();
     enableEmailVerification();
   });
 
   afterEach(() => {
-    deleteUserWithEmailVerification(TEST_USERNAME);
+    deleteUser(TEST_USERNAME);
   });
 
   describe('without recaptcha', () => {

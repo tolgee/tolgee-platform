@@ -147,13 +147,6 @@ export const createUser = (
 };
 
 export const deleteUser = (username: string) => {
-  const deleteUserSql = `delete
-                         from user_account
-                         where username = '${username}'`;
-  return internalFetch(`sql/execute`, { method: 'POST', body: deleteUserSql });
-};
-
-export const deleteUserWithEmailVerification = (username: string) => {
   const sql = `
       delete
       from permission
@@ -161,6 +154,9 @@ export const deleteUserWithEmailVerification = (username: string) => {
       delete
       from email_verification
       where user_account_id in (select id from user_account where username = '${username}');
+      delete
+      from organization_role
+      where user_id in (select id from user_account where username = '${username}');
       delete
       from user_account
       where username = '${username}';
