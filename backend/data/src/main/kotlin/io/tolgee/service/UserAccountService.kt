@@ -53,7 +53,7 @@ class UserAccountService(
     return userAccountRepository.findByUsername(username).orElse(null)
   }
 
-  fun get(username: String): UserAccount {
+  operator fun get(username: String): UserAccount {
     return userAccountRepository
       .findByUsername(username)
       .orElseThrow { NotFoundException(Message.USER_NOT_FOUND) }

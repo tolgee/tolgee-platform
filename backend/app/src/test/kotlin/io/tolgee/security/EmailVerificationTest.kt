@@ -108,7 +108,7 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
     assertThat(emailVerificationRepository.findById(emailVerification.id!!)).isPresent
   }
 
-  val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", "testtest", null)
+  val signUpDto = SignUpDto("Test Name", "aaa@aaa.com", null, "testtest")
 
   protected fun perform(): MvcResult {
     return mvc.perform(
