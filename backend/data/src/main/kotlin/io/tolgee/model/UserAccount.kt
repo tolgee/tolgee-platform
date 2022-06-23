@@ -1,5 +1,6 @@
 package io.tolgee.model
 
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EnumType
@@ -62,7 +63,7 @@ data class UserAccount(
   @OneToMany(mappedBy = "user", orphanRemoval = true)
   var organizationRoles: MutableList<OrganizationRole> = mutableListOf()
 
-  @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY)
+  @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE])
   var preferences: UserPreferences? = null
 
   override var avatarHash: String? = null
