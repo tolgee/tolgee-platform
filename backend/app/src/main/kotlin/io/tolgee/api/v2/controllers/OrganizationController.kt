@@ -115,6 +115,7 @@ class OrganizationController(
   @Operation(summary = "Returns organization by ID")
   fun get(@PathVariable("id") id: Long): OrganizationModel? {
     val organization = organizationService.get(id)
+    organizationRoleService.checkUserCanView(authenticationFacade.userAccount.id, organization.id)
     setPreferredOrganization(organization)
     val roleType = organizationRoleService.findType(id)
     return OrganizationView.of(organization, roleType).toModel()
@@ -130,8 +131,8 @@ class OrganizationController(
   @Operation(summary = "Returns organization by address part")
   fun get(@PathVariable("slug") slug: String): OrganizationModel {
     val organization = organizationService.get(slug)
-    setPreferredOrganization(organization)
     organizationRoleService.checkUserCanView(authenticationFacade.userAccount.id, organization.id)
+    setPreferredOrganization(organization)
     val roleType = organizationRoleService.findType(organization.id)
     return OrganizationView.of(organization, roleType).toModel()
   }

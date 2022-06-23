@@ -26,7 +26,7 @@ data class CreateProjectDTO(
   var slug: String? = null,
 
   @field: Min(1)
-  @Schema(description = "If not provided, project will be created in user scope")
+  @Schema(description = "Organization to create the project in")
   var organizationId: Long = 0,
 
   @Schema(
