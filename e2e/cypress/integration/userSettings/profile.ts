@@ -1,7 +1,7 @@
 import {
   createUser,
   deleteAllEmails,
-  deleteUserWithEmailVerification,
+  deleteUser,
   disableEmailVerification,
   enableEmailVerification,
   getParsedEmailVerification,
@@ -23,8 +23,8 @@ describe('User profile', () => {
 
   beforeEach(() => {
     enableEmailVerification();
-    deleteUserWithEmailVerification(INITIAL_EMAIL);
-    deleteUserWithEmailVerification(NEW_EMAIL);
+    deleteUser(INITIAL_EMAIL);
+    deleteUser(NEW_EMAIL);
     createUser(INITIAL_EMAIL, INITIAL_PASSWORD);
     login(INITIAL_EMAIL, INITIAL_PASSWORD);
     deleteAllEmails();
