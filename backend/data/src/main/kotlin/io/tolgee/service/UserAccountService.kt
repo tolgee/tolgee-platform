@@ -59,7 +59,7 @@ class UserAccountService(
       .orElseThrow { NotFoundException(Message.USER_NOT_FOUND) }
   }
 
-  operator fun get(id: Long): Optional<UserAccount> {
+  fun find(id: Long): Optional<UserAccount> {
     return userAccountRepository.findById(id)
   }
 

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.batch.core.Job
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.transaction.support.TransactionTemplate
 
 class AllOrganizationOwnerJobTest : AbstractSpringTest() {
 
@@ -37,9 +36,6 @@ class AllOrganizationOwnerJobTest : AbstractSpringTest() {
   lateinit var permissionRepository: PermissionRepository
 
   lateinit var project1: Project
-
-  @Autowired
-  lateinit var transactionTemplate: TransactionTemplate
 
   @BeforeEach
   fun setup() {

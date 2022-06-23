@@ -14,6 +14,7 @@ import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.project.ProjectService
 import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
@@ -29,7 +30,9 @@ class OrganizationService(
   private val slugGenerator: SlugGenerator,
   private val organizationRoleService: OrganizationRoleService,
   private val invitationService: InvitationService,
-  private val avatarService: AvatarService
+  private val avatarService: AvatarService,
+  @Lazy
+  private val userPreferencesService: UserPreferencesService
 ) {
 
   @set:Autowired
@@ -148,6 +151,11 @@ class OrganizationService(
 
     invitationService.getForOrganization(organization).forEach { invitation ->
       invitationService.delete(invitation)
+    }
+
+    organization.prefereredBy.forEach {
+      it.preferredOrganization = null
+      userPreferencesService.save(it)
     }
 
     organizationRoleService.deleteAllInOrganization(organization)

@@ -33,6 +33,7 @@ import io.tolgee.service.TagService
 import io.tolgee.service.TranslationCommentService
 import io.tolgee.service.TranslationService
 import io.tolgee.service.UserAccountService
+import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.dataImport.ImportService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
 import io.tolgee.service.machineTranslation.MtService
@@ -43,6 +44,7 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationContext
+import org.springframework.transaction.support.TransactionTemplate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
@@ -164,6 +166,12 @@ abstract class AbstractSpringTest : AbstractTransactionalTest() {
 
   @Autowired
   lateinit var activityService: ActivityService
+
+  @Autowired
+  lateinit var userPreferencesService: UserPreferencesService
+
+  @Autowired
+  lateinit var transactionTemplate: TransactionTemplate
 
   @Autowired
   private fun initInitialUser(authenticationProperties: AuthenticationProperties) {

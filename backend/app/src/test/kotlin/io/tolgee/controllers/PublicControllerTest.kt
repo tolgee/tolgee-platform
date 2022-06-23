@@ -20,7 +20,12 @@ class PublicControllerTest :
 
   @Test
   fun `creates organization`() {
-    val dto = SignUpDto(name = "Pavel Novak", password = "aaaaaaaaa", email = "aaaa@aaaa.com", organizationName = "Hello")
+    val dto = SignUpDto(
+      name = "Pavel Novak",
+      password = "aaaaaaaaa",
+      email = "aaaa@aaaa.com",
+      organizationName = "Hello"
+    )
     performPost("/api/public/sign_up", dto).andIsOk
     assertThat(organizationRepository.findAllByName("Hello")).hasSize(1)
   }

@@ -15,10 +15,8 @@ import io.tolgee.model.translation.Translation
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.transaction.support.TransactionTemplate
 import java.util.*
 
 @SpringBootTest
@@ -31,9 +29,6 @@ class V2TranslationsControllerHistoryTest : ProjectAuthControllerTest("/v2/proje
   lateinit var testProject: Project
   lateinit var lang: Language
   lateinit var emptyKey: Key
-
-  @Autowired
-  lateinit var transactionTemplate: TransactionTemplate
 
   @BeforeEach
   fun setup() {

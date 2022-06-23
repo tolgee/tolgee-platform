@@ -41,13 +41,25 @@ interface OrganizationRepository : JpaRepository<Organization, Long> {
     from Organization o
     left join o.memberRoles mr on mr.user.id = :userId
     left join o.projects p
-    left p.permissions perm on perm.user.id = :userId
+    left join p.permissions perm on perm.user.id = :userId
     where perm is not null or mr is not null
   """
   )
   fun findAllPermitted(
     userId: Long,
   ): List<Organization>
+
+  @Query(
+    """
+    select count(o) > 0
+    from Organization o
+    left join o.memberRoles mr on mr.user.id = :userId
+    left join o.projects p
+    left join p.permissions perm on perm.user.id = :userId
+    where perm is not null or mr is not null and o.id = :organizationId
+  """
+  )
+  fun canUserView(userId: Long, organizationId: Long): Boolean
 
   fun countAllBySlug(slug: String): Long
   fun findAllByName(name: String): List<Organization>
