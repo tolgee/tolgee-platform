@@ -21,6 +21,13 @@ class TestDataBuilder {
 
   val data = DATA()
 
+  fun addUserAccountWithoutOrganization(ft: UserAccount.() -> Unit): UserAccountBuilder {
+    val builder = UserAccountBuilder(this)
+    data.userAccounts.add(builder)
+    ft(builder.self)
+    return builder
+  }
+
   fun addUserAccount(ft: UserAccount.() -> Unit): UserAccountBuilder {
     val builder = UserAccountBuilder(this)
     data.userAccounts.add(builder)

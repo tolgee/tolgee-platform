@@ -28,7 +28,7 @@ class AuthenticationFacade(
     } else authentication?.principal as? UserAccountDto
 
   val userAccountEntity: UserAccount
-    get() = userAccountService[userAccount.id]
+    get() = userAccountService.find(userAccount.id)
       .orElseThrow { throw NotFoundException() }!!
 
   val isApiKeyAuthentication: Boolean

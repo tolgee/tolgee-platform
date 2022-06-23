@@ -12,6 +12,7 @@ import io.tolgee.fixtures.andIsCreated
 import io.tolgee.fixtures.andIsForbidden
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
+import io.tolgee.fixtures.node
 import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
@@ -29,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
-open class OrganizationControllerTest : AuthorizedControllerTest() {
+class OrganizationControllerTest : AuthorizedControllerTest() {
 
   lateinit var dummyDto: OrganizationDto
   lateinit var dummyDto2: OrganizationDto
@@ -62,12 +63,12 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
     loginAsUser(users[1].name)
 
     performAuthGet("/api/organizations?size=100")
-      .andPrettyPrint.andAssertThatJson.let {
-        it.node("_embedded.organizations").let {
-          it.isArray.hasSize(6)
-          it.node("[0].name").isEqualTo("user-2's organization 1")
-          it.node("[0].basePermissions").isEqualTo("VIEW")
-          it.node("[0].currentUserRole").isEqualTo("OWNER")
+      .andPrettyPrint.andAssertThatJson {
+        node("_embedded.organizations") {
+          isArray.hasSize(6)
+          node("[0].name").isEqualTo("user-2's organization 1")
+          node("[0].basePermissions").isEqualTo("VIEW")
+          node("[0].currentUserRole").isEqualTo("OWNER")
         }
       }
   }
@@ -82,7 +83,7 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
     performAuthGet("/api/organizations?size=100")
       .andPrettyPrint.andAssertThatJson.let {
         it.node("_embedded.organizations").let {
-          it.isArray.hasSize(2)
+          it.isArray.hasSize(1)
         }
       }
   }
@@ -156,6 +157,24 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
         it.node("description").isEqualTo(dummyDto.description)
       }
     }
+  }
+
+  @Test
+  fun `returns one only with project base permission`() {
+    val testData = OrganizationTestData()
+    testDataService.saveTestData(testData.root)
+    val organization = testData.userAccountBuilder.defaultOrganizationBuilder.self
+    userAccount = testData.pepa
+    performAuthGet("/v2/organizations/${organization.id}").andIsOk
+  }
+
+  @Test
+  fun `doesn't return without permission`() {
+    val testData = OrganizationTestData()
+    testDataService.saveTestData(testData.root)
+    val organization = testData.jirinaOrg
+    userAccount = testData.pepa
+    performAuthGet("/v2/organizations/${organization.id}").andIsOk
   }
 
   @Test
@@ -339,7 +358,7 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
 
   @Test
   @Transactional
-  open fun testSetUserRole() {
+  fun testSetUserRole() {
     withOwnerInOrganization { organization, owner, role ->
       performAuthPut(
         "/v2/organizations/${organization.id}/users/${owner.id}/set-role",
@@ -351,7 +370,7 @@ open class OrganizationControllerTest : AuthorizedControllerTest() {
 
   @Test
   @Transactional
-  open fun `cannot set own permission`() {
+  fun `cannot set own permission`() {
     withOwnerInOrganization { organization, owner, role ->
       loginAsUser(owner)
       performAuthPut(

@@ -24,7 +24,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.transaction.support.TransactionTemplate
 import kotlin.system.measureTimeMillis
 
 @SpringBootTest
@@ -47,9 +46,6 @@ class AutoTranslatingTest : ProjectAuthControllerTest("/v2/projects/"), MachineT
   @Autowired
   @MockBean
   override lateinit var amazonTranslate: AmazonTranslate
-
-  @Autowired
-  lateinit var transactionTemplate: TransactionTemplate
 
   @BeforeEach
   fun setup() {

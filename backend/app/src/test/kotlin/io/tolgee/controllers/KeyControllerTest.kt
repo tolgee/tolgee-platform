@@ -13,19 +13,14 @@ import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.transaction.support.TransactionTemplate
 
 class KeyControllerTest : AuthorizedControllerTest() {
   private val keyDto = SetTranslationsWithKeyDto("test string", mapOf(Pair("en", "Hello")))
   private val keyDto2 = SetTranslationsWithKeyDto("test string 2", mapOf(Pair("en", "Hello 2")))
 
   private lateinit var project: Project
-
-  @Autowired
-  lateinit var transactionTemplate: TransactionTemplate
 
   @BeforeEach
   fun setup() {

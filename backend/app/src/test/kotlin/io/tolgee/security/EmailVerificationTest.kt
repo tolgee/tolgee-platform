@@ -130,7 +130,7 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
 
     assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
 
-    assertThat(userAccountService[user.id]).isNotNull
+    assertThat(userAccountService.find(user.id)).isNotNull
   }
 
   @Test
@@ -141,7 +141,7 @@ class EmailVerificationTest : AbstractControllerTest(), JavaMailSenderMocked {
 
     assertThat(getMessageContent()).contains("dummy_frontend_url/login/verify_email/${user.id}/")
 
-    assertThat(userAccountService[user.id]).isNotNull
+    assertThat(userAccountService.find(user.id)).isNotNull
   }
 
   private fun getMessageContent(): String {

@@ -218,7 +218,7 @@ class PermissionService(
     }
 
     val permission = data.directPermissions?.let { findById(it.id) } ?: let {
-      val userAccount = userAccountService[userId].get()
+      val userAccount = userAccountService.find(userId).get()
       val project = projectService.get(data.project.id)
       Permission(user = userAccount, project = project, type = newPermissionType)
     }

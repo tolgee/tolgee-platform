@@ -28,7 +28,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.transaction.support.TransactionTemplate
 import javax.mail.internet.MimeMessage
 
 @SpringBootTest
@@ -45,9 +44,6 @@ class V2ProjectsControllerInvitationTest : ProjectAuthControllerTest("/v2/projec
   override lateinit var javaMailSender: JavaMailSender
 
   override lateinit var messageArgumentCaptor: ArgumentCaptor<MimeMessage>
-
-  @Autowired
-  lateinit var transactionTemplate: TransactionTemplate
 
   @BeforeEach
   @AfterEach

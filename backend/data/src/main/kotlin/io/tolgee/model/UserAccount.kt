@@ -62,6 +62,9 @@ data class UserAccount(
   @OneToMany(mappedBy = "user", orphanRemoval = true)
   var organizationRoles: MutableList<OrganizationRole> = mutableListOf()
 
+  @OneToOne(mappedBy = "userAccount", fetch = FetchType.LAZY)
+  var preferences: UserPreferences? = null
+
   override var avatarHash: String? = null
 
   constructor(

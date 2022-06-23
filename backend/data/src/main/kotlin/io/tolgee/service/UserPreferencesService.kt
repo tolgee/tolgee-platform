@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service
 @Service
 class UserPreferencesService(
   private val authenticationFacade: AuthenticationFacade,
-  private val userPreferencesRepository: UserPreferencesRepository
+  private val userPreferencesRepository: UserPreferencesRepository,
+  private val userAccountService: UserAccountService,
+  private val organizationService: OrganizationService
 ) {
   fun setLanguage(tag: String, userAccount: UserAccount = authenticationFacade.userAccountEntity) {
-    val preferences = findOrCreate(userAccount)
+    val preferences = findOrCreate(userAccount.id)
     preferences.language = tag
     userPreferencesRepository.save(preferences)
   }
@@ -23,22 +25,35 @@ class UserPreferencesService(
     organization: Organization,
     userAccount: UserAccount = authenticationFacade.userAccountEntity
   ) {
-    val preferences = findOrCreate(userAccount)
+    val preferences = findOrCreate(userAccount.id)
     preferences.preferredOrganization = organization
     userPreferencesRepository.save(preferences)
   }
 
-  fun findOrCreate(userAccount: UserAccount = authenticationFacade.userAccountEntity): UserPreferences {
+  fun findOrCreate(userAccountId: Long = authenticationFacade.userAccount.id): UserPreferences {
     return tryUntilItDoesntBreakConstraint {
-      userPreferencesRepository.findById(userAccount).orElseGet {
-        UserPreferences(userAccount = userAccount).apply {
-          userPreferencesRepository.save(this)
-        }
+      val userAccount = userAccountService.get(authenticationFacade.userAccount.username)
+      val preferences = find(userAccountId) ?: UserPreferences(userAccount = userAccount).apply {
+        userPreferencesRepository.save(this)
       }
+
+      if (preferences.preferredOrganization == null) {
+        preferences.preferredOrganization = findPreferredOrganization()
+      }
+
+      preferences
     }
+  }
+
+  fun find(userAccountId: Long = authenticationFacade.userAccount.id): UserPreferences? {
+    return userPreferencesRepository.findById(userAccountId).orElse(null)
   }
 
   fun save(prefs: UserPreferences) {
     userPreferencesRepository.save(prefs)
+  }
+
+  fun findPreferredOrganization(): Organization? {
+    return organizationService.findAllPermitted().firstOrNull()
   }
 }

@@ -65,8 +65,8 @@ class TestDataService(
     // To be able to save project in its separate transaction,
     // user/organization has to be stored first.
     executeInNewTransaction(transactionManager) {
-      saveAllUsers(builder)
       saveOrganizationData(builder)
+      saveAllUsers(builder)
     }
 
     executeInNewTransaction(transactionManager) {

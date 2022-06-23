@@ -9,6 +9,7 @@ import io.tolgee.model.Organization
 import io.tolgee.model.OrganizationRole
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
+import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.AuthenticationFacade
 import org.springframework.stereotype.Service
@@ -21,8 +22,13 @@ class OrganizationRoleService(
   private val organizationRoleRepository: OrganizationRoleRepository,
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
-  private val entityManager: EntityManager
+  private val entityManager: EntityManager,
+  private val organizationRepository: OrganizationRepository
 ) {
+
+  fun checkUserCanView(userId: Long, organizationId: Long) {
+    if (this.organizationRepository.canUserView(userId, organizationId)) return else throw PermissionException()
+  }
 
   fun checkUserIsOwner(userId: Long, organizationId: Long) {
     if (this.isUserOwner(userId, organizationId)) return else throw PermissionException()
@@ -67,6 +73,10 @@ class OrganizationRoleService(
 
   fun getType(organizationId: Long): OrganizationRoleType {
     return getType(authenticationFacade.userAccount.id, organizationId)
+  }
+
+  fun findType(organizationId: Long): OrganizationRoleType? {
+    return findType(authenticationFacade.userAccount.id, organizationId)
   }
 
   fun findType(userId: Long, organizationId: Long): OrganizationRoleType? {
@@ -115,7 +125,7 @@ class OrganizationRoleService(
   }
 
   fun setMemberRole(organizationId: Long, userId: Long, dto: SetOrganizationRoleDto) {
-    val user = userAccountService[userId].orElseThrow { NotFoundException() }!!
+    val user = userAccountService.find(userId).orElseThrow { NotFoundException() }!!
     organizationRoleRepository.findOneByUserIdAndOrganizationId(user.id, organizationId)?.let {
       it.type = dto.roleType
       organizationRoleRepository.save(it)

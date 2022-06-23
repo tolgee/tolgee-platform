@@ -14,7 +14,7 @@ interface OrganizationView {
   val avatarHash: String?
 
   companion object {
-    fun of(entity: Organization, currentUserRole: OrganizationRoleType): OrganizationView {
+    fun of(entity: Organization, currentUserRole: OrganizationRoleType?): OrganizationView {
       return object : OrganizationView {
         override val id = entity.id
         override val name = entity.name
