@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.ResultActions
 abstract class ProjectAuthRequestPerformer(
   userAccountProvider: () -> UserAccount,
   val projectUrlPrefix: String = "/api/project/"
-) : SignedInRequestPerformer() {
+) : AuthorizedRequestPerformer() {
 
   @field:Autowired
   lateinit var dbPopulator: DbPopulatorReal

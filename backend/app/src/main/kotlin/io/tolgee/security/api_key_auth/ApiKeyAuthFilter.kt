@@ -54,7 +54,10 @@ class ApiKeyAuthFilter(
     filterChain.doFilter(request, response)
   }
 
-  private fun getApiKey(request: HttpServletRequest) = request.getParameter("ak")
+  private fun getApiKey(request: HttpServletRequest): String? {
+    return request.getHeader("X-API-Key")
+      ?: request.getParameter("ak")
+  }
 
   private fun isApiAccessAllowed(request: HttpServletRequest): Boolean {
     return this.getAccessAllowedAnnotation(request) != null

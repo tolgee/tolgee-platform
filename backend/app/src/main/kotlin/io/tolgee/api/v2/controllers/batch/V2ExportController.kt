@@ -19,7 +19,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -32,27 +31,26 @@ import java.util.zip.ZipOutputStream
 
 @RestController
 @CrossOrigin(origins = ["*"])
-@RequestMapping(value = ["/v2/projects/{projectId:[0-9]+}", "/v2/projects"])
+@RequestMapping(value = ["/v2/projects/{projectId:\\d+}/export", "/v2/projects/export"])
 @Tag(name = "Export")
 @Suppress("SpringJavaInjectionPointsAutowiringInspection", "MVCPathVariableInspection")
 class V2ExportController(
   private val exportService: ExportService,
-  private val projectHolder: ProjectHolder
+  private val projectHolder: ProjectHolder,
 ) {
-  @GetMapping(value = ["/export"])
+  @GetMapping(value = [""])
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
   @Operation(summary = "Exports data")
   fun export(
-    @PathVariable projectId: Long,
     @ParameterObject params: ExportParams
   ): ResponseEntity<StreamingResponseBody> {
-    val exported = exportService.export(projectId, params)
+    val exported = exportService.export(projectHolder.project.id, params)
     checkExportNotEmpty(exported)
     return getExportResponse(params, exported)
   }
 
-  @PostMapping(value = ["/export"])
+  @PostMapping(value = [""])
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
   @AccessWithProjectPermission(Permission.ProjectPermissionType.VIEW)
   @Operation(
@@ -60,10 +58,9 @@ class V2ExportController(
   """
   )
   fun exportPost(
-    @PathVariable projectId: Long,
     @RequestBody params: ExportParams
   ): ResponseEntity<StreamingResponseBody> {
-    return export(projectId, params)
+    return export(params)
   }
 
   private fun getZipHeaders(projectName: String): HttpHeaders {
