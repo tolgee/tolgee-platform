@@ -8,22 +8,22 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 @Component
 @Scope("prototype")
-class SignedInRequestPerformer : BaseRequestPerformer(), AuthRequestPerformer {
+class AuthorizedRequestPerformer : BaseRequestPerformer(), AuthRequestPerformer {
 
   override fun performAuthPut(url: String, content: Any?): ResultActions {
-    return mvc.perform(LoggedRequestFactory.loggedPut(url).withJsonContent(content))
+    return mvc.perform(AuthorizedRequestFactory.loggedPut(url).withJsonContent(content))
   }
 
   override fun performAuthPost(url: String, content: Any?): ResultActions {
-    return mvc.perform(LoggedRequestFactory.loggedPost(url).withJsonContent(content))
+    return mvc.perform(AuthorizedRequestFactory.loggedPost(url).withJsonContent(content))
   }
 
   override fun performAuthGet(url: String): ResultActions {
-    return mvc.perform(LoggedRequestFactory.loggedGet(url))
+    return mvc.perform(AuthorizedRequestFactory.loggedGet(url))
   }
 
   override fun performAuthDelete(url: String, content: Any?): ResultActions {
-    return mvc.perform(LoggedRequestFactory.loggedDelete(url).withJsonContent(content))
+    return mvc.perform(AuthorizedRequestFactory.loggedDelete(url).withJsonContent(content))
   }
 
   override fun performAuthMultipart(
@@ -35,6 +35,6 @@ class SignedInRequestPerformer : BaseRequestPerformer(), AuthRequestPerformer {
     files.forEach { builder.file(it) }
     params.forEach { (name, values) -> builder.param(name, *values) }
 
-    return mvc.perform(LoggedRequestFactory.addToken(builder))
+    return mvc.perform(AuthorizedRequestFactory.addToken(builder))
   }
 }

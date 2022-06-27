@@ -7,7 +7,7 @@ package io.tolgee.controllers.screenshot
 import io.tolgee.dtos.request.screenshot.GetScreenshotsByKeyDto
 import io.tolgee.dtos.response.DeprecatedKeyDto
 import io.tolgee.dtos.response.ScreenshotDTO
-import io.tolgee.fixtures.LoggedRequestFactory.addToken
+import io.tolgee.fixtures.AuthorizedRequestFactory.addToken
 import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.generateUniqueString
 import io.tolgee.testing.assertions.Assertions.assertThat

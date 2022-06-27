@@ -6,7 +6,7 @@ import io.tolgee.dtos.dataImport.ImportStreamingProgressMessage
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_ARCHIVE
 import io.tolgee.dtos.dataImport.ImportStreamingProgressMessageType.FOUND_FILES_IN_ARCHIVE
-import io.tolgee.fixtures.LoggedRequestFactory
+import io.tolgee.fixtures.AuthorizedRequestFactory
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
 import io.tolgee.fixtures.andIsOk
@@ -217,7 +217,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
     }
 
     loginAsUser("admin")
-    return mvc.perform(LoggedRequestFactory.addToken(builder))
+    return mvc.perform(AuthorizedRequestFactory.addToken(builder))
   }
 
   private fun performStreamingImport(projectId: Long, files: Map<String?, Resource>): ResultActions {
@@ -235,7 +235,7 @@ class V2ImportControllerAddFilesTest : AuthorizedControllerTest() {
 
     loginAsUser("admin")
     mvc.perform(
-      LoggedRequestFactory.addToken(
+      AuthorizedRequestFactory.addToken(
         builder
       )
     ).andReturn().let {

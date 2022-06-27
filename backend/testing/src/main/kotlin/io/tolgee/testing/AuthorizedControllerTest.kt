@@ -1,12 +1,13 @@
 package io.tolgee.testing
 
 import io.tolgee.fixtures.AuthRequestPerformer
-import io.tolgee.fixtures.LoggedRequestFactory.init
-import io.tolgee.fixtures.SignedInRequestPerformer
+import io.tolgee.fixtures.AuthorizedRequestFactory.init
+import io.tolgee.fixtures.AuthorizedRequestPerformer
 import io.tolgee.model.UserAccount
 import io.tolgee.security.JwtTokenProvider
 import org.junit.jupiter.api.AfterEach
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
@@ -31,7 +32,7 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
     }
 
   @Autowired
-  lateinit var signedInRequestPerformer: SignedInRequestPerformer
+  lateinit var authorizedRequestPerformer: AuthorizedRequestPerformer
 
   @Autowired
   lateinit var jwtTokenProvider: JwtTokenProvider
@@ -67,40 +68,40 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
     return requestPerformer.perform(builder)
   }
 
-  override fun performDelete(url: String, content: Any?): ResultActions {
+  override fun performDelete(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
     return requestPerformer.performDelete(url, content)
   }
 
-  override fun performGet(url: String): ResultActions {
+  override fun performGet(url: String, httpHeaders: HttpHeaders): ResultActions {
     return requestPerformer.performGet(url)
   }
 
-  override fun performPost(url: String, content: Any?): ResultActions {
+  override fun performPost(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
     return requestPerformer.performPost(url, content)
   }
 
-  override fun performPut(url: String, content: Any?): ResultActions {
+  override fun performPut(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
     return requestPerformer.performPut(url, content)
   }
 
   override fun performAuthPut(url: String, content: Any?): ResultActions {
     loginAsAdminIfNotLogged()
-    return signedInRequestPerformer.performAuthPut(url, content)
+    return authorizedRequestPerformer.performAuthPut(url, content)
   }
 
   override fun performAuthPost(url: String, content: Any?): ResultActions {
     loginAsAdminIfNotLogged()
-    return signedInRequestPerformer.performAuthPost(url, content)
+    return authorizedRequestPerformer.performAuthPost(url, content)
   }
 
   override fun performAuthGet(url: String): ResultActions {
     loginAsAdminIfNotLogged()
-    return signedInRequestPerformer.performAuthGet(url)
+    return authorizedRequestPerformer.performAuthGet(url)
   }
 
   override fun performAuthDelete(url: String, content: Any?): ResultActions {
     loginAsAdminIfNotLogged()
-    return signedInRequestPerformer.performAuthDelete(url, content)
+    return authorizedRequestPerformer.performAuthDelete(url, content)
   }
 
   override fun performAuthMultipart(
@@ -109,6 +110,6 @@ abstract class AuthorizedControllerTest : AbstractControllerTest(), AuthRequestP
     params: Map<String, Array<String>>
   ): ResultActions {
     loginAsAdminIfNotLogged()
-    return signedInRequestPerformer.performAuthMultipart(url, files, params)
+    return authorizedRequestPerformer.performAuthMultipart(url, files, params)
   }
 }

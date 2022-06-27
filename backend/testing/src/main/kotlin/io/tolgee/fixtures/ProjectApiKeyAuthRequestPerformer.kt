@@ -3,8 +3,10 @@ package io.tolgee.fixtures
 import io.tolgee.dtos.response.ApiKeyDTO.ApiKeyDTO
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.testing.annotations.ApiKeyPresentMode
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
+import org.springframework.http.HttpHeaders
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.ResultActions
@@ -16,7 +18,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 class ProjectApiKeyAuthRequestPerformer(
   private val userAccountProvider: () -> UserAccount,
   private val scopes: Array<ApiScope>,
-  projectUrlPrefix: String = "/api/project"
+  projectUrlPrefix: String = "/api/project",
+  private val apiKeyPresentMode: ApiKeyPresentMode = ApiKeyPresentMode.HEADER
 ) : ProjectAuthRequestPerformer(userAccountProvider, projectUrlPrefix) {
 
   @field:Autowired
@@ -29,19 +32,19 @@ class ProjectApiKeyAuthRequestPerformer(
   }
 
   override fun performProjectAuthPut(url: String, content: Any?): ResultActions {
-    return performPut(projectUrlPrefix + url.withApiKey, content)
+    return performPut(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
   }
 
   override fun performProjectAuthPost(url: String, content: Any?): ResultActions {
-    return performPost(projectUrlPrefix + url.withApiKey, content)
+    return performPost(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
   }
 
   override fun performProjectAuthGet(url: String): ResultActions {
-    return performGet(projectUrlPrefix + url.withApiKey)
+    return performGet(projectUrlPrefix + url.withApiKey, headersWithApiKey)
   }
 
   override fun performProjectAuthDelete(url: String, content: Any?): ResultActions {
-    return performDelete(projectUrlPrefix + url.withApiKey, content)
+    return performDelete(projectUrlPrefix + url.withApiKey, content, headersWithApiKey)
   }
 
   override fun performProjectAuthMultipart(
@@ -53,7 +56,7 @@ class ProjectApiKeyAuthRequestPerformer(
     files.forEach { builder.file(it) }
     params.forEach { (name, values) -> builder.param(name, *values) }
     return mvc.perform(
-      LoggedRequestFactory.addToken(
+      AuthorizedRequestFactory.addToken(
         MockMvcRequestBuilders.multipart(projectUrlPrefix + url.withApiKey)
       )
     )
@@ -61,7 +64,18 @@ class ProjectApiKeyAuthRequestPerformer(
 
   private val String.withApiKey: String
     get() {
-      val symbol = if (this.contains("?")) "&" else "?"
-      return this + symbol + "ak=" + apiKey.key
+      if (apiKeyPresentMode == ApiKeyPresentMode.QUERY_PARAM) {
+        val symbol = if (this.contains("?")) "&" else "?"
+        return this + symbol + "ak=" + apiKey.key
+      }
+      return this
+    }
+
+  private val headersWithApiKey: HttpHeaders
+    get() {
+      if (apiKeyPresentMode == ApiKeyPresentMode.HEADER) {
+        return HttpHeaders().apply { add("X-API-Key", apiKey.key) }
+      }
+      return HttpHeaders.EMPTY
     }
 }

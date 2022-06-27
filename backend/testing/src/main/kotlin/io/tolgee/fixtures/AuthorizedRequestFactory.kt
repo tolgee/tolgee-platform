@@ -3,12 +3,12 @@ package io.tolgee.fixtures
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
-object LoggedRequestFactory {
+object AuthorizedRequestFactory {
   var token: String? = null
 
   @JvmStatic
   fun init(token: String?) {
-    LoggedRequestFactory.token = token
+    AuthorizedRequestFactory.token = token
   }
 
   @JvmStatic
