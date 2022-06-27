@@ -1,3 +1,15 @@
+# [2.32.0](https://github.com/tolgee/tolgee-platform/compare/v2.31.1...v2.32.0) (2022-06-27)
+
+
+### Bug Fixes
+
+* Lighter default text color ([0bc018e](https://github.com/tolgee/tolgee-platform/commit/0bc018eae61435049b66868a7ba78dcdf961d3b5))
+
+
+### Features
+
+* API key in Header and fixed export with API key ([746bd26](https://github.com/tolgee/tolgee-platform/commit/746bd2643fd4cc430473fd444bbc2ec989295af5))
+
 ## [2.31.1](https://github.com/tolgee/tolgee-platform/compare/v2.31.0...v2.31.1) (2022-06-15)
 
 
