@@ -63,6 +63,10 @@ class UserAccountService(
     return userAccountRepository.findById(id)
   }
 
+  fun get(id: Long): UserAccount {
+    return userAccountRepository.findById(id).orElseThrow { NotFoundException(Message.USER_NOT_FOUND) }
+  }
+
   @Cacheable(cacheNames = [Caches.USER_ACCOUNTS], key = "#id")
   fun getDto(id: Long): UserAccountDto? {
     return userAccountRepository.findById(id).orElse(null)?.let {

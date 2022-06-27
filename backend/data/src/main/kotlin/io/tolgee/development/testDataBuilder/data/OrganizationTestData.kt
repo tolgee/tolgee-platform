@@ -32,6 +32,12 @@ class OrganizationTestData : BaseTestData() {
           language = "de"
         }
       }
+
+      projectBuilder.addPermission {
+        user = pepa
+        project = projectBuilder.self
+      }
+
       addOrganization {
         name = "Organizacion"
         pepaOrg = this

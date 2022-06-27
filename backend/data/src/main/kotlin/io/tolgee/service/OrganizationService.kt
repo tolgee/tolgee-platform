@@ -90,8 +90,8 @@ class OrganizationService(
     )
   }
 
-  fun findAllPermitted(): List<Organization> {
-    return organizationRepository.findAllPermitted(
+  fun findPreferred(): List<Organization> {
+    return organizationRepository.findPreferred(
       userId = authenticationFacade.userAccount.id
     )
   }

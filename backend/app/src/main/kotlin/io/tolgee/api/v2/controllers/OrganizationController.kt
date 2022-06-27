@@ -123,7 +123,7 @@ class OrganizationController(
 
   private fun setPreferredOrganization(organization: Organization) {
     if (!authenticationFacade.isApiKeyAuthentication) {
-      userPreferencesService.setPreferredOrganization(organization)
+      userPreferencesService.setPreferredOrganizationAsync(organization, authenticationFacade.userAccountEntity)
     }
   }
 

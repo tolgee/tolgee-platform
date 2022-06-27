@@ -174,7 +174,7 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
     testDataService.saveTestData(testData.root)
     val organization = testData.jirinaOrg
     userAccount = testData.pepa
-    performAuthGet("/v2/organizations/${organization.id}").andIsOk
+    performAuthGet("/v2/organizations/${organization.id}").andIsForbidden
   }
 
   @Test

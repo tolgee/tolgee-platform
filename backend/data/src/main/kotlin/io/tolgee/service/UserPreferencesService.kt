@@ -6,6 +6,7 @@ import io.tolgee.model.UserPreferences
 import io.tolgee.repository.UserPreferencesRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 
 @Service
@@ -15,7 +16,7 @@ class UserPreferencesService(
   private val userAccountService: UserAccountService,
   private val organizationService: OrganizationService
 ) {
-  fun setLanguage(tag: String, userAccount: UserAccount = authenticationFacade.userAccountEntity) {
+  fun setLanguage(tag: String, userAccount: UserAccount) {
     val preferences = findOrCreate(userAccount.id)
     preferences.language = tag
     userPreferencesRepository.save(preferences)
@@ -23,16 +24,24 @@ class UserPreferencesService(
 
   fun setPreferredOrganization(
     organization: Organization,
-    userAccount: UserAccount = authenticationFacade.userAccountEntity
+    userAccount: UserAccount
   ) {
     val preferences = findOrCreate(userAccount.id)
     preferences.preferredOrganization = organization
     userPreferencesRepository.save(preferences)
   }
 
-  fun findOrCreate(userAccountId: Long = authenticationFacade.userAccount.id): UserPreferences {
+  @Async
+  fun setPreferredOrganizationAsync(
+    organization: Organization,
+    userAccount: UserAccount
+  ) {
+    setPreferredOrganization(organization, userAccount)
+  }
+
+  fun findOrCreate(userAccountId: Long): UserPreferences {
     return tryUntilItDoesntBreakConstraint {
-      val userAccount = userAccountService.get(authenticationFacade.userAccount.username)
+      val userAccount = userAccountService.get(userAccountId)
       val preferences = find(userAccountId) ?: UserPreferences(userAccount = userAccount).apply {
         userPreferencesRepository.save(this)
       }
@@ -54,6 +63,6 @@ class UserPreferencesService(
   }
 
   fun findPreferredOrganization(): Organization? {
-    return organizationService.findAllPermitted().firstOrNull()
+    return organizationService.findPreferred().firstOrNull()
   }
 }
