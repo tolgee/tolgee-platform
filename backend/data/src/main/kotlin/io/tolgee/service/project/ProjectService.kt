@@ -296,11 +296,16 @@ class ProjectService constructor(
     }
   }
 
-  fun findPermittedPaged(pageable: Pageable, search: String?): Page<ProjectWithLanguagesView> {
+  fun findPermittedPaged(
+    pageable: Pageable,
+    search: String?,
+    organizationId: Long? = null
+  ): Page<ProjectWithLanguagesView> {
     val withoutPermittedLanguages = projectRepository.findAllPermitted(
       authenticationFacade.userAccount.id,
       pageable,
-      search
+      search,
+      organizationId
     )
     return addPermittedLanguagesToProjects(withoutPermittedLanguages)
   }

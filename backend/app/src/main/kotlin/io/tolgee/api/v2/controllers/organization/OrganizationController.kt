@@ -2,7 +2,7 @@
  * Copyright (c) 2020. Tolgee
  */
 
-package io.tolgee.api.v2.controllers
+package io.tolgee.api.v2.controllers.organization
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -13,7 +13,6 @@ import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.api.v2.hateoas.organization.UsageModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
-import io.tolgee.api.v2.hateoas.project.ProjectModel
 import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.component.translationsLimitProvider.TranslationsLimitProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
@@ -207,32 +206,6 @@ class OrganizationController(
   ) {
     organizationRoleService.checkUserIsOwner(organizationId)
     organizationRoleService.removeUser(organizationId, userId)
-  }
-
-  @GetMapping("/{id:[0-9]+}/projects")
-  @Operation(summary = "Returns all organization projects")
-  fun getAllProjects(
-    @PathVariable("id") id: Long,
-    @ParameterObject pageable: Pageable,
-    @RequestParam("search") search: String?
-  ): PagedModel<ProjectModel> {
-    return organizationService.find(id)?.let {
-      projectService.findAllInOrganization(it.id, pageable, search).let { projects ->
-        pagedProjectResourcesAssembler.toModel(projects, projectModelAssembler)
-      }
-    } ?: throw NotFoundException()
-  }
-
-  @GetMapping("/{slug:.*[a-z].*}/projects")
-  @Operation(summary = "Returns all organization projects")
-  fun getAllProjects(
-    @PathVariable("slug") slug: String,
-    @ParameterObject pageable: Pageable,
-    @RequestParam("search") search: String?
-  ): PagedModel<ProjectModel> {
-    return organizationService.find(slug)?.let {
-      getAllProjects(it.id, pageable, search)
-    } ?: throw NotFoundException()
   }
 
   @PutMapping("/{id:[0-9]+}/invite")

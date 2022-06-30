@@ -39,14 +39,18 @@ interface ProjectRepository : JpaRepository<Project, Long> {
 
   @Query(
     """$BASE_VIEW_QUERY 
-        and (:search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
-        or lower(o.name) like lower(concat('%', cast(:search as text),'%'))))
+        and (
+            :search is null or (lower(r.name) like lower(concat('%', cast(:search as text), '%'))
+            or lower(o.name) like lower(concat('%', cast(:search as text),'%')))
+        )
+        and (:organizationId is null or o.id = :organizationId)
     """
   )
   fun findAllPermitted(
     userAccountId: Long,
     pageable: Pageable,
-    @Param("search") search: String? = null
+    @Param("search") search: String? = null,
+    organizationId: Long? = null
   ): Page<ProjectView>
 
   fun findAllByOrganizationOwnerId(organizationOwnerId: Long): List<io.tolgee.model.Project>
