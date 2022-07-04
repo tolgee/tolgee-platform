@@ -3,7 +3,6 @@ package io.tolgee.service
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
 import io.tolgee.dtos.request.auth.SignUpDto
-import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.model.Invitation
 import io.tolgee.security.JwtTokenProvider
@@ -40,7 +39,7 @@ class SignUpService(
 
     if (invitation == null || !dto.organizationName.isNullOrBlank()) {
       val name = if (dto.organizationName.isNullOrBlank()) user.name else dto.organizationName!!
-      organizationService.create(OrganizationDto(name = name), userAccount = user)
+      organizationService.createPreferred(user, name)
     }
 
     if (!tolgeeProperties.authentication.needsEmailVerification) {

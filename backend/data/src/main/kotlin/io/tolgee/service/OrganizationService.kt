@@ -69,6 +69,10 @@ class OrganizationService(
     }
   }
 
+  fun createPreferred(userAccount: UserAccount, name: String = userAccount.name): Organization {
+    return this.create(OrganizationDto(name = name), userAccount = userAccount)
+  }
+
   private fun generateSlug(name: String) =
     slugGenerator.generate(name, 3, 60) {
       @Suppress("BlockingMethodInNonBlockingContext") // this is bug in IDEA
