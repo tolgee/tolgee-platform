@@ -7,23 +7,24 @@ import { AppState } from '../store';
 import { GlobalActions } from '../store/global/GlobalActions';
 import { components } from 'tg.service/apiSchema.generated';
 
-export const useConfig =
-  (): components['schemas']['PublicConfigurationDTO'] => {
-    const loadable = useSelector(
-      (state: AppState) => state.global.loadables.remoteConfig
-    );
+type PublicConfigurationDTO = components['schemas']['PublicConfigurationDTO'];
 
-    const actions = container.resolve(GlobalActions);
+export const useConfig = (): PublicConfigurationDTO => {
+  const loadable = useSelector(
+    (state: AppState) => state.global.loadables.remoteConfig
+  );
 
-    if (loadable.error) {
-      throw new GlobalError(loadable.error.message);
+  const actions = container.resolve(GlobalActions);
+
+  if (loadable.error) {
+    throw new GlobalError(loadable.error.message);
+  }
+
+  useEffect(() => {
+    if (!loadable.data && !loadable.loading && !loadable.error) {
+      actions.loadableActions.remoteConfig.dispatch();
     }
+  }, [loadable.loading, loadable.loaded]);
 
-    useEffect(() => {
-      if (!loadable.data && !loadable.loading && !loadable.error) {
-        actions.loadableActions.remoteConfig.dispatch();
-      }
-    }, [loadable.loading, loadable.loaded]);
-
-    return loadable.data;
-  };
+  return loadable.data;
+};

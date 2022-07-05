@@ -123,7 +123,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                     <Button
                       size="small"
                       disableElevation
-                      color={values.type === 'email' ? 'primary' : undefined}
+                      color={values.type === 'email' ? 'primary' : 'default'}
                       onClick={() => formik.setFieldValue('type', 'email')}
                       data-cy="invitation-dialog-type-email-button"
                     >
@@ -132,7 +132,7 @@ export const InviteDialog: React.FC<Props> = ({ open, onClose }) => {
                     <Button
                       size="small"
                       disableElevation
-                      color={values.type === 'link' ? 'primary' : undefined}
+                      color={values.type === 'link' ? 'primary' : 'default'}
                       onClick={() => formik.setFieldValue('type', 'link')}
                       data-cy="invitation-dialog-type-link-button"
                     >

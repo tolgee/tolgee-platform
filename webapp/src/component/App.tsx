@@ -1,13 +1,14 @@
 import React, { FC, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useSelector } from 'react-redux';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch, BrowserRouter } from 'react-router-dom';
 import { container } from 'tsyringe';
 import { Helmet } from 'react-helmet';
 import { useTheme } from '@mui/material';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import type API from '@openreplay/tracker';
 
+import { CurrentOrganizationProvider } from 'tg.hooks/CurrentOrganizationProvider';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { LINKS } from '../constants/links';
 import { GlobalError } from '../error/GlobalError';
@@ -195,39 +196,41 @@ export class App extends React.Component {
           <Redirection />
           <Chatwoot />
           <MandatoryDataProvider>
-            <Switch>
-              <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
-                <PasswordResetView />
-              </Route>
-              <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
-                <PasswordResetSetView />
-              </Route>
-              <Route exact path={LINKS.SIGN_UP.template}>
-                <RecaptchaProvider>
-                  <SignUpView />
-                </RecaptchaProvider>
-              </Route>
-              <Route path={LINKS.LOGIN.template}>
-                <LoginRouter />
-              </Route>
-              <Route path={LINKS.ACCEPT_INVITATION.template}>
-                <AcceptInvitationHandler />
-              </Route>
-              <PrivateRoute exact path={LINKS.ROOT.template}>
-                <Redirect to={LINKS.PROJECTS.template} />
-              </PrivateRoute>
-              <PrivateRoute path={LINKS.PROJECTS.template}>
-                <ProjectsRouter />
-              </PrivateRoute>
-              <PrivateRoute path={LINKS.USER_SETTINGS.template}>
-                <UserSettingsRouter />
-              </PrivateRoute>
-              <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
-                <OrganizationsRouter />
-              </PrivateRoute>
-            </Switch>
-            <SnackBar />
-            <GlobalConfirmation />
+            <CurrentOrganizationProvider>
+              <Switch>
+                <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
+                  <PasswordResetView />
+                </Route>
+                <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
+                  <PasswordResetSetView />
+                </Route>
+                <Route exact path={LINKS.SIGN_UP.template}>
+                  <RecaptchaProvider>
+                    <SignUpView />
+                  </RecaptchaProvider>
+                </Route>
+                <Route path={LINKS.LOGIN.template}>
+                  <LoginRouter />
+                </Route>
+                <Route path={LINKS.ACCEPT_INVITATION.template}>
+                  <AcceptInvitationHandler />
+                </Route>
+                <PrivateRoute exact path={LINKS.ROOT.template}>
+                  <Redirect to={LINKS.PROJECTS.template} />
+                </PrivateRoute>
+                <PrivateRoute path={LINKS.PROJECTS.template}>
+                  <ProjectsRouter />
+                </PrivateRoute>
+                <PrivateRoute path={LINKS.USER_SETTINGS.template}>
+                  <UserSettingsRouter />
+                </PrivateRoute>
+                <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
+                  <OrganizationsRouter />
+                </PrivateRoute>
+              </Switch>
+              <SnackBar />
+              <GlobalConfirmation />
+            </CurrentOrganizationProvider>
           </MandatoryDataProvider>
         </BrowserRouter>
       </>

@@ -11,11 +11,9 @@ import { T, useTranslate } from '@tolgee/react';
 import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
 
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
-import { BaseView } from 'tg.component/layout/BaseView';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { ProjectLanguagesProvider } from 'tg.hooks/ProjectLanguagesProvider';
@@ -29,6 +27,7 @@ import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { ProjectTransferModal } from 'tg.views/projects/project/components/ProjectTransferModal';
 import { ProjectProfileAvatar } from './ProjectProfileAvatar';
+import { BaseProjectView } from '../BaseProjectView';
 
 const messageService = container.resolve(MessageService);
 
@@ -127,19 +126,12 @@ export const ProjectSettingsView: FunctionComponent = () => {
   };
 
   return (
-    <BaseView
+    <BaseProjectView
       lg={7}
       md={9}
       containerMaxWidth="lg"
       windowTitle={t('project_settings_title')}
       navigation={[
-        [
-          project.name,
-          LINKS.PROJECT_DASHBOARD.build({
-            [PARAMS.PROJECT_ID]: project.id,
-          }),
-          <SmallProjectAvatar key={0} project={project} />,
-        ],
         [
           t('project_settings_title'),
           LINKS.PROJECT_EDIT.build({
@@ -214,6 +206,6 @@ export const ProjectSettingsView: FunctionComponent = () => {
           </StyledDangerZonePart>
         </StyledDangerZone>
       </Box>
-    </BaseView>
+    </BaseProjectView>
   );
 };

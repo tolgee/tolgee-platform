@@ -179,14 +179,6 @@ export interface paths {
     /** Refreshes organizations subscription by Stripe data */
     put: operations["refresh"];
   };
-  "/v2/organizations/{organizationId}/billing/prepare-update-subscription": {
-    /** Prepares update subscription session */
-    put: operations["prepareUpdateSubscription"];
-  };
-  "/v2/organizations/{organizationId}/billing/cancel-subscription": {
-    /** Cancels subscription */
-    put: operations["cancelSubscription"];
-  };
   "/v2/organizations/{id}/leave": {
     put: operations["leaveOrganization"];
   };
@@ -343,6 +335,14 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/subscribe": {
     /** Returns url of Stripe checkout session */
     post: operations["subscribe"];
+  };
+  "/v2/organizations/{organizationId}/billing/customer-portal-session": {
+    /** Returns url of Stripe checkout session */
+    post: operations["createCustomerPortalSession"];
+  };
+  "/v2/organizations/{organizationId}/billing/cancel-subscription": {
+    /** Cancels subscription */
+    post: operations["cancelSubscription"];
   };
   "/v2/organizations/{organizationId}/billing/buy-more-credits": {
     /** Returns url of Stripe checkout session to buy more credits */
@@ -569,10 +569,6 @@ export interface paths {
     /** Returns organization invoices */
     get: operations["getInvoices"];
   };
-  "/v2/organizations/{organizationId}/billing/customer-portal": {
-    /** Returns url of Stripe customer portal session */
-    get: operations["goToCustomerPortal"];
-  };
   "/v2/organizations/{organizationId}/billing/active-plan": {
     /** Refreshes organizations subscription by Stripe data */
     get: operations["getActivePlan"];
@@ -593,7 +589,7 @@ export interface paths {
     get: operations["acceptInvitation"];
   };
   "/v2/billing/plans": {
-    get: operations["getPlans_1"];
+    get: operations["getPlans"];
   };
   "/v2/billing/mt-credit-prices": {
     get: operations["getMtCreditPrices"];
@@ -945,7 +941,9 @@ export interface components {
       roleType: "MEMBER" | "OWNER";
     };
     UpdateSubscriptionRequest: {
-      token: string;
+      /** Id of the subscription plan */
+      planId: number;
+      period: "MONTHLY" | "YEARLY";
     };
     ActivePlanModel: {
       id: number;
@@ -958,24 +956,6 @@ export interface components {
       cancelAtPeriodEnd: boolean;
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
       free: boolean;
-    };
-    UpdateSubscriptionPrepareRequest: {
-      /** Id of the subscription plan */
-      planId: number;
-      period: "MONTHLY" | "YEARLY";
-    };
-    SubscriptionUpdatePreviewItem: {
-      description: string;
-      amount: number;
-      taxRate: number;
-    };
-    SubscriptionUpdatePreviewModel: {
-      items: components["schemas"]["SubscriptionUpdatePreviewItem"][];
-      total: number;
-      amountDue: number;
-      updateToken: string;
-      prorationDate: number;
-      endingBalance: number;
     };
     OrganizationInviteUserDto: {
       roleType: "MEMBER" | "OWNER";
@@ -1156,15 +1136,9 @@ export interface components {
       planId: number;
       period: "MONTHLY" | "YEARLY";
     };
-    SubscribeModel: {
-      url: string;
-    };
     BuyMoreCreditsRequest: {
       priceId: number;
       amount: number;
-    };
-    BuyMoreCreditsModel: {
-      url: string;
     };
     UploadedImageModel: {
       id: number;
@@ -1645,20 +1619,6 @@ export interface components {
       /** How many translations are currently stored within your organization. */
       currentTranslations: number;
     };
-    CollectionModelPlanModel: {
-      _embedded?: {
-        plans?: components["schemas"]["PlanModel"][];
-      };
-    };
-    PlanModel: {
-      id: number;
-      name: string;
-      translationLimit?: number;
-      includedMtCredits?: number;
-      monthlyPrice: number;
-      yearlyPrice: number;
-      free: boolean;
-    };
     InvoiceModel: {
       id: number;
       /** The number on the invoice */
@@ -1674,9 +1634,6 @@ export interface components {
         invoices?: components["schemas"]["InvoiceModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
-    };
-    GoToCustomerPortalModel: {
-      url: string;
     };
     PagedModelUserAccountWithOrganizationRoleModel: {
       _embedded?: {
@@ -1698,6 +1655,20 @@ export interface components {
         organizations?: components["schemas"]["OrganizationModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
+    };
+    CollectionModelPlanModel: {
+      _embedded?: {
+        plans?: components["schemas"]["PlanModel"][];
+      };
+    };
+    PlanModel: {
+      id: number;
+      name: string;
+      translationLimit?: number;
+      includedMtCredits?: number;
+      monthlyPrice: number;
+      yearlyPrice: number;
+      free: boolean;
     };
     CollectionModelMtCreditsPriceModel: {
       _embedded?: {
@@ -3656,63 +3627,6 @@ export interface operations {
       };
     };
   };
-  /** Prepares update subscription session */
-  prepareUpdateSubscription: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["SubscriptionUpdatePreviewModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateSubscriptionPrepareRequest"];
-      };
-    };
-  };
-  /** Cancels subscription */
-  cancelSubscription: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   leaveOrganization: {
     parameters: {
       path: {
@@ -4535,7 +4449,7 @@ export interface operations {
   webhook: {
     parameters: {
       header: {
-        "Stripe-Signature"?: string;
+        "Stripe-Signature": string;
       };
     };
     responses: {
@@ -5701,7 +5615,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["SubscribeModel"];
+          "*/*": string;
         };
       };
       /** Bad Request */
@@ -5723,6 +5637,58 @@ export interface operations {
       };
     };
   };
+  /** Returns url of Stripe checkout session */
+  createCustomerPortalSession: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Cancels subscription */
+  cancelSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   /** Returns url of Stripe checkout session to buy more credits */
   getBuyMoreCreditsCheckoutSessionUrl: {
     parameters: {
@@ -5734,7 +5700,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BuyMoreCreditsModel"];
+          "*/*": string;
         };
       };
       /** Bad Request */
@@ -7889,33 +7855,6 @@ export interface operations {
       };
     };
   };
-  getPlans: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["CollectionModelPlanModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   /** Returns organization invoices */
   getInvoicePdf: {
     parameters: {
@@ -7965,34 +7904,6 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelInvoiceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  /** Returns url of Stripe customer portal session */
-  goToCustomerPortal: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["GoToCustomerPortalModel"];
         };
       };
       /** Bad Request */
@@ -8204,7 +8115,7 @@ export interface operations {
       };
     };
   };
-  getPlans_1: {
+  getPlans: {
     responses: {
       /** OK */
       200: {

@@ -10,6 +10,8 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
 import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { useCurrentOrganization } from 'tg.hooks/CurrentOrganizationProvider';
+import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -23,18 +25,20 @@ const StyledWrapper = styled('div')`
 export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
+  const currentOrganization = useCurrentOrganization();
 
   const listPermitted = useApiQuery({
-    url: '/v2/projects/with-stats',
+    url: '/v2/organizations/{slug}/projects-with-stats',
     method: 'get',
-    options: {
-      keepPreviousData: true,
-    },
+    path: { slug: currentOrganization.slug },
     query: {
       page,
       size: 20,
       search,
       sort: ['id,desc'],
+    },
+    options: {
+      keepPreviousData: true,
     },
   });
 
@@ -48,8 +52,13 @@ export const ProjectListView = () => {
           windowTitle={t('projects_title')}
           onSearch={setSearch}
           containerMaxWidth="lg"
-          addLinkTo={LINKS.PROJECT_ADD.build()}
+          addLinkTo={
+            currentOrganization.currentUserRole === 'OWNER'
+              ? LINKS.PROJECT_ADD.build()
+              : undefined
+          }
           hideChildrenOnLoading={false}
+          switcher={<OrganizationSwitch />}
           loading={listPermitted.isFetching}
         >
           <PaginatedHateoasList

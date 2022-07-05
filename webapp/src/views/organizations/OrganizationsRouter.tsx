@@ -8,11 +8,9 @@ import { LINKS } from 'tg.constants/links';
 import { useConfig } from 'tg.hooks/useConfig';
 
 import { OrganizationCreateView } from './OrganizationCreateView';
-import { OrganizationsListView } from './OrganizationListView';
 import { OrganizationMemberPrivilegesView } from './OrganizationMemberPrivilegesView';
 import { OrganizationMembersView } from './members/OrganizationMembersView';
 import { OrganizationProfileView } from './OrganizationProfileView';
-import { OrganizationsProjectListView } from './OrganizationProjectListView';
 import { useOrganization } from './useOrganization';
 import { OrganizationBillingView } from './billing/OrganizationBillingView';
 
@@ -35,9 +33,6 @@ const SpecificOrganizationRouter = () => {
             path={LINKS.ORGANIZATION_MEMBER_PRIVILEGES.template}
           >
             <OrganizationMemberPrivilegesView />
-          </PrivateRoute>
-          <PrivateRoute exact path={LINKS.ORGANIZATION_PROJECTS.template}>
-            <OrganizationsProjectListView />
           </PrivateRoute>
           {config.billing.enabled && (
             <PrivateRoute exact path={LINKS.ORGANIZATION_BILLING.template}>
@@ -63,10 +58,6 @@ const SpecificOrganizationRouter = () => {
 export const OrganizationsRouter = () => {
   return (
     <Switch>
-      <PrivateRoute exact path={LINKS.ORGANIZATIONS.template}>
-        <OrganizationsListView />
-      </PrivateRoute>
-
       <PrivateRoute exact path={LINKS.ORGANIZATIONS_ADD.template}>
         <OrganizationCreateView />
       </PrivateRoute>

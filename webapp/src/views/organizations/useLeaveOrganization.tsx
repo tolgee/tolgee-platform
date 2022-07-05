@@ -23,6 +23,9 @@ export const useLeaveOrganization = () => {
           {
             onSuccess() {
               messageService.success(<T>organization_left_message</T>);
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 1000);
             },
             onError(e) {
               const parsed = parseErrorResponse(e);
