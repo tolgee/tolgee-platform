@@ -1,12 +1,17 @@
 import { useRef, useState } from 'react';
 import { Box, Link, MenuItem, Popover, styled } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
-import { Link as RouterLink } from 'react-router-dom';
+import { T } from '@tolgee/react';
 
 import { components } from 'tg.service/apiSchema.generated';
-import { PARAMS, Link as UrlLink } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
+import { useHistory } from 'react-router-dom';
+import { LINKS } from 'tg.constants/links';
+import {
+  useCurrentOrganization,
+  useUpdateCurrentOrganization,
+} from 'tg.hooks/CurrentOrganizationProvider';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 
@@ -18,16 +23,19 @@ const StyledOrgItem = styled('div')`
 `;
 
 type Props = {
-  selectedId?: number;
-  link: UrlLink;
+  onSelect?: (organization: OrganizationModel) => void;
+  ownedOnly?: boolean;
 };
 
-const UserOrganizationSettingsSubtitleLink: React.FC<Props> = ({
-  selectedId,
-  link,
+export const OrganizationSwitch: React.FC<Props> = ({
+  onSelect,
+  ownedOnly,
 }) => {
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const organization = useCurrentOrganization();
+  const updateCurrentOrganization = useUpdateCurrentOrganization();
+  const history = useHistory();
 
   const handleClose = () => {
     setIsOpen(false);
@@ -35,6 +43,17 @@ const UserOrganizationSettingsSubtitleLink: React.FC<Props> = ({
 
   const handleClick = () => {
     setIsOpen(true);
+  };
+
+  const handleSelectOrganization = (organization: OrganizationModel) => {
+    handleClose();
+    updateCurrentOrganization(organization);
+    onSelect?.(organization);
+  };
+
+  const handleCreateNewOrg = () => {
+    handleClose();
+    history.push(LINKS.ORGANIZATIONS_ADD.build());
   };
 
   const organizationsLoadable = useApiQuery({
@@ -67,34 +86,36 @@ const UserOrganizationSettingsSubtitleLink: React.FC<Props> = ({
   };
 
   const selected = organizationsLoadable.data?._embedded?.organizations?.find(
-    (org) => org.id === selectedId
+    (org) => org.id === organization.id
   );
 
   const MenuItems = () => {
     return (
       <>
-        {organizationsLoadable.data?._embedded?.organizations?.map(
-          (item, idx) => (
+        {organizationsLoadable.data?._embedded?.organizations
+          ?.filter((org) =>
+            ownedOnly ? org.currentUserRole === 'OWNER' : true
+          )
+          ?.map((item, idx) => (
             <MenuItem
               key={idx}
-              component={RouterLink}
               selected={item.id === selected?.id}
-              to={link.build({
-                [PARAMS.ORGANIZATION_SLUG]: item.slug,
-              })}
-              onClick={() => handleClose()}
+              onClick={() => handleSelectOrganization(item)}
             >
               <OrganizationItem data={item} />
             </MenuItem>
-          )
-        )}
+          ))}
       </>
     );
   };
 
   return (
     <>
-      <Box display="flex" data-cy="user-organizations-settings-subtitle-link">
+      <Box
+        display="flex"
+        data-cy="user-organizations-settings-subtitle-link"
+        mr={-1}
+      >
         <Link
           ref={anchorEl}
           style={{
@@ -123,14 +144,15 @@ const UserOrganizationSettingsSubtitleLink: React.FC<Props> = ({
           }}
           transformOrigin={{
             vertical: 'top',
-            horizontal: 'left',
+            horizontal: 'center',
           }}
         >
-          {isOpen && <MenuItems />}
+          <MenuItems />
+          <MenuItem onClick={handleCreateNewOrg}>
+            <T keyName="organizations_add_new" />
+          </MenuItem>
         </Popover>
       </Box>
     </>
   );
 };
-
-export default UserOrganizationSettingsSubtitleLink;

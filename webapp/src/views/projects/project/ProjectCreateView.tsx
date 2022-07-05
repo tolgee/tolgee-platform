@@ -10,14 +10,17 @@ import { BaseFormView } from 'tg.component/layout/BaseFormView';
 import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/useConfig';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 
 import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
-import OwnerSelect from './components/OwnerSelect';
+import {
+  useCurrentOrganization,
+  useUpdateCurrentOrganization,
+} from 'tg.hooks/CurrentOrganizationProvider';
+import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
 
 const messageService = container.resolve(MessageService);
 
@@ -29,8 +32,8 @@ export const ProjectCreateView: FunctionComponent = () => {
     method: 'post',
   });
   const t = useTranslate();
-
-  const config = useConfig();
+  const organization = useCurrentOrganization();
+  const updateOrganization = useUpdateCurrentOrganization();
 
   const onSubmit = (values: CreateProjectValueType) => {
     values.languages = values.languages.filter((l) => !!l);
@@ -42,6 +45,7 @@ export const ProjectCreateView: FunctionComponent = () => {
       },
       {
         onSuccess() {
+          updateOrganization(values.organizationId);
           messageService.success(<T>project_created_message</T>);
         },
       }
@@ -64,8 +68,7 @@ export const ProjectCreateView: FunctionComponent = () => {
     languages: [
       { tag: 'en', name: 'English', originalName: 'English', flagEmoji: '🇬🇧' },
     ],
-    organizationId:
-      organizationsLoadable?.data?._embedded?.organizations?.[0].id || 0,
+    organizationId: organization.id,
     baseLanguageTag: 'en',
   };
 
@@ -88,6 +91,7 @@ export const ProjectCreateView: FunctionComponent = () => {
         onCancel={() => setCancelled(true)}
         saveActionLoadable={createProjectLoadable}
         validationSchema={Validation.PROJECT_CREATION(t)}
+        switcher={<OrganizationSwitch ownedOnly />}
       >
         {(props: FormikProps<CreateProjectValueType>) => {
           return (
@@ -103,11 +107,6 @@ export const ProjectCreateView: FunctionComponent = () => {
                     required={true}
                   />
                 </Grid>
-                {config.authentication && (
-                  <Grid item lg md sm xs={12}>
-                    <OwnerSelect organizations={organizationsLoadable.data!} />
-                  </Grid>
-                )}
               </Grid>
               <Box mb={2}>
                 <Typography variant="h6">

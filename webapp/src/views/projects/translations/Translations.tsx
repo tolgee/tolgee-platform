@@ -4,7 +4,6 @@ import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 import { LINKS, PARAMS } from 'tg.constants/links';
-import { BaseView } from 'tg.component/layout/BaseView';
 import {
   useTranslationsDispatch,
   useTranslationsSelector,
@@ -19,7 +18,7 @@ import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { ProjectPermissionType } from 'tg.service/response.types';
 import { useUrlSearchState } from 'tg.hooks/useUrlSearchState';
 import { useGlobalLoading } from 'tg.component/GlobalLoading';
-import { SmallProjectAvatar } from 'tg.component/navigation/SmallProjectAvatar';
+import { BaseProjectView } from '../BaseProjectView';
 
 export const Translations = () => {
   const t = useTranslate();
@@ -112,16 +111,9 @@ export const Translations = () => {
     );
 
   return (
-    <BaseView
+    <BaseProjectView
       windowTitle={t('translations_view_title')}
       navigation={[
-        [
-          project.name,
-          LINKS.PROJECT_DASHBOARD.build({
-            [PARAMS.PROJECT_ID]: project.id,
-          }),
-          <SmallProjectAvatar key={0} project={project} />,
-        ],
         [
           t('translations_view_title'),
           LINKS.PROJECT_TRANSLATIONS.build({
@@ -138,6 +130,6 @@ export const Translations = () => {
       ) : (
         <TranslationsList />
       )}
-    </BaseView>
+    </BaseProjectView>
   );
 };

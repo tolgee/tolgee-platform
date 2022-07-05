@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { Breadcrumbs, Link, styled } from '@mui/material';
+import { Breadcrumbs, Link, Box, styled } from '@mui/material';
 import { NavigateNext } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -27,18 +27,29 @@ export const Navigation: React.FC<Props> = ({ path }) => {
       separator={<NavigateNext fontSize="small" />}
     >
       {path.map(([name, url, icon], index) => {
-        return (
-          <StyledLink
-            key={index}
-            color={index === path.length - 1 ? 'primary' : 'inherit'}
-            // @ts-ignore
-            to={url}
-            component={RouterLink}
-          >
-            {icon}
-            {name}
-          </StyledLink>
-        );
+        if (React.isValidElement(name)) {
+          return (
+            <Box
+              color={index === path.length - 1 ? 'primary' : 'inherit'}
+              key={index}
+            >
+              {name}
+            </Box>
+          );
+        } else {
+          return (
+            <StyledLink
+              key={index}
+              color={index === path.length - 1 ? 'primary' : 'inherit'}
+              // @ts-ignore
+              to={url}
+              component={RouterLink}
+            >
+              {icon}
+              {name}
+            </StyledLink>
+          );
+        }
       })}
     </Breadcrumbs>
   );

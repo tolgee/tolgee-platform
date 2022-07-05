@@ -8,8 +8,11 @@ export interface paths {
     put: operations["uploadAvatar"];
     delete: operations["removeAvatar"];
   };
+  "/v2/user-preferences/set-language/{languageTag}": {
+    put: operations["setLanguage"];
+  };
   "/v2/projects/{projectId}": {
-    get: operations["get"];
+    get: operations["get_1"];
     put: operations["editProject"];
     delete: operations["deleteProject"];
   };
@@ -103,12 +106,12 @@ export interface paths {
     put: operations["setState_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_1"];
+    get: operations["get_2"];
     put: operations["update"];
     delete: operations["delete_2"];
   };
   "/v2/projects/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_2"];
+    get: operations["get_3"];
     put: operations["update_1"];
     delete: operations["delete_3"];
   };
@@ -135,12 +138,12 @@ export interface paths {
     put: operations["leaveProject"];
   };
   "/v2/projects/{projectId}/languages/{languageId}": {
-    get: operations["get_3"];
+    get: operations["get_4"];
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_2"];
   };
   "/v2/projects/languages/{languageId}": {
-    get: operations["get_4"];
+    get: operations["get_5"];
     put: operations["editLanguage_1"];
     delete: operations["deleteLanguage_3"];
   };
@@ -161,14 +164,6 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/refresh-subscription": {
     /** Refreshes organizations subscription by Stripe data */
     put: operations["refresh"];
-  };
-  "/v2/organizations/{organizationId}/billing/prepare-update-subscription": {
-    /** Prepares update subscription session */
-    put: operations["prepareUpdateSubscription"];
-  };
-  "/v2/organizations/{organizationId}/billing/cancel-subscription": {
-    /** Cancels subscription */
-    put: operations["cancelSubscription"];
   };
   "/v2/organizations/{id}/leave": {
     put: operations["leaveOrganization"];
@@ -191,12 +186,12 @@ export interface paths {
     delete: operations["removeAvatar_3"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_7"];
+    get: operations["get_8"];
     put: operations["update_2"];
     delete: operations["delete_4"];
   };
   "/api/organizations/{id}": {
-    get: operations["get_8"];
+    get: operations["get_9"];
     put: operations["update_3"];
     delete: operations["delete_5"];
   };
@@ -315,6 +310,14 @@ export interface paths {
     /** Returns url of Stripe checkout session */
     post: operations["subscribe"];
   };
+  "/v2/organizations/{organizationId}/billing/customer-portal-session": {
+    /** Returns url of Stripe checkout session */
+    post: operations["createCustomerPortalSession"];
+  };
+  "/v2/organizations/{organizationId}/billing/cancel-subscription": {
+    /** Cancels subscription */
+    post: operations["cancelSubscription"];
+  };
   "/v2/organizations/{organizationId}/billing/buy-more-credits": {
     /** Returns url of Stripe checkout session to buy more credits */
     post: operations["getBuyMoreCreditsCheckoutSessionUrl"];
@@ -379,6 +382,9 @@ export interface paths {
   };
   "/api/apiKeys/edit": {
     post: operations["edit_4"];
+  };
+  "/v2/user-preferences": {
+    get: operations["get"];
   };
   "/v2/slug/validate-project/{slug}": {
     get: operations["validateProjectSlug"];
@@ -469,6 +475,15 @@ export interface paths {
   "/v2/projects/with-stats": {
     get: operations["getAllWithStatistics"];
   };
+  "/v2/preferred-organization": {
+    get: operations["getPreferred"];
+  };
+  "/v2/organizations/{slug}/projects-with-stats": {
+    get: operations["getAllWithStatistics_1"];
+  };
+  "/api/organizations/{slug}/projects-with-stats": {
+    get: operations["getAllWithStatistics_2"];
+  };
   "/v2/organizations/{slug}/projects": {
     get: operations["getAllProjects"];
   };
@@ -476,10 +491,10 @@ export interface paths {
     get: operations["getAllProjects_1"];
   };
   "/v2/organizations/{slug}": {
-    get: operations["get_5"];
+    get: operations["get_6"];
   };
   "/api/organizations/{slug}": {
-    get: operations["get_6"];
+    get: operations["get_7"];
   };
   "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
     get: operations["getOrganizationCredits"];
@@ -498,8 +513,11 @@ export interface paths {
     /** Returns current organization usage */
     get: operations["getUsage_1"];
   };
-  "/v2/organizations/{organizationId}/billing/plans": {
-    get: operations["getPlans"];
+  "/v2/organizations/{organizationId}/projects-with-stats": {
+    get: operations["getAllWithStatistics_3"];
+  };
+  "/api/organizations/{organizationId}/projects-with-stats": {
+    get: operations["getAllWithStatistics_4"];
   };
   "/v2/organizations/{organizationId}/billing/invoices/{invoiceId}/pdf": {
     /** Returns organization invoices */
@@ -508,10 +526,6 @@ export interface paths {
   "/v2/organizations/{organizationId}/billing/invoices/": {
     /** Returns organization invoices */
     get: operations["getInvoices"];
-  };
-  "/v2/organizations/{organizationId}/billing/customer-portal": {
-    /** Returns url of Stripe customer portal session */
-    get: operations["goToCustomerPortal"];
   };
   "/v2/organizations/{organizationId}/billing/active-plan": {
     /** Refreshes organizations subscription by Stripe data */
@@ -533,13 +547,13 @@ export interface paths {
     get: operations["acceptInvitation"];
   };
   "/v2/billing/plans": {
-    get: operations["getPlans_1"];
+    get: operations["getPlans"];
   };
   "/v2/billing/mt-credit-prices": {
     get: operations["getMtCreditPrices"];
   };
   "/v2/api-keys/{keyId}": {
-    get: operations["get_9"];
+    get: operations["get_10"];
   };
   "/v2/api-keys/current": {
     get: operations["getCurrent"];
@@ -885,7 +899,9 @@ export interface components {
       roleType: "MEMBER" | "OWNER";
     };
     UpdateSubscriptionRequest: {
-      token: string;
+      /** Id of the subscription plan */
+      planId: number;
+      period: "MONTHLY" | "YEARLY";
     };
     ActivePlanModel: {
       id: number;
@@ -898,24 +914,6 @@ export interface components {
       cancelAtPeriodEnd: boolean;
       currentBillingPeriod?: "MONTHLY" | "YEARLY";
       free: boolean;
-    };
-    UpdateSubscriptionPrepareRequest: {
-      /** Id of the subscription plan */
-      planId: number;
-      period: "MONTHLY" | "YEARLY";
-    };
-    SubscriptionUpdatePreviewItem: {
-      description: string;
-      amount: number;
-      taxRate: number;
-    };
-    SubscriptionUpdatePreviewModel: {
-      items: components["schemas"]["SubscriptionUpdatePreviewItem"][];
-      total: number;
-      amountDue: number;
-      updateToken: string;
-      prorationDate: number;
-      endingBalance: number;
     };
     OrganizationInviteUserDto: {
       roleType: "MEMBER" | "OWNER";
@@ -938,7 +936,12 @@ export interface components {
       slug: string;
       description?: string;
       basePermissions: "VIEW" | "TRANSLATE" | "EDIT" | "MANAGE";
-      currentUserRole: "MEMBER" | "OWNER";
+      /**
+       * The role of currently authorized user.
+       *
+       * Can be null when user has direct access to one of the projects owned by the organization.
+       */
+      currentUserRole?: "MEMBER" | "OWNER";
       avatar?: components["schemas"]["Avatar"];
     };
     OrganizationDto: {
@@ -986,7 +989,7 @@ export interface components {
       languages: components["schemas"]["LanguageDto"][];
       /** Slug of your project used in url e.g. "/v2/projects/what-a-project". If not provided, it will be generated */
       slug?: string;
-      /** If not provided, project will be created in user scope */
+      /** Organization to create the project in */
       organizationId: number;
       /** Tag of one of created languages, to select it as base language. If not provided, first language will be selected as base. */
       baseLanguageTag?: string;
@@ -1091,15 +1094,9 @@ export interface components {
       planId: number;
       period: "MONTHLY" | "YEARLY";
     };
-    SubscribeModel: {
-      url: string;
-    };
     BuyMoreCreditsRequest: {
       priceId: number;
       amount: number;
-    };
-    BuyMoreCreditsModel: {
-      url: string;
     };
     UploadedImageModel: {
       id: number;
@@ -1116,6 +1113,7 @@ export interface components {
     SignUpDto: {
       name: string;
       email: string;
+      organizationName?: string;
       password: string;
       invitationCode?: string;
       callbackUrl?: string;
@@ -1165,6 +1163,10 @@ export interface components {
     EditApiKeyDTO: {
       id: number;
       scopes: string[];
+    };
+    UserPreferencesModel: {
+      language?: string;
+      preferredOrganizationId?: number;
     };
     PagedModelProjectModel: {
       _embedded?: {
@@ -1516,20 +1518,6 @@ export interface components {
       /** How many translations are currently stored within your organization. */
       currentTranslations: number;
     };
-    CollectionModelPlanModel: {
-      _embedded?: {
-        plans?: components["schemas"]["PlanModel"][];
-      };
-    };
-    PlanModel: {
-      id: number;
-      name: string;
-      translationLimit?: number;
-      includedMtCredits?: number;
-      monthlyPrice: number;
-      yearlyPrice: number;
-      free: boolean;
-    };
     InvoiceModel: {
       id: number;
       /** The number on the invoice */
@@ -1545,9 +1533,6 @@ export interface components {
         invoices?: components["schemas"]["InvoiceModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
-    };
-    GoToCustomerPortalModel: {
-      url: string;
     };
     PagedModelUserAccountWithOrganizationRoleModel: {
       _embedded?: {
@@ -1569,6 +1554,20 @@ export interface components {
         organizations?: components["schemas"]["OrganizationModel"][];
       };
       page?: components["schemas"]["PageMetadata"];
+    };
+    CollectionModelPlanModel: {
+      _embedded?: {
+        plans?: components["schemas"]["PlanModel"][];
+      };
+    };
+    PlanModel: {
+      id: number;
+      name: string;
+      translationLimit?: number;
+      includedMtCredits?: number;
+      monthlyPrice: number;
+      yearlyPrice: number;
+      free: boolean;
     };
     CollectionModelMtCreditsPriceModel: {
       _embedded?: {
@@ -1729,7 +1728,30 @@ export interface operations {
       };
     };
   };
-  get: {
+  setLanguage: {
+    parameters: {
+      path: {
+        languageTag: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  get_1: {
     parameters: {
       path: {
         projectId: number;
@@ -2659,7 +2681,7 @@ export interface operations {
       };
     };
   };
-  get_1: {
+  get_2: {
     parameters: {
       path: {
         translationId: number;
@@ -2745,7 +2767,7 @@ export interface operations {
       };
     };
   };
-  get_2: {
+  get_3: {
     parameters: {
       path: {
         translationId: number;
@@ -3189,7 +3211,7 @@ export interface operations {
       };
     };
   };
-  get_3: {
+  get_4: {
     parameters: {
       path: {
         languageId: number;
@@ -3274,7 +3296,7 @@ export interface operations {
       };
     };
   };
-  get_4: {
+  get_5: {
     parameters: {
       path: {
         languageId: number;
@@ -3532,63 +3554,6 @@ export interface operations {
       };
     };
   };
-  /** Prepares update subscription session */
-  prepareUpdateSubscription: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["SubscriptionUpdatePreviewModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateSubscriptionPrepareRequest"];
-      };
-    };
-  };
-  /** Cancels subscription */
-  cancelSubscription: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: unknown;
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
   leaveOrganization: {
     parameters: {
       path: {
@@ -3821,7 +3786,7 @@ export interface operations {
       };
     };
   };
-  get_7: {
+  get_8: {
     parameters: {
       path: {
         id: number;
@@ -3903,7 +3868,7 @@ export interface operations {
       };
     };
   };
-  get_8: {
+  get_9: {
     parameters: {
       path: {
         id: number;
@@ -4411,7 +4376,7 @@ export interface operations {
   webhook: {
     parameters: {
       header: {
-        "Stripe-Signature"?: string;
+        "Stripe-Signature": string;
       };
     };
     responses: {
@@ -5425,7 +5390,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["SubscribeModel"];
+          "*/*": string;
         };
       };
       /** Bad Request */
@@ -5447,6 +5412,58 @@ export interface operations {
       };
     };
   };
+  /** Returns url of Stripe checkout session */
+  createCustomerPortalSession: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  /** Cancels subscription */
+  cancelSubscription: {
+    parameters: {
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: unknown;
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   /** Returns url of Stripe checkout session to buy more credits */
   getBuyMoreCreditsCheckoutSessionUrl: {
     parameters: {
@@ -5458,7 +5475,7 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["BuyMoreCreditsModel"];
+          "*/*": string;
         };
       };
       /** Bad Request */
@@ -6118,6 +6135,28 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["EditApiKeyDTO"];
+      };
+    };
+  };
+  get: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["UserPreferencesModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
       };
     };
   };
@@ -7130,6 +7169,100 @@ export interface operations {
       };
     };
   };
+  getPreferred: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["OrganizationModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllWithStatistics_1: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        slug: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllWithStatistics_2: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        slug: string;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllProjects: {
     parameters: {
       path: {
@@ -7202,7 +7335,7 @@ export interface operations {
       };
     };
   };
-  get_5: {
+  get_6: {
     parameters: {
       path: {
         slug: string;
@@ -7229,7 +7362,7 @@ export interface operations {
       };
     };
   };
-  get_6: {
+  get_7: {
     parameters: {
       path: {
         slug: string;
@@ -7393,8 +7526,17 @@ export interface operations {
       };
     };
   };
-  getPlans: {
+  getAllWithStatistics_3: {
     parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
       path: {
         organizationId: number;
       };
@@ -7403,7 +7545,43 @@ export interface operations {
       /** OK */
       200: {
         content: {
-          "*/*": components["schemas"]["CollectionModelPlanModel"];
+          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  getAllWithStatistics_4: {
+    parameters: {
+      query: {
+        /** Zero-based page index (0..N) */
+        page?: number;
+        /** The size of the page to be returned */
+        size?: number;
+        /** Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported. */
+        sort?: string[];
+        search?: string;
+      };
+      path: {
+        organizationId: number;
+      };
+    };
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "application/hal+json": components["schemas"]["PagedModelProjectWithStatsModel"];
         };
       };
       /** Bad Request */
@@ -7469,34 +7647,6 @@ export interface operations {
       200: {
         content: {
           "*/*": components["schemas"]["PagedModelInvoiceModel"];
-        };
-      };
-      /** Bad Request */
-      400: {
-        content: {
-          "*/*": string;
-        };
-      };
-      /** Not Found */
-      404: {
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  /** Returns url of Stripe customer portal session */
-  goToCustomerPortal: {
-    parameters: {
-      path: {
-        organizationId: number;
-      };
-    };
-    responses: {
-      /** OK */
-      200: {
-        content: {
-          "*/*": components["schemas"]["GoToCustomerPortalModel"];
         };
       };
       /** Bad Request */
@@ -7708,7 +7858,7 @@ export interface operations {
       };
     };
   };
-  getPlans_1: {
+  getPlans: {
     responses: {
       /** OK */
       200: {
@@ -7752,7 +7902,7 @@ export interface operations {
       };
     };
   };
-  get_9: {
+  get_10: {
     parameters: {
       path: {
         keyId: number;

@@ -41,7 +41,6 @@ declare namespace DataCy {
         "global-form-save-button" |
         "global-form-select" |
         "global-list-item" |
-        "global-list-item-text" |
         "global-list-items" |
         "global-list-pagination" |
         "global-list-search" |
@@ -119,7 +118,6 @@ declare namespace DataCy {
         "languages-modify-apply-button" |
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
-        "leave-organization-button" |
         "login-button" |
         "organization-address-part-field" |
         "organization-delete-button" |
@@ -135,7 +133,6 @@ declare namespace DataCy {
         "organization-role-menu" |
         "organization-role-menu-button" |
         "organization-role-select-item" |
-        "organization-settings-button" |
         "organization-side-menu" |
         "permission-select-item" |
         "permissions-language-menu-button" |

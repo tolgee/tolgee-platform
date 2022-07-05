@@ -13,6 +13,7 @@ import { ProjectPermissionType } from 'tg.service/response.types';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 
 import { OrganizationFields } from './components/OrganizationFields';
+import { useUpdateCurrentOrganization } from 'tg.hooks/CurrentOrganizationProvider';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
@@ -25,21 +26,19 @@ export const OrganizationCreateView: FunctionComponent = () => {
     method: 'post',
   });
   const t = useTranslate();
+  const updateOrganization = useUpdateCurrentOrganization();
 
   const onSubmit = (values) => {
     loadable.mutate(
       { content: { 'application/json': values } },
       {
-        onSuccess: () => {
-          redirectionActions.redirect.dispatch(LINKS.ORGANIZATIONS.build());
+        onSuccess: (organization) => {
+          updateOrganization(organization);
+          redirectionActions.redirect.dispatch(LINKS.PROJECTS.build());
           messageService.success(<T>organization_created_message</T>);
         },
       }
     );
-  };
-
-  const onCancel = () => {
-    redirectionActions.redirect.dispatch(LINKS.ORGANIZATIONS.build());
   };
 
   const initialValues: OrganizationBody = {
@@ -58,7 +57,6 @@ export const OrganizationCreateView: FunctionComponent = () => {
         title={<T>create_organization_title</T>}
         initialValues={initialValues}
         onSubmit={onSubmit}
-        onCancel={onCancel}
         saveActionLoadable={loadable}
         validationSchema={Validation.ORGANIZATION_CREATE_OR_EDIT(t, '')}
       >

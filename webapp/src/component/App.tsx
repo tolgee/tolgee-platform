@@ -1,13 +1,14 @@
 import React, { FC, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/browser';
 import { useSelector } from 'react-redux';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { container } from 'tsyringe';
 import { Helmet } from 'react-helmet';
 import { useTheme } from '@mui/material';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import type API from '@openreplay/tracker';
 
+import { CurrentOrganizationProvider } from 'tg.hooks/CurrentOrganizationProvider';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { LINKS } from '../constants/links';
 import { GlobalError } from '../error/GlobalError';
@@ -190,9 +191,9 @@ export class App extends React.Component {
     return (
       <>
         <Head />
-        <BrowserRouter>
-          <Redirection />
-          <MandatoryDataProvider>
+        <Redirection />
+        <MandatoryDataProvider>
+          <CurrentOrganizationProvider>
             <Switch>
               <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
                 <PasswordResetView />
@@ -226,8 +227,8 @@ export class App extends React.Component {
             </Switch>
             <SnackBar />
             <GlobalConfirmation />
-          </MandatoryDataProvider>
-        </BrowserRouter>
+          </CurrentOrganizationProvider>
+        </MandatoryDataProvider>
       </>
     );
   }

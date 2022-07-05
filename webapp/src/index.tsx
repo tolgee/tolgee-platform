@@ -4,6 +4,7 @@ import { StyledEngineProvider } from '@mui/material/styles';
 import { TolgeeProvider } from '@tolgee/react';
 import ReactDOM from 'react-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { BrowserRouter } from 'react-router-dom';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { Provider } from 'react-redux';
 import 'reflect-metadata';
@@ -59,30 +60,32 @@ const MainWrapper = () => {
         }}
         loadingFallback={<FullPageLoading />}
       >
-        <StyledEngineProvider injectFirst>
-          <ThemeProvider>
-            <CssBaseline />
-            <Provider store={store}>
-              <QueryClientProvider client={queryClient}>
-                {/* @ts-ignore */}
-                <ErrorBoundary>
-                  <SnackbarProvider data-cy="global-snackbars">
-                    <LoadingProvider>
-                      <BottomPanelProvider>
-                        <TopBarProvider>
-                          <GlobalLoading />
-                          <App />
-                          <GlobalErrorModal />
-                        </TopBarProvider>
-                      </BottomPanelProvider>
-                    </LoadingProvider>
-                  </SnackbarProvider>
-                </ErrorBoundary>
-                <ReactQueryDevtools />
-              </QueryClientProvider>
-            </Provider>
-          </ThemeProvider>
-        </StyledEngineProvider>
+        <BrowserRouter>
+          <StyledEngineProvider injectFirst>
+            <ThemeProvider>
+              <CssBaseline />
+              <Provider store={store}>
+                <QueryClientProvider client={queryClient}>
+                  {/* @ts-ignore */}
+                  <ErrorBoundary>
+                    <SnackbarProvider data-cy="global-snackbars">
+                      <LoadingProvider>
+                        <BottomPanelProvider>
+                          <TopBarProvider>
+                            <GlobalLoading />
+                            <App />
+                            <GlobalErrorModal />
+                          </TopBarProvider>
+                        </BottomPanelProvider>
+                      </LoadingProvider>
+                    </SnackbarProvider>
+                  </ErrorBoundary>
+                  <ReactQueryDevtools />
+                </QueryClientProvider>
+              </Provider>
+            </ThemeProvider>
+          </StyledEngineProvider>{' '}
+        </BrowserRouter>
       </TolgeeProvider>
     </React.Suspense>
   );

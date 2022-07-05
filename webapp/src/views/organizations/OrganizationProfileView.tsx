@@ -1,7 +1,7 @@
 import { FunctionComponent, useState } from 'react';
 import { Box, Button } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
-import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
 
 import { StandardForm } from 'tg.component/common/form/StandardForm';
@@ -16,6 +16,8 @@ import { RedirectionActions } from 'tg.store/global/RedirectionActions';
 import { BaseOrganizationSettingsView } from './components/BaseOrganizationSettingsView';
 import { OrganizationFields } from './components/OrganizationFields';
 import { OrganizationProfileAvatar } from './OrganizationProfileAvatar';
+import { useLeaveOrganization } from './useLeaveOrganization';
+import { useUpdateCurrentOrganization } from 'tg.hooks/CurrentOrganizationProvider';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
@@ -24,6 +26,9 @@ const messageService = container.resolve(MessageService);
 
 export const OrganizationProfileView: FunctionComponent = () => {
   const t = useTranslate();
+  const leaveOrganization = useLeaveOrganization();
+  const updateOrganization = useUpdateCurrentOrganization();
+  const history = useHistory();
 
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
@@ -86,15 +91,20 @@ export const OrganizationProfileView: FunctionComponent = () => {
           {
             onSuccess: () => {
               messageService.success(<T>organization_deleted_message</T>);
-              redirectionActions.redirect.dispatch(LINKS.ORGANIZATIONS.build());
+              history.push(LINKS.PROJECTS.build());
+              updateOrganization(undefined);
             },
           }
         ),
     });
   };
 
+  const handleLeave = () => {
+    leaveOrganization(organization.data!.id);
+  };
+
   if (cancelled) {
-    return <Redirect to={LINKS.ORGANIZATIONS.build()} />;
+    return <Redirect to={LINKS.PROJECTS.build()} />;
   }
 
   return (
@@ -117,14 +127,24 @@ export const OrganizationProfileView: FunctionComponent = () => {
             initialValues?.slug
           )}
           customActions={
-            <Button
-              data-cy="organization-delete-button"
-              color="secondary"
-              variant="outlined"
-              onClick={handleDelete}
-            >
-              <T>organization_delete_button</T>
-            </Button>
+            <Box display="flex" gap={1}>
+              <Button
+                data-cy="organization-delete-button"
+                color="error"
+                variant="outlined"
+                onClick={handleDelete}
+              >
+                <T>organization_delete_button</T>
+              </Button>
+              <Button
+                data-cy="organization-delete-button"
+                color="secondary"
+                variant="outlined"
+                onClick={handleLeave}
+              >
+                <T>organization_leave_button</T>
+              </Button>
+            </Box>
           }
         >
           <>
