@@ -21,6 +21,7 @@ import io.tolgee.service.TagService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.data.web.SortDefault
 import org.springframework.hateoas.PagedModel
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -44,7 +45,7 @@ import io.swagger.v3.oas.annotations.tags.Tag as OpenApiTag
   ]
 )
 @OpenApiTag(name = "Tags", description = "Manipulates key tags")
-class TagController(
+class TagsController(
   private val keyService: KeyService,
   private val projectHolder: ProjectHolder,
   private val tagService: TagService,
@@ -82,7 +83,7 @@ class TagController(
   @AccessWithApiKey(scopes = [ApiScope.TRANSLATIONS_VIEW])
   fun getAll(
     @RequestParam search: String? = null,
-    @ParameterObject pageable: Pageable
+    @SortDefault("name") @ParameterObject pageable: Pageable
   ): PagedModel<TagModel> {
     val data = tagService.getProjectTags(projectHolder.project.id, search, pageable)
     return pagedResourcesAssembler.toModel(data, tagModelAssembler)
