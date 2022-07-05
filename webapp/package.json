@@ -13,7 +13,7 @@
     "@mui/lab": "^5.0.0-alpha.75",
     "@mui/material": "^5.5.3",
     "@openreplay/tracker": "^3.5.4",
-    "@sentry/browser": "^6.10.0",
+    "@sentry/browser": "^6.19.7",
     "@tolgee/react": "^4.6.0",
     "@tolgee/socketio-client": "^4.0.0",
     "clsx": "^1.1.1",
