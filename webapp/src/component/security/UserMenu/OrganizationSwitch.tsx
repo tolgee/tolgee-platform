@@ -3,7 +3,7 @@ import { T } from '@tolgee/react';
 import { MenuItem, ListItemText, Menu, styled } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
-import { useCurrentOrganization } from 'tg.hooks/CurrentOrganizationProvider';
+import { useCurrentOrganization } from 'tg.hooks/InitialDataProvider';
 import { AvatarImg } from 'tg.component/common/avatar/AvatarImg';
 import { components } from 'tg.service/apiSchema.generated';
 

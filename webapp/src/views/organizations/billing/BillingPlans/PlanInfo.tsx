@@ -7,9 +7,11 @@ import { components } from 'tg.service/billingApiSchema.generated';
 type PlanModel = components['schemas']['PlanModel'];
 
 const StyledInfo = styled(Box)`
-  display: flex;
+  display: grid;
   justify-content: space-between;
+  grid-template-columns: 1fr 16px 1fr;
   padding-bottom: 8px;
+  justify-items: center;
 `;
 
 const StyledItem = styled('div')`
@@ -29,6 +31,7 @@ const StyledNumber = styled('div')`
 
 const StyledName = styled('div')`
   font-size: 14px;
+  text-align: center;
 `;
 
 type Props = {
@@ -39,7 +42,6 @@ export const PlanInfo: React.FC<Props> = ({ plan }) => {
   const formatNumber = useNumberFormatter();
   return (
     <StyledInfo gridArea="info">
-      <div />
       <StyledItem>
         <StyledNumber>{formatNumber(plan.translationLimit!)}</StyledNumber>
         <StyledName>
@@ -55,7 +57,6 @@ export const PlanInfo: React.FC<Props> = ({ plan }) => {
           <T keyName="billing_plan_credits_included" />
         </StyledName>
       </StyledItem>
-      <div />
     </StyledInfo>
   );
 };

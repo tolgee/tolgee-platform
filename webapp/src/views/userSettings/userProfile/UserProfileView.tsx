@@ -9,9 +9,13 @@ import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { TextField } from 'tg.component/common/form/fields/TextField';
 import { SetPasswordFields } from 'tg.component/security/SetPasswordFields';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
-import { useConfig } from 'tg.hooks/useConfig';
+import {
+  useConfig,
+  useInitialDataDispatch,
+  useUser,
+} from 'tg.hooks/InitialDataProvider';
 import { MessageService } from 'tg.service/MessageService';
-import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
+import { useApiMutation } from 'tg.service/http/useQueryApi';
 import { UserUpdateDTO } from 'tg.service/request.types';
 import { UserProfileAvatar } from './UserProfileAvatar';
 import { BaseUserSettingsView } from '../BaseUserSettingsView';
@@ -20,13 +24,8 @@ const messagesService = container.resolve(MessageService);
 
 export const UserProfileView: FunctionComponent = () => {
   const t = useTranslate();
-  const userLoadable = useApiQuery({
-    url: '/api/user',
-    method: 'get',
-    options: {
-      cacheTime: 0,
-    },
-  });
+  const initialDataDispatch = useInitialDataDispatch();
+  const user = useUser();
 
   const updateUser = useApiMutation({
     url: '/api/user',
@@ -44,7 +43,7 @@ export const UserProfileView: FunctionComponent = () => {
       {
         onSuccess() {
           messagesService.success(<T>User data - Successfully updated!</T>);
-          userLoadable.refetch();
+          initialDataDispatch({ type: 'REFETCH' });
         },
       }
     );
@@ -72,12 +71,12 @@ export const UserProfileView: FunctionComponent = () => {
           name="email"
           label={<T>User settings - E-mail</T>}
         />
-        {userLoadable?.data?.emailAwaitingVerification && (
+        {user?.emailAwaitingVerification && (
           <Box>
             <Typography variant="body1">
               <T
                 parameters={{
-                  email: userLoadable.data.emailAwaitingVerification!,
+                  email: user.emailAwaitingVerification!,
                 }}
               >
                 email_waiting_for_verification
@@ -100,18 +99,17 @@ export const UserProfileView: FunctionComponent = () => {
     <BaseUserSettingsView
       windowTitle={t('user_profile_title')}
       title={t('user_profile_title')}
-      loading={userLoadable.isFetching}
       containerMaxWidth="md"
     >
-      {userLoadable.data && (
+      {user && (
         <StandardForm
           saveActionLoadable={updateUser}
           initialValues={
             {
               password: '',
               passwordRepeat: '',
-              name: userLoadable.data.name,
-              email: userLoadable.data.username,
+              name: user.name,
+              email: user.username,
             } as UserUpdateDTO
           }
           validationSchema={Validation.USER_SETTINGS}

@@ -95,7 +95,6 @@ declare namespace DataCy {
         "integrate-choose-your-weapon-step-label" |
         "integrate-go-to-docs-button" |
         "integrate-guide" |
-        "integrate-navigation-title" |
         "integrate-select-api-key-step-content" |
         "integrate-select-api-key-step-label" |
         "integrate-weapon-selector-button" |

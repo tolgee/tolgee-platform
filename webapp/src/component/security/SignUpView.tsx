@@ -4,10 +4,11 @@ import { T, useTranslate } from '@tolgee/react';
 import { useSelector } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import { container } from 'tsyringe';
+import { Link, Typography } from '@mui/material';
 
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/useConfig';
+import { useConfig } from 'tg.hooks/InitialDataProvider';
 import { SignUpActions } from 'tg.store/global/SignUpActions';
 import { AppState } from 'tg.store/index';
 
@@ -19,7 +20,6 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { CompactView } from 'tg.component/layout/CompactView';
 import LoadingButton from 'tg.component/common/form/LoadingButton';
-import { Link, Typography } from '@mui/material';
 
 const actions = container.resolve(SignUpActions);
 
@@ -28,6 +28,7 @@ export type SignUpType = {
   email: string;
   password: string;
   passwordRepeat?: string;
+  organizationName: string;
   invitationCode?: string;
 };
 
@@ -102,6 +103,7 @@ const SignUpView: FunctionComponent = () => {
                   passwordRepeat: '',
                   name: '',
                   email: '',
+                  organizationName: '',
                 } as SignUpType
               }
               validationSchema={Validation.SIGN_UP(t)}
@@ -128,6 +130,11 @@ const SignUpView: FunctionComponent = () => {
               <TextField
                 name="email"
                 label={<T>sign_up_form_email</T>}
+                variant="standard"
+              />
+              <TextField
+                name="organizationName"
+                label={<T>sign_up_form_organization_name</T>}
                 variant="standard"
               />
               <SetPasswordFields />

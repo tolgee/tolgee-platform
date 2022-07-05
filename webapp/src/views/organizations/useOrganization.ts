@@ -1,13 +1,13 @@
 import { useRouteMatch } from 'react-router-dom';
 
 import { PARAMS } from 'tg.constants/links';
-import { useUpdateCurrentOrganization } from 'tg.hooks/CurrentOrganizationProvider';
+import { useInitialDataDispatch } from 'tg.hooks/InitialDataProvider';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 
 export const useOrganization = () => {
   const match = useRouteMatch();
   const organizationSlug = match.params[PARAMS.ORGANIZATION_SLUG];
-  const updateCurrentOrganization = useUpdateCurrentOrganization();
+  const initialDataDispatch = useInitialDataDispatch();
 
   const organization = useApiQuery({
     url: '/v2/organizations/{slug}',
@@ -15,7 +15,10 @@ export const useOrganization = () => {
     path: { slug: organizationSlug },
     options: {
       onSuccess(data) {
-        updateCurrentOrganization(data);
+        initialDataDispatch({
+          type: 'UPDATE_ORGANIZATION',
+          payload: data,
+        });
       },
     },
   });

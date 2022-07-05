@@ -8,12 +8,11 @@ import { useTheme } from '@mui/material';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import type API from '@openreplay/tracker';
 
-import { CurrentOrganizationProvider } from 'tg.hooks/CurrentOrganizationProvider';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { LINKS } from '../constants/links';
 import { GlobalError } from '../error/GlobalError';
-import { useConfig } from '../hooks/useConfig';
-import { useUser } from '../hooks/useUser';
+import { useConfig, useInitialDataContext } from '../hooks/InitialDataProvider';
+import { useUser } from '../hooks/InitialDataProvider';
 import { AppState } from '../store';
 import { ErrorActions } from '../store/global/ErrorActions';
 import { GlobalActions } from '../store/global/GlobalActions';
@@ -25,6 +24,7 @@ import { FullPageLoading } from './common/FullPageLoading';
 import { PrivateRoute } from './common/PrivateRoute';
 import SnackBar from './common/SnackBar';
 import { Chatwoot } from './Chatwoot';
+import { useGlobalLoading } from './GlobalLoading';
 
 const LoginRouter = React.lazy(
   () => import(/* webpackChunkName: "login" */ './security/LoginRouter')
@@ -74,6 +74,8 @@ const Redirection = () => {
 const MandatoryDataProvider = (props: any) => {
   const config = useConfig();
   const userData = useUser();
+  const isLoading = useInitialDataContext((v) => v.isLoading);
+  const isFetching = useInitialDataContext((v) => v.isFetching);
   const [openReplayTracker, setOpenReplayTracker] = useState(
     undefined as undefined | API
   );
@@ -111,11 +113,9 @@ const MandatoryDataProvider = (props: any) => {
     }
   }, [userData, openReplayTracker]);
 
-  const allowPrivate = useSelector(
-    (state: AppState) => state.global.security.allowPrivate
-  );
+  useGlobalLoading(isFetching);
 
-  if (!config || (!userData && allowPrivate && config.authentication)) {
+  if (isLoading) {
     return <FullPageLoading />;
   } else {
     return props.children;
