@@ -17,7 +17,7 @@
     "@tolgee/react": "^4.6.0",
     "@tolgee/socketio-client": "^4.0.0",
     "clsx": "^1.1.1",
-    "codemirror": "^5.62.0",
+    "codemirror": "^5.65.5",
     "copy-to-clipboard": "^3.3.1",
     "diff": "^5.0.0",
     "formik": "^2.2.9",
