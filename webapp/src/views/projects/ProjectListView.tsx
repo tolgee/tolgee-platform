@@ -10,7 +10,7 @@ import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
 import { Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { useCurrentOrganization } from 'tg.hooks/CurrentOrganizationProvider';
+import { useCurrentOrganization } from 'tg.hooks/InitialDataProvider';
 import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
 
 const StyledWrapper = styled('div')`
@@ -30,7 +30,7 @@ export const ProjectListView = () => {
   const listPermitted = useApiQuery({
     url: '/v2/organizations/{slug}/projects-with-stats',
     method: 'get',
-    path: { slug: currentOrganization.slug },
+    path: { slug: currentOrganization?.slug || '' },
     query: {
       page,
       size: 20,
@@ -39,6 +39,7 @@ export const ProjectListView = () => {
     },
     options: {
       keepPreviousData: true,
+      enabled: Boolean(currentOrganization?.slug),
     },
   });
 
@@ -53,7 +54,7 @@ export const ProjectListView = () => {
           onSearch={setSearch}
           containerMaxWidth="lg"
           addLinkTo={
-            currentOrganization.currentUserRole === 'OWNER'
+            currentOrganization?.currentUserRole === 'OWNER'
               ? LINKS.PROJECT_ADD.build()
               : undefined
           }

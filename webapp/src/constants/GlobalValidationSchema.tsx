@@ -74,6 +74,7 @@ export class Validation {
           t('validation_email_not_unique'),
           Validation.createEmailValidation()
         ),
+      organizationName: Yup.string().min(3).max(50).required(),
     });
 
   static readonly USER_SETTINGS = Yup.object().shape({

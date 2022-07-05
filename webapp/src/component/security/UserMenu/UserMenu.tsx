@@ -5,16 +5,16 @@ import { useSelector } from 'react-redux';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { container } from 'tsyringe';
 
-import { useConfig } from 'tg.hooks/useConfig';
-import { useUser } from 'tg.hooks/useUser';
+import { useConfig } from 'tg.hooks/InitialDataProvider';
+import { useUser } from 'tg.hooks/InitialDataProvider';
 import { useUserMenuItems } from 'tg.hooks/useUserMenuItems';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
 import { AppState } from 'tg.store/index';
 import { UserAvatar } from 'tg.component/common/avatar/UserAvatar';
 import {
   useCurrentOrganization,
-  useUpdateCurrentOrganization,
-} from 'tg.hooks/CurrentOrganizationProvider';
+  useInitialDataDispatch,
+} from 'tg.hooks/InitialDataProvider';
 import { LINKS, PARAMS } from 'tg.constants/links';
 import { components } from 'tg.service/apiSchema.generated';
 
@@ -52,7 +52,7 @@ export const UserMenu: React.FC = () => {
   const t = useTranslate();
   const config = useConfig();
   const location = useLocation();
-  const updateCurrentOrganization = useUpdateCurrentOrganization();
+  const initialDataDispatch = useInitialDataDispatch();
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
   const user = useUser();
@@ -68,7 +68,7 @@ export const UserMenu: React.FC = () => {
   };
 
   const handleSelectOrganization = (organization: OrganizationModel) => {
-    updateCurrentOrganization(organization);
+    initialDataDispatch({ type: 'UPDATE_ORGANIZATION', payload: organization });
     setAnchorEl(null);
     history.push(LINKS.PROJECTS.build());
   };

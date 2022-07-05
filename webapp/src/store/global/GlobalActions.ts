@@ -1,6 +1,6 @@
 import { ConfirmationDialogProps } from 'tg.component/common/ConfirmationDialog';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
-import { RemoteConfigService } from 'tg.service/RemoteConfigService';
+import { InitialDataService } from 'tg.service/InitialDataService';
 import { ErrorResponseDto, TokenDTO } from 'tg.service/response.types';
 import { SecurityService } from 'tg.service/SecurityService';
 import { singleton } from 'tsyringe';
@@ -29,7 +29,7 @@ export class GlobalState extends StateWithLoadables<GlobalActions> {
 @singleton()
 export class GlobalActions extends AbstractLoadableActions<GlobalState> {
   constructor(
-    private configService: RemoteConfigService,
+    private initialDataService: InitialDataService,
     private securityService: SecurityService,
     private invitationCodeService: InvitationCodeService
   ) {
@@ -150,9 +150,20 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
       }
   );
 
+  updateSecurity = this.createAction(
+    'UPDATE_SECURITY',
+    (options: Partial<SecurityDTO>) => options
+  ).build.on(
+    (state, action) =>
+      <GlobalState>{
+        ...state,
+        security: { ...state.security, ...action.payload },
+      }
+  );
+
   readonly loadableDefinitions = {
-    remoteConfig: this.createLoadableDefinition(
-      () => this.configService.getConfiguration(),
+    initialData: this.createLoadableDefinition(
+      () => this.initialDataService.getConfiguration(),
       (state, action) => {
         const invitationCode = this.invitationCodeService.getCode();
         return {
@@ -160,9 +171,11 @@ export class GlobalActions extends AbstractLoadableActions<GlobalState> {
           security: {
             ...state.security,
             allowPrivate:
-              !action.payload?.authentication || state.security.allowPrivate,
+              !action.payload?.serverConfiguration?.authentication ||
+              state.security.allowPrivate,
             allowRegistration:
-              action.payload?.allowRegistrations || !!invitationCode, //if user has invitation code, registration is allowed
+              action.payload?.serverConfiguration.allowRegistrations ||
+              !!invitationCode, //if user has invitation code, registration is allowed
           },
         };
       }

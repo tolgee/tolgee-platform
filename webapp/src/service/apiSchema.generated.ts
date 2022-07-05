@@ -12,7 +12,7 @@ export interface paths {
     put: operations["setLanguage"];
   };
   "/v2/projects/{projectId}": {
-    get: operations["get_1"];
+    get: operations["get_2"];
     put: operations["editProject"];
     delete: operations["deleteProject"];
   };
@@ -106,12 +106,12 @@ export interface paths {
     put: operations["setState_1"];
   };
   "/v2/projects/{projectId}/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_2"];
+    get: operations["get_3"];
     put: operations["update"];
     delete: operations["delete_2"];
   };
   "/v2/projects/translations/{translationId}/comments/{commentId}": {
-    get: operations["get_3"];
+    get: operations["get_4"];
     put: operations["update_1"];
     delete: operations["delete_3"];
   };
@@ -138,12 +138,12 @@ export interface paths {
     put: operations["leaveProject"];
   };
   "/v2/projects/{projectId}/languages/{languageId}": {
-    get: operations["get_4"];
+    get: operations["get_5"];
     put: operations["editLanguage"];
     delete: operations["deleteLanguage_2"];
   };
   "/v2/projects/languages/{languageId}": {
-    get: operations["get_5"];
+    get: operations["get_6"];
     put: operations["editLanguage_1"];
     delete: operations["deleteLanguage_3"];
   };
@@ -186,12 +186,12 @@ export interface paths {
     delete: operations["removeAvatar_3"];
   };
   "/v2/organizations/{id}": {
-    get: operations["get_8"];
+    get: operations["get_9"];
     put: operations["update_2"];
     delete: operations["delete_4"];
   };
   "/api/organizations/{id}": {
-    get: operations["get_9"];
+    get: operations["get_10"];
     put: operations["update_3"];
     delete: operations["delete_5"];
   };
@@ -398,6 +398,10 @@ export interface paths {
   "/api/address-part/validate-organization/{slug}": {
     get: operations["validateOrganizationSlug_1"];
   };
+  "/v2/public/initial-data": {
+    /** Returns initial data always required by frontend */
+    get: operations["get_1"];
+  };
   "/v2/projects/{projectId}/users": {
     get: operations["getAllUsers"];
   };
@@ -491,10 +495,10 @@ export interface paths {
     get: operations["getAllProjects_1"];
   };
   "/v2/organizations/{slug}": {
-    get: operations["get_6"];
+    get: operations["get_7"];
   };
   "/api/organizations/{slug}": {
-    get: operations["get_7"];
+    get: operations["get_8"];
   };
   "/v2/organizations/{organizationId}/machine-translation-credit-balance": {
     get: operations["getOrganizationCredits"];
@@ -553,7 +557,7 @@ export interface paths {
     get: operations["getMtCreditPrices"];
   };
   "/v2/api-keys/{keyId}": {
-    get: operations["get_10"];
+    get: operations["get_11"];
   };
   "/v2/api-keys/current": {
     get: operations["getCurrent"];
@@ -1168,6 +1172,57 @@ export interface components {
       language?: string;
       preferredOrganizationId?: number;
     };
+    AuthMethodsDTO: {
+      github: components["schemas"]["OAuthPublicConfigDTO"];
+      google: components["schemas"]["OAuthPublicConfigDTO"];
+    };
+    InitialDataModel: {
+      serverConfiguration: components["schemas"]["PublicConfigurationDTO"];
+      userInfo?: components["schemas"]["UserAccountModel"];
+      preferredOrganization?: components["schemas"]["OrganizationModel"];
+    };
+    MtServiceDTO: {
+      enabled: boolean;
+      defaultEnabledForProject: boolean;
+    };
+    MtServicesDTO: {
+      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL";
+      services: { [key: string]: components["schemas"]["MtServiceDTO"] };
+    };
+    OAuthPublicConfigDTO: {
+      clientId?: string;
+      enabled: boolean;
+    };
+    PublicBillingConfigurationDTO: {
+      enabled: boolean;
+    };
+    PublicConfigurationDTO: {
+      machineTranslationServices: components["schemas"]["MtServicesDTO"];
+      billing: components["schemas"]["PublicBillingConfigurationDTO"];
+      authentication: boolean;
+      authMethods?: components["schemas"]["AuthMethodsDTO"];
+      passwordResettable: boolean;
+      allowRegistrations: boolean;
+      screenshotsUrl: string;
+      maxUploadFileSize: number;
+      clientSentryDsn?: string;
+      needsEmailVerification: boolean;
+      userCanCreateProjects: boolean;
+      userCanCreateOrganizations: boolean;
+      socket: components["schemas"]["SocketIo"];
+      appName: string;
+      version: string;
+      showVersion: boolean;
+      maxTranslationTextLength: number;
+      recaptchaSiteKey?: string;
+      openReplayApiKey?: string;
+    };
+    SocketIo: {
+      enabled: boolean;
+      port: number;
+      serverUrl?: string;
+      allowedTransports: string[];
+    };
     PagedModelProjectModel: {
       _embedded?: {
         projects?: components["schemas"]["ProjectModel"][];
@@ -1317,7 +1372,6 @@ export interface components {
       page?: components["schemas"]["PageMetadata"];
     };
     EntityModelImportFileIssueView: {
-      params: components["schemas"]["ImportFileIssueParamView"][];
       id: number;
       type:
         | "KEY_IS_NOT_STRING"
@@ -1329,6 +1383,7 @@ export interface components {
         | "ID_ATTRIBUTE_NOT_PROVIDED"
         | "TARGET_NOT_PROVIDED"
         | "TRANSLATION_TOO_LONG";
+      params: components["schemas"]["ImportFileIssueParamView"][];
     };
     ImportFileIssueParamView: {
       value?: string;
@@ -1600,52 +1655,6 @@ export interface components {
       username?: string;
       emailAwaitingVerification?: string;
     };
-    AuthMethodsDTO: {
-      github: components["schemas"]["OAuthPublicConfigDTO"];
-      google: components["schemas"]["OAuthPublicConfigDTO"];
-    };
-    MtServiceDTO: {
-      enabled: boolean;
-      defaultEnabledForProject: boolean;
-    };
-    MtServicesDTO: {
-      defaultPrimaryService?: "GOOGLE" | "AWS" | "DEEPL";
-      services: { [key: string]: components["schemas"]["MtServiceDTO"] };
-    };
-    OAuthPublicConfigDTO: {
-      clientId?: string;
-      enabled: boolean;
-    };
-    PublicBillingConfigurationDTO: {
-      enabled: boolean;
-    };
-    PublicConfigurationDTO: {
-      machineTranslationServices: components["schemas"]["MtServicesDTO"];
-      billing: components["schemas"]["PublicBillingConfigurationDTO"];
-      authentication: boolean;
-      authMethods?: components["schemas"]["AuthMethodsDTO"];
-      passwordResettable: boolean;
-      allowRegistrations: boolean;
-      screenshotsUrl: string;
-      maxUploadFileSize: number;
-      clientSentryDsn?: string;
-      needsEmailVerification: boolean;
-      userCanCreateProjects: boolean;
-      userCanCreateOrganizations: boolean;
-      socket: components["schemas"]["SocketIo"];
-      appName: string;
-      version: string;
-      showVersion: boolean;
-      maxTranslationTextLength: number;
-      recaptchaSiteKey?: string;
-      openReplayApiKey?: string;
-    };
-    SocketIo: {
-      enabled: boolean;
-      port: number;
-      serverUrl?: string;
-      allowedTransports: string[];
-    };
     DeprecatedKeyDto: {
       /** This means name of key. Will be renamed in v2 */
       fullPathString: string;
@@ -1751,7 +1760,7 @@ export interface operations {
       };
     };
   };
-  get_1: {
+  get_2: {
     parameters: {
       path: {
         projectId: number;
@@ -2681,7 +2690,7 @@ export interface operations {
       };
     };
   };
-  get_2: {
+  get_3: {
     parameters: {
       path: {
         translationId: number;
@@ -2767,7 +2776,7 @@ export interface operations {
       };
     };
   };
-  get_3: {
+  get_4: {
     parameters: {
       path: {
         translationId: number;
@@ -3211,7 +3220,7 @@ export interface operations {
       };
     };
   };
-  get_4: {
+  get_5: {
     parameters: {
       path: {
         languageId: number;
@@ -3296,7 +3305,7 @@ export interface operations {
       };
     };
   };
-  get_5: {
+  get_6: {
     parameters: {
       path: {
         languageId: number;
@@ -3786,7 +3795,7 @@ export interface operations {
       };
     };
   };
-  get_8: {
+  get_9: {
     parameters: {
       path: {
         id: number;
@@ -3868,7 +3877,7 @@ export interface operations {
       };
     };
   };
-  get_9: {
+  get_10: {
     parameters: {
       path: {
         id: number;
@@ -6268,6 +6277,29 @@ export interface operations {
       };
     };
   };
+  /** Returns initial data always required by frontend */
+  get_1: {
+    responses: {
+      /** OK */
+      200: {
+        content: {
+          "*/*": components["schemas"]["InitialDataModel"];
+        };
+      };
+      /** Bad Request */
+      400: {
+        content: {
+          "*/*": string;
+        };
+      };
+      /** Not Found */
+      404: {
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
   getAllUsers: {
     parameters: {
       path: {
@@ -7335,7 +7367,7 @@ export interface operations {
       };
     };
   };
-  get_6: {
+  get_7: {
     parameters: {
       path: {
         slug: string;
@@ -7362,7 +7394,7 @@ export interface operations {
       };
     };
   };
-  get_7: {
+  get_8: {
     parameters: {
       path: {
         slug: string;
@@ -7902,7 +7934,7 @@ export interface operations {
       };
     };
   };
-  get_10: {
+  get_11: {
     parameters: {
       path: {
         keyId: number;

@@ -10,10 +10,14 @@ import { useHistory } from 'react-router-dom';
 import { LINKS } from 'tg.constants/links';
 import {
   useCurrentOrganization,
-  useUpdateCurrentOrganization,
-} from 'tg.hooks/CurrentOrganizationProvider';
+  useInitialDataDispatch,
+} from 'tg.hooks/InitialDataProvider';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
+
+const StyledLink = styled(Link)`
+  display: flex;
+`;
 
 const StyledOrgItem = styled('div')`
   display: grid;
@@ -34,7 +38,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
   const anchorEl = useRef<HTMLAnchorElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const organization = useCurrentOrganization();
-  const updateCurrentOrganization = useUpdateCurrentOrganization();
+  const initialDataDispatch = useInitialDataDispatch();
   const history = useHistory();
 
   const handleClose = () => {
@@ -47,7 +51,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
 
   const handleSelectOrganization = (organization: OrganizationModel) => {
     handleClose();
-    updateCurrentOrganization(organization);
+    initialDataDispatch({ type: 'UPDATE_ORGANIZATION', payload: organization });
     onSelect?.(organization);
   };
 
@@ -86,7 +90,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
   };
 
   const selected = organizationsLoadable.data?._embedded?.organizations?.find(
-    (org) => org.id === organization.id
+    (org) => org.id === organization?.id
   );
 
   const MenuItems = () => {
@@ -116,7 +120,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
         data-cy="user-organizations-settings-subtitle-link"
         mr={-1}
       >
-        <Link
+        <StyledLink
           ref={anchorEl}
           style={{
             cursor: 'pointer',
@@ -129,7 +133,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
         >
           {selected && <OrganizationItem data={selected!} />}
           <ArrowDropDown fontSize={'small'} />
-        </Link>
+        </StyledLink>
 
         <Popover
           elevation={1}
@@ -139,7 +143,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
           open={isOpen}
           onClose={handleClose}
           anchorOrigin={{
-            vertical: 'bottom',
+            vertical: 'top',
             horizontal: 'center',
           }}
           transformOrigin={{

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog } from '@mui/material';
 
-import { useConfig } from 'tg.hooks/useConfig';
+import { useConfig } from 'tg.hooks/InitialDataProvider';
 
 interface ScreenshotDetailProps {
   onClose: () => void;

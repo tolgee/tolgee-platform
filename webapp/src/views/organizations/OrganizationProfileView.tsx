@@ -17,7 +17,7 @@ import { BaseOrganizationSettingsView } from './components/BaseOrganizationSetti
 import { OrganizationFields } from './components/OrganizationFields';
 import { OrganizationProfileAvatar } from './OrganizationProfileAvatar';
 import { useLeaveOrganization } from './useLeaveOrganization';
-import { useUpdateCurrentOrganization } from 'tg.hooks/CurrentOrganizationProvider';
+import { useInitialDataDispatch } from 'tg.hooks/InitialDataProvider';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
@@ -27,7 +27,7 @@ const messageService = container.resolve(MessageService);
 export const OrganizationProfileView: FunctionComponent = () => {
   const t = useTranslate();
   const leaveOrganization = useLeaveOrganization();
-  const updateOrganization = useUpdateCurrentOrganization();
+  const initialDataDispatch = useInitialDataDispatch();
   const history = useHistory();
 
   const match = useRouteMatch();
@@ -92,7 +92,9 @@ export const OrganizationProfileView: FunctionComponent = () => {
             onSuccess: () => {
               messageService.success(<T>organization_deleted_message</T>);
               history.push(LINKS.PROJECTS.build());
-              updateOrganization(undefined);
+              initialDataDispatch({
+                type: 'REFETCH',
+              });
             },
           }
         ),

@@ -1,19 +1,28 @@
+import React from 'react';
 import { ProfileAvatar } from 'tg.component/common/avatar/ProfileAvatar';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
-import React from 'react';
-import { useUser } from 'tg.hooks/useUser';
+import { useInitialDataDispatch, useUser } from 'tg.hooks/InitialDataProvider';
 
 export const UserProfileAvatar = () => {
+  const initialDataDispatch = useInitialDataDispatch();
   const uploadLoadable = useApiMutation({
     url: '/v2/user/avatar',
     method: 'put',
-    invalidatePrefix: '/v2/user',
+    options: {
+      onSuccess() {
+        initialDataDispatch({ type: 'REFETCH' });
+      },
+    },
   });
 
   const removeLoadable = useApiMutation({
     url: '/v2/user/avatar',
     method: 'delete',
-    invalidatePrefix: '/v2/user',
+    options: {
+      onSuccess() {
+        initialDataDispatch({ type: 'REFETCH' });
+      },
+    },
   });
 
   const user = useUser();

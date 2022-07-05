@@ -5,7 +5,7 @@ import { T } from '@tolgee/react';
 import clsx from 'clsx';
 
 import { confirmation } from 'tg.hooks/confirmation';
-import { useConfig } from 'tg.hooks/useConfig';
+import { useConfig } from 'tg.hooks/InitialDataProvider';
 import { useProjectPermissions } from 'tg.hooks/useProjectPermissions';
 import { components } from 'tg.service/apiSchema.generated';
 import { ProjectPermissionType } from 'tg.service/response.types';

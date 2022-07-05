@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import { Alert, Button, Link as MuiLink, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
 import { T, useTranslate } from '@tolgee/react';
@@ -7,7 +7,7 @@ import { Link, Redirect, useHistory } from 'react-router-dom';
 import { container } from 'tsyringe';
 
 import { LINKS } from 'tg.constants/links';
-import { useConfig } from 'tg.hooks/useConfig';
+import { useConfig } from 'tg.hooks/InitialDataProvider';
 import { SecurityService } from 'tg.service/SecurityService';
 import { AppState } from 'tg.store/index';
 
@@ -92,8 +92,8 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
                       marginX={-1}
                     />
                   )}
-                  {oAuthServices.map((provider) => (
-                    <>
+                  {oAuthServices.map((provider, i) => (
+                    <React.Fragment key={i}>
                       <Button
                         component="a"
                         href={provider.authenticationUrl}
@@ -104,7 +104,7 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
                       >
                         <T>{provider.buttonLabelTranslationKey}</T>
                       </Button>
-                    </>
+                    </React.Fragment>
                   ))}
                 </Box>
               </Box>
@@ -129,23 +129,23 @@ export const LoginView: FunctionComponent<LoginProps> = (props) => {
             <Box>
               {security.allowRegistration && (
                 <>
-                  <Link to={LINKS.SIGN_UP.build()} component={MuiLink}>
+                  <MuiLink to={LINKS.SIGN_UP.build()} component={Link}>
                     <Typography variant="caption">
                       <T>login_sign_up</T>
                     </Typography>
-                  </Link>
+                  </MuiLink>
                 </>
               )}
             </Box>
             {remoteConfig.passwordResettable && (
-              <Link
+              <MuiLink
                 to={LINKS.RESET_PASSWORD_REQUEST.build()}
-                component={MuiLink}
+                component={Link}
               >
                 <Typography variant="caption">
                   <T>login_reset_password_button</T>
                 </Typography>
-              </Link>
+              </MuiLink>
             )}
           </Box>
         }

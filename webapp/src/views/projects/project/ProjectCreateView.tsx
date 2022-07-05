@@ -18,8 +18,8 @@ import { BaseLanguageSelect } from './components/BaseLanguageSelect';
 import { CreateProjectLanguagesArrayField } from './components/CreateProjectLanguagesArrayField';
 import {
   useCurrentOrganization,
-  useUpdateCurrentOrganization,
-} from 'tg.hooks/CurrentOrganizationProvider';
+  useInitialDataDispatch,
+} from 'tg.hooks/InitialDataProvider';
 import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
 
 const messageService = container.resolve(MessageService);
@@ -33,7 +33,7 @@ export const ProjectCreateView: FunctionComponent = () => {
   });
   const t = useTranslate();
   const organization = useCurrentOrganization();
-  const updateOrganization = useUpdateCurrentOrganization();
+  const initialDataDispatch = useInitialDataDispatch();
 
   const onSubmit = (values: CreateProjectValueType) => {
     values.languages = values.languages.filter((l) => !!l);
@@ -45,7 +45,10 @@ export const ProjectCreateView: FunctionComponent = () => {
       },
       {
         onSuccess() {
-          updateOrganization(values.organizationId);
+          initialDataDispatch({
+            type: 'UPDATE_ORGANIZATION',
+            payload: values.organizationId,
+          });
           messageService.success(<T>project_created_message</T>);
         },
       }
@@ -68,7 +71,7 @@ export const ProjectCreateView: FunctionComponent = () => {
     languages: [
       { tag: 'en', name: 'English', originalName: 'English', flagEmoji: '🇬🇧' },
     ],
-    organizationId: organization.id,
+    organizationId: organization!.id,
     baseLanguageTag: 'en',
   };
 

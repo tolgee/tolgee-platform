@@ -102,8 +102,8 @@ export const Usage: FC<UsageProps> = (props) => {
                 <T
                   keyName="dashboard_billing_credit"
                   parameters={{
-                    available: creditAvailable,
-                    max: creditLimit,
+                    available: creditAvailable / 100,
+                    max: creditLimit / 100,
                   }}
                 />
               </Typography>

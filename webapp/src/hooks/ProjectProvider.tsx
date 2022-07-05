@@ -4,7 +4,7 @@ import { FullPageLoading } from 'tg.component/common/FullPageLoading';
 import { GlobalError } from '../error/GlobalError';
 import { components } from '../service/apiSchema.generated';
 import { useApiQuery } from '../service/http/useQueryApi';
-import { useUpdateCurrentOrganization } from './CurrentOrganizationProvider';
+import { useInitialDataDispatch } from './InitialDataProvider';
 
 export const ProjectContext = createContext<
   components['schemas']['ProjectModel'] | null
@@ -17,11 +17,14 @@ export const ProjectProvider: React.FC<{ id: number }> = ({ id, children }) => {
     path: { projectId: id },
   });
 
-  const updateOrganization = useUpdateCurrentOrganization();
+  const initialDataDispatch = useInitialDataDispatch();
 
   useEffect(() => {
     if (data?.organizationOwner) {
-      updateOrganization(data.organizationOwner.id);
+      initialDataDispatch({
+        type: 'UPDATE_ORGANIZATION',
+        payload: data.organizationOwner.id,
+      });
     }
   }, [data]);
 
