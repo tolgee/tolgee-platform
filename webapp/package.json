@@ -35,7 +35,7 @@
     "react-google-recaptcha-v3": "1.9.5",
     "react-helmet": "^6.1.0",
     "react-list": "^0.8.16",
-    "react-query": "^3.19.1",
+    "react-query": "^3.39.1",
     "react-redux": "^7.2.6",
     "react-router-dom": "^5.2.0",
     "recharts": "2.1.9",
