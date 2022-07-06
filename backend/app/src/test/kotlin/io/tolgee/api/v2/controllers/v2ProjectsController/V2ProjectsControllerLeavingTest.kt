@@ -1,6 +1,7 @@
 package io.tolgee.api.v2.controllers.v2ProjectsController
 
 import io.tolgee.controllers.ProjectAuthControllerTest
+import io.tolgee.development.testDataBuilder.data.OrganizationTestData
 import io.tolgee.development.testDataBuilder.data.ProjectLeavingTestData
 import io.tolgee.fixtures.andAssertThatJson
 import io.tolgee.fixtures.andIsBadRequest
@@ -40,5 +41,18 @@ class V2ProjectsControllerLeavingTest : ProjectAuthControllerTest("/v2/projects/
     performProjectAuthPut("/leave", null).andPrettyPrint.andIsBadRequest.andAssertThatJson {
       node("code").isEqualTo("cannot_leave_project_with_organization_role")
     }
+  }
+
+  @Test
+  @ProjectJWTAuthTestMethod
+  fun `resets user preferred organization when leaves organization project with only base permissions`() {
+    val testData = OrganizationTestData()
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.kvetoslav
+    projectSupplier = { testData.projectBuilder.self }
+    performProjectAuthPut("/leave", null).andIsOk
+    val preferences = userPreferencesService.find(testData.kvetoslav.id)!!
+    assertThat(preferences.preferredOrganization.id)
+      .isNotEqualTo(testData.userAccountBuilder.defaultOrganizationBuilder.self.id)
   }
 }

@@ -12,6 +12,7 @@ import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.repository.OrganizationRepository
 import io.tolgee.repository.OrganizationRoleRepository
 import io.tolgee.security.AuthenticationFacade
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
@@ -23,12 +24,17 @@ class OrganizationRoleService(
   private val authenticationFacade: AuthenticationFacade,
   private val userAccountService: UserAccountService,
   private val entityManager: EntityManager,
-  private val organizationRepository: OrganizationRepository
+  private val organizationRepository: OrganizationRepository,
+  @Lazy
+  private val userPreferencesService: UserPreferencesService
 ) {
 
   fun checkUserCanView(userId: Long, organizationId: Long) {
-    if (this.organizationRepository.canUserView(userId, organizationId)) return else throw PermissionException()
+    if (canUserView(userId, organizationId)) return else throw PermissionException()
   }
+
+  fun canUserView(userId: Long, organizationId: Long) =
+    this.organizationRepository.canUserView(userId, organizationId)
 
   fun checkUserIsOwner(userId: Long, organizationId: Long) {
     if (this.isUserOwner(userId, organizationId)) return else throw PermissionException()
@@ -106,6 +112,7 @@ class OrganizationRoleService(
     organizationRoleRepository.findOneByUserIdAndOrganizationId(userId, organizationId)?.let {
       organizationRoleRepository.delete(it)
     }
+    userPreferencesService.refreshPreferredOrganization(userId)
   }
 
   fun deleteAllInOrganization(organization: Organization) {

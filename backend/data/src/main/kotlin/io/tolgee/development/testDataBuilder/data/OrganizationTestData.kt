@@ -8,6 +8,7 @@ class OrganizationTestData : BaseTestData() {
   lateinit var franta: UserAccount
   lateinit var pepa: UserAccount
   lateinit var jirina: UserAccount
+  lateinit var kvetoslav: UserAccount
 
   lateinit var pepaOrg: Organization
   lateinit var jirinaOrg: Organization
@@ -54,12 +55,35 @@ class OrganizationTestData : BaseTestData() {
         jirina = this
       }
 
+      val kvetoslavBuilder = addUserAccountWithoutOrganization {
+        username = "kvetoslav"
+        name = "Kvetoslav Barta"
+        kvetoslav = this
+      }
+
+      projectBuilder.build {
+        addPermission {
+          user = kvetoslav
+        }
+      }
+
+      kvetoslavBuilder.build {
+        setUserPreferences {
+          preferredOrganization = this@OrganizationTestData.userAccountBuilder.defaultOrganizationBuilder.self
+        }
+      }
+
       addOrganization {
         name = "Jirinina Org 2"
         jirinaOrg = this
       }.build {
         addRole {
           user = jirina
+          type = OrganizationRoleType.OWNER
+        }
+        // to make it possible for jirina to leave
+        addRole {
+          user = kvetoslavBuilder.self
           type = OrganizationRoleType.OWNER
         }
       }

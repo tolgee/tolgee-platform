@@ -13,7 +13,6 @@ import io.tolgee.api.v2.hateoas.organization.OrganizationModelAssembler
 import io.tolgee.api.v2.hateoas.organization.UsageModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModel
 import io.tolgee.api.v2.hateoas.organization.UserAccountWithOrganizationRoleModelAssembler
-import io.tolgee.api.v2.hateoas.project.ProjectModelAssembler
 import io.tolgee.component.translationsLimitProvider.TranslationsLimitProvider
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.constants.Message
@@ -30,7 +29,6 @@ import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
-import io.tolgee.model.views.ProjectWithLanguagesView
 import io.tolgee.model.views.UserAccountWithOrganizationRoleView
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.service.ImageUploadService
@@ -41,7 +39,6 @@ import io.tolgee.service.OrganizationStatsService
 import io.tolgee.service.UserAccountService
 import io.tolgee.service.UserPreferencesService
 import io.tolgee.service.machineTranslation.MtCreditBucketService
-import io.tolgee.service.project.ProjectService
 import org.springdoc.api.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -75,7 +72,6 @@ import javax.validation.Valid
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class OrganizationController(
   private val organizationService: OrganizationService,
-  private val pagedProjectResourcesAssembler: PagedResourcesAssembler<ProjectWithLanguagesView>,
   private val arrayResourcesAssembler: PagedResourcesAssembler<OrganizationView>,
   private val arrayUserResourcesAssembler: PagedResourcesAssembler<UserAccountWithOrganizationRoleView>,
   private val organizationModelAssembler: OrganizationModelAssembler,
@@ -84,8 +80,6 @@ class OrganizationController(
   private val authenticationFacade: AuthenticationFacade,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
-  private val projectService: ProjectService,
-  private val projectModelAssembler: ProjectModelAssembler,
   private val invitationService: InvitationService,
   private val organizationInvitationModelAssembler: OrganizationInvitationModelAssembler,
   private val imageUploadService: ImageUploadService,
@@ -177,7 +171,7 @@ class OrganizationController(
   fun leaveOrganization(@PathVariable("id") id: Long) {
     organizationService.find(id)?.let {
       if (!organizationService.isThereAnotherOwner(id)) {
-        throw ValidationException(io.tolgee.constants.Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
+        throw ValidationException(Message.ORGANIZATION_HAS_NO_OTHER_OWNER)
       }
       organizationRoleService.checkUserIsMemberOrOwner(id)
       organizationRoleService.leave(id)

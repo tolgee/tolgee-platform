@@ -28,7 +28,6 @@ import io.tolgee.dtos.request.project.CreateProjectDTO
 import io.tolgee.dtos.request.project.EditProjectDTO
 import io.tolgee.dtos.request.project.ProjectInviteUserDto
 import io.tolgee.exceptions.BadRequestException
-import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
 import io.tolgee.facade.ProjectWithStatsFacade
 import io.tolgee.model.Language
@@ -272,20 +271,8 @@ class V2ProjectsController(
   @PutMapping(value = ["/{projectId:[0-9]+}/leave"])
   @Operation(summary = "Leave project")
   @AccessWithProjectPermission(ProjectPermissionType.VIEW)
-  fun leaveProject(@PathVariable projectId: Long) {
-    val project = projectHolder.projectEntity
-    val permissionData = permissionService.getProjectPermissionData(project.id, authenticationFacade.userAccount.id)
-    if (permissionData.organizationRole != null) {
-      throw BadRequestException(Message.CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE)
-    }
-
-    val directPermissions = permissionData.directPermissions
-      ?: throw BadRequestException(Message.DONT_HAVE_DIRECT_PERMISSIONS)
-
-    val permissionEntity = permissionService.findById(directPermissions.id)
-      ?: throw NotFoundException()
-
-    permissionService.delete(permissionEntity)
+  fun leaveProject() {
+    permissionService.leave(projectHolder.projectEntity, authenticationFacade.userAccount.id)
   }
 
   @AccessWithProjectPermission(ProjectPermissionType.MANAGE)
