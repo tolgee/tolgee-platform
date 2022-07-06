@@ -118,7 +118,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
       <Box
         display="flex"
         data-cy="user-organizations-settings-subtitle-link"
-        mr={-1}
+        overflow="hidden"
       >
         <StyledLink
           ref={anchorEl}
@@ -131,8 +131,8 @@ export const OrganizationSwitch: React.FC<Props> = ({
           }}
           onClick={handleClick}
         >
-          {selected && <OrganizationItem data={selected!} />}
-          <ArrowDropDown fontSize={'small'} />
+          {selected && <OrganizationItem data={selected} />}
+          <ArrowDropDown fontSize={'small'} sx={{ marginRight: '-6px' }} />
         </StyledLink>
 
         <Popover
