@@ -90,7 +90,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
   };
 
   const selected = organizationsLoadable.data?._embedded?.organizations?.find(
-    (org) => org.id === organization?.id
+    (org) => org.id === organization.id
   );
 
   const MenuItems = () => {

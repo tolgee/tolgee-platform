@@ -84,7 +84,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
               key={item.slug}
               value={item.slug}
               onClick={setOrganization(item)}
-              selected={item.id === organization?.id}
+              selected={item.id === organization.id}
             >
               <AvatarImg
                 owner={{

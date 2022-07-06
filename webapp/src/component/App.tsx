@@ -76,6 +76,9 @@ const MandatoryDataProvider = (props: any) => {
   const userData = useUser();
   const isLoading = useInitialDataContext((v) => v.isLoading);
   const isFetching = useInitialDataContext((v) => v.isFetching);
+  const currentOrganization = useInitialDataContext(
+    (v) => v.currentOrganization
+  );
   const [openReplayTracker, setOpenReplayTracker] = useState(
     undefined as undefined | API
   );
@@ -113,10 +116,10 @@ const MandatoryDataProvider = (props: any) => {
     }
   }, [userData, openReplayTracker]);
 
-  useGlobalLoading(isFetching);
+  useGlobalLoading(isFetching || isLoading);
 
-  if (isLoading) {
-    return <FullPageLoading />;
+  if (isLoading || (isFetching && !currentOrganization)) {
+    return null;
   } else {
     return props.children;
   }

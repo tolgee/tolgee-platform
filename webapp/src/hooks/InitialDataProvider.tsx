@@ -112,7 +112,7 @@ export const [
 });
 
 export const useCurrentOrganization = () =>
-  useInitialDataContext((v) => v.currentOrganization);
+  useInitialDataContext((v) => v.currentOrganization!);
 
 export const useConfig = () =>
   useInitialDataContext((v) => v.serverConfiguration);

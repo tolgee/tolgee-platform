@@ -62,7 +62,10 @@ export class Validation {
       }
     }, container.resolve(SignUpService).validateEmail);
 
-  static readonly SIGN_UP = (t: (key: string) => string) =>
+  static readonly SIGN_UP = (
+    t: (key: string) => string,
+    orgRequired: boolean
+  ) =>
     Yup.object().shape({
       ...Validation.USER_PASSWORD_WITH_REPEAT_NAKED,
       name: Yup.string().required(),
@@ -74,7 +77,9 @@ export class Validation {
           t('validation_email_not_unique'),
           Validation.createEmailValidation()
         ),
-      organizationName: Yup.string().min(3).max(50).required(),
+      organizationName: orgRequired
+        ? Yup.string().min(3).max(50).required()
+        : Yup.string(),
     });
 
   static readonly USER_SETTINGS = Yup.object().shape({

@@ -40,12 +40,12 @@ export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const config = useConfig();
-  const currentOrganization = useCurrentOrganization();
+  const organization = useCurrentOrganization();
 
   const listPermitted = useApiQuery({
     url: '/v2/organizations/{slug}/projects-with-stats',
     method: 'get',
-    path: { slug: currentOrganization?.slug || '' },
+    path: { slug: organization.slug || '' },
     query: {
       page,
       size: 20,
@@ -54,13 +54,14 @@ export const ProjectListView = () => {
     },
     options: {
       keepPreviousData: true,
-      enabled: Boolean(currentOrganization?.slug),
+      enabled: Boolean(organization.slug),
     },
   });
 
   const t = useTranslate();
 
-  const showStats = config.billing.enabled;
+  const showStats =
+    config.billing.enabled && organization.currentUserRole === 'OWNER';
 
   return (
     <StyledWrapper>
@@ -71,7 +72,7 @@ export const ProjectListView = () => {
           onSearch={setSearch}
           containerMaxWidth="lg"
           addLinkTo={
-            currentOrganization?.currentUserRole === 'OWNER'
+            organization.currentUserRole === 'OWNER'
               ? LINKS.PROJECT_ADD.build()
               : undefined
           }
@@ -79,11 +80,11 @@ export const ProjectListView = () => {
           navigation={[[<OrganizationSwitch key={0} />]]}
           navigationRight={
             showStats &&
-            currentOrganization && (
+            organization && (
               <StyledUsage>
                 <Usage
-                  organizationId={currentOrganization.id}
-                  slug={currentOrganization.slug}
+                  organizationId={organization.id}
+                  slug={organization.slug}
                 />
               </StyledUsage>
             )
