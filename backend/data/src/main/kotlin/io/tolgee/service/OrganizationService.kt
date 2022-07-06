@@ -16,6 +16,7 @@ import io.tolgee.util.SlugGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -94,10 +95,22 @@ class OrganizationService(
     )
   }
 
-  fun findPreferred(): List<Organization> {
+  /**
+   * Returns any organizations accessible by user.
+   */
+  fun findPreferred(userAccountId: Long, exceptOrganizationId: Long = 0): Organization? {
     return organizationRepository.findPreferred(
-      userId = authenticationFacade.userAccount.id
-    )
+      userId = userAccountId,
+      exceptOrganizationId,
+      PageRequest.of(0, 1)
+    ).content.firstOrNull()
+  }
+
+  /**
+   * Returns existing or created organization which seems to be potentially preferred.
+   */
+  fun findOrCreatePreferred(userAccount: UserAccount, exceptOrganizationId: Long = 0): Organization {
+    return findPreferred(userAccount.id, exceptOrganizationId) ?: createPreferred(userAccount)
   }
 
   fun findPermittedPaged(
@@ -158,7 +171,10 @@ class OrganizationService(
     }
 
     organization.prefereredBy.forEach {
-      it.preferredOrganization = null
+      it.preferredOrganization = findOrCreatePreferred(
+        userAccount = it.userAccount,
+        exceptOrganizationId = organization.id
+      )
       userPreferencesService.save(it)
     }
 

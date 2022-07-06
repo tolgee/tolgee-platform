@@ -13,15 +13,19 @@ class UserPreferences(
   @OneToOne
   @MapsId
   @JoinColumn(name = "user_account_id")
-  var userAccount: UserAccount? = null,
-
+  var userAccount: UserAccount,
 ) : AuditModel() {
+
+  constructor(userAccount: UserAccount, preferredOrganization: Organization) : this(userAccount) {
+    this.preferredOrganization = preferredOrganization
+  }
+
   var language: String? = null
+
+  @ManyToOne
+  lateinit var preferredOrganization: Organization
 
   @Id
   @Column(name = "user_account_id")
   var id: Long = 0
-
-  @ManyToOne
-  var preferredOrganization: Organization? = null
 }

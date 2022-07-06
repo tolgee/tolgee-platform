@@ -2,7 +2,6 @@ package io.tolgee.api.v2.controllers.organizationController
 
 import io.tolgee.constants.Message
 import io.tolgee.development.testDataBuilder.data.OrganizationTestData
-import io.tolgee.dtos.request.organization.OrganizationDto
 import io.tolgee.dtos.request.organization.SetOrganizationRoleDto
 import io.tolgee.fixtures.andAssertError
 import io.tolgee.fixtures.andAssertThatJson
@@ -14,49 +13,17 @@ import io.tolgee.fixtures.andIsOk
 import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.node
 import io.tolgee.model.Organization
-import io.tolgee.model.OrganizationRole
 import io.tolgee.model.Permission
-import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
-import io.tolgee.testing.AuthorizedControllerTest
 import io.tolgee.testing.assertions.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class OrganizationControllerTest : AuthorizedControllerTest() {
-
-  lateinit var dummyDto: OrganizationDto
-  lateinit var dummyDto2: OrganizationDto
-
-  @BeforeEach
-  fun setup() {
-    resetDto()
-    this.userAccount = userAccountService.findOptional(username = userAccount!!.username).get()
-  }
-
-  private fun resetDto() {
-    dummyDto = OrganizationDto(
-      "Test org",
-      "This is description",
-      "test-org",
-      Permission.ProjectPermissionType.VIEW
-    )
-
-    dummyDto2 = OrganizationDto(
-      "Test org 2",
-      "This is description 2",
-      "test-org-2",
-      Permission.ProjectPermissionType.VIEW
-    )
-  }
-
+class OrganizationControllerTest : BaseOrganizationControllerTest() {
   @Test
   fun testGetAll() {
     val users = dbPopulator.createUsersAndOrganizations()
@@ -326,37 +293,6 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
   }
 
   @Test
-  fun testLeaveOrganization() {
-    this.organizationService.create(dummyDto, userAccount!!).let {
-      organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {
-        assertThat(it).isNotEmpty
-      }
-
-      organizationRoleService.grantOwnerRoleToUser(dbPopulator.createUserIfNotExists("secondOwner"), it)
-
-      performAuthPut("/v2/organizations/${it.id}/leave", null)
-
-      organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {
-        assertThat(it).isEmpty()
-      }
-    }
-  }
-
-  @Test
-  fun testLeaveOrganizationNoOtherOwner() {
-    this.organizationService.create(dummyDto, userAccount!!).let {
-      organizationRepository.findAllPermitted(userAccount!!.id, PageRequest.of(0, 20)).content.let {
-        assertThat(it).isNotEmpty
-      }
-
-      performAuthPut("/v2/organizations/${it.id}/leave", null)
-        .andIsBadRequest
-        .andAssertError
-        .isCustomValidation.hasMessage("organization_has_no_other_owner")
-    }
-  }
-
-  @Test
   @Transactional
   fun testSetUserRole() {
     withOwnerInOrganization { organization, owner, role ->
@@ -377,34 +313,6 @@ class OrganizationControllerTest : AuthorizedControllerTest() {
         "/v2/organizations/${organization.id}/users/${owner.id}/set-role",
         SetOrganizationRoleDto(OrganizationRoleType.MEMBER)
       ).andIsBadRequest.andHasErrorMessage(Message.CANNOT_SET_YOUR_OWN_ROLE)
-    }
-  }
-
-  @Test
-  fun testRemoveUser() {
-    withOwnerInOrganization { organization, owner, role ->
-      organizationRoleRepository.save(role)
-      performAuthDelete("/v2/organizations/${organization.id}/users/${owner.id}", null).andIsOk
-      organizationRoleRepository.findByIdOrNull(role.id!!).let {
-        assertThat(it).isNull()
-      }
-    }
-  }
-
-  private fun withOwnerInOrganization(
-    fn: (organization: Organization, owner: UserAccount, ownerRole: OrganizationRole) -> Unit
-  ) {
-    this.organizationService.create(dummyDto, userAccount!!).let { organization ->
-      dbPopulator.createUserIfNotExists("superuser").let { createdUser ->
-        OrganizationRole(
-          user = createdUser,
-          organization = organization,
-          type = OrganizationRoleType.OWNER
-        ).let { createdOwnerRole ->
-          organizationRoleRepository.save(createdOwnerRole)
-          fn(organization, createdUser, createdOwnerRole)
-        }
-      }
     }
   }
 }

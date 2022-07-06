@@ -28,6 +28,8 @@ class PermissionService(
   private val permissionRepository: PermissionRepository,
   private val organizationRoleService: OrganizationRoleService,
   private val userAccountService: UserAccountService,
+  @Lazy
+  private val userPreferencesService: UserPreferencesService
 ) {
   @set:Autowired
   @set:Lazy
@@ -116,7 +118,10 @@ class PermissionService(
   }
 
   fun delete(permission: Permission) {
-    return cachedPermissionService.delete(permission)
+    cachedPermissionService.delete(permission)
+    permission.user?.let {
+      userPreferencesService.refreshPreferredOrganization(it.id)
+    }
   }
 
   /**
@@ -252,6 +257,8 @@ class PermissionService(
         cachedPermissionService.delete(found)
       }
     } ?: throw BadRequestException(Message.USER_HAS_NO_PROJECT_ACCESS)
+
+    userPreferencesService.refreshPreferredOrganization(userId)
   }
 
   fun onLanguageDeleted(language: Language) {
@@ -270,5 +277,21 @@ class PermissionService(
       permission.languages.removeIf { it.id == language.id }
       cachedPermissionService.save(permission)
     }
+  }
+
+  @Transactional
+  fun leave(project: Project, userId: Long) {
+    val permissionData = this.getProjectPermissionData(project.id, userId)
+    if (permissionData.organizationRole != null) {
+      throw BadRequestException(Message.CANNOT_LEAVE_PROJECT_WITH_ORGANIZATION_ROLE)
+    }
+
+    val directPermissions = permissionData.directPermissions
+      ?: throw BadRequestException(Message.DONT_HAVE_DIRECT_PERMISSIONS)
+
+    val permissionEntity = this.findById(directPermissions.id)
+      ?: throw NotFoundException()
+
+    this.delete(permissionEntity)
   }
 }
