@@ -82,24 +82,22 @@ export const UserMenu: React.FC = () => {
     return null;
   }
 
-  const organizationItems: { link: string; label: string }[] = [];
-
-  if (organization.currentUserRole === 'OWNER') {
-    organizationItems.push({
+  const organizationItems = [
+    {
       link: LINKS.ORGANIZATION_PROFILE.build({
         [PARAMS.ORGANIZATION_SLUG]: organization.slug,
       }),
       label: t('user_menu_organization_settings'),
-    });
+    },
+  ];
 
-    if (config.billing.enabled) {
-      organizationItems.push({
-        link: LINKS.ORGANIZATION_BILLING.build({
-          [PARAMS.ORGANIZATION_SLUG]: organization.slug,
-        }),
-        label: t('organization_menu_billing'),
-      });
-    }
+  if (config.billing.enabled && organization.currentUserRole === 'OWNER') {
+    organizationItems.push({
+      link: LINKS.ORGANIZATION_BILLING.build({
+        [PARAMS.ORGANIZATION_SLUG]: organization.slug,
+      }),
+      label: t('organization_menu_billing'),
+    });
   }
 
   const organizationMenuItems = organizationItems.map((i) => ({

@@ -30,12 +30,15 @@ export const Select: FunctionComponent<Props> = (props) => {
 
   return (
     <StyledFormControl
-      variant="outlined"
+      variant={props.variant}
       error={!!meta.error}
       {...formControlProps}
     >
       {props.label && (
-        <InputLabel variant="outlined" id={'select_' + field.name + '_label'}>
+        <InputLabel
+          variant={props.variant}
+          id={'select_' + field.name + '_label'}
+        >
           {props.label}
         </InputLabel>
       )}

@@ -38,7 +38,6 @@ const EditButtonWrapper = styled(Box)`
 `;
 
 const StyledBox = styled(Box)`
-  cursor: pointer;
   position: relative;
   &:hover ${StyledEditButton} {
     opacity: 1;
@@ -58,6 +57,7 @@ const messageService = container.resolve(MessageService);
 const ALLOWED_UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 
 export const ProfileAvatar: FC<{
+  disabled?: boolean;
   onUpload: (blob: Blob) => Promise<any>;
   onRemove: () => Promise<any>;
   owner: AvatarOwner;
@@ -126,17 +126,20 @@ export const ProfileAvatar: FC<{
         onClick={() => {
           setAvatarMenuAnchorEl(editAvatarRef.current);
         }}
+        sx={{ cursor: props.disabled ? 'default' : 'pointer' }}
       >
         <AvatarImg owner={props.owner} size={200} />
-        <EditButtonWrapper>
-          <StyledEditButton
-            data-cy="avatar-menu-open-button"
-            size="small"
-            ref={editAvatarRef as any}
-          >
-            <EditIcon />
-          </StyledEditButton>
-        </EditButtonWrapper>
+        {!props.disabled && (
+          <EditButtonWrapper>
+            <StyledEditButton
+              data-cy="avatar-menu-open-button"
+              size="small"
+              ref={editAvatarRef as any}
+            >
+              <EditIcon />
+            </StyledEditButton>
+          </EditButtonWrapper>
+        )}
       </StyledBox>
       <AvatarEditMenu
         canRemove={!!props.owner.avatar}

@@ -129,6 +129,7 @@ declare namespace DataCy {
         "organization-members-remove-user-button" |
         "organization-name-field" |
         "organization-profile" |
+        "organization-profile-delete-button" |
         "organization-role-menu" |
         "organization-role-menu-button" |
         "organization-role-select-item" |
@@ -168,6 +169,7 @@ declare namespace DataCy {
         "project-owner-select-item" |
         "project-settings" |
         "project-settings-button" |
+        "project-settings-delete-button" |
         "project-settings-languages" |
         "project-settings-languages-list-edit-button" |
         "project-settings-languages-list-name" |

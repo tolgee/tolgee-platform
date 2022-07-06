@@ -1,9 +1,10 @@
 import { FunctionComponent, useState } from 'react';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { T, useTranslate } from '@tolgee/react';
 import { Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 import { container } from 'tsyringe';
 
+import { DangerZone } from 'tg.component/DangerZone/DangerZone';
 import { StandardForm } from 'tg.component/common/form/StandardForm';
 import { Validation } from 'tg.constants/GlobalValidationSchema';
 import { LINKS, PARAMS } from 'tg.constants/links';
@@ -12,12 +13,13 @@ import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { RedirectionActions } from 'tg.store/global/RedirectionActions';
+import { useInitialDataDispatch } from 'tg.hooks/InitialDataProvider';
+import { DangerButton } from 'tg.component/DangerZone/DangerButton';
 
 import { BaseOrganizationSettingsView } from './components/BaseOrganizationSettingsView';
 import { OrganizationFields } from './components/OrganizationFields';
 import { OrganizationProfileAvatar } from './OrganizationProfileAvatar';
 import { useLeaveOrganization } from './useLeaveOrganization';
-import { useInitialDataDispatch } from 'tg.hooks/InitialDataProvider';
 
 type OrganizationBody = components['schemas']['OrganizationDto'];
 
@@ -43,10 +45,14 @@ export const OrganizationProfileView: FunctionComponent = () => {
     url: '/v2/organizations/{id}',
     method: 'put',
   });
+
   const deleteOrganization = useApiMutation({
     url: '/v2/organizations/{id}',
     method: 'delete',
   });
+
+  const readOnly = organization.data?.currentUserRole !== 'OWNER';
+  const notMember = !organization.data?.currentUserRole;
 
   const onSubmit = (values: OrganizationBody) => {
     const toSave = {
@@ -89,12 +95,12 @@ export const OrganizationProfileView: FunctionComponent = () => {
         deleteOrganization.mutate(
           { path: { id: organization.data!.id } },
           {
-            onSuccess: () => {
+            onSuccess: async () => {
               messageService.success(<T>organization_deleted_message</T>);
-              history.push(LINKS.PROJECTS.build());
-              initialDataDispatch({
+              await initialDataDispatch({
                 type: 'REFETCH',
               });
+              history.push(LINKS.PROJECTS.build());
             },
           }
         ),
@@ -120,6 +126,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
     >
       <Box data-cy="organization-profile">
         <StandardForm
+          disabled={readOnly}
           initialValues={initialValues!}
           saveActionLoadable={editOrganization}
           onSubmit={onSubmit}
@@ -132,17 +139,10 @@ export const OrganizationProfileView: FunctionComponent = () => {
             <Box display="flex" gap={1}>
               <Button
                 data-cy="organization-delete-button"
-                color="error"
-                variant="outlined"
-                onClick={handleDelete}
-              >
-                <T>organization_delete_button</T>
-              </Button>
-              <Button
-                data-cy="organization-delete-button"
                 color="secondary"
                 variant="outlined"
                 onClick={handleLeave}
+                disabled={notMember}
               >
                 <T>organization_leave_button</T>
               </Button>
@@ -150,10 +150,33 @@ export const OrganizationProfileView: FunctionComponent = () => {
           }
         >
           <>
-            <OrganizationProfileAvatar />
-            <OrganizationFields />
+            <OrganizationProfileAvatar disabled={readOnly} />
+            <OrganizationFields disabled={readOnly} />
           </>
         </StandardForm>
+
+        <Box mt={2} mb={1}>
+          <Typography variant={'h5'}>
+            <T>project_settings_danger_zone_title</T>
+          </Typography>
+        </Box>
+        <DangerZone
+          actions={[
+            {
+              description: (
+                <T keyName="this_will_delete_organization_forever" />
+              ),
+              button: (
+                <DangerButton
+                  onClick={handleDelete}
+                  data-cy="organization-profile-delete-button"
+                >
+                  <T>organization_delete_button</T>
+                </DangerButton>
+              ),
+            },
+          ]}
+        />
       </Box>
     </BaseOrganizationSettingsView>
   );

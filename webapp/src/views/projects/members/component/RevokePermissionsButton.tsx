@@ -10,6 +10,8 @@ import { useUser } from 'tg.hooks/InitialDataProvider';
 import { MessageService } from 'tg.service/MessageService';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation } from 'tg.service/http/useQueryApi';
+import { useLeaveProject } from 'tg.views/projects/useLeaveProject';
+import { useGlobalLoading } from 'tg.component/GlobalLoading';
 
 const messageService = container.resolve(MessageService);
 
@@ -20,6 +22,8 @@ const RevokePermissionsButton = (props: {
   const project = useProject();
   const currentUser = useUser();
 
+  const { leave, isLeaving } = useLeaveProject();
+
   const revokeAccess = useApiMutation({
     url: '/v2/projects/{projectId}/users/{userId}/revoke-access',
     method: 'put',
@@ -27,36 +31,56 @@ const RevokePermissionsButton = (props: {
   });
 
   const handleRevoke = () => {
-    revokeAccess.mutate(
-      {
-        path: {
-          projectId: project.id,
-          userId: props.user.id,
+    if (currentUser!.id === props.user.id) {
+      leave(project.name, project.id);
+    } else {
+      confirmation({
+        title: <T>revoke_access_confirmation_title</T>,
+        message: (
+          <T
+            parameters={{
+              userName: props.user.name || props.user.username!,
+            }}
+          >
+            project_permissions_revoke_user_access_message
+          </T>
+        ),
+        onConfirm: () => {
+          revokeAccess.mutate(
+            {
+              path: {
+                projectId: project.id,
+                userId: props.user.id,
+              },
+            },
+            {
+              onSuccess() {
+                messageService.success(<T>access_revoked_message</T>);
+              },
+            }
+          );
         },
-      },
-      {
-        onSuccess() {
-          messageService.success(<T>access_revoked_message</T>);
-        },
-      }
-    );
+      });
+    }
   };
 
-  let disabledTooltipTitle = undefined as ReactElement | undefined;
+  useGlobalLoading(isLeaving || revokeAccess.isLoading);
 
-  if (currentUser!.id === props.user.id) {
-    disabledTooltipTitle = <T>cannot_revoke_your_own_access_tooltip</T>;
-  } else if (hasOrganizationRole) {
-    disabledTooltipTitle = <T>user_is_part_of_organization_tooltip</T>;
+  let isDisabled = false;
+  let tooltip = undefined as ReactElement | undefined;
+
+  if (hasOrganizationRole) {
+    tooltip = <T>user_is_part_of_organization_tooltip</T>;
+    isDisabled = true;
+  } else if (currentUser!.id === props.user.id) {
+    tooltip = <T>project_leave_button</T>;
   }
 
-  const isDisabled = !!disabledTooltipTitle;
-
   const Wrapper: FunctionComponent = (props) =>
-    !isDisabled ? (
+    !tooltip ? (
       <>{props.children}</>
     ) : (
-      <Tooltip title={disabledTooltipTitle!}>
+      <Tooltip title={tooltip}>
         <span>{props.children}</span>
       </Tooltip>
     );
@@ -67,21 +91,7 @@ const RevokePermissionsButton = (props: {
         data-cy="project-member-revoke-button"
         disabled={isDisabled}
         size="small"
-        onClick={() =>
-          confirmation({
-            title: <T>revoke_access_confirmation_title</T>,
-            message: (
-              <T
-                parameters={{
-                  userName: props.user.name || props.user.username!,
-                }}
-              >
-                project_permissions_revoke_user_access_message
-              </T>
-            ),
-            onConfirm: handleRevoke,
-          })
-        }
+        onClick={handleRevoke}
       >
         <Clear />
       </IconButton>

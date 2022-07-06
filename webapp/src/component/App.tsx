@@ -20,7 +20,6 @@ import { RedirectionActions } from '../store/global/RedirectionActions';
 import { OrganizationsRouter } from '../views/organizations/OrganizationsRouter';
 import { ProjectsRouter } from '../views/projects/ProjectsRouter';
 import ConfirmationDialog from './common/ConfirmationDialog';
-import { FullPageLoading } from './common/FullPageLoading';
 import { PrivateRoute } from './common/PrivateRoute';
 import SnackBar from './common/SnackBar';
 import { Chatwoot } from './Chatwoot';

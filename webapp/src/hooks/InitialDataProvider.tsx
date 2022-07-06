@@ -84,15 +84,13 @@ export const [
     [organization, setOrganization, organizationLoadable]
   );
 
-  const dispatch = (action: ActionType) => {
+  const dispatch = async (action: ActionType) => {
     switch (action.type) {
       case 'UPDATE_ORGANIZATION':
-        updateCurrentOrganization(action.payload);
-        break;
+        return updateCurrentOrganization(action.payload);
       case 'REFETCH':
         setOrganization(undefined);
-        initialData.refetch();
-        break;
+        return initialData.refetch();
     }
   };
 
