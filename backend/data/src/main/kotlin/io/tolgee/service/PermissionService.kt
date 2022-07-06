@@ -190,6 +190,8 @@ class PermissionService(
   }
 
   fun acceptInvitation(permission: Permission, userAccount: UserAccount): Permission {
+    // switch user to the organization when accepted invitation
+    userPreferencesService.setPreferredOrganization(permission.project.organizationOwner, userAccount)
     return cachedPermissionService.acceptInvitation(permission, userAccount)
   }
 
