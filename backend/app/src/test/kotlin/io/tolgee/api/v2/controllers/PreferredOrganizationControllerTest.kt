@@ -36,8 +36,9 @@ class PreferredOrganizationControllerTest : AuthorizedControllerTest() {
 
   @Test
   fun `stores preferred organization`() {
-    userAccount = testData.pepa
-    performAuthGet("/v2/preferred-organization").andIsOk
-    assertThat(userPreferencesService.find(userAccount!!.id)).isNotNull
+    userAccount = testData.kvetoslav
+    val defaultOrg = testData.userAccountBuilder.defaultOrganizationBuilder.self
+    performAuthGet("/v2/organizations/${defaultOrg.id}").andIsOk
+    assertThat(userPreferencesService.find(userAccount!!.id)!!.preferredOrganization.id).isEqualTo(defaultOrg.id)
   }
 }

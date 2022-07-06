@@ -24,14 +24,10 @@ class OrganizationTestData : BaseTestData() {
         user = franta
       }
 
-      addUserAccountWithoutOrganization {
+      val pepaBuilder = addUserAccountWithoutOrganization {
         username = "pepa"
         name = "Josef Tyl"
         pepa = this
-      }.build {
-        setUserPreferences {
-          language = "de"
-        }
       }
 
       projectBuilder.addPermission {
@@ -46,6 +42,13 @@ class OrganizationTestData : BaseTestData() {
         addRole {
           user = pepa
           type = OrganizationRoleType.OWNER
+        }
+      }
+
+      pepaBuilder.build {
+        setUserPreferences {
+          language = "de"
+          preferredOrganization = pepaOrg
         }
       }
 
