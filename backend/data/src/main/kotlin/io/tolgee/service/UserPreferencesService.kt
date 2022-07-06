@@ -67,7 +67,9 @@ class UserPreferencesService(
     val preferences = findOrCreate(userAccountId)
     val canUserView = organizationRoleService.canUserView(userAccountId, preferences.preferredOrganization.id)
     if (!canUserView) {
-      preferences.preferredOrganization = organizationService.findOrCreatePreferred(userAccount = preferences.userAccount)
+      preferences.preferredOrganization = organizationService.findOrCreatePreferred(
+        userAccount = preferences.userAccount
+      )
       save(preferences)
     }
   }

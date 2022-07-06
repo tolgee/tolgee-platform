@@ -153,6 +153,10 @@ class OrganizationRoleService(
     organizationRole.invitation = null
     organizationRole.user = userAccount
     organizationRoleRepository.save(organizationRole)
+    // switch user to the organization when accepted invitation
+    organizationRole.organization?.let {
+      userPreferencesService.setPreferredOrganization(it, userAccount)
+    }
   }
 
   fun isAnotherOwnerInOrganization(id: Long): Boolean {
