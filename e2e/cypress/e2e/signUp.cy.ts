@@ -6,82 +6,55 @@ import {
   deleteUserWithEmailVerification,
   disableEmailVerification,
   enableEmailVerification,
-  getParsedEmailInvitationLink,
   getParsedEmailVerification,
   getRecaptchaSiteKey,
   getUser,
   login,
+  logout,
   setProperty,
   setRecaptchaSecretKey,
   setRecaptchaSiteKey,
+  v2apiFetch,
 } from '../common/apiCalls/common';
-import { assertMessage, gcy, selectInProjectMenu } from '../common/shared';
+import { assertMessage, gcy } from '../common/shared';
 import { loginWithFakeGithub } from '../common/login';
-
-type ReturnVal = {
-  projectId: string;
-  invitationLink: string;
-};
-
-const createProjectWithInvitation = (
-  name = 'Test',
-  email = false
-): Cypress.Chainable<ReturnVal> => {
-  let clipboard: string;
-  return login()
-    .then(() =>
-      createProject({
-        name,
-        languages: [
-          {
-            tag: 'en',
-            name: 'English',
-            originalName: 'English',
-            flagEmoji: '🇬🇧',
-          },
-        ],
-      })
-    )
-    .then((r) => {
-      cy.visit(`${HOST}/projects/${r.body.id}`, {
-        onBeforeLoad(win) {
-          if (!email) {
-            cy.stub(win, 'prompt').callsFake((_, input) => {
-              clipboard = input;
-            });
-          }
-        },
-      });
-      selectInProjectMenu('Members');
-      cy.gcy('invite-generate-button').click();
-
-      if (!email) {
-        cy.gcy('invitation-dialog-type-link-button').click();
-      }
-
-      cy.gcy('invitation-dialog-input-field').type('test@invitation.com');
-      cy.gcy('invitation-dialog-invite-button').click();
-      if (!email) {
-        return assertMessage('Invitation link copied to clipboard').then(() => {
-          window.localStorage.removeItem('jwtToken');
-          return { projectId: r.body.id, invitationLink: clipboard };
-        });
-      } else {
-        return assertMessage('Invitation was sent').then(() => {
-          window.localStorage.removeItem('jwtToken');
-          return getParsedEmailInvitationLink().then((code) => ({
-            projectId: r.body.id,
-            invitationLink: code,
-          }));
-        });
-      }
-    });
-};
+import { ProjectDTO } from '../../../webapp/src/service/response.types';
 
 const TEST_USERNAME = 'johndoe@doe.com';
 
+const createProjectWithInvitation = (name: string) => {
+  return login().then(() =>
+    createProject({
+      name,
+      languages: [
+        {
+          tag: 'en',
+          name: 'English',
+          originalName: 'English',
+          flagEmoji: '🇬🇧',
+        },
+      ],
+    }).then((projectResponse: { body: ProjectDTO }) => {
+      return v2apiFetch(`projects/${projectResponse.body.id}/invite`, {
+        method: 'PUT',
+        body: { type: 'VIEW', name: 'Franta' },
+      }).then((invitation) => {
+        logout();
+        return {
+          projectId: projectResponse.body.id,
+          invitationLink: `${HOST}/accept_invitation/${invitation.body.code}`,
+        };
+      });
+    })
+  );
+};
+
 context('Sign up', () => {
+  let recaptchaSiteKey;
+
   beforeEach(() => {
+    getRecaptchaSiteKey().then((it) => (recaptchaSiteKey = it));
+    logout();
     visit();
     deleteUserWithEmailVerification(TEST_USERNAME);
     deleteAllEmails();
@@ -90,21 +63,15 @@ context('Sign up', () => {
 
   afterEach(() => {
     deleteUserWithEmailVerification(TEST_USERNAME);
+    setRecaptchaSiteKey(recaptchaSiteKey);
   });
 
   describe('without recaptcha', () => {
-    let recaptchaSiteKey;
-
     beforeEach(() => {
-      getRecaptchaSiteKey().then((it) => (recaptchaSiteKey = it));
       setRecaptchaSiteKey(null);
     });
 
-    afterEach(() => {
-      setRecaptchaSiteKey(recaptchaSiteKey);
-    });
-
-    it('Will sign up without recaptcha', () => {
+    it('Signs up without recaptcha', () => {
       visit();
       cy.intercept('/**/sign_up', (req) => {
         expect(req.body.recaptchaToken).be.undefined;
@@ -159,7 +126,9 @@ context('Sign up', () => {
 
   it('will sign up with project invitation code', () => {
     disableEmailVerification();
-    createProjectWithInvitation().then(({ invitationLink }) => {
+    createProjectWithInvitation('Test').then(({ invitationLink }) => {
+      logout();
+      cy.log(window.localStorage.getItem('jwtToken'));
       cy.visit(HOST + '/sign_up');
       fillAndSubmitForm();
       cy.contains('Projects').should('be.visible');
@@ -168,18 +137,7 @@ context('Sign up', () => {
     });
   });
 
-  it('will sign up with project invitation code from email', () => {
-    disableEmailVerification();
-    createProjectWithInvitation('Test', true).then(({ invitationLink }) => {
-      cy.visit(HOST + '/sign_up');
-      fillAndSubmitForm();
-      cy.contains('Projects').should('be.visible');
-      cy.visit(invitationLink);
-      assertMessage('Invitation successfully accepted');
-    });
-  });
-
-  it('will remember code after sign up', () => {
+  it('Remembers code after sign up', () => {
     disableEmailVerification();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(invitationLink);
@@ -191,7 +149,7 @@ context('Sign up', () => {
     });
   });
 
-  it('will work with github signup', () => {
+  it('Works with github signup', () => {
     disableEmailVerification();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(HOST + '/login');
@@ -202,7 +160,7 @@ context('Sign up', () => {
     });
   });
 
-  it('will remember code after github signup', () => {
+  it('Remember code after github signup', () => {
     disableEmailVerification();
     createProjectWithInvitation('Crazy project').then(({ invitationLink }) => {
       cy.visit(invitationLink);
@@ -219,7 +177,8 @@ context('Sign up', () => {
 });
 
 const fillAndSubmitForm = () => {
-  cy.xpath(getInput('name')).type('Test user');
+  cy.waitForDom();
+  cy.xpath(getInput('name')).should('be.visible').type('Test user');
   cy.xpath(getInput('email')).type(TEST_USERNAME);
   cy.xpath(getInput('password')).type('password');
   cy.xpath(getInput('passwordRepeat')).type('password');
