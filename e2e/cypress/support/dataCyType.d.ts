@@ -118,8 +118,8 @@ declare namespace DataCy {
         "languages-modify-cancel-button" |
         "languages-prepared-language-box" |
         "login-button" |
+        "navigation-item" |
         "organization-address-part-field" |
-        "organization-delete-button" |
         "organization-description-field" |
         "organization-invitation-cancel-button" |
         "organization-invitation-copy-button" |
@@ -130,10 +130,14 @@ declare namespace DataCy {
         "organization-name-field" |
         "organization-profile" |
         "organization-profile-delete-button" |
+        "organization-profile-leave-button" |
         "organization-role-menu" |
         "organization-role-menu-button" |
         "organization-role-select-item" |
         "organization-side-menu" |
+        "organization-switch" |
+        "organization-switch-item" |
+        "organization-switch-new" |
         "permission-select-item" |
         "permissions-language-menu-button" |
         "permissions-languages-menu" |
@@ -155,6 +159,7 @@ declare namespace DataCy {
         "project-dashboard-reviewed-percentage" |
         "project-dashboard-tags" |
         "project-dashboard-translated-percentage" |
+        "project-delete-button" |
         "project-leave-button" |
         "project-list-languages" |
         "project-list-languages-item" |
@@ -240,6 +245,9 @@ declare namespace DataCy {
         "translations-view-list-button" |
         "translations-view-table" |
         "translations-view-table-button" |
-        "user-organizations-settings-subtitle-link" |
+        "user-menu-logout" |
+        "user-menu-organization-settings" |
+        "user-menu-organization-switch" |
+        "user-menu-user-settings" |
         "user-profile"
 }

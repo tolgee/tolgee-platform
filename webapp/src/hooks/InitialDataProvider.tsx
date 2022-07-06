@@ -106,6 +106,10 @@ export const [
     dispatch({ type: 'REFETCH' });
   }, [security.jwtToken]);
 
+  if (initialData.error) {
+    throw new Error(initialData.error.message || initialData.error);
+  }
+
   return [contextData, dispatch];
 });
 

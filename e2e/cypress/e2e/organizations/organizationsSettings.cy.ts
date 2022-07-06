@@ -76,7 +76,7 @@ describe('Organization Settings', () => {
   });
 
   it('deletes organization', () => {
-    gcy('organization-delete-button').click();
+    gcy('organization-profile-delete-button').click();
     confirmHardMode();
     assertMessage('Organization deleted');
   });

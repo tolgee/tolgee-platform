@@ -102,6 +102,9 @@ export const OrganizationProfileView: FunctionComponent = () => {
               });
               history.push(LINKS.PROJECTS.build());
             },
+            onError(e) {
+              messageService.error(<T>{e.code}</T>);
+            },
           }
         ),
     });
@@ -138,7 +141,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
           customActions={
             <Box display="flex" gap={1}>
               <Button
-                data-cy="organization-delete-button"
+                data-cy="organization-profile-leave-button"
                 color="secondary"
                 variant="outlined"
                 onClick={handleLeave}
@@ -169,6 +172,7 @@ export const OrganizationProfileView: FunctionComponent = () => {
               button: (
                 <DangerButton
                   onClick={handleDelete}
+                  disabled={readOnly}
                   data-cy="organization-profile-delete-button"
                 >
                   <T>organization_delete_button</T>

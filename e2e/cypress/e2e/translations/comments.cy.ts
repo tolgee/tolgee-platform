@@ -5,10 +5,11 @@ import {
   resolveComment,
   unresolveComment,
 } from '../../common/comments';
-import { enterProject } from '../../common/projects';
+import { enterProject, visitList } from '../../common/projects';
 import { waitForGlobalLoading } from '../../common/loading';
 import { commentsTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
+import { switchToOrganization } from '../../common/shared';
 
 describe('Translation comments', () => {
   beforeEach(() => {
@@ -118,7 +119,8 @@ describe('Translation comments', () => {
 
 function logInAs(user: string) {
   login(user, 'admin');
-  enterProject("Franta's project");
+  visitList();
+  enterProject("Franta's project", 'franta');
 }
 
 function userCanResolveComment(index: number, lang: string, comment: string) {

@@ -105,6 +105,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
               key={idx}
               selected={item.id === selected?.id}
               onClick={() => handleSelectOrganization(item)}
+              data-cy="organization-switch-item"
             >
               <OrganizationItem data={item} />
             </MenuItem>
@@ -115,11 +116,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
 
   return (
     <>
-      <Box
-        display="flex"
-        data-cy="user-organizations-settings-subtitle-link"
-        overflow="hidden"
-      >
+      <Box display="flex" data-cy="organization-switch" overflow="hidden">
         <StyledLink
           ref={anchorEl}
           style={{
@@ -152,7 +149,10 @@ export const OrganizationSwitch: React.FC<Props> = ({
           }}
         >
           <MenuItems />
-          <MenuItem onClick={handleCreateNewOrg}>
+          <MenuItem
+            onClick={handleCreateNewOrg}
+            data-cy="organization-switch-new"
+          >
             <T keyName="organizations_add_new" />
           </MenuItem>
         </Popover>

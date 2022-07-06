@@ -99,7 +99,10 @@ export const OrganizationSwitch: React.FC<Props> = ({
             </StyledMenuItem>
           );
         })}
-        <StyledMenuItem onClick={handleCreateNewOrg}>
+        <StyledMenuItem
+          onClick={handleCreateNewOrg}
+          data-cy="user-menu-organization-switch"
+        >
           <T keyName="organizations_add_new" />
         </StyledMenuItem>
       </Menu>

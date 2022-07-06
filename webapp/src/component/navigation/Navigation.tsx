@@ -54,6 +54,7 @@ export const Navigation: React.FC<Props> = ({ path }) => {
           if (React.isValidElement(name)) {
             return (
               <Box
+                data-cy="navigation-item"
                 color={index === path.length - 1 ? 'primary' : 'inherit'}
                 key={index}
               >
@@ -63,6 +64,7 @@ export const Navigation: React.FC<Props> = ({ path }) => {
           } else {
             return (
               <StyledLink
+                data-cy="navigation-item"
                 key={index}
                 color={index === path.length - 1 ? 'primary' : 'inherit'}
                 // @ts-ignore

@@ -176,10 +176,13 @@ context('Sign up', () => {
   });
 });
 
-const fillAndSubmitForm = () => {
+const fillAndSubmitForm = (withOrganization?: boolean) => {
   cy.waitForDom();
   cy.xpath(getInput('name')).should('be.visible').type('Test user');
   cy.xpath(getInput('email')).type(TEST_USERNAME);
+  if (withOrganization) {
+    cy.xpath(getInput('organizationName')).type('organization');
+  }
   cy.xpath(getInput('password')).type('password');
   cy.xpath(getInput('passwordRepeat')).type('password');
   gcy('sign-up-submit-button').click();

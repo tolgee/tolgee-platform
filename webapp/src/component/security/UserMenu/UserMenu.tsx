@@ -147,6 +147,7 @@ export const UserMenu: React.FC = () => {
             to={item.link}
             selected={item.isSelected}
             onClick={handleClose}
+            data-cy="user-menu-user-settings"
           >
             {item.label}
           </MenuItem>
@@ -167,6 +168,7 @@ export const UserMenu: React.FC = () => {
                 to={item.link}
                 selected={item.isSelected}
                 onClick={handleClose}
+                data-cy="user-menu-organization-settings"
               >
                 {item.label}
               </MenuItem>
@@ -178,7 +180,11 @@ export const UserMenu: React.FC = () => {
           </>
         )}
         <StyledDivider />
-        <MenuItem onClick={() => globalActions.logout.dispatch()} divider>
+        <MenuItem
+          onClick={() => globalActions.logout.dispatch()}
+          data-cy="user-menu-logout"
+          divider
+        >
           <T>user_menu_logout</T>
         </MenuItem>
       </StyledPopover>

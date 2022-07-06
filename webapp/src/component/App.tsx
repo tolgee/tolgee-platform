@@ -11,7 +11,11 @@ import type API from '@openreplay/tracker';
 import { UserSettingsRouter } from 'tg.views/userSettings/UserSettingsRouter';
 import { LINKS } from '../constants/links';
 import { GlobalError } from '../error/GlobalError';
-import { useConfig, useInitialDataContext } from '../hooks/InitialDataProvider';
+import {
+  useConfig,
+  useCurrentOrganization,
+  useInitialDataContext,
+} from '../hooks/InitialDataProvider';
 import { useUser } from '../hooks/InitialDataProvider';
 import { AppState } from '../store';
 import { ErrorActions } from '../store/global/ErrorActions';
@@ -72,12 +76,13 @@ const Redirection = () => {
 
 const MandatoryDataProvider = (props: any) => {
   const config = useConfig();
+  const allowPrivate = useSelector(
+    (v: AppState) => v.global.security.allowPrivate
+  );
   const userData = useUser();
   const isLoading = useInitialDataContext((v) => v.isLoading);
   const isFetching = useInitialDataContext((v) => v.isFetching);
-  const currentOrganization = useInitialDataContext(
-    (v) => v.currentOrganization
-  );
+  const currentOrganization = useCurrentOrganization();
   const [openReplayTracker, setOpenReplayTracker] = useState(
     undefined as undefined | API
   );
@@ -117,7 +122,7 @@ const MandatoryDataProvider = (props: any) => {
 
   useGlobalLoading(isFetching || isLoading);
 
-  if (isLoading || (isFetching && !currentOrganization)) {
+  if (isLoading || (allowPrivate && !currentOrganization)) {
     return null;
   } else {
     return props.children;

@@ -132,7 +132,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
           initialValues={initialValues}
           customActions={
             <LoadingButton
-              data-cy="organization-delete-button"
+              data-cy="project-delete-button"
               color="secondary"
               variant="outlined"
               onClick={() => leave(project.name, project.id)}
