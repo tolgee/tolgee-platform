@@ -8,10 +8,14 @@ import { DashboardPage } from 'tg.component/layout/DashboardPage';
 import { LINKS } from 'tg.constants/links';
 import { useApiQuery } from 'tg.service/http/useQueryApi';
 import DashboardProjectListItem from 'tg.views/projects/DashboardProjectListItem';
-import { Button, styled } from '@mui/material';
+import { Box, Button, styled } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { useCurrentOrganization } from 'tg.hooks/InitialDataProvider';
+import {
+  useConfig,
+  useCurrentOrganization,
+} from 'tg.hooks/InitialDataProvider';
 import { OrganizationSwitch } from 'tg.component/OrganizationSwitch';
+import { Usage } from './dashboard/Usage';
 
 const StyledWrapper = styled('div')`
   display: flex;
@@ -22,9 +26,20 @@ const StyledWrapper = styled('div')`
   }
 `;
 
+const StyledUsage = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 14px;
+  color: ${({ theme }) => theme.palette.text.secondary};
+  width: 100%;
+  max-width: 200px;
+`;
+
 export const ProjectListView = () => {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
+  const config = useConfig();
   const currentOrganization = useCurrentOrganization();
 
   const listPermitted = useApiQuery({
@@ -45,6 +60,8 @@ export const ProjectListView = () => {
 
   const t = useTranslate();
 
+  const showStats = config.billing.enabled;
+
   return (
     <StyledWrapper>
       <DashboardPage>
@@ -59,7 +76,18 @@ export const ProjectListView = () => {
               : undefined
           }
           hideChildrenOnLoading={false}
-          switcher={<OrganizationSwitch />}
+          navigation={[[<OrganizationSwitch key={0} />]]}
+          navigationRight={
+            showStats &&
+            currentOrganization && (
+              <StyledUsage>
+                <Usage
+                  organizationId={currentOrganization.id}
+                  slug={currentOrganization.slug}
+                />
+              </StyledUsage>
+            )
+          }
           loading={listPermitted.isFetching}
         >
           <PaginatedHateoasList
