@@ -1,3 +1,10 @@
+## [2.32.2](https://github.com/tolgee/tolgee-platform/compare/v2.32.1...v2.32.2) (2022-07-06)
+
+
+### Bug Fixes
+
+* Return tags sorted by name ([d5a3052](https://github.com/tolgee/tolgee-platform/commit/d5a305228cdbe11e54f3ef0f04a4d14850b6b75d))
+
 ## [2.32.1](https://github.com/tolgee/tolgee-platform/compare/v2.32.0...v2.32.1) (2022-07-05)
 
 
