@@ -27,7 +27,7 @@ class UserPreferencesService(
     organization: Organization,
     userAccount: UserAccount
   ) {
-    val preferences = findOrCreate(userAccount.id)
+    val preferences = find(userAccount.id) ?: create(userAccount, organization)
     preferences.preferredOrganization = organization
     userPreferencesRepository.save(preferences)
   }
@@ -47,8 +47,11 @@ class UserPreferencesService(
     }
   }
 
-  private fun create(userAccount: UserAccount): UserPreferences {
-    val preferences = UserPreferences(userAccount = userAccount, organizationService.findOrCreatePreferred(userAccount))
+  private fun create(userAccount: UserAccount, preferredOrganization: Organization? = null): UserPreferences {
+    val preferences = UserPreferences(
+      userAccount = userAccount,
+      preferredOrganization = preferredOrganization ?: organizationService.findOrCreatePreferred(userAccount)
+    )
     return save(preferences)
   }
 
