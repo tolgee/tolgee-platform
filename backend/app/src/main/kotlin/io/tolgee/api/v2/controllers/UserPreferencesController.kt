@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.tolgee.api.v2.hateoas.userPreferences.UserPreferencesModel
 import io.tolgee.security.AuthenticationFacade
+import io.tolgee.service.OrganizationRoleService
+import io.tolgee.service.OrganizationService
 import io.tolgee.service.UserPreferencesService
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,21 +24,33 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "User preferences")
 class UserPreferencesController(
   private val userPreferencesService: UserPreferencesService,
-  private val authenticationFacade: AuthenticationFacade
+  private val authenticationFacade: AuthenticationFacade,
+  private val organizationRoleService: OrganizationRoleService,
+  private val organizationService: OrganizationService
 ) {
   @GetMapping("")
-  @Operation(summary = "")
+  @Operation(summary = "Get user's preferences")
   fun get(): UserPreferencesModel {
     return userPreferencesService.findOrCreate(authenticationFacade.userAccount.id).let {
-      UserPreferencesModel(language = it.language, preferredOrganizationId = it.preferredOrganization?.id)
+      UserPreferencesModel(language = it.language, preferredOrganizationId = it.preferredOrganization.id)
     }
   }
 
   @PutMapping("/set-language/{languageTag}")
-  @Operation(summary = "")
+  @Operation(summary = "Set user's UI language")
   fun setLanguage(
     @PathVariable languageTag: String
   ) {
     userPreferencesService.setLanguage(languageTag, authenticationFacade.userAccountEntity)
+  }
+
+  @PutMapping("/set-preferred-organization/{organizationId}")
+  @Operation(summary = "Set user preferred organization")
+  fun setPreferredOrganization(
+    @PathVariable organizationId: Long
+  ) {
+    val organization = organizationService.get(organizationId)
+    organizationRoleService.checkUserCanView(authenticationFacade.userAccount.id, organization.id)
+    userPreferencesService.setPreferredOrganization(organization, authenticationFacade.userAccountEntity)
   }
 }

@@ -25,7 +25,6 @@ import io.tolgee.dtos.request.validators.exceptions.ValidationException
 import io.tolgee.exceptions.BadRequestException
 import io.tolgee.exceptions.NotFoundException
 import io.tolgee.exceptions.PermissionException
-import io.tolgee.model.Organization
 import io.tolgee.model.UserAccount
 import io.tolgee.model.enums.OrganizationRoleType
 import io.tolgee.model.views.OrganizationView
@@ -109,15 +108,8 @@ class OrganizationController(
   fun get(@PathVariable("id") id: Long): OrganizationModel? {
     val organization = organizationService.get(id)
     organizationRoleService.checkUserCanView(authenticationFacade.userAccount.id, organization.id)
-    setPreferredOrganization(organization)
     val roleType = organizationRoleService.findType(id)
     return OrganizationView.of(organization, roleType).toModel()
-  }
-
-  private fun setPreferredOrganization(organization: Organization) {
-    if (!authenticationFacade.isApiKeyAuthentication) {
-      userPreferencesService.setPreferredOrganizationAsync(organization, authenticationFacade.userAccountEntity)
-    }
   }
 
   @GetMapping("/{slug:.*[a-z].*}")
@@ -125,7 +117,6 @@ class OrganizationController(
   fun get(@PathVariable("slug") slug: String): OrganizationModel {
     val organization = organizationService.get(slug)
     organizationRoleService.checkUserCanView(authenticationFacade.userAccount.id, organization.id)
-    setPreferredOrganization(organization)
     val roleType = organizationRoleService.findType(organization.id)
     return OrganizationView.of(organization, roleType).toModel()
   }
