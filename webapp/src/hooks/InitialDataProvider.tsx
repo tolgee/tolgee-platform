@@ -70,14 +70,25 @@ export const [
     },
   });
 
+  const setPreferredOrganization = useApiMutation({
+    url: '/v2/user-preferences/set-preferred-organization/{organizationId}',
+    method: 'put',
+  });
+
   const updateCurrentOrganization = useCallback(
     (newOrg: number | OrganizationModel) => {
+      let organizationId: number | undefined;
       if (typeof newOrg === 'number') {
         if (organization?.id !== newOrg) {
           organizationLoadable.mutate({ path: { id: newOrg } });
+          organizationId = newOrg;
         }
       } else if (newOrg) {
         setOrganization(newOrg as OrganizationModel);
+        organizationId = newOrg.id;
+      }
+      if (organizationId !== undefined && newOrg !== organization?.id) {
+        setPreferredOrganization.mutate({ path: { organizationId } });
       }
     },
     [organization, setOrganization, organizationLoadable]
