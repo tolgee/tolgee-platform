@@ -60,8 +60,9 @@ export const ProjectListView = () => {
 
   const t = useTranslate();
 
-  const showStats =
-    config.billing.enabled && organization.currentUserRole === 'OWNER';
+  const isOrganizationOwner = organization.currentUserRole === 'OWNER';
+
+  const showStats = config.billing.enabled && isOrganizationOwner;
 
   return (
     <StyledWrapper>
@@ -72,9 +73,7 @@ export const ProjectListView = () => {
           onSearch={setSearch}
           containerMaxWidth="lg"
           addLinkTo={
-            organization.currentUserRole === 'OWNER'
-              ? LINKS.PROJECT_ADD.build()
-              : undefined
+            isOrganizationOwner ? LINKS.PROJECT_ADD.build() : undefined
           }
           hideChildrenOnLoading={false}
           navigation={[[<OrganizationSwitch key={0} />]]}
@@ -100,13 +99,15 @@ export const ProjectListView = () => {
               <EmptyListMessage
                 loading={listPermitted.isFetching}
                 hint={
-                  <Button
-                    component={Link}
-                    to={LINKS.PROJECT_ADD.build()}
-                    color="primary"
-                  >
-                    <T>projects_empty_action</T>
-                  </Button>
+                  isOrganizationOwner ? (
+                    <Button
+                      component={Link}
+                      to={LINKS.PROJECT_ADD.build()}
+                      color="primary"
+                    >
+                      <T>projects_empty_action</T>
+                    </Button>
+                  ) : undefined
                 }
               >
                 <T>projects_empty</T>

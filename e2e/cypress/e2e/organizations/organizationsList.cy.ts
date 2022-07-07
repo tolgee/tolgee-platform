@@ -30,6 +30,9 @@ describe('Organization List', () => {
     clickGlobalSave();
     gcy('organization-switch').contains('What a nice organization');
     cy.contains('Organization created').should('be.visible');
+    gcy('organization-switch')
+      .contains('What a nice organization')
+      .should('be.visible');
   });
 
   it('creates organization without description', () => {
@@ -93,6 +96,15 @@ describe('Organization List', () => {
         .click();
       cy.gcy('global-form-save-button').should('be.disabled');
       cy.gcy('organization-profile-delete-button').should('be.disabled');
+      cy.gcy('settings-menu-item')
+        .contains('Organization profile')
+        .should('be.visible');
+      cy.gcy('settings-menu-item')
+        .contains('Organization members')
+        .should('not.exist');
+      cy.gcy('settings-menu-item')
+        .contains('Member permissions')
+        .should('not.exist');
     });
 
     it('admin leaves Microsoft', { scrollBehavior: 'center' }, () => {

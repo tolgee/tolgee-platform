@@ -113,8 +113,9 @@ describe('Organization Invitations', () => {
 
       assertMessage('Invitation successfully accepted');
       cy.visit(`${HOST}/projects`);
-      cy.gcy('organization-switch').click();
-      cy.gcy('organization-switch-item').contains('Tolgee');
+      cy.waitForDom();
+      // user should be automatically switched to the new organization
+      cy.gcy('organization-switch').contains('Tolgee');
     });
   };
 });

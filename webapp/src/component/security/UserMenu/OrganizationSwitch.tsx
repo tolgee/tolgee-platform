@@ -51,12 +51,16 @@ export const OrganizationSwitch: React.FC<Props> = ({
     query: {
       params: { filterCurrentUserOwner: false },
       size: 1000,
+      sort: ['name'],
     },
   });
 
   return (
     <>
-      <MenuItem onClick={handleMenuClick}>
+      <MenuItem
+        onClick={handleMenuClick}
+        data-cy="user-menu-organization-switch"
+      >
         <ListItemText sx={{ flexGrow: 1 }}>
           <T keyName="user_menu_organization_switch">Switch organization</T>
         </ListItemText>
@@ -82,6 +86,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
           return (
             <StyledMenuItem
               key={item.slug}
+              data-cy="user-menu-organization-item"
               value={item.slug}
               onClick={setOrganization(item)}
               selected={item.id === organization.id}
@@ -101,7 +106,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
         })}
         <StyledMenuItem
           onClick={handleCreateNewOrg}
-          data-cy="user-menu-organization-switch"
+          data-cy="user-menu-organization-item"
         >
           <T keyName="organizations_add_new" />
         </StyledMenuItem>

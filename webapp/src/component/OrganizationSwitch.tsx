@@ -66,6 +66,7 @@ export const OrganizationSwitch: React.FC<Props> = ({
     query: {
       params: { filterCurrentUserOwner: false },
       size: 1000,
+      sort: ['name'],
     },
   });
 
