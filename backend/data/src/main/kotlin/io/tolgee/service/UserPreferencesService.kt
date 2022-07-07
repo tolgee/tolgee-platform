@@ -6,7 +6,6 @@ import io.tolgee.model.UserPreferences
 import io.tolgee.repository.UserPreferencesRepository
 import io.tolgee.security.AuthenticationFacade
 import io.tolgee.util.tryUntilItDoesntBreakConstraint
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 
 @Service
@@ -30,14 +29,6 @@ class UserPreferencesService(
     val preferences = find(userAccount.id) ?: create(userAccount, organization)
     preferences.preferredOrganization = organization
     userPreferencesRepository.save(preferences)
-  }
-
-  @Async
-  fun setPreferredOrganizationAsync(
-    organization: Organization,
-    userAccount: UserAccount
-  ) {
-    setPreferredOrganization(organization, userAccount)
   }
 
   fun findOrCreate(userAccountId: Long): UserPreferences {
