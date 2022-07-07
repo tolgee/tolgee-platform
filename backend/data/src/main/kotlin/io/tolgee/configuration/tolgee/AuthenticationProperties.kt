@@ -26,6 +26,7 @@ class AuthenticationProperties(
   var securedImageTimestampMaxAge: Long = 600000, // one week
   var github: GithubAuthenticationProperties = GithubAuthenticationProperties(),
   var google: GoogleAuthenticationProperties = GoogleAuthenticationProperties(),
+  var oauth2: OAuth2AuthenticationProperties = OAuth2AuthenticationProperties(),
   var ldap: LdapAuthenticationProperties = LdapAuthenticationProperties(),
   var userCanCreateProjects: Boolean = true,
   var userCanCreateOrganizations: Boolean = true

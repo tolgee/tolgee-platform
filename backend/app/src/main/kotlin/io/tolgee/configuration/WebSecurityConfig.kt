@@ -32,35 +32,29 @@ class WebSecurityConfig @Autowired constructor(
   private val rateLimitsFilterFactory: RateLimitsFilterFactory,
 ) : WebSecurityConfigurerAdapter() {
   override fun configure(http: HttpSecurity) {
-    if (configuration.authentication.enabled) {
-      http
-        .csrf().disable().cors().and().headers().frameOptions().sameOrigin().and()
-        .addFilterBefore(internalDenyFilter, UsernamePasswordAuthenticationFilter::class.java)
-        .addFilterBefore(rateLimitsFilterFactory.create(RateLimitLifeCyclePoint.ENTRY), InternalDenyFilter::class.java)
-        .addFilterBefore(disabledAuthenticationFilter, InternalDenyFilter::class.java)
-        // if jwt token is provided in header, this filter will authorize user, so the request is not gonna reach the ldap auth
-        .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter::class.java)
-        // this is used to authorize user's app calls with generated api key
-        .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
-        .addFilterAfter(projectPermissionFilter, JwtTokenFilter::class.java)
-        .addFilterAfter(activityFilter, ProjectPermissionFilter::class.java)
-        .addFilterAfter(
-          rateLimitsFilterFactory.create(RateLimitLifeCyclePoint.AFTER_AUTHORIZATION),
-          ProjectPermissionFilter::class.java
-        )
-        .authorizeRequests()
-        .antMatchers(
-          "/api/public/**", "/webjars/**", "/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/v2/public/**"
-        ).permitAll()
-        .antMatchers("/api/**", "/uaa", "/uaa/**", "/v2/**").authenticated()
-        .and().sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-      return
-    }
     http
-      .csrf().disable()
-      .cors().and()
-      .authorizeRequests().anyRequest().permitAll()
+      .csrf().disable().cors().and().headers().frameOptions().sameOrigin().and()
+      .addFilterBefore(internalDenyFilter, UsernamePasswordAuthenticationFilter::class.java)
+      .addFilterBefore(rateLimitsFilterFactory.create(RateLimitLifeCyclePoint.ENTRY), InternalDenyFilter::class.java)
+      // if jwt token is provided in header, this filter will authorize user, so the request is not gonna reach the ldap auth
+      .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter::class.java)
+      // this is used to authorize user's app calls with generated api key
+      .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
+      .addFilterAfter(disabledAuthenticationFilter, ApiKeyAuthFilter::class.java)
+      .addFilterAfter(projectPermissionFilter, JwtTokenFilter::class.java)
+      .addFilterAfter(activityFilter, ProjectPermissionFilter::class.java)
+      .addFilterAfter(
+        rateLimitsFilterFactory.create(RateLimitLifeCyclePoint.AFTER_AUTHORIZATION),
+        ProjectPermissionFilter::class.java
+      )
+      .authorizeRequests()
+      .antMatchers(
+        "/api/public/**", "/webjars/**", "/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/v2/public/**"
+      ).permitAll()
+      .antMatchers("/api/**", "/uaa", "/uaa/**", "/v2/**").authenticated()
+      .and().sessionManagement()
+      .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+    return
   }
 
   override fun configure(auth: AuthenticationManagerBuilder) {

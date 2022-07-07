@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { T } from '@tolgee/react';
 import { Button, styled } from '@mui/material';
 import { CameraAlt } from '@mui/icons-material';
@@ -52,13 +52,6 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
 
   const isEditLoading = useTranslationsSelector((c) => c.isEditLoading);
 
-  const [isLoading, setIsLoading] = useState(isEditLoading);
-  useEffect(() => {
-    if (isEditLoading && !isLoading) {
-      setIsLoading(true);
-    }
-  }, [isEditLoading]);
-
   return (
     <>
       <StyledLeftPart>
@@ -76,7 +69,7 @@ export const ControlsEditor: React.FC<ControlsProps> = ({
           color="primary"
           variant="contained"
           size="small"
-          loading={isLoading}
+          loading={isEditLoading}
           data-cy="translations-cell-save-button"
         >
           <T>translations_cell_save</T>

@@ -11,6 +11,7 @@ import io.tolgee.security.payload.LoginRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.MvcResult
@@ -104,19 +105,19 @@ abstract class AbstractControllerTest :
     return requestPerformer.perform(builder)
   }
 
-  override fun performPut(url: String, content: Any?): ResultActions {
+  override fun performPut(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
     return requestPerformer.performPut(url, content)
   }
 
-  override fun performPost(url: String, content: Any?): ResultActions {
+  override fun performPost(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
     return requestPerformer.performPost(url, content)
   }
 
-  override fun performGet(url: String): ResultActions {
+  override fun performGet(url: String, httpHeaders: HttpHeaders): ResultActions {
     return requestPerformer.performGet(url)
   }
 
-  override fun performDelete(url: String, content: Any?): ResultActions {
+  override fun performDelete(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
     return requestPerformer.performDelete(url, content)
   }
 }

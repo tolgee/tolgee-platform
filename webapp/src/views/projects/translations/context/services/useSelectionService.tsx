@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { container } from 'tsyringe';
-import { useTranslate } from '@tolgee/react';
+import { useTranslate, T } from '@tolgee/react';
 
 import { confirmation } from 'tg.hooks/confirmation';
 import { useProject } from 'tg.hooks/useProject';
@@ -28,6 +28,10 @@ export const useSelectionService = ({ translations }: Props) => {
     setSelection(newSelection);
   };
 
+  const select = (data: number[]) => {
+    setSelection(data);
+  };
+
   const clear = () => {
     setSelection([]);
   };
@@ -42,7 +46,8 @@ export const useSelectionService = ({ translations }: Props) => {
         onConfirm() {
           deleteKeys.mutate(
             {
-              path: { projectId: project.id, ids: selection },
+              path: { projectId: project.id },
+              content: { 'application/json': { ids: selection } },
             },
             {
               onSuccess() {
@@ -54,7 +59,7 @@ export const useSelectionService = ({ translations }: Props) => {
               },
               onError(e) {
                 const parsed = parseErrorResponse(e);
-                parsed.forEach((error) => messaging.error(t(error)));
+                parsed.forEach((error) => messaging.error(<T>{error}</T>));
                 reject(e);
               },
             }
@@ -68,7 +73,8 @@ export const useSelectionService = ({ translations }: Props) => {
     toggle,
     clear,
     deleteSelected,
-    isLoading: deleteKeys.isLoading,
+    select,
+    isDeleting: deleteKeys.isLoading,
     data: selection,
   };
 };

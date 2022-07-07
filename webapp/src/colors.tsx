@@ -36,7 +36,7 @@ export const colors = {
     secondary: '#2B5582',
     default: grey[700],
     navbarBackground: '#822B55',
-    text: '#000000',
+    text: '#525252',
     textSecondary: '#808080',
     divider1: '#00000014',
     divider2: '#0000001e',

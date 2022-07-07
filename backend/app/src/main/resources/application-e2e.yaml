@@ -11,6 +11,16 @@ tolgee:
     github:
       client-id: dummy_client_id
       client-secret: dummy_client_secret
+    oauth2:
+      client-id: dummy_client_id
+      client-secret: dummy_client_secret
+      scopes:
+        - openid
+        - email
+        - profile
+      authorization-url: "https://dummy-url.com/authorize"
+      token-url: "https://dummy-url.com/oauth/token"
+      user-url: "https://dummy-url.com/userinfo"
   file-storage-url: http://localhost:8201
   internal:
     controller-enabled: true

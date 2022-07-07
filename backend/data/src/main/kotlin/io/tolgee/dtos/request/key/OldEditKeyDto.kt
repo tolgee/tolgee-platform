@@ -10,7 +10,7 @@ data class OldEditKeyDto(
   @field:NotBlank
   var currentName: String = "",
   @field:NotBlank
-  @field:Length(max = 200)
+  @field:Length(max = 2000)
   var newName: String = ""
 ) {
   @get:Hidden

@@ -46,7 +46,7 @@ class Key(
   var name: String = "",
 ) : StandardAuditModel(), WithKeyMeta {
   @field:NotNull
-  @ManyToOne(optional = false)
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
   lateinit var project: Project
 
   @OneToMany(mappedBy = "key")

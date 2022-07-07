@@ -43,7 +43,6 @@ import javax.validation.Valid
 @Suppress("MVCPathVariableInspection", "SpringJavaInjectionPointsAutowiringInspection")
 @RestController
 @CrossOrigin(origins = ["*"])
-@Tag(name = "Import")
 @RequestMapping(
   value = [
     "/v2/projects/{projectId:[0-9]+}/languages",
@@ -88,7 +87,7 @@ class V2LanguagesController(
   ): LanguageModel {
     languageValidator.validateEdit(languageId, dto)
     val language = languageService.findById(languageId).orElseThrow { NotFoundException(Message.LANGUAGE_NOT_FOUND) }
-    securityService.checkProjectPermission(language.project!!.id, Permission.ProjectPermissionType.MANAGE)
+    securityService.checkProjectPermission(language.project.id, Permission.ProjectPermissionType.MANAGE)
     return languageModelAssembler.toModel(languageService.editLanguage(languageId, dto))
   }
 

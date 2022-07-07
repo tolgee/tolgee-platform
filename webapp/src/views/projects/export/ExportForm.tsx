@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Formik, FormikErrors } from 'formik';
 import { container } from 'tsyringe';
-import { useTranslate } from '@tolgee/react';
+import { T, useTranslate } from '@tolgee/react';
 import { Box, CircularProgress, styled } from '@mui/material';
 
 import { useProject } from 'tg.hooks/useProject';
@@ -164,7 +164,7 @@ export const ExportForm = () => {
               a.click();
             },
             onError(error) {
-              parseErrorResponse(error).map((e) => messaging.error(t(e)));
+              parseErrorResponse(error).map((e) => messaging.error(<T>{e}</T>));
             },
             onSettled() {
               actions.setSubmitting(false);

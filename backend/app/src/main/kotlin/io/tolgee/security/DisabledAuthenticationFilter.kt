@@ -3,6 +3,7 @@ package io.tolgee.security
 import io.tolgee.configuration.tolgee.TolgeeProperties
 import io.tolgee.dtos.cacheable.UserAccountDto
 import io.tolgee.exceptions.AuthenticationException
+import io.tolgee.security.api_key_auth.ApiKeyAuthenticationToken
 import io.tolgee.service.UserAccountService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -23,7 +24,6 @@ class DisabledAuthenticationFilter @Autowired constructor(
   private val resolver: HandlerExceptionResolver,
   private val userAccountService: UserAccountService,
   private val authenticationProvider: AuthenticationProvider
-
 ) : OncePerRequestFilter() {
   @Throws(ServletException::class, IOException::class)
   override fun doFilterInternal(
@@ -32,7 +32,8 @@ class DisabledAuthenticationFilter @Autowired constructor(
     filterChain: FilterChain
   ) {
     try {
-      if (!this.configuration.authentication.enabled) {
+      val isApiKeyAuth = SecurityContextHolder.getContext().authentication as? ApiKeyAuthenticationToken != null
+      if (!this.configuration.authentication.enabled && !isApiKeyAuth) {
         SecurityContextHolder.getContext().authentication =
           authenticationProvider.getAuthentication(UserAccountDto.fromEntity(userAccountService.implicitUser))
       }

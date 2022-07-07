@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Scope
+import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.test.web.servlet.MockMvc
@@ -27,20 +28,24 @@ class BaseRequestPerformer : RequestPerformer {
     }
   }
 
-  override fun performPut(url: String, content: Any?): ResultActions {
-    return perform(MockMvcRequestBuilders.put(url).withJsonContent(content))
+  override fun performPut(
+    url: String,
+    content: Any?,
+    httpHeaders: HttpHeaders
+  ): ResultActions {
+    return perform(MockMvcRequestBuilders.put(url).withJsonContent(content).headers(httpHeaders))
   }
 
-  override fun performPost(url: String, content: Any?): ResultActions {
-    return mvc.perform(MockMvcRequestBuilders.post(url).withJsonContent(content))
+  override fun performPost(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
+    return perform(MockMvcRequestBuilders.post(url).withJsonContent(content).headers(httpHeaders))
   }
 
-  override fun performGet(url: String): ResultActions {
-    return perform(MockMvcRequestBuilders.get(url))
+  override fun performGet(url: String, httpHeaders: HttpHeaders): ResultActions {
+    return perform(MockMvcRequestBuilders.get(url).headers(httpHeaders))
   }
 
-  override fun performDelete(url: String, content: Any?): ResultActions {
-    return perform(MockMvcRequestBuilders.delete(url).withJsonContent(content))
+  override fun performDelete(url: String, content: Any?, httpHeaders: HttpHeaders): ResultActions {
+    return perform(MockMvcRequestBuilders.delete(url).withJsonContent(content).headers(httpHeaders))
   }
 
   protected fun MockHttpServletRequestBuilder.withJsonContent(content: Any?): MockHttpServletRequestBuilder {

@@ -35,7 +35,7 @@ class OpenApiConfiguration {
       .externalDocs(
         ExternalDocumentation()
           .description("Tolgee documentation")
-          .url("https://toolkit.tolgee.io")
+          .url("https://tolgee.io")
       )
   }
 

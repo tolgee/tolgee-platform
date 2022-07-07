@@ -26,7 +26,11 @@ class MtService(
     Map<MtServiceType, String?>? {
     val baseLanguage = projectService.getOrCreateBaseLanguage(key.project.id)!!
     val baseTranslationText = translationService.find(key, baseLanguage).orElse(null)?.text
-      ?: return null
+
+    if (baseTranslationText.isNullOrBlank()) {
+      return null
+    }
+
     return getMachineTranslations(key.project, baseTranslationText, baseLanguage, targetLanguage)
   }
 

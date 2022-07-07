@@ -7,6 +7,7 @@ import { useDebouncedCallback } from 'use-debounce';
 
 import { useTranslationsSelector } from './context/TranslationsContext';
 import { TranslationsShortcuts } from './TranslationsShortcuts';
+import { TranslationsSelection } from './TranslationsSelection';
 
 const StyledContainer = styled('div')`
   z-index: ${({ theme }) => theme.zIndex.drawer};
@@ -79,11 +80,14 @@ type Props = {
 
 export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
   const [index, setIndex] = useState(1);
+  const [isMouseOver, setIsMouseOver] = useState(false);
+  const [selectionOpen, setSelectionOpen] = useState(false);
   const theme = useTheme();
   const [toolbarVisible, setToolbarVisible] = useState(false);
   const t = useTranslate();
   const totalCount = useTranslationsSelector((c) => c.translationsTotal || 0);
   const list = useTranslationsSelector((c) => c.reactList);
+  const selection = useTranslationsSelector((c) => c.selection);
   const getVisibleRange = list?.getVisibleRange.bind(list);
 
   const handleScrollUp = () => {
@@ -111,12 +115,31 @@ export const TranslationsToolbar: React.FC<Props> = ({ width }) => {
     return () => window.removeEventListener('scroll', onScroll);
   }, [getVisibleRange]);
 
+  const handlePointerEnter = () => {
+    setIsMouseOver(true);
+  };
+  const handlePointerLeave = () => {
+    setIsMouseOver(false);
+  };
+
+  useEffect(() => {
+    if (selection.length || (selectionOpen && isMouseOver)) {
+      setSelectionOpen(true);
+    } else {
+      setSelectionOpen(false);
+    }
+  }, [isMouseOver, Boolean(selection.length)]);
+
   const counterContent = `${index} / ${totalCount}`;
 
   return width ? (
-    <StyledContainer style={{ width: `calc(${width}px + ${theme.spacing(8)}` }}>
+    <StyledContainer
+      style={{ width: `calc(${width}px + ${theme.spacing(8)}` }}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+    >
       <StyledShortcutsContainer>
-        <TranslationsShortcuts />
+        {selectionOpen ? <TranslationsSelection /> : <TranslationsShortcuts />}
       </StyledShortcutsContainer>
       <StyledCounterContainer
         className={clsx({

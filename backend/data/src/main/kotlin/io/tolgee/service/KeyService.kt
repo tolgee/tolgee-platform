@@ -81,8 +81,8 @@ class KeyService(
     return keyRepository.findById(id)
   }
 
-  fun findOptional(ids: Set<Long>): List<Key> {
-    return keyRepository.findAllById(ids)
+  fun findAllWithProjectsAndMetas(ids: Set<Long>): List<Key> {
+    return keyRepository.findWithProjectsAndMetas(ids)
   }
 
   fun save(key: Key): Key {

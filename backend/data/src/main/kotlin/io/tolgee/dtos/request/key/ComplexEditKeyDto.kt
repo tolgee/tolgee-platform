@@ -9,7 +9,7 @@ import javax.validation.constraints.NotBlank
 data class ComplexEditKeyDto(
   @Schema(description = "Name of the key")
   @field:NotBlank
-  @field:Length(max = 200, min = 1)
+  @field:Length(max = 2000, min = 1)
   val name: String = "",
 
   @Schema(description = "Translations to update")

@@ -57,7 +57,8 @@ abstract class ProjectAuthControllerTest(
             ProjectApiKeyAuthRequestPerformer::class.java,
             { userAccount },
             this.scopes,
-            projectUrlPrefix
+            projectUrlPrefix,
+            this.apiKeyPresentType
           )
       }
     }

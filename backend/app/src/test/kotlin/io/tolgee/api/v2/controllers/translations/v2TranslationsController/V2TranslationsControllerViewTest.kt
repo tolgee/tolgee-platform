@@ -9,6 +9,7 @@ import io.tolgee.fixtures.andPrettyPrint
 import io.tolgee.fixtures.isValidId
 import io.tolgee.fixtures.node
 import io.tolgee.model.enums.ApiScope
+import io.tolgee.testing.annotations.ApiKeyPresentMode
 import io.tolgee.testing.annotations.ProjectApiKeyAuthTestMethod
 import io.tolgee.testing.annotations.ProjectJWTAuthTestMethod
 import io.tolgee.testing.assertions.Assertions.assertThat
@@ -202,6 +203,17 @@ class V2TranslationsControllerViewTest : ProjectAuthControllerTest("/v2/projects
   @ProjectApiKeyAuthTestMethod
   @Test
   fun `works with API key`() {
+    testDataService.saveTestData(testData.root)
+    userAccount = testData.user
+    performProjectAuthGet("/translations").andPrettyPrint.andIsOk
+      .andAssertThatJson {
+        node("page.totalElements").isEqualTo(2)
+      }
+  }
+
+  @ProjectApiKeyAuthTestMethod(apiKeyPresentType = ApiKeyPresentMode.QUERY_PARAM)
+  @Test
+  fun `works with API key in query`() {
     testDataService.saveTestData(testData.root)
     userAccount = testData.user
     performProjectAuthGet("/translations").andPrettyPrint.andIsOk

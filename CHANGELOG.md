@@ -1,3 +1,120 @@
+## [2.32.2](https://github.com/tolgee/tolgee-platform/compare/v2.32.1...v2.32.2) (2022-07-06)
+
+
+### Bug Fixes
+
+* Return tags sorted by name ([d5a3052](https://github.com/tolgee/tolgee-platform/commit/d5a305228cdbe11e54f3ef0f04a4d14850b6b75d))
+
+## [2.32.1](https://github.com/tolgee/tolgee-platform/compare/v2.32.0...v2.32.1) (2022-07-05)
+
+
+### Bug Fixes
+
+* OpenApi import documentation ([99d4d78](https://github.com/tolgee/tolgee-platform/commit/99d4d78bb6650defa6b818b26f4e019ecbe5931f))
+
+# [2.32.0](https://github.com/tolgee/tolgee-platform/compare/v2.31.1...v2.32.0) (2022-06-27)
+
+
+### Bug Fixes
+
+* Lighter default text color ([0bc018e](https://github.com/tolgee/tolgee-platform/commit/0bc018eae61435049b66868a7ba78dcdf961d3b5))
+
+
+### Features
+
+* API key in Header and fixed export with API key ([746bd26](https://github.com/tolgee/tolgee-platform/commit/746bd2643fd4cc430473fd444bbc2ec989295af5))
+
+## [2.31.1](https://github.com/tolgee/tolgee-platform/compare/v2.31.0...v2.31.1) (2022-06-15)
+
+
+### Bug Fixes
+
+* JS and CSS files caching ([47409de](https://github.com/tolgee/tolgee-platform/commit/47409de12b91b43b6f949c3ace8a8f43e404f693))
+* Set content-type header and extend error logger ([5740126](https://github.com/tolgee/tolgee-platform/commit/5740126324864f4224a46985dac90cc96194b7a0))
+
+# [2.31.0](https://github.com/tolgee/tolgee-platform/compare/v2.30.3...v2.31.0) (2022-06-10)
+
+
+### Features
+
+* Add chatwoot to tolgee ([bff4be2](https://github.com/tolgee/tolgee-platform/commit/bff4be2a6155043d668787aea8717374e73de13f))
+
+## [2.30.3](https://github.com/tolgee/tolgee-platform/compare/v2.30.2...v2.30.3) (2022-06-09)
+
+
+### Bug Fixes
+
+* Avoid infinite loading on saving error ([c26d94c](https://github.com/tolgee/tolgee-platform/commit/c26d94c570cc8ac3c21576c5ad50ca0c6b2a432a))
+* Editor long words not wrapping ([abb664e](https://github.com/tolgee/tolgee-platform/commit/abb664e73a7f2c68a10b0cd5b82a5295c8ac73cf))
+* Use T component in messaging to avoid blank error messages ([d285c01](https://github.com/tolgee/tolgee-platform/commit/d285c0189ddca8754aa226f905812eccd242c2b3))
+
+## [2.30.2](https://github.com/tolgee/tolgee-platform/compare/v2.30.1...v2.30.2) (2022-06-09)
+
+
+### Bug Fixes
+
+* Max key length to 2000 - Closes [#1184](https://github.com/tolgee/tolgee-platform/issues/1184) ([ab7d5a9](https://github.com/tolgee/tolgee-platform/commit/ab7d5a9e8805c3551eb1ed45f4c8c1636674324b))
+* Using API key endpoints in no auth mode ([f4a1001](https://github.com/tolgee/tolgee-platform/commit/f4a10019bad06b2926517774e42eab4b2ebddf38))
+
+## [2.30.1](https://github.com/tolgee/tolgee-platform/compare/v2.30.0...v2.30.1) (2022-06-08)
+
+
+### Bug Fixes
+
+* Group actions loading and better hiding logic ([422ae08](https://github.com/tolgee/tolgee-platform/commit/422ae0858efe9b179563d5396934396a9220ab0b))
+* Group selection keep open only while mouse over ([68968f4](https://github.com/tolgee/tolgee-platform/commit/68968f42938517d6149a2a93fbc3f946c9ae9d0f))
+* Minor fixes ([9c56baf](https://github.com/tolgee/tolgee-platform/commit/9c56baf7f4ce35a0f287923f3c6272fea22de3eb))
+* Minor fixes - adapt FE ([0c66a1e](https://github.com/tolgee/tolgee-platform/commit/0c66a1ef231ba1624efc32adbf9526d8974cf266))
+* V2 Export controller access with API key ([b1c83b6](https://github.com/tolgee/tolgee-platform/commit/b1c83b61b16affdaf9d89917e68b471b5c4fb551))
+
+# [2.30.0](https://github.com/tolgee/tolgee-platform/compare/v2.29.2...v2.30.0) (2022-06-07)
+
+
+### Bug Fixes
+
+* Use new delete endpoint for keys delete ([20cac29](https://github.com/tolgee/tolgee-platform/commit/20cac297ce33307c71322473077e3631bae120b5))
+
+
+### Features
+
+* Delete multiple keys via DELETE endpoint with key ids in request body ([32c5131](https://github.com/tolgee/tolgee-platform/commit/32c51310e1e28961e8a3b5896f0921f42298407f))
+
+## [2.29.2](https://github.com/tolgee/tolgee-platform/compare/v2.29.1...v2.29.2) (2022-06-07)
+
+
+### Bug Fixes
+
+* Activity title same in compact view and detail ([f6270ac](https://github.com/tolgee/tolgee-platform/commit/f6270ac6ba1a22a75f335d2439fc78c843153aab))
+* Show partly selected as indeterminate ([96e552e](https://github.com/tolgee/tolgee-platform/commit/96e552e7b9af15279cdc8db9e60d2f7327d37661))
+
+## [2.29.1](https://github.com/tolgee/tolgee-platform/compare/v2.29.0...v2.29.1) (2022-06-07)
+
+
+### Bug Fixes
+
+* Select all endpoint should return distinct key ids ([e7dc56e](https://github.com/tolgee/tolgee-platform/commit/e7dc56e1774acb8fff5095eb7981d05064185aa8))
+
+# [2.29.0](https://github.com/tolgee/tolgee-platform/compare/v2.28.0...v2.29.0) (2022-06-06)
+
+
+### Features
+
+* Selection menu + select all ([2443f4b](https://github.com/tolgee/tolgee-platform/commit/2443f4b93109af52455424e9fe9655f410a449c1))
+
+# [2.28.0](https://github.com/tolgee/tolgee-platform/compare/v2.27.3...v2.28.0) (2022-06-06)
+
+
+### Features
+
+* Implement OAuth2 login ([f91cfb4](https://github.com/tolgee/tolgee-platform/commit/f91cfb4866e9ec168b4e061401bc0f66ea09ebec))
+
+## [2.27.3](https://github.com/tolgee/tolgee-platform/compare/v2.27.2...v2.27.3) (2022-05-31)
+
+
+### Bug Fixes
+
+* Better relase info in github - channel latest ([d33206a](https://github.com/tolgee/tolgee-platform/commit/d33206af9b0f5887262700a0a6b447c9ae49ad5e))
+
 ## [2.27.2](https://github.com/tolgee/tolgee-platform/compare/v2.27.1...v2.27.2) (2022-05-31)
 
 

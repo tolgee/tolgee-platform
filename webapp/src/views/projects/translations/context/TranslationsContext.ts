@@ -37,6 +37,8 @@ type ActionType =
   | { type: 'SET_EDIT_FORCE'; payload: Edit | undefined }
   | { type: 'UPDATE_EDIT'; payload: Partial<Edit> }
   | { type: 'TOGGLE_SELECT'; payload: number }
+  | { type: 'SELECT_ALL' }
+  | { type: 'SELECTION_CLEAR' }
   | { type: 'CHANGE_FIELD'; payload: ChangeValue }
   | { type: 'FETCH_MORE' }
   | { type: 'SELECT_LANGUAGES'; payload: string[] | undefined }
@@ -152,6 +154,12 @@ export const [
         return editService.updatePosition(action.payload);
       case 'TOGGLE_SELECT':
         return selectionService.toggle(action.payload);
+      case 'SELECT_ALL': {
+        const allItems = await translationService.getAllIds();
+        return selectionService.select(allItems.ids);
+      }
+      case 'SELECTION_CLEAR':
+        return selectionService.clear();
       case 'FETCH_MORE':
         return translationService.fetchNextPage();
       case 'CHANGE_FIELD':
@@ -214,11 +222,12 @@ export const [
     isFetching:
       translationService.isFetching ||
       languages.isFetching ||
-      selectionService.isLoading ||
       stateService.isLoading ||
       tagsService.isLoading,
     isEditLoading: editService.isLoading,
     isFetchingMore: translationService.isFetchingNextPage,
+    isLoadingAllIds: translationService.isLoadingAllIds,
+    isDeleting: selectionService.isDeleting,
     hasMoreToFetch: translationService.hasNextPage,
     search: translationService.search as string,
     urlSearch: translationService.urlSearch,

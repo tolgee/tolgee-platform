@@ -1,4 +1,4 @@
-import { useTranslate } from '@tolgee/react';
+import { T } from '@tolgee/react';
 import { useQueryClient } from 'react-query';
 import { container } from 'tsyringe';
 
@@ -21,7 +21,6 @@ export const useTagsService = ({ translations }: Props) => {
   const putTag = usePutTag();
   const deleteTag = useDeleteTag();
   const project = useProject();
-  const t = useTranslate();
 
   const removeTag = (data: RemoveTag) =>
     deleteTag
@@ -43,7 +42,7 @@ export const useTagsService = ({ translations }: Props) => {
       })
       .catch((e) => {
         const parsed = parseErrorResponse(e);
-        parsed.forEach((error) => messaging.error(t(error)));
+        parsed.forEach((error) => messaging.error(<T>{error}</T>));
       });
 
   const addTag = (data: AddTag) =>
@@ -65,7 +64,7 @@ export const useTagsService = ({ translations }: Props) => {
       })
       .catch((e) => {
         const parsed = parseErrorResponse(e);
-        parsed.forEach((error) => messaging.error(t(error)));
+        parsed.forEach((error) => messaging.error(<T>{error}</T>));
         // return never fullfilling promise to prevent after action
         return new Promise(() => {});
       });
