@@ -1,14 +1,13 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { container } from 'tsyringe';
+import { useSelector } from 'react-redux';
 
 import { createProvider } from 'tg.fixtures/createProvider';
 import { components } from 'tg.service/apiSchema.generated';
 import { useApiMutation, useApiQuery } from 'tg.service/http/useQueryApi';
 import { GlobalActions } from 'tg.store/global/GlobalActions';
-import { useSelector } from 'react-redux';
 import { AppState } from 'tg.store/index';
 import { InvitationCodeService } from 'tg.service/InvitationCodeService';
-import { useEffect } from 'react';
 
 type OrganizationModel = components['schemas']['OrganizationModel'];
 type InitialDataModel = components['schemas']['InitialDataModel'];

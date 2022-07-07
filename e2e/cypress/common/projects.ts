@@ -2,9 +2,12 @@ import { assertMessage, gcy, switchToOrganization } from './shared';
 import { HOST } from './constants';
 import { waitForGlobalLoading } from './loading';
 
-export const enterProjectSettings = (projectName: string) => {
+export const enterProjectSettings = (
+  projectName: string,
+  organization?: string
+) => {
   visitList();
-  selectInProjectMoreMenu(projectName, 'project-settings-button');
+  selectInProjectMoreMenu(projectName, 'project-settings-button', organization);
   waitForGlobalLoading();
 };
 

@@ -73,6 +73,7 @@ describe('Organization List', () => {
 
   describe('list', () => {
     it('contains created data', () => {
+      cy.waitForDom();
       cy.gcy('organization-switch').click();
       cy.gcy('organization-switch-item')
         .contains('Facebook')

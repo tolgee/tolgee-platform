@@ -203,41 +203,39 @@ export class App extends React.Component {
           <Redirection />
           <Chatwoot />
           <MandatoryDataProvider>
-            <CurrentOrganizationProvider>
-              <Switch>
-                <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
-                  <PasswordResetView />
-                </Route>
-                <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
-                  <PasswordResetSetView />
-                </Route>
-                <Route exact path={LINKS.SIGN_UP.template}>
-                  <RecaptchaProvider>
-                    <SignUpView />
-                  </RecaptchaProvider>
-                </Route>
-                <Route path={LINKS.LOGIN.template}>
-                  <LoginRouter />
-                </Route>
-                <Route path={LINKS.ACCEPT_INVITATION.template}>
-                  <AcceptInvitationHandler />
-                </Route>
-                <PrivateRoute exact path={LINKS.ROOT.template}>
-                  <Redirect to={LINKS.PROJECTS.template} />
-                </PrivateRoute>
-                <PrivateRoute path={LINKS.PROJECTS.template}>
-                  <ProjectsRouter />
-                </PrivateRoute>
-                <PrivateRoute path={LINKS.USER_SETTINGS.template}>
-                  <UserSettingsRouter />
-                </PrivateRoute>
-                <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
-                  <OrganizationsRouter />
-                </PrivateRoute>
-              </Switch>
-              <SnackBar />
-              <GlobalConfirmation />
-            </CurrentOrganizationProvider>
+            <Switch>
+              <Route exact path={LINKS.RESET_PASSWORD_REQUEST.template}>
+                <PasswordResetView />
+              </Route>
+              <Route exact path={LINKS.RESET_PASSWORD_WITH_PARAMS.template}>
+                <PasswordResetSetView />
+              </Route>
+              <Route exact path={LINKS.SIGN_UP.template}>
+                <RecaptchaProvider>
+                  <SignUpView />
+                </RecaptchaProvider>
+              </Route>
+              <Route path={LINKS.LOGIN.template}>
+                <LoginRouter />
+              </Route>
+              <Route path={LINKS.ACCEPT_INVITATION.template}>
+                <AcceptInvitationHandler />
+              </Route>
+              <PrivateRoute exact path={LINKS.ROOT.template}>
+                <Redirect to={LINKS.PROJECTS.template} />
+              </PrivateRoute>
+              <PrivateRoute path={LINKS.PROJECTS.template}>
+                <ProjectsRouter />
+              </PrivateRoute>
+              <PrivateRoute path={LINKS.USER_SETTINGS.template}>
+                <UserSettingsRouter />
+              </PrivateRoute>
+              <PrivateRoute path={`${LINKS.ORGANIZATIONS.template}`}>
+                <OrganizationsRouter />
+              </PrivateRoute>
+            </Switch>
+            <SnackBar />
+            <GlobalConfirmation />
           </MandatoryDataProvider>
         </BrowserRouter>
       </>

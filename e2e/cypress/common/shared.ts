@@ -123,6 +123,7 @@ export const getInputByName = (name: string): Chainable => {
 };
 
 export const switchToOrganization = (name: string): Chainable => {
+  cy.waitForDom();
   cy.gcy('organization-switch').click();
   return cy.gcy('organization-switch-item').contains(name).click();
 };

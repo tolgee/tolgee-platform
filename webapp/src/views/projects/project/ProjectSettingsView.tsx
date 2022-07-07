@@ -164,7 +164,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
               button: (
                 <DangerButton
                   onClick={handleDelete}
-                  data-cy="project-settings-transfer-button"
+                  data-cy="project-settings-delete-button"
                 >
                   <T keyName="delete_project_button" />
                 </DangerButton>
@@ -175,7 +175,7 @@ export const ProjectSettingsView: FunctionComponent = () => {
               button: (
                 <DangerButton
                   onClick={() => setTransferDialogOpen(true)}
-                  data-cy="project-settings-delete-button"
+                  data-cy="project-settings-transfer-button"
                 >
                   <T keyName="transfer_project_button" />
                 </DangerButton>

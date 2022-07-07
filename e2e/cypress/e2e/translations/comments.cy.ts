@@ -9,7 +9,6 @@ import { enterProject, visitList } from '../../common/projects';
 import { waitForGlobalLoading } from '../../common/loading';
 import { commentsTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
-import { switchToOrganization } from '../../common/shared';
 
 describe('Translation comments', () => {
   beforeEach(() => {

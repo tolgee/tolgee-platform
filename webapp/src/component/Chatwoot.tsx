@@ -3,8 +3,7 @@ import { styled, useTheme, Tooltip, Fab } from '@mui/material';
 import { Chat } from '@mui/icons-material';
 import { useTranslate } from '@tolgee/react';
 
-import { useConfig } from 'tg.hooks/useConfig';
-import { useUser } from 'tg.hooks/useUser';
+import { useConfig, useUser } from 'tg.hooks/InitialDataProvider';
 
 const BASE_URL = 'https://app.chatwoot.com';
 let scriptPromise: Promise<void> | null = null;

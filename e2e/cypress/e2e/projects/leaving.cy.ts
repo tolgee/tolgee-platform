@@ -1,11 +1,7 @@
 import { HOST } from '../../common/constants';
 import 'cypress-file-upload';
 import { selectInProjectMoreMenu } from '../../common/projects';
-import {
-  assertMessage,
-  confirmHardMode,
-  switchToOrganization,
-} from '../../common/shared';
+import { assertMessage, confirmHardMode } from '../../common/shared';
 import { projectLeavingTestData } from '../../common/apiCalls/testData/testData';
 import { login } from '../../common/apiCalls/common';
 
